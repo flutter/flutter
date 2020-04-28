@@ -7,19 +7,17 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/intl_standalone.dart' as intl_standalone;
-import 'package:meta/meta.dart';
+import 'package:http/http.dart' as http;
 
 import 'src/base/common.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
-import 'src/base/net.dart';
 import 'src/base/process.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart' as globals;
-import 'src/reporting/github_template.dart';
 import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
@@ -28,17 +26,17 @@ import 'src/runner/flutter_command_runner.dart';
 Future<int> run(
   List<String> args,
   List<FlutterCommand> commands, {
-  bool muteCommandLogging = false,
-  bool verbose = false,
-  bool verboseHelp = false,
-  bool reportCrashes,
-  String flutterVersion,
-  Map<Type, Generator> overrides,
-}) async {
+    bool muteCommandLogging = false,
+    bool verbose = false,
+    bool verboseHelp = false,
+    bool reportCrashes,
+    String flutterVersion,
+    Map<Type, Generator> overrides,
+  }) async {
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
     // verbose logs.
-    args = List<String>.from(args);
+    args = List<String>.of(args);
     args.removeWhere((String option) => option == '-v' || option == '--verbose');
   }
 
@@ -122,27 +120,39 @@ Future<int> _handleToolError(
 
     // Report to both [Usage] and [CrashReportSender].
     globals.flutterUsage.sendException(error);
-    await CrashReportSender.instance.sendReport(
+    final CrashReportSender crashReportSender = CrashReportSender(
+      client: http.Client(),
+      usage: globals.flutterUsage,
+      platform: globals.platform,
+      logger: globals.logger,
+      operatingSystemUtils: globals.os,
+    );
+    await crashReportSender.sendReport(
       error: error,
       stackTrace: stackTrace,
       getFlutterVersion: getFlutterVersion,
       command: args.join(' '),
     );
 
-    final String errorString = error.toString();
-    globals.printError('Oops; flutter has exited unexpectedly: "$errorString".');
+    globals.printError('Oops; flutter has exited unexpectedly: "$error".');
 
     try {
-      await _informUserOfCrash(args, error, stackTrace, errorString);
+      final CrashDetails details = CrashDetails(
+        command: _crashCommand(args),
+        error: error,
+        stackTrace: stackTrace,
+        doctorText: await _doctorText(),
+      );
+      final File file = await _createLocalCrashReport(details);
+      await globals.crashReporter.informUser(details, file);
 
       return _exit(1);
     // This catch catches all exceptions to ensure the message below is printed.
     } catch (error) { // ignore: avoid_catches_without_on_clauses
       globals.stdio.stderrWrite(
         'Unable to generate crash report due to secondary error: $error\n'
-        'please let us know at https://github.com/flutter/flutter/issues.\n',
-      );
-      // Any exception throw here (including one thrown by `_exit()`) will
+        '${globals.userMessages.flutterToolBugInstructions}\n');
+      // Any exception thrown here (including one thrown by `_exit()`) will
       // get caught by our zone's `onError` handler. In order to avoid an
       // infinite error loop, we throw an error that is recognized above
       // and will trigger an immediate exit.
@@ -151,76 +161,39 @@ Future<int> _handleToolError(
   }
 }
 
-Future<void> _informUserOfCrash(List<String> args, dynamic error, StackTrace stackTrace, String errorString) async {
-  final String doctorText = await _doctorText();
-  final File file = await _createLocalCrashReport(args, error, stackTrace, doctorText);
-
-  globals.printError('A crash report has been written to ${file.path}.');
-  globals.printStatus('This crash may already be reported. Check GitHub for similar crashes.', emphasis: true);
-
-  final HttpClientFactory clientFactory = context.get<HttpClientFactory>();
-  final GitHubTemplateCreator gitHubTemplateCreator = context.get<GitHubTemplateCreator>() ?? GitHubTemplateCreator(
-    fileSystem: globals.fs,
-    logger: globals.logger,
-    flutterProjectFactory: globals.projectFactory,
-    client: clientFactory != null ? clientFactory() : HttpClient(),
-  );
-  final String similarIssuesURL = GitHubTemplateCreator.toolCrashSimilarIssuesURL(errorString);
-  globals.printStatus('$similarIssuesURL\n', wrap: false);
-  globals.printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
-  globals.printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
-  globals.printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
-
-  final String command = _crashCommand(args);
-  final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(
-    command,
-    error,
-    stackTrace,
-    doctorText
-  );
-  globals.printStatus('$gitHubTemplateURL\n', wrap: false);
-}
-
 String _crashCommand(List<String> args) => 'flutter ${args.join(' ')}';
 
 String _crashException(dynamic error) => '${error.runtimeType}: $error';
 
-/// File system used by the crash reporting logic.
-///
-/// We do not want to use the file system stored in the context because it may
-/// be recording. Additionally, in the case of a crash we do not trust the
-/// integrity of the [AppContext].
-@visibleForTesting
-FileSystem crashFileSystem = const LocalFileSystem();
-
 /// Saves the crash report to a local file.
-Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrace stackTrace, String doctorText) async {
+Future<File> _createLocalCrashReport(CrashDetails details) async {
   File crashFile = globals.fsUtils.getUniqueFile(
-    crashFileSystem.currentDirectory,
+    globals.fs.currentDirectory,
     'flutter',
     'log',
   );
 
   final StringBuffer buffer = StringBuffer();
 
-  buffer.writeln('Flutter crash report; please file at https://github.com/flutter/flutter/issues.\n');
+  buffer.writeln('Flutter crash report.');
+  buffer.writeln('${globals.userMessages.flutterToolBugInstructions}\n');
 
   buffer.writeln('## command\n');
-  buffer.writeln('${_crashCommand(args)}\n');
+  buffer.writeln('${details.command}\n');
 
   buffer.writeln('## exception\n');
-  buffer.writeln('${_crashException(error)}\n');
-  buffer.writeln('```\n$stackTrace```\n');
+  buffer.writeln('${_crashException(details.error)}\n');
+  buffer.writeln('```\n${details.stackTrace}```\n');
 
   buffer.writeln('## flutter doctor\n');
-  buffer.writeln('```\n$doctorText```');
+  buffer.writeln('```\n${details.doctorText}```');
 
   try {
     crashFile.writeAsStringSync(buffer.toString());
   } on FileSystemException catch (_) {
     // Fallback to the system temporary directory.
     crashFile = globals.fsUtils.getUniqueFile(
-      crashFileSystem.systemTempDirectory,
+      globals.fs.systemTempDirectory,
       'flutter',
       'log',
     );
@@ -242,12 +215,8 @@ Future<String> _doctorText() async {
       outputPreferences: globals.outputPreferences,
     );
 
-    await context.run<bool>(
-      body: () => doctor.diagnose(verbose: true, showColor: false),
-      overrides: <Type, Generator>{
-        Logger: () => logger,
-      },
-    );
+    final Doctor doctor = Doctor(logger: logger);
+    await doctor.diagnose(verbose: true, showColor: false);
 
     return logger.statusText;
   } on Exception catch (error, trace) {

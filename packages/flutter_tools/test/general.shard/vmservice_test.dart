@@ -91,46 +91,6 @@ final Map<String, Object> listViews = <String, dynamic>{
 typedef ServiceCallback = Future<Map<String, dynamic>> Function(Map<String, Object>);
 
 void main() {
-  testUsingContext('VMService can refreshViews', () async {
-    final MockVMService mockVmService = MockVMService();
-    final VMService vmService = VMService(
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      mockVmService,
-      Completer<void>(),
-      const Stream<dynamic>.empty(),
-    );
-
-    verify(mockVmService.registerService('flutterVersion', 'Flutter Tools')).called(1);
-
-    when(mockVmService.callServiceExtension('getVM',
-      args: anyNamed('args'), // Empty
-      isolateId: null
-    )).thenAnswer((Invocation invocation) async {
-      return vm_service.Response.parse(vm);
-    });
-    await vmService.getVMOld();
-
-
-    when(mockVmService.callServiceExtension('_flutter.listViews',
-      args: anyNamed('args'),
-      isolateId: anyNamed('isolateId')
-    )).thenAnswer((Invocation invocation) async {
-      return vm_service.Response.parse(listViews);
-    });
-    await vmService.refreshViews(waitForViews: true);
-
-    expect(vmService.vm.name, 'vm');
-    expect(vmService.vm.views.single.id, '_flutterView/0x4a4c1f8');
-  }, overrides: <Type, Generator>{
-    Logger: () => BufferLogger.test()
-  });
-
   testUsingContext('VmService registers reloadSources', () {
     Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
     final MockVMService mockVMService = MockVMService();
@@ -279,6 +239,35 @@ void main() {
         containsPair('isolateId', 'def'),
       ]))
     ]));
+  });
+
+  testWithoutContext('runInView forwards arguments correctly', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(method: 'streamListen', id: '1', args: <String, Object>{
+          'streamId': 'Isolate'
+        }),
+        const FakeVmServiceRequest(method: kRunInViewMethod, id: '2', args: <String, Object>{
+          'viewId': '1234',
+          'mainScript': 'main.dart',
+          'assetDirectory': 'flutter_assets/',
+        }),
+        FakeVmServiceStreamResponse(
+          streamId: 'Isolate',
+          event: vm_service.Event(
+            kind: vm_service.EventKind.kIsolateRunnable,
+            timestamp: 1,
+          )
+        ),
+      ]
+    );
+
+    await fakeVmServiceHost.vmService.runInView(
+      viewId: '1234',
+      main: Uri.file('main.dart'),
+      assetsDirectory: Uri.file('flutter_assets/'),
+    );
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 }
 

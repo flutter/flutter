@@ -22,6 +22,7 @@ import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'doctor.dart';
 import 'fuchsia/fuchsia_sdk.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
@@ -33,17 +34,22 @@ import 'persistent_tool_state.dart';
 import 'project.dart';
 import 'reporting/reporting.dart';
 import 'version.dart';
-import 'web/chrome.dart';
 
 Artifacts get artifacts => context.get<Artifacts>();
 BuildSystem get buildSystem => context.get<BuildSystem>();
 Cache get cache => context.get<Cache>();
 Config get config => context.get<Config>();
+CrashReporter get crashReporter => context.get<CrashReporter>();
+Doctor get doctor => context.get<Doctor>();
+HttpClientFactory get httpClientFactory => context.get<HttpClientFactory>();
 Logger get logger => context.get<Logger>();
 OperatingSystemUtils get os => context.get<OperatingSystemUtils>();
 PersistentToolState get persistentToolState => PersistentToolState.instance;
 Usage get flutterUsage => context.get<Usage>();
-FlutterProjectFactory get projectFactory => context.get<FlutterProjectFactory>() ?? FlutterProjectFactory();
+FlutterProjectFactory get projectFactory => context.get<FlutterProjectFactory>() ?? FlutterProjectFactory(
+  logger: logger,
+  fileSystem: fs,
+);
 
 const FileSystem _kLocalFs = LocalFileSystem();
 
@@ -177,9 +183,6 @@ PlistParser get plistParser => context.get<PlistParser>() ?? (
     logger: logger,
 ));
 PlistParser _plistInstance;
-
-/// The [ChromeLauncher] instance.
-ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
 
 /// The global template renderer
 TemplateRenderer get templateRenderer => context.get<TemplateRenderer>();

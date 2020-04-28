@@ -186,7 +186,8 @@ BuildApp() {
     -dTrackWidgetCreation="${track_widget_creation_flag}"                 \
     -dDartObfuscation="${dart_obfuscation_flag}"                          \
     -dEnableBitcode="${bitcode_flag}"                                     \
-    -dDartDefines="${DART_DEFINES}"                                       \
+    --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"             \
+    --DartDefines="${DART_DEFINES}"                                       \
     -dExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                   \
     "${build_mode}_ios_bundle_flutter_assets"
 
@@ -259,7 +260,6 @@ ThinFramework() {
   local framework_dir="$1"
   shift
 
-  local plist_path="${framework_dir}/Info.plist"
   local executable="$(GetFrameworkExecutablePath "${framework_dir}")"
   LipoExecutable "${executable}" "$@"
 }

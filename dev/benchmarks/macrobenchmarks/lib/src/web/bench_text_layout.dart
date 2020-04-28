@@ -58,11 +58,6 @@ void _useCanvasText(bool useCanvasText) {
   );
 }
 
-typedef OnBenchmark = void Function(String name, num value);
-void _onBenchmark(OnBenchmark listener) {
-  js_util.setProperty(html.window, '_flutter_internal_on_benchmark', listener);
-}
-
 /// Repeatedly lays out a paragraph using the DOM measurement approach.
 ///
 /// Creates a different paragraph each time in order to avoid hitting the cache.
@@ -132,21 +127,21 @@ class BenchTextLayout extends RawRecorder {
   }) {
     profile.record('$keyPrefix.layout', () {
       paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
-    });
+    }, reported: true);
     profile.record('$keyPrefix.getBoxesForRange', () {
       for (int start = 0; start < text.length; start += 3) {
         for (int end = start + 1; end < text.length; end *= 2) {
           paragraph.getBoxesForRange(start, end);
         }
       }
-    });
+    }, reported: true);
     profile.record('$keyPrefix.getPositionForOffset', () {
       for (double dx = 0.0; dx < paragraph.width; dx += 10.0) {
         for (double dy = 0.0; dy < paragraph.height; dy += 10.0) {
           paragraph.getPositionForOffset(Offset(dx, dy));
         }
       }
-    });
+    }, reported: true);
   }
 }
 
@@ -179,7 +174,7 @@ class BenchTextCachedLayout extends RawRecorder {
     final ui.Paragraph paragraph = builder.build();
     profile.record('layout', () {
       paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
-    });
+    }, reported: true);
     _useCanvasText(null);
   }
 }
@@ -215,6 +210,16 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
   BenchBuildColorsGrid.canvasKit()
       : mode = _TestMode.useCanvasKit, super(name: canvasKitBenchmarkName);
 
+  /// Disables tracing for this benchmark.
+  ///
+  /// When tracing is enabled, DOM layout takes longer to complete. This has a
+  /// significant effect on the benchmark since we do a lot of text layout
+  /// operations that trigger synchronous DOM layout.
+  ///
+  /// Tracing has a negative effect only in [_TestMode.useDomTextLayout] mode.
+  @override
+  bool get isTracingEnabled => false;
+
   static const String domBenchmarkName = 'text_dom_color_grid';
   static const String canvasBenchmarkName = 'text_canvas_color_grid';
   static const String canvasKitBenchmarkName = 'text_canvas_kit_color_grid';
@@ -232,7 +237,7 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
     if (mode == _TestMode.useDomTextLayout) {
       _useCanvasText(false);
     }
-    _onBenchmark((String name, num value) {
+    registerEngineBenchmarkValueListener('text_layout', (num value) {
       _textLayoutMicros += value;
     });
   }
@@ -240,7 +245,7 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
   @override
   Future<void> tearDownAll() async {
     _useCanvasText(null);
-    _onBenchmark(null);
+    stopListeningToEngineBenchmarkValues('text_layout');
   }
 
   @override
@@ -258,6 +263,7 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
       profile.addDataPoint(
         'text_layout',
         Duration(microseconds: _textLayoutMicros.toInt()),
+        reported: true,
       );
     }
     super.frameDidDraw();

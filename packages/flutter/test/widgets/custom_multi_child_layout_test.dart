@@ -49,8 +49,8 @@ Widget buildFrame(MultiChildLayoutDelegate delegate) {
   return Center(
     child: CustomMultiChildLayout(
       children: <Widget>[
-        LayoutId(id: 0, child: Container(width: 150.0, height: 100.0)),
-        LayoutId(id: 1, child: Container(width: 100.0, height: 200.0)),
+        LayoutId(id: 0, child: const SizedBox(width: 150.0, height: 100.0)),
+        LayoutId(id: 1, child: const SizedBox(width: 100.0, height: 200.0)),
       ],
       delegate: delegate,
     ),
@@ -225,13 +225,13 @@ void main() {
             id: 0,
             child: CustomMultiChildLayout(
               children: <Widget>[
-                LayoutId(id: 0, child: Container(width: 150.0, height: 100.0)),
-                LayoutId(id: 1, child: Container(width: 100.0, height: 200.0)),
+                LayoutId(id: 0, child: const SizedBox(width: 150.0, height: 100.0)),
+                LayoutId(id: 1, child: const SizedBox(width: 100.0, height: 200.0)),
               ],
               delegate: delegate,
             ),
           ),
-          LayoutId(id: 1, child: Container(width: 100.0, height: 200.0)),
+          LayoutId(id: 1, child: const SizedBox(width: 100.0, height: 200.0)),
         ],
         delegate: delegate,
       ),

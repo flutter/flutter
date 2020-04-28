@@ -842,7 +842,7 @@ class TextStyle with Diagnosticable {
       fontStyle: fontStyle ?? this.fontStyle,
       letterSpacing: letterSpacing == null ? null : letterSpacing * letterSpacingFactor + letterSpacingDelta,
       wordSpacing: wordSpacing == null ? null : wordSpacing * wordSpacingFactor + wordSpacingDelta,
-      textBaseline: textBaseline,
+      textBaseline: textBaseline ?? this.textBaseline,
       height: height == null ? null : height * heightFactor + heightDelta,
       locale: locale ?? this.locale,
       foreground: foreground,

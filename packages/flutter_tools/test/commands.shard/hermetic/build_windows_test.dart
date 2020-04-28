@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:platform/platform.dart';
 
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -108,7 +109,7 @@ void main() {
     setUpMockProjectFilesForBuild();
 
     expect(createTestCommandRunner(command).run(
-      const <String>['windows']
+      const <String>['windows', '--no-pub']
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
@@ -125,7 +126,7 @@ void main() {
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
 
     expect(createTestCommandRunner(command).run(
-      const <String>['windows']
+      const <String>['windows', '--no-pub']
     ), throwsToolExit(message: 'No Windows desktop project configured'));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
@@ -142,7 +143,7 @@ void main() {
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
 
     expect(createTestCommandRunner(command).run(
-      const <String>['windows']
+      const <String>['windows', '--no-pub']
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => notWindowsPlatform,
@@ -158,7 +159,7 @@ void main() {
     setUpMockProjectFilesForBuild(templateVersion: 1);
 
     expect(createTestCommandRunner(command).run(
-      const <String>['windows']
+      const <String>['windows', '--no-pub']
     ), throwsToolExit(message: 'flutter create .'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -174,7 +175,7 @@ void main() {
     setUpMockProjectFilesForBuild(templateVersion: 999);
 
     expect(createTestCommandRunner(command).run(
-      const <String>['windows']
+      const <String>['windows', '--no-pub']
     ), throwsToolExit(message: 'Upgrade Flutter'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -191,19 +192,55 @@ void main() {
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
 
     when(mockProcessManager.start(<String>[
-      fileSystem.path.join(flutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
-      vcvarsPath,
-      fileSystem.path.basename(solutionPath),
-      'Release',
-    ], workingDirectory: fileSystem.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
+        fileSystem.path.join(flutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
+        vcvarsPath,
+        fileSystem.path.basename(solutionPath),
+        'Release',
+      ],
+      environment: <String, String>{},
+      workingDirectory: fileSystem.path.dirname(solutionPath))
+    ).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
 
     await createTestCommandRunner(command).run(
-      const <String>['windows']
+      const <String>['windows', '--no-pub']
     );
     expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
     expect(testLogger.traceText, contains('STDOUT STUFF'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => mockProcessManager,
+    Platform: () => windowsPlatform,
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('Windows verbose build sets VERBOSE_SCRIPT_LOGGING', () async {
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = mockVisualStudio;
+    applyMocksToCommand(command);
+    setUpMockProjectFilesForBuild();
+    when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
+
+    when(mockProcessManager.start(<String>[
+        fileSystem.path.join(flutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
+        vcvarsPath,
+        fileSystem.path.basename(solutionPath),
+        'Release',
+      ],
+      environment: <String, String>{
+        'VERBOSE_SCRIPT_LOGGING': 'true',
+      },
+      workingDirectory: fileSystem.path.dirname(solutionPath))
+    ).thenAnswer((Invocation invocation) async {
+      return mockProcess;
+    });
+
+    await createTestCommandRunner(command).run(
+      const <String>['windows', '--no-pub', '-v']
+    );
+    expect(testLogger.statusText, contains('STDOUT STUFF'));
+    expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => mockProcessManager,
@@ -219,25 +256,48 @@ void main() {
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
 
     when(mockProcessManager.start(<String>[
-      fileSystem.path.join(flutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
-      vcvarsPath,
-      fileSystem.path.basename(solutionPath),
-      'Release',
-    ], workingDirectory: fileSystem.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
+        fileSystem.path.join(flutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
+        vcvarsPath,
+        fileSystem.path.basename(solutionPath),
+        'Release',
+      ],
+      environment: <String, String>{},
+      workingDirectory: fileSystem.path.dirname(solutionPath))
+    ).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
 
     await createTestCommandRunner(command).run(
-      const <String>['windows']
+      const <String>[
+        'windows',
+        '--no-pub',
+        '--track-widget-creation',
+        '--obfuscate',
+        '--tree-shake-icons',
+        '--enable-experiment=non-nullable',
+        r'--split-debug-info=C:\foo\',
+        '--dart-define=foo=a',
+        '--dart-define=bar=b',
+        r'--target=lib\main.dart',
+      ]
     );
 
     // Spot-check important elements from the properties file.
     final File propsFile = fileSystem.file(r'C:\windows\flutter\ephemeral\Generated.props');
-    expect(propsFile.existsSync(), true);
+    expect(propsFile, exists);
+
     final xml.XmlDocument props = xml.parse(propsFile.readAsStringSync());
     expect(props.findAllElements('PropertyGroup').first.getAttribute('Label'), 'UserMacros');
     expect(props.findAllElements('ItemGroup').length, 1);
     expect(props.findAllElements('FLUTTER_ROOT').first.text, flutterRoot);
+    expect(props.findAllElements('TRACK_WIDGET_CREATION').first.text, 'true');
+    expect(props.findAllElements('TREE_SHAKE_ICONS').first.text, 'true');
+    expect(props.findAllElements('EXTRA_GEN_SNAPSHOT_OPTIONS').first.text, '--enable-experiment=non-nullable');
+    expect(props.findAllElements('EXTRA_FRONT_END_OPTIONS').first.text, '--enable-experiment=non-nullable');
+    expect(props.findAllElements('DART_DEFINES').first.text, 'foo=a,bar=b');
+    expect(props.findAllElements('DART_OBFUSCATION').first.text, 'true');
+    expect(props.findAllElements('SPLIT_DEBUG_INFO').first.text, r'C:\foo\');
+    expect(props.findAllElements('FLUTTER_TARGET').first.text, r'lib\main.dart');
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => mockProcessManager,
@@ -252,17 +312,21 @@ void main() {
     setUpMockProjectFilesForBuild();
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
 
-    when(mockProcessManager.start(<String>[
-      fileSystem.path.join(flutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
-      vcvarsPath,
-      fileSystem.path.basename(solutionPath),
-      'Release',
-    ], workingDirectory: fileSystem.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
-      return mockProcess;
-    });
+    when(mockProcessManager.start(
+      <String>[
+        fileSystem.path.join(flutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
+        vcvarsPath,
+        fileSystem.path.basename(solutionPath),
+        'Release',
+      ],
+      environment: <String, String>{},
+      workingDirectory: fileSystem.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
+        return mockProcess;
+      },
+    );
 
     await createTestCommandRunner(command).run(
-      const <String>['windows']
+      const <String>['windows', '--no-pub']
     );
 
     expect(testLogger.statusText, contains('🚧'));

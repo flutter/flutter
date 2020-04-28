@@ -106,14 +106,14 @@ void main() {
 
       _findNextMatcherInList(
         stdout,
-        (String line) => line.contains('Built build/app/outputs/apk/release/app-release.apk (') && line.contains('MB).'),
-        'Built build/app/outputs/apk/release/app-release.apk',
+        (String line) => line.contains('Built build/app/outputs/flutter-apk/app-release.apk (') && line.contains('MB).'),
+        'Built build/app/outputs/flutter-apk/app-release.apk',
       );
 
       _findNextMatcherInList(
         stdout,
-        (String line) => line.startsWith('Installing build/app/outputs/apk/app.apk...'),
-        'Installing build/app/outputs/apk/app.apk...',
+        (String line) => line.startsWith('Installing build/app/outputs/flutter-apk/app.apk...'),
+        'Installing build/app/outputs/flutter-apk/app.apk...',
       );
 
       _findNextMatcherInList(

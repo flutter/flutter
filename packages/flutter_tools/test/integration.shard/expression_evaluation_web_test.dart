@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:matcher/matcher.dart';
 
 import 'package:vm_service/vm_service.dart';
 
@@ -46,6 +47,14 @@ void batch1() {
     );
   }
 
+  test('flutter run expression evaluation - can handle compilation errors', () async {
+    await initProject();
+    await _flutter.run(withDebugger: true, chrome: true);
+    await breakInTopLevelFunction(_flutter);
+    await evaluateErrorExpressions(_flutter);
+    await cleanProject();
+  }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
+
   test('flutter run expression evaluation - can evaluate trivial expressions in top level function', () async {
     await initProject();
     await _flutter.run(withDebugger: true, chrome: true);
@@ -77,22 +86,6 @@ void batch1() {
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
   }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
-
-  test('flutter run expression evaluation - can evaluate expressions returning complex objects in top level function', () async {
-    await initProject();
-    await _flutter.run(withDebugger: true, chrome: true);
-    await breakInTopLevelFunction(_flutter);
-    await evaluateComplexReturningExpressions(_flutter);
-    await cleanProject();
-  }, skip: 'Evaluate on objects is not supported for web yet');
-
-  test('flutter run expression evaluation - can evaluate expressions returning complex objects in build method', () async {
-    await initProject();
-    await _flutter.run(withDebugger: true, chrome: true);
-    await breakInBuildMethod(_flutter);
-    await evaluateComplexReturningExpressions(_flutter);
-    await cleanProject();
-  }, skip: 'Evaluate on objects is not supported for web yet');
 }
 
 void batch2() {
@@ -133,43 +126,43 @@ void batch2() {
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
   }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
+}
 
-  test('flutter test expression evaluation - can evaluate expressions returning complex objects in a test', () async {
-    await initProject();
-    await _flutter.run(withDebugger: true, chrome: true, script: _project.testFilePath);
-    await breakInMethod(_flutter);
-    await evaluateComplexReturningExpressions(_flutter);
-    await cleanProject();
-  }, skip: 'Evaluate on objects is not supported for web yet');
+
+Future<void> evaluateErrorExpressions(FlutterTestDriver flutter) async {
+  final ObjRef res = await flutter.evaluateInFrame('typo');
+  expectError(res, 'CompilationError: Getter not found: \'typo\'.\ntypo\n^^^^');
 }
 
 Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
-  InstanceRef res;
+  ObjRef res;
 
   res = await flutter.evaluateInFrame('"test"');
-  expect(res.kind == InstanceKind.kString && res.valueAsString == 'test', isTrue);
+  expectInstance(res, InstanceKind.kString, 'test');
 
   res = await flutter.evaluateInFrame('1');
-  expect(res.kind == InstanceKind.kDouble && res.valueAsString == 1.toString(), isTrue);
+  expectInstance(res, InstanceKind.kDouble, 1.toString());
 
   res = await flutter.evaluateInFrame('true');
-  expect(res.kind == InstanceKind.kBool && res.valueAsString == true.toString(), isTrue);
+  expectInstance(res, InstanceKind.kBool, true.toString());
 }
 
 Future<void> evaluateComplexExpressions(FlutterTestDriver flutter) async {
-  final InstanceRef res = await flutter.evaluateInFrame('new DateTime.now().year');
-  expect(res.kind == InstanceKind.kDouble && res.valueAsString == DateTime.now().year.toString(), isTrue);
+  final ObjRef res = await flutter.evaluateInFrame('new DateTime.now().year');
+  expectInstance(res, InstanceKind.kDouble, DateTime.now().year.toString());
 }
 
-Future<void> evaluateComplexReturningExpressions(FlutterTestDriver flutter) async {
-  final DateTime now = DateTime.now();
-  final InstanceRef resp = await flutter.evaluateInFrame('new DateTime.now()');
-  expect(resp.classRef.name, equals('DateTime'));
-  // Ensure we got a reasonable approximation. The more accurate we try to
-  // make this, the more likely it'll fail due to differences in the time
-  // in the remote VM and the local VM at the time the code runs.
-  final InstanceRef res = await flutter.evaluate(resp.id, r'"$year-$month-$day"');
-  expect(res.valueAsString, equals('${now.year}-${now.month}-${now.day}'));
+void expectInstance(ObjRef result, String kind, String message) {
+  expect(result,
+    const TypeMatcher<InstanceRef>()
+      .having((InstanceRef instance) => instance.kind, 'kind', kind)
+      .having((InstanceRef instance) => instance.valueAsString, 'valueAsString', message));
+}
+
+void expectError(ObjRef result, String message) {
+  expect(result,
+    const TypeMatcher<ErrorRef>()
+      .having((ErrorRef instance) => instance.message, 'message', message));
 }
 
 void main() {

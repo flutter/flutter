@@ -45,7 +45,6 @@ import 'persistent_tool_state.dart';
 import 'reporting/reporting.dart';
 import 'run_hot.dart';
 import 'version.dart';
-import 'web/chrome.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio.dart';
 import 'windows/visual_studio_validator.dart';
@@ -99,13 +98,6 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
       ),
-      ChromeLauncher: () => ChromeLauncher(
-        fileSystem: globals.fs,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        operatingSystemUtils: globals.os,
-        platform: globals.platform,
-      ),
       CocoaPods: () => CocoaPods(
         fileSystem: globals.fs,
         processManager: globals.processManager,
@@ -124,9 +116,15 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
       ),
+      CrashReporter: () => CrashReporter(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        flutterProjectFactory: globals.projectFactory,
+        client: globals.httpClientFactory?.call() ?? HttpClient(),
+      ),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => DeviceManager(),
-      Doctor: () => const Doctor(),
+      Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(),
       FeatureFlags: () => const FeatureFlags(),
@@ -175,7 +173,14 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         logger: globals.logger,
       ),
-      Pub: () => const Pub(),
+      Pub: () => Pub(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        usage: globals.flutterUsage,
+      ),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Signals: () => Signals(),
       Stdio: () => Stdio(),

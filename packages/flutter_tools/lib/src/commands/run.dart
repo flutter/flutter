@@ -80,6 +80,8 @@ class RunCommand extends RunCommandBase {
   RunCommand({ bool verboseHelp = false }) : super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
+    usesExtraFrontendOptions();
+    addEnableExperimentation(hide: !verboseHelp);
     argParser
       ..addFlag('start-paused',
         negatable: false,
@@ -208,11 +210,6 @@ class RunCommand extends RunCommandBase {
         help: 'Whether to quickly bootstrap applications with a minimal app. '
               'Currently this is only supported on Android devices. This option '
               'cannot be paired with --use-application-binary.'
-      )
-      ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
-      ..addMultiOption(FlutterOptions.kEnableExperiment,
-        splitCommas: true,
-        hide: true,
       );
   }
 
@@ -382,6 +379,7 @@ class RunCommand extends RunCommandBase {
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
+        webEnableExpressionEvaluation: featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
         vmserviceOutFile: stringArg('vmservice-out-file'),
         // Allow forcing fast-start to off to prevent doing more work on devices that
         // don't support it.

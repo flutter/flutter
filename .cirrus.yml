@@ -5,6 +5,7 @@ web_shard_template: &WEB_SHARD_TEMPLATE
   only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
   environment:
     # As of March 2020, the Web shards needed 16G of RAM and 4 CPUs to run all framework tests with goldens without flaking.
+    WEB_SHARD_COUNT: 8
     CPU: 4
     MEMORY: 16G
     CHROME_NO_SANDBOX: true
@@ -488,7 +489,7 @@ task:
 # than just fetching the data in the first place.
 task:
   osx_instance:
-    image: catalina-flutter # see https://cirrus-ci.org/guide/macOS/ for list of images (we should update regularly)
+    image: catalina-xcode-11.3.1-flutter # see https://cirrus-ci.org/guide/macOS/ for list of images (we should update regularly)
     # cpu is always 2
     # memory is always 8G
   environment:

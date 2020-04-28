@@ -146,6 +146,7 @@ class TextFormField extends FormField<String> {
     bool readOnly = false,
     ToolbarOptions toolbarOptions,
     bool showCursor,
+    String obscuringCharacter = '•',
     bool obscureText = false,
     bool autocorrect = true,
     SmartDashesType smartDashesType,
@@ -164,7 +165,7 @@ class TextFormField extends FormField<String> {
     FormFieldSetter<String> onSaved,
     FormFieldValidator<String> validator,
     List<TextInputFormatter> inputFormatters,
-    bool enabled = true,
+    bool enabled,
     double cursorWidth = 2.0,
     Radius cursorRadius,
     Color cursorColor,
@@ -177,6 +178,7 @@ class TextFormField extends FormField<String> {
        assert(textAlign != null),
        assert(autofocus != null),
        assert(readOnly != null),
+       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(enableSuggestions != null),
@@ -203,7 +205,7 @@ class TextFormField extends FormField<String> {
     onSaved: onSaved,
     validator: validator,
     autovalidate: autovalidate,
-    enabled: enabled,
+    enabled: enabled ?? decoration?.enabled ?? true,
     builder: (FormFieldState<String> field) {
       final _TextFormFieldState state = field as _TextFormFieldState;
       final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
@@ -230,6 +232,7 @@ class TextFormField extends FormField<String> {
         toolbarOptions: toolbarOptions,
         readOnly: readOnly,
         showCursor: showCursor,
+        obscuringCharacter: obscuringCharacter,
         obscureText: obscureText,
         autocorrect: autocorrect,
         smartDashesType: smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -245,7 +248,7 @@ class TextFormField extends FormField<String> {
         onEditingComplete: onEditingComplete,
         onSubmitted: onFieldSubmitted,
         inputFormatters: inputFormatters,
-        enabled: enabled,
+        enabled: enabled ?? decoration?.enabled ?? true,
         cursorWidth: cursorWidth,
         cursorRadius: cursorRadius,
         cursorColor: cursorColor,
@@ -307,6 +310,14 @@ class _TextFormFieldState extends FormFieldState<String> {
   void dispose() {
     widget.controller?.removeListener(_handleControllerChanged);
     super.dispose();
+  }
+
+  @override
+  void didChange(String value) {
+    super.didChange(value);
+
+    if (_effectiveController.text != value)
+      _effectiveController.text = value;
   }
 
   @override

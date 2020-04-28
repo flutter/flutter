@@ -126,6 +126,8 @@ abstract class FlutterTestDriver {
     _stderr.stream.listen((String message) => _debugPrint(message, topic: '<=stderr='));
   }
 
+  Future<void> get done => _process.exitCode;
+
   Future<void> connectToVmService({ bool pauseOnExceptions = false }) async {
     _vmService = await vmServiceConnectUri('$_vmServiceWsUri');
     _vmService.onSend.listen((String s) => _debugPrint(s, topic: '=vm=>'));
@@ -189,7 +191,7 @@ abstract class FlutterTestDriver {
     // ceases to be the case, this code will need changing.
     if (_flutterIsolateId == null) {
       final VM vm = await _vmService.getVM();
-      _flutterIsolateId = vm.isolates.first.id;
+      _flutterIsolateId = vm.isolates.single.id;
     }
     return _flutterIsolateId;
   }
@@ -289,9 +291,9 @@ abstract class FlutterTestDriver {
     return waitForNextPause ? waitForPause() : null;
   }
 
-  Future<InstanceRef> evaluateInFrame(String expression) async {
-    return _timeoutWithMessages<InstanceRef>(
-      () async => await _vmService.evaluateInFrame(await _getFlutterIsolateId(), 0, expression) as InstanceRef,
+  Future<ObjRef> evaluateInFrame(String expression) async {
+    return _timeoutWithMessages<ObjRef>(
+      () async => await _vmService.evaluateInFrame(await _getFlutterIsolateId(), 0, expression) as ObjRef,
       task: 'Evaluating expression ($expression)',
     );
   }
@@ -446,7 +448,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         '--machine',
         '-d',
         if (chrome)
-          ...<String>['chrome', '--web-run-headless']
+          ...<String>['chrome', '--web-run-headless', '--web-enable-expression-evaluation']
         else
           'flutter-tester',
       ],
@@ -680,6 +682,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     String testFile = 'test/test.dart',
     bool withDebugger = false,
     bool pauseOnExceptions = false,
+    bool coverage = false,
     File pidFile,
     Future<void> Function() beforeStart,
   }) async {
@@ -687,6 +690,8 @@ class FlutterTestTestDriver extends FlutterTestDriver {
       'test',
       '--disable-service-auth-codes',
       '--machine',
+      if (coverage)
+        '--coverage',
     ], script: testFile, withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile, beforeStart: beforeStart);
   }
 

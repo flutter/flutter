@@ -5,12 +5,18 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:meta/meta.dart';
+import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
+import 'package:quiver/testing/async.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
+
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
-
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
@@ -22,10 +28,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
-import 'package:quiver/testing/async.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
@@ -33,6 +35,22 @@ import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/mocks.dart';
 
+final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
+  id: '1',
+  pauseEvent: vm_service.Event(
+    kind: vm_service.EventKind.kResume,
+    timestamp: 0
+  ),
+  breakpoints: <vm_service.Breakpoint>[],
+  exceptionPauseMode: null,
+  libraries: <vm_service.LibraryRef>[],
+  livePorts: 0,
+  name: 'test',
+  number: '1',
+  pauseOnExit: false,
+  runnable: true,
+  startTime: 0,
+);
 
 void main() {
   group('attach', () {
@@ -142,7 +160,7 @@ void main() {
           final Process dartProcess = MockProcess();
           final StreamController<List<int>> compilerStdoutController = StreamController<List<int>>();
 
-          when(dartProcess.stdout).thenAnswer((_) => compilerStdoutController.stream);
+        when(dartProcess.stdout).thenAnswer((_) => compilerStdoutController.stream);
         when(dartProcess.stderr)
           .thenAnswer((_) => Stream<List<int>>.fromFuture(Future<List<int>>.value(const <int>[])));
 
@@ -490,7 +508,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-    });
+    }, skip: const LocalPlatform().isWindows); // mDNS does not work on Windows.
 
     group('forwarding to given port', () {
       const int devicePort = 499;
@@ -787,11 +805,38 @@ VMServiceConnector getFakeVmServiceFactory({
     when(vmService.done).thenAnswer((_) {
       return Future<void>.value(null);
     });
-
-    when(vm.refreshViews(waitForViews: anyNamed('waitForViews')))
-      .thenAnswer((_) => Future<void>.value(null));
-    when(vm.views)
-      .thenReturn(<FlutterView>[FlutterViewMock()]);
+    when(vmService.onDone).thenAnswer((_) {
+      return Future<void>.value(null);
+    });
+    when(vmService.getVM()).thenAnswer((_) async {
+      return vm_service.VM(
+        pid: 1,
+        architectureBits: 64,
+        hostCPU: '',
+        name: '',
+        isolates: <vm_service.IsolateRef>[],
+        isolateGroups: <vm_service.IsolateGroupRef>[],
+        startTime: 0,
+        targetCPU: '',
+        operatingSystem: '',
+        version: '',
+      );
+    });
+    when(vmService.getIsolate(any))
+      .thenAnswer((Invocation invocation) async {
+        return fakeUnpausedIsolate;
+      });
+    when(vmService.callMethod(kListViewsMethod))
+      .thenAnswer((_) async {
+        return vm_service.Response.parse(<String, Object>{
+          'views': <Object>[
+            <String, Object>{
+              'id': '1',
+              'isolate': fakeUnpausedIsolate.toJson()
+            }
+          ]
+        });
+      });
     when(vm.createDevFS(any))
       .thenAnswer((_) => Future<Map<String, dynamic>>.value(<String, dynamic>{'uri': '/',}));
 
@@ -841,7 +886,6 @@ class TestHotRunnerFactory extends HotRunnerFactory {
 
 class VMMock extends Mock implements VM {}
 class VMServiceMock extends Mock implements VMService {}
-class FlutterViewMock extends Mock implements FlutterView {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}

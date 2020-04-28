@@ -97,7 +97,7 @@ void main() {
               onEnter: (_) { logs.add('enter'); },
               onHover: (_) { logs.add('hover'); },
               onExit: (_) { logs.add('exit'); },
-              child: Container(width: 10, height: 10),
+              child: const SizedBox(width: 10, height: 10),
             ),
           ),
         ),

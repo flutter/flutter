@@ -7,12 +7,13 @@ import 'dart:math' as math;
 import 'dart:ui' as ui hide TextStyle;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
+import 'autofill.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'binding.dart';
@@ -29,8 +30,8 @@ import 'scrollable.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
 
-export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType, SmartQuotesType, SmartDashesType;
 export 'package:flutter/rendering.dart' show SelectionChangedCause;
+export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType, SmartQuotesType, SmartDashesType;
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -356,6 +357,7 @@ class EditableText extends StatefulWidget {
     @required this.controller,
     @required this.focusNode,
     this.readOnly = false,
+    this.obscuringCharacter = '•',
     this.obscureText = false,
     this.autocorrect = true,
     SmartDashesType smartDashesType,
@@ -409,8 +411,10 @@ class EditableText extends StatefulWidget {
       paste: true,
       selectAll: true,
     ),
+    this.autofillHints,
   }) : assert(controller != null),
        assert(focusNode != null),
+       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert(obscureText != null),
        assert(autocorrect != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -462,11 +466,20 @@ class EditableText extends StatefulWidget {
   /// Controls whether this widget has keyboard focus.
   final FocusNode focusNode;
 
+  /// {@template flutter.widgets.editableText.obscuringCharacter}
+  /// Character used for obscuring text if [obscureText] is true.
+  ///
+  /// Must be only a single character.
+  ///
+  /// Defaults to the character U+2022 BULLET (•).
+  /// {@endtemplate}
+  final String obscuringCharacter;
+
   /// {@template flutter.widgets.editableText.obscureText}
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
   /// When this is set to true, all the characters in the text field are
-  /// replaced by U+2022 BULLET characters (•).
+  /// replaced by [obscuringCharacter].
   ///
   /// Defaults to false. Cannot be null.
   /// {@endtemplate}
@@ -1079,6 +1092,23 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.rendering.editable.selectionEnabled}
   bool get selectionEnabled => enableInteractiveSelection;
 
+  /// {@template flutter.widgets.editableText.autofillHints}
+  /// A list of strings that helps the autofill service identify the type of this
+  /// text input.
+  ///
+  /// When set to null or empty, the text input will not send any autofill related
+  /// information to the platform. As a result, it will not participate in
+  /// autofills triggered by a different [AutofillClient], even if they're in the
+  /// same [AutofillScope]. Additionally, on Android and web, setting this to null
+  /// or empty will disable autofill for this text field.
+  ///
+  /// The minimum platform SDK version that supports Autofill is API level 26
+  /// for Android, and iOS 10.0 for iOS.
+  ///
+  /// {@macro flutter.services.autofill.autofillHints}
+  /// {@endtemplate}
+  final Iterable<String> autofillHints;
+
   @override
   EditableTextState createState() => EditableTextState();
 
@@ -1104,11 +1134,12 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
+    properties.add(DiagnosticsProperty<Iterable<String>>('autofillHints', autofillHints, defaultValue: null));
   }
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText> implements TextInputClient, TextSelectionDelegate {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText> implements TextSelectionDelegate, TextInputClient, AutofillClient {
   Timer _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
@@ -1127,6 +1158,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   bool _didAutoFocus = false;
   FocusAttachment _focusAttachment;
+
+  AutofillGroupState _currentAutofillScope;
+  @override
+  AutofillScope get currentAutofillScope => _currentAutofillScope;
 
   // This value is an eyeball estimation of the time it takes for the iOS cursor
   // to ease in and out.
@@ -1175,6 +1210,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    final AutofillGroupState newAutofillGroup = AutofillGroup.of(context);
+    if (currentAutofillScope != newAutofillGroup) {
+      _currentAutofillScope?.unregister(autofillId);
+      _currentAutofillScope = newAutofillGroup;
+      newAutofillGroup?.register(this);
+    }
+
     if (!_didAutoFocus && widget.autofocus) {
       _didAutoFocus = true;
       SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -1210,6 +1253,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (oldWidget.readOnly && _hasFocus)
         _openInputConnection();
     }
+
     if (widget.style != oldWidget.style) {
       final TextStyle style = widget.style;
       // The _textInputConnection will pick up the new style when it attaches in
@@ -1228,6 +1272,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void dispose() {
+    _currentAutofillScope?.unregister(autofillId);
     widget.controller.removeListener(_didChangeTextEditingValue);
     _cursorBlinkOpacityController.removeListener(_onCursorColorTick);
     _floatingCursorResetController.removeListener(_onFloatingCursorResetTick);
@@ -1278,10 +1323,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     _formatAndSetValue(value);
 
-    // To keep the cursor from blinking while typing, we want to restart the
-    // cursor timer every time a new character is typed.
-    _stopCursorTimer(resetCharTicks: false);
-    _startCursorTimer();
+    if (_hasInputConnection) {
+      // To keep the cursor from blinking while typing, we want to restart the
+      // cursor timer every time a new character is typed.
+      _stopCursorTimer(resetCharTicks: false);
+      _startCursorTimer();
+    }
   }
 
   @override
@@ -1465,26 +1512,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
       _lastFormattedUnmodifiedTextEditingValue = localValue;
-      _textInputConnection = TextInput.attach(
-        this,
-        TextInputConfiguration(
-          inputType: widget.keyboardType,
-          obscureText: widget.obscureText,
-          autocorrect: widget.autocorrect,
-          smartDashesType: widget.smartDashesType ?? (widget.obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-          smartQuotesType: widget.smartQuotesType ?? (widget.obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-          enableSuggestions: widget.enableSuggestions,
-          inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
-              ? TextInputAction.newline
-              : TextInputAction.done
-          ),
-          textCapitalization: widget.textCapitalization,
-          keyboardAppearance: widget.keyboardAppearance,
-        ),
-      );
-      _textInputConnection.show();
 
+      _textInputConnection = (widget.autofillHints?.isNotEmpty ?? false) && currentAutofillScope != null
+        ? currentAutofillScope.attach(this, textInputConfiguration)
+        : TextInput.attach(this, textInputConfiguration);
+      _textInputConnection.show();
       _updateSizeAndTransform();
+      // Request autofill AFTER the size and the transform have been sent to the
+      // platform side.
+      _textInputConnection.requestAutofill();
+
       final TextStyle style = widget.style;
       _textInputConnection
         ..setStyle(
@@ -1679,13 +1716,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _whitespaceFormatter ??= _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
 
     // Check if the new value is the same as the current local value, or is the same
-    // as the post-formatting value of the previous pass.
+    // as the pre-formatting value of the previous pass (repeat call).
     final bool textChanged = _value?.text != value?.text;
-    final bool isRepeatText = value?.text == _lastFormattedUnmodifiedTextEditingValue?.text;
-    final bool isRepeatSelection = value?.selection == _lastFormattedUnmodifiedTextEditingValue?.selection;
-    final bool isRepeatComposing = value?.composing == _lastFormattedUnmodifiedTextEditingValue?.composing;
-    // Only format when the text has changed and there are available formatters.
-    if (!isRepeatText && textChanged && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
+    final bool isRepeat = value == _lastFormattedUnmodifiedTextEditingValue;
+
+    if (textChanged && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
+      // Only format when the text has changed and there are available formatters.
+      // Pass through the formatter regardless of repeat status if the input value is
+      // different than the stored value.
       for (final TextInputFormatter formatter in widget.inputFormatters) {
         value = formatter.formatEditUpdate(_value, value);
       }
@@ -1695,9 +1733,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _lastFormattedValue = value;
     }
 
+    // Setting _value here ensures the selection and composing region info is passed.
     _value = value;
     // Use the last formatted value when an identical repeat pass is detected.
-    if (isRepeatText && isRepeatSelection && isRepeatComposing && textChanged && _lastFormattedValue != null) {
+    if (isRepeat && textChanged && _lastFormattedValue != null) {
       _value = _lastFormattedValue;
     }
 
@@ -1902,6 +1941,33 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  @override
+  String get autofillId => 'EditableText-$hashCode';
+
+  @override
+  TextInputConfiguration get textInputConfiguration {
+    final bool isAutofillEnabled = widget.autofillHints?.isNotEmpty ?? false;
+    return TextInputConfiguration(
+      inputType: widget.keyboardType,
+      obscureText: widget.obscureText,
+      autocorrect: widget.autocorrect,
+      smartDashesType: widget.smartDashesType ?? (widget.obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+      smartQuotesType: widget.smartQuotesType ?? (widget.obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+      enableSuggestions: widget.enableSuggestions,
+      inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
+        ? TextInputAction.newline
+        : TextInputAction.done
+      ),
+      textCapitalization: widget.textCapitalization,
+      keyboardAppearance: widget.keyboardAppearance,
+      autofillConfiguration: !isAutofillEnabled ? null : AutofillConfiguration(
+        uniqueIdentifier: autofillId,
+        autofillHints: widget.autofillHints.toList(growable: false),
+        currentEditingValue: currentTextEditingValue,
+      ),
+    );
+  }
+
   // null if no promptRect should be shown.
   TextRange _currentPromptRectRange;
 
@@ -1974,6 +2040,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textDirection: _textDirection,
               locale: widget.locale,
               textWidthBasis: widget.textWidthBasis,
+              obscuringCharacter: widget.obscuringCharacter,
               obscureText: widget.obscureText,
               autocorrect: widget.autocorrect,
               smartDashesType: widget.smartDashesType,
@@ -2008,7 +2075,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextSpan buildTextSpan() {
     if (widget.obscureText) {
       String text = _value.text;
-      text = RenderEditable.obscuringCharacter * text.length;
+      text = widget.obscuringCharacter * text.length;
       final int o =
         _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
       if (o != null && o >= 0 && o < text.length)
@@ -2046,6 +2113,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.textAlign,
     @required this.textDirection,
     this.locale,
+    this.obscuringCharacter,
     this.obscureText,
     this.autocorrect,
     this.smartDashesType,
@@ -2089,6 +2157,7 @@ class _Editable extends LeafRenderObjectWidget {
   final TextAlign textAlign;
   final TextDirection textDirection;
   final Locale locale;
+  final String obscuringCharacter;
   final bool obscureText;
   final TextWidthBasis textWidthBasis;
   final bool autocorrect;
@@ -2137,6 +2206,7 @@ class _Editable extends LeafRenderObjectWidget {
       onSelectionChanged: onSelectionChanged,
       onCaretChanged: onCaretChanged,
       ignorePointer: rendererIgnoresPointer,
+      obscuringCharacter: obscuringCharacter,
       obscureText: obscureText,
       textWidthBasis: textWidthBasis,
       cursorWidth: cursorWidth,
@@ -2179,6 +2249,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..onCaretChanged = onCaretChanged
       ..ignorePointer = rendererIgnoresPointer
       ..textWidthBasis = textWidthBasis
+      ..obscuringCharacter = obscuringCharacter
       ..obscureText = obscureText
       ..cursorWidth = cursorWidth
       ..cursorRadius = cursorRadius

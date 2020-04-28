@@ -19,8 +19,8 @@ Shader createShader(Rect bounds) {
 
 void main() {
   testWidgets('Can be constructed', (WidgetTester tester) async {
-    final Widget child = Container(width: 100.0, height: 100.0);
-    await tester.pumpWidget(ShaderMask(child: child, shaderCallback: createShader));
+    const Widget child = SizedBox(width: 100.0, height: 100.0);
+    await tester.pumpWidget(const ShaderMask(child: child, shaderCallback: createShader));
   }, skip: isBrowser);
 
   testWidgets('Bounds rect includes offset', (WidgetTester tester) async {
@@ -37,7 +37,7 @@ void main() {
         height: 400.0,
         child: ShaderMask(
           shaderCallback: recordShaderBounds,
-          child: Container(width: 100.0, height: 100.0),
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       ),
     );

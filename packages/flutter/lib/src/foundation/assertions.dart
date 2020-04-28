@@ -10,6 +10,9 @@ import 'diagnostics.dart';
 import 'print.dart';
 import 'stack_frame.dart';
 
+// Examples can assume:
+// String runtimeType;
+
 /// Signature for [FlutterError.onError] handler.
 typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
 
@@ -281,7 +284,7 @@ class ErrorSummary extends _ErrorDiagnostic {
 
 /// An [ErrorHint] provides specific, non-obvious advice that may be applicable.
 ///
-/// If your message provides obvious advice that is always applicable it is an
+/// If your message provides obvious advice that is always applicable, it is an
 /// [ErrorDescription] not a hint.
 ///
 /// See also:
@@ -325,7 +328,30 @@ class ErrorSpacer extends DiagnosticsProperty<void> {
 
 /// Class for information provided to [FlutterExceptionHandler] callbacks.
 ///
-/// See [FlutterError.onError].
+///  {@tool snippet}
+/// This is an example of using [FlutterErrorDetails] when calling
+/// [FlutterError.reportError].
+///
+/// ```dart
+/// void main() {
+///   try {
+///     // Try to do something!
+///   } catch (error) {
+///     // Catch & report error.
+///     FlutterError.reportError(FlutterErrorDetails(
+///       exception: error,
+///       library: 'Flutter test framework',
+///       context: ErrorSummary('while running async test code'),
+///     ));
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///   * [FlutterError.onError], which is called whenever the Flutter framework
+///     catches an error
 class FlutterErrorDetails with Diagnosticable {
   /// Creates a [FlutterErrorDetails] object with the given arguments setting
   /// the object's properties.
@@ -382,13 +408,45 @@ class FlutterErrorDetails with Diagnosticable {
   /// the console.
   final String library;
 
-  /// A human-readable description of where the error was caught (as opposed to
-  /// where it was thrown).
+  /// A [DiagnosticsNode] that provides a human-readable description of where
+  /// the error was caught (as opposed to where it was thrown).
   ///
-  /// The string should be in a form that will make sense in English when
-  /// following the word "thrown", as in "thrown while obtaining the image from
-  /// the network" (for the context "while obtaining the image from the
-  /// network").
+  /// The node, e.g. an [ErrorDescription], should be in a form that will make
+  /// sense in English when following the word "thrown", as in "thrown while
+  /// obtaining the image from the network" (for the context "while obtaining
+  /// the image from the network").
+  ///
+  /// {@tool snippet}
+  /// This is an example of using and [ErrorDescription] as the
+  /// [FlutterErrorDetails.context] when calling [FlutterError.reportError].
+  ///
+  /// ```dart
+  /// void maybeDoSomething() {
+  ///   try {
+  ///     // Try to do something!
+  ///   } catch (error) {
+  ///     // Catch & report error.
+  ///     FlutterError.reportError(FlutterErrorDetails(
+  ///       exception: error,
+  ///       library: 'Flutter test framework',
+  ///       context: ErrorDescription('while dispatching notifications for $runtimeType'),
+  ///     ));
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [ErrorDescription], which provides an explanation of the problem and
+  ///    its cause, any information that may help track down the problem,
+  ///    background information, etc.
+  ///  * [ErrorSummary], which provides a short (one line) description of the
+  ///    problem that was detected.
+  ///  * [ErrorHint], which provides specific, non-obvious advice that may be
+  ///    applicable.
+  ///  * [FlutterError], which is the most common place to use
+  ///    [FlutterErrorDetails].
   final DiagnosticsNode context;
 
   /// A callback which filters the [stack] trace. Receives an iterable of
@@ -715,7 +773,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
 
   /// Called whenever the Flutter framework catches an error.
   ///
-  /// The default behavior is to call [dumpErrorToConsole].
+  /// The default behavior is to call [presentError].
   ///
   /// You can set this to your own function to override this default behavior.
   /// For example, you could report all errors to your server.
@@ -725,7 +783,18 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// Set this to null to silently catch and ignore errors. This is not
   /// recommended.
-  static FlutterExceptionHandler onError = dumpErrorToConsole;
+  static FlutterExceptionHandler onError = (FlutterErrorDetails details) => presentError(details);
+
+  /// Called whenever the Flutter framework wants to present an error to the
+  /// users.
+  ///
+  /// The default behavior is to call [dumpErrorToConsole].
+  ///
+  /// Plugins can override how an error is to be presented to the user. For
+  /// example, the structured errors service extension sets its own method when
+  /// the extension is enabled. If you want to change how Flutter responds to an
+  /// error, use [onError] instead.
+  static FlutterExceptionHandler presentError = dumpErrorToConsole;
 
   static int _errorCount = 0;
 

@@ -29,7 +29,6 @@ import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/github_template.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -109,7 +108,7 @@ void testUsingContext(
           AnsiTerminal: () => AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
           Config: () => buildConfig(globals.fs),
           DeviceManager: () => FakeDeviceManager(),
-          Doctor: () => FakeDoctor(),
+          Doctor: () => FakeDoctor(globals.logger),
           FlutterVersion: () => MockFlutterVersion(),
           HttpClient: () => MockHttpClient(),
           IOSSimulatorUtils: () {
@@ -132,7 +131,7 @@ void testUsingContext(
           PlistParser: () => FakePlistParser(),
           Signals: () => FakeSignals(),
           Pub: () => ThrowingPub(), // prevent accidentally using pub.
-          GitHubTemplateCreator: () => MockGitHubTemplateCreator(),
+          CrashReporter: () => MockCrashReporter(),
           TemplateRenderer: () => const MustacheTemplateRenderer(),
         },
         body: () {
@@ -261,6 +260,8 @@ class FakeAndroidLicenseValidator extends AndroidLicenseValidator {
 }
 
 class FakeDoctor extends Doctor {
+  FakeDoctor(Logger logger) : super(logger: logger);
+
   // True for testing.
   @override
   bool get canListAnything => true;
@@ -431,7 +432,7 @@ class MockClock extends Mock implements SystemClock {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 
-class MockGitHubTemplateCreator extends Mock implements GitHubTemplateCreator {}
+class MockCrashReporter extends Mock implements CrashReporter {}
 
 class FakePlistParser implements PlistParser {
   @override

@@ -15,10 +15,16 @@
 #
 # This script expects `pm`, `device-finder`, and `fuchsia_ctl` to all be in the
 # same directory as the script.
+#
+# This script also expects a private key available at:
+# "/etc/botanist/keys/id_rsa_infra".
 
 set -Eex
 
 script_dir=$(dirname "$(readlink -f "$0")")
+
+# Bot key to pave and ssh the device.
+pkey="/etc/botanist/keys/id_rsa_infra"
 
 # The nodes are named blah-blah--four-word-fuchsia-id
 device_name=${SWARMING_BOT_ID#*--}
@@ -33,16 +39,22 @@ fi
 
 reboot() {
   # note: this will set an exit code of 255, which we can ignore.
-  $script_dir/fuchsia_ctl -d $device_name --dev-finder-path $script_dir/dev_finder ssh --identity-file $script_dir/.ssh/pkey -c "dm reboot-recovery" || true
+  echo "$(date) START:REBOOT ------------------------------------------"
+  $script_dir/fuchsia_ctl -d $device_name --dev-finder-path $script_dir/dev_finder ssh --identity-file $pkey -c "dm reboot-recovery" || true
+  echo "$(date) END:REBOOT --------------------------------------------"
 }
 
 trap reboot EXIT
 
-$script_dir/fuchsia_ctl -d $device_name pave  -i $1
-$script_dir/fuchsia_ctl push-packages -d $device_name --repoArchive generic-x64.tar.gz -p tiles -p tiles_ctl
+echo "$(date) START:PAVING ------------------------------------------"
+ssh-keygen -y -f $pkey > key.pub
+$script_dir/fuchsia_ctl -d $device_name pave  -i $1 --public-key "key.pub"
+echo "$(date) END:PAVING --------------------------------------------"
+
+
+$script_dir/fuchsia_ctl push-packages -d $device_name --identity-file $pkey --repoArchive generic-x64.tar.gz -p tiles -p tiles_ctl
 
 # set fuchsia ssh config
-export FUCHSIA_SSH_PKEY=$script_dir/.ssh/pkey
 cat > $script_dir/fuchsia_ssh_config << EOF
 Host *
   CheckHostIP no
@@ -53,7 +65,7 @@ Host *
   UserKnownHostsFile /dev/null
   User fuchsia
   IdentitiesOnly yes
-  IdentityFile $FUCHSIA_SSH_PKEY
+  IdentityFile $pkey
   ControlPersist yes
   ControlMaster auto
   ControlPath /tmp/fuchsia--%r@%h:%p
@@ -66,13 +78,13 @@ EOF
 export FUCHSIA_SSH_CONFIG=$script_dir/fuchsia_ssh_config
 
 # Run the driver test
+echo "$(date) START:DRIVER_TEST -------------------------------------"
 flutter_dir=$script_dir/flutter
 flutter_bin=$flutter_dir/bin/flutter
 
 # remove all out dated .packages references
 find $flutter_dir -name ".packages" | xargs rm
-
 cd $flutter_dir/dev/benchmarks/test_apps/stocks/
-
 $flutter_bin pub get
 $flutter_bin drive -v -d $device_name --target=test_driver/stock_view.dart
+echo "$(date) END:DRIVER_TEST ---------------------------------------"

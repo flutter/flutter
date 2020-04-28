@@ -131,14 +131,18 @@ void main() {
     final MockChromeConnection mockChromeConnection = MockChromeConnection();
     final MockChromeTab mockChromeTab = MockChromeTab();
     final MockWipConnection mockWipConnection = MockWipConnection();
+    final MockChromiumLauncher chromiumLauncher = MockChromiumLauncher();
     when(mockChromeConnection.getTab(any)).thenAnswer((Invocation invocation) async {
       return mockChromeTab;
     });
     when(mockChromeTab.connect()).thenAnswer((Invocation invocation) async {
       return mockWipConnection;
     });
+    when(chromiumLauncher.connectedInstance).thenAnswer((Invocation invocation) async {
+      return chrome;
+    });
     when(chrome.chromeConnection).thenReturn(mockChromeConnection);
-    launchChromeInstance(chrome);
+    when(chromeDevice.chromeLauncher).thenReturn(chromiumLauncher);
     when(mockFlutterDevice.device).thenReturn(chromeDevice);
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
@@ -163,10 +167,11 @@ class MockDebugConnection extends Mock implements DebugConnection {}
 class MockVmService extends Mock implements VmService {}
 class MockStatus extends Mock implements Status {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
-class MockChromeDevice extends Mock implements ChromeDevice {}
-class MockChrome extends Mock implements Chrome {}
+class MockChromeDevice extends Mock implements ChromiumDevice {}
+class MockChrome extends Mock implements Chromium {}
 class MockChromeConnection extends Mock implements ChromeConnection {}
 class MockChromeTab extends Mock implements ChromeTab {}
 class MockWipConnection extends Mock implements WipConnection {}
 class MockBuildSystem extends Mock implements BuildSystem {}
 class MockPub extends Mock implements Pub {}
+class MockChromiumLauncher extends Mock implements ChromiumLauncher {}

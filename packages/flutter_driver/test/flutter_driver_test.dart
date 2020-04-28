@@ -51,7 +51,7 @@ void main() {
       when(mockIsolate.loadRunnable()).thenAnswer((_) => Future<MockIsolate>.value(mockIsolate));
       when(mockIsolate.invokeExtension(any, any)).thenAnswer(
           (Invocation invocation) => makeMockResponse(<String, dynamic>{'status': 'ok'}));
-      vmServiceConnectFunction = (String url) {
+      vmServiceConnectFunction = (String url, {Map<String, dynamic> headers}) {
         return Future<VMServiceClientConnection>.value(
           VMServiceClientConnection(mockClient, mockPeer)
         );
@@ -115,6 +115,22 @@ void main() {
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
       expectLogContains('Isolate is not paused. Assuming application is ready.');
+    });
+
+    test('connects with headers', () async {
+      Map<String, dynamic> actualHeaders;
+      vmServiceConnectFunction = (String url, {Map<String, dynamic> headers}) {
+        actualHeaders = headers;
+        return Future<VMServiceClientConnection>.value(
+          VMServiceClientConnection(mockClient, mockPeer)
+        );
+      };
+
+      final Map<String, String> expectedHeaders = <String, String>{'header-key': 'header-value'};
+      final FlutterDriver driver = await FlutterDriver.connect(
+        dartVmServiceUrl: '', headers: expectedHeaders);
+      expect(driver, isNotNull);
+      expect(actualHeaders, equals(expectedHeaders));
     });
   });
 
@@ -693,7 +709,7 @@ void main() {
 
     setUp(() {
       mockConnection = MockFlutterWebConnection();
-      mockConnection.supportsTimelineAction = true;
+      when(mockConnection.supportsTimelineAction).thenReturn(true);
       driver = WebFlutterDriver.connectedTo(mockConnection);
     });
 
@@ -1033,19 +1049,19 @@ void main() {
 
     setUp(() {
       mockConnection = MockFlutterWebConnection();
-      mockConnection.supportsTimelineAction = false;
+      when(mockConnection.supportsTimelineAction).thenReturn(false);
       driver = WebFlutterDriver.connectedTo(mockConnection);
     });
 
     test('tracing', () async {
       expect(driver.traceAction(() async { return Future<dynamic>.value(); }),
-          throwsA(isA<UnimplementedError>()));
+          throwsA(isA<UnsupportedError>()));
       expect(driver.startTracing(),
-          throwsA(isA<UnimplementedError>()));
+          throwsA(isA<UnsupportedError>()));
       expect(driver.stopTracingAndDownloadTimeline(),
-          throwsA(isA<UnimplementedError>()));
+          throwsA(isA<UnsupportedError>()));
       expect(driver.clearTimeline(),
-          throwsA(isA<UnimplementedError>()));
+          throwsA(isA<UnsupportedError>()));
     });
   });
 }

@@ -435,8 +435,13 @@ class XCDevice {
       } on Exception {
         // Fallback to default iOS architecture. Future-proof against a
         // theoretical version of Xcode that changes this string to something
-        // slightly different like "ARM64".
-        cpuArchitecture ??= defaultIOSArchs.first;
+        // slightly different like "ARM64", or armv7 variations like
+        // armv7s and armv7f.
+        if (architecture.startsWith('armv7')) {
+          cpuArchitecture = DarwinArch.armv7;
+        } else {
+          cpuArchitecture = defaultIOSArchs.first;
+        }
         _logger.printError(
           'Unknown architecture $architecture, defaulting to '
           '${getNameForDarwinArch(cpuArchitecture)}',

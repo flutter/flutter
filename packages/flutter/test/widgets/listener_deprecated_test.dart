@@ -122,7 +122,7 @@ void main() {
       await tester.pumpWidget(
         Center(
           child: Listener(
-            child: Container(
+            child: const SizedBox(
               width: 100.0,
               height: 100.0,
             ),
@@ -152,7 +152,7 @@ void main() {
       await tester.pumpWidget(
         Center(
           child: Listener(
-            child: Container(
+            child: const SizedBox(
               width: 100.0,
               height: 100.0,
             ),
@@ -170,8 +170,8 @@ void main() {
       expect(enter, isNotNull);
       expect(enter.position, equals(const Offset(400.0, 300.0)));
       expect(exit, isNull);
-      await tester.pumpWidget(Center(
-        child: Container(
+      await tester.pumpWidget(const Center(
+        child: SizedBox(
           width: 100.0,
           height: 100.0,
         ),
@@ -284,7 +284,7 @@ void main() {
           children: <Widget>[
             Listener(
               key: key1,
-              child: Container(
+              child: const SizedBox(
                 width: 100.0,
                 height: 100.0,
               ),
@@ -294,7 +294,7 @@ void main() {
             ),
             Listener(
               key: key2,
-              child: Container(
+              child: const SizedBox(
                 width: 100.0,
                 height: 100.0,
               ),
@@ -561,7 +561,7 @@ void main() {
             onPointerEnter: (PointerEnterEvent e) => enter.add(e),
             onPointerHover: (PointerHoverEvent e) => hover.add(e),
             onPointerExit: (PointerExitEvent e) => exit.add(e),
-            child: Container(
+            child: const SizedBox(
               height: 100.0,
               width: 100.0,
             ),
@@ -574,7 +574,7 @@ void main() {
       await gesture.addPointer(location: Offset.zero);
       addTearDown(() => gesture?.removePointer());
       await tester.pumpAndSettle();
-      await gesture.moveTo(tester.getCenter(find.byType(Container)));
+      await gesture.moveTo(tester.getCenter(find.byType(SizedBox)));
 
       expect(enter.length, 1);
       expect(enter.single.position, const Offset(400.0, 300.0));

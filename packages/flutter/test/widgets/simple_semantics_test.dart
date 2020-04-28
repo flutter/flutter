@@ -44,7 +44,7 @@ void main() {
       home: Center(
         child: Semantics(
           label: 'Hello!',
-          child: Container(
+          child: const SizedBox(
             width: 10.0,
             height: 10.0,
           ),
