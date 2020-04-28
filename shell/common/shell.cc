@@ -1312,7 +1312,6 @@ bool Shell::OnServiceProtocolRunInView(
   configuration.AddAssetResolver(
       std::make_unique<DirectoryAssetBundle>(fml::OpenDirectory(
           asset_directory_path.c_str(), false, fml::FilePermission::kRead)));
-  PersistentCache::UpdateAssetPath(asset_directory_path);
 
   auto& allocator = response.GetAllocator();
   response.SetObject();
@@ -1407,7 +1406,6 @@ bool Shell::OnServiceProtocolSetAssetBundlePath(
   asset_manager->PushFront(std::make_unique<DirectoryAssetBundle>(
       fml::OpenDirectory(params.at("assetDirectory").data(), false,
                          fml::FilePermission::kRead)));
-  PersistentCache::UpdateAssetPath(params.at("assetDirectory").data());
 
   if (engine_->UpdateAssetManager(std::move(asset_manager))) {
     response.AddMember("type", "Success", allocator);

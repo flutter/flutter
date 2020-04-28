@@ -204,6 +204,7 @@ if (enable_unittests) {
     deps = [
       ":shell_unittests_fixtures",
       ":shell_unittests_gpu_configuration",
+      "//flutter/assets",
       "//flutter/common",
       "//flutter/flow",
       "//flutter/fml/dart",
