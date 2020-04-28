@@ -1,4 +1,4 @@
-Signature: 5358cd4bf66eea185882567f4435fc97
+Signature: 8fca61d17ed861a71f35520cd7d371a6
 
 UNUSED LICENSES:
 
@@ -961,6 +961,18 @@ FILE: ../../../third_party/skia/experimental/docs/jsonbaseddoc.htm
 FILE: ../../../third_party/skia/experimental/docs/svgBackend.js
 FILE: ../../../third_party/skia/experimental/docs/svgbaseddoc.htm
 FILE: ../../../third_party/skia/experimental/docs/utilities.js
+FILE: ../../../third_party/skia/experimental/skottiekit/cpu.js
+FILE: ../../../third_party/skia/experimental/skottiekit/debug.js
+FILE: ../../../third_party/skia/experimental/skottiekit/examples/ck.html
+FILE: ../../../third_party/skia/experimental/skottiekit/examples/index.html
+FILE: ../../../third_party/skia/experimental/skottiekit/externs.js
+FILE: ../../../third_party/skia/experimental/skottiekit/gpu.js
+FILE: ../../../third_party/skia/experimental/skottiekit/helper.js
+FILE: ../../../third_party/skia/experimental/skottiekit/interface.js
+FILE: ../../../third_party/skia/experimental/skottiekit/postamble.js
+FILE: ../../../third_party/skia/experimental/skottiekit/preamble.js
+FILE: ../../../third_party/skia/experimental/skottiekit/ready.js
+FILE: ../../../third_party/skia/experimental/skottiekit/release.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/cpu.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger/anim.mskp
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger/index.html
@@ -3874,6 +3886,7 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/bench/GrQuadBench.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/GrQuadBench.cpp
+FILE: ../../../third_party/skia/experimental/skottiekit/skottiekit_bindings.cpp
 FILE: ../../../third_party/skia/gm/crbug_1041204.cpp
 FILE: ../../../third_party/skia/gm/crbug_224618.cpp
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DBackendContext.h
