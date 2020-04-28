@@ -122,6 +122,70 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
   static final BlacklistingTextInputFormatter singleLineFormatter
       = BlacklistingTextInputFormatter(RegExp(r'\n'));
 }
+///Used to support the problem of limiting the maximum length when there is an emoji in the input box
+///author: linsixudream@163.com
+///data: April 28, 2020
+///defect：When the maximum length is reached, the cursor will move after the last character. Temporarily unable to resolve
+class EmojiLengthLimitingTextInputFormatter extends TextInputFormatter {
+  EmojiLengthLimitingTextInputFormatter(this.maxLength) : assert(maxLength == null || maxLength == -1 || maxLength > 0);
+
+  final int maxLength;
+
+  bool hasAlreadyMaxLength = false;
+
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, // unused.
+      TextEditingValue newValue,
+      ) {
+    hasAlreadyMaxLength = oldValue.text.length >= maxLength && newValue.text.length >= maxLength;
+    if (!hasAlreadyMaxLength && maxLength != null && maxLength > 0 && newValue.text.runes.length >= maxLength) {
+      return _resetSelection(newValue);
+    } else if (hasAlreadyMaxLength && maxLength != null && maxLength > 0 && newValue.text.runes.length >= maxLength) {
+      return _initOldDataSelection(oldValue, newValue);
+    } else {
+      return newValue;
+    }
+  }
+
+  TextEditingValue _resetSelection(TextEditingValue newValue) {
+    hasAlreadyMaxLength = true;
+    var sRunes = newValue.text.runes;
+    String result;
+    int i = 0;
+    for (i = 0; i < sRunes.length; i++) {
+      if (String.fromCharCodes(sRunes, 0, sRunes.length - i).length <= maxLength) {
+        result = String.fromCharCodes(sRunes, 0, sRunes.length - i);
+        if (result.runes.last == 105) {
+          //If there is a space left after deletion, continue to delete
+          result = String.fromCharCodes(result.runes, 0, result.runes.length - 1);
+        }
+        break;
+      }
+    }
+    TextSelection temp = newValue.selection.copyWith(
+      baseOffset: result.length,
+      extentOffset: result.length,
+    );
+    TextRange fixRange = newValue.composing;
+    if (newValue.composing.end > result.length) {
+      fixRange = TextRange(start: fixRange.start - i, end: result.length);
+    }
+    return TextEditingValue(text: result, selection: temp, composing: fixRange);
+  }
+
+  TextEditingValue _initOldDataSelection(TextEditingValue oldValue, TextEditingValue newValue) {
+    TextSelection actualSelection = newValue.selection;
+    actualSelection = newValue.selection.copyWith(
+      baseOffset: oldValue.text.length,
+      extentOffset: oldValue.text.length,
+    );
+    //ios:When TextRange is not -1, next time update will discard all the variable values ​​directly from start and end.
+    // When you are sure that the content is unchanged, please change them to -1
+    TextRange fixRange = TextRange(start: -1, end: -1);
+    return TextEditingValue(text: oldValue.text, selection: actualSelection, composing: fixRange);
+  }
+}
 
 /// A [TextInputFormatter] that prevents the insertion of more characters
 /// (currently defined as Unicode scalar values) than allowed.
