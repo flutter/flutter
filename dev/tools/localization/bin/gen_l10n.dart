@@ -23,10 +23,14 @@ void main(List<String> arguments) {
   parser.addOption(
     'arb-dir',
     defaultsTo: path.join('lib', 'l10n'),
-    help: 'The directory where all localization files should reside. For '
-      'example, the template and translated arb files should be located here. '
-      'Also, the generated output messages Dart files for each locale and the '
-      'generated localizations classes will be created here.',
+    help: 'The directory where the template and translated arb files are located.',
+  );
+  parser.addOption(
+    'output-dir',
+    defaultsTo: path.join('lib', 'l10n'),
+    help: 'The directory where the generated localization classes will be written. '
+      'The app must import the file specified in the \'output-localization-file\' '
+      'option from this directory.'
   );
   parser.addOption(
     'template-arb-file',
@@ -77,9 +81,11 @@ void main(List<String> arguments) {
     'header-file',
     help: 'The header to prepend to the generated Dart localizations '
       'files. The value of this option is the name of the file that '
-      'contains the header text. \n\n'
+      'contains the header text which will be inserted at the top '
+      'of each generated Dart file. \n\n'
       'Alternatively, see the `header` option to pass in a string '
-      'for a simpler header.'
+      'for a simpler header. \n\n'
+      'This file should be placed in the directory specified in \'arb-dir\'.'
   );
   parser.addFlag(
     'use-deferred-loading',
@@ -108,7 +114,8 @@ void main(List<String> arguments) {
 
   precacheLanguageAndRegionTags();
 
-  final String arbPathString = results['arb-dir'] as String;
+  final String inputPathString = results['arb-dir'] as String;
+  final String outputPathString = results['output-dir'] as String;
   final String outputFileString = results['output-localization-file'] as String;
   final String templateArbFileName = results['template-arb-file'] as String;
   final String untranslatedMessagesFile = results['untranslated-messages-file'] as String;
@@ -124,7 +131,8 @@ void main(List<String> arguments) {
   try {
     localizationsGenerator
       ..initialize(
-        l10nDirectoryPath: arbPathString,
+        inputPathString: inputPathString,
+        outputPathString: outputPathString,
         templateArbFileName: templateArbFileName,
         outputFileString: outputFileString,
         classNameString: classNameString,
