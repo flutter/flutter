@@ -277,7 +277,7 @@ class ToolbarOptions {
   final bool selectAll;
 
   /// The actions that appear in the toolbar.
-  /// 
+  ///
   /// Defaults to empty. Must not be null.
   final List<TextSelectionAction> actions;
 }

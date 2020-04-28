@@ -710,8 +710,8 @@ class TextEditingValue {
 /// A class for defining actions that appear in text selection controls toolbar
 class TextSelectionAction {
   /// Creates a selection action.
-  const TextSelectionAction(this.label, this.onPressed): 
-    assert(label != null), 
+  const TextSelectionAction(this.label, this.onPressed):
+    assert(label != null),
     assert(onPressed != null);
 
   /// The label that appears in the toolbar, typeically returns a [Text] widget

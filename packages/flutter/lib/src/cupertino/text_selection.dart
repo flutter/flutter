@@ -346,7 +346,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       : EdgeInsets.only(top: _kToolbarArrowSize.height);
 
     void addToolbarButton(
-      Widget label, 
+      Widget label,
       void Function(TextSelectionDelegate) onPressed,
     ) {
       items.add(CupertinoButton(
