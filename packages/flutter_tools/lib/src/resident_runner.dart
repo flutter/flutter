@@ -287,7 +287,7 @@ class FlutterDevice {
       }
     }
     return vmService.onDone
-      .onError((dynamic error, StackTrace stackTrace) {
+      .catchError((dynamic error, StackTrace stackTrace) {
         globals.logger.printError(
           'unhanlded error waiting for vm service exit:\n $error',
           stackTrace: stackTrace,
