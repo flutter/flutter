@@ -2341,16 +2341,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     // has been resolved to EdgeInsets.
     final TextDirection textDirection = Directionality.of(context);
     final EdgeInsets decorationContentPadding = decoration.contentPadding?.resolve(textDirection);
-
-    double floatingLabelHeight;
-    if (decoration.isCollapsed) {
-      floatingLabelHeight = 0.0;
-    } else if (!border.isOutline) {
-      // 4.0: the vertical gap between the inline elements and the floating label.
-      floatingLabelHeight = (4.0 + 0.75 * inlineLabelStyle.fontSize) * MediaQuery.textScaleFactorOf(context);
-    } else {
-      floatingLabelHeight = 0.0;
-    }
+    final double floatingLabelHeight = !decoration.isCollapsed && !border.isOutline
+        // 4.0: the vertical gap between the inline elements and the floating label.
+        ? (4.0 + 0.75 * inlineLabelStyle.fontSize) * MediaQuery.textScaleFactorOf(context)
+        : 0.0;
 
     return _Decorator(
       decoration: _Decoration(
