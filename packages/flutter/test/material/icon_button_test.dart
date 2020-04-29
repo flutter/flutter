@@ -340,19 +340,17 @@ void main() {
   testWidgets('IconButton with explicit splash radius',
       (WidgetTester tester) async {
     const double splashRadius = 30.0;
-
-    final Widget buttonWidget = wrap(
-      child: IconButton(
-        icon: const Icon(Icons.android),
-        splashRadius: splashRadius,
-        onPressed: () {/* Enable the button. */},
-      ),
-    );
-
     await tester.pumpWidget(
-      Theme(
-        data: ThemeData(),
-        child: buttonWidget,
+      MaterialApp(
+        home: Material(
+          child: Center(
+            IconButton(
+              icon: const Icon(Icons.android),
+              splashRadius: splashRadius,
+              onPressed: () { /* enable the button */ },
+            ),
+          ),
+        ),
       ),
     );
 
