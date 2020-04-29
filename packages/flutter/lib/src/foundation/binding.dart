@@ -17,6 +17,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'object.dart';
 import 'platform.dart';
+import 'platform_configuration.dart';
 import 'print.dart';
 
 /// Signature for service extensions.
@@ -87,6 +88,8 @@ abstract class BindingBase {
   /// different [Window] implementation, such as a [TestWindow].
   ui.Window get window => ui.window;
 
+  DeviceConfigurationDispatch deviceConfigurationDispatch;
+
   /// The initialization method. Subclasses override this method to hook into
   /// the platform and otherwise configure their services. Subclasses must call
   /// "super.initInstances()".
@@ -103,7 +106,20 @@ abstract class BindingBase {
       _debugInitialized = true;
       return true;
     }());
+    /// TODO: This should really be initialized to a singleton in dart:ui.
+    deviceConfigurationDispatch = DeviceConfigurationDispatch();
+    windowManager = WindowManager(deviceConfigurationDispatch);
+    screenManager = ScreenManager(deviceConfigurationDispatch);
+    platformConfigurationManager = PlatformConfigurationManager(deviceConfigurationDispatch);
   }
+
+  /// The current [BindingBase], if one has been created.
+  static BindingBase get instance => _instance;
+  static BindingBase _instance;
+
+  WindowManager windowManager;
+  ScreenManager screenManager;
+  PlatformConfigurationManager platformConfigurationManager;
 
   /// Called when the binding is initialized, to register service
   /// extensions.

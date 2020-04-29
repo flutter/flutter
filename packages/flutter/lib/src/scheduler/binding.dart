@@ -196,7 +196,7 @@ enum SchedulerPhase {
 /// * Non-rendering tasks, to be run between frames. These are given a
 ///   priority and are executed in priority order according to a
 ///   [schedulingStrategy].
-mixin SchedulerBinding on BindingBase {
+mixin SchedulerBinding on BindingBase, FoundationBinding {
   @override
   void initInstances() {
     super.initInstances();
