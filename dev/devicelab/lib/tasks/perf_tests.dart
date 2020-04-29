@@ -52,7 +52,7 @@ TaskFunction createAndroidViewScrollPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/android_view_scroll_perf.dart',
-    'android_view_scroll_perf',
+    'platform_views_scroll_perf',
     testDriver: 'test_driver/scroll_perf_test.dart',
   ).run;
 }
