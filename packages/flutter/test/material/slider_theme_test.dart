@@ -222,7 +222,6 @@ void main() {
     expect(lerp.valueIndicatorTextStyle.color, equals(middleGrey.withAlpha(0xff)));
   });
 
-
   testWidgets('Default slider track draws correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,

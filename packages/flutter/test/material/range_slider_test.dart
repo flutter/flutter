@@ -1006,22 +1006,22 @@ void main() {
 
   ThemeData _buildTheme() {
     return ThemeData(
-      platform: TargetPlatform.android,
-      primarySwatch: Colors.blue,
-      sliderTheme: const SliderThemeData(
-        disabledThumbColor: Color(0xff000001),
-        disabledActiveTickMarkColor: Color(0xff000002),
-        disabledActiveTrackColor: Color(0xff000003),
-        disabledInactiveTickMarkColor: Color(0xff000004),
-        disabledInactiveTrackColor: Color(0xff000005),
-        activeTrackColor: Color(0xff000006),
-        activeTickMarkColor: Color(0xff000007),
-        inactiveTrackColor: Color(0xff000008),
-        inactiveTickMarkColor: Color(0xff000009),
-        overlayColor: Color(0xff000010),
-        thumbColor: Color(0xff000011),
-        valueIndicatorColor: Color(0xff000012),
-      ),
+        platform: TargetPlatform.android,
+        primarySwatch: Colors.blue,
+        sliderTheme: const SliderThemeData(
+          disabledThumbColor: Color(0xff000001),
+          disabledActiveTickMarkColor: Color(0xff000002),
+          disabledActiveTrackColor: Color(0xff000003),
+          disabledInactiveTickMarkColor: Color(0xff000004),
+          disabledInactiveTrackColor: Color(0xff000005),
+          activeTrackColor: Color(0xff000006),
+          activeTickMarkColor: Color(0xff000007),
+          inactiveTrackColor: Color(0xff000008),
+          inactiveTickMarkColor: Color(0xff000009),
+          overlayColor: Color(0xff000010),
+          thumbColor: Color(0xff000011),
+          valueIndicatorColor: Color(0xff000012),
+        ),
     );
   }
 
@@ -1579,8 +1579,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString()).toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString()).toList();
 
     expect(description, <String>[
       'valueStart: 25.0',

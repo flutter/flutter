@@ -134,13 +134,13 @@ class Slider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
   }) : _sliderType = _SliderType.material,
-        assert(value != null),
-        assert(min != null),
-        assert(max != null),
-        assert(min <= max),
-        assert(value >= min && value <= max),
-        assert(divisions == null || divisions > 0),
-        super(key: key);
+       assert(value != null),
+       assert(min != null),
+       assert(max != null),
+       assert(min <= max),
+       assert(value >= min && value <= max),
+       assert(divisions == null || divisions > 0),
+       super(key: key);
 
   /// Creates a [CupertinoSlider] if the target platform is iOS, creates a
   /// Material Design slider otherwise.
@@ -165,13 +165,13 @@ class Slider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
   }) : _sliderType = _SliderType.adaptive,
-        assert(value != null),
-        assert(min != null),
-        assert(max != null),
-        assert(min <= max),
-        assert(value >= min && value <= max),
-        assert(divisions == null || divisions > 0),
-        super(key: key);
+       assert(value != null),
+       assert(min != null),
+       assert(max != null),
+       assert(min <= max),
+       assert(value >= min && value <= max),
+       assert(divisions == null || divisions > 0),
+       super(key: key);
 
   /// The currently selected value for this slider.
   ///
@@ -618,7 +618,13 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // RectangularSliderValueIndicatorShape is used. In all other cases, the
     // value indicator is assumed to be the same as the active color.
     final SliderComponentShape valueIndicatorShape = sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape;
-    final Color valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90));
+    Color valueIndicatorColor;
+
+    if (valueIndicatorShape is RectangularSliderValueIndicatorShape) {
+      valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90));
+    } else {
+      valueIndicatorColor = widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary;
+    }
 
     sliderTheme = sliderTheme.copyWith(
       trackHeight: sliderTheme.trackHeight ?? _defaultTrackHeight,
@@ -918,8 +924,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // get to the new location.
       final double distance = (_value - _state.positionController.value).abs();
       _state.positionController.duration = distance != 0.0
-          ? _positionAnimationDuration * (1.0 / distance)
-          : Duration.zero;
+        ? _positionAnimationDuration * (1.0 / distance)
+        : Duration.zero;
       _state.positionController.animateTo(convertedValue, curve: Curves.easeInOut);
     } else {
       _state.positionController.value = convertedValue;
@@ -1096,13 +1102,13 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     switch (_platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-      // Matches iOS implementation of material slider.
+        // Matches iOS implementation of material slider.
         return 0.1;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-      // Matches Android implementation of material slider.
+        // Matches Android implementation of material slider.
         return 0.05;
     }
     assert(false, 'Unhandled TargetPlatform $_platform');

@@ -133,14 +133,14 @@ class RangeSlider extends StatefulWidget {
     this.inactiveColor,
     this.semanticFormatterCallback,
   }) : assert(values != null),
-        assert(min != null),
-        assert(max != null),
-        assert(min <= max),
-        assert(values.start <= values.end),
-        assert(values.start >= min && values.start <= max),
-        assert(values.end >= min && values.end <= max),
-        assert(divisions == null || divisions > 0),
-        super(key: key);
+       assert(min != null),
+       assert(max != null),
+       assert(min <= max),
+       assert(values.start <= values.end),
+       assert(values.start >= min && values.start <= max),
+       assert(values.end >= min && values.end <= max),
+       assert(divisions == null || divisions > 0),
+       super(key: key);
 
   /// The currently selected values for this range slider.
   ///
@@ -486,13 +486,13 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   // non-zero displacement is negative, then the left thumb is selected, and if its
   // positive, then the right thumb is selected.
   static final RangeThumbSelector _defaultRangeThumbSelector = (
-      TextDirection textDirection,
-      RangeValues values,
-      double tapValue,
-      Size thumbSize,
-      Size trackSize,
-      double dx, // The horizontal delta or displacement of the drag update.
-      ) {
+    TextDirection textDirection,
+    RangeValues values,
+    double tapValue,
+    Size thumbSize,
+    Size trackSize,
+    double dx, // The horizontal delta or displacement of the drag update.
+  ) {
     final double touchRadius = math.max(thumbSize.width, RangeSlider._minTouchTargetWidth) / 2;
     final bool inStartTouchTarget = (tapValue - values.start).abs() * trackSize.width < touchRadius;
     final bool inEndTouchTarget = (tapValue - values.end).abs() * trackSize.width < touchRadius;
@@ -560,7 +560,12 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // RectangularSliderValueIndicatorShape is used. In all other cases, the
     // value indicator is assumed to be the same as the active color.
     final RangeSliderValueIndicatorShape valueIndicatorShape = sliderTheme.rangeValueIndicatorShape ?? _defaultValueIndicatorShape;
-    final Color valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90));
+    Color valueIndicatorColor;
+    if (valueIndicatorShape is RectangularRangeSliderValueIndicatorShape) {
+      valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90));
+    } else {
+      valueIndicatorColor = widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary;
+    }
 
     sliderTheme = sliderTheme.copyWith(
       trackHeight: sliderTheme.trackHeight ?? _defaultTrackHeight,
@@ -967,14 +972,14 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   double get _adjustmentUnit {
     switch (_platform) {
       case TargetPlatform.iOS:
-      // Matches iOS implementation of material slider.
+        // Matches iOS implementation of material slider.
         return 0.1;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-      // Matches Android implementation of material slider.
+        // Matches Android implementation of material slider.
         return 0.05;
     }
     assert(false, 'Unhandled TargetPlatform $_platform');
@@ -1105,12 +1110,12 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         _state.valueIndicatorController.forward();
         _state.interactionTimer?.cancel();
         _state.interactionTimer =
-            Timer(_minimumInteractionTime * timeDilation, () {
-              _state.interactionTimer = null;
-              if (!_active && _state.valueIndicatorController.status == AnimationStatus.completed) {
-                _state.valueIndicatorController.reverse();
-              }
-            });
+          Timer(_minimumInteractionTime * timeDilation, () {
+            _state.interactionTimer = null;
+            if (!_active && _state.valueIndicatorController.status == AnimationStatus.completed) {
+              _state.valueIndicatorController.reverse();
+            }
+          });
       }
     }
   }
@@ -1248,25 +1253,25 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     }
 
     final Rect trackRect = _sliderTheme.rangeTrackShape.getPreferredRect(
-      parentBox: this,
-      offset: offset,
-      sliderTheme: _sliderTheme,
-      isDiscrete: isDiscrete,
+        parentBox: this,
+        offset: offset,
+        sliderTheme: _sliderTheme,
+        isDiscrete: isDiscrete,
     );
     final Offset startThumbCenter = Offset(trackRect.left + startVisualPosition * trackRect.width, trackRect.center.dy);
     final Offset endThumbCenter = Offset(trackRect.left + endVisualPosition * trackRect.width, trackRect.center.dy);
 
     _sliderTheme.rangeTrackShape.paint(
-      context,
-      offset,
-      parentBox: this,
-      sliderTheme: _sliderTheme,
-      enableAnimation: _enableAnimation,
-      textDirection: _textDirection,
-      startThumbCenter: startThumbCenter,
-      endThumbCenter: endThumbCenter,
-      isDiscrete: isDiscrete,
-      isEnabled: isEnabled,
+        context,
+        offset,
+        parentBox: this,
+        sliderTheme: _sliderTheme,
+        enableAnimation: _enableAnimation,
+        textDirection: _textDirection,
+        startThumbCenter: startThumbCenter,
+        endThumbCenter: endThumbCenter,
+        isDiscrete: isDiscrete,
+        isEnabled: isEnabled,
     );
 
     final bool startThumbSelected = _lastThumbSelection == Thumb.start;
