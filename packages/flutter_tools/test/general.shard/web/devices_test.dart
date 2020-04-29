@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
@@ -15,6 +16,37 @@ import '../../src/context.dart';
 import '../../src/testbed.dart';
 
 void main() {
+  testUsingContext('Grabs context logger if no constructor logger is provided', () async {
+    final WebDevices webDevices = WebDevices(
+      featureFlags: TestFeatureFlags(isWebEnabled: true),
+      fileSystem: MemoryFileSystem.test(),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{}
+      ),
+      processManager:  FakeProcessManager.any(),
+    );
+
+    final List<Device> devices = await webDevices.pollingGetDevices();
+    final WebServerDevice serverDevice = devices.firstWhere((Device device) => device is WebServerDevice)
+      as WebServerDevice;
+
+    await serverDevice.startApp(
+      null,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        startPaused: true,
+      ),
+      platformArgs: <String, String>{
+        'uri': 'foo',
+      }
+    );
+
+    // Verify that the injected testLogger is used.
+    expect(testLogger.statusText, contains(
+      'Waiting for connection from Dart debug extension at foo'
+    ));
+  });
   testWithoutContext('No web devices listed if feature is disabled', () async {
     final WebDevices webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: false),
