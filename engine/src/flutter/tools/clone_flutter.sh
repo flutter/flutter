@@ -17,7 +17,7 @@ fi
 cd $ENGINE_PATH/src/flutter
 
 # Special handling of release branches.
-ENGINE_BRANCH_NAME=`git branch | grep '*' | cut -d ' ' -f2`
+ENGINE_BRANCH_NAME=$CIRRUS_BASE_BRANCH
 versionregex="^v[[:digit:]]+\."
 releasecandidateregex="^flutter-[[:digit:]]+\.[[:digit:]]+-candidate\.[[:digit:]]+$"
 ON_RELEASE_BRANCH=false
