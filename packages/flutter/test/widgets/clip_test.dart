@@ -869,7 +869,9 @@ void main() {
       ..restore(),
     );
 
+    expect(tester.renderObject(find.byType(ClipRect)).debugNeedsPaint, isFalse);
     clip.value = const Rect.fromLTWH(50.0, 50.0, 150.0, 100.0);
+    expect(tester.renderObject(find.byType(ClipRect)).debugNeedsPaint, isTrue);
 
     expect(tester.renderObject(find.byType(ClipRect)).paint, paints
       ..save()
