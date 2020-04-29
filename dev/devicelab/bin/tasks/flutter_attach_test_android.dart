@@ -57,7 +57,7 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
       event,
       process.exitCode,
       // Keep the test from running for 15 minutes if it gets stuck.
-      Future<void>.delayed(const Duration(seconds: 10)).then<void>((void _) {
+      Future<void>.delayed(const Duration(minutes: 1)).then<void>((void _) {
         throw StateError('eventOrExit timed out');
       }),
     ]);
