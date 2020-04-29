@@ -22,13 +22,13 @@ static void fl_dart_project_set_path(FlDartProject* self, const gchar* path) {
   if (g_path_is_absolute(path))
     self->path = g_strdup(path);
   else {
-    g_autoptr(GError) error = NULL;
+    g_autoptr(GError) error = nullptr;
     g_autofree gchar* exe_path = g_file_read_link("/proc/self/exe", &error);
-    if (exe_path == NULL)
+    if (exe_path == nullptr)
       g_critical("Failed to determine location of executable: %s",
                  error->message);
     g_autofree gchar* dir = g_path_get_dirname(exe_path);
-    self->path = g_build_filename(dir, path, NULL);
+    self->path = g_build_filename(dir, path, nullptr);
   }
 }
 
@@ -117,10 +117,10 @@ G_MODULE_EXPORT const gchar* fl_dart_project_get_path(FlDartProject* self) {
 
 G_MODULE_EXPORT gchar* fl_dart_project_get_assets_path(FlDartProject* self) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(self), nullptr);
-  return g_build_filename(self->path, "flutter_assets", NULL);
+  return g_build_filename(self->path, "flutter_assets", nullptr);
 }
 
 G_MODULE_EXPORT gchar* fl_dart_project_get_icu_data_path(FlDartProject* self) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(self), nullptr);
-  return g_build_filename(self->path, "icudtl.dat", NULL);
+  return g_build_filename(self->path, "icudtl.dat", nullptr);
 }
