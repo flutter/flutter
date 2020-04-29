@@ -324,6 +324,18 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
 
+  test('serves valid etag header for asset files with non-ascii chracters', () => testbed.run(() async {
+    globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'fooπ'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(<int>[1, 2, 3]);
+
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/assets/fooπ')));
+    final String etag = response.headers[HttpHeaders.etagHeader];
+
+    expect(etag.runes, everyElement(predicate((int char) => char < 255)));
+  }));
+
   test('handles serving missing asset file', () => testbed.run(() async {
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/assets/foo')));

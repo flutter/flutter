@@ -305,7 +305,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project) async {
     project.directory.path,
     globalPackagesPath,
   );
-  final PackageConfig packageConfig = await loadPackageConfigOrFail(
+  final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     globals.fs.file(packagesFile),
     logger: globals.logger,
   );

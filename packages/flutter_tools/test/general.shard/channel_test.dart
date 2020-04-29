@@ -35,7 +35,10 @@ void main() {
       // The bots may return an empty list of channels (network hiccup?)
       // and when run locally the list of branches might be different
       // so we check for the header text rather than any specific channel name.
-      expect(testLogger.statusText, contains('Flutter channels:'));
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace('Flutter channels:'),
+      );
     }
 
     testUsingContext('list', () async {
@@ -212,7 +215,10 @@ void main() {
         environment: anyNamed('environment'),
       )).called(1);
 
-      expect(testLogger.statusText, contains("Switching to flutter channel 'beta'..."));
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace("Switching to flutter channel 'beta'..."),
+      );
       expect(testLogger.errorText, hasLength(0));
 
       when(mockProcessManager.start(
@@ -290,12 +296,16 @@ void main() {
         environment: anyNamed('environment'),
       )).called(1);
 
-      expect(testLogger.statusText, containsIgnoringWhitespace(
-        "Successfully switched to flutter channel 'beta'."));
-      expect(testLogger.statusText,
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace("Successfully switched to flutter channel 'beta'."),
+      );
+      expect(
+        testLogger.statusText,
         containsIgnoringWhitespace(
           "To ensure that you're on the latest build "
-          "from this channel, run 'flutter upgrade'"));
+          "from this channel, run 'flutter upgrade'"),
+      );
       expect(testLogger.errorText, hasLength(0));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),

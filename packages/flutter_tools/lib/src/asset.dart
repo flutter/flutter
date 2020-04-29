@@ -152,7 +152,7 @@ class _ManifestAssetBundle implements AssetBundle {
     }
 
     final String assetBasePath = globals.fs.path.dirname(globals.fs.path.absolute(manifestPath));
-    final PackageConfig packageConfig = await loadPackageConfigOrFail(
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       globals.fs.file(packagesPath),
       logger: globals.logger,
     );

@@ -9,6 +9,6 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 
 Future<void> main() async {
-  deviceOperatingSystem = DeviceOperatingSystem.ios;
-  await task(createUiKitViewScrollPerfTest());
+  deviceOperatingSystem = DeviceOperatingSystem.android;
+  await task(createAndroidViewScrollPerfTest());
 }

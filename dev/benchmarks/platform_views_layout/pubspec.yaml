@@ -2,8 +2,7 @@ name: platform_views_layout
 description: A benchmark for platform views.
 
 environment:
-  # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  sdk: ">=2.2.0 <3.0.0"
 
 dependencies:
   flutter:

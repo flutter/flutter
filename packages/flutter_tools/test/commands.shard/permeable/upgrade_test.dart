@@ -186,6 +186,26 @@ void main() {
       Platform: () => fakePlatform,
     });
 
+    testUsingContext('git exception during attemptReset throwsToolExit', () async {
+      const String revision = 'abc123';
+      const String errorMessage = 'fatal: Could not parse object ´$revision´';
+      when(processManager.run(
+        <String>['git', 'reset', '--hard', revision]
+      )).thenThrow(const ProcessException(
+        'git',
+        <String>['reset', '--hard', revision],
+        errorMessage,
+      ));
+
+      expect(
+        () async => await realCommandRunner.attemptReset(revision),
+        throwsToolExit(message: errorMessage),
+      );
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
+    });
+
     testUsingContext('flutterUpgradeContinue passes env variables to child process', () async {
       await realCommandRunner.flutterUpgradeContinue();
 
@@ -315,7 +335,7 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   Future<void> upgradeChannel(FlutterVersion flutterVersion) async {}
 
   @override
-  Future<bool> attemptReset(FlutterVersion flutterVersion, String newRevision) async => alreadyUpToDate;
+  Future<void> attemptReset(String newRevision) async {}
 
   @override
   Future<void> precacheArtifacts() async {}
