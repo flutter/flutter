@@ -1,4 +1,4 @@
-Signature: 8efd292fa4af5f44bfbd55f33d3a3745
+Signature: 1ee1c3db80750322b04770ff8d6a4e7f
 
 UNUSED LICENSES:
 
@@ -2652,7 +2652,6 @@ FILE: ../../../third_party/skia/bench/WritePixelsBench.cpp
 FILE: ../../../third_party/skia/bench/gUniqueGlyphIDs.h
 FILE: ../../../third_party/skia/client_utils/android/FrontBufferedStream.cpp
 FILE: ../../../third_party/skia/client_utils/android/FrontBufferedStream.h
-FILE: ../../../third_party/skia/client_utils/android/SkFrontBufferedStream.h
 FILE: ../../../third_party/skia/dm/DM.cpp
 FILE: ../../../third_party/skia/gm/alphagradients.cpp
 FILE: ../../../third_party/skia/gm/arcofzorro.cpp
@@ -3939,6 +3938,8 @@ FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDeviceSpaceEffect.cp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDeviceSpaceEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrMatrixEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrMatrixEffect.h
+FILE: ../../../third_party/skia/src/gpu/geometry/GrShape.cpp
+FILE: ../../../third_party/skia/src/gpu/geometry/GrShape.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLUniformHandler.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkManagedResource.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.cpp
@@ -5215,6 +5216,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/animator/TextKeyframeAnimato
 FILE: ../../../third_party/skia/modules/skottie/src/animator/Vec2KeyframeAnimator.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/animator/VectorKeyframeAnimator.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/animator/VectorKeyframeAnimator.h
+FILE: ../../../third_party/skia/modules/skottie/src/effects/BrightnessContrastEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/CornerPinEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/GlowStyles.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/ShadowStyles.cpp
