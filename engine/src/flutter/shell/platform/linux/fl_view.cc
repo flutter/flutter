@@ -143,7 +143,7 @@ static void fl_view_realize(GtkWidget* widget) {
   self->engine = fl_engine_new(self->project, FL_RENDERER(renderer));
   g_autoptr(GError) error = nullptr;
   if (!fl_engine_start(self->engine, &error))
-    g_printerr("Failed to start Flutter engine: %s", error->message);
+    g_warning("Failed to start Flutter engine: %s", error->message);
 }
 
 static void fl_view_size_allocate(GtkWidget* widget,
