@@ -22,11 +22,11 @@ void main() {
       ),
     );
 
-    // 1st, check that the render object has received the clip behavior.
+    // 1st, check that the render object has received the default clip behavior.
     final RenderListWheelViewport renderObject = tester.allRenderObjects.whereType<RenderListWheelViewport>().first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
-    // 2nd, check that the painting context has received the clip behavior.
+    // 2nd, check that the painting context has received the default clip behavior.
     final TestClipPaintingContext context = TestClipPaintingContext();
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.hardEdge));

@@ -41,12 +41,12 @@ void main() {
   testWidgets('SingleChildScrollView respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(SingleChildScrollView(child: Container(height: 2000.0)));
 
-    // 1st, check that the render object has received the clip behavior.
+    // 1st, check that the render object has received the default clip behavior.
     final ClippableRenderBox renderObject = tester.allRenderObjects.whereType<ClippableRenderBox>().first;
     expect(renderObject.runtimeType.toString(), equals('_RenderSingleChildViewport'));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
-    // 2nd, check that the painting context has received the clip behavior.
+    // 2nd, check that the painting context has received the default clip behavior.
     final TestClipPaintingContext context = TestClipPaintingContext();
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.hardEdge));

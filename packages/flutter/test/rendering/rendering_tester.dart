@@ -299,8 +299,9 @@ class TestClipPaintingContext extends PaintingContext {
   TestClipPaintingContext() : super(ContainerLayer(), Rect.zero);
 
   @override
-  ClipRectLayer pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, painter, {Clip clipBehavior = Clip.hardEdge, ClipRectLayer oldLayer}) {
+  ClipRectLayer pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.hardEdge, ClipRectLayer oldLayer}) {
     this.clipBehavior = clipBehavior;
+    return null;
   }
 
   Clip clipBehavior = Clip.none;
