@@ -93,4 +93,26 @@ void main() {
     expect(getIOSArchForName('x86_64'), DarwinArch.x86_64);
     expect(() => getIOSArchForName('bogus'), throwsException);
   });
+
+  test('toEnvironmentConfig encoding of standard values', () {
+    const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
+      treeShakeIcons: true,
+      trackWidgetCreation: true,
+      dartDefines: <String>['foo=2', 'bar=2'],
+      dartObfuscation: true,
+      splitDebugInfoPath: 'foo/',
+      extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
+      extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
+    );
+
+    expect(buildInfo.toEnvironmentConfig(), <String, String>{
+      'TREE_SHAKE_ICONS': 'true',
+      'TRACK_WIDGET_CREATION': 'true',
+      'DART_DEFINES': 'foo=2,bar=2',
+      'DART_OBFUSCATION': 'true',
+      'SPLIT_DEBUG_INFO': 'foo/',
+      'EXTRA_FRONT_END_OPTIONS': '--enable-experiment=non-nullable,bar',
+      'EXTRA_GEN_SNAPSHOT_OPTIONS': '--enable-experiment=non-nullable,fizz',
+    });
+  });
 }

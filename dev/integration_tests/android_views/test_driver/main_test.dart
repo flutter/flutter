@@ -60,8 +60,6 @@ Future<void> main() async {
       await driver.tap(tapWindow);
       final String windowClickCount = await driver.getText(find.byValueKey('WindowClickCount'));
       expect(windowClickCount, 'Click count: 1');
-    },
-    // TODO(amirh): enable this after fixing https://github.com/flutter/flutter/issues/55066
-    skip:true);
+    });
   });
 }

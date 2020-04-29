@@ -35,6 +35,7 @@ import 'reporting/reporting.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
+import 'web/chrome.dart';
 import 'web/web_validator.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio_validator.dart';
@@ -82,10 +83,16 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (globals.iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[XcodeValidator(xcode: globals.xcode, userMessages: userMessages), cocoapodsValidator]),
       if (webWorkflow.appliesToHostPlatform)
-        WebValidator(
-          chromeLauncher: globals.chromeLauncher,
+        ChromeValidator(
+          chromiumLauncher: ChromiumLauncher(
+            browserFinder: findChromeExecutable,
+            fileSystem: globals.fs,
+            logger: globals.logger,
+            operatingSystemUtils: globals.os,
+            platform:  globals.platform,
+            processManager: globals.processManager,
+          ),
           platform: globals.platform,
-          fileSystem: globals.fs,
         ),
       if (linuxWorkflow.appliesToHostPlatform)
         LinuxDoctorValidator(

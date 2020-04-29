@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:usage/uuid/uuid.dart';
 
 import 'artifacts.dart';
@@ -15,7 +16,6 @@ import 'base/terminal.dart';
 import 'build_info.dart';
 import 'codegen.dart';
 import 'convert.dart';
-import 'dart/package_map.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
 
@@ -193,54 +193,6 @@ class StdoutHandler {
   }
 }
 
-/// Converts filesystem paths to package URIs.
-class PackageUriMapper {
-  PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
-    final Map<String, Uri> packageMap = PackageMap(globals.fs.path.absolute(packagesPath), fileSystem: globals.fs).map;
-    final bool isWindowsPath = globals.platform.isWindows && !scriptPath.startsWith('org-dartlang-app');
-    final String scriptUri = Uri.file(scriptPath, windows: isWindowsPath).toString();
-    for (final String packageName in packageMap.keys) {
-      final String prefix = packageMap[packageName].toString();
-      // Only perform a multi-root mapping if there are multiple roots.
-      if (fileSystemScheme != null
-        && fileSystemRoots != null
-        && fileSystemRoots.length > 1
-        && prefix.contains(fileSystemScheme)) {
-        _packageName = packageName;
-        _uriPrefixes = fileSystemRoots
-          .map((String name) => Uri.file(name, windows:globals.platform.isWindows).toString())
-          .toList();
-        return;
-      }
-      if (scriptUri.startsWith(prefix)) {
-        _packageName = packageName;
-        _uriPrefixes = <String>[prefix];
-        return;
-      }
-    }
-  }
-
-  String _packageName;
-  List<String> _uriPrefixes;
-
-  Uri map(String scriptPath) {
-    if (_packageName == null) {
-      return null;
-    }
-    final String scriptUri = Uri.file(scriptPath, windows: globals.platform.isWindows).toString();
-    for (final String uriPrefix in _uriPrefixes) {
-      if (scriptUri.startsWith(uriPrefix)) {
-        return Uri.parse('package:$_packageName/${scriptUri.substring(uriPrefix.length)}');
-      }
-    }
-    return null;
-  }
-
-  static Uri findUri(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
-    return PackageUriMapper(scriptPath, packagesPath, fileSystemScheme, fileSystemRoots).map(scriptPath);
-  }
-}
-
 /// List the preconfigured build options for a given build mode.
 List<String> buildModeOptions(BuildMode mode) {
   switch (mode) {
@@ -276,17 +228,18 @@ class KernelCompiler {
     String outputFilePath,
     String depFilePath,
     TargetModel targetModel = TargetModel.flutter,
-    @required BuildMode buildMode,
     bool linkPlatformKernelIn = false,
     bool aot = false,
-    @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
-    String packagesPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
     String initializeFromDill,
     String platformDill,
+    @required String packagesPath,
+    @required BuildMode buildMode,
+    @required bool trackWidgetCreation,
     @required List<String> dartDefines,
+    @required PackageConfig packageConfig,
   }) async {
     final String frontendServer = globals.artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
@@ -301,7 +254,7 @@ class KernelCompiler {
     }
     Uri mainUri;
     if (packagesPath != null) {
-      mainUri = PackageUriMapper.findUri(mainPath, packagesPath, fileSystemScheme, fileSystemRoots);
+      mainUri = packageConfig.toPackageUri(globals.fs.file(mainPath).uri);
     }
     // TODO(jonahwilliams): The output file must already exist, but this seems
     // unnecessary.
@@ -392,16 +345,16 @@ abstract class _CompilationRequest {
 class _RecompileRequest extends _CompilationRequest {
   _RecompileRequest(
     Completer<CompilerOutput> completer,
-    this.mainPath,
+    this.mainUri,
     this.invalidatedFiles,
     this.outputPath,
-    this.packagesFilePath,
+    this.packageConfig,
   ) : super(completer);
 
-  String mainPath;
+  Uri mainUri;
   List<Uri> invalidatedFiles;
   String outputPath;
-  String packagesFilePath;
+  PackageConfig packageConfig;
 
   @override
   Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
@@ -499,10 +452,10 @@ abstract class ResidentCompiler {
   /// Binary file name is returned if compilation was successful, otherwise
   /// null is returned.
   Future<CompilerOutput> recompile(
-    String mainPath,
+    Uri mainUri,
     List<Uri> invalidatedFiles, {
     @required String outputPath,
-    String packagesFilePath,
+    @required PackageConfig packageConfig,
   });
 
   Future<CompilerOutput> compileExpression(
@@ -620,56 +573,46 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
   @override
   Future<CompilerOutput> recompile(
-    String mainPath,
+    Uri mainUri,
     List<Uri> invalidatedFiles, {
     @required String outputPath,
-    String packagesFilePath,
+    @required PackageConfig packageConfig,
   }) async {
-    assert (outputPath != null);
+    assert(outputPath != null);
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
     final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
     _controller.add(
-        _RecompileRequest(completer, mainPath, invalidatedFiles, outputPath, packagesFilePath)
+      _RecompileRequest(completer, mainUri, invalidatedFiles, outputPath, packageConfig)
     );
     return completer.future;
   }
 
   Future<CompilerOutput> _recompile(_RecompileRequest request) async {
     _stdoutHandler.reset();
-
-    // First time recompile is called we actually have to compile the app from
-    // scratch ignoring list of invalidated files.
-    PackageUriMapper packageUriMapper;
-    if (request.packagesFilePath != null || packagesPath != null) {
-      packageUriMapper = PackageUriMapper(
-        request.mainPath,
-        request.packagesFilePath ?? packagesPath,
-        fileSystemScheme,
-        fileSystemRoots,
-      );
-    }
-
     _compileRequestNeedsConfirmation = true;
 
     if (_server == null) {
       return _compile(
-        _mapFilename(request.mainPath, packageUriMapper),
+        request.packageConfig.toPackageUri(request.mainUri)?.toString() ?? request.mainUri.toString(),
         request.outputPath,
-        _mapFilename(request.packagesFilePath ?? packagesPath, /* packageUriMapper= */ null),
       );
     }
-
     final String inputKey = Uuid().generateV4();
-    final String mainUri = request.mainPath != null
-        ? _mapFilename(request.mainPath, packageUriMapper) + ' '
-        : '';
-    _server.stdin.writeln('recompile $mainUri$inputKey');
-    globals.printTrace('<- recompile $mainUri$inputKey');
+    final String mainUri = request.packageConfig.toPackageUri(request.mainUri)?.toString()
+      ?? request.mainUri.toString();
+    _server.stdin.writeln('recompile $mainUri $inputKey');
+    globals.printTrace('<- recompile $mainUri $inputKey');
     for (final Uri fileUri in request.invalidatedFiles) {
-      final String message = _mapFileUri(fileUri.toString(), packageUriMapper);
+      String message;
+      if (fileUri.scheme == 'package') {
+        message = fileUri.toString();
+      } else {
+        message = request.packageConfig.toPackageUri(fileUri)?.toString()
+          ?? fileUri.toString();
+      }
       _server.stdin.writeln(message);
       globals.printTrace(message);
     }
@@ -699,7 +642,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
   Future<CompilerOutput> _compile(
     String scriptUri,
     String outputPath,
-    String packagesFilePath,
   ) async {
     final String frontendServer = globals.artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
@@ -726,10 +668,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         '--libraries-spec',
         librariesSpec,
       ],
-      if (packagesFilePath != null) ...<String>[
-        '--packages',
-        packagesFilePath,
-      ] else if (packagesPath != null) ...<String>[
+      if (packagesPath != null) ...<String>[
         '--packages',
         packagesPath,
       ],
@@ -914,43 +853,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
   void reset() {
     _server?.stdin?.writeln('reset');
     globals.printTrace('<- reset');
-  }
-
-  String _mapFilename(String filename, PackageUriMapper packageUriMapper) {
-    return _doMapFilename(filename, packageUriMapper) ?? filename;
-  }
-
-  String _mapFileUri(String fileUri, PackageUriMapper packageUriMapper) {
-    String filename;
-    try {
-      filename = Uri.parse(fileUri).toFilePath();
-    } on UnsupportedError catch (_) {
-      return fileUri;
-    }
-    return _doMapFilename(filename, packageUriMapper) ?? fileUri;
-  }
-
-  String _doMapFilename(String filename, PackageUriMapper packageUriMapper) {
-    if (packageUriMapper != null) {
-      final Uri packageUri = packageUriMapper.map(filename);
-      if (packageUri != null) {
-        return packageUri.toString();
-      }
-    }
-
-    if (fileSystemRoots != null) {
-      for (final String root in fileSystemRoots) {
-        if (filename.startsWith(root)) {
-          return Uri(
-              scheme: fileSystemScheme, path: filename.substring(root.length))
-              .toString();
-        }
-      }
-    }
-    if (globals.platform.isWindows && fileSystemRoots != null && fileSystemRoots.length > 1) {
-      return Uri.file(filename, windows: globals.platform.isWindows).toString();
-    }
-    return null;
   }
 
   @override

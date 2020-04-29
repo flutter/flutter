@@ -118,6 +118,7 @@ abstract class SearchDelegate<T> {
   /// {@end-tool}
   SearchDelegate({
     this.searchFieldLabel,
+    this.searchFieldStyle,
     this.keyboardType,
     this.textInputAction = TextInputAction.search,
   });
@@ -267,6 +268,11 @@ abstract class SearchDelegate<T> {
   ///
   /// If this value is set to null, the value of MaterialLocalizations.of(context).searchFieldLabel will be used instead.
   final String searchFieldLabel;
+
+  /// The style of the [searchFieldLabel].
+  ///
+  /// If this value is set to null, the value of the ambient [Theme]'s [ThemeData.inputDecorationTheme.hintStyle] will be used instead.
+  final TextStyle searchFieldStyle;
 
   /// The type of action button to use for the keyboard.
   ///
@@ -474,8 +480,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
-    final String searchFieldLabel = widget.delegate.searchFieldLabel ??
-        MaterialLocalizations.of(context).searchFieldLabel;
+    final String searchFieldLabel = widget.delegate.searchFieldLabel
+      ?? MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;
     switch (widget.delegate._currentBody) {
       case _SearchBody.suggestions:

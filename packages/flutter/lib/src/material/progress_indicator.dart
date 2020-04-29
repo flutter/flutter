@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 import 'material.dart';
 import 'theme.dart';
 
-const double _kLinearProgressIndicatorHeight = 6.0;
 const double _kMinCircularProgressIndicatorSize = 36.0;
 const int _kIndeterminateLinearDuration = 1800;
 
@@ -221,6 +220,9 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// The indicator line is displayed with [valueColor], an animated value. To
 /// specify a constant color value use: `AlwaysStoppedAnimation<Color>(color)`.
 ///
+/// The minimum height of the indicator can be specified using [minHeight].
+/// The indicator can be made taller by wrapping the widget with a [SizedBox].
+///
 /// See also:
 ///
 ///  * [CircularProgressIndicator], which shows progress along a circular arc.
@@ -236,16 +238,23 @@ class LinearProgressIndicator extends ProgressIndicator {
     double value,
     Color backgroundColor,
     Animation<Color> valueColor,
+    this.minHeight,
     String semanticsLabel,
     String semanticsValue,
-  }) : super(
-         key: key,
-         value: value,
-         backgroundColor: backgroundColor,
-         valueColor: valueColor,
-         semanticsLabel: semanticsLabel,
-         semanticsValue: semanticsValue,
-       );
+  }) : assert(minHeight == null || minHeight > 0),
+       super(
+        key: key,
+        value: value,
+        backgroundColor: backgroundColor,
+        valueColor: valueColor,
+        semanticsLabel: semanticsLabel,
+        semanticsValue: semanticsValue,
+      );
+
+  /// The minimum height of the line used to draw the indicator.
+  ///
+  /// This defaults to 4dp.
+  final double minHeight;
 
   @override
   _LinearProgressIndicatorState createState() => _LinearProgressIndicatorState();
@@ -284,9 +293,9 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
     return widget._buildSemanticsWrapper(
       context: context,
       child: Container(
-        constraints: const BoxConstraints(
+        constraints: BoxConstraints(
           minWidth: double.infinity,
-          minHeight: _kLinearProgressIndicatorHeight,
+          minHeight: widget.minHeight ?? 4.0,
         ),
         child: CustomPaint(
           painter: _LinearProgressIndicatorPainter(

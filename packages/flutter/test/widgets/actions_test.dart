@@ -30,6 +30,8 @@ class TestAction extends CallbackAction<TestIntent> {
         super(onInvoke: onInvoke);
 
   @override
+  bool isEnabled(TestIntent intent) => enabled;
+
   bool get enabled => _enabled;
   bool _enabled = true;
   set enabled(bool value) {
@@ -412,17 +414,17 @@ void main() {
         },
       );
       bool enabled1 = true;
-      action1.addActionListener((Action<Intent> action) => enabled1 = action.enabled);
+      action1.addActionListener((Action<Intent> action) => enabled1 = action.isEnabled(const TestIntent()));
       action1.enabled = false;
       expect(enabled1, isFalse);
 
       bool enabled2 = true;
-      action2.addActionListener((Action<Intent> action) => enabled2 = action.enabled);
+      action2.addActionListener((Action<Intent> action) => enabled2 = action.isEnabled(const SecondTestIntent()));
       action2.enabled = false;
       expect(enabled2, isFalse);
 
       bool enabled3 = true;
-      action3.addActionListener((Action<Intent> action) => enabled3 = action.enabled);
+      action3.addActionListener((Action<Intent> action) => enabled3 = action.isEnabled(const ThirdTestIntent()));
       action3.enabled = false;
       expect(enabled3, isFalse);
 
@@ -466,7 +468,7 @@ void main() {
             SecondTestIntent: action2,
           },
           child: ActionListener(
-            listener: (Action<Intent> action) => enabledChanged = action.enabled,
+            listener: (Action<Intent> action) => enabledChanged = action.isEnabled(const ThirdTestIntent()),
             action: action2,
             child: Actions(
               actions: <Type, Action<Intent>>{

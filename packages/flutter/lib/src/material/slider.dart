@@ -133,7 +133,12 @@ class Slider extends StatefulWidget {
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
-    this.useV2Slider = false,
+    @Deprecated(
+      'This flag has changed to true by default and no longer needed. '
+      'This feature was deprecated after v1.18.0.'
+    )
+    // ignore: deprecated_member_use_from_same_package
+    this.useV2Slider = true,
   }) : _sliderType = _SliderType.material,
        assert(value != null),
        assert(min != null),
@@ -141,6 +146,7 @@ class Slider extends StatefulWidget {
        assert(min <= max),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
+       // ignore: deprecated_member_use_from_same_package
        assert(useV2Slider != null),
        super(key: key);
 
@@ -166,7 +172,12 @@ class Slider extends StatefulWidget {
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
-    this.useV2Slider = false,
+    @Deprecated(
+      'This flag has changed to true by default and no longer needed. '
+      'This feature was deprecated after v1.18.0.'
+    )
+    // ignore: deprecated_member_use_from_same_package
+    this.useV2Slider = true,
   }) : _sliderType = _SliderType.adaptive,
        assert(value != null),
        assert(min != null),
@@ -174,6 +185,7 @@ class Slider extends StatefulWidget {
        assert(min <= max),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
+       // ignore: deprecated_member_use_from_same_package
        assert(useV2Slider != null),
        super(key: key);
 

@@ -5,10 +5,12 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/convert.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
+
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -145,6 +147,15 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
   }
 }
 
+Matcher containsIgnoringWhitespace(String toSearch) {
+  return predicate(
+    (String source) {
+      return collapseWhitespace(source).contains(collapseWhitespace(toSearch));
+    },
+    'contains "$toSearch" ignoring whitespace.',
+  );
+}
+
 /// Executes a test body in zone that does not allow context-based injection.
 ///
 /// For classes which have been refactored to excluded context-based injection
@@ -207,4 +218,119 @@ class NoContext implements AppContext {
   }) async {
     return body();
   }
+}
+
+/// A fake implementation of a vm_service that mocks the JSON-RPC request
+/// and response structure.
+class FakeVmServiceHost {
+  FakeVmServiceHost({
+    @required List<VmServiceExpectation> requests,
+  }) : _requests = requests {
+    _vmService = vm_service.VmService(
+      _input.stream,
+      _output.add,
+    );
+    _applyStreamListen();
+    _output.stream.listen((String data) {
+      final Map<String, Object> request = json.decode(data) as Map<String, Object>;
+      if (_requests.isEmpty) {
+        throw Exception('Unexpected request: $request');
+      }
+      final FakeVmServiceRequest fakeRequest = _requests.removeAt(0) as FakeVmServiceRequest;
+      expect(request, isA<Map<String, Object>>()
+        .having((Map<String, Object> request) => request['method'], 'method', fakeRequest.method)
+        .having((Map<String, Object> request) => request['id'], 'id', fakeRequest.id)
+        .having((Map<String, Object> request) => request['params'], 'args', fakeRequest.args)
+      );
+      if (fakeRequest.close) {
+        _vmService.dispose();
+        expect(_requests, isEmpty);
+        return;
+      }
+      if (fakeRequest.errorCode == null) {
+        _input.add(json.encode(<String, Object>{
+          'jsonrpc': '2.0',
+          'id': fakeRequest.id,
+          'result': fakeRequest.jsonResponse ?? <String, Object>{'type': 'Success'},
+        }));
+      } else {
+        _input.add(json.encode(<String, Object>{
+          'jsonrpc': '2.0',
+          'id': fakeRequest.id,
+          'error': <String, Object>{
+            'code': fakeRequest.errorCode,
+          }
+        }));
+      }
+      _applyStreamListen();
+    });
+  }
+
+  final List<VmServiceExpectation> _requests;
+  final StreamController<String> _input = StreamController<String>();
+  final StreamController<String> _output = StreamController<String>();
+
+  vm_service.VmService get vmService => _vmService;
+  vm_service.VmService _vmService;
+
+  bool get hasRemainingExpectations => _requests.isNotEmpty;
+
+  // remove FakeStreamResponse objects from _requests until it is empty
+  // or until we hit a FakeRequest
+  void _applyStreamListen() {
+    while (_requests.isNotEmpty && !_requests.first.isRequest) {
+      final FakeVmServiceStreamResponse response = _requests.removeAt(0) as FakeVmServiceStreamResponse;
+      _input.add(json.encode(<String, Object>{
+        'jsonrpc': '2.0',
+        'method': 'streamNotify',
+        'params': <String, Object>{
+          'streamId': response.streamId,
+          'event': response.event.toJson(),
+        },
+      }));
+    }
+  }
+}
+
+abstract class VmServiceExpectation {
+  bool get isRequest;
+}
+
+class FakeVmServiceRequest implements VmServiceExpectation {
+  const FakeVmServiceRequest({
+    @required this.method,
+    @required this.id,
+    @required this.args,
+    this.jsonResponse,
+    this.errorCode,
+    this.close = false,
+  });
+
+  final String method;
+  final String id;
+
+  /// When true, the vm service is automatically closed.
+  final bool close;
+
+  /// If non-null, the error code for a [vm_service.RPCError] in place of a
+  /// standard response.
+  final int errorCode;
+  final Map<String, Object> args;
+  final Map<String, Object> jsonResponse;
+
+  @override
+  bool get isRequest => true;
+}
+
+class FakeVmServiceStreamResponse implements VmServiceExpectation {
+  const FakeVmServiceStreamResponse({
+    @required this.event,
+    @required this.streamId,
+  });
+
+  final vm_service.Event event;
+  final String streamId;
+
+  @override
+  bool get isRequest => false;
 }

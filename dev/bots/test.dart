@@ -9,6 +9,7 @@ import 'dart:math' as math;
 import 'package:googleapis/bigquery/v2.dart' as bq;
 import 'package:googleapis_auth/auth_io.dart' as auth;
 import 'package:http/http.dart' as http;
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'browser.dart';
@@ -26,26 +27,12 @@ typedef ShardRunner = Future<void> Function();
 /// appropriate error message.
 typedef OutputChecker = String Function(CapturedOutput);
 
-final String exe = Platform.isWindows ? '.exe' : '';
-final String bat = Platform.isWindows ? '.bat' : '';
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
-final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
-final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
-final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'pub$bat');
+final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
+final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
-final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
-
-String get platformFolderName {
-  if (Platform.isWindows)
-    return 'windows-x64';
-  if (Platform.isMacOS)
-    return 'darwin-x64';
-  if (Platform.isLinux)
-    return 'linux-x64';
-  throw UnsupportedError('The platform ${Platform.operatingSystem} is not supported by this script.');
-}
-final String flutterTester = path.join(flutterRoot, 'bin', 'cache', 'artifacts', 'engine', platformFolderName, 'flutter_tester$exe');
 
 /// The arguments to pass to `flutter test` (typically the local engine
 /// configuration) -- prefilled with the arguments passed to test.dart.
@@ -132,18 +119,6 @@ Future<void> main(List<String> args) async {
 
 Future<void> _runSmokeTests() async {
   print('${green}Running smoketests...$reset');
-  // Verify the Flutter Engine is the revision we asked for.
-  final String expectedVersion = File(engineVersionFile).readAsStringSync().trim();
-  final CapturedOutput flutterTesterOutput = CapturedOutput();
-  await runCommand(flutterTester, <String>['--help'], output: flutterTesterOutput, outputMode: OutputMode.capture);
-  final String actualVersion = flutterTesterOutput.stderr.split('\n').firstWhere((final String line) {
-    return line.startsWith('Flutter Engine Version:');
-  });
-  if (!actualVersion.contains(expectedVersion)) {
-    print('${red}Expected "Flutter Engine Version: $expectedVersion", '
-          'but found "$actualVersion".');
-    exit(1);
-  }
   // Verify that the tests actually return failure on failure and success on
   // success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
@@ -313,21 +288,27 @@ Future<void> _runToolTests() async {
 /// we can build when there are spaces in the path name for the Flutter SDK and
 /// target app.
 Future<void> _runBuildTests() async {
-  final Stream<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).list();
-  await for (final FileSystemEntity fileEntity in exampleDirectories) {
+  final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')));
+  for (final FileSystemEntity fileEntity in exampleDirectories) {
     if (fileEntity is! Directory) {
       continue;
     }
     final String examplePath = fileEntity.path;
+    final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
+    final List<String> additionalArgs = hasNullSafety
+      ? <String>['--enable-experiment', 'non-nullable']
+      : <String>[];
     if (Directory(path.join(examplePath, 'android')).existsSync()) {
-      await _flutterBuildAot(examplePath);
-      await _flutterBuildApk(examplePath);
+      await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs);
+      await _flutterBuildApk(examplePath, release: true, additionalArgs: additionalArgs);
     } else {
-      print('Example project ${path.basename(examplePath)} has no android directory, skipping aot and apk');
+      print('Example project ${path.basename(examplePath)} has no android directory, skipping apk');
     }
     if (Platform.isMacOS) {
       if (Directory(path.join(examplePath, 'ios')).existsSync()) {
-        await _flutterBuildIpa(examplePath);
+        await _flutterBuildIpa(examplePath, release: false, additionalArgs: additionalArgs);
+        await _flutterBuildIpa(examplePath, release: true, additionalArgs: additionalArgs);
       } else {
         print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
       }
@@ -349,23 +330,30 @@ Future<void> _runBuildTests() async {
   }
 }
 
-Future<void> _flutterBuildAot(String relativePathToApplication) async {
-  print('${green}Testing AOT build$reset for $cyan$relativePathToApplication$reset...');
-  await runCommand(flutter,
-    <String>['build', 'aot', '-v'],
-    workingDirectory: path.join(flutterRoot, relativePathToApplication),
-  );
-}
-
-Future<void> _flutterBuildApk(String relativePathToApplication) async {
+Future<void> _flutterBuildApk(String relativePathToApplication, {
+  @required bool release,
+  List<String> additionalArgs = const <String>[],
+}) async {
   print('${green}Testing APK --debug build$reset for $cyan$relativePathToApplication$reset...');
   await runCommand(flutter,
-    <String>['build', 'apk', '--debug', '-v'],
+    <String>[
+      'build',
+      'apk',
+      ...additionalArgs,
+      if (release)
+        '--release'
+      else
+        '--debug',
+      '-v',
+    ],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
   );
 }
 
-Future<void> _flutterBuildIpa(String relativePathToApplication) async {
+Future<void> _flutterBuildIpa(String relativePathToApplication, {
+  @required bool release,
+  List<String> additionalArgs = const <String>[],
+}) async {
   assert(Platform.isMacOS);
   print('${green}Testing IPA build$reset for $cyan$relativePathToApplication$reset...');
   // Install Cocoapods.  We don't have these checked in for the examples,
@@ -381,7 +369,17 @@ Future<void> _flutterBuildIpa(String relativePathToApplication) async {
     );
   }
   await runCommand(flutter,
-    <String>['build', 'ios', '--no-codesign', '--debug', '-v'],
+    <String>[
+      'build',
+      'ios',
+      ...additionalArgs,
+      '--no-codesign',
+      if (release)
+        '--release'
+      else
+        '--debug',
+      '-v',
+    ],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
   );
 }
@@ -482,6 +480,10 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'),
+      options: <String>['--enable-experiment=non-nullable'],
+      skip: true, // TODO(jonahwilliams): re-enable after https://github.com/flutter/flutter/issues/55872
+    );
     await _runFlutterTest(
       path.join(flutterRoot, 'dev', 'tracing_tests'),
       options: <String>['--enable-vmservice'],
@@ -616,6 +618,7 @@ Future<void> _runWebIntegrationTests() async {
   await _runWebDebugTest('lib/stack_trace.dart');
   await _runWebDebugTest('lib/web_directory_loading.dart');
   await _runWebDebugTest('test/test.dart');
+  await _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true);
   await _runWebDebugTest('lib/web_define_loading.dart',
     additionalArguments: <String>[
       '--dart-define=test.valueA=Example',
@@ -718,6 +721,7 @@ Future<void> _runWebReleaseTest(String target, {
 ///
 /// Instead, we use `flutter run --debug` and sniff out the standard output.
 Future<void> _runWebDebugTest(String target, {
+  bool enableNullSafety = false,
   List<String> additionalArguments = const<String>[],
 }) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
@@ -728,6 +732,11 @@ Future<void> _runWebDebugTest(String target, {
     <String>[
       'run',
       '--debug',
+      if (enableNullSafety)
+        ...<String>[
+          '--enable-experiment',
+          'non-nullable',
+        ],
       '-d',
       'chrome',
       '--web-run-headless',
@@ -1178,6 +1187,7 @@ int get prNumber {
 }
 
 Future<String> _getAuthors() async {
+  final String exe = Platform.isWindows ? '.exe' : '';
   final String author = await runAndGetStdout(
     'git$exe', <String>['-c', 'log.showSignature=false', 'log', gitHash, '--pretty="%an <%ae>"'],
     workingDirectory: flutterRoot,

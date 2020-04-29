@@ -454,6 +454,7 @@ void main() {
                         label: value,
                         divisions: 3,
                         onChanged: (double d) { },
+                        // ignore: deprecated_member_use_from_same_package
                         useV2Slider: true,
                       ),
                     ),
@@ -607,7 +608,7 @@ void main() {
         )
     );
     await gesture.up();
-  }, skip: isBrowser);
+  });
 
   testWidgets('Default paddle slider value indicator shape draws correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
@@ -784,7 +785,7 @@ void main() {
         ),
     );
     await gesture.up();
-  }, skip: isBrowser);
+  });
 
   testWidgets('The slider track height can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(trackHeight: 16);
@@ -1281,6 +1282,7 @@ Widget _buildApp(
             label: '$value',
             onChanged: onChanged,
             divisions: divisions,
+            // ignore: deprecated_member_use_from_same_package
             useV2Slider: useV2Slider
           ),
         ),
