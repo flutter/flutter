@@ -30,17 +30,17 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('hot reload works without error', () async {
+  test('hot reload works without error', () async {
     await flutter.run();
     await flutter.hotReload();
   });
 
-  testWithoutContext('hot restart works without error', () async {
+  test('hot restart works without error', () async {
     await flutter.run();
     await flutter.hotRestart();
   });
 
-  testWithoutContext('newly added code executes during hot reload', () async {
+  test('newly added code executes during hot reload', () async {
     await flutter.run();
 
     project.uncommentHotReloadPrint();
@@ -50,7 +50,7 @@ void main() {
       emitsThrough(contains('(((((RELOAD WORKED)))))')));
   });
 
-  testWithoutContext('reloadMethod triggers hot reload behavior', () async {
+  test('reloadMethod triggers hot reload behavior', () async {
     await flutter.run();
 
     project.uncommentHotReloadPrint();
@@ -61,7 +61,7 @@ void main() {
       emitsThrough(contains('(((((RELOAD WORKED)))))')));
   });
 
-  testWithoutContext('breakpoints are hit after hot reload', () async {
+  test('breakpoints are hit after hot reload', () async {
     final Future<void> didStart = flutter.run(withDebugger: true);
     await expectLater(flutter.stdout,
       emitsThrough(contains('((((TICK 1))))')));
@@ -97,7 +97,7 @@ void main() {
     await expectLater(pendingHotReload, completes);
   });
 
-  testWithoutContext('hot reload does not reassemble if paused', () async {
+  test('hot reload does not reassemble if paused', () async {
     final Future<void> didStart = flutter.run(withDebugger: true);
 
     await expectLater(flutter.stdout,
