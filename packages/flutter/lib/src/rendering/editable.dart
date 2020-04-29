@@ -174,7 +174,7 @@ bool _isTrailingSurrogate(int codeUnit) {
 /// Keyboard handling, IME handling, scrolling, toggling the [showCursor] value
 /// to actually blink the cursor, and other features not mentioned above are the
 /// responsibility of higher layers and not handled by this object.
-class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
+class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, ClipBehaviorMixin {
   /// Creates a render object that implements the visual aspects of a text field.
   ///
   /// The [textAlign] argument must not be null. It defaults to [TextAlign.start].
@@ -227,6 +227,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     EdgeInsets floatingCursorAddedMargin = const EdgeInsets.fromLTRB(4, 4, 4, 5),
     TextRange promptRectRange,
     Color promptRectColor,
+    Clip clipBehavior = Clip.hardEdge,
     @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
@@ -257,6 +258,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        assert(devicePixelRatio != null),
        assert(selectionHeightStyle != null),
        assert(selectionWidthStyle != null),
+       assert(clipBehavior != null),
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -294,6 +296,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
     this.hasFocus = hasFocus ?? false;
+    this.clipBehavior = clipBehavior;
     if (promptRectColor != null)
       _promptRectPaint.color = promptRectColor;
   }
@@ -2133,8 +2136,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   void paint(PaintingContext context, Offset offset) {
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
-    if (_hasVisualOverflow)
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents);
+    if (_hasVisualOverflow && clipBehavior != Clip.none)
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents, clipBehavior: clipBehavior);
     else
       _paintContents(context, offset);
     _paintHandleLayers(context, getEndpointsForSelection(selection));
