@@ -126,8 +126,8 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> {
 ///    in the center of that plane will be mostly untransformed with children
 ///    above and below it being transformed more as the angle increases.
 class RenderListWheelViewport
-    extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, ListWheelParentData>, ClipBehaviorMixin
+    extends ClippableRenderBox
+    with ContainerRenderObjectMixin<RenderBox, ListWheelParentData>
     implements RenderAbstractViewport {
   /// Creates a [RenderListWheelViewport] which renders children on a wheel.
   ///

@@ -314,10 +314,9 @@ enum Overflow {
 /// See also:
 ///
 ///  * [RenderFlow]
-class RenderStack extends RenderBox
+class RenderStack extends ClippableRenderBox
     with ContainerRenderObjectMixin<RenderBox, StackParentData>,
-         RenderBoxContainerDefaultsMixin<RenderBox, StackParentData>,
-         ClipBehaviorMixin {
+         RenderBoxContainerDefaultsMixin<RenderBox, StackParentData> {
   /// Creates a stack render object.
   ///
   /// By default, the non-positioned children of the stack are aligned by their

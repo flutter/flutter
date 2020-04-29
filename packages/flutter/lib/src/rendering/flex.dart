@@ -261,10 +261,10 @@ typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
 ///
 ///  * [Flex], the widget equivalent.
 ///  * [Row] and [Column], direction-specific variants of [Flex].
-class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>,
-                                        RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData>,
-                                        DebugOverflowIndicatorMixin,
-                                        ClipBehaviorMixin {
+class RenderFlex extends ClippableRenderBox
+    with ContainerRenderObjectMixin<RenderBox, FlexParentData>,
+         RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData>,
+         DebugOverflowIndicatorMixin {
   /// Creates a flex render object.
   ///
   /// By default, the flex layout is horizontal and children are aligned to the

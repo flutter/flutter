@@ -2425,6 +2425,9 @@ abstract class RenderBox extends RenderObject {
   }
 }
 
+/// A [RenderBox] subclass that can configure its clip behavior.
+abstract class ClippableRenderBox extends RenderBox with ClipBehaviorMixin {}
+
 /// A mixin that provides useful default behaviors for boxes with children
 /// managed by the [ContainerRenderObjectMixin] mixin.
 ///
