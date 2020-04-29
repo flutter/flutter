@@ -344,7 +344,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: Center(
-            IconButton(
+            child: IconButton(
               icon: const Icon(Icons.android),
               splashRadius: splashRadius,
               onPressed: () { /* enable the button */ },
