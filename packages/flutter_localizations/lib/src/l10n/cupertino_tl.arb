@@ -18,5 +18,6 @@
   "cutButtonLabel": "I-cut",
   "copyButtonLabel": "Kopyahin",
   "pasteButtonLabel": "I-paste",
-  "selectAllButtonLabel": "Piliin Lahat"
+  "selectAllButtonLabel": "Piliin Lahat",
+  "modalBarrierDismissLabel": "I-dismiss"
 }

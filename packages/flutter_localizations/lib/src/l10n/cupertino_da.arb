@@ -18,5 +18,6 @@
   "cutButtonLabel": "Klip",
   "copyButtonLabel": "Kopiér",
   "pasteButtonLabel": "Sæt ind",
-  "selectAllButtonLabel": "Vælg alle"
+  "selectAllButtonLabel": "Vælg alle",
+  "modalBarrierDismissLabel": "Afvis"
 }

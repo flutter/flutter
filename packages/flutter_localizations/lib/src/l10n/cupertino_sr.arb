@@ -23,5 +23,6 @@
   "cutButtonLabel": "Исеци",
   "copyButtonLabel": "Копирај",
   "pasteButtonLabel": "Налепи",
-  "selectAllButtonLabel": "Изабери све"
+  "selectAllButtonLabel": "Изабери све",
+  "modalBarrierDismissLabel": "Одбаци"
 }

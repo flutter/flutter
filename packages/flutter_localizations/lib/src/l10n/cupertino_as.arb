@@ -18,5 +18,6 @@
   "cutButtonLabel": "কাট কৰক",
   "copyButtonLabel": "প্ৰতিলিপি কৰক",
   "pasteButtonLabel": "পে'ষ্ট কৰক",
-  "selectAllButtonLabel": "সকলো বাছনি কৰক"
+  "selectAllButtonLabel": "সকলো বাছনি কৰক",
+  "modalBarrierDismissLabel": "অগ্ৰাহ্য কৰক"
 }

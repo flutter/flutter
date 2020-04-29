@@ -28,5 +28,6 @@
   "cutButtonLabel": "גזירה",
   "copyButtonLabel": "העתקה",
   "pasteButtonLabel": "הדבקה",
-  "selectAllButtonLabel": "בחירת הכול"
+  "selectAllButtonLabel": "בחירת הכול",
+  "modalBarrierDismissLabel": "סגירה"
 }

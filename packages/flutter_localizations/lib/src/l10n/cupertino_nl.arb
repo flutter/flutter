@@ -18,5 +18,6 @@
   "cutButtonLabel": "Knippen",
   "copyButtonLabel": "Kopiëren",
   "pasteButtonLabel": "Plakken",
-  "selectAllButtonLabel": "Alles selecteren"
+  "selectAllButtonLabel": "Alles selecteren",
+  "modalBarrierDismissLabel": "Sluiten"
 }

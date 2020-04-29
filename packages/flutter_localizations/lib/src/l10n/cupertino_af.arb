@@ -18,5 +18,6 @@
   "cutButtonLabel": "Knip",
   "copyButtonLabel": "Kopieer",
   "pasteButtonLabel": "Plak",
-  "selectAllButtonLabel": "Kies alles"
+  "selectAllButtonLabel": "Kies alles",
+  "modalBarrierDismissLabel": "Maak toe"
 }

@@ -28,5 +28,6 @@
   "cutButtonLabel": "Wytnij",
   "copyButtonLabel": "Kopiuj",
   "pasteButtonLabel": "Wklej",
-  "selectAllButtonLabel": "Wybierz wszystkie"
+  "selectAllButtonLabel": "Wybierz wszystkie",
+  "modalBarrierDismissLabel": "Zamknij"
 }
