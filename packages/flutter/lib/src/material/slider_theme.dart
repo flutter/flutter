@@ -1005,16 +1005,16 @@ abstract class SliderComponentShape {
   void paint(
     PaintingContext context,
     Offset center, {
-      Animation<double> activationAnimation,
-      Animation<double> enableAnimation,
-      bool isDiscrete,
-      TextPainter labelPainter,
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      TextDirection textDirection,
-      double value,
-      double textScaleFactor,
-      Size sizeWithOverflow,
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    bool isDiscrete,
+    TextPainter labelPainter,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   });
 
   /// Special instance of [SliderComponentShape] to skip the thumb drawing.
@@ -1087,12 +1087,12 @@ abstract class SliderTickMarkShape {
   void paint(
     PaintingContext context,
     Offset center, {
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      Animation<double> enableAnimation,
-      Offset thumbCenter,
-      bool isEnabled,
-      TextDirection textDirection,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    Animation<double> enableAnimation,
+    Offset thumbCenter,
+    bool isEnabled,
+    TextDirection textDirection,
   });
 
   /// Special instance of [SliderTickMarkShape] to skip the tick mark painting.
@@ -1175,13 +1175,13 @@ abstract class SliderTrackShape {
   void paint(
     PaintingContext context,
     Offset offset, {
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      Animation<double> enableAnimation,
-      Offset thumbCenter,
-      bool isEnabled,
-      bool isDiscrete,
-      TextDirection textDirection,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    Animation<double> enableAnimation,
+    Offset thumbCenter,
+    bool isEnabled,
+    bool isDiscrete,
+    TextDirection textDirection,
   });
 }
 
@@ -1236,16 +1236,16 @@ abstract class RangeSliderThumbShape {
   void paint(
     PaintingContext context,
     Offset center, {
-      Animation<double> activationAnimation,
-      Animation<double> enableAnimation,
-      bool isDiscrete,
-      bool isEnabled,
-      bool isOnTop,
-      TextDirection textDirection,
-      SliderThemeData sliderTheme,
-      Thumb thumb,
-      bool isPressed,
-    });
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    bool isDiscrete,
+    bool isEnabled,
+    bool isOnTop,
+    TextDirection textDirection,
+    SliderThemeData sliderTheme,
+    Thumb thumb,
+    bool isPressed,
+  });
 }
 
 /// Base class for [RangeSlider] value indicator shapes.
@@ -1275,8 +1275,8 @@ abstract class RangeSliderValueIndicatorShape {
   Size getPreferredSize(
     bool isEnabled,
     bool isDiscrete, {
-      TextPainter labelPainter,
-      double textScaleFactor,
+    TextPainter labelPainter,
+    double textScaleFactor,
   });
 
   /// Determines the best offset to keep this shape on the screen.
@@ -1329,18 +1329,18 @@ abstract class RangeSliderValueIndicatorShape {
   void paint(
     PaintingContext context,
     Offset center, {
-      Animation<double> activationAnimation,
-      Animation<double> enableAnimation,
-      bool isDiscrete,
-      bool isOnTop,
-      TextPainter labelPainter,
-      double textScaleFactor,
-      Size sizeWithOverflow,
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      TextDirection textDirection,
-      double value,
-      Thumb thumb,
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    bool isDiscrete,
+    bool isOnTop,
+    TextPainter labelPainter,
+    double textScaleFactor,
+    Size sizeWithOverflow,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+    Thumb thumb,
   });
 }
 
@@ -1393,13 +1393,13 @@ abstract class RangeSliderTickMarkShape {
   void paint(
     PaintingContext context,
     Offset center, {
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      Animation<double> enableAnimation,
-      Offset startThumbCenter,
-      Offset endThumbCenter,
-      bool isEnabled,
-      TextDirection textDirection,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    Animation<double> enableAnimation,
+    Offset startThumbCenter,
+    Offset endThumbCenter,
+    bool isEnabled,
+    TextDirection textDirection,
   });
 }
 
@@ -1481,15 +1481,15 @@ abstract class RangeSliderTrackShape {
   void paint(
     PaintingContext context,
     Offset offset, {
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      Animation<double> enableAnimation,
-      Offset startThumbCenter,
-      Offset endThumbCenter,
-      bool isEnabled,
-      bool isDiscrete,
-      TextDirection textDirection,
-    });
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    Animation<double> enableAnimation,
+    Offset startThumbCenter,
+    Offset endThumbCenter,
+    bool isEnabled,
+    bool isDiscrete,
+    TextDirection textDirection,
+  });
 }
 
 /// Base track shape that provides an implementation of [getPreferredRect] for
@@ -1579,14 +1579,14 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
   void paint(
     PaintingContext context,
     Offset offset, {
-      @required RenderBox parentBox,
-      @required SliderThemeData sliderTheme,
-      @required Animation<double> enableAnimation,
-      @required TextDirection textDirection,
-      @required Offset thumbCenter,
-      bool isDiscrete = false,
-      bool isEnabled = false,
-    }) {
+    @required RenderBox parentBox,
+    @required SliderThemeData sliderTheme,
+    @required Animation<double> enableAnimation,
+    @required TextDirection textDirection,
+    @required Offset thumbCenter,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+  }) {
     assert(context != null);
     assert(offset != null);
     assert(parentBox != null);
@@ -1676,15 +1676,15 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
   void paint(
     PaintingContext context,
     Offset offset, {
-      @required RenderBox parentBox,
-      @required SliderThemeData sliderTheme,
-      @required Animation<double> enableAnimation,
-      @required TextDirection textDirection,
-      @required Offset thumbCenter,
-      bool isDiscrete = false,
-      bool isEnabled = false,
-      double additionalActiveTrackHeight = 2,
-    }) {
+    @required RenderBox parentBox,
+    @required SliderThemeData sliderTheme,
+    @required Animation<double> enableAnimation,
+    @required TextDirection textDirection,
+    @required Offset thumbCenter,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+    double additionalActiveTrackHeight = 2,
+  }) {
     assert(context != null);
     assert(offset != null);
     assert(parentBox != null);
@@ -1819,14 +1819,14 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
   void paint(
     PaintingContext context,
     Offset offset, {
-      @required RenderBox parentBox,
-      @required SliderThemeData sliderTheme,
-      @required Animation<double> enableAnimation,
-      @required Offset startThumbCenter,
-      @required Offset endThumbCenter,
-      bool isEnabled = false,
-      bool isDiscrete = false,
-      @required TextDirection textDirection,
+    @required RenderBox parentBox,
+    @required SliderThemeData sliderTheme,
+    @required Animation<double> enableAnimation,
+    @required Offset startThumbCenter,
+    @required Offset endThumbCenter,
+    bool isEnabled = false,
+    bool isDiscrete = false,
+    @required TextDirection textDirection,
   }) {
     assert(context != null);
     assert(offset != null);
@@ -1946,15 +1946,15 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
   void paint(
     PaintingContext context,
     Offset offset, {
-      @required RenderBox parentBox,
-      @required SliderThemeData sliderTheme,
-      @required Animation<double> enableAnimation,
-      @required Offset startThumbCenter,
-      @required Offset endThumbCenter,
-      bool isEnabled = false,
-      bool isDiscrete = false,
-      @required TextDirection textDirection,
-      double additionalActiveTrackHeight = 2,
+    @required RenderBox parentBox,
+    @required SliderThemeData sliderTheme,
+    @required Animation<double> enableAnimation,
+    @required Offset startThumbCenter,
+    @required Offset endThumbCenter,
+    bool isEnabled = false,
+    bool isDiscrete = false,
+    @required TextDirection textDirection,
+    double additionalActiveTrackHeight = 2,
   }) {
     assert(context != null);
     assert(offset != null);
@@ -2096,12 +2096,12 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
   void paint(
     PaintingContext context,
     Offset center, {
-      @required RenderBox parentBox,
-      @required SliderThemeData sliderTheme,
-      @required Animation<double> enableAnimation,
-      @required TextDirection textDirection,
-      @required Offset thumbCenter,
-      bool isEnabled = false,
+    @required RenderBox parentBox,
+    @required SliderThemeData sliderTheme,
+    @required Animation<double> enableAnimation,
+    @required TextDirection textDirection,
+    @required Offset thumbCenter,
+    bool isEnabled = false,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2135,9 +2135,9 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
 
     // The tick marks are tiny circles that are the same height as the track.
     final double tickMarkRadius = getPreferredSize(
-      isEnabled: isEnabled,
-      sliderTheme: sliderTheme,
-    ).width / 2;
+       isEnabled: isEnabled,
+       sliderTheme: sliderTheme,
+     ).width / 2;
     if (tickMarkRadius > 0) {
       context.canvas.drawCircle(center, tickMarkRadius, paint);
     }
@@ -2188,13 +2188,13 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
   void paint(
     PaintingContext context,
     Offset center, {
-      @required RenderBox parentBox,
-      @required SliderThemeData sliderTheme,
-      @required Animation<double> enableAnimation,
-      @required Offset startThumbCenter,
-      @required Offset endThumbCenter,
-      bool isEnabled = false,
-      @required TextDirection textDirection,
+    @required RenderBox parentBox,
+    @required SliderThemeData sliderTheme,
+    @required Animation<double> enableAnimation,
+    @required Offset startThumbCenter,
+    @required Offset endThumbCenter,
+    bool isEnabled = false,
+    @required TextDirection textDirection,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2254,12 +2254,12 @@ class _EmptySliderTickMarkShape extends SliderTickMarkShape {
   void paint(
     PaintingContext context,
     Offset center, {
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      Animation<double> enableAnimation,
-      Offset thumbCenter,
-      bool isEnabled,
-      TextDirection textDirection,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    Animation<double> enableAnimation,
+    Offset thumbCenter,
+    bool isEnabled,
+    TextDirection textDirection,
   }) {
     // no-op.
   }
@@ -2282,16 +2282,16 @@ class _EmptySliderComponentShape extends SliderComponentShape {
   void paint(
     PaintingContext context,
     Offset center, {
-      Animation<double> activationAnimation,
-      Animation<double> enableAnimation,
-      bool isDiscrete,
-      TextPainter labelPainter,
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      TextDirection textDirection,
-      double value,
-      double textScaleFactor,
-      Size sizeWithOverflow,
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    bool isDiscrete,
+    TextPainter labelPainter,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     // no-op.
   }
@@ -2353,16 +2353,16 @@ class RoundSliderThumbShape extends SliderComponentShape {
   void paint(
     PaintingContext context,
     Offset center, {
-      Animation<double> activationAnimation,
-      @required Animation<double> enableAnimation,
-      bool isDiscrete,
-      TextPainter labelPainter,
-      RenderBox parentBox,
-      @required SliderThemeData sliderTheme,
-      TextDirection textDirection,
-      double value,
-      double textScaleFactor,
-      Size sizeWithOverflow,
+    Animation<double> activationAnimation,
+    @required Animation<double> enableAnimation,
+    bool isDiscrete,
+    TextPainter labelPainter,
+    RenderBox parentBox,
+    @required SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2452,15 +2452,15 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
   void paint(
     PaintingContext context,
     Offset center, {
-      @required Animation<double> activationAnimation,
-      @required Animation<double> enableAnimation,
-      bool isDiscrete = false,
-      bool isEnabled = false,
-      bool isOnTop,
-      @required SliderThemeData sliderTheme,
-      TextDirection textDirection,
-      Thumb thumb,
-      bool isPressed,
+    @required Animation<double> activationAnimation,
+    @required Animation<double> enableAnimation,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+    bool isOnTop,
+    @required SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    Thumb thumb,
+    bool isPressed,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2561,16 +2561,16 @@ class RoundSliderOverlayShape extends SliderComponentShape {
   void paint(
     PaintingContext context,
     Offset center, {
-      @required Animation<double> activationAnimation,
-      @required Animation<double> enableAnimation,
-      bool isDiscrete = false,
-      @required TextPainter labelPainter,
-      @required RenderBox parentBox,
-      @required SliderThemeData sliderTheme,
-      @required TextDirection textDirection,
-      @required double value,
-      double textScaleFactor,
-      Size sizeWithOverflow,
+    @required Animation<double> activationAnimation,
+    @required Animation<double> enableAnimation,
+    bool isDiscrete = false,
+    @required TextPainter labelPainter,
+    @required RenderBox parentBox,
+    @required SliderThemeData sliderTheme,
+    @required TextDirection textDirection,
+    @required double value,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2611,30 +2611,30 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
 
   @override
   Size getPreferredSize(
-    bool isEnabled,
-    bool isDiscrete, {
-      @required TextPainter labelPainter,
-      @required double textScaleFactor,
+     bool isEnabled,
+     bool isDiscrete, {
+     @required TextPainter labelPainter,
+     @required double textScaleFactor,
   }) {
-    assert(labelPainter != null);
-    assert(textScaleFactor != null && textScaleFactor >= 0);
-    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, textScaleFactor);
+     assert(labelPainter != null);
+     assert(textScaleFactor != null && textScaleFactor >= 0);
+     return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter, textScaleFactor);
   }
 
   @override
   void paint(
     PaintingContext context,
     Offset center, {
-      @required Animation<double> activationAnimation,
-      @required Animation<double> enableAnimation,
-      bool isDiscrete,
-      @required TextPainter labelPainter,
-      @required RenderBox parentBox,
-      @required SliderThemeData sliderTheme,
-      TextDirection textDirection,
-      double value,
-      double textScaleFactor,
-      Size sizeWithOverflow,
+    @required Animation<double> activationAnimation,
+    @required Animation<double> enableAnimation,
+    bool isDiscrete,
+    @required TextPainter labelPainter,
+    @required RenderBox parentBox,
+    @required SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     final Canvas canvas = context.canvas;
     final double scale = activationAnimation.value;
@@ -2668,8 +2668,8 @@ class RectangularRangeSliderValueIndicatorShape
   Size getPreferredSize(
     bool isEnabled,
     bool isDiscrete, {
-      @required TextPainter labelPainter,
-      @required double textScaleFactor,
+    @required TextPainter labelPainter,
+    @required double textScaleFactor,
   }) {
     assert(labelPainter != null);
     assert(textScaleFactor != null && textScaleFactor >= 0);
@@ -2699,18 +2699,18 @@ class RectangularRangeSliderValueIndicatorShape
   void paint(
     PaintingContext context,
     Offset center, {
-      Animation<double> activationAnimation,
-      Animation<double> enableAnimation,
-      bool isDiscrete,
-      bool isOnTop,
-      TextPainter labelPainter,
-      double textScaleFactor,
-      Size sizeWithOverflow,
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      TextDirection textDirection,
-      double value,
-      Thumb thumb,
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    bool isDiscrete,
+    bool isOnTop,
+    TextPainter labelPainter,
+    double textScaleFactor,
+    Size sizeWithOverflow,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+    Thumb thumb,
   }) {
     final Canvas canvas = context.canvas;
     final double scale = activationAnimation.value;
@@ -2878,16 +2878,16 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   void paint(
     PaintingContext context,
     Offset center, {
-      @required Animation<double> activationAnimation,
-      @required Animation<double> enableAnimation,
-      bool isDiscrete,
-      @required TextPainter labelPainter,
-      @required RenderBox parentBox,
-      @required SliderThemeData sliderTheme,
-      TextDirection textDirection,
-      double value,
-      double textScaleFactor,
-      Size sizeWithOverflow,
+    @required Animation<double> activationAnimation,
+    @required Animation<double> enableAnimation,
+    bool isDiscrete,
+    @required TextPainter labelPainter,
+    @required RenderBox parentBox,
+    @required SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     assert(context != null);
     assert(center != null);
@@ -2933,8 +2933,8 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
   Size getPreferredSize(
     bool isEnabled,
     bool isDiscrete, {
-      @required TextPainter labelPainter,
-      @required double textScaleFactor,
+    @required TextPainter labelPainter,
+    @required double textScaleFactor,
   }) {
     assert(labelPainter != null);
     assert(textScaleFactor != null && textScaleFactor >= 0);
@@ -2964,18 +2964,18 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
   void paint(
     PaintingContext context,
     Offset center, {
-      @required Animation<double> activationAnimation,
-      @required Animation<double> enableAnimation,
-      bool isDiscrete,
-      bool isOnTop = false,
-      @required TextPainter labelPainter,
-      @required RenderBox parentBox,
-      @required SliderThemeData sliderTheme,
-      TextDirection textDirection,
-      Thumb thumb,
-      double value,
-      double textScaleFactor,
-      Size sizeWithOverflow,
+    @required Animation<double> activationAnimation,
+    @required Animation<double> enableAnimation,
+    bool isDiscrete,
+    bool isOnTop = false,
+    @required TextPainter labelPainter,
+    @required RenderBox parentBox,
+    @required SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    Thumb thumb,
+    double value,
+    double textScaleFactor,
+    Size sizeWithOverflow,
   }) {
     assert(context != null);
     assert(center != null);

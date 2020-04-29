@@ -619,7 +619,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // value indicator is assumed to be the same as the active color.
     final SliderComponentShape valueIndicatorShape = sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape;
     Color valueIndicatorColor;
-
     if (valueIndicatorShape is RectangularSliderValueIndicatorShape) {
       valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90));
     } else {
