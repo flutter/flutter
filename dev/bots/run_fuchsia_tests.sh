@@ -92,5 +92,6 @@ echo "$(date) START:HOT_RELOAD_TEST ---------------------------------"
 # remove all out dated .packages references
 find $flutter_dir -name ".packages" | xargs rm
 cd $flutter_dir/dev/integration_tests/flutter_gallery
+$flutter_bin pub get
 $flutter_bin run --hot -d $device_name --benchmark --verbose --resident --output-dill build/app.dill
 echo "$(date) END:HOT_RELOAD_TEST -----------------------------------"
