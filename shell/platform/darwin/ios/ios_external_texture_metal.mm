@@ -30,11 +30,17 @@ void IOSExternalTextureMetal::Paint(SkCanvas& canvas,
   const bool needs_updated_texture = (!freeze && texture_frame_available_) || !external_image_;
 
   if (needs_updated_texture) {
+    auto pixel_buffer = fml::CFRef<CVPixelBufferRef>([external_texture_ copyPixelBuffer]);
+    if (!pixel_buffer) {
+      pixel_buffer = std::move(last_pixel_buffer_);
+    }
+
     // If the application told us there was a texture frame available but did not provide one when
     // asked for it, reuse the previous texture but make sure to ask again the next time around.
-    if (auto wrapped_texture = WrapExternalPixelBuffer(context)) {
+    if (auto wrapped_texture = WrapExternalPixelBuffer(pixel_buffer, context)) {
       external_image_ = wrapped_texture;
       texture_frame_available_ = false;
+      last_pixel_buffer_ = std::move(pixel_buffer);
     }
   }
 
@@ -48,8 +54,9 @@ void IOSExternalTextureMetal::Paint(SkCanvas& canvas,
   }
 }
 
-sk_sp<SkImage> IOSExternalTextureMetal::WrapExternalPixelBuffer(GrContext* context) const {
-  auto pixel_buffer = fml::CFRef<CVPixelBufferRef>([external_texture_ copyPixelBuffer]);
+sk_sp<SkImage> IOSExternalTextureMetal::WrapExternalPixelBuffer(
+    fml::CFRef<CVPixelBufferRef> pixel_buffer,
+    GrContext* context) const {
   if (!pixel_buffer) {
     return nullptr;
   }
@@ -126,6 +133,10 @@ void IOSExternalTextureMetal::OnGrContextCreated() {
 }
 
 void IOSExternalTextureMetal::OnGrContextDestroyed() {
+  // The image must be reset because it is tied to the onscreen context. But the pixel buffer that
+  // created the image is still around. In case of context reacquisition, that last pixel
+  // buffer will be used to materialize the image in case the application fails to provide a new
+  // one.
   external_image_.reset();
   CVMetalTextureCacheFlush(texture_cache_,  // cache
                            0                // options (must be zero)
