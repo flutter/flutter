@@ -187,10 +187,10 @@ class FlutterDevice {
       // FYI, this message is used as a sentinel in tests.
       globals.printTrace('Connecting to service protocol: $observatoryUri');
       isWaitingForVm = true;
-      VMService service;
+      vm_service.VmService service;
 
       try {
-        service = await VMService.connect(
+        service = await connectToVmService(
           observatoryUri,
           reloadSources: reloadSources,
           restart: restart,
@@ -226,9 +226,6 @@ class FlutterDevice {
     return completer.future;
   }
 
-  // TODO(jonahwilliams): remove once all callsites are updated.
-  VMService get flutterDeprecatedVmService => vmService as VMService;
-
   Future<void> refreshViews() async {
     if (vmService == null) {
       return;
@@ -253,8 +250,6 @@ class FlutterDevice {
     }
     return _views;
   }
-
-  Future<void> getVMs() => flutterDeprecatedVmService.getVMOld();
 
   Future<void> exitApps() async {
     if (!device.supportsFlutterExit) {
@@ -308,7 +303,7 @@ class FlutterDevice {
   }) {
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
-      flutterDeprecatedVmService,
+      vmService,
       fsName,
       rootDirectory,
       osUtils: globals.os,
@@ -316,16 +311,17 @@ class FlutterDevice {
     return devFS.create();
   }
 
-  List<Future<vm_service.ReloadReport>> reloadSources(
+  Future<List<Future<vm_service.ReloadReport>>> reloadSources(
     String entryPath, {
     bool pause = false,
-  }) {
+  }) async {
     final String deviceEntryUri = devFS.baseUri
       .resolveUri(globals.fs.path.toUri(entryPath)).toString();
+    final vm_service.VM vm = await vmService.getVM();
     return <Future<vm_service.ReloadReport>>[
-      for (final Isolate isolate in flutterDeprecatedVmService.vm.isolates)
+      for (final vm_service.IsolateRef isolateRef in vm.isolates)
         vmService.reloadSources(
-          isolate.id,
+          isolateRef.id,
           pause: pause,
           rootLibUri: deviceEntryUri,
         )
@@ -867,7 +863,7 @@ abstract class ResidentRunner {
   void writeVmserviceFile() {
     if (debuggingOptions.vmserviceOutFile != null) {
       try {
-        final String address = flutterDevices.first.flutterDeprecatedVmService.wsAddress.toString();
+        final String address = flutterDevices.first.vmService.wsAddress.toString();
         final File vmserviceOutFile = globals.fs.file(debuggingOptions.vmserviceOutFile);
         vmserviceOutFile.createSync(recursive: true);
         vmserviceOutFile.writeAsStringSync(address);
@@ -895,13 +891,6 @@ abstract class ResidentRunner {
   Future<void> refreshViews() async {
     final List<Future<void>> futures = <Future<void>>[
       for (final FlutterDevice device in flutterDevices) device.refreshViews(),
-    ];
-    await Future.wait(futures);
-  }
-
-  Future<void> refreshVM() async {
-    final List<Future<void>> futures = <Future<void>>[
-      for (final FlutterDevice device in flutterDevices) device.getVMs(),
     ];
     await Future.wait(futures);
   }
@@ -1086,7 +1075,6 @@ abstract class ResidentRunner {
         compileExpression: compileExpression,
         reloadMethod: reloadMethod,
       );
-      await device.getVMs();
       await device.refreshViews();
       if (device.views.isNotEmpty) {
         viewFound = true;
@@ -1122,7 +1110,7 @@ abstract class ResidentRunner {
         <String, dynamic>{
           'reuseWindows': true,
         },
-        flutterDevices.first.flutterDeprecatedVmService.httpAddress,
+        flutterDevices.first.vmService.httpAddress,
         'http://${_devtoolsServer.address.host}:${_devtoolsServer.port}',
         false,  // headless mode,
         false,  // machine mode

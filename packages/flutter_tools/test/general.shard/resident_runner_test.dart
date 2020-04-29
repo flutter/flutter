@@ -146,29 +146,21 @@ void main() {
     when(mockFlutterDevice.vmService).thenAnswer((Invocation invocation) {
       return fakeVmServiceHost.vmService;
     });
-    when(mockFlutterDevice.flutterDeprecatedVmService).thenAnswer((Invocation invocation) {
-      return mockVMService;
-    });
     when(mockFlutterDevice.refreshViews()).thenAnswer((Invocation invocation) async { });
-    when(mockFlutterDevice.getVMs()).thenAnswer((Invocation invocation) async { });
-    when(mockFlutterDevice.reloadSources(any, pause: anyNamed('pause'))).thenReturn(<Future<vm_service.ReloadReport>>[
-      Future<vm_service.ReloadReport>.value(vm_service.ReloadReport.parse(<String, dynamic>{
-        'type': 'ReloadReport',
-        'success': true,
-        'details': <String, dynamic>{
-          'loadedLibraryCount': 1,
-          'finalLibraryCount': 1,
-          'receivedLibraryCount': 1,
-          'receivedClassesCount': 1,
-          'receivedProceduresCount': 1,
-        },
-      })),
-    ]);
-    // VMService mocks.
-    when(mockVMService.wsAddress).thenReturn(testUri);
-    when(mockVMService.done).thenAnswer((Invocation invocation) {
-      final Completer<void> result = Completer<void>.sync();
-      return result.future;
+    when(mockFlutterDevice.reloadSources(any, pause: anyNamed('pause'))).thenAnswer((Invocation invocation) async {
+      return <Future<vm_service.ReloadReport>>[
+        Future<vm_service.ReloadReport>.value(vm_service.ReloadReport.parse(<String, dynamic>{
+          'type': 'ReloadReport',
+          'success': true,
+          'details': <String, dynamic>{
+            'loadedLibraryCount': 1,
+            'finalLibraryCount': 1,
+            'receivedLibraryCount': 1,
+            'receivedClassesCount': 1,
+            'receivedProceduresCount': 1,
+          },
+        })),
+      ];
     });
   });
 
@@ -955,6 +947,7 @@ void main() {
 
   test('HotRunner writes vm service file when providing debugging option', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    setWsAddress(testUri, fakeVmServiceHost.vmService);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
@@ -1029,6 +1022,7 @@ void main() {
   test('ColdRunner writes vm service file when providing debugging option', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    setWsAddress(testUri, fakeVmServiceHost.vmService);
     residentRunner = ColdRunner(
       <FlutterDevice>[
         mockFlutterDevice,
@@ -1111,7 +1105,7 @@ void main() {
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}
-class MockVMService extends Mock implements VMService {}
+class MockVMService extends Mock implements vm_service.VmService {}
 class MockDevFS extends Mock implements DevFS {}
 class MockDevice extends Mock implements Device {}
 class MockDeviceLogReader extends Mock implements DeviceLogReader {}
