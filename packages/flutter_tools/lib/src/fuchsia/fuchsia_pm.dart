@@ -111,7 +111,7 @@ class FuchsiaPM {
       throwToolExit('Fuchsia pm tool not found');
     }
     if (isIPv6Address(host.split('%').first)) {
-      host = '[${host.replaceAll('%', '%25')}]';
+      host = '[$host]';
     }
     final List<String> command = <String>[
       globals.fuchsiaArtifacts.pm.path,
@@ -181,12 +181,6 @@ class FuchsiaPM {
 /// }
 class FuchsiaPackageServer {
   factory FuchsiaPackageServer(String repo, String name, String host, int port) {
-    // TODO(jonahwilliams): ensure we only receive valid ipv4 or ipv6 InternetAddresses.
-    // Temporary work around to receiving ipv6 addresses with trailing information:
-    // fe80::ec4:7aff:fecc:ea8f%eno2
-    if (host.contains('%')) {
-      host = host.split('%').first;
-    }
     return FuchsiaPackageServer._(repo, name, host, port);
   }
 
@@ -203,6 +197,14 @@ class FuchsiaPackageServer {
 
   /// The URL that can be used by the device to access this package server.
   String get url => Uri(scheme: 'http', host: _host, port: _port).toString();
+
+  /// The URL that is stripped of interface name if it is an ipv6 address,
+  /// which should be supplied to amber_ctl to configure access to host
+  String get interfaceStrippedUrl => Uri(
+    scheme: 'http',
+    host: (isIPv6Address(_host.split('%').first)) ? '[${_host.split('%').first}]' : _host,
+    port: _port,
+  ).toString();
 
   // The name used to reference the server by fuchsia-pkg:// urls.
   final String name;
