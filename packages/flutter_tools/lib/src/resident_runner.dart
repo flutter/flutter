@@ -251,14 +251,15 @@ class FlutterDevice {
     return _views;
   }
 
-  Future<void> exitApps() async {
+  Future<void> exitApps({
+    @visibleForTesting Duration timeoutDelay = const Duration(seconds: 10),
+  }) async {
     if (!device.supportsFlutterExit) {
-      await device.stopApp(package);
-      return;
+      return device.stopApp(package);
     }
     await refreshViews();
     if (views == null || views.isEmpty) {
-      return;
+      return device.stopApp(package);
     }
     // If any of the flutter views are paused, we might not be able to
     // cleanly exit since the service extension may not have been registered.
@@ -269,8 +270,7 @@ class FlutterDevice {
         continue;
       }
       if (isPauseEvent(isolate.pauseEvent.kind)) {
-        await device.stopApp(package);
-        return;
+        return device.stopApp(package);
       }
     }
     for (final FlutterView view in views) {
@@ -288,11 +288,12 @@ class FlutterDevice {
           stackTrace: stackTrace,
          );
       })
-      .timeout(const Duration(seconds: 2), onTimeout: () {
+      .timeout(timeoutDelay, onTimeout: () {
         // TODO(jonahwilliams): this only seems to fail on CI in the
         // flutter_attach_android_test. This log should help verify this
         // is where the tool is getting stuck.
         globals.logger.printTrace('error: vm service shutdown failed');
+        return device.stopApp(package);
       });
   }
 

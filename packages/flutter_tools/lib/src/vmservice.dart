@@ -676,6 +676,7 @@ extension FlutterVmService on vm_service.VmService {
       'ext.flutter.exit',
       isolateId: isolateId,
     ).catchError((dynamic error, StackTrace stackTrace) {
+      globals.logger.printTrace('Failure in ext.flutter.exit: $error\n$stackTrace');
       // Do nothing on sentinel or exception, the isolate already exited.
     }, test: (dynamic error) => error is vm_service.SentinelException || error is vm_service.RPCError);
   }
