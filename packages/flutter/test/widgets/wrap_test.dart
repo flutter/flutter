@@ -733,6 +733,7 @@ void main() {
 
     await tester.pumpWidget(Wrap(
       textDirection: TextDirection.ltr,
+      clipBehavior: Clip.hardEdge,
       children: const <Widget>[
         SizedBox(width: 500.0, height: 500.0),
         SizedBox(width: 500.0, height: 500.0),

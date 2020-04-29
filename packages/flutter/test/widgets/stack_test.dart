@@ -421,6 +421,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: Stack(
+            clipBehavior: Clip.hardEdge,
+            overflow: Overflow.clip,
             children: const <Widget>[
               SizedBox(
                 width: 100.0,

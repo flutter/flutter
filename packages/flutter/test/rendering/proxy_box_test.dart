@@ -431,6 +431,7 @@ void main() {
     _testLayerReuse<ClipRectLayer>(RenderFittedBox(
       alignment: Alignment.center,
       fit: BoxFit.cover,
+      clipBehavior: Clip.hardEdge,
       // Inject opacity under the clip to force compositing.
       child: RenderOpacity(
         opacity: 0.5,

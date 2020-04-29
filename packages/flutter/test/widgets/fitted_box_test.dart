@@ -369,6 +369,7 @@ void main() {
           height: 10.0,
           child: FittedBox(
             fit: BoxFit.cover,
+            clipBehavior: Clip.hardEdge,
             child: SizedBox(
               width: 10.0,
               height: 50.0,
@@ -391,6 +392,7 @@ void main() {
           height: 100.0,
           child: FittedBox(
             fit: BoxFit.cover,
+            clipBehavior: Clip.hardEdge,
             child: SizedBox(
               width: 50.0,
               height: 10.0,
@@ -418,6 +420,7 @@ void main() {
                   height: b,
                   child: FittedBox(
                     fit: BoxFit.none,
+                    clipBehavior: Clip.hardEdge,
                     child: SizedBox(
                       width: c,
                       height: d,
