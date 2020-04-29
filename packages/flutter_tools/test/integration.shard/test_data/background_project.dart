@@ -103,6 +103,10 @@ class RepeatingBackgroundProject extends Project {
 
   void updateTestIsolatePhrase(String message) {
     final String newMainContents = main.replaceFirst('Isolate thread', message);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
+    writeFile(
+      globals.fs.path.join(dir.path, 'lib', 'main.dart'),
+      newMainContents,
+      sendToFuture: true,
+    );
   }
 }

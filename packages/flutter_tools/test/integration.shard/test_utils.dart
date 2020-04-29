@@ -19,11 +19,16 @@ Directory createResolvedTempDirectorySync(String prefix) {
   return globals.fs.directory(tempDirectory.resolveSymbolicLinksSync());
 }
 
-void writeFile(String path, String content) {
-  globals.fs.file(path)
+void writeFile(String path, String content, { bool sendToFuture = false }) {
+  final File file = globals.fs.file(path)
     ..createSync(recursive: true)
-    ..writeAsStringSync(content)
-    ..setLastModifiedSync(DateTime.now().add(const Duration(seconds: 10)));
+    ..writeAsStringSync(content);
+  // When making edits for hot reload changes, the synchronous file write combined
+  // with the immediate hot reload request may arrive too close together
+  // Ensure the change is recognized by sending it into the future.
+  if (sendToFuture) {
+    file.setLastModifiedSync(DateTime.now().add(const Duration(seconds: 10)));
+  }
 }
 
 void writePackages(String folder) {

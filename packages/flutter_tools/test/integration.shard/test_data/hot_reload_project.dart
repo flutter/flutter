@@ -86,6 +86,10 @@ class HotReloadProject extends Project {
       '// printHotReloadWorked();',
       'printHotReloadWorked();',
     );
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
+    writeFile(
+      globals.fs.path.join(dir.path, 'lib', 'main.dart'),
+      newMainContents,
+      sendToFuture: true,
+    );
   }
 }

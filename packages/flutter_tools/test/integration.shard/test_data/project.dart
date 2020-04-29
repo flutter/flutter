@@ -40,7 +40,6 @@ abstract class Project {
       writeFile(globals.fs.path.join(dir.path, 'test', 'test.dart'), test);
     }
     writeFile(globals.fs.path.join(dir.path, 'web', 'index.html'), _kDefaultHtml);
-    writePackages(dir.path);
     await getPackages(dir.path);
   }
 
