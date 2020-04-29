@@ -13,13 +13,16 @@ import 'package:flutter_test/flutter_test.dart';
 /// Records the frames of an animating widget, and later displays it in an
 /// animation sheet.
 /// 
+/// This class does not work on the Web, because taking screenshots is
+/// unsupported.
+/// 
 /// Using this class takes the following steps:
 /// 
 ///  * Create an instance of this class.
 ///  * Pump frames that render the target widget wrapped in [record]. Every frame
 ///    that has `recording` being true will be recorded.
 ///  * Optionally, adjust the size of the test view port to the
-///    [requiredSheetSize].
+///    [sheetSize].
 ///  * Pump a frame that renders [display], which shows all recorded frames in an
 ///    animation sheet, and can be matched against the golden test.
 /// 
@@ -30,7 +33,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// ```dart
 /// testWidgets('Inkwell animation sheet', (WidgetTester tester) async {
 ///   // Create instance
-///   final AnimationSheetRecorder recorder = AnimationSheetRecorder(size: const Size(48, 24)); 
+///   final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(size: const Size(48, 24)); 
 ///
 ///   final Widget target = Material(
 ///     child: Directionality(
@@ -42,8 +45,8 @@ import 'package:flutter_test/flutter_test.dart';
 ///     ),
 ///   );
 ///
-///   // Setup before recording (`recording` is false)
-///   await tester.pumpWidget(recorder.record(
+///   // Optional: setup before recording (`recording` is false)
+///   await tester.pumpWidget(animationSheet.record(
 ///     recording: false,
 ///     child: target,
 ///   ));
@@ -51,26 +54,26 @@ import 'package:flutter_test/flutter_test.dart';
 ///   final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(InkWell)));
 ///
 ///   // Start recording (`recording` is true)
-///   await tester.pumpFrames(recorder.record(
+///   await tester.pumpFrames(animationSheet.record(
 ///     target,
 ///     recording: true,
 ///   ), fullDuration: const Duration(seconds: 1));
 ///
 ///   await gesture.up();
 ///
-///   await tester.pumpFrames(recorder.record(
+///   await tester.pumpFrames(animationSheet.record(
 ///     target,
 ///     recording: true,
 ///   ), fullDuration: const Duration(seconds: 1));
 ///
 ///   // Optional: adjust view port size
-///   tester.binding.setSurfaceSize(recorder.sheetSize(width: 500));
+///   tester.binding.setSurfaceSize(animationSheet.sheetSize(width: 500));
 /// 
 ///   // Display
-///   final Widget display = await recorder.display();
+///   final Widget display = await animationSheet.display();
 ///   await tester.pumpWidget(display);
 ///
-///   // Compare against 
+///   // Compare against golden file
 ///   expect(
 ///     find.byWidget(display),
 ///     matchesGoldenFile('inkwell.press.animation.png'),
@@ -78,15 +81,17 @@ import 'package:flutter_test/flutter_test.dart';
 /// });
 /// ```
 /// {@end-tool}
-class AnimationSheetRecorder {
-  /// Starts a session of [AnimationSheetRecorder] by specifying the frame size.
+class AnimationSheetBuilder {
+  /// Starts a session of building an animation sheet.
   /// 
-  /// The [size] must not be null.
-  AnimationSheetRecorder({@required this.size}) : assert(size != null);
+  /// The [size] is a tight constraint for the child to be recorded, and must not
+  /// be null.
+  AnimationSheetBuilder({@required this.size}) : assert(size != null);
 
-  /// The size of each frame that will be recorded.
+  /// The size of the child to be recorded.
   /// 
-  /// This size is fixed throughout the recording session.
+  /// This size is applied as a tight layout constraint for the child, and is
+  /// fixed throughout the building session.
   final Size size;
 
   final List<Future<ui.Image>> _recordedFrames = <Future<ui.Image>>[];
@@ -107,13 +112,13 @@ class AnimationSheetRecorder {
   /// The returned widget wraps `child` in a box with a fixed size specified by
   /// [size]. The `key` is also applied to the returned widget.
   /// 
-  /// If `recording` is true, then the painted result of each frame will be
-  /// stored and later available for [display]. If `recording` is false, then
-  /// [record] barely has any effect, which is useful if there are setup phases
-  /// that shouldn't be recorded, so that turning `recording` on will not make
-  /// the target widget lose states.
+  /// The `recording` defaults to true, which means the painted result of each
+  /// frame will be stored and later available for [display]. If `recording` is
+  /// false, then frames are not recorded. This is useful during the setup phase
+  /// that shouldn't be recorded; if the target widget isn't wrapped in [record]
+  /// during the setup phase, the states will be lost when it starts recording.
   /// 
-  /// The `child` must not be null. The `recording` defaults to true.
+  /// The `child` must not be null.
   /// 
   /// See also:
   /// 
@@ -149,7 +154,7 @@ class AnimationSheetRecorder {
   Future<Widget> display({Key key}) async {
     assert(_recordedFrames.isNotEmpty);
     final List<ui.Image> frames = await _frames;
-    return _CellGrid(
+    return _CellSheet(
       key: key,
       cellSize: size,
       children: frames.map((ui.Image image) => RawImage(
@@ -213,28 +218,30 @@ class _FrameRecorderContainerState extends State<_FrameRecorderContainer> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox.fromSize(
-      size: widget.size,
-      child: RepaintBoundary(
-        key: boundaryKey,
-        child: _PostFrameCallbacker(
-          callback: widget.handleRecorded == null ? null : _record,
-          child: widget.child,
+    return Align(
+      alignment: Alignment.topLeft,
+      child: SizedBox.fromSize(
+        size: widget.size,
+        child: RepaintBoundary(
+          key: boundaryKey,
+          child: _PostFrameCallbacker(
+            callback: widget.handleRecorded == null ? null : _record,
+            child: widget.child,
+          ),
         ),
       ),
     );
   }
 }
 
-// Calls `callback` and [markNeedsPaint] during the post-frame callback phase of
-// every frame.
+// Invokes `callback` and [markNeedsPaint] during the post-frame callback phase
+// of every frame.
 // 
 // If `callback` is non-null, `_PostFrameCallbacker` adds a post-frame callback
 // every time it paints, during which it calls the provided `callback` then
 // invokes [markNeedsPaint].
 // 
-// If `callback` is null, `_PostFrameCallbacker` is equivalent to a
-// [RenderProxyBox].
+// If `callback` is null, `_PostFrameCallbacker` is equivalent to a proxy box.
 class _PostFrameCallbacker extends SingleChildRenderObjectWidget {
   const _PostFrameCallbacker({
     Key key,
@@ -287,12 +294,12 @@ class _RenderPostFrameCallbacker extends RenderProxyBox {
   }
 }
 
-// A grid of fixed-sized cells that are positioned from top left to bottom
-// right, horizontal-first.
+// Layout children in a grid of fixed-sized cells.
 //
-// It fills up as much space as the parent allows.
-class _CellGrid extends StatelessWidget {
-  _CellGrid({
+// The sheet fills up as much space as the parent allows. The cells are
+// positioned from top left to bottom right in a row-major order.
+class _CellSheet extends StatelessWidget {
+  _CellSheet({
     Key key,
     @required this.cellSize,
     @required this.children,

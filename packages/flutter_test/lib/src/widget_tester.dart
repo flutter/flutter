@@ -574,9 +574,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     assert(fullDuration != null);
     final int frameNum = (fullDuration.inMicroseconds / interval.inMicroseconds).floor();
     return TestAsyncUtils.guard<void>(() async {
+      binding.attachRootWidget(target);
+      binding.scheduleFrame();
       for (int currentFrame = 0; currentFrame < frameNum; currentFrame++) {
-        binding.attachRootWidget(target);
-        binding.scheduleFrame();
         await binding.pump(interval);
       }
     });
