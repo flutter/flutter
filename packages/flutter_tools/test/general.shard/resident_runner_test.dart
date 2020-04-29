@@ -815,6 +815,51 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
+  test('FlutterDevice will call stopApp if the exit request times out', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      FakeVmServiceRequest(
+        id: '1',
+        method: '_flutter.listViews',
+        args: null,
+        jsonResponse: <String, Object>{
+          'views': <Object>[
+            fakeFlutterView.toJson(),
+          ],
+        },
+      ),
+      FakeVmServiceRequest(
+        id: '2',
+        method: 'getIsolate',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+        },
+        jsonResponse: fakeUnpausedIsolate.toJson(),
+      ),
+      FakeVmServiceRequest(
+        id: '3',
+        method: 'ext.flutter.exit',
+        args: <String, Object>{
+          'isolateId': fakeUnpausedIsolate.id,
+        },
+        // Intentionally do not close isolate.
+        close: false,
+      )
+    ]);
+    final TestFlutterDevice flutterDevice = TestFlutterDevice(
+      mockDevice,
+      <FlutterView>[ fakeFlutterView ],
+    );
+    flutterDevice.vmService = fakeVmServiceHost.vmService;
+    when(mockDevice.supportsFlutterExit).thenReturn(true);
+
+    await flutterDevice.exitApps(
+      timeoutDelay: Duration.zero,
+    );
+
+    verify(mockDevice.stopApp(any)).called(1);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }));
+
   test('FlutterDevice will exit an un-paused isolate', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       FakeVmServiceRequest(
