@@ -25,7 +25,9 @@ void writeFile(String path, String content, { bool sendToFuture = false }) {
     ..writeAsStringSync(content);
   // When making edits for hot reload changes, the synchronous file write combined
   // with the immediate hot reload request may arrive too close together.
-  // Ensure the change is recognized by sending it into the future.
+  // The tool determines if a file is dirty by checking if the last modified
+  // timestamp occurred after the timestamp of the last compile, thus we can force
+  // it to be recognized by setting the last modified timestamp to a future time.
   if (sendToFuture) {
     file.setLastModifiedSync(DateTime.now().add(const Duration(seconds: 10)));
   }
