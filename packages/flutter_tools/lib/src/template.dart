@@ -249,7 +249,7 @@ Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem) as
   if (!fileSystem.file(packageFilePath).existsSync()) {
     await _ensurePackageDependencies(toolPackagePath);
   }
-  final PackageConfig packageConfig = await loadPackageConfigOrFail(
+  final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     fileSystem.file(packageFilePath),
     logger: globals.logger,
   );

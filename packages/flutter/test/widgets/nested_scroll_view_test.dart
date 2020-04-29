@@ -133,9 +133,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 20));
     final Offset point2 = tester.getCenter(find.text('aaa1'));
     expect(point2.dy, greaterThan(point1.dy));
-    // TODO(ianh): Once we improve how we handle scrolling down from overscroll,
-    // the following expectation should switch to 200.0.
-    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 120.0);
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
@@ -173,7 +171,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('aaa2'), findsOneWidget);
   },
-  skip: true,  // https://github.com/flutter/flutter/issues/9040
   variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('NestedScrollView', (WidgetTester tester) async {
@@ -780,7 +777,7 @@ void main() {
     await tester.pump();
     expect(
       tester.getRect(find.byKey(key1)),
-      const Rect.fromLTWH(0.0, -1.0, 800.0, 100.0),
+      const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
     );
     expect(tester.getRect(find.byKey(key2)).top, greaterThan(100.0));
     expect(tester.getRect(find.byKey(key2)).top, lessThan(129.0));
@@ -788,7 +785,7 @@ void main() {
     await tester.pump();
     expect(
       tester.getRect(find.byKey(key1)),
-      const Rect.fromLTWH(0.0, -11.0, 800.0, 100.0),
+      const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
     );
     await gesture.moveBy(const Offset(0.0, 20.0)); // overscroll again
     await tester.pump();

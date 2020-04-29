@@ -640,38 +640,38 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// Returns the size of the attached widget's [RenderObject], in logical
   /// units.
-  Size get size {
-    assert(
-        context != null,
-        "Tried to get the size of a focus node that didn't have its context set yet.\n"
-        'The context needs to be set before trying to evaluate traversal policies. This '
-        'is typically done with the attach method.');
-    return context.findRenderObject().semanticBounds.size;
-  }
+  ///
+  /// Size is the size of the transformed widget in global coordinates.
+  Size get size => rect.size;
 
   /// Returns the global offset to the upper left corner of the attached
   /// widget's [RenderObject], in logical units.
+  ///
+  /// Offset is the offset of the transformed widget in global coordinates.
   Offset get offset {
     assert(
         context != null,
         "Tried to get the offset of a focus node that didn't have its context set yet.\n"
-        'The context needs to be set before trying to evaluate traversal policies. This '
-        'is typically done with the attach method.');
+        'The context needs to be set before trying to evaluate traversal policies. '
+        'Setting the context is typically done with the attach method.');
     final RenderObject object = context.findRenderObject();
     return MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
   }
 
   /// Returns the global rectangle of the attached widget's [RenderObject], in
   /// logical units.
+  ///
+  /// Rect is the rectangle of the transformed widget in global coordinates.
   Rect get rect {
     assert(
         context != null,
         "Tried to get the bounds of a focus node that didn't have its context set yet.\n"
-        'The context needs to be set before trying to evaluate traversal policies. This '
-        'is typically done with the attach method.');
+        'The context needs to be set before trying to evaluate traversal policies. '
+        'Setting the context is typically done with the attach method.');
     final RenderObject object = context.findRenderObject();
-    final Offset globalOffset = MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
-    return globalOffset & object.semanticBounds.size;
+    final Offset topLeft = MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
+    final Offset bottomRight = MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.bottomRight);
+    return Rect.fromLTRB(topLeft.dx, topLeft.dy, bottomRight.dx, bottomRight.dy);
   }
 
   /// Removes the focus on this node by moving the primary focus to another node.

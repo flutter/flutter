@@ -368,9 +368,8 @@ class _ResidentWebRunner extends ResidentWebRunner {
       applicationBinary: null,
     );
     if (package == null) {
-      globals.printError('This application is not configured to build on the web.');
-      globals.printError('To add web support to a project, run `flutter create .`.');
-      return 1;
+      globals.printStatus('This application is not configured to build on the web.');
+      globals.printStatus('To add web support to a project, run `flutter create .`.');
     }
     if (!globals.fs.isFileSync(mainPath)) {
       String message = 'Tried to run $mainPath, but that file does not exist.';
@@ -569,6 +568,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
       if (importedEntrypoint == null) {
         final String parent = globals.fs.file(mainUri).parent.path;
         flutterDevices.first.generator.addFileSystemRoot(parent);
+        flutterDevices.first.generator.addFileSystemRoot(globals.fs.directory('test').absolute.path);
         importedEntrypoint = Uri(
           scheme: 'org-dartlang-app',
           path: '/' + mainUri.pathSegments.last,
