@@ -127,7 +127,7 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> {
 ///    above and below it being transformed more as the angle increases.
 class RenderListWheelViewport
     extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, ListWheelParentData>
+    with ContainerRenderObjectMixin<RenderBox, ListWheelParentData>, ClipBehaviorMixin
     implements RenderAbstractViewport {
   /// Creates a [RenderListWheelViewport] which renders children on a wheel.
   ///
@@ -145,6 +145,7 @@ class RenderListWheelViewport
     double squeeze = 1,
     bool clipToSize = true,
     bool renderChildrenOutsideViewport = false,
+    Clip clipBehavior = Clip.none,
     List<RenderBox> children,
   }) : assert(childManager != null),
        assert(offset != null),
@@ -165,6 +166,7 @@ class RenderListWheelViewport
        assert(itemExtent > 0),
        assert(clipToSize != null),
        assert(renderChildrenOutsideViewport != null),
+       assert(clipBehavior != null),
        assert(
          !renderChildrenOutsideViewport || !clipToSize,
          clipToSizeAndRenderChildrenOutsideViewportConflict,
@@ -181,6 +183,7 @@ class RenderListWheelViewport
        _clipToSize = clipToSize,
        _renderChildrenOutsideViewport = renderChildrenOutsideViewport {
     addAll(children);
+    this.clipBehavior = clipBehavior;
   }
 
   /// An arbitrary but aesthetically reasonable default value for [diameterRatio].
@@ -786,13 +789,15 @@ class RenderListWheelViewport
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    assert(_clipToSize == (clipBehavior != Clip.none));
     if (childCount > 0) {
-      if (_clipToSize && _shouldClipAtCurrentOffset()) {
+      if (_clipToSize && _shouldClipAtCurrentOffset() && clipBehavior != Clip.none) {
         context.pushClipRect(
           needsCompositing,
           offset,
           Offset.zero & size,
           _paintVisibleChildren,
+          clipBehavior: clipBehavior,
         );
       } else {
         _paintVisibleChildren(context, offset);

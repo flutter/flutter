@@ -3234,7 +3234,9 @@ class Stack extends MultiChildRenderObjectWidget {
     this.overflow = Overflow.visible,
     this.clipBehavior = Clip.none,
     List<Widget> children = const <Widget>[],
-  }) : assert(clipBehavior != null), super(key: key, children: children);
+  }) : assert(clipBehavior != null),
+       assert((overflow == Overflow.visible) == (clipBehavior == Clip.none)),
+       super(key: key, children: children);
 
   /// How to align the non-positioned and partially-positioned children in the
   /// stack.
