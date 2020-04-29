@@ -12,12 +12,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Records the frames of an animating widget, and later displays it in an
 /// animation sheet.
-/// 
+///
 /// This class does not work on the Web, because taking screenshots is
 /// unsupported.
-/// 
+///
 /// Using this class takes the following steps:
-/// 
+///
 ///  * Create an instance of this class.
 ///  * Pump frames that render the target widget wrapped in [record]. Every frame
 ///    that has `recording` being true will be recorded.
@@ -25,7 +25,7 @@ import 'package:flutter_test/flutter_test.dart';
 ///    [sheetSize].
 ///  * Pump a frame that renders [display], which shows all recorded frames in an
 ///    animation sheet, and can be matched against the golden test.
-/// 
+///
 /// {@tool snippet}
 /// The following example shows how to record an animation sheet of an [Inkwell]
 /// being pressed then released.
@@ -33,7 +33,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// ```dart
 /// testWidgets('Inkwell animation sheet', (WidgetTester tester) async {
 ///   // Create instance
-///   final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(size: const Size(48, 24)); 
+///   final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(size: const Size(48, 24));
 ///
 ///   final Widget target = Material(
 ///     child: Directionality(
@@ -68,7 +68,7 @@ import 'package:flutter_test/flutter_test.dart';
 ///
 ///   // Optional: adjust view port size
 ///   tester.binding.setSurfaceSize(animationSheet.sheetSize(width: 500));
-/// 
+///
 ///   // Display
 ///   final Widget display = await animationSheet.display();
 ///   await tester.pumpWidget(display);
@@ -83,13 +83,13 @@ import 'package:flutter_test/flutter_test.dart';
 /// {@end-tool}
 class AnimationSheetBuilder {
   /// Starts a session of building an animation sheet.
-  /// 
+  ///
   /// The [size] is a tight constraint for the child to be recorded, and must not
   /// be null.
   AnimationSheetBuilder({@required this.size}) : assert(size != null);
 
   /// The size of the child to be recorded.
-  /// 
+  ///
   /// This size is applied as a tight layout constraint for the child, and is
   /// fixed throughout the building session.
   final Size size;
@@ -111,17 +111,17 @@ class AnimationSheetBuilder {
   ///
   /// The returned widget wraps `child` in a box with a fixed size specified by
   /// [size]. The `key` is also applied to the returned widget.
-  /// 
+  ///
   /// The `recording` defaults to true, which means the painted result of each
   /// frame will be stored and later available for [display]. If `recording` is
   /// false, then frames are not recorded. This is useful during the setup phase
   /// that shouldn't be recorded; if the target widget isn't wrapped in [record]
   /// during the setup phase, the states will be lost when it starts recording.
-  /// 
+  ///
   /// The `child` must not be null.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///  * [WidgetTester.pumpFrames], which renders a widget in a series of frames
   ///    with a fixed time interval.
   Widget record(Widget child, {
@@ -139,16 +139,16 @@ class AnimationSheetBuilder {
 
   /// Constructs a widget that renders the recorded frames in an animation sheet.
   ///
-  /// The resulting animation sheet is a grid of cells that contain the recorded 
-  /// frames, with the eariest at the top-left and latest at the bottom-right in
-  /// a row-major order. Each cell has a size specified by [size].
+  /// The resulting widget takes as much space as its parent allows, which is
+  /// usually the screen size, and is then filled with the recorded frames, each
+  /// having a size specified by [size], chronologically from top-left to
+  /// bottom-right in a row-major order.
+  ///
+  /// If too many frames have be recorded, overflow errors might be thrown,
+  /// therefore it is recommended to adjust the screen size to [sheetSize] before
+  /// calling this method.
   ///
   /// The `key` is applied to the root widget.
-  /// 
-  /// The resulting widget takes up as much space as its parent allows, which is
-  /// usually the screen size. If too many frames have be recorded, this might 
-  /// lead to overflow errors, therefore it is recommended to adjust the screen
-  /// size to [sheetSize] before calling this method.
   ///
   /// This method can only be called if at least one frame has been recorded.
   Future<Widget> display({Key key}) async {
@@ -166,23 +166,26 @@ class AnimationSheetBuilder {
   }
 
   /// Returns the smallest size that can contain all recorded frames.
-  /// 
-  /// The returned size will have a width as specified by `width`, which defaults
-  /// to the width of the default view port, 800.0, and a height that is just
-  /// enough for a grid of this width to contain all recorded frames.
+  ///
+  /// The [sheetSize] tries to place the recorded frames, each having a size
+  /// specified by [size], in a row-major grid with a maximum width specified by
+  /// `maxWidth`, and returns the size of that grid.
+  ///
+  /// The `maxWidth defaults to the width of the default view port, 800.0.
   ///
   /// This method can only be called if at least one frame has been recorded.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///  * [TestWidgetsFlutterBinding.setSurfaceSize], which artificially changes
   ///    the screen size during a widget test.
   ///  * [WidgetTester.binding], which returns the [TestWidgetsFlutterBinding]
   ///    during a widget test.
-  Size sheetSize({double width = _kDefaultTestViewportWidth}) {
+  Size sheetSize({double maxWidth = _kDefaultTestViewportWidth}) {
     assert(_recordedFrames.isNotEmpty);
-    final int cellsPerRow = (width / size.width).floor();
+    final int cellsPerRow = (maxWidth / size.width).floor();
     final int rowNum = (_recordedFrames.length / cellsPerRow).ceil();
+    final double width = math.min(cellsPerRow, _recordedFrames.length) * size.width;
     return Size(width, size.height * rowNum);
   }
 
@@ -236,11 +239,11 @@ class _FrameRecorderContainerState extends State<_FrameRecorderContainer> {
 
 // Invokes `callback` and [markNeedsPaint] during the post-frame callback phase
 // of every frame.
-// 
+//
 // If `callback` is non-null, `_PostFrameCallbacker` adds a post-frame callback
 // every time it paints, during which it calls the provided `callback` then
 // invokes [markNeedsPaint].
-// 
+//
 // If `callback` is null, `_PostFrameCallbacker` is equivalent to a proxy box.
 class _PostFrameCallbacker extends SingleChildRenderObjectWidget {
   const _PostFrameCallbacker({
@@ -313,7 +316,7 @@ class _CellSheet extends StatelessWidget {
   @override
   Widget build(BuildContext _context) {
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      final double rowWidth = constraints.biggest.width;      
+      final double rowWidth = constraints.biggest.width;
       final int cellsPerRow = (rowWidth / cellSize.width).floor();
       final List<Widget> rows = <Widget>[];
       for (int rowStart = 0; rowStart < children.length; rowStart += cellsPerRow) {
