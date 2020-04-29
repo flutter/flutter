@@ -174,6 +174,7 @@ void main() {
         await testReload(attachProcess);
       } catch (err, st) {
         print('Uncaught exception: $err\n$st');
+        rethrow;
       } finally {
         section('Uninstalling');
         await device.adb(<String>['uninstall', kAppId]);
