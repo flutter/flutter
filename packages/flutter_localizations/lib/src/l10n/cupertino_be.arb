@@ -28,5 +28,6 @@
   "cutButtonLabel": "Выразаць",
   "copyButtonLabel": "Капіраваць",
   "pasteButtonLabel": "Уставіць",
-  "selectAllButtonLabel": "Выбраць усе"
+  "selectAllButtonLabel": "Выбраць усе",
+  "modalBarrierDismissLabel": "Адхіліць"
 }
