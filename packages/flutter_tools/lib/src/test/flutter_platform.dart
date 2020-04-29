@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
@@ -521,9 +522,9 @@ class FlutterPlatform extends PlatformPlugin {
           processObservatoryUri = detectedUri;
           {
             globals.printTrace('Connecting to service protocol: $processObservatoryUri');
-            final Future<VMService> localVmService = VMService.connect(processObservatoryUri,
+            final Future<vm_service.VmService> localVmService = connectToVmService(processObservatoryUri,
               compileExpression: _compileExpressionService);
-            localVmService.then((VMService vmservice) {
+            localVmService.then((vm_service.VmService vmservice) {
               globals.printTrace('Successfully connected to service protocol: $processObservatoryUri');
             });
           }
