@@ -12,6 +12,8 @@ import androidx.test.internal.runner.junit4.statement.UiThreadStatement;
 import androidx.test.runner.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import java.util.Arrays;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +35,14 @@ public class EngineLaunchE2ETest {
     // on the same thread will create deadlocks.
     UiThreadStatement.runOnUiThread(() -> engine.set(new FlutterEngine(applicationContext)));
     CompletableFuture<Boolean> statusReceived = new CompletableFuture<>();
+
+    // Resolve locale to `en_US`.
+    // This is required, so `window.locale` in populated in dart.
+    // TODO: Fix race condition between sending this over the channel and starting the entrypoint.
+    // https://github.com/flutter/flutter/issues/55999
+    UiThreadStatement.runOnUiThread(
+        () ->
+            engine.get().getLocalizationChannel().sendLocales(Arrays.asList(Locale.US), Locale.US));
 
     // The default Dart main entrypoint sends back a platform message on the "waiting_for_status"
     // channel. That will be our launch success assertion condition.
