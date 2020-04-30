@@ -196,7 +196,7 @@ flutter:
       logger: logger,
       engineVersion: '2',
     ), throwsA(isA<Exception>()));
-    expect(logger.errorText, contains('produced with a different engine revision'));
+    expect(logger.errorText, contains('Expected Flutter 1, but found 2'));
   });
 
   testWithoutContext('processSkSLBundle warns if the bundle target platform is '
@@ -219,7 +219,8 @@ flutter:
       logger: logger,
       engineVersion: '2',
     );
-    expect(await content.contentsAsBytes(), utf8.encode('{}'));
+
+    expect(await content.contentsAsBytes(), utf8.encode('{"data":{}}'));
     expect(logger.errorText, contains('This may lead to less efficient shader caching'));
   });
 
@@ -242,7 +243,8 @@ flutter:
       logger: logger,
       engineVersion: '2',
     );
-    expect(await content.contentsAsBytes(), utf8.encode('{}'));
+
+    expect(await content.contentsAsBytes(), utf8.encode('{"data":{}}'));
     expect(logger.errorText, isEmpty);
   });
 }

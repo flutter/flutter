@@ -102,7 +102,7 @@ void main() {
     expect(globals.fs.file(globals.fs.path.join('out', 'flutter_assets', 'isolate_snapshot_data')), exists);
     expect(globals.fs.file(globals.fs.path.join('out', 'flutter_assets', 'vm_snapshot_data')), exists);
     expect(globals.fs.file(globals.fs.path.join('out', 'flutter_assets', 'kernel_blob.bin')), exists);
-    expect(globals.fs.file(globals.fs.path.join('out', 'flutter_assets', 'sksl', 'io.flutter.shaders.json')), exists);
+    expect(globals.fs.file(globals.fs.path.join('out', 'flutter_assets', 'io.flutter.shaders.json')), exists);
   });
 
   testbed.test('profile bundle contains expected resources', () async {

@@ -96,7 +96,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
 }
 
 /// The path of the SkSL JSON bundle included in flutter_assets.
-const String kSkSLShaderBundlePath = 'sksl/io.flutter.shaders.json';
+const String kSkSLShaderBundlePath = 'io.flutter.shaders.json';
 
 /// Validate and process an SkSL asset bundle in a [DevFSContent].
 ///
@@ -159,7 +159,9 @@ DevFSContent processSkSLBundle(String bundlePath, {
       'caching.'
     );
   }
-  return DevFSStringContent(json.encode(bundle['data']));
+  return DevFSStringContent(json.encode(<String, Object>{
+    'data': bundle['data'],
+  }));
 }
 
 /// Copy the assets defined in the flutter manifest into a build directory.
