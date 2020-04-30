@@ -40,6 +40,7 @@ class _TextSpanEditingController extends TextEditingController {
 
   @override
   set text(String newText) {
+    // This should never be reached.
     throw UnimplementedError();
   }
 }
