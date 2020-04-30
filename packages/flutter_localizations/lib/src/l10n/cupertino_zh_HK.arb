@@ -18,5 +18,6 @@
   "cutButtonLabel": "剪下",
   "copyButtonLabel": "複製",
   "pasteButtonLabel": "貼上",
-  "selectAllButtonLabel": "全選"
+  "selectAllButtonLabel": "全選",
+  "modalBarrierDismissLabel": "拒絕"
 }

@@ -240,6 +240,54 @@ void main() {
     expect(_validateCalled, 2);
   });
 
+
+  testWidgets('Disabled field hides helper and counter', (WidgetTester tester) async {
+    const String helperText = 'helper text';
+    const String counterText = 'counter text';
+    const String errorText = 'error text';
+    Widget buildFrame(bool enabled, bool hasError) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              decoration: InputDecoration(
+                labelText: 'label text',
+                helperText: helperText,
+                counterText: counterText,
+                errorText: hasError ? errorText : null,
+                enabled: enabled,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // When enabled is true, the helper/error and counter are visible.
+    await tester.pumpWidget(buildFrame(true, false));
+    Text helperWidget = tester.widget(find.text(helperText));
+    Text counterWidget = tester.widget(find.text(counterText));
+    expect(helperWidget.style.color, isNot(equals(Colors.transparent)));
+    expect(counterWidget.style.color, isNot(equals(Colors.transparent)));
+    await tester.pumpWidget(buildFrame(true, true));
+    counterWidget = tester.widget(find.text(counterText));
+    Text errorWidget = tester.widget(find.text(errorText));
+    expect(helperWidget.style.color, isNot(equals(Colors.transparent)));
+    expect(errorWidget.style.color, isNot(equals(Colors.transparent)));
+
+    // When enabled is false, the helper/error and counter are not visible.
+    await tester.pumpWidget(buildFrame(false, false));
+    helperWidget = tester.widget(find.text(helperText));
+    counterWidget = tester.widget(find.text(counterText));
+    expect(helperWidget.style.color, equals(Colors.transparent));
+    expect(counterWidget.style.color, equals(Colors.transparent));
+    await tester.pumpWidget(buildFrame(false, true));
+    errorWidget = tester.widget(find.text(errorText));
+    counterWidget = tester.widget(find.text(counterText));
+    expect(counterWidget.style.color, equals(Colors.transparent));
+    expect(errorWidget.style.color, equals(Colors.transparent));
+  });
+
   testWidgets('passing a buildCounter shows returned widget', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(

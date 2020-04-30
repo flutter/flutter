@@ -17,19 +17,19 @@ void main() {
     // Should be copied.
     fileSystem.file('inputs/a.txt').createSync();
     fileSystem.file('inputs/b.txt').createSync();
-    fileSystem.file('inputs/foo/c.txt').createSync();
+    fileSystem.file('foo/c.txt').createSync(recursive: true);
     // Sould not be copied.
     fileSystem.file('inputs/d.txt').createSync();
 
     final Depfile depfile = unpackDesktopArtifacts(
       fileSystem: fileSystem,
-      artifactPath: 'inputs',
+      engineSourcePath: 'inputs',
       outputDirectory: fileSystem.directory('outputs'),
       artifacts: <String>[
         'a.txt',
         'b.txt',
-        'foo/'
       ],
+      clientSourcePath: 'foo',
     );
 
     // Files are copied
@@ -42,7 +42,7 @@ void main() {
     expect(depfile.inputs.map((File file) => file.path), unorderedEquals(<String>[
       'inputs/a.txt',
       'inputs/b.txt',
-      'inputs/foo/c.txt',
+      'foo/c.txt',
     ]));
     expect(depfile.outputs.map((File file) => file.path), unorderedEquals(<String>[
       'outputs/a.txt',
@@ -56,11 +56,41 @@ void main() {
 
     expect(() => unpackDesktopArtifacts(
       fileSystem: fileSystem,
-      artifactPath: 'inputs',
+      engineSourcePath: 'inputs',
       outputDirectory: fileSystem.directory('outputs'),
       artifacts: <String>[
         'a.txt',
       ],
+      clientSourcePath: 'foo'
     ), throwsA(isA<Exception>()));
+  });
+
+  testWithoutContext('unpackDesktopArtifacts throws when attempting to copy missing directory', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.file('inputs/a.txt').createSync(recursive: true);
+
+    expect(() => unpackDesktopArtifacts(
+      fileSystem: fileSystem,
+      engineSourcePath: 'inputs',
+      outputDirectory: fileSystem.directory('outputs'),
+      artifacts: <String>[
+        'a.txt',
+      ],
+      clientSourcePath: 'foo'
+    ), throwsA(isA<Exception>()));
+  });
+
+  testWithoutContext('unpackDesktopArtifacts does not require a client source path', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.file('inputs/a.txt').createSync(recursive: true);
+
+    expect(() => unpackDesktopArtifacts(
+      fileSystem: fileSystem,
+      engineSourcePath: 'inputs',
+      outputDirectory: fileSystem.directory('outputs'),
+      artifacts: <String>[
+        'a.txt',
+      ],
+    ), returnsNormally);
   });
 }

@@ -18,5 +18,6 @@
   "cutButtonLabel": "کٹ کریں",
   "copyButtonLabel": "کاپی کریں",
   "pasteButtonLabel": "پیسٹ کریں",
-  "selectAllButtonLabel": "سبھی منتخب کریں"
+  "selectAllButtonLabel": "سبھی منتخب کریں",
+  "modalBarrierDismissLabel": "برخاست کریں"
 }

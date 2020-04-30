@@ -214,6 +214,13 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String get selectAllButtonLabel;
 
+  /// Label read out by accessibility tools (VoiceOver) for a modal
+  /// barrier to indicate that a tap dismisses the barrier.
+  ///
+  /// A modal barrier can for example be found behind an alert or popup to block
+  /// user interaction with elements behind it.
+  String get modalBarrierDismissLabel;
+
   /// The `CupertinoLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -377,6 +384,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Select All';
+
+  @override
+  String get modalBarrierDismissLabel => 'Dismiss';
 
   /// Creates an object that provides US English resource values for the
   /// cupertino library widgets.

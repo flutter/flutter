@@ -2,49 +2,49 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
-import 'package:flutter_tools/src/vmservice.dart';
-import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 
 void main() {
-  MockVMService mockVMService;
+  testWithoutContext('Coverage collector Can handle coverage SentinelException', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        FakeVmServiceRequest(
+          id: '1',
+          method: 'getVM',
+          args: null,
+          jsonResponse: (vm_service.VM.parse(<String, Object>{})
+            ..isolates = <vm_service.IsolateRef>[
+              vm_service.IsolateRef.parse(<String, Object>{
+                'id': '1'
+              }),
+            ]
+          ).toJson(),
+        ),
+        const FakeVmServiceRequest(
+          id: '2',
+          method: 'getScripts',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'type': 'Sentinel'
+          }
+        )
+      ],
+    );
 
-  setUp(() {
-    mockVMService = MockVMService();
-  });
-
-  test('Coverage collector Can handle coverage sentinenl data', () async {
-    when(mockVMService.getScripts(any))
-      .thenThrow(vm_service.SentinelException.parse('getScripts', <String, Object>{}));
-    final Map<String, Object> result = await collect(null, (String predicate) => true, connector: (Uri uri) async {
-      return mockVMService;
-    });
+    final Map<String, Object> result = await collect(
+      null,
+      (String predicate) => true,
+      connector: (Uri uri) async {
+        return fakeVmServiceHost.vmService;
+      },
+    );
 
     expect(result, <String, Object>{'type': 'CodeCoverage', 'coverage': <Object>[]});
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
-}
-
-class MockVMService extends Mock implements VMService {
-  @override
-  final MockVM vm = MockVM();
-}
-
-class MockVM extends Mock implements VM {
-  @override
-  final List<MockIsolate> isolates = <MockIsolate>[ MockIsolate() ];
-}
-
-class MockIsolate extends Mock implements Isolate {}
-
-class MockProcess extends Mock implements Process {
-  final Completer<int>completer = Completer<int>();
-
-  @override
-  Future<int> get exitCode => completer.future;
 }

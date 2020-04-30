@@ -116,6 +116,12 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
       ),
+      CrashReporter: () => CrashReporter(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        flutterProjectFactory: globals.projectFactory,
+        client: globals.httpClientFactory?.call() ?? HttpClient(),
+      ),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => DeviceManager(),
       Doctor: () => Doctor(logger: globals.logger),

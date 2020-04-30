@@ -13,11 +13,9 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:mockito/mockito.dart';
 
@@ -61,26 +59,6 @@ void main() {
       false,
       <String>[],
     ), throwsToolExit());
-  }, overrides: <Type, Generator>{
-    Platform: () => fakePlatform,
-    FileSystem: () => fileSystem,
-    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    Pub: () => MockPub(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
-
-  testUsingContext('Refuses to build using runner when missing index.html', () async {
-    fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
-
-    final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
-      null,
-      flutterProject: FlutterProject.current(),
-      ipv6: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      stayResident: true,
-      urlTunneller: null,
-    ) as ResidentWebRunner;
-    expect(await runner.run(), 1);
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,

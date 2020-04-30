@@ -647,6 +647,9 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> stopApp(AndroidApk app) {
+    if (app == null) {
+      return Future<bool>.value(false);
+    }
     final List<String> command = adbCommandForDevice(<String>['shell', 'am', 'force-stop', app.id]);
     return processUtils.stream(command).then<bool>(
         (int exitCode) => exitCode == 0 || allowHeapCorruptionOnWindows(exitCode));

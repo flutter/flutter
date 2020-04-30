@@ -19,7 +19,7 @@ class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
     @required bool verboseHelp,
   }) {
-    addTreeShakeIconsFlag();
+    addTreeShakeIconsFlag(enabledByDefault: false);
     usesTargetOption();
     usesPubOption();
     addBuildModeFlags(excludeDebug: true);

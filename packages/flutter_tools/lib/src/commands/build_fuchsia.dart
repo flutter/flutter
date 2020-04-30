@@ -19,6 +19,7 @@ class BuildFuchsiaCommand extends BuildSubCommand {
   BuildFuchsiaCommand({bool verboseHelp = false}) {
     addTreeShakeIconsFlag();
     usesTargetOption();
+    usesDartDefineOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
     argParser.addOption(
       'runner-source',

@@ -47,6 +47,9 @@ void main() {
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
+      defines: <String, String>{
+        kBuildMode: 'debug',
+      }
     );
     final DepfileService depfileService = DepfileService(
       logger: BufferLogger.test(),
@@ -54,8 +57,16 @@ void main() {
     );
     environment.buildDir.createSync(recursive: true);
 
-    when(artifacts.getArtifactPath(Artifact.windowsDesktopPath))
-      .thenReturn(r'C:\bin\cache\artifacts\engine\windows-x64\');
+    when(artifacts.getArtifactPath(
+      Artifact.windowsDesktopPath,
+      mode: anyNamed('mode'),
+      platform: anyNamed('platform')
+    )).thenReturn(r'C:\bin\cache\artifacts\engine\windows-x64\');
+    when(artifacts.getArtifactPath(
+      Artifact.windowsCppClientWrapper,
+      mode: anyNamed('mode'),
+      platform: anyNamed('platform')
+    )).thenReturn(r'C:\bin\cache\artifacts\engine\windows-x64\cpp_client_wrapper\');
     for (final String path in kRequiredFiles) {
       fileSystem.file(path).createSync(recursive: true);
     }
@@ -117,8 +128,13 @@ void main() {
   });
 
   // AssetBundleFactory still uses context injection
+  FileSystem fileSystem;
+
+  setUp(() {
+    fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+  });
+
   testUsingContext('DebugBundleWindowsAssets creates correct bundle structure', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       artifacts: MockArtifacts(),
@@ -137,6 +153,10 @@ void main() {
     // Depfile is created and dill is copied.
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
     expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }
 

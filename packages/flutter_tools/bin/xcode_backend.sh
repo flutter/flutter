@@ -260,7 +260,6 @@ ThinFramework() {
   local framework_dir="$1"
   shift
 
-  local plist_path="${framework_dir}/Info.plist"
   local executable="$(GetFrameworkExecutablePath "${framework_dir}")"
   LipoExecutable "${executable}" "$@"
 }
