@@ -54,10 +54,6 @@ BuildApp() {
     derived_dir="${project_path}/.ios/Flutter"
   fi
 
-  RunCommand mkdir -p -- "$derived_dir"
-  AssertExists "$derived_dir"
-  RunCommand rm -rf -- "${derived_dir}/App.framework"
-
   # Default value of assets_path is flutter_assets
   local assets_path="flutter_assets"
   # The value of assets_path can set by add FLTAssetsPath to
@@ -161,14 +157,19 @@ BuildApp() {
     track_widget_creation_flag="true"
   fi
 
-  icon_tree_shaker_flag="false"
+  local icon_tree_shaker_flag="false"
   if [[ -n "$TREE_SHAKE_ICONS" ]]; then
     icon_tree_shaker_flag="true"
   fi
 
-  dart_obfuscation_flag="false"
+  local dart_obfuscation_flag="false"
   if [[ -n "$DART_OBFUSCATION" ]]; then
     dart_obfuscation_flag="true"
+  fi
+
+  local performance_measurement_option=""
+  if [[ -n "$PERFORMANCE_MEASUREMENT_FILE" ]]; then
+    performance_measurement_option="--performance-measurement-file=${PERFORMANCE_MEASUREMENT_FILE}"
   fi
 
   RunCommand "${FLUTTER_ROOT}/bin/flutter"                                \
@@ -177,6 +178,7 @@ BuildApp() {
     ${local_engine_flag}                                                  \
     assemble                                                              \
     --output="${derived_dir}/"                                            \
+    ${performance_measurement_option}                                     \
     -dTargetPlatform=ios                                                  \
     -dTargetFile="${target_path}"                                         \
     -dBuildMode=${build_mode}                                             \

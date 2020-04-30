@@ -963,6 +963,8 @@ class Node {
       }
       final File file = fileSystem.file(previousOutput);
       if (!file.existsSync()) {
+        print('MISSING');
+        print(file.path);
         invalidatedReasons.add(InvalidatedReason.outputMissing);
         _dirty = true;
         continue;

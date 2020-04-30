@@ -166,16 +166,6 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('FLUTTER_TARGET=$targetOverride');
   }
 
-  // This is an optional path to split debug info
-  if (buildInfo.splitDebugInfoPath != null) {
-    xcodeBuildSettings.add('SPLIT_DEBUG_INFO=${buildInfo.splitDebugInfoPath}');
-  }
-
-  // This is an optional path to obfuscate and output a mapping.
-  if (buildInfo.dartObfuscation) {
-    xcodeBuildSettings.add('DART_OBFUSCATION=true');
-  }
-
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
   xcodeBuildSettings.add('FLUTTER_BUILD_DIR=${buildDirOverride ?? getBuildDirectory()}');
 
@@ -226,31 +216,9 @@ List<String> _xcodeBuildSettingsLines({
     }
   }
 
-  if (buildInfo.trackWidgetCreation) {
-    xcodeBuildSettings.add('TRACK_WIDGET_CREATION=true');
+  for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {
+    xcodeBuildSettings.add('${config.key}=${config.value}');
   }
-
-  if (buildInfo.treeShakeIcons) {
-    xcodeBuildSettings.add('TREE_SHAKE_ICONS=true');
-  }
-
-  if (buildInfo.dartDefines?.isNotEmpty ?? false) {
-    xcodeBuildSettings.add('DART_DEFINES=${buildInfo.dartDefines.join(',')}');
-  }
-
-  if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false) {
-    xcodeBuildSettings.add(
-      'EXTRA_FRONT_END_OPTIONS='
-      '${buildInfo.extraFrontEndOptions.join(',')}',
-    );
-  }
-  if (buildInfo.extraGenSnapshotOptions?.isNotEmpty ?? false) {
-    xcodeBuildSettings.add(
-      'EXTRA_GEN_SNAPSHOT_OPTIONS='
-      '${buildInfo.extraGenSnapshotOptions.join(',')}',
-    );
-  }
-
   return xcodeBuildSettings;
 }
 

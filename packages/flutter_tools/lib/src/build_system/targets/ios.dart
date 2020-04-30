@@ -187,7 +187,7 @@ class DebugUniveralFramework extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/App')
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
   ];
 
   @override
@@ -250,7 +250,7 @@ abstract class IosAssetBundle extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/App'),
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     ...IconTreeShaker.inputs,
   ];
