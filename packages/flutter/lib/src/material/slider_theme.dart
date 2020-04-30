@@ -2299,7 +2299,7 @@ class _EmptySliderComponentShape extends SliderComponentShape {
 
 /// The default shape of a [Slider]'s thumb.
 ///
-/// There is a shadow for the resting and pressed state.
+/// There is a shadow for the resting, pressed, hovered, and focused state.
 ///
 /// See also:
 ///
