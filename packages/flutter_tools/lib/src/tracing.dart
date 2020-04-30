@@ -24,15 +24,15 @@ class Tracing {
   static const String firstUsefulFrameEventName = kFirstFrameRasterizedEventName;
 
   static Future<Tracing> connect(Uri uri) async {
-    final VMService observatory = await VMService.connect(uri);
+    final vm_service.VmService observatory = await connectToVmService(uri);
     return Tracing(observatory);
   }
 
-  final VMService vmService;
+  final vm_service.VmService vmService;
 
   Future<void> startTracing() async {
-    await vmService.vm.setVMTimelineFlags(<String>['Compiler', 'Dart', 'Embedder', 'GC']);
-    await vmService.vm.clearVMTimeline();
+    await vmService.setVMTimelineFlags(<String>['Compiler', 'Dart', 'Embedder', 'GC']);
+    await vmService.clearVMTimeline();
   }
 
   /// Stops tracing; optionally wait for first frame.
@@ -73,15 +73,15 @@ class Tracing {
       }
       status.stop();
     }
-    final Map<String, dynamic> timeline = await vmService.vm.getVMTimeline();
-    await vmService.vm.setVMTimelineFlags(<String>[]);
-    return timeline;
+    final vm_service.Timeline timeline = await vmService.getVMTimeline();
+    await vmService.setVMTimelineFlags(<String>[]);
+    return timeline.json;
   }
 }
 
 /// Download the startup trace information from the given observatory client and
 /// store it to build/start_up_info.json.
-Future<void> downloadStartupTrace(VMService observatory, { bool awaitFirstFrame = true }) async {
+Future<void> downloadStartupTrace(vm_service.VmService vmService, { bool awaitFirstFrame = true }) async {
   final String traceInfoFilePath = globals.fs.path.join(getBuildDirectory(), 'start_up_info.json');
   final File traceInfoFile = globals.fs.file(traceInfoFilePath);
 
@@ -95,7 +95,7 @@ Future<void> downloadStartupTrace(VMService observatory, { bool awaitFirstFrame 
     traceInfoFile.parent.createSync();
   }
 
-  final Tracing tracing = Tracing(observatory);
+  final Tracing tracing = Tracing(vmService);
 
   final Map<String, dynamic> timeline = await tracing.stopTracingAndDownloadTimeline(
     awaitFirstFrame: awaitFirstFrame,

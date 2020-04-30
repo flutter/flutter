@@ -628,21 +628,34 @@ void main() {
 
   group('FuchsiaIsolateDiscoveryProtocol', () {
     MockPortForwarder portForwarder;
-    MockVMService vmService;
 
     setUp(() {
       portForwarder = MockPortForwarder();
-      vmService = MockVMService();
     });
 
     Future<Uri> findUri(List<FlutterView> views, String expectedIsolateName) async {
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          FakeVmServiceRequest(
+            id: '1',
+            method: kListViewsMethod,
+            args: null,
+            jsonResponse: <String, Object>{
+              'views': <Object>[
+                for (FlutterView view in views)
+                  view.toJson()
+              ],
+            },
+          ),
+        ],
+      );
       final MockFuchsiaDevice fuchsiaDevice =
         MockFuchsiaDevice('123', portForwarder, false);
       final FuchsiaIsolateDiscoveryProtocol discoveryProtocol =
         FuchsiaIsolateDiscoveryProtocol(
         fuchsiaDevice,
         expectedIsolateName,
-        (Uri uri) async => vmService,
+        (Uri uri) async => fakeVmServiceHost.vmService,
         true, // only poll once.
       );
 
@@ -650,17 +663,7 @@ void main() {
           .thenAnswer((Invocation invocation) async => <int>[1]);
       when(portForwarder.forward(1))
           .thenAnswer((Invocation invocation) async => 2);
-      when(vmService.getVMOld())
-          .thenAnswer((Invocation invocation) => Future<void>.value(null));
-      when(vmService.httpAddress).thenReturn(Uri.parse('example'));
-      when(vmService.callMethod(kListViewsMethod)).thenAnswer((Invocation invocation) async {
-        return vm_service.Response.parse(<String, Object>{
-          'views': <Object>[
-            for (FlutterView view in views)
-              view.toJson()
-          ],
-        });
-      });
+      setHttpAddress(Uri.parse('example'), fakeVmServiceHost.vmService);
       return await discoveryProtocol.uri;
     }
 
@@ -1120,8 +1123,6 @@ class MockFuchsiaDevice extends Mock implements FuchsiaDevice {
 }
 
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
-
-class MockVMService extends Mock implements VMService {}
 
 class FuchsiaDeviceWithFakeDiscovery extends FuchsiaDevice {
   FuchsiaDeviceWithFakeDiscovery(String id, {String name}) : super(id, name: name);

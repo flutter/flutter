@@ -19,7 +19,7 @@ import 'assets.dart';
 import 'icon_tree_shaker.dart';
 
 /// The define to pass a [BuildMode].
-const String kBuildMode= 'BuildMode';
+const String kBuildMode = 'BuildMode';
 
 /// The define to pass whether we compile 64-bit android-arm code.
 const String kTargetPlatform = 'TargetPlatform';

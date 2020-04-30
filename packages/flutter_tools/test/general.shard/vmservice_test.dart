@@ -91,20 +91,17 @@ final Map<String, Object> listViews = <String, dynamic>{
 typedef ServiceCallback = Future<Map<String, dynamic>> Function(Map<String, Object>);
 
 void main() {
-  testUsingContext('VmService registers reloadSources', () {
+  testUsingContext('VmService registers reloadSources', () async {
     Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
+
     final MockVMService mockVMService = MockVMService();
-    VMService(
-      null,
-      null,
+    setUpVmService(
       reloadSources,
       null,
       null,
       null,
       null,
       mockVMService,
-      Completer<void>(),
-      const Stream<dynamic>.empty(),
     );
 
     verify(mockVMService.registerService('reloadSources', 'Flutter Tools')).called(1);
@@ -112,20 +109,17 @@ void main() {
     Logger: () => BufferLogger.test()
   });
 
-  testUsingContext('VmService registers reloadMethod', () {
+  testUsingContext('VmService registers reloadMethod', () async {
     Future<void> reloadMethod({  String classId, String libraryId,}) async {}
+
     final MockVMService mockVMService = MockVMService();
-    VMService(
-      null,
-      null,
+    setUpVmService(
       null,
       null,
       null,
       null,
       reloadMethod,
       mockVMService,
-      Completer<void>(),
-      const Stream<dynamic>.empty(),
     );
 
     verify(mockVMService.registerService('reloadMethod', 'Flutter Tools')).called(1);
@@ -133,20 +127,17 @@ void main() {
     Logger: () => BufferLogger.test()
   });
 
-  testUsingContext('VmService registers flutterMemoryInfo service', () {
+  testUsingContext('VmService registers flutterMemoryInfo service', () async {
     final MockDevice mockDevice = MockDevice();
+
     final MockVMService mockVMService = MockVMService();
-    VMService(
-      null,
-      null,
+    setUpVmService(
       null,
       null,
       null,
       mockDevice,
       null,
       mockVMService,
-      Completer<void>(),
-      const Stream<dynamic>.empty(),
     );
 
     verify(mockVMService.registerService('flutterMemoryInfo', 'Flutter Tools')).called(1);
@@ -156,17 +147,13 @@ void main() {
 
   testUsingContext('VMService returns correct FlutterVersion', () async {
     final MockVMService mockVMService = MockVMService();
-    VMService(
-      null,
-      null,
+    setUpVmService(
       null,
       null,
       null,
       null,
       null,
       mockVMService,
-      Completer<void>(),
-      const Stream<dynamic>.empty(),
     );
 
     verify(mockVMService.registerService('flutterVersion', 'Flutter Tools')).called(1);

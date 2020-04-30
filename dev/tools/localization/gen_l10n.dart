@@ -511,7 +511,7 @@ class LocalizationsGenerator {
     bool useDeferredLoading = false,
   }) {
     setInputDirectory(inputPathString);
-    setOutputDirectory(outputPathString);
+    setOutputDirectory(outputPathString ?? inputPathString);
     setTemplateArbFile(templateArbFileName);
     setOutputFile(outputFileString);
     setPreferredSupportedLocales(preferredSupportedLocaleString);

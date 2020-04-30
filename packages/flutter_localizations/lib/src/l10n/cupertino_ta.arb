@@ -18,5 +18,6 @@
   "cutButtonLabel": "வெட்டு",
   "copyButtonLabel": "நகலெடு",
   "pasteButtonLabel": "ஒட்டு",
-  "selectAllButtonLabel": "எல்லாம் தேர்ந்தெடு"
+  "selectAllButtonLabel": "எல்லாம் தேர்ந்தெடு",
+  "modalBarrierDismissLabel": "நிராகரிக்கும்"
 }

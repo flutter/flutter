@@ -351,6 +351,9 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.buildInfo.dartObfuscation) {
     command.add('-Pdart-obfuscation=true');
   }
+  if (androidBuildInfo.buildInfo.bundleSkSLPath != null) {
+    command.add('-Pbundle-sksl-path=${androidBuildInfo.buildInfo.bundleSkSLPath}');
+  }
   command.add(assembleTask);
 
   GradleHandledError detectedGradleError;
