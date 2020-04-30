@@ -38,6 +38,7 @@ class BuildAarCommand extends BuildSubCommand {
     usesFlavorOption();
     usesBuildNumberOption();
     usesPubOption();
+    addDartObfuscationOption();
     argParser
       ..addMultiOption(
         'target-platform',
