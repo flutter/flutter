@@ -38,6 +38,7 @@ class BuildAarCommand extends BuildSubCommand {
     usesFlavorOption();
     usesBuildNumberOption();
     usesPubOption();
+    addSplitDebugInfoOption();
     addDartObfuscationOption();
     argParser
       ..addMultiOption(
@@ -103,14 +104,17 @@ class BuildAarCommand extends BuildSubCommand {
       ? stringArg('build-number')
       : '1.0';
 
-    for (final String buildMode in const <String>['debug', 'profile', 'release']) {
+    const Map<String, BuildInfo> buildModes = {'debug': BuildInfo.debug, 'profile': BuildInfo.profile, 'release': BuildInfo.release};
+
+    for (final String buildMode in buildModes.keys) {
       if (boolArg(buildMode)) {
         androidBuildInfo.add(AndroidBuildInfo(
-          BuildInfo(BuildMode.fromName(buildMode), stringArg('flavor'), treeShakeIcons: boolArg('tree-shake-icons')),
+          buildModes[buildMode],
           targetArchs: targetArchitectures,
         ));
       }
     }
+
     if (androidBuildInfo.isEmpty) {
       throwToolExit('Please specify a build mode and try again.');
     }
