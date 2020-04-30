@@ -250,6 +250,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
             inputFormatters: _inputFormatters,
             keyboardType: TextInputType.datetime,
             onChanged: _handleStartChanged,
+            autofocus: widget.autofocus,
           ),
         ),
         const SizedBox(width: 8),
