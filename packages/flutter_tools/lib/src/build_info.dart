@@ -75,7 +75,7 @@ class BuildInfo {
   /// Whether to apply dart source code obfuscation.
   final bool dartObfuscation;
 
-  /// An optional path to a JSON containing precompiled SkSL shaders
+  /// An optional path to a JSON containing object SkSL shaders
   ///
   /// Currently this is only supported for Android builds.
   final String bundleSkSLPath;
