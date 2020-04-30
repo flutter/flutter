@@ -50,6 +50,8 @@ import '../gen_material_localizations.dart';
 import '../localizations_utils.dart';
 import '../localizations_validator.dart';
 
+import 'encode_kn_arb_files.dart';
+
 /// This is the core of this script; it generates the code used for translations.
 String generateArbBasedLocalizationSubclasses({
   @required Map<LocaleInfo, Map<String, String>> localeToResources,
@@ -525,6 +527,12 @@ void main(List<String> rawArgs) {
   } on ValidationError catch (exception) {
     exitWithError('$exception');
   }
+
+  // Encodes the material_kn.arb file adn the cupertino_en.arb files before
+  // generating localizations. This prevents a subset of Emacs users from
+  // crashing when opening up the Flutter source code.
+  // See https://github.com/flutter/flutter/issues/36704 for more context.
+  encodeKnArbFiles(directory);
 
   precacheLanguageAndRegionTags();
 

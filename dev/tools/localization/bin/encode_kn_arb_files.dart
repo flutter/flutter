@@ -74,12 +74,9 @@ void rewriteBundle(File file, Map<String, dynamic> bundle) {
   file.writeAsStringSync(contents.toString());
 }
 
-Future<void> main(List<String> rawArgs) async {
-  checkCwdIsRepoRoot('encode_kn_arb_files');
-
-  final String l10nPath = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n');
-  final File materialArbFile = File(path.join(l10nPath, 'material_kn.arb'));
-  final File cupertinoArbFile = File(path.join(l10nPath, 'cupertino_kn.arb'));
+void encodeKnArbFiles(Directory directory) {
+  final File materialArbFile = File(path.join(directory.path, 'material_kn.arb'));
+  final File cupertinoArbFile = File(path.join(directory.path, 'cupertino_kn.arb'));
 
   final Map<String, dynamic> materialBundle = loadBundle(materialArbFile);
   final Map<String, dynamic> cupertinoBundle = loadBundle(cupertinoArbFile);
