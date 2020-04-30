@@ -23,4 +23,4 @@ function path_uri() {
 }
 
 BIN_DIR="$(dirname "$(path_uri "$(follow_links "$BASH_SOURCE")")")"
-ENTRYPOINT="dart" "$BIN_DIR/common_execute.sh"
+ENTRYPOINT="flutter" "$BIN_DIR/common_execute.sh" "$@"
