@@ -25,7 +25,8 @@ const String kBundleSkSLPath = 'BundleSkSLPath';
 ///
 /// Throws [Exception] if [AssetBundle.build] returns a non-zero exit code.
 ///
-/// [skSLBundle] may optionally contain a validated SkSL shader bundle.
+/// [additionalContent] may contain additional DevFS entries that will be
+/// included in the final bundle, but not the AssetManifest.json file.
 ///
 /// Returns a [Depfile] containing all assets used in the build.
 Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
