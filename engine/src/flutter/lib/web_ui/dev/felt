@@ -64,12 +64,12 @@ then
   # Increase the file limit if it is low. Note that these limits are changed
   # only for this script (for this shell). After felt execution is completed
   # no change is required to reset the original shell.
-  if [[ $ULIMIT_FILES < 50000 ]]
+  if [[ $ULIMIT_FILES -lt 50000 ]]
   then
     echo "File limits too low increasing the file limits"
     # Get the max file limit.
     MAX_ULIMIT_FILES=`launchctl limit maxfiles | sed -e 's/^[[:space:]]*//' | sed 's/ \{1,\}/ /g' | cut -d' ' -f2`
-    if [[ $MAX_ULIMIT_FILES < 50000 ]]
+    if [[ $MAX_ULIMIT_FILES -lt 50000 ]]
     then
       # Increase the maximum file limit.
       sudo launchctl limit maxfiles 50000 200000
@@ -82,7 +82,7 @@ then
   fi
   ULIMIT_USER=`ulimit -u`
   # Increase the hard user limit if it is lower than 2048.
-  if [[ $ULIMIT_USER < 4096 ]]
+  if [[ $ULIMIT_USER -lt 4096 ]]
   then
     echo "User limits too low increasing the user limits"
     ERROR2=$(ulimit -u 4096 2>&1 >/dev/null)
