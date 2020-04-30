@@ -909,6 +909,9 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// The `semanticsDismissible` argument is used to determine whether the
 /// semantics of the modal barrier are included in the semantics tree.
 ///
+/// The `settings` argument is used to provide [RouteSettings] to the
+/// created Route.
+///
 /// The `builder` argument typically builds a [CupertinoActionSheet] widget.
 /// Content below the widget is dimmed with a [ModalBarrier]. The widget built
 /// by the `builder` does not share a context with the location that
