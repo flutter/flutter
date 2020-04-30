@@ -578,12 +578,18 @@ void PlatformView::HandlePlatformMessage(
   if (!message) {
     return;
   }
-  auto found = platform_message_handlers_.find(message->channel());
+  const std::string channel = message->channel();
+  auto found = platform_message_handlers_.find(channel);
   if (found == platform_message_handlers_.end()) {
-    FML_LOG(ERROR)
-        << "Platform view received message on channel '" << message->channel()
-        << "' with no registered handler. And empty response will be "
-           "generated. Please implement the native message handler.";
+    const bool already_errored = unregistered_channels_.count(channel);
+    if (!already_errored) {
+      FML_LOG(INFO)
+          << "Platform view received message on channel '" << message->channel()
+          << "' with no registered handler. And empty response will be "
+             "generated. Please implement the native message handler. This "
+             "message will appear only once per channel.";
+      unregistered_channels_.insert(channel);
+    }
     flutter::PlatformView::HandlePlatformMessage(std::move(message));
     return;
   }
