@@ -18,5 +18,6 @@
   "cutButtonLabel": "Lõika",
   "copyButtonLabel": "Kopeeri",
   "pasteButtonLabel": "Kleebi",
-  "selectAllButtonLabel": "Vali kõik"
+  "selectAllButtonLabel": "Vali kõik",
+  "modalBarrierDismissLabel": "Loobu"
 }

@@ -15,6 +15,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../convert.dart';
+import '../globals.dart' as globals;
 
 /// An environment variable used to override the location of Google Chrome.
 const String kChromeEnvironment = 'CHROME_EXECUTABLE';
@@ -121,7 +122,7 @@ class ChromiumLauncher {
   final Platform _platform;
   final ProcessManager _processManager;
   final OperatingSystemUtils _operatingSystemUtils;
-  final Logger _logger;
+  Logger _logger;
   final BrowserFinder _browserFinder;
   final FileSystemUtils _fileSystemUtils;
 
@@ -162,6 +163,7 @@ class ChromiumLauncher {
     bool skipCheck = false,
     Directory cacheDir,
   }) async {
+    _logger ??= globals.logger;
     if (_currentCompleter.isCompleted) {
       throwToolExit('Only one instance of chrome can be started.');
     }

@@ -18,5 +18,6 @@
   "cutButtonLabel": "Klippa",
   "copyButtonLabel": "Afrita",
   "pasteButtonLabel": "Líma",
-  "selectAllButtonLabel": "Velja allt"
+  "selectAllButtonLabel": "Velja allt",
+  "modalBarrierDismissLabel": "Hunsa"
 }

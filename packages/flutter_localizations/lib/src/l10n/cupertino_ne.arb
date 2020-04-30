@@ -18,5 +18,6 @@
   "cutButtonLabel": "काट्नुहोस्",
   "copyButtonLabel": "प्रतिलिपि गर्नुहोस्",
   "pasteButtonLabel": "टाँस्नुहोस्",
-  "selectAllButtonLabel": "सबै चयन गर्नुहोस्"
+  "selectAllButtonLabel": "सबै चयन गर्नुहोस्",
+  "modalBarrierDismissLabel": "खारेज गर्नुहोस्"
 }

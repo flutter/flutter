@@ -18,5 +18,6 @@
   "cutButtonLabel": "Қию",
   "copyButtonLabel": "Көшіру",
   "pasteButtonLabel": "Қою",
-  "selectAllButtonLabel": "Барлығын таңдау"
+  "selectAllButtonLabel": "Барлығын таңдау",
+  "modalBarrierDismissLabel": "Жабу"
 }

@@ -425,10 +425,13 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addTreeShakeIconsFlag() {
+  void addTreeShakeIconsFlag({
+    bool enabledByDefault
+  }) {
     argParser.addFlag('tree-shake-icons',
       negatable: true,
-      defaultsTo: kIconTreeShakerEnabledDefault,
+      defaultsTo: enabledByDefault
+        ?? kIconTreeShakerEnabledDefault,
       help: 'Tree shake icon fonts so that only glyphs used by the application remain.',
     );
   }
@@ -579,8 +582,12 @@ abstract class FlutterCommand extends Command<void> {
         'combination with "--${FlutterOptions.kSplitDebugInfoOption}"',
       );
     }
+    final BuildMode buildMode = getBuildMode();
+    final bool treeShakeIcons = argParser.options.containsKey('tree-shake-icons')
+      && buildMode.isPrecompiled
+      && boolArg('tree-shake-icons');
 
-    return BuildInfo(getBuildMode(),
+    return BuildInfo(buildMode,
       argParser.options.containsKey('flavor')
         ? stringArg('flavor')
         : null,
@@ -601,9 +608,7 @@ abstract class FlutterCommand extends Command<void> {
       buildName: argParser.options.containsKey('build-name')
           ? stringArg('build-name')
           : null,
-      treeShakeIcons: argParser.options.containsKey('tree-shake-icons')
-          ? boolArg('tree-shake-icons')
-          : kIconTreeShakerEnabledDefault,
+      treeShakeIcons: treeShakeIcons,
       splitDebugInfoPath: splitDebugInfoPath,
       dartObfuscation: dartObfuscation,
       dartDefines: argParser.options.containsKey(FlutterOptions.kDartDefinesOption)

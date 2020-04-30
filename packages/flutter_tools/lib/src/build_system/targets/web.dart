@@ -62,7 +62,7 @@ class WebEntrypointTarget extends Target {
     final bool shouldInitializePlatform = environment.defines[kInitializePlatform] == 'true';
     final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
-    final PackageConfig packageConfig = await loadPackageConfigOrFail(
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       environment.projectDir.childFile('.packages'),
       logger: environment.logger,
     );

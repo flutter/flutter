@@ -18,5 +18,6 @@
   "cutButtonLabel": "ตัด",
   "copyButtonLabel": "คัดลอก",
   "pasteButtonLabel": "วาง",
-  "selectAllButtonLabel": "เลือกทั้งหมด"
+  "selectAllButtonLabel": "เลือกทั้งหมด",
+  "modalBarrierDismissLabel": "ปิด"
 }

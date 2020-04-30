@@ -229,7 +229,7 @@ class KernelSnapshot extends Target {
         forceLinkPlatform = false;
     }
 
-    final PackageConfig packageConfig = await loadPackageConfigOrFail(
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       environment.projectDir.childFile('.packages'),
       logger: environment.logger,
     );

@@ -18,5 +18,6 @@
   "cutButtonLabel": "Kəsin",
   "copyButtonLabel": "Kopyalayın",
   "pasteButtonLabel": "Yerləşdirin",
-  "selectAllButtonLabel": "Hamısını seçin"
+  "selectAllButtonLabel": "Hamısını seçin",
+  "modalBarrierDismissLabel": "İmtina edin"
 }

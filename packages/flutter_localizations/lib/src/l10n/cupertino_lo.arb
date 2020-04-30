@@ -18,5 +18,6 @@
   "cutButtonLabel": "ຕັດ",
   "copyButtonLabel": "ສຳເນົາ",
   "pasteButtonLabel": "ວາງ",
-  "selectAllButtonLabel": "ເລືອກທັງໝົດ"
+  "selectAllButtonLabel": "ເລືອກທັງໝົດ",
+  "modalBarrierDismissLabel": "ປິດໄວ້"
 }

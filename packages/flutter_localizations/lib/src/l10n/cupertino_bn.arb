@@ -18,5 +18,6 @@
   "cutButtonLabel": "কাট করুন",
   "copyButtonLabel": "কপি করুন",
   "pasteButtonLabel": "পেস্ট করুন",
-  "selectAllButtonLabel": "সব বেছে নিন"
+  "selectAllButtonLabel": "সব বেছে নিন",
+  "modalBarrierDismissLabel": "খারিজ করুন"
 }
