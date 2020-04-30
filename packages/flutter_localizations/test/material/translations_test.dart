@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../test_utils.dart';
 
 void main() {
   for (final String language in kMaterialSupportedLanguages) {
@@ -491,5 +494,18 @@ void main() {
       expect(localizations.closeButtonLabel, closeButtonLabelNo);
       expect(localizations.okButtonLabel, okButtonLabelNo);
     }
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/36704.
+  testWidgets('kn arb file should be properly Unicode escaped', (WidgetTester tester) async {
+    final File file = File('lib/src/l10n/material_kn.arb');
+
+    final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+    encodeBundleTranslations(bundle);
+    final String encodedArbFile = generateArbString(bundle);
+
+    // After encoding the bundles, the generated string should match
+    // material_kn.arb.
+    expect(file.readAsStringSync(), encodedArbFile);
   });
 }

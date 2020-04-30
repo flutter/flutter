@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../test_utils.dart';
 
 void main() {
   for (final String language in kCupertinoSupportedLanguages) {
@@ -144,5 +147,19 @@ void main() {
       expect(localizations.copyButtonLabel, copyButtonLabelNo);
       expect(localizations.cutButtonLabel, cutButtonLabelNo);
     }
+  });
+
+  testWidgets('kn arb file should be properly Unicode escaped', (WidgetTester tester) async {
+    final File file = File('lib/src/l10n/cupertino_kn.arb');
+
+    final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+    encodeBundleTranslations(bundle);
+    final String encodedArbFile = generateArbString(bundle);
+
+    // After encoding the bundles, the generated string should match
+    // cupertino_kn.arb.
+    expect(file.readAsStringSync(), encodedArbFile);
+
+
   });
 }
