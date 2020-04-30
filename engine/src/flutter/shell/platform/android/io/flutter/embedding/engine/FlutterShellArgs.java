@@ -38,6 +38,8 @@ public class FlutterShellArgs {
   public static final String ARG_SKIA_DETERMINISTIC_RENDERING = "--skia-deterministic-rendering";
   public static final String ARG_KEY_TRACE_SKIA = "trace-skia";
   public static final String ARG_TRACE_SKIA = "--trace-skia";
+  public static final String ARG_KEY_TRACE_SYSTRACE = "trace-systrace";
+  public static final String ARG_TRACE_SYSTRACE = "--trace-systrace";
   public static final String ARG_KEY_DUMP_SHADER_SKP_ON_SHADER_COMPILATION =
       "dump-skp-on-shader-compilation";
   public static final String ARG_DUMP_SHADER_SKP_ON_SHADER_COMPILATION =
@@ -90,6 +92,9 @@ public class FlutterShellArgs {
     }
     if (intent.getBooleanExtra(ARG_KEY_TRACE_SKIA, false)) {
       args.add(ARG_TRACE_SKIA);
+    }
+    if (intent.getBooleanExtra(ARG_KEY_TRACE_SYSTRACE, false)) {
+      args.add(ARG_TRACE_SYSTRACE);
     }
     if (intent.getBooleanExtra(ARG_KEY_DUMP_SHADER_SKP_ON_SHADER_COMPILATION, false)) {
       args.add(ARG_DUMP_SHADER_SKP_ON_SHADER_COMPILATION);
