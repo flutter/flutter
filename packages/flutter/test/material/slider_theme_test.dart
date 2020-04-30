@@ -1086,8 +1086,8 @@ void main() {
 
     final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
 
-    Offset center = tester.getCenter(find.byType(RangeSlider));
-    TestGesture gesture = await tester.startGesture(center);
+    final Offset center = tester.getCenter(find.byType(RangeSlider));
+    final TestGesture gesture = await tester.startGesture(center);
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
     expect(
