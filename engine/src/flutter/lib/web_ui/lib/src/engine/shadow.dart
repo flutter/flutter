@@ -133,9 +133,24 @@ void applyCssShadow(
   if (shadow == null) {
     element.style.boxShadow = 'none';
   } else {
-    // Multiply by 0.4 to make shadows less aggressive (https://github.com/flutter/flutter/issues/52734)
-    final double alpha = 0.4 * color.alpha / 255;
+    color = toShadowColor(color);
     element.style.boxShadow = '${shadow.offset.dx}px ${shadow.offset.dy}px '
-        '${shadow.blurWidth}px 0px rgba(${color.red}, ${color.green}, ${color.blue}, $alpha)';
+        '${shadow.blurWidth}px 0px rgba(${color.red}, ${color.green}, ${color.blue}, ${color.alpha / 255})';
   }
+}
+
+/// Converts a shadow color specified by the framework to the color that should
+/// actually be applied when rendering the shadow.
+///
+/// Flutter shadows look softer than the color specified by the developer. For
+/// example, it is common to get a solid black for a shadow and see a very soft
+/// shadow. This function softens the color by reducing its alpha by a constant
+/// factor.
+ui.Color toShadowColor(ui.Color color) {
+  // Reduce alpha to make shadows less aggressive:
+  //
+  // - https://github.com/flutter/flutter/issues/52734
+  // - https://github.com/flutter/gallery/issues/118
+  final int reducedAlpha = (0.3 * color.alpha).round();
+  return ui.Color((reducedAlpha & 0xff) << 24 | (color.value & 0x00ffffff));
 }
