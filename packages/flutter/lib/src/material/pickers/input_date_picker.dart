@@ -261,13 +261,15 @@ class DateTextInputFormatter extends TextInputFormatter {
   /// List of common separators that are used in dates. This is used to make
   /// sure that if given platform's [TextInputType.datetime] keyboard doesn't
   /// provide the given locale's separator character, they can still enter the
-  /// separator using one of these (slash, period, comma, dash, or space).
+  /// separator using one of these characters (slash, period, comma, dash, or
+  /// space).
   static const String _commonSeparators = r'\/\.,-\s';
 
   /// The date separator for the current locale.
   final String separator;
 
-  /// Formatter that will filter out all characters except digits and date separators.
+  // Formatter that will filter out all characters except digits and date
+  // separators.
   final WhitelistingTextInputFormatter _filterFormatter;
 
   @override

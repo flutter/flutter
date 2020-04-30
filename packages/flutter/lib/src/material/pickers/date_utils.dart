@@ -128,7 +128,7 @@ int getDaysInMonth(int year, int month) {
   return daysInMonth[month - 1];
 }
 
-/// Returns an appropriate string to describe the start of a date range.
+/// Returns a locale-appropriate string to describe the start of a date range.
 ///
 /// If `startDate` is null, then it defaults to 'Start Date', otherwise if it
 /// is in the same year as the `endDate` then it will use the short month
@@ -142,7 +142,7 @@ String formatRangeStartDate(MaterialLocalizations localizations, DateTime startD
       : localizations.formatShortDate(startDate);
 }
 
-/// Returns an appropriate string to describe the end of a date range.
+/// Returns an locale-appropriate string to describe the end of a date range.
 ///
 /// If `endDate` is null, then it defaults to 'End Date', otherwise if it
 /// is in the same year as the `startDate` and the `currentDate` then it will

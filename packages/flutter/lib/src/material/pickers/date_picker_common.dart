@@ -11,6 +11,11 @@ import 'package:flutter/foundation.dart';
 /// Either a calendar or text input. In [calendar] mode, a calendar view is
 /// displayed and the user taps the day they wish to select. In [input] mode a
 /// [TextField] is displayed and the user types in the date they wish to select.
+///
+/// See also:
+///
+///  * [showDatePicker] and [showDateRangePicker], which use this to control
+///    the initial entry mode of their dialogs.
 enum DatePickerEntryMode {
   /// Tapping on a calendar.
   calendar,
@@ -38,11 +43,16 @@ enum DatePickerMode {
 
 /// Signature for predicating dates for enabled date selections.
 ///
-/// See [showDatePicker] or [showDateRangePicker].
+/// See [showDatePicker], which has a [SelectableDayPredicate] parameter used
+/// to specify allowable days in the date picker.
 typedef SelectableDayPredicate = bool Function(DateTime day);
 
 /// Encapsulates a start and end [DateTime] that represent the range of dates
 /// between them.
+///
+/// See also:
+///  * [showDateRangePicker], which displays a dialog that allows the user to
+///    select a date range.
 @immutable
 class DateTimeRange {
   /// Creates a date range for the given start and end [DateTime].

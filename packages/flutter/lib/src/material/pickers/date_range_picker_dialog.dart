@@ -36,47 +36,54 @@ const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
 const double _inputFormPortraitHeight = 98.0;
 const double _inputFormLandscapeHeight = 108.0;
 
-/// Shows a full screen modal dialog containing a material design date range picker.
+/// Shows a full screen modal dialog containing a Material Design date range
+/// picker.
 ///
-/// The returned [Future] resolves to the [DateTimeRange] selected by the user when
-/// the user saves their selection. If the user cancels the modal, null is
+/// The returned [Future] resolves to the [DateTimeRange] selected by the user
+/// when the user saves their selection. If the user cancels the dialog, null is
 /// returned.
 ///
-/// If [initialDateRange] is non-null, then it will be used as the initially selected
-/// date range. If it is provided, [initialDateRange.start] must be before or on
-/// [initialDateRange.end].
+/// If [initialDateRange] is non-null, then it will be used as the initially
+/// selected date range. If it is provided, [initialDateRange.start] must be
+/// before or on [initialDateRange.end].
 ///
 /// The [firstDate] is the earliest allowable date. The [lastDate] is the latest
-/// allowable date. Neither can be null.
+/// allowable date. Both must be non-null.
 ///
 /// If an initial date range is provided, [initialDateRange.start]
-/// and [initialDateRange.end] must both fall between or on [firstDate] and [lastDate].
-/// For all of these [DateTime] values, only their dates are considered. Their
-/// time fields are ignored.
+/// and [initialDateRange.end] must both fall between or on [firstDate] and
+/// [lastDate]. For all of these [DateTime] values, only their dates are
+/// considered. Their time fields are ignored.
 ///
 /// The [currentDate] represents the current day (i.e. today). This
 /// date will be highlighted in the day grid. If null, the date of
 /// `DateTime.now()` will be used.
 ///
 /// An optional [initialEntryMode] argument can be used to display the date
-/// picker in the [DatePickerEntryMode.calendar] (a scrollable calendar month grid)
-/// or [DatePickerEntryMode.input] (two text input fields) mode.
+/// picker in the [DatePickerEntryMode.calendar] (a scrollable calendar month
+/// grid) or [DatePickerEntryMode.input] (two text input fields) mode.
 /// It defaults to [DatePickerEntryMode.calendar] and must be non-null.
 ///
 /// The following optional string parameters allow you to override the default
 /// text used for various parts of the dialog:
 ///
-///   * [helpText], label displayed at the top of the dialog.
-///   * [cancelText], label on the cancel button for the text input mode.
-///   * [confirmText], label on the ok button for the text input mode.
-///   * [saveText], label on the save button for the fullscreen calendar mode.
-///   * [errorFormatText], message used when an input text isn't in a proper date format.
-///   * [errorInvalidText], message used when an input text isn't a selectable date.
-///   * [errorInvalidRangeText], message used when the date range is invalid (e.g. start date is after end date).
-///   * [fieldStartHintText], text used to prompt the user when no text has been entered in the start field.
-///   * [fieldEndHintText], text used to prompt the user when no text has been entered in the end field.
-///   * [fieldStartLabelText], label for the start date text input field.
-///   * [fieldEndLabelText], label for the end date text input field.
+///   * [helpText], the label displayed at the top of the dialog.
+///   * [cancelText], the label on the cancel button for the text input mode.
+///   * [confirmText],the  label on the ok button for the text input mode.
+///   * [saveText], the label on the save button for the fullscreen calendar
+///     mode.
+///   * [errorFormatText], the message used when an input text isn't in a proper
+///     date format.
+///   * [errorInvalidText], the message used when an input text isn't a
+///     selectable date.
+///   * [errorInvalidRangeText], the message used when the date range is
+///     invalid (e.g. start date is after end date).
+///   * [fieldStartHintText], the text used to prompt the user when no text has
+///     been entered in the start field.
+///   * [fieldEndHintText], the text used to prompt the user when no text has
+///     been entered in the end field.
+///   * [fieldStartLabelText], the label for the start date text input field.
+///   * [fieldEndLabelText], the label for the end date text input field.
 ///
 /// An optional [locale] argument can be used to set the locale for the date
 /// picker. It defaults to the ambient locale provided by [Localizations].
@@ -87,9 +94,9 @@ const double _inputFormLandscapeHeight = 108.0;
 /// [locale] and [textDirection] are non-null, [textDirection] overrides the
 /// direction chosen for the [locale].
 ///
-/// The [context], [useRootNavigator] and [routeSettings] arguments are passed to
-/// [showDialog], the documentation for which discusses how it is used. [context]
-/// and [useRootNavigator] must be non-null.
+/// The [context], [useRootNavigator] and [routeSettings] arguments are passed
+/// to [showDialog], the documentation for which discusses how it is used.
+/// [context] and [useRootNavigator] must be non-null.
 ///
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
@@ -111,11 +118,6 @@ Future<DateTimeRange> showDateRangePicker({
   String cancelText,
   String confirmText,
   String saveText,
-  Locale locale,
-  bool useRootNavigator = true,
-  RouteSettings routeSettings,
-  TextDirection textDirection,
-  TransitionBuilder builder,
   String errorFormatText,
   String errorInvalidText,
   String errorInvalidRangeText,
@@ -123,6 +125,11 @@ Future<DateTimeRange> showDateRangePicker({
   String fieldEndHintText,
   String fieldStartLabelText,
   String fieldEndLabelText,
+  Locale locale,
+  bool useRootNavigator = true,
+  RouteSettings routeSettings,
+  TextDirection textDirection,
+  TransitionBuilder builder,
 }) async {
     assert(context != null);
     assert(
@@ -360,6 +367,7 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
         contents = _InputDateRangePickerDialog(
           selectedStartDate: _selectedStart,
           selectedEndDate: _selectedEnd,
+          currentDate: widget.currentDate,
           picker: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             height: orientation == Orientation.portrait
@@ -479,9 +487,15 @@ class _CalendarRangePickerDialog extends StatelessWidget {
     final String startDateText = utils.formatRangeStartDate(localizations, selectedStartDate, selectedEndDate);
     final String endDateText = utils.formatRangeEndDate(localizations, selectedStartDate, selectedEndDate, DateTime.now());
     final TextStyle headlineStyle = textTheme.headline5;
-    final TextStyle startDateStyle = headlineStyle?.apply(color: selectedStartDate != null ? headerForeground : headerDisabledForeground);
-    final TextStyle endDateStyle = headlineStyle?.apply(color: selectedEndDate != null ? headerForeground : headerDisabledForeground);
-    final TextStyle saveButtonStyle = textTheme.button.apply(color: onConfirm != null ? headerForeground : headerDisabledForeground);
+    final TextStyle startDateStyle = headlineStyle?.apply(
+      color: selectedStartDate != null ? headerForeground : headerDisabledForeground
+    );
+    final TextStyle endDateStyle = headlineStyle?.apply(
+      color: selectedEndDate != null ? headerForeground : headerDisabledForeground
+    );
+    final TextStyle saveButtonStyle = textTheme.button.apply(
+      color: onConfirm != null ? headerForeground : headerDisabledForeground
+    );
 
     final IconButton entryModeIcon = IconButton(
       padding: EdgeInsets.zero,
@@ -576,6 +590,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     Key key,
     @required this.selectedStartDate,
     @required this.selectedEndDate,
+    @required this.currentDate,
     @required this.picker,
     @required this.onConfirm,
     @required this.onCancel,
@@ -587,6 +602,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
 
   final DateTime selectedStartDate;
   final DateTime selectedEndDate;
+  final DateTime currentDate;
   final Widget picker;
   final VoidCallback onConfirm;
   final VoidCallback onCancel;
@@ -595,6 +611,21 @@ class _InputDateRangePickerDialog extends StatelessWidget {
   final String cancelText;
   final String helpText;
 
+  String _formatDateRange(BuildContext context, DateTime start, DateTime end, DateTime now) {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final String startText = utils.formatRangeStartDate(localizations, start, end);
+    final String endText = utils.formatRangeEndDate(localizations, start, end, now);
+    if (start == null || end == null) {
+      // TODO(darrenaustin): localize 'Date Range'
+      return 'Date Range';
+    }
+    if (Directionality.of(context) == TextDirection.ltr) {
+      return '$startText – $endText';
+    } else {
+      return '$endText – $startText';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -602,7 +633,6 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Orientation orientation = MediaQuery.of(context).orientation;
     final TextTheme textTheme = theme.textTheme;
-    final TextDirection textDirection = Directionality.of(context);
 
     final Color dateColor = colorScheme.brightness == Brightness.light
       ? colorScheme.onPrimary
@@ -610,14 +640,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     final TextStyle dateStyle = orientation == Orientation.landscape
       ? textTheme.headline5?.apply(color: dateColor)
       : textTheme.headline4?.apply(color: dateColor);
-    final String startDateText = utils.formatRangeStartDate(localizations, selectedStartDate, selectedEndDate);
-    final String endDateText = utils.formatRangeEndDate(localizations, selectedStartDate, selectedEndDate, DateTime.now());
-    final String dateText = (selectedStartDate == null || selectedEndDate == null)
-      // TODO(darrenaustin): localize 'Date Range'
-      ? 'Date Range'
-      : textDirection == TextDirection.ltr
-        ? '$startDateText – $endDateText'
-        : '$endDateText – $startDateText';
+    final String dateText = _formatDateRange(context, selectedStartDate, selectedEndDate, currentDate);
     final String semanticDateText = selectedStartDate != null && selectedEndDate != null
       ? '${localizations.formatMediumDate(selectedStartDate)} – ${localizations.formatMediumDate(selectedEndDate)}'
       : '';

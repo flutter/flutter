@@ -92,7 +92,7 @@ void main() {
 
   testWidgets('Save and help text is used', (WidgetTester tester) async {
     helpText = 'help';
-    saveText = 'SAVE';
+    saveText = 'make it so';
     await preparePicker(tester, (Future<DateTimeRange> range) async {
       expect(find.text(helpText), findsOneWidget);
       expect(find.text(saveText), findsOneWidget);
