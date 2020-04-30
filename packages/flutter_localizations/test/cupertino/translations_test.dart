@@ -5,6 +5,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -126,8 +128,9 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/53036.
   testWidgets('`nb` uses `no` as its synonym when `nb` arb file is not present', (WidgetTester tester) async {
-    final File nbCupertinoArbFile = File('lib/src/l10n/cupertino_nb.arb');
-    final File noCupertinoArbFile = File('lib/src/l10n/cupertino_no.arb');
+    final File nbCupertinoArbFile = File(path.join('lib', 'src', 'l10n', 'cupertino_nb.arb'));
+    final File noCupertinoArbFile = File(path.join('lib', 'src', 'l10n', 'cupertino_no.arb'));
+
 
     if (noCupertinoArbFile.existsSync() && !nbCupertinoArbFile.existsSync()) {
       Locale locale = const Locale.fromSubtags(languageCode: 'no', scriptCode: null, countryCode: null);
@@ -151,7 +154,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/36704.
   testWidgets('kn arb file should be properly Unicode escaped', (WidgetTester tester) async {
-    final File file = File('lib/src/l10n/material_kn.arb');
+    final File file = File(path.join('lib', 'src', 'l10n', 'cupertino_kn.arb'));
 
     final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
 
