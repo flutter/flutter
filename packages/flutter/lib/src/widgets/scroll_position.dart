@@ -492,8 +492,32 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       _minScrollExtent = minScrollExtent;
       _maxScrollExtent = maxScrollExtent;
       _haveDimensions = true;
-      applyNewDimensions();
       _didChangeViewportDimensionOrReceiveCorrection = false;
+      if (!approveNewDimensions())
+        return false;
+      applyNewDimensions();
+    }
+    assert(!_didChangeViewportDimensionOrReceiveCorrection, 'Use approveNewDimensions() (and return true) to change the scroll offset during applyContentDimensions().');
+    return true;
+  }
+
+  /// Verifies that the new content and viewport dimensions are acceptable.
+  ///
+  /// Called by [applyContentDimensions] to determine its return value.
+  ///
+  /// Should return true if the current scroll offset is correct given
+  /// the new content and viewport dimensions.
+  ///
+  /// Should return false if it calls [correctPixels] to correct the
+  /// scroll offset given the new dimensions.
+  ///
+  /// The default implementation defers to [ScrollPhysics.adjustPositionForNewDimensions].
+  @protected
+  bool approveNewDimensions() {
+    final double newPixels = physics.adjustPositionForNewDimensions(copyWith(), isScrolling: activity.isScrolling, velocity: activity.velocity);
+    if (newPixels != pixels) {
+      correctPixels(newPixels);
+      return false;
     }
     return true;
   }

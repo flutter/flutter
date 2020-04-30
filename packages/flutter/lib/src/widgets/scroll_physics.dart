@@ -228,6 +228,50 @@ class ScrollPhysics {
     return parent.applyBoundaryConditions(position, value);
   }
 
+  /// Describes what the scroll position should be given new viewport dimensions.
+  ///
+  /// This is called by [ScrollPosition.approveNewDimensions].
+  ///
+  /// The arguments consist of the current scroll metrics, including the
+  /// position and minimum and maximum scroll extents; a flag indicating if the
+  /// current [ScrollActivity] considers that the user is actively scrolling
+  /// (see [ScrollActivity.isScrolling]); and the current velocity of the scroll
+  /// position, if it is being driven by the scroll activity (this is 0.0 during
+  /// a user gesture) (see [ScrollActivity.velocity]).
+  ///
+  /// If the returned value does not exactly match the current scroll offset
+  /// given by the `position` argument (see [ScrollMetrics.pixels]), then the
+  /// [ScrollPosition] will call [ScrollPosition.correctPixels] to update the
+  /// new value, and layout will be re-run. This is expensive. The new value is
+  /// subject to further manipulation by [applyBoundaryConditions].
+  ///
+  /// If the returned value _does_ match the current scroll offset exactly, then
+  /// [ScrollPosition.applyNewDimensions] will be called next. In that case,
+  /// [applyBoundaryConditions] is not applied to the return value.
+  ///
+  /// The given `position` is only valid during this method call. Do not keep a
+  /// reference to it to use later, as the values may update, may not update, or
+  /// may update to reflect an entirely unrelated scrollable.
+  ///
+  /// ## Examples
+  ///
+  /// The default implementation returns [ScrollMetrics.pixels], which indicates
+  /// that the current scroll offset is acceptable.
+  ///
+  /// When `velocity` is 0.0, [ClampingScrollPhysics] returns the
+  /// current scroll offset ([ScrollMetrics.pixels]) clamped to the minimum and
+  /// maximum scroll extents ([ScrollMetrics.minScrollExtent] and
+  /// [ScrollMetrics.maxScrollExtent]), essentially forcing the scroll position
+  /// to never go out-of-range even if the contents of the list change suddenly.
+  double adjustPositionForNewDimensions(ScrollMetrics position, {
+    @required bool isScrolling,
+    @required double velocity,
+  }) {
+    if (parent == null)
+      return position.pixels;
+    return parent.adjustPositionForNewDimensions(position, isScrolling: isScrolling, velocity: velocity);
+  }
+
   /// Returns a simulation for ballistic scrolling starting from the given
   /// position with the given velocity.
   ///
@@ -399,6 +443,16 @@ class BouncingScrollPhysics extends ScrollPhysics {
   double applyBoundaryConditions(ScrollMetrics position, double value) => 0.0;
 
   @override
+  double adjustPositionForNewDimensions(ScrollMetrics position, {
+    @required bool isScrolling,
+    @required double velocity,
+  }) {
+    if (!isScrolling && velocity == 0.0)
+      return position.pixels.clamp(position.minScrollExtent, position.maxScrollExtent) as double;
+    return super.adjustPositionForNewDimensions(position, isScrolling: isScrolling, velocity: velocity);
+  }
+
+  @override
   Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = this.tolerance;
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
@@ -498,6 +552,16 @@ class ClampingScrollPhysics extends ScrollPhysics {
     if (position.pixels < position.maxScrollExtent && position.maxScrollExtent < value) // hit bottom edge
       return value - position.maxScrollExtent;
     return 0.0;
+  }
+
+  @override
+  double adjustPositionForNewDimensions(ScrollMetrics position, {
+    @required bool isScrolling,
+    @required double velocity,
+  }) {
+    if (velocity == 0.0)
+      return position.pixels.clamp(position.minScrollExtent, position.maxScrollExtent) as double;
+    return super.adjustPositionForNewDimensions(position, isScrolling: isScrolling, velocity: velocity);
   }
 
   @override
