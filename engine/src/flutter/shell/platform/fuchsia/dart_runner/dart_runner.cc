@@ -127,7 +127,7 @@ bool EntropySource(uint8_t* buffer, intptr_t count) {
 
 }  // namespace
 
-DartRunner::DartRunner() : context_(sys::ComponentContext::Create()) {
+DartRunner::DartRunner(sys::ComponentContext* context) : context_(context) {
   context_->outgoing()->AddPublicService<fuchsia::sys::Runner>(
       [this](fidl::InterfaceRequest<fuchsia::sys::Runner> request) {
         bindings_.AddBinding(this, std::move(request));

@@ -25,14 +25,15 @@ namespace flutter_runner {
 // their own threads.
 class Runner final : public fuchsia::sys::Runner {
  public:
-  explicit Runner(async::Loop* loop);
+  // Does not take ownership of loop or context.
+  Runner(async::Loop* loop, sys::ComponentContext* context);
 
   ~Runner();
 
  private:
   async::Loop* loop_;
 
-  std::unique_ptr<sys::ComponentContext> context_;
+  sys::ComponentContext* context_;
   fidl::BindingSet<fuchsia::sys::Runner> active_applications_bindings_;
   std::unordered_map<const Application*, ActiveApplication>
       active_applications_;

@@ -9,6 +9,7 @@
 #include <cstdlib>
 
 #include "loop.h"
+#include "platform/utils.h"
 #include "runner.h"
 #include "runtime/dart/utils/tempfs.h"
 
@@ -28,10 +29,9 @@ int main(int argc, char const* argv[]) {
 
   FML_DLOG(INFO) << "Flutter application services initialized.";
 
-  flutter_runner::Runner runner(loop.get());
+  flutter_runner::Runner runner(loop.get(), dart::ComponentContext());
 
   loop->Run();
-
   FML_DLOG(INFO) << "Flutter application services terminated.";
 
   return EXIT_SUCCESS;

@@ -146,8 +146,8 @@ static void RegisterProfilerSymbols(const char* symbols_path,
 }
 #endif  // !defined(DART_PRODUCT)
 
-Runner::Runner(async::Loop* loop)
-    : loop_(loop), context_(sys::ComponentContext::Create()) {
+Runner::Runner(async::Loop* loop, sys::ComponentContext* context)
+    : loop_(loop), context_(context) {
 #if !defined(DART_PRODUCT)
   // The VM service isolate uses the process-wide namespace. It writes the
   // vm service protocol port under /tmp. The VMServiceObject exposes that
