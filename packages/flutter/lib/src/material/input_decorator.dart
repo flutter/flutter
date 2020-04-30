@@ -501,7 +501,6 @@ class _Decoration {
     this.border,
     this.borderGap,
     this.alignLabelWithHint,
-    this.filled,
     this.isDense,
     this.visualDensity,
     this.icon,
@@ -515,11 +514,10 @@ class _Decoration {
     this.helperError,
     this.counter,
     this.container,
-    this.fixTextFieldOutlineLabel = false,
-  }) : assert(isCollapsed != null),
+  }) : assert(contentPadding != null),
+       assert(isCollapsed != null),
        assert(floatingLabelHeight != null),
-       assert(floatingLabelProgress != null),
-       assert(fixTextFieldOutlineLabel != null);
+       assert(floatingLabelProgress != null);
 
   final EdgeInsetsGeometry contentPadding;
   final bool isCollapsed;
@@ -530,7 +528,6 @@ class _Decoration {
   final bool alignLabelWithHint;
   final bool isDense;
   final VisualDensity visualDensity;
-  final bool filled;
   final Widget icon;
   final Widget input;
   final Widget label;
@@ -542,7 +539,6 @@ class _Decoration {
   final Widget helperError;
   final Widget counter;
   final Widget container;
-  final bool fixTextFieldOutlineLabel;
 
   @override
   bool operator ==(Object other) {
@@ -559,7 +555,6 @@ class _Decoration {
         && other.borderGap == borderGap
         && other.alignLabelWithHint == alignLabelWithHint
         && other.isDense == isDense
-        && other.filled == filled
         && other.visualDensity == visualDensity
         && other.icon == icon
         && other.input == input
@@ -571,8 +566,7 @@ class _Decoration {
         && other.suffixIcon == suffixIcon
         && other.helperError == helperError
         && other.counter == counter
-        && other.container == container
-        && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel;
+        && other.container == container;
   }
 
   @override
@@ -597,7 +591,6 @@ class _Decoration {
       helperError,
       counter,
       container,
-      fixTextFieldOutlineLabel,
     );
   }
 }
@@ -928,34 +921,7 @@ class _RenderDecoration extends RenderBox {
 
   static BoxParentData _boxParentData(RenderBox box) => box.parentData as BoxParentData;
 
-  EdgeInsets get contentPadding {
-    if (decoration.contentPadding != null) {
-      return decoration.contentPadding as EdgeInsets;
-    }
-
-    final bool decorationIsDense = decoration.isDense == true; // isDense == null, same as false
-    if (decoration.isCollapsed) {
-      return EdgeInsets.zero;
-    } else if (!decoration.border.isOutline) {
-      // 4.0: the vertical gap between the inline elements and the floating label.
-      if (decoration.filled == true) { // filled == null same as filled == false
-        return decorationIsDense
-          ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-          : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0);
-      } else {
-        // Not left or right padding for underline borders that aren't filled
-        // is a small concession to backwards compatibility. This eliminates
-        // the most noticeable layout change introduced by #13734.
-        return decorationIsDense
-          ? const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
-          : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0);
-      }
-    } else {
-      return decorationIsDense
-        ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
-        : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0);
-    }
-  }
+  EdgeInsets get contentPadding => decoration.contentPadding as EdgeInsets;
 
   // Lay out the given box if needed, and return its baseline.
   double _layoutLineBox(RenderBox box, BoxConstraints constraints) {
@@ -1104,19 +1070,19 @@ class _RenderDecoration extends RenderBox {
       + contentPadding.bottom
       + densityOffset.dy,
     );
-    final double minContainerHeight = decoration.isDense
-        || expands
-        || decoration.contentPadding != null
-            ? 0.0
-            : kMinInteractiveDimension + densityOffset.dy;
-    final double interactiveAdjustment = minContainerHeight > contentHeight
-       && decoration.contentPadding == null
-            ? (minContainerHeight - contentHeight) / 2.0
-            : 0.0;
+    final double minContainerHeight = decoration.isDense || expands || decoration.isCollapsed
+      ? 0.0
+      : kMinInteractiveDimension + densityOffset.dy;
     final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight + densityOffset.dy;
     final double containerHeight = expands
       ? maxContainerHeight
       : math.min(math.max(contentHeight, minContainerHeight), maxContainerHeight);
+
+    // Ensure the text is vertically centered in cases where the content is
+    // shorter than kMinInteractiveDimension.
+    final double interactiveAdjustment = minContainerHeight > contentHeight
+      ? (minContainerHeight - contentHeight) / 2.0
+      : 0.0;
 
     // Try to consider the prefix/suffix as part of the text when aligning it.
     // If the prefix/suffix overflows however, allow it to extend outside of the
@@ -1134,8 +1100,8 @@ class _RenderDecoration extends RenderBox {
     final double topInputBaseline = contentPadding.top
       + topHeight
       + inputInternalBaseline
-      + interactiveAdjustment
-      + baselineAdjustment;
+      + baselineAdjustment
+      + interactiveAdjustment;
     final double maxContentHeight = containerHeight
       - contentPadding.top
       - topHeight
@@ -1272,16 +1238,11 @@ class _RenderDecoration extends RenderBox {
     double subtextHeight = _lineHeight(width, <RenderBox>[helperError, counter]);
     if (subtextHeight > 0.0)
       subtextHeight += subtextGap;
-    final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
-    final double containerHeight = contentPadding.top
+    return contentPadding.top
       + (label == null ? 0.0 : decoration.floatingLabelHeight)
       + _lineHeight(width, <RenderBox>[prefix, input, suffix])
       + subtextHeight
       + contentPadding.bottom;
-    final double minContainerHeight = decoration.isDense || expands
-      ? 0.0
-      : kMinInteractiveDimension + densityOffset.dy;
-    return math.max(containerHeight, minContainerHeight);
   }
 
   @override
@@ -1472,18 +1433,12 @@ class _RenderDecoration extends RenderBox {
     if (label != null) {
       final Offset labelOffset = _boxParentData(label).offset;
       final double labelHeight = label.size.height;
-      final double borderWeight = decoration.border.borderSide.width;
       final double t = decoration.floatingLabelProgress;
       // The center of the outline border label ends up a little below the
       // center of the top border line.
       final bool isOutlineBorder = decoration.border != null && decoration.border.isOutline;
-      // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
-      // Center the scaled label relative to the border.
-      const double finalLabelScale = 0.75;
-      final double floatingY = decoration.fixTextFieldOutlineLabel
-        ? isOutlineBorder ? (-labelHeight * finalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top
-        : isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
-      final double scale = lerpDouble(1.0, finalLabelScale, t);
+      final double floatingY = isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
+      final double scale = lerpDouble(1.0, 0.75, t);
       double dx;
       switch (textDirection) {
         case TextDirection.rtl:
@@ -1944,10 +1899,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     super.initState();
 
     final bool labelIsInitiallyFloating = widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always
-        || (widget.decoration.floatingLabelBehavior != FloatingLabelBehavior.never &&
-            // ignore: deprecated_member_use_from_same_package
-            widget.decoration.hasFloatingPlaceholder &&
-            widget._labelShouldWithdraw);
+        // ignore: deprecated_member_use_from_same_package
+        || (widget.decoration.hasFloatingPlaceholder && widget._labelShouldWithdraw);
 
     _floatingLabelController = AnimationController(
       duration: _kTransitionDuration,
@@ -2120,17 +2073,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ? decoration.errorStyle?.color ?? themeData.errorColor
       : _getActiveColor(themeData);
     final TextStyle style = themeData.textTheme.subtitle1.merge(widget.baseStyle);
-    // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
-    // Setting TextStyle.height to 1 ensures that the label's height will equal
-    // its font size.
-    return themeData.fixTextFieldOutlineLabel
-      ? style
-        .copyWith(height: 1, color: decoration.enabled ? color : themeData.disabledColor)
-        .merge(decoration.labelStyle)
-      : style
-        .copyWith(color: decoration.enabled ? color : themeData.disabledColor)
-        .merge(decoration.labelStyle);
-
+    return style
+      .copyWith(color: decoration.enabled ? color : themeData.disabledColor)
+      .merge(decoration.labelStyle);
   }
 
   TextStyle _getHelperStyle(ThemeData themeData) {
@@ -2209,12 +2154,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       isHovering: isHovering,
     );
 
-    // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
-    // Setting TextStyle.height to 1 ensures that the label's height will equal
-    // its font size.
-    final TextStyle inlineLabelStyle = themeData.fixTextFieldOutlineLabel
-      ? inlineStyle.merge(decoration.labelStyle).copyWith(height: 1)
-      : inlineStyle.merge(decoration.labelStyle);
+    final TextStyle inlineLabelStyle = inlineStyle.merge(decoration.labelStyle);
     final Widget label = decoration.labelText == null ? null : _Shaker(
       animation: _shakingLabelController.view,
       child: AnimatedOpacity(
@@ -2341,16 +2281,38 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     // has been resolved to EdgeInsets.
     final TextDirection textDirection = Directionality.of(context);
     final EdgeInsets decorationContentPadding = decoration.contentPadding?.resolve(textDirection);
-    final double floatingLabelHeight = !decoration.isCollapsed && !border.isOutline
-        // 4.0: the vertical gap between the inline elements and the floating label.
-        ? (4.0 + 0.75 * inlineLabelStyle.fontSize) * MediaQuery.textScaleFactorOf(context)
-        : 0.0;
+
+    EdgeInsets contentPadding;
+    double floatingLabelHeight;
+    if (decoration.isCollapsed) {
+      floatingLabelHeight = 0.0;
+      contentPadding = decorationContentPadding ?? EdgeInsets.zero;
+    } else if (!border.isOutline) {
+      // 4.0: the vertical gap between the inline elements and the floating label.
+      floatingLabelHeight = (4.0 + 0.75 * inlineLabelStyle.fontSize) * MediaQuery.textScaleFactorOf(context);
+      if (decoration.filled == true) { // filled == null same as filled == false
+        contentPadding = decorationContentPadding ?? (decorationIsDense
+          ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
+          : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
+      } else {
+        // Not left or right padding for underline borders that aren't filled
+        // is a small concession to backwards compatibility. This eliminates
+        // the most noticeable layout change introduced by #13734.
+        contentPadding = decorationContentPadding ?? (decorationIsDense
+          ? const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
+          : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
+      }
+    } else {
+      floatingLabelHeight = 0.0;
+      contentPadding = decorationContentPadding ?? (decorationIsDense
+        ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
+        : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
+    }
 
     return _Decorator(
       decoration: _Decoration(
-        contentPadding: decorationContentPadding,
+        contentPadding: contentPadding,
         isCollapsed: decoration.isCollapsed,
-        filled: decoration.filled,
         floatingLabelHeight: floatingLabelHeight,
         floatingLabelProgress: _floatingLabelController.value,
         border: border,
@@ -2369,7 +2331,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         helperError: helperError,
         counter: counter,
         container: container,
-        fixTextFieldOutlineLabel: themeData.fixTextFieldOutlineLabel,
       ),
       textDirection: textDirection,
       textBaseline: textBaseline,
@@ -2518,6 +2479,7 @@ class InputDecoration {
     )
     this.hasFloatingPlaceholder = true, // ignore: deprecated_member_use_from_same_package
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
+    this.isCollapsed = false,
     this.isDense,
     this.contentPadding,
     this.prefixIcon,
@@ -2548,8 +2510,7 @@ class InputDecoration {
     this.alignLabelWithHint,
   }) : assert(enabled != null),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
-       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.'),
-       isCollapsed = false;
+       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
 
   /// Defines an [InputDecorator] that is the same size as the input field.
   ///
@@ -3327,6 +3288,7 @@ class InputDecoration {
     int errorMaxLines,
     bool hasFloatingPlaceholder,
     FloatingLabelBehavior floatingLabelBehavior,
+    bool isCollapsed,
     bool isDense,
     EdgeInsetsGeometry contentPadding,
     Widget prefixIcon,
@@ -3372,6 +3334,7 @@ class InputDecoration {
       // ignore: deprecated_member_use_from_same_package
       hasFloatingPlaceholder: hasFloatingPlaceholder ?? this.hasFloatingPlaceholder,
       floatingLabelBehavior: floatingLabelBehavior ?? this.floatingLabelBehavior,
+      isCollapsed: isCollapsed ?? this.isCollapsed,
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
       prefixIcon: prefixIcon ?? this.prefixIcon,
@@ -3419,6 +3382,7 @@ class InputDecoration {
       // ignore: deprecated_member_use_from_same_package
       hasFloatingPlaceholder: hasFloatingPlaceholder ?? theme.hasFloatingPlaceholder,
       floatingLabelBehavior: floatingLabelBehavior ?? theme.floatingLabelBehavior,
+      isCollapsed : isCollapsed ?? theme.isCollapsed,
       isDense: isDense ?? theme.isDense,
       contentPadding: contentPadding ?? theme.contentPadding,
       prefixStyle: prefixStyle ?? theme.prefixStyle,
