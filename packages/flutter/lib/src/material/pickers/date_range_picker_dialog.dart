@@ -226,7 +226,7 @@ class _DateRangePickerDialog extends StatefulWidget {
     this.fieldStartLabelText,
     this.fieldEndLabelText,
   }) : super(key: key);
- 
+
   final DateTimeRange initialDateRange;
   final DateTime firstDate;
   final DateTime lastDate;
