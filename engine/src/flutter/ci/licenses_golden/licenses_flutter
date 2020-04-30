@@ -586,6 +586,11 @@ FILE: ../../../flutter/shell/common/pointer_data_dispatcher.cc
 FILE: ../../../flutter/shell/common/pointer_data_dispatcher.h
 FILE: ../../../flutter/shell/common/rasterizer.cc
 FILE: ../../../flutter/shell/common/rasterizer.h
+FILE: ../../../flutter/shell/common/renderer_context_manager.cc
+FILE: ../../../flutter/shell/common/renderer_context_manager.h
+FILE: ../../../flutter/shell/common/renderer_context_manager_unittests.cc
+FILE: ../../../flutter/shell/common/renderer_context_test.cc
+FILE: ../../../flutter/shell/common/renderer_context_test.h
 FILE: ../../../flutter/shell/common/run_configuration.cc
 FILE: ../../../flutter/shell/common/run_configuration.h
 FILE: ../../../flutter/shell/common/shell.cc
