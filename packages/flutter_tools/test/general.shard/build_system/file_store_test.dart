@@ -106,7 +106,8 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File cacheFile = fileSystem
       .directory('example')
-      .childFile(FileStore.kFileCache);
+      .childFile(FileStore.kFileCache)
+      ..createSync(recursive: true);
     final FileStore fileCache = FileStore(
       cacheFile: cacheFile,
       logger: BufferLogger.test(),
