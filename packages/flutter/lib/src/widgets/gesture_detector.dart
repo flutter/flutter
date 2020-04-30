@@ -342,6 +342,8 @@ class GestureDetector extends StatelessWidget {
   ///
   /// See also:
   ///
+  ///  * [onSecondaryTap], a handler triggered right after this one that doesn't
+  ///    pass any details about the tap.
   ///  * [kSecondaryButton], the button this callback responds to.
   final GestureTapUpCallback onSecondaryTapUp;
 
