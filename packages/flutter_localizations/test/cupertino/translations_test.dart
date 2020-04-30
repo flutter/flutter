@@ -150,16 +150,19 @@ void main() {
   });
 
   testWidgets('kn arb file should be properly Unicode escaped', (WidgetTester tester) async {
-    final File file = File('lib/src/l10n/cupertino_kn.arb');
+    final File file = File('lib/src/l10n/material_kn.arb');
 
     final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+
+    // Encodes the arb resource values if they have not already been
+    // encoded.
     encodeBundleTranslations(bundle);
+
+    // Generates the encoded arb output file in as a string.
     final String encodedArbFile = generateArbString(bundle);
 
     // After encoding the bundles, the generated string should match
-    // cupertino_kn.arb.
+    // the existing material_kn.arb.
     expect(file.readAsStringSync(), encodedArbFile);
-
-
   });
 }

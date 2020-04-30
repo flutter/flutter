@@ -501,11 +501,16 @@ void main() {
     final File file = File('lib/src/l10n/material_kn.arb');
 
     final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+
+    // Encodes the arb resource values if they have not already been
+    // encoded.
     encodeBundleTranslations(bundle);
+
+    // Generates the encoded arb output file in as a string.
     final String encodedArbFile = generateArbString(bundle);
 
     // After encoding the bundles, the generated string should match
-    // material_kn.arb.
+    // the existing material_kn.arb.
     expect(file.readAsStringSync(), encodedArbFile);
   });
 }
