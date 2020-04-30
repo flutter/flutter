@@ -13,7 +13,7 @@ import 'semantics_tester.dart';
 void main() {
   testWidgets('Drag and drop - control test', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails> acceptedDetails = <DragTargetDetails>[];
+    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     int dragStartedCount = 0;
 
     await tester.pumpWidget(MaterialApp(
@@ -186,7 +186,7 @@ void main() {
                 onAccept: (int data) {
                   events.add('drop');
                 },
-                onAcceptWithDetails: (DragTargetDetails _) {
+                onAcceptWithDetails: (DragTargetDetails<int> _) {
                   events.add('details');
                 },
               ),
@@ -274,7 +274,7 @@ void main() {
             onAccept: (int data) {
               events.add('drop');
             },
-            onAcceptWithDetails: (DragTargetDetails _) {
+            onAcceptWithDetails: (DragTargetDetails<int> _) {
               events.add('details');
             },
           ),
@@ -325,7 +325,7 @@ void main() {
             onAccept: (int data) {
               events.add('drop');
             },
-            onAcceptWithDetails: (DragTargetDetails _) {
+            onAcceptWithDetails: (DragTargetDetails<int> _) {
               events.add('details');
             },
           ),
@@ -374,7 +374,7 @@ void main() {
             onAccept: (int data) {
               events.add('drop');
             },
-            onAcceptWithDetails: (DragTargetDetails _) {
+            onAcceptWithDetails: (DragTargetDetails<int> _) {
               events.add('details');
             },
           ),
@@ -421,7 +421,7 @@ void main() {
             onAccept: (int data) {
               events.add('drop $data');
             },
-            onAcceptWithDetails: (DragTargetDetails _) {
+            onAcceptWithDetails: (DragTargetDetails<int> _) {
               events.add('details');
             },
           ),
@@ -532,7 +532,7 @@ void main() {
             onAccept: (int data) {
               events.add('drop $data');
             },
-            onAcceptWithDetails: (DragTargetDetails _) {
+            onAcceptWithDetails: (DragTargetDetails<int> _) {
               events.add('details');
             },
           ),
@@ -642,7 +642,7 @@ void main() {
               onAccept: (int data) {
                 events.add('drop $data');
               },
-              onAcceptWithDetails: (DragTargetDetails _) {
+              onAcceptWithDetails: (DragTargetDetails<int> _) {
                 events.add('details');
               },
             ),
@@ -760,7 +760,7 @@ void main() {
 
   testWidgets('Drag and drop - onDraggableCanceled not called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails> acceptedDetails = <DragTargetDetails>[];
+    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDraggableCanceledCalled = false;
 
     await tester.pumpWidget(MaterialApp(
@@ -828,7 +828,7 @@ void main() {
 
   testWidgets('Drag and drop - onDraggableCanceled called if dropped on non-accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails> acceptedDetails = <DragTargetDetails>[];
+    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDraggableCanceledCalled = false;
     Velocity onDraggableCanceledVelocity;
     Offset onDraggableCanceledOffset;
@@ -905,7 +905,7 @@ void main() {
 
   testWidgets('Drag and drop - onDraggableCanceled called if dropped on non-accepting target with correct velocity', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails> acceptedDetails = <DragTargetDetails>[];
+    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDraggableCanceledCalled = false;
     Velocity onDraggableCanceledVelocity;
     Offset onDraggableCanceledOffset;
@@ -960,7 +960,7 @@ void main() {
 
   testWidgets('Drag and drop - onDragEnd not called if dropped on non-accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails> acceptedDetails = <DragTargetDetails>[];
+    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragEndCalled = false;
     DraggableDetails onDragEndDraggableDetails;
     await tester.pumpWidget(MaterialApp(
@@ -1174,7 +1174,7 @@ void main() {
 
   testWidgets('Drag and drop - onDragCompleted not called if dropped on non-accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails> acceptedDetails = <DragTargetDetails>[];
+    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragCompletedCalled = false;
 
     await tester.pumpWidget(MaterialApp(
@@ -1245,7 +1245,7 @@ void main() {
 
   testWidgets('Drag and drop - onDragEnd called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails> acceptedDetails = <DragTargetDetails>[];
+    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragEndCalled = false;
     DraggableDetails onDragEndDraggableDetails;
     await tester.pumpWidget(MaterialApp(
@@ -1341,7 +1341,7 @@ void main() {
             onAccept: (int data) {
               events.add('drop');
             },
-            onAcceptWithDetails: (DragTargetDetails _) {
+            onAcceptWithDetails: (DragTargetDetails<int> _) {
               events.add('details');
             },
           ),
@@ -1387,7 +1387,7 @@ void main() {
 
   testWidgets('Drag and drop - onDragCompleted called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails> acceptedDetails = <DragTargetDetails>[];
+    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragCompletedCalled = false;
 
     await tester.pumpWidget(MaterialApp(
@@ -1455,9 +1455,9 @@ void main() {
 
   testWidgets('Drag and drop - allow pass thru of unaccepted data test', (WidgetTester tester) async {
     final List<int> acceptedInts = <int>[];
-    final List<DragTargetDetails> acceptedIntsDetails = <DragTargetDetails>[];
+    final List<DragTargetDetails<int>> acceptedIntsDetails = <DragTargetDetails<int>>[];
     final List<double> acceptedDoubles = <double>[];
-    final List<DragTargetDetails> acceptedDoublesDetails = <DragTargetDetails>[];
+    final List<DragTargetDetails<double>> acceptedDoublesDetails = <DragTargetDetails<double>>[];
 
     await tester.pumpWidget(MaterialApp(
       home: Column(
@@ -1589,9 +1589,9 @@ void main() {
 
   testWidgets('Drag and drop - allow pass thru of unaccepted data twice test', (WidgetTester tester) async {
     final List<DragTargetData> acceptedDragTargetDatas = <DragTargetData>[];
-    final List<DragTargetDetails> acceptedDragTargetDataDetails = <DragTargetDetails>[];
+    final List<DragTargetDetails<DragTargetData>> acceptedDragTargetDataDetails = <DragTargetDetails<DragTargetData>>[];
     final List<ExtendedDragTargetData> acceptedExtendedDragTargetDatas = <ExtendedDragTargetData>[];
-    final List<DragTargetDetails> acceptedExtendedDragTargetDataDetails = <DragTargetDetails>[];
+    final List<DragTargetDetails<ExtendedDragTargetData>> acceptedExtendedDragTargetDataDetails = <DragTargetDetails<ExtendedDragTargetData>>[];
     final DragTargetData dragTargetData = DragTargetData();
     await tester.pumpWidget(MaterialApp(
       home: Column(
@@ -1657,7 +1657,7 @@ void main() {
 
   testWidgets('Drag and drop - maxSimultaneousDrags', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails> acceptedDetails = <DragTargetDetails>[];
+    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
 
     Widget build(int maxSimultaneousDrags) {
       return MaterialApp(
@@ -1873,7 +1873,7 @@ void main() {
             onAccept: (int data) {
               events.add('drop');
             },
-            onAcceptWithDetails: (DragTargetDetails _) {
+            onAcceptWithDetails: (DragTargetDetails<int> _) {
               events.add('details');
             },
           ),
@@ -1918,7 +1918,7 @@ void main() {
 
   testWidgets('Drag and drop - remove draggable', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails> acceptedDetails = <DragTargetDetails>[];
+    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
 
     await tester.pumpWidget(MaterialApp(
       home: Column(
@@ -2022,7 +2022,7 @@ void main() {
 
   testWidgets('long-press draggable calls onDragEnd called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails> acceptedDetails = <DragTargetDetails>[];
+    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragEndCalled = false;
     DraggableDetails onDragEndDraggableDetails;
 
@@ -2109,7 +2109,7 @@ void main() {
 
   testWidgets('long-press draggable calls onDragCompleted called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
-    final List<DragTargetDetails> acceptedDetails = <DragTargetDetails>[];
+    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
     bool onDragCompletedCalled = false;
 
     await tester.pumpWidget(MaterialApp(
@@ -2429,7 +2429,7 @@ Future<void> _testLongPressDraggableHapticFeedback({ WidgetTester tester, bool h
 
 Future<void> _testChildAnchorFeedbackPosition({ WidgetTester tester, double top = 0.0, double left = 0.0 }) async {
   final List<int> accepted = <int>[];
-  final List<DragTargetDetails> acceptedDetails = <DragTargetDetails>[];
+  final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
   int dragStartedCount = 0;
 
   await tester.pumpWidget(

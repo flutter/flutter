@@ -583,7 +583,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
     if (widget.onAccept != null)
       widget.onAccept(avatar.data as T);
     if (widget.onAcceptWithDetails != null)
-      widget.onAcceptWithDetails(DragTargetDetails(data: avatar.data as T, offset: avatar._lastOffset));
+      widget.onAcceptWithDetails(DragTargetDetails<T>(data: avatar.data as T, offset: avatar._lastOffset));
   }
 
   @override
