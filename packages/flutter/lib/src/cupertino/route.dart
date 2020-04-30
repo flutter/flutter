@@ -930,6 +930,7 @@ Future<T> showCupertinoModalPopup<T>({
   ImageFilter filter,
   bool useRootNavigator = true,
   bool semanticsDismissible,
+  RouteSettings settings,
 }) {
   assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push(
@@ -939,6 +940,7 @@ Future<T> showCupertinoModalPopup<T>({
       builder: builder,
       filter: filter,
       semanticsDismissible: semanticsDismissible,
+      settings: settings,
     ),
   );
 }
