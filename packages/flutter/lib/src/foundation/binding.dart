@@ -88,7 +88,7 @@ abstract class BindingBase {
   /// different [Window] implementation, such as a [TestWindow].
   ui.Window get window => ui.window;
 
-  DeviceConfigurationDispatch deviceConfigurationDispatch;
+  PlatformDispatcher platformDispatcher;
 
   /// The initialization method. Subclasses override this method to hook into
   /// the platform and otherwise configure their services. Subclasses must call
@@ -107,10 +107,10 @@ abstract class BindingBase {
       return true;
     }());
     /// TODO: This should really be initialized to a singleton in dart:ui.
-    deviceConfigurationDispatch = DeviceConfigurationDispatch();
-    windowManager = WindowManager(deviceConfigurationDispatch);
-    screenManager = ScreenManager(deviceConfigurationDispatch);
-    platformConfigurationManager = PlatformConfigurationManager(deviceConfigurationDispatch);
+    platformDispatcher = PlatformDispatcher();
+    windowManager = WindowManager(platformDispatcher);
+    screenManager = ScreenManager(platformDispatcher);
+    platformConfigurationManager = PlatformConfigurationManager(platformDispatcher);
   }
 
   /// The current [BindingBase], if one has been created.

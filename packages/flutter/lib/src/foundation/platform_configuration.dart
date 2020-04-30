@@ -1,7 +1,8 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 
@@ -9,17 +10,10 @@ import 'binding.dart';
 
 // -------------- Base API (doesn't require bindings/managers) ---------------
 
-typedef PlatformWindowBeginFrameCallback = void Function(Object windowId, Duration duration);
-typedef PlatformWindowDrawFrameCallback = void Function(Object windowId);
-typedef PlatformWindowReportTimingsCallback = void Function(
-    Object windowId, List<FrameTiming> timings);
-typedef PlatformWindowPointerDataPacketCallback = void Function(
-    Object windowId, PointerDataPacket packet);
-
 /// Device configuration dispatcher.
 ///
-/// This is the central entry point for device configuration changes.
-class DeviceConfigurationDispatch {
+/// This is the central entry point for platform messages and configuration events.
+class PlatformDispatcher {
   /// Receives all events related to platform configuration changes.
   PlatformConfigurationEventCallback onPlatformConfigurationChanged;
 
@@ -31,17 +25,17 @@ class DeviceConfigurationDispatch {
 
   /// A callback invoked when any window begins a frame.
   ///
-  /// {@template flutter.foundation.DeviceConfigurationDispatch.onBeginFrame}
+  /// {@template flutter.foundation.PlatformDispatcher.onBeginFrame}
   /// A callback that is invoked to notify the application that it is an
   /// appropriate time to provide a scene using the [SceneBuilder] API and the
-  /// [PlatformWindow.render] method of the window the the provided platform ID.
+  /// [PlatformWindow.render] method of the window for the provided platform ID.
   /// When possible, this is driven by the hardware VSync signal. This is only
   /// called if [PlatformWindow.scheduleFrame] for the window with the provided
   /// ID has been called since the last time this callback was invoked.
   /// {@endtemplate}
   PlatformWindowBeginFrameCallback onBeginFrame;
 
-  /// {@template flutter.foundation.DeviceConfigurationDispatch.onDrawFrame}
+  /// {@template flutter.foundation.PlatformDispatcher.onDrawFrame}
   /// A callback that is invoked for each frame after [onBeginFrame] has
   /// completed and after the microtask queue has been drained.
   ///
@@ -50,14 +44,14 @@ class DeviceConfigurationDispatch {
   /// {@endtemplate}
   PlatformWindowDrawFrameCallback onDrawFrame;
 
-  /// {@template flutter.foundation.DeviceConfigurationDispatch.onPointerDataPacket}
+  /// {@template flutter.foundation.PlatformDispatcher.onPointerDataPacket}
   /// A callback that is invoked when pointer data is available for a window.
   /// {@endtemplate}
   ///
   /// This callback is called when any window receives a pointer event.
   PlatformWindowPointerDataPacketCallback onPointerDataPacket;
 
-  /// {@template flutter.foundation.DeviceConfigurationDispatch.onReportTimings}
+  /// {@template flutter.foundation.PlatformDispatcher.onReportTimings}
   /// A callback that is invoked to report the [FrameTiming] of recently
   /// rasterized frames for a window.
   /// {@endtemplate}
@@ -65,28 +59,13 @@ class DeviceConfigurationDispatch {
   /// This callback is called whenever any window receives timing information.
   PlatformWindowReportTimingsCallback onReportTimings;
 
-  /// Creates a window and returns the window obtained.
+  /// Opens a new window and returns the window created.
   ///
   /// The configuration obtained and the one requested may not match, depending
   /// on what the platform was able to accommodate.
-  Future<PlatformWindow> createWindow(PlatformWindowConfigurationRequest configuration) async {
+  Future<PlatformWindow> openWindow(PlatformWindowConfigurationRequest configuration) async {
     // ...
   }
-
-  /// Requests that the platform configure the `window` with the `configuration`.
-  ///
-  /// Returns the window after configuration. The configuration obtained and the
-  /// one requested may not match, depending on what the platform was able to
-  /// accommodate.
-  Future<PlatformWindow> configureWindow(
-      PlatformWindow window, PlatformWindowConfigurationRequest configuration) async {
-    // ...
-  }
-
-  /// Destroys the given window.
-  ///
-  /// Completes when the window has been destroyed.
-  Future<void> destroyWindow(PlatformWindow window) async {}
 
   /// Encodes and sends raw messages to the platform.
   void sendPlatformMessage(
@@ -97,8 +76,8 @@ class DeviceConfigurationDispatch {
     // ...
   }
 
-  /// Called by the platform code to receives all raw platform messages and
-  /// parse them.
+  /// Called by the platform code to receive raw platform messages and parse
+  /// them.
   PlatformMessageCallback get onPlatformMessage {
     // ...
   }
@@ -113,6 +92,14 @@ class DeviceConfigurationDispatch {
     // ...
   }
 }
+
+/// Callback types used by the [PlatformDispatcher].
+typedef PlatformWindowBeginFrameCallback = void Function(Object windowId, Duration duration);
+typedef PlatformWindowDrawFrameCallback = void Function(Object windowId);
+typedef PlatformWindowReportTimingsCallback = void Function(
+    Object windowId, List<FrameTiming> timings);
+typedef PlatformWindowPointerDataPacketCallback = void Function(
+    Object windowId, PointerDataPacket packet);
 
 /// Callback type for events relating to platform configuration changes.
 typedef PlatformConfigurationEventCallback = void Function(PlatformConfigurationEvent event);
@@ -298,25 +285,25 @@ abstract class PlatformWindowEvent {
   const PlatformWindowEvent();
 }
 
-/// A [PlatformWindow] has been created.
-class PlatformWindowCreatedEvent extends PlatformWindowEvent {
-  /// A const constructor for a [PlatformWindowCreatedEvent].
+/// A new [PlatformWindow] has been opened.
+class PlatformWindowOpenedEvent extends PlatformWindowEvent {
+  /// A const constructor for a [PlatformWindowOpenedEvent].
   ///
   /// The [window] parameter must not be null.
-  const PlatformWindowCreatedEvent({this.window});
+  const PlatformWindowOpenedEvent({this.window});
 
-  /// The window that was created.
+  /// The window that was opened.
   final PlatformWindow window;
 }
 
-/// A [PlatformWindow] has been destroyed.
-class PlatformWindowDestroyedEvent extends PlatformWindowEvent {
-  /// A const constructor for a [PlatformWindowCreatedEvent].
+/// A [PlatformWindow] has been closed.
+class PlatformWindowClosedEvent extends PlatformWindowEvent {
+  /// A const constructor for a [PlatformWindowOpenedEvent].
   ///
   /// The [id] parameter must not be null.
-  const PlatformWindowDestroyedEvent({this.id});
+  const PlatformWindowClosedEvent({this.id});
 
-  /// The opaque platform ID of the window that was destroyed.
+  /// The opaque platform ID of the window that was closed.
   final Object id;
 }
 
@@ -336,20 +323,19 @@ class PlatformWindowReconfiguredEvent extends PlatformWindowEvent {
 /// Used to request a different configuration of a [PlatformWindow], so that
 /// multiple window parameters can be configured simultaneously.
 ///
-/// Parameters shouldn't be changed may be null. At least one parameter must not
-/// be null.
+/// Parameters that shouldn't be changed may be null. At least one parameter
+/// must be set.
 @immutable
 class PlatformWindowConfigurationRequest {
   /// Const constructor for a [PlatformWindowConfigurationRequest].
   const PlatformWindowConfigurationRequest({
     this.screen,
     this.geometry,
-    this.layerRequest,
-    this.layerWindowId,
-  })  : assert(layerWindowId != null ||
-            (layerRequest != PlatformWindowLayerRequest.aboveWindow &&
-                layerRequest != PlatformWindowLayerRequest.belowWindow)),
-        assert(screen != null || geometry != null || layerRequest != null,
+    this.order,
+    this.orderWindowId,
+  })  : assert(orderWindowId != null ||
+            (order != PlatformWindowOrder.aboveWindow && order != PlatformWindowOrder.belowWindow)),
+        assert(screen != null || geometry != null || order != null,
             'At least one parameter must be non-null');
 
   /// Makes a new copy of this [PlatformWindowConfigurationRequest] with some attributes
@@ -357,14 +343,14 @@ class PlatformWindowConfigurationRequest {
   PlatformWindowConfigurationRequest copyWith({
     Object screen,
     Rect geometry,
-    PlatformWindowLayerRequest layerRequest,
+    PlatformWindowOrder layerRequest,
     Object layerWindowId,
   }) {
     return PlatformWindowConfigurationRequest(
       screen: screen ?? this.screen,
       geometry: geometry ?? this.geometry,
-      layerRequest: layerRequest ?? this.layerRequest,
-      layerWindowId: layerWindowId ?? this.layerWindowId,
+      order: layerRequest ?? this.order,
+      orderWindowId: layerWindowId ?? this.orderWindowId,
     );
   }
 
@@ -381,26 +367,26 @@ class PlatformWindowConfigurationRequest {
   final Rect geometry;
 
   /// The depth ordering of this window relative to other windows.
-  final PlatformWindowLayerRequest layerRequest;
+  final PlatformWindowOrder order;
 
   /// The opaque ID of the window to place this window on a layer relative to,
-  /// according to [layerRequest].
+  /// according to [order].
   ///
-  /// Only used (and required) if [layerRequest] is
-  /// [PlatformWindowLayerRequest.aboveWindow] or [PlatformWindowLayerRequest.belowWindow].
+  /// Only used (and required) if [order] is
+  /// [PlatformWindowOrder.aboveWindow] or [PlatformWindowOrder.belowWindow].
   ///
   /// This ID corresponds to the window that this one should be above or below.
-  final Object layerWindowId;
+  final Object orderWindowId;
 }
 
 /// An enum describing how to layer this window in a [PlatformWindowConfigurationRequest].
-enum PlatformWindowLayerRequest {
+enum PlatformWindowOrder {
   /// Place this window immediately above the window with ID
-  /// [PlatformWindowConfigurationRequest.layerWindowId].
+  /// [PlatformWindowConfigurationRequest.orderWindowId].
   aboveWindow,
 
   /// Place this window immediately above the window with ID
-  /// [PlatformWindowConfigurationRequest.layerWindowId].
+  /// [PlatformWindowConfigurationRequest.orderWindowId].
   belowWindow,
 
   /// Place this window on top of all other windows.
@@ -418,7 +404,7 @@ enum PlatformWindowLayerRequest {
 /// Window coordinates are relative to the screen origin at the upper left
 /// corner of the screen, and are in logical coordinates.
 class PlatformWindow {
-  /// Creates a [PlatformWindow].
+  /// Creates a new [PlatformWindow].
   ///
   /// All parameters must not be null.
   PlatformWindow({
@@ -448,16 +434,28 @@ class PlatformWindow {
   /// Updates the semantics for this window.
   void updateSemantics(SemanticsUpdate update) {}
 
-  /// {@macro flutter.foundation.DeviceConfigurationDispatch.onBeginFrame}
+  /// Called by the [PlatformDispatcher] when it receives an `onBeginFrame` for
+  /// this window.
+  ///
+  /// {@macro flutter.foundation.PlatformDispatcher.onBeginFrame}
   void onBeginFrame(Duration duration) {}
 
-  /// {@macro flutter.foundation.DeviceConfigurationDispatch.onDrawFrame}
+  /// Called by the [PlatformDispatcher] when it receives an `onDrawFrame` for
+  /// this window.
+  ///
+  /// {@macro flutter.foundation.PlatformDispatcher.onDrawFrame}
   void onDrawFrame() {}
 
-  /// {@macro flutter.foundation.DeviceConfigurationDispatch.onPointerDataPacket}
+  /// Called by the [PlatformDispatcher] when it receives an `onPointerDataPacket` for
+  /// this window.
+  ///
+  /// {@macro flutter.foundation.PlatformDispatcher.onPointerDataPacket}
   void onPointerDataPacket(PointerDataPacket packet) {}
 
-  /// {@macro flutter.foundation.DeviceConfigurationDispatch.onReportTimings}
+  /// Called by the [PlatformDispatcher] when it receives an `onReportTimings` for
+  /// this window.
+  ///
+  /// {@macro flutter.foundation.PlatformDispatcher.onReportTimings}
   void onReportTimings(List<FrameTiming> timings) {}
 
   /// The geometry of the window on the [screen], in logical pixels.
@@ -465,6 +463,20 @@ class PlatformWindow {
   /// This is multiplied by the device pixel ratio of the screen with the upper
   /// left corner of this window on it to convert to the device's coordinates.
   Rect get geometry {}
+
+  /// Requests that the platform configure the `window` with the `configuration`.
+  ///
+  /// Returns the window after configuration. The configuration obtained and the
+  /// one requested may not match, depending on what the platform was able to
+  /// accommodate.
+  Future<PlatformWindow> configureWindow(PlatformWindowConfigurationRequest configuration) async {
+    // ...
+  }
+
+  /// Closes the given window.
+  ///
+  /// Completes when the window has been closed.
+  Future<void> closeWindow() async {}
 
   // The values below are all read-only, non-configurable aspects of the window.
 
@@ -524,15 +536,15 @@ class PlatformWindow {
 
 // ----------------- Binding-owned Managers ----------------------
 
-/// Registered with [DeviceConfigurationDispatch] by the binding to manage
+/// Registered with [PlatformDispatcher] by the binding to manage
 /// and accumulate device configuration changes.
 class PlatformConfigurationManager with ChangeNotifier {
   /// Const constructor so subclasses can be const.
-  PlatformConfigurationManager(DeviceConfigurationDispatch dispatch) {
+  PlatformConfigurationManager(PlatformDispatcher dispatch) {
     dispatch.onPlatformConfigurationChanged = onPlatformConfigurationChanged;
   }
 
-  /// Called by the [DeviceConfigurationDispatch] whenever the configuration
+  /// Called by the [PlatformDispatcher] whenever the configuration
   /// changes.
   @protected
   void onPlatformConfigurationChanged(PlatformConfigurationEvent event) {
@@ -545,8 +557,6 @@ class PlatformConfigurationManager with ChangeNotifier {
 
   /// Gets the binding's instance of the current configuration manager.
   static PlatformConfigurationManager get instance {
-    // FoundationBinding doesn't exist yet, but would be created to hold this,
-    // to maintain layering.
     return BindingBase.instance.platformConfigurationManager;
   }
 }
@@ -554,11 +564,11 @@ class PlatformConfigurationManager with ChangeNotifier {
 /// A screen manager that listens to events from the platform.
 class ScreenManager with ChangeNotifier {
   /// Creates a screen manager that listens to the given dispatch.
-  ScreenManager(DeviceConfigurationDispatch dispatch) {
+  ScreenManager(PlatformDispatcher dispatch) {
     dispatch.onScreenEvent = onScreenEvent;
   }
 
-  /// Called by the [DeviceConfigurationDispatch] whenever a screen event
+  /// Called by the [PlatformDispatcher] whenever a screen event
   /// occurs.
   @protected
   void onScreenEvent(ScreenEvent event) {
@@ -572,8 +582,6 @@ class ScreenManager with ChangeNotifier {
 
   /// Gets the binding's instance of the current screen manager.
   static ScreenManager get instance {
-    // FoundationBinding doesn't exist yet, but would be created to hold this,
-    // to maintain layering.
     return BindingBase.instance.screenManager;
   }
 }
@@ -581,7 +589,7 @@ class ScreenManager with ChangeNotifier {
 /// A window manager that handles window events from the platform.
 class WindowManager with ChangeNotifier {
   /// Creates a window manager that listens to events on the given dispatch.
-  WindowManager(DeviceConfigurationDispatch dispatch) : _dispatch = dispatch {
+  WindowManager(PlatformDispatcher dispatch) : _dispatch = dispatch {
     dispatch.onWindowEvent = onWindowEvent;
     dispatch.onPointerDataPacket = onPointerDataPacket;
     dispatch.onBeginFrame = onBeginFrame;
@@ -589,29 +597,29 @@ class WindowManager with ChangeNotifier {
     dispatch.onReportTimings = onReportTimings;
   }
 
-  /// {@macro flutter.foundation.DeviceConfigurationDispatch.onBeginFrame}
+  /// {@macro flutter.foundation.PlatformDispatcher.onBeginFrame}
   void onBeginFrame(Object windowId, Duration duration) {
     windows[windowId]?.onBeginFrame(duration);
   }
 
-  /// {@macro flutter.foundation.DeviceConfigurationDispatch.onDrawFrame}
+  /// {@macro flutter.foundation.PlatformDispatcher.onDrawFrame}
   void onDrawFrame(Object windowId) {
     windows[windowId]?.onDrawFrame();
   }
 
-  /// {@macro flutter.foundation.DeviceConfigurationDispatch.onPointerDataPacket}
+  /// {@macro flutter.foundation.PlatformDispatcher.onPointerDataPacket}
   void onPointerDataPacket(Object windowId, PointerDataPacket event) {
     windows[windowId]?.onPointerDataPacket(event);
   }
 
-  /// {@macro flutter.foundation.DeviceConfigurationDispatch.onReportTimings}
+  /// {@macro flutter.foundation.PlatformDispatcher.onReportTimings}
   void onReportTimings(Object windowId, List<FrameTiming> timings) {
     windows[windowId]?.onReportTimings(timings);
   }
 
-  final DeviceConfigurationDispatch _dispatch;
+  final PlatformDispatcher _dispatch;
 
-  /// Called by the [DeviceConfigurationDispatch] whenever a window event
+  /// Called by the [PlatformDispatcher] whenever a window event
   /// occurs.
   @protected
   void onWindowEvent(PlatformWindowEvent event) {
@@ -620,32 +628,13 @@ class WindowManager with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Creates a window and returns the window obtained.
+  /// Opens a new window and returns the window created.
   ///
   /// The configuration obtained and the one requested may not match, depending
   /// on what the platform was able to accommodate.
-  Future<PlatformWindow> createWindow(PlatformWindowConfigurationRequest configuration) async {
-    return await _dispatch.createWindow(configuration);
-  }
-
-  /// Destroys the given window.
-  ///
-  /// Completes when the window has been destroyed.
-  Future<void> destroyWindow(PlatformWindow window) async {
-    await _dispatch.destroyWindow(window);
-  }
-
-  /// Requests a new configuration for the given `window`.
-  ///
-  /// Returns the reconfigured window.
-  ///
-  /// The configuration obtained and the one requested may not match, depending
-  /// on what the platform was able to accommodate.
-  Future<PlatformWindow> configureWindow(
-    PlatformWindow window,
-    PlatformWindowConfigurationRequest configuration,
-  ) async {
-    return await _dispatch.configureWindow(window, configuration);
+  Future<PlatformWindow> openWindow(PlatformWindowConfigurationRequest configuration) async {
+    // Also adds the window to the list of windows.
+    return await _dispatch.openWindow(configuration);
   }
 
   /// The current set of windows on all screens, mapped by platform id.
@@ -653,10 +642,6 @@ class WindowManager with ChangeNotifier {
 
   /// Gets the binding's instance of the current window manager.
   static WindowManager get instance {
-    // FoundationBinding doesn't exist yet, but would be created to hold this,
-    // to maintain layering.
     return BindingBase.instance.windowManager;
   }
 }
-
-class FoundationBinding extends BindingBase {}
