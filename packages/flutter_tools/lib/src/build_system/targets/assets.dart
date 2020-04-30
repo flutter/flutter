@@ -32,8 +32,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   Map<String, DevFSContent> additionalContent,
 }) async {
   final File pubspecFile =  environment.projectDir.childFile('pubspec.yaml');
-  final ManifestAssetBundle assetBundle = AssetBundleFactory.instance.createBundle()
-    as ManifestAssetBundle;
+  final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int resultCode = await assetBundle.build(
     manifestPath: pubspecFile.path,
     packagesPath: environment.projectDir.childFile('.packages').path,
@@ -126,16 +125,17 @@ DevFSContent processSkSLBundle(String bundlePath, {
   // Step 2: validate top level bundle structure.
   Map<String, Object> bundle;
   try {
-    bundle = json.decode(skSLBundleFile.readAsStringSync())
-      as Map<String, Object>;
-  } on FormatException {
-    logger.printError('"$bundle" was not a JSON object.');
-    throw Exception('SkSL bundle was invalid.');
-  } on TypeError {
-    logger.printError('"$bundle" was not a JSON object.');
+    final Object rawBundle = json.decode(skSLBundleFile.readAsStringSync());
+    if (rawBundle is Map<String, Object>) {
+      bundle = rawBundle;
+    } else {
+      logger.printError('"$bundle" was not a JSON object: $rawBundle');
+      throw Exception('SkSL bundle was invalid.');
+    }
+  } on FormatException catch (err) {
+    logger.printError('"$bundle" was not a JSON object: $err');
     throw Exception('SkSL bundle was invalid.');
   }
-
   // Step 3: Validate that:
   // * The engine revision the bundle was compiled with
   //   is the same as the current revision.
