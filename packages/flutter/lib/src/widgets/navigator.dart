@@ -3811,9 +3811,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         child: FocusScope(
           node: focusScopeNode,
           autofocus: true,
-          child: Overlay(
-            key: _overlayKey,
-            initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+          child: Semantics(
+            // The [Overlay] may contain a [BlockSemantics] widget, e.g. as
+            // part of a modal barrier. To ensure that [BlockSemantics] only
+            // drops the semantics of other overlay entries (and not siblings
+            // of the Navigator itself) the overlay is wrapped in its own
+            // semantics container.
+            container: true,
+            child: Overlay(
+              key: _overlayKey,
+              initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+            ),
           ),
         ),
       ),

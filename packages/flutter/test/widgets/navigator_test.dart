@@ -2366,7 +2366,40 @@ void main() {
       expect(thirdPageless1Completed, false);
       expect(find.text('forth'), findsOneWidget);
     });
+  });
 
+  testWidgets('ModalBarrier does not block sibling semantics of Navigator', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/55758.
+
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          explicitChildNodes: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              const Expanded(child: Text('1')),
+              Expanded(
+                child: Navigator(
+                  initialRoute: '/',
+                  onGenerateRoute: (_) => PageRouteBuilder<void>(pageBuilder: (_, __, ___) => const Text('2')),
+                ),
+              ),
+              const Expanded(child:  Text('3')),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(BlockSemantics), findsOneWidget);
+    expect(find.byType(ModalBarrier), findsOneWidget);
+    expect(semantics, includesNodeWith(label: '1'));
+    expect(semantics, includesNodeWith(label: '2'));
+    expect(semantics, includesNodeWith(label: '3'));
+    semantics.dispose();
   });
 }
 
