@@ -1,0 +1,6 @@
+# Exclude lib/main.dart to avoid warnings about the non_nullable
+# experiment before it is enabled.
+analyzer:
+  exclude:
+    - lib/main.dart
+    - test/test_test.dart

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -13,14 +12,11 @@ class DepfileService {
   DepfileService({
     @required Logger logger,
     @required FileSystem fileSystem,
-    @required Platform platform,
   }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _platform = platform;
+       _fileSystem = fileSystem;
 
   final Logger _logger;
   final FileSystem _fileSystem;
-  final Platform _platform;
   static final RegExp _separatorExpr = RegExp(r'([^\\]) ');
   static final RegExp _escapeExpr = RegExp(r'\\(.)');
 
@@ -82,8 +78,9 @@ class DepfileService {
 
   void _writeFilesToBuffer(List<File> files, StringBuffer buffer) {
     for (final File outputFile in files) {
-      if (_platform.isWindows) {
-        // Foward slashes and spaces in a depfile have to be escaped on windows.
+      if (_fileSystem.path.style.separator == r'\') {
+        // backslashes and spaces in a depfile have to be escaped if the
+        // platform separator is a backslash.
         final String path = outputFile.path
           .replaceAll(r'\', r'\\')
           .replaceAll(r' ', r'\ ');

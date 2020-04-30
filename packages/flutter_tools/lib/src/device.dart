@@ -90,7 +90,12 @@ class DeviceManager {
       featureFlags: featureFlags,
     ),
     WindowsDevices(),
-    WebDevices(),
+    WebDevices(
+      featureFlags: featureFlags,
+      fileSystem: globals.fs,
+      platform: globals.platform,
+      processManager: globals.processManager,
+    ),
   ]);
 
   String _specifiedDeviceId;

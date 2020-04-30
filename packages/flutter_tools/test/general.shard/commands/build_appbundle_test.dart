@@ -303,12 +303,18 @@ void main() {
         );
       }, throwsToolExit(message: 'Gradle task bundleRelease failed with exit code 1'));
 
-      expect(testLogger.statusText,
-          contains('The shrinker may have failed to optimize the Java bytecode.'));
-      expect(testLogger.statusText,
-          contains('To disable the shrinker, pass the `--no-shrink` flag to this command.'));
-      expect(testLogger.statusText,
-          contains('To learn more, see: https://developer.android.com/studio/build/shrink-code'));
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace('The shrinker may have failed to optimize the Java bytecode.'),
+      );
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace('To disable the shrinker, pass the `--no-shrink` flag to this command.'),
+      );
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace('To learn more, see: https://developer.android.com/studio/build/shrink-code'),
+      );
 
       verify(mockUsage.sendEvent(
         'build',
@@ -361,11 +367,16 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText, containsIgnoringWhitespace("Your app isn't using AndroidX"));
-      expect(testLogger.statusText, containsIgnoringWhitespace(
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace("Your app isn't using AndroidX"),
+      );
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace(
         'To avoid potential build failures, you can quickly migrate your app by '
         'following the steps on https://goo.gl/CP92wY'
-        )
+        ),
       );
       verify(mockUsage.sendEvent(
         'build',
@@ -412,12 +423,17 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText,
-        not(containsIgnoringWhitespace("Your app isn't using AndroidX")));
       expect(
-        testLogger.statusText, not(containsIgnoringWhitespace(
-          'To avoid potential build failures, you can quickly migrate your app by '
-          'following the steps on https://goo.gl/CP92wY'))
+        testLogger.statusText,
+        not(containsIgnoringWhitespace("Your app isn't using AndroidX")),
+      );
+      expect(
+        testLogger.statusText,
+        not(
+          containsIgnoringWhitespace(
+            'To avoid potential build failures, you can quickly migrate your app by '
+            'following the steps on https://goo.gl/CP92wY'),
+        )
       );
       verify(mockUsage.sendEvent(
         'build',

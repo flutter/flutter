@@ -131,7 +131,7 @@ void testUsingContext(
           PlistParser: () => FakePlistParser(),
           Signals: () => FakeSignals(),
           Pub: () => ThrowingPub(), // prevent accidentally using pub.
-          GitHubTemplateCreator: () => MockGitHubTemplateCreator(),
+          CrashReporter: () => MockCrashReporter(),
           TemplateRenderer: () => const MustacheTemplateRenderer(),
         },
         body: () {
@@ -432,7 +432,7 @@ class MockClock extends Mock implements SystemClock {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 
-class MockGitHubTemplateCreator extends Mock implements GitHubTemplateCreator {}
+class MockCrashReporter extends Mock implements CrashReporter {}
 
 class FakePlistParser implements PlistParser {
   @override

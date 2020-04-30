@@ -28,5 +28,6 @@
   "cutButtonLabel": "Vystrihnúť",
   "copyButtonLabel": "Kopírovať",
   "pasteButtonLabel": "Prilepiť",
-  "selectAllButtonLabel": "Vybrať všetko"
+  "selectAllButtonLabel": "Vybrať všetko",
+  "modalBarrierDismissLabel": "Odmietnuť"
 }

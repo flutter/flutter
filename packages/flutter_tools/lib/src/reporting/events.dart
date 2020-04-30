@@ -129,7 +129,8 @@ class PubResultEvent extends UsageEvent {
   PubResultEvent({
     @required String context,
     @required String result,
-  }) : super('pub-result', context, label: result, flutterUsage: globals.flutterUsage);
+    @required Usage usage,
+  }) : super('pub-result', context, label: result, flutterUsage: usage);
 }
 
 /// An event that reports something about a build.

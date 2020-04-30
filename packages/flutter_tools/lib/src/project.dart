@@ -108,7 +108,7 @@ class FlutterProject {
       example.android.applicationId,
       await example.ios.productBundleIdentifier,
     ];
-    return Set<String>.from(candidates
+    return Set<String>.of(candidates
         .map<String>(_organizationNameFromPackageName)
         .where((String name) => name != null));
   }
@@ -226,7 +226,7 @@ class FlutterProject {
     if (!directory.existsSync() || hasExampleApp) {
       return;
     }
-    refreshPluginsList(this);
+    await refreshPluginsList(this);
     if ((android.existsSync() && checkProjects) || !checkProjects) {
       await android.ensureReadyForPlatformSpecificTooling();
     }

@@ -28,5 +28,6 @@
   "cutButtonLabel": "Iškirpti",
   "copyButtonLabel": "Kopijuoti",
   "pasteButtonLabel": "Įklijuoti",
-  "selectAllButtonLabel": "Pasirinkti viską"
+  "selectAllButtonLabel": "Pasirinkti viską",
+  "modalBarrierDismissLabel": "Atsisakyti"
 }

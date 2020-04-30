@@ -23,5 +23,6 @@
   "cutButtonLabel": "Decupați",
   "copyButtonLabel": "Copiați",
   "pasteButtonLabel": "Inserați",
-  "selectAllButtonLabel": "Selectați-le pe toate"
+  "selectAllButtonLabel": "Selectați-le pe toate",
+  "modalBarrierDismissLabel": "Închideți"
 }

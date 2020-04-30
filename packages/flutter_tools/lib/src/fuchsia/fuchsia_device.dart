@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
 import '../artifacts.dart';
@@ -46,8 +47,8 @@ final String _ipv4Loopback = InternetAddress.loopbackIPv4.address;
 final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
 
 // Enables testing the fuchsia isolate discovery
-Future<VMService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) {
-  return VMService.connect(uri);
+Future<vm_service.VmService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) {
+  return connectToVmService(uri);
 }
 
 /// Read the log for a particular device.
@@ -619,16 +620,14 @@ class FuchsiaDevice extends Device {
         // netstat shows that the local port is actually being used on the IPv6
         // loopback (::1).
         final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$port');
-        final VMService vmService = await VMService.connect(uri);
-        await vmService.getVMOld();
-        await vmService.refreshViews();
-        for (final FlutterView flutterView in vmService.vm.views) {
+        final vm_service.VmService vmService = await connectToVmService(uri);
+        final List<FlutterView> flutterViews = await vmService.getFlutterViews();
+        for (final FlutterView flutterView in flutterViews) {
           if (flutterView.uiIsolate == null) {
             continue;
           }
-          final Uri address = flutterView.owner.vmService.httpAddress;
           if (flutterView.uiIsolate.name.contains(isolateName)) {
-            return address.port;
+            return vmService.httpAddress.port;
           }
         }
       } on SocketException catch (err) {
@@ -663,11 +662,11 @@ class FuchsiaIsolateDiscoveryProtocol {
   ]);
 
   static const Duration _pollDuration = Duration(seconds: 10);
-  final Map<int, VMService> _ports = <int, VMService>{};
+  final Map<int, vm_service.VmService> _ports = <int, vm_service.VmService>{};
   final FuchsiaDevice _device;
   final String _isolateName;
   final Completer<Uri> _foundUri = Completer<Uri>();
-  final Future<VMService> Function(Uri) _vmServiceConnector;
+  final Future<vm_service.VmService> Function(Uri) _vmServiceConnector;
   // whether to only poll once.
   final bool _pollOnce;
   Timer _pollingTimer;
@@ -703,7 +702,7 @@ class FuchsiaIsolateDiscoveryProtocol {
   Future<void> _findIsolate() async {
     final List<int> ports = await _device.servicePorts();
     for (final int port in ports) {
-      VMService service;
+      vm_service.VmService service;
       if (_ports.containsKey(port)) {
         service = _ports[port];
       } else {
@@ -717,17 +716,15 @@ class FuchsiaIsolateDiscoveryProtocol {
           continue;
         }
       }
-      await service.getVMOld();
-      await service.refreshViews();
-      for (final FlutterView flutterView in service.vm.views) {
+      final List<FlutterView> flutterViews = await service.getFlutterViews();
+      for (final FlutterView flutterView in flutterViews) {
         if (flutterView.uiIsolate == null) {
           continue;
         }
-        final Uri address = flutterView.owner.vmService.httpAddress;
         if (flutterView.uiIsolate.name.contains(_isolateName)) {
           _foundUri.complete(_device.ipv6
-              ? Uri.parse('http://[$_ipv6Loopback]:${address.port}/')
-              : Uri.parse('http://$_ipv4Loopback:${address.port}/'));
+              ? Uri.parse('http://[$_ipv6Loopback]:${service.httpAddress.port}/')
+              : Uri.parse('http://$_ipv4Loopback:${service.httpAddress.port}/'));
           _status.stop();
           return;
         }
@@ -802,14 +799,18 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     ];
     final ProcessResult result = await globals.processManager.run(command);
     if (result.exitCode != 0) {
-      throwToolExit('Unforward command failed: $result');
+      throwToolExit(
+        'Unforward command failed:\n'
+        'stdout: ${result.stdout}\n'
+        'stderr: ${result.stderr}'
+      );
     }
   }
 
   @override
   Future<void> dispose() async {
     final List<ForwardedPort> forwardedPortsCopy =
-      List<ForwardedPort>.from(forwardedPorts);
+      List<ForwardedPort>.of(forwardedPorts);
     for (final ForwardedPort port in forwardedPortsCopy) {
       await unforward(port);
     }

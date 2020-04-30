@@ -2276,11 +2276,11 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       );
     }, skip: isBrowser);
 
-    testWidgets('ext.flutter.inspector.structuredErrors', (WidgetTester tester) async {
+    test('ext.flutter.inspector.structuredErrors', () async {
       List<Map<Object, Object>> flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
       expect(flutterErrorEvents, isEmpty);
 
-      final FlutterExceptionHandler oldHandler = FlutterError.onError;
+      final FlutterExceptionHandler oldHandler = FlutterError.presentError;
 
       try {
         // Enable structured errors.
@@ -2320,9 +2320,19 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         error = flutterErrorEvents.last;
         expect(error['errorsSinceReload'], 1);
 
-        // Reload the app.
-        tester.binding.reassembleApplication();
-        await tester.pump();
+        // Reloads the app.
+        final FlutterExceptionHandler oldHandler = FlutterError.onError;
+        final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+        // We need the runTest to setup the fake async in the test binding.
+        await binding.runTest(() async {
+          binding.reassembleApplication();
+          await binding.pump();
+        }, () { });
+        // The run test overrides the flutter error handler, so we should
+        // restore it back for the structure error to continue working.
+        FlutterError.onError = oldHandler;
+        // Cleans up the fake async so it does not bleed into next test.
+        binding.postTest();
 
         // Send another error.
         FlutterError.reportError(FlutterErrorDetailsForRendering(
@@ -2337,7 +2347,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         error = flutterErrorEvents.last;
         expect(error['errorsSinceReload'], 0);
       } finally {
-        FlutterError.onError = oldHandler;
+        FlutterError.presentError = oldHandler;
       }
     });
 

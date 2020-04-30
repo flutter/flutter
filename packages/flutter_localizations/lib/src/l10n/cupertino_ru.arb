@@ -28,5 +28,6 @@
   "cutButtonLabel": "Вырезать",
   "copyButtonLabel": "Копировать",
   "pasteButtonLabel": "Вставить",
-  "selectAllButtonLabel": "Выбрать все"
+  "selectAllButtonLabel": "Выбрать все",
+  "modalBarrierDismissLabel": "Закрыть"
 }

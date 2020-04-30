@@ -574,26 +574,41 @@ void main() {
     Platform: () => FakePlatform(operatingSystem: 'linux'),
   });
 
-  testUsingContext('Windows desktop artifacts ignore filtering when requested', () {
+  testWithoutContext('Windows desktop artifacts ignore filtering when requested', () {
     final MockCache mockCache = MockCache();
-    final WindowsEngineArtifacts artifacts = WindowsEngineArtifacts(mockCache);
+    final WindowsEngineArtifacts artifacts = WindowsEngineArtifacts(
+      mockCache,
+      platform: FakePlatform(operatingSystem: 'linux'),
+    );
     when(mockCache.includeAllPlatforms).thenReturn(false);
     when(mockCache.platformOverrideArtifacts).thenReturn(<String>{'windows'});
 
     expect(artifacts.getBinaryDirs(), isNotEmpty);
-  }, overrides: <Type, Generator> {
-    Platform: () => FakePlatform(operatingSystem: 'linux'),
   });
 
-  testUsingContext('Linux desktop artifacts ignore filtering when requested', () {
+  testWithoutContext('Windows desktop artifacts include profile and release artifacts', () {
     final MockCache mockCache = MockCache();
-    final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(mockCache);
+    final WindowsEngineArtifacts artifacts = WindowsEngineArtifacts(
+      mockCache,
+      platform: FakePlatform(operatingSystem: 'windows'),
+    );
+
+    expect(artifacts.getBinaryDirs(), containsAll(<Matcher>[
+      contains(contains('profile')),
+      contains(contains('release')),
+    ]));
+  });
+
+  testWithoutContext('Linux desktop artifacts ignore filtering when requested', () {
+    final MockCache mockCache = MockCache();
+    final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
+      mockCache,
+      platform: FakePlatform(operatingSystem: 'macos'),
+    );
     when(mockCache.includeAllPlatforms).thenReturn(false);
     when(mockCache.platformOverrideArtifacts).thenReturn(<String>{'linux'});
 
     expect(artifacts.getBinaryDirs(), isNotEmpty);
-  }, overrides: <Type, Generator> {
-    Platform: () => FakePlatform(operatingSystem: 'macos'),
   });
 }
 

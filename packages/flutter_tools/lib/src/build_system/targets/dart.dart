@@ -9,6 +9,7 @@ import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
+import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
 import '../../project.dart';
 import '../build_system.dart';
@@ -18,7 +19,7 @@ import 'assets.dart';
 import 'icon_tree_shaker.dart';
 
 /// The define to pass a [BuildMode].
-const String kBuildMode= 'BuildMode';
+const String kBuildMode = 'BuildMode';
 
 /// The define to pass whether we compile 64-bit android-arm code.
 const String kTargetPlatform = 'TargetPlatform';
@@ -121,7 +122,6 @@ class CopyFlutterBundle extends Target {
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
-      platform: globals.platform,
     );
     depfileService.writeToFile(
       assetDepfile,
@@ -231,15 +231,9 @@ class KernelSnapshot extends Target {
         forceLinkPlatform = false;
     }
 
-    final PackageConfig packageConfig = await loadPackageConfigUri(
-     packagesFile.absolute.uri,
-      loader: (Uri uri) {
-        final File file = globals.fs.file(uri);
-        if (!file.existsSync()) {
-          return null;
-        }
-        return file.readAsBytes();
-      }
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      environment.projectDir.childFile('.packages'),
+      logger: environment.logger,
     );
 
     final CompilerOutput output = await compiler.compile(

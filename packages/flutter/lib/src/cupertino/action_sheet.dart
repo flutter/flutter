@@ -937,13 +937,15 @@ class _PressableActionButtonState extends State<_PressableActionButton> {
   Widget build(BuildContext context) {
     return _ActionButtonParentDataWidget(
       isPressed: _isPressed,
-      // TODO(mattcarroll): Button press dynamics need overhaul for iOS: https://github.com/flutter/flutter/issues/19786
+      // TODO(mattcarroll): Button press dynamics need overhaul for iOS:
+      //  https://github.com/flutter/flutter/issues/19786
       child: GestureDetector(
         excludeFromSemantics: true,
         behavior: HitTestBehavior.opaque,
         onTapDown: (TapDownDetails details) => setState(() => _isPressed = true),
         onTapUp: (TapUpDetails details) => setState(() => _isPressed = false),
-        // TODO(mattcarroll): Cancel is currently triggered when user moves past slop instead of off button: https://github.com/flutter/flutter/issues/19783
+        // TODO(mattcarroll): Cancel is currently triggered when user moves past
+        //  slop instead of off button: https://github.com/flutter/flutter/issues/19783
         onTapCancel: () => setState(() => _isPressed = false),
         child: widget.child,
       ),
