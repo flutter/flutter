@@ -57,17 +57,17 @@ import 'package:flutter_test/flutter_test.dart';
 ///   await tester.pumpFrames(animationSheet.record(
 ///     target,
 ///     recording: true,
-///   ), fullDuration: const Duration(seconds: 1));
+///   ), const Duration(seconds: 1));
 ///
 ///   await gesture.up();
 ///
 ///   await tester.pumpFrames(animationSheet.record(
 ///     target,
 ///     recording: true,
-///   ), fullDuration: const Duration(seconds: 1));
+///   ), const Duration(seconds: 1));
 ///
 ///   // Optional: adjust view port size
-///   tester.binding.setSurfaceSize(animationSheet.sheetSize(width: 500));
+///   tester.binding.setSurfaceSize(animationSheet.sheetSize());
 ///
 ///   // Display
 ///   final Widget display = await animationSheet.display();
@@ -129,7 +129,7 @@ class AnimationSheetBuilder {
     bool recording = true,
   }) {
     assert(child != null);
-    return _FrameRecorderContainer(
+    return _FrameRecorderRecorder(
       key: key,
       child: child,
       size: size,
@@ -195,8 +195,8 @@ class AnimationSheetBuilder {
 
 typedef _RecordedHandler = void Function(Future<ui.Image> image);
 
-class _FrameRecorderContainer extends StatefulWidget {
-  const _FrameRecorderContainer({
+class _FrameRecorderRecorder extends StatefulWidget {
+  const _FrameRecorderRecorder({
     this.handleRecorded,
     this.child,
     this.size,
@@ -208,10 +208,10 @@ class _FrameRecorderContainer extends StatefulWidget {
   final Size size;
 
   @override
-  State<StatefulWidget> createState() => _FrameRecorderContainerState();
+  State<StatefulWidget> createState() => _FrameRecorderRecorderState();
 }
 
-class _FrameRecorderContainerState extends State<_FrameRecorderContainer> {
+class _FrameRecorderRecorderState extends State<_FrameRecorderRecorder> {
   GlobalKey boundaryKey = GlobalKey();
 
   void _record(Duration duration) {

@@ -278,6 +278,25 @@ void main() {
       count = await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(count, 6);
     });
+
+    testWidgets('pumpFrames', (WidgetTester tester) async {
+      final List<int> logPaints = <int>[];
+
+      final Widget target = _AlwaysAnimating(
+        onPaint: () {
+          logPaints.add(SchedulerBinding.instance.currentFrameTimeStamp.inMicroseconds);
+        },
+      );
+
+      await tester.pumpFrames(target, const Duration(milliseconds: 55));
+
+      expect(logPaints, <int>[0, 17000, 34000, 50000]);
+      logPaints.clear();
+
+      await tester.pumpFrames(target, const Duration(milliseconds: 30), const Duration(milliseconds: 10));
+
+      expect(logPaints, <int>[60000, 70000, 80000]);
+    });
   });
 
   group('find.byElementPredicate', () {
@@ -791,5 +810,65 @@ class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerP
   @override
   Widget build(BuildContext context) {
     return Container();
+  }
+}
+
+class _AlwaysAnimating extends StatefulWidget {
+  _AlwaysAnimating({
+    this.child,
+    this.onPaint,
+  });
+
+  final Widget child;
+  final VoidCallback onPaint;
+
+  @override
+  State<StatefulWidget> createState() => _AlwaysAnimatingState();
+}
+
+class _AlwaysAnimatingState extends State<_AlwaysAnimating> with SingleTickerProviderStateMixin {
+  AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: this,
+    );
+    _controller.repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller.view,
+      builder: (BuildContext context, Widget child) {
+        return CustomPaint(
+          painter: _AlwaysRepaint(widget.onPaint),
+          child: widget.child,
+        );
+      },
+    );
+  }
+}
+
+class _AlwaysRepaint extends CustomPainter {
+  _AlwaysRepaint(this.onPaint);
+
+  final VoidCallback onPaint;
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    onPaint();
   }
 }
