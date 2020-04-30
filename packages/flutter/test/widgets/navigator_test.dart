@@ -2367,6 +2367,35 @@ void main() {
       expect(find.text('forth'), findsOneWidget);
     });
 
+    testWidgets('can update pages before a route has finished popping', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      List<Page<dynamic>> myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      ];
+      bool onPopPage(Route<dynamic> route, dynamic result) {
+        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        return route.didPop(result);
+      }
+      await tester.pumpWidget(buildNavigator(myPages, onPopPage, navigator));
+
+      // Pops the second page route.
+      myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+      ];
+      await tester.pumpWidget(buildNavigator(myPages, onPopPage, navigator));
+
+      // Updates the pages again before second page finishes popping.
+      myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+      ];
+      await tester.pumpWidget(buildNavigator(myPages, onPopPage, navigator));
+
+      // It should not crash the app.
+      expect(tester.takeException(), isNull);
+      await tester.pumpAndSettle();
+      expect(find.text('initial'), findsOneWidget);
+    });
   });
 }
 

@@ -830,20 +830,20 @@ abstract class TransitionDelegate<T> {
   ///
   /// For example, consider the following case.
   ///
-  ///    newPageRouteHistory = [A, B, C]
+  /// newPageRouteHistory = [A, B, C]
   ///
-  ///    locationToExitingPageRoute = {A -> D, C -> E}
+  /// locationToExitingPageRoute = {A -> D, C -> E}
   ///
   /// The following outputs are valid.
   ///
-  ///    result = [A, B ,C ,D ,E] is valid
-  ///    result = [D, A, B ,C ,E] is also valid because exiting route can be
-  ///    inserted in any place
+  /// result = [A, B ,C ,D ,E] is valid.
+  /// result = [D, A, B ,C ,E] is also valid because exiting route can be
+  /// inserted in any place.
   ///
   /// The following outputs are invalid.
   ///
-  ///    result = [B, A, C ,D ,E] is invalid because B must be after A.
-  ///    result = [A, B, C ,E] is invalid because results must include D.
+  /// result = [B, A, C ,D ,E] is invalid because B must be after A.
+  /// result = [A, B, C ,E] is invalid because results must include D.
   ///
   /// See also:
   ///
@@ -1379,10 +1379,15 @@ class Navigator extends StatefulWidget {
   /// This callback is responsible for calling [Route.didPop] and returning
   /// whether this pop is successful.
   ///
-  /// The [Navigator] widget should be rebuilt with a [pages] list that does not
-  /// contain the [Page] for the given [Route]. The next time the [pages] list
-  /// is updated, if the [Page] corresponding to this [Route] is still present,
-  /// it will be interpreted as a new route to display.
+  /// This callback is also responsible for updating the list of [Page]s that
+  /// was passed into the [pages]. If the [Page] corresponding to this [Route]
+  /// is still present the next time the [pages] list is updated, it will be
+  /// interpreted as a new route to display.
+  ///
+  /// When updating the list of [Page]s, this callback should avoid triggering
+  /// navigator rebuilds. The [Route.didPop] is sufficient for the navigator
+  /// to remove the route from the history. Additional rebuilds may potentially
+  /// impact the performance.
   final PopPageCallback onPopPage;
 
   /// The delegate used for deciding how routes transition in or off the screen
@@ -2514,7 +2519,8 @@ class _RouteEntry extends RouteTransitionRecord {
       'This route cannot be marked for pop. Either a decision has already been '
       'made or it does not require an explicit decision on how to transition out.'
     );
-    pop<dynamic>(result);
+    if (isPresent)
+      pop<dynamic>(result);
     _debugWaitingForExitDecision = false;
   }
 
@@ -2526,7 +2532,8 @@ class _RouteEntry extends RouteTransitionRecord {
       'been made or it does not require an explicit decision on how to transition '
       'out.'
     );
-    complete<dynamic>(result);
+    if (isPresent)
+      complete<dynamic>(result);
     _debugWaitingForExitDecision = false;
   }
 
@@ -2538,7 +2545,8 @@ class _RouteEntry extends RouteTransitionRecord {
       'been made or it does not require an explicit decision on how to transition '
       'out.'
     );
-    remove();
+    if (isPresent)
+      remove();
     _debugWaitingForExitDecision = false;
   }
 }
