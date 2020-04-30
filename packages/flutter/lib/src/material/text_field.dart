@@ -959,7 +959,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    // TODO(jonhawilliams): Uncomment this check once tests are migrated, needs reference
+    // TODO(jonahwilliams): Uncomment this check once tests are migrated, needs reference
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
     assert(
