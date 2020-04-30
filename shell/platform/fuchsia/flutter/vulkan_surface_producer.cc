@@ -63,9 +63,13 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
   std::vector<std::string> extensions = {
       VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME,
   };
+
+  // On Fuchsia, the validation layers need to be packaged as part of the
+  // flutter_runner in order to work. As a result, we can use the presence
+  // of the layers to mean that we want the layers enabled.
   application_ = std::make_unique<vulkan::VulkanApplication>(
       *vk_, "FlutterRunner", std::move(extensions), VK_MAKE_VERSION(1, 0, 0),
-      VK_MAKE_VERSION(1, 1, 0));
+      VK_MAKE_VERSION(1, 1, 0), true /* enable_validation_layers */);
 
   if (!application_->IsValid() || !vk_->AreInstanceProcsSetup()) {
     // Make certain the application instance was created and it setup the
