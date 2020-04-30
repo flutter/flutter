@@ -55,16 +55,23 @@ void main() {
   testWidgets('PhysicalModel - creates a physical model layer when it needs compositing', (WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: PhysicalModel(
-            shape: BoxShape.rectangle,
-            color: Colors.grey,
-            shadowColor: Colors.red,
-            elevation: 1.0,
-            child: Material(child: TextField(controller: TextEditingController())),
+      Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: PhysicalModel(
+              shape: BoxShape.rectangle,
+              color: Colors.grey,
+              shadowColor: Colors.red,
+              elevation: 1.0,
+              child: Material(child: TextField(controller: TextEditingController())),
+            ),
           ),
         ),
       ),
