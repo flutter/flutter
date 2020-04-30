@@ -63,7 +63,7 @@ void main() {
 
       await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.wraps.png'));
     });
-  }, skip: isBrowser); // Animation sheet does not support browser https://github.com/flutter/flutter/issues/56001 
+  }, skip: isBrowser); // Animation sheet does not support browser https://github.com/flutter/flutter/issues/56001
 }
 
 // An animation of a yellow pixel moving from left to right, in a container of
