@@ -117,60 +117,60 @@ void TextInputPlugin::HandleMethodCall(
     // These methods are no-ops.
   } else if (method.compare(kClearClientMethod) == 0) {
     active_model_ = nullptr;
-  } else {
-    // Every following method requires args.
+  } else if (method.compare(kSetClientMethod) == 0) {
     if (!method_call.arguments() || method_call.arguments()->IsNull()) {
       result->Error(kBadArgumentError, "Method invoked without args");
       return;
     }
     const rapidjson::Document& args = *method_call.arguments();
 
-    if (method.compare(kSetClientMethod) == 0) {
-      const rapidjson::Value& client_id_json = args[0];
-      const rapidjson::Value& client_config = args[1];
-      if (client_id_json.IsNull()) {
-        result->Error(kBadArgumentError, "Could not set client, ID is null.");
-        return;
-      }
-      if (client_config.IsNull()) {
-        result->Error(kBadArgumentError,
-                      "Could not set client, missing arguments.");
-        return;
-      }
-      int client_id = client_id_json.GetInt();
-      active_model_ =
-          std::make_unique<TextInputModel>(client_id, client_config);
-    } else if (method.compare(kSetEditingStateMethod) == 0) {
-      if (active_model_ == nullptr) {
-        result->Error(
-            kInternalConsistencyError,
-            "Set editing state has been invoked, but no client is set.");
-        return;
-      }
-      auto text = args.FindMember(kTextKey);
-      if (text == args.MemberEnd() || text->value.IsNull()) {
-        result->Error(kBadArgumentError,
-                      "Set editing state has been invoked, but without text.");
-        return;
-      }
-      auto selection_base = args.FindMember(kSelectionBaseKey);
-      auto selection_extent = args.FindMember(kSelectionExtentKey);
-      if (selection_base == args.MemberEnd() ||
-          selection_base->value.IsNull() ||
-          selection_extent == args.MemberEnd() ||
-          selection_extent->value.IsNull()) {
-        result->Error(kInternalConsistencyError,
-                      "Selection base/extent values invalid.");
-        return;
-      }
-      active_model_->SetEditingState(selection_base->value.GetInt(),
-                                     selection_extent->value.GetInt(),
-                                     text->value.GetString());
-    } else {
-      // Unhandled method.
-      result->NotImplemented();
+    const rapidjson::Value& client_id_json = args[0];
+    const rapidjson::Value& client_config = args[1];
+    if (client_id_json.IsNull()) {
+      result->Error(kBadArgumentError, "Could not set client, ID is null.");
       return;
     }
+    if (client_config.IsNull()) {
+      result->Error(kBadArgumentError,
+                    "Could not set client, missing arguments.");
+      return;
+    }
+    int client_id = client_id_json.GetInt();
+    active_model_ = std::make_unique<TextInputModel>(client_id, client_config);
+  } else if (method.compare(kSetEditingStateMethod) == 0) {
+    if (!method_call.arguments() || method_call.arguments()->IsNull()) {
+      result->Error(kBadArgumentError, "Method invoked without args");
+      return;
+    }
+    const rapidjson::Document& args = *method_call.arguments();
+
+    if (active_model_ == nullptr) {
+      result->Error(
+          kInternalConsistencyError,
+          "Set editing state has been invoked, but no client is set.");
+      return;
+    }
+    auto text = args.FindMember(kTextKey);
+    if (text == args.MemberEnd() || text->value.IsNull()) {
+      result->Error(kBadArgumentError,
+                    "Set editing state has been invoked, but without text.");
+      return;
+    }
+    auto selection_base = args.FindMember(kSelectionBaseKey);
+    auto selection_extent = args.FindMember(kSelectionExtentKey);
+    if (selection_base == args.MemberEnd() || selection_base->value.IsNull() ||
+        selection_extent == args.MemberEnd() ||
+        selection_extent->value.IsNull()) {
+      result->Error(kInternalConsistencyError,
+                    "Selection base/extent values invalid.");
+      return;
+    }
+    active_model_->SetEditingState(selection_base->value.GetInt(),
+                                   selection_extent->value.GetInt(),
+                                   text->value.GetString());
+  } else {
+    result->NotImplemented();
+    return;
   }
   // All error conditions return early, so if nothing has gone wrong indicate
   // success.
