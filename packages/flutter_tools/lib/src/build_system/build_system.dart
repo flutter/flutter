@@ -19,7 +19,7 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
 import 'exceptions.dart';
-import 'file_hash_store.dart';
+import 'file_store.dart';
 import 'source.dart';
 
 export 'source.dart';
@@ -49,7 +49,7 @@ class BuildSystemConfig {
 ///
 /// To determine if the action for a target needs to be executed, the
 /// [BuildSystem] performs a hash of the file contents for both inputs and
-/// outputs. This is tracked separately in the [FileHashStore].
+/// outputs. This is tracked separately in the [FileStore].
 ///
 /// A Target has both implicit and explicit inputs and outputs. Only the
 /// later are safe to evaluate before invoking the [buildAction]. For example,
@@ -508,9 +508,9 @@ class BuildSystem {
     environment.outputDir.createSync(recursive: true);
 
     // Load file hash store from previous builds.
-    final FileHashStore fileCache = FileHashStore(
-      environment: environment,
-      fileSystem: _fileSystem,
+    final File cacheFile = environment.buildDir.childFile(FileStore.kFileCache);
+    final FileStore fileCache = FileStore(
+      cacheFile: cacheFile,
       logger: _logger,
     )..initialize();
 
@@ -567,6 +567,55 @@ class BuildSystem {
       outputFiles: buildInstance.outputFiles.values.toList()
           ..sort((File a, File b) => a.path.compareTo(b.path)),
     );
+  }
+
+  static final Expando<FileStore> _incrementalFileStore = Expando<FileStore>();
+
+  /// Perform an incremental build of `target` and all of its dependencies.
+  ///
+  /// If [previousBuild] is not provided, a new incremental build is
+  /// initialized.
+  Future<BuildResult> buildIncremental(
+    Target target,
+    Environment environment,
+    BuildResult previousBuild,
+  ) async {
+      environment.buildDir.createSync(recursive: true);
+    environment.outputDir.createSync(recursive: true);
+
+    FileStore fileCache;
+    if (previousBuild == null || _incrementalFileStore[previousBuild] == null) {
+      final File cacheFile = environment.buildDir.childFile(FileStore.kFileCache);
+      fileCache = FileStore(
+        cacheFile: cacheFile,
+        logger: _logger,
+        strategy: FileStoreStrategy.timestamp,
+      )..initialize();
+    } else {
+      fileCache = _incrementalFileStore[previousBuild];
+    }
+    final Node node = target._toNode(environment);
+    final _BuildInstance buildInstance = _BuildInstance(
+      environment: environment,
+      fileCache: fileCache,
+      buildSystemConfig: const BuildSystemConfig(),
+      logger: _logger,
+      fileSystem: _fileSystem,
+      platform: _platform,
+    );
+    bool passed = true;
+    try {
+      passed = await buildInstance.invokeTarget(node);
+    } finally {
+      fileCache.persistIncremental();
+    }
+    final BuildResult result = BuildResult(
+      success: passed,
+      exceptions: buildInstance.exceptionMeasurements,
+      performance: buildInstance.stepTimings,
+    );
+    _incrementalFileStore[result] = fileCache;
+    return result;
   }
 
   /// Write the identifier of the last build into the output directory and
@@ -644,7 +693,7 @@ class _BuildInstance {
   final Pool resourcePool;
   final Map<String, AsyncMemoizer<bool>> pending = <String, AsyncMemoizer<bool>>{};
   final Environment environment;
-  final FileHashStore fileCache;
+  final FileStore fileCache;
   final Map<String, File> inputFiles = <String, File>{};
   final Map<String, File> outputFiles = <String, File>{};
 
@@ -718,11 +767,11 @@ class _BuildInstance {
       // If we were missing the depfile, resolve  input files after executing the
       // target so that all file hashes are up to date on the next run.
       if (node.missingDepfile) {
-        await fileCache.hashFiles(node.inputs);
+        await fileCache.diffFileList(node.inputs);
       }
 
       // Always update hashes for output files.
-      await fileCache.hashFiles(node.outputs);
+      await fileCache.diffFileList(node.outputs);
       node.target._writeStamp(node.inputs, node.outputs, environment);
       updateGraph();
 
@@ -921,7 +970,7 @@ class Node {
   /// Returns whether this target can be skipped.
   Future<bool> computeChanges(
     Environment environment,
-    FileHashStore fileHashStore,
+    FileStore fileHashStore,
     FileSystem fileSystem,
     Logger logger,
   ) async {
@@ -939,9 +988,9 @@ class Node {
       }
 
       final String absolutePath = file.path;
-      final String previousHash = fileHashStore.previousHashes[absolutePath];
-      if (fileHashStore.currentHashes.containsKey(absolutePath)) {
-        final String currentHash = fileHashStore.currentHashes[absolutePath];
+      final String previousHash = fileHashStore.previousMarks[absolutePath];
+      if (fileHashStore.currentMarks.containsKey(absolutePath)) {
+        final String currentHash = fileHashStore.currentMarks[absolutePath];
         if (currentHash != previousHash) {
           invalidatedReasons.add(InvalidatedReason.inputChanged);
           _dirty = true;
@@ -968,9 +1017,9 @@ class Node {
         continue;
       }
       final String absolutePath = file.path;
-      final String previousHash = fileHashStore.previousHashes[absolutePath];
-      if (fileHashStore.currentHashes.containsKey(absolutePath)) {
-        final String currentHash = fileHashStore.currentHashes[absolutePath];
+      final String previousHash = fileHashStore.previousMarks[absolutePath];
+      if (fileHashStore.currentMarks.containsKey(absolutePath)) {
+        final String currentHash = fileHashStore.currentMarks[absolutePath];
         if (currentHash != previousHash) {
           invalidatedReasons.add(InvalidatedReason.outputChanged);
           _dirty = true;
@@ -993,7 +1042,7 @@ class Node {
     // If we have files to hash, compute them asynchronously and then
     // update the result.
     if (sourcesToHash.isNotEmpty) {
-      final List<File> dirty = await fileHashStore.hashFiles(sourcesToHash);
+      final List<File> dirty = await fileHashStore.diffFileList(sourcesToHash);
       if (dirty.isNotEmpty) {
         invalidatedReasons.add(InvalidatedReason.inputChanged);
         _dirty = true;
