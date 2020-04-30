@@ -149,6 +149,7 @@ void main() {
     }
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/36704.
   testWidgets('kn arb file should be properly Unicode escaped', (WidgetTester tester) async {
     final File file = File('lib/src/l10n/material_kn.arb');
 
