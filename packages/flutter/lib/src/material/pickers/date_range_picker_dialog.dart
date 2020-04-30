@@ -200,6 +200,7 @@ Future<DateTimeRange> showDateRangePicker({
     context: context,
     useRootNavigator: useRootNavigator,
     routeSettings: routeSettings,
+    useSafeArea: false,
     builder: (BuildContext context) {
       return builder == null ? dialog : builder(context, dialog);
     },
