@@ -814,7 +814,7 @@ class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerP
 }
 
 class _AlwaysAnimating extends StatefulWidget {
-  _AlwaysAnimating({
+  const _AlwaysAnimating({
     this.child,
     this.onPaint,
   });

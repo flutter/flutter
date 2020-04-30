@@ -13,8 +13,10 @@ import 'package:flutter_test/flutter_test.dart';
 /// Records the frames of an animating widget, and later displays it in an
 /// animation sheet.
 ///
-/// This class does not work on the Web, because taking screenshots is
-/// unsupported.
+/// This class does not support Web, because taking screenshots is unsupported,
+/// which is necessary to build an animation sheet. Tests thatuse this class must
+/// be noted with `skip: isBrowser`.
+/// (https://github.com/flutter/flutter/issues/56001)
 ///
 /// Using this class takes the following steps:
 ///
@@ -78,7 +80,7 @@ import 'package:flutter_test/flutter_test.dart';
 ///     find.byWidget(display),
 ///     matchesGoldenFile('inkwell.press.animation.png'),
 ///   );
-/// });
+/// }, skip: isBrowser); // Animation sheet does not support browser https://github.com/flutter/flutter/issues/56001
 /// ```
 /// {@end-tool}
 class AnimationSheetBuilder {
