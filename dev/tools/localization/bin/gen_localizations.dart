@@ -528,11 +528,15 @@ void main(List<String> rawArgs) {
     exitWithError('$exception');
   }
 
-  // Encodes the material_kn.arb file adn the cupertino_en.arb files before
-  // generating localizations. This prevents a subset of Emacs users from
-  // crashing when opening up the Flutter source code.
-  // See https://github.com/flutter/flutter/issues/36704 for more context.
-  encodeKnArbFiles(directory);
+  // Only rewrite material_kn.arb and cupertino_en.arb if overwriting the
+  // Material and Cupertino localizations files.
+  if (options.writeToFile) {
+    // Encodes the material_kn.arb file and the cupertino_en.arb files before
+    // generating localizations. This prevents a subset of Emacs users from
+    // crashing when opening up the Flutter source code.
+    // See https://github.com/flutter/flutter/issues/36704 for more context.
+    encodeKnArbFiles(directory);
+  }
 
   precacheLanguageAndRegionTags();
 
