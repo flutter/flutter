@@ -2,24 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This program replaces the material_kn.arb and cupertino_kn.arb
-// files in flutter_localizations/packages/lib/src/l10n with versions
-// where the contents of the localized strings have been replaced by JSON
-// escapes. This is done because some of those strings contain characters
-// that can crash Emacs on Linux. There is more information
+// The utility function `encodeKnArbFiles` replaces the material_kn.arb
+// and cupertino_kn.arb files in flutter_localizations/packages/lib/src/l10n
+// with versions where the contents of the localized strings have been
+// replaced by JSON escapes. This is done because some of those strings
+// contain characters that can crash Emacs on Linux. There is more information
 // here: https://github.com/flutter/flutter/issues/36704 and in the README
 // in flutter_localizations/packages/lib/src/l10n.
 //
-// This app needs to be run by hand when material_kn.arb or cupertino_kn.arb
-// have been updated.
-//
-// ## Usage
-//
-// Run this program from the root of the git repository.
-//
-// ```
-// dart dev/tools/localization/bin/encode_kn_arb_files.dart
-// ```
+// This utility is run by `gen_localizations.dart` if --overwrite is passed
+// in as an option.
 
 import 'dart:convert';
 import 'dart:io';
