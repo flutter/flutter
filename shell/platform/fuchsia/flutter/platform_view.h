@@ -109,6 +109,10 @@ class PlatformView final : public flutter::PlatformView,
       fit::function<void(
           fml::RefPtr<flutter::PlatformMessage> /* message */)> /* handler */>
       platform_message_handlers_;
+  // These are the channels that aren't registered and have been notified as
+  // such. Notifying via logs multiple times results in log-spam. See:
+  // https://github.com/flutter/flutter/issues/55966
+  std::set<std::string /* channel */> unregistered_channels_;
   zx_handle_t vsync_event_handle_ = 0;
 
   void RegisterPlatformMessageHandlers();
