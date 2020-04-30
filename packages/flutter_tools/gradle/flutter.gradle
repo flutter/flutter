@@ -619,6 +619,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('dart-defines')) {
             dartDefinesValue = project.property('dart-defines')
         }
+        String bundleSkSLPathValue;
+        if (project.hasProperty('bundle-sksl-path')) {
+            bundleSkSLPathValue = project.property('bundle-sksl-path')
+        }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
             if (shouldSplitPerAbi()) {
@@ -657,6 +661,7 @@ class FlutterPlugin implements Plugin<Project> {
                 treeShakeIcons treeShakeIconsOptionsValue
                 dartObfuscation dartObfuscationValue
                 dartDefines dartDefinesValue
+                bundleSkSLPath bundleSkSLPathValue
                 doLast {
                     project.exec {
                         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -849,6 +854,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     Boolean dartObfuscation
     @Optional @Input
     String dartDefines
+    @Optional @Input
+    String bundleSkSLPath
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -917,6 +924,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (dartDefines != null) {
                 args "--DartDefines=${dartDefines}"
+            }
+            if (bundleSkSLPath != null) {
+                args "-iBundleSkSLPath=${bundleSkSLPath}"
             }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"

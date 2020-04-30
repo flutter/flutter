@@ -627,7 +627,7 @@ void main() {
     expect(testLogger.statusText, contains('flutter_01.sksl'));
     expect(globals.fs.file('flutter_01.sksl'), exists);
     expect(json.decode(globals.fs.file('flutter_01.sksl').readAsStringSync()), <String, Object>{
-      'platform': 'android-arm',
+      'platform': 'android',
       'name': 'test device',
       'engineRevision': '42.2', // From FakeFlutterVersion
       'data': <String, Object>{'A': 'B'}

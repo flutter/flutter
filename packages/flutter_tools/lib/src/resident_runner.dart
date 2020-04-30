@@ -834,8 +834,21 @@ abstract class ResidentRunner {
       'sksl',
     );
     final Device device = flutterDevices.first.device;
+
+    // Convert android sub-platforms to single target platform.
+    TargetPlatform targetPlatform = await flutterDevices.first.device.targetPlatform;
+    switch (targetPlatform) {
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+        targetPlatform = TargetPlatform.android;
+        break;
+      default:
+        break;
+    }
     final Map<String, Object> manifest = <String, Object>{
-      'platform': getNameForTargetPlatform(await flutterDevices.first.device.targetPlatform),
+      'platform': getNameForTargetPlatform(targetPlatform),
       'name': device.name,
       'engineRevision': globals.flutterVersion.engineRevision,
       'data': data,

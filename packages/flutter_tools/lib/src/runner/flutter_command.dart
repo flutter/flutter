@@ -108,6 +108,7 @@ class FlutterOptions {
   static const String kSplitDebugInfoOption = 'split-debug-info';
   static const String kDartObfuscationOption = 'obfuscate';
   static const String kDartDefinesOption = 'dart-define';
+  static const String kBundleSkSLPathOption = 'bundle-sksl-path';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -425,6 +426,16 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addBundleSkSLPathOption({ @required bool hide }) {
+    argParser.addOption(FlutterOptions.kBundleSkSLPathOption,
+      help: 'A path to a file containing precompiled SkSL shaders generated '
+        'during "flutter run". These can be included in an application to '
+        'improve the first frame render times.',
+      hide: hide,
+      valueHelp: '/project-name/flutter_1.sksl'
+    );
+  }
+
   void addTreeShakeIconsFlag({
     bool enabledByDefault
   }) {
@@ -587,6 +598,10 @@ abstract class FlutterCommand extends Command<void> {
       && buildMode.isPrecompiled
       && boolArg('tree-shake-icons');
 
+    final String bundleSkSLPath = argParser.options.containsKey(FlutterOptions.kBundleSkSLPathOption)
+      ? stringArg(FlutterOptions.kBundleSkSLPathOption)
+      : null;
+
     return BuildInfo(buildMode,
       argParser.options.containsKey('flavor')
         ? stringArg('flavor')
@@ -614,6 +629,7 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines: argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
           ? stringsArg(FlutterOptions.kDartDefinesOption)
           : const <String>[],
+      bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
     );
   }
