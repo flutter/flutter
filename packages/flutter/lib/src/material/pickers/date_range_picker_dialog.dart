@@ -15,6 +15,7 @@ import '../button_theme.dart';
 import '../color_scheme.dart';
 import '../debug.dart';
 import '../dialog.dart';
+import '../dialog_theme.dart';
 import '../flat_button.dart';
 import '../icon_button.dart';
 import '../icons.dart';
@@ -326,6 +327,7 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
     Widget contents;
     Size size;
     ShapeBorder shape;
+    double elevation;
     EdgeInsets insetPadding;
     switch (_entryMode) {
       case DatePickerEntryMode.calendar:
@@ -349,8 +351,9 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
         size = mediaQuery.size;
         insetPadding = const EdgeInsets.all(0.0);
         shape = const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(0.0))
+          borderRadius: BorderRadius.all(Radius.zero)
         );
+        elevation = 0;
         break;
 
       case DatePickerEntryMode.input:
@@ -396,11 +399,16 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
           // TODO(darrenaustin): localize 'SELECTED DATE RANGE'
           helpText: widget.helpText ?? 'SELECTED DATE RANGE',
         );
+        final DialogTheme dialogTheme = Theme.of(context).dialogTheme;
         size = orientation == Orientation.portrait ? _inputPortraitDialogSize : _inputLandscapeDialogSize;
         insetPadding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0);
-        shape = const RoundedRectangleBorder(
+        // The default dialog shape is radius 2 rounded rect, but the spec has
+        // been updated to 4, so we will use that here for the Input Date Range
+        // Picker, but only if there isn't one provided in the theme.
+        shape = dialogTheme.shape ?? const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(4.0))
         );
+        elevation = dialogTheme.elevation ?? 24;
         break;
     }
 
@@ -421,8 +429,8 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
       ),
       insetPadding: insetPadding,
       shape: shape,
+      elevation: elevation,
       clipBehavior: Clip.antiAlias,
-      elevation: 24.0,
     );
   }
 }
