@@ -402,11 +402,10 @@ class Focus extends StatefulWidget {
   final bool canRequestFocus;
 
   /// {@template flutter.widgets.Focus.descendantsAreFocusable}
-  /// If false, will make this widget's focus node and its descendants
-  /// unfocusable.
+  /// If false, will make this widget's descendants unfocusable.
   ///
-  /// Defaults to true. Does not affect focusability of this node: for that,
-  /// use [canRequestFocus].
+  /// Defaults to true. Does not affect focusability of this node (just its
+  /// descendants): for that, use [canRequestFocus].
   ///
   /// If any descendants are focused when this is set to false, they will be
   /// unfocused. When `descendantsAreFocusable` is set to true again, they will
@@ -419,7 +418,7 @@ class Focus extends StatefulWidget {
   ///  * [ExcludeFocus], a widget that uses this property to conditionally
   ///    exclude focus for a subtree.
   ///  * [FocusTraversalGroup], a widget used to group together and configure
-  ///    the focus traversal policy for a widget subtree that has an
+  ///    the focus traversal policy for a widget subtree that has a
   ///    `descendantsAreFocusable` parameter to conditionally block focus for a
   ///    subtree.
   /// {@endtemplate}
@@ -949,26 +948,44 @@ class _FocusMarker extends InheritedNotifier<FocusNode> {
 /// Does not affect the value of [canRequestFocus] on the descendants.
 ///
 /// See also:
-///  - [Focus], a widget for adding and managing a [FocusNode] in the widget tree.
-///  - [FocusTraversalGroup], a widget that groups widgets for focus traversal,
+///
+///  * [Focus], a widget for adding and managing a [FocusNode] in the widget tree.
+///  * [FocusTraversalGroup], a widget that groups widgets for focus traversal,
 ///    and can also be used in the same way as this widget by setting its
 ///    `descendantsAreFocusable` attribute.
 class ExcludeFocus extends StatelessWidget {
   /// Const constructor for [ExcludeFocus] widget.
   ///
-  /// The [descendantsAreFocusable] argument must not be null.
+  /// The [excluding] argument must not be null.
   ///
   /// The [child] argument is required, and must not be null.
   const ExcludeFocus({
     Key key,
-    this.descendantsAreFocusable = false,
+    this.excluding = true,
     @required this.child,
-  })  : assert(descendantsAreFocusable != null),
+  })  : assert(excluding != null),
         assert(child != null),
         super(key: key);
 
-  /// {@macro flutter.widgets.Focus.descendantsAreFocusable}
-  final bool descendantsAreFocusable;
+  /// If true, will make this widget's descendants unfocusable.
+  ///
+  /// Defaults to true.
+  ///
+  /// If any descendants are focused when this is set to true, they will be
+  /// unfocused. When `excluding` is set to false again, they will not be
+  /// refocused, although they will be able to accept focus again.
+  ///
+  /// Does not affect the value of [canRequestFocus] on the descendants.
+  ///
+  /// See also:
+  ///
+  ///  * [Focus.descendantsAreFocusable], the attribute of a [Focus] widget that
+  ///    controls this same property for focus widgets.
+  ///  * [FocusTraversalGroup], a widget used to group together and configure
+  ///    the focus traversal policy for a widget subtree that has a
+  ///    `descendantsAreFocusable` parameter to conditionally block focus for a
+  ///    subtree.
+  final bool excluding;
 
   /// The child widget of this [ExcludeFocus].
   ///
@@ -980,7 +997,7 @@ class ExcludeFocus extends StatelessWidget {
     return Focus(
       canRequestFocus: false,
       skipTraversal: true,
-      descendantsAreFocusable: descendantsAreFocusable,
+      descendantsAreFocusable: !excluding,
       child: child,
     );
   }
