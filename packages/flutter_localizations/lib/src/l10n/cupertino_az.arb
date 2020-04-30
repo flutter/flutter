@@ -19,5 +19,6 @@
   "copyButtonLabel": "Kopyalayın",
   "pasteButtonLabel": "Yerləşdirin",
   "selectAllButtonLabel": "Hamısını seçin",
-  "tabSemanticsLabel": "TBD"
+  "tabSemanticsLabel": "TBD",
+  "modalBarrierDismissLabel": "İmtina edin"
 }

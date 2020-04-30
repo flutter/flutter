@@ -315,7 +315,7 @@ Future<void> buildGradleApp({
     command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions.join(',')}');
   }
   if (buildInfo.extraGenSnapshotOptions != null) {
-    command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions}');
+    command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions.join(',')}');
   }
   if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty) {
     command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
@@ -350,6 +350,9 @@ Future<void> buildGradleApp({
   }
   if (androidBuildInfo.buildInfo.dartObfuscation) {
     command.add('-Pdart-obfuscation=true');
+  }
+  if (androidBuildInfo.buildInfo.bundleSkSLPath != null) {
+    command.add('-Pbundle-sksl-path=${androidBuildInfo.buildInfo.bundleSkSLPath}');
   }
   command.add(assembleTask);
 

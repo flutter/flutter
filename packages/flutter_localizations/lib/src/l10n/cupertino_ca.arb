@@ -19,5 +19,6 @@
   "copyButtonLabel": "Copia",
   "pasteButtonLabel": "Enganxa",
   "selectAllButtonLabel": "Selecciona-ho tot",
-  "tabSemanticsLabel": "TBD"
+  "tabSemanticsLabel": "TBD",
+  "modalBarrierDismissLabel": "Ignora"
 }

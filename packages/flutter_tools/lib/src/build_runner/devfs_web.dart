@@ -48,6 +48,15 @@ typedef DwdsLauncher = Future<Dwds> Function({
   ExpressionCompiler expressionCompiler,
 });
 
+// A minimal index for projects that do not yet support web.
+const String _kDefaultIndex = '''
+<html>
+    <body>
+        <script src="main.dart.js"></script>
+    </body>
+</html>
+''';
+
 /// An expression compiler connecting to FrontendServer
 ///
 /// This is only used in development mode
@@ -125,6 +134,7 @@ class WebAssetServer implements AssetReader {
   /// Unhandled exceptions will throw a [ToolExit] with the error and stack
   /// trace.
   static Future<WebAssetServer> start(
+    ChromiumLauncher chromiumLauncher,
     String hostname,
     int port,
     UrlTunneller urlTunneller,
@@ -144,15 +154,9 @@ class WebAssetServer implements AssetReader {
         address = (await InternetAddress.lookup(hostname)).first;
       }
       final HttpServer httpServer = await HttpServer.bind(address, port);
-      final PackageConfig packageConfig = await loadPackageConfigUri(
-        globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
-        loader: (Uri uri) {
-          final File file = globals.fs.file(uri);
-          if (!file.existsSync()) {
-            return null;
-          }
-          return file.readAsBytes();
-        }
+      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+        globals.fs.file(globalPackagesPath),
+        logger: globals.logger,
       );
       final Map<String, String> digests = <String, String>{};
       final Map<String, String> modules = <String, String>{};
@@ -214,8 +218,8 @@ class WebAssetServer implements AssetReader {
         enableDebugExtension: true,
         buildResults: const Stream<BuildResult>.empty(),
         chromeConnection: () async {
-          final Chrome chrome = await ChromeLauncher.connectedInstance;
-          return chrome.chromeConnection;
+          final Chromium chromium = await chromiumLauncher.connectedInstance;
+          return chromium.chromeConnection;
         },
         hostname: hostname,
         urlEncoder: urlTunneller,
@@ -282,8 +286,11 @@ class WebAssetServer implements AssetReader {
         headers[HttpHeaders.contentTypeHeader] = 'text/html';
         headers[HttpHeaders.contentLengthHeader] = indexFile.lengthSync().toString();
         return shelf.Response.ok(indexFile.openRead(), headers: headers);
+      } else {
+        headers[HttpHeaders.contentTypeHeader] = 'text/html';
+        headers[HttpHeaders.contentLengthHeader] = _kDefaultIndex.length.toString();
+        return shelf.Response.ok(_kDefaultIndex, headers: headers);
       }
-      return shelf.Response.notFound('');
     }
 
     // Track etag headers for better caching of resources.
@@ -343,7 +350,8 @@ class WebAssetServer implements AssetReader {
 
     // For real files, use a serialized file stat plus path as a revision.
     // This allows us to update between canvaskit and non-canvaskit SDKs.
-    final String etag = file.lastModifiedSync().toIso8601String() + file.path;
+    final String etag = file.lastModifiedSync().toIso8601String()
+      + Uri.encodeComponent(file.path);
     if (ifNoneMatch == etag) {
       return shelf.Response.notModified();
     }
@@ -568,6 +576,7 @@ class WebDevFS implements DevFS {
     @required this.enableDwds,
     @required this.entrypoint,
     @required this.expressionCompiler,
+    @required this.chromiumLauncher,
     this.testMode = false,
   });
 
@@ -581,6 +590,7 @@ class WebDevFS implements DevFS {
   final bool enableDwds;
   final bool testMode;
   final ExpressionCompiler expressionCompiler;
+  final ChromiumLauncher chromiumLauncher;
 
   WebAssetServer webAssetServer;
 
@@ -638,6 +648,7 @@ class WebDevFS implements DevFS {
   @override
   Future<Uri> create() async {
     webAssetServer = await WebAssetServer.start(
+      chromiumLauncher,
       hostname,
       port,
       urlTunneller,

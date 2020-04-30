@@ -19,5 +19,6 @@
   "copyButtonLabel": "Nusxa olish",
   "pasteButtonLabel": "Joylash",
   "selectAllButtonLabel": "Barchasini tanlash",
-  "tabSemanticsLabel": "TBD"
+  "tabSemanticsLabel": "TBD",
+  "modalBarrierDismissLabel": "Yopish"
 }

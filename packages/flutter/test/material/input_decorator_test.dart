@@ -3671,7 +3671,7 @@ void main() {
       )
       ..restore(),
     );
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
 
   testWidgets('OutlineInputBorder radius carries over when lerping', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/23982
@@ -3910,4 +3910,18 @@ void main() {
     expect(tester.getTopLeft(find.text('label')).dy, -4.0);
   });
 
+  testWidgets('InputDecorator floating label obeys floatingLabelBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          labelText: 'label',
+          floatingLabelBehavior: FloatingLabelBehavior.never,
+        ),
+      ),
+    );
+
+    // Passing floating behavior never results in a dy offset of 20
+    // because the label is not initially floating.
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+  });
 }

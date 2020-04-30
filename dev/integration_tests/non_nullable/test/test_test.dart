@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_driver/driver_extension.dart';
-import 'package:platform_views_layout/main.dart' as app;
+// @dart=2.9
+import 'package:flutter_test/flutter_test.dart';
+
+String? x;
 
 void main() {
-  enableFlutterDriverExtension();
-  app.main();
+  testWidgets('trivial', (WidgetTester tester) async {
+    expect(true, true);
+  });
 }

@@ -139,7 +139,7 @@ abstract class DesktopDevice extends Device {
     bool succeeded = true;
     // Walk a copy of _runningProcesses, since the exit handler removes from the
     // set.
-    for (final Process process in Set<Process>.from(_runningProcesses)) {
+    for (final Process process in Set<Process>.of(_runningProcesses)) {
       succeeded &= process.kill();
     }
     return succeeded;

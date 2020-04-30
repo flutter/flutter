@@ -57,8 +57,7 @@ void main() {
       'git', 'config', '--system', 'core.longpaths', 'true',
     ]);
 
-    print('Step 1');
-    // Step 1. Clone the dev branch of flutter into the test directory.
+    print('Step 1 - clone the $_kBranch of flutter into the test directory');
     exitCode = await processUtils.stream(<String>[
       'git',
       'clone',
@@ -66,8 +65,7 @@ void main() {
     ], workingDirectory: parentDirectory.path, trace: true);
     expect(exitCode, 0);
 
-    print('Step 2');
-    // Step 2. Switch to the dev branch.
+    print('Step 2 - switch to the $_kBranch');
     exitCode = await processUtils.stream(<String>[
       'git',
       'checkout',
@@ -78,8 +76,7 @@ void main() {
     ], workingDirectory: testDirectory.path, trace: true);
     expect(exitCode, 0);
 
-    print('Step 3');
-    // Step 3. Revert to a prior version.
+    print('Step 3 - revert back to $_kInitialVersion');
     exitCode = await processUtils.stream(<String>[
       'git',
       'reset',
@@ -88,9 +85,8 @@ void main() {
     ], workingDirectory: testDirectory.path, trace: true);
     expect(exitCode, 0);
 
-    print('Step 4');
-    // Step 4. Upgrade to the newest stable. This should update the persistent
-    // tool state with the sha for v1.14.3
+    print('Step 4 - upgrade to the newest $_kBranch');
+    // This should update the persistent tool state with the sha for HEAD
     exitCode = await processUtils.stream(<String>[
       flutterBin,
       'upgrade',
@@ -99,8 +95,7 @@ void main() {
     ], workingDirectory: testDirectory.path, trace: true);
     expect(exitCode, 0);
 
-    print('Step 5');
-    // Step 5. Verify that the version is different.
+    print('Step 5 - verify that the version is different');
     final RunResult versionResult = await processUtils.run(<String>[
       'git',
       'describe',
@@ -111,8 +106,9 @@ void main() {
       '--tags',
     ], workingDirectory: testDirectory.path);
     expect(versionResult.stdout, isNot(contains(_kInitialVersion)));
+    print('current version is ${versionResult.stdout.trim()}\ninitial was $_kInitialVersion');
 
-    print('Step 6');
+    print('Step 6 - downgrade back to the initial version');
     // Step 6. Downgrade back to initial version.
     exitCode = await processUtils.stream(<String>[
        flutterBin,
@@ -122,7 +118,7 @@ void main() {
     ], workingDirectory: testDirectory.path, trace: true);
     expect(exitCode, 0);
 
-    print('Step 7');
+    print('Step 7 - verify downgraded version matches original version');
     // Step 7. Verify downgraded version matches original version.
     final RunResult oldVersionResult = await processUtils.run(<String>[
       'git',
@@ -134,5 +130,6 @@ void main() {
       '--tags',
     ], workingDirectory: testDirectory.path);
     expect(oldVersionResult.stdout, contains(_kInitialVersion));
+    print('current version is ${oldVersionResult.stdout.trim()}\ninitial was $_kInitialVersion');
   });
 }

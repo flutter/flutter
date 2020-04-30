@@ -14,7 +14,11 @@ import '../plugins.dart';
 import '../project.dart';
 
 /// Builds the Linux project through the Makefile.
-Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
+Future<void> buildLinux(
+  LinuxProject linuxProject,
+  BuildInfo buildInfo, {
+    String target = 'lib/main.dart',
+  }) async {
   if (!linuxProject.makeFile.existsSync()) {
     throwToolExit('No Linux desktop project configured. See '
       'https://github.com/flutter/flutter/wiki/Desktop-shells#create '
@@ -38,10 +42,15 @@ Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String 
   final StringBuffer buffer = StringBuffer('''
 # Generated code do not commit.
 export FLUTTER_ROOT=${Cache.flutterRoot}
-export TRACK_WIDGET_CREATION=${buildInfo?.trackWidgetCreation == true}
 export FLUTTER_TARGET=$target
 export PROJECT_DIR=${linuxProject.project.directory.path}
 ''');
+  final Map<String, String> environmentConfig = buildInfo.toEnvironmentConfig();
+  for (final String key in environmentConfig.keys) {
+    final String value = environmentConfig[key];
+    buffer.writeln('export $key=$value');
+  }
+
   if (globals.artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
@@ -73,12 +82,18 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   );
   int result;
   try {
-    result = await processUtils.stream(<String>[
-      'make',
-      '-C',
-      linuxProject.makeFile.parent.path,
-      'BUILD=$buildFlag',
-    ], trace: true);
+    result = await processUtils.stream(
+      <String>[
+        'make',
+        '-C',
+        linuxProject.makeFile.parent.path,
+        'BUILD=$buildFlag',
+      ],
+      environment: <String, String>{
+        if (globals.logger.isVerbose)
+          'VERBOSE_SCRIPT_LOGGING': 'true'
+      }, trace: true,
+    );
   } on ArgumentError {
     throwToolExit("make not found. Run 'flutter doctor' for more information.");
   } finally {

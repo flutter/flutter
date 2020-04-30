@@ -14,12 +14,10 @@ import '../runner/flutter_command.dart';
 class DevicesCommand extends FlutterCommand {
 
   DevicesCommand() {
-
     argParser.addFlag('machine',
       negatable: false,
       help: 'Output device information in machine readable structured JSON format',
     );
-
     argParser.addOption(
       'timeout',
       abbr: 't',
@@ -60,7 +58,9 @@ class DevicesCommand extends FlutterCommand {
 
     final List<Device> devices = await deviceManager.refreshAllConnectedDevices(timeout: timeout);
 
-    if (devices.isEmpty) {
+    if (boolArg('machine')) {
+      await printDevicesAsJson(devices);
+    } else if (devices.isEmpty) {
       final StringBuffer status = StringBuffer('No devices detected.');
       status.writeln();
       status.writeln();
@@ -80,8 +80,6 @@ class DevicesCommand extends FlutterCommand {
           globals.printStatus('• $diagnostic', hangingIndent: 2);
         }
       }
-    } else if (boolArg('machine')) {
-      await printDevicesAsJson(devices);
     } else {
       globals.printStatus('${devices.length} connected ${pluralize('device', devices.length)}:\n');
       await Device.printDevices(devices);
@@ -97,5 +95,4 @@ class DevicesCommand extends FlutterCommand {
       )
     );
   }
-
 }

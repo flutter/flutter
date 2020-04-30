@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -61,6 +63,39 @@ void main() {
       expect(child1.parent, isNull);
       expect(child2.parent, isNull);
       expect(parent.children, isEmpty);
+    });
+    testWidgets('Geometry is transformed properly.', (WidgetTester tester) async {
+      final FocusNode focusNode1 = FocusNode(debugLabel: 'Test Node 1');
+      final FocusNode focusNode2 = FocusNode(debugLabel: 'Test Node 2');
+      await tester.pumpWidget(
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: <Widget>[
+              Focus(focusNode: focusNode1, child: Container(width: 200, height: 100),),
+              Transform.translate(
+                offset: const Offset(10, 20),
+                child: Transform.scale(
+                  scale: 0.33,
+                  child: Transform.rotate(
+                    angle: math.pi,
+                    child: Focus(focusNode: focusNode2, child: Container(width: 200, height: 100)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      focusNode2.requestFocus();
+      await tester.pump();
+
+      expect(focusNode1.rect, equals(const Rect.fromLTRB(300.0, 8.0, 500.0, 108.0)));
+      expect(focusNode2.rect, equals(const Rect.fromLTRB(443.0, 194.5, 377.0, 161.5)));
+      expect(focusNode1.size, equals(const Size(200.0, 100.0)));
+      expect(focusNode2.size, equals(const Size(-66.0, -33.0)));
+      expect(focusNode1.offset, equals(const Offset(300.0, 8.0)));
+      expect(focusNode2.offset, equals(const Offset(443.0, 194.5)));
     });
     testWidgets('implements debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();

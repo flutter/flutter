@@ -362,7 +362,7 @@ void main() {
           },
           'files': <String, dynamic>{},
         };
-        final Map<String, dynamic> b = Map<String, dynamic>.from(a);
+        final Map<String, dynamic> b = Map<String, dynamic>.of(a);
         b['properties'] = <String, String>{
           'buildMode': BuildMode.release.toString(),
         };
@@ -380,7 +380,7 @@ void main() {
             'b.dart': '6f144e08b58cd0925328610fad7ac07c',
           },
         };
-        final Map<String, dynamic> b = Map<String, dynamic>.from(a);
+        final Map<String, dynamic> b = Map<String, dynamic>.of(a);
         b['files'] = <String, dynamic>{
           'a.dart': '8a21a15fad560b799f6731d436c1b698',
           'b.dart': '6f144e08b58cd0925328610fad7ac07d',
@@ -399,7 +399,7 @@ void main() {
             'b.dart': '6f144e08b58cd0925328610fad7ac07c',
           },
         };
-        final Map<String, dynamic> b = Map<String, dynamic>.from(a);
+        final Map<String, dynamic> b = Map<String, dynamic>.of(a);
         b['files'] = <String, dynamic>{
           'a.dart': '8a21a15fad560b799f6731d436c1b698',
           'c.dart': '6f144e08b58cd0925328610fad7ac07d',

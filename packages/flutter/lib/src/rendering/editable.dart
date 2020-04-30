@@ -138,6 +138,18 @@ bool _isWhitespace(int codeUnit) {
   return true;
 }
 
+/// Returns true if [codeUnit] is a leading (high) surrogate for a surrogate
+/// pair.
+bool _isLeadingSurrogate(int codeUnit) {
+  return codeUnit & 0xFC00 == 0xD800;
+}
+
+/// Returns true if [codeUnit] is a trailing (low) surrogate for a surrogate
+/// pair.
+bool _isTrailingSurrogate(int codeUnit) {
+  return codeUnit & 0xFC00 == 0xDC00;
+}
+
 /// Displays some text in a scrollable container with a potentially blinking
 /// cursor and with gesture recognizers.
 ///
@@ -201,6 +213,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     bool readOnly = false,
     bool forceLine = true,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
+    String obscuringCharacter = '•',
     bool obscureText = false,
     Locale locale,
     double cursorWidth = 1.0,
@@ -235,6 +248,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        assert(ignorePointer != null),
        assert(textWidthBasis != null),
        assert(paintCursorAboveText != null),
+       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert(obscureText != null),
        assert(textSelectionDelegate != null),
        assert(cursorWidth != null && cursorWidth >= 0.0),
@@ -272,6 +286,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _selectionWidthStyle = selectionWidthStyle,
        _startHandleLayerLink = startHandleLayerLink,
        _endHandleLayerLink = endHandleLayerLink,
+       _obscuringCharacter = obscuringCharacter,
        _obscureText = obscureText,
        _readOnly = readOnly,
        _forceLine = forceLine,
@@ -282,9 +297,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (promptRectColor != null)
       _promptRectPaint.color = promptRectColor;
   }
-
-  /// Character used to obscure text if [obscureText] is true.
-  static const String obscuringCharacter = '•';
 
   /// Called when the selection changes.
   ///
@@ -330,6 +342,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     _devicePixelRatio = value;
     markNeedsTextLayout();
+  }
+
+  /// Character used for obscuring text if [obscureText] is true.
+  ///
+  /// Cannot be null, and must have a length of exactly one.
+  String get obscuringCharacter => _obscuringCharacter;
+  String _obscuringCharacter;
+  set obscuringCharacter(String value) {
+    if (_obscuringCharacter == value) {
+      return;
+    }
+    assert(value != null && value.length == 1);
+    _obscuringCharacter = value;
+    markNeedsLayout();
   }
 
   /// Whether to hide the text being edited (e.g., for passwords).
@@ -597,12 +623,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         }
       } else {
         if (rightArrow && newSelection.extentOffset < _plainText.length) {
-          newSelection = newSelection.copyWith(extentOffset: newSelection.extentOffset + 1);
+          final int delta = _isLeadingSurrogate(text.codeUnitAt(newSelection.extentOffset)) ? 2 : 1;
+          newSelection = newSelection.copyWith(extentOffset: newSelection.extentOffset + delta);
           if (shift) {
             _cursorResetLocation += 1;
           }
         } else if (leftArrow && newSelection.extentOffset > 0) {
-          newSelection = newSelection.copyWith(extentOffset: newSelection.extentOffset - 1);
+          final int delta = _isTrailingSurrogate(text.codeUnitAt(newSelection.extentOffset - 1)) ? 2 : 1;
+          newSelection = newSelection.copyWith(extentOffset: newSelection.extentOffset - delta);
           if (shift) {
             _cursorResetLocation -= 1;
           }
@@ -720,10 +748,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _handleDelete() {
-    if (selection.textAfter(_plainText).isNotEmpty) {
+    final String textAfter = selection.textAfter(_plainText);
+    if (textAfter.isNotEmpty) {
+      final int deleteCount = _isLeadingSurrogate(textAfter.codeUnitAt(0)) ? 2 : 1;
       textSelectionDelegate.textEditingValue = TextEditingValue(
         text: selection.textBefore(_plainText)
-          + selection.textAfter(_plainText).substring(1),
+          + selection.textAfter(_plainText).substring(deleteCount),
         selection: TextSelection.collapsed(offset: selection.start),
       );
     } else {
