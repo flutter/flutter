@@ -402,6 +402,10 @@ abstract class CopyFlutterAotBundle extends Target {
 ///
 /// All assets and manifests are included from flutter_assets/**.
 abstract class ApplicationAssetBundle extends Target {
+  /// create an [ApplicationAssetBundle] class.
+  ///
+  /// If [shouldCopyAssets] is true, an asset bundle is created as a part of
+  /// the application bundle.
   const ApplicationAssetBundle({
     this.shouldCopyAssets = true,
   });
@@ -466,7 +470,10 @@ abstract class ApplicationAssetBundle extends Target {
   ];
 }
 
-/// For single-arch release builds, copy app.so to flutter_assets
+/// For single-arch release builds that create ELF shared object files.
+///
+/// This not used by iOS or macOS application bundles, which use assembly
+/// files.
 mixin ReleaseAssetBundle on ApplicationAssetBundle {
   @override
   Future<void> build(Environment environment) async {
