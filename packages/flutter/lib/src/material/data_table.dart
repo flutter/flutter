@@ -467,6 +467,7 @@ class DataTable extends StatelessWidget {
   }
 
   static const double _sortArrowPadding = 2.0;
+  static const double _headingFontSize = 12.0;
   static const Duration _sortArrowAnimationDuration = Duration(milliseconds: 150);
   static const Color _grey100Opacity = Color(0x0A000000); // Grey 100 as opacity instead of solid color
   static const Color _grey300Opacity = Color(0x1E000000); // Dark theme variant is just a guess.
@@ -540,8 +541,16 @@ class DataTable extends StatelessWidget {
       height: headingRowHeight,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: AnimatedDefaultTextStyle(
-        // Is this correct/breaking?
-        style: Theme.of(context).textTheme.headline6,
+        style: TextStyle(
+          // TODO(hansmuller): This should use the information provided by
+          // textTheme/DataTableTheme, https://github.com/flutter/flutter/issues/56079
+          fontWeight: FontWeight.w500,
+          fontSize: _headingFontSize,
+          height: math.min(1.0, headingRowHeight / _headingFontSize),
+          color: (Theme.of(context).brightness == Brightness.light)
+            ? ((onSort != null && sorted) ? Colors.black87 : Colors.black54)
+            : ((onSort != null && sorted) ? Colors.white : Colors.white70),
+        ),
         softWrap: false,
         duration: _sortArrowAnimationDuration,
         child: label,
@@ -586,8 +595,14 @@ class DataTable extends StatelessWidget {
       height: dataRowHeight,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: DefaultTextStyle(
-        // Is this correct/breaking?
-        style: Theme.of(context).textTheme.bodyText2,
+        style: TextStyle(
+          // TODO(hansmuller): This should use the information provided by
+          // textTheme/DataTableTheme, https://github.com/flutter/flutter/issues/56079
+          fontSize: 13.0,
+          color: isLightTheme
+            ? (placeholder ? Colors.black38 : Colors.black87)
+            : (placeholder ? Colors.white38 : Colors.white70),
+        ),
         child: IconTheme.merge(
           data: IconThemeData(
             color: isLightTheme ? Colors.black54 : Colors.white70,

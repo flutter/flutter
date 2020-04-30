@@ -1489,8 +1489,7 @@ class _RenderDecoration extends RenderBox {
   bool hitTestChildren(BoxHitTestResult result, { @required Offset position }) {
     assert(position != null);
     for (final RenderBox child in _children) {
-      // TODO(hansmuller): label must be handled specially since we've transformed it
-      // What is the actionable todo here?
+      // The label must be handled specially since we've transformed it.
       final Offset offset = _boxParentData(child).offset;
       final bool isHit = result.addWithPaintOffset(
         offset: offset,

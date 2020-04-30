@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(shihaohong): remove ignoring deprecated member use analysis
+// when AlertDialog.scrollable parameter is removed. See
+// https://flutter.dev/go/scrollable-alert-dialog for more details.
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -121,9 +126,9 @@ class Dialog extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  // Is 4.0 still spec? Is this breaking?
+  // TODO(johnsonmh): Update default dialog border radius to 4.0 to match material spec.
   static const RoundedRectangleBorder _defaultDialogShape =
-    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
   static const double _defaultElevation = 24.0;
 
   @override
@@ -435,7 +440,6 @@ class AlertDialog extends StatelessWidget {
   /// to overflow. Both [title] and [content] are wrapped in a scroll view,
   /// allowing all overflowed content to be visible while still showing the
   /// button bar.
-  // ignore: deprecated_member_use_from_same_package
   @Deprecated(
     'Set scrollable to `true`. This parameter will be removed and '
     'was introduced to migrate AlertDialog to be scrollable by '

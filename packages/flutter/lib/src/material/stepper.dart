@@ -19,7 +19,6 @@ import 'theme.dart';
 //   * mobile horizontal mode with adding/removing steps
 //   * alternative labeling
 //   * stepper feedback in the case of high-latency interactions
-// Needs reference
 
 /// The state of a [Step] which is used to control the style of the circle and
 /// text.
