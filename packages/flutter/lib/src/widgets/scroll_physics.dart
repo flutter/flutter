@@ -447,9 +447,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
     @required bool isScrolling,
     @required double velocity,
   }) {
-    return (!isScrolling && velocity == 0.0)
-      ? position.pixels.clamp(position.minScrollExtent, position.maxScrollExtent) as double
-      : super.adjustPositionForNewDimensions(position, isScrolling: isScrolling, velocity: velocity);
+    return position.pixels.clamp(position.minScrollExtent, position.maxScrollExtent) as double;
   }
 
   @override
@@ -559,9 +557,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
     @required bool isScrolling,
     @required double velocity,
   }) {
-    return (!isScrolling && velocity == 0.0)
-      ? position.pixels.clamp(position.minScrollExtent, position.maxScrollExtent) as double
-      : super.adjustPositionForNewDimensions(position, isScrolling: isScrolling, velocity: velocity);
+    return position.pixels.clamp(position.minScrollExtent, position.maxScrollExtent) as double;
   }
 
   @override

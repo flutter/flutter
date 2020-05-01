@@ -162,6 +162,12 @@ class _ExpandingBoxState extends State<ExpandingBox> with AutomaticKeepAliveClie
 
   double height;
 
+  void toggleSize() {
+    setState(() {
+      height = height == collapsedSize ? expandedsize : collapsedSize;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -172,11 +178,7 @@ class _ExpandingBoxState extends State<ExpandingBox> with AutomaticKeepAliveClie
         alignment: Alignment.bottomCenter,
         child: FlatButton(
           child: const Text('Collapse'),
-          onPressed: () {
-            setState(() {
-              height = height == collapsedSize ? expandedsize : collapsedSize;
-            });
-          }
+          onPressed: toggleSize,
         ),
       ),
     );
@@ -291,17 +293,20 @@ void main() {
     expect(position.pixels, closeTo(900.00, 0.01));
     expect(position.activity.runtimeType, DragScrollActivity);
 
-    await tester.tap(find.byType(FlatButton));
+    final _ExpandingBoxState expandingBoxState =
+        tester.state<_ExpandingBoxState>(find.byType(ExpandingBox));
+    expandingBoxState.toggleSize();
     await tester.pump();
     expect(position.activity.runtimeType, DragScrollActivity);
     expect(position.minScrollExtent, 0.0);
-    expect(position.maxScrollExtent, 900.0);
-    expect(position.pixels, 900.0);
+    expect(position.maxScrollExtent, 100.0);
+    expect(position.pixels, 100.0);
 
+    await drag2.moveTo(const Offset(10.0, 150.0));
     await drag2.up();
     expect(position.minScrollExtent, 0.0);
-    expect(position.maxScrollExtent, 900.0);
-    expect(position.pixels, 900.0);
+    expect(position.maxScrollExtent, 100.0);
+    expect(position.pixels, 50.0);
   });
 
   testWidgets('whether we remember our scroll position', (WidgetTester tester) async {
