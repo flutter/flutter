@@ -294,7 +294,7 @@ class SingleChildScrollView extends StatelessWidget {
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   AxisDirection _getDirection(BuildContext context) {

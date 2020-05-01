@@ -307,7 +307,7 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   @override

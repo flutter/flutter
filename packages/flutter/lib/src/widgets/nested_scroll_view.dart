@@ -264,7 +264,7 @@ class NestedScrollView extends StatefulWidget {
 
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   /// Returns the [SliverOverlapAbsorberHandle] of the nearest ancestor

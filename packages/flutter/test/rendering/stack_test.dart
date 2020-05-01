@@ -76,7 +76,7 @@ void main() {
       final RenderStack stack = RenderStack(
           textDirection: TextDirection.ltr,
           children: <RenderBox>[child],
-          clipBehavior: clip, overflow: clip == Clip.none ? Overflow.visible : Overflow.clip,
+          clipBehavior: clip,
       );
       { // Make sure that the child is positioned so the stack will consider it as overflowed.
         final StackParentData parentData = child.parentData as StackParentData;

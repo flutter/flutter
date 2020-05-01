@@ -268,16 +268,6 @@ enum StackFit {
   passthrough,
 }
 
-/// Whether overflowing children should be clipped, or their overflow be
-/// visible.
-enum Overflow {
-  /// Overflowing children will be visible.
-  visible,
-
-  /// Overflowing children will be clipped to the bounds of their parent.
-  clip,
-}
-
 /// Implements the stack layout algorithm
 ///
 /// In a stack layout, the children are positioned on top of each other in the
@@ -326,16 +316,13 @@ class RenderStack extends ClippableRenderBox
     AlignmentGeometry alignment = AlignmentDirectional.topStart,
     TextDirection textDirection,
     StackFit fit = StackFit.loose,
-    Overflow overflow = Overflow.visible,
     Clip clipBehavior = Clip.none,
   }) : assert(alignment != null),
        assert(fit != null),
-       assert(overflow != null),
        assert(clipBehavior != null),
        _alignment = alignment,
        _textDirection = textDirection,
-       _fit = fit,
-       _overflow = overflow {
+       _fit = fit {
     addAll(children);
     this.clipBehavior = clipBehavior;
   }
@@ -411,20 +398,6 @@ class RenderStack extends ClippableRenderBox
     if (_fit != value) {
       _fit = value;
       markNeedsLayout();
-    }
-  }
-
-  /// Whether overflowing children should be clipped. See [Overflow].
-  ///
-  /// Some children in a stack might overflow its box. When this flag is set to
-  /// [Overflow.clip], children cannot paint outside of the stack's box.
-  Overflow get overflow => _overflow;
-  Overflow _overflow;
-  set overflow(Overflow value) {
-    assert(value != null);
-    if (_overflow != value) {
-      _overflow = value;
-      markNeedsPaint();
     }
   }
 
@@ -607,10 +580,7 @@ class RenderStack extends ClippableRenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    // Make sure that _overflow and clipBehavior are compatible.
-    assert((_overflow == Overflow.visible) == (clipBehavior == Clip.none));
-
-    if (_overflow == Overflow.clip && _hasVisualOverflow) {
+    if (clipBehavior != Clip.none && _hasVisualOverflow) {
       context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack, clipBehavior: clipBehavior);
     } else {
       paintStack(context, offset);
@@ -626,7 +596,7 @@ class RenderStack extends ClippableRenderBox
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection));
     properties.add(EnumProperty<StackFit>('fit', fit));
-    properties.add(EnumProperty<Overflow>('overflow', overflow));
+    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior));
   }
 }
 

@@ -3231,11 +3231,9 @@ class Stack extends MultiChildRenderObjectWidget {
     this.alignment = AlignmentDirectional.topStart,
     this.textDirection,
     this.fit = StackFit.loose,
-    this.overflow = Overflow.visible,
     this.clipBehavior = Clip.none,
     List<Widget> children = const <Widget>[],
   }) : assert(clipBehavior != null),
-       assert((overflow == Overflow.visible) == (clipBehavior == Clip.none)),
        super(key: key, children: children);
 
   /// How to align the non-positioned and partially-positioned children in the
@@ -3273,12 +3271,6 @@ class Stack extends MultiChildRenderObjectWidget {
   /// ([StackFit.expand]).
   final StackFit fit;
 
-  /// Whether overflowing children should be clipped. See [Overflow].
-  ///
-  /// Some children in a stack might overflow its box. When this flag is set to
-  /// [Overflow.clip], children cannot paint outside of the stack's box.
-  final Overflow overflow;
-
   /// {@macro flutter.widgets.Clip}
   ///
   /// Defaults to [Clip.none].
@@ -3290,7 +3282,6 @@ class Stack extends MultiChildRenderObjectWidget {
       alignment: alignment,
       textDirection: textDirection ?? Directionality.of(context),
       fit: fit,
-      overflow: overflow,
       clipBehavior: clipBehavior,
     );
   }
@@ -3301,7 +3292,6 @@ class Stack extends MultiChildRenderObjectWidget {
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.of(context)
       ..fit = fit
-      ..overflow = overflow
       ..clipBehavior = clipBehavior;
   }
 
@@ -3311,7 +3301,7 @@ class Stack extends MultiChildRenderObjectWidget {
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<StackFit>('fit', fit));
-    properties.add(EnumProperty<Overflow>('overflow', overflow));
+    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior));
   }
 }
 

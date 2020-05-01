@@ -2144,7 +2144,6 @@ void main() {
                           // this hint aligns "properly" with the menu.
                           return Stack(
                             alignment: Alignment.topCenter,
-                            overflow: Overflow.visible,
                             children: <Widget>[
                               PositionedDirectional(
                                 width: constraints.maxWidth + hintPaddingOffset,

@@ -381,7 +381,7 @@ void main() {
     final RenderStack renderObject = tester.allRenderObjects.whereType<RenderStack>().first;
     expect(renderObject.clipBehavior, equals(Clip.none));
 
-    await tester.pumpWidget(Stack(textDirection: TextDirection.ltr, clipBehavior: Clip.hardEdge, overflow: Overflow.clip));
+    await tester.pumpWidget(Stack(textDirection: TextDirection.ltr, clipBehavior: Clip.hardEdge));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
   });
 
@@ -422,7 +422,6 @@ void main() {
         child: Center(
           child: Stack(
             clipBehavior: Clip.hardEdge,
-            overflow: Overflow.clip,
             children: const <Widget>[
               SizedBox(
                 width: 100.0,
@@ -452,7 +451,6 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: Stack(
-            overflow: Overflow.visible,
             children: const <Widget>[
               SizedBox(
                 width: 100.0,
