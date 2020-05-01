@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 
 #include <assert.h>
+#include <io.h>
 
 #include <algorithm>
 #include <chrono>
@@ -222,6 +223,17 @@ UINT FlutterDesktopGetDpiForHWND(HWND hwnd) {
 
 UINT FlutterDesktopGetDpiForMonitor(HMONITOR monitor) {
   return flutter::GetDpiForMonitor(monitor);
+}
+
+void FlutterDesktopResyncOutputStreams() {
+  FILE* unused;
+  if (freopen_s(&unused, "CONOUT$", "w", stdout)) {
+    _dup2(_fileno(stdout), 1);
+  }
+  if (freopen_s(&unused, "CONOUT$", "w", stderr)) {
+    _dup2(_fileno(stdout), 2);
+  }
+  std::ios::sync_with_stdio();
 }
 
 FlutterDesktopEngineRef FlutterDesktopRunEngine(
