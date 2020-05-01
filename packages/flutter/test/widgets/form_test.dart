@@ -620,8 +620,6 @@ void main() {
 
     await tester.pumpWidget(builder());
 
-
-
     Future<void> checkErrorText(String testValue) async {
       // state value was not changed yet
       expect(find.text(testValue + '/error'),findsNothing);
