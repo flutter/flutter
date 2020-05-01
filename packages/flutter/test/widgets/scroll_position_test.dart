@@ -140,6 +140,34 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
   expect(find.text('100'), findsNothing, reason: 'with maintainState: $maintainState');
 }
 
+class ExpandingBox extends StatefulWidget {
+  @override
+  _ExpandingBoxState createState() => _ExpandingBoxState();
+}
+
+class _ExpandingBoxState extends State<ExpandingBox> {
+  double height = 400.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: height,
+      color: Colors.green,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: FlatButton(
+          child: const Text('Collapse'),
+          onPressed: () {
+            setState(() {
+              height = height == 400 ? 1200 : 400;
+            });
+          }
+        ),
+      ),
+    );
+  }
+}
+
 void main() {
   testWidgets('ScrollPosition jumpTo() doesn\'t call notifyListeners twice', (WidgetTester tester) async {
     int count = 0;
@@ -158,6 +186,37 @@ void main() {
     position.jumpTo(100);
 
     expect(count, 1);
+  });
+
+  testWidgets('shrink listview', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: ListView.builder(
+        itemBuilder: (BuildContext context, int index) => index == 0
+              ? ExpandingBox()
+              : Container(height: 300, color: Colors.red),
+        itemCount: 2,
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+    final ScrollPosition position =
+        tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    expect(position.activity.runtimeType, IdleScrollActivity);
+    expect(position.minScrollExtent, 0.0);
+    expect(position.maxScrollExtent, 100.0);
+    expect(position.pixels, 0.0);
+    await tester.tap(find.byType(FlatButton));
+    await tester.pump();
+    expect(position.minScrollExtent, 0.0);
+    expect(position.maxScrollExtent, 1800.0);
+    expect(position.pixels, 0.0);
+    position.jumpTo(1800.0);
+    await tester.pump();
+    await tester.tap(find.byType(FlatButton));
+    await tester.pump();
+    expect(position.minScrollExtent, 0.0);
+    expect(position.maxScrollExtent, 100.0);
+    expect(position.pixels, 100.0);
   });
 
   testWidgets('whether we remember our scroll position', (WidgetTester tester) async {
