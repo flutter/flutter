@@ -360,6 +360,7 @@ Future<void> _flutterBuildApk(String relativePathToApplication, {
       <String>[
         'build',
         'apk',
+        '--performance-measurement-file=perf.json',
         ...additionalArgs,
         if (release)
           '--release'
