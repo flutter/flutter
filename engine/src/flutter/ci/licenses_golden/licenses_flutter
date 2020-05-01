@@ -1083,6 +1083,8 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/compositor_context.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_fakes.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_product_configuration.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_product_configuration.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl_unittest.cc
