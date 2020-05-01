@@ -80,7 +80,7 @@ enum FileStoreStrategy {
 /// avoid recomputing or storing multiple copies of hashes by delegating
 /// through this class.
 ///
-/// This class will use either timestamps or file hashes depending on the
+/// This class uses either timestamps or file hashes depending on the
 /// provided [FileStoreStrategy]. All information  is held in memory during
 /// a build operation, and may be persisted to cache in the root build
 /// directory.
@@ -99,8 +99,8 @@ class FileStore {
   final Logger _logger;
   final FileStoreStrategy _strategy;
 
-  final HashMap<String, String> previousMarks = HashMap<String, String>();
-  final HashMap<String, String> currentMarks = HashMap<String, String>();
+  final HashMap<String, String> previousAssetKeys = HashMap<String, String>();
+  final HashMap<String, String> currentAssetKeys = HashMap<String, String>();
 
   // The name of the file which stores the file hashes.
   static const String kFileCache = '.filecache';
@@ -140,7 +140,7 @@ class FileStore {
       return;
     }
     for (final FileHash fileHash in fileStorage.files) {
-      previousMarks[fileHash.path] = fileHash.hash;
+      previousAssetKeys[fileHash.path] = fileHash.hash;
     }
     _logger.printTrace('Done initializing file store');
   }
@@ -152,7 +152,7 @@ class FileStore {
       _cacheFile.createSync(recursive: true);
     }
     final List<FileHash> fileHashes = <FileHash>[];
-    for (final MapEntry<String, String> entry in currentMarks.entries) {
+    for (final MapEntry<String, String> entry in currentAssetKeys.entries) {
       fileHashes.add(FileHash(entry.key, entry.value));
     }
     final FileStorage fileStorage = FileStorage(
@@ -174,9 +174,9 @@ class FileStore {
 
   /// Reset `previousMarks` for an incremental build.
   void persistIncremental() {
-    previousMarks.clear();
-    previousMarks.addAll(currentMarks);
-    currentMarks.clear();
+    previousAssetKeys.clear();
+    previousAssetKeys.addAll(currentAssetKeys);
+    currentAssetKeys.clear();
   }
 
   /// Computes a diff of the provided files and returns a list of files
@@ -201,12 +201,12 @@ class FileStore {
 
   void _checkModification(File file, List<File> dirty) {
     final String absolutePath = file.path;
-    final String previousTime = previousMarks[absolutePath];
+    final String previousTime = previousAssetKeys[absolutePath];
 
     // If the file is missing it is assumed to be dirty.
     if (!file.existsSync()) {
-      currentMarks.remove(absolutePath);
-      previousMarks.remove(absolutePath);
+      currentAssetKeys.remove(absolutePath);
+      previousAssetKeys.remove(absolutePath);
       dirty.add(file);
       return;
     }
@@ -214,18 +214,18 @@ class FileStore {
     if (modifiedTime != previousTime) {
       dirty.add(file);
     }
-    currentMarks[absolutePath] = modifiedTime;
+    currentAssetKeys[absolutePath] = modifiedTime;
   }
 
   Future<void> _hashFile(File file, List<File> dirty, Pool pool) async {
     final PoolResource resource = await pool.request();
     try {
       final String absolutePath = file.path;
-      final String previousHash = previousMarks[absolutePath];
+      final String previousHash = previousAssetKeys[absolutePath];
       // If the file is missing it is assumed to be dirty.
       if (!file.existsSync()) {
-        currentMarks.remove(absolutePath);
-        previousMarks.remove(absolutePath);
+        currentAssetKeys.remove(absolutePath);
+        previousAssetKeys.remove(absolutePath);
         dirty.add(file);
         return;
       }
@@ -234,7 +234,7 @@ class FileStore {
       if (currentHash != previousHash) {
         dirty.add(file);
       }
-      currentMarks[absolutePath] = currentHash;
+      currentAssetKeys[absolutePath] = currentHash;
     } finally {
       resource.release();
     }

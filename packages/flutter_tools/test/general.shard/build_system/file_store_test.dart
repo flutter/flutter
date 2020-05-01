@@ -77,7 +77,7 @@ void main() {
     fileCache.initialize();
     await fileCache.diffFileList(<File>[file]);
     fileCache.persist();
-    final String currentHash =  fileCache.currentMarks[file.path];
+    final String currentHash =  fileCache.currentAssetKeys[file.path];
     final Uint8List buffer = cacheFile
         .readAsBytesSync();
     FileStorage fileStorage = FileStorage.fromBuffer(buffer);
@@ -91,8 +91,8 @@ void main() {
       logger: BufferLogger.test(),
     );
     newfileCache.initialize();
-    expect(newfileCache.currentMarks, isEmpty);
-    expect(newfileCache.previousMarks['foo.dart'],  currentHash);
+    expect(newfileCache.currentAssetKeys, isEmpty);
+    expect(newfileCache.previousAssetKeys['foo.dart'],  currentHash);
     newfileCache.persist();
 
     // Still persisted correctly.
@@ -137,7 +137,7 @@ void main() {
 
     expect(results, hasLength(1));
     expect(results.single.path, 'hello.dart');
-    expect(fileCache.currentMarks, isNot(contains(fileSystem.path.absolute('hello.dart'))));
+    expect(fileCache.currentAssetKeys, isNot(contains(fileSystem.path.absolute('hello.dart'))));
   });
 
   test('FileStore handles failure to persist file cache', () async {
