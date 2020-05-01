@@ -136,8 +136,8 @@ DartIsolate::DartIsolate(const Settings& settings,
                   advisory_script_entrypoint,
                   settings.log_tag,
                   settings.unhandled_exception_callback,
-                  DartVMRef::GetIsolateNameServer()),
-      is_root_isolate_(is_root_isolate),
+                  DartVMRef::GetIsolateNameServer(),
+                  is_root_isolate),
       disable_http_(settings.disable_http) {
   phase_ = Phase::Uninitialized;
 }
@@ -264,7 +264,7 @@ bool DartIsolate::LoadLibraries() {
 
   DartIO::InitForIsolate(disable_http_);
 
-  DartUI::InitForIsolate(IsRootIsolate());
+  DartUI::InitForIsolate();
 
   const bool is_service_isolate = Dart_IsServiceIsolate(isolate());
 

@@ -25,7 +25,8 @@ UIDartState::UIDartState(
     std::string advisory_script_entrypoint,
     std::string logger_prefix,
     UnhandledExceptionCallback unhandled_exception_callback,
-    std::shared_ptr<IsolateNameServer> isolate_name_server)
+    std::shared_ptr<IsolateNameServer> isolate_name_server,
+    bool is_root_isolate)
     : task_runners_(std::move(task_runners)),
       add_callback_(std::move(add_callback)),
       remove_callback_(std::move(remove_callback)),
@@ -36,6 +37,7 @@ UIDartState::UIDartState(
       advisory_script_uri_(std::move(advisory_script_uri)),
       advisory_script_entrypoint_(std::move(advisory_script_entrypoint)),
       logger_prefix_(std::move(logger_prefix)),
+      is_root_isolate_(is_root_isolate),
       unhandled_exception_callback_(unhandled_exception_callback),
       isolate_name_server_(std::move(isolate_name_server)) {
   AddOrRemoveTaskObserver(true /* add */);
@@ -60,6 +62,13 @@ void UIDartState::DidSetIsolate() {
   debug_name << advisory_script_uri_ << "$" << advisory_script_entrypoint_
              << "-" << main_port_;
   SetDebugName(debug_name.str());
+}
+
+void UIDartState::ThrowIfUIOperationsProhibited() {
+  if (!UIDartState::Current()->IsRootIsolate()) {
+    Dart_ThrowException(
+        tonic::ToDart("UI actions are only available on root isolate."));
+  }
 }
 
 void UIDartState::SetDebugName(const std::string debug_name) {

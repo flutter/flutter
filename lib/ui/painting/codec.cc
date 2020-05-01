@@ -145,6 +145,7 @@ static std::variant<ImageDecoder::ImageInfo, std::string> ConvertImageInfo(
 }
 
 static void InstantiateImageCodec(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
   Dart_Handle callback_handle = Dart_GetNativeArgument(args, 1);
   if (!Dart_IsClosure(callback_handle)) {
     Dart_SetReturnValue(args, tonic::ToDart("Callback must be a function"));

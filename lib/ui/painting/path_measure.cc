@@ -8,6 +8,7 @@
 #include <math.h>
 
 #include "flutter/lib/ui/painting/matrix.h"
+#include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"
@@ -20,6 +21,7 @@ namespace flutter {
 typedef CanvasPathMeasure PathMeasure;
 
 static void PathMeasure_constructor(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
   DartCallConstructor(&CanvasPathMeasure::Create, args);
 }
 
