@@ -493,14 +493,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       _maxScrollExtent = maxScrollExtent;
       _haveDimensions = true;
       _didChangeViewportDimensionOrReceiveCorrection = false;
-      if (pixels > _maxScrollExtent) {
-        correctPixels(_maxScrollExtent);
-        activity.delegate.goIdle();
-        return false;
-      }
-      if (pixels < _minScrollExtent) {
-        correctPixels(_minScrollExtent);
-        activity.delegate.goIdle();
+      final double adjustedPixels =
+          physics.adjustPositionForNewDimensions(this, isScrolling: activity.isScrolling, velocity: activity.velocity);
+      if (adjustedPixels != pixels) {
+        correctPixels(adjustedPixels);
         return false;
       }
       applyNewDimensions();
