@@ -393,7 +393,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   }
 
   void _validate() {
-    if (widget.validator != null && _isStateDirty)
+    if (widget.validator != null)
       _errorText = widget.validator(_value);
   }
 
@@ -436,8 +436,8 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   @override
   Widget build(BuildContext context) {
-    // Only autovalidate if the widget is also enabled
-    if (widget.autovalidate && widget.enabled)
+    // Only autovalidate if the widget is also enabled and state value has changed at least once
+    if (widget.autovalidate && widget.enabled && _isStateDirty)
       _validate();
     Form.of(context)?._register(this);
     return widget.builder(this);
