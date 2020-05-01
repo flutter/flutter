@@ -14,6 +14,7 @@
 #include "flutter/fml/time/time_point.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/vsync_waiter.h"
+#include "flutter/shell/platform/fuchsia/flutter/flutter_runner_product_configuration.h"
 #include "flutter/shell/platform/fuchsia/flutter/task_runner_adapter.h"
 #include "flutter/shell/platform/fuchsia/flutter/thread.h"
 #include "flutter/shell/platform/fuchsia/flutter/vsync_waiter.h"
@@ -29,7 +30,8 @@ class VsyncWaiterTest : public testing::Test {
   std::unique_ptr<flutter::VsyncWaiter> CreateVsyncWaiter(
       flutter::TaskRunners task_runners) {
     return std::make_unique<flutter_runner::VsyncWaiter>(
-        "VsyncWaiterTest", vsync_event_.get(), task_runners);
+        "VsyncWaiterTest", vsync_event_.get(), task_runners,
+        fml::TimeDelta::Zero());
   }
 
   void SignalVsyncEvent() {

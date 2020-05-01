@@ -16,6 +16,7 @@
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/run_configuration.h"
+#include "flutter_runner_product_configuration.h"
 #include "fuchsia_intl.h"
 #include "platform_view.h"
 #include "runtime/dart/utils/files.h"
@@ -57,7 +58,8 @@ Engine::Engine(Delegate& delegate,
                fml::RefPtr<const flutter::DartSnapshot> isolate_snapshot,
                fuchsia::ui::views::ViewToken view_token,
                UniqueFDIONS fdio_ns,
-               fidl::InterfaceRequest<fuchsia::io::Directory> directory_request)
+               fidl::InterfaceRequest<fuchsia::io::Directory> directory_request,
+               FlutterRunnerProductConfiguration product_config)
     : delegate_(delegate),
       thread_label_(std::move(thread_label)),
       settings_(std::move(settings)),
@@ -137,7 +139,8 @@ Engine::Engine(Delegate& delegate,
                std::move(on_session_size_change_hint_callback),
            on_enable_wireframe_callback =
                std::move(on_enable_wireframe_callback),
-           vsync_handle = vsync_event_.get()](flutter::Shell& shell) mutable {
+           vsync_handle = vsync_event_.get(),
+           product_config = product_config](flutter::Shell& shell) mutable {
             return std::make_unique<flutter_runner::PlatformView>(
                 shell,                   // delegate
                 debug_label,             // debug label
@@ -150,8 +153,8 @@ Engine::Engine(Delegate& delegate,
                 std::move(on_session_metrics_change_callback),
                 std::move(on_session_size_change_hint_callback),
                 std::move(on_enable_wireframe_callback),
-                vsync_handle  // vsync handle
-            );
+                vsync_handle,  // vsync handle
+                product_config);
           });
 
   // Session can be terminated on the raster thread, but we must terminate
@@ -199,8 +202,7 @@ Engine::Engine(Delegate& delegate,
                   std::move(view_ref_pair),  // scenic view ref/view ref control
                   std::move(session),        // scenic session
                   on_session_error_callback,  // session did encounter error
-                  vsync_event                 // vsync event handle
-              );
+                  vsync_event);               // vsync event handle
         }
 
         return std::make_unique<flutter::Rasterizer>(

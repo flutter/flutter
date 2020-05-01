@@ -12,6 +12,7 @@
 #include "flutter/lib/ui/compositing/scene_host.h"
 #include "flutter/lib/ui/window/pointer_data.h"
 #include "flutter/lib/ui/window/window.h"
+#include "flutter_runner_product_configuration.h"
 #include "logging.h"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
@@ -91,7 +92,8 @@ PlatformView::PlatformView(
     OnMetricsUpdate session_metrics_did_change_callback,
     OnSizeChangeHint session_size_change_hint_callback,
     OnEnableWireframe wireframe_enabled_callback,
-    zx_handle_t vsync_event_handle)
+    zx_handle_t vsync_event_handle,
+    FlutterRunnerProductConfiguration product_config)
     : flutter::PlatformView(delegate, std::move(task_runners)),
       debug_label_(std::move(debug_label)),
       view_ref_(std::move(view_ref)),
@@ -103,7 +105,8 @@ PlatformView::PlatformView(
       wireframe_enabled_callback_(std::move(wireframe_enabled_callback)),
       ime_client_(this),
       surface_(std::make_unique<Surface>(debug_label_)),
-      vsync_event_handle_(vsync_event_handle) {
+      vsync_event_handle_(vsync_event_handle),
+      product_config_(product_config) {
   // Register all error handlers.
   SetInterfaceErrorHandler(session_listener_binding_, "SessionListener");
   SetInterfaceErrorHandler(ime_, "Input Method Editor");
@@ -561,7 +564,8 @@ void PlatformView::DeactivateIme() {
 // |flutter::PlatformView|
 std::unique_ptr<flutter::VsyncWaiter> PlatformView::CreateVSyncWaiter() {
   return std::make_unique<flutter_runner::VsyncWaiter>(
-      debug_label_, vsync_event_handle_, task_runners_);
+      debug_label_, vsync_event_handle_, task_runners_,
+      product_config_.get_vsync_offset());
 }
 
 // |flutter::PlatformView|

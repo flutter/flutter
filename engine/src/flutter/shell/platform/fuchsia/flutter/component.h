@@ -25,6 +25,7 @@
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
 
+#include "flutter_runner_product_configuration.h"
 #include "thread.h"
 #include "unique_fdio_ns.h"
 
@@ -77,6 +78,7 @@ class Application final : public Engine::Delegate,
 
  private:
   flutter::Settings settings_;
+  FlutterRunnerProductConfiguration product_config_;
   TerminationCallback termination_callback_;
   const std::string debug_label_;
   UniqueFDIONS fdio_ns_ = UniqueFDIONSCreate();

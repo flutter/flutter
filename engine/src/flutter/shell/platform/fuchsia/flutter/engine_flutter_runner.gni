@@ -50,6 +50,8 @@ template("flutter_runner") {
       "compositor_context.h",
       "engine.cc",
       "engine.h",
+      "flutter_runner_product_configuration.cc",
+      "flutter_runner_product_configuration.h",
       "fuchsia_intl.cc",
       "fuchsia_intl.h",
       "isolate_configurator.cc",

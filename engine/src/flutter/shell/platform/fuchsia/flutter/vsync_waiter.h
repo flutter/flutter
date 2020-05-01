@@ -9,8 +9,10 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
+#include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/shell/common/vsync_waiter.h"
+#include "flutter_runner_product_configuration.h"
 
 namespace flutter_runner {
 
@@ -18,24 +20,24 @@ class VsyncWaiter final : public flutter::VsyncWaiter {
  public:
   static constexpr zx_signals_t SessionPresentSignal = ZX_EVENT_SIGNALED;
 
+  VsyncWaiter(std::string debug_label,
+              zx_handle_t session_present_handle,
+              flutter::TaskRunners task_runners,
+              fml::TimeDelta vsync_offset);
+
+  ~VsyncWaiter() override;
+
   static fml::TimePoint SnapToNextPhase(
       const fml::TimePoint now,
       const fml::TimePoint last_frame_presentation_time,
       const fml::TimeDelta presentation_interval);
 
-  VsyncWaiter(std::string debug_label,
-              zx_handle_t session_present_handle,
-              flutter::TaskRunners task_runners);
-
-  ~VsyncWaiter() override;
-
  private:
   const std::string debug_label_;
   async::Wait session_wait_;
-  fml::WeakPtrFactory<VsyncWaiter> weak_factory_;
+  fml::TimeDelta vsync_offset_ = fml::TimeDelta::FromMicroseconds(0);
 
-  static constexpr fml::TimeDelta vsync_offset =
-      fml::TimeDelta::FromNanoseconds(0);
+  fml::WeakPtrFactory<VsyncWaiter> weak_factory_;
 
   // For accessing the VsyncWaiter via the UI thread, necessary for the callback
   // for AwaitVSync()
