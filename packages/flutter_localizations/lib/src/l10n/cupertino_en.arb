@@ -43,6 +43,12 @@
     "description": "The accessibility audio announcement made when an iOS style alert dialog is opened."
   },
 
+  "tabSemanticsLabel": "tab, $tabIndex of $tabCount",
+  "@tabSemanticsLabel": {
+    "description": "The accessibility label used on a tab. This message describes the index of the selected tab and how many tabs there are, e.g. 'tab, 1 of 2'. All values are greater than or equal to one.",
+    "parameters": "tabIndex, tabCount"
+  },
+
   "timerPickerHourLabelOne": "hour",
   "timerPickerHourLabelOther": "hours",
   "@timerPickerHourLabel": {

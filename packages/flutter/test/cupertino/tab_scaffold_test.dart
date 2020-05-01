@@ -435,14 +435,21 @@ void main() {
   });
 
   testWidgets('Tab contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overriden', (WidgetTester tester) async {
-    final Widget child = Directionality(
-      textDirection: TextDirection.ltr,
-      child: CupertinoTabScaffold(
-        resizeToAvoidBottomInset: false,
-        tabBar: _buildTabBar(),
-        tabBuilder: (BuildContext context, int index) {
-          return const Placeholder();
-        },
+    final Widget child = Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultCupertinoLocalizations.delegate,
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: CupertinoTabScaffold(
+          resizeToAvoidBottomInset: false,
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return const Placeholder();
+          },
+        ),
       ),
     );
 

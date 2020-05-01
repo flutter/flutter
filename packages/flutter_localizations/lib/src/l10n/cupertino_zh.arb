@@ -19,5 +19,6 @@
   "copyButtonLabel": "复制",
   "pasteButtonLabel": "粘贴",
   "selectAllButtonLabel": "全选",
+  "tabSemanticsLabel": "TBD",
   "modalBarrierDismissLabel": "关闭"
 }

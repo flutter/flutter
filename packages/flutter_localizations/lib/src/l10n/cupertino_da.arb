@@ -19,5 +19,6 @@
   "copyButtonLabel": "Kopiér",
   "pasteButtonLabel": "Sæt ind",
   "selectAllButtonLabel": "Vælg alle",
+  "tabSemanticsLabel": "TBD",
   "modalBarrierDismissLabel": "Afvis"
 }
