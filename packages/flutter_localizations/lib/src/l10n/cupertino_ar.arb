@@ -39,5 +39,6 @@
   "copyButtonLabel": "نسخ",
   "pasteButtonLabel": "لصق",
   "selectAllButtonLabel": "اختيار الكل",
+  "tabSemanticsLabel": "TBD",
   "modalBarrierDismissLabel": "رفض"
 }

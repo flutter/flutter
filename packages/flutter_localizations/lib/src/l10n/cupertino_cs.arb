@@ -29,5 +29,6 @@
   "copyButtonLabel": "Kopírovat",
   "pasteButtonLabel": "Vložit",
   "selectAllButtonLabel": "Vybrat vše",
+  "tabSemanticsLabel": "TBD",
   "modalBarrierDismissLabel": "Zavřít"
 }

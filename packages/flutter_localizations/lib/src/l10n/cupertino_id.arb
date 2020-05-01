@@ -19,5 +19,6 @@
   "copyButtonLabel": "Salin",
   "pasteButtonLabel": "Tempel",
   "selectAllButtonLabel": "Pilih Semua",
+  "tabSemanticsLabel": "TBD",
   "modalBarrierDismissLabel": "Tutup"
 }
