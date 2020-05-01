@@ -291,6 +291,7 @@ Future<void> _runToolTests() async {
 Future<void> _runBuildTests() async {
   final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')));
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')));
   for (final FileSystemEntity fileEntity in exampleDirectories) {
     // Only verify caching with flutter gallery.
     final bool verifyCaching = fileEntity.path.contains('flutter_gallery');
@@ -335,7 +336,7 @@ Future<void> _runBuildTests() async {
 
 Future<void> _flutterBuildApk(String relativePathToApplication, {
   @required bool release,
-  @required bool verifyCaching = false,
+  bool verifyCaching = false,
   List<String> additionalArgs = const <String>[],
 }) async {
   print('${green}Testing APK build$reset for $cyan$relativePathToApplication$reset...');
