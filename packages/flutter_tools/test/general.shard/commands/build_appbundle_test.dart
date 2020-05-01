@@ -1,3 +1,4 @@
+
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -223,7 +224,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
-          '-Ptrack-widget-creation=false',
+          '-Ptrack-widget-creation=true',
           '-Pshrink=true',
           'bundleRelease',
         ],
@@ -256,7 +257,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
-          '-Ptrack-widget-creation=false',
+          '-Ptrack-widget-creation=true',
           'bundleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -279,7 +280,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
-          '-Ptrack-widget-creation=false',
+          '-Ptrack-widget-creation=true',
           '-Pshrink=true',
           'bundleRelease',
         ],
@@ -346,7 +347,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
-          '-Ptrack-widget-creation=false',
+          '-Ptrack-widget-creation=true',
           '-Pshrink=true',
           'assembleRelease',
         ],
@@ -402,7 +403,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
-          '-Ptrack-widget-creation=false',
+          '-Ptrack-widget-creation=true',
           '-Pshrink=true',
           'assembleRelease',
         ],
