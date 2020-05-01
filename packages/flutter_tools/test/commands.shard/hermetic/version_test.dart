@@ -51,7 +51,7 @@ void main() {
 
     testUsingContext('version switch prompt is accepted', () async {
       when(mockStdio.stdinHasTerminal).thenReturn(true);
-      const String version = '10.0.0';
+      const String version = 'v10.0.0';
       final VersionCommand command = VersionCommand();
       when(globals.terminal.promptForCharInput(<String>['y', 'n'],
         logger: anyNamed('logger'),
