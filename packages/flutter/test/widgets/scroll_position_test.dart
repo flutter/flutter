@@ -189,6 +189,9 @@ void main() {
   });
 
   testWidgets('shrink listview', (WidgetTester tester) async {
+    tester.binding.window.physicalSizeTestValue = const Size(750, 1334);
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+
     await tester.pumpWidget(MaterialApp(
       home: ListView.builder(
         itemBuilder: (BuildContext context, int index) => index == 0
@@ -203,20 +206,20 @@ void main() {
         tester.state<ScrollableState>(find.byType(Scrollable)).position;
     expect(position.activity.runtimeType, IdleScrollActivity);
     expect(position.minScrollExtent, 0.0);
-    expect(position.maxScrollExtent, 100.0);
+    expect(position.maxScrollExtent, closeTo(255.33, 0.01));
     expect(position.pixels, 0.0);
     await tester.tap(find.byType(FlatButton));
     await tester.pump();
     expect(position.minScrollExtent, 0.0);
-    expect(position.maxScrollExtent, 1800.0);
+    expect(position.maxScrollExtent, closeTo(1955.33, 0.01));
     expect(position.pixels, 0.0);
-    position.jumpTo(1800.0);
+    position.jumpTo(1955.0);
     await tester.pump();
     await tester.tap(find.byType(FlatButton));
     await tester.pump();
     expect(position.minScrollExtent, 0.0);
-    expect(position.maxScrollExtent, 100.0);
-    expect(position.pixels, 100.0);
+    expect(position.maxScrollExtent, closeTo(255.33, 0.01));
+    expect(position.pixels, closeTo(255.33, 0.01));
   });
 
   testWidgets('whether we remember our scroll position', (WidgetTester tester) async {
