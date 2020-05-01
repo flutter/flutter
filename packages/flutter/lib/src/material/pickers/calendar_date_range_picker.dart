@@ -5,9 +5,15 @@
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+
+import '../color_scheme.dart';
+import '../divider.dart';
+import '../material_localizations.dart';
+import '../text_theme.dart';
+import '../theme.dart';
 
 import 'date_utils.dart' as utils;
 
