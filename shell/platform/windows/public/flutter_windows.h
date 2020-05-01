@@ -110,6 +110,11 @@ FLUTTER_EXPORT UINT FlutterDesktopGetDpiForHWND(HWND hwnd);
 // DPI of 96 is returned.
 FLUTTER_EXPORT UINT FlutterDesktopGetDpiForMonitor(HMONITOR monitor);
 
+// Reopens stdout and stderr and resysncs the standard library output streams.
+// Should be called if output is being directed somewhere in the runner process
+// (e.g., after an AllocConsole call).
+FLUTTER_EXPORT void FlutterDesktopResyncOutputStreams();
+
 // Runs an instance of a headless Flutter engine.
 //
 // Returns a null pointer in the event of an error.
