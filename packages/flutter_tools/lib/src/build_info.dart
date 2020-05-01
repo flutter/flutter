@@ -93,7 +93,7 @@ class BuildInfo {
   /// The name of a file where flutter assemble will output performance
   /// information in a JSON format.
   ///
-  /// This is not considered a build inpit and will not force assemble to
+  /// This is not considered a build input and will not force assemble to
   /// rerun tasks.
   final String performanceMeasurementFile;
 
