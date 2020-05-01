@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -282,7 +283,7 @@ Future<void> _runToolTests() async {
   await selectSubshard(subshards);
 }
 
-/// Verifies that AOT, APK, and IPA (if on macOS) builds the examples apps
+/// Verifies that APK, and IPA (if on macOS) builds the examples apps
 /// without crashing. It does not actually launch the apps. That happens later
 /// in the devicelab. This is just a smoke-test. In particular, this will verify
 /// we can build when there are spaces in the path name for the Flutter SDK and
@@ -353,6 +354,7 @@ Future<void> _flutterBuildApk(String relativePathToApplication, {
 Future<void> _flutterBuildIpa(String relativePathToApplication, {
   @required bool release,
   List<String> additionalArgs = const <String>[],
+  bool verifyCaching,
 }) async {
   assert(Platform.isMacOS);
   print('${green}Testing IPA build$reset for $cyan$relativePathToApplication$reset...');
@@ -382,6 +384,38 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
     ],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
   );
+  if (verifyCaching) {
+    print('${green}Testing IPA cache$reset for $cyan$relativePathToApplication$reset...');
+    await runCommand(flutter,
+      <String>[
+        'build',
+        'ios',
+        '--performance-measurement-file=perf.json',
+        ...additionalArgs,
+        '--no-codesign',
+        if (release)
+          '--release'
+        else
+          '--debug',
+        '-v',
+      ],
+      workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    );
+    final File file = File(path.join(flutterRoot, relativePathToApplication, 'perf.json');
+    if (!_allTargetsCached(file)) {
+      print('${red}Not all build targets cached after second run.$reset');
+      print('The target performance data was: ${file.readAsStringSync()}');
+      exit(1);
+    }
+  }
+}
+
+bool _allTargetsCached(File performanceFile) {
+  final Map<String, Object> data = json.decode(performanceFile.readAsStringSync())
+    as Map<String, Object>;
+  final List<Map<String, Object>> targets = (data['targets'] as List<Object>)
+    .cast<Map<String, Object>>();
+  return targets.every((Map<String, Object> element) => element['skipped'] == true);
 }
 
 Future<void> _flutterBuildDart2js(String relativePathToApplication, String target, { bool expectNonZeroExit = false }) async {
