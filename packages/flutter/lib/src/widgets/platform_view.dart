@@ -33,7 +33,7 @@ import 'framework.dart';
 /// platform view iff it won the arena. Specific gestures that should be dispatched to the platform
 /// view can be specified in the `gestureRecognizers` constructor parameter. If
 /// the set of gesture recognizers is empty, a gesture will be dispatched to the platform
-/// view iff it was not claimed by any other gesture recognizer.
+/// view if it was not claimed by any other gesture recognizer.
 /// {@endtemplate}
 ///
 /// The Android view object is created using a [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html).
