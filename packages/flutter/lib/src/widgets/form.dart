@@ -338,6 +338,11 @@ class FormFieldState<T> extends State<FormField<T>> {
   T _value;
   String _errorText;
 
+  /// True when state becomes dirty for the first time, i.e. [ didChange(value) ] is called
+  ///
+  /// This ensures that [Form.autovalidate] only works once the state is modified at least once
+  bool _isStateDirty = false;
+
   /// The current value of the form field.
   T get value => _value;
 
@@ -388,7 +393,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   }
 
   void _validate() {
-    if (widget.validator != null)
+    if (widget.validator != null && _isStateDirty)
       _errorText = widget.validator(_value);
   }
 
@@ -398,6 +403,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   /// Triggers the [Form.onChanged] callback and, if the [Form.autovalidate]
   /// field is set, revalidates all the fields of the form.
   void didChange(T value) {
+    _isStateDirty = true;
     setState(() {
       _value = value;
     });
