@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 // Encodes ARB file resource values with Unicode escapes.
 void encodeBundleTranslations(Map<String, dynamic> bundle) {
   for (final String key in bundle.keys) {
