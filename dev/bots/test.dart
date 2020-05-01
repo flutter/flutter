@@ -303,8 +303,8 @@ Future<void> _runBuildTests() async {
       ? <String>['--enable-experiment', 'non-nullable']
       : <String>[];
     if (Directory(path.join(examplePath, 'android')).existsSync()) {
-      await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs);
-      await _flutterBuildApk(examplePath, release: true, additionalArgs: additionalArgs);
+      await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+      await _flutterBuildApk(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
     } else {
       print('Example project ${path.basename(examplePath)} has no android directory, skipping apk');
     }
@@ -335,7 +335,7 @@ Future<void> _runBuildTests() async {
 
 Future<void> _flutterBuildApk(String relativePathToApplication, {
   @required bool release,
-  @required bool verifyCaching,
+  @required bool verifyCaching = false,
   List<String> additionalArgs = const <String>[],
 }) async {
   print('${green}Testing APK build$reset for $cyan$relativePathToApplication$reset...');
@@ -380,7 +380,7 @@ Future<void> _flutterBuildApk(String relativePathToApplication, {
 Future<void> _flutterBuildIpa(String relativePathToApplication, {
   @required bool release,
   List<String> additionalArgs = const <String>[],
-  bool verifyCaching,
+  bool verifyCaching = false,
 }) async {
   assert(Platform.isMacOS);
   print('${green}Testing IPA build$reset for $cyan$relativePathToApplication$reset...');
