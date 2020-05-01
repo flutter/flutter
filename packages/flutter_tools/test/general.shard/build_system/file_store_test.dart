@@ -15,7 +15,7 @@ import 'package:mockito/mockito.dart';
 import '../../src/common.dart';
 
 void main() {
-  test('FileStore initializes file cache', () {
+  testWithoutContext('FileStore initializes file cache', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File cacheFile = fileSystem.file(FileStore.kFileCache);
     final FileStore fileCache = FileStore(
@@ -34,7 +34,7 @@ void main() {
     expect(fileStorage.version, 2);
   });
 
-  test('FileStore can use timestamp strategy', () async {
+  testWithoutContext('FileStore can use timestamp strategy', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File cacheFile = fileSystem.file(FileStore.kFileCache);
     final FileStore fileCache = FileStore(
@@ -63,7 +63,7 @@ void main() {
     expect(await fileCache.diffFileList(<File>[file]), hasLength(1));
   });
 
-  test('FileStore saves and restores to file cache', () async {
+  testWithoutContext('FileStore saves and restores to file cache', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File cacheFile = fileSystem.file(FileStore.kFileCache);
     final FileStore fileCache = FileStore(
@@ -102,7 +102,7 @@ void main() {
     expect(fileStorage.files.single.path, file.path);
   });
 
-  test('FileStore handles persisting with a missing build directory', () async {
+  testWithoutContext('FileStore handles persisting with a missing build directory', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File cacheFile = fileSystem
       .directory('example')
@@ -124,7 +124,7 @@ void main() {
     expect(() => fileCache.persist(), returnsNormally);
   });
 
-  test('FileStore handles hashing missing files', () async {
+  testWithoutContext('FileStore handles hashing missing files', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File cacheFile = fileSystem.file(FileStore.kFileCache);
     final FileStore fileCache = FileStore(
@@ -140,7 +140,7 @@ void main() {
     expect(fileCache.currentAssetKeys, isNot(contains(fileSystem.path.absolute('hello.dart'))));
   });
 
-  test('FileStore handles failure to persist file cache', () async {
+  testWithoutContext('FileStore handles failure to persist file cache', () async {
     final MockFile mockFile = MockFile();
     final BufferLogger logger = BufferLogger.test();
     when(mockFile.writeAsBytesSync(any)).thenThrow(const FileSystemException('Out of space!'));
@@ -158,7 +158,7 @@ void main() {
     expect(logger.errorText, contains('Out of space!'));
   });
 
-  test('FileStore handles failure to restore file cache', () async {
+  testWithoutContext('FileStore handles failure to restore file cache', () async {
     final MockFile mockFile = MockFile();
     final BufferLogger logger = BufferLogger.test();
     when(mockFile.readAsBytesSync()).thenThrow(const FileSystemException('Out of space!'));
