@@ -60,14 +60,11 @@ TEST_F(ImageFilterLayerTest, EmptyFilter) {
   layer->Paint(paint_context());
   EXPECT_EQ(mock_canvas().draw_calls(),
             std::vector({
-                MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-                MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkMatrix()}},
                 MockCanvas::DrawCall{
-                    1, MockCanvas::SaveLayerData{child_bounds, filter_paint,
-                                                 nullptr, 2}},
+                    0, MockCanvas::SaveLayerData{child_bounds, filter_paint,
+                                                 nullptr, 1}},
                 MockCanvas::DrawCall{
-                    2, MockCanvas::DrawPathData{child_path, child_paint}},
-                MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
+                    1, MockCanvas::DrawPathData{child_path, child_paint}},
                 MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}},
             }));
 }
@@ -96,14 +93,11 @@ TEST_F(ImageFilterLayerTest, SimpleFilter) {
   layer->Paint(paint_context());
   EXPECT_EQ(mock_canvas().draw_calls(),
             std::vector({
-                MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-                MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkMatrix()}},
                 MockCanvas::DrawCall{
-                    1, MockCanvas::SaveLayerData{child_bounds, filter_paint,
-                                                 nullptr, 2}},
+                    0, MockCanvas::SaveLayerData{child_bounds, filter_paint,
+                                                 nullptr, 1}},
                 MockCanvas::DrawCall{
-                    2, MockCanvas::DrawPathData{child_path, child_paint}},
-                MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
+                    1, MockCanvas::DrawPathData{child_path, child_paint}},
                 MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}},
             }));
 }
@@ -132,14 +126,11 @@ TEST_F(ImageFilterLayerTest, SimpleFilterBounds) {
   layer->Paint(paint_context());
   EXPECT_EQ(mock_canvas().draw_calls(),
             std::vector({
-                MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-                MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkMatrix()}},
                 MockCanvas::DrawCall{
-                    1, MockCanvas::SaveLayerData{child_bounds, filter_paint,
-                                                 nullptr, 2}},
+                    0, MockCanvas::SaveLayerData{child_bounds, filter_paint,
+                                                 nullptr, 1}},
                 MockCanvas::DrawCall{
-                    2, MockCanvas::DrawPathData{child_path, child_paint}},
-                MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
+                    1, MockCanvas::DrawPathData{child_path, child_paint}},
                 MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}},
             }));
 }
@@ -177,19 +168,16 @@ TEST_F(ImageFilterLayerTest, MultipleChildren) {
   SkPaint filter_paint;
   filter_paint.setImageFilter(layer_filter);
   layer->Paint(paint_context());
-  EXPECT_EQ(mock_canvas().draw_calls(),
-            std::vector(
-                {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-                 MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkMatrix()}},
-                 MockCanvas::DrawCall{
-                     1, MockCanvas::SaveLayerData{children_bounds, filter_paint,
-                                                  nullptr, 2}},
-                 MockCanvas::DrawCall{
-                     2, MockCanvas::DrawPathData{child_path1, child_paint1}},
-                 MockCanvas::DrawCall{
-                     2, MockCanvas::DrawPathData{child_path2, child_paint2}},
-                 MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-                 MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  EXPECT_EQ(
+      mock_canvas().draw_calls(),
+      std::vector({MockCanvas::DrawCall{
+                       0, MockCanvas::SaveLayerData{children_bounds,
+                                                    filter_paint, nullptr, 1}},
+                   MockCanvas::DrawCall{
+                       1, MockCanvas::DrawPathData{child_path1, child_paint1}},
+                   MockCanvas::DrawCall{
+                       1, MockCanvas::DrawPathData{child_path2, child_paint2}},
+                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
 TEST_F(ImageFilterLayerTest, Nested) {
@@ -237,22 +225,16 @@ TEST_F(ImageFilterLayerTest, Nested) {
   layer1->Paint(paint_context());
   EXPECT_EQ(mock_canvas().draw_calls(),
             std::vector({
-                MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-                MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkMatrix()}},
                 MockCanvas::DrawCall{
-                    1, MockCanvas::SaveLayerData{children_bounds, filter_paint1,
-                                                 nullptr, 2}},
+                    0, MockCanvas::SaveLayerData{children_bounds, filter_paint1,
+                                                 nullptr, 1}},
                 MockCanvas::DrawCall{
-                    2, MockCanvas::DrawPathData{child_path1, child_paint1}},
-                MockCanvas::DrawCall{2, MockCanvas::SaveData{3}},
-                MockCanvas::DrawCall{3, MockCanvas::SetMatrixData{SkMatrix()}},
+                    1, MockCanvas::DrawPathData{child_path1, child_paint1}},
                 MockCanvas::DrawCall{
-                    3, MockCanvas::SaveLayerData{child_path2.getBounds(),
-                                                 filter_paint2, nullptr, 4}},
+                    1, MockCanvas::SaveLayerData{child_path2.getBounds(),
+                                                 filter_paint2, nullptr, 2}},
                 MockCanvas::DrawCall{
-                    4, MockCanvas::DrawPathData{child_path2, child_paint2}},
-                MockCanvas::DrawCall{4, MockCanvas::RestoreData{3}},
-                MockCanvas::DrawCall{3, MockCanvas::RestoreData{2}},
+                    2, MockCanvas::DrawPathData{child_path2, child_paint2}},
                 MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
                 MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}},
             }));
