@@ -292,6 +292,8 @@ Future<void> _runBuildTests() async {
   final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')));
   for (final FileSystemEntity fileEntity in exampleDirectories) {
+    // Only verify caching with flutter gallery.
+    final bool verifyCaching = fileEntity.path.contains('flutter_gallery');
     if (fileEntity is! Directory) {
       continue;
     }
@@ -308,8 +310,8 @@ Future<void> _runBuildTests() async {
     }
     if (Platform.isMacOS) {
       if (Directory(path.join(examplePath, 'ios')).existsSync()) {
-        await _flutterBuildIpa(examplePath, release: false, additionalArgs: additionalArgs);
-        await _flutterBuildIpa(examplePath, release: true, additionalArgs: additionalArgs);
+        await _flutterBuildIpa(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+        await _flutterBuildIpa(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
       } else {
         print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
       }
@@ -333,9 +335,10 @@ Future<void> _runBuildTests() async {
 
 Future<void> _flutterBuildApk(String relativePathToApplication, {
   @required bool release,
+  @required bool verifyCaching,
   List<String> additionalArgs = const <String>[],
 }) async {
-  print('${green}Testing APK --debug build$reset for $cyan$relativePathToApplication$reset...');
+  print('${green}Testing APK build$reset for $cyan$relativePathToApplication$reset...');
   await runCommand(flutter,
     <String>[
       'build',
@@ -349,6 +352,29 @@ Future<void> _flutterBuildApk(String relativePathToApplication, {
     ],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
   );
+
+  if (verifyCaching) {
+    print('${green}Testing APK cache$reset for $cyan$relativePathToApplication$reset...');
+    await runCommand(flutter,
+      <String>[
+        'build',
+        'apk',
+        ...additionalArgs,
+        if (release)
+          '--release'
+        else
+          '--debug',
+        '-v',
+      ],
+      workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    );
+    final File file = File(path.join(flutterRoot, relativePathToApplication, 'perf.json'));
+    if (!_allTargetsCached(file)) {
+      print('${red}Not all build targets cached after second run.$reset');
+      print('The target performance data was: ${file.readAsStringSync()}');
+      exit(1);
+    }
+  }
 }
 
 Future<void> _flutterBuildIpa(String relativePathToApplication, {
@@ -401,7 +427,7 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
       ],
       workingDirectory: path.join(flutterRoot, relativePathToApplication),
     );
-    final File file = File(path.join(flutterRoot, relativePathToApplication, 'perf.json');
+    final File file = File(path.join(flutterRoot, relativePathToApplication, 'perf.json'));
     if (!_allTargetsCached(file)) {
       print('${red}Not all build targets cached after second run.$reset');
       print('The target performance data was: ${file.readAsStringSync()}');
