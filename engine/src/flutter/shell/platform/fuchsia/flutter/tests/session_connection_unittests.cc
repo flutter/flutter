@@ -22,7 +22,7 @@ namespace flutter_runner_test {
 class SessionConnectionTest : public ::testing::Test {
  public:
   void SetUp() override {
-    context_ = sys::ComponentContext::Create();
+    context_ = sys::ComponentContext::CreateAndServeOutgoingDirectory();
     scenic_ = context_->svc()->Connect<fuchsia::ui::scenic::Scenic>();
     presenter_ = context_->svc()->Connect<fuchsia::ui::policy::Presenter>();
 
