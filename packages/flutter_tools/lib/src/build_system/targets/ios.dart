@@ -187,7 +187,7 @@ class DebugUniveralFramework extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/App.framework/App'),
+    Source.pattern('{BUILD_DIR}/App'),
   ];
 
   @override
