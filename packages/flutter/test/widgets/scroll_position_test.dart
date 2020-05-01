@@ -141,15 +141,30 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
 }
 
 class ExpandingBox extends StatefulWidget {
+  const ExpandingBox({this.collapsedSize, this.expandedsize});
+
+  final double collapsedSize;
+  final double expandedsize;
+
   @override
-  _ExpandingBoxState createState() => _ExpandingBoxState();
+  _ExpandingBoxState createState() {
+    return _ExpandingBoxState(collapsedSize: collapsedSize, expandedsize: expandedsize);
+  }
 }
 
-class _ExpandingBoxState extends State<ExpandingBox> {
-  double height = 400.0;
+class _ExpandingBoxState extends State<ExpandingBox> with AutomaticKeepAliveClientMixin<ExpandingBox>{
+  _ExpandingBoxState({this.collapsedSize, this.expandedsize}) {
+    height = collapsedSize;
+  }
+
+  final double collapsedSize;
+  final double expandedsize;
+
+  double height;
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Container(
       height: height,
       color: Colors.green,
@@ -159,13 +174,16 @@ class _ExpandingBoxState extends State<ExpandingBox> {
           child: const Text('Collapse'),
           onPressed: () {
             setState(() {
-              height = height == 400 ? 1200 : 400;
+              height = height == collapsedSize ? expandedsize : collapsedSize;
             });
           }
         ),
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 void main() {
@@ -189,16 +207,16 @@ void main() {
   });
 
   testWidgets('shrink listview', (WidgetTester tester) async {
+    // widget tests run at (800x600)@3.0x
     await tester.pumpWidget(MaterialApp(
       home: ListView.builder(
         itemBuilder: (BuildContext context, int index) => index == 0
-              ? ExpandingBox()
+              ? const ExpandingBox(collapsedSize: 400, expandedsize: 1200)
               : Container(height: 300, color: Colors.red),
         itemCount: 2,
       ),
     ));
 
-    await tester.pumpAndSettle();
     final ScrollPosition position =
         tester.state<ScrollableState>(find.byType(Scrollable)).position;
     expect(position.activity.runtimeType, IdleScrollActivity);
@@ -206,17 +224,84 @@ void main() {
     expect(position.maxScrollExtent, 100.0);
     expect(position.pixels, 0.0);
     await tester.tap(find.byType(FlatButton));
-    await tester.pump();
+    await tester.pumpAndSettle();
+
+    final TestGesture drag1 = await tester.startGesture(const Offset(10.0, 500.0));
+    await tester.pumpAndSettle();
+    await drag1.moveTo(const Offset(10.0, 0.0));
+    await tester.pumpAndSettle();
+    await drag1.up();
+    await tester.pumpAndSettle();
+    expect(position.pixels, closeTo(500.00, 0.01));
     expect(position.minScrollExtent, 0.0);
-    expect(position.maxScrollExtent, 1800.0);
-    expect(position.pixels, 0.0);
-    position.jumpTo(1800.0);
-    await tester.pump();
+    expect(position.maxScrollExtent, 900.0);
+
+    final TestGesture drag2 = await tester.startGesture(const Offset(10.0, 500.0));
+    await tester.pumpAndSettle();
+    await drag2.moveTo(const Offset(10.0, 100.0));
+    await tester.pumpAndSettle();
+    await drag2.up();
+    await tester.pumpAndSettle();
+    expect(position.maxScrollExtent, 900.0);
+    expect(position.pixels, closeTo(900.00, 0.01));
+
+    await tester.pumpAndSettle();
     await tester.tap(find.byType(FlatButton));
     await tester.pump();
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, 100.0);
     expect(position.pixels, 100.0);
+  });
+
+  testWidgets('shrink listview while dragging', (WidgetTester tester) async {
+    // widget tests run at (800x600)@3.0x
+    await tester.pumpWidget(MaterialApp(
+      home: ListView.builder(
+        itemBuilder: (BuildContext context, int index) => index == 0
+              ? const ExpandingBox(collapsedSize: 400, expandedsize: 1200)
+              : Container(height: 300, color: Colors.red),
+        itemCount: 2,
+      ),
+    ));
+
+    final ScrollPosition position =
+        tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    expect(position.activity.runtimeType, IdleScrollActivity);
+    expect(position.minScrollExtent, 0.0);
+    expect(position.maxScrollExtent, 100.0);
+    expect(position.pixels, 0.0);
+    await tester.tap(find.byType(FlatButton));
+    await tester.pumpAndSettle();
+
+    final TestGesture drag1 = await tester.startGesture(const Offset(10.0, 500.0));
+    await tester.pumpAndSettle();
+    await drag1.moveTo(const Offset(10.0, 0.0));
+    await tester.pumpAndSettle();
+    await drag1.up();
+    await tester.pumpAndSettle();
+    expect(position.pixels, closeTo(500.00, 0.01));
+    expect(position.minScrollExtent, 0.0);
+    expect(position.maxScrollExtent, 900.0);
+
+    final TestGesture drag2 = await tester.startGesture(const Offset(10.0, 500.0));
+    await tester.pumpAndSettle();
+    await drag2.moveTo(const Offset(10.0, 100.0));
+    await tester.pumpAndSettle();
+    expect(position.maxScrollExtent, 900.0);
+    expect(position.pixels, closeTo(900.00, 0.01));
+    expect(position.activity.runtimeType, DragScrollActivity);
+
+    await tester.tap(find.byType(FlatButton));
+    await tester.pump();
+    expect(position.activity.runtimeType, DragScrollActivity);
+    expect(position.minScrollExtent, 0.0);
+    expect(position.maxScrollExtent, 900.0);
+    expect(position.pixels, 900.0);
+
+    await drag2.up();
+    expect(position.minScrollExtent, 0.0);
+    expect(position.maxScrollExtent, 900.0);
+    expect(position.pixels, 900.0);
   });
 
   testWidgets('whether we remember our scroll position', (WidgetTester tester) async {
