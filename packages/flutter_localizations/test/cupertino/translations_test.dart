@@ -181,6 +181,13 @@ void main() {
 
     // After encoding the bundles, the generated string should match
     // the existing material_kn.arb.
-    expect(file.readAsStringSync(), encodedArbFile);
+    if (Platform.isWindows) {
+      // On Windows, the character '\n' can output the two-character sequence
+      // '\r\n' (and when reading the file back, '\r\n' is translated back
+      // into a single '\n' character).
+      expect(file.readAsStringSync().replaceAll('\r\n', '\n'), encodedArbFile);
+    } else {
+      expect(file.readAsStringSync(), encodedArbFile);
+    }
   });
 }
