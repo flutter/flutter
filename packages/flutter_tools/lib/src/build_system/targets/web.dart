@@ -357,7 +357,8 @@ class WebServiceWorker extends Target {
     final Map<String, String> urlToHash = <String, String>{};
     for (final File file in contents) {
       // Do not force caching of source maps.
-      if (file.path.endsWith('main.dart.js.map')) {
+      if (file.path.endsWith('main.dart.js.map') ||
+        file.path.endsWith('.part.js.map')) {
         continue;
       }
       final String url = globals.fs.path.toUri(
@@ -376,7 +377,15 @@ class WebServiceWorker extends Target {
     final File serviceWorkerFile = environment.outputDir
       .childFile('flutter_service_worker.js');
     final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
-    final String serviceWorker = generateServiceWorker(urlToHash);
+    final String serviceWorker = generateServiceWorker(urlToHash, <String>[
+      'main.dart.js',
+      '/',
+      'index.html',
+      'assets/LICENSE',
+      'assets/AssetManifest.json',
+      if (urlToHash.containsKey('assets/FontManifest.json'))
+        'assets/FontManifest.json',
+    ]);
     serviceWorkerFile
       .writeAsStringSync(serviceWorker);
     final DepfileService depfileService = DepfileService(
@@ -393,11 +402,10 @@ class WebServiceWorker extends Target {
 /// Generate a service worker with an app-specific cache name a map of
 /// resource files.
 ///
-/// We embed file hashes directly into the worker so that the byte for byte
+/// The tool embeds file hashes directly into the worker so that the byte for byte
 /// invalidation will automatically reactivate workers whenever a new
 /// version is deployed.
-// TODO(jonahwilliams): on re-activate, only evict stale assets.
-String generateServiceWorker(Map<String, String> resources) {
+String generateServiceWorker(Map<String, String> resources, List<String> coreBundle) {
   return '''
 'use strict';
 const CACHE_NAME = 'flutter-app-cache';
@@ -405,27 +413,33 @@ const RESOURCES = {
   ${resources.entries.map((MapEntry<String, String> entry) => '"${entry.key}": "${entry.value}"').join(",\n")}
 };
 
-self.addEventListener('activate', function (event) {
-  event.waitUntil(
-    caches.keys().then(function (cacheName) {
-      return caches.delete(cacheName);
-    }).then(function (_) {
-      return caches.open(CACHE_NAME);
-    }).then(function (cache) {
-      return cache.addAll(Object.keys(RESOURCES));
+const CORE = [
+  ${coreBundle.map((String file) => '"$file"').join(',\n')}];
+
+self.addEventListener("install", (event) => {
+  return event.waitUntil(
+    caches.delete(CACHE_NAME).then((deleted) => {
+      return caches.open(CACHE_NAME).then((cache) => {
+        return cache.addAll(CORE);
+      });
     })
   );
 });
 
-self.addEventListener('fetch', function (event) {
-  event.respondWith(
-    caches.match(event.request)
-      .then(function (response) {
-        if (response) {
+self.addEventListener("fetch", (event) => {
+  event.respondWith(caches.open(CACHE_NAME)
+    .then((cache) =>  {
+      return cache.match(event.request).then((response) => {
+        return response || fetch(event.request).then((response) => {
+          var origin = self.location.origin;
+          var key = event.request.url.substring(origin.length + 1);
+          if (RESOURCES[key]) {
+            cache.put(event.request, response.clone());
+          }
           return response;
-        }
-        return fetch(event.request);
+        });
       })
+    })
   );
 });
 ''';

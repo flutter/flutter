@@ -464,9 +464,15 @@ void main() {
   }));
 
   test('Generated service worker correctly inlines file hashes', () {
-    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'});
+    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>[]);
 
     expect(result, contains('{\n  "/foo": "abcd"\n};'));
+  });
+
+  test('Generated service worker includes core files', () {
+    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>['foo', 'bar']);
+
+    expect(result, contains('"foo",\n"bar"'));
   });
 
   test('WebServiceWorker generates a service_worker for a web resource folder', () => testbed.run(() async {
