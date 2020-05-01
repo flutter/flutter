@@ -189,19 +189,16 @@ void main() {
         FakeVmServiceRequest(
           id: '3',
           method: 'getVM',
-          args: null,
           jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
         ),
         FakeVmServiceRequest(
           id: '4',
           method: 'getVM',
-          args: null,
           jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
         ),
         const FakeVmServiceRequest(
           id: '5',
           method: kListViewsMethod,
-          args: null,
           jsonResponse: <String, Object>{
             'views': <Object>[],
           }
@@ -209,7 +206,6 @@ void main() {
         const FakeVmServiceRequest(
           id: '6',
           method: kListViewsMethod,
-          args: null,
           jsonResponse: <String, Object>{
             'views': <Object>[],
           }
@@ -264,7 +260,6 @@ void main() {
         const FakeVmServiceRequest(
           id: '1',
           method: kListViewsMethod,
-          args: null,
           jsonResponse: <String, Object>{
             'views': <Object>[],
           }
@@ -272,13 +267,11 @@ void main() {
         FakeVmServiceRequest(
           id: '2',
           method: 'getVM',
-          args: null,
           jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
         ),
         const FakeVmServiceRequest(
           id: '3',
           method: kListViewsMethod,
-          args: null,
           jsonResponse: <String, Object>{
             'views': <Object>[],
           }
