@@ -370,6 +370,52 @@ public class TextInputPluginTest {
   }
 
   @Test
+  public void inputConnection_finishComposingTextUpdatesIMM() throws JSONException {
+    ShadowBuild.setManufacturer("samsung");
+    InputMethodSubtype inputMethodSubtype =
+        new InputMethodSubtype(0, 0, /*locale=*/ "en", "", "", false, false);
+    Settings.Secure.putString(
+        RuntimeEnvironment.application.getContentResolver(),
+        Settings.Secure.DEFAULT_INPUT_METHOD,
+        "com.sec.android.inputmethod/.SamsungKeypad");
+    TestImm testImm =
+        Shadow.extract(
+            RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
+    FlutterJNI mockFlutterJni = mock(FlutterJNI.class);
+    View testView = new View(RuntimeEnvironment.application);
+    DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJni, mock(AssetManager.class)));
+    TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(testView, textInputChannel, mock(PlatformViewsController.class));
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            null,
+            null,
+            null,
+            null));
+    // There's a pending restart since we initialized the text input client. Flush that now.
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("", 0, 0));
+    InputConnection connection = textInputPlugin.createInputConnection(testView, new EditorInfo());
+
+    connection.finishComposingText();
+
+    if (Build.VERSION.SDK_INT >= 21) {
+      CursorAnchorInfo.Builder builder = new CursorAnchorInfo.Builder();
+      builder.setComposingText(-1, "");
+      CursorAnchorInfo anchorInfo = builder.build();
+      assertEquals(testImm.getLastCursorAnchorInfo(), anchorInfo);
+    }
+  }
+
+  @Test
   public void autofill_onProvideVirtualViewStructure() {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
 
