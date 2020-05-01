@@ -35,6 +35,7 @@
 #include "runtime/dart/utils/tempfs.h"
 #include "runtime/dart/utils/vmo.h"
 
+#include "flutter_runner_product_configuration.h"
 #include "task_observers.h"
 #include "task_runner_adapter.h"
 #include "thread.h"
@@ -312,6 +313,13 @@ Application::Application(
       FML_LOG(INFO) << "Using snapshot without framework for "
                     << package.resolved_url;
     }
+  }
+
+  // Load and use product-specific configuration, if it exists.
+  std::string json_string;
+  if (dart_utils::ReadFileToString(
+          "/config/data/frame_scheduling_performance_values", &json_string)) {
+    product_config_ = FlutterRunnerProductConfiguration(json_string);
   }
 
 #if defined(DART_PRODUCT)
@@ -609,7 +617,8 @@ void Application::CreateView(
       std::move(isolate_snapshot_),  // isolate snapshot
       scenic::ToViewToken(std::move(view_token)),  // view token
       std::move(fdio_ns_),                         // FDIO namespace
-      std::move(directory_request_)                // outgoing request
+      std::move(directory_request_),               // outgoing request
+      product_config_                              // product configuration
       ));
 }
 
