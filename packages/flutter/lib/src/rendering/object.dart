@@ -3929,6 +3929,7 @@ mixin ClipBehaviorMixin on RenderObject {
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
+      markNeedsSemanticsUpdate();
     }
   }
 }
