@@ -17,6 +17,18 @@ typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstrain
 /// function at layout time and provides the constraints that this widget should
 /// adhere to. This is useful when the parent constrains the child's size and layout,
 /// and doesn't depend on the child's intrinsic size.
+///
+/// {@template flutter.widgets.layoutBuilder.builderFunctionInvocation}
+/// The [builder] function is called in the following situations:
+///
+/// * The first time the widget is laid out.
+/// * When the parent widget passes different layout constraints.
+/// * When the parent widget updates this widget.
+/// * When the depedencies that the [builder] function subscribes to change.
+///
+/// The [builder] function is _not_ called during layout if the parent passes
+/// the same constraints repeatedly.
+/// {@endtemplate}
 abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> extends RenderObjectWidget {
   /// Creates a widget that defers its building until layout.
   ///
@@ -221,11 +233,13 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
 /// the child's intrinsic size. The [LayoutBuilder]'s final size will match its
 /// child's size.
 ///
+/// {@macro flutter.widgets.layoutBuilder.builderFunctionInvocation}
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=IYDVcriKjsw}
 ///
 /// If the child should be smaller than the parent, consider wrapping the child
 /// in an [Align] widget. If the child might want to be bigger, consider
-/// wrapping it in a [SingleChildScrollView].
+/// wrapping it in a [SingleChildScrollView] or [OverflowBox].
 ///
 /// See also:
 ///
