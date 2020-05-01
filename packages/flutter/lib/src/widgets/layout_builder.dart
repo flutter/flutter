@@ -193,10 +193,11 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
   ///
   /// The layout build rebuilds automatically when layout constraints change.
   /// However, we must also rebuild when the widget updates, e.g. after
-  /// `setState`, or `didChangeDependencies`, even when the layout constraints
-  /// remain unchanged.
+  /// [State.setState], or [State.didChangeDependencies], even when the layout
+  /// constraints remain unchanged.
   ///
   /// See also:
+  ///
   ///  * [ConstrainedLayoutBuilder.builder], which is called during the rebuild.
   void markNeedsBuild() {
     // Do not call the callback directly. It must be called during the layout
