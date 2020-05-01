@@ -175,7 +175,6 @@ void main() {
         const FakeVmServiceRequest(
           id: '1',
           method: kListViewsMethod,
-          args: null,
           jsonResponse: <String, Object>{
             'views': <Object>[],
           }
@@ -183,7 +182,6 @@ void main() {
          const FakeVmServiceRequest(
           id: '2',
           method: kListViewsMethod,
-          args: null,
           jsonResponse: <String, Object>{
             'views': <Object>[],
           }
