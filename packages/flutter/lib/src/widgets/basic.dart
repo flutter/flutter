@@ -7194,13 +7194,20 @@ enum NavigationMode {
 
 /// An inherited widget that defines the navigation modality for a subtree.
 ///
-/// Some user interfaces are better navigated using a directional pad or arrow
-/// keys, and for those interfaces, some widgets need to handle DPAD and arrow
-/// keys differently.  In order to know when to do that, they will look for the
-/// navigation mode in effect for their context.
+/// Some user interfaces are better navigated using a directional pad (DPAD) or
+/// arrow keys, and for those interfaces, some widgets need to handle
+/// directional pad and arrow keys differently.  In order to know when to do
+/// that, they will look for the navigation mode in effect for their context.
 ///
 /// This widget allows the developer of those interfaces to indicate which parts
 /// of the UI should be using this modality.
+///
+/// The default mode (or if this widget is not present) is
+/// [NavigationMode.traditional].
+///
+/// See also:
+///
+///  * [NavigationMode], the enum that describes the different allowable modes.
 class NavigationModality extends InheritedWidget {
   /// Creates a widget that determines the [NavigationMode] for widgets sensitive
   /// to it.
@@ -7208,13 +7215,15 @@ class NavigationModality extends InheritedWidget {
   /// The [navigationMode] and [child] arguments must not be null.
   const NavigationModality({
     Key key,
-    @required this.navigationMode,
+    this.navigationMode = NavigationMode.traditional,
     @required Widget child,
   }) : assert(navigationMode != null),
-        assert(child != null),
-        super(key: key, child: child);
+       assert(child != null),
+       super(key: key, child: child);
 
   /// The navigation mode for this subtree.
+  ///
+  /// Defaults to [NavigationMode.traditional].
   final NavigationMode navigationMode;
 
   /// Whether the navigation mode from the closest instance of this class that
@@ -7229,17 +7238,14 @@ class NavigationModality extends InheritedWidget {
   /// bool isDirectional = NavigationModality.isDirectional(context);
   /// ```
   static bool isDirectional(BuildContext context) {
-    final NavigationModality widget = context.dependOnInheritedWidgetOfExactType<NavigationModality>();
-    if (widget == null) {
-      return false;
-    }
-    switch (widget.navigationMode) {
+    final NavigationMode mode = NavigationModality.of(context);
+    switch (mode) {
       case NavigationMode.traditional:
         return false;
       case NavigationMode.directional:
         return true;
     }
-    assert(false, 'Unhandled navigation mode ${widget.navigationMode}');
+    assert(false, 'Unhandled navigation mode $mode');
     return false;
   }
 
