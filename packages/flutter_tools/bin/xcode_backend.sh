@@ -152,21 +152,6 @@ BuildApp() {
     verbose_flag="--verbose"
   fi
 
-  local track_widget_creation_flag=""
-  if [[ -n "$TRACK_WIDGET_CREATION" ]]; then
-    track_widget_creation_flag="true"
-  fi
-
-  local icon_tree_shaker_flag="false"
-  if [[ -n "$TREE_SHAKE_ICONS" ]]; then
-    icon_tree_shaker_flag="true"
-  fi
-
-  local dart_obfuscation_flag="false"
-  if [[ -n "$DART_OBFUSCATION" ]]; then
-    dart_obfuscation_flag="true"
-  fi
-
   local performance_measurement_option=""
   if [[ -n "$PERFORMANCE_MEASUREMENT_FILE" ]]; then
     performance_measurement_option="--performance-measurement-file=${PERFORMANCE_MEASUREMENT_FILE}"
@@ -184,9 +169,9 @@ BuildApp() {
     -dBuildMode=${build_mode}                                             \
     -dIosArchs="${ARCHS}"                                                 \
     -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                \
-    -dTreeShakeIcons="${icon_tree_shaker_flag}"                           \
-    -dTrackWidgetCreation="${track_widget_creation_flag}"                 \
-    -dDartObfuscation="${dart_obfuscation_flag}"                          \
+    -dTreeShakeIcons="${TREE_SHAKE_ICONS}"                                \
+    -dTrackWidgetCreation="${TRACK_WIDGET_CREATION}"                      \
+    -dDartObfuscation="${DART_OBFUSCATION}"                               \
     -dEnableBitcode="${bitcode_flag}"                                     \
     --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"             \
     --DartDefines="${DART_DEFINES}"                                       \
