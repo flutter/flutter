@@ -997,6 +997,7 @@ void main() {
       final List<String> description = builder.properties.map((DiagnosticsNode n) => n.toString()).toList();
       expect(description, <String>[
         'context: null',
+        'descendantsAreFocusable: true',
         'canRequestFocus: true',
         'hasFocus: false',
         'hasPrimaryFocus: false'
