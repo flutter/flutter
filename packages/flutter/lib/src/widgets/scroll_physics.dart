@@ -230,7 +230,7 @@ class ScrollPhysics {
 
   /// Describes what the scroll position should be given new viewport dimensions.
   ///
-  /// This is called by [ScrollPosition.approveNewDimensions].
+  /// This is called by [ScrollPosition.applyContentDimensions].
   ///
   /// The arguments consist of the current scroll metrics, including the
   /// position and minimum and maximum scroll extents; a flag indicating if the
@@ -258,11 +258,11 @@ class ScrollPhysics {
   /// The default implementation returns [ScrollMetrics.pixels], which indicates
   /// that the current scroll offset is acceptable.
   ///
-  /// When `velocity` is 0.0, [ClampingScrollPhysics] returns the
-  /// current scroll offset ([ScrollMetrics.pixels]) clamped to the minimum and
-  /// maximum scroll extents ([ScrollMetrics.minScrollExtent] and
-  /// [ScrollMetrics.maxScrollExtent]), essentially forcing the scroll position
-  /// to never go out-of-range even if the contents of the list change suddenly.
+  /// [ClampingScrollPhysics] returns the current scroll offset
+  /// ([ScrollMetrics.pixels]) clamped to the minimum and maximum scroll extents
+  /// ([ScrollMetrics.minScrollExtent] and [ScrollMetrics.maxScrollExtent]),
+  /// essentially forcing the scroll position to never go out-of-range even if
+  /// the contents of the list change suddenly.
   double adjustPositionForNewDimensions(ScrollMetrics position, {
     @required bool isScrolling,
     @required double velocity,
