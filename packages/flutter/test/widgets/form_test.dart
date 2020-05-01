@@ -272,6 +272,11 @@ void main() {
       await tester.enterText(find.byType(TextFormField).first, testValue);
       await tester.pump();
 
+      //now autovalidate functions only when state value of the field changes at least once
+      //hence setting some text to the last TextformField
+      await tester.enterText(find.byType(TextFormField).last, testValue);
+      await tester.pump();
+
       // Check for a new Text widget with our error text.
       expect(find.text(testValue + '/error'), findsOneWidget);
       return;
@@ -577,5 +582,60 @@ void main() {
     formKey.currentState.reset();
     formKey.currentState.save();
     expect(formKey.currentState.validate(), isTrue);
+  });
+
+  testWidgets('autovalidate functions only when state value changes atleast once', (WidgetTester tester) async {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    final GlobalKey<FormFieldState<String>> fieldKey = GlobalKey<FormFieldState<String>>();
+    // Input 2's validator depends on a input 1's value.
+    String errorText(String input) => '${fieldKey.currentState.value}/error';
+
+    Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  key: formKey,
+                  autovalidate: true,
+                  child: ListView(
+                    children: <Widget>[
+                      TextFormField(
+                        key: fieldKey,
+                        autovalidate: true,
+                        validator: errorText,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+
+
+    Future<void> checkErrorText(String testValue) async {
+      // state value was not changed yet
+      expect(find.text(testValue + '/error'),findsNothing);
+
+      // state value changes now
+      await tester.enterText(find.byType(TextFormField).first, testValue);
+      await tester.pump();
+
+      //autovalidate functions after state changed at least once
+      expect(find.text(testValue + '/error'), findsOneWidget);
+      return;
+    }
+
+    await checkErrorText('Test');
+    await checkErrorText('');
   });
 }
