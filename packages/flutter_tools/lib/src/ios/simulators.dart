@@ -700,12 +700,16 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   String _filterDeviceLine(String string) {
     final Match match = _mapRegex.matchAsPrefix(string);
     if (match != null) {
+
+      // The category contains the text between the date and the PID. Depending on which version of iOS being run,
+      // it can contain "hostname App Name" or just "App Name".
       final String category = match.group(1);
       final String tag = match.group(2);
       final String content = match.group(3);
 
-      // Filter out non-Flutter originated noise from the engine.
-      if (_appName != null && category != _appName && !category.endsWith(' $_appName')) {
+      // Filter out log lines from an app other than this one (category doesn't match the app name).
+      // If the hostname is included in the category, check that it doesn't end with the app name.
+      if (_appName != null && !category.endsWith(_appName)) {
         return null;
       }
 

@@ -411,7 +411,11 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
 
   /// The product bundle identifier of the host app, or null if not set or if
   /// iOS tooling needed to read it is not installed.
-  Future<String> get productBundleIdentifier async {
+  Future<String> get productBundleIdentifier async =>
+    _productBundleIdentifier ??= await _parseProductBundleIdentifier();
+  String _productBundleIdentifier;
+
+  Future<String> _parseProductBundleIdentifier() async {
     String fromPlist;
     final File defaultInfoPlist = defaultHostInfoPlist;
     // Users can change the location of the Info.plist.
@@ -454,7 +458,11 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
 
   /// The bundle name of the host app, `My App.app`.
-  Future<String> get hostAppBundleName async {
+  Future<String> get hostAppBundleName async =>
+    _hostAppBundleName ??= await _parseHostAppBundleName();
+  String _hostAppBundleName;
+
+  Future<String> _parseHostAppBundleName() async {
     // The product name and bundle name are derived from the display name, which the user
     // is instructed to change in Xcode as part of deploying to the App Store.
     // https://flutter.dev/docs/deployment/ios#review-xcode-project-settings
@@ -475,24 +483,24 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   /// The build settings for the host app of this project, as a detached map.
   ///
   /// Returns null, if iOS tooling is unavailable.
-  Future<Map<String, String>> get buildSettings async {
+  Future<Map<String, String>> get buildSettings async =>
+    _buildSettings ??= await _xcodeProjectBuildSettings();
+  Map<String, String> _buildSettings;
+
+  Future<Map<String, String>> _xcodeProjectBuildSettings() async {
     if (!globals.xcodeProjectInterpreter.isInstalled) {
       return null;
     }
-    Map<String, String> buildSettings = _buildSettings;
-    buildSettings ??= await globals.xcodeProjectInterpreter.getBuildSettings(
+    final Map<String, String> buildSettings = await globals.xcodeProjectInterpreter.getBuildSettings(
       xcodeProject.path,
       _hostAppProjectName,
     );
     if (buildSettings != null && buildSettings.isNotEmpty) {
       // No timeouts, flakes, or errors.
-      _buildSettings = buildSettings;
       return buildSettings;
     }
     return null;
   }
-
-  Map<String, String> _buildSettings;
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     await _regenerateFromTemplateIfNeeded();

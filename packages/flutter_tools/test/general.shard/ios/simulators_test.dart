@@ -539,7 +539,9 @@ void main() {
         fakeProcessManager
           ..addCommand(const FakeCommand(
             command:  <String>['tail', '-n', '0', '-F', 'system.log'],
-            stdout: 'Dec 20 17:04:32 md32-11-vm1 My Super Awesome App[88374]: flutter: Observatory listening on http://127.0.0.1:64213/1Uoeu523990=/',
+            stdout: '''
+Dec 20 17:04:32 md32-11-vm1 My Super Awesome App[88374]: flutter: Observatory listening on http://127.0.0.1:64213/1Uoeu523990=/
+Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           ))
           ..addCommand(const FakeCommand(
             command:  <String>['tail', '-n', '0', '-F', '/private/var/log/system.log']
