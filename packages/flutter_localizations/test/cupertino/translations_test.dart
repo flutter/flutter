@@ -13,6 +13,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../test_utils.dart';
 
+final String rootDirectoryPath = Directory.current.parent.path;
+
 void main() {
   for (final String language in kCupertinoSupportedLanguages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
@@ -128,8 +130,12 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/53036.
   testWidgets('`nb` uses `no` as its synonym when `nb` arb file is not present', (WidgetTester tester) async {
-    final File nbCupertinoArbFile = File(path.join('lib', 'src', 'l10n', 'cupertino_nb.arb'));
-    final File noCupertinoArbFile = File(path.join('lib', 'src', 'l10n', 'cupertino_no.arb'));
+    final File nbCupertinoArbFile = File(
+      path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'cupertino_nb.arb'),
+    );
+    final File noCupertinoArbFile = File(
+      path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'cupertino_no.arb'),
+    );
 
 
     if (noCupertinoArbFile.existsSync() && !nbCupertinoArbFile.existsSync()) {
@@ -154,7 +160,9 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/36704.
   testWidgets('kn arb file should be properly Unicode escaped', (WidgetTester tester) async {
-    final File file = File(path.join('lib', 'src', 'l10n', 'cupertino_kn.arb'));
+    final File file = File(
+      path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'cupertino_kn.arb'),
+    );
 
     final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
 

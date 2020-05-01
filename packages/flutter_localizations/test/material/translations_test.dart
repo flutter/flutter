@@ -13,6 +13,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../test_utils.dart';
 
+final String rootDirectoryPath = Directory.current.parent.path;
+
 void main() {
   for (final String language in kMaterialSupportedLanguages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
@@ -472,8 +474,12 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/53036.
   testWidgets('`nb` uses `no` as its synonym when `nb` arb file is not present', (WidgetTester tester) async {
-    final File nbMaterialArbFile = File(path.join('lib', 'src', 'l10n', 'material_nb.arb'));
-    final File noMaterialArbFile = File(path.join('lib', 'src', 'l10n', 'material_no.arb'));
+    final File nbMaterialArbFile = File(
+      path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'material_nb.arb'),
+    );
+    final File noMaterialArbFile = File(
+      path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'material_no.arb'),
+    );
 
     // No need to run test if `nb` arb file exists or if `no` arb file does not exist.
     if (noMaterialArbFile.existsSync() && !nbMaterialArbFile.existsSync()) {
@@ -500,9 +506,13 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/36704.
   testWidgets('kn arb file should be properly Unicode escaped', (WidgetTester tester) async {
-    final File file = File(path.join('lib', 'src', 'l10n', 'material_kn.arb'));
+    final File file = File(
+      path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'material_kn.arb'),
+    );
 
-    final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+    final Map<String, dynamic> bundle = json.decode(
+      file.readAsStringSync(),
+    ) as Map<String, dynamic>;
 
     // Encodes the arb resource values if they have not already been
     // encoded.
