@@ -7,8 +7,14 @@
 
 #include "tonic/dart_args.h"
 
+#define DART_NATIVE_NO_UI_CHECK_CALLBACK(CLASS, METHOD)     \
+  static void CLASS##_##METHOD(Dart_NativeArguments args) { \
+    tonic::DartCall(&CLASS::METHOD, args);                  \
+  }
+
 #define DART_NATIVE_CALLBACK(CLASS, METHOD)                 \
   static void CLASS##_##METHOD(Dart_NativeArguments args) { \
+    UIDartState::ThrowIfUIOperationsProhibited();           \
     tonic::DartCall(&CLASS::METHOD, args);                  \
   }
 

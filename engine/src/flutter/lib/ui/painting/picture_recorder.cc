@@ -14,6 +14,7 @@
 namespace flutter {
 
 static void PictureRecorder_constructor(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
   DartCallConstructor(&PictureRecorder::Create, args);
 }
 

@@ -26,7 +26,7 @@ IMPLEMENT_WRAPPERTYPEINFO(zircon, HandleWaiter);
 
 #define FOR_EACH_BINDING(V) V(HandleWaiter, Cancel)
 
-FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
+FOR_EACH_BINDING(DART_NATIVE_NO_UI_CHECK_CALLBACK)
 
 void HandleWaiter::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
