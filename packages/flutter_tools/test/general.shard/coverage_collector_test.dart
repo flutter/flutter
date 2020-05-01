@@ -14,7 +14,6 @@ void main() {
         FakeVmServiceRequest(
           id: '1',
           method: 'getVM',
-          args: null,
           jsonResponse: (vm_service.VM.parse(<String, Object>{})
             ..isolates = <vm_service.IsolateRef>[
               vm_service.IsolateRef.parse(<String, Object>{
