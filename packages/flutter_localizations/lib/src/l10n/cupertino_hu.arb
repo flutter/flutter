@@ -19,5 +19,6 @@
   "copyButtonLabel": "Másolás",
   "pasteButtonLabel": "Beillesztés",
   "selectAllButtonLabel": "Összes kijelölése",
+  "tabSemanticsLabel": "TBD",
   "modalBarrierDismissLabel": "Elvetés"
 }
