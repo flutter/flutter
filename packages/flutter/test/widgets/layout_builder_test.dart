@@ -644,6 +644,10 @@ void main() {
     spy.markNeedsLayout();
     await tester.pump();
 
+    // Builder is not invoked. This was a layout-only pump with the same parent
+    // constraints.
+    expect(builderInvocationCount, 2);
+
     // Expect performLayout to be called.
     expect(spy.performLayoutCount, 2);
 
@@ -653,6 +657,8 @@ void main() {
 
     // Change the parent size, triggering constraint change.
     await pumpTestWidget(const Size(20, 20));
+
+    // We should see everything invoked once.
     expect(builderInvocationCount, 3);
     expect(spy.performLayoutCount, 3);
     expect(spy.performResizeCount, 2);
