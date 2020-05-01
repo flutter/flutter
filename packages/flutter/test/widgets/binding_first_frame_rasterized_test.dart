@@ -15,7 +15,7 @@ void main() {
 
   test('Deferred frames will trigger the first frame callback', () {
     FakeAsync().run((FakeAsync fakeAsync) {
-      final WidgetsBinding binding = WidgetsBinding.instance;
+      final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
       binding.deferFirstFrame();
 
       runApp(const Placeholder());
