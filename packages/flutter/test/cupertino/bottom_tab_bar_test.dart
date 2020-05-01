@@ -13,7 +13,7 @@ Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async
   await tester.pumpWidget(
     Localizations(
       locale: const Locale('en', 'US'),
-      delegates: <LocalizationsDelegate<dynamic>>[
+      delegates: const <LocalizationsDelegate<dynamic>>[
         DefaultWidgetsLocalizations.delegate,
         DefaultCupertinoLocalizations.delegate,
       ],
