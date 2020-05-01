@@ -2,10 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#define FML_USED_ON_EMBEDDER
+
 #include "flutter/fml/memory/weak_ptr.h"
 
+#include <thread>
 #include <utility>
 
+#include "flutter/fml/message_loop.h"
+#include "flutter/fml/raster_thread_merger.h"
+#include "flutter/fml/synchronization/count_down_latch.h"
 #include "gtest/gtest.h"
 
 namespace fml {
@@ -160,6 +166,67 @@ TEST(WeakPtrTest, UpcastMoveAssignment) {
   ptr2 = std::move(ptr);
   EXPECT_EQ(nullptr, ptr.get());
   EXPECT_EQ(&data, ptr2.get());
+}
+
+TEST(TaskRunnerAffineWeakPtrTest, ShouldNotCrashIfRunningOnTheSameTaskRunner) {
+  fml::MessageLoop* loop1 = nullptr;
+  fml::AutoResetWaitableEvent latch1;
+  fml::AutoResetWaitableEvent term1;
+  std::thread thread1([&loop1, &latch1, &term1]() {
+    fml::MessageLoop::EnsureInitializedForCurrentThread();
+    loop1 = &fml::MessageLoop::GetCurrent();
+    latch1.Signal();
+    term1.Wait();
+  });
+
+  fml::MessageLoop* loop2 = nullptr;
+  fml::AutoResetWaitableEvent latch2;
+  fml::AutoResetWaitableEvent term2;
+  fml::AutoResetWaitableEvent loop2_task_finish_latch;
+  fml::AutoResetWaitableEvent loop2_task_start_latch;
+  std::thread thread2([&loop2, &latch2, &term2, &loop2_task_finish_latch,
+                       &loop2_task_start_latch]() {
+    fml::MessageLoop::EnsureInitializedForCurrentThread();
+    int data = 0;
+    WeakPtrFactory<int> factory(&data);
+    loop2 = &fml::MessageLoop::GetCurrent();
+
+    loop2->GetTaskRunner()->PostTask([&]() {
+      latch2.Signal();
+      loop2_task_start_latch.Wait();
+      TaskRunnerAffineWeakPtr<int> ptr = factory.GetTaskRunnerAffineWeakPtr();
+      EXPECT_EQ(*ptr, data);
+      loop2_task_finish_latch.Signal();
+    });
+    loop2->Run();
+    term2.Wait();
+  });
+
+  latch1.Wait();
+  latch2.Wait();
+  fml::TaskQueueId qid1 = loop1->GetTaskRunner()->GetTaskQueueId();
+  fml::TaskQueueId qid2 = loop2->GetTaskRunner()->GetTaskQueueId();
+  const auto raster_thread_merger_ =
+      fml::MakeRefCounted<fml::RasterThreadMerger>(qid1, qid2);
+  const int kNumFramesMerged = 5;
+
+  raster_thread_merger_->MergeWithLease(kNumFramesMerged);
+
+  loop2_task_start_latch.Signal();
+  loop2_task_finish_latch.Wait();
+
+  for (int i = 0; i < kNumFramesMerged; i++) {
+    ASSERT_TRUE(raster_thread_merger_->IsMerged());
+    raster_thread_merger_->DecrementLease();
+  }
+
+  ASSERT_FALSE(raster_thread_merger_->IsMerged());
+  loop2->Terminate();
+
+  term1.Signal();
+  term2.Signal();
+  thread1.join();
+  thread2.join();
 }
 
 }  // namespace

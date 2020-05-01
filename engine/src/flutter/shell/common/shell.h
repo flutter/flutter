@@ -255,7 +255,7 @@ class Shell final : public PlatformView::Delegate,
   ///
   /// @return     A weak pointer to the rasterizer.
   ///
-  fml::WeakPtr<Rasterizer> GetRasterizer() const;
+  fml::TaskRunnerAffineWeakPtr<Rasterizer> GetRasterizer() const;
 
   //------------------------------------------------------------------------------
   /// @brief      Engines may only be accessed on the UI thread. This method is
@@ -378,8 +378,9 @@ class Shell final : public PlatformView::Delegate,
   std::unique_ptr<ShellIOManager> io_manager_;   // on IO task runner
   std::shared_ptr<fml::SyncSwitch> is_gpu_disabled_sync_switch_;
 
-  fml::WeakPtr<Engine> weak_engine_;          // to be shared across threads
-  fml::WeakPtr<Rasterizer> weak_rasterizer_;  // to be shared across threads
+  fml::WeakPtr<Engine> weak_engine_;  // to be shared across threads
+  fml::TaskRunnerAffineWeakPtr<Rasterizer>
+      weak_rasterizer_;  // to be shared across threads
   fml::WeakPtr<PlatformView>
       weak_platform_view_;  // to be shared across threads
 
