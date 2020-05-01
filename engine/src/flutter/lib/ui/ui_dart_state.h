@@ -34,6 +34,9 @@ class UIDartState : public tonic::DartState {
   static UIDartState* Current();
 
   Dart_Port main_port() const { return main_port_; }
+  // Root isolate of the VM application
+  bool IsRootIsolate() const { return is_root_isolate_; }
+  static void ThrowIfUIOperationsProhibited();
 
   void SetDebugName(const std::string name);
 
@@ -89,7 +92,8 @@ class UIDartState : public tonic::DartState {
               std::string advisory_script_entrypoint,
               std::string logger_prefix,
               UnhandledExceptionCallback unhandled_exception_callback,
-              std::shared_ptr<IsolateNameServer> isolate_name_server);
+              std::shared_ptr<IsolateNameServer> isolate_name_server,
+              bool is_root_isolate_);
 
   ~UIDartState() override;
 
@@ -113,6 +117,7 @@ class UIDartState : public tonic::DartState {
   const std::string advisory_script_entrypoint_;
   const std::string logger_prefix_;
   Dart_Port main_port_ = ILLEGAL_PORT;
+  const bool is_root_isolate_;
   std::string debug_name_;
   std::unique_ptr<Window> window_;
   tonic::DartMicrotaskQueue microtask_queue_;

@@ -25,6 +25,7 @@ using tonic::ToDart;
 namespace flutter {
 
 static void Canvas_constructor(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
   DartCallConstructor(&Canvas::Create, args);
 }
 

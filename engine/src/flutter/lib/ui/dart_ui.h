@@ -12,7 +12,7 @@ namespace flutter {
 class DartUI {
  public:
   static void InitForGlobal();
-  static void InitForIsolate(bool is_root_isolate);
+  static void InitForIsolate();
 
  private:
   FML_DISALLOW_IMPLICIT_CONSTRUCTORS(DartUI);

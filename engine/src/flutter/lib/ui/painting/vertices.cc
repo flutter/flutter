@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/lib/ui/painting/vertices.h"
+#include "flutter/lib/ui/ui_dart_state.h"
 
 #include <algorithm>
 
@@ -27,6 +28,7 @@ void DecodeInts(const tonic::Int32List& ints, T* out) {
 }  // namespace
 
 static void Vertices_constructor(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
   DartCallConstructor(&Vertices::Create, args);
 }
 

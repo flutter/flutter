@@ -42,7 +42,6 @@ namespace flutter {
 namespace {
 
 static tonic::DartLibraryNatives* g_natives;
-static tonic::DartLibraryNatives* g_natives_secondary;
 
 Dart_NativeFunction GetNativeFunction(Dart_Handle name,
                                       int argument_count,
@@ -50,19 +49,8 @@ Dart_NativeFunction GetNativeFunction(Dart_Handle name,
   return g_natives->GetNativeFunction(name, argument_count, auto_setup_scope);
 }
 
-Dart_NativeFunction GetNativeFunctionSecondary(Dart_Handle name,
-                                               int argument_count,
-                                               bool* auto_setup_scope) {
-  return g_natives_secondary->GetNativeFunction(name, argument_count,
-                                                auto_setup_scope);
-}
-
 const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
   return g_natives->GetSymbol(native_function);
-}
-
-const uint8_t* GetSymbolSecondary(Dart_NativeFunction native_function) {
-  return g_natives_secondary->GetSymbol(native_function);
 }
 
 }  // namespace
@@ -97,21 +85,13 @@ void DartUI::InitForGlobal() {
 #if defined(OS_FUCHSIA)
     SceneHost::RegisterNatives(g_natives);
 #endif
-
-    // Secondary isolates do not provide UI-related APIs.
-    g_natives_secondary = new tonic::DartLibraryNatives();
-    DartRuntimeHooks::RegisterNatives(g_natives_secondary);
-    IsolateNameServerNatives::RegisterNatives(g_natives_secondary);
   }
 }
 
-void DartUI::InitForIsolate(bool is_root_isolate) {
+void DartUI::InitForIsolate() {
   FML_DCHECK(g_natives);
-  auto get_native_function =
-      is_root_isolate ? GetNativeFunction : GetNativeFunctionSecondary;
-  auto get_symbol = is_root_isolate ? GetSymbol : GetSymbolSecondary;
   Dart_Handle result = Dart_SetNativeResolver(
-      Dart_LookupLibrary(ToDart("dart:ui")), get_native_function, get_symbol);
+      Dart_LookupLibrary(ToDart("dart:ui")), GetNativeFunction, GetSymbol);
   if (Dart_IsError(result)) {
     Dart_PropagateError(result);
   }

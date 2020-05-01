@@ -39,6 +39,7 @@ void LoadFontFromList(tonic::Uint8List& font_data,
 }
 
 void _LoadFontFromList(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
   tonic::DartCallStatic(LoadFontFromList, args);
 }
 

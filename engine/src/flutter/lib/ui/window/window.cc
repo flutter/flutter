@@ -18,16 +18,19 @@ namespace flutter {
 namespace {
 
 void DefaultRouteName(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
   std::string routeName =
       UIDartState::Current()->window()->client()->DefaultRouteName();
   Dart_SetReturnValue(args, tonic::StdStringToDart(routeName));
 }
 
 void ScheduleFrame(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
   UIDartState::Current()->window()->client()->ScheduleFrame();
 }
 
 void Render(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
   Dart_Handle exception = nullptr;
   Scene* scene =
       tonic::DartConverter<Scene*>::FromArguments(args, 1, exception);
@@ -39,6 +42,7 @@ void Render(Dart_NativeArguments args) {
 }
 
 void UpdateSemantics(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
   Dart_Handle exception = nullptr;
   SemanticsUpdate* update =
       tonic::DartConverter<SemanticsUpdate*>::FromArguments(args, 1, exception);
@@ -50,6 +54,7 @@ void UpdateSemantics(Dart_NativeArguments args) {
 }
 
 void SetIsolateDebugName(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
   Dart_Handle exception = nullptr;
   const std::string name =
       tonic::DartConverter<std::string>::FromArguments(args, 1, exception);
@@ -61,12 +66,15 @@ void SetIsolateDebugName(Dart_NativeArguments args) {
 }
 
 void SetNeedsReportTimings(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
   Dart_Handle exception = nullptr;
   bool value = tonic::DartConverter<bool>::FromArguments(args, 1, exception);
   UIDartState::Current()->window()->client()->SetNeedsReportTimings(value);
 }
 
 void ReportUnhandledException(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+
   Dart_Handle exception = nullptr;
 
   auto error_name =
@@ -143,6 +151,8 @@ void _RespondToPlatformMessage(Dart_NativeArguments args) {
 }
 
 void GetPersistentIsolateData(Dart_NativeArguments args) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+
   auto persistent_isolate_data =
       UIDartState::Current()->window()->client()->GetPersistentIsolateData();
 
@@ -270,6 +280,7 @@ void Window::UpdateSemanticsEnabled(bool enabled) {
   if (!dart_state)
     return;
   tonic::DartState::Scope scope(dart_state);
+  UIDartState::ThrowIfUIOperationsProhibited();
 
   tonic::LogIfError(tonic::DartInvokeField(
       library_.value(), "_updateSemanticsEnabled", {tonic::ToDart(enabled)}));

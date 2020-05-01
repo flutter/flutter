@@ -381,9 +381,6 @@ class DartIsolate : public UIDartState {
   ///
   fml::RefPtr<fml::TaskRunner> GetMessageHandlingTaskRunner() const;
 
-  // Root isolate of the VM application
-  bool IsRootIsolate() const { return is_root_isolate_; }
-
  private:
   class AutoFireClosure {
    public:
@@ -401,7 +398,6 @@ class DartIsolate : public UIDartState {
   std::vector<std::shared_ptr<const fml::Mapping>> kernel_buffers_;
   std::vector<std::unique_ptr<AutoFireClosure>> shutdown_callbacks_;
   fml::RefPtr<fml::TaskRunner> message_handling_task_runner_;
-  const bool is_root_isolate_;
   const bool disable_http_;
 
   DartIsolate(const Settings& settings,
