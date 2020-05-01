@@ -2223,10 +2223,10 @@ void main() {
           ),
         );
 
-        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 44.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 13.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 29.0);
-        expect(getBorderBottom(tester), 44.0);
+        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
+        expect(tester.getTopLeft(find.text('text')).dy, 15.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 31.0);
+        expect(getBorderBottom(tester), 48.0);
         expect(getBorderWeight(tester), 1.0);
       });
 
@@ -2243,11 +2243,10 @@ void main() {
             ),
           ),
         );
-
-        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 44.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 13.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 29.0);
-        expect(getBorderBottom(tester), 44.0);
+        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
+        expect(tester.getTopLeft(find.text('text')).dy, 15.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 31.0);
+        expect(getBorderBottom(tester), 48.0);
         expect(getBorderWeight(tester), 1.0);
       });
 
@@ -2643,15 +2642,14 @@ void main() {
       ),
     );
 
-    // Overall height for this InputDecorator is 16dps:
+    // Overall height should be 18dps, but the min is kMinInteractiveDimension
+    // when isDense and isCollapsed are false.
     //   16 - input text (ahem font size 16dps)
+    //    2 - total vertical padding
 
-    // A custom contentPadding is respected, even when not using isDense or
-    // InputDecoration.collapsed.
-    const double height = 16.0 + verticalPadding * 2.0;
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, height));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
     expect(tester.getSize(find.text('text')).height, 16.0);
-    expect(tester.getTopLeft(find.text('text')).dy, verticalPadding);
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
     expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderWeight(tester), 1.0);
   });
@@ -2667,7 +2665,8 @@ void main() {
       ),
     );
 
-    // Overall height for this InputDecorator is 16dps:
+    // Overall height for this InputDecorator is 16dps. There is no minimum
+    // height when InputDecoration.collapsed is used.
     //   16 - input text (ahem font size 16dps)
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 16.0));
