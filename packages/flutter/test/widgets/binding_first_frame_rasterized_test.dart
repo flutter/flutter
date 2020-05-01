@@ -9,10 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:quiver/testing/async.dart';
 
 void main() {
-  setUp(() {
-    WidgetsFlutterBinding.ensureInitialized();
-  });
-
   test('Deferred frames will trigger the first frame callback', () {
     FakeAsync().run((FakeAsync fakeAsync) {
       final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
@@ -23,9 +19,7 @@ void main() {
 
       // Simulates the engine completing a frame render to trigger the
       // appropriate callback setting [WidgetBinding.firstFrameRasterized].
-      binding.window.onReportTimings(
-        // The actual timings are not important.
-        <FrameTiming>[]);
+      binding.window.onReportTimings(<FrameTiming>[]);
       expect(binding.firstFrameRasterized, isFalse);
 
       binding.allowFirstFrame();
