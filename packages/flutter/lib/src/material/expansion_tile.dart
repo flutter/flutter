@@ -42,7 +42,12 @@ class ExpansionTile extends StatefulWidget {
     this.trailing,
     this.initiallyExpanded = false,
     this.tilePadding,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
+    this.alignment = Alignment.center,
+    this.textBaseline,
   }) : assert(initiallyExpanded != null),
+       assert(crossAxisAlignment != null),
+       assert(alignment != null),
        super(key: key);
 
   /// A widget to display before the title.
@@ -89,6 +94,31 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// When the value is null, the tile's padding is `EdgeInsets.symmetric(horizontal: 16.0)`.
   final EdgeInsetsGeometry tilePadding;
+
+  /// Specifies the alignment of [Column] used for [children].
+  ///
+  /// It does not specifies how the children are positioned inside the [Column].
+  /// The width of the `Column` is the maximum width of the children. If the
+  /// children have same width, then alignment will align all the children to
+  /// specified value of [Alignment].
+  ///
+  /// When the width of children is different, then [crossAxisAlignment] property
+  /// can be used with `alignment` property to place the children along the cross axis.
+  ///
+  /// The default value for `alignment` is [Alignment.center].
+  final Alignment alignment;
+
+  /// Specifies the position of [children] inside [Column].
+  ///
+  /// When the value of `crossAxisAlignment` is [CrossAxisAlignment.baseline], then
+  /// the value of [textBaseline] can not be null.
+  ///
+  /// The default value for `crossAxisAlignment` is [CrossAxisAlignment.center].
+  final CrossAxisAlignment crossAxisAlignment;
+
+  /// Defines the baseline for the alignment to be considered when the value
+  /// of [crossAxisAlignment] is [CrossAxisAlignment.baseline].
+  final TextBaseline textBaseline;
 
   @override
   _ExpansionTileState createState() => _ExpansionTileState();
@@ -187,6 +217,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           ),
           ClipRect(
             child: Align(
+              alignment: widget.alignment,
               heightFactor: _heightFactor.value,
               child: child,
             ),
@@ -216,7 +247,11 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     return AnimatedBuilder(
       animation: _controller.view,
       builder: _buildChildren,
-      child: closed ? null : Column(children: widget.children),
+      child: closed ? null : Column(
+        crossAxisAlignment: widget.crossAxisAlignment,
+        textBaseline: widget.textBaseline,
+        children: widget.children,
+      ),
     );
 
   }

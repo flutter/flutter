@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
@@ -256,4 +259,135 @@ void main() {
     expect(listTileRect.top, tallerWidget.top - remainingHeight / 2 - 12);
     expect(listTileRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 10);
   });
+
+  testWidgets('ExpansionTile alignment test', (WidgetTester tester) async {
+    const Key childKey = Key('key');
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: ExpansionTile(
+            title: const Text('title'),
+            alignment: Alignment.centerLeft,
+            children: <Widget>[
+              Container(height: 100, width: 100),
+              Container(height: 100, width: 80, key: childKey,)
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    final Rect columnRect = tester.getRect(find.byType(Column).last);
+    final Rect secondChild = tester.getRect(find.byKey(childKey));
+
+    expect(columnRect.left, 0.0);
+    // The width of the Column is the maximum width of the children. The maximum
+    // width being 100.0, the offset of the right edge of Column from X-axis should
+    // be 100.0.
+    expect(columnRect.right, 100.0);
+
+    // The alignment doesn't define the position of the children inside the Column.
+    // Considering the default value for CrossAxisAlignment is CrossAxisAlignment.center,
+    // the offset of the left edge of second Container from X-axis should be greater
+    // than 0.
+    expect(secondChild.left, greaterThan(0.0));
+    expect(secondChild.right, lessThan(100.0));
+  });
+
+  testWidgets('ExpansionTile crossAxisAlignment test', (WidgetTester tester) async {
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: ExpansionTile(
+            title: const Text('title'),
+            alignment: Alignment.centerRight,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(height: 100, width: 100, key: child0Key,),
+              Container(height: 100, width: 80, key: child1Key,)
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    final Rect columnRect = tester.getRect(find.byType(Column).last);
+    final Rect child0Rect = tester.getRect(find.byKey(child0Key));
+    final Rect child1Rect = tester.getRect(find.byKey(child1Key));
+
+    expect(columnRect.right, 800.0);
+    // The width of the Column is the maximum width of the children. The maximum
+    // width being 100.0, the offset of the left edge of Column from X-axis should
+    // be 700.0.
+    expect(columnRect.left, 700.0);
+
+    // Considering the value of CrossAxisAlignment is CrossAxisAlignment.start,
+    // the offset of the left edge of both the children from X-axis should be 700.0.
+    expect(child0Rect.left, 700.0);
+    expect(child1Rect.left, 700.0);
+  });
+
+  test('ExpansionTile alignment can not be null', () {
+    try{
+       MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            title: const Text('title'),
+            alignment: null,
+          ),
+        ),
+      );
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('alignment != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('ExpansionTile did not throw AssertionError when alignment was null');
+  });
+
+  test('ExpansionTile crossAxisAlignment can not be null', () {
+    try{
+      MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            title: const Text('title'),
+            crossAxisAlignment: null,
+          ),
+        ),
+      );
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('crossAxisAlignment != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('ExpansionTile did not throw AssertionError when crossAxisAlignment was null');
+  });
+
+  testWidgets('ExpansionTile crossAxisAlignment.baseline', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          initiallyExpanded: true,
+          title: const Text('title'),
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          children: <Widget>[
+             Container(height: 100, width: 100,),
+          ],
+        ),
+      ),
+    ));
+
+    // When the value of crossAxisAlignment is CrossAxisAlignment.baseline,
+    // the textBaseline can not be null.
+    expect(tester.takeException(), isAssertionError);
+  });
+
 }
