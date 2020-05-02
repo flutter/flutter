@@ -259,7 +259,7 @@ class MockProcessManager extends Mock implements ProcessManager {
       return ProcessResult(0, 0, '000000000000000000000', '');
     }
     if (commandStr ==
-        'git describe --match *.*.* --first-parent --long --tags') {
+        'git describe --match *.*.*-*.*.pre --first-parent --long --tags') {
       if (version.isNotEmpty) {
         return ProcessResult(0, 0, '$version-0-g00000000', '');
       }

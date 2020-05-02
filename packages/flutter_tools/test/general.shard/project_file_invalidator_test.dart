@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:package_config/package_config.dart';
 
@@ -79,6 +80,49 @@ void main() {
         isEmpty,
       );
     });
+
+    testWithoutContext('Picks up changes to the .packages file and updates package_config.json'
+      ', asyncScanning: $asyncScanning', () async {
+      final DateTime past = DateTime.now().subtract(const Duration(seconds: 1));
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final PackageConfig packageConfig = PackageConfig.empty;
+      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+        fileSystem: fileSystem,
+        platform: FakePlatform(),
+        logger: BufferLogger.test(),
+      );
+      fileSystem.file('.packages')
+        .writeAsStringSync('\n');
+      fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(json.encode(<String, Object>{
+            'configVersion': 2,
+            'packages': <Object>[],
+        }));
+
+      final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
+        lastCompiled: null,
+        urisToMonitor: <Uri>[],
+        packagesPath: '.packages',
+        asyncScanning: asyncScanning,
+        packageConfig: packageConfig,
+      );
+      expect(invalidationResult.uris, isEmpty);
+      fileSystem.file('.packages').setLastModifiedSync(DateTime.now());
+
+      final InvalidationResult secondInvalidation = await projectFileInvalidator.findInvalidated(
+        lastCompiled: past,
+        urisToMonitor: <Uri>[],
+        packagesPath: '.packages',
+        asyncScanning: asyncScanning,
+        packageConfig: packageConfig,
+      );
+      expect(secondInvalidation.uris, unorderedEquals(<Uri>[
+        Uri.parse('.packages'),
+        Uri.parse('.dart_tool/package_config.json'),
+      ]));
+    });
+
 
     testWithoutContext('Picks up changes to the .packages file and updates PackageConfig'
       ', asyncScanning: $asyncScanning', () async {

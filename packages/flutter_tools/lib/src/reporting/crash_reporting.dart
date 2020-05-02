@@ -26,37 +26,96 @@ const String _kStackTraceFileField = 'DartError';
 /// it must be supplied in the request.
 const String _kStackTraceFilename = 'stacktrace_file';
 
+class CrashDetails {
+  CrashDetails({
+    @required this.command,
+    @required this.error,
+    @required this.stackTrace,
+    @required this.doctorText,
+  });
+
+  final String command;
+  final dynamic error;
+  final StackTrace stackTrace;
+  final String doctorText;
+}
+
+/// Reports information about the crash to the user.
+class CrashReporter {
+  CrashReporter({
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required FlutterProjectFactory flutterProjectFactory,
+    @required HttpClient client,
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
+       _flutterProjectFactory = flutterProjectFactory,
+       _client = client;
+
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final FlutterProjectFactory _flutterProjectFactory;
+  final HttpClient _client;
+
+  /// Prints instructions for filing a bug about the crash.
+  Future<void> informUser(CrashDetails details, File crashFile) async {
+    _logger.printError('A crash report has been written to ${crashFile.path}.');
+    _logger.printStatus('This crash may already be reported. Check GitHub for similar crashes.', emphasis: true);
+
+    final String similarIssuesURL = GitHubTemplateCreator.toolCrashSimilarIssuesURL(details.error.toString());
+    _logger.printStatus('$similarIssuesURL\n', wrap: false);
+    _logger.printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
+    _logger.printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
+
+    _logger.printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
+
+    final GitHubTemplateCreator gitHubTemplateCreator = GitHubTemplateCreator(
+      fileSystem: _fileSystem,
+      logger: _logger,
+      flutterProjectFactory: _flutterProjectFactory,
+      client: _client,
+    );
+
+    final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(
+      details.command,
+      details.error,
+      details.stackTrace,
+      details.doctorText,
+    );
+    _logger.printStatus('$gitHubTemplateURL\n', wrap: false);
+  }
+}
+
 /// Sends crash reports to Google.
 ///
-/// There are two ways to override the behavior of this class:
-///
-/// * Define a `FLUTTER_CRASH_SERVER_BASE_URL` environment variable that points
-///   to a custom crash reporting server. This is useful if your development
-///   environment is behind a firewall and unable to send crash reports to
-///   Google, or when you wish to use your own server for collecting crash
-///   reports from Flutter Tools.
-/// * In tests call [initializeWith] and provide a mock implementation of
-///   [http.Client].
+/// To override the behavior of this class, define a
+/// `FLUTTER_CRASH_SERVER_BASE_URL` environment variable that points to a custom
+/// crash reporting server. This is useful if your development environment is
+/// behind a firewall and unable to send crash reports to Google, or when you
+/// wish to use your own server for collecting crash reports from Flutter Tools.
 class CrashReportSender {
-  CrashReportSender._(this._client);
+  CrashReportSender({
+    @required http.Client client,
+    @required Usage usage,
+    @required Platform platform,
+    @required Logger logger,
+    @required OperatingSystemUtils operatingSystemUtils,
+  }) : _client = client,
+      _usage = usage,
+      _platform = platform,
+      _logger = logger,
+      _operatingSystemUtils = operatingSystemUtils;
 
-  static CrashReportSender _instance;
-
-  static CrashReportSender get instance => _instance ?? CrashReportSender._(http.Client());
+  final http.Client _client;
+  final Usage _usage;
+  final Platform _platform;
+  final Logger _logger;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   bool _crashReportSent = false;
 
-  /// Overrides the default [http.Client] with [client] for testing purposes.
-  @visibleForTesting
-  static void initializeWith(http.Client client) {
-    _instance = CrashReportSender._(client);
-  }
-
-  final http.Client _client;
-  final Usage _usage = globals.flutterUsage;
-
   Uri get _baseUrl {
-    final String overrideUrl = globals.platform.environment['FLUTTER_CRASH_SERVER_BASE_URL'];
+    final String overrideUrl = _platform.environment['FLUTTER_CRASH_SERVER_BASE_URL'];
 
     if (overrideUrl != null) {
       return Uri.parse(overrideUrl);
@@ -90,7 +149,7 @@ class CrashReportSender {
         return;
       }
 
-      globals.printTrace('Sending crash report to Google.');
+      _logger.printTrace('Sending crash report to Google.');
 
       final Uri uri = _baseUrl.replace(
         queryParameters: <String, String>{
@@ -103,8 +162,8 @@ class CrashReportSender {
       req.fields['uuid'] = _usage.clientId;
       req.fields['product'] = _kProductId;
       req.fields['version'] = flutterVersion;
-      req.fields['osName'] = globals.platform.operatingSystem;
-      req.fields['osVersion'] = globals.os.name; // this actually includes version
+      req.fields['osName'] = _platform.operatingSystem;
+      req.fields['osVersion'] = _operatingSystemUtils.name; // this actually includes version
       req.fields['type'] = _kDartTypeId;
       req.fields['error_runtime_type'] = '${error.runtimeType}';
       req.fields['error_message'] = '$error';
@@ -120,20 +179,20 @@ class CrashReportSender {
 
       if (resp.statusCode == 200) {
         final String reportId = await http.ByteStream(resp.stream)
-            .bytesToString();
-        globals.printTrace('Crash report sent (report ID: $reportId)');
+          .bytesToString();
+        _logger.printTrace('Crash report sent (report ID: $reportId)');
         _crashReportSent = true;
       } else {
-        globals.printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
+        _logger.printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
       }
     // Catch all exceptions to print the message that makes clear that the
     // crash logger crashed.
     } catch (sendError, sendStackTrace) { // ignore: avoid_catches_without_on_clauses
       if (sendError is SocketException || sendError is HttpException) {
-        globals.printError('Failed to send crash report due to a network error: $sendError');
+        _logger.printError('Failed to send crash report due to a network error: $sendError');
       } else {
         // If the sender itself crashes, just print. We did our best.
-        globals.printError('Crash report sender itself crashed: $sendError\n$sendStackTrace');
+        _logger.printError('Crash report sender itself crashed: $sendError\n$sendStackTrace');
       }
     }
   }

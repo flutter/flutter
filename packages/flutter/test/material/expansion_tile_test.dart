@@ -229,4 +229,31 @@ void main() {
 
     expect(find.text('Subtitle'), findsOneWidget);
   });
+
+  testWidgets('ExpansionTile padding test', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: Center(
+          child: ExpansionTile(
+            title: Text('Hello'),
+            tilePadding: EdgeInsets.fromLTRB(8, 12, 4, 10),
+          ),
+        ),
+      ),
+    ));
+
+    final Rect titleRect = tester.getRect(find.text('Hello'));
+    final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
+    final Rect listTileRect = tester.getRect(find.byType(ListTile));
+    final Rect tallerWidget = titleRect.height > trailingRect.height ? titleRect : trailingRect;
+
+    // Check the positions of title and trailing Widgets, after padding is applied.
+    expect(listTileRect.left, titleRect.left - 8);
+    expect(listTileRect.right, trailingRect.right + 4);
+
+    // Calculate the remaining height of ListTile from the default height.
+    final double remainingHeight = 56 - tallerWidget.height;
+    expect(listTileRect.top, tallerWidget.top - remainingHeight / 2 - 12);
+    expect(listTileRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 10);
+  });
 }

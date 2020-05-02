@@ -501,6 +501,22 @@ String jsonEncode(dynamic data) {
   return const JsonEncoder.withIndent('  ').convert(data) + '\n';
 }
 
+Future<void> getNewGallery(String revision, Directory galleryDir) async {
+  section('Get New Flutter Gallery!');
+
+  if (exists(galleryDir)) {
+    galleryDir.deleteSync(recursive: true);
+  }
+
+  await inDirectory<void>(galleryDir.parent, () async {
+    await exec('git', <String>['clone', 'https://github.com/flutter/gallery.git']);
+  });
+
+  await inDirectory<void>(galleryDir, () async {
+    await exec('git', <String>['checkout', revision]);
+  });
+}
+
 void checkNotNull(Object o1,
     [Object o2 = 1,
     Object o3 = 1,
@@ -675,4 +691,19 @@ void checkFileContains(List<Pattern> patterns, String filePath) {
       );
     }
   }
+}
+
+/// Clones a git repository.
+///
+/// Removes the directory [path], then clones the git repository
+/// specified by [repo] to the directory [path].
+Future<int> gitClone({String path, String repo}) async {
+  rmTree(Directory(path));
+
+  await Directory(path).create(recursive: true);
+
+  return await inDirectory<int>(
+    path,
+        () => exec('git', <String>['clone', repo]),
+  );
 }

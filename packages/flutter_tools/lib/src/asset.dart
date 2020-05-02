@@ -61,13 +61,14 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
   const _ManifestAssetBundleFactory();
 
   @override
-  AssetBundle createBundle() => _ManifestAssetBundle();
+  AssetBundle createBundle() => ManifestAssetBundle();
 }
 
-class _ManifestAssetBundle implements AssetBundle {
-  /// Constructs an [_ManifestAssetBundle] that gathers the set of assets from the
+/// An asset bundle based on a pubspec.yaml
+class ManifestAssetBundle implements AssetBundle {
+  /// Constructs an [ManifestAssetBundle] that gathers the set of assets from the
   /// pubspec.yaml manifest.
-  _ManifestAssetBundle();
+  ManifestAssetBundle();
 
   @override
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
@@ -125,7 +126,7 @@ class _ManifestAssetBundle implements AssetBundle {
     bool reportLicensedPackages = false,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
-    packagesPath ??= globals.fs.path.absolute(PackageMap.globalPackagesPath);
+    packagesPath ??= globals.fs.path.absolute(globalPackagesPath);
     FlutterManifest flutterManifest;
     try {
       flutterManifest = FlutterManifest.createFromPath(
@@ -152,15 +153,9 @@ class _ManifestAssetBundle implements AssetBundle {
     }
 
     final String assetBasePath = globals.fs.path.dirname(globals.fs.path.absolute(manifestPath));
-    final PackageConfig packageConfig = await loadPackageConfigUri(
-      globals.fs.file(packagesPath).absolute.uri,
-      loader: (Uri uri) {
-        final File file = globals.fs.file(uri);
-        if (!file.existsSync()) {
-          return null;
-        }
-        return file.readAsBytes();
-      },
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      globals.fs.file(packagesPath),
+      logger: globals.logger,
     );
     final List<Uri> wildcardDirectories = <Uri>[];
 
@@ -265,20 +260,31 @@ class _ManifestAssetBundle implements AssetBundle {
       _wildcardDirectories[uri] ??= globals.fs.directory(uri);
     }
 
-    entries[_assetManifestJson] = _createAssetManifest(assetVariants);
-
-    entries[kFontManifestJson] = DevFSStringContent(json.encode(fonts));
-
-    // TODO(ianh): Only do the following line if we've changed packages or if our LICENSE file changed
+    final DevFSStringContent assetManifest  = _createAssetManifest(assetVariants);
+    final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = licenseCollector.obtainLicenses(packageConfig);
-    entries[_license] = DevFSStringContent(licenseResult.combinedLicenses);
+    final DevFSStringContent licenses = DevFSStringContent(licenseResult.combinedLicenses);
     additionalDependencies = licenseResult.dependencies;
 
+    _setIfChanged(_assetManifestJson, assetManifest);
+    _setIfChanged(kFontManifestJson, fontManifest);
+    _setIfChanged(_license, licenses);
     return 0;
   }
 
   @override
   List<File> additionalDependencies = <File>[];
+
+  void _setIfChanged(String key, DevFSStringContent content) {
+    if (!entries.containsKey(key)) {
+      entries[key] = content;
+      return;
+    }
+    final DevFSStringContent oldContent = entries[key] as DevFSStringContent;
+    if (oldContent.string != content.string) {
+      entries[key] = content;
+    }
+  }
 }
 
 @immutable
@@ -474,7 +480,7 @@ int _byBasename(_Asset a, _Asset b) {
   return a.assetFile.basename.compareTo(b.assetFile.basename);
 }
 
-DevFSContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
+DevFSStringContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
   final Map<String, List<String>> jsonObject = <String, List<String>>{};
 
   // necessary for making unit tests deterministic
@@ -499,7 +505,7 @@ List<Map<String, dynamic>> _parseFonts(
 }) {
   return <Map<String, dynamic>>[
     if (manifest.usesMaterialDesign && includeDefaultFonts)
-      ..._getMaterialFonts(_ManifestAssetBundle._fontSetMaterial),
+      ..._getMaterialFonts(ManifestAssetBundle._fontSetMaterial),
     if (packageName == null)
       ...manifest.fontsDescriptor
     else

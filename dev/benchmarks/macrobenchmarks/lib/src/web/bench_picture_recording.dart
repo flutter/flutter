@@ -67,9 +67,9 @@ class BenchPictureRecording extends RawRecorder {
         }
         canvas.restore();
       }
-    });
+    }, reported: true);
     profile.record('estimatePaintBounds', () {
       recorder.endRecording();
-    });
+    }, reported: true);
   }
 }

@@ -30,7 +30,7 @@ const int kPrimaryButton = 0x01;
 /// It is equivalent to:
 ///
 ///  * [kPrimaryStylusButton]: The stylus contacts the screen.
-///  * [kSecondaryMouseButton]: The primary mouse button.
+///  * [kSecondaryMouseButton]: The secondary mouse button.
 ///
 /// See also:
 ///

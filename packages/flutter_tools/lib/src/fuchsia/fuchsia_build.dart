@@ -131,7 +131,7 @@ Future<void> _buildAssets(
   );
 
   final Map<String, DevFSContent> assetEntries =
-      Map<String, DevFSContent>.from(assets.entries);
+      Map<String, DevFSContent>.of(assets.entries);
   await writeBundle(globals.fs.directory(assetDir), assetEntries);
 
   final String appName = fuchsiaProject.project.manifest.appName;

@@ -1421,6 +1421,9 @@ class FocusTraversalOrder extends InheritedWidget {
 ///
 /// By default, traverses in reading order using [ReadingOrderTraversalPolicy].
 ///
+/// To prevent the members of the group from being focused, set the
+/// [descendantsAreFocusable] attribute to true.
+///
 /// {@tool dartpad --template=stateless_widget_material}
 /// This sample shows three rows of buttons, each grouped by a
 /// [FocusTraversalGroup], each with different traversal order policies. Use tab
@@ -1583,18 +1586,15 @@ class FocusTraversalOrder extends InheritedWidget {
 class FocusTraversalGroup extends StatefulWidget {
   /// Creates a [FocusTraversalGroup] object.
   ///
-  /// The [child] argument must not be null.
+  /// The [child] and [descendantsAreFocusable] arguments must not be null.
   FocusTraversalGroup({
     Key key,
     FocusTraversalPolicy policy,
+    this.descendantsAreFocusable = true,
     @required this.child,
-  })  : policy = policy ?? ReadingOrderTraversalPolicy(),
+  })  : assert(descendantsAreFocusable != null),
+        policy = policy ?? ReadingOrderTraversalPolicy(),
         super(key: key);
-
-  /// The child widget of this [FocusTraversalGroup].
-  ///
-  /// {@macro flutter.widgets.child}
-  final Widget child;
 
   /// The policy used to move the focus from one focus node to another when
   /// traversing them using a keyboard.
@@ -1612,6 +1612,14 @@ class FocusTraversalGroup extends StatefulWidget {
   ///    nodes in the reading order defined in the widget tree, and then top to
   ///    bottom.
   final FocusTraversalPolicy policy;
+
+  /// {@macro flutter.widgets.Focus.descendantsAreFocusable}
+  final bool descendantsAreFocusable;
+
+  /// The child widget of this [FocusTraversalGroup].
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
 
   /// Returns the focus policy set by the [FocusTraversalGroup] that most
   /// tightly encloses the given [BuildContext].
@@ -1691,6 +1699,7 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
         canRequestFocus: false,
         skipTraversal: true,
         includeSemantics: false,
+        descendantsAreFocusable: widget.descendantsAreFocusable,
         child: widget.child,
       ),
     );

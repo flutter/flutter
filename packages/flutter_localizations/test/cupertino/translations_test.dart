@@ -88,6 +88,12 @@ void main() {
       expect(localizations.copyButtonLabel, isNotNull);
       expect(localizations.pasteButtonLabel, isNotNull);
       expect(localizations.selectAllButtonLabel, isNotNull);
+
+      expect(localizations.tabSemanticsLabel(tabIndex: 2, tabCount: 5), isNotNull);
+      expect(localizations.tabSemanticsLabel(tabIndex: 2, tabCount: 5), isNot(contains(r'$tabIndex')));
+      expect(localizations.tabSemanticsLabel(tabIndex: 2, tabCount: 5), isNot(contains(r'$tabCount')));
+      expect(() => localizations.tabSemanticsLabel(tabIndex: 0, tabCount: 5), throwsAssertionError);
+      expect(() => localizations.tabSemanticsLabel(tabIndex: 2, tabCount: 0), throwsAssertionError);
     });
   }
 

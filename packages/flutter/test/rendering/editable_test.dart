@@ -14,10 +14,7 @@ import 'rendering_tester.dart';
 
 class FakeEditableTextState with TextSelectionDelegate {
   @override
-  TextEditingValue get textEditingValue { return const TextEditingValue(); }
-
-  @override
-  set textEditingValue(TextEditingValue value) { }
+  TextEditingValue textEditingValue = const TextEditingValue();
 
   @override
   void hideToolbar() { }
@@ -701,4 +698,102 @@ void main() {
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(editable.maxScrollExtent, equals(10));
   }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42772
+
+  test('arrow keys and delete handle simple text correctly', () async {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: 'test',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 0,
+      ),
+    );
+
+    layout(editable);
+    editable.hasFocus = true;
+
+    editable.selectPositionAt(from: const Offset(0, 0), cause: SelectionChangedCause.tap);
+    editable.selection = const TextSelection.collapsed(offset: 0);
+    pumpFrame();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 1);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 0);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    expect(delegate.textEditingValue.text, 'est');
+  }, skip: kIsWeb);
+
+  test('arrow keys and delete handle surrogate pairs correctly', () async {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: '\u{1F44D}',  // Thumbs up
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 0,
+      ),
+    );
+
+    layout(editable);
+    editable.hasFocus = true;
+
+    editable.selectPositionAt(from: const Offset(0, 0), cause: SelectionChangedCause.tap);
+    editable.selection = const TextSelection.collapsed(offset: 0);
+    pumpFrame();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 2);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 0);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    expect(delegate.textEditingValue.text, '');
+  }, skip: kIsWeb); // Key simulation doesn't work on web.
 }

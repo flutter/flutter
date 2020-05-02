@@ -42,6 +42,14 @@ class TestCommand extends FlutterCommand {
         valueHelp: 'substring',
         splitCommas: false,
       )
+      ..addOption('tags',
+        abbr: 't',
+        help: 'Run only tests associated with tags',
+      )
+      ..addOption('exclude-tags',
+        abbr: 'x',
+        help: 'Run only tests WITHOUT given tags',
+      )
       ..addFlag('start-paused',
         defaultsTo: false,
         negatable: false,
@@ -121,6 +129,7 @@ class TestCommand extends FlutterCommand {
               'The vmservice will be enabled no matter what in those cases.'
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
+    addEnableExperimentation(hide: !verboseHelp);
   }
 
   /// The interface for starting and configuring the tester.
@@ -160,7 +169,10 @@ class TestCommand extends FlutterCommand {
     final bool buildTestAssets = boolArg('test-assets');
     final List<String> names = stringsArg('name');
     final List<String> plainNames = stringsArg('plain-name');
+    final String tags = stringArg('tags');
+    final String excludeTags = stringArg('exclude-tags');
     final FlutterProject flutterProject = FlutterProject.current();
+    final List<String> dartExperiments = stringsArg(FlutterOptions.kEnableExperiment);
 
     if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
       await _buildTestAsset();
@@ -250,6 +262,8 @@ class TestCommand extends FlutterCommand {
       workDir: workDir,
       names: names,
       plainNames: plainNames,
+      tags: tags,
+      excludeTags: excludeTags,
       watcher: watcher,
       enableObservatory: collector != null || startPaused || boolArg('enable-vmservice'),
       startPaused: startPaused,
@@ -264,6 +278,7 @@ class TestCommand extends FlutterCommand {
       flutterProject: flutterProject,
       web: stringArg('platform') == 'chrome',
       randomSeed: stringArg('test-randomize-ordering-seed'),
+      dartExperiments: dartExperiments,
     );
 
     if (collector != null) {

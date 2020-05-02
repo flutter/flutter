@@ -28,6 +28,30 @@ const Duration kFloatingActionButtonSegue = Duration(milliseconds: 200);
 /// Its value corresponds to 0.125 of a full circle, equivalent to 45 degrees or pi/4 radians.
 const double kFloatingActionButtonTurnInterval = 0.125;
 
+/// If a [FloatingActionButton] is used on a [Scaffold] in certain positions,
+/// it is moved [kMiniButtonOffsetAdjustment] pixels closer to the edge of the screen.
+///
+/// This is intended to be used with [FloatingActionButton.mini] set to true,
+/// so that the floating action button appears to align with [CircleAvatar]s
+/// in the [ListTile.leading] slot of a [ListTile] in a [ListView] in the
+/// [Scaffold.body].
+///
+/// More specifically:
+/// * In the following positions, the [FloatingActionButton] is moved *horizontally*
+/// closer to the edge of the screen:
+///   * [FloatingActionButtonLocation.miniStartTop]
+///   * [FloatingActionButtonLocation.miniStartFloat]
+///   * [FloatingActionButtonLocation.miniStartDocked]
+///   * [FloatingActionButtonLocation.miniEndTop]
+///   * [FloatingActionButtonLocation.miniEndFloat]
+///   * [FloatingActionButtonLocation.miniEndDocked]
+/// * In the following positions, the [FloatingActionButton] is moved *vertically*
+/// closer to the bottom of the screen:
+///   * [FloatingActionButtonLocation.miniStartFloat]
+///   * [FloatingActionButtonLocation.miniCenterFloat]
+///   * [FloatingActionButtonLocation.miniEndFloat]
+const double kMiniButtonOffsetAdjustment = 4.0;
+
 /// An object that defines a position for the [FloatingActionButton]
 /// based on the [Scaffold]'s [ScaffoldPrelayoutGeometry].
 ///
@@ -49,48 +73,16 @@ abstract class FloatingActionButtonLocation {
   /// const constructors so that they can be used in const expressions.
   const FloatingActionButtonLocation();
 
-  /// End-aligned [FloatingActionButton], floating at the bottom of the screen.
-  ///
-  /// This is the default alignment of [FloatingActionButton]s in Material applications.
-  static const FloatingActionButtonLocation endFloat = _EndFloatFloatingActionButtonLocation();
-
-  /// Centered [FloatingActionButton], floating at the bottom of the screen.
-  static const FloatingActionButtonLocation centerFloat = _CenterFloatFloatingActionButtonLocation();
-
-  /// End-aligned [FloatingActionButton], floating over the
-  /// [Scaffold.bottomNavigationBar] so that the center of the floating
-  /// action button lines up with the top of the bottom navigation bar.
-  ///
-  /// If the value of [Scaffold.bottomNavigationBar] is a [BottomAppBar],
-  /// the bottom app bar can include a "notch" in its shape that accommodates
-  /// the overlapping floating action button.
-  ///
-  /// This is unlikely to be a useful location for apps that lack a bottom
-  /// navigation bar.
-  static const FloatingActionButtonLocation endDocked = _EndDockedFloatingActionButtonLocation();
-
-  /// Center-aligned [FloatingActionButton], floating over the
-  /// [Scaffold.bottomNavigationBar] so that the center of the floating
-  /// action button lines up with the top of the bottom navigation bar.
-  ///
-  /// If the value of [Scaffold.bottomNavigationBar] is a [BottomAppBar],
-  /// the bottom app bar can include a "notch" in its shape that accommodates
-  /// the overlapping floating action button.
-  ///
-  /// This is unlikely to be a useful location for apps that lack a bottom
-  /// navigation bar.
-  static const FloatingActionButtonLocation centerDocked = _CenterDockedFloatingActionButtonLocation();
-
   /// Start-aligned [FloatingActionButton], floating over the transition between
   /// the [Scaffold.appBar] and the [Scaffold.body].
   ///
-  /// To align a floating action button with [FloatingActionButton.mini] set to
-  /// true with [CircleAvatar]s in the [ListTile.leading] slots of [ListTile]s
-  /// in a [ListView] in the [Scaffold.body], consider using [miniStartTop].
+  /// To align a floating action button with [CircleAvatar]s in the
+  /// [ListTile.leading] slots of [ListTile]s in a [ListView] in the [Scaffold.body],
+  /// use [miniStartTop] and set [FloatingActionButton.mini] to true.
   ///
   /// This is unlikely to be a useful location for apps that lack a top [AppBar]
   /// or that use a [SliverAppBar] in the scaffold body itself.
-  static const FloatingActionButtonLocation startTop = _StartTopFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation startTop = _StartTopFabLocation();
 
   /// Start-aligned [FloatingActionButton], floating over the transition between
   /// the [Scaffold.appBar] and the [Scaffold.body], optimized for mini floating
@@ -103,14 +95,200 @@ abstract class FloatingActionButtonLocation {
   ///
   /// This is unlikely to be a useful location for apps that lack a top [AppBar]
   /// or that use a [SliverAppBar] in the scaffold body itself.
-  static const FloatingActionButtonLocation miniStartTop = _MiniStartTopFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation miniStartTop = _MiniStartTopFabLocation();
 
-  /// End-aligned [FloatingActionButton], floating over the transition between
+  /// Centered [FloatingActionButton], floating over the transition between
   /// the [Scaffold.appBar] and the [Scaffold.body].
   ///
   /// This is unlikely to be a useful location for apps that lack a top [AppBar]
   /// or that use a [SliverAppBar] in the scaffold body itself.
-  static const FloatingActionButtonLocation endTop = _EndTopFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation centerTop = _CenterTopFabLocation();
+
+  /// Centered [FloatingActionButton], floating over the transition between
+  /// the [Scaffold.appBar] and the [Scaffold.body], intended to be used with
+  /// [FloatingActionButton.mini] set to true.
+  ///
+  /// This is unlikely to be a useful location for apps that lack a top [AppBar]
+  /// or that use a [SliverAppBar] in the scaffold body itself.
+  static const FloatingActionButtonLocation miniCenterTop = _MiniCenterTopFabLocation();
+
+  /// End-aligned [FloatingActionButton], floating over the transition between
+  /// the [Scaffold.appBar] and the [Scaffold.body].
+  ///
+  /// To align a floating action button with [CircleAvatar]s in the
+  /// [ListTile.trailing] slots of [ListTile]s in a [ListView] in the [Scaffold.body],
+  /// use [miniEndTop] and set [FloatingActionButton.mini] to true.
+  ///
+  /// This is unlikely to be a useful location for apps that lack a top [AppBar]
+  /// or that use a [SliverAppBar] in the scaffold body itself.
+  static const FloatingActionButtonLocation endTop = _EndTopFabLocation();
+
+  /// End-aligned [FloatingActionButton], floating over the transition between
+  /// the [Scaffold.appBar] and the [Scaffold.body], optimized for mini floating
+  /// action buttons.
+  ///
+  /// This is intended to be used with [FloatingActionButton.mini] set to true,
+  /// so that the floating action button appears to align with [CircleAvatar]s
+  /// in the [ListTile.trailing] slot of a [ListTile] in a [ListView] in the
+  /// [Scaffold.body].
+  ///
+  /// This is unlikely to be a useful location for apps that lack a top [AppBar]
+  /// or that use a [SliverAppBar] in the scaffold body itself.
+  static const FloatingActionButtonLocation miniEndTop = _MiniEndTopFabLocation();
+
+  /// Start-aligned [FloatingActionButton], floating at the bottom of the screen.
+  ///
+  /// To align a floating action button with [CircleAvatar]s in the
+  /// [ListTile.leading] slots of [ListTile]s in a [ListView] in the [Scaffold.body],
+  /// use [miniStartFloat] and set [FloatingActionButton.mini] to true.
+  static const FloatingActionButtonLocation startFloat = _StartFloatFabLocation();
+
+  /// Start-aligned [FloatingActionButton], floating at the bottom of the screen,
+  /// optimized for mini floating action buttons.
+  ///
+  /// This is intended to be used with [FloatingActionButton.mini] set to true,
+  /// so that the floating action button appears to align with [CircleAvatar]s
+  /// in the [ListTile.leading] slot of a [ListTile] in a [ListView] in the
+  /// [Scaffold.body].
+  ///
+  /// Compared to [FloatingActionButtonLocation.startFloat], floating action
+  /// buttons using this location will move horizontally _and_ vertically
+  /// closer to the edges, by [kMiniButtonOffsetAdjustment] each.
+  static const FloatingActionButtonLocation miniStartFloat = _MiniStartFloatFabLocation();
+
+  /// Centered [FloatingActionButton], floating at the bottom of the screen.
+  ///
+  /// To position a mini floating action button, use [miniCenterFloat] and
+  /// set [FloatingActionButtonLocation.mini] to true.
+  static const FloatingActionButtonLocation centerFloat = _CenterFloatFabLocation();
+
+  /// Centered [FloatingActionButton], floating at the bottom of the screen,
+  /// optimized for mini floating action buttons.
+  ///
+  /// This is intended to be used with [FloatingActionButton.mini] set to true,
+  /// so that the floating action button appears to align horizontally with
+  /// the locations [FloatingActionButtonLocation.miniStartFloat]
+  /// and [FloatingActionButtonLocation.miniEndFloat].
+  ///
+  /// Compared to [FloatingActionButtonLocation.centerFloat], floating action
+  /// buttons using this location will move vertically down
+  /// by [kMiniButtonOffsetAdjustment].
+  static const FloatingActionButtonLocation miniCenterFloat = _MiniCenterFloatFabLocation();
+
+  /// End-aligned [FloatingActionButton], floating at the bottom of the screen.
+  ///
+  /// This is the default alignment of [FloatingActionButton]s in Material applications.
+  ///
+  /// To align a floating action button with [CircleAvatar]s in the
+  /// [ListTile.trailing] slots of [ListTile]s in a [ListView] in the [Scaffold.body],
+  /// use [miniEndFloat] and set [FloatingActionButton.mini] to true.
+  static const FloatingActionButtonLocation endFloat = _EndFloatFabLocation();
+
+  /// End-aligned [FloatingActionButton], floating at the bottom of the screen,
+  /// optimized for mini floating action buttons.
+  ///
+  /// This is intended to be used with [FloatingActionButton.mini] set to true,
+  /// so that the floating action button appears to align with [CircleAvatar]s
+  /// in the [ListTile.trailing] slot of a [ListTile] in a [ListView] in the
+  /// [Scaffold.body].
+  ///
+  /// Compared to [FloatingActionButtonLocation.endFloat], floating action
+  /// buttons using this location will move horizontally _and_ vertically
+  /// closer to the edges, by [kMiniButtonOffsetAdjustment] each.
+  static const FloatingActionButtonLocation miniEndFloat = _MiniEndFloatFabLocation();
+
+  /// Start-aligned [FloatingActionButton], floating over the
+  /// [Scaffold.bottomNavigationBar] so that the center of the floating
+  /// action button lines up with the top of the bottom navigation bar.
+  ///
+  /// To align a floating action button with [CircleAvatar]s in the
+  /// [ListTile.leading] slots of [ListTile]s in a [ListView] in the [Scaffold.body],
+  /// use [miniStartDocked] and set [FloatingActionButton.mini] to true.
+  ///
+  /// If the value of [Scaffold.bottomNavigationBar] is a [BottomAppBar],
+  /// the bottom app bar can include a "notch" in its shape that accommodates
+  /// the overlapping floating action button.
+  ///
+  /// This is unlikely to be a useful location for apps that lack a bottom
+  /// navigation bar.
+  static const FloatingActionButtonLocation startDocked = _StartDockedFabLocation();
+
+  /// Start-aligned [FloatingActionButton], floating over the
+  /// [Scaffold.bottomNavigationBar] so that the center of the floating
+  /// action button lines up with the top of the bottom navigation bar,
+  /// optimized for mini floating action buttons.
+  ///
+  /// If the value of [Scaffold.bottomNavigationBar] is a [BottomAppBar],
+  /// the bottom app bar can include a "notch" in its shape that accommodates
+  /// the overlapping floating action button.
+  ///
+  /// This is intended to be used with [FloatingActionButton.mini] set to true,
+  /// so that the floating action button appears to align with [CircleAvatar]s
+  /// in the [ListTile.leading] slot of a [ListTile] in a [ListView] in the
+  /// [Scaffold.body].
+  ///
+  /// This is unlikely to be a useful location for apps that lack a bottom
+  /// navigation bar.
+  static const FloatingActionButtonLocation miniStartDocked = _MiniStartDockedFabLocation();
+
+  /// Centered [FloatingActionButton], floating over the
+  /// [Scaffold.bottomNavigationBar] so that the center of the floating
+  /// action button lines up with the top of the bottom navigation bar.
+  ///
+  /// If the value of [Scaffold.bottomNavigationBar] is a [BottomAppBar],
+  /// the bottom app bar can include a "notch" in its shape that accommodates
+  /// the overlapping floating action button.
+  ///
+  /// This is unlikely to be a useful location for apps that lack a bottom
+  /// navigation bar.
+  static const FloatingActionButtonLocation centerDocked = _CenterDockedFabLocation();
+
+  /// Centered [FloatingActionButton], floating over the
+  /// [Scaffold.bottomNavigationBar] so that the center of the floating
+  /// action button lines up with the top of the bottom navigation bar;
+  /// intended to be used with [FloatingActionButton.mini] set to true.
+  ///
+  /// If the value of [Scaffold.bottomNavigationBar] is a [BottomAppBar],
+  /// the bottom app bar can include a "notch" in its shape that accommodates
+  /// the overlapping floating action button.
+  ///
+  /// This is unlikely to be a useful location for apps that lack a bottom
+  /// navigation bar.
+  static const FloatingActionButtonLocation miniCenterDocked = _MiniCenterDockedFabLocation();
+
+  /// End-aligned [FloatingActionButton], floating over the
+  /// [Scaffold.bottomNavigationBar] so that the center of the floating
+  /// action button lines up with the top of the bottom navigation bar.
+  ///
+  /// If the value of [Scaffold.bottomNavigationBar] is a [BottomAppBar],
+  /// the bottom app bar can include a "notch" in its shape that accommodates
+  /// the overlapping floating action button.
+  ///
+  /// This is unlikely to be a useful location for apps that lack a bottom
+  /// navigation bar.
+  static const FloatingActionButtonLocation endDocked = _EndDockedFabLocation();
+
+  /// End-aligned [FloatingActionButton], floating over the
+  /// [Scaffold.bottomNavigationBar] so that the center of the floating
+  /// action button lines up with the top of the bottom navigation bar,
+  /// optimized for mini floating action buttons.
+  ///
+  /// To align a floating action button with [CircleAvatar]s in the
+  /// [ListTile.trailing] slots of [ListTile]s in a [ListView] in the [Scaffold.body],
+  /// use [miniEndDocked] and set [FloatingActionButton.mini] to true.
+  ///
+  /// If the value of [Scaffold.bottomNavigationBar] is a [BottomAppBar],
+  /// the bottom app bar can include a "notch" in its shape that accommodates
+  /// the overlapping floating action button.
+  ///
+  /// This is intended to be used with [FloatingActionButton.mini] set to true,
+  /// so that the floating action button appears to align with [CircleAvatar]s
+  /// in the [ListTile.trailing] slot of a [ListTile] in a [ListView] in the
+  /// [Scaffold.body].
+  ///
+  /// This is unlikely to be a useful location for apps that lack a bottom
+  /// navigation bar.
+  static const FloatingActionButtonLocation miniEndDocked = _MiniEndDockedFabLocation();
 
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
   ///
@@ -125,104 +303,154 @@ abstract class FloatingActionButtonLocation {
   String toString() => objectRuntimeType(this, 'FloatingActionButtonLocation');
 }
 
-double _leftOffset(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
-  return kFloatingActionButtonMargin
-       + scaffoldGeometry.minInsets.left
-       - offset;
-}
+/// A base class that simplifies building [FloatingActionButtonLocation]s when
+/// used with mixins [FabTopOffsetY], [FabFloatOffsetY], [FabDockedOffsetY],
+/// [FabStartOffsetX], [FabCenterOffsetX], [FabEndOffsetX], and [FabMiniOffsetAdjustment].
+///
+/// A subclass of [FloatingActionButtonLocation] which implements its [getOffset] method
+/// using three other methods: [getOffsetX], [getOffsetY], and [isMini].
+///
+/// Different mixins on this class override different methods, so that combining
+/// a set of mixins creates a floating action button location.
+///
+/// For example: the location [FloatingActionButtonLocation.miniEndTop]
+/// is based on a class that extends [StandardFabLocation]
+/// with mixins [FabMiniOffsetAdjustment], [FabEndOffsetX], and [FabTopOffsetY].
+///
+/// You can create your own subclass of [StandardFabLocation]
+/// to implement a custom [FloatingActionButtonLocation].
+///
+/// {@tool dartpad --template=stateless_widget_material}
+///
+/// This is an example of a user-defined [FloatingActionButtonLocation].
+///
+/// The example shows a [Scaffold] with an [AppBar], a [BottomAppBar], and a
+/// [FloatingActionButton] using a custom [FloatingActionButtonLocation].
+///
+/// The new [FloatingActionButtonLocation] is defined
+/// by extending [StandardFabLocation] with two mixins,
+/// [FabEndOffsetX] and [FabFloatOffsetY], and overriding the
+/// [getOffsetX] method to adjust the FAB's x-coordinate, creating a
+/// [FloatingActionButtonLocation] slightly different from
+/// [FloatingActionButtonLocation.endFloat].
+///
+/// ```dart preamble
+/// class AlmostEndFloatFabLocation extends StandardFabLocation
+///     with FabEndOffsetX, FabFloatOffsetY {
+///   @override
+///   double getOffsetX (ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+///     final double directionalAdjustment =
+///       scaffoldGeometry.textDirection == TextDirection.ltr ? -50.0 : 50.0;
+///     return super.getOffsetX(scaffoldGeometry, adjustment) + directionalAdjustment;
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('Home page'),
+///     ),
+///     floatingActionButton: FloatingActionButton(
+///       onPressed: () { print('FAB pressed.'); },
+///       tooltip: 'Increment',
+///       child: Icon(Icons.add),
+///     ),
+///     floatingActionButtonLocation: AlmostEndFloatFabLocation(),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+abstract class StandardFabLocation extends FloatingActionButtonLocation {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const StandardFabLocation();
 
-double _rightOffset(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
-  return scaffoldGeometry.scaffoldSize.width
-       - kFloatingActionButtonMargin
-       - scaffoldGeometry.minInsets.right
-       - scaffoldGeometry.floatingActionButtonSize.width
-       + offset;
-}
+  /// Obtains the x-offset to place the [FloatingActionButton] based on the
+  /// [Scaffold]'s layout.
+  ///
+  /// Used by [getOffset] to compute its x-coordinate.
+  double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment);
 
-double _endOffset(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
-  assert(scaffoldGeometry.textDirection != null);
-  switch (scaffoldGeometry.textDirection) {
-    case TextDirection.rtl:
-      return _leftOffset(scaffoldGeometry, offset: offset);
-    case TextDirection.ltr:
-      return _rightOffset(scaffoldGeometry, offset: offset);
-  }
-  return null;
-}
+  /// Obtains the y-offset to place the [FloatingActionButton] based on the
+  /// [Scaffold]'s layout.
+  ///
+  /// Used by [getOffset] to compute its y-coordinate.
+  double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment);
 
-double _startOffset(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
-  assert(scaffoldGeometry.textDirection != null);
-  switch (scaffoldGeometry.textDirection) {
-    case TextDirection.rtl:
-      return _rightOffset(scaffoldGeometry, offset: offset);
-    case TextDirection.ltr:
-      return _leftOffset(scaffoldGeometry, offset: offset);
-  }
-  return null;
-}
-
-class _CenterFloatFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _CenterFloatFloatingActionButtonLocation();
+  /// A function returning whether this [StandardFabLocation] is optimized for
+  /// mini [FloatingActionButton]s.
+  bool isMini () => false;
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    // Compute the x-axis offset.
-    final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
+    final double adjustment = isMini() ? kMiniButtonOffsetAdjustment : 0.0;
+    return Offset(
+      getOffsetX(scaffoldGeometry, adjustment),
+      getOffsetY(scaffoldGeometry, adjustment),
+    );
+  }
 
-    // Compute the y-axis offset.
+  /// Calculates x-offset for left-aligned [FloatingActionButtonLocation]s.
+  static double _leftOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+    return kFloatingActionButtonMargin
+        + scaffoldGeometry.minInsets.left
+        - adjustment;
+  }
+
+  /// Calculates x-offset for right-aligned [FloatingActionButtonLocation]s.
+  static double _rightOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+    return scaffoldGeometry.scaffoldSize.width
+        - kFloatingActionButtonMargin
+        - scaffoldGeometry.minInsets.right
+        - scaffoldGeometry.floatingActionButtonSize.width
+        + adjustment;
+  }
+
+
+}
+
+/// Mixin for a "top" floating action button location, such as [FloatingActionButtonLocation.startTop].
+mixin FabTopOffsetY on StandardFabLocation {
+  /// Calculates y-offset for [FloatingActionButtonLocation]s floating over
+  /// the transition between the [Scaffold.appBar] and the [Scaffold.body].
+  @override
+  double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+    final double fabHalfHeight = scaffoldGeometry.floatingActionButtonSize.height / 2.0;
+    return scaffoldGeometry.contentTop - fabHalfHeight;
+  }
+}
+
+/// Mixin for a "float" floating action button location, such as [FloatingActionButtonLocation.centerFloat].
+mixin FabFloatOffsetY on StandardFabLocation {
+  /// Calculates y-offset for [FloatingActionButtonLocation]s floating at
+  /// the bottom of the screen.
+  @override
+  double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
     final double contentBottom = scaffoldGeometry.contentBottom;
     final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
     final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
     final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
+
     double fabY = contentBottom - fabHeight - kFloatingActionButtonMargin;
     if (snackBarHeight > 0.0)
       fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - kFloatingActionButtonMargin);
     if (bottomSheetHeight > 0.0)
       fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
 
-    return Offset(fabX, fabY);
+    return fabY + adjustment;
   }
-
-  @override
-  String toString() => 'FloatingActionButtonLocation.centerFloat';
 }
 
-class _EndFloatFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _EndFloatFloatingActionButtonLocation();
-
+/// Mixin for a "docked" floating action button location, such as [FloatingActionButtonLocation.endDocked].
+mixin FabDockedOffsetY on StandardFabLocation {
+  /// Calculates y-offset for [FloatingActionButtonLocation]s floating over the
+  /// [Scaffold.bottomNavigationBar] so that the center of the floating
+  /// action button lines up with the top of the bottom navigation bar.
   @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    // Compute the x-axis offset.
-    final double fabX = _endOffset(scaffoldGeometry);
-
-    // Compute the y-axis offset.
-    final double contentBottom = scaffoldGeometry.contentBottom;
-    final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
-    final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
-    final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
-
-    double fabY = contentBottom - fabHeight - kFloatingActionButtonMargin;
-    if (snackBarHeight > 0.0)
-      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - kFloatingActionButtonMargin);
-    if (bottomSheetHeight > 0.0)
-      fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
-
-    return Offset(fabX, fabY);
-  }
-
-  @override
-  String toString() => 'FloatingActionButtonLocation.endFloat';
-}
-
-// Provider of common logic for [FloatingActionButtonLocation]s that
-// dock to the [BottomAppBar].
-abstract class _DockedFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _DockedFloatingActionButtonLocation();
-
-  // Positions the Y coordinate of the [FloatingActionButton] at a height
-  // where it docks to the [BottomAppBar].
-  @protected
-  double getDockedY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+  double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
     final double contentBottom = scaffoldGeometry.contentBottom;
     final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
     final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
@@ -241,74 +469,195 @@ abstract class _DockedFloatingActionButtonLocation extends FloatingActionButtonL
   }
 }
 
-class _EndDockedFloatingActionButtonLocation extends _DockedFloatingActionButtonLocation {
-  const _EndDockedFloatingActionButtonLocation();
-
+/// Mixin for a "start" floating action button location, such as [FloatingActionButtonLocation.startTop].
+mixin FabStartOffsetX on StandardFabLocation {
+  /// Calculates x-offset for start-aligned [FloatingActionButtonLocation]s.
   @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    final double fabX = _endOffset(scaffoldGeometry);
-    return Offset(fabX, getDockedY(scaffoldGeometry));
+  double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+    assert(scaffoldGeometry.textDirection != null);
+    switch (scaffoldGeometry.textDirection) {
+      case TextDirection.rtl:
+        return StandardFabLocation._rightOffsetX(scaffoldGeometry, adjustment);
+      case TextDirection.ltr:
+        return StandardFabLocation._leftOffsetX(scaffoldGeometry, adjustment);
+    }
+    return null;
   }
-
-  @override
-  String toString() => 'FloatingActionButtonLocation.endDocked';
 }
 
-class _CenterDockedFloatingActionButtonLocation extends _DockedFloatingActionButtonLocation {
-  const _CenterDockedFloatingActionButtonLocation();
-
+/// Mixin for a "center" floating action button location, such as [FloatingActionButtonLocation.centerFloat].
+mixin FabCenterOffsetX on StandardFabLocation {
+  /// Calculates x-offset for center-aligned [FloatingActionButtonLocation]s.
   @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
-    return Offset(fabX, getDockedY(scaffoldGeometry));
+  double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+    return (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
   }
-
-  @override
-  String toString() => 'FloatingActionButtonLocation.centerDocked';
 }
 
-double _straddleAppBar(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-  final double fabHalfHeight = scaffoldGeometry.floatingActionButtonSize.height / 2.0;
-  return scaffoldGeometry.contentTop - fabHalfHeight;
+/// Mixin for an "end" floating action button location, such as [FloatingActionButtonLocation.endDocked].
+mixin FabEndOffsetX on StandardFabLocation {
+  /// Calculates x-offset for end-aligned [FloatingActionButtonLocation]s.
+  @override
+  double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+    assert(scaffoldGeometry.textDirection != null);
+    switch (scaffoldGeometry.textDirection) {
+      case TextDirection.rtl:
+        return StandardFabLocation._leftOffsetX(scaffoldGeometry, adjustment);
+      case TextDirection.ltr:
+        return StandardFabLocation._rightOffsetX(scaffoldGeometry, adjustment);
+    }
+    return null;
+  }
 }
 
-class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _StartTopFloatingActionButtonLocation();
-
+/// Mixin for a "mini" floating action button location, such as [FloatingActionButtonLocation.miniStartTop].
+mixin FabMiniOffsetAdjustment on StandardFabLocation {
   @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    return Offset(_startOffset(scaffoldGeometry), _straddleAppBar(scaffoldGeometry));
-  }
+  bool isMini () => true;
+}
+
+class _StartTopFabLocation extends StandardFabLocation
+    with FabStartOffsetX, FabTopOffsetY {
+  const _StartTopFabLocation();
 
   @override
   String toString() => 'FloatingActionButtonLocation.startTop';
 }
 
-class _MiniStartTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _MiniStartTopFloatingActionButtonLocation();
-
-  @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    // We have to offset the FAB by four pixels because the FAB itself _adds_
-    // four pixels in every direction in order to have a hit target area of 48
-    // pixels in each dimension, despite being a circle of radius 40.
-    return Offset(_startOffset(scaffoldGeometry, offset: 4.0), _straddleAppBar(scaffoldGeometry));
-  }
+class _MiniStartTopFabLocation extends StandardFabLocation
+    with FabMiniOffsetAdjustment, FabStartOffsetX, FabTopOffsetY {
+  const _MiniStartTopFabLocation();
 
   @override
   String toString() => 'FloatingActionButtonLocation.miniStartTop';
 }
 
-class _EndTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _EndTopFloatingActionButtonLocation();
+class _CenterTopFabLocation extends StandardFabLocation
+    with FabCenterOffsetX, FabTopOffsetY {
+  const _CenterTopFabLocation();
 
   @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    return Offset(_endOffset(scaffoldGeometry), _straddleAppBar(scaffoldGeometry));
-  }
+  String toString() => 'FloatingActionButtonLocation.centerTop';
+}
+
+class _MiniCenterTopFabLocation extends StandardFabLocation
+    with FabMiniOffsetAdjustment, FabCenterOffsetX, FabTopOffsetY {
+  const _MiniCenterTopFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.miniCenterTop';
+}
+
+class _EndTopFabLocation extends StandardFabLocation
+    with FabEndOffsetX, FabTopOffsetY {
+  const _EndTopFabLocation();
 
   @override
   String toString() => 'FloatingActionButtonLocation.endTop';
+}
+
+class _MiniEndTopFabLocation extends StandardFabLocation
+    with FabMiniOffsetAdjustment, FabEndOffsetX, FabTopOffsetY {
+  const _MiniEndTopFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.miniEndTop';
+}
+
+class _StartFloatFabLocation extends StandardFabLocation
+    with FabStartOffsetX, FabFloatOffsetY {
+  const _StartFloatFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.startFloat';
+}
+
+class _MiniStartFloatFabLocation extends StandardFabLocation
+    with FabMiniOffsetAdjustment, FabStartOffsetX, FabFloatOffsetY {
+  const _MiniStartFloatFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.miniStartFloat';
+}
+
+class _CenterFloatFabLocation extends StandardFabLocation
+    with FabCenterOffsetX, FabFloatOffsetY {
+  const _CenterFloatFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.centerFloat';
+}
+
+class _MiniCenterFloatFabLocation extends StandardFabLocation
+    with FabMiniOffsetAdjustment, FabCenterOffsetX, FabFloatOffsetY {
+  const _MiniCenterFloatFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.miniCenterFloat';
+}
+
+class _EndFloatFabLocation extends StandardFabLocation
+    with FabEndOffsetX, FabFloatOffsetY {
+  const _EndFloatFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.endFloat';
+}
+
+class _MiniEndFloatFabLocation extends StandardFabLocation
+    with FabMiniOffsetAdjustment, FabEndOffsetX, FabFloatOffsetY {
+  const _MiniEndFloatFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.miniEndFloat';
+}
+
+class _StartDockedFabLocation extends StandardFabLocation
+    with FabStartOffsetX, FabDockedOffsetY {
+  const _StartDockedFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.startDocked';
+}
+
+class _MiniStartDockedFabLocation extends StandardFabLocation
+    with FabMiniOffsetAdjustment, FabStartOffsetX, FabDockedOffsetY {
+  const _MiniStartDockedFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.miniStartDocked';
+}
+
+class _CenterDockedFabLocation extends StandardFabLocation
+    with FabCenterOffsetX, FabDockedOffsetY {
+  const _CenterDockedFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.centerDocked';
+}
+
+class _MiniCenterDockedFabLocation extends StandardFabLocation
+    with FabMiniOffsetAdjustment, FabCenterOffsetX, FabDockedOffsetY {
+  const _MiniCenterDockedFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.miniCenterDocked';
+}
+
+class _EndDockedFabLocation extends StandardFabLocation
+    with FabEndOffsetX, FabDockedOffsetY {
+  const _EndDockedFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.endDocked';
+}
+
+class _MiniEndDockedFabLocation extends StandardFabLocation
+    with FabMiniOffsetAdjustment, FabEndOffsetX, FabDockedOffsetY {
+  const _MiniEndDockedFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.miniEndDocked';
 }
 
 /// Provider of animations to move the [FloatingActionButton] between [FloatingActionButtonLocation]s.

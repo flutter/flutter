@@ -493,6 +493,61 @@ void main() {
     box.translation = const Offset(0.3, 0.3);
     expect(box.markNeedsSemanticsUpdateCallCount, 3);
   });
+
+  test('RenderFollowerLayer hit test without a leader layer and the showWhenUnlinked is true', () {
+    final RenderFollowerLayer follower = RenderFollowerLayer(
+      link: LayerLink(),
+      showWhenUnlinked: true,
+      child: RenderSizedBox(const Size(1.0, 1.0)),
+    );
+    layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
+    final BoxHitTestResult hitTestResult = BoxHitTestResult();
+    expect(follower.hitTest(hitTestResult, position: const Offset(0.0, 0.0)), isTrue);
+  });
+
+  test('RenderFollowerLayer hit test without a leader layer and the showWhenUnlinked is false', () {
+    final RenderFollowerLayer follower = RenderFollowerLayer(
+      link: LayerLink(),
+      showWhenUnlinked: false,
+      child: RenderSizedBox(const Size(1.0, 1.0)),
+    );
+    layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
+    final BoxHitTestResult hitTestResult = BoxHitTestResult();
+    expect(follower.hitTest(hitTestResult, position: const Offset(0.0, 0.0)), isFalse);
+  });
+
+  test('RenderFollowerLayer hit test with a leader layer and the showWhenUnlinked is true', () {
+    // Creates a layer link with a leader.
+    final LayerLink link = LayerLink();
+    final LeaderLayer leader = LeaderLayer(link: link);
+    leader.attach(Object());
+
+    final RenderFollowerLayer follower = RenderFollowerLayer(
+      link: link,
+      showWhenUnlinked: true,
+      child: RenderSizedBox(const Size(1.0, 1.0)),
+    );
+    layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
+    final BoxHitTestResult hitTestResult = BoxHitTestResult();
+    expect(follower.hitTest(hitTestResult, position: const Offset(0.0, 0.0)), isTrue);
+  });
+
+  test('RenderFollowerLayer hit test with a leader layer and the showWhenUnlinked is false', () {
+    // Creates a layer link with a leader.
+    final LayerLink link = LayerLink();
+    final LeaderLayer leader = LeaderLayer(link: link);
+    leader.attach(Object());
+
+    final RenderFollowerLayer follower = RenderFollowerLayer(
+      link: link,
+      showWhenUnlinked: false,
+      child: RenderSizedBox(const Size(1.0, 1.0)),
+    );
+    layout(follower, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
+    final BoxHitTestResult hitTestResult = BoxHitTestResult();
+    // The follower is still hit testable because there is a leader layer.
+    expect(follower.hitTest(hitTestResult, position: const Offset(0.0, 0.0)), isTrue);
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
