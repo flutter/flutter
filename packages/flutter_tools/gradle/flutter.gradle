@@ -922,6 +922,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (extraFrontEndOptions != null) {
                 args "-dExtraFrontEndOptions=${extraFrontEndOptions}"
             }
+            if (trackWidgetCreation != null) {
+                args "-dTrackWidgetCreation=${trackWidgetCreation}"
+            }
             if (splitDebugInfo != null) {
                 args "-dSplitDebugInfo=${splitDebugInfo}"
             }
