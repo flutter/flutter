@@ -93,8 +93,10 @@ void main() {
 
   testWidgets('ClampingScrollPhysics handles out of bounds ScrollPosition', (WidgetTester tester) async {
     Future<void> testOutOfBounds(ScrollPhysics physics, double initialOffset, double expectedOffset) async {
-      final ScrollController scrollController = ScrollController(initialScrollOffset: initialOffset);
+      final ScrollController scrollController = ScrollController();
       await tester.pumpWidget(buildFrame(physics, scrollController: scrollController));
+      scrollController.jumpTo(initialOffset);
+      await tester.pump();
       final ScrollableState scrollable = tester.state(find.byType(Scrollable));
 
       expect(scrollable.position.pixels, equals(initialOffset));
