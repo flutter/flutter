@@ -57,6 +57,7 @@ void _testMessageLength({
   expect(commandHelp.U.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.a.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.d.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.g.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.h.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.i.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.k.toString().length, lessThanOrEqualTo(expectedWidth));
@@ -88,6 +89,7 @@ void main() {
         expect(commandHelp.U.toString(), startsWith('\x1B[1mU\x1B[22m'));
         expect(commandHelp.a.toString(), startsWith('\x1B[1ma\x1B[22m'));
         expect(commandHelp.d.toString(), startsWith('\x1B[1md\x1B[22m'));
+        expect(commandHelp.g.toString(), startsWith('\x1B[1mg\x1B[22m'));
         expect(commandHelp.h.toString(), startsWith('\x1B[1mh\x1B[22m'));
         expect(commandHelp.i.toString(), startsWith('\x1B[1mi\x1B[22m'));
         expect(commandHelp.o.toString(), startsWith('\x1B[1mo\x1B[22m'));
@@ -164,6 +166,7 @@ void main() {
         expect(commandHelp.U.toString(), equals('\x1B[1mU\x1B[22m Dump accessibility tree in inverse hit test order.            \x1B[1;30m(debugDumpSemantics)\x1B[39m'));
         expect(commandHelp.a.toString(), equals('\x1B[1ma\x1B[22m Toggle timeline events for all widget build methods.    \x1B[1;30m(debugProfileWidgetBuilds)\x1B[39m'));
         expect(commandHelp.d.toString(), equals('\x1B[1md\x1B[22m Detach (terminate "flutter run" but leave application running).'));
+        expect(commandHelp.g.toString(), equals('\x1B[1mg\x1B[22m Run source code generators.'));
         expect(commandHelp.h.toString(), equals('\x1B[1mh\x1B[22m Repeat this help message.'));
         expect(commandHelp.i.toString(), equals('\x1B[1mi\x1B[22m Toggle widget inspector.                  \x1B[1;30m(WidgetsApp.showWidgetInspectorOverride)\x1B[39m'));
         expect(commandHelp.o.toString(), equals('\x1B[1mo\x1B[22m Simulate different operating systems.                      \x1B[1;30m(defaultTargetPlatform)\x1B[39m'));
@@ -190,6 +193,7 @@ void main() {
         expect(commandHelp.U.toString(), equals('U Dump accessibility tree in inverse hit test order.            (debugDumpSemantics)'));
         expect(commandHelp.a.toString(), equals('a Toggle timeline events for all widget build methods.    (debugProfileWidgetBuilds)'));
         expect(commandHelp.d.toString(), equals('d Detach (terminate "flutter run" but leave application running).'));
+        expect(commandHelp.g.toString(), equals('g Run source code generators.'));
         expect(commandHelp.h.toString(), equals('h Repeat this help message.'));
         expect(commandHelp.i.toString(), equals('i Toggle widget inspector.                  (WidgetsApp.showWidgetInspectorOverride)'));
         expect(commandHelp.o.toString(), equals('o Simulate different operating systems.                      (defaultTargetPlatform)'));

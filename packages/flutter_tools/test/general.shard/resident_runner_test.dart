@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/cache.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -530,6 +531,49 @@ void main() {
     expect(cacheDill, isNot(exists));
   }));
 
+  test('ResidentRunner can run source generation', () => testbed.run(() async {
+    final FakeProcessManager processManager = globals.processManager as FakeProcessManager;
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+        globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
+      ],
+    ));
+    globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
+      .createSync(recursive: true);
+    globals.fs.file('l10n.yaml').createSync();
+
+    await residentRunner.runSourceGenerators();
+
+    expect(testLogger.errorText, isEmpty);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
+  }));
+
+  test('ResidentRunner can run source generation - generation fails', () => testbed.run(() async {
+    final FakeProcessManager processManager = globals.processManager as FakeProcessManager;
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+        globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
+      ],
+      exitCode: 1,
+      stderr: 'stderr'
+    ));
+    globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
+      .createSync(recursive: true);
+    globals.fs.file('l10n.yaml').createSync();
+
+    await residentRunner.runSourceGenerators();
+
+    expect(testLogger.errorText, allOf(
+      contains('stderr'), // Message from gen_l10n.dart
+      contains('Exception') // Message from build_system
+    ));
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
+  }));
+
   test('ResidentRunner printHelpDetails', () => testbed.run(() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     when(mockDevice.supportsHotRestart).thenReturn(true);
@@ -566,6 +610,7 @@ void main() {
           commandHelp.p,
           commandHelp.o,
           commandHelp.z,
+          commandHelp.g,
           commandHelp.M,
           commandHelp.v,
           commandHelp.P,
