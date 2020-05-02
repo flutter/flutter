@@ -1230,7 +1230,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       if (widget.onChanged != null && newValue != null)
         widget.onChanged(newValue.result);
       if(widget.onClosed != null)
-        widget.onClosed(); 
+        widget.onClosed();
     });
 
     if (widget.onTap != null) {
