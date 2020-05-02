@@ -4,12 +4,10 @@
 
 import 'dart:async';
 
-import 'package:platform/platform.dart';
-import 'package:process/process.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -23,7 +21,7 @@ import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'build_system/depfile.dart';
+import 'build_system/build_system.dart';
 import 'build_system/targets/localizations.dart';
 import 'cache.dart';
 import 'codegen.dart';
@@ -808,16 +806,38 @@ abstract class ResidentRunner {
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
   }
 
-  final SourceCodeGenerator _sourceCodeGenerator = SourceCodeGenerator(
-    artifacts: globals.artifacts,
-    fileSystem:  globals.fs,
-    logger:  globals.logger,
-    platform:  globals.platform,
-    processManager:  globals.processManager,
-  );
 
+  BuildResult _lastBuild;
+  Environment _environment;
   Future<void> runSourceGenerators() async {
-    return _sourceCodeGenerator.generate();
+    _environment ??= Environment(
+      artifacts: globals.artifacts,
+      logger: globals.logger,
+      cacheDir: globals.cache.getRoot(),
+      engineVersion: globals.flutterVersion.engineRevision,
+      fileSystem: globals.fs,
+      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+      outputDir: globals.fs.directory(getBuildDirectory()),
+      processManager: globals.processManager,
+      projectDir: globals.fs.currentDirectory,
+    );
+    globals.logger.printTrace('Starting incremental build...');
+    _lastBuild = await globals.buildSystem.buildIncremental(
+      const GenerateLocalizationsTarget(),
+      _environment,
+      _lastBuild,
+    );
+    if (!_lastBuild.success) {
+      for (final ExceptionMeasurement exceptionMeasurement in _lastBuild.exceptions.values) {
+        globals.logger.printError(
+          exceptionMeasurement.exception.toString(),
+          stackTrace: globals.logger.isVerbose
+            ? exceptionMeasurement.stackTrace
+            : null,
+        );
+      }
+    }
+    globals.logger.printTrace('complete');
   }
 
   /// Toggle whether canvaskit is being used for rendering, returning the new
@@ -1585,95 +1605,5 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
     default:
       assert(false); // Invalid current platform.
       return 'android';
-  }
-}
-
-/// The source code generator runs additional  tasks that produce Dart source
-/// files.
-class SourceCodeGenerator {
-  SourceCodeGenerator({
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required Artifacts artifacts,
-    @required Platform platform,
-    @required ProcessManager processManager,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _artifacts = artifacts,
-       _processManager = processManager,
-       _platform = platform;
-
-  static const String _kLocalizationDependency = 'l10n.yaml';
-
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final Platform _platform;
-  final Artifacts _artifacts;
-  final ProcessManager _processManager;
-
-  bool _generateLocalizations = true;
-  DateTime _lastCompiled;
-  Depfile _depfile;
-
-  /// Run code generators.
-  Future<void> generate() async {
-    if (_generateLocalizations) {
-      await _runCodeGenerators();
-    }
-  }
-
-  Future<void> _runCodeGenerators() async {
-    final File configFile = _fileSystem.file(_kLocalizationDependency);
-    _generateLocalizations = configFile.existsSync();
-    if (!_generateLocalizations) {
-      return;
-    }
-
-    final List<Uri> urisToScan = <Uri>[
-      configFile.uri,
-      if (_depfile != null)
-        ..._depfile.inputs.map((File file) => file.uri),
-      if (_depfile != null)
-        ..._depfile.outputs.map((File file) => file.uri),
-    ];
-
-    // Short-circuit as soon as a changed value is detected.
-    bool dirty = false;
-    if (_lastCompiled != null) {
-      for (final Uri uri in urisToScan) {
-        final DateTime updatedAt = _fileSystem.statSync(
-          uri.toFilePath(windows: _platform.isWindows)).modified;
-        if (updatedAt != null && updatedAt.isAfter(_lastCompiled)) {
-          dirty = true;
-          break;
-        }
-      }
-    } else {
-      dirty = true;
-    }
-    // If the depfile doesn't exist, we need to run at least once.
-    if (dirty || _depfile == null) {
-      final LocalizationOptions options = parseLocalizationsOptions(
-        file: configFile,
-        logger: _logger,
-      );
-      _logger.printTrace('Running update localizations');
-      try {
-        _depfile = await generateLocalizations(
-          fileSystem: _fileSystem,
-          flutterRoot: Cache.flutterRoot,
-          logger: _logger,
-          processManager: _processManager,
-          options: options,
-          projectDir: _fileSystem.currentDirectory,
-          dartBinaryPath: _artifacts
-            .getArtifactPath(Artifact.engineDartBinary),
-        );
-        _lastCompiled = DateTime.now();
-      } on Exception {
-        _logger.printError('Error generating localizations.');
-        _depfile = null;
-      }
-    }
   }
 }

@@ -31,11 +31,16 @@ Future<Depfile> generateLocalizations({
       .childDirectory('lib')
       .childFile('l10n').uri,
   );
-  final File outputLocalizations = fileSystem.file(
-    options.outputLocalizationsFile ?? projectDir
+
+  File outputLocalzations;
+  if (options.outputLocalizationsFile != null) {
+    outputLocalzations = fileSystem
+      .file(inputArb.uri.resolveUri(options.outputLocalizationsFile));
+  } else {
+    outputLocalzations = projectDir
     .childDirectory('lib')
-    .childFile('app_localizations.dart').uri,
-  );
+    .childFile('app_localizations.dart');
+  }
 
   if (!inputArb.existsSync()) {
     logger.printError('arb-dir: ${inputArb.path} does not exist.');
@@ -43,17 +48,13 @@ Future<Depfile> generateLocalizations({
   }
 
   final List<File> inputs = <File>[
-    if (options.headerFile != null)
-      fileSystem.file(options.headerFile).absolute,
     // Include all arb files as build inputs.
     for (final File file in inputArb.listSync().whereType<File>())
       if (fileSystem.path.extension(file.path) == '.arb')
         file,
   ];
   final List<File> outputs = <File>[
-    if (options.untranslatedMessagesFile != null)
-      fileSystem.file(options.untranslatedMessagesFile).absolute,
-    outputLocalizations,
+    outputLocalzations,
   ];
 
   final Depfile depfile = Depfile(inputs, outputs);

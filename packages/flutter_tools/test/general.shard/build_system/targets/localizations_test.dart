@@ -65,7 +65,6 @@ void main() {
     expect(depfile.inputs.map((File file) => file.uri), unorderedEquals(<Uri>[
       Uri.parse('arb/foo.arb'),
       Uri.parse('arb/bar.arb'),
-      Uri.parse('file:///header'),
     ]));
     expect(depfile.outputs.map((File file) => file.uri), unorderedEquals(<Uri>[
       Uri.parse('file:///untranslated'),

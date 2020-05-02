@@ -568,7 +568,7 @@ void main() {
 
     expect(testLogger.errorText, allOf(
       contains('stderr'), // Message from gen_l10n.dart
-      contains('Error generating localizations.') // Message from resident_runner.dart
+      contains('Exception') // Message from build_system
     ));
   }, overrides: <Type, Generator>{
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
