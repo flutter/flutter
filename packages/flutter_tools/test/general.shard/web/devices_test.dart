@@ -138,6 +138,22 @@ void main() {
       contains(isA<GoogleChromeDevice>()));
   });
 
+  testWithoutContext('Edge device is listed when Edge can be run', () async {
+    final WebDevices webDevices = WebDevices(
+      featureFlags: TestFeatureFlags(isWebEnabled: true),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{}
+      ),
+      processManager:  FakeProcessManager.any(),
+    );
+
+    expect(await webDevices.pollingGetDevices(),
+      contains(isA<MicrosoftEdgeDevice>()));
+  });
+
   testWithoutContext('Chrome device is not listed when Chrome cannot be run', () async {
     final MockProcessManager processManager = MockProcessManager();
     when(processManager.canRun(any)).thenReturn(false);
@@ -154,6 +170,24 @@ void main() {
 
     expect(await webDevices.pollingGetDevices(),
       isNot(contains(isA<GoogleChromeDevice>())));
+  });
+
+  testWithoutContext('Edge device is not listed when Edge cannot be run', () async {
+    final MockProcessManager processManager = MockProcessManager();
+    when(processManager.canRun(any)).thenReturn(false);
+    final WebDevices webDevices = WebDevices(
+      featureFlags: TestFeatureFlags(isWebEnabled: true),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{}
+      ),
+      processManager: processManager,
+    );
+
+    expect(await webDevices.pollingGetDevices(),
+      isNot(contains(isA<MicrosoftEdgeDevice>())));
   });
 
   testWithoutContext('Web Server device is listed by default', () async {

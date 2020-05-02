@@ -218,7 +218,6 @@ class GoogleChromeDevice extends ChromiumDevice {
 }
 
 /// The Microsoft Edge browser based on Chromium.
-// This is not currently used, see https://github.com/flutter/flutter/issues/55322
 class MicrosoftEdgeDevice extends ChromiumDevice {
   MicrosoftEdgeDevice({
     @required ChromiumLauncher chromiumLauncher,
@@ -235,7 +234,7 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
   String get name => 'Edge';
 
   @override
-  Future<String> get sdkNameAndVersion async => '<?>';
+  Future<String> get sdkNameAndVersion async => '<>';
 }
 
 class WebDevices extends PollingDeviceDiscovery {
@@ -270,6 +269,18 @@ class WebDevices extends PollingDeviceDiscovery {
         operatingSystemUtils: operatingSystemUtils,
       ),
     );
+    _edgeDevice = MicrosoftEdgeDevice(
+      chromiumLauncher: ChromiumLauncher(
+        browserFinder: findEdgeExecutable,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+      ),
+      logger: logger,
+      fileSystem: fileSystem,
+    );
     _webServerDevice = WebServerDevice(
       logger: logger,
     );
@@ -277,6 +288,7 @@ class WebDevices extends PollingDeviceDiscovery {
 
   GoogleChromeDevice _chromeDevice;
   WebServerDevice _webServerDevice;
+  MicrosoftEdgeDevice _edgeDevice;
   final FeatureFlags _featureFlags;
 
   @override
@@ -291,6 +303,8 @@ class WebDevices extends PollingDeviceDiscovery {
       _webServerDevice,
       if (_chromeDevice.isSupported())
         _chromeDevice,
+      if (_edgeDevice.isSupported())
+        _edgeDevice,
     ];
   }
 
