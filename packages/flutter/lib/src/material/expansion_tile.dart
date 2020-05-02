@@ -91,10 +91,10 @@ class ExpansionTile extends StatefulWidget {
   final EdgeInsetsGeometry tilePadding;
 
   @override
-  _ExpansionTileState createState() => _ExpansionTileState();
+  ExpansionTileState createState() => ExpansionTileState();
 }
 
-class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProviderStateMixin {
+class ExpansionTileState extends State<ExpansionTile> with SingleTickerProviderStateMixin {
   static final Animatable<double> _easeOutTween = CurveTween(curve: Curves.easeOut);
   static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
   static final Animatable<double> _halfTween = Tween<double>(begin: 0.0, end: 0.5);
@@ -136,9 +136,19 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     super.dispose();
   }
 
-  void _handleTap() {
+  /// current expansion state
+  bool get isExpanded => _isExpanded;
+
+  /// Change expansion state.
+  /// If this method is called with state equal to current,
+  /// it quietly does nothing.
+  ///
+  /// [ExpansionTile.onExpansionChanged] is called
+  set isExpanded(bool state) {
+    if (_isExpanded == state)
+      return;
     setState(() {
-      _isExpanded = !_isExpanded;
+      _isExpanded = state;
       if (_isExpanded) {
         _controller.forward();
       } else {
@@ -154,6 +164,10 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     });
     if (widget.onExpansionChanged != null)
       widget.onExpansionChanged(_isExpanded);
+  }
+
+  void _handleTap() {
+    isExpanded = !isExpanded;
   }
 
   Widget _buildChildren(BuildContext context, Widget child) {
