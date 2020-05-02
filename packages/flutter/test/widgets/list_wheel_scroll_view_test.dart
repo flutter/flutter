@@ -651,7 +651,7 @@ void main() {
     });
 
     testWidgets('Scrolling, diameterRatio, perspective all changes matrix', (WidgetTester tester) async {
-      final ScrollController controller = ScrollController(initialScrollOffset: 200.0);
+      final ScrollController controller = ScrollController();
 
       await tester.pumpWidget(
         Directionality(
@@ -670,6 +670,8 @@ void main() {
           ),
         ),
       );
+
+      controller.jumpTo(200.0);
 
       final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent as RenderListWheelViewport;
       expect(viewport, paints..transform(
@@ -770,8 +772,7 @@ void main() {
     });
 
     testWidgets('offAxisFraction, magnification changes matrix', (WidgetTester tester) async {
-      final ScrollController controller = ScrollController(
-          initialScrollOffset: 200.0);
+      final ScrollController controller = ScrollController();
 
       await tester.pumpWidget(
         Directionality(
@@ -791,6 +792,8 @@ void main() {
           ),
         ),
       );
+
+      controller.jumpTo(200.0);
 
       final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent as RenderListWheelViewport;
       expect(viewport, paints
