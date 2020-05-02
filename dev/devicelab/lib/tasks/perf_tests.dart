@@ -473,6 +473,8 @@ class CompileTest {
           metrics.addAll(await getSizesFromApk(apkPath));
         break;
       case DeviceOperatingSystem.fuchsia:
+      case DeviceOperatingSystem.macOS:
+      case DeviceOperatingSystem.web:
         throw Exception('Unsupported option for Fuchsia devices');
     }
 
@@ -497,6 +499,8 @@ class CompileTest {
         options.add('--target-platform=android-arm');
         break;
       case DeviceOperatingSystem.fuchsia:
+      case DeviceOperatingSystem.macOS:
+      case DeviceOperatingSystem.web:
         throw Exception('Unsupported option for Fuchsia devices');
     }
     watch.start();
