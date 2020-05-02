@@ -2677,11 +2677,11 @@ class Offstage extends SingleChildRenderObjectWidget {
   _OffstageElement createElement() => _OffstageElement(this);
 }
 
-class _OffstageElement extends SingleChildRenderObjectElement {
+class _OffstageElement extends SingleChildRenderObjectElement<Offstage> {
   _OffstageElement(Offstage widget) : super(widget);
 
   @override
-  Offstage get widget => super.widget as Offstage;
+  Offstage get widget => super.widget;
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {

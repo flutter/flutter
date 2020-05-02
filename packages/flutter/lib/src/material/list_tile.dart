@@ -1007,14 +1007,14 @@ class _ListTile extends RenderObjectWidget {
   }
 }
 
-class _ListTileElement extends RenderObjectElement {
+class _ListTileElement extends RenderObjectElement<_ListTile> {
   _ListTileElement(_ListTile widget) : super(widget);
 
   final Map<_ListTileSlot, Element> slotToChild = <_ListTileSlot, Element>{};
   final Map<Element, _ListTileSlot> childToSlot = <Element, _ListTileSlot>{};
 
   @override
-  _ListTile get widget => super.widget as _ListTile;
+  _ListTile get widget => super.widget;
 
   @override
   _RenderListTile get renderObject => super.renderObject as _RenderListTile;

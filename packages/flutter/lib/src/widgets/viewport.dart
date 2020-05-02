@@ -181,12 +181,12 @@ class Viewport extends MultiChildRenderObjectWidget {
   }
 }
 
-class _ViewportElement extends MultiChildRenderObjectElement {
+class _ViewportElement extends MultiChildRenderObjectElement<Viewport> {
   /// Creates an element that uses the given widget as its configuration.
   _ViewportElement(Viewport widget) : super(widget);
 
   @override
-  Viewport get widget => super.widget as Viewport;
+  Viewport get widget => super.widget;
 
   @override
   RenderViewport get renderObject => super.renderObject as RenderViewport;
@@ -198,7 +198,7 @@ class _ViewportElement extends MultiChildRenderObjectElement {
   }
 
   @override
-  void update(MultiChildRenderObjectWidget newWidget) {
+  void update(Viewport newWidget) {
     super.update(newWidget);
     _updateCenter();
   }

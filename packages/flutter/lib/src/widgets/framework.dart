@@ -2875,11 +2875,11 @@ class BuildOwner {
 ///    element.
 ///  * At this point, the element is considered "defunct" and will not be
 ///    incorporated into the tree in the future.
-abstract class Element extends DiagnosticableTree implements BuildContext {
+abstract class Element<T extends Widget> extends DiagnosticableTree implements BuildContext {
   /// Creates an element that uses the given widget as its configuration.
   ///
   /// Typically called by an override of [Widget.createElement].
-  Element(Widget widget)
+  Element(T widget)
     : assert(widget != null),
       _widget = widget;
 
@@ -2950,8 +2950,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// The configuration for this element.
   @override
-  Widget get widget => _widget;
-  Widget _widget;
+  T get widget => _widget;
+  T _widget;
 
   /// The object that manages the lifecycle of this element.
   @override
@@ -3277,7 +3277,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// This function is called only during the "active" lifecycle state.
   @mustCallSuper
-  void update(covariant Widget newWidget) {
+  void update(T newWidget) {
     // This code is hot when hot reloading, so we try to
     // only call _AssertionError._evaluateAssertion once.
     assert(_debugLifecycleState == _ElementLifecycle.active
@@ -4462,9 +4462,9 @@ typedef ControlsWidgetBuilder = Widget Function(BuildContext context, { VoidCall
 /// [RenderObject]s indirectly by creating other [Element]s.
 ///
 /// Contrast with [RenderObjectElement].
-abstract class ComponentElement extends Element {
+abstract class ComponentElement<T extends Widget> extends Element<T> {
   /// Creates an element that uses the given widget as its configuration.
-  ComponentElement(Widget widget) : super(widget);
+  ComponentElement(T widget) : super(widget);
 
   Element _child;
 
@@ -4569,18 +4569,18 @@ abstract class ComponentElement extends Element {
 }
 
 /// An [Element] that uses a [StatelessWidget] as its configuration.
-class StatelessElement extends ComponentElement {
+class StatelessElement<T extends StatelessWidget> extends ComponentElement<T> {
   /// Creates an element that uses the given widget as its configuration.
-  StatelessElement(StatelessWidget widget) : super(widget);
+  StatelessElement(T widget) : super(widget);
 
   @override
-  StatelessWidget get widget => super.widget as StatelessWidget;
+  T get widget => super.widget;
 
   @override
   Widget build() => widget.build(this);
 
   @override
-  void update(StatelessWidget newWidget) {
+  void update(T newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     _dirty = true;
@@ -4589,9 +4589,9 @@ class StatelessElement extends ComponentElement {
 }
 
 /// An [Element] that uses a [StatefulWidget] as its configuration.
-class StatefulElement extends ComponentElement {
+class StatefulElement<T extends StatefulWidget> extends ComponentElement<T> {
   /// Creates an element that uses the given widget as its configuration.
-  StatefulElement(StatefulWidget widget)
+  StatefulElement(T widget)
       : _state = widget.createState(),
         super(widget) {
     assert(() {
@@ -4680,7 +4680,7 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  void update(StatefulWidget newWidget) {
+  void update(T newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     final StatefulWidget oldWidget = _state._widget;
@@ -4688,7 +4688,7 @@ class StatefulElement extends ComponentElement {
     // let authors call setState from within didUpdateWidget without triggering
     // asserts.
     _dirty = true;
-    _state._widget = widget as StatefulWidget;
+    _state._widget = widget;
     try {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
       final dynamic debugCheckForReturnedFuture = _state.didUpdateWidget(oldWidget) as dynamic;
@@ -4844,19 +4844,19 @@ class StatefulElement extends ComponentElement {
 }
 
 /// An [Element] that uses a [ProxyWidget] as its configuration.
-abstract class ProxyElement extends ComponentElement {
+abstract class ProxyElement<T extends ProxyWidget> extends ComponentElement<T> {
   /// Initializes fields for subclasses.
-  ProxyElement(ProxyWidget widget) : super(widget);
+  ProxyElement(T widget) : super(widget);
 
   @override
-  ProxyWidget get widget => super.widget as ProxyWidget;
+  T get widget => super.widget;
 
   @override
   Widget build() => widget.child;
 
   @override
-  void update(ProxyWidget newWidget) {
-    final ProxyWidget oldWidget = widget;
+  void update(T newWidget) {
+    final T oldWidget = widget;
     assert(widget != null);
     assert(widget != newWidget);
     super.update(newWidget);
@@ -4886,12 +4886,12 @@ abstract class ProxyElement extends ComponentElement {
 }
 
 /// An [Element] that uses a [ParentDataWidget] as its configuration.
-class ParentDataElement<T extends ParentData> extends ProxyElement {
+class ParentDataElement<T extends ParentData> extends ProxyElement<ParentDataWidget<T>> {
   /// Creates an element that uses the given widget as its configuration.
   ParentDataElement(ParentDataWidget<T> widget) : super(widget);
 
   @override
-  ParentDataWidget<T> get widget => super.widget as ParentDataWidget<T>;
+  ParentDataWidget<T> get widget => super.widget;
 
   void _applyParentData(ParentDataWidget<T> widget) {
     void applyParentDataToChild(Element child) {
@@ -4951,12 +4951,12 @@ class ParentDataElement<T extends ParentData> extends ProxyElement {
 }
 
 /// An [Element] that uses an [InheritedWidget] as its configuration.
-class InheritedElement extends ProxyElement {
+class InheritedElement<T extends InheritedWidget> extends ProxyElement<T> {
   /// Creates an element that uses the given widget as its configuration.
-  InheritedElement(InheritedWidget widget) : super(widget);
+  InheritedElement(T widget) : super(widget);
 
   @override
-  InheritedWidget get widget => super.widget as InheritedWidget;
+  T get widget => super.widget;
 
   final Map<Element, Object> _dependents = HashMap<Element, Object>();
 
@@ -5291,12 +5291,12 @@ class InheritedElement extends ProxyElement {
 /// expose them in its implementation of the [visitChildren] method. This method
 /// is used by many of the framework's internal mechanisms, and so should be
 /// fast. It is also used by the test framework and [debugDumpApp].
-abstract class RenderObjectElement extends Element {
+abstract class RenderObjectElement<T extends RenderObjectWidget> extends Element<T> {
   /// Creates an element that uses the given widget as its configuration.
-  RenderObjectElement(RenderObjectWidget widget) : super(widget);
+  RenderObjectElement(T widget) : super(widget);
 
   @override
-  RenderObjectWidget get widget => super.widget as RenderObjectWidget;
+  T get widget => super.widget;
 
   /// The underlying [RenderObject] for this element.
   @override
@@ -5382,7 +5382,7 @@ abstract class RenderObjectElement extends Element {
   }
 
   @override
-  void update(covariant RenderObjectWidget newWidget) {
+  void update(T newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     assert(() {
@@ -5740,9 +5740,9 @@ abstract class RenderObjectElement extends Element {
 ///
 /// Only root elements may have their owner set explicitly. All other
 /// elements inherit their owner from their parent.
-abstract class RootRenderObjectElement extends RenderObjectElement {
+abstract class RootRenderObjectElement<T extends RenderObjectWidget> extends RenderObjectElement<T> {
   /// Initializes fields for subclasses.
-  RootRenderObjectElement(RenderObjectWidget widget) : super(widget);
+  RootRenderObjectElement(T widget) : super(widget);
 
   /// Set the owner of the element. The owner will be propagated to all the
   /// descendants of this element.
@@ -5806,12 +5806,12 @@ class LeafRenderObjectElement extends RenderObjectElement {
 /// This element subclass can be used for RenderObjectWidgets whose
 /// RenderObjects use the [RenderObjectWithChildMixin] mixin. Such widgets are
 /// expected to inherit from [SingleChildRenderObjectWidget].
-class SingleChildRenderObjectElement extends RenderObjectElement {
+class SingleChildRenderObjectElement<T extends SingleChildRenderObjectWidget> extends RenderObjectElement<T> {
   /// Creates an element that uses the given widget as its configuration.
-  SingleChildRenderObjectElement(SingleChildRenderObjectWidget widget) : super(widget);
+  SingleChildRenderObjectElement(T widget) : super(widget);
 
   @override
-  SingleChildRenderObjectWidget get widget => super.widget as SingleChildRenderObjectWidget;
+  T get widget => super.widget;
 
   Element _child;
 
@@ -5835,7 +5835,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   }
 
   @override
-  void update(SingleChildRenderObjectWidget newWidget) {
+  void update(T newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     _child = updateChild(_child, widget.child, null);
@@ -5877,14 +5877,14 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 ///   [MultiChildRenderObjectElement].
 /// * [RenderObjectElement.updateChildren], which discusses why [IndexedSlot]
 ///   is used for the slots of the children.
-class MultiChildRenderObjectElement extends RenderObjectElement {
+class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> extends RenderObjectElement<T> {
   /// Creates an element that uses the given widget as its configuration.
-  MultiChildRenderObjectElement(MultiChildRenderObjectWidget widget)
+  MultiChildRenderObjectElement(T widget)
     : assert(!debugChildrenHaveDuplicateKeys(widget, widget.children)),
       super(widget);
 
   @override
-  MultiChildRenderObjectWidget get widget => super.widget as MultiChildRenderObjectWidget;
+  T get widget => super.widget;
 
   /// The current list of children of this element.
   ///
@@ -5955,7 +5955,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   }
 
   @override
-  void update(MultiChildRenderObjectWidget newWidget) {
+  void update(T newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     _children = updateChildren(_children, widget.children, forgottenChildren: _forgottenChildren);

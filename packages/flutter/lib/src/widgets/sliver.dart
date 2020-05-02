@@ -1029,18 +1029,18 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 ///
 /// Implements [RenderSliverBoxChildManager], which lets this element manage
 /// the children of subclasses of [RenderSliverMultiBoxAdaptor].
-class SliverMultiBoxAdaptorElement extends RenderObjectElement implements RenderSliverBoxChildManager {
+class SliverMultiBoxAdaptorElement<T extends SliverMultiBoxAdaptorWidget> extends RenderObjectElement<T> implements RenderSliverBoxChildManager {
   /// Creates an element that lazily builds children for the given widget.
-  SliverMultiBoxAdaptorElement(SliverMultiBoxAdaptorWidget widget) : super(widget);
+  SliverMultiBoxAdaptorElement(T widget) : super(widget);
 
   @override
-  SliverMultiBoxAdaptorWidget get widget => super.widget as SliverMultiBoxAdaptorWidget;
+  T get widget => super.widget;
 
   @override
   RenderSliverMultiBoxAdaptor get renderObject => super.renderObject as RenderSliverMultiBoxAdaptor;
 
   @override
-  void update(covariant SliverMultiBoxAdaptorWidget newWidget) {
+  void update(T newWidget) {
     final SliverMultiBoxAdaptorWidget oldWidget = widget;
     super.update(newWidget);
     final SliverChildDelegate newDelegate = newWidget.delegate;
@@ -1538,11 +1538,11 @@ class SliverOffstage extends SingleChildRenderObjectWidget {
   _SliverOffstageElement createElement() => _SliverOffstageElement(this);
 }
 
-class _SliverOffstageElement extends SingleChildRenderObjectElement {
+class _SliverOffstageElement extends SingleChildRenderObjectElement<SliverOffstage> {
   _SliverOffstageElement(SliverOffstage widget) : super(widget);
 
   @override
-  SliverOffstage get widget => super.widget as SliverOffstage;
+  SliverOffstage get widget => super.widget;
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {

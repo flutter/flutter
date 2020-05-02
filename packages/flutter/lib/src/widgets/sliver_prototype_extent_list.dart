@@ -60,11 +60,11 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   _SliverPrototypeExtentListElement createElement() => _SliverPrototypeExtentListElement(this);
 }
 
-class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
+class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement<SliverPrototypeExtentList> {
   _SliverPrototypeExtentListElement(SliverPrototypeExtentList widget) : super(widget);
 
   @override
-  SliverPrototypeExtentList get widget => super.widget as SliverPrototypeExtentList;
+  SliverPrototypeExtentList get widget => super.widget;
 
   @override
   _RenderSliverPrototypeExtentList get renderObject => super.renderObject as _RenderSliverPrototypeExtentList;

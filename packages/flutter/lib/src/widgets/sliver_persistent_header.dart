@@ -172,11 +172,11 @@ class SliverPersistentHeader extends StatelessWidget {
   }
 }
 
-class _SliverPersistentHeaderElement extends RenderObjectElement {
+class _SliverPersistentHeaderElement extends RenderObjectElement<_SliverPersistentHeaderRenderObjectWidget> {
   _SliverPersistentHeaderElement(_SliverPersistentHeaderRenderObjectWidget widget) : super(widget);
 
   @override
-  _SliverPersistentHeaderRenderObjectWidget get widget => super.widget as _SliverPersistentHeaderRenderObjectWidget;
+  _SliverPersistentHeaderRenderObjectWidget get widget => super.widget;
 
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin get renderObject => super.renderObject as _RenderSliverPersistentHeaderForWidgetsMixin;

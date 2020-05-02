@@ -2048,14 +2048,14 @@ enum _ChipSlot {
   deleteIcon,
 }
 
-class _RenderChipElement extends RenderObjectElement {
+class _RenderChipElement  extends RenderObjectElement<_ChipRenderWidget> {
   _RenderChipElement(_ChipRenderWidget chip) : super(chip);
 
   final Map<_ChipSlot, Element> slotToChild = <_ChipSlot, Element>{};
   final Map<Element, _ChipSlot> childToSlot = <Element, _ChipSlot>{};
 
   @override
-  _ChipRenderWidget get widget => super.widget as _ChipRenderWidget;
+  _ChipRenderWidget get widget => super.widget;
 
   @override
   _RenderChip get renderObject => super.renderObject as _RenderChip;

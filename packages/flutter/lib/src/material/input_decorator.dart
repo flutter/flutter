@@ -1517,14 +1517,14 @@ class _RenderDecoration extends RenderBox {
   }
 }
 
-class _RenderDecorationElement extends RenderObjectElement {
+class _RenderDecorationElement extends RenderObjectElement<_Decorator> {
   _RenderDecorationElement(_Decorator widget) : super(widget);
 
   final Map<_DecorationSlot, Element> slotToChild = <_DecorationSlot, Element>{};
   final Map<Element, _DecorationSlot> childToSlot = <Element, _DecorationSlot>{};
 
   @override
-  _Decorator get widget => super.widget as _Decorator;
+  _Decorator get widget => super.widget;
 
   @override
   _RenderDecoration get renderObject => super.renderObject as _RenderDecoration;

@@ -160,13 +160,13 @@ abstract class InheritedNotifier<T extends Listenable> extends InheritedWidget {
   _InheritedNotifierElement<T> createElement() => _InheritedNotifierElement<T>(this);
 }
 
-class _InheritedNotifierElement<T extends Listenable> extends InheritedElement {
+class _InheritedNotifierElement<T extends Listenable> extends InheritedElement<InheritedNotifier<T>> {
   _InheritedNotifierElement(InheritedNotifier<T> widget) : super(widget) {
     widget.notifier?.addListener(_handleUpdate);
   }
 
   @override
-  InheritedNotifier<T> get widget => super.widget as InheritedNotifier<T>;
+  InheritedNotifier<T> get widget => super.widget;
 
   bool _dirty = false;
 

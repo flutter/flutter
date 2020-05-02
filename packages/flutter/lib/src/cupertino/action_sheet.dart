@@ -412,14 +412,14 @@ class _CupertinoAlertRenderWidget extends RenderObjectWidget {
   }
 }
 
-class _CupertinoAlertRenderElement extends RenderObjectElement {
+class _CupertinoAlertRenderElement extends RenderObjectElement<_CupertinoAlertRenderWidget> {
   _CupertinoAlertRenderElement(_CupertinoAlertRenderWidget widget) : super(widget);
 
   Element _contentElement;
   Element _actionsElement;
 
   @override
-  _CupertinoAlertRenderWidget get widget => super.widget as _CupertinoAlertRenderWidget;
+  _CupertinoAlertRenderWidget get widget => super.widget;
 
   @override
   _RenderCupertinoAlert get renderObject => super.renderObject as _RenderCupertinoAlert;
@@ -454,7 +454,7 @@ class _CupertinoAlertRenderElement extends RenderObjectElement {
   }
 
   @override
-  void update(RenderObjectWidget newWidget) {
+  void update(_CupertinoAlertRenderWidget newWidget) {
     super.update(newWidget);
     _contentElement = updateChild(_contentElement,
         widget.contentSection, _AlertSections.contentSection);
