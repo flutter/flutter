@@ -155,6 +155,114 @@ void main() {
     expect(collapsedContainerDecoration.border.bottom.color, _dividerColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
+
+  testWidgets('ExpansionTileState isExpanded setter', (WidgetTester tester) async {
+    final Key topKey = UniqueKey();
+    final GlobalKey<ExpansionTileState> expandedKey = GlobalKey<ExpansionTileState>();
+    final GlobalKey<ExpansionTileState> collapsedKey = GlobalKey<ExpansionTileState>();
+    final GlobalKey<ExpansionTileState> defaultKey = GlobalKey<ExpansionTileState>();
+
+    final Key tileKey = UniqueKey();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        dividerColor: _dividerColor,
+      ),
+      home: Material(
+        child: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              ListTile(title: const Text('Top'), key: topKey),
+              ExpansionTile(
+                key: expandedKey,
+                initiallyExpanded: true,
+                title: const Text('Expanded'),
+                backgroundColor: Colors.red,
+                children: <Widget>[
+                  ListTile(
+                    key: tileKey,
+                    title: const Text('0'),
+                  ),
+                ],
+              ),
+              ExpansionTile(
+                key: collapsedKey,
+                initiallyExpanded: false,
+                title: const Text('Collapsed'),
+                children: <Widget>[
+                  ListTile(
+                    key: tileKey,
+                    title: const Text('0'),
+                  ),
+                ],
+              ),
+              ExpansionTile(
+                key: defaultKey,
+                title: const Text('Default'),
+                children: const <Widget>[
+                  ListTile(title: Text('0')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
+    Container getContainer(Key key) => tester.firstWidget(find.descendant(
+      of: find.byKey(key),
+      matching: find.byType(Container),
+    ));
+
+    expect(getHeight(topKey), getHeight(expandedKey) - getHeight(tileKey) - 2.0);
+    expect(getHeight(topKey), getHeight(collapsedKey) - 2.0);
+    expect(getHeight(topKey), getHeight(defaultKey) - 2.0);
+
+    BoxDecoration expandedContainerDecoration = getContainer(expandedKey).decoration as BoxDecoration;
+    expect(expandedContainerDecoration.color, Colors.red);
+    expect(expandedContainerDecoration.border.top.color, _dividerColor);
+    expect(expandedContainerDecoration.border.bottom.color, _dividerColor);
+
+    BoxDecoration collapsedContainerDecoration = getContainer(collapsedKey).decoration as BoxDecoration;
+    expect(collapsedContainerDecoration.color, Colors.transparent);
+    expect(collapsedContainerDecoration.border.top.color, Colors.transparent);
+    expect(collapsedContainerDecoration.border.bottom.color, Colors.transparent);
+
+    expandedKey.currentState.isExpanded = !expandedKey.currentState.isExpanded;
+    collapsedKey.currentState.isExpanded = !collapsedKey.currentState.isExpanded;
+    defaultKey.currentState.isExpanded = !defaultKey.currentState.isExpanded;
+
+    await tester.pump();
+
+    // Pump to the middle of the animation for expansion.
+    await tester.pump(const Duration(milliseconds: 100));
+    final BoxDecoration collapsingContainerDecoration = getContainer(collapsedKey).decoration as BoxDecoration;
+    expect(collapsingContainerDecoration.color, Colors.transparent);
+    // Opacity should change but color component should remain the same.
+    expect(collapsingContainerDecoration.border.top.color, const Color(0x15333333));
+    expect(collapsingContainerDecoration.border.bottom.color, const Color(0x15333333));
+
+    // Pump all the way to the end now.
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(getHeight(topKey), getHeight(expandedKey) - 2.0);
+    expect(getHeight(topKey), getHeight(collapsedKey) - getHeight(tileKey) - 2.0);
+    expect(getHeight(topKey), getHeight(defaultKey) - getHeight(tileKey) - 2.0);
+
+    // Expanded should be collapsed now.
+    expandedContainerDecoration = getContainer(expandedKey).decoration as BoxDecoration;
+    expect(expandedContainerDecoration.color, Colors.transparent);
+    expect(expandedContainerDecoration.border.top.color, Colors.transparent);
+    expect(expandedContainerDecoration.border.bottom.color, Colors.transparent);
+
+    // Collapsed should be expanded now.
+    collapsedContainerDecoration = getContainer(collapsedKey).decoration as BoxDecoration;
+    expect(collapsedContainerDecoration.color, Colors.transparent);
+    expect(collapsedContainerDecoration.border.top.color, _dividerColor);
+    expect(collapsedContainerDecoration.border.bottom.color, _dividerColor);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
   testWidgets('ListTileTheme', (WidgetTester tester) async {
     final Key expandedTitleKey = UniqueKey();
     final Key collapsedTitleKey = UniqueKey();
