@@ -83,32 +83,17 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (globals.iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[XcodeValidator(xcode: globals.xcode, userMessages: userMessages), cocoapodsValidator]),
       if (webWorkflow.appliesToHostPlatform)
-        GroupedValidator(<DoctorValidator>[
-          ChromeValidator(
-            chromiumLauncher: ChromiumLauncher(
-              browserFinder: findChromeExecutable,
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              operatingSystemUtils: globals.os,
-              platform:  globals.platform,
-              processManager: globals.processManager,
-            ),
-            platform: globals.platform,
+       ChromeValidator(
+          chromiumLauncher: ChromiumLauncher(
+            browserFinder: findChromeExecutable,
+            fileSystem: globals.fs,
+            logger: globals.logger,
+            operatingSystemUtils: globals.os,
+            platform:  globals.platform,
+            processManager: globals.processManager,
           ),
-          EdgeValidator(
-            chromiumLauncher: ChromiumLauncher(
-              browserFinder: findEdgeExecutable,
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              operatingSystemUtils: globals.os,
-              platform:  globals.platform,
-              processManager: globals.processManager,
-            ),
-            platform: globals.platform,
-          ),
-        ],
-        title: 'Browser - Develop for the Web'
-      ),
+          platform: globals.platform,
+        ),
       if (linuxWorkflow.appliesToHostPlatform)
         LinuxDoctorValidator(
           processManager: globals.processManager,
@@ -425,14 +410,11 @@ abstract class DoctorValidator {
 }
 
 /// A validator that runs other [DoctorValidator]s and combines their output
-/// into a single [ValidationResult].
-///
-/// If [title] is not provided, It uses the title of the first validator
+/// into a single [ValidationResult]. It uses the title of the first validator
 /// passed to the constructor and reports the statusInfo of the first validator
 /// that provides one. Other titles and statusInfo strings are discarded.
 class GroupedValidator extends DoctorValidator {
-  GroupedValidator(this.subValidators, {String title})
-    : super(title ?? subValidators[0].title);
+  GroupedValidator(this.subValidators) : super(subValidators[0].title);
 
   final List<DoctorValidator> subValidators;
 
