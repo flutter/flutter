@@ -83,7 +83,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (globals.iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[XcodeValidator(xcode: globals.xcode, userMessages: userMessages), cocoapodsValidator]),
       if (webWorkflow.appliesToHostPlatform)
-       ChromeValidator(
+        ChromeValidator(
           chromiumLauncher: ChromiumLauncher(
             browserFinder: findChromeExecutable,
             fileSystem: globals.fs,
