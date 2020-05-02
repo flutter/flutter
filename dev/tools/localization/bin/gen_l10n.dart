@@ -105,6 +105,16 @@ void main(List<String> arguments) {
       'Note that this flag does not affect other platforms such as mobile or '
       'desktop.',
   );
+  parser.addOption(
+    'build-inputs',
+    help: 'A location where a list of all files read during localization generation '
+      'will be written to',
+  );
+  parser.addOption(
+    'build-outputs',
+    help: 'A location where a list of all files output during localization generation '
+      'will be written to',
+  );
 
   final argslib.ArgResults results = parser.parse(arguments);
   if (results['help'] == true) {
@@ -123,6 +133,8 @@ void main(List<String> arguments) {
   final String preferredSupportedLocaleString = results['preferred-supported-locales'] as String;
   final String headerString = results['header'] as String;
   final String headerFile = results['header-file'] as String;
+  final String buildInputs = results['build-inputs'] as String;
+  final String buildOutputs = results['build-outputs'] as String;
   final bool useDeferredLoading = results['use-deferred-loading'] as bool;
 
   const local.LocalFileSystem fs = local.LocalFileSystem();
@@ -139,11 +151,15 @@ void main(List<String> arguments) {
         preferredSupportedLocaleString: preferredSupportedLocaleString,
         headerString: headerString,
         headerFile: headerFile,
-        useDeferredLoading: useDeferredLoading,
+        useDeferredLoading: useDeferredLoading
       )
       ..loadResources()
       ..writeOutputFile()
-      ..outputUnimplementedMessages(untranslatedMessagesFile);
+      ..outputUnimplementedMessages(untranslatedMessagesFile)
+      ..produceDependencyFiles(
+        buildInputs: buildInputs,
+        buildOutputs: buildOutputs,
+      );
   } on FileSystemException catch (e) {
     exitWithError(e.message);
   } on FormatException catch (e) {

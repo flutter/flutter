@@ -491,6 +491,9 @@ class LocalizationsGenerator {
   /// classes.
   String _generatedLocalizationsFile;
 
+  final List<Uri> _inputs = <Uri>[];
+  final List<Uri> _outputs = <Uri>[];
+
   /// Initializes [inputDirectory], [outputDirectory], [templateArbFile],
   /// [outputFile] and [className].
   ///
@@ -647,7 +650,9 @@ class LocalizationsGenerator {
       header = headerString;
     } else if (headerFile != null) {
       try {
-        header = _fs.file(path.join(inputDirectory.path, headerFile)).readAsStringSync();
+        final File resolvedHeaderFile = _fs.file(path.join(inputDirectory.path, headerFile));
+        _inputs.add(resolvedHeaderFile.absolute.uri);
+        header = resolvedHeaderFile.readAsStringSync();
       } on FileSystemException catch (error) {
         throw L10nException (
           'Failed to read header file: "$headerFile". \n'
@@ -683,6 +688,7 @@ class LocalizationsGenerator {
   // Load _allMessages from templateArbFile and _allBundles from all of the ARB
   // files in inputDirectory. Also initialized: supportedLocales.
   void loadResources() {
+    _inputs.add(templateArbFile.absolute.uri);
     final AppResourceBundle templateBundle = AppResourceBundle(templateArbFile);
     _templateArbLocale = templateBundle.locale;
     _allMessages = templateBundle.resourceIds.map((String id) => Message(templateBundle.resources, id));
@@ -912,9 +918,11 @@ class LocalizationsGenerator {
 
     // Generate the required files for localizations.
     _languageFileMap.forEach((File file, String contents) {
+      _outputs.add(file.absolute.uri);
       file.writeAsStringSync(contents);
     });
     outputFile.writeAsStringSync(_generatedLocalizationsFile);
+    _outputs.add(outputFile.absolute.uri);
   }
 
   void outputUnimplementedMessages(String untranslatedMessagesFile) {
@@ -929,6 +937,22 @@ class LocalizationsGenerator {
       );
     } else {
       _writeUnimplementedMessagesFile(untranslatedMessagesFile);
+    }
+  }
+
+  void produceDependencyFiles({
+    @required String buildInputs,
+    @required String buildOutputs,
+  }) {
+    if (buildInputs != null && buildInputs.isNotEmpty) {
+      _fs.file(buildInputs)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_inputs.join('\n'));
+    }
+    if (buildOutputs != null && buildOutputs.isNotEmpty) {
+      _fs.file(buildOutputs)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_outputs.join('\n'));
     }
   }
 
@@ -963,5 +987,6 @@ class LocalizationsGenerator {
 
     resultingFile += '}\n';
     unimplementedMessageTranslationsFile.writeAsStringSync(resultingFile);
+    _outputs.add(unimplementedMessageTranslationsFile.absolute.uri);
   }
 }
