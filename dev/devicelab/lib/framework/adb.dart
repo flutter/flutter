@@ -27,7 +27,7 @@ String getArtifactPath() {
 DeviceDiscovery get devices => DeviceDiscovery();
 
 /// Device operating system the test is configured to test.
-enum DeviceOperatingSystem { android, ios, fuchsia, }
+enum DeviceOperatingSystem { android, ios, fuchsia }
 
 /// Device OS to test on.
 DeviceOperatingSystem deviceOperatingSystem = DeviceOperatingSystem.android;
