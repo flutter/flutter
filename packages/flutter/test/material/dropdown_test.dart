@@ -36,6 +36,7 @@ Widget buildDropdown({
     String value = 'two',
     ValueChanged<String> onChanged,
     VoidCallback onTap,
+    VoidCallback onClosed,
     Widget icon,
     Color iconDisabledColor,
     Color iconEnabledColor,
@@ -99,6 +100,7 @@ Widget buildDropdown({
     disabledHint: disabledHint,
     onChanged: onChanged,
     onTap: onTap,
+    onClosed: onClosed,
     icon: icon,
     iconSize: iconSize,
     iconDisabledColor: iconDisabledColor,
@@ -121,6 +123,7 @@ Widget buildFrame({
   String value = 'two',
   ValueChanged<String> onChanged,
   VoidCallback onTap,
+  VoidCallback onClosed,
   Widget icon,
   Color iconDisabledColor,
   Color iconEnabledColor,
@@ -157,6 +160,7 @@ Widget buildFrame({
             disabledHint: disabledHint,
             onChanged: onChanged,
             onTap: onTap,
+            onClosed: onClosed,
             icon: icon,
             iconSize: iconSize,
             iconDisabledColor: iconDisabledColor,
@@ -2603,5 +2607,50 @@ void main() {
     // though it was already selected.
     expect(value, equals('two'));
     expect(menuItemTapCounters, <int>[0, 2, 1, 0]);
+  });
+
+  testWidgets('DropdownButton onClosed callback is called when defined', (WidgetTester tester) async {
+    int dropdownClosedCounter = 0;
+    String value = 'one';
+
+    void onChanged(String newValue) { value = newValue; }
+    void onClosed() {dropdownClosedCounter += 1;}
+
+    Widget build() => buildFrame(
+      value: value,
+      onChanged: onChanged,
+      onClosed: onClosed,
+    );
+    await tester.pumpWidget(build());
+
+    expect(dropdownClosedCounter, 0);
+
+    // Tap dropdown button.
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();
+
+    expect(value, equals('one'));
+    expect(dropdownClosedCounter, 0); //Should not update yet
+
+    // Tap dropdown menu item.
+    await tester.tap(find.text('three').last);
+    await tester.pumpAndSettle();
+
+    expect(value, equals('three'));
+    expect(dropdownClosedCounter, 1); //Should update to indicate closed
+
+    // Tap dropdown button again.
+    await tester.tap(find.text('three'));
+    await tester.pumpAndSettle();
+
+    expect(value, equals('three'));
+    expect(dropdownClosedCounter, 1); //Should not change yet
+
+    // Tap dropdown menu item.
+    await tester.tap(find.text('two').last);
+    await tester.pumpAndSettle();
+
+    expect(value, equals('two'));
+    expect(dropdownClosedCounter, 2); //Should change
   });
 }

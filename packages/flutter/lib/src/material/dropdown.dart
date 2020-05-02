@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:html';
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
@@ -813,6 +814,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.disabledHint,
     @required this.onChanged,
     this.onTap,
+    this.onClosed,
     this.elevation = 8,
     this.style,
     this.underline,
@@ -894,6 +896,10 @@ class DropdownButton<T> extends StatefulWidget {
   ///
   /// The callback will not be invoked if the dropdown button is disabled.
   final VoidCallback onTap;
+
+  ///Called when the dropdown is closed, regardless of if a selection was made.
+  ///Called after [onChanged] in the event that a selection was made.
+  final VoidCallback onClosed;
 
   /// A builder to customize the dropdown buttons corresponding to the
   /// [DropdownMenuItem]s in [items].
@@ -1220,10 +1226,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     Navigator.push(context, _dropdownRoute).then<void>((_DropdownRouteResult<T> newValue) {
       _removeDropdownRoute();
-      if (!mounted || newValue == null)
+      if (!mounted)
         return;
-      if (widget.onChanged != null)
+      if (widget.onChanged != null && newValue != null)
         widget.onChanged(newValue.result);
+      if(widget.onClosed != null)
+        widget.onClosed(); 
     });
 
     if (widget.onTap != null) {
@@ -1450,6 +1458,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     Widget disabledHint,
     @required this.onChanged,
     VoidCallback onTap,
+    VoidCallback onClosed,
     int elevation = 8,
     TextStyle style,
     Widget icon,
@@ -1514,6 +1523,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                      disabledHint: disabledHint,
                      onChanged: onChanged == null ? null : state.didChange,
                      onTap: onTap,
+                     onClosed: onClosed,
                      elevation: elevation,
                      style: style,
                      icon: icon,
