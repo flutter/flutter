@@ -99,8 +99,8 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// It does not specifies how the children are positioned inside the [Column].
   /// The width of the `Column` is the maximum width of the children. If the
-  /// children have same width, then alignment will align all the children to
-  /// specified value of [Alignment].
+  /// children have same width, then the `alignment` property will properly align
+  /// all the children to specified value of [Alignment].
   ///
   /// When the width of children is different, then [crossAxisAlignment] property
   /// can be used with `alignment` property to place the children along the cross axis.
