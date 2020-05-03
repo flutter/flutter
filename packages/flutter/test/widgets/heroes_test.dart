@@ -1313,6 +1313,121 @@ Future<void> main() async {
     expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0, 50.0));
   });
 
+  testWidgets('Hero createRectTween with chained Tween', (WidgetTester tester) async {
+    const Curve heroCurve = Curves.fastOutSlowIn;
+    const Curve curve = Curves.easeInOut;
+    Tween<Rect> createRectTween(Rect begin, Rect end) {
+      return MaterialRectCenterArcTween(begin: begin, end: end)
+          .chain(CurveTween(curve: curve));
+    }
+
+    final Map<String, WidgetBuilder> createRectTweenHeroRoutes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Hero(
+              tag: 'a',
+              createRectTween: createRectTween,
+              child: Container(height: 100.0, width: 100.0, key: firstKey),
+            ),
+            FlatButton(
+              child: const Text('two'),
+              onPressed: () { Navigator.pushNamed(context, '/two'); },
+            ),
+          ],
+        ),
+      ),
+      '/two': (BuildContext context) => Material(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(
+              height: 200.0,
+              child: FlatButton(
+                child: const Text('pop'),
+                onPressed: () { Navigator.pop(context); },
+              ),
+            ),
+            Hero(
+              tag: 'a',
+              createRectTween: createRectTween,
+              child: Container(height: 200.0, width: 100.0, key: secondKey),
+            ),
+          ],
+        ),
+      ),
+    };
+
+    await tester.pumpWidget(MaterialApp(routes: createRectTweenHeroRoutes));
+    expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0, 50.0));
+
+    const double epsilon = 0.001;
+    const Duration duration = Duration(milliseconds: 300);
+    final Animatable<Offset> pushCenterTween = MaterialPointArcTween(
+      begin: const Offset(50.0, 50.0),
+      end: const Offset(400.0, 300.0),
+    ).chain(CurveTween(curve: curve)).chain(CurveTween(curve: heroCurve));
+
+    await tester.tap(find.text('two'));
+    await tester.pump(); // begin navigation
+
+    // Verify that the center of the secondKey Hero flies along the
+    // pushCenterTween arc for the push /two flight.
+
+    await tester.pump();
+    expect(tester.getCenter(find.byKey(secondKey)), const Offset(50.0, 50.0));
+
+    await tester.pump(duration * 0.25);
+    Offset actualHeroCenter = tester.getCenter(find.byKey(secondKey));
+    Offset predictedHeroCenter = pushCenterTween.transform(0.25);
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
+
+    await tester.pump(duration * 0.25);
+    actualHeroCenter = tester.getCenter(find.byKey(secondKey));
+    predictedHeroCenter = pushCenterTween.transform(0.5);
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
+
+    await tester.pump(duration * 0.25);
+    actualHeroCenter = tester.getCenter(find.byKey(secondKey));
+    predictedHeroCenter = pushCenterTween.transform(0.75);
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
+
+    await tester.pumpAndSettle();
+    expect(tester.getCenter(find.byKey(secondKey)), const Offset(400.0, 300.0));
+
+    // Verify that the center of the firstKey Hero flies along the
+    // pushCenterTween arc for the pop /two flight.
+
+    await tester.tap(find.text('pop'));
+    await tester.pump(); // begin navigation
+
+    final Animatable<Offset> popCenterTween = MaterialPointArcTween(
+      begin: const Offset(400.0, 300.0),
+      end: const Offset(50.0, 50.0),
+    ).chain(CurveTween(curve: curve)).chain(CurveTween(curve: heroCurve));
+    await tester.pump();
+    expect(tester.getCenter(find.byKey(firstKey)), const Offset(400.0, 300.0));
+
+    await tester.pump(duration * 0.25);
+    actualHeroCenter = tester.getCenter(find.byKey(firstKey));
+    predictedHeroCenter = popCenterTween.transform(0.25);
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
+
+    await tester.pump(duration * 0.25);
+    actualHeroCenter = tester.getCenter(find.byKey(firstKey));
+    predictedHeroCenter = popCenterTween.transform(0.5);
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
+
+    await tester.pump(duration * 0.25);
+    actualHeroCenter = tester.getCenter(find.byKey(firstKey));
+    predictedHeroCenter = popCenterTween.transform(0.75);
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
+
+    await tester.pumpAndSettle();
+    expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0, 50.0));
+  });
+
   testWidgets('Hero createRectTween for Navigator that is not full screen', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/25272
 

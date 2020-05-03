@@ -11,12 +11,21 @@ void main() {
   test('Can chain tweens', () {
     final Tween<double> tween = Tween<double>(begin: 0.30, end: 0.50);
     expect(tween, hasOneLineDescription);
-    final Animatable<double> chain = tween.chain(Tween<double>(begin: 0.50, end: 1.0));
+    final Tween<double> chain = tween.chain(Tween<double>(begin: 0.50, end: 1.0));
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
     );
     expect(chain.evaluate(controller), 0.40);
+    expect(chain.begin, 0.40);
+    expect(chain.end, 0.50);
     expect(chain, hasOneLineDescription);
+  });
+
+  test('Chained Tween setters throws', () {
+    final Tween<double> tween = Tween<double>(begin: 0.30, end: 0.50);
+    final Tween<double> chain = tween.chain(Tween<double>(begin: 0.50, end: 1.0));
+    expect(() => chain.begin = 0, throwsUnsupportedError);
+    expect(() => chain.end = 1, throwsUnsupportedError);
   });
 
   test('Can animate tweens', () {
