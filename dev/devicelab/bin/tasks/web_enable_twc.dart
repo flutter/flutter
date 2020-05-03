@@ -9,5 +9,5 @@ import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart'
 
 /// Verify that twc can be enabled/disabled on macOS
 Future<void> main() async {
-  await task(TrackWidgetCreationEnabledTask('macos').task);
+  await task(TrackWidgetCreationEnabledTask('chrome').task);
 }

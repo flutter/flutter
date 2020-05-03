@@ -271,7 +271,10 @@ class KernelCompiler {
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
       ...buildModeOptions(buildMode),
-      if (trackWidgetCreation) '--track-widget-creation',
+      if (trackWidgetCreation)
+        '--track-widget-creation'
+      else
+        '--no-track-widget-creation',
       if (!linkPlatformKernelIn) '--no-link-platform',
       if (aot) ...<String>[
         '--aot',
@@ -673,7 +676,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
         packagesPath,
       ],
       ...buildModeOptions(buildMode),
-      if (trackWidgetCreation) '--track-widget-creation',
+      if (trackWidgetCreation)
+        '--track-widget-creation'
+      else
+        '--no-track-widget-creation',
       if (fileSystemRoots != null)
         for (final String root in fileSystemRoots) ...<String>[
           '--filesystem-root',

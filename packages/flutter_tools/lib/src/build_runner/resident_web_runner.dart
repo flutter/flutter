@@ -635,7 +635,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
       pathToReload: getReloadPath(fullRestart: fullRestart),
       invalidatedFiles: invalidationResult.uris,
       packageConfig: invalidationResult.packageConfig,
-      trackWidgetCreation: true,
+      trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
     );
     devFSStatus.stop();
     globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
@@ -713,6 +713,11 @@ class _ResidentWebRunner extends ResidentWebRunner {
       }
     }
     if (websocketUri != null) {
+      if (debuggingOptions.vmserviceOutFile != null) {
+        globals.fs.file(debuggingOptions.vmserviceOutFile)
+          ..createSync(recursive: true)
+          ..writeAsStringSync(websocketUri.toString());
+      }
       globals.printStatus('Debug service listening on $websocketUri');
     }
     appStartedCompleter?.complete();

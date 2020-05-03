@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
+import 'dart:developer';
 import 'package:flutter/widgets.dart';
 
 void main() {
@@ -13,6 +12,7 @@ void main() {
 
   // If track-widget-creation is enabled, the set will have 2 members.
   // Otherwise is will only have one.
-  print('SET WIDGETS: ${widgets.length}');
-  exit(0);
+  registerExtension('ext.devicelab.test', (String method, Map<String, Object> params) async {
+    return ServiceExtensionResponse.result('{"result":${widgets.length}}');
+  });
 }
