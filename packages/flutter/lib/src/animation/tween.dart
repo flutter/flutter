@@ -353,7 +353,7 @@ class FlippedTween extends Tween<double> {
   set end(double _end) => parent.end = _end;
 
   @override
-  double lerp(double t) => parent.end - parent.lerp(1.0 - t) + parent.begin;
+  double lerp(double t) => end - parent.lerp(1.0 - t) + begin;
 
   @override
   String toString() => 'FlippedTween(parent: $parent)';
