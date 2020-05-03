@@ -105,7 +105,7 @@ void main() {
 
   test('ReverseTween', () {
     final Tween<double> tween = Tween<double>(begin: 0.30, end: 0.50);
-    final Tween<double> reverseTween = ReverseTween(tween);
+    final Tween<double> reverseTween = ReverseTween<double>(tween);
     expect(tween, hasOneLineDescription);
     expect(reverseTween, hasOneLineDescription);
 
@@ -153,7 +153,7 @@ void main() {
   });
 
   test('CurveTween', () {
-    final Curve curve = Curves.bounceIn;
+    const Curve curve = Curves.bounceIn;
     final Tween<double> tween = CurveTween(curve: curve);
     expect(tween.begin, curve.transform(0));
     expect(tween.lerp(0.05), curve.transform(0.05));
