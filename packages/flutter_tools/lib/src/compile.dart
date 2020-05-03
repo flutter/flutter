@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:usage/uuid/uuid.dart'
+import 'package:usage/uuid/uuid.dart';
 
 import 'artifacts.dart';
 import 'base/common.dart';
@@ -520,8 +520,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   DefaultResidentCompiler(
     String sdkRoot, {
     @required this.buildMode,
-    this.
-      = true,
+    this.trackWidgetCreation = true,
     this.packagesPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
