@@ -170,4 +170,31 @@ void main() {
     expect(() => tween.begin = 0, throwsUnsupportedError);
     expect(() => tween.end = 1, throwsUnsupportedError);
   });
+
+  test('Flipped TweenSequence', () {
+    final Tween<double> tween = TweenSequence<double>(
+      <TweenSequenceItem<double>>[
+        TweenSequenceItem<double>(
+          tween: Tween<double>(begin: 5.0, end: 10.0),
+          weight: 4.0,
+        ),
+        TweenSequenceItem<double>(
+          tween: ConstantTween<double>(10.0),
+          weight: 2.0,
+        ),
+        TweenSequenceItem<double>(
+          tween: Tween<double>(begin: 10.0, end: 5.0),
+          weight: 4.0,
+        ),
+      ],
+    );
+    final FlippedTween flippedTween = FlippedTween(tween);
+
+    expect(tween.lerp(0.0), 10 - flippedTween.lerp(1.0));
+    expect(tween.lerp(0.2), 10 - flippedTween.lerp(0.8));
+    expect(tween.lerp(0.4), 10 - flippedTween.lerp(0.6));
+    expect(tween.lerp(0.6), 10 - flippedTween.lerp(0.4));
+    expect(tween.lerp(0.8), 10 - flippedTween.lerp(0.2));
+    expect(tween.lerp(1.0), 10 - flippedTween.lerp(0.0));
+  });
 }
