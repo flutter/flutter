@@ -280,7 +280,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
   String toString() => '${objectRuntimeType(this, 'Animatable')}($begin \u2192 $end)';
 }
 
-class _ChainedTweenEvaluation<T> extends Tween<T> {
+class _ChainedTweenEvaluation<T> extends Tween<T> with TweenWithoutSettersMixin<T> {
   _ChainedTweenEvaluation(this._parent, this._evaluatable)
       : super(
       begin: _evaluatable.transform(_parent.transform(0.0)),
@@ -288,16 +288,6 @@ class _ChainedTweenEvaluation<T> extends Tween<T> {
 
   final Animatable<double> _parent;
   final Tween<T> _evaluatable;
-
-  @override
-  set begin(T _begin) {
-    throw UnsupportedError('Cannot change the begin of a chained tween');
-  }
-
-  @override
-  set end(T _end) {
-    throw UnsupportedError('Cannot change the end of a chained tween');
-  }
 
   @override
   T lerp(double t) {
@@ -509,4 +499,17 @@ class CurveTween extends Animatable<double> {
 
   @override
   String toString() => '${objectRuntimeType(this, 'CurveTween')}(curve: $curve)';
+}
+
+
+mixin TweenWithoutSettersMixin<T> on Tween<T> {
+  @override
+  set begin(T _begin) {
+    throw UnsupportedError('Cannot change the begin of a tween $this');
+  }
+
+  @override
+  set end(T _end) {
+    throw UnsupportedError('Cannot change the end of a chained tween $this');
+  }
 }
