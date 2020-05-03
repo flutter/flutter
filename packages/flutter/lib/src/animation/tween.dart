@@ -331,6 +331,34 @@ class ReverseTween<T> extends Tween<T> {
   String toString() => 'ReverseTween(parent: $parent)';
 }
 
+/// A [Tween] that evaluates its flipped [parent].
+class FlippedTween extends Tween<double> {
+  /// Construct a [Tween] that evaluates its flipped [parent].
+  FlippedTween(this.parent) : assert(parent != null);
+
+  /// This tween's value is evaluated to a result that flips the tween
+  /// both horizontally and vertically.
+  final Tween<double> parent;
+
+  @override
+  double get begin => parent.begin;
+
+  @override
+  double get end => parent.end;
+
+  @override
+  set begin(double _begin) => parent.begin = _begin;
+
+  @override
+  set end(double _end) => parent.end = _end;
+
+  @override
+  double lerp(double t) => parent.end - parent.lerp(1.0 - t) + parent.begin;
+
+  @override
+  String toString() => 'FlippedTween(parent: $parent)';
+}
+
 /// An interpolation between two colors.
 ///
 /// This class specializes the interpolation of [Tween<Color>] to use
