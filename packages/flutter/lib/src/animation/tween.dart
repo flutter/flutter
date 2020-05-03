@@ -69,7 +69,7 @@ abstract class Animatable<T> {
   /// Returns a new [Animatable] whose value is determined by first evaluating
   /// the given parent and then evaluating this object.
   ///
-  /// This allows [Tween]s to be chained before obtaining an [Animation].
+  /// This allows [Animatable]s to be chained before obtaining an [Animation].
   Animatable<T> chain(Animatable<double> parent) {
     return _ChainedEvaluation<T>(parent, this);
   }
@@ -219,12 +219,16 @@ class Tween<T extends dynamic> extends Animatable<T> {
   ///
   /// See the constructor for details about whether this property may be null
   /// (it varies from subclass to subclass).
+  ///
+  /// setter Throws an [UnsupportedError] if the Tween is chained
   T begin;
 
   /// The value this variable has at the end of the animation.
   ///
   /// See the constructor for details about whether this property may be null
   /// (it varies from subclass to subclass).
+  ///
+  /// setter Throws an [UnsupportedError] if the Tween is chained
   T end;
 
   /// Returns the value this variable has at the given animation clock value.
@@ -260,6 +264,13 @@ class Tween<T extends dynamic> extends Animatable<T> {
     return lerp(t);
   }
 
+  /// Returns a new [Tween] whose value is determined by first evaluating
+  /// the given parent and then evaluating this object.
+  ///
+  /// [begin] and [end] of returned Tween are not modifiable
+  /// and its setters will throw [UnsupportedError]
+  ///
+  /// This allows [Tween]s to be chained before obtaining an [Animation].
   @override
   Tween<T> chain(Animatable<double> parent) {
     return _ChainedTweenEvaluation<T>(parent, this);
