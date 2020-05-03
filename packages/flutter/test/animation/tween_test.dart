@@ -131,7 +131,7 @@ void main() {
   test('FlippedTween', () {
     final Tween<double> curveTween = CurveTween(curve: Curves.bounceIn);
     final Tween<double> curveFlippedTween = FlippedTween(curveTween);
-    final Tween<double> flippedCurveTween = FlippedTween(CurveTween(curve: Curves.bounceIn.flipped));
+    final Tween<double> flippedCurveTween = CurveTween(curve: Curves.bounceIn.flipped);
 
     expect(curveTween, hasOneLineDescription);
     expect(curveFlippedTween, hasOneLineDescription);
