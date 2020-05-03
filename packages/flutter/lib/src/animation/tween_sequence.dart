@@ -43,7 +43,7 @@ import 'tween.dart';
 /// ).animate(myAnimationController);
 /// ```
 /// {@end-tool}
-class TweenSequence<T> extends Animatable<T> {
+class TweenSequence<T> extends Tween<T> with TweenWithoutSettersMixin<T> {
   /// Construct a TweenSequence.
   ///
   /// The [items] parameter must be a list of one or more [TweenSequenceItem]s.
@@ -53,7 +53,11 @@ class TweenSequence<T> extends Animatable<T> {
   /// possible.
   TweenSequence(List<TweenSequenceItem<T>> items)
       : assert(items != null),
-        assert(items.isNotEmpty) {
+        assert(items.isNotEmpty),
+        super(
+        begin: items.first.tween.transform(0.0),
+        end: items.last.tween.transform(1.0),
+      ) {
     _items.addAll(items);
 
     double totalWeight = 0.0;
@@ -79,7 +83,7 @@ class TweenSequence<T> extends Animatable<T> {
   }
 
   @override
-  T transform(double t) {
+  T lerp(double t) {
     assert(t >= 0.0 && t <= 1.0);
     if (t == 1.0)
       return _evaluateAt(t, _items.length - 1);
