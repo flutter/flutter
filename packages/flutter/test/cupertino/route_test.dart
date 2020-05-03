@@ -1302,6 +1302,61 @@ void main() {
     ));
     debugDefaultTargetPlatformOverride = null;
   });
+
+  testWidgets('showCupertinoModalPopup transparent barrier color', (WidgetTester tester) async {
+    await tester.pumpWidget(CupertinoApp(
+      home: CupertinoPageScaffold(
+        child: Builder(builder: (BuildContext context) {
+          return GestureDetector(
+            onTap: () async {
+              await showCupertinoModalPopup<void>(
+                  context: context,
+                  builder: (BuildContext context) => const SizedBox(),
+                  barrierColor: const Color(0x00000000));
+            },
+            child: const Text('tap'),
+          );
+        }),
+      ),
+    ));
+
+    await tester.tap(find.text('tap'));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color,
+      null,
+    );
+  });
+
+  testWidgets('showCupertinoModalPopup custom barrier color', (WidgetTester tester) async {
+    // Color shoule be the same both for Light and Dark theme
+    const Color customColor = Color(0x11223344);
+
+    await tester.pumpWidget(CupertinoApp(
+      home: CupertinoPageScaffold(
+        child: Builder(builder: (BuildContext context) {
+          return GestureDetector(
+            onTap: () async {
+              await showCupertinoModalPopup<void>(
+                  context: context,
+                  builder: (BuildContext context) => const SizedBox(),
+                  barrierColor: customColor);
+            },
+            child: const Text('tap'),
+          );
+        }),
+      ),
+    ));
+
+    await tester.tap(find.text('tap'));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color,
+      customColor,
+    );
+  });
 }
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}

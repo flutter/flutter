@@ -904,7 +904,12 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///
 /// The `useRootNavigator` argument is used to determine whether to push the
 /// popup to the [Navigator] furthest from or nearest to the given `context`. It
-/// is `false` by default.
+/// is `true` by default.
+///
+/// The `barrierColor` argument is used to determine use barrier [Color] to use.
+/// If [Color] passed is fully transparent (it's Alpha channel is equal 0) then
+/// barrier [Color] will be transparent. If `null` passed, then [Color] resolved
+/// from the given `context`.
 ///
 /// The `semanticsDismissible` argument is used to determine whether the
 /// semantics of the modal barrier are included in the semantics tree.
@@ -928,14 +933,22 @@ Future<T> showCupertinoModalPopup<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
   ImageFilter filter,
+  Color barrierColor,
   bool useRootNavigator = true,
   bool semanticsDismissible,
 }) {
   assert(useRootNavigator != null);
+
+  barrierColor = barrierColor ?? CupertinoDynamicColor.resolve(_kModalBarrierColor, context);
+
+  if (barrierColor.alpha == 0) {
+    barrierColor = null;
+  }
+
   return Navigator.of(context, rootNavigator: useRootNavigator).push(
     _CupertinoModalPopupRoute<T>(
-      barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
       barrierLabel: 'Dismiss',
+      barrierColor: barrierColor,
       builder: builder,
       filter: filter,
       semanticsDismissible: semanticsDismissible,
