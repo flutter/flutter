@@ -102,4 +102,29 @@ void main() {
     expect(tween.lerp(0.5), 100.0);
     expect(tween.lerp(1.0), 100.0);
   });
+
+  test('ReverseTween', () {
+    final Tween<double> tween = Tween<double>(begin: 0.30, end: 0.50);
+    final Tween<double> reverseTween = ReverseTween(tween);
+    expect(tween, hasOneLineDescription);
+    expect(reverseTween, hasOneLineDescription);
+
+    expect(reverseTween.lerp(0.25), tween.lerp(0.75));
+
+    reverseTween.begin = 0.7;
+    reverseTween.end = 1.0;
+
+    expect(reverseTween.begin, tween.end);
+    expect(reverseTween.end, tween.begin);
+
+    expect(reverseTween.lerp(0.25), tween.lerp(0.75));
+
+    tween.begin = 0.1;
+    tween.end = 0.2;
+
+    expect(reverseTween.begin, tween.end);
+    expect(reverseTween.end, tween.begin);
+
+    expect(reverseTween.lerp(0.25), tween.lerp(0.75));
+  });
 }
