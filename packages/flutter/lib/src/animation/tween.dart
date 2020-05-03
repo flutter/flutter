@@ -524,12 +524,15 @@ class CurveTween extends Tween<double> with TweenWithoutSettersMixin<double> {
   double get end => 1.0;
 
   @override
+  double lerp(double t) => curve.transform(t);
+
+  @override
   double transform(double t) {
     if (t == 0.0 || t == 1.0) {
       assert(curve.transform(t).round() == t);
       return t;
     }
-    return curve.transform(t);
+    return super.transform(t);
   }
 
   @override
