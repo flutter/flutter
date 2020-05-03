@@ -94,6 +94,8 @@ class ExpansionTile extends StatefulWidget {
   ExpansionTileState createState() => ExpansionTileState();
 }
 
+/// Contains the state for a [ExpansionTile]. This class can be used to
+/// programmatically control expanded state, see the [isExpanded] getter and setter.
 class ExpansionTileState extends State<ExpansionTile> with SingleTickerProviderStateMixin {
   static final Animatable<double> _easeOutTween = CurveTween(curve: Curves.easeOut);
   static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
