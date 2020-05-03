@@ -85,6 +85,8 @@ class TweenSequence<T> extends Tween<T> with TweenWithoutSettersMixin<T> {
   @override
   T lerp(double t) {
     assert(t >= 0.0 && t <= 1.0);
+    if (t == 1.0)
+      return end;
     for (int index = 0; index < _items.length; index++) {
       if (_intervals[index].contains(t))
         return _evaluateAt(t, index);
