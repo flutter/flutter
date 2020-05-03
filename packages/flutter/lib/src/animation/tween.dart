@@ -478,7 +478,7 @@ class ConstantTween<T> extends Tween<T> {
 ///  * [CurvedAnimation], for an alternative way of expressing the sample above.
 ///  * [AnimationController], for examples of creating and disposing of an
 ///    [AnimationController].
-class CurveTween extends Animatable<double> {
+class CurveTween extends Tween<double> with TweenWithoutSettersMixin<double> {
   /// Creates a curve tween.
   ///
   /// The [curve] argument must not be null.
@@ -487,6 +487,12 @@ class CurveTween extends Animatable<double> {
 
   /// The curve to use when transforming the value of the animation.
   Curve curve;
+
+  @override
+  double get begin => 0.0;
+
+  @override
+  double get end => 1.0;
 
   @override
   double transform(double t) {
