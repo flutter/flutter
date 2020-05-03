@@ -128,6 +128,30 @@ void main() {
     expect(reverseTween.lerp(0.25), tween.lerp(0.75));
   });
 
+  test('FlippedTween', () {
+    final Tween<double> curveTween = CurveTween(curve: Curves.bounceIn);
+    final Tween<double> curveFlippedTween = FlippedTween(curveTween);
+    final Tween<double> flippedCurveTween = FlippedTween(CurveTween(curve: Curves.bounceIn.flipped));
+
+    expect(curveTween, hasOneLineDescription);
+    expect(curveFlippedTween, hasOneLineDescription);
+    expect(flippedCurveTween, hasOneLineDescription);
+
+    expect(curveTween.begin, curveFlippedTween.begin);
+    expect(curveTween.end, curveFlippedTween.end);
+
+    expect(curveFlippedTween.begin, flippedCurveTween.begin);
+    expect(curveFlippedTween.lerp(0.05), flippedCurveTween.lerp(0.05));
+    expect(curveFlippedTween.lerp(0.1), flippedCurveTween.lerp(0.1));
+    expect(curveFlippedTween.lerp(0.5), flippedCurveTween.lerp(0.5));
+    expect(curveFlippedTween.lerp(0.9), flippedCurveTween.lerp(0.9));
+    expect(curveFlippedTween.lerp(0.95), flippedCurveTween.lerp(0.95));
+    expect(curveFlippedTween.end, flippedCurveTween.end);
+
+    expect(() => curveFlippedTween.begin = 0.2, throwsUnsupportedError);
+    expect(() => curveFlippedTween.end = 0.3, throwsUnsupportedError);
+  });
+
   test('CurveTween setters throws', () {
     final Tween<double> tween = CurveTween(curve: Curves.bounceIn);
     expect(() => tween.begin = 0, throwsUnsupportedError);
