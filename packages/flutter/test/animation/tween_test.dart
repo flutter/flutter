@@ -152,6 +152,19 @@ void main() {
     expect(() => curveFlippedTween.end = 0.3, throwsUnsupportedError);
   });
 
+  test('CurveTween', () {
+    final Curve curve = Curves.bounceIn;
+    final Tween<double> tween = CurveTween(curve: curve);
+    expect(tween.begin, curve.transform(0));
+    expect(tween.lerp(0.05), curve.transform(0.05));
+    expect(tween.lerp(0.1), curve.transform(0.1));
+    expect(tween.lerp(0.5), curve.transform(0.5));
+    expect(tween.lerp(0.9), curve.transform(0.9));
+    expect(tween.lerp(0.95), curve.transform(0.95));
+    expect(tween.end, curve.transform(1.0));
+
+  });
+
   test('CurveTween setters throws', () {
     final Tween<double> tween = CurveTween(curve: Curves.bounceIn);
     expect(() => tween.begin = 0, throwsUnsupportedError);
