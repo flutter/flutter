@@ -898,6 +898,8 @@ class DropdownButton<T> extends StatefulWidget {
 
   ///Called when the dropdown is closed, regardless of if a selection was made.
   ///Called after [onChanged] in the event that a selection was made.
+  ///
+  ///This callback cannot be invoked if the dropdown button is disabled.
   final VoidCallback onClosed;
 
   /// A builder to customize the dropdown buttons corresponding to the
