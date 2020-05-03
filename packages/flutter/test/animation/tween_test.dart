@@ -127,4 +127,10 @@ void main() {
 
     expect(reverseTween.lerp(0.25), tween.lerp(0.75));
   });
+
+  test('CurveTween setters throws', () {
+    final Tween<double> tween = CurveTween(curve: Curves.bounceIn);
+    expect(() => tween.begin = 0, throwsUnsupportedError);
+    expect(() => tween.end = 1, throwsUnsupportedError);
+  });
 }
