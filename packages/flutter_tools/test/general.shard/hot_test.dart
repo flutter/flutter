@@ -21,6 +21,13 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
+const FakeVmServiceRequest listViews = FakeVmServiceRequest(
+  method: kListViewsMethod,
+  jsonResponse: <String, Object>{
+    'views': <Object>[],
+  }
+);
+
 void main() {
   group('validateReloadReport', () {
     testUsingContext('invalid', () async {
@@ -172,44 +179,18 @@ void main() {
 
     testUsingContext('Does hot restarts when all devices support it', () async {
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          id: '1',
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          }
-        ),
-         const FakeVmServiceRequest(
-          id: '2',
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          }
-        ),
+        listViews,
         FakeVmServiceRequest(
-          id: '3',
           method: 'getVM',
           jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
         ),
+        listViews,
         FakeVmServiceRequest(
-          id: '4',
           method: 'getVM',
           jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
         ),
-        const FakeVmServiceRequest(
-          id: '5',
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          }
-        ),
-        const FakeVmServiceRequest(
-          id: '6',
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          }
-        ),
+        listViews,
+        listViews,
       ]);
       // Setup mocks
       final MockDevice mockDevice = MockDevice();
@@ -258,19 +239,16 @@ void main() {
       // Setup mocks
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
         const FakeVmServiceRequest(
-          id: '1',
           method: kListViewsMethod,
           jsonResponse: <String, Object>{
             'views': <Object>[],
           }
         ),
         FakeVmServiceRequest(
-          id: '2',
           method: 'getVM',
           jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
         ),
         const FakeVmServiceRequest(
-          id: '3',
           method: kListViewsMethod,
           jsonResponse: <String, Object>{
             'views': <Object>[],

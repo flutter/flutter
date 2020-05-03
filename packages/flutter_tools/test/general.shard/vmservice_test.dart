@@ -231,10 +231,10 @@ void main() {
   testWithoutContext('runInView forwards arguments correctly', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(method: 'streamListen', id: '1', args: <String, Object>{
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
           'streamId': 'Isolate'
         }),
-        const FakeVmServiceRequest(method: kRunInViewMethod, id: '2', args: <String, Object>{
+        const FakeVmServiceRequest(method: kRunInViewMethod, args: <String, Object>{
           'viewId': '1234',
           'mainScript': 'main.dart',
           'assetDirectory': 'flutter_assets/',
