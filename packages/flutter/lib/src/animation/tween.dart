@@ -311,30 +311,19 @@ class _ChainedTweenEvaluation<T> extends Tween<T> {
 }
 
 /// A [Tween] that evaluates its [parent] in reverse.
-class ReverseTween<T> extends Tween<T> {
+class ReverseTween<T> extends Tween<T> with TweenWithParentMixin<T> {
   /// Construct a [Tween] that evaluates its [parent] in reverse.
   ReverseTween(this.parent)
-    : assert(parent != null),
-      super(begin: parent.end, end: parent.begin);
+      : assert(parent != null),
+        super(begin: parent.end, end: parent.begin);
 
   /// This tween's value is the same as the parent's value evaluated in reverse.
   ///
   /// This tween's [begin] is the parent's [end] and its [end] is the parent's
   /// [begin]. The [lerp] method returns `parent.lerp(1.0 - t)` and its
   /// [evaluate] method is similar.
+  @override
   final Tween<T> parent;
-
-  @override
-  T get begin => parent.end;
-
-  @override
-  T get end => parent.begin;
-
-  @override
-  set begin(T _begin) => parent.end = _begin;
-
-  @override
-  set end(T _end) => parent.begin = _end;
 
   @override
   T lerp(double t) => parent.lerp(1.0 - t);
@@ -509,4 +498,20 @@ class CurveTween extends Animatable<double> {
 
   @override
   String toString() => '${objectRuntimeType(this, 'CurveTween')}(curve: $curve)';
+}
+
+mixin TweenWithParentMixin<T> on Tween<T> {
+  Tween<T> get parent;
+
+  @override
+  T get begin => parent.end;
+
+  @override
+  T get end => parent.begin;
+
+  @override
+  set begin(T _begin) => parent.end = _begin;
+
+  @override
+  set end(T _end) => parent.begin = _end;
 }
