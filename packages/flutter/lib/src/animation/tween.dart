@@ -261,7 +261,42 @@ class Tween<T extends dynamic> extends Animatable<T> {
   }
 
   @override
+  Tween<T> chain(Animatable<double> parent) {
+    return _ChainedTweenEvaluation<T>(parent, this);
+  }
+
+  @override
   String toString() => '${objectRuntimeType(this, 'Animatable')}($begin \u2192 $end)';
+}
+
+class _ChainedTweenEvaluation<T> extends Tween<T> {
+  _ChainedTweenEvaluation(this._parent, this._evaluatable)
+      : super(
+      begin: _evaluatable.transform(_parent.transform(0.0)),
+      end: _evaluatable.transform(_parent.transform(1.0)));
+
+  final Animatable<double> _parent;
+  final Tween<T> _evaluatable;
+
+  @override
+  set begin(T _begin) {
+    throw UnsupportedError('Cannot change the begin of a chained tween');
+  }
+
+  @override
+  set end(T _end) {
+    throw UnsupportedError('Cannot change the end of a chained tween');
+  }
+
+  @override
+  T lerp(double t) {
+    return _evaluatable.transform(_parent.transform(t));
+  }
+
+  @override
+  String toString() {
+    return '$_parent\u27A9$_evaluatable';
+  }
 }
 
 /// A [Tween] that evaluates its [parent] in reverse.
