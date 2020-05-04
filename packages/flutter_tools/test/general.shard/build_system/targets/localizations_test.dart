@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/localizations.dart';
 
@@ -67,10 +68,26 @@ void main() {
       Uri.parse('arb/bar.arb'),
     ]));
     expect(depfile.outputs.map((File file) => file.uri), unorderedEquals(<Uri>[
-      Uri.parse('file:///untranslated'),
-      Uri.parse('bar'),
+      Uri.parse('arb/bar'),
     ]));
     expect(processManager.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('generateLocalizations is skipped if l10n.yaml does not exist.', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: null,
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+    );
+
+    expect(const GenerateLocalizationsTarget().canSkip(environment), true);
+
+    environment.projectDir.childFile('l10n.yaml').createSync();
+
+    expect(const GenerateLocalizationsTarget().canSkip(environment), false);
   });
 
   testWithoutContext('parseLocalizationsOptions handles valid yaml configuration', () async {

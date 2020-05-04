@@ -118,13 +118,16 @@ class GenerateLocalizationsTarget extends Target {
   List<String> get depfiles => <String>['gen_localizations.d'];
 
   @override
+  bool canSkip(Environment environment) {
+    final File configFile = environment.projectDir.childFile('l10n.yaml');
+    return !configFile.existsSync();
+  }
+
+  @override
   Future<void> build(Environment environment) async {
     final File configFile = environment.projectDir.childFile('l10n.yaml');
+    assert(configFile.existsSync());
 
-    // If the config file does not exist, exit immediately.
-    if (!configFile.existsSync()) {
-      return;
-    }
     final LocalizationOptions options = parseLocalizationsOptions(
       file: configFile,
       logger: globals.logger,
