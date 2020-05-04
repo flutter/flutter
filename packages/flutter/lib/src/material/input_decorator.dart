@@ -3303,8 +3303,6 @@ class InputDecoration {
 
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
-  ///
-  /// Always sets [isCollapsed] to false.
   InputDecoration copyWith({
     Widget icon,
     String labelText,
