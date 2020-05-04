@@ -1065,6 +1065,12 @@ abstract class ResidentRunner {
     _finished = Completer<int>();
     // Listen for service protocol connection to close.
     for (final FlutterDevice device in flutterDevices) {
+      await device.connect(
+        reloadSources: reloadSources,
+        restart: restart,
+        compileExpression: compileExpression,
+        reloadMethod: reloadMethod,
+      );
       // This hooks up callbacks for when the connection stops in the future.
       // We don't want to wait for them. We don't handle errors in those callbacks'
       // futures either because they just print to logger and is not critical.
