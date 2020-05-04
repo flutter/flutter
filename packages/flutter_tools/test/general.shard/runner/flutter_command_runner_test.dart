@@ -131,7 +131,7 @@ void main() {
       }, initializeFlutterRoot: false);
 
       testUsingContext('works if --local-engine is specified and --local-engine-src-path is specified', () async {
-        fs.file(_kDotPackages).writeAsStringSync('\n');
+        // Intentionally do not create a package_config to verify that it is not required.
         fs.directory('$_kArbitraryEngineRoot/src/out/ios_debug').createSync(recursive: true);
         fs.directory('$_kArbitraryEngineRoot/src/out/host_debug').createSync(recursive: true);
 

@@ -152,6 +152,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  android_view_scroll_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of Android views in the platform view layout sample app on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   home_scroll_perf__timeline_summary:
     description: >
       Measures the runtime performance of scrolling the material page in the
@@ -373,12 +379,15 @@ tasks:
   #   required_agent_capabilities: ["linux/android"]
   #   flaky: true
 
+  # TODO(jonahwilliams): marked as flaky to due unreproducible errors
+  # 55875 and 55811
   flutter_attach_test_android:
     description: >
       Tests the `flutter attach` command.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
     timeout_in_minutes: 20
+    flaky: true
 
   named_isolates_test:
     description: >
@@ -749,11 +758,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  new_gallery__transition_perf:
-    description: >
-      Measures the performance of screen transitions in the new Flutter Gallery on Android.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
+# TODO(https://github.com/flutter/flutter/issues/56135)
+#  new_gallery__transition_perf:
+#    description: >
+#      Measures the performance of screen transitions in the new Flutter Gallery on Android.
+#    stage: devicelab
+#    required_agent_capabilities: ["mac/android"]
 
   fast_scroll_large_images__memory:
     description: >
@@ -823,7 +833,6 @@ tasks:
       Checks that the New Flutter Gallery runs successfully on Chrome.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery_v2_web_compile_test:
     description: >
@@ -831,4 +840,3 @@ tasks:
       and the size of the compiled code.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true

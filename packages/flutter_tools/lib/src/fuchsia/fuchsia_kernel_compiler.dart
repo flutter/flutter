@@ -56,28 +56,7 @@ class FuchsiaKernelCompiler {
       '--packages', '$multiRootScheme:///$relativePackagesFile',
       '--output', globals.fs.path.join(outDir, '$appName.dil'),
       '--component-name', appName,
-
-      // AOT/JIT:
-      if (buildInfo.usesAot) ...<String>['--aot', '--tfa']
-      else ...<String>[
-        '--no-link-platform',
-        '--split-output-by-packages',
-        '--manifest', manifestPath
-      ],
-
-      // debug, profile, jit release, release:
-      if (buildInfo.isDebug) '--embed-sources'
-      else '--no-embed-sources',
-
-      if (buildInfo.isProfile) '-Ddart.vm.profile=true',
-      if (buildInfo.mode.isRelease) '-Ddart.vm.release=true',
-      '-Ddart.developer.causal_async_stacks=${buildInfo.isDebug}',
-
-      // Use bytecode and drop the ast in JIT release mode.
-      if (buildInfo.isJitRelease) ...<String>[
-        '--gen-bytecode',
-        '--drop-ast',
-      ],
+      ...getBuildInfoFlags(buildInfo: buildInfo, manifestPath: manifestPath)
     ];
 
     flags += <String>[
@@ -102,5 +81,51 @@ class FuchsiaKernelCompiler {
     if (result != 0) {
       throwToolExit('Build process failed');
     }
+  }
+
+  /// Provide flags that are affected by [BuildInfo]
+  @visibleForTesting
+  static List<String> getBuildInfoFlags({
+    @required BuildInfo buildInfo,
+    @required String manifestPath,
+  }) {
+    return <String>[
+      // AOT/JIT:
+      if (buildInfo.usesAot) ...<String>[
+        '--aot',
+        '--tfa'
+      ] else ...<String>[
+        '--no-link-platform',
+        '--split-output-by-packages',
+        '--manifest',
+        manifestPath
+      ],
+
+      // debug, profile, jit release, release:
+      if (buildInfo.isDebug)
+        '--embed-sources'
+      else
+        '--no-embed-sources',
+
+      if (buildInfo.isProfile) ...<String>[
+        '-Ddart.vm.profile=true',
+        '-Ddart.vm.product=false',
+      ],
+
+      if (buildInfo.mode.isRelease) ...<String>[
+        '-Ddart.vm.profile=false',
+        '-Ddart.vm.product=true',
+      ],
+      '-Ddart.developer.causal_async_stacks=${buildInfo.isDebug}',
+
+      // Use bytecode and drop the ast in JIT release mode.
+      if (buildInfo.isJitRelease) ...<String>[
+        '--gen-bytecode',
+        '--drop-ast',
+      ],
+
+      for (final String dartDefine in buildInfo.dartDefines)
+        '-D$dartDefine',
+    ];
   }
 }

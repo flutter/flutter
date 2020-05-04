@@ -154,7 +154,7 @@ class WebAssetServer implements AssetReader {
         address = (await InternetAddress.lookup(hostname)).first;
       }
       final HttpServer httpServer = await HttpServer.bind(address, port);
-      final PackageConfig packageConfig = await loadPackageConfigOrFail(
+      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         globals.fs.file(globalPackagesPath),
         logger: globals.logger,
       );
@@ -350,7 +350,8 @@ class WebAssetServer implements AssetReader {
 
     // For real files, use a serialized file stat plus path as a revision.
     // This allows us to update between canvaskit and non-canvaskit SDKs.
-    final String etag = file.lastModifiedSync().toIso8601String() + file.path;
+    final String etag = file.lastModifiedSync().toIso8601String()
+      + Uri.encodeComponent(file.path);
     if (ifNoneMatch == etag) {
       return shelf.Response.notModified();
     }

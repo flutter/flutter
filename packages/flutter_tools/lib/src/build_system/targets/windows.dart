@@ -24,7 +24,6 @@ const List<String> _kWindowsArtifacts = <String>[
   'flutter_plugin_registrar.h',
   'flutter_windows.h',
   'icudtl.dat',
-  'cpp_client_wrapper',
 ];
 
 const String _kWindowsDepfile = 'windows_engine_sources.d';
@@ -52,7 +51,19 @@ class UnpackWindows extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final String artifactPath = environment.artifacts.getArtifactPath(Artifact.windowsDesktopPath);
+    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final String engineSourcePath = environment.artifacts
+      .getArtifactPath(
+        Artifact.windowsDesktopPath,
+        platform: TargetPlatform.windows_x64,
+        mode: buildMode,
+      );
+    final String clientSourcePath = environment.artifacts
+      .getArtifactPath(
+        Artifact.windowsCppClientWrapper,
+        platform: TargetPlatform.windows_x64,
+        mode: buildMode,
+      );
     final Directory outputDirectory = environment.fileSystem.directory(
       environment.fileSystem.path.join(
         environment.projectDir.path,
@@ -64,8 +75,9 @@ class UnpackWindows extends Target {
     final Depfile depfile = unpackDesktopArtifacts(
       fileSystem: environment.fileSystem,
       artifacts: _kWindowsArtifacts,
-      artifactPath: artifactPath,
+      engineSourcePath: engineSourcePath,
       outputDirectory: outputDirectory,
+      clientSourcePath: clientSourcePath,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,

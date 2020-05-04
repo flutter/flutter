@@ -351,6 +351,12 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.buildInfo.dartObfuscation) {
     command.add('-Pdart-obfuscation=true');
   }
+  if (androidBuildInfo.buildInfo.bundleSkSLPath != null) {
+    command.add('-Pbundle-sksl-path=${androidBuildInfo.buildInfo.bundleSkSLPath}');
+  }
+  if (androidBuildInfo.buildInfo.performanceMeasurementFile != null) {
+    command.add('-Pperformance-measurement-file=${androidBuildInfo.buildInfo.performanceMeasurementFile}');
+  }
   command.add(assembleTask);
 
   GradleHandledError detectedGradleError;
