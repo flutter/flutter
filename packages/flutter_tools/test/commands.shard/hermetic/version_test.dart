@@ -51,7 +51,7 @@ void main() {
 
     testUsingContext('version switch prompt is accepted', () async {
       when(mockStdio.stdinHasTerminal).thenReturn(true);
-      const String version = '10.0.0';
+      const String version = 'v10.0.0';
       final VersionCommand command = VersionCommand();
       when(globals.terminal.promptForCharInput(<String>['y', 'n'],
         logger: anyNamed('logger'),
@@ -134,33 +134,6 @@ void main() {
       ProcessManager: () => MockProcessManager(),
       Stdio: () => mockStdio,
       AnsiTerminal: () => MockTerminal(),
-      FlutterVersion: () => mockVersion,
-    });
-
-    testUsingContext('version switch, latest commit query fails', () async {
-      const String version = '10.0.0';
-      final VersionCommand command = VersionCommand();
-      await createTestCommandRunner(command).run(<String>[
-        'version',
-        '--no-pub',
-        version,
-      ]);
-      expect(testLogger.errorText, contains('git failed'));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => MockProcessManager(latestCommitFails: true),
-      Stdio: () => mockStdio,
-      FlutterVersion: () => mockVersion,
-    });
-
-    testUsingContext('latest commit is parsable when query fails', () {
-      final FlutterVersion flutterVersion = FlutterVersion();
-      expect(
-        () => DateTime.parse(flutterVersion.frameworkCommitDate),
-        returnsNormally,
-      );
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => MockProcessManager(latestCommitFails: true),
-      Stdio: () => mockStdio,
       FlutterVersion: () => mockVersion,
     });
 
@@ -285,6 +258,7 @@ class MockProcessManager extends Mock implements ProcessManager {
     if (command[0] == 'git' && command[1] == 'checkout') {
       version = (command[2] as String).replaceFirst(RegExp('^v'), '');
     }
+
     return ProcessResult(0, 0, '', '');
   }
 
@@ -307,14 +281,6 @@ class MockProcessManager extends Mock implements ProcessManager {
       if (version.isNotEmpty) {
         return ProcessResult(0, 0, '$version-0-g00000000', '');
       }
-    }
-    final List<String> commitDateCommand = <String>[
-      '-n', '1',
-      '--pretty=format:%ad',
-      '--date=iso',
-    ];
-    if (latestCommitFails && commandStr == FlutterVersion.gitLog(commitDateCommand).join(' ')) {
-      return ProcessResult(0, -9, '', 'git failed');
     }
     return ProcessResult(0, 0, '', '');
   }
