@@ -230,8 +230,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 /// Toolbar configuration for [EditableText].
 ///
 /// Toolbar is a context menu that will show up when user right click or long
-/// press the [EditableText]. It includes several options: cut, copy, paste,
-/// and select all.
+/// press the [EditableText]. It includes several actions by default: cut, copy,
+/// paste, and select all.
 ///
 /// [EditableText] and its derived widgets have their own default [ToolbarOptions].
 /// Create a custom [ToolbarOptions] if you want explicit control over the toolbar
@@ -239,7 +239,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 class ToolbarOptions {
   /// Create a toolbar configuration with given options.
   ///
-  /// All options default to false if they are not explicitly set.
+  /// All boolean options default to false if they are not explicitly set.
   const ToolbarOptions({
     this.copy = false,
     this.cut = false,
@@ -277,6 +277,10 @@ class ToolbarOptions {
   final bool selectAll;
 
   /// The actions that appear in the toolbar.
+  ///
+  /// These actions will appear after cut, copy, paste, and select all in the
+  /// toolbar.  To have actions appear before the standard operations, then
+  /// these actions must be created using [TextSelectionAction] objects.
   ///
   /// Defaults to empty. Must not be null.
   final List<TextSelectionAction> actions;

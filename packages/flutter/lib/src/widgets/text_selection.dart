@@ -29,17 +29,21 @@ export 'package:flutter/services.dart' show TextSelectionDelegate;
 const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
 
 
-/// A class for defining actions that appear in text selection controls toolbar
+/// A class for defining actions that appear in the text selection menu.
 class TextSelectionAction {
   /// Creates a selection action.
+  ///
+  /// [label] and [onPressed] must not be null.
   const TextSelectionAction(this.label, this.onPressed):
         assert(label != null),
         assert(onPressed != null);
 
-  /// The label that appears in the toolbar, typeically returns a [Text] widget
+  /// Creates label that appears in the toolbar.
+  ///
+  /// Typically returns a [Text] widget.
   final WidgetBuilder label;
 
-  /// The callback to call when the label is tapped
+  /// The callback that is called when the label is pressed.
   final void Function(TextSelectionDelegate delegate) onPressed;
 }
 
@@ -62,7 +66,9 @@ abstract class TextSelectionDelegate extends TextEditingDelegate {
   /// Whether select all is enabled, must not be null.
   bool get selectAllEnabled => true;
 
-  /// The actions that appear in the toolbar, must not be null.
+  /// The actions that appear in the toolbar.
+  ///
+  /// Must not be null.
   List<TextSelectionAction> get actions => <TextSelectionAction>[];
 }
 
