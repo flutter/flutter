@@ -768,15 +768,15 @@ class _BuildInstance {
 
       // Check if we can skip via runtime dependencies.
       final bool runtimeSkip = node.target.canSkip(environment);
-      if (!runtimeSkip) {
+      if (runtimeSkip) {
+        logger.printTrace('Skipping target: ${node.target.name}');
+        skipped = true;
+      } else {
         logger.printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
         await node.target.build(environment);
         logger.printTrace('${node.target.name}: Complete');
         node.inputs.addAll(node.target.resolveInputs(environment).sources);
         node.outputs.addAll(node.target.resolveOutputs(environment).sources);
-      } else {
-        logger.printTrace('Skipping target: ${node.target.name}');
-        skipped = true;
       }
 
       // If we were missing the depfile, resolve input files after executing the
