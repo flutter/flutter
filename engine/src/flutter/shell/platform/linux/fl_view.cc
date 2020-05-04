@@ -16,6 +16,7 @@ struct _FlView {
   GtkWidget parent_instance;
 
   FlDartProject* project;
+  FlRendererX11* renderer;
   FlEngine* engine;
   int64_t button_state;
 };
@@ -68,6 +69,13 @@ static gboolean fl_view_send_pointer_button_event(FlView* self,
   return TRUE;
 }
 
+static void fl_view_constructed(GObject* object) {
+  FlView* self = FL_VIEW(object);
+
+  self->renderer = fl_renderer_x11_new();
+  self->engine = fl_engine_new(self->project, FL_RENDERER(self->renderer));
+}
+
 static void fl_view_set_property(GObject* object,
                                  guint prop_id,
                                  const GValue* value,
@@ -105,6 +113,7 @@ static void fl_view_dispose(GObject* object) {
   FlView* self = FL_VIEW(object);
 
   g_clear_object(&self->project);
+  g_clear_object(&self->renderer);
   g_clear_object(&self->engine);
 
   G_OBJECT_CLASS(fl_view_parent_class)->dispose(object);
@@ -139,8 +148,8 @@ static void fl_view_realize(GtkWidget* widget) {
   gtk_widget_set_window(widget, window);
 
   Window xid = gdk_x11_window_get_xid(gtk_widget_get_window(GTK_WIDGET(self)));
-  g_autoptr(FlRendererX11) renderer = fl_renderer_x11_new(xid);
-  self->engine = fl_engine_new(self->project, FL_RENDERER(renderer));
+  fl_renderer_x11_set_xid(self->renderer, xid);
+
   g_autoptr(GError) error = nullptr;
   if (!fl_engine_start(self->engine, &error))
     g_warning("Failed to start Flutter engine: %s", error->message);
@@ -197,6 +206,7 @@ static gboolean fl_view_motion_notify_event(GtkWidget* widget,
 }
 
 static void fl_view_class_init(FlViewClass* klass) {
+  G_OBJECT_CLASS(klass)->constructed = fl_view_constructed;
   G_OBJECT_CLASS(klass)->set_property = fl_view_set_property;
   G_OBJECT_CLASS(klass)->get_property = fl_view_get_property;
   G_OBJECT_CLASS(klass)->dispose = fl_view_dispose;

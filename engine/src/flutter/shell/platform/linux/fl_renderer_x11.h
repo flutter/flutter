@@ -26,13 +26,21 @@ G_DECLARE_FINAL_TYPE(FlRendererX11,
 
 /**
  * fl_renderer_x11_new:
- * @xid: The X window to render to.
  *
  * Create an object that allows Flutter to render to X11 windows.
  *
  * Returns: a #FlRendererX11
  */
-FlRendererX11* fl_renderer_x11_new(Window xid);
+FlRendererX11* fl_renderer_x11_new();
+
+/**
+ * fl_renderer_x11_set_xid:
+ * @renderer: a #FlRendererX11
+ * @xid: The X window being rendered to
+ *
+ * Set the X11 window that is being rendered to.
+ */
+void fl_renderer_x11_set_xid(FlRendererX11* renderer, Window xid);
 
 G_END_DECLS
 

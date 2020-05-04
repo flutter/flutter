@@ -25,9 +25,11 @@ static void fl_renderer_x11_class_init(FlRendererX11Class* klass) {
 
 static void fl_renderer_x11_init(FlRendererX11* self) {}
 
-FlRendererX11* fl_renderer_x11_new(Window xid) {
-  FlRendererX11* self = static_cast<FlRendererX11*>(
-      g_object_new(fl_renderer_x11_get_type(), nullptr));
+FlRendererX11* fl_renderer_x11_new() {
+  return FL_RENDERER_X11(g_object_new(fl_renderer_x11_get_type(), nullptr));
+}
+
+void fl_renderer_x11_set_xid(FlRendererX11* self, Window xid) {
+  g_return_if_fail(FL_IS_RENDERER_X11(self));
   self->xid = xid;
-  return self;
 }
