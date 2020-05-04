@@ -333,7 +333,8 @@ void main() {
     );
 
     await tester.pump(const Duration(milliseconds: 100));
-    expect(scrollableState.position.pixels, greaterThan(0.0));
+    // All steps fit on the screen, so they only valid offset is 0.0.
+    expect(scrollableState.position.pixels, 0.0);
   });
 
   testWidgets('Stepper index test', (WidgetTester tester) async {
