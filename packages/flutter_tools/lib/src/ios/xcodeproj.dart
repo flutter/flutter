@@ -125,7 +125,7 @@ String parsedBuildName({
   @required BuildInfo buildInfo,
 }) {
   final String buildNameToParse = buildInfo?.buildName ?? manifest.buildName;
-  return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse);
+  return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse, globals.logger);
 }
 
 /// Build number parsed and validated from build info and manifest. Used for CFBundleVersion.
@@ -134,14 +134,22 @@ String parsedBuildNumber({
   @required BuildInfo buildInfo,
 }) {
   String buildNumberToParse = buildInfo?.buildNumber ?? manifest.buildNumber;
-  final String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.ios, buildNumberToParse);
+  final String buildNumber = validatedBuildNumberForPlatform(
+    TargetPlatform.ios,
+    buildNumberToParse,
+    globals.logger,
+  );
   if (buildNumber != null && buildNumber.isNotEmpty) {
     return buildNumber;
   }
   // Drop back to parsing build name if build number is not present. Build number is optional in the manifest, but
   // FLUTTER_BUILD_NUMBER is required as the backing value for the required CFBundleVersion.
   buildNumberToParse = buildInfo?.buildName ?? manifest.buildName;
-  return validatedBuildNumberForPlatform(TargetPlatform.ios, buildNumberToParse);
+  return validatedBuildNumberForPlatform(
+    TargetPlatform.ios,
+    buildNumberToParse,
+    globals.logger,
+  );
 }
 
 /// List of lines of build settings. Example: 'FLUTTER_BUILD_DIR=build'
