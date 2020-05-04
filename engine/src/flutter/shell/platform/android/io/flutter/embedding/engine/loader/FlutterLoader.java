@@ -295,8 +295,6 @@ public class FlutterLoader {
 
   /** Extract assets out of the APK that need to be cached as uncompressed files on disk. */
   private void initResources(@NonNull Context applicationContext) {
-    new ResourceCleaner(applicationContext).start();
-
     if (BuildConfig.DEBUG || BuildConfig.JIT_RELEASE) {
       final String dataDirPath = PathUtils.getDataDirectory(applicationContext);
       final String packageName = applicationContext.getPackageName();
