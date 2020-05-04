@@ -304,7 +304,8 @@ void main() {
 
     await drag2.moveTo(const Offset(10.0, 150.0));
     await drag2.up();
-    await tester.pumpAndSettle();
+    final int numPumps = await tester.pumpAndSettle();
+    expect(numPumps, greaterThan(1)); // Animates back in place.
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, 100.0);
     expect(position.pixels, 100.0);
