@@ -797,7 +797,7 @@ class ListTile extends StatelessWidget {
 
     switch (theme.brightness) {
       case Brightness.light:
-        return selected ? theme.primaryColor : Colors.black45;
+        return selected ? theme.primaryColor : null; // null - use current icon theme color
       case Brightness.dark:
         return selected ? theme.accentColor : null; // null - use current icon theme color
     }
