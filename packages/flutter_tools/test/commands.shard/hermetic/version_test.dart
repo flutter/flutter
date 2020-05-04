@@ -71,7 +71,7 @@ void main() {
       FlutterVersion: () => mockVersion,
     });
 
-    testUsingContext('dev version switch prompt is accepted', () async {
+    testUsingContext('old dev version switch prompt is accepted', () async {
       when(mockStdio.stdinHasTerminal).thenReturn(true);
       const String version = '30.0.0-dev.0.0';
       final VersionCommand command = VersionCommand();
