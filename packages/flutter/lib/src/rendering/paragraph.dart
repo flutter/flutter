@@ -919,7 +919,7 @@ class RenderParagraph extends RenderBox
           } else if (recognizer is LongPressGestureRecognizer) {
             configuration.onLongPress = recognizer.onLongPress;
           } else {
-            assert(false, '${recognizer.runtimeType} not supported.');
+            assert(false, '${recognizer.runtimeType} is not supported.');
           }
         }
         final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty == true)
