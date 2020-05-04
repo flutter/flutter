@@ -730,13 +730,13 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autofillHints}
   final Iterable<String> autofillHints;
 
-  /// Indicates whether [debugCheckHasMaterialLocalizations] can be called from
-  /// the build function.
+  /// Indicates whether [debugCheckHasMaterialLocalizations] can be called
+  /// during build.
   @Deprecated(
     'Set canAssertMaterialLocalizations to `true`. This parameter will be '
-      'removed and was introduced to migrate TextField to assert '
-      'debugCheckHasMaterialLocalizations by default.'
-      'This feature was deprecated after TBD.'
+    'removed and was introduced to migrate TextField to assert '
+    'debugCheckHasMaterialLocalizations by default.'
+    'This feature was deprecated after TBD.'
   )
   final bool canAssertMaterialLocalizations;
 
