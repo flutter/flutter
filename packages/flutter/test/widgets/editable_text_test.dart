@@ -1176,7 +1176,7 @@ void main() {
           focusNode: focusNode,
           readOnly: true,
           toolbarOptions: ToolbarOptions(
-            actions: [
+            actions: <TextSelectionAction>[
               TextSelectionAction(
                 (BuildContext context) => const Text('CUSTOM'),
                 (TextSelectionDelegate delegate) { clicked = true; },
