@@ -33,7 +33,7 @@ class PlatformDispatcher {
   /// called if [PlatformWindow.scheduleFrame] for the window with the provided
   /// ID has been called since the last time this callback was invoked.
   /// {@endtemplate}
-  PlatformWindowBeginFrameCallback onBeginFrame;
+  FrameCallback onBeginFrame;
 
   /// {@template flutter.foundation.PlatformDispatcher.onDrawFrame}
   /// A callback that is invoked for each frame after [onBeginFrame] has
@@ -42,14 +42,14 @@ class PlatformDispatcher {
   /// This can be used to implement a second phase of frame rendering that
   /// happens after any deferred work queued by the [onBeginFrame] phase.
   /// {@endtemplate}
-  PlatformWindowDrawFrameCallback onDrawFrame;
+  VoidCallback onDrawFrame;
 
   /// {@template flutter.foundation.PlatformDispatcher.onPointerDataPacket}
   /// A callback that is invoked when pointer data is available for a window.
   /// {@endtemplate}
   ///
   /// This callback is called when any window receives a pointer event.
-  PlatformWindowPointerDataPacketCallback onPointerDataPacket;
+  PointerDataPacketCallback onPointerDataPacket;
 
   /// {@template flutter.foundation.PlatformDispatcher.onReportTimings}
   /// A callback that is invoked to report the [FrameTiming] of recently
@@ -57,7 +57,7 @@ class PlatformDispatcher {
   /// {@endtemplate}
   ///
   /// This callback is called whenever any window receives timing information.
-  PlatformWindowReportTimingsCallback onReportTimings;
+  TimingsCallback onReportTimings;
 
   /// Opens a new window and returns the window created.
   ///
@@ -598,23 +598,30 @@ class WindowManager with ChangeNotifier {
   }
 
   /// {@macro flutter.foundation.PlatformDispatcher.onBeginFrame}
-  void onBeginFrame(Object windowId, Duration duration) {
-    windows[windowId]?.onBeginFrame(duration);
+  void onBeginFrame(Duration duration) {
+    for (final PlatformWindow window in windows.values) {
+      window.onBeginFrame(duration);
+    }
   }
 
   /// {@macro flutter.foundation.PlatformDispatcher.onDrawFrame}
-  void onDrawFrame(Object windowId) {
-    windows[windowId]?.onDrawFrame();
+  void onDrawFrame() {
+    for (final PlatformWindow window in windows.values) {
+      window.onDrawFrame();
+    }
   }
 
   /// {@macro flutter.foundation.PlatformDispatcher.onPointerDataPacket}
-  void onPointerDataPacket(Object windowId, PointerDataPacket event) {
-    windows[windowId]?.onPointerDataPacket(event);
+  void onPointerDataPacket(PointerDataPacket event) {
+    // determine which window from the event, dispatch a pointer data packet to it.
+    // ...
   }
 
   /// {@macro flutter.foundation.PlatformDispatcher.onReportTimings}
-  void onReportTimings(Object windowId, List<FrameTiming> timings) {
-    windows[windowId]?.onReportTimings(timings);
+  void onReportTimings(List<FrameTiming> timings) {
+    // only report the timings for the relevant window to each window, not all
+    // timings.
+    // ...
   }
 
   final PlatformDispatcher _dispatch;
