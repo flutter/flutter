@@ -282,9 +282,13 @@ class Tween<T extends dynamic> extends Animatable<T> {
 
 class _ChainedTweenEvaluation<T> extends Tween<T> with TweenWithoutSettersMixin<T> {
   _ChainedTweenEvaluation(this._parent, this._evaluatable)
-      : super(
-      begin: _evaluatable.transform(_parent.transform(0.0)),
-      end: _evaluatable.transform(_parent.transform(1.0)));
+      : super();
+
+  @override
+  T get begin => _evaluatable.transform(_parent.transform(0.0));
+
+  @override
+  T get end => _evaluatable.transform(_parent.transform(1.0));
 
   final Animatable<double> _parent;
   final Tween<T> _evaluatable;
