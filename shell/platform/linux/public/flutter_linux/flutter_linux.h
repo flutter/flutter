@@ -7,6 +7,7 @@
 
 #define __FLUTTER_LINUX_INSIDE__
 
+#include <flutter_linux/fl_binary_messenger.h>
 #include <flutter_linux/fl_dart_project.h>
 #include <flutter_linux/fl_engine.h>
 #include <flutter_linux/fl_view.h>
