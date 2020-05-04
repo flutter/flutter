@@ -84,9 +84,11 @@ void main() {
       ..inputs = const <Source>[
         Source.pattern('{PROJECT_DIR}/foo.dart'),
       ];
+    final MockArtifacts artifacts = MockArtifacts();
+    when(artifacts.isLocalEngine).thenReturn(false);
     environment = Environment.test(
       fileSystem.currentDirectory,
-      artifacts: MockArtifacts(),
+      artifacts: artifacts,
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -350,6 +352,32 @@ void main() {
 
     // Second build is up to date due to depfile parse.
     await buildSystem.build(target, environment);
+
+    expect(called, 1);
+  });
+
+  testWithoutContext('Target with depfile dependency will not run twice without '
+    'invalidation in incremental builds', () async {
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+    int called = 0;
+    final TestTarget target = TestTarget((Environment environment) async {
+      environment.buildDir
+        .childFile('example.d')
+        .writeAsStringSync('a.txt: b.txt');
+      fileSystem.file('a.txt').writeAsStringSync('a');
+      called += 1;
+    })
+      ..depfiles = <String>['example.d'];
+    fileSystem.file('b.txt').writeAsStringSync('b');
+
+    final BuildResult result = await buildSystem
+      .buildIncremental(target, environment, null);
+
+    expect(fileSystem.file('a.txt'), exists);
+    expect(called, 1);
+
+    // Second build is up to date due to depfile parse.
+    await buildSystem.buildIncremental(target, environment, result);
 
     expect(called, 1);
   });

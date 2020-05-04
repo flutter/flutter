@@ -2326,7 +2326,7 @@ void main() {
       ),
     ));
 
-    const String expectedValue = '••••••••••••••••••••••••';
+    final String expectedValue = '•' * originalText.length;
 
     expect(
       semantics,
@@ -2411,6 +2411,27 @@ void main() {
     );
 
     semantics.dispose();
+  });
+
+  testWidgets('password fields can have their obscuring character customized', (WidgetTester tester) async {
+    const String originalText = 'super-secret-password!!1';
+    controller.text = originalText;
+
+    const String obscuringCharacter = '#';
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        obscuringCharacter: obscuringCharacter,
+        obscureText: true,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    final String expectedValue = obscuringCharacter * originalText.length;
+    expect(findRenderEditable(tester).text.text, expectedValue);
   });
 
   group('a11y copy/cut/paste', () {
@@ -4161,8 +4182,17 @@ void main() {
 
     await tester.showKeyboard(find.byType(EditableText));
     // TextInput.show should be before TextInput.setEditingState
-    final List<String> logOrder = <String>['TextInput.setClient', 'TextInput.show', 'TextInput.setEditableSizeAndTransform', 'TextInput.setStyle', 'TextInput.setEditingState', 'TextInput.setEditingState', 'TextInput.show'];
-    expect(tester.testTextInput.log.length, 7);
+    final List<String> logOrder = <String>[
+      'TextInput.setClient',
+      'TextInput.show',
+      'TextInput.setEditableSizeAndTransform',
+      'TextInput.requestAutofill',
+      'TextInput.setStyle',
+      'TextInput.setEditingState',
+      'TextInput.setEditingState',
+      'TextInput.show',
+    ];
+    expect(tester.testTextInput.log.length, 8);
     int index = 0;
     for (final MethodCall m in tester.testTextInput.log) {
       expect(m.method, logOrder[index]);
@@ -4201,6 +4231,7 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
+      'TextInput.requestAutofill',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
@@ -4248,6 +4279,7 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
+      'TextInput.requestAutofill',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',

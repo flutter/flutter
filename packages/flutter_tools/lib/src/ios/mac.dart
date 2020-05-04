@@ -342,7 +342,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   // it a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
   // When there is a timeout, we retry once. See issue #35988.
   final List<String> showBuildSettingsCommand = (List<String>
-      .from(buildCommands)
+      .of(buildCommands)
       ..add('-showBuildSettings'))
       // Undocumented behavior: xcodebuild craps out if -showBuildSettings
       // is used together with -allowProvisioningUpdates or
@@ -632,7 +632,7 @@ bool upgradePbxProjWithFlutterAssets(IosProject project, Logger logger) {
     final Match match = oldAssets.firstMatch(line);
     if (match != null) {
       if (printedStatuses.add(match.group(1))) {
-        logger.printStatus('Removing obsolete reference to ${match.group(1)} from ${project.hostAppBundleName}');
+        logger.printStatus('Removing obsolete reference to ${match.group(1)} from ${project.xcodeProject?.basename}');
       }
     } else {
       buffer.writeln(line);

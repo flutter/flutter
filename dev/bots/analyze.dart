@@ -605,6 +605,7 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatche
     .where((File file) => path.extension(file.path) != '.jpg')
     .where((File file) => path.extension(file.path) != '.ico')
     .where((File file) => path.extension(file.path) != '.jar')
+    .where((File file) => path.extension(file.path) != '.swp')
     .toList();
   final List<String> problems = <String>[];
   for (final File file in files) {
@@ -1085,13 +1086,9 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> grandfathe
       try {
         utf8.decode(bytes);
       } on FormatException catch (error) {
-        if (error.message.startsWith('Bad UTF-8 encoding ')) {
-          final Digest digest = sha256.convert(bytes);
-          if (!grandfatheredBinaries.contains(Hash256.fromDigest(digest)))
-            problems.add('${file.path}:${error.offset}: file is not valid UTF-8');
-        } else {
-          rethrow;
-        }
+        final Digest digest = sha256.convert(bytes);
+        if (!grandfatheredBinaries.contains(Hash256.fromDigest(digest)))
+          problems.add('${file.path}:${error.offset}: file is not valid UTF-8');
       }
     }
     if (problems.isNotEmpty) {
@@ -1299,5 +1296,6 @@ bool _isGeneratedPluginRegistrant(File file) {
   return !file.path.contains('.pub-cache')
       && (filename == 'GeneratedPluginRegistrant.java' ||
           filename == 'GeneratedPluginRegistrant.h' ||
-          filename == 'GeneratedPluginRegistrant.m');
+          filename == 'GeneratedPluginRegistrant.m' ||
+          filename == 'generated_plugin_registrant.dart');
 }

@@ -166,7 +166,19 @@ class SourceVisitor implements ResolvedFiles {
   /// Visit a [Source] which is defined by an [Artifact] from the flutter cache.
   ///
   /// If the [Artifact] points to a directory then all child files are included.
+  /// To increase the performance of builds that use a known revision of Flutter,
+  /// these are updated to point towards the engine.version file instead of
+  /// the artifact itself.
   void visitArtifact(Artifact artifact, TargetPlatform platform, BuildMode mode) {
+    // This is not a local engine.
+    if (environment.engineVersion != null) {
+      sources.add(environment.flutterRootDir
+        .childDirectory('bin')
+        .childDirectory('internal')
+        .childFile('engine.version'),
+      );
+      return;
+    }
     final String path = environment.artifacts
       .getArtifactPath(artifact, platform: platform, mode: mode);
     if (environment.fileSystem.isDirectorySync(path)) {
@@ -175,9 +187,9 @@ class SourceVisitor implements ResolvedFiles {
           if (entity is File)
             entity,
       ]);
-    } else {
-      sources.add(environment.fileSystem.file(path));
+      return;
     }
+    sources.add(environment.fileSystem.file(path));
   }
 }
 

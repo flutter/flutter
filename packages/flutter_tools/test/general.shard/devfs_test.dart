@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:mockito/mockito.dart';
+import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
@@ -125,13 +126,21 @@ void main() {
         // simulate package
         await _createPackage(fs, 'somepkg', 'somefile.txt');
 
-        final RealMockVMService vmService = RealMockVMService();
-        final RealMockVM vm = RealMockVM();
-        final Map<String, dynamic> response =  <String, dynamic>{ 'uri': 'file://abc' };
-        when(vm.createDevFS(any)).thenAnswer((Invocation invocation) {
-          return Future<Map<String, dynamic>>.value(response);
-        });
-        when(vmService.vm).thenReturn(vm);
+        final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            FakeVmServiceRequest(
+              id: '1',
+              method: '_createDevFS',
+              args: <String, Object>{
+                'fsName': 'test',
+              },
+              jsonResponse: <String, Object>{
+                'uri': Uri.parse('test').toString(),
+              }
+            )
+          ],
+        );
+        setHttpAddress(Uri.parse('http://localhost'), fakeVmServiceHost.vmService);
 
         reset(httpClient);
 
@@ -151,7 +160,7 @@ void main() {
         });
 
         final DevFS devFS = DevFS(
-          vmService,
+          fakeVmServiceHost.vmService,
           'test',
           tempDir,
           osUtils: osUtils,
@@ -160,11 +169,12 @@ void main() {
 
         final MockResidentCompiler residentCompiler = MockResidentCompiler();
         final UpdateFSReport report = await devFS.update(
-          mainPath: 'lib/foo.txt',
+          mainUri: Uri.parse('lib/foo.txt'),
           generator: residentCompiler,
           pathToReload: 'lib/foo.txt.dill',
           trackWidgetCreation: false,
           invalidatedFiles: <Uri>[],
+          packageConfig: PackageConfig.empty,
         );
 
         expect(report.syncedBytes, 22);
@@ -181,98 +191,41 @@ void main() {
   });
 
   group('devfs remote', () {
-    MockVMService vmService;
-    final MockResidentCompiler residentCompiler = MockResidentCompiler();
     DevFS devFS;
 
     setUpAll(() async {
       tempDir = _newTempDir(fs);
       basePath = tempDir.path;
-      vmService = MockVMService();
-      await vmService.setUp();
     });
 
     setUp(() {
-      vmService.resetState();
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          FakeVmServiceRequest(
+            id: '1',
+            method: '_createDevFS',
+            args: <String, Object>{
+              'fsName': 'test',
+            },
+            jsonResponse: <String, Object>{
+              'uri': Uri.parse('test').toString(),
+            }
+          )
+        ],
+      );
+      setHttpAddress(Uri.parse('http://localhost'), fakeVmServiceHost.vmService);
       devFS = DevFS(
-        vmService,
+        fakeVmServiceHost.vmService,
         'test',
         tempDir,
         osUtils: FakeOperatingSystemUtils(),
+        // TODO(jonahwilliams): remove and prevent usage of http writer.
+        disableUpload: true,
       );
     });
 
     tearDownAll(() async {
-      await vmService.tearDown();
       _cleanupTempDirs();
-    });
-
-    testUsingContext('create dev file system', () async {
-      // simulate workspace
-      final File file = fs.file(fs.path.join(basePath, filePath));
-      await file.parent.create(recursive: true);
-      file.writeAsBytesSync(<int>[1, 2, 3]);
-
-      // simulate package
-      await _createPackage(fs, 'somepkg', 'somefile.txt');
-
-      await devFS.create();
-      vmService.expectMessages(<String>['create test']);
-      expect(devFS.assetPathsToEvict, isEmpty);
-
-      final UpdateFSReport report = await devFS.update(
-        mainPath: 'lib/foo.txt',
-        generator: residentCompiler,
-        pathToReload: 'lib/foo.txt.dill',
-        trackWidgetCreation: false,
-        invalidatedFiles: <Uri>[],
-      );
-      vmService.expectMessages(<String>[
-        'writeFile test lib/foo.txt.dill',
-      ]);
-      expect(devFS.assetPathsToEvict, isEmpty);
-      expect(report.syncedBytes, 22);
-      expect(report.success, true);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      HttpClient: () => () => HttpClient(),
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-
-    testUsingContext('delete dev file system', () async {
-      expect(vmService.messages, isEmpty, reason: 'prior test timeout');
-      await devFS.destroy();
-      vmService.expectMessages(<String>['destroy test']);
-      expect(devFS.assetPathsToEvict, isEmpty);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-
-    testUsingContext('cleanup preexisting file system', () async {
-      // simulate workspace
-      final File file = fs.file(fs.path.join(basePath, filePath));
-      await file.parent.create(recursive: true);
-      file.writeAsBytesSync(<int>[1, 2, 3]);
-
-      // simulate package
-      await _createPackage(fs, 'somepkg', 'somefile.txt');
-      await devFS.create();
-      vmService.expectMessages(<String>['create test']);
-      expect(devFS.assetPathsToEvict, isEmpty);
-
-      // Try to create again.
-      await devFS.create();
-      vmService.expectMessages(<String>['create test', 'destroy test', 'create test']);
-      expect(devFS.assetPathsToEvict, isEmpty);
-
-      // Really destroy.
-      await devFS.destroy();
-      vmService.expectMessages(<String>['destroy test']);
-      expect(devFS.assetPathsToEvict, isEmpty);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('reports unsuccessful compile when errors are returned', () async {
@@ -284,17 +237,18 @@ void main() {
         any,
         any,
         outputPath: anyNamed('outputPath'),
-        packagesFilePath: anyNamed('packagesFilePath'),
+        packageConfig: anyNamed('packageConfig'),
       )).thenAnswer((Invocation invocation) {
         return Future<CompilerOutput>.value(const CompilerOutput('example', 2, <Uri>[]));
       });
 
       final UpdateFSReport report = await devFS.update(
-        mainPath: 'lib/foo.txt',
+        mainUri: Uri.parse('lib/foo.txt'),
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
         trackWidgetCreation: false,
         invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
       );
 
       expect(report.success, false);
@@ -316,18 +270,19 @@ void main() {
         any,
         any,
         outputPath: anyNamed('outputPath'),
-        packagesFilePath: anyNamed('packagesFilePath'),
+        packageConfig: anyNamed('packageConfig'),
       )).thenAnswer((Invocation invocation) {
         fs.file('example').createSync();
         return Future<CompilerOutput>.value(CompilerOutput('example', 0, <Uri>[sourceFile.uri]));
       });
 
       final UpdateFSReport report = await devFS.update(
-        mainPath: 'lib/main.dart',
+        mainUri: Uri.parse('lib/main.dart'),
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
         trackWidgetCreation: false,
         invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
       );
 
       expect(report.success, true);
@@ -338,98 +293,6 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
-}
-
-class MockVMService extends BasicMock implements VMService {
-  MockVMService() {
-    _vm = MockVM(this);
-  }
-
-  Uri _httpAddress;
-  HttpServer _server;
-  MockVM _vm;
-
-  @override
-  Uri get httpAddress => _httpAddress;
-
-  @override
-  VM get vm => _vm;
-
-  Future<void> setUp() async {
-    try {
-      _server = await HttpServer.bind(InternetAddress.loopbackIPv6, 0);
-      _httpAddress = Uri.parse('http://[::1]:${_server.port}');
-    } on SocketException {
-      // Fall back to IPv4 if the host doesn't support binding to IPv6 localhost
-      _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-      _httpAddress = Uri.parse('http://127.0.0.1:${_server.port}');
-    }
-    _server.listen((HttpRequest request) {
-      final String fsName = request.headers.value('dev_fs_name');
-      final String devicePath = utf8.decode(base64.decode(request.headers.value('dev_fs_uri_b64')));
-      messages.add('writeFile $fsName $devicePath');
-      request.drain<List<int>>().then<void>((List<int> value) {
-        request.response
-          ..write('Got it')
-          ..close();
-      });
-    });
-  }
-
-  Future<void> tearDown() async {
-    await _server?.close();
-  }
-
-  void resetState() {
-    _vm = MockVM(this);
-    messages.clear();
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-
-}
-
-class MockVM implements VM {
-  MockVM(this._service);
-
-  final MockVMService _service;
-  final Uri _baseUri = Uri.parse('file:///tmp/devfs/test');
-  bool _devFSExists = false;
-
-  static const int kFileSystemAlreadyExists = 1001;
-
-  @override
-  Future<Map<String, dynamic>> createDevFS(String fsName) async {
-    _service.messages.add('create $fsName');
-    if (_devFSExists) {
-      throw vm_service.RPCError('File system already exists', kFileSystemAlreadyExists, '');
-    }
-    _devFSExists = true;
-    return <String, dynamic>{'uri': '$_baseUri'};
-  }
-
-  @override
-  Future<Map<String, dynamic>> deleteDevFS(String fsName) async {
-    _service.messages.add('destroy $fsName');
-    _devFSExists = false;
-    return <String, dynamic>{'type': 'Success'};
-  }
-
-  @override
-  Future<Map<String, dynamic>> invokeRpcRaw(
-    String method, {
-    Map<String, dynamic> params = const <String, dynamic>{},
-    Duration timeout,
-    bool timeoutFatal = true,
-    bool truncateLogs = true,
-  }) async {
-    _service.messages.add('$method $params');
-    return <String, dynamic>{'success': true};
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class RealMockResidentCompiler extends Mock implements ResidentCompiler {}
@@ -469,14 +332,6 @@ Future<File> _createPackage(FileSystem fs, String pkgName, String pkgFileName, {
     ..writeAsStringSync(sb.toString());
 }
 
-class RealMockVM extends Mock implements VM {
-
-}
-
-class RealMockVMService extends Mock implements VMService {
-
-}
-
 class MyHttpOverrides extends HttpOverrides {
   MyHttpOverrides(this._httpClient);
   @override
@@ -492,3 +347,4 @@ class MockHttpClientRequest extends Mock implements HttpClientRequest {}
 class MockHttpHeaders extends Mock implements HttpHeaders {}
 class MockHttpClientResponse extends Mock implements HttpClientResponse {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+class MockVMService extends Mock implements vm_service.VmService {}

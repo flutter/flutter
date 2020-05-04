@@ -482,7 +482,7 @@ class TextStyle with Diagnosticable {
   ///
   /// When [fontFamily] is null or not provided, the first value in [fontFamilyFallback]
   /// acts as the preferred/first font family. When neither is provided, then
-  /// the default platform font will be used. Providing and empty list or null
+  /// the default platform font will be used. Providing an empty list or null
   /// for this property is the same as omitting it.
   ///
   /// For example, if a glyph is not found in [fontFamily], then each font family

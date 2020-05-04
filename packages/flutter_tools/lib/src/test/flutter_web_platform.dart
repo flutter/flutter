@@ -75,7 +75,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
     _testGoldenComparator = TestGoldenComparator(
       shellPath,
-      () => TestCompiler(BuildMode.debug, false, flutterProject),
+      () => TestCompiler(BuildMode.debug, false, flutterProject, <String>[]),
     );
   }
 
@@ -97,32 +97,20 @@ class FlutterWebPlatform extends PlatformPlugin {
     );
   }
 
-  final Future<PackageConfig> _packagesFuture = loadPackageConfigUri(
-    Uri.base.resolve('.packages'),
-    loader: (Uri uri) {
-      final File file = globals.fs.file(uri);
-      if (!file.existsSync()) {
-        return null;
-      }
-      return file.readAsBytes();
-    }
+  final Future<PackageConfig> _packagesFuture = loadPackageConfigWithLogging(
+    globals.fs.file(globalPackagesPath),
+    logger: globals.logger,
   );
 
-  final Future<PackageConfig> _flutterToolsPackageMap = loadPackageConfigUri(
+  final Future<PackageConfig> _flutterToolsPackageMap = loadPackageConfigWithLogging(
     globals.fs.file(globals.fs.path.join(
       Cache.flutterRoot,
       'packages',
       'flutter_tools',
       '.packages',
-    )).absolute.uri,
-      loader: (Uri uri) {
-        final File file = globals.fs.file(uri);
-        if (!file.existsSync()) {
-          return null;
-        }
-        return file.readAsBytes();
-      }
-    );
+    )),
+    logger: globals.logger,
+  );
 
   /// Uri of the test package.
   Future<Uri> get testUri async => (await _flutterToolsPackageMap)['test']?.packageUriRoot;
@@ -567,7 +555,7 @@ class BrowserManager {
   }
 
   /// The browser instance that this is connected to via [_channel].
-  final Chrome _browser;
+  final Chromium _browser;
 
   // TODO(nweiz): Consider removing the duplication between this and
   // [_browser.name].
@@ -635,8 +623,16 @@ class BrowserManager {
     bool debug = false,
     bool headless = true,
   }) async {
-    final Chrome chrome =
-        await globals.chromeLauncher.launch(url.toString(), headless: headless);
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      browserFinder: findChromeExecutable,
+      fileSystem: globals.fs,
+      operatingSystemUtils: globals.os,
+      logger: globals.logger,
+      platform: globals.platform,
+      processManager: globals.processManager,
+    );
+    final Chromium chrome =
+      await chromiumLauncher.launch(url.toString(), headless: headless);
 
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
@@ -869,12 +865,12 @@ class TestGoldenComparator {
 
     // Lazily create the compiler
     _compiler = _compiler ?? compilerFactory();
-    final String output = await _compiler.compile(listenerFile.path);
+    final String output = await _compiler.compile(listenerFile.uri);
     final List<String> command = <String>[
       shellPath,
       '--disable-observatory',
       '--non-interactive',
-      '--packages=${PackageMap.globalPackagesPath}',
+      '--packages=$globalPackagesPath',
       output,
     ];
 

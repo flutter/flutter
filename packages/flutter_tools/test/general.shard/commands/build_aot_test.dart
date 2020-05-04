@@ -119,14 +119,14 @@ void main() {
             analyicsName: 'kernel_snapshot',
             target: 'kernel_snapshot',
             elapsedMilliseconds: 1000,
-            passed: true,
+            succeeded: true,
             skipped: false,
           ),
           'anything': PerformanceMeasurement(
             analyicsName: 'android_aot',
             target: 'anything',
             elapsedMilliseconds: 1000,
-            passed: true,
+            succeeded: true,
             skipped: false,
           ),
         });

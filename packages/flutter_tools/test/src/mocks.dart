@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
+import 'package:package_config/package_config.dart';
 import 'package:platform/platform.dart';
 
 import 'package:flutter_tools/src/android/android_device.dart';
@@ -44,7 +45,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
       versionCode: 1,
       launchActivity: 'io.flutter.android.mock.MockActivity',
     ),
-    iOS: BuildableIOSApp(MockIosProject(), MockIosProject.bundleId),
+    iOS: BuildableIOSApp(MockIosProject(), MockIosProject.bundleId, MockIosProject.appBundleName),
   );
 }
 
@@ -528,12 +529,13 @@ class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
 
 class MockIosProject extends Mock implements IosProject {
   static const String bundleId = 'com.example.test';
+  static const String appBundleName = 'My Super Awesome App.app';
 
   @override
   Future<String> get productBundleIdentifier async => bundleId;
 
   @override
-  String get hostAppBundleName => 'Runner.app';
+  Future<String> get hostAppBundleName async => appBundleName;
 }
 
 class MockAndroidDevice extends Mock implements AndroidDevice {
@@ -584,7 +586,7 @@ class BasicMock {
   final List<String> messages = <String>[];
 
   void expectMessages(List<String> expectedMessages) {
-    final List<String> actualMessages = List<String>.from(messages);
+    final List<String> actualMessages = List<String>.of(messages);
     messages.clear();
     expect(actualMessages, unorderedEquals(expectedMessages));
   }
@@ -662,7 +664,7 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   }
 
   @override
-  Future<CompilerOutput> recompile(String mainPath, List<Uri> invalidatedFiles, { String outputPath, String packagesFilePath }) async {
+  Future<CompilerOutput> recompile(Uri mainPath, List<Uri> invalidatedFiles, { String outputPath, PackageConfig packageConfig }) async {
     globals.fs.file(outputPath).createSync(recursive: true);
     globals.fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
     return CompilerOutput(outputPath, 0, <Uri>[]);

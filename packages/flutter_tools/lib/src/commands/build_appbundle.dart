@@ -28,9 +28,10 @@ class BuildAppBundleCommand extends BuildSubCommand {
     addDartObfuscationOption();
     usesDartDefineOption();
     usesExtraFrontendOptions();
-    argParser
-      ..addFlag('track-widget-creation', negatable: false, hide: !verboseHelp)
-      ..addMultiOption('target-platform',
+    addBundleSkSLPathOption(hide: !verboseHelp);
+    addBuildPerformanceFile(hide: !verboseHelp);
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
+    argParser.addMultiOption('target-platform',
         splitCommas: true,
         defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
         allowed: <String>['android-arm', 'android-arm64', 'android-x64'],

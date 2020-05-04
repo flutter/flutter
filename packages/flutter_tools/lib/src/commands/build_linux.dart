@@ -16,10 +16,18 @@ import 'build.dart';
 
 /// A command to build a linux desktop target through a build shell script.
 class BuildLinuxCommand extends BuildSubCommand {
-  BuildLinuxCommand() {
+  BuildLinuxCommand({ bool verboseHelp = false }) {
     addTreeShakeIconsFlag();
-    addBuildModeFlags();
     usesTargetOption();
+    addBuildModeFlags(verboseHelp: verboseHelp);
+    usesPubOption();
+    addSplitDebugInfoOption();
+    addDartObfuscationOption();
+    usesDartDefineOption();
+    usesExtraFrontendOptions();
+    addEnableExperimentation(hide: !verboseHelp);
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
+    addBuildPerformanceFile(hide: !verboseHelp);
   }
 
   @override

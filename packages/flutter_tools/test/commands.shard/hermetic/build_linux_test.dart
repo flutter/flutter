@@ -87,7 +87,7 @@ void main() {
     setUpMockCoreProjectFiles();
 
     expect(createTestCommandRunner(command).run(
-      const <String>['build', 'linux']
+      const <String>['build', 'linux', '--no-pub']
     ), throwsToolExit(message: 'No Linux desktop project configured'));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
@@ -101,7 +101,7 @@ void main() {
     setUpMockProjectFilesForBuild();
 
     expect(createTestCommandRunner(command).run(
-      const <String>['build', 'linux']
+      const <String>['build', 'linux', '--no-pub']
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => notLinuxPlatform,
@@ -115,7 +115,7 @@ void main() {
     setUpMockProjectFilesForBuild(templateVersion: 1);
 
     expect(createTestCommandRunner(command).run(
-      const <String>['build', 'linux']
+      const <String>['build', 'linux', '--no-pub']
     ), throwsToolExit(message: 'flutter create .'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -129,7 +129,7 @@ void main() {
     setUpMockProjectFilesForBuild(templateVersion: 999);
 
     expect(createTestCommandRunner(command).run(
-      const <String>['build', 'linux']
+      const <String>['build', 'linux', '--no-pub']
     ), throwsToolExit(message: 'Upgrade Flutter'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -146,15 +146,13 @@ void main() {
         '-C',
         '/linux',
         'BUILD=release',
-      ], onRun: () {
-
-      })
+      ], onRun: () { })
     ]);
 
     setUpMockProjectFilesForBuild();
 
     await createTestCommandRunner(command).run(
-      const <String>['build', 'linux']
+      const <String>['build', 'linux', '--no-pub']
     );
     expect(fileSystem.file('linux/flutter/ephemeral/generated_config.mk'), exists);
   }, overrides: <Type, Generator>{
@@ -179,7 +177,7 @@ void main() {
     ]);
 
     expect(createTestCommandRunner(command).run(
-      const <String>['build', 'linux']
+      const <String>['build', 'linux', '--no-pub']
     ), throwsToolExit(message: "make not found. Run 'flutter doctor' for more information."));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -201,10 +199,40 @@ void main() {
     ]);
 
     await createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--debug']
+      const <String>['build', 'linux', '--debug', '--no-pub']
     );
     expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
     expect(testLogger.traceText, contains('STDOUT STUFF'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('Linux verbose build sets VERBOSE_SCRIPT_LOGGING', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'make',
+          '-C',
+          '/linux',
+          'BUILD=debug',
+        ],
+        environment: <String, String>{
+          'VERBOSE_SCRIPT_LOGGING': 'true'
+        },
+        stdout: 'STDOUT STUFF',
+      ),
+    ]);
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--debug', '-v', '--no-pub']
+    );
+    expect(testLogger.statusText, contains('STDOUT STUFF'));
+    expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -226,7 +254,7 @@ void main() {
 
 
     await createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--debug']
+      const <String>['build', 'linux', '--debug', '--no-pub']
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -248,8 +276,66 @@ void main() {
     ]);
 
     await createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--profile']
+      const <String>['build', 'linux', '--profile', '--no-pub']
     );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('Linux build configures Makefile exports', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild();
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(command: <String>[
+        'make',
+        '-C',
+        '/linux',
+        'BUILD=release',
+      ]),
+    ]);
+    fileSystem.file('lib/other.dart')
+      .createSync(recursive: true);
+
+    await createTestCommandRunner(command).run(
+      const <String>[
+        'build',
+        'linux',
+        '--target=lib/other.dart',
+        '--no-pub',
+        '--track-widget-creation',
+        '--split-debug-info=foo/',
+        '--enable-experiment=non-nullable',
+        '--obfuscate',
+        '--dart-define=foo.bar=2',
+        '--dart-define=fizz.far=3',
+        '--tree-shake-icons',
+      ]
+    );
+
+    final File makeConfig = fileSystem.currentDirectory
+      .childDirectory('linux')
+      .childDirectory('flutter')
+      .childDirectory('ephemeral')
+      .childFile('generated_config.mk');
+
+    expect(makeConfig, exists);
+
+    final List<String> configLines = makeConfig.readAsLinesSync();
+
+    expect(configLines, containsAll(<String>[
+      'export DART_DEFINES=foo.bar=2,fizz.far=3',
+      'export DART_OBFUSCATION=true',
+      'export EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable',
+      'export EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable',
+      'export SPLIT_DEBUG_INFO=foo/',
+      'export TRACK_WIDGET_CREATION=true',
+      'export TREE_SHAKE_ICONS=true',
+      'export FLUTTER_ROOT=$_kTestFlutterRoot',
+      'export FLUTTER_TARGET=lib/other.dart',
+    ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -305,7 +391,7 @@ BINARY_NAME=fizz_bar
   testUsingContext('Refuses to build for Linux when feature is disabled', () {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
-    expect(() => runner.run(<String>['build', 'linux']),
+    expect(() => runner.run(<String>['build', 'linux', '--no-pub']),
       throwsToolExit());
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
@@ -324,7 +410,7 @@ BINARY_NAME=fizz_bar
     ]);
 
     await createTestCommandRunner(command).run(
-      const <String>['build', 'linux']
+      const <String>['build', 'linux', '--no-pub']
     );
     expect(testLogger.statusText, contains('🚧'));
   }, overrides: <Type, Generator>{

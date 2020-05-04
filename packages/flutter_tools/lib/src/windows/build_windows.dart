@@ -86,12 +86,20 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     // Run the script with a relative path to the project using the enclosing
     // directory as the workingDirectory, to avoid hitting the limit on command
     // lengths in batch scripts if the absolute path to the project is long.
-    result = await processUtils.stream(<String>[
-      buildScript,
-      vcvarsScript,
-      globals.fs.path.basename(solutionPath),
-      configuration,
-    ], workingDirectory: globals.fs.path.dirname(solutionPath), trace: true);
+    result = await processUtils.stream(
+      <String>[
+        buildScript,
+        vcvarsScript,
+        globals.fs.path.basename(solutionPath),
+        configuration,
+      ],
+      environment: <String, String>{
+        if (globals.logger.isVerbose)
+          'VERBOSE_SCRIPT_LOGGING': 'true'
+      },
+      workingDirectory: globals.fs.path.dirname(solutionPath),
+      trace: true,
+    );
   } finally {
     status.cancel();
   }
@@ -102,16 +110,19 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
 }
 
 /// Writes the generatedPropertySheetFile with the configuration for the given build.
-void _writeGeneratedFlutterProperties(WindowsProject windowsProject, BuildInfo buildInfo, String target) {
+void _writeGeneratedFlutterProperties(
+  WindowsProject windowsProject,
+  BuildInfo buildInfo,
+  String target,
+) {
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': Cache.flutterRoot,
     'FLUTTER_EPHEMERAL_DIR': windowsProject.ephemeralDirectory.path,
     'PROJECT_DIR': windowsProject.project.directory.path,
-    'TRACK_WIDGET_CREATION': (buildInfo?.trackWidgetCreation == true).toString(),
+    if (target != null)
+      'FLUTTER_TARGET': target,
+    ...buildInfo.toEnvironmentConfig(),
   };
-  if (target != null) {
-    environment['FLUTTER_TARGET'] = target;
-  }
   if (globals.artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;

@@ -516,6 +516,23 @@ abstract class ImageStreamCompleter with Diagnosticable {
     }
   }
 
+  /// Calls all the registered [ImageChunkListener]s (listeners with an
+  /// [ImageStreamListener.onChunk] specified) to notify them of a new
+  /// [ImageChunkEvent].
+  @protected
+  void reportImageChunkEvent(ImageChunkEvent event){
+    if (hasListeners) {
+      // Make a copy to allow for concurrent modification.
+      final List<ImageChunkListener> localListeners = _listeners
+          .map<ImageChunkListener>((ImageStreamListener listener) => listener.onChunk)
+          .where((ImageChunkListener chunkListener) => chunkListener != null)
+          .toList();
+      for (final ImageChunkListener listener in localListeners) {
+        listener(event);
+      }
+    }
+  }
+
   /// Accumulates a list of strings describing the object's state. Subclasses
   /// should override this to have their information included in [toString].
   @override
@@ -626,19 +643,8 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       );
     });
     if (chunkEvents != null) {
-      chunkEvents.listen(
-        (ImageChunkEvent event) {
-          if (hasListeners) {
-            // Make a copy to allow for concurrent modification.
-            final List<ImageChunkListener> localListeners = _listeners
-                .map<ImageChunkListener>((ImageStreamListener listener) => listener.onChunk)
-                .where((ImageChunkListener chunkListener) => chunkListener != null)
-                .toList();
-            for (final ImageChunkListener listener in localListeners) {
-              listener(event);
-            }
-          }
-        }, onError: (dynamic error, StackTrace stack) {
+      chunkEvents.listen(reportImageChunkEvent,
+        onError: (dynamic error, StackTrace stack) {
           reportError(
             context: ErrorDescription('loading an image'),
             exception: error,

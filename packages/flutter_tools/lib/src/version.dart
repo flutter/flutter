@@ -752,80 +752,83 @@ class GitTagVersion {
         _runGit('git fetch $_flutterGit --tags', processUtils, workingDirectory);
       }
     }
-    // `--match` glob must match old version tag `v1.2.3` and new `1.2.3-dev.4.5`
-    return parse(_runGit('git describe --match *.*.* --first-parent --long --tags', processUtils, workingDirectory));
-  }
+    final List<String> tags = _runGit(
+      'git tag --contains HEAD', processUtils, workingDirectory).split('\n');
 
-  // TODO(fujino): Deprecate this https://github.com/flutter/flutter/issues/53850
-  /// Check for the release tag format of the form x.y.z-dev.m.n
-  static GitTagVersion parseLegacyVersion(String version) {
-    final RegExp versionPattern = RegExp(
-      r'^([0-9]+)\.([0-9]+)\.([0-9]+)(-dev\.[0-9]+\.[0-9]+)?-([0-9]+)-g([a-f0-9]+)$');
-    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
-    if (parts == null) {
-      return const GitTagVersion.unknown();
+    // Check first for a stable tag
+    final RegExp stableTagPattern = RegExp(r'^\d+\.\d+\.\d+$');
+    for (final String tag in tags) {
+      final String trimmedTag = tag.trim();
+      if (stableTagPattern.hasMatch(trimmedTag)) {
+        return parse(trimmedTag);
+      }
     }
-    final List<int> parsedParts = parts.take(5).map<int>(
-      (String source) => source == null ? null : int.tryParse(source)).toList();
-    List<int> devParts = <int>[null, null];
-    if (parts[3] != null) {
-      devParts = RegExp(r'^-dev\.(\d+)\.(\d+)')
-        .matchAsPrefix(parts[3])
-        ?.groups(<int>[1, 2])
-        ?.map<int>(
-          (String source) => source == null ? null : int.tryParse(source)
-        )?.toList() ?? <int>[null, null];
+    // Next check for a dev tag
+    final RegExp devTagPattern = RegExp(r'^\d+\.\d+\.\d+-\d+\.\d+\.pre$');
+    for (final String tag in tags) {
+      final String trimmedTag = tag.trim();
+      if (devTagPattern.hasMatch(trimmedTag)) {
+        return parse(trimmedTag);
+      }
     }
-    return GitTagVersion(
-      x: parsedParts[0],
-      y: parsedParts[1],
-      z: parsedParts[2],
-      devVersion: devParts[0],
-      devPatch: devParts[1],
-      commits: parsedParts[4],
-      hash: parts[5],
-      gitTag: '${parts[0]}.${parts[1]}.${parts[2]}${parts[3] ?? ''}', // x.y.z-dev.m.n
+
+    // If we're not currently on a tag, use git describe to find the most
+    // recent tag and number of commits past.
+    return parse(
+      _runGit(
+        'git describe --match *.*.*-*.*.pre --first-parent --long --tags',
+        processUtils,
+        workingDirectory,
+      )
     );
   }
 
-  /// Check for the release tag format of the form x.y.z-m.n.pre
+  /// Parse a version string.
+  ///
+  /// The version string can either be an exact release tag (e.g. '1.2.3' for
+  /// stable or 1.2.3-4.5.pre for a dev) or the output of `git describe` (e.g.
+  /// for commit abc123 that is 6 commits after tag 1.2.3-4.5.pre, git would
+  /// return '1.2.3-4.5.pre-6-gabc123').
   static GitTagVersion parseVersion(String version) {
     final RegExp versionPattern = RegExp(
-      r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?-(\d+)-g([a-f0-9]+)$');
-    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
-    if (parts == null) {
+      r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?(?:-(\d+)-g([a-f0-9]+))?$');
+    final Match match = versionPattern.firstMatch(version.trim());
+    if (match == null) {
       return const GitTagVersion.unknown();
     }
-    final List<int> parsedParts = parts.take(5).map<int>(
-      (String source) => source == null ? null : int.tryParse(source)).toList();
-    List<int> devParts = <int>[null, null];
-    if (parts[3] != null) {
-      devParts = RegExp(r'^-(\d+)\.(\d+)\.pre')
-        .matchAsPrefix(parts[3])
-        ?.groups(<int>[1, 2])
-        ?.map<int>(
-          (String source) => source == null ? null : int.tryParse(source)
-        )?.toList() ?? <int>[null, null];
+
+    final List<String> matchGroups = match.groups(<int>[1, 2, 3, 4, 5, 6]);
+    final int x = matchGroups[0] == null ? null : int.tryParse(matchGroups[0]);
+    final int y = matchGroups[1] == null ? null : int.tryParse(matchGroups[1]);
+    final int z = matchGroups[2] == null ? null : int.tryParse(matchGroups[2]);
+    final String devString = matchGroups[3];
+    int devVersion, devPatch;
+    if (devString != null) {
+      final Match devMatch = RegExp(r'^-(\d+)\.(\d+)\.pre$')
+        .firstMatch(devString);
+      final List<String> devGroups = devMatch.groups(<int>[1, 2]);
+      devVersion = devGroups[0] == null ? null : int.tryParse(devGroups[0]);
+      devPatch = devGroups[1] == null ? null : int.tryParse(devGroups[1]);
     }
+    // count of commits past last tagged version
+    final int commits = matchGroups[4] == null ? 0 : int.tryParse(matchGroups[4]);
+    final String hash = matchGroups[5] ?? '';
+
     return GitTagVersion(
-      x: parsedParts[0],
-      y: parsedParts[1],
-      z: parsedParts[2],
-      devVersion: devParts[0],
-      devPatch: devParts[1],
-      commits: parsedParts[4],
-      hash: parts[5],
-      gitTag: '${parts[0]}.${parts[1]}.${parts[2]}${parts[3] ?? ''}', // x.y.z-m.n.pre
+      x: x,
+      y: y,
+      z: z,
+      devVersion: devVersion,
+      devPatch: devPatch,
+      commits: commits,
+      hash: hash,
+      gitTag: '$x.$y.$z${devString ?? ''}', // e.g. 1.2.3-4.5.pre
     );
   }
 
   static GitTagVersion parse(String version) {
     GitTagVersion gitTagVersion;
 
-    gitTagVersion = parseLegacyVersion(version);
-    if (gitTagVersion != const GitTagVersion.unknown()) {
-      return gitTagVersion;
-    }
     gitTagVersion = parseVersion(version);
     if (gitTagVersion != const GitTagVersion.unknown()) {
       return gitTagVersion;
