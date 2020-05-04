@@ -356,6 +356,7 @@ class BitmapCanvas extends EngineCanvas {
     _drawImage(image, p, paint);
     _childOverdraw = true;
     _canvasPool.closeCurrentCanvas();
+    _cachedLastStyle = null;
   }
 
   html.ImageElement _drawImage(
