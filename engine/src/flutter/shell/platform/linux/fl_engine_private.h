@@ -26,6 +26,25 @@ typedef enum {
 GQuark fl_engine_error_quark(void) G_GNUC_CONST;
 
 /**
+ * FlEnginePlatformMessageCallback:
+ * @engine: a #FlEngine
+ * @channel: channel message received on.
+ * @message: message content received from Dart
+ * @response_handle: a handle to respond to the message with
+ * @user_data: (closure): data provided when registering this callback
+ *
+ * Function called when platform messages are received.
+ *
+ * Returns: %TRUE if message has been accepted.
+ */
+typedef gboolean (*FlEnginePlatformMessageCallback)(
+    FlEngine* engine,
+    const gchar* channel,
+    GBytes* message,
+    const FlutterPlatformMessageResponseHandle* response_handle,
+    gpointer user_data);
+
+/**
  * fl_engine_new:
  * @project: a #FlDartProject
  * @renderer: a #FlRenderer
@@ -35,6 +54,23 @@ GQuark fl_engine_error_quark(void) G_GNUC_CONST;
  * Returns: a #FlEngine
  */
 FlEngine* fl_engine_new(FlDartProject* project, FlRenderer* renderer);
+
+/**
+ * fl_engine_set_platform_message_handler:
+ * @engine: a #FlEngine
+ * @callback: function to call when a platform message is received
+ * @user_data: (closure): user data to pass to @callback
+ *
+ * Register a callback to handle platform messages. Call
+ * fl_engine_send_platform_message_response() when this message should be
+ * responded to. Ownership of #FlutterPlatformMessageResponseHandle is
+ * transferred to the caller, and the call must be responded to to avoid
+ * memory leaks.
+ */
+void fl_engine_set_platform_message_handler(
+    FlEngine* engine,
+    FlEnginePlatformMessageCallback callback,
+    gpointer user_data);
 
 /**
  * fl_engine_start:
@@ -79,6 +115,58 @@ void fl_engine_send_mouse_pointer_event(FlEngine* engine,
                                         double x,
                                         double y,
                                         int64_t buttons);
+
+/**
+ * fl_engine_send_platform_message_response:
+ * @engine: a #FlEngine
+ * @response_handle: handle that was provided in the callback.
+ * @response: (allow-none): response to send or %NULL for an empty response.
+ * @error: (allow-none): #GError location to store the error occurring, or %NULL
+ * to ignore.
+ *
+ * Respond to a platform message.
+ *
+ * Returns: %TRUE on success.
+ */
+gboolean fl_engine_send_platform_message_response(
+    FlEngine* engine,
+    const FlutterPlatformMessageResponseHandle* handle,
+    GBytes* response,
+    GError** error);
+
+/**
+ * fl_engine_send_platform_message:
+ * @engine: a #FlEngine
+ * @channel: channel to send to
+ * @message: (allow-none): message buffer to send or %NULL for an empty message
+ * @cancellable: (allow-none): a #GCancellable or %NULL
+ * @callback: (scope async): a #GAsyncReadyCallback to call when the request is
+ * satisfied
+ * @user_data: (closure): user data to pass to @callback
+ *
+ * Asynchronously send a platform message.
+ */
+void fl_engine_send_platform_message(FlEngine* engine,
+                                     const gchar* channel,
+                                     GBytes* message,
+                                     GCancellable* cancellable,
+                                     GAsyncReadyCallback callback,
+                                     gpointer user_data);
+
+/**
+ * fl_engine_send_platform_message_finish:
+ * @engine: a #FlEngine
+ * @result: a #GAsyncResult
+ * @error: (allow-none): #GError location to store the error occurring, or %NULL
+ * to ignore.
+ *
+ * Complete request started with fl_engine_send_platform_message().
+ *
+ * Returns: message response on success or %NULL on error.
+ */
+GBytes* fl_engine_send_platform_message_finish(FlEngine* engine,
+                                               GAsyncResult* result,
+                                               GError** error);
 
 G_END_DECLS
 
