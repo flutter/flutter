@@ -250,6 +250,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     _mouseTracker = tracker ?? MouseTracker(pointerRouter, renderView.hitTestMouseTrackers);
   }
 
+  final ImageMouseCursorCache mouseCursorCache = ImageMouseCursorCache();
+
   void _handleSemanticsEnabledChanged() {
     setSemanticsEnabled(window.semanticsEnabled);
   }

@@ -344,7 +344,6 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     _setUpMouseTracker(
       annotationFinder: (Offset position) sync* {
-        print(position);
         if (position.dx > 200) {
           yield const MouseTrackerAnnotation(cursor: SystemMouseCursors.forbidden);
         } else if (position.dx > 100) {

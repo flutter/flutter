@@ -379,6 +379,299 @@ class SystemMouseCursor extends MouseCursor {
   }
 }
 
+typedef _MouseCursorPreparationListener = void Function(int preparedCursor);
+
+class _SingleFrameImageResolver {
+  _SingleFrameImageResolver(this._stream) : assert(_stream != null) {
+    _stream.addListener(_getListener());
+  }
+
+  Future<ImageInfo> get future => _completer.future;
+
+  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
+  final ImageStream _stream;
+
+  ImageStreamListener _getListener() {
+    return ImageStreamListener(
+      _handleImageFrame,
+      onError: _handleImageError,
+    );
+  }
+
+  bool _firstImageReceived = false;
+  void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
+    if (_firstImageReceived)
+      return;
+    if (imageInfo != null) {
+      _firstImageReceived = true;
+      _completer.complete(imageInfo);
+    }
+  }
+
+  void _handleImageError(dynamic error, StackTrace stackTrace) {
+    if (_firstImageReceived)
+      return;
+    _firstImageReceived = true;
+    _completer.completeError(error, stackTrace);
+  }
+}
+
+
+class _ImageCursorResolver {
+  _ImageCursorResolver(
+    this._cursor,
+    this.onResult, {
+    this.onError,
+  }) : assert(_cursor != null),
+       assert(onResult != null) {
+    _initialize();
+  }
+
+  final _MouseCursorPreparationListener onResult;
+  final void Function(dynamic error, StackTrace stackTrace) onError;
+
+  Future<void> _initialize() async {
+    final ImageMouseCursorCacheKey cacheKey = ImageMouseCursorCacheKey(
+      imageKey: await _cursor.image.obtainKey(_cursor.imageConfiguration),
+      hotSpot: _cursor.hotSpot,
+    );
+    _cache.query(cacheKey,
+      ifHit: _onTaskResult,
+      ifPending: (Future<int> task) {
+        task
+          .then(_onTaskResult)
+          .catchError(_onTaskError);
+      },
+      ifMiss: () {
+        return _prepareImage(_cursor.image.resolve(_cursor.imageConfiguration))
+          .then(_onTaskResult)
+          .catchError(_onTaskError);
+      }
+    );
+  }
+
+  int _onTaskResult(int imageId) {
+    onResult(imageId);
+    return imageId;
+  }
+
+  void _onTaskError(dynamic error, StackTrace stackTrace) {
+    onError(error, stackTrace);
+  }
+
+  final ImageMouseCursor _cursor;
+
+  Future<int> _prepareImage(ImageStream stream) {
+    return _SingleFrameImageResolver(stream).future
+      .then((ImageInfo imageInfo) =>
+        SystemChannels.mouseCursor.invokeMethod<int>(
+          'registerImage',
+          <String, dynamic>{
+            'image': imageInfo.image,
+            'scale': imageInfo.scale,
+            'hotSpotX': _cursor.hotSpot.dx,
+            'hotSpotY': _cursor.hotSpot.dy,
+          },
+        ),
+      );
+  }
+
+  bool _interrupted = false;
+  void dispose() {
+    _interrupted = true;
+  }
+
+  static ImageMouseCursorCache get _cache => RendererBinding.instance.mouseCursorCache;
+}
+
+class _ImageMouseCursorSession extends MouseCursorSession {
+  _ImageMouseCursorSession(ImageMouseCursor cursor, int device)
+    : super(cursor, device);
+
+  @override
+  ImageMouseCursor get cursor => super.cursor as ImageMouseCursor;
+
+  _ImageCursorResolver _imageCursorResolver;
+  int _cursorId;
+
+  @override
+  Future<void> activate() {
+    _syncResultGuard(() {
+      _imageCursorResolver = _ImageCursorResolver(cursor, _onResult);
+    });
+    return _activateCursor();
+  }
+
+  bool _isSyncResult = false;
+  void _syncResultGuard(VoidCallback task) {
+    _isSyncResult = true;
+    try {
+      task();
+    } finally {
+      _isSyncResult = false;
+    }
+  }
+
+  void _onResult(int cursorId) {
+    _cursorId = cursorId;
+    if (!_isSyncResult) {
+      _activateCursor();
+    }
+  }
+
+  Future<void> _activateCursor() {
+    if (_cursorId == null) {
+      return SystemChannels.mouseCursor.invokeMethod<int>(
+        'activateSystemCursor',
+        <String, dynamic>{
+          'device': device,
+          'shapeCode': SystemMouseCursors.basic.shapeCode,
+        },
+      );
+    }
+    return SystemChannels.mouseCursor.invokeMethod<int>(
+      'activateImageCursor',
+      <String, dynamic>{
+        'device': device,
+        'cursorId': _cursorId,
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _imageCursorResolver?.dispose();
+    _imageCursorResolver = null;
+  }
+}
+
+class ImageMouseCursor extends MouseCursor {
+  /// Creates a widget that displays an image obtained from the network.
+  ///
+  /// The [src], and [scale] arguments must not be null. The [hotSpot] defaults
+  /// to the upper left corner of the image.
+  ///
+  /// All network images are cached regardless of HTTP headers.
+  ///
+  /// An optional [headers] argument can be used to send custom HTTP headers
+  /// with the image request.
+  ImageMouseCursor.network(
+    String src, {
+    this.hotSpot = Offset.zero,
+    double scale = 1.0,
+    Map<String, String> headers,
+    this.imageConfiguration,
+    this.debugDescription,
+  }) : image = NetworkImage(src, scale: scale, headers: headers);
+
+  /// The image to display.
+  final ImageProvider image;
+
+  /// The pixel on the image that the platform sees as the position of the
+  /// pointer.
+  ///
+  /// The [hotSpot] defaults to [Offset.zero], which is the upper-left corner
+  /// of the image.
+  final Offset hotSpot;
+
+  final ImageConfiguration imageConfiguration;
+
+  @override
+  final String debugDescription;
+
+  @override
+  @protected
+  MouseCursorSession createSession(int device) => _ImageMouseCursorSession(this, device);
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(other, this))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is ImageMouseCursor
+        && other.image == image
+        && other.hotSpot == hotSpot;
+  }
+
+  @override
+  int get hashCode => hashValues(image, hotSpot);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ImageProvider>('image', image));
+    properties.add(DiagnosticsProperty<Offset>('hotSpot', hotSpot, defaultValue: null));
+  }
+}
+
+@immutable
+class ImageMouseCursorCacheKey {
+  const ImageMouseCursorCacheKey({
+    @required this.imageKey,
+    @required this.hotSpot,
+  }) : assert(imageKey != null),
+       assert(hotSpot != null);
+
+  final Object imageKey;
+  final Offset hotSpot;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(other, this))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is ImageMouseCursorCacheKey
+        && other.imageKey == imageKey
+        && other.hotSpot == hotSpot;
+  }
+
+  @override
+  int get hashCode => hashValues(imageKey, hotSpot);
+
+  @override
+  String toString() => 'ImageMouseCursorCacheKey(imageKey: $imageKey, hotSpot: $hotSpot)';
+}
+
+class ImageMouseCursorCache {
+  final Map<Object, FutureOr<int>> _cache = <Object, FutureOr<int>>{};
+
+  void query(
+    Object key, {
+    void Function(int value) ifHit,
+    void Function(Future<int> value) ifPending,
+    Future<int> Function() ifMiss,
+  }) {
+    final FutureOr<int> cachedValue = _cache[key];
+    if (cachedValue is int) {
+      ifHit(cachedValue);
+      return;
+    }
+    if (cachedValue is Future<int>) {
+      ifPending(cachedValue);
+      return;
+    }
+    assert(cachedValue == null);
+
+    final Future<int> newTask = ifMiss();
+    _cache[key] = newTask;
+    newTask.then((int result) {
+      if (!identical(newTask, _cache[key])) {
+        // This can happen when the cache is disposed while the task is pending
+        return null;
+      }
+      _cache[key] = result;
+    });
+  }
+
+  List<int> dispose() {
+    final List<int> previousValues = _cache.values.whereType<int>().toList();
+    _cache.clear();
+    return previousValues;
+  }
+}
+
 /// A collection of system [MouseCursor]s.
 ///
 /// System cursors are standard mouse cursors that are provided by the current
