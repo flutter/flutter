@@ -36,6 +36,7 @@ void _setStaticStyleAttributes(html.HtmlElement domElement) {
     ..border = 'none'
     ..resize = 'none'
     ..textShadow = 'transparent'
+    ..overflow = 'hidden'
     ..transformOrigin = '0 0 0';
 
   /// This property makes the input's blinking cursor transparent.
