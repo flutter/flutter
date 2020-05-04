@@ -79,6 +79,7 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \
     -dTreeShakeIcons="${TREE_SHAKE_ICONS}"                                  \
     -dDartObfuscation="${DART_OBFUSCATION}"                                 \
     -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                  \
+    -dTrackWidgetCreation="${TRACK_WIDGET_CREATION}"                        \
     --DartDefines="${DART_DEFINES}"                                         \
     --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"               \
     -dExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                     \
