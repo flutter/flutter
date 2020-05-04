@@ -13,6 +13,7 @@ void main() {
   setUp(() {
     logger = BufferLogger.test();
   });
+
   group('Validate build number', () {
     testWithoutContext('CFBundleVersion for iOS', () async {
       String buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, 'xyz', logger);
