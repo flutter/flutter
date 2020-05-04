@@ -296,36 +296,6 @@ void main() {
     ]));
   });
 
-  test('cursor change caused by notification', () {
-    final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
-    _MutableMouseTrackerAnnotation annotation;
-    _setUpMouseTracker(
-      annotationFinder: (Offset position) => <MouseTrackerAnnotation>[if (annotation != null) annotation],
-      logCursors: logCursors,
-    );
-
-    // Pointer is added onto an annotation.
-    annotation = _MutableMouseTrackerAnnotation(cursor: SystemMouseCursors.grabbing);
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
-    ]));
-    logCursors.clear();
-
-    // The annotation has cursor changed
-    annotation.cursor = SystemMouseCursors.forbidden;
-    annotation.testNotify();
-
-    expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 0, shapeCode: SystemMouseCursors.forbidden.shapeCode),
-    ]);
-    logCursors.clear();
-
-    // Remove
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.remove, const Offset(5.0, 0.0)),
-    ]));
-  });
-
   test('Finding no annotation is equivalent to specifying default cursor', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     MouseTrackerAnnotation annotation;
@@ -361,6 +331,68 @@ void main() {
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
+    ]);
+    logCursors.clear();
+
+    // Remove
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.remove, const Offset(0.0, 0.0)),
+    ]));
+  });
+
+  test('Pointing devices display cursors separately', () {
+    final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
+    _setUpMouseTracker(
+      annotationFinder: (Offset position) sync* {
+        print(position);
+        if (position.dx > 200) {
+          yield const MouseTrackerAnnotation(cursor: SystemMouseCursors.forbidden);
+        } else if (position.dx > 100) {
+          yield const MouseTrackerAnnotation(cursor: SystemMouseCursors.click);
+        } else {}
+      },
+      logCursors: logCursors,
+    );
+
+    // Pointers are added outside of the annotation.
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.add, const Offset(0.0, 0.0), device: 1),
+      _pointerData(PointerChange.add, const Offset(0.0, 0.0), device: 2),
+    ]));
+
+    expect(logCursors, <_CursorUpdateDetails>[
+      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.basic.shapeCode),
+      _CursorUpdateDetails.activateSystemCursor(device: 2, shapeCode: SystemMouseCursors.basic.shapeCode),
+    ]);
+    logCursors.clear();
+
+    // Pointer 1 moved to cursor "click"
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(101.0, 0.0), device: 1),
+    ]));
+
+    expect(logCursors, <_CursorUpdateDetails>[
+      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.click.shapeCode),
+    ]);
+    logCursors.clear();
+
+    // Pointer 2 moved to cursor "click"
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(102.0, 0.0), device: 2),
+    ]));
+
+    expect(logCursors, <_CursorUpdateDetails>[
+      _CursorUpdateDetails.activateSystemCursor(device: 2, shapeCode: SystemMouseCursors.click.shapeCode),
+    ]);
+    logCursors.clear();
+
+    // Pointer 2 moved to cursor "forbidden"
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(202.0, 0.0), device: 2),
+    ]));
+
+    expect(logCursors, <_CursorUpdateDetails>[
+      _CursorUpdateDetails.activateSystemCursor(device: 2, shapeCode: SystemMouseCursors.forbidden.shapeCode),
     ]);
     logCursors.clear();
 
@@ -460,58 +492,5 @@ class _TestGestureFlutterBinding extends BindingBase
       callback(duration);
     }
     postFrameCallbacks.clear();
-  }
-}
-
-class _MutableMouseTrackerAnnotation with Diagnosticable, ChangeNotifier implements MouseTrackerAnnotation {
-  /// Creates an annotation that can be used to find layers interested in mouse
-  /// movements.
-  _MutableMouseTrackerAnnotation({this.cursor});
-
-  @override
-  PointerEnterEventListener get onEnter => null;
-
-  @override
-  PointerHoverEventListener get onHover => null;
-
-  @override
-  PointerExitEventListener get onExit => null;
-
-  @override
-  PreparedMouseCursor cursor;
-
-  @override
-  void addCursorListener(VoidCallback listener) {
-    _cursorListeners.add(listener);
-  }
-
-  @override
-  void removeCursorListener(VoidCallback listener) {
-    _cursorListeners.remove(listener);
-  }
-
-  final ObserverList<VoidCallback> _cursorListeners = ObserverList<VoidCallback>();
-
-  void testNotify() {
-    final List<VoidCallback> localListeners = List<VoidCallback>.from(_cursorListeners);
-    for (final VoidCallback listener in localListeners) {
-      if (_cursorListeners.contains(listener))
-        listener();
-    }
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(FlagsSummary<Function>(
-      'callbacks',
-      <String, Function> {
-        'enter': onEnter,
-        'hover': onHover,
-        'exit': onExit,
-      },
-      ifEmpty: '<none>',
-    ));
-    properties.add(DiagnosticsProperty<PreparedMouseCursor>('cursor', cursor, defaultValue: null));
   }
 }

@@ -760,7 +760,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     context.addLayer(PlatformViewLayer(
             rect: offset & size,
             viewId: _controller.viewId,
-            hoverAnnotation: _hoverAnnotation));
+            hoverAnnotation: hoverAnnotation));
   }
 
   @override
@@ -788,6 +788,15 @@ mixin _PlatformViewGestureMixin on RenderBox {
   /// and apply it to all subsequent move events, but there is no down event
   /// for a hover. To support native hover gesture handling by platform views,
   /// we attach/detach this layer annotation as necessary.
+  MouseTrackerAnnotation get hoverAnnotation {
+    return _hoverAnnotation ??= MouseTrackerAnnotation(
+      onHover: (PointerHoverEvent event) {
+        if (_handlePointerEvent != null)
+          _handlePointerEvent(event);
+      },
+      cursor: SystemMouseCursors.uncontrolled,
+    );
+  }
   MouseTrackerAnnotation _hoverAnnotation;
 
   _HandlePointerEvent _handlePointerEvent;
@@ -832,22 +841,8 @@ mixin _PlatformViewGestureMixin on RenderBox {
   }
 
   @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    assert(_hoverAnnotation == null);
-    _hoverAnnotation = MouseTrackerAnnotation(
-      onHover: (PointerHoverEvent event) {
-        if (_handlePointerEvent != null)
-          _handlePointerEvent(event);
-      },
-      cursor: SystemMouseCursors.uncontrolled,
-    );
-  }
-
-  @override
   void detach() {
     _gestureRecognizer.reset();
-    _hoverAnnotation = null;
     super.detach();
   }
 }

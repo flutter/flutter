@@ -6163,15 +6163,6 @@ class _MouseRegionState extends State<MouseRegion> {
       widget.onExit(event);
   }
 
-  PreparedMouseCursor get cursor {
-    if (widget.cursor == null)
-      return null;
-    // Although MouseRegion only supports prepared mouse cursors for now.
-    assert(widget.cursor is PreparedMouseCursor,
-      'Unsupported mouse cursor type ${widget.cursor.runtimeType}.');
-    return widget.cursor as PreparedMouseCursor;
-  }
-
   PointerExitEventListener getHandleExit() {
     return widget.onExit == null ? null : handleExit;
   }
@@ -6194,7 +6185,7 @@ class _RawMouseRegion extends SingleChildRenderObjectWidget {
       onEnter: widget.onEnter,
       onHover: widget.onHover,
       onExit: owner.getHandleExit(),
-      cursor: owner.cursor,
+      cursor: widget.cursor,
       opaque: widget.opaque,
     );
   }
@@ -6206,7 +6197,7 @@ class _RawMouseRegion extends SingleChildRenderObjectWidget {
       ..onEnter = widget.onEnter
       ..onHover = widget.onHover
       ..onExit = owner.getHandleExit()
-      ..cursor = owner.cursor
+      ..cursor = widget.cursor
       ..opaque = widget.opaque;
   }
 }

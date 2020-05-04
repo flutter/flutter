@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection' show LinkedHashSet;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'mouse_tracking.dart';
 
 class _MouseCursorState {
-  MouseTrackerAnnotation currentAnnotation;
-  VoidCallback onCursorChange;
+  MouseCursorSession session;
 }
 
 class _FallbackAnnotation with Diagnosticable implements MouseTrackerAnnotation {
@@ -25,11 +27,7 @@ class _FallbackAnnotation with Diagnosticable implements MouseTrackerAnnotation 
   @override
   PointerExitEventListener get onExit => null;
   @override
-  PreparedMouseCursor get cursor => SystemMouseCursors.basic;
-  @override
-  void addCursorListener(VoidCallback listener) { }
-  @override
-  void removeCursorListener(VoidCallback listener) { }
+  MouseCursor get cursor => SystemMouseCursors.basic;
 }
 
 /// A mixin for [BaseMouseTracker] that sets the mouse pointer's cursors
@@ -41,16 +39,16 @@ class _FallbackAnnotation with Diagnosticable implements MouseTrackerAnnotation 
 mixin MouseTrackerCursorMixin on BaseMouseTracker {
   /// Returns the active mouse cursor of a device.
   ///
-  /// The return value is the last [PreparedMouseCursor] activated onto this
+  /// The return value is the last [MouseCursor] activated onto this
   /// device, even if the activation failed.
   ///
   /// Only valid when asserts are enabled. In release builds, always returns
   /// null.
   @visibleForTesting
-  PreparedMouseCursor debugDeviceActiveCursor(int device) {
-    PreparedMouseCursor result;
+  MouseCursor debugDeviceActiveCursor(int device) {
+    MouseCursor result;
     assert(() {
-      result = _mouseCursorStates[device]?.currentAnnotation?.cursor;
+      result = _mouseCursorStates[device]?.session?.cursor;
       return true;
     }());
     return result;
@@ -90,73 +88,71 @@ mixin MouseTrackerCursorMixin on BaseMouseTracker {
     }
 
     final bool hadState = _mouseCursorStates.containsKey(device);
-    _mouseCursorStates.putIfAbsent(device, () {
-      final _MouseCursorState state = _MouseCursorState();
-      state.onCursorChange = () {
-        assert(state.currentAnnotation?.cursor != null);
-        state.currentAnnotation.cursor._activate(device);
-      };
-      return state;
-    });
+    final _MouseCursorState state = _mouseCursorStates.putIfAbsent(device, () => _MouseCursorState());
 
-    final _MouseCursorState state = _mouseCursorStates[device];
-    final MouseTrackerAnnotation lastAnnotation = state.currentAnnotation;
-    assert(lastAnnotation != null || !hadState);
+    final MouseCursorSession lastSession = state.session;
+    assert(lastSession != null || !hadState);
     final MouseTrackerAnnotation nextAnnotation = _findCursorAnnotation(details.nextAnnotations);
-    if (lastAnnotation == nextAnnotation)
+    if (lastSession?.cursor == nextAnnotation.cursor)
       return;
 
-    lastAnnotation?.removeCursorListener(state.onCursorChange);
-    state.currentAnnotation = nextAnnotation;
-    nextAnnotation.addCursorListener(state.onCursorChange);
+    final MouseCursorSession nextSession = nextAnnotation.cursor.createSession(device);
+    state.session = nextSession;
 
-    final PreparedMouseCursor lastCursor = lastAnnotation?.cursor;
-    final PreparedMouseCursor nextCursor = nextAnnotation.cursor;
-    if (nextCursor != lastCursor) {
-      state.onCursorChange();
-    }
+    lastSession?.dispose();
+    nextSession.activate();
   }
 }
 
-/// Imperative methods that talk to the platform and controls mouse cursors.
+/// Manages the duration that a pointing device should display a specific mouse
+/// cursor.
 ///
-/// This class is usually used by [PreparedMouseCursor], and should not be used
-/// by widgets or render objects.
-class MouseCursorController {
-  // This class is not meant to be instatiated or extended; this constructor
-  // prevents instantiation and extension.
-  MouseCursorController._();
+/// While [MouseCursor] classes describe the kind of cursors, [MouseCursorSession]
+/// classes represents a continuous use of the cursor on a pointing device. The
+/// [MouseCursorSession] classes can be stateful. For example, a cursor that
+/// needs to load resources might want to set a temporary cursor first, then
+/// switch to the correct cursor after the load is completed.
+///
+/// A [MouseCursorSession] have the following lifecycle:
+/// 
+///  * When a pointing device should start displaying a cursor, [MouseTracker]
+///    creates a session by calling [MouseCursor.createSession] on the target
+///    cursor, and stores it in a table associated with the device.
+///  * [MouseTracker] then immediately calls the session's [activate], where the
+///    session should fetch resources and make system calls.
+///  * When the pointing device should start displaying a different cursor, which
+///    is determined by [MouseCursor]'s `==`, [MouseTracker] calls [dispose] on the
+///    session, and this session will no longer be used in the future.
+abstract class MouseCursorSession {
+  /// Create a session.
+  ///
+  /// All arguments must be non-null.
+  MouseCursorSession(this.cursor, this.device)
+    : assert(cursor != null),
+      assert(device != null);
 
-  static MethodChannel get _channel => SystemChannels.mouseCursor;
+  /// The cursor that created this session.
+  final MouseCursor cursor;
 
-  /// Request the platform to change the cursor of `device` to the system mouse
-  /// cursor specified by `shapeCode`.
+  /// The device ID of the pointing device.
+  final int device;
+
+  /// Override this method to do the work of changing the cursor of the device.
   ///
-  /// All arguments are required, and must not be null.
+  /// Called right after this session is created.
   ///
-  /// The returned future completes after the request is completed by the
-  /// platform. It completes with an error if any errors are thrown from the
-  /// platform. If the `shapeCode` is invalid, it is equivalent to setting
-  /// the cursor to [SystemMouseCursors.basic].
+  /// This method should collect necessary resources, then make system calls
+  /// (usually through [SystemChannels.mouseCursor]) to apply the effect.
+  /// This method may change the state of this class.
+  @protected
+  Future<void> activate();
+
+  /// Called when device stops displaying the cursor.
   ///
-  /// See also:
-  ///
-  ///  * [SystemMouseCursor], which explains system mouse cursors and shapes,
-  ///    and uses this method.
-  static Future<void> activateSystemCursor({
-    @required int device,
-    @required int shapeCode,
-  }) {
-    assert(device != null);
-    assert(shapeCode != null);
-    return _channel.invokeMethod<void>(
-      'activateSystemCursor',
-      <String, dynamic>{
-        'device': device,
-        'shapeCode': shapeCode,
-      },
-    );
-  }
+  /// After this call, this session instance will no longer be used in the
+  /// future.
+  @protected
+  void dispose() {}
 }
 
 /// An interface for mouse cursor definitions.
@@ -168,9 +164,9 @@ class MouseCursorController {
 ///
 /// A [MouseCursor] object may, but not necessarily, contain the full resources
 /// to be consumed by the system. If it does, it is a subclass to
-/// [PreparedMouseCursor], and can be directly used by render objects and 
+/// [MouseCursor], and can be directly used by render objects and 
 /// annotations. Otherwise, it only contains a full specification and need to
-/// be prepared (to collect resources) and converted to a [PreparedMouseCursor],
+/// be prepared (to collect resources) and converted to a [MouseCursor],
 /// which is done by [MouseRegion] the first time a pointer hovers over.
 ///
 /// During the painting phase, [MouseCursor] objects are assigned to regions on
@@ -180,19 +176,13 @@ class MouseCursorController {
 /// or defaults to [SystemMouseCursors.basic] if no cursors are associated with
 /// the position. [MouseTracker] changes the cursor of the pointer if the new
 /// active cursor is different from the previous active cursor, whose effect is
-/// defined by [PreparedMouseCursor.performActivate].
+/// defined by [MouseCursor.performActivate].
 ///
 /// ## Cursor classes
 ///
 /// A [SystemMouseCursor] is a prepared cursor that is natively supported by the
 /// platform that the program is running on. All supported system mouse cursors
 /// are enumerated in [SystemMouseCursors].
-///
-/// A [NoopMouseCursor] ia a a prepared cursor that keeps the current cursor when
-/// activated. It is useful in special cases such as a platform view where the
-/// mouse cursor is managed by other means, and wishes to block widgets behind it
-/// from overwriting the cursor changes. Its singleton instance is available at
-/// [SystemMouseCursors.uncontrolled].
 ///
 /// ## Using cursors
 ///
@@ -233,13 +223,13 @@ class MouseCursorController {
 /// cursors, or when there are no mice connected, will have no effect.
 /// 
 /// To assign mouse cursors to render objects or annoations, the cursor must 
-/// have been prepared, i.e. it must be a subclass to [PreparedMouseCursor].
+/// have been prepared, i.e. it must be a subclass to [MouseCursor].
 ///
 /// ## Related classes
 ///
-/// [MouseCursorController] implements low-level imperative control by directly
-/// talking to the platform. It can be called by [MouseCursor]s, but should not
-/// be directly used by widgets or render objects.
+/// [MouseCursorSession] represents the duration when a pointing device displays
+/// a cursor, and defines the states and behaviors of the cursor. Every mouse
+/// cursor class usually has a corresponding [MouseCursorSession] class.
 /// 
 /// [MouseTrackerCursorMixin] is a mixin that adds the feature of changing
 /// cursors to [BaseMouseTracker], which tracks the relationship between mouse
@@ -250,6 +240,17 @@ abstract class MouseCursor with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const MouseCursor();
+
+  /// Associate a pointing device to this cursor.
+  ///
+  /// A mouse cursor class usually has a corresponding [MouseCursorSession]
+  /// class, and instantiates such class in this method.
+  ///
+  /// This method is called each time a pointing device starts displaying this
+  /// cursor. A given cursor can be displayed by multiple devices at the same
+  /// time, in which case this method will be called separately for each device.
+  @protected
+  MouseCursorSession createSession(int device);
 
   /// A very short description of the mouse cursor.
   ///
@@ -270,37 +271,12 @@ abstract class MouseCursor with Diagnosticable {
   }
 }
 
-/// An interface for mouse cursors that have all resources prepared and ready to
-/// be used by the operating system.
-///
-/// Subclasses of [PreparedMouseCursor] should override [performActivate] and
-/// define the effect of setting a pointer to this cursor, which usually invoves
-/// calling the methods from [MouseCursorController].
-///
-/// [PreparedMouseCursor] can be assigned to more places than [MouseCursor].
-/// Besides widgets, it can also be assigned to a [RenderObject], such as
-/// [RenderMouseRegion], or be assigned to [MouseTrackerAnnotation] if you want
-/// to directly handle annoations.
-abstract class PreparedMouseCursor extends MouseCursor {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const PreparedMouseCursor();
+class _NoopMouseCursorSession extends MouseCursorSession {
+  _NoopMouseCursorSession(_NoopMouseCursor cursor, int device)
+    : super(cursor, device);
 
-  Future<void> _activate(int device) {
-    return performActivate(device);
-  }
-
-  /// Do the work of applying this cursor to a pointing device.
-  ///
-  /// Do not call this function directly: assign this cursor object to a region
-  /// instead (as described in the documentation of [PreparedMouseCursor]). This
-  /// function is called by [MouseTracker] during a device update where a pointer
-  /// enters the region.
-  ///
-  /// In implementing this function, you should call methods of
-  /// [MouseCursorController] to send requests to the platform.
-  @protected
-  Future<void> performActivate(int device);
+  @override
+  Future<void> activate() async { /* Nothing */ }
 }
 
 /// A mouse cursor that doesn't change the cursor when activated.
@@ -312,18 +288,37 @@ abstract class PreparedMouseCursor extends MouseCursor {
 ///
 /// To use this class, use [SystemMouseCursors.uncontrolled]. Directly
 /// instantiating this class is not allowed.
-class NoopMouseCursor extends PreparedMouseCursor {
+class _NoopMouseCursor extends MouseCursor {
   // Application code shouldn't directly instantiate this class, since its only
   // instance is accessible at [SystemMouseCursors.releaseControl].
-  const NoopMouseCursor._();
+  const _NoopMouseCursor._();
 
   @override
   @protected
-  Future<void> performActivate(int device) async {
-  }
+  _NoopMouseCursorSession createSession(int device) => _NoopMouseCursorSession(this, device);
 
+  // The [debugDescription] is '' so that its toString() returns 'NoopMouseCursor()'.
   @override
   String get debugDescription => '';
+}
+
+class _SystemMouseCursorSession extends MouseCursorSession {
+  _SystemMouseCursorSession(SystemMouseCursor cursor, int device)
+    : super(cursor, device);
+
+  @override
+  SystemMouseCursor get cursor => super.cursor as SystemMouseCursor;
+
+  @override
+  Future<void> activate() {
+    return SystemChannels.mouseCursor.invokeMethod<void>(
+      'activateSystemCursor',
+      <String, dynamic>{
+        'device': device,
+        'shapeCode': cursor.shapeCode,
+      },
+    );
+  }
 }
 
 /// A mouse cursor that is standard on the platform that the application is
@@ -343,7 +338,7 @@ class NoopMouseCursor extends PreparedMouseCursor {
 /// [SystemMouseCursors] enumerates the complete set of system cursors supported
 /// by Flutter, which are hard-coded in the engine. Therefore, manually
 /// instantiating this class is not supported.
-class SystemMouseCursor extends PreparedMouseCursor {
+class SystemMouseCursor extends MouseCursor {
   // Application code shouldn't directly instantiate system mouse cursors, since
   // the supported system cursors are enumerated in [SystemMouseCursors].
   const SystemMouseCursor._({
@@ -363,6 +358,10 @@ class SystemMouseCursor extends PreparedMouseCursor {
   final String debugDescription;
 
   @override
+  @protected
+  _SystemMouseCursorSession createSession(int device) => _SystemMouseCursorSession(this, device);
+
+  @override
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
@@ -372,15 +371,6 @@ class SystemMouseCursor extends PreparedMouseCursor {
 
   @override
   int get hashCode => shapeCode;
-
-  @override
-  @protected
-  Future<void> performActivate(int device) async {
-    MouseCursorController.activateSystemCursor(
-      shapeCode: shapeCode,
-      device: device,
-    );
-  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -421,7 +411,7 @@ class SystemMouseCursors {
   /// that might overwrite the system request upon pointer entering; the cursor
   /// must not be null either, since that allows the widgets behind the region to
   /// change cursors.
-  static const NoopMouseCursor uncontrolled = NoopMouseCursor._();
+  static const MouseCursor uncontrolled = _NoopMouseCursor._();
 
   // The `shapeCode` values are chosen as the first 6 bytes of the MD5 hash of the
   // cursor's name at the time of creation. The reason for the 6-byte limit

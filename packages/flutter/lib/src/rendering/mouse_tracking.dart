@@ -33,6 +33,12 @@ typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 /// To use an annotation, push it with [AnnotatedRegionLayer] during painting.
 /// The annotation's callbacks or configurations will be used depending on the
 /// relationship between annotations and mouse pointers.
+/// 
+/// A [RenderObject] who uses this class must not dispose this class in its
+/// `detach`, even if it recreates a new one in `attach`, because the object
+/// might be detached and attached during the same frame during a reparent, and
+/// replacing the `MouseTrackerAnnotation` will cause an unnecessary `onExit` and
+/// `onEnter`.
 ///
 /// This class is also the type parameter of the annotation search started by
 /// [MouseTracker].
@@ -124,35 +130,7 @@ class MouseTrackerAnnotation with Diagnosticable {
   ///    values to this field.
   ///  * [MouseTrackedRenderObjectMixin], which is a utility class that simplifies
   ///    defining annotations that support varying [cursor].
-  final PreparedMouseCursor cursor;
-
-  /// Calls listener every time the cursor changes.
-  ///
-  /// This is listened to by [MouseTracker], so that when [cursor] changes
-  /// mouse pointers that are hovering over this region are properly updated.
-  ///
-  /// The [MouseTrackerAnnotation] is immutable and does not support varying
-  /// [cursor], therefore this method has no effect. For a subclass that allows
-  /// varying [cursor], this method should forward this call to a
-  /// [ChangeNotifier] and behave as follows:
-  ///
-  ///  * If the change of [cursor] is from null to non-null or vice versa, trigger
-  ///    a device update (e.g. [RenderObject.markNeedsPaint]).
-  ///  * Otherwise, fire all listeners.
-  ///
-  /// Listeners can be removed with [removeStatusListener].
-  void addCursorListener(VoidCallback listener) { }
-
-  /// Stops calling the listener every time the cursor changes.
-  ///
-  /// This is listened to by [MouseTracker]. The [MouseTrackerAnnotation] is
-  /// immutable and does not support varying [cursor], therefore this method has
-  /// no effect. For a subclass that allows varying [cursor], this method should
-  /// foward this call to a [ChangeNotifier] that removes the listener added via
-  /// [addCursorListener].
-  ///
-  /// Listeners can be added with [addCursorListener].
-  void removeCursorListener(VoidCallback listener) { }
+  final MouseCursor cursor;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -166,7 +144,7 @@ class MouseTrackerAnnotation with Diagnosticable {
       },
       ifEmpty: '<none>',
     ));
-    properties.add(DiagnosticsProperty<PreparedMouseCursor>('cursor', cursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: null));
   }
 }
 
@@ -200,10 +178,10 @@ mixin MouseTrackedRenderObjectMixin on RenderObject implements MouseTrackerAnnot
   PointerExitEventListener onExit;
 
   @override
-  PreparedMouseCursor get cursor => _cursor;
-  PreparedMouseCursor _cursor;
-  set cursor(PreparedMouseCursor value) {
-    final PreparedMouseCursor oldCursor = _cursor;
+  MouseCursor get cursor => _cursor;
+  MouseCursor _cursor;
+  set cursor(MouseCursor value) {
+    final MouseCursor oldCursor = _cursor;
     _cursor = value;
     if (attached && oldCursor != value) {
       if ((oldCursor != null) == (value != null)) {
@@ -212,16 +190,6 @@ mixin MouseTrackedRenderObjectMixin on RenderObject implements MouseTrackerAnnot
         markNeedsPaint();
       }
     }
-  }
-
-  @override
-  void addCursorListener(VoidCallback listener) {
-    _cursorListeners.add(listener);
-  }
-
-  @override
-  void removeCursorListener(VoidCallback listener) {
-    _cursorListeners.remove(listener);
   }
 
   final ObserverList<VoidCallback> _cursorListeners = ObserverList<VoidCallback>();

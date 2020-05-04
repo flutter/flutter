@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 
@@ -1443,7 +1444,7 @@ void main() {
     expect(logs, <String>['paint', 'hover-enter']);
   });
 
-  testWidgets("Changing MouseRegion.cursor is effective and doesn't repaint", (WidgetTester tester) async {
+  testWidgets('Changing MouseRegion.cursor is effective and repaints', (WidgetTester tester) async {
     final List<String> logPaints = <String>[];
     final List<String> logEnters = <String>[];
 
@@ -1486,7 +1487,7 @@ void main() {
       ),
     ));
 
-    expect(logPaints, isEmpty);
+    expect(logPaints, <String>['paint']);
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     expect(logEnters, isEmpty);
     logPaints.clear();
@@ -1559,6 +1560,89 @@ void main() {
     logEnters.clear();
   });
 
+  testWidgets('Does not trigger side effects during a reparent', (WidgetTester tester) async {
+    final List<String> logEnters = <String>[];
+    final List<String> logExits = <String>[];
+    final List<String> logCursors = <String>[];
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(100, 100));
+    addTearDown(gesture.removePointer);
+    SystemChannels.mouseCursor.setMockMethodCallHandler((_) async {
+      logCursors.add('cursor');
+    });
+
+    final GlobalKey key = GlobalKey();
+
+    // Pump a row of 2 SizedBox's, each taking 50px of width.
+    await tester.pumpWidget(_Scaffold(
+      topLeft: SizedBox(
+        width: 100,
+        height: 50,
+        child: Row(
+          children: <Widget>[
+            SizedBox(
+              width: 50,
+              height: 50,
+              child: MouseRegion(
+                key: key,
+                onEnter: (_) { logEnters.add('enter'); },
+                onExit: (_) { logEnters.add('enter'); },
+                cursor: SystemMouseCursors.click,
+              ),
+            ),
+            const SizedBox(
+              width: 50,
+              height: 50,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    // Move to the mouse region inside the first box.
+    await gesture.moveTo(const Offset(40, 5));
+
+    expect(logEnters, <String>['enter']);
+    expect(logExits, isEmpty);
+    expect(logCursors, isNotEmpty);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    logEnters.clear();
+    logExits.clear();
+    logCursors.clear();
+
+    // Move MouseRegion to the second box while resizing them so that the
+    // mouse is still on the MouseRegion
+    await tester.pumpWidget(_Scaffold(
+      topLeft: SizedBox(
+        width: 100,
+        height: 50,
+        child: Row(
+          children: <Widget>[
+            const SizedBox(
+              width: 30,
+              height: 50,
+            ),
+            SizedBox(
+              width: 70,
+              height: 50,
+              child: MouseRegion(
+                key: key,
+                onEnter: (_) { logEnters.add('enter'); },
+                onExit: (_) { logEnters.add('enter'); },
+                cursor: SystemMouseCursors.click,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    expect(logEnters, isEmpty);
+    expect(logExits, isEmpty);
+    expect(logCursors, isEmpty);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
 
   testWidgets("RenderMouseRegion's debugFillProperties when default", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
