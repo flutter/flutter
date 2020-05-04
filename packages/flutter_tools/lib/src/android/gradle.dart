@@ -636,6 +636,8 @@ void printHowToConsumeAar({
   @required Set<String> buildModes,
   @required String androidPackage,
   @required Directory repoDirectory,
+  @required Logger logger,
+  @required FileSystem fileSystem,
   String buildNumber,
 }) {
   assert(buildModes != null && buildModes.isNotEmpty);
@@ -643,10 +645,9 @@ void printHowToConsumeAar({
   assert(repoDirectory != null);
   buildNumber ??= '1.0';
 
-  globals.printStatus('''
-
-${globals.terminal.bolden('Consuming the Module')}
-  1. Open ${globals.fs.path.join('<host>', 'app', 'build.gradle')}
+  logger.printStatus('\nConsuming the Module', emphasis: true);
+  logger.printStatus('''
+  1. Open ${fileSystem.path.join('<host>', 'app', 'build.gradle')}
   2. Ensure you have the repositories configured, otherwise add them:
 
       repositories {
@@ -663,16 +664,16 @@ ${globals.terminal.bolden('Consuming the Module')}
     dependencies {''');
 
   for (final String buildMode in buildModes) {
-    globals.printStatus("""
+    logger.printStatus("""
       ${buildMode}Implementation '$androidPackage:flutter_$buildMode:$buildNumber'""");
   }
 
-  globals.printStatus('''
+  logger.printStatus('''
     }
 ''');
 
   if (buildModes.contains('profile')) {
-    globals.printStatus('''
+    logger.printStatus('''
 
   4. Add the `profile` build type:
 
@@ -686,7 +687,7 @@ ${globals.terminal.bolden('Consuming the Module')}
 ''');
   }
 
-  globals.printStatus('To learn more, visit https://flutter.dev/go/build-aar');
+  logger.printStatus('To learn more, visit https://flutter.dev/go/build-aar');
 }
 
 String _hex(List<int> bytes) {
