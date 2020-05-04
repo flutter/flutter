@@ -53,11 +53,7 @@ class TweenSequence<T> extends Tween<T> with TweenWithoutSettersMixin<T> {
   /// possible.
   TweenSequence(List<TweenSequenceItem<T>> items)
       : assert(items != null),
-        assert(items.isNotEmpty),
-        super(
-        begin: items.first.tween.transform(0.0),
-        end: items.last.tween.transform(1.0),
-      ) {
+        assert(items.isNotEmpty) {
     _items.addAll(items);
 
     double totalWeight = 0.0;
@@ -72,6 +68,12 @@ class TweenSequence<T> extends Tween<T> with TweenWithoutSettersMixin<T> {
       start = end;
     }
   }
+
+  @override
+  T get begin => _items.first.tween.transform(0.0);
+
+  @override
+  T get end => _items.last.tween.transform(1.0);
 
   final List<TweenSequenceItem<T>> _items = <TweenSequenceItem<T>>[];
   final List<_Interval> _intervals = <_Interval>[];
