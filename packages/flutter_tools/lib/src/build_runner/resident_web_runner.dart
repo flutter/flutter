@@ -191,6 +191,11 @@ abstract class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
+  Future<List<FlutterView>> listFlutterViews() async {
+    return <FlutterView>[];
+  }
+
+  @override
   Future<void> debugDumpApp() async {
     try {
       await _vmService
