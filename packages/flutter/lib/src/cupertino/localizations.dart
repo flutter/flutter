@@ -150,6 +150,14 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String get alertDialogLabel;
 
+  /// The accessibility label used on a tab in a [CupertinoTabBar].
+  ///
+  /// This message describes the index of the selected tab and how many tabs
+  /// there are, e.g. 'tab, 1 of 2' in United States English.
+  ///
+  /// `tabIndex` and `tabCount` must be greater than or equal to one.
+  String tabSemanticsLabel({int tabIndex, int tabCount});
+
   /// Hour that is shown in [CupertinoTimerPicker] corresponding to
   /// the given hour value.
   ///
@@ -354,6 +362,13 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String get alertDialogLabel => 'Alert';
+
+  @override
+  String tabSemanticsLabel({int tabIndex, int tabCount}) {
+    assert(tabIndex >= 1);
+    assert(tabCount >= 1);
+    return 'tab, $tabIndex of $tabCount';
+  }
 
   @override
   String timerPickerHour(int hour) => hour.toString();

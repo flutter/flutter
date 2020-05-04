@@ -19,5 +19,6 @@
   "copyButtonLabel": "Kopieer",
   "pasteButtonLabel": "Plak",
   "selectAllButtonLabel": "Kies alles",
+  "tabSemanticsLabel": "TBD",
   "modalBarrierDismissLabel": "Maak toe"
 }

@@ -19,5 +19,6 @@
   "copyButtonLabel": "Копиране",
   "pasteButtonLabel": "Поставяне",
   "selectAllButtonLabel": "Избиране на всички",
+  "tabSemanticsLabel": "TBD",
   "modalBarrierDismissLabel": "Отхвърляне"
 }

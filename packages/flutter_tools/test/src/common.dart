@@ -300,7 +300,7 @@ class FakeVmServiceRequest implements VmServiceExpectation {
   const FakeVmServiceRequest({
     @required this.method,
     @required this.id,
-    @required this.args,
+    this.args = const <String, Object>{},
     this.jsonResponse,
     this.errorCode,
     this.close = false,

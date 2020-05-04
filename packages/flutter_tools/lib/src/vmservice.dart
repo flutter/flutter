@@ -43,7 +43,7 @@ abstract class RPCErrorCodes {
   /// Internal JSON-RPC error.
   static const int kInternalError = -32603;
 
-  /// Application specific error codes.s
+  /// Application specific error codes.
   static const int kServerError = -32000;
 }
 
@@ -155,32 +155,19 @@ vm_service.VmService setUpVmService(
 ) {
   if (reloadSources != null) {
     vmService.registerServiceCallback('reloadSources', (Map<String, dynamic> params) async {
-      final String isolateId = params['isolateId'].value as String;
-      final bool force = params['force'] as bool ?? false;
-      final bool pause = params['pause'] as bool ?? false;
+      final String isolateId = _validateRpcStringParam('reloadSources', params, 'isolateId');
+      final bool force = _validateRpcBoolParam('reloadSources', params, 'force');
+      final bool pause = _validateRpcBoolParam('reloadSources', params, 'pause');
 
-      if (isolateId.isEmpty) {
-        throw vm_service.RPCError(
-          "Invalid 'isolateId': $isolateId",
-          RPCErrorCodes.kInvalidParams,
-          '',
-        );
-      }
-      try {
-        await reloadSources(isolateId, force: force, pause: pause);
-        return <String, String>{'type': 'Success'};
-      } on vm_service.RPCError {
-        rethrow;
-      } on Exception catch (e, st) {
-        throw vm_service.RPCError(
-          'Error during Sources Reload: $e\n$st',
-          RPCErrorCodes.kServerError,
-          '',
-        );
-      }
+      await reloadSources(isolateId, force: force, pause: pause);
+
+      return <String, dynamic>{
+        'result': <String, Object>{
+          'type': 'Success',
+        }
+      };
     });
     vmService.registerService('reloadSources', 'Flutter Tools');
-
   }
 
   if (reloadMethod != null) {
@@ -194,56 +181,30 @@ vm_service.VmService setUpVmService(
     // If the build method of a StatefulWidget is updated, then this is the name
     // of the Widget class that created the State object.
     vmService.registerServiceCallback('reloadMethod', (Map<String, dynamic> params) async {
-      final String libraryId = params['library'] as String;
-      final String classId = params['class'] as String;
-
-      if (libraryId.isEmpty) {
-        throw vm_service.RPCError(
-          "Invalid 'libraryId': $libraryId",
-          RPCErrorCodes.kInvalidParams,
-          '',
-        );
-      }
-      if (classId.isEmpty) {
-        throw vm_service.RPCError(
-          "Invalid 'classId': $classId",
-          RPCErrorCodes.kInvalidParams,
-          '',
-        );
-      }
+      final String libraryId = _validateRpcStringParam('reloadMethod', params, 'library');
+      final String classId = _validateRpcStringParam('reloadMethod', params, 'class');
 
       globals.printTrace('reloadMethod not yet supported, falling back to hot reload');
 
-      try {
-        await reloadMethod(
-          libraryId: libraryId,
-          classId: classId,
-        );
-        return <String, String>{'type': 'Success'};
-      } on vm_service.RPCError {
-        rethrow;
-      } on Exception catch (e, st) {
-        throw vm_service.RPCError('Error during Sources Reload: $e\n$st', -32000, '');
-      }
+      await reloadMethod(libraryId: libraryId, classId: classId);
+      return <String, dynamic>{
+        'result': <String, Object>{
+          'type': 'Success',
+        }
+      };
     });
     vmService.registerService('reloadMethod', 'Flutter Tools');
   }
 
   if (restart != null) {
     vmService.registerServiceCallback('hotRestart', (Map<String, dynamic> params) async {
-      final bool pause = params['pause'] as bool ?? false;
-      try {
-        await restart(pause: pause);
-        return <String, String>{'type': 'Success'};
-      } on vm_service.RPCError {
-        rethrow;
-      } on Exception catch (e, st) {
-        throw vm_service.RPCError(
-          'Error during Hot Restart: $e\n$st',
-          RPCErrorCodes.kServerError,
-          '',
-        );
-      }
+      final bool pause = _validateRpcBoolParam('compileExpression', params, 'pause');
+      await restart(pause: pause);
+      return <String, dynamic>{
+        'result': <String, Object>{
+          'type': 'Success',
+        }
+      };
     });
     vmService.registerService('hotRestart', 'Flutter Tools');
   }
@@ -264,66 +225,35 @@ vm_service.VmService setUpVmService(
 
   if (compileExpression != null) {
     vmService.registerServiceCallback('compileExpression', (Map<String, dynamic> params) async {
-      final String isolateId = params['isolateId'] as String;
-      if (isolateId is! String || isolateId.isEmpty) {
-        throw throw vm_service.RPCError(
-          "Invalid 'isolateId': $isolateId",
-          RPCErrorCodes.kInvalidParams,
-          '',
-        );
-      }
-      final String expression = params['expression'] as String;
-      if (expression is! String || expression.isEmpty) {
-        throw throw vm_service.RPCError(
-          "Invalid 'expression': $expression",
-          RPCErrorCodes.kInvalidParams,
-          '',
-        );
-      }
+      final String isolateId = _validateRpcStringParam('compileExpression', params, 'isolateId');
+      final String expression = _validateRpcStringParam('compileExpression', params, 'expression');
       final List<String> definitions = List<String>.from(params['definitions'] as List<dynamic>);
       final List<String> typeDefinitions = List<String>.from(params['typeDefinitions'] as List<dynamic>);
       final String libraryUri = params['libraryUri'] as String;
       final String klass = params['klass'] as String;
-      final bool isStatic = params['isStatic'] as bool ?? false;
-      try {
-        final String kernelBytesBase64 = await compileExpression(isolateId,
-            expression, definitions, typeDefinitions, libraryUri, klass,
-            isStatic);
-        return <String, dynamic>{
-          'type': 'Success',
-          'result': <String, dynamic>{
-            'result': <String, dynamic>{'kernelBytes': kernelBytesBase64},
-          },
-        };
-      } on vm_service.RPCError {
-        rethrow;
-      } on Exception catch (e, st) {
-        throw vm_service.RPCError(
-          'Error during expression compilation: $e\n$st',
-          RPCErrorCodes.kServerError,
-          '',
-        );
-      }
+      final bool isStatic = _validateRpcBoolParam('compileExpression', params, 'isStatic');
+
+      final String kernelBytesBase64 = await compileExpression(isolateId,
+          expression, definitions, typeDefinitions, libraryUri, klass,
+          isStatic);
+      return <String, dynamic>{
+        'type': 'Success',
+        'result': <String, dynamic>{
+          'result': <String, dynamic>{'kernelBytes': kernelBytesBase64},
+        },
+      };
     });
     vmService.registerService('compileExpression', 'Flutter Tools');
   }
   if (device != null) {
     vmService.registerServiceCallback('flutterMemoryInfo', (Map<String, dynamic> params) async {
-      try {
-        final MemoryInfo result = await device.queryMemoryInfo();
-        return <String, dynamic>{
-          'result': <String, Object>{
-            'type': 'Success',
-            ...result.toJson(),
-          }
-        };
-      } on Exception catch (e, st) {
-        throw vm_service.RPCError(
-          'Error during memory info query $e\n$st',
-          RPCErrorCodes.kServerError,
-          '',
-        );
-      }
+      final MemoryInfo result = await device.queryMemoryInfo();
+      return <String, dynamic>{
+        'result': <String, Object>{
+          'type': 'Success',
+          ...result.toJson(),
+        }
+      };
     });
     vmService.registerService('flutterMemoryInfo', 'Flutter Tools');
   }
@@ -399,6 +329,30 @@ Future<vm_service.VmService> _connect(
   // keeping on trucking and failing farther down the process.
   await delegateService.getVersion();
   return service;
+}
+
+String _validateRpcStringParam(String methodName, Map<String, dynamic> params, String paramName) {
+  final dynamic value = params[paramName];
+  if (value is! String || (value as String).isEmpty) {
+    throw vm_service.RPCError(
+      methodName,
+      RPCErrorCodes.kInvalidParams,
+      "Invalid '$paramName': $value",
+    );
+  }
+  return value as String;
+}
+
+bool _validateRpcBoolParam(String methodName, Map<String, dynamic> params, String paramName) {
+  final dynamic value = params[paramName];
+  if (value != null && value is! bool) {
+    throw vm_service.RPCError(
+      methodName,
+      RPCErrorCodes.kInvalidParams,
+      "Invalid '$paramName': $value",
+    );
+  }
+  return (value as bool) ?? false;
 }
 
 /// Peered to an Android/iOS FlutterView widget on a device.

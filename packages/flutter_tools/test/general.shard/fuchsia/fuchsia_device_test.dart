@@ -639,7 +639,6 @@ void main() {
           FakeVmServiceRequest(
             id: '1',
             method: kListViewsMethod,
-            args: null,
             jsonResponse: <String, Object>{
               'views': <Object>[
                 for (FlutterView view in views)

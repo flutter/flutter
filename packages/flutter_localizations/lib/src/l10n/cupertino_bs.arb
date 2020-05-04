@@ -24,5 +24,6 @@
   "copyButtonLabel": "Kopiraj",
   "pasteButtonLabel": "Zalijepi",
   "selectAllButtonLabel": "Odaberi sve",
+  "tabSemanticsLabel": "TBD",
   "modalBarrierDismissLabel": "Odbaci"
 }

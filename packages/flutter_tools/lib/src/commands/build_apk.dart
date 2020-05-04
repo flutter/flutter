@@ -32,6 +32,7 @@ class BuildApkCommand extends BuildSubCommand {
     usesExtraFrontendOptions();
     addBundleSkSLPathOption(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
+    addBuildPerformanceFile(hide: !verboseHelp);
     argParser
       ..addFlag('split-per-abi',
         negatable: false,
