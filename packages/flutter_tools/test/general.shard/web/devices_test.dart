@@ -76,7 +76,7 @@ void main() {
     expect(chromeDevice.supportsHotReload, true);
     expect(chromeDevice.supportsHotRestart, true);
     expect(chromeDevice.supportsStartPaused, true);
-    expect(chromeDevice.supportsFlutterExit, true);
+    expect(chromeDevice.supportsFlutterExit, false);
     expect(chromeDevice.supportsScreenshot, false);
     expect(await chromeDevice.isLocalEmulator, false);
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
@@ -96,7 +96,7 @@ void main() {
     expect(chromeDevice.supportsHotReload, true);
     expect(chromeDevice.supportsHotRestart, true);
     expect(chromeDevice.supportsStartPaused, true);
-    expect(chromeDevice.supportsFlutterExit, true);
+    expect(chromeDevice.supportsFlutterExit, false);
     expect(chromeDevice.supportsScreenshot, false);
     expect(await chromeDevice.isLocalEmulator, false);
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
