@@ -389,7 +389,7 @@ void main() {
     expect(controller.offset, 1600.0);
     await tester.pumpAndSettle();
     // It will be corrected after a auto scroll animation.
-    expect(controller.offset, 600.0); // Viewport is 600px tall.
+    expect(controller.offset, 800.0);
   });
 
   testWidgets('SliverFixedExtentList with SliverChildBuilderDelegate auto-correct scroll offset - reasonable', (WidgetTester tester) async {
