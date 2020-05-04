@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -29,6 +30,7 @@ import 'package:mockito/mockito.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/testbed.dart';
+import 'vmservice_test.dart';
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
@@ -82,6 +84,7 @@ void main() {
   final Uri testUri = Uri.parse('foo://bar');
   Testbed testbed;
   MockFlutterDevice mockFlutterDevice;
+  MockVMService mockVMService;
   MockDevFS mockDevFS;
   ResidentRunner residentRunner;
   MockDevice mockDevice;
@@ -103,6 +106,7 @@ void main() {
     });
     mockFlutterDevice = MockFlutterDevice();
     mockDevice = MockDevice();
+    mockVMService = MockVMService();
     mockDevFS = MockDevFS();
 
     // DevFS Mocks
@@ -136,6 +140,11 @@ void main() {
     when(mockFlutterDevice.device).thenReturn(mockDevice);
     when(mockFlutterDevice.stopEchoingDeviceLog()).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.observatoryUris).thenAnswer((_) => Stream<Uri>.value(testUri));
+    when(mockFlutterDevice.connect(
+      reloadSources: anyNamed('reloadSources'),
+      restart: anyNamed('restart'),
+      compileExpression: anyNamed('compileExpression'),
+    )).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.setupDevFS(any, any, packagesFilePath: anyNamed('packagesFilePath')))
       .thenAnswer((Invocation invocation) async {
         return testUri;
@@ -177,6 +186,7 @@ void main() {
   test('ResidentRunner can attach to device successfully', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
+      listViews,
     ]);
     final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> onAppStart = Completer<void>.sync();
@@ -198,6 +208,7 @@ void main() {
 
   test('ResidentRunner can attach to device successfully with --fast-start', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
       listViews,
       listViews,
       FakeVmServiceRequest(
@@ -277,6 +288,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
+      listViews,
     ]);
     when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
       return 'Example';
@@ -329,6 +341,7 @@ void main() {
       listViews,
       listViews,
       listViews,
+      listViews,
       FakeVmServiceRequest(
         method: 'getIsolate',
         args: <String, Object>{
@@ -373,6 +386,7 @@ void main() {
 
   test('ResidentRunner can send target platform to analytics from full restart', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
       listViews,
       listViews,
       FakeVmServiceRequest(
@@ -441,6 +455,7 @@ void main() {
 
   test('ResidentRunner Can handle an RPC exception from hot restart', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
       listViews,
     ]);
     when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
@@ -955,6 +970,7 @@ void main() {
   test('HotRunner writes vm service file when providing debugging option', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
+      listViews,
     ]);
     setWsAddress(testUri, fakeVmServiceHost.vmService);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
@@ -978,6 +994,7 @@ void main() {
 
   test('HotRunner unforwards device ports', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
       listViews,
     ]);
     final MockDevicePortForwarder mockPortForwarder = MockDevicePortForwarder();
@@ -1009,6 +1026,7 @@ void main() {
   test('HotRunner handles failure to write vmservice file', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
+      listViews,
     ]);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
@@ -1034,7 +1052,9 @@ void main() {
 
 
   test('ColdRunner writes vm service file when providing debugging option', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+    ]);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     setWsAddress(testUri, fakeVmServiceHost.vmService);
     residentRunner = ColdRunner(
@@ -1083,6 +1103,30 @@ void main() {
       globals.fs.file(globals.artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: BuildMode.debug))
         .absolute.uri.toString(),
     );
+  }));
+
+  test('connect sets up log reader', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final MockDevice mockDevice = MockDevice();
+    final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
+    when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(mockLogReader);
+
+    final TestFlutterDevice flutterDevice = TestFlutterDevice(
+      mockDevice,
+      observatoryUris: Stream<Uri>.value(testUri),
+    );
+
+    await flutterDevice.connect();
+    verify(mockLogReader.connectedVMService = mockVMService);
+  }, overrides: <Type, Generator>{
+    VMServiceConnector: () => (Uri httpUri, {
+      ReloadSources reloadSources,
+      Restart restart,
+      CompileExpression compileExpression,
+      ReloadMethod reloadMethod,
+      io.CompressionOptions compression,
+      Device device,
+    }) async => mockVMService,
   }));
 
   test('nextPlatform moves through expected platforms', () {

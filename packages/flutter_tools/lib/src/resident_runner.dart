@@ -164,6 +164,68 @@ class FlutterDevice {
   /// Whether the stream [observatoryUris] is still open.
   bool get isWaitingForObservatory => _isListeningForObservatoryUri ?? false;
 
+  /// If the [reloadSources] parameter is not null the 'reloadSources' service
+  /// will be registered.
+  /// The 'reloadSources' service can be used by other Service Protocol clients
+  /// connected to the VM (e.g. Observatory) to request a reload of the source
+  /// code of the running application (a.k.a. HotReload).
+  /// The 'compileExpression' service can be used to compile user-provided
+  /// expressions requested during debugging of the application.
+  /// This ensures that the reload process follows the normal orchestration of
+  /// the Flutter Tools and not just the VM internal service.
+  Future<void> connect({
+    ReloadSources reloadSources,
+    Restart restart,
+    CompileExpression compileExpression,
+    ReloadMethod reloadMethod,
+  }) {
+    final Completer<void> completer = Completer<void>();
+    StreamSubscription<void> subscription;
+    bool isWaitingForVm = false;
+
+    subscription = observatoryUris.listen((Uri observatoryUri) async {
+      // FYI, this message is used as a sentinel in tests.
+      globals.printTrace('Connecting to service protocol: $observatoryUri');
+      isWaitingForVm = true;
+      vm_service.VmService service;
+
+      try {
+        service = await connectToVmService(
+          observatoryUri,
+          reloadSources: reloadSources,
+          restart: restart,
+          compileExpression: compileExpression,
+          reloadMethod: reloadMethod,
+          device: device,
+        );
+      } on Exception catch (exception) {
+        globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
+        if (!completer.isCompleted && !_isListeningForObservatoryUri) {
+          completer.completeError('failed to connect to $observatoryUri');
+        }
+        return;
+      }
+      if (completer.isCompleted) {
+        return;
+      }
+      globals.printTrace('Successfully connected to service protocol: $observatoryUri');
+
+      vmService = service;
+      (await device.getLogReader(app: package)).connectedVMService = vmService;
+      completer.complete();
+      await subscription.cancel();
+    }, onError: (dynamic error) {
+      globals.printTrace('Fail to handle observatory URI: $error');
+    }, onDone: () {
+      _isListeningForObservatoryUri = false;
+      if (!completer.isCompleted && !isWaitingForVm) {
+        completer.completeError('connection to device ended too early');
+      }
+    });
+    _isListeningForObservatoryUri = true;
+    return completer.future;
+  }
+
   Future<void> exitApps({
     @visibleForTesting Duration timeoutDelay = const Duration(seconds: 10),
   }) async {
@@ -384,9 +446,8 @@ class FlutterDevice {
 
   Future<void> initLogReader() async {
     final vm_service.VM vm = await vmService.getVM();
-    print(vm);
     final DeviceLogReader logReader = await device.getLogReader(app: package);
-    logReader?.appPid = vm.pid;
+    logReader.appPid = vm.pid;
   }
 
   Future<int> runHot({
