@@ -114,7 +114,7 @@ void main() {
     expect(device.supportsHotReload, true);
     expect(device.supportsHotRestart, true);
     expect(device.supportsStartPaused, true);
-    expect(device.supportsFlutterExit, true);
+    expect(device.supportsFlutterExit, false);
     expect(device.supportsScreenshot, false);
     expect(await device.isLocalEmulator, false);
     expect(device.getLogReader(), isA<NoOpDeviceLogReader>());
