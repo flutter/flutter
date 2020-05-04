@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -222,6 +223,48 @@ assets:
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('does not track wildcard directories from dependencies', () async {
+    globals.fs.file('.packages').writeAsStringSync(r'''
+example:lib/
+foo:foo/lib/
+''');
+    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+      .createSync(recursive: true);
+    globals.fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+dependencies:
+  foo: any
+''');
+    globals.fs.file('foo/pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'''
+name: foo
+
+flutter:
+  assets:
+    - bar/
+''');
+    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+    globals.fs.file('foo/bar/fizz.txt').createSync(recursive: true);
+
+    await bundle.build(manifestPath: 'pubspec.yaml');
+
+    expect(bundle.entries, hasLength(4));
+    expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
+
+    // Does not track dependency's wildcard directories.
+    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+      .deleteSync();
+
+    expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
   });
 }
 
