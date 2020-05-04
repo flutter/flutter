@@ -74,8 +74,6 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/view/FlutterMain.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/view/TextureRegistry.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/view/ResourcePaths.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/view/ResourceCleaner.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/view/FlutterRunArguments.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityViewEmbedder.java" />
