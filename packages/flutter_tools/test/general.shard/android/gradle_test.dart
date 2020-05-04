@@ -35,68 +35,74 @@ void main() {
   Cache.flutterRoot = getFlutterRoot();
 
   group('build artifacts', () {
-    test('getApkDirectory in app projects', () {
+    FileSystem fileSystem;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+    });
+
+    testWithoutContext('getApkDirectory in app projects', () {
       final FlutterProject project = MockFlutterProject();
       final AndroidProject androidProject = MockAndroidProject();
       when(project.android).thenReturn(androidProject);
       when(project.isModule).thenReturn(false);
-      when(androidProject.buildDirectory).thenReturn(globals.fs.directory('foo'));
+      when(androidProject.buildDirectory).thenReturn(fileSystem.directory('foo'));
 
       expect(
         getApkDirectory(project).path,
-        equals(globals.fs.path.join('foo', 'app', 'outputs', 'flutter-apk')),
+        equals(fileSystem.path.join('foo', 'app', 'outputs', 'flutter-apk')),
       );
     });
 
-    test('getApkDirectory in module projects', () {
+    testWithoutContext('getApkDirectory in module projects', () {
       final FlutterProject project = MockFlutterProject();
       final AndroidProject androidProject = MockAndroidProject();
       when(project.android).thenReturn(androidProject);
       when(project.isModule).thenReturn(true);
-      when(androidProject.buildDirectory).thenReturn(globals.fs.directory('foo'));
+      when(androidProject.buildDirectory).thenReturn(fileSystem.directory('foo'));
 
       expect(
         getApkDirectory(project).path,
-        equals(globals.fs.path.join('foo', 'host', 'outputs', 'apk')),
+        equals(fileSystem.path.join('foo', 'host', 'outputs', 'apk')),
       );
     });
 
-    test('getBundleDirectory in app projects', () {
+    testWithoutContext('getBundleDirectory in app projects', () {
       final FlutterProject project = MockFlutterProject();
       final AndroidProject androidProject = MockAndroidProject();
       when(project.android).thenReturn(androidProject);
       when(project.isModule).thenReturn(false);
-      when(androidProject.buildDirectory).thenReturn(globals.fs.directory('foo'));
+      when(androidProject.buildDirectory).thenReturn(fileSystem.directory('foo'));
 
       expect(
         getBundleDirectory(project).path,
-        equals(globals.fs.path.join('foo', 'app', 'outputs', 'bundle')),
+        equals(fileSystem.path.join('foo', 'app', 'outputs', 'bundle')),
       );
     });
 
-    test('getBundleDirectory in module projects', () {
+    testWithoutContext('getBundleDirectory in module projects', () {
       final FlutterProject project = MockFlutterProject();
       final AndroidProject androidProject = MockAndroidProject();
       when(project.android).thenReturn(androidProject);
       when(project.isModule).thenReturn(true);
-      when(androidProject.buildDirectory).thenReturn(globals.fs.directory('foo'));
+      when(androidProject.buildDirectory).thenReturn(fileSystem.directory('foo'));
 
       expect(
         getBundleDirectory(project).path,
-        equals(globals.fs.path.join('foo', 'host', 'outputs', 'bundle')),
+        equals(fileSystem.path.join('foo', 'host', 'outputs', 'bundle')),
       );
     });
 
-    test('getRepoDirectory', () {
+    testWithoutContext('getRepoDirectory', () {
       expect(
-        getRepoDirectory(globals.fs.directory('foo')).path,
-        equals(globals.fs.path.join('foo','outputs', 'repo')),
+        getRepoDirectory(fileSystem.directory('foo')).path,
+        equals(fileSystem.path.join('foo','outputs', 'repo')),
       );
     });
   });
 
   group('gradle tasks', () {
-    test('assemble release', () {
+    testWithoutContext('assemble release', () {
       expect(
         getAssembleTaskFor(const BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
         equals('assembleRelease'),
@@ -107,7 +113,7 @@ void main() {
       );
     });
 
-    test('assemble debug', () {
+    testWithoutContext('assemble debug', () {
       expect(
         getAssembleTaskFor(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)),
         equals('assembleDebug'),
@@ -118,7 +124,7 @@ void main() {
       );
     });
 
-    test('assemble profile', () {
+    testWithoutContext('assemble profile', () {
       expect(
         getAssembleTaskFor(const BuildInfo(BuildMode.profile, null, treeShakeIcons: false)),
         equals('assembleProfile'),
@@ -700,7 +706,7 @@ flutter:
   });
 
   group('gradle version', () {
-    test('should be compatible with the Android plugin version', () {
+    testWithoutContext('should be compatible with the Android plugin version', () {
       // Granular versions.
       expect(getGradleVersionFor('1.0.0'), '2.3');
       expect(getGradleVersionFor('1.0.1'), '2.3');
@@ -739,7 +745,7 @@ flutter:
       expect(getGradleVersionFor('3.5.0'), '5.6.2');
     });
 
-    test('throws on unsupported versions', () {
+    testWithoutContext('throws on unsupported versions', () {
       expect(() => getGradleVersionFor('3.6.0'),
           throwsA(predicate<Exception>((Exception e) => e is ToolExit)));
     });
