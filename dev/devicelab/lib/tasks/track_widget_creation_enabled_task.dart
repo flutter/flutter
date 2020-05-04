@@ -13,7 +13,8 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 final Directory integrationTestDir = Directory(
-  path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
+  path.join(flutterDirectory.path, 'dev/integration_tests/ui'),
+);
 
 /// Verifies that track-widget-creation can be enabled and disabled.
 class TrackWidgetCreationEnabledTask {
@@ -57,8 +58,10 @@ class TrackWidgetCreationEnabledTask {
       final File file = await waitForFile(path.join(integrationTestDir.path, 'info'));
       final VmService vmService = await vmServiceConnectUri(file.readAsStringSync());
       final VM vm = await vmService.getVM();
-      final Response result = await vmService
-        .callMethod('ext.devicelab.test', isolateId: vm.isolates.single.id);
+      final Response result = await vmService.callMethod(
+        'ext.devicelab.test',
+        isolateId: vm.isolates.single.id,
+       );
       if (result.json['result'] != 2) {
         message += result.json.toString();
         failed = true;
@@ -93,8 +96,10 @@ class TrackWidgetCreationEnabledTask {
       final File file = await waitForFile(path.join(integrationTestDir.path, 'info'));
       final VmService vmService = await vmServiceConnectUri(file.readAsStringSync());
       final VM vm = await vmService.getVM();
-      final Response result = await vmService
-        .callMethod('ext.devicelab.test', isolateId: vm.isolates.single.id);
+      final Response result = await vmService.callMethod(
+        'ext.devicelab.test',
+        isolateId: vm.isolates.single.id,
+       );
       if (result.json['result'] != 1) {
         message += result.json.toString();
         failed = true;
@@ -121,5 +126,5 @@ Future<File> waitForFile(String path) async {
     }
     await Future<void>.delayed(const Duration(seconds: 20));
   }
-  throw StateError('Did not find vmservice out file after 400s seconds');
+  throw StateError('Did not find vmservice out file after 400 seconds');
 }
