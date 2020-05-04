@@ -685,7 +685,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   // Match the log prefix (in order to shorten it):
   // * Xcode 8: Sep 13 15:28:51 cbracken-macpro localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
   // * Xcode 9: 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
-  static final RegExp _mapRegex = RegExp(r'\S+ +\S+ +\S+ +(\S+ +)?(\S+)\[\d+\]\)?: (\(.*?\))? *(.*)$');
+  static final RegExp _mapRegex = RegExp(r'\S+ +\S+ +(?:\S+) (.+?(?=\[))\[\d+\]\)?: (\(.*?\))? *(.*)$');
 
   // Jan 31 19:23:28 --- last message repeated 1 time ---
   static final RegExp _lastMessageSingleRegex = RegExp(r'\S+ +\S+ +\S+ --- last message repeated 1 time ---$');
@@ -700,12 +700,16 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   String _filterDeviceLine(String string) {
     final Match match = _mapRegex.matchAsPrefix(string);
     if (match != null) {
-      final String category = match.group(2);
-      final String tag = match.group(3);
-      final String content = match.group(4);
 
-      // Filter out non-Flutter originated noise from the engine.
-      if (_appName != null && category != _appName) {
+      // The category contains the text between the date and the PID. Depending on which version of iOS being run,
+      // it can contain "hostname App Name" or just "App Name".
+      final String category = match.group(1);
+      final String tag = match.group(2);
+      final String content = match.group(3);
+
+      // Filter out log lines from an app other than this one (category doesn't match the app name).
+      // If the hostname is included in the category, check that it doesn't end with the app name.
+      if (_appName != null && !category.endsWith(_appName)) {
         return null;
       }
 
@@ -725,7 +729,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
       if (_appName == null) {
         return '$category: $content';
-      } else if (category == _appName) {
+      } else if (category == _appName || category.endsWith(' $_appName')) {
         return content;
       }
 

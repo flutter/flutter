@@ -42,7 +42,7 @@ void main() {
         'version',
         '--no-pub',
       ]);
-      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0\n'));
+      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0\r\n31.0.0-0.0.pre\n'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Stdio: () => mockStdio,
@@ -51,7 +51,51 @@ void main() {
 
     testUsingContext('version switch prompt is accepted', () async {
       when(mockStdio.stdinHasTerminal).thenReturn(true);
-      const String version = '10.0.0';
+      const String version = 'v10.0.0';
+      final VersionCommand command = VersionCommand();
+      when(globals.terminal.promptForCharInput(<String>['y', 'n'],
+        logger: anyNamed('logger'),
+        prompt: 'Are you sure you want to proceed?')
+      ).thenAnswer((Invocation invocation) async => 'y');
+
+      await createTestCommandRunner(command).run(<String>[
+        'version',
+        '--no-pub',
+        version,
+      ]);
+      expect(testLogger.statusText, contains('Switching Flutter to version $version'));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => MockProcessManager(),
+      Stdio: () => mockStdio,
+      AnsiTerminal: () => MockTerminal(),
+      FlutterVersion: () => mockVersion,
+    });
+
+    testUsingContext('old dev version switch prompt is accepted', () async {
+      when(mockStdio.stdinHasTerminal).thenReturn(true);
+      const String version = '30.0.0-dev.0.0';
+      final VersionCommand command = VersionCommand();
+      when(globals.terminal.promptForCharInput(<String>['y', 'n'],
+        logger: anyNamed('logger'),
+        prompt: 'Are you sure you want to proceed?')
+      ).thenAnswer((Invocation invocation) async => 'y');
+
+      await createTestCommandRunner(command).run(<String>[
+        'version',
+        '--no-pub',
+        version,
+      ]);
+      expect(testLogger.statusText, contains('Switching Flutter to version $version'));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => MockProcessManager(),
+      Stdio: () => mockStdio,
+      AnsiTerminal: () => MockTerminal(),
+      FlutterVersion: () => mockVersion,
+    });
+
+    testUsingContext('dev version switch prompt is accepted', () async {
+      when(mockStdio.stdinHasTerminal).thenReturn(true);
+      const String version = '31.0.0-0.0.pre';
       final VersionCommand command = VersionCommand();
       when(globals.terminal.promptForCharInput(<String>['y', 'n'],
         logger: anyNamed('logger'),
@@ -90,33 +134,6 @@ void main() {
       ProcessManager: () => MockProcessManager(),
       Stdio: () => mockStdio,
       AnsiTerminal: () => MockTerminal(),
-      FlutterVersion: () => mockVersion,
-    });
-
-    testUsingContext('version switch, latest commit query fails', () async {
-      const String version = '10.0.0';
-      final VersionCommand command = VersionCommand();
-      await createTestCommandRunner(command).run(<String>[
-        'version',
-        '--no-pub',
-        version,
-      ]);
-      expect(testLogger.errorText, contains('git failed'));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => MockProcessManager(latestCommitFails: true),
-      Stdio: () => mockStdio,
-      FlutterVersion: () => mockVersion,
-    });
-
-    testUsingContext('latest commit is parsable when query fails', () {
-      final FlutterVersion flutterVersion = FlutterVersion();
-      expect(
-        () => DateTime.parse(flutterVersion.frameworkCommitDate),
-        returnsNormally,
-      );
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => MockProcessManager(latestCommitFails: true),
-      Stdio: () => mockStdio,
       FlutterVersion: () => mockVersion,
     });
 
@@ -187,7 +204,7 @@ void main() {
       await createTestCommandRunner(command).run(<String>[
         'version',
       ]);
-      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0\n'));
+      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0\r\n31.0.0-0.0.pre\n'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Stdio: () => mockStdio,
@@ -236,11 +253,12 @@ class MockProcessManager extends Mock implements ProcessManager {
       if (failGitTag) {
         return ProcessResult(0, 1, '', '');
       }
-      return ProcessResult(0, 0, 'v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0', '');
+      return ProcessResult(0, 0, 'v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0\r\n31.0.0-0.0.pre', '');
     }
     if (command[0] == 'git' && command[1] == 'checkout') {
-      version = (command[2] as String).replaceFirst('v', '');
+      version = (command[2] as String).replaceFirst(RegExp('^v'), '');
     }
+
     return ProcessResult(0, 0, '', '');
   }
 
@@ -263,14 +281,6 @@ class MockProcessManager extends Mock implements ProcessManager {
       if (version.isNotEmpty) {
         return ProcessResult(0, 0, '$version-0-g00000000', '');
       }
-    }
-    final List<String> commitDateCommand = <String>[
-      '-n', '1',
-      '--pretty=format:%ad',
-      '--date=iso',
-    ];
-    if (latestCommitFails && commandStr == FlutterVersion.gitLog(commitDateCommand).join(' ')) {
-      return ProcessResult(0, -9, '', 'git failed');
     }
     return ProcessResult(0, 0, '', '');
   }

@@ -71,9 +71,9 @@ const Set<String> _validDateFormats = <String>{
 // The set of number formats that can be automatically localized.
 //
 // The localizations generation tool makes use of the intl library's
-// NumberFormat class to properly format numbers based on the locale, the
-// desired format, as well as the passed in number. For example, using
-// DateFormat.compactLong("en_US").format(1200000) results
+// NumberFormat class to properly format numbers based on the locale and
+// the desired format. For example, using
+// NumberFormat.compactLong("en_US").format(1200000) results
 // in the string "1.2 million".
 //
 // Since the tool generates code that uses NumberFormat's constructor, it is

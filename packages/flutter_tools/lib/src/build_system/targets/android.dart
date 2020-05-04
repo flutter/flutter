@@ -119,9 +119,9 @@ class DebugAndroidApplication extends AndroidAssetBundle {
   @override
   List<Source> get outputs => <Source>[
     ...super.outputs,
-    const Source.pattern('{OUTPUT_DIR}/vm_snapshot_data'),
-    const Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
-    const Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
+    const Source.pattern('{OUTPUT_DIR}/flutter_assets/vm_snapshot_data'),
+    const Source.pattern('{OUTPUT_DIR}/flutter_assets/isolate_snapshot_data'),
+    const Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
   ];
 }
 

@@ -357,18 +357,22 @@ abstract class IOSApp extends ApplicationPackage {
 }
 
 class BuildableIOSApp extends IOSApp {
-  BuildableIOSApp(this.project, String projectBundleId)
-    : super(projectBundleId: projectBundleId);
+  BuildableIOSApp(this.project, String projectBundleId, String hostAppBundleName)
+    : _hostAppBundleName = hostAppBundleName,
+      super(projectBundleId: projectBundleId);
 
   static Future<BuildableIOSApp> fromProject(IosProject project) async {
     final String projectBundleId = await project.productBundleIdentifier;
-    return BuildableIOSApp(project, projectBundleId);
+    final String hostAppBundleName = await project.hostAppBundleName;
+    return BuildableIOSApp(project, projectBundleId, hostAppBundleName);
   }
 
   final IosProject project;
 
+  final String _hostAppBundleName;
+
   @override
-  String get name => project.hostAppBundleName;
+  String get name => _hostAppBundleName;
 
   @override
   String get simulatorBundlePath => _buildAppPath('iphonesimulator');
@@ -377,7 +381,7 @@ class BuildableIOSApp extends IOSApp {
   String get deviceBundlePath => _buildAppPath('iphoneos');
 
   String _buildAppPath(String type) {
-    return globals.fs.path.join(getIosBuildDirectory(), type, name);
+    return globals.fs.path.join(getIosBuildDirectory(), type, _hostAppBundleName);
   }
 }
 

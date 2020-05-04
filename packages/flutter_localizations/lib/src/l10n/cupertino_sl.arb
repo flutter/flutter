@@ -29,5 +29,6 @@
   "copyButtonLabel": "Kopiraj",
   "pasteButtonLabel": "Prilepi",
   "selectAllButtonLabel": "Izberi vse",
+  "tabSemanticsLabel": "TBD",
   "modalBarrierDismissLabel": "Opusti"
 }

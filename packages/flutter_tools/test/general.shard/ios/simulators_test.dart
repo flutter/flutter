@@ -452,10 +452,10 @@ void main() {
         simControl: mockSimControl,
         xcode: mockXcode,
       );
-      await launchDeviceUnifiedLogging(device, 'Runner');
+      await launchDeviceUnifiedLogging(device, 'My Super Awesome App');
 
       const String expectedPredicate = 'eventType = logEvent AND '
-        'processImagePath ENDSWITH "Runner" AND '
+        'processImagePath ENDSWITH "My Super Awesome App" AND '
         '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID) AND '
         'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
         'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
@@ -539,7 +539,9 @@ void main() {
         fakeProcessManager
           ..addCommand(const FakeCommand(
             command:  <String>['tail', '-n', '0', '-F', 'system.log'],
-            stdout: 'Dec 20 17:04:32 md32-11-vm1 Runner[88374]: flutter: Observatory listening on http://127.0.0.1:64213/1Uoeu523990=/',
+            stdout: '''
+Dec 20 17:04:32 md32-11-vm1 My Super Awesome App[88374]: flutter: Observatory listening on http://127.0.0.1:64213/1Uoeu523990=/
+Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           ))
           ..addCommand(const FakeCommand(
             command:  <String>['tail', '-n', '0', '-F', '/private/var/log/system.log']
@@ -571,9 +573,9 @@ void main() {
           ..addCommand(const FakeCommand(
             command:  <String>['tail', '-n', '0', '-F', 'system.log'],
             stdout: '''
-2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
-2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) ))))))))))
-2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) #0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)'''
+2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
+2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) ))))))))))
+2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) #0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)'''
           ))
           ..addCommand(const FakeCommand(
             command:  <String>['tail', '-n', '0', '-F', '/private/var/log/system.log']
@@ -607,19 +609,19 @@ void main() {
           ..addCommand(const FakeCommand(
             command:  <String>['tail', '-n', '0', '-F', 'system.log'],
             stdout: '''
-2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Single line message
-2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Multi line message
+2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Single line message
+2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Multi line message
   continues...
   continues...
-2020-03-11 15:58:28.207175-0700  localhost Runner[72166]: (libnetwork.dylib) [com.apple.network:] [28 www.googleapis.com:443 stream, pid: 72166, tls] cancelled
+2020-03-11 15:58:28.207175-0700  localhost My Super Awesome App[72166]: (libnetwork.dylib) [com.apple.network:] [28 www.googleapis.com:443 stream, pid: 72166, tls] cancelled
 	[28.1 64A98447-EABF-4983-A387-7DB9D0C1785F 10.0.1.200.57912<->172.217.6.74:443]
 	Connected Path: satisfied (Path is satisfied), interface: en18
 	Duration: 0.271s, DNS @0.000s took 0.001s, TCP @0.002s took 0.019s, TLS took 0.046s
 	bytes in/out: 4468/1933, packets in/out: 11/10, rtt: 0.016s, retransmitted packets: 0, out-of-order packets: 0
-2017-09-13 15:36:57.228948-0700  localhost Runner[37195]: (Flutter) Multi line message again
+2017-09-13 15:36:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Multi line message again
   and it goes...
   and goes...
-2017-09-13 15:36:57.228948-0700  localhost Runner[37195]: (Flutter) Single line message, not the part of the above
+2017-09-13 15:36:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Single line message, not the part of the above
 '''
           ))
           ..addCommand(const FakeCommand(
@@ -657,7 +659,7 @@ void main() {
 
     group('unified logging', () {
       testUsingContext('log reader handles escaped multiline messages', () async {
-        const String logPredicate = 'eventType = logEvent AND processImagePath ENDSWITH "Runner" '
+        const String logPredicate = 'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
           'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
           'OR processImageUUID == senderImageUUID) AND NOT(eventMessage CONTAINS ": could not find icon '
           'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '

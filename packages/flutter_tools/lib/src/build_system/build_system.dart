@@ -19,7 +19,7 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
 import 'exceptions.dart';
-import 'file_hash_store.dart';
+import 'file_store.dart';
 import 'source.dart';
 
 export 'source.dart';
@@ -48,8 +48,9 @@ class BuildSystemConfig {
 /// of at least one of the environment values and zero or more local values.
 ///
 /// To determine if the action for a target needs to be executed, the
-/// [BuildSystem] performs a hash of the file contents for both inputs and
-/// outputs. This is tracked separately in the [FileHashStore].
+/// [BuildSystem] computes a key of the file contents for both inputs and
+/// outputs. This is tracked separately in the [FileStore]. The key may
+/// be either an md5 hash of the file contents or a timestamp.
 ///
 /// A Target has both implicit and explicit inputs and outputs. Only the
 /// later are safe to evaluate before invoking the [buildAction]. For example,
@@ -507,10 +508,10 @@ class BuildSystem {
     environment.buildDir.createSync(recursive: true);
     environment.outputDir.createSync(recursive: true);
 
-    // Load file hash store from previous builds.
-    final FileHashStore fileCache = FileHashStore(
-      environment: environment,
-      fileSystem: _fileSystem,
+    // Load file store from previous builds.
+    final File cacheFile = environment.buildDir.childFile(FileStore.kFileCache);
+    final FileStore fileCache = FileStore(
+      cacheFile: cacheFile,
       logger: _logger,
     )..initialize();
 
@@ -567,6 +568,55 @@ class BuildSystem {
       outputFiles: buildInstance.outputFiles.values.toList()
           ..sort((File a, File b) => a.path.compareTo(b.path)),
     );
+  }
+
+  static final Expando<FileStore> _incrementalFileStore = Expando<FileStore>();
+
+  /// Perform an incremental build of `target` and all of its dependencies.
+  ///
+  /// If [previousBuild] is not provided, a new incremental build is
+  /// initialized.
+  Future<BuildResult> buildIncremental(
+    Target target,
+    Environment environment,
+    BuildResult previousBuild,
+  ) async {
+    environment.buildDir.createSync(recursive: true);
+    environment.outputDir.createSync(recursive: true);
+
+    FileStore fileCache;
+    if (previousBuild == null || _incrementalFileStore[previousBuild] == null) {
+      final File cacheFile = environment.buildDir.childFile(FileStore.kFileCache);
+      fileCache = FileStore(
+        cacheFile: cacheFile,
+        logger: _logger,
+        strategy: FileStoreStrategy.timestamp,
+      )..initialize();
+    } else {
+      fileCache = _incrementalFileStore[previousBuild];
+    }
+    final Node node = target._toNode(environment);
+    final _BuildInstance buildInstance = _BuildInstance(
+      environment: environment,
+      fileCache: fileCache,
+      buildSystemConfig: const BuildSystemConfig(),
+      logger: _logger,
+      fileSystem: _fileSystem,
+      platform: _platform,
+    );
+    bool passed = true;
+    try {
+      passed = await buildInstance.invokeTarget(node);
+    } finally {
+      fileCache.persistIncremental();
+    }
+    final BuildResult result = BuildResult(
+      success: passed,
+      exceptions: buildInstance.exceptionMeasurements,
+      performance: buildInstance.stepTimings,
+    );
+    _incrementalFileStore[result] = fileCache;
+    return result;
   }
 
   /// Write the identifier of the last build into the output directory and
@@ -644,7 +694,7 @@ class _BuildInstance {
   final Pool resourcePool;
   final Map<String, AsyncMemoizer<bool>> pending = <String, AsyncMemoizer<bool>>{};
   final Environment environment;
-  final FileHashStore fileCache;
+  final FileStore fileCache;
   final Map<String, File> inputFiles = <String, File>{};
   final Map<String, File> outputFiles = <String, File>{};
 
@@ -718,11 +768,11 @@ class _BuildInstance {
       // If we were missing the depfile, resolve  input files after executing the
       // target so that all file hashes are up to date on the next run.
       if (node.missingDepfile) {
-        await fileCache.hashFiles(node.inputs);
+        await fileCache.diffFileList(node.inputs);
       }
 
       // Always update hashes for output files.
-      await fileCache.hashFiles(node.outputs);
+      await fileCache.diffFileList(node.outputs);
       node.target._writeStamp(node.inputs, node.outputs, environment);
       updateGraph();
 
@@ -921,16 +971,16 @@ class Node {
   /// Returns whether this target can be skipped.
   Future<bool> computeChanges(
     Environment environment,
-    FileHashStore fileHashStore,
+    FileStore fileStore,
     FileSystem fileSystem,
     Logger logger,
   ) async {
     final Set<String> currentOutputPaths = <String>{
       for (final File file in outputs) file.path,
     };
-    // For each input, first determine if we've already computed the hash
-    // for it. Then collect it to be sent off for hashing as a group.
-    final List<File> sourcesToHash = <File>[];
+    // For each input, first determine if we've already computed the key
+    // for it. Then collect it to be sent off for diffing as a group.
+    final List<File> sourcesToDiff = <File>[];
     final List<File> missingInputs = <File>[];
     for (final File file in inputs) {
       if (!file.existsSync()) {
@@ -939,26 +989,26 @@ class Node {
       }
 
       final String absolutePath = file.path;
-      final String previousHash = fileHashStore.previousHashes[absolutePath];
-      if (fileHashStore.currentHashes.containsKey(absolutePath)) {
-        final String currentHash = fileHashStore.currentHashes[absolutePath];
-        if (currentHash != previousHash) {
+      final String previousAssetKey = fileStore.previousAssetKeys[absolutePath];
+      if (fileStore.currentAssetKeys.containsKey(absolutePath)) {
+        final String currentHash = fileStore.currentAssetKeys[absolutePath];
+        if (currentHash != previousAssetKey) {
           invalidatedReasons.add(InvalidatedReason.inputChanged);
           _dirty = true;
         }
       } else {
-        sourcesToHash.add(file);
+        sourcesToDiff.add(file);
       }
     }
 
-    // For each output, first determine if we've already computed the hash
+    // For each output, first determine if we've already computed the key
     // for it. Then collect it to be sent off for hashing as a group.
     for (final String previousOutput in previousOutputs) {
       // output paths changed.
       if (!currentOutputPaths.contains(previousOutput)) {
         _dirty = true;
         invalidatedReasons.add(InvalidatedReason.outputSetChanged);
-        // if this isn't a current output file there is no reason to compute the hash.
+        // if this isn't a current output file there is no reason to compute the key.
         continue;
       }
       final File file = fileSystem.file(previousOutput);
@@ -968,15 +1018,15 @@ class Node {
         continue;
       }
       final String absolutePath = file.path;
-      final String previousHash = fileHashStore.previousHashes[absolutePath];
-      if (fileHashStore.currentHashes.containsKey(absolutePath)) {
-        final String currentHash = fileHashStore.currentHashes[absolutePath];
+      final String previousHash = fileStore.previousAssetKeys[absolutePath];
+      if (fileStore.currentAssetKeys.containsKey(absolutePath)) {
+        final String currentHash = fileStore.currentAssetKeys[absolutePath];
         if (currentHash != previousHash) {
           invalidatedReasons.add(InvalidatedReason.outputChanged);
           _dirty = true;
         }
       } else {
-        sourcesToHash.add(file);
+        sourcesToDiff.add(file);
       }
     }
 
@@ -990,10 +1040,10 @@ class Node {
       invalidatedReasons.add(InvalidatedReason.inputMissing);
     }
 
-    // If we have files to hash, compute them asynchronously and then
+    // If we have files to diff, compute them asynchronously and then
     // update the result.
-    if (sourcesToHash.isNotEmpty) {
-      final List<File> dirty = await fileHashStore.hashFiles(sourcesToHash);
+    if (sourcesToDiff.isNotEmpty) {
+      final List<File> dirty = await fileStore.diffFileList(sourcesToDiff);
       if (dirty.isNotEmpty) {
         invalidatedReasons.add(InvalidatedReason.inputChanged);
         _dirty = true;
@@ -1009,10 +1059,10 @@ enum InvalidatedReason {
   /// depfile dependencies, or if a target is incorrectly specified.
   inputMissing,
 
-  /// An input file has an updated hash.
+  /// An input file has an updated key.
   inputChanged,
 
-  /// An output file has an updated hash.
+  /// An output file has an updated key.
   outputChanged,
 
   /// An output file that is expected is missing.
