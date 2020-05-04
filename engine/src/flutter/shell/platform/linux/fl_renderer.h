@@ -42,8 +42,6 @@ struct _FlRendererClass {
                                EGLConfig config);
 };
 
-G_END_DECLS
-
 /**
  * fl_renderer_start:
  * @renderer: a #FlRenderer
@@ -110,5 +108,7 @@ guint32 fl_renderer_get_fbo(FlRenderer* renderer);
  * Returns %TRUE if successful
  */
 gboolean fl_renderer_present(FlRenderer* renderer, GError** error);
+
+G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_RENDERER_H_
