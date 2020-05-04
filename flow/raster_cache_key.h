@@ -15,8 +15,11 @@ template <typename ID>
 class RasterCacheKey {
  public:
   RasterCacheKey(ID id, const SkMatrix& ctm) : id_(id), matrix_(ctm) {
-    matrix_[SkMatrix::kMTransX] = 0;
-    matrix_[SkMatrix::kMTransY] = 0;
+    matrix_[SkMatrix::kMTransX] = SkScalarFraction(ctm.getTranslateX());
+    matrix_[SkMatrix::kMTransY] = SkScalarFraction(ctm.getTranslateY());
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+    FML_DCHECK(matrix_.getTranslateX() == 0 && matrix_.getTranslateY() == 0);
+#endif
   }
 
   ID id() const { return id_; }
