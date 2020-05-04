@@ -214,7 +214,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     EdgeInsets floatingCursorAddedMargin = const EdgeInsets.fromLTRB(4, 4, 4, 5),
     TextRange promptRectRange,
     Color promptRectColor,
-    @required this.textSelectionDelegate,
+    @required this.textEditingDelegate,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
@@ -236,7 +236,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        assert(textWidthBasis != null),
        assert(paintCursorAboveText != null),
        assert(obscureText != null),
-       assert(textSelectionDelegate != null),
+       assert(textEditingDelegate != null),
        assert(cursorWidth != null && cursorWidth >= 0.0),
        assert(readOnly != null),
        assert(forceLine != null),
@@ -345,9 +345,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// The object that controls the text selection, used by this render object
   /// for implementing cut, copy, and paste keyboard shortcuts.
   ///
-  /// It must not be null. It will make cut, copy and paste functionality work
-  /// with the most recently set [TextSelectionDelegate].
-  TextSelectionDelegate textSelectionDelegate;
+  /// It must not be null. This is typically an instance of [TextSelectionDelegate]
+  TextEditingDelegate textEditingDelegate;
 
   Rect _lastCaretRect;
 
@@ -661,7 +660,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     // Update the text selection delegate so that the engine knows what we did.
-    textSelectionDelegate.textEditingValue = textSelectionDelegate.textEditingValue.copyWith(selection: newSelection);
+    textEditingDelegate.textEditingValue = textEditingDelegate.textEditingValue.copyWith(selection: newSelection);
     _handleSelectionChange(
       newSelection,
       SelectionChangedCause.keyboard,
@@ -682,7 +681,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (key == LogicalKeyboardKey.keyX) {
       if (!selection.isCollapsed) {
         Clipboard.setData(ClipboardData(text: selection.textInside(_plainText)));
-        textSelectionDelegate.textEditingValue = TextEditingValue(
+        textEditingDelegate.textEditingValue = TextEditingValue(
           text: selection.textBefore(_plainText)
               + selection.textAfter(_plainText),
           selection: TextSelection.collapsed(offset: selection.start),
@@ -693,10 +692,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (key == LogicalKeyboardKey.keyV) {
       // Snapshot the input before using `await`.
       // See https://github.com/flutter/flutter/issues/11427
-      final TextEditingValue value = textSelectionDelegate.textEditingValue;
+      final TextEditingValue value = textEditingDelegate.textEditingValue;
       final ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
       if (data != null) {
-        textSelectionDelegate.textEditingValue = TextEditingValue(
+        textEditingDelegate.textEditingValue = TextEditingValue(
           text: value.selection.textBefore(value.text)
               + data.text
               + value.selection.textAfter(value.text),
@@ -711,7 +710,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _handleSelectionChange(
         selection.copyWith(
           baseOffset: 0,
-          extentOffset: textSelectionDelegate.textEditingValue.text.length,
+          extentOffset: textEditingDelegate.textEditingValue.text.length,
         ),
         SelectionChangedCause.keyboard,
       );
@@ -721,13 +720,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   void _handleDelete() {
     if (selection.textAfter(_plainText).isNotEmpty) {
-      textSelectionDelegate.textEditingValue = TextEditingValue(
+      textEditingDelegate.textEditingValue = TextEditingValue(
         text: selection.textBefore(_plainText)
           + selection.textAfter(_plainText).substring(1),
         selection: TextSelection.collapsed(offset: selection.start),
       );
     } else {
-      textSelectionDelegate.textEditingValue = TextEditingValue(
+      textEditingDelegate.textEditingValue = TextEditingValue(
         text: selection.textBefore(_plainText),
         selection: TextSelection.collapsed(offset: selection.start),
       );

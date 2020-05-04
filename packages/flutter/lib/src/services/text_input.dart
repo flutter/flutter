@@ -14,7 +14,6 @@ import 'dart:ui' show
   hashValues;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'message_codec.dart';
@@ -707,49 +706,17 @@ class TextEditingValue {
   );
 }
 
-/// A class for defining actions that appear in text selection controls toolbar
-class TextSelectionAction {
-  /// Creates a selection action.
-  const TextSelectionAction(this.label, this.onPressed):
-    assert(label != null),
-    assert(onPressed != null);
-
-  /// The label that appears in the toolbar, typeically returns a [Text] widget
-  final WidgetBuilder label;
-  /// The callback to call when the label is tapped
-  final void Function(TextSelectionDelegate delegate) onPressed;
-}
-
-/// An interface for manipulating the selection, to be used by the implementor
-/// of the toolbar widget.
-abstract class TextSelectionDelegate {
+/// An interface for manipulating the editable text.
+abstract class TextEditingDelegate {
   /// Gets the current text input.
   TextEditingValue get textEditingValue;
 
   /// Sets the current text input (replaces the whole line).
   set textEditingValue(TextEditingValue value);
 
-  /// Hides the text selection toolbar.
-  void hideToolbar();
-
   /// Brings the provided [TextPosition] into the visible area of the text
   /// input.
   void bringIntoView(TextPosition position);
-
-  /// Whether cut is enabled, must not be null.
-  bool get cutEnabled => true;
-
-  /// Whether copy is enabled, must not be null.
-  bool get copyEnabled => true;
-
-  /// Whether paste is enabled, must not be null.
-  bool get pasteEnabled => true;
-
-  /// Whether select all is enabled, must not be null.
-  bool get selectAllEnabled => true;
-
-  /// The actions that appear in the toolbar, must not be null.
-  List<TextSelectionAction> get actions => <TextSelectionAction>[];
 }
 
 /// An interface to receive information from [TextInput].

@@ -12,7 +12,7 @@ import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
 import 'rendering_tester.dart';
 
-class FakeEditableTextState with TextSelectionDelegate {
+class FakeEditableTextState extends TextSelectionDelegate {
   @override
   TextEditingValue get textEditingValue { return const TextEditingValue(); }
 
@@ -40,7 +40,7 @@ void main() {
       textDirection: TextDirection.ltr,
       locale: const Locale('ja', 'JP'),
       offset: ViewportOffset.zero(),
-      textSelectionDelegate: delegate,
+      textEditingDelegate: delegate,
     );
     expect(editable.getMinIntrinsicWidth(double.infinity), 50.0);
     // The width includes the width of the cursor (1.0).
@@ -92,7 +92,7 @@ void main() {
       textDirection: TextDirection.ltr,
       locale: const Locale('en', 'US'),
       offset: ViewportOffset.fixed(10.0),
-      textSelectionDelegate: delegate,
+      textEditingDelegate: delegate,
       selection: const TextSelection.collapsed(
         offset: 0,
       ),
@@ -114,7 +114,7 @@ void main() {
       textDirection: TextDirection.ltr,
       cursorColor: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
       offset: ViewportOffset.zero(),
-      textSelectionDelegate: delegate,
+      textEditingDelegate: delegate,
       text: const TextSpan(
         text: 'test',
         style: TextStyle(
@@ -186,7 +186,7 @@ void main() {
       textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
       offset: ViewportOffset.zero(),
-      textSelectionDelegate: delegate,
+      textEditingDelegate: delegate,
       text: const TextSpan(text: 'test'),
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -213,7 +213,7 @@ void main() {
       textDirection: TextDirection.ltr,
       cursorColor: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
       offset: ViewportOffset.zero(),
-      textSelectionDelegate: delegate,
+      textEditingDelegate: delegate,
       text: const TextSpan(
         text: '中文测试文本是否正确',
         style: TextStyle(
@@ -286,7 +286,7 @@ void main() {
       textDirection: TextDirection.ltr,
       cursorColor: Colors.red,
       offset: ViewportOffset.zero(),
-      textSelectionDelegate: delegate,
+      textEditingDelegate: delegate,
       text: const TextSpan(
         text: 'test',
         style: TextStyle(
@@ -327,7 +327,7 @@ void main() {
       cursorColor: Colors.red,
       showCursor: showCursor,
       offset: ViewportOffset.zero(),
-      textSelectionDelegate: delegate,
+      textEditingDelegate: delegate,
       text: const TextSpan(
         text: 'test',
         style: TextStyle(
@@ -380,7 +380,7 @@ void main() {
       offset: viewportOffset,
       // This makes the scroll axis vertical.
       maxLines: 2,
-      textSelectionDelegate: delegate,
+      textEditingDelegate: delegate,
       onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
         currentSelection = selection;
       },
@@ -432,7 +432,7 @@ void main() {
       offset: viewportOffset,
       // This makes the scroll axis vertical.
       maxLines: 2,
-      textSelectionDelegate: delegate,
+      textEditingDelegate: delegate,
       onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
         currentSelection = selection;
       },
@@ -515,7 +515,7 @@ void main() {
       textDirection: TextDirection.ltr,
       cursorColor: Colors.red,
       offset: viewportOffset,
-      textSelectionDelegate: delegate,
+      textEditingDelegate: delegate,
       onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
         currentSelection = selection;
       },
@@ -551,7 +551,7 @@ void main() {
     );
 
     final RenderEditable editable1 = RenderEditable(
-      textSelectionDelegate: delegate,
+      textEditingDelegate: delegate,
       textDirection: TextDirection.ltr,
       offset: ViewportOffset.zero(),
       selection: const TextSelection(baseOffset: 3, extentOffset: 4),
@@ -574,7 +574,7 @@ void main() {
     expect(selectionChangedCount, 0);
 
     final RenderEditable editable2 = RenderEditable(
-      textSelectionDelegate: delegate,
+      textEditingDelegate: delegate,
       textDirection: TextDirection.ltr,
       offset: ViewportOffset.zero(),
       selection: const TextSelection(baseOffset: 3, extentOffset: 4),
@@ -612,7 +612,7 @@ void main() {
       textDirection: TextDirection.ltr,
       locale: const Locale('en', 'US'),
       offset: ViewportOffset.fixed(10.0),
-      textSelectionDelegate: delegate,
+      textEditingDelegate: delegate,
       selection: const TextSelection.collapsed(offset: 0),
       promptRectColor: promptRectColor,
       promptRectRange: const TextRange(start: 0, end: 1),
@@ -648,7 +648,7 @@ void main() {
       textDirection: TextDirection.ltr,
       locale: const Locale('en', 'US'),
       offset: ViewportOffset.zero(),
-      textSelectionDelegate: delegate,
+      textEditingDelegate: delegate,
       hasFocus: true,
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -669,7 +669,7 @@ void main() {
       textDirection: TextDirection.ltr,
       cursorColor: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
       offset: ViewportOffset.zero(),
-      textSelectionDelegate: delegate,
+      textEditingDelegate: delegate,
       text: const TextSpan(
         text: '撒地方加咖啡哈金凤凰卡号方式剪坏算法发挥福建垃\nasfjafjajfjaslfjaskjflasjfksajf撒分开建安路口附近拉设\n计费可使肌肤撒附近埃里克圾房卡设计费"',
         style: TextStyle(

@@ -660,7 +660,7 @@ class FakeRenderEditable extends RenderEditable {
     textDirection: TextDirection.ltr,
     locale: const Locale('en', 'US'),
     offset: ViewportOffset.fixed(10.0),
-    textSelectionDelegate: delegate,
+    textEditingDelegate: delegate,
     selection: const TextSelection.collapsed(
       offset: 0,
     ),

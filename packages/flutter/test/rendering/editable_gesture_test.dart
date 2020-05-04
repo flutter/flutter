@@ -20,7 +20,7 @@ void main() {
       textDirection: TextDirection.ltr,
       cursorColor: Colors.red,
       offset: ViewportOffset.zero(),
-      textSelectionDelegate: delegate,
+      textEditingDelegate: delegate,
       text: const TextSpan(
         text: 'test',
         style: TextStyle(

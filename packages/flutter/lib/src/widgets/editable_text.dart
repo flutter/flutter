@@ -2158,7 +2158,7 @@ class _Editable extends LeafRenderObjectWidget {
       selectionHeightStyle: selectionHeightStyle,
       selectionWidthStyle: selectionWidthStyle,
       enableInteractiveSelection: enableInteractiveSelection,
-      textSelectionDelegate: textSelectionDelegate,
+      textEditingDelegate: textSelectionDelegate,
       devicePixelRatio: devicePixelRatio,
       promptRectRange: promptRectRange,
       promptRectColor: promptRectColor,
@@ -2197,7 +2197,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..cursorOffset = cursorOffset
       ..selectionHeightStyle = selectionHeightStyle
       ..selectionWidthStyle = selectionWidthStyle
-      ..textSelectionDelegate = textSelectionDelegate
+      ..textEditingDelegate = textSelectionDelegate
       ..devicePixelRatio = devicePixelRatio
       ..paintCursorAboveText = paintCursorAboveText
       ..promptRectColor = promptRectColor
