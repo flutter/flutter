@@ -300,13 +300,14 @@ void main() {
     expect(position.activity.runtimeType, DragScrollActivity);
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, 100.0);
-    expect(position.pixels, 100.0);
+    expect(position.pixels, 900.0);
 
     await drag2.moveTo(const Offset(10.0, 150.0));
     await drag2.up();
+    await tester.pumpAndSettle();
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, 100.0);
-    expect(position.pixels, 50.0);
+    expect(position.pixels, 100.0);
   });
 
   testWidgets('whether we remember our scroll position', (WidgetTester tester) async {
