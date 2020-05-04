@@ -444,6 +444,7 @@ self.addEventListener("activate", function(event) {
       var manifest = await manifestCache.match('manifest');
 
       if (!manifest) {
+        await caches.delete(CACHE_NAME);
         for (var request of await tempCache.keys()) {
           var response = await tempCache.match(request);
           await contentCache.put(request, response);
