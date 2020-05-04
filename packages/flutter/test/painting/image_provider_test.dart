@@ -65,7 +65,7 @@ void main() {
 
         expect(imageCache.statusForKey(provider).untracked, true);
         expect(imageCache.pendingImageCount, 0);
-      }, skip: isBrowser); // Reference needed
+      }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56314
 
       test('AssetImageProvider - evicts on null load', () async {
         final Completer<StateError> error = Completer<StateError>();
@@ -395,7 +395,7 @@ void main() {
           expect(events[i].cumulativeBytesLoaded, math.min((i + 1) * chunkSize, kTransparentImage.length));
           expect(events[i].expectedTotalBytes, kTransparentImage.length);
         }
-      }, skip: isBrowser); // Reference needed
+      }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56317
 
       test('NetworkImage is evicted from cache on SocketException', () async {
         final MockHttpClient mockHttpClient = MockHttpClient();
@@ -443,7 +443,7 @@ void main() {
     const ImageConfiguration resizeConfig = ImageConfiguration(size: resizeDims);
     final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
     expect(resizedImageSize, resizeDims);
-  }, skip: isBrowser); // Reference needed
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56312
 
   test('ResizeImage does not resize when no size is passed', () async {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
