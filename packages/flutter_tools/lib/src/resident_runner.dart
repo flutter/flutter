@@ -1072,7 +1072,15 @@ abstract class ResidentRunner {
         reloadMethod: reloadMethod,
       );
       // This will wait for at least one flutter view before returning.
-      await device.vmService.getFlutterViews();
+      final Status status = globals.logger.startProgress(
+        'Waiting for ${device.device.name} to report its views...',
+        timeout: const Duration(milliseconds: 200),
+      );
+      try {
+        await device.vmService.getFlutterViews();
+      } finally {
+        status.stop();
+      }
       // This hooks up callbacks for when the connection stops in the future.
       // We don't want to wait for them. We don't handle errors in those callbacks'
       // futures either because they just print to logger and is not critical.
