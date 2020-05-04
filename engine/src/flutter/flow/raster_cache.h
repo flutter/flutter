@@ -62,6 +62,13 @@ class RasterCache {
     return bounds;
   }
 
+  static SkMatrix GetIntegralTransCTM(const SkMatrix& ctm) {
+    SkMatrix result = ctm;
+    result[SkMatrix::kMTransX] = SkScalarRoundToScalar(ctm.getTranslateX());
+    result[SkMatrix::kMTransY] = SkScalarRoundToScalar(ctm.getTranslateY());
+    return result;
+  }
+
   // Return true if the cache is generated.
   //
   // We may return false and not generate the cache if

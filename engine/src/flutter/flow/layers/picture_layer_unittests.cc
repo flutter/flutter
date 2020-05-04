@@ -11,6 +11,10 @@
 #include "flutter/testing/mock_canvas.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+#include "flutter/flow/raster_cache.h"
+#endif
+
 namespace flutter {
 namespace testing {
 
@@ -81,11 +85,16 @@ TEST_F(PictureLayerTest, SimplePicture) {
   EXPECT_FALSE(layer->needs_system_composite());
 
   layer->Paint(paint_context());
-  auto expected_draw_calls =
-      std::vector({MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::ConcatMatrixData{layer_offset_matrix}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
+  auto expected_draw_calls = std::vector(
+      {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
+       MockCanvas::DrawCall{1,
+                            MockCanvas::ConcatMatrixData{layer_offset_matrix}},
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+       MockCanvas::DrawCall{
+           1, MockCanvas::SetMatrixData{RasterCache::GetIntegralTransCTM(
+                  layer_offset_matrix)}},
+#endif
+       MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
   EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
 }
 

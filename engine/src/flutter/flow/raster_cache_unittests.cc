@@ -159,6 +159,9 @@ TEST(RasterCache, DeviceRectRoundOut) {
   ASSERT_TRUE(cache.Draw(*picture, canvas));
 
   canvas.translate(248, 0);
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+  canvas.setMatrix(RasterCache::GetIntegralTransCTM(canvas.getTotalMatrix()));
+#endif
   ASSERT_TRUE(cache.Draw(*picture, canvas));
 }
 
