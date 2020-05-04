@@ -192,6 +192,37 @@ flutter:
     verify(mockDirectory.createSync(recursive: true)).called(1);
     expect(testLogger.errorText, contains('ABCD'));
   });
+
+  testUsingContext('does not unnecessarily recreate asset manifest, font manifest, license', () async {
+    globals.fs.file('.packages').createSync();
+    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+    globals.fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+flutter:
+assets:
+  - assets/foo/bar.txt
+''');
+    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+    await bundle.build(manifestPath: 'pubspec.yaml');
+
+    final DevFSStringContent assetManifest = bundle.entries['AssetManifest.json']
+      as DevFSStringContent;
+    final DevFSStringContent fontManifest = bundle.entries['FontManifest.json']
+      as DevFSStringContent;
+    final DevFSStringContent license = bundle.entries['LICENSE']
+      as DevFSStringContent;
+
+    await bundle.build(manifestPath: 'pubspec.yaml');
+
+    expect(assetManifest, bundle.entries['AssetManifest.json']);
+    expect(fontManifest, bundle.entries['FontManifest.json']);
+    expect(license, bundle.entries['LICENSE']);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 }
 
 class MockDirectory extends Mock implements Directory {}

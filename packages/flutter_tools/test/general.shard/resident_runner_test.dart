@@ -169,7 +169,6 @@ void main() {
       FakeVmServiceRequest(
         id: '1',
         method: kListViewsMethod,
-        args: null,
         jsonResponse: <String, Object>{
           'views': <Object>[
             fakeFlutterView.toJson(),
@@ -223,7 +222,6 @@ void main() {
       FakeVmServiceRequest(
         id: '2',
         method: 'getVM',
-        args: null,
         jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
       ),
       const FakeVmServiceRequest(
@@ -396,7 +394,6 @@ void main() {
       FakeVmServiceRequest(
         id: '2',
         method: 'getVM',
-        args: null,
         jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
       ),
       const FakeVmServiceRequest(
@@ -786,7 +783,6 @@ void main() {
       FakeVmServiceRequest(
         id: '1',
         method: '_flutter.listViews',
-        args: null,
         jsonResponse: <String, Object>{
           'views': <Object>[
             fakeFlutterView.toJson(),
@@ -820,7 +816,6 @@ void main() {
       FakeVmServiceRequest(
         id: '1',
         method: '_flutter.listViews',
-        args: null,
         jsonResponse: <String, Object>{
           'views': <Object>[
             fakeFlutterView.toJson(),
@@ -865,7 +860,6 @@ void main() {
       FakeVmServiceRequest(
         id: '1',
         method: kListViewsMethod,
-        args: null,
         jsonResponse: <String, Object>{
           'views': <Object>[
             fakeFlutterView.toJson(),

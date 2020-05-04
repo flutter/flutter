@@ -623,6 +623,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('bundle-sksl-path')) {
             bundleSkSLPathValue = project.property('bundle-sksl-path')
         }
+        String performanceMeasurementFileValue;
+        if (project.hasProperty('performance-measurement-file')) {
+            performanceMeasurementFileValue = project.property('performance-measurement-file')
+        }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
             if (shouldSplitPerAbi()) {
@@ -662,6 +666,7 @@ class FlutterPlugin implements Plugin<Project> {
                 dartObfuscation dartObfuscationValue
                 dartDefines dartDefinesValue
                 bundleSkSLPath bundleSkSLPathValue
+                performanceMeasurementFile performanceMeasurementFileValue
                 doLast {
                     project.exec {
                         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -856,6 +861,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     String dartDefines
     @Optional @Input
     String bundleSkSLPath
+    String performanceMeasurementFile;
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -903,6 +909,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "assemble"
             args "--depfile", "${intermediateDir}/flutter_build.d"
             args "--output", "${intermediateDir}"
+            if (performanceMeasurementFile != null) {
+                args "--performance-measurement-file=${performanceMeasurementFile}"
+            }
             if (!fastStart || buildMode != "debug") {
                 args "-dTargetFile=${targetPath}"
             } else {

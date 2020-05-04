@@ -97,6 +97,53 @@ void main() {
       expect(focusNode1.offset, equals(const Offset(300.0, 8.0)));
       expect(focusNode2.offset, equals(const Offset(443.0, 194.5)));
     });
+    testWidgets('descendantsAreFocusable disables focus for descendants.', (WidgetTester tester) async {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
+      final FocusAttachment parent2Attachment = parent2.attach(context);
+      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final FocusAttachment child1Attachment = child1.attach(context);
+      final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+      final FocusAttachment child2Attachment = child2.attach(context);
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      parent1Attachment.reparent(parent: scope);
+      parent2Attachment.reparent(parent: scope);
+      child1Attachment.reparent(parent: parent1);
+      child2Attachment.reparent(parent: parent2);
+      child1.requestFocus();
+      await tester.pump();
+
+      expect(tester.binding.focusManager.primaryFocus, equals(child1));
+      expect(scope.focusedChild, equals(child1));
+      expect(scope.traversalDescendants.contains(child1), isTrue);
+      expect(scope.traversalDescendants.contains(child2), isTrue);
+
+      parent2.descendantsAreFocusable = false;
+      // Node should still be focusable, even if descendants are not.
+      parent2.requestFocus();
+      await tester.pump();
+      expect(parent2.hasPrimaryFocus, isTrue);
+
+      child2.requestFocus();
+      await tester.pump();
+      expect(tester.binding.focusManager.primaryFocus, isNot(equals(child2)));
+      expect(tester.binding.focusManager.primaryFocus, equals(parent2));
+      expect(scope.focusedChild, equals(parent2));
+      expect(scope.traversalDescendants.contains(child1), isTrue);
+      expect(scope.traversalDescendants.contains(child2), isFalse);
+
+      parent1.descendantsAreFocusable = false;
+      await tester.pump();
+      expect(tester.binding.focusManager.primaryFocus, isNot(equals(child2)));
+      expect(tester.binding.focusManager.primaryFocus, isNot(equals(child1)));
+      expect(scope.focusedChild, equals(parent2));
+      expect(scope.traversalDescendants.contains(child1), isFalse);
+      expect(scope.traversalDescendants.contains(child2), isFalse);
+    });
     testWidgets('implements debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       FocusNode(
@@ -105,9 +152,10 @@ void main() {
       final List<String> description = builder.properties.map((DiagnosticsNode n) => n.toString()).toList();
       expect(description, <String>[
         'context: null',
+        'descendantsAreFocusable: true',
         'canRequestFocus: true',
         'hasFocus: false',
-        'hasPrimaryFocus: false'
+        'hasPrimaryFocus: false',
       ]);
     });
   });
@@ -949,6 +997,7 @@ void main() {
       final List<String> description = builder.properties.map((DiagnosticsNode n) => n.toString()).toList();
       expect(description, <String>[
         'context: null',
+        'descendantsAreFocusable: true',
         'canRequestFocus: true',
         'hasFocus: false',
         'hasPrimaryFocus: false'

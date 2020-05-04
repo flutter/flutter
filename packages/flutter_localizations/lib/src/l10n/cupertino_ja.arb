@@ -19,5 +19,6 @@
   "copyButtonLabel": "コピー",
   "pasteButtonLabel": "貼り付け",
   "selectAllButtonLabel": "すべて選択",
+  "tabSemanticsLabel": "TBD",
   "modalBarrierDismissLabel": "閉じる"
 }

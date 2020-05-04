@@ -363,7 +363,6 @@ void main() {
       const FakeVmServiceRequest(
         method: 'hotRestart',
         id: '5',
-        args: null,
         jsonResponse: <String, Object>{
           'type': 'Success',
         }
@@ -441,7 +440,6 @@ void main() {
       const FakeVmServiceRequest(
         method: 'hotRestart',
         id: '5',
-        args: null,
         jsonResponse: <String, Object>{
           'type': 'Success',
         }
@@ -674,7 +672,6 @@ void main() {
       const FakeVmServiceRequest(
         id: '5',
         method: 'hotRestart',
-        args: null,
         jsonResponse: <String, Object>{
           'type': 'Failed',
         }
@@ -698,7 +695,6 @@ void main() {
       const FakeVmServiceRequest(
         id: '5',
         method: 'hotRestart',
-        args: null,
         // Failed response,
         errorCode: RPCErrorCodes.kInternalError,
       ),
