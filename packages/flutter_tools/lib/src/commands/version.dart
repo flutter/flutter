@@ -127,7 +127,9 @@ class VersionCommand extends FlutterCommand {
       throwToolExit('Unable to checkout version branch for version $version: $e');
     }
 
-    globals.printStatus('Switching Flutter to version $matchingTag${withForce ? ' with force' : ''}');
+    final FlutterVersion flutterVersion = FlutterVersion();
+
+    globals.printStatus('Switching Flutter to version ${flutterVersion.frameworkVersion}${withForce ? ' with force' : ''}');
 
     // Check for and download any engine and pkg/ updates.
     // We run the 'flutter' shell script re-entrantly here
@@ -144,6 +146,9 @@ class VersionCommand extends FlutterCommand {
     if (code != 0) {
       throwToolExit(null, exitCode: code);
     }
+
+    globals.printStatus('');
+    globals.printStatus(flutterVersion.toString());
 
     final String projectRoot = findProjectRoot();
     if (projectRoot != null && boolArg('pub')) {
