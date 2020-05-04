@@ -1086,13 +1086,9 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> grandfathe
       try {
         utf8.decode(bytes);
       } on FormatException catch (error) {
-        if (error.message.startsWith('Bad UTF-8 encoding ')) {
-          final Digest digest = sha256.convert(bytes);
-          if (!grandfatheredBinaries.contains(Hash256.fromDigest(digest)))
-            problems.add('${file.path}:${error.offset}: file is not valid UTF-8');
-        } else {
-          rethrow;
-        }
+        final Digest digest = sha256.convert(bytes);
+        if (!grandfatheredBinaries.contains(Hash256.fromDigest(digest)))
+          problems.add('${file.path}:${error.offset}: file is not valid UTF-8');
       }
     }
     if (problems.isNotEmpty) {
