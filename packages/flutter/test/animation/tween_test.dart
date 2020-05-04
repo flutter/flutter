@@ -197,4 +197,34 @@ void main() {
     expect(tween.lerp(0.8), 10 - flippedTween.lerp(0.2));
     expect(tween.lerp(1.0), 10 - flippedTween.lerp(0.0));
   });
+
+
+  test('TweenSequence with changed children', () {
+    final Tween<double> startTween = Tween<double>(begin: 5.0, end: 10.0);
+    final Tween<double> endTween = Tween<double>(begin: 10.0, end: 5.0);
+    final Tween<double> tween = TweenSequence<double>(
+      <TweenSequenceItem<double>>[
+        TweenSequenceItem<double>(
+          tween: startTween,
+          weight: 4.0,
+        ),
+        TweenSequenceItem<double>(
+          tween: ConstantTween<double>(10.0),
+          weight: 2.0,
+        ),
+        TweenSequenceItem<double>(
+          tween: endTween,
+          weight: 4.0,
+        )
+      ],
+    );
+
+    expect(tween.begin, startTween.begin);
+    expect(tween.end, endTween.end);
+
+    startTween.begin = 7.0;
+    endTween.end = 12.0;
+    expect(tween.begin, startTween.begin);
+    expect(tween.end, endTween.end);
+  });
 }
