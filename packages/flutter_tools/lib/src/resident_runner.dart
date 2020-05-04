@@ -1071,6 +1071,8 @@ abstract class ResidentRunner {
         compileExpression: compileExpression,
         reloadMethod: reloadMethod,
       );
+      // This will wait for at least one flutter view before returning.
+      await device.vmService.getFlutterViews();
       // This hooks up callbacks for when the connection stops in the future.
       // We don't want to wait for them. We don't handle errors in those callbacks'
       // futures either because they just print to logger and is not critical.

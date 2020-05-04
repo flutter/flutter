@@ -256,6 +256,65 @@ void main() {
     );
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
+
+  testWithoutContext('getFlutterViews polls until a view is returned', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: kListViewsMethod,
+          jsonResponse: <String, Object>{
+            'views': <Object>[],
+          },
+        ),
+        const FakeVmServiceRequest(
+          method: kListViewsMethod,
+          jsonResponse: <String, Object>{
+            'views': <Object>[],
+          },
+        ),
+        const FakeVmServiceRequest(
+          method: kListViewsMethod,
+          jsonResponse: <String, Object>{
+            'views': <Object>[
+              <String, Object>{
+                'id': 'a',
+                'isolate': <String, Object>{},
+              },
+            ],
+          },
+        ),
+      ]
+    );
+
+    expect(
+      await fakeVmServiceHost.vmService.getFlutterViews(
+        delay: Duration.zero,
+      ),
+      isNotEmpty,
+    );
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('getFlutterViews does not poll if returnEarly is true', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: kListViewsMethod,
+          jsonResponse: <String, Object>{
+            'views': <Object>[],
+          },
+        ),
+      ]
+    );
+
+    expect(
+      await fakeVmServiceHost.vmService.getFlutterViews(
+        returnEarly: true,
+      ),
+      isEmpty,
+    );
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
 }
 
 class MockDevice extends Mock implements Device {}
