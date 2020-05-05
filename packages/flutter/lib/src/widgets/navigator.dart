@@ -624,8 +624,7 @@ abstract class RouteTransitionRecord {
   /// If this property is true, this route requires an explicit decision on how
   /// to transition off the screen. Such a decision should be made in the
   /// [TransitionDelegate.resolve].
-  bool get isWaitingForExitingDecision => _isWaitingForExitingDecision;
-  bool _isWaitingForExitingDecision = false;
+  bool get isWaitingForExitingDecision;
 
   /// Marks the [route] to be pushed with transition.
   ///
@@ -818,7 +817,7 @@ abstract class TransitionDelegate<T> {
   /// original route history before the update. The keys are the locations
   /// represented by the page-based routes that are directly below the removed
   /// routes, and the value are the page-based routes to be removed. The
-  /// location is null if the route to be removed is the bottom most route.  If
+  /// location is null if the route to be removed is the bottom most route. If
   /// a route in `locationToExitingPageRoute` has its
   /// [RouteTransitionRecord.isWaitingForExitingDecision] set to true, this
   /// route requires explicit decision on how it should transition off the
@@ -827,7 +826,7 @@ abstract class TransitionDelegate<T> {
   /// [RouteTransitionRecord.markForComplete] or
   /// [RouteTransitionRecord.markForRemove]. It is possible that decisions are
   /// not required for routes in the `locationToExitingPageRoute`. This can
-  /// happen if the routes has already been popped in earlier page updates and
+  /// happen if the routes have already been popped in earlier page updates and
   /// are still waiting for popping animations to finish. In such case, those
   /// routes are still included in the `locationToExitingPageRoute` with their
   /// [RouteTransitionRecord.isWaitingForExitingDecision] set to false and no
@@ -916,16 +915,13 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
         if (isLastExitingPageRoute && !hasPagelessRoute) {
           exitingPageRoute.markForPop(exitingPageRoute.route.currentResult);
         } else {
-          exitingPageRoute.markForComplete(
-            exitingPageRoute.route.currentResult);
+          exitingPageRoute.markForComplete(exitingPageRoute.route.currentResult);
         }
         if (hasPagelessRoute) {
-          final List<
-            RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
+          final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
           for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
             assert(pagelessRoute.isWaitingForExitingDecision);
-            if (isLastExitingPageRoute &&
-              pagelessRoute == pagelessRoutes.last) {
+            if (isLastExitingPageRoute && pagelessRoute == pagelessRoutes.last) {
               pagelessRoute.markForPop(pagelessRoute.route.currentResult);
             } else {
               pagelessRoute.markForComplete(pagelessRoute.route.currentResult);
@@ -2270,7 +2266,7 @@ enum _RouteLifecycle {
   // routes that are present:
   //
   add, // we'll want to run install, didAdd, etc; a route created by onGenerateInitialRoutes or by the initial widget.pages
-  adding, // we'll want to run install, didAdd, etc; a route created by onGenerateInitialRoutes or by the initial widget.pages
+  adding, // we'll waiting for the future from didPush of top-most route to complete
   // routes that are ready for transition.
   push, // we'll want to run install, didPush, etc; a route added via push() and friends
   pushReplace, // we'll want to run install, didPush, etc; a route added via pushReplace() and friends
@@ -2508,6 +2504,12 @@ class _RouteEntry extends RouteTransitionRecord {
 
   @override
   bool get isWaitingForEnteringDecision => currentState == _RouteLifecycle.staging;
+
+  @override
+  bool get isWaitingForExitingDecision => _isWaitingForExitingDecision;
+  bool _isWaitingForExitingDecision = false;
+
+  void markNeedsExitingDecision() => _isWaitingForExitingDecision = true;
 
   @override
   void markForPush() {
@@ -2860,11 +2862,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         assert(previousOldPageRouteEntry != null);
         final List<_RouteEntry> pagelessRoutes = pageRouteToPagelessRoutes
           .putIfAbsent(
-          previousOldPageRouteEntry,
-            () => <_RouteEntry>[]
-        );
+            previousOldPageRouteEntry,
+            () => <_RouteEntry>[],
+          );
         pagelessRoutes.add(potentialEntryToRemove);
-        potentialEntryToRemove._isWaitingForExitingDecision = previousOldPageRouteEntry.isWaitingForExitingDecision;
+        if (previousOldPageRouteEntry.isWaitingForExitingDecision)
+          potentialEntryToRemove.markNeedsExitingDecision();
         continue;
       }
 
@@ -2877,7 +2880,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       ) {
         locationToExitingPageRoute[previousOldPageRouteEntry] = potentialEntryToRemove;
         // We only need a decision if it has not already been popped.
-        potentialEntryToRemove._isWaitingForExitingDecision = potentialEntryToRemove.isPresent;
+        if (potentialEntryToRemove.isPresent)
+          potentialEntryToRemove.markNeedsExitingDecision();
       }
       previousOldPageRouteEntry = potentialEntryToRemove;
     }
