@@ -391,13 +391,15 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
     while (child != null) {
       final double childWidth = child.getMaxIntrinsicWidth(double.infinity);
       final double childHeight = child.getMaxIntrinsicHeight(childWidth);
-      final double spaceWidth = childCount > 0 ? spacing : 0;
-      // child count check for situation when width of first child in run over available width
-      if (runWidth + childWidth + spaceWidth > width && childCount > 0) {
-        height += runHeight + runSpacing;
-        runWidth = 0.0;
-        runHeight = 0.0;
-        childCount = 0;
+      // There must be at least one child before we move on to the next run.
+      if (childCount > 0) {
+        final double spaceWidth = childCount > 0 ? spacing : 0;
+        if (runWidth + childWidth + spaceWidth > width) {
+          height += runHeight + runSpacing;
+          runWidth = 0.0;
+          runHeight = 0.0;
+          childCount = 0;
+        }
       }
       runWidth += childWidth;
       runHeight = math.max(runHeight, childHeight);
@@ -421,12 +423,14 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
       final double childHeight = child.getMaxIntrinsicHeight(double.infinity);
       final double childWidth = child.getMaxIntrinsicWidth(childHeight);
       final double spaceWidth = childCount > 0 ? spacing : 0;
-      // child count check for situation when height of first child in run over available height
-      if (runHeight + childHeight + spaceWidth > height && childCount > 0) {
-        width += runWidth + runSpacing;
-        runHeight = 0.0;
-        runWidth = 0.0;
-        childCount = 0;
+      // There must be at least one child before we move on to the next run.
+      if (childCount > 0) {
+        if (runHeight + childHeight + spaceWidth > height) {
+          width += runWidth + runSpacing;
+          runHeight = 0.0;
+          runWidth = 0.0;
+          childCount = 0;
+        }
       }
       runHeight += childHeight;
       runWidth = math.max(runWidth, childWidth);

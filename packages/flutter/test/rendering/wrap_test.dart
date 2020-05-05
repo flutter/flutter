@@ -25,133 +25,139 @@ void main() {
     );
   });
 
-  test(
-    'Compute intrinsic height test',
-    () {
-      final List<RenderBox> children = <RenderBox>[
-        RenderConstrainedBox(
-          additionalConstraints:
-              const BoxConstraints(minWidth: 80, minHeight: 80),
+  test('Compute intrinsic height test', () {
+    final List<RenderBox> children = <RenderBox>[
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(
+          minWidth: 80,
+          minHeight: 80,
         ),
-        RenderConstrainedBox(
-          additionalConstraints:
-              const BoxConstraints(minWidth: 80, minHeight: 80),
+      ),
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(
+          minWidth: 80,
+          minHeight: 80,
         ),
-        RenderConstrainedBox(
-          additionalConstraints:
-              const BoxConstraints(minWidth: 80, minHeight: 80),
+      ),
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(
+          minWidth: 80,
+          minHeight: 80,
         ),
-      ];
+      ),
+    ];
 
-      _intrinsicHeightDefaultTest(children, 245, 165);
-      _intrinsicHeightDefaultTest(children, 250, 80);
-      _intrinsicHeightDefaultTest(children, 80, 250);
-      _intrinsicHeightDefaultTest(children, 79, 250);
-      _intrinsicHeightDefaultTest(children, 245, 165, isMax: false);
-      _intrinsicHeightDefaultTest(children, 250, 80, isMax: false);
-      _intrinsicHeightDefaultTest(children, 80, 250, isMax: false);
-      _intrinsicHeightDefaultTest(children, 79, 250, isMax: false);
-    },
-  );
+    final RenderWrap renderWrap = RenderWrap();
 
-  test(
-    'Compute intrinsic width test',
-    () {
-      final List<RenderBox> children = <RenderBox>[
-        RenderConstrainedBox(
-          additionalConstraints:
-              const BoxConstraints(minWidth: 80, minHeight: 80),
+    // ignore: avoid_function_literals_in_foreach_calls
+    children.forEach(
+          (RenderBox child) {
+        renderWrap.add(child);
+      },
+    );
+
+    renderWrap.spacing = 5;
+    renderWrap.runSpacing = 5;
+    renderWrap.direction = Axis.horizontal;
+
+    expect(renderWrap.computeMaxIntrinsicHeight(245), 165);
+    expect(renderWrap.computeMaxIntrinsicHeight(250), 80);
+    expect(renderWrap.computeMaxIntrinsicHeight(80), 250);
+    expect(renderWrap.computeMaxIntrinsicHeight(79), 250);
+    expect(renderWrap.computeMinIntrinsicHeight(245), 165);
+    expect(renderWrap.computeMinIntrinsicHeight(250), 80);
+    expect(renderWrap.computeMinIntrinsicHeight(80), 250);
+    expect(renderWrap.computeMinIntrinsicHeight(79), 250);
+  });
+
+  test('Compute intrinsic width test', () {
+    final List<RenderBox> children = <RenderBox>[
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(
+          minWidth: 80,
+          minHeight: 80,
         ),
-        RenderConstrainedBox(
-          additionalConstraints:
-              const BoxConstraints(minWidth: 80, minHeight: 80),
+      ),
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(
+          minWidth: 80,
+          minHeight: 80,
         ),
-        RenderConstrainedBox(
-          additionalConstraints:
-              const BoxConstraints(minWidth: 80, minHeight: 80),
+      ),
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(
+          minWidth: 80,
+          minHeight: 80,
         ),
-      ];
+      ),
+    ];
 
-      _intrinsicWidthDefaultTest(children, 245, 165);
-      _intrinsicWidthDefaultTest(children, 250, 80);
-      _intrinsicWidthDefaultTest(children, 80, 250);
-      _intrinsicWidthDefaultTest(children, 79, 250);
-      _intrinsicWidthDefaultTest(children, 245, 165, isMax: false);
-      _intrinsicWidthDefaultTest(children, 250, 80, isMax: false);
-      _intrinsicWidthDefaultTest(children, 80, 250, isMax: false);
-      _intrinsicWidthDefaultTest(children, 79, 250, isMax: false);
-    },
-  );
-}
+    final RenderWrap renderWrap = RenderWrap();
 
-void _intrinsicWidthDefaultTest(
-  List<RenderBox> children,
-  double availableHeight,
-  double expectedWidth, {
-  Axis direction = Axis.vertical,
-  double spacing = 5.0,
-  double runSpacing = 5.0,
-  bool isMax = true,
-}) {
-  final RenderWrap renderWrap = _prepareWrapForComputeIntrinsicSize(
-    children,
-    spacing: spacing,
-    runSpacing: runSpacing,
-    direction: direction,
-  );
-  expect(
-    isMax
-        ? renderWrap.computeMaxIntrinsicWidth(availableHeight)
-        : renderWrap.computeMinIntrinsicWidth(availableHeight),
-    equals(expectedWidth),
-  );
+    // ignore: avoid_function_literals_in_foreach_calls
+    children.forEach(
+          (RenderBox child) {
+        renderWrap.add(child);
+      },
+    );
 
-  // clear for available reuse children in test
-  renderWrap.removeAll();
-}
+    renderWrap.spacing = 5;
+    renderWrap.runSpacing = 5;
+    renderWrap.direction = Axis.vertical;
 
-void _intrinsicHeightDefaultTest(
-  List<RenderBox> children,
-  double availableWidth,
-  double expectedHeight, {
-  Axis direction = Axis.horizontal,
-  double spacing = 5.0,
-  double runSpacing = 5.0,
-  bool isMax = true,
-}) {
-  final RenderWrap renderWrap = _prepareWrapForComputeIntrinsicSize(
-    children,
-    spacing: spacing,
-    runSpacing: runSpacing,
-    direction: direction,
-  );
-  expect(
-    isMax
-        ? renderWrap.computeMaxIntrinsicHeight(availableWidth)
-        : renderWrap.computeMinIntrinsicHeight(availableWidth),
-    equals(expectedHeight),
-  );
+    expect(renderWrap.computeMaxIntrinsicWidth(245), 165);
+    expect(renderWrap.computeMaxIntrinsicWidth(250), 80);
+    expect(renderWrap.computeMaxIntrinsicWidth(80), 250);
+    expect(renderWrap.computeMaxIntrinsicWidth(79), 250);
+    expect(renderWrap.computeMinIntrinsicWidth(245), 165);
+    expect(renderWrap.computeMinIntrinsicWidth(250), 80);
+    expect(renderWrap.computeMinIntrinsicWidth(80), 250);
+    expect(renderWrap.computeMinIntrinsicWidth(79), 250);
+  });
 
-  // clear for available reuse children in test
-  renderWrap.removeAll();
-}
+  test('Compute intrinsic height for only one run', () {
+    final RenderBox child = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints(
+        minWidth: 80,
+        minHeight: 80,
+      ),
+    );
 
-RenderWrap _prepareWrapForComputeIntrinsicSize(
-  List<RenderBox> children, {
-  Axis direction = Axis.horizontal,
-  double spacing = 5.0,
-  double runSpacing = 5.0,
-}) {
-  final RenderWrap renderWrap = RenderWrap();
-
-  // ignore: prefer_foreach
-  for (final RenderBox child in children) {
+    final RenderWrap renderWrap = RenderWrap();
     renderWrap.add(child);
-  }
 
-  renderWrap.spacing = spacing;
-  renderWrap.runSpacing = runSpacing;
-  renderWrap.direction = direction;
+    renderWrap.spacing = 5;
+    renderWrap.runSpacing = 5;
+    renderWrap.direction = Axis.horizontal;
 
-  return renderWrap;
+    expect(renderWrap.computeMaxIntrinsicHeight(100), 80);
+    expect(renderWrap.computeMaxIntrinsicHeight(79), 80);
+    expect(renderWrap.computeMaxIntrinsicHeight(80), 80);
+    expect(renderWrap.computeMinIntrinsicHeight(100), 80);
+    expect(renderWrap.computeMinIntrinsicHeight(79), 80);
+    expect(renderWrap.computeMinIntrinsicHeight(80), 80);
+  });
+
+  test('Compute intrinsic width for only one run', () {
+    final RenderBox child = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints(
+        minWidth: 80,
+        minHeight: 80,
+      ),
+    );
+
+    final RenderWrap renderWrap = RenderWrap();
+    renderWrap.add(child);
+
+    renderWrap.spacing = 5;
+    renderWrap.runSpacing = 5;
+    renderWrap.direction = Axis.vertical;
+
+    expect(renderWrap.computeMaxIntrinsicWidth(100), 80);
+    expect(renderWrap.computeMaxIntrinsicWidth(79), 80);
+    expect(renderWrap.computeMaxIntrinsicWidth(80), 80);
+    expect(renderWrap.computeMinIntrinsicWidth(100), 80);
+    expect(renderWrap.computeMinIntrinsicWidth(79), 80);
+    expect(renderWrap.computeMinIntrinsicWidth(80), 80);
+  });
 }
