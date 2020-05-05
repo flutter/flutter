@@ -149,7 +149,7 @@ class HtmlImage implements ui.Image {
       return imgElement.clone(true);
     } else {
       _requiresClone = true;
-      imgElement.style..position = 'absolute';
+      imgElement.style.position = 'absolute';
       return imgElement;
     }
   }
