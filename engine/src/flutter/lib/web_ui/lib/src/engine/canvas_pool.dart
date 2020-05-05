@@ -10,7 +10,7 @@ part of engine;
 /// [BitmapCanvas] signals allocation of first canvas using allocateCanvas.
 /// When a painting command such as drawImage or drawParagraph requires
 /// multiple canvases for correct compositing, it calls [closeCurrentCanvas]
-/// and adds the canvas(s) to a [_pool] of active canvas(s).
+/// and adds the canvas(s) to [_activeCanvasList].
 ///
 /// To make sure transformations and clips are preserved correctly when a new
 /// canvas is allocated, [_CanvasPool] replays the current stack on the newly
@@ -25,7 +25,7 @@ class _CanvasPool extends _SaveStackTracking {
   ContextStateHandle _contextHandle;
   final int _widthInBitmapPixels, _heightInBitmapPixels;
   // List of canvases that have been allocated and used in this paint cycle.
-  List<html.CanvasElement> _pool;
+  List<html.CanvasElement> _activeCanvasList;
   // List of canvases available to reuse from prior paint cycle.
   List<html.CanvasElement> _reusablePool;
   // Current canvas element or null if marked for lazy allocation.
@@ -33,6 +33,8 @@ class _CanvasPool extends _SaveStackTracking {
 
   html.HtmlElement _rootElement;
   int _saveContextCount = 0;
+  // Number of elements that have been added to flt-canvas.
+  int _activeElementCount = 0;
 
   _CanvasPool(this._widthInBitmapPixels, this._heightInBitmapPixels);
 
@@ -66,12 +68,13 @@ class _CanvasPool extends _SaveStackTracking {
     if (_canvas != null) {
       _restoreContextSave();
       _contextHandle.reset();
-      _pool ??= [];
-      _pool.add(_canvas);
+      _activeCanvasList ??= [];
+      _activeCanvasList.add(_canvas);
       _canvas = null;
       _context = null;
       _contextHandle = null;
     }
+    _activeElementCount++;
   }
 
   void allocateCanvas(html.HtmlElement rootElement) {
@@ -83,8 +86,8 @@ class _CanvasPool extends _SaveStackTracking {
     bool reused = false;
     if (_reusablePool != null && _reusablePool.isNotEmpty) {
       _canvas = _reusablePool.removeAt(0);
-      reused = true;
       requiresClearRect = true;
+      reused = true;
     } else {
       // Compute the final CSS canvas size given the actual pixel count we
       // allocated. This is done for the following reasons:
@@ -120,17 +123,8 @@ class _CanvasPool extends _SaveStackTracking {
     if (_rootElement.lastChild != _canvas) {
       _rootElement.append(_canvas);
     }
-    // When the picture has a 90-degree transform and clip in its
-    // ancestor layers, it triggers a bug in Blink and Webkit browsers
-    // that results in canvas obscuring text that should be painted on
-    // top. Setting z-index to any negative value works around the bug.
-    // This workaround only works with the first canvas. If more than
-    // one element have negative z-index, the bug is triggered again.
-    //
-    // Possible Blink bugs that are causing this:
-    // * https://bugs.chromium.org/p/chromium/issues/detail?id=370604
-    // * https://bugs.chromium.org/p/chromium/issues/detail?id=586601
-    if (_rootElement.firstChild == _canvas) {
+
+    if (_activeElementCount == 0) {
       _canvas.style.zIndex = '-1';
     } else if (reused) {
       // If a canvas is the first element we set z-index = -1 to workaround
@@ -138,6 +132,7 @@ class _CanvasPool extends _SaveStackTracking {
       // reset z-index.
       _canvas.style.removeProperty('z-index');
     }
+    ++_activeElementCount;
 
     _context = _canvas.context2D;
     _contextHandle = ContextStateHandle(_context);
@@ -250,16 +245,17 @@ class _CanvasPool extends _SaveStackTracking {
     if (_canvas != null) {
       _restoreContextSave();
       _contextHandle.reset();
-      _pool ??= [];
-      _pool.add(_canvas);
+      _activeCanvasList ??= [];
+      _activeCanvasList.add(_canvas);
       _context = null;
       _contextHandle = null;
     }
-    _reusablePool = _pool;
-    _pool = null;
+    _reusablePool = _activeCanvasList;
+    _activeCanvasList = null;
     _canvas = null;
     _context = null;
     _contextHandle = null;
+    _activeElementCount = 0;
   }
 
   void endOfPaint() {
@@ -666,19 +662,19 @@ class _CanvasPool extends _SaveStackTracking {
     if (browserEngine == BrowserEngine.webkit && _canvas != null) {
       _canvas.width = _canvas.height = 0;
     }
-    _clearPool();
+    _clearActiveCanvasList();
   }
 
-  void _clearPool() {
-    if (_pool != null) {
-      for (html.CanvasElement c in _pool) {
+  void _clearActiveCanvasList() {
+    if (_activeCanvasList != null) {
+      for (html.CanvasElement c in _activeCanvasList) {
         if (browserEngine == BrowserEngine.webkit) {
           c.width = c.height = 0;
         }
         c.remove();
       }
     }
-    _pool = null;
+    _activeCanvasList = null;
   }
 }
 
