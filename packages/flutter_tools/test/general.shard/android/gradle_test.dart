@@ -137,156 +137,117 @@ void main() {
   });
 
   group('findBundleFile', () {
-    final Usage mockUsage = MockUsage();
+    FileSystem fileSystem;
+    Usage mockUsage;
 
-    testUsingContext('Finds app bundle when flavor contains underscores in release mode', () {
-      final FlutterProject project = generateFakeAppBundle('foo_barRelease', 'app.aab');
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo_bar', treeShakeIcons: false));
-      expect(bundle, isNotNull);
-      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app.aab'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      mockUsage = MockUsage();
     });
 
-    testUsingContext("Finds app bundle when flavor doesn't contain underscores in release mode", () {
-      final FlutterProject project = generateFakeAppBundle('fooRelease', 'app.aab');
+    testWithoutContext('Finds app bundle when flavor contains underscores in release mode', () {
+      final FlutterProject project = generateFakeAppBundle('foo_barRelease', 'app.aab', fileSystem);
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo_bar', treeShakeIcons: false));
+      expect(bundle, isNotNull);
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app.aab'));
+    });
+
+    testWithoutContext("Finds app bundle when flavor doesn't contain underscores in release mode", () {
+      final FlutterProject project = generateFakeAppBundle('fooRelease', 'app.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo', treeShakeIcons: false));
       expect(bundle, isNotNull);
-      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooRelease', 'app.aab'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooRelease', 'app.aab'));
     });
 
-    testUsingContext('Finds app bundle when no flavor is used in release mode', () {
-      final FlutterProject project = generateFakeAppBundle('release', 'app.aab');
+    testWithoutContext('Finds app bundle when no flavor is used in release mode', () {
+      final FlutterProject project = generateFakeAppBundle('release', 'app.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
       expect(bundle, isNotNull);
-      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'release', 'app.aab'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'release', 'app.aab'));
     });
 
-    testUsingContext('Finds app bundle when flavor contains underscores in debug mode', () {
-      final FlutterProject project = generateFakeAppBundle('foo_barDebug', 'app.aab');
+    testWithoutContext('Finds app bundle when flavor contains underscores in debug mode', () {
+      final FlutterProject project = generateFakeAppBundle('foo_barDebug', 'app.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo_bar', treeShakeIcons: false));
       expect(bundle, isNotNull);
-      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barDebug', 'app.aab'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barDebug', 'app.aab'));
     });
 
-    testUsingContext("Finds app bundle when flavor doesn't contain underscores in debug mode", () {
-      final FlutterProject project = generateFakeAppBundle('fooDebug', 'app.aab');
+    testWithoutContext("Finds app bundle when flavor doesn't contain underscores in debug mode", () {
+      final FlutterProject project = generateFakeAppBundle('fooDebug', 'app.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo', treeShakeIcons: false));
       expect(bundle, isNotNull);
-      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooDebug', 'app.aab'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooDebug', 'app.aab'));
     });
 
-    testUsingContext('Finds app bundle when no flavor is used in debug mode', () {
-      final FlutterProject project = generateFakeAppBundle('debug', 'app.aab');
+    testWithoutContext('Finds app bundle when no flavor is used in debug mode', () {
+      final FlutterProject project = generateFakeAppBundle('debug', 'app.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, null, treeShakeIcons: false));
       expect(bundle, isNotNull);
-      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'debug', 'app.aab'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'debug', 'app.aab'));
     });
 
-    testUsingContext('Finds app bundle when flavor contains underscores in profile mode', () {
-      final FlutterProject project = generateFakeAppBundle('foo_barProfile', 'app.aab');
+    testWithoutContext('Finds app bundle when flavor contains underscores in profile mode', () {
+      final FlutterProject project = generateFakeAppBundle('foo_barProfile', 'app.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, 'foo_bar', treeShakeIcons: false));
       expect(bundle, isNotNull);
-      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barProfile', 'app.aab'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barProfile', 'app.aab'));
     });
 
-    testUsingContext("Finds app bundle when flavor doesn't contain underscores in profile mode", () {
-      final FlutterProject project = generateFakeAppBundle('fooProfile', 'app.aab');
+    testWithoutContext("Finds app bundle when flavor doesn't contain underscores in profile mode", () {
+      final FlutterProject project = generateFakeAppBundle('fooProfile', 'app.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, 'foo', treeShakeIcons: false));
       expect(bundle, isNotNull);
-      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooProfile', 'app.aab'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooProfile', 'app.aab'));
     });
 
-    testUsingContext('Finds app bundle when no flavor is used in profile mode', () {
-      final FlutterProject project = generateFakeAppBundle('profile', 'app.aab');
+    testWithoutContext('Finds app bundle when no flavor is used in profile mode', () {
+      final FlutterProject project = generateFakeAppBundle('profile', 'app.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, null, treeShakeIcons: false));
       expect(bundle, isNotNull);
-      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'profile', 'app.aab'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'profile', 'app.aab'));
     });
 
-    testUsingContext('Finds app bundle in release mode - Gradle 3.5', () {
-      final FlutterProject project = generateFakeAppBundle('release', 'app-release.aab');
+    testWithoutContext('Finds app bundle in release mode - Gradle 3.5', () {
+      final FlutterProject project = generateFakeAppBundle('release', 'app-release.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
       expect(bundle, isNotNull);
-      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'release', 'app-release.aab'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'release', 'app-release.aab'));
     });
 
-    testUsingContext('Finds app bundle in profile mode - Gradle 3.5', () {
-      final FlutterProject project = generateFakeAppBundle('profile', 'app-profile.aab');
+    testWithoutContext('Finds app bundle in profile mode - Gradle 3.5', () {
+      final FlutterProject project = generateFakeAppBundle('profile', 'app-profile.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, null, treeShakeIcons: false));
       expect(bundle, isNotNull);
-      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'profile', 'app-profile.aab'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'profile', 'app-profile.aab'));
     });
 
-    testUsingContext('Finds app bundle in debug mode - Gradle 3.5', () {
-      final FlutterProject project = generateFakeAppBundle('debug', 'app-debug.aab');
+    testWithoutContext('Finds app bundle in debug mode - Gradle 3.5', () {
+      final FlutterProject project = generateFakeAppBundle('debug', 'app-debug.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, null, treeShakeIcons: false));
       expect(bundle, isNotNull);
-      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'debug', 'app-debug.aab'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'debug', 'app-debug.aab'));
     });
 
-    testUsingContext('Finds app bundle when flavor contains underscores in release mode - Gradle 3.5', () {
-      final FlutterProject project = generateFakeAppBundle('foo_barRelease', 'app-foo_bar-release.aab');
+    testWithoutContext('Finds app bundle when flavor contains underscores in release mode - Gradle 3.5', () {
+      final FlutterProject project = generateFakeAppBundle('foo_barRelease', 'app-foo_bar-release.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo_bar', treeShakeIcons: false));
       expect(bundle, isNotNull);
-      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app-foo_bar-release.aab'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app-foo_bar-release.aab'));
     });
 
-    testUsingContext('Finds app bundle when flavor contains underscores in profile mode - Gradle 3.5', () {
-      final FlutterProject project = generateFakeAppBundle('foo_barProfile', 'app-foo_bar-profile.aab');
+    testWithoutContext('Finds app bundle when flavor contains underscores in profile mode - Gradle 3.5', () {
+      final FlutterProject project = generateFakeAppBundle('foo_barProfile', 'app-foo_bar-profile.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, 'foo_bar', treeShakeIcons: false));
       expect(bundle, isNotNull);
-      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barProfile', 'app-foo_bar-profile.aab'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(bundle.path, fileSystem.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barProfile', 'app-foo_bar-profile.aab'));
     });
 
-    testUsingContext('Finds app bundle when flavor contains underscores in debug mode - Gradle 3.5', () {
-      final FlutterProject project = generateFakeAppBundle('foo_barDebug', 'app-foo_bar-debug.aab');
+    testWithoutContext('Finds app bundle when flavor contains underscores in debug mode - Gradle 3.5', () {
+      final FlutterProject project = generateFakeAppBundle('foo_barDebug', 'app-foo_bar-debug.aab', fileSystem);
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo_bar', treeShakeIcons: false));
       expect(bundle, isNotNull);
-      expect(bundle.path, globals.fs.path.join('irrelevant','app', 'outputs', 'bundle', 'foo_barDebug', 'app-foo_bar-debug.aab'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(bundle.path, fileSystem.path.join('irrelevant','app', 'outputs', 'bundle', 'foo_barDebug', 'app-foo_bar-debug.aab'));
     });
 
     testUsingContext('aab not found', () {
@@ -2540,13 +2501,13 @@ plugin1=${plugin1.path}
 }
 
 /// Generates a fake app bundle at the location [directoryName]/[fileName].
-FlutterProject generateFakeAppBundle(String directoryName, String fileName) {
+FlutterProject generateFakeAppBundle(String directoryName, String fileName, FileSystem fileSystem) {
   final FlutterProject project = MockFlutterProject();
   final AndroidProject androidProject = MockAndroidProject();
 
   when(project.isModule).thenReturn(false);
   when(project.android).thenReturn(androidProject);
-  when(androidProject.buildDirectory).thenReturn(globals.fs.directory('irrelevant'));
+  when(androidProject.buildDirectory).thenReturn(fileSystem.directory('irrelevant'));
 
   final Directory bundleDirectory = getBundleDirectory(project);
   bundleDirectory
