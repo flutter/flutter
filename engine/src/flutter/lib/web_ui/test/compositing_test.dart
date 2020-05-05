@@ -4,7 +4,7 @@
 
 // @dart = 2.6
 import 'dart:html' as html;
-
+import 'dart:js_util' as js_util;
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
@@ -183,7 +183,7 @@ void main() {
     //
     // When BitmapCanvas uses multiple elements to paint, the very first
     // canvas needs to have a -1 zIndex so it can preserve compositing order.
-    test('First canvas element should retain -1 zIndex after update', () async {
+    test('Canvas element should retain -1 zIndex after update', () async {
       final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
       final Picture picture1 = _drawPicture();
       EngineLayer oldLayer = builder.pushClipRect(
@@ -207,6 +207,35 @@ void main() {
 
       html.HtmlElement contentAfterReuse = builder2.build().webOnlyRootElement;
       expect(contentAfterReuse.querySelector('canvas').style.zIndex, '-1');
+    });
+
+    test('Multiple canvas elements should retain zIndex after update', () async {
+      final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+      final Picture picture1 = _drawPathImagePath();
+      EngineLayer oldLayer = builder.pushClipRect(
+        const Rect.fromLTRB(10, 10, 300, 300),
+      );
+      builder.addPicture(Offset.zero, picture1);
+      builder.pop();
+
+      html.HtmlElement content = builder.build().webOnlyRootElement;
+      expect(content.querySelector('canvas').style.zIndex, '-1');
+
+      // Force update to scene which will utilize reuse code path.
+      final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
+      builder2.pushClipRect(
+          const Rect.fromLTRB(5, 10, 300, 300),
+          oldLayer: oldLayer
+      );
+      final Picture picture2 = _drawPathImagePath();
+      builder2.addPicture(Offset.zero, picture2);
+      builder2.pop();
+
+      html.HtmlElement contentAfterReuse = builder2.build().webOnlyRootElement;
+      List<html.CanvasElement> list =
+          contentAfterReuse.querySelectorAll('canvas');
+      expect(list[0].style.zIndex, '-1');
+      expect(list[1].style.zIndex, '');
     });
   });
 
@@ -373,4 +402,52 @@ Picture _drawPicture() {
         ..style = PaintingStyle.fill
         ..color = const Color.fromRGBO(0, 0, 255, 1));
   return recorder.endRecording();
+}
+
+Picture _drawPathImagePath() {
+  const double offsetX = 50;
+  const double offsetY = 50;
+  final EnginePictureRecorder recorder = PictureRecorder();
+  final RecordingCanvas canvas =
+  recorder.beginRecording(const Rect.fromLTRB(0, 0, 400, 400));
+  canvas.drawCircle(
+      Offset(offsetX + 10, offsetY + 10), 10, Paint()..style = PaintingStyle.fill);
+  canvas.drawCircle(
+      Offset(offsetX + 60, offsetY + 10),
+      10,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..color = const Color.fromRGBO(255, 0, 0, 1));
+  canvas.drawCircle(
+      Offset(offsetX + 10, offsetY + 60),
+      10,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..color = const Color.fromRGBO(0, 255, 0, 1));
+  canvas.drawImage(createTestImage(), Offset(0, 0), Paint());
+  canvas.drawCircle(
+      Offset(offsetX + 60, offsetY + 60),
+      10,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..color = const Color.fromRGBO(0, 0, 255, 1));
+  return recorder.endRecording();
+}
+
+HtmlImage createTestImage({int width = 100, int height = 50}) {
+  html.CanvasElement canvas =
+  new html.CanvasElement(width: width, height: height);
+  html.CanvasRenderingContext2D ctx = canvas.context2D;
+  ctx.fillStyle = '#E04040';
+  ctx.fillRect(0, 0, 33, 50);
+  ctx.fill();
+  ctx.fillStyle = '#40E080';
+  ctx.fillRect(33, 0, 33, 50);
+  ctx.fill();
+  ctx.fillStyle = '#2040E0';
+  ctx.fillRect(66, 0, 33, 50);
+  ctx.fill();
+  html.ImageElement imageElement = html.ImageElement();
+  imageElement.src = js_util.callMethod(canvas, 'toDataURL', <dynamic>[]);
+  return HtmlImage(imageElement, width, height);
 }

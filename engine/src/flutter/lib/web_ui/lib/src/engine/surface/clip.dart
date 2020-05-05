@@ -28,7 +28,9 @@ mixin _DomClip on PersistedContainerSurface {
     if (!debugShowClipLayers) {
       // Hide overflow in production mode. When debugging we want to see the
       // clipped picture in full.
-      element.style.overflow = 'hidden';
+      element.style
+        ..overflow = 'hidden'
+        ..zIndex = '0';
     } else {
       // Display the outline of the clipping region. When debugShowClipLayers is
       // `true` we don't hide clip overflow (see above). This outline helps
@@ -41,6 +43,7 @@ mixin _DomClip on PersistedContainerSurface {
       _surfaceStatsFor(this).allocatedDomNodeCount++;
     }
     _childContainer.style.position = 'absolute';
+
     element.append(_childContainer);
     return element;
   }
