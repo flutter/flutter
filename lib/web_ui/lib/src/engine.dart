@@ -108,6 +108,7 @@ part 'engine/surface/surface_stats.dart';
 part 'engine/surface/transform.dart';
 part 'engine/test_embedding.dart';
 part 'engine/text/font_collection.dart';
+part 'engine/text/line_break_properties.dart';
 part 'engine/text/line_breaker.dart';
 part 'engine/text/measurement.dart';
 part 'engine/text/paragraph.dart';

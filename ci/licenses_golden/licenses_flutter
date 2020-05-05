@@ -490,6 +490,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/surface_stats.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/transform.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/test_embedding.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/font_collection.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/line_break_properties.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/line_breaker.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/measurement.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/paragraph.dart
