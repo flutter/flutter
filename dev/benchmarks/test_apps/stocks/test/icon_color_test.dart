@@ -75,7 +75,7 @@ void main() {
     // check the color of the icon - light mode
     checkIconColor(tester, 'Stock List', Colors.purple); // theme primary color
     checkIconColor(tester, 'Account Balance', Colors.black38); // disabled
-    checkIconColor(tester, 'About', Colors.black45); // enabled
+    checkIconColor(tester, 'About', ThemeData().iconTheme.color); // enabled
 
     // switch to dark mode
     await tester.tap(find.text('Pessimistic'));
