@@ -14,6 +14,26 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _TestSliverPersistentHeaderDelegate(this.minExtent, this.maxExtent, this.key);
+
+  final Key key;
+
+  @override
+  final double maxExtent;
+
+  @override
+  final double minExtent;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return SizedBox.expand(key: key);
+  }
+
+  @override
+  bool shouldRebuild(_TestSliverPersistentHeaderDelegate oldDelegate) => true;
+}
+
 void main() {
   testWidgets('Viewport getOffsetToReveal - down', (WidgetTester tester) async {
     List<Widget> children;
@@ -984,6 +1004,139 @@ void main() {
     tester.renderObject(find.byWidget(children[1], skipOffstage: false)).showOnScreen();
     await tester.pumpAndSettle();
     expect(controller.offset, 300.0);
+  });
+
+  testWidgets(
+    'Viewport showOnScreen should not scroll if the rect is already visible, even if it does not scroll linearly',
+    (WidgetTester tester) async {
+      List<Widget> children;
+      ScrollController controller;
+
+      const Key headerKey = Key('header');
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Container(
+              height: 600.0,
+              child: CustomScrollView(
+                controller: controller = ScrollController(initialScrollOffset: 300.0),
+                slivers: children = List<Widget>.generate(20, (int i) {
+                  return i == 10
+                  ? SliverPersistentHeader(
+                    pinned: true,
+                    floating: false,
+                    delegate: _TestSliverPersistentHeaderDelegate(100, 300, headerKey),
+                  )
+                  : SliverToBoxAdapter(
+                    child: Container(
+                      height: 300.0,
+                      child: Text('Tile $i'),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      controller.jumpTo(300.0 * 15);
+      await tester.pumpAndSettle();
+
+      final Finder pinnedHeaderContent = find.descendant(
+        of: find.byWidget(children[10], skipOffstage: false),
+        matching: find.byKey(headerKey, skipOffstage: false),
+        skipOffstage: false,
+      );
+
+      // The persistent header is pinned to the leading edge thus still visible,
+      // the viewport should not scroll.
+      tester.renderObject(pinnedHeaderContent).showOnScreen();
+      await tester.pumpAndSettle();
+      expect(controller.offset, 300.0 * 15);
+
+      // The 11th child will be partially obstructed by the persistent header,
+      // the viewport should scroll to reveal it.
+      controller.jumpTo(
+        11 * 300.0  // Preceding headers
+        + 200.0     // Shrinks the pinned header to minExtent
+        + 100.0     // Obstructs the leading 100 pixels of the 11th header
+      );
+      await tester.pumpAndSettle();
+
+      tester.renderObject(find.byWidget(children[11], skipOffstage: false)).showOnScreen();
+      await tester.pumpAndSettle();
+      expect(controller.offset, lessThan(11 * 300.0 + 200.0 + 100.0));
+  });
+
+  testWidgets(
+    'Viewport showOnScreen should not scroll if the rect is already visible, '
+    'even if it does not scroll linearly (reversed order version)',
+    (WidgetTester tester) async {
+      List<Widget> children;
+      ScrollController controller;
+
+      const Key headerKey = Key('header');
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Container(
+              height: 600.0,
+              child: CustomScrollView(
+                center: const Key('19'),
+                controller: controller = ScrollController(initialScrollOffset: 300.0),
+                slivers: children = List<Widget>.generate(20, (int i) {
+                  return i == 10
+                    ? SliverPersistentHeader(
+                      pinned: true,
+                      floating: false,
+                      delegate: _TestSliverPersistentHeaderDelegate(100, 300, headerKey),
+                    )
+                    : SliverToBoxAdapter(
+                      key: (i == 19) ? const Key('19') : null,
+                      child: Container(
+                        height: 300.0,
+                        child: Text('Tile $i'),
+                      ),
+                    );
+                }),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      controller.jumpTo(-300.0 * 15);
+      await tester.pumpAndSettle();
+
+      final Finder pinnedHeaderContent = find.descendant(
+        of: find.byWidget(children[10], skipOffstage: false),
+        matching: find.byKey(headerKey, skipOffstage: false),
+        skipOffstage: false,
+      );
+
+      // The persistent header is pinned to the leading edge thus still visible,
+      // the viewport should not scroll.
+      tester.renderObject(pinnedHeaderContent).showOnScreen();
+      await tester.pumpAndSettle();
+      expect(controller.offset, -300.0 * 15);
+
+      // children[9] will be partially obstructed by the persistent header,
+      // the viewport should scroll to reveal it.
+      controller.jumpTo(
+        -8 * 300.0  // Preceding headers 11 - 18
+        - 200.0     // Viewport height
+        - 200.0     // Shrinks the pinned header to minExtent
+        - 100.0     // Obstructs the leading 100 pixels of the 11th header
+      );
+      await tester.pumpAndSettle();
+
+      tester.renderObject(find.byWidget(children[11], skipOffstage: false)).showOnScreen();
+      await tester.pumpAndSettle();
+      expect(controller.offset, lessThan(-8 * 300.0 - 200.0 - 100.0));
+
   });
 
   group('unbounded constraints control test', () {
