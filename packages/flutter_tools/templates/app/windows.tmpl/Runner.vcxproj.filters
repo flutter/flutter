@@ -27,6 +27,9 @@
     <ClCompile Include="runner\flutter_window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="runner\utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="runner\win32_window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -51,6 +54,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="runner\flutter_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="runner\utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="runner\win32_window.h">

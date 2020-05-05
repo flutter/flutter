@@ -5,11 +5,13 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
@@ -18,22 +20,25 @@ import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/testbed.dart';
 
 void main() {
   BufferLogger logger;
+  FileSystem fs;
   MockUsage mockUsage;
   Platform platform;
   OperatingSystemUtils operatingSystemUtils;
 
   setUp(() async {
     logger = BufferLogger.test();
+    fs = MemoryFileSystem.test();
 
     mockUsage = MockUsage();
     when(mockUsage.clientId).thenReturn('00000000-0000-4000-0000-000000000000');
 
     platform = FakePlatform(environment: <String, String>{}, operatingSystem: 'linux');
     operatingSystemUtils = OperatingSystemUtils(
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fs,
       logger: logger,
       platform: platform,
       processManager: FakeProcessManager.any(),
@@ -70,6 +75,29 @@ void main() {
     expect(logger.traceText, contains('Sending crash report to Google.'));
     expect(logger.traceText, contains('Crash report sent (report ID: test-report-id)'));
   }
+
+  testWithoutContext('CrashReporter.informUser provides basic instructions', () async {
+    final CrashReporter crashReporter = CrashReporter(
+      fileSystem: fs,
+      logger: logger,
+      flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+      client: FakeHttpClient(),
+    );
+
+    final File file = fs.file('flutter_00.log');
+
+    await crashReporter.informUser(
+      CrashDetails(
+        command: 'arg1 arg2 arg3',
+        error: Exception('Dummy exception'),
+        stackTrace: StackTrace.current,
+        doctorText: 'Fake doctor text'),
+      file,
+    );
+
+    expect(logger.errorText, contains('A crash report has been written to ${file.path}.'));
+    expect(logger.statusText, contains('https://github.com/flutter/flutter/issues/new'));
+  });
 
   testWithoutContext('suppress analytics', () async {
     when(mockUsage.suppressAnalytics).thenReturn(true);

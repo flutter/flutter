@@ -131,7 +131,7 @@ void main() {
       }, initializeFlutterRoot: false);
 
       testUsingContext('works if --local-engine is specified and --local-engine-src-path is specified', () async {
-        fs.file(_kDotPackages).writeAsStringSync('\n');
+        // Intentionally do not create a package_config to verify that it is not required.
         fs.directory('$_kArbitraryEngineRoot/src/out/ios_debug').createSync(recursive: true);
         fs.directory('$_kArbitraryEngineRoot/src/out/host_debug').createSync(recursive: true);
 
@@ -185,7 +185,9 @@ void main() {
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
         when(processManager.runSync('git fetch https://github.com/flutter/flutter.git --tags'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
-        when(processManager.runSync('git describe --match *.*.* --first-parent --long --tags'.split(' '),
+        when(processManager.runSync('git tag --contains HEAD'.split(' '),
+          workingDirectory: Cache.flutterRoot)).thenReturn(result);
+        when(processManager.runSync('git describe --match *.*.*-*.*.pre --first-parent --long --tags'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
         when(processManager.runSync(FlutterVersion.gitLog('-n 1 --pretty=format:%ad --date=iso'.split(' ')),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);

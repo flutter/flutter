@@ -7,10 +7,11 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart'
-  show getEmulatorPath, AndroidSdk, androidSdk;
+  show getEmulatorPath, AndroidSdk;
 import 'package:flutter_tools/src/android/android_emulator.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
 
@@ -130,7 +131,7 @@ void main() {
 
     testUsingContext('succeeds', () async {
       final AndroidEmulator emulator = AndroidEmulator(emulatorID);
-      expect(getEmulatorPath(androidSdk), mockSdk.emulatorPath);
+      expect(getEmulatorPath(globals.androidSdk), mockSdk.emulatorPath);
       final Completer<void> completer = Completer<void>();
       FakeAsync().run((FakeAsync time) {
         unawaited(emulator.launch().whenComplete(completer.complete));

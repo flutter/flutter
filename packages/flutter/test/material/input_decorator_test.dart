@@ -3910,4 +3910,18 @@ void main() {
     expect(tester.getTopLeft(find.text('label')).dy, -4.0);
   });
 
+  testWidgets('InputDecorator floating label obeys floatingLabelBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          labelText: 'label',
+          floatingLabelBehavior: FloatingLabelBehavior.never,
+        ),
+      ),
+    );
+
+    // Passing floating behavior never results in a dy offset of 20
+    // because the label is not initially floating.
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+  });
 }

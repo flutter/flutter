@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -97,6 +100,37 @@ void main() {
     expect(testLogger.errorText, isNot(contains(testStackTrace.toString())));
   });
 
+  testbed.test('flutter assemble outputs JSON performance data to provided file', () async {
+    when(globals.buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
+      .thenAnswer((Invocation invocation) async {
+        return BuildResult(success: true, performance: <String, PerformanceMeasurement>{
+          'hello': PerformanceMeasurement(
+            target: 'hello',
+            analyicsName: 'bar',
+            elapsedMilliseconds: 123,
+            skipped: false,
+            succeeded: true,
+          ),
+        });
+      });
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
+
+    await commandRunner.run(<String>[
+      'assemble',
+      '-o Output',
+      '--performance-measurement-file=out.json',
+      'debug_macos_bundle_flutter_assets',
+    ]);
+
+    expect(globals.fs.file('out.json'), exists);
+    expect(
+      json.decode(globals.fs.file('out.json').readAsStringSync()),
+      containsPair('targets', contains(
+        containsPair('name', 'bar'),
+      )),
+    );
+  });
+
   testbed.test('flutter assemble does not inject engine revision with local-engine', () async {
     Environment environment;
     when(globals.artifacts.isLocalEngine).thenReturn(true);
@@ -169,6 +203,36 @@ void main() {
     expect(inputs.readAsStringSync(), contains('foo'));
     expect(inputs.readAsStringSync(), contains('fizz'));
     expect(inputs.lastModifiedSync(), isNot(theDistantPast));
+  });
+
+  testWithoutContext('writePerformanceData outputs performance data in JSON form', () {
+    final List<PerformanceMeasurement> performanceMeasurement = <PerformanceMeasurement>[
+      PerformanceMeasurement(
+        analyicsName: 'foo',
+        target: 'hidden',
+        skipped: false,
+        succeeded: true,
+        elapsedMilliseconds: 123,
+      )
+    ];
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File outFile = fileSystem.currentDirectory
+      .childDirectory('foo')
+      .childFile('out.json');
+
+    writePerformanceData(performanceMeasurement, outFile);
+
+    expect(outFile, exists);
+    expect(json.decode(outFile.readAsStringSync()), <String, Object>{
+      'targets': <Object>[
+        <String, Object>{
+          'name': 'foo',
+          'skipped': false,
+          'succeeded': true,
+          'elapsedMilliseconds': 123,
+        },
+      ],
+    });
   });
 }
 

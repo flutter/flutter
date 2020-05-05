@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
@@ -45,17 +47,12 @@ class NewGalleryChromeRunTest {
         '-v',
         '--release',
         '--no-pub',
-      ], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
+      ]);
 
       final List<String> options = <String>['-d', 'chrome', '--verbose', '--resident'];
       final Process process = await startProcess(
-        'flutter',
+        path.join(flutterDirectory.path, 'bin', 'flutter'),
         flutterCommandArgs('run', options),
-        environment: <String, String>{
-          'FLUTTER_WEB': 'true',
-        },
       );
 
       final Completer<void> stdoutDone = Completer<void>();

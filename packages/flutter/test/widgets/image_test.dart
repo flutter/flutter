@@ -528,7 +528,6 @@ void main() {
     final ImageListener listener = (ImageInfo info, bool synchronous) {
       capturedImage = info;
     };
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails flutterError) {
       reportedException = flutterError.exception;
       reportedStackTrace = flutterError.stack;
@@ -565,7 +564,6 @@ void main() {
     // The image stream error handler should have the original exception.
     expect(capturedException, testException);
     expect(capturedStackTrace, testStack);
-    FlutterError.onError = oldHandler;
   });
 
   testWidgets('Duplicate listener registration does not affect error listeners', (WidgetTester tester) async {

@@ -8,6 +8,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:path/path.dart' as path;
 import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
 
@@ -85,9 +86,22 @@ class _TaskRunner {
       ).toSet();
       beforeRunningDartInstances.forEach(print);
 
+      print('enabling configs for macOS, Linux, Windows, and Web...');
+      final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
+        'config',
+        '--enable-macos-desktop',
+        '--enable-windows-desktop',
+        '--enable-linux-desktop',
+        '--enable-web'
+      ]);
+      if (configResult != 0) {
+        print('Failed to enable configuration, tasks may not run.');
+      }
+
       Future<TaskResult> futureResult = _performTask();
       if (taskTimeout != null)
         futureResult = futureResult.timeout(taskTimeout);
+
       TaskResult result = await futureResult;
 
       section('Checking running Dart$exe processes after task...');

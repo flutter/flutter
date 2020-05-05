@@ -227,18 +227,11 @@ void main() {
     expect(residentWebRunner.supportsServiceProtocol, true);
   }));
 
-  test('Exits on run if application does not support the web', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    globals.fs.file('pubspec.yaml').createSync();
-
-    expect(await residentWebRunner.run(), 1);
-    expect(testLogger.errorText, contains('This application is not configured to build on the web'));
-  }));
-
   test('Exits on run if target file does not exist', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file(globals.fs.path.join('web', 'index.html')).createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('web', 'index.html'))
+      .createSync(recursive: true);
 
     expect(await residentWebRunner.run(), 1);
     final String absoluteMain = globals.fs.path.absolute(globals.fs.path.join('lib', 'main.dart'));
@@ -275,6 +268,25 @@ void main() {
       ),
       outputPreferences: OutputPreferences.test(),
     )),
+  }));
+
+  test('Can successfully run without an index.html including status warning', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+    _setupMocks();
+    globals.fs.file(globals.fs.path.join('web', 'index.html'))
+      .deleteSync();
+    residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
+      mockFlutterDevice,
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      ipv6: true,
+      stayResident: false,
+      urlTunneller: null,
+    ) as ResidentWebRunner;
+
+    expect(await residentWebRunner.run(), 0);
+    expect(testLogger.statusText,
+      contains('This application is not configured to build on the web'));
   }));
 
   test('Can successfully run and disconnect with --no-resident', () => testbed.run(() async {
@@ -351,7 +363,6 @@ void main() {
       const FakeVmServiceRequest(
         method: 'hotRestart',
         id: '5',
-        args: null,
         jsonResponse: <String, Object>{
           'type': 'Success',
         }
@@ -429,7 +440,6 @@ void main() {
       const FakeVmServiceRequest(
         method: 'hotRestart',
         id: '5',
-        args: null,
         jsonResponse: <String, Object>{
           'type': 'Success',
         }
@@ -662,7 +672,6 @@ void main() {
       const FakeVmServiceRequest(
         id: '5',
         method: 'hotRestart',
-        args: null,
         jsonResponse: <String, Object>{
           'type': 'Failed',
         }
@@ -686,7 +695,6 @@ void main() {
       const FakeVmServiceRequest(
         id: '5',
         method: 'hotRestart',
-        args: null,
         // Failed response,
         errorCode: RPCErrorCodes.kInternalError,
       ),

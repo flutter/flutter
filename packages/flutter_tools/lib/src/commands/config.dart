@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
 import '../base/common.dart';
 import '../convert.dart';
@@ -172,8 +171,8 @@ class ConfigCommand extends FlutterCommand {
     if (results['android-studio-dir'] == null && androidStudio != null) {
       results['android-studio-dir'] = androidStudio.directory;
     }
-    if (results['android-sdk'] == null && androidSdk != null) {
-      results['android-sdk'] = androidSdk.directory;
+    if (results['android-sdk'] == null && globals.androidSdk != null) {
+      results['android-sdk'] = globals.androidSdk.directory;
     }
 
     globals.printStatus(const JsonEncoder.withIndent('  ').convert(results));

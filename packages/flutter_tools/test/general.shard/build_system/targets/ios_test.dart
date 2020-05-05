@@ -100,7 +100,7 @@ void main() {
         environment.buildDir.childFile('iphone_framework').path,
         environment.buildDir.childFile('simulator_framework').path,
         '-output',
-        environment.buildDir.childFile('App').path,
+        environment.buildDir.childDirectory('App.framework').childFile('App').path,
       ]),
     ]);
 
@@ -127,7 +127,10 @@ void main() {
     // App kernel
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
     // Stub framework
-    environment.buildDir.childFile('App').createSync();
+    environment.buildDir
+      .childDirectory('App.framework')
+      .childFile('App')
+      .createSync(recursive: true);
 
     await const DebugIosApplicationBundle().build(environment);
 

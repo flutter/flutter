@@ -18,5 +18,7 @@
   "cutButtonLabel": "Retalla",
   "copyButtonLabel": "Copia",
   "pasteButtonLabel": "Enganxa",
-  "selectAllButtonLabel": "Selecciona-ho tot"
+  "selectAllButtonLabel": "Selecciona-ho tot",
+  "tabSemanticsLabel": "TBD",
+  "modalBarrierDismissLabel": "Ignora"
 }

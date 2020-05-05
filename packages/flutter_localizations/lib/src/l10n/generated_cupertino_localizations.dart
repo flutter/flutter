@@ -103,6 +103,9 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Maak toe';
+
+  @override
   String get pasteButtonLabel => 'Plak';
 
   @override
@@ -110,6 +113,9 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Kies alles';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -251,6 +257,9 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'አሰናብት';
+
+  @override
   String get pasteButtonLabel => 'ለጥፍ';
 
   @override
@@ -258,6 +267,9 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'ሁሉንም ምረጥ';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -399,6 +411,9 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => '\$minute دقيقة​';
 
   @override
+  String get modalBarrierDismissLabel => 'رفض';
+
+  @override
   String get pasteButtonLabel => 'لصق';
 
   @override
@@ -406,6 +421,9 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'اختيار الكل';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => 'ساعات';
@@ -547,6 +565,9 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'অগ্ৰাহ্য কৰক';
+
+  @override
   String get pasteButtonLabel => 'পে\'ষ্ট কৰক';
 
   @override
@@ -554,6 +575,9 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'সকলো বাছনি কৰক';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -695,6 +719,9 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'İmtina edin';
+
+  @override
   String get pasteButtonLabel => 'Yerləşdirin';
 
   @override
@@ -702,6 +729,9 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Hamısını seçin';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -843,6 +873,9 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Адхіліць';
+
+  @override
   String get pasteButtonLabel => 'Уставіць';
 
   @override
@@ -850,6 +883,9 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Выбраць усе';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => 'гадзіны';
@@ -991,6 +1027,9 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Отхвърляне';
+
+  @override
   String get pasteButtonLabel => 'Поставяне';
 
   @override
@@ -998,6 +1037,9 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Избиране на всички';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -1139,6 +1181,9 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'খারিজ করুন';
+
+  @override
   String get pasteButtonLabel => 'পেস্ট করুন';
 
   @override
@@ -1146,6 +1191,9 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'সব বেছে নিন';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -1287,6 +1335,9 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Odbaci';
+
+  @override
   String get pasteButtonLabel => 'Zalijepi';
 
   @override
@@ -1294,6 +1345,9 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Odaberi sve';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => 'sata';
@@ -1435,6 +1489,9 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Ignora';
+
+  @override
   String get pasteButtonLabel => 'Enganxa';
 
   @override
@@ -1442,6 +1499,9 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Selecciona-ho tot';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -1583,6 +1643,9 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Zavřít';
+
+  @override
   String get pasteButtonLabel => 'Vložit';
 
   @override
@@ -1590,6 +1653,9 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Vybrat vše';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => 'hodiny';
@@ -1731,6 +1797,9 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Afvis';
+
+  @override
   String get pasteButtonLabel => 'Sæt ind';
 
   @override
@@ -1738,6 +1807,9 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Vælg alle';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -1879,6 +1951,9 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Schließen';
+
+  @override
   String get pasteButtonLabel => 'Einsetzen';
 
   @override
@@ -1886,6 +1961,9 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Alles auswählen';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -2027,6 +2105,9 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Παράβλεψη';
+
+  @override
   String get pasteButtonLabel => 'Επικόλληση';
 
   @override
@@ -2034,6 +2115,9 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Επιλογή όλων';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -2175,6 +2259,9 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Dismiss';
+
+  @override
   String get pasteButtonLabel => 'Paste';
 
   @override
@@ -2182,6 +2269,9 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Select All';
+
+  @override
+  String get tabSemanticsLabelRaw => 'tab, \$tabIndex of \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -2595,6 +2685,9 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Cerrar';
+
+  @override
   String get pasteButtonLabel => 'Pegar';
 
   @override
@@ -2602,6 +2695,9 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Seleccionar todos';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -2699,6 +2795,9 @@ class CupertinoLocalizationEs419 extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in Argentina (`es_AR`).
@@ -2739,6 +2838,9 @@ class CupertinoLocalizationEsAr extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in Bolivia (`es_BO`).
@@ -2779,6 +2881,9 @@ class CupertinoLocalizationEsBo extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in Chile (`es_CL`).
@@ -2819,6 +2924,9 @@ class CupertinoLocalizationEsCl extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in Colombia (`es_CO`).
@@ -2859,6 +2967,9 @@ class CupertinoLocalizationEsCo extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in Costa Rica (`es_CR`).
@@ -2899,6 +3010,9 @@ class CupertinoLocalizationEsCr extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in the Dominican Republic (`es_DO`).
@@ -2939,6 +3053,9 @@ class CupertinoLocalizationEsDo extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in Ecuador (`es_EC`).
@@ -2979,6 +3096,9 @@ class CupertinoLocalizationEsEc extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in Guatemala (`es_GT`).
@@ -3019,6 +3139,9 @@ class CupertinoLocalizationEsGt extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in Honduras (`es_HN`).
@@ -3059,6 +3182,9 @@ class CupertinoLocalizationEsHn extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in Mexico (`es_MX`).
@@ -3099,6 +3225,9 @@ class CupertinoLocalizationEsMx extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in Nicaragua (`es_NI`).
@@ -3139,6 +3268,9 @@ class CupertinoLocalizationEsNi extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in Panama (`es_PA`).
@@ -3179,6 +3311,9 @@ class CupertinoLocalizationEsPa extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in Peru (`es_PE`).
@@ -3219,6 +3354,9 @@ class CupertinoLocalizationEsPe extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in Puerto Rico (`es_PR`).
@@ -3259,6 +3397,9 @@ class CupertinoLocalizationEsPr extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in Paraguay (`es_PY`).
@@ -3299,6 +3440,9 @@ class CupertinoLocalizationEsPy extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in El Salvador (`es_SV`).
@@ -3339,6 +3483,9 @@ class CupertinoLocalizationEsSv extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in the United States (`es_US`).
@@ -3379,6 +3526,9 @@ class CupertinoLocalizationEsUs extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in Uruguay (`es_UY`).
@@ -3419,6 +3569,9 @@ class CupertinoLocalizationEsUy extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Spanish Castilian, as used in Venezuela (`es_VE`).
@@ -3459,6 +3612,9 @@ class CupertinoLocalizationEsVe extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get modalBarrierDismissLabel => 'Descartar';
 }
 
 /// The translations for Estonian (`et`).
@@ -3543,6 +3699,9 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Loobu';
+
+  @override
   String get pasteButtonLabel => 'Kleebi';
 
   @override
@@ -3550,6 +3709,9 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Vali kõik';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -3691,6 +3853,9 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Baztertu';
+
+  @override
   String get pasteButtonLabel => 'Itsatsi';
 
   @override
@@ -3698,6 +3863,9 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Hautatu guztiak';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -3839,6 +4007,9 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'نپذیرفتن';
+
+  @override
   String get pasteButtonLabel => 'جای‌گذاری';
 
   @override
@@ -3846,6 +4017,9 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'انتخاب همه';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -3987,6 +4161,9 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Ohita';
+
+  @override
   String get pasteButtonLabel => 'Liitä';
 
   @override
@@ -3994,6 +4171,9 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Valitse kaikki';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4135,6 +4315,9 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'I-dismiss';
+
+  @override
   String get pasteButtonLabel => 'I-paste';
 
   @override
@@ -4142,6 +4325,9 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Piliin Lahat';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4283,6 +4469,9 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Ignorer';
+
+  @override
   String get pasteButtonLabel => 'Coller';
 
   @override
@@ -4290,6 +4479,9 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Tout sélect.';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4483,6 +4675,9 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Ignorar';
+
+  @override
   String get pasteButtonLabel => 'Pegar';
 
   @override
@@ -4490,6 +4685,9 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Seleccionar todo';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4631,6 +4829,9 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Schließen';
+
+  @override
   String get pasteButtonLabel => 'Einsetzen';
 
   @override
@@ -4638,6 +4839,9 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Alles auswählen';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4779,6 +4983,9 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'છોડી દો';
+
+  @override
   String get pasteButtonLabel => 'પેસ્ટ કરો';
 
   @override
@@ -4786,6 +4993,9 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'બધા પસંદ કરો';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4927,6 +5137,9 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'סגירה';
+
+  @override
   String get pasteButtonLabel => 'הדבקה';
 
   @override
@@ -4934,6 +5147,9 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'בחירת הכול';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -5075,6 +5291,9 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'खारिज करें';
+
+  @override
   String get pasteButtonLabel => 'चिपकाएं';
 
   @override
@@ -5082,6 +5301,9 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'सभी चुनें';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -5223,6 +5445,9 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Odbaci';
+
+  @override
   String get pasteButtonLabel => 'Zalijepi';
 
   @override
@@ -5230,6 +5455,9 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Odaberi sve';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => 'sata';
@@ -5371,6 +5599,9 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Elvetés';
+
+  @override
   String get pasteButtonLabel => 'Beillesztés';
 
   @override
@@ -5378,6 +5609,9 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Összes kijelölése';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -5519,6 +5753,9 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Փակել';
+
+  @override
   String get pasteButtonLabel => 'Տեղադրել';
 
   @override
@@ -5526,6 +5763,9 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Նշել բոլորը';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -5667,6 +5907,9 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Tutup';
+
+  @override
   String get pasteButtonLabel => 'Tempel';
 
   @override
@@ -5674,6 +5917,9 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Pilih Semua';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -5815,6 +6061,9 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Hunsa';
+
+  @override
   String get pasteButtonLabel => 'Líma';
 
   @override
@@ -5822,6 +6071,9 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Velja allt';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -5963,6 +6215,9 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Ignora';
+
+  @override
   String get pasteButtonLabel => 'Incolla';
 
   @override
@@ -5970,6 +6225,9 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Seleziona tutto';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6111,6 +6369,9 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => '閉じる';
+
+  @override
   String get pasteButtonLabel => '貼り付け';
 
   @override
@@ -6118,6 +6379,9 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'すべて選択';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6259,6 +6523,9 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'დახურვა';
+
+  @override
   String get pasteButtonLabel => 'ჩასმა';
 
   @override
@@ -6266,6 +6533,9 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'ყველას არჩევა';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6407,6 +6677,9 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Жабу';
+
+  @override
   String get pasteButtonLabel => 'Қою';
 
   @override
@@ -6414,6 +6687,9 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Барлығын таңдау';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6555,6 +6831,9 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'ច្រាន​ចោល';
+
+  @override
   String get pasteButtonLabel => 'ដាក់​ចូល';
 
   @override
@@ -6562,6 +6841,9 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'ជ្រើសរើស​ទាំងអស់';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6703,6 +6985,9 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => '\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cca}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
   String get pasteButtonLabel => '\u{c85}\u{c82}\u{c9f}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
@@ -6710,6 +6995,9 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6851,6 +7139,9 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => '닫기';
+
+  @override
   String get pasteButtonLabel => '붙여넣기';
 
   @override
@@ -6858,6 +7149,9 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => '전체 선택';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6999,6 +7293,9 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Жабуу';
+
+  @override
   String get pasteButtonLabel => 'Чаптоо';
 
   @override
@@ -7006,6 +7303,9 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Баарын тандоо';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -7147,6 +7447,9 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'ປິດໄວ້';
+
+  @override
   String get pasteButtonLabel => 'ວາງ';
 
   @override
@@ -7154,6 +7457,9 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'ເລືອກທັງໝົດ';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -7295,6 +7601,9 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Atsisakyti';
+
+  @override
   String get pasteButtonLabel => 'Įklijuoti';
 
   @override
@@ -7302,6 +7611,9 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Pasirinkti viską';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => 'val.';
@@ -7443,6 +7755,9 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => '\$minute minūtes';
 
   @override
+  String get modalBarrierDismissLabel => 'Nerādīt';
+
+  @override
   String get pasteButtonLabel => 'Ielīmēt';
 
   @override
@@ -7450,6 +7765,9 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Atlasīt visu';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -7591,6 +7909,9 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Отфрли';
+
+  @override
   String get pasteButtonLabel => 'Залепи';
 
   @override
@@ -7598,6 +7919,9 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Избери ги сите';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -7739,6 +8063,9 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'നിരസിക്കുക';
+
+  @override
   String get pasteButtonLabel => 'ഒട്ടിക്കുക';
 
   @override
@@ -7746,6 +8073,9 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'എല്ലാം തിരഞ്ഞെടുക്കുക';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -7887,6 +8217,9 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Үл хэрэгсэх';
+
+  @override
   String get pasteButtonLabel => 'Буулгах';
 
   @override
@@ -7894,6 +8227,9 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Бүгдийг сонгох';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8035,6 +8371,9 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'डिसमिस करा';
+
+  @override
   String get pasteButtonLabel => 'पेस्ट करा';
 
   @override
@@ -8042,6 +8381,9 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'सर्व निवडा';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8183,6 +8525,9 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Tolak';
+
+  @override
   String get pasteButtonLabel => 'Tampal';
 
   @override
@@ -8190,6 +8535,9 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Pilih Semua';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8331,6 +8679,9 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'ပယ်ရန်';
+
+  @override
   String get pasteButtonLabel => 'ကူးထည့်ရန်';
 
   @override
@@ -8338,6 +8689,9 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'အားလုံး ရွေးရန်';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8507,6 +8861,9 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'खारेज गर्नुहोस्';
+
+  @override
   String get pasteButtonLabel => 'टाँस्नुहोस्';
 
   @override
@@ -8514,6 +8871,9 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'सबै चयन गर्नुहोस्';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8655,6 +9015,9 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Sluiten';
+
+  @override
   String get pasteButtonLabel => 'Plakken';
 
   @override
@@ -8662,6 +9025,9 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Alles selecteren';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8803,6 +9169,9 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Avvis';
+
+  @override
   String get pasteButtonLabel => 'Lim inn';
 
   @override
@@ -8810,6 +9179,9 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Velg alle';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8951,6 +9323,9 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'ଖାରଜ କରନ୍ତୁ';
+
+  @override
   String get pasteButtonLabel => 'ପେଷ୍ଟ କରନ୍ତୁ';
 
   @override
@@ -8958,6 +9333,9 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'ସମସ୍ତ ଚୟନ କରନ୍ତୁ';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -9099,6 +9477,9 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'ਖਾਰਜ ਕਰੋ';
+
+  @override
   String get pasteButtonLabel => 'ਪੇਸਟ ਕਰੋ';
 
   @override
@@ -9106,6 +9487,9 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'ਸਭ ਚੁਣੋ';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -9247,6 +9631,9 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Zamknij';
+
+  @override
   String get pasteButtonLabel => 'Wklej';
 
   @override
@@ -9254,6 +9641,9 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Wybierz wszystkie';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => 'godziny';
@@ -9395,6 +9785,9 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Dispensar';
+
+  @override
   String get pasteButtonLabel => 'Colar';
 
   @override
@@ -9402,6 +9795,9 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Selecionar Tudo';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -9499,6 +9895,9 @@ class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
 
   @override
   String get selectAllButtonLabel => 'Selecionar tudo';
+
+  @override
+  String get modalBarrierDismissLabel => 'Ignorar';
 }
 
 /// The translations for Romanian Moldavian Moldovan (`ro`).
@@ -9583,6 +9982,9 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Închideți';
+
+  @override
   String get pasteButtonLabel => 'Inserați';
 
   @override
@@ -9590,6 +9992,9 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Selectați-le pe toate';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => 'ore';
@@ -9731,6 +10136,9 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Закрыть';
+
+  @override
   String get pasteButtonLabel => 'Вставить';
 
   @override
@@ -9738,6 +10146,9 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Выбрать все';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => 'часа';
@@ -9879,6 +10290,9 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'ඉවත ලන්න';
+
+  @override
   String get pasteButtonLabel => 'අලවන්න';
 
   @override
@@ -9886,6 +10300,9 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'සියල්ල තෝරන්න';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -10027,6 +10444,9 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Odmietnuť';
+
+  @override
   String get pasteButtonLabel => 'Prilepiť';
 
   @override
@@ -10034,6 +10454,9 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Vybrať všetko';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => 'hodiny';
@@ -10175,6 +10598,9 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Opusti';
+
+  @override
   String get pasteButtonLabel => 'Prilepi';
 
   @override
@@ -10182,6 +10608,9 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Izberi vse';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => 'ure';
@@ -10323,6 +10752,9 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Hiq';
+
+  @override
   String get pasteButtonLabel => 'Ngjit';
 
   @override
@@ -10330,6 +10762,9 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Zgjidhi të gjitha';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -10471,6 +10906,9 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Одбаци';
+
+  @override
   String get pasteButtonLabel => 'Налепи';
 
   @override
@@ -10478,6 +10916,9 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Изабери све';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => 'сата';
@@ -10623,6 +11064,9 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
   String get datePickerMinuteSemanticsLabelOther => '\$minute minuta';
 
   @override
+  String get modalBarrierDismissLabel => 'Odbaci';
+
+  @override
   String get pasteButtonLabel => 'Nalepi';
 
   @override
@@ -10744,6 +11188,9 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Stäng';
+
+  @override
   String get pasteButtonLabel => 'Klistra in';
 
   @override
@@ -10751,6 +11198,9 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Markera alla';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -10892,6 +11342,9 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Ondoa';
+
+  @override
   String get pasteButtonLabel => 'Bandika';
 
   @override
@@ -10899,6 +11352,9 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Teua Zote';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -11040,6 +11496,9 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'நிராகரிக்கும்';
+
+  @override
   String get pasteButtonLabel => 'ஒட்டு';
 
   @override
@@ -11047,6 +11506,9 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'எல்லாம் தேர்ந்தெடு';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -11188,6 +11650,9 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'విస్మరించు';
+
+  @override
   String get pasteButtonLabel => 'అతికించు';
 
   @override
@@ -11195,6 +11660,9 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'అన్నింటినీ ఎంచుకోండి';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -11336,6 +11804,9 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'ปิด';
+
+  @override
   String get pasteButtonLabel => 'วาง';
 
   @override
@@ -11343,6 +11814,9 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'เลือกทั้งหมด';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -11484,6 +11958,9 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'I-dismiss';
+
+  @override
   String get pasteButtonLabel => 'I-paste';
 
   @override
@@ -11491,6 +11968,9 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Piliin Lahat';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -11632,6 +12112,9 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Kapat';
+
+  @override
   String get pasteButtonLabel => 'Yapıştır';
 
   @override
@@ -11639,6 +12122,9 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Tümünü Seç';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -11780,6 +12266,9 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Закрити';
+
+  @override
   String get pasteButtonLabel => 'Вставити';
 
   @override
@@ -11787,6 +12276,9 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Вибрати все';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => 'години';
@@ -11928,6 +12420,9 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'برخاست کریں';
+
+  @override
   String get pasteButtonLabel => 'پیسٹ کریں';
 
   @override
@@ -11935,6 +12430,9 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'سبھی منتخب کریں';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -12076,6 +12574,9 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Yopish';
+
+  @override
   String get pasteButtonLabel => 'Joylash';
 
   @override
@@ -12083,6 +12584,9 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Barchasini tanlash';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -12224,6 +12728,9 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Bỏ qua';
+
+  @override
   String get pasteButtonLabel => 'Dán';
 
   @override
@@ -12231,6 +12738,9 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Chọn tất cả';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -12372,6 +12882,9 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => '关闭';
+
+  @override
   String get pasteButtonLabel => '粘贴';
 
   @override
@@ -12379,6 +12892,9 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => '全选';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -12518,6 +13034,9 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
   String get datePickerMinuteSemanticsLabelOther => '\$minute 分鐘';
 
   @override
+  String get modalBarrierDismissLabel => '拒絕';
+
+  @override
   String get pasteButtonLabel => '貼上';
 
   @override
@@ -12608,6 +13127,9 @@ class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
 
   @override
   String get timerPickerMinuteLabelOther => '分';
+
+  @override
+  String get modalBarrierDismissLabel => '關閉';
 }
 
 /// The translations for Zulu (`zu`).
@@ -12692,6 +13214,9 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get modalBarrierDismissLabel => 'Cashisa';
+
+  @override
   String get pasteButtonLabel => 'Namathisela';
 
   @override
@@ -12699,6 +13224,9 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Khetha konke';
+
+  @override
+  String get tabSemanticsLabelRaw => 'TBD';
 
   @override
   String get timerPickerHourLabelFew => null;

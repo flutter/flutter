@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import 'base/context.dart';
+import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
 import 'globals.dart' as globals;
@@ -24,8 +25,10 @@ class BuildInfo {
     this.splitDebugInfoPath,
     this.dartObfuscation = false,
     this.dartDefines = const <String>[],
+    this.bundleSkSLPath,
     this.dartExperiments = const <String>[],
     @required this.treeShakeIcons,
+    this.performanceMeasurementFile,
   });
 
   final BuildMode mode;
@@ -74,6 +77,11 @@ class BuildInfo {
   /// Whether to apply dart source code obfuscation.
   final bool dartObfuscation;
 
+  /// An optional path to a JSON containing object SkSL shaders
+  ///
+  /// Currently this is only supported for Android builds.
+  final String bundleSkSLPath;
+
   /// Additional constant values to be made available in the Dart program.
   ///
   /// These values can be used with the const `fromEnvironment` constructors of
@@ -82,6 +90,13 @@ class BuildInfo {
 
   /// A list of Dart experiments.
   final List<String> dartExperiments;
+
+  /// The name of a file where flutter assemble will output performance
+  /// information in a JSON format.
+  ///
+  /// This is not considered a build input and will not force assemble to
+  /// rerun tasks.
+  final String performanceMeasurementFile;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -116,6 +131,31 @@ class BuildInfo {
   bool get supportsSimulator => isEmulatorBuildMode(mode);
   String get modeName => getModeName(mode);
   String get friendlyModeName => getFriendlyModeName(mode);
+
+  /// Convert to a structued string encoded structure appropriate for usage as
+  /// environment variables or to embed in other scripts.
+  ///
+  /// Fields that are `null` are excluded from this configration.
+  Map<String, String> toEnvironmentConfig() {
+    return <String, String>{
+      if (dartDefines?.isNotEmpty ?? false)
+        'DART_DEFINES': dartDefines.join(','),
+      if (dartObfuscation != null)
+        'DART_OBFUSCATION': dartObfuscation.toString(),
+      if (extraFrontEndOptions?.isNotEmpty ?? false)
+        'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
+      if (extraGenSnapshotOptions?.isNotEmpty ?? false)
+        'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions.join(','),
+      if (splitDebugInfoPath != null)
+        'SPLIT_DEBUG_INFO': splitDebugInfoPath,
+      if (trackWidgetCreation != null)
+        'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
+      if (treeShakeIcons != null)
+        'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
+      if (performanceMeasurementFile != null)
+        'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile,
+    };
+  }
 }
 
 /// Information about an Android build to be performed or used.
@@ -226,7 +266,7 @@ BuildMode getBuildModeForName(String name) {
   return BuildMode.fromName(name);
 }
 
-String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber) {
+String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber, Logger logger) {
   if (buildNumber == null) {
     return null;
   }
@@ -247,7 +287,7 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     }
     tmpBuildNumber = segments.join('.');
     if (tmpBuildNumber != buildNumber) {
-      globals.printTrace('Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
+      logger.printTrace('Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
           'See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
     }
     return tmpBuildNumber;
@@ -265,7 +305,7 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     }
     tmpBuildNumberStr = tmpBuildNumberInt.toString();
     if (tmpBuildNumberStr != buildNumber) {
-      globals.printTrace('Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
+      logger.printTrace('Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
           'See versionCode at https://developer.android.com/studio/publish/versioning');
     }
     return tmpBuildNumberStr;
@@ -273,7 +313,7 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
   return buildNumber;
 }
 
-String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String buildName) {
+String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String buildName, Logger logger) {
   if (buildName == null) {
     return null;
   }
@@ -294,7 +334,7 @@ String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String build
     }
     tmpBuildName = segments.join('.');
     if (tmpBuildName != buildName) {
-      globals.printTrace('Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
+      logger.printTrace('Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
           'See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
     }
     return tmpBuildName;
