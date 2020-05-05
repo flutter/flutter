@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
@@ -136,28 +137,43 @@ class _FuchsiaLogSink implements EventSink<String> {
   }
 }
 
+/// Device discovery for Fuchsia devices.
 class FuchsiaDevices extends PollingDeviceDiscovery {
-  FuchsiaDevices() : super('Fuchsia devices');
+  FuchsiaDevices({
+    @required Platform platform,
+    @required FuchsiaWorkflow fuchsiaWorkflow,
+    @required FuchsiaSdk fuchsiaSdk,
+    @required Logger logger,
+  }) : _platform = platform,
+       _fuchsiaWorkflow = fuchsiaWorkflow,
+       _fuchsiaSdk = fuchsiaSdk,
+       _logger = logger,
+       super('Fuchsia devices');
+
+  final Platform _platform;
+  final FuchsiaWorkflow _fuchsiaWorkflow;
+  final FuchsiaSdk _fuchsiaSdk;
+  final Logger _logger;
 
   @override
-  bool get supportsPlatform => isFuchsiaSupportedPlatform();
+  bool get supportsPlatform => isFuchsiaSupportedPlatform(_platform);
 
   @override
-  bool get canListAnything => fuchsiaWorkflow.canListDevices;
+  bool get canListAnything => _fuchsiaWorkflow.canListDevices;
 
   @override
   Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
-    if (!fuchsiaWorkflow.canListDevices) {
+    if (!_fuchsiaWorkflow.canListDevices) {
       return <Device>[];
     }
-    final List<String> text = (await fuchsiaSdk.listDevices(timeout: timeout))
+    final List<String> text = (await _fuchsiaSdk.listDevices(timeout: timeout))
       ?.split('\n');
     if (text == null || text.isEmpty) {
       return <Device>[];
     }
     final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
     for (final String line in text) {
-      final FuchsiaDevice device = await parseDevice(line);
+      final FuchsiaDevice device = await _parseDevice(line);
       if (device == null) {
         continue;
       }
@@ -168,27 +184,27 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<String>> getDiagnostics() async => const <String>[];
+
+  Future<FuchsiaDevice> _parseDevice(String text) async {
+    final String line = text.trim();
+    // ['ip', 'device name']
+    final List<String> words = line.split(' ');
+    if (words.length < 2) {
+      return null;
+    }
+    final String name = words[1];
+    final String resolvedHost = await _fuchsiaSdk.fuchsiaDevFinder.resolve(
+      name,
+      local: false,
+    );
+    if (resolvedHost == null) {
+      _logger.printError('Failed to resolve host for Fuchsia device `$name`');
+      return null;
+    }
+    return FuchsiaDevice(resolvedHost, name: name);
+  }
 }
 
-@visibleForTesting
-Future<FuchsiaDevice> parseDevice(String text) async {
-  final String line = text.trim();
-  // ['ip', 'device name']
-  final List<String> words = line.split(' ');
-  if (words.length < 2) {
-    return null;
-  }
-  final String name = words[1];
-  final String resolvedHost = await fuchsiaSdk.fuchsiaDevFinder.resolve(
-    name,
-    local: false,
-  );
-  if (resolvedHost == null) {
-    globals.printError('Failed to resolve host for Fuchsia device `$name`');
-    return null;
-  }
-  return FuchsiaDevice(resolvedHost, name: name);
-}
 
 class FuchsiaDevice extends Device {
   FuchsiaDevice(String id, {this.name}) : super(
@@ -455,7 +471,7 @@ class FuchsiaDevice extends Device {
   }
 
   @override
-  bool get supportsScreenshot => isFuchsiaSupportedPlatform();
+  bool get supportsScreenshot => isFuchsiaSupportedPlatform(globals.platform);
 
   @override
   Future<void> takeScreenshot(File outputFile) async {

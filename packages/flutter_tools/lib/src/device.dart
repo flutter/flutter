@@ -19,6 +19,8 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_device.dart';
+import 'fuchsia/fuchsia_sdk.dart';
+import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart' as globals;
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
@@ -82,7 +84,12 @@ class DeviceManager {
       iosWorkflow: globals.iosWorkflow,
     ),
     IOSSimulators(iosSimulatorUtils: globals.iosSimulatorUtils),
-    FuchsiaDevices(),
+    FuchsiaDevices(
+      fuchsiaSdk: fuchsiaSdk,
+      logger: globals.logger,
+      fuchsiaWorkflow: fuchsiaWorkflow,
+      platform: globals.platform,
+    ),
     FlutterTesterDevices(),
     MacOSDevices(),
     LinuxDevices(

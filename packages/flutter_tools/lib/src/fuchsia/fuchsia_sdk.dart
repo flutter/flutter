@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:platform/platform.dart';
+
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -18,8 +20,8 @@ import 'fuchsia_pm.dart';
 FuchsiaSdk get fuchsiaSdk => context.get<FuchsiaSdk>();
 
 /// Returns [true] if the current platform supports Fuchsia targets.
-bool isFuchsiaSupportedPlatform() {
-  return globals.platform.isLinux || globals.platform.isMacOS;
+bool isFuchsiaSupportedPlatform(Platform platform) {
+  return platform.isLinux || platform.isMacOS;
 }
 
 /// The Fuchsia SDK shell commands.
@@ -118,7 +120,7 @@ class FuchsiaArtifacts {
   /// FUCHSIA_SSH_CONFIG) to find the ssh configuration needed to talk to
   /// a device.
   factory FuchsiaArtifacts.find() {
-    if (!isFuchsiaSupportedPlatform()) {
+    if (!isFuchsiaSupportedPlatform(globals.platform)) {
       // Don't try to find the artifacts on platforms that are not supported.
       return FuchsiaArtifacts();
     }
