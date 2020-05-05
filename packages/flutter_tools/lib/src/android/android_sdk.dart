@@ -6,7 +6,6 @@ import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../base/process.dart';
@@ -14,8 +13,6 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import 'android_studio.dart';
-
-AndroidSdk get androidSdk => context.get<AndroidSdk>();
 
 const String kAndroidHome = 'ANDROID_HOME';
 const String kAndroidSdkRoot = 'ANDROID_SDK_ROOT';

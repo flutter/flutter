@@ -31,7 +31,7 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
       .listen((String line) {
     print('attach:stdout: $line');
     stdout.add(line);
-    if (line.contains('Waiting') && onListening != null)
+    if (line.contains('Waiting') && onListening != null && !listening.isCompleted)
       listening.complete(onListening());
     if (line.contains('Quit (terminate the application on the device)'))
       ready.complete();
@@ -56,8 +56,6 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
     return Future.any<dynamic>(<Future<dynamic>>[
       event,
       process.exitCode,
-      // Keep the test from running for 15 minutes if it gets stuck.
-      Future<void>.delayed(const Duration(seconds: 10)),
     ]);
   }
 
@@ -71,10 +69,12 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
   print('run:stdin: r');
   await process.stdin.flush();
   await eventOrExit(reloaded.future);
+
   process.stdin.write('R');
   print('run:stdin: R');
   await process.stdin.flush();
   await eventOrExit(restarted.future);
+
   process.stdin.write('q');
   print('run:stdin: q');
   await process.stdin.flush();
@@ -168,9 +168,13 @@ void main() {
         );
         // Verify that it can discover the observatory port from past logs.
         await testReload(attachProcess);
+      } catch (err, st) {
+        print('Uncaught exception: $err\n$st');
+        rethrow;
       } finally {
         section('Uninstalling');
         await device.adb(<String>['uninstall', kAppId]);
+        print('uninstall complete');
       }
     });
     return TaskResult.success(null);

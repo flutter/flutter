@@ -23,5 +23,7 @@
   "cutButtonLabel": "Izgriezt",
   "copyButtonLabel": "Kopēt",
   "pasteButtonLabel": "Ielīmēt",
-  "selectAllButtonLabel": "Atlasīt visu"
+  "selectAllButtonLabel": "Atlasīt visu",
+  "tabSemanticsLabel": "TBD",
+  "modalBarrierDismissLabel": "Nerādīt"
 }

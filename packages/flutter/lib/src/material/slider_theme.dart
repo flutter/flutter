@@ -109,9 +109,6 @@ import 'theme_data.dart';
 /// left, and in [TextDirection.rtl], the start of the slider is on the right.
 /// {@endtemplate}
 ///
-/// {@template flutter.material.slider.useV2Slider}
-/// Whether to use the updated Material spec version of the slider shape.
-///
 /// This is a temporary flag for migrating the slider from v1 to v2. To avoid
 /// unexpected breaking changes, this value should be set to true. Setting
 /// this to false is considered deprecated.
@@ -1673,14 +1670,7 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 ///  * [RectangularSliderTrackShape], for a similar track with sharp edges.
 class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
   /// Create a slider track that draws two rectangles with rounded outer edges.
-  const RoundedRectSliderTrackShape({ this.useV2Slider = true });
-
-  /// {@macro flutter.material.slider.useV2Slider}
-  @Deprecated(
-    'This flag has changed to true by default and no longer needed. '
-    'This feature was deprecated after v1.18.0.'
-  )
-  final bool useV2Slider;
+  const RoundedRectSliderTrackShape();
 
   @override
   void paint(
@@ -1743,47 +1733,28 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     final Radius trackRadius = Radius.circular(trackRect.height / 2);
     final Radius activeTrackRadius = Radius.circular(trackRect.height / 2 + 1);
 
-    // ignore: deprecated_member_use_from_same_package
-    if (useV2Slider) {
-      context.canvas.drawRRect(
-        RRect.fromLTRBAndCorners(
-          trackRect.left,
-          (textDirection == TextDirection.ltr) ? trackRect.top - (additionalActiveTrackHeight / 2): trackRect.top,
-          thumbCenter.dx,
-          (textDirection == TextDirection.ltr) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
-          topLeft: (textDirection == TextDirection.ltr) ? activeTrackRadius : trackRadius,
-          bottomLeft: (textDirection == TextDirection.ltr) ? activeTrackRadius: trackRadius,
-        ),
-        leftTrackPaint,
-      );
-      context.canvas.drawRRect(
-        RRect.fromLTRBAndCorners(
-          thumbCenter.dx,
-          (textDirection == TextDirection.rtl) ? trackRect.top - (additionalActiveTrackHeight / 2) : trackRect.top,
-          trackRect.right,
-          (textDirection == TextDirection.rtl) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
-          topRight: (textDirection == TextDirection.rtl) ? activeTrackRadius : trackRadius,
-          bottomRight: (textDirection == TextDirection.rtl) ? activeTrackRadius : trackRadius,
-        ),
-        rightTrackPaint,
-      );
-    } else {
-      // The arc rects create a semi-circle with radius equal to track height.
-      final Rect leftTrackArcRect = Rect.fromLTWH(trackRect.left, trackRect.top, trackRect.height, trackRect.height);
-      if (!leftTrackArcRect.isEmpty)
-        context.canvas.drawArc(leftTrackArcRect, math.pi / 2, math.pi, false, leftTrackPaint);
-      final Rect rightTrackArcRect = Rect.fromLTWH(trackRect.right - trackRect.height / 2, trackRect.top, trackRect.height, trackRect.height);
-      if (!rightTrackArcRect.isEmpty)
-        context.canvas.drawArc(rightTrackArcRect, -math.pi / 2, math.pi, false, rightTrackPaint);
-
-      final Size thumbSize = sliderTheme.thumbShape.getPreferredSize(isEnabled, isDiscrete);
-      final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left + trackRect.height / 2, trackRect.top, thumbCenter.dx - thumbSize.width / 2, trackRect.bottom);
-      if (!leftTrackSegment.isEmpty)
-        context.canvas.drawRect(leftTrackSegment, leftTrackPaint);
-      final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx + thumbSize.width / 2, trackRect.top, trackRect.right, trackRect.bottom);
-      if (!rightTrackSegment.isEmpty)
-        context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
-    }
+    context.canvas.drawRRect(
+      RRect.fromLTRBAndCorners(
+        trackRect.left,
+        (textDirection == TextDirection.ltr) ? trackRect.top - (additionalActiveTrackHeight / 2): trackRect.top,
+        thumbCenter.dx,
+        (textDirection == TextDirection.ltr) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
+        topLeft: (textDirection == TextDirection.ltr) ? activeTrackRadius : trackRadius,
+        bottomLeft: (textDirection == TextDirection.ltr) ? activeTrackRadius: trackRadius,
+      ),
+      leftTrackPaint,
+    );
+    context.canvas.drawRRect(
+      RRect.fromLTRBAndCorners(
+        thumbCenter.dx,
+        (textDirection == TextDirection.rtl) ? trackRect.top - (additionalActiveTrackHeight / 2) : trackRect.top,
+        trackRect.right,
+        (textDirection == TextDirection.rtl) ? trackRect.bottom + (additionalActiveTrackHeight / 2) : trackRect.bottom,
+        topRight: (textDirection == TextDirection.rtl) ? activeTrackRadius : trackRadius,
+        bottomRight: (textDirection == TextDirection.rtl) ? activeTrackRadius : trackRadius,
+      ),
+      rightTrackPaint,
+    );
   }
 }
 
@@ -1815,14 +1786,7 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
   ///
   /// The middle track segment is the selected range and is active, and the two
   /// outer track segments are inactive.
-  const RectangularRangeSliderTrackShape({this.useV2Slider});
-
-  /// {@macro flutter.material.slider.useV2Slider}
-  @Deprecated(
-    'This flag has changed to true by default and no longer needed. '
-    'This feature was deprecated after v1.18.0.'
-  )
-  final bool useV2Slider;
+  const RectangularRangeSliderTrackShape();
 
   @override
   Rect getPreferredRect({
@@ -1948,14 +1912,7 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
   ///
   /// The middle track segment is the selected range and is active, and the two
   /// outer track segments are inactive.
-  const RoundedRectRangeSliderTrackShape({ this.useV2Slider });
-
-  /// {@macro flutter.material.slider.useV2Slider}
-  @Deprecated(
-    'This flag has changed to true by default and no longer needed. '
-    'This feature was deprecated after v1.18.0.'
-  )
-  final bool useV2Slider;
+  const RoundedRectRangeSliderTrackShape();
 
   @override
   Rect getPreferredRect({
@@ -2056,62 +2013,39 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
       isDiscrete: isDiscrete,
     );
 
-    // ignore: deprecated_member_use_from_same_package
-    if (useV2Slider) {
-      final Radius trackRadius = Radius.circular(trackRect.height / 2);
+    final Radius trackRadius = Radius.circular(trackRect.height / 2);
 
-      context.canvas.drawRRect(
-        RRect.fromLTRBAndCorners(
-          trackRect.left,
-          trackRect.top,
-          leftThumbOffset.dx,
-          trackRect.bottom,
-          topLeft: trackRadius,
-          bottomLeft: trackRadius,
-        ),
-        inactivePaint,
-      );
-      context.canvas.drawRect(
-        Rect.fromLTRB(
-          leftThumbOffset.dx,
-          trackRect.top - (additionalActiveTrackHeight / 2),
-          rightThumbOffset.dx,
-          trackRect.bottom + (additionalActiveTrackHeight / 2),
-        ),
-        activePaint,
-      );
-      context.canvas.drawRRect(
-        RRect.fromLTRBAndCorners(
-          rightThumbOffset.dx,
-          trackRect.top,
-          trackRect.right,
-          trackRect.bottom,
-          topRight: trackRadius,
-          bottomRight: trackRadius,
-        ),
-        inactivePaint,
-      );
-    } else {
-      final double trackRadius = trackRect.height / 2;
-
-      final Rect leftTrackArcRect = Rect.fromLTWH(trackRect.left, trackRect.top, trackRect.height, trackRect.height);
-      if (!leftTrackArcRect.isEmpty)
-        context.canvas.drawArc(leftTrackArcRect, math.pi / 2, math.pi, false, inactivePaint);
-
-      final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left + trackRadius, trackRect.top, leftThumbOffset.dx - thumbRadius, trackRect.bottom);
-      if (!leftTrackSegment.isEmpty)
-        context.canvas.drawRect(leftTrackSegment, inactivePaint);
-      final Rect middleTrackSegment = Rect.fromLTRB(leftThumbOffset.dx + thumbRadius, trackRect.top, rightThumbOffset.dx - thumbRadius, trackRect.bottom);
-      if (!middleTrackSegment.isEmpty)
-        context.canvas.drawRect(middleTrackSegment, activePaint);
-      final Rect rightTrackSegment = Rect.fromLTRB(rightThumbOffset.dx + thumbRadius, trackRect.top, trackRect.right - trackRadius, trackRect.bottom);
-      if (!rightTrackSegment.isEmpty)
-        context.canvas.drawRect(rightTrackSegment, inactivePaint);
-
-      final Rect rightTrackArcRect = Rect.fromLTWH(trackRect.right - trackRect.height, trackRect.top, trackRect.height, trackRect.height);
-      if (!rightTrackArcRect.isEmpty)
-        context.canvas.drawArc(rightTrackArcRect, -math.pi / 2, math.pi, false, inactivePaint);
-    }
+    context.canvas.drawRRect(
+      RRect.fromLTRBAndCorners(
+        trackRect.left,
+        trackRect.top,
+        leftThumbOffset.dx,
+        trackRect.bottom,
+        topLeft: trackRadius,
+        bottomLeft: trackRadius,
+      ),
+      inactivePaint,
+    );
+    context.canvas.drawRect(
+      Rect.fromLTRB(
+        leftThumbOffset.dx,
+        trackRect.top - (additionalActiveTrackHeight / 2),
+        rightThumbOffset.dx,
+        trackRect.bottom + (additionalActiveTrackHeight / 2),
+      ),
+      activePaint,
+    );
+    context.canvas.drawRRect(
+      RRect.fromLTRBAndCorners(
+        rightThumbOffset.dx,
+        trackRect.top,
+        trackRect.right,
+        trackRect.bottom,
+        topRight: trackRadius,
+        bottomRight: trackRadius,
+      ),
+      inactivePaint,
+    );
   }
 }
 
@@ -2137,24 +2071,12 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
   /// Create a slider tick mark that draws a circle.
   const RoundSliderTickMarkShape({
     this.tickMarkRadius,
-    this.useV2Slider = true,
   });
 
   /// The preferred radius of the round tick mark.
   ///
-  // ignore: deprecated_member_use_from_same_package
-  /// If it is not provided, and [useV2Slider] is true, then 1/4 of the
-  /// [SliderThemeData.trackHeight] is used. If it is not provided, and
-  // ignore: deprecated_member_use_from_same_package
-  /// [useV2Slider] is false, then half of the track height is used.
+  /// If it is not provided, then 1/4 of the [SliderThemeData.trackHeight] is used.
   final double tickMarkRadius;
-
-  /// {@macro flutter.material.slider.useV2Slider}
-  @Deprecated(
-    'This flag has changed to true by default and no longer needed. '
-    'This feature was deprecated after v1.18.0.'
-  )
-  final bool useV2Slider;
 
   @override
   Size getPreferredSize({
@@ -2166,10 +2088,8 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
     assert(isEnabled != null);
     // The tick marks are tiny circles. If no radius is provided, then the
     // radius is defaulted to be a fraction of the
-    // [SliderThemeData.trackHeight]. The fraction is 1/4 when [useV2Slider] is
-    // true, and 1/2 when it is false.
-    // ignore: deprecated_member_use_from_same_package
-    return Size.fromRadius(tickMarkRadius ?? sliderTheme.trackHeight / (useV2Slider ? 4 : 2));
+    // [SliderThemeData.trackHeight]. The fraction is 1/4.
+    return Size.fromRadius(tickMarkRadius ?? sliderTheme.trackHeight / 4);
   }
 
   @override
@@ -2246,24 +2166,12 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
   /// Create a range slider tick mark that draws a circle.
   const RoundRangeSliderTickMarkShape({
     this.tickMarkRadius,
-    this.useV2Slider = true,
   });
 
   /// The preferred radius of the round tick mark.
   ///
-  // ignore: deprecated_member_use_from_same_package
-  /// If it is not provided, and [useV2Slider] is true, then 1/4 of the
-  /// [SliderThemeData.trackHeight] is used. If it is not provided, and
-  // ignore: deprecated_member_use_from_same_package
-  /// [useV2Slider] is false, then half of the track height is used.
+  /// If it is not provided, then 1/4 of the [SliderThemeData.trackHeight] is used.
   final double tickMarkRadius;
-
-  /// {@macro flutter.material.slider.useV2Slider}
-  @Deprecated(
-    'This flag has changed to true by default and no longer needed. '
-    'This feature was deprecated after v1.18.0.'
-  )
-  final bool useV2Slider;
 
   @override
   Size getPreferredSize({
@@ -2273,8 +2181,7 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
     assert(sliderTheme != null);
     assert(sliderTheme.trackHeight != null);
     assert(isEnabled != null);
-    // ignore: deprecated_member_use_from_same_package
-    return Size.fromRadius(tickMarkRadius ?? sliderTheme.trackHeight / (useV2Slider ? 4 : 2));
+    return Size.fromRadius(tickMarkRadius ?? sliderTheme.trackHeight / 4);
   }
 
   @override
@@ -2392,9 +2299,7 @@ class _EmptySliderComponentShape extends SliderComponentShape {
 
 /// The default shape of a [Slider]'s thumb.
 ///
-// ignore: deprecated_member_use_from_same_package
-/// If [useV2Slider] is true, then there is a shadow for the resting and
-/// pressed state.
+/// There is a shadow for the resting, pressed, hovered, and focused state.
 ///
 /// See also:
 ///
@@ -2408,7 +2313,6 @@ class RoundSliderThumbShape extends SliderComponentShape {
     this.disabledThumbRadius,
     this.elevation = 1.0,
     this.pressedElevation = 6.0,
-    this.useV2Slider = true,
   });
 
   /// The preferred radius of the round thumb shape when the slider is enabled.
@@ -2425,9 +2329,6 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
   /// The resting elevation adds shadow to the unpressed thumb.
   ///
-  // ignore: deprecated_member_use_from_same_package
-  /// This value is only used when [useV2Slider] is true.
-  ///
   /// The default is 1.
   ///
   /// Use 0 for no shadow. The higher the value, the larger the shadow. For
@@ -2437,21 +2338,11 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
   /// The pressed elevation adds shadow to the pressed thumb.
   ///
-  // ignore: deprecated_member_use_from_same_package
-  /// This value is only used when [useV2Slider] is true.
-  ///
   /// The default is 6.
   ///
   /// Use 0 for no shadow. The higher the value, the larger the shadow. For
   /// example, a value of 12 will create a very large shadow.
   final double pressedElevation;
-
-  /// {@macro flutter.material.slider.useV2Slider}
-  @Deprecated(
-    'This flag has changed to true by default and no longer needed. '
-    'This feature was deprecated after v1.18.0.'
-  )
-  final bool useV2Slider;
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
@@ -2494,18 +2385,15 @@ class RoundSliderThumbShape extends SliderComponentShape {
     final Color color = colorTween.evaluate(enableAnimation);
     final double radius = radiusTween.evaluate(enableAnimation);
 
-    // ignore: deprecated_member_use_from_same_package
-    if (useV2Slider) {
-      final Tween<double> elevationTween = Tween<double>(
-        begin: elevation,
-        end: pressedElevation,
-      );
+    final Tween<double> elevationTween = Tween<double>(
+      begin: elevation,
+      end: pressedElevation,
+    );
 
-      final double evaluatedElevation = elevationTween.evaluate(activationAnimation);
-      final Path path = Path()
-        ..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
-      canvas.drawShadow(path, Colors.black, evaluatedElevation, true);
-    }
+    final double evaluatedElevation = elevationTween.evaluate(activationAnimation);
+    final Path path = Path()
+      ..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
+    canvas.drawShadow(path, Colors.black, evaluatedElevation, true);
 
     canvas.drawCircle(
       center,
@@ -2517,9 +2405,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
 /// The default shape of a [RangeSlider]'s thumbs.
 ///
-// ignore: deprecated_member_use_from_same_package
-/// If [useV2Slider] is true, then there is a shadow for the resting and
-/// pressed state.
+/// There is a shadow for the resting and pressed state.
 ///
 /// See also:
 ///
@@ -2533,15 +2419,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     this.disabledThumbRadius,
     this.elevation = 1.0,
     this.pressedElevation = 6.0,
-    this.useV2Slider = true,
   }) : assert(enabledThumbRadius != null);
-
-  /// {@macro flutter.material.slider.useV2Slider}
-  @Deprecated(
-    'This flag has changed to true by default and no longer needed. '
-    'This feature was deprecated after v1.18.0.'
-  )
-  final bool useV2Slider;
 
   /// The preferred radius of the round thumb shape when the slider is enabled.
   ///
@@ -2636,13 +2514,10 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
 
     final Color color = colorTween.evaluate(enableAnimation);
 
-    // ignore: deprecated_member_use_from_same_package
-    if (useV2Slider) {
-      final double evaluatedElevation = isPressed ? elevationTween.evaluate(activationAnimation) : elevation;
-      final Path shadowPath = Path()
-        ..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
-      canvas.drawShadow(shadowPath, Colors.black, evaluatedElevation, true);
-    }
+    final double evaluatedElevation = isPressed ? elevationTween.evaluate(activationAnimation) : elevation;
+    final Path shadowPath = Path()
+      ..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
+    canvas.drawShadow(shadowPath, Colors.black, evaluatedElevation, true);
 
     canvas.drawCircle(
       center,

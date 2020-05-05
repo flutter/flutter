@@ -25,8 +25,12 @@ String _globalPackagesPath;
 
 /// Load the package configuration from [file] or throws a [ToolExit]
 /// if the operation would fail.
-Future<PackageConfig> loadPackageConfigOrFail(File file, {
+///
+/// If [nonFatal] is true, in the event of an error an empty package
+/// config is returned.
+Future<PackageConfig> loadPackageConfigWithLogging(File file, {
   @required Logger logger,
+  bool throwOnError = true,
 }) {
   final FileSystem fileSystem = file.fileSystem;
   return loadPackageConfigUri(
@@ -39,6 +43,9 @@ Future<PackageConfig> loadPackageConfigOrFail(File file, {
       return Future<Uint8List>.value(configFile.readAsBytesSync());
     },
     onError: (dynamic error) {
+      if (!throwOnError) {
+        return;
+      }
       logger.printTrace(error.toString());
       String message = '${file.path} does not exist.';
       final String pubspecPath = fileSystem.path.absolute(fileSystem.path.dirname(file.path), 'pubspec.yaml');

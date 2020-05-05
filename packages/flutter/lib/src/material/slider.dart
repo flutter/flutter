@@ -133,12 +133,6 @@ class Slider extends StatefulWidget {
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
-    @Deprecated(
-      'This flag has changed to true by default and no longer needed. '
-      'This feature was deprecated after v1.18.0.'
-    )
-    // ignore: deprecated_member_use_from_same_package
-    this.useV2Slider = true,
   }) : _sliderType = _SliderType.material,
        assert(value != null),
        assert(min != null),
@@ -146,8 +140,6 @@ class Slider extends StatefulWidget {
        assert(min <= max),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
-       // ignore: deprecated_member_use_from_same_package
-       assert(useV2Slider != null),
        super(key: key);
 
   /// Creates a [CupertinoSlider] if the target platform is iOS, creates a
@@ -172,12 +164,6 @@ class Slider extends StatefulWidget {
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
-    @Deprecated(
-      'This flag has changed to true by default and no longer needed. '
-      'This feature was deprecated after v1.18.0.'
-    )
-    // ignore: deprecated_member_use_from_same_package
-    this.useV2Slider = true,
   }) : _sliderType = _SliderType.adaptive,
        assert(value != null),
        assert(min != null),
@@ -185,8 +171,6 @@ class Slider extends StatefulWidget {
        assert(min <= max),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
-       // ignore: deprecated_member_use_from_same_package
-       assert(useV2Slider != null),
        super(key: key);
 
   /// The currently selected value for this slider.
@@ -407,20 +391,6 @@ class Slider extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// Whether to use the updated Material spec version of the [Slider].
-  ///
-  /// * The v2 Slider has an updated value indicator that matches the latest specs.
-  /// * The value indicator is painted on the Overlay.
-  /// * The active track is bigger than the inactive track.
-  /// * The thumb that is activated has elevation.
-  /// * Updated value indicators in case they overlap with each other.
-  /// * <https://groups.google.com/g/flutter-announce/c/69dmlKUL5Ew/m/tQh-ajiEAAAJl>
-  ///
-  /// This is a temporary flag for migrating the slider from v1 to v2. To avoid
-  /// unexpected breaking changes, this value should be set to true. Setting
-  /// this to false is considered deprecated.
-  final bool useV2Slider;
-
   final _SliderType _sliderType ;
 
   @override
@@ -442,7 +412,6 @@ class Slider extends StatefulWidget {
     properties.add(ObjectFlagProperty<ValueChanged<double>>.has('semanticFormatterCallback', semanticFormatterCallback));
     properties.add(ObjectFlagProperty<FocusNode>.has('focusNode', focusNode));
     properties.add(FlagProperty('autofocus', value: autofocus, ifTrue: 'autofocus'));
-    properties.add(FlagProperty('useV2Slider', value: useV2Slider, ifFalse: 'useV1Slider'));
   }
 }
 
@@ -636,13 +605,12 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // the default shapes and text styles are aligned to the Material
     // Guidelines.
 
-    final bool useV2Slider = widget.useV2Slider;
-    final double _defaultTrackHeight = useV2Slider ? 4 : 2;
-    final SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape(useV2Slider: useV2Slider);
-    final SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape(useV2Slider: useV2Slider);
+    const double _defaultTrackHeight = 4;
+    const SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape();
+    const SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape();
     const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
-    final SliderComponentShape _defaultThumbShape = RoundSliderThumbShape(useV2Slider: useV2Slider);
-    final SliderComponentShape _defaultValueIndicatorShape = useV2Slider ? const RectangularSliderValueIndicatorShape() : const PaddleSliderValueIndicatorShape();
+    const SliderComponentShape _defaultThumbShape = RoundSliderThumbShape();
+    const SliderComponentShape _defaultValueIndicatorShape = RectangularSliderValueIndicatorShape();
     const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
 
     // The value indicator's color is not the same as the thumb and active track
@@ -712,7 +680,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
           semanticFormatterCallback: widget.semanticFormatterCallback,
           hasFocus: _focused,
           hovering: _hovering,
-          useV2Slider: widget.useV2Slider,
         ),
       ),
     );
@@ -774,7 +741,6 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.semanticFormatterCallback,
     this.hasFocus,
     this.hovering,
-    this.useV2Slider,
   }) : super(key: key);
 
   final double value;
@@ -790,7 +756,6 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final _SliderState state;
   final bool hasFocus;
   final bool hovering;
-  final bool useV2Slider;
 
   @override
   _RenderSlider createRenderObject(BuildContext context) {
@@ -810,7 +775,6 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       platform: Theme.of(context).platform,
       hasFocus: hasFocus,
       hovering: hovering,
-      useV2Slider: useV2Slider,
     );
   }
 
@@ -854,7 +818,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     @required TextDirection textDirection,
     bool hasFocus,
     bool hovering,
-    bool useV2Slider,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
         assert(state != null),
         assert(textDirection != null),
@@ -870,8 +833,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         _state = state,
         _textDirection = textDirection,
         _hasFocus = hasFocus,
-        _hovering = hovering,
-        _useV2Slider = useV2Slider {
+        _hovering = hovering {
     _updateLabelPainter();
     final GestureArenaTeam team = GestureArenaTeam();
     _drag = HorizontalDragGestureRecognizer()
@@ -1116,8 +1078,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
     }
   }
-  final bool _useV2Slider;
-
   bool get showValueIndicator {
     bool showValueIndicator;
     switch (_sliderTheme.showValueIndicator) {
@@ -1379,7 +1339,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         isEnabled: isInteractive,
         sliderTheme: _sliderTheme,
       ).width;
-      final double padding = _useV2Slider ? trackRect.height : tickMarkWidth;
+      final double padding = trackRect.height;
       final double adjustedTrackWidth = trackRect.width - padding;
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions >= 3.0 * tickMarkWidth) {

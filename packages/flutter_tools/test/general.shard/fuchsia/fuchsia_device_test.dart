@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
@@ -66,32 +68,89 @@ void main() {
       when(sshConfig.absolute).thenReturn(sshConfig);
     });
 
-    testUsingContext('stores the requested id and name', () {
+    testWithoutContext('stores the requested id and name', () {
       const String deviceId = 'e80::0000:a00a:f00f:2002/3';
       const String name = 'halfbaked';
       final FuchsiaDevice device = FuchsiaDevice(deviceId, name: name);
+
       expect(device.id, deviceId);
       expect(device.name, name);
     });
 
-    testUsingContext('parse device-finder output', () async {
-      const String example = '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel';
-      final List<FuchsiaDevice> names = await parseListDevices(example);
+    testWithoutContext('lists nothing when workflow cannot list devices', () async {
+      final MockFuchsiaWorkflow fuchsiaWorkflow = MockFuchsiaWorkflow();
+      final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
+        platform: FakePlatform(operatingSystem: 'linux'),
+        fuchsiaSdk: null,
+        fuchsiaWorkflow: fuchsiaWorkflow,
+        logger: BufferLogger.test(),
+      );
+      when(fuchsiaWorkflow.canListDevices).thenReturn(false);
 
-      expect(names.length, 1);
-      expect(names.first.name, 'paper-pulp-bush-angel');
-      expect(names.first.id, '192.168.42.10');
-    }, overrides: <Type, Generator>{
-      FuchsiaSdk: () => MockFuchsiaSdk(),
+      expect(fuchsiaDevices.canListAnything, false);
+      expect(await fuchsiaDevices.pollingGetDevices(), isEmpty);
     });
 
-    testUsingContext('parse junk device-finder output', () async {
-      const String example = 'junk';
-      final List<FuchsiaDevice> names = await parseListDevices(example);
+    testWithoutContext('can parse device-finder output for single device', () async {
+      final MockFuchsiaWorkflow fuchsiaWorkflow = MockFuchsiaWorkflow();
+      final MockFuchsiaSdk fuchsiaSdk = MockFuchsiaSdk();
+      final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
+        platform: FakePlatform(operatingSystem: 'linux'),
+        fuchsiaSdk: fuchsiaSdk,
+        fuchsiaWorkflow: fuchsiaWorkflow,
+        logger: BufferLogger.test(),
+      );
+      when(fuchsiaWorkflow.canListDevices).thenReturn(true);
+      when(fuchsiaSdk.listDevices()).thenAnswer((Invocation invocation) async {
+        return '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel';
+      });
 
-      expect(names.length, 0);
-    }, overrides: <Type, Generator>{
-      FuchsiaSdk: () => MockFuchsiaSdk(),
+      final Device device = (await fuchsiaDevices.pollingGetDevices()).single;
+
+      expect(device.name, 'paper-pulp-bush-angel');
+      expect(device.id, '192.168.42.10');
+    });
+
+    testWithoutContext('can parse device-finder output for multiple devices', () async {
+      final MockFuchsiaWorkflow fuchsiaWorkflow = MockFuchsiaWorkflow();
+      final MockFuchsiaSdk fuchsiaSdk = MockFuchsiaSdk();
+      final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
+        platform: FakePlatform(operatingSystem: 'linux'),
+        fuchsiaSdk: fuchsiaSdk,
+        fuchsiaWorkflow: fuchsiaWorkflow,
+        logger: BufferLogger.test(),
+      );
+      when(fuchsiaWorkflow.canListDevices).thenReturn(true);
+      when(fuchsiaSdk.listDevices()).thenAnswer((Invocation invocation) async {
+        return '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel\n'
+          '2001:0db8:85a3:0000:0000:8a2e:0370:7335 foo-bar-fiz-buzz';
+      });
+
+      final List<Device> devices = await fuchsiaDevices.pollingGetDevices();
+
+      expect(devices.first.name, 'paper-pulp-bush-angel');
+      expect(devices.first.id, '192.168.42.10');
+      expect(devices.last.name, 'foo-bar-fiz-buzz');
+      expect(devices.last.id, '192.168.42.10');
+    });
+
+    testWithoutContext('can parse junk output from the dev-finder', () async {
+      final MockFuchsiaWorkflow fuchsiaWorkflow = MockFuchsiaWorkflow();
+      final MockFuchsiaSdk fuchsiaSdk = MockFuchsiaSdk();
+      final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
+        platform: FakePlatform(operatingSystem: 'linux'),
+        fuchsiaSdk: fuchsiaSdk,
+        fuchsiaWorkflow: fuchsiaWorkflow,
+        logger: BufferLogger.test(),
+      );
+      when(fuchsiaWorkflow.canListDevices).thenReturn(true);
+      when(fuchsiaSdk.listDevices()).thenAnswer((Invocation invocation) async {
+        return 'junk';
+      });
+
+      final List<Device> devices = await fuchsiaDevices.pollingGetDevices();
+
+      expect(devices, isEmpty);
     });
 
     testUsingContext('disposing device disposes the portForwarder', () async {
@@ -118,6 +177,7 @@ void main() {
 
     test('is ephemeral', () {
       final FuchsiaDevice device = FuchsiaDevice('123');
+
       expect(device.ephemeral, true);
     });
 
@@ -125,6 +185,7 @@ void main() {
       final FuchsiaDevice device = FuchsiaDevice('123');
       globals.fs.directory('fuchsia').createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
+
       expect(device.isSupportedForProject(FlutterProject.current()), true);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
@@ -134,6 +195,7 @@ void main() {
     testUsingContext('not supported for project', () async {
       final FuchsiaDevice device = FuchsiaDevice('123');
       globals.fs.file('pubspec.yaml').createSync();
+
       expect(device.isSupportedForProject(FlutterProject.current()), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
@@ -142,6 +204,7 @@ void main() {
 
     testUsingContext('targetPlatform does not throw when sshConfig is missing', () async {
       final FuchsiaDevice device = FuchsiaDevice('123');
+
       expect(await device.targetPlatform, TargetPlatform.fuchsia_arm64);
     }, overrides: <Type, Generator>{
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: null),
@@ -628,21 +691,32 @@ void main() {
 
   group('FuchsiaIsolateDiscoveryProtocol', () {
     MockPortForwarder portForwarder;
-    MockVMService vmService;
 
     setUp(() {
       portForwarder = MockPortForwarder();
-      vmService = MockVMService();
     });
 
     Future<Uri> findUri(List<FlutterView> views, String expectedIsolateName) async {
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          FakeVmServiceRequest(
+            method: kListViewsMethod,
+            jsonResponse: <String, Object>{
+              'views': <Object>[
+                for (FlutterView view in views)
+                  view.toJson()
+              ],
+            },
+          ),
+        ],
+      );
       final MockFuchsiaDevice fuchsiaDevice =
         MockFuchsiaDevice('123', portForwarder, false);
       final FuchsiaIsolateDiscoveryProtocol discoveryProtocol =
         FuchsiaIsolateDiscoveryProtocol(
         fuchsiaDevice,
         expectedIsolateName,
-        (Uri uri) async => vmService,
+        (Uri uri) async => fakeVmServiceHost.vmService,
         true, // only poll once.
       );
 
@@ -650,17 +724,7 @@ void main() {
           .thenAnswer((Invocation invocation) async => <int>[1]);
       when(portForwarder.forward(1))
           .thenAnswer((Invocation invocation) async => 2);
-      when(vmService.getVMOld())
-          .thenAnswer((Invocation invocation) => Future<void>.value(null));
-      when(vmService.httpAddress).thenReturn(Uri.parse('example'));
-      when(vmService.callMethod(kListViewsMethod)).thenAnswer((Invocation invocation) async {
-        return vm_service.Response.parse(<String, Object>{
-          'views': <Object>[
-            for (FlutterView view in views)
-              view.toJson()
-          ],
-        });
-      });
+      setHttpAddress(Uri.parse('example'), fakeVmServiceHost.vmService);
       return await discoveryProtocol.uri;
     }
 
@@ -1121,8 +1185,6 @@ class MockFuchsiaDevice extends Mock implements FuchsiaDevice {
 
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
 
-class MockVMService extends Mock implements VMService {}
-
 class FuchsiaDeviceWithFakeDiscovery extends FuchsiaDevice {
   FuchsiaDeviceWithFakeDiscovery(String id, {String name}) : super(id, name: name);
 
@@ -1476,3 +1538,5 @@ class MockFuchsiaSdk extends Mock implements FuchsiaSdk {
   @override
   final FuchsiaDevFinder fuchsiaDevFinder;
 }
+
+class MockFuchsiaWorkflow extends Mock implements FuchsiaWorkflow {}

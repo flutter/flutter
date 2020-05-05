@@ -239,7 +239,6 @@ class FakeVmServiceHost {
       final FakeVmServiceRequest fakeRequest = _requests.removeAt(0) as FakeVmServiceRequest;
       expect(request, isA<Map<String, Object>>()
         .having((Map<String, Object> request) => request['method'], 'method', fakeRequest.method)
-        .having((Map<String, Object> request) => request['id'], 'id', fakeRequest.id)
         .having((Map<String, Object> request) => request['params'], 'args', fakeRequest.args)
       );
       if (fakeRequest.close) {
@@ -250,13 +249,13 @@ class FakeVmServiceHost {
       if (fakeRequest.errorCode == null) {
         _input.add(json.encode(<String, Object>{
           'jsonrpc': '2.0',
-          'id': fakeRequest.id,
+          'id': request['id'],
           'result': fakeRequest.jsonResponse ?? <String, Object>{'type': 'Success'},
         }));
       } else {
         _input.add(json.encode(<String, Object>{
           'jsonrpc': '2.0',
-          'id': fakeRequest.id,
+          'id': request['id'],
           'error': <String, Object>{
             'code': fakeRequest.errorCode,
           }
@@ -299,15 +298,13 @@ abstract class VmServiceExpectation {
 class FakeVmServiceRequest implements VmServiceExpectation {
   const FakeVmServiceRequest({
     @required this.method,
-    @required this.id,
-    @required this.args,
+    this.args = const <String, Object>{},
     this.jsonResponse,
     this.errorCode,
     this.close = false,
   });
 
   final String method;
-  final String id;
 
   /// When true, the vm service is automatically closed.
   final bool close;
