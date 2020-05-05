@@ -21,6 +21,7 @@ Future<void> main() async {
             '--target-platform=android-arm',
             '--obfuscate',
             '--split-debug-info=foo/',
+            '--verbose',
           ]);
         });
         final String outputApkDirectory = path.join(
@@ -63,12 +64,13 @@ Future<void> main() async {
             '--split-debug-info=foo/',
             '--no-debug',
             '--no-profile',
+            '--verbose',
           ]);
         });
 
         final String outputAarDirectory = path.join(
           flutterProject.rootPath,
-          'build/host/outputs/repo/com/example/aaa/flutter_release/1.0/flutter_release-1.0.aar',
+          'build/host/outputs/repo/com/example/${flutterProject.name}/flutter_release/1.0/flutter_release-1.0.aar',
         );
         final Iterable<String> aarFiles = await getFilesInAar(outputAarDirectory);
 

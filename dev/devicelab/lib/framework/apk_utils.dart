@@ -51,10 +51,10 @@ Future<void> runPluginProjectTest(Future<void> testFunction(FlutterPluginProject
   }
 }
 
-/// Runs the given [testFunction] on a freshly generated Flutter modile project.
+/// Runs the given [testFunction] on a freshly generated Flutter module project.
 Future<void> runModuleProjectTest(Future<void> testFunction(FlutterModuleProject moduleProject)) async {
-  final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_gradle_plugin_test.');
-  final FlutterModuleProject moduleProject = await FlutterModuleProject.create(tempDir, 'aaa');
+  final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_gradle_module_test.');
+  final FlutterModuleProject moduleProject = await FlutterModuleProject.create(tempDir, 'hello_module');
 
   try {
     await testFunction(moduleProject);
