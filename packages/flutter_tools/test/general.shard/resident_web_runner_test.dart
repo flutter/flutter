@@ -36,12 +36,14 @@ import '../src/testbed.dart';
 
 const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(
+    id: '1',
     method: 'streamListen',
     args: <String, Object>{
       'streamId': 'Stdout',
     },
   ),
   FakeVmServiceRequest(
+    id: '2',
     method: 'streamListen',
     args: <String, Object>{
       'streamId': 'Stderr',
@@ -51,12 +53,14 @@ const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>
 
 const List<VmServiceExpectation> kAttachIsolateExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(
+    id: '3',
     method: 'streamListen',
     args: <String, Object>{
       'streamId': 'Isolate'
     }
   ),
   FakeVmServiceRequest(
+    id: '4',
     method: 'registerService',
     args: <String, Object>{
       'service': 'reloadSources',
@@ -358,6 +362,7 @@ void main() {
       ...kAttachExpectations,
       const FakeVmServiceRequest(
         method: 'hotRestart',
+        id: '5',
         jsonResponse: <String, Object>{
           'type': 'Success',
         }
@@ -434,6 +439,7 @@ void main() {
       ...kAttachExpectations,
       const FakeVmServiceRequest(
         method: 'hotRestart',
+        id: '5',
         jsonResponse: <String, Object>{
           'type': 'Success',
         }
@@ -664,6 +670,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
+        id: '5',
         method: 'hotRestart',
         jsonResponse: <String, Object>{
           'type': 'Failed',
@@ -686,6 +693,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
+        id: '5',
         method: 'hotRestart',
         // Failed response,
         errorCode: RPCErrorCodes.kInternalError,
@@ -717,6 +725,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
+        id: '5',
         method: 'ext.flutter.debugDumpApp',
         args: <String, Object>{
           'isolateId': null,
@@ -738,6 +747,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
+        id: '5',
         method: 'ext.flutter.debugDumpLayerTree',
         args: <String, Object>{
           'isolateId': null,
@@ -759,6 +769,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
+        id: '5',
         method: 'ext.flutter.debugDumpRenderTree',
         args: <String, Object>{
           'isolateId': null,
@@ -780,6 +791,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
+        id: '5',
         method: 'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
         args: <String, Object>{
           'isolateId': null,
@@ -801,6 +813,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
+        id: '5',
         method: 'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
         args: <String, Object>{
           'isolateId': null,
@@ -823,6 +836,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
+        id: '5',
         method: 'ext.flutter.debugPaint',
         args: <String, Object>{
           'isolateId': null,
@@ -832,6 +846,7 @@ void main() {
         },
       ),
       const FakeVmServiceRequest(
+        id: '6',
         method: 'ext.flutter.debugPaint',
         args: <String, Object>{
           'isolateId': null,
@@ -859,6 +874,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
+        id: '5',
         method: 'ext.flutter.showPerformanceOverlay',
         args: <String, Object>{
           'isolateId': null,
@@ -868,6 +884,7 @@ void main() {
         },
       ),
       const FakeVmServiceRequest(
+        id: '6',
         method: 'ext.flutter.showPerformanceOverlay',
         args: <String, Object>{
           'isolateId': null,
@@ -894,6 +911,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
+        id: '5',
         method: 'ext.flutter.inspector.show',
         args: <String, Object>{
           'isolateId': null,
@@ -903,6 +921,7 @@ void main() {
         },
       ),
       const FakeVmServiceRequest(
+        id: '6',
         method: 'ext.flutter.inspector.show',
         args: <String, Object>{
           'isolateId': null,
@@ -929,6 +948,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
+        id: '5',
         method: 'ext.flutter.profileWidgetBuilds',
         args: <String, Object>{
           'isolateId': null,
@@ -938,6 +958,7 @@ void main() {
         },
       ),
       const FakeVmServiceRequest(
+        id: '6',
         method: 'ext.flutter.profileWidgetBuilds',
         args: <String, Object>{
           'isolateId': null,
@@ -964,6 +985,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
+        id: '5',
         method: 'ext.flutter.platformOverride',
         args: <String, Object>{
           'isolateId': null,
@@ -973,6 +995,7 @@ void main() {
         },
       ),
       const FakeVmServiceRequest(
+        id: '6',
         method: 'ext.flutter.platformOverride',
         args: <String, Object>{
           'isolateId': null,
@@ -1066,12 +1089,14 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachLogExpectations,
       const FakeVmServiceRequest(
+        id: '3',
         method: 'streamListen',
         args: <String, Object>{
           'streamId': 'Isolate'
         }
       ),
       const FakeVmServiceRequest(
+        id: '4',
         method: 'registerService',
         args: <String, Object>{
           'service': 'reloadSources',
