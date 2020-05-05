@@ -23,25 +23,6 @@ class TrackWidgetCreationEnabledTask {
   String deviceIdOverride;
 
   Future<TaskResult> task() async {
-    try {
-      await exec(
-        path.join(flutterDirectory.path, 'bin', 'flutter'),
-        flutterCommandArgs('config', <String>[
-          '--enable-macos-desktop',
-        ])
-      );
-      return _task();
-    } finally {
-      await exec(
-        path.join(flutterDirectory.path, 'bin', 'flutter'),
-        flutterCommandArgs('config', <String>[
-          '--no-enable-macos-desktop',
-        ])
-      );
-    }
-  }
-
-  Future<TaskResult> _task() async {
     final File file = File(path.join(integrationTestDir.path, 'info'));
     if (file.existsSync()) {
       file.deleteSync();
