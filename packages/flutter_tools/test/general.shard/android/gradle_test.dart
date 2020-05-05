@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -2349,16 +2350,26 @@ plugin1=${plugin1.path}
   });
 
   group('printHowToConsumeAar', () {
-    testUsingContext('stdout contains release, debug and profile', () async {
+    BufferLogger logger;
+    FileSystem fileSystem;
+
+    setUp(() {
+      logger = BufferLogger.test();
+      fileSystem = MemoryFileSystem.test();
+    });
+
+    testWithoutContext('stdout contains release, debug and profile', () async {
       printHowToConsumeAar(
         buildModes: const <String>{'release', 'debug', 'profile'},
         androidPackage: 'com.mycompany',
-        repoDirectory: globals.fs.directory('build/'),
+        repoDirectory: fileSystem.directory('build/'),
         buildNumber: '2.2',
+        logger: logger,
+        fileSystem: fileSystem,
       );
 
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains(
           '\n'
           'Consuming the Module\n'
@@ -2396,21 +2407,19 @@ plugin1=${plugin1.path}
           'To learn more, visit https://flutter.dev/go/build-aar\n'
         )
       );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      Platform: () => fakePlatform('android'),
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('stdout contains release', () async {
+    testWithoutContext('stdout contains release', () async {
       printHowToConsumeAar(
         buildModes: const <String>{'release'},
         androidPackage: 'com.mycompany',
-        repoDirectory: globals.fs.directory('build/'),
+        repoDirectory: fileSystem.directory('build/'),
+        logger: logger,
+        fileSystem: fileSystem,
       );
 
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains(
           '\n'
           'Consuming the Module\n'
@@ -2435,21 +2444,19 @@ plugin1=${plugin1.path}
           'To learn more, visit https://flutter.dev/go/build-aar\n'
         )
       );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      Platform: () => fakePlatform('android'),
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('stdout contains debug', () async {
+    testWithoutContext('stdout contains debug', () async {
       printHowToConsumeAar(
         buildModes: const <String>{'debug'},
         androidPackage: 'com.mycompany',
-        repoDirectory: globals.fs.directory('build/'),
+        repoDirectory: fileSystem.directory('build/'),
+        logger: logger,
+        fileSystem: fileSystem,
       );
 
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains(
           '\n'
           'Consuming the Module\n'
@@ -2474,22 +2481,20 @@ plugin1=${plugin1.path}
           'To learn more, visit https://flutter.dev/go/build-aar\n'
         )
       );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      Platform: () => fakePlatform('android'),
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('stdout contains profile', () async {
+    testWithoutContext('stdout contains profile', () async {
       printHowToConsumeAar(
         buildModes: const <String>{'profile'},
         androidPackage: 'com.mycompany',
-        repoDirectory: globals.fs.directory('build/'),
+        repoDirectory: fileSystem.directory('build/'),
         buildNumber: '1.0',
+        logger: logger,
+        fileSystem: fileSystem,
       );
 
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains(
           '\n'
           'Consuming the Module\n'
@@ -2525,10 +2530,6 @@ plugin1=${plugin1.path}
           'To learn more, visit https://flutter.dev/go/build-aar\n'
         )
       );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      Platform: () => fakePlatform('android'),
-      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 }
