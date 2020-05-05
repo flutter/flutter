@@ -818,6 +818,17 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
+  test('FlutterDevice can exit from a release mode isolate with no VmService', () => testbed.run(() async {
+    final TestFlutterDevice flutterDevice = TestFlutterDevice(
+      mockDevice,
+    );
+    when(mockDevice.supportsFlutterExit).thenReturn(true);
+
+    await flutterDevice.exitApps();
+
+    verify(mockDevice.stopApp(any)).called(1);
+  }));
+
   test('FlutterDevice will call stopApp if the exit request times out', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       FakeVmServiceRequest(

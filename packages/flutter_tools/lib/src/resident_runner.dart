@@ -229,7 +229,7 @@ class FlutterDevice {
   Future<void> exitApps({
     @visibleForTesting Duration timeoutDelay = const Duration(seconds: 10),
   }) async {
-    if (!device.supportsFlutterExit) {
+    if (!device.supportsFlutterExit || vmService == null) {
       return device.stopApp(package);
     }
     final List<FlutterView> views = await vmService.getFlutterViews();
