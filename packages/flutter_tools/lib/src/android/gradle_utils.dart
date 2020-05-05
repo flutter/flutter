@@ -4,7 +4,6 @@
 
 import 'package:meta/meta.dart';
 
-import '../android/android_sdk.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -16,7 +15,6 @@ import '../cache.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import 'android_sdk.dart';
 import 'android_studio.dart';
 
 /// The environment variables needed to run Gradle.
@@ -239,7 +237,7 @@ void updateLocalProperties({
   BuildInfo buildInfo,
   bool requireAndroidSdk = true,
 }) {
-  if (requireAndroidSdk && androidSdk == null) {
+  if (requireAndroidSdk && globals.androidSdk == null) {
     exitWithNoSdkMessage();
   }
   final File localProperties = project.android.localPropertiesFile;
@@ -265,8 +263,8 @@ void updateLocalProperties({
     changed = true;
   }
 
-  if (androidSdk != null) {
-    changeIfNecessary('sdk.dir', globals.fsUtils.escapePath(androidSdk.directory));
+  if (globals.androidSdk != null) {
+    changeIfNecessary('sdk.dir', globals.fsUtils.escapePath(globals.androidSdk.directory));
   }
 
   changeIfNecessary('flutter.sdk', globals.fsUtils.escapePath(Cache.flutterRoot));
@@ -294,8 +292,8 @@ void updateLocalProperties({
 /// Writes the path to the Android SDK, if known.
 void writeLocalProperties(File properties) {
   final SettingsFile settings = SettingsFile();
-  if (androidSdk != null) {
-    settings.values['sdk.dir'] = globals.fsUtils.escapePath(androidSdk.directory);
+  if (globals.androidSdk != null) {
+    settings.values['sdk.dir'] = globals.fsUtils.escapePath(globals.androidSdk.directory);
   }
   settings.writeContents(properties);
 }

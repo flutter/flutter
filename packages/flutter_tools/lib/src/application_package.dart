@@ -8,7 +8,6 @@ import 'dart:collection';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart' as xml;
 
-import 'android/android_sdk.dart';
 import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/context.dart';
@@ -40,7 +39,7 @@ class ApplicationPackageFactory {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-        if (androidSdk?.licensesAvailable == true  && androidSdk?.latestVersion == null) {
+        if (globals.androidSdk?.licensesAvailable == true  && globals.androidSdk?.latestVersion == null) {
           await checkGradleDependencies();
         }
         return applicationBinary == null
@@ -109,7 +108,7 @@ class AndroidApk extends ApplicationPackage {
 
   /// Creates a new AndroidApk from an existing APK.
   factory AndroidApk.fromApk(File apk) {
-    final String aaptPath = androidSdk?.latestVersion?.aaptPath;
+    final String aaptPath = globals.androidSdk?.latestVersion?.aaptPath;
     if (aaptPath == null) {
       globals.printError(userMessages.aaptNotFound);
       return null;

@@ -55,7 +55,7 @@ class AndroidEmulator extends Emulator {
   @override
   Future<void> launch() async {
     final Process process = await processUtils.start(
-      <String>[getEmulatorPath(androidSdk), '-avd', id],
+      <String>[getEmulatorPath(globals.androidSdk), '-avd', id],
     );
 
     // Record output from the emulator process.
@@ -112,7 +112,7 @@ class AndroidEmulator extends Emulator {
 
 /// Return the list of available emulator AVDs.
 List<AndroidEmulator> getEmulatorAvds() {
-  final String emulatorPath = getEmulatorPath(androidSdk);
+  final String emulatorPath = getEmulatorPath(globals.androidSdk);
   if (emulatorPath == null) {
     return <AndroidEmulator>[];
   }
