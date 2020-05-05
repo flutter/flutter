@@ -132,12 +132,6 @@ class RangeSlider extends StatefulWidget {
     this.activeColor,
     this.inactiveColor,
     this.semanticFormatterCallback,
-    @Deprecated(
-      'This flag has changed to true by default and no longer needed. '
-      'This feature was deprecated after v1.18.0.'
-    )
-    // ignore: deprecated_member_use_from_same_package
-    this.useV2Slider = true,
   }) : assert(values != null),
        assert(min != null),
        assert(max != null),
@@ -146,8 +140,6 @@ class RangeSlider extends StatefulWidget {
        assert(values.start >= min && values.start <= max),
        assert(values.end >= min && values.end <= max),
        assert(divisions == null || divisions > 0),
-       // ignore: deprecated_member_use_from_same_package
-       assert(useV2Slider != null),
        super(key: key);
 
   /// The currently selected values for this range slider.
@@ -346,23 +338,6 @@ class RangeSlider extends StatefulWidget {
   /// {@end-tool}
   final RangeSemanticFormatterCallback semanticFormatterCallback;
 
-  /// Whether to use the updated Material spec version of the [RangeSlider].
-  /// * The v2 [RangeSlider] has an updated value indicator that matches the latest specs.
-  /// * The value indicator is painted on the Overlay.
-  /// * The active track is bigger than the inactive track.
-  /// * The thumb that is activated has elevation.
-  /// * Updated value indicators in case they overlap with each other.
-  /// * <https://groups.google.com/g/flutter-announce/c/69dmlKUL5Ew/m/tQh-ajiEAAAJl>
-  ///
-  /// This is a temporary flag for migrating the slider from v1 to v2. Currently
-  /// this defaults to false, because the changes may break existing tests. This
-  /// value will be defaulted to true in the future.
-  @Deprecated(
-    'This flag has changed to true by default and no longer needed. '
-    'This feature was deprecated after v1.18.0.'
-  )
-  final bool useV2Slider;
-
   // Touch width for the tap boundary of the slider thumbs.
   static const double _minTouchTargetWidth = kMinInteractiveDimension;
 
@@ -384,8 +359,6 @@ class RangeSlider extends StatefulWidget {
     properties.add(StringProperty('labelEnd', labels?.end));
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('inactiveColor', inactiveColor));
-    // ignore: deprecated_member_use_from_same_package
-    properties.add(FlagProperty('useV2Slider', value: useV2Slider, ifFalse: 'useV1Slider'));
     properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('semanticFormatterCallback', semanticFormatterCallback));
   }
 }
@@ -573,14 +546,12 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // the default shapes and text styles are aligned to the Material
     // Guidelines.
 
-    // ignore: deprecated_member_use_from_same_package
-    final bool useV2Slider = widget.useV2Slider;
-    final double _defaultTrackHeight = useV2Slider ? 4 : 2;
-    final RangeSliderTrackShape _defaultTrackShape = RoundedRectRangeSliderTrackShape(useV2Slider: useV2Slider);
-    final RangeSliderTickMarkShape _defaultTickMarkShape = RoundRangeSliderTickMarkShape(useV2Slider: useV2Slider);
+    const double _defaultTrackHeight = 4;
+    const RangeSliderTrackShape _defaultTrackShape = RoundedRectRangeSliderTrackShape();
+    const RangeSliderTickMarkShape _defaultTickMarkShape = RoundRangeSliderTickMarkShape();
     const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
-    final RangeSliderThumbShape _defaultThumbShape = RoundRangeSliderThumbShape(useV2Slider: useV2Slider);
-    final RangeSliderValueIndicatorShape _defaultValueIndicatorShape = useV2Slider ? const RectangularRangeSliderValueIndicatorShape() : const PaddleRangeSliderValueIndicatorShape();
+    const RangeSliderThumbShape _defaultThumbShape = RoundRangeSliderThumbShape();
+    const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = RectangularRangeSliderValueIndicatorShape();
     const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
     const double _defaultMinThumbSeparation = 8;
 
@@ -643,8 +614,6 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
         onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
         state: this,
         semanticFormatterCallback: widget.semanticFormatterCallback,
-        // ignore: deprecated_member_use_from_same_package
-        useV2Slider: widget.useV2Slider,
       ),
     );
   }
@@ -684,7 +653,6 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.onChangeEnd,
     this.state,
     this.semanticFormatterCallback,
-    this.useV2Slider,
   }) : super(key: key);
 
   final RangeValues values;
@@ -698,7 +666,6 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<RangeValues> onChangeEnd;
   final RangeSemanticFormatterCallback semanticFormatterCallback;
   final _RangeSliderState state;
-  final bool useV2Slider;
 
   @override
   _RenderRangeSlider createRenderObject(BuildContext context) {
@@ -717,7 +684,6 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       textDirection: Directionality.of(context),
       semanticFormatterCallback: semanticFormatterCallback,
       platform: Theme.of(context).platform,
-      useV2Slider: useV2Slider,
     );
   }
 
@@ -756,7 +722,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     this.onChangeEnd,
     @required _RangeSliderState state,
     @required TextDirection textDirection,
-    bool useV2Slider,
   })  : assert(values != null),
         assert(values.start >= 0.0 && values.start <= 1.0),
         assert(values.end >= 0.0 && values.end <= 1.0),
@@ -773,8 +738,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         _screenSize = screenSize,
         _onChanged = onChanged,
         _state = state,
-        _textDirection = textDirection,
-        _useV2Slider = useV2Slider {
+        _textDirection = textDirection {
     _updateLabelPainters();
     final GestureArenaTeam team = GestureArenaTeam();
     _drag = HorizontalDragGestureRecognizer()
@@ -1021,8 +985,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     assert(false, 'Unhandled TargetPlatform $_platform');
     return 0.05;
   }
-
-  final bool _useV2Slider;
 
   void _updateLabelPainters() {
     _updateLabelPainter(Thumb.start);
@@ -1351,7 +1313,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         isEnabled: isEnabled,
         sliderTheme: _sliderTheme,
       ).width;
-      final double padding = _useV2Slider ? trackRect.height : tickMarkWidth;
+      final double padding = trackRect.height;
       final double adjustedTrackWidth = trackRect.width - padding;
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions >= 3.0 * tickMarkWidth) {

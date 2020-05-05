@@ -115,7 +115,7 @@ class EmulatorManager {
     }
 
     final List<String> args = <String>[
-      getAvdManagerPath(androidSdk),
+      getAvdManagerPath(globals.androidSdk),
       'create',
       'avd',
       '-n', name,
@@ -123,7 +123,7 @@ class EmulatorManager {
       '-d', device,
     ];
     final RunResult runResult = processUtils.runSync(args,
-        environment: androidSdk?.sdkManagerEnv);
+        environment: globals.androidSdk?.sdkManagerEnv);
     return CreateEmulatorResult(
       name,
       success: runResult.exitCode == 0,
@@ -138,13 +138,13 @@ class EmulatorManager {
   ];
   Future<String> _getPreferredAvailableDevice() async {
     final List<String> args = <String>[
-      getAvdManagerPath(androidSdk),
+      getAvdManagerPath(globals.androidSdk),
       'list',
       'device',
       '-c',
     ];
     final RunResult runResult = processUtils.runSync(args,
-        environment: androidSdk?.sdkManagerEnv);
+        environment: globals.androidSdk?.sdkManagerEnv);
     if (runResult.exitCode != 0) {
       return null;
     }
@@ -165,13 +165,13 @@ class EmulatorManager {
     // It seems that to get the available list of images, we need to send a
     // request to create without the image and it'll provide us a list :-(
     final List<String> args = <String>[
-      getAvdManagerPath(androidSdk),
+      getAvdManagerPath(globals.androidSdk),
       'create',
       'avd',
       '-n', 'temp',
     ];
     final RunResult runResult = processUtils.runSync(args,
-        environment: androidSdk?.sdkManagerEnv);
+        environment: globals.androidSdk?.sdkManagerEnv);
 
     // Get the list of IDs that match our criteria
     final List<String> availableIDs = runResult.stderr

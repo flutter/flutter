@@ -129,7 +129,7 @@ class TestCompiler {
     if (!isEmpty) {
       return;
     }
-    _packageConfig ??= await loadPackageConfigOrFail(
+    _packageConfig ??= await loadPackageConfigWithLogging(
       globals.fs.file(globalPackagesPath),
       logger: globals.logger,
     );

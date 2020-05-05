@@ -32,7 +32,7 @@ void main() {
 
       expect(timeline.events, hasLength(2));
 
-      final TimelineEvent e1 = timeline.events[0];
+      final TimelineEvent e1 = timeline.events[1];
       expect(e1.name, 'test event');
       expect(e1.category, 'test category');
       expect(e1.phase, 'B');
@@ -44,7 +44,7 @@ void main() {
       expect(e1.threadTimestampMicros, 567);
       expect(e1.arguments, <String, dynamic>{'arg1': true});
 
-      final TimelineEvent e2 = timeline.events[1];
+      final TimelineEvent e2 = timeline.events[0];
       expect(e2.name, isNull);
       expect(e2.category, isNull);
       expect(e2.phase, isNull);
@@ -55,6 +55,60 @@ void main() {
       expect(e2.timestampMicros, isNull);
       expect(e2.threadTimestampMicros, isNull);
       expect(e2.arguments, isNull);
+    });
+
+    test('sorts JSON', () {
+      final Timeline timeline = Timeline.fromJson(<String, dynamic>{
+        'traceEvents': <Map<String, dynamic>>[
+          <String, dynamic>{
+            'name': 'test event 1',
+            'ts': 457,
+          },
+          <String, dynamic>{
+            'name': 'test event 2',
+            'ts': 456,
+          },
+        ],
+      });
+
+      expect(timeline.events, hasLength(2));
+      expect(timeline.events[0].timestampMicros, equals(456));
+      expect(timeline.events[1].timestampMicros, equals(457));
+      expect(timeline.events[0].name, equals('test event 2'));
+      expect(timeline.events[1].name, equals('test event 1'));
+    });
+
+    test('sorts JSON nulls first', () {
+      final Timeline timeline = Timeline.fromJson(<String, dynamic>{
+        'traceEvents': <Map<String, dynamic>>[
+          <String, dynamic>{
+            'name': 'test event 0',
+            'ts': null,
+          },
+          <String, dynamic>{
+            'name': 'test event 1',
+            'ts': 457,
+          },
+          <String, dynamic>{
+            'name': 'test event 2',
+            'ts': 456,
+          },
+          <String, dynamic>{
+            'name': 'test event 3',
+            'ts': null,
+          },
+        ],
+      });
+
+      expect(timeline.events, hasLength(4));
+      expect(timeline.events[0].timestampMicros, isNull);
+      expect(timeline.events[1].timestampMicros, isNull);
+      expect(timeline.events[2].timestampMicros, equals(456));
+      expect(timeline.events[3].timestampMicros, equals(457));
+      expect(timeline.events[0].name, equals('test event 0'));
+      expect(timeline.events[1].name, equals('test event 3'));
+      expect(timeline.events[2].name, equals('test event 2'));
+      expect(timeline.events[3].name, equals('test event 1'));
     });
   });
 }

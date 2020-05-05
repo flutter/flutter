@@ -713,6 +713,11 @@ class _ResidentWebRunner extends ResidentWebRunner {
       }
     }
     if (websocketUri != null) {
+      if (debuggingOptions.vmserviceOutFile != null) {
+        globals.fs.file(debuggingOptions.vmserviceOutFile)
+          ..createSync(recursive: true)
+          ..writeAsStringSync(websocketUri.toString());
+      }
       globals.printStatus('Debug service listening on $websocketUri');
     }
     appStartedCompleter?.complete();

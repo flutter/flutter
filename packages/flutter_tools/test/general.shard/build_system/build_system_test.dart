@@ -356,6 +356,32 @@ void main() {
     expect(called, 1);
   });
 
+  testWithoutContext('Target with depfile dependency will not run twice without '
+    'invalidation in incremental builds', () async {
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+    int called = 0;
+    final TestTarget target = TestTarget((Environment environment) async {
+      environment.buildDir
+        .childFile('example.d')
+        .writeAsStringSync('a.txt: b.txt');
+      fileSystem.file('a.txt').writeAsStringSync('a');
+      called += 1;
+    })
+      ..depfiles = <String>['example.d'];
+    fileSystem.file('b.txt').writeAsStringSync('b');
+
+    final BuildResult result = await buildSystem
+      .buildIncremental(target, environment, null);
+
+    expect(fileSystem.file('a.txt'), exists);
+    expect(called, 1);
+
+    // Second build is up to date due to depfile parse.
+    await buildSystem.buildIncremental(target, environment, result);
+
+    expect(called, 1);
+  });
+
   testWithoutContext('output directory is an input to the build',  () async {
     final Environment environmentA = Environment.test(
       fileSystem.currentDirectory,

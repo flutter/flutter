@@ -242,6 +242,11 @@ class FakeVmServiceHost {
         .having((Map<String, Object> request) => request['id'], 'id', fakeRequest.id)
         .having((Map<String, Object> request) => request['params'], 'args', fakeRequest.args)
       );
+      if (fakeRequest.close) {
+        _vmService.dispose();
+        expect(_requests, isEmpty);
+        return;
+      }
       if (fakeRequest.errorCode == null) {
         _input.add(json.encode(<String, Object>{
           'jsonrpc': '2.0',
@@ -295,13 +300,17 @@ class FakeVmServiceRequest implements VmServiceExpectation {
   const FakeVmServiceRequest({
     @required this.method,
     @required this.id,
-    @required this.args,
+    this.args = const <String, Object>{},
     this.jsonResponse,
     this.errorCode,
+    this.close = false,
   });
 
   final String method;
   final String id;
+
+  /// When true, the vm service is automatically closed.
+  final bool close;
 
   /// If non-null, the error code for a [vm_service.RPCError] in place of a
   /// standard response.

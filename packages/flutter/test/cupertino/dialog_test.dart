@@ -52,6 +52,62 @@ void main() {
     expect(find.text('Delete'), findsNothing);
   });
 
+  testWidgets('Dialog not barrier dismissible by default', (WidgetTester tester) async {
+    await tester.pumpWidget(createAppWithCenteredButton(const Text('Go')));
+
+    final BuildContext context = tester.element(find.text('Go'));
+
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          width: 100.0,
+          height: 100.0,
+          alignment: Alignment.center,
+          child: const Text('Dialog'),
+        );
+      },
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog'), findsOneWidget);
+
+    // Tap on the barrier, which shouldn't do anything this time.
+    await tester.tapAt(const Offset(10.0, 10.0));
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog'), findsOneWidget);
+
+  });
+
+ testWidgets('Dialog configurable to be barrier dismissible', (WidgetTester tester) async {
+    await tester.pumpWidget(createAppWithCenteredButton(const Text('Go')));
+
+    final BuildContext context = tester.element(find.text('Go'));
+
+    showCupertinoDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Container(
+          width: 100.0,
+          height: 100.0,
+          alignment: Alignment.center,
+          child: const Text('Dialog'),
+        );
+      },
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog'), findsOneWidget);
+
+    // Tap off the barrier.
+    await tester.tapAt(const Offset(10.0, 10.0));
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog'), findsNothing);
+  });
+
   testWidgets('Dialog destructive action style', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDestructiveAction: true,
@@ -1127,5 +1183,18 @@ Widget boilerplate(Widget child) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: child,
+  );
+}
+
+Widget createAppWithCenteredButton(Widget child) {
+  return MaterialApp(
+    home: Material(
+      child: Center(
+        child: RaisedButton(
+          onPressed: null,
+          child: child
+        ),
+      )
+    )
   );
 }

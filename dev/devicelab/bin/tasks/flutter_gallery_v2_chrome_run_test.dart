@@ -47,17 +47,12 @@ class NewGalleryChromeRunTest {
         '-v',
         '--release',
         '--no-pub',
-      ], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
+      ]);
 
       final List<String> options = <String>['-d', 'chrome', '--verbose', '--resident'];
       final Process process = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
         flutterCommandArgs('run', options),
-        environment: <String, String>{
-          'FLUTTER_WEB': 'true',
-        },
       );
 
       final Completer<void> stdoutDone = Completer<void>();
