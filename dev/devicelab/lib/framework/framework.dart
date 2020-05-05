@@ -86,10 +86,6 @@ class _TaskRunner {
       ).toSet();
       beforeRunningDartInstances.forEach(print);
 
-      Future<TaskResult> futureResult = _performTask();
-      if (taskTimeout != null)
-        futureResult = futureResult.timeout(taskTimeout);
-
       print('enabling configs for macOS, Linux, Windows, and Web...');
       final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
         'config',
@@ -101,6 +97,10 @@ class _TaskRunner {
       if (configResult != 0) {
         print('Failed to enable configuration, tasks may not run.');
       }
+
+      Future<TaskResult> futureResult = _performTask();
+      if (taskTimeout != null)
+        futureResult = futureResult.timeout(taskTimeout);
 
       TaskResult result = await futureResult;
 
