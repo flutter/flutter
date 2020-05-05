@@ -139,7 +139,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   ///  * [next], the function that is called to move the focus to the next node.
   ///  * [DirectionalFocusTraversalPolicyMixin.findFirstFocusInDirection], a
   ///    function that finds the first focusable widget in a particular direction.
-  FocusNode findFirstFocus(FocusNode currentNode) => _findFirstFocus(currentNode);
+  FocusNode findFirstFocus(FocusNode currentNode) => _findInitialFocus(currentNode);
 
   /// Returns the node that should receive focus if focus is traversing
   /// backwards, and there is no current focus.
@@ -160,9 +160,9 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   ///  * [previous], the function that is called to move the focus to the next node.
   ///  * [DirectionalFocusTraversalPolicyMixin.findFirstFocusInDirection], a
   ///    function that finds the first focusable widget in a particular direction.
-  FocusNode findLastFocus(FocusNode currentNode) => _findFirstFocus(currentNode, findLast: true);
+  FocusNode findLastFocus(FocusNode currentNode) => _findInitialFocus(currentNode, fromEnd: true);
 
-  FocusNode _findFirstFocus(FocusNode currentNode, {bool findLast = false}) {
+  FocusNode _findInitialFocus(FocusNode currentNode, {bool fromEnd = false}) {
     assert(currentNode != null);
     final FocusScopeNode scope = currentNode.nearestScope;
     FocusNode candidate = scope.focusedChild;
@@ -171,7 +171,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
       if (sorted.isEmpty) {
         candidate = null;
       } else {
-        candidate = findLast ? sorted.last : sorted.first;
+        candidate = fromEnd ? sorted.last : sorted.first;
       }
     }
 
