@@ -31,7 +31,7 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
       .listen((String line) {
     print('attach:stdout: $line');
     stdout.add(line);
-    if (line.contains('Waiting') && onListening != null)
+    if (line.contains('Waiting') && onListening != null && !listening.isCompleted)
       listening.complete(onListening());
     if (line.contains('Quit (terminate the application on the device)'))
       ready.complete();
