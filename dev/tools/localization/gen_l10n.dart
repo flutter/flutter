@@ -950,9 +950,11 @@ class LocalizationsGenerator {
     }
 
     // Generate a JSON file containing the inputs and outputs of the gen_l10n script.
-    // TODO: implement JSON generating function.
-    print(_inputFileList);
-    print(_outputFileList);
+    _inputsAndOutputsListFile.writeAsStringSync(
+      inputAndOutputsJsonFileTemplate
+        .replaceAll('@(inputs)', _inputFileList.map((String file) => '"$file"').join(',\n    '))
+        .replaceAll('@(outputs)', _outputFileList.map((String file) => '"$file"').join(',\n    '))
+    );
   }
 
   void outputUnimplementedMessages(String untranslatedMessagesFile) {
