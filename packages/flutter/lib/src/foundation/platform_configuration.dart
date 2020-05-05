@@ -28,10 +28,11 @@ class PlatformDispatcher {
   /// {@template flutter.foundation.PlatformDispatcher.onBeginFrame}
   /// A callback that is invoked to notify the application that it is an
   /// appropriate time to provide a scene using the [SceneBuilder] API and the
-  /// [PlatformWindow.render] method of the window for the provided platform ID.
-  /// When possible, this is driven by the hardware VSync signal. This is only
-  /// called if [PlatformWindow.scheduleFrame] for the window with the provided
-  /// ID has been called since the last time this callback was invoked.
+  /// [PlatformWindow.render] method.
+  /// When possible, this is driven by the hardware VSync signal of the attached
+  /// screen with the highest frame rate. This is only called if
+  /// [PlatformWindow.scheduleFrame] has been called since the last time this
+  /// callback was invoked.
   /// {@endtemplate}
   FrameCallback onBeginFrame;
 
@@ -535,31 +536,6 @@ class PlatformWindow {
 }
 
 // ----------------- Binding-owned Managers ----------------------
-
-/// Registered with [PlatformDispatcher] by the binding to manage
-/// and accumulate device configuration changes.
-class PlatformConfigurationManager with ChangeNotifier {
-  /// Const constructor so subclasses can be const.
-  PlatformConfigurationManager(PlatformDispatcher dispatch) {
-    dispatch.onPlatformConfigurationChanged = onPlatformConfigurationChanged;
-  }
-
-  /// Called by the [PlatformDispatcher] whenever the configuration
-  /// changes.
-  @protected
-  void onPlatformConfigurationChanged(PlatformConfigurationEvent event) {
-    // handle events...
-    notifyListeners();
-  }
-
-  /// The current platform configuration.
-  PlatformConfiguration configuration;
-
-  /// Gets the binding's instance of the current configuration manager.
-  static PlatformConfigurationManager get instance {
-    return BindingBase.instance.platformConfigurationManager;
-  }
-}
 
 /// A screen manager that listens to events from the platform.
 class ScreenManager with ChangeNotifier {

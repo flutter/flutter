@@ -34,6 +34,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
       onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
     );
+    platformDispatcher
+      ..onPlatformConfigurationChanged = _handleConfigurationChanged;
     window
       ..onMetricsChanged = handleMetricsChanged
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
@@ -46,6 +48,18 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
   }
+
+  void _handleConfigurationChanged(PlatformConfigurationEvent event) {
+    if (platformConfiguration is PlatformConfigurationChangedEvent) {
+      PlatformConfiguration newConfiguration = (event as PlatformConfigurationChangedEvent).configuration;
+      if (newConfiguration.textScaleFactor != platformConfiguration.textScaleFactor) {
+        handleTextScaleFactorChanged();
+      }
+      platformConfiguration = (event as PlatformConfigurationChangedEvent).configuration;
+    }
+  }
+
+  PlatformConfiguration platformConfiguration;
 
   /// The current [RendererBinding], if one has been created.
   static RendererBinding get instance => _instance;

@@ -89,9 +89,6 @@ class TestBindingBase implements BindingBase {
   ui.Window get window => throw UnimplementedError();
 
   @override
-  PlatformConfigurationManager platformConfigurationManager;
-
-  @override
   PlatformDispatcher platformDispatcher;
 
   @override

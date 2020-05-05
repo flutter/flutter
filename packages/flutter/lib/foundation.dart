@@ -51,6 +51,7 @@ export 'src/foundation/node.dart';
 export 'src/foundation/object.dart';
 export 'src/foundation/observer_list.dart';
 export 'src/foundation/platform.dart';
+export 'src/foundation/platform_configuration.dart';
 export 'src/foundation/print.dart';
 export 'src/foundation/serialization.dart';
 export 'src/foundation/stack_frame.dart';

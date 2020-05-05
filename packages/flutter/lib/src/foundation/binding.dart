@@ -110,7 +110,6 @@ abstract class BindingBase {
     platformDispatcher = PlatformDispatcher();
     windowManager = WindowManager(platformDispatcher);
     screenManager = ScreenManager(platformDispatcher);
-    platformConfigurationManager = PlatformConfigurationManager(platformDispatcher);
   }
 
   /// The current [BindingBase], if one has been created.
@@ -119,7 +118,6 @@ abstract class BindingBase {
 
   WindowManager windowManager;
   ScreenManager screenManager;
-  PlatformConfigurationManager platformConfigurationManager;
 
   /// Called when the binding is initialized, to register service
   /// extensions.
