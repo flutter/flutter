@@ -34,12 +34,12 @@ Future<Depfile> generateLocalizations({
       .childFile('l10n').uri,
   );
 
-  File outputLocalzations;
+  File outputLocalizations;
   if (options.outputLocalizationsFile != null) {
-    outputLocalzations = fileSystem
+    outputLocalizations = fileSystem
       .file(inputArb.uri.resolveUri(options.outputLocalizationsFile));
   } else {
-    outputLocalzations = projectDir
+    outputLocalizations = projectDir
     .childDirectory('lib')
     .childFile('app_localizations.dart');
   }
@@ -56,7 +56,7 @@ Future<Depfile> generateLocalizations({
         file,
   ];
   final List<File> outputs = <File>[
-    outputLocalzations,
+    outputLocalizations,
   ];
 
   final Depfile depfile = Depfile(inputs, outputs);
