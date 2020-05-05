@@ -188,6 +188,27 @@ class _ExpandingBoxState extends State<ExpandingBox> with AutomaticKeepAliveClie
   bool get wantKeepAlive => true;
 }
 
+/// A ScrollPhysics that will pop the ScrollPosition back in bounds if it is out
+/// when it gets new dimensions.
+class _JumpingScrollPhysics extends ClampingScrollPhysics {
+  const _JumpingScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
+
+  @override
+  _JumpingScrollPhysics applyTo(ScrollPhysics ancestor) {
+    return _JumpingScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  double adjustPositionForNewDimensions(ScrollMetrics position, {
+    @required bool isScrolling,
+    @required double velocity,
+  }) {
+    return isScrolling
+      ? super.adjustPositionForNewDimensions(position, isScrolling: isScrolling, velocity: velocity)
+      : position.pixels.clamp(position.minScrollExtent, position.maxScrollExtent) as double;
+  }
+}
+
 void main() {
   testWidgets('ScrollPosition jumpTo() doesn\'t call notifyListeners twice', (WidgetTester tester) async {
     int count = 0;
@@ -212,6 +233,7 @@ void main() {
     // widget tests run at (800x600)@3.0x
     await tester.pumpWidget(MaterialApp(
       home: ListView.builder(
+        physics: const _JumpingScrollPhysics(),
         itemBuilder: (BuildContext context, int index) => index == 0
               ? const ExpandingBox(collapsedSize: 400, expandedsize: 1200)
               : Container(height: 300, color: Colors.red),

@@ -443,16 +443,6 @@ class BouncingScrollPhysics extends ScrollPhysics {
   double applyBoundaryConditions(ScrollMetrics position, double value) => 0.0;
 
   @override
-  double adjustPositionForNewDimensions(ScrollMetrics position, {
-    @required bool isScrolling,
-    @required double velocity,
-  }) {
-    return isScrolling
-      ? super.adjustPositionForNewDimensions(position, isScrolling: isScrolling, velocity: velocity)
-      : position.pixels.clamp(position.minScrollExtent, position.maxScrollExtent) as double;
-  }
-
-  @override
   Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = this.tolerance;
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
@@ -552,16 +542,6 @@ class ClampingScrollPhysics extends ScrollPhysics {
     if (position.pixels < position.maxScrollExtent && position.maxScrollExtent < value) // hit bottom edge
       return value - position.maxScrollExtent;
     return 0.0;
-  }
-
-  @override
-  double adjustPositionForNewDimensions(ScrollMetrics position, {
-    @required bool isScrolling,
-    @required double velocity,
-  }) {
-    return isScrolling
-      ? super.adjustPositionForNewDimensions(position, isScrolling: isScrolling, velocity: velocity)
-      : position.pixels.clamp(position.minScrollExtent, position.maxScrollExtent) as double;
   }
 
   @override

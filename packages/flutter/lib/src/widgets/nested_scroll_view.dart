@@ -1182,11 +1182,6 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     return 0.0;
   }
 
-  @override
-  bool doesAcceptAdjustedPositionForNewDimensions(double adjustedPixels) {
-    return false;
-  }
-
   // This is called by activities when they finish their work.
   @override
   void goIdle() {

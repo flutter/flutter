@@ -489,19 +489,15 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       assert(minScrollExtent != null);
       assert(maxScrollExtent != null);
       assert(minScrollExtent <= maxScrollExtent);
-      final bool extentsFinte =
-          maxScrollExtent.isFinite &&
-          minScrollExtent.isFinite &&
-          (_minScrollExtent != null && _minScrollExtent.isFinite) &&
-          (_maxScrollExtent != null && _maxScrollExtent.isFinite);
+      final bool isFirstApplication = _minScrollExtent == null || _maxScrollExtent == null;
       _minScrollExtent = minScrollExtent;
       _maxScrollExtent = maxScrollExtent;
       _haveDimensions = true;
       _didChangeViewportDimensionOrReceiveCorrection = false;
-      if (extentsFinte) {
+      if (!isFirstApplication) {
         final double adjustedPixels =
             physics.adjustPositionForNewDimensions(this, isScrolling: activity.isScrolling, velocity: activity.velocity);
-        if (doesAcceptAdjustedPositionForNewDimensions(adjustedPixels)) {
+        if (adjustedPixels != pixels) {
           correctPixels(adjustedPixels);
           return false;
         }
@@ -509,17 +505,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       applyNewDimensions();
     }
     return true;
-  }
-
-  /// Returns `true` if the [ScrollPosition] will accept the adjusted position
-  /// calculated by the [ScrollPhysics] as a result of new contents dimensions.
-  ///
-  /// See also:
-  ///   - [ScrollPosition.applyContentDimensions]
-  ///   - [ScrollPhysics.adjustPositionForNewDimensions]
-  @protected
-  bool doesAcceptAdjustedPositionForNewDimensions(double adjustedPixels) {
-    return adjustedPixels != pixels;
   }
 
   /// Notifies the activity that the dimensions of the underlying viewport or
