@@ -56,10 +56,6 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
     return Future.any<dynamic>(<Future<dynamic>>[
       event,
       process.exitCode,
-      // Keep the test from running for 15 minutes if it gets stuck.
-      Future<void>.delayed(const Duration(minutes: 1)).then<void>((void _) {
-        throw StateError('eventOrExit timed out');
-      }),
     ]);
   }
 
@@ -178,6 +174,7 @@ void main() {
       } finally {
         section('Uninstalling');
         await device.adb(<String>['uninstall', kAppId]);
+        print('uninstall complete');
       }
     });
     return TaskResult.success(null);
