@@ -353,21 +353,56 @@ class BitmapCanvas extends EngineCanvas {
 
   @override
   void drawImage(ui.Image image, ui.Offset p, SurfacePaintData paint) {
-    _drawImage(image, p, paint);
+    final html.HtmlElement imageElement = _drawImage(image, p, paint);
+    if (paint.colorFilter != null) {
+      _applyTargetSize(imageElement, image.width.toDouble(),
+          image.height.toDouble());
+    }
     _childOverdraw = true;
     _canvasPool.closeCurrentCanvas();
     _cachedLastStyle = null;
   }
 
-  html.ImageElement _drawImage(
+  html.HtmlElement _drawImage(
       ui.Image image, ui.Offset p, SurfacePaintData paint) {
     final HtmlImage htmlImage = image;
-    final html.Element imgElement = htmlImage.cloneImageElement();
     final ui.BlendMode blendMode = paint.blendMode;
+    final EngineColorFilter colorFilter = paint.colorFilter as EngineColorFilter;
+    final ui.BlendMode colorFilterBlendMode = colorFilter?._blendMode;
+    html.HtmlElement imgElement;
+    if (colorFilterBlendMode == null) {
+      // No Blending, create an image by cloning original loaded image.
+      imgElement = htmlImage.cloneImageElement();
+    } else {
+      switch (colorFilterBlendMode) {
+        case ui.BlendMode.colorBurn:
+        case ui.BlendMode.colorDodge:
+        case ui.BlendMode.hue:
+        case ui.BlendMode.modulate:
+        case ui.BlendMode.overlay:
+        case ui.BlendMode.plus:
+        case ui.BlendMode.srcIn:
+        case ui.BlendMode.srcATop:
+        case ui.BlendMode.srcOut:
+        case ui.BlendMode.saturation:
+        case ui.BlendMode.color:
+        case ui.BlendMode.luminosity:
+        case ui.BlendMode.xor:
+          imgElement = _createImageElementWithSvgFilter(image,
+              colorFilter._color, colorFilterBlendMode, paint);
+          break;
+        default:
+          imgElement = _createBackgroundImageWithBlend(image,
+              colorFilter._color, colorFilterBlendMode, paint);
+          break;
+      }
+    }
     imgElement.style.mixBlendMode = _stringForBlendMode(blendMode);
     if (_canvasPool.isClipped) {
       // Reset width/height since they may have been previously set.
-      imgElement.style..removeProperty('width')..removeProperty('height');
+      imgElement.style
+        ..removeProperty('width')
+        ..removeProperty('height');
       final List<html.Element> clipElements = _clipContent(
           _canvasPool._clipStack, imgElement, p, _canvasPool.currentTransform);
       for (html.Element clipElement in clipElements) {
@@ -396,10 +431,19 @@ class BitmapCanvas extends EngineCanvas {
         src.top != 0 ||
         src.width != image.width ||
         src.height != image.height;
+    // If source and destination sizes are identical, we can skip the longer
+    // code path that sets the size of the element and clips.
+    //
+    // If there is a color filter set however, we maybe using background-image
+    // to render therefore we have to explicitely set width/height of the
+    // element for blending to work with background-color.
     if (dst.width == image.width &&
         dst.height == image.height &&
-        !requiresClipping) {
-      drawImage(image, dst.topLeft, paint);
+        !requiresClipping &&
+        paint.colorFilter == null) {
+      _drawImage(image, dst.topLeft, paint);
+      _childOverdraw = true;
+      _canvasPool.closeCurrentCanvas();
     } else {
       if (requiresClipping) {
         save();
@@ -418,7 +462,7 @@ class BitmapCanvas extends EngineCanvas {
         }
       }
 
-      final html.ImageElement imgElement =
+      final html.Element imgElement =
           _drawImage(image, ui.Offset(targetLeft, targetTop), paint);
       // To scale set width / height on destination image.
       // For clipping we need to scale according to
@@ -430,15 +474,145 @@ class BitmapCanvas extends EngineCanvas {
         targetWidth *= image.width / src.width;
         targetHeight *= image.height / src.height;
       }
-      final html.CssStyleDeclaration imageStyle = imgElement.style;
-      imageStyle
-        ..width = '${targetWidth.toStringAsFixed(2)}px'
-        ..height = '${targetHeight.toStringAsFixed(2)}px';
+      _applyTargetSize(imgElement, targetWidth, targetHeight);
       if (requiresClipping) {
         restore();
       }
     }
     _closeCurrentCanvas();
+  }
+
+  void _applyTargetSize(html.HtmlElement imageElement, double targetWidth,
+      double targetHeight) {
+    final html.CssStyleDeclaration imageStyle = imageElement.style;
+    final String widthPx = '${targetWidth.toStringAsFixed(2)}px';
+    final String heightPx = '${targetHeight.toStringAsFixed(2)}px';
+    imageStyle
+      // left,top are set to 0 (although position is absolute) because
+      // Chrome will glitch if you leave them out, reproducable with
+      // canvas_image_blend_test on row 6,  MacOS / Chrome 81.04.
+      ..left = "0px"
+      ..top = "0px"
+      ..width = widthPx
+      ..height = heightPx;
+    if (imageElement is! html.ImageElement) {
+      imageElement.style.backgroundSize = '$widthPx $heightPx';
+    }
+  }
+
+  // Creates a Div element to render an image using background-image css
+  // attribute to be able to use background blend mode(s) when possible.
+  //
+  // Example: <div style="
+  //               position:absolute;
+  //               background-image:url(....);
+  //               background-blend-mode:"darken"
+  //               background-color: #RRGGBB">
+  //
+  // Special cases:
+  // For clear,dstOut it generates a blank element.
+  // For src,srcOver it only sets background-color attribute.
+  // For dst,dstIn , it only sets source not background color.
+  html.HtmlElement _createBackgroundImageWithBlend(HtmlImage image,
+      ui.Color filterColor, ui.BlendMode colorFilterBlendMode,
+      SurfacePaintData paint) {
+    // When blending with color we can't use an image element.
+    // Instead use a div element with background image, color and
+    // background blend mode.
+    final html.HtmlElement imgElement = html.DivElement();
+    final html.CssStyleDeclaration style = imgElement.style;
+    switch (colorFilterBlendMode) {
+      case ui.BlendMode.clear:
+      case ui.BlendMode.dstOut:
+        style.position = 'absolute';
+        break;
+      case ui.BlendMode.src:
+      case ui.BlendMode.srcOver:
+        style
+            ..position = 'absolute'
+            ..backgroundColor = colorToCssString(filterColor);
+        break;
+      case ui.BlendMode.dst:
+      case ui.BlendMode.dstIn:
+        style
+          ..position = 'absolute'
+          ..backgroundImage = "url('${image.imgElement.src}')";
+        break;
+      default:
+        style
+          ..position = 'absolute'
+          ..backgroundImage = "url('${image.imgElement.src}')"
+          ..backgroundBlendMode = _stringForBlendMode(colorFilterBlendMode)
+          ..backgroundColor = colorToCssString(filterColor);
+        break;
+    }
+    return imgElement;
+  }
+
+  // Creates an image element and an svg filter to apply on the element.
+  html.HtmlElement _createImageElementWithSvgFilter(HtmlImage image,
+      ui.Color filterColor, ui.BlendMode colorFilterBlendMode,
+      SurfacePaintData paint) {
+    // For srcIn blendMode, we use an svg filter to apply to image element.
+    String svgFilter;
+    switch (colorFilterBlendMode) {
+      case ui.BlendMode.srcIn:
+      case ui.BlendMode.srcATop:
+        svgFilter = _srcInColorFilterToSvg(filterColor);
+        break;
+      case ui.BlendMode.srcOut:
+        svgFilter = _srcOutColorFilterToSvg(filterColor);
+        break;
+      case ui.BlendMode.xor:
+        svgFilter = _xorColorFilterToSvg(filterColor);
+        break;
+      case ui.BlendMode.plus:
+        // Porter duff source + destination.
+        svgFilter = _compositeColorFilterToSvg(filterColor, 0, 1, 1, 0);
+        break;
+      case ui.BlendMode.modulate:
+        // Porter duff source * destination but preserves alpha.
+        svgFilter = _modulateColorFilterToSvg(filterColor);
+        break;
+      case ui.BlendMode.overlay:
+        // Since overlay is the same as hard-light by swapping layers,
+        // pass hard-light blend function.
+        svgFilter = _blendColorFilterToSvg(filterColor, 'hard-light',
+            swapLayers: true);
+        break;
+      // Several of the filters below (although supported) do not render the
+      // same (close but not exact) as native flutter when used as blend mode
+      // for a background-image with a background color. They only look
+      // identical when feBlend is used within an svg filter definition.
+      //
+      // Saturation filter uses destination when source is transparent.
+      // cMax = math.max(r, math.max(b, g));
+      // cMin = math.min(r, math.min(b, g));
+      // delta = cMax - cMin;
+      // lightness = (cMax + cMin) / 2.0;
+      // saturation = delta / (1.0 - (2 * lightness - 1.0).abs());
+      case ui.BlendMode.saturation:
+      case ui.BlendMode.colorDodge:
+      case ui.BlendMode.colorBurn:
+      case ui.BlendMode.hue:
+      case ui.BlendMode.color:
+      case ui.BlendMode.luminosity:
+        svgFilter = _blendColorFilterToSvg(filterColor,
+            _stringForBlendMode(colorFilterBlendMode));
+        break;
+      default:
+        break;
+    }
+    final html.Element filterElement =
+    html.Element.html(svgFilter, treeSanitizer: _NullTreeSanitizer());
+    rootElement.append(filterElement);
+    _children.add(filterElement);
+    final html.HtmlElement imgElement = image.cloneImageElement();
+    imgElement.style.filter = 'url(#_fcf${_filterIdCounter})';
+    if (colorFilterBlendMode == ui.BlendMode.saturation) {
+      imgElement.style.backgroundColor = colorToCssString(filterColor);
+    }
+    return imgElement;
   }
 
   // Should be called when we add new html elements into rootElement so that
@@ -796,4 +970,111 @@ String _maskFilterToCss(ui.MaskFilter maskFilter) {
     return 'none';
   }
   return 'blur(${maskFilter.webOnlySigma}px)';
+}
+
+int _filterIdCounter = 0;
+
+// The color matrix for feColorMatrix element changes colors based on
+// the following:
+//
+// | R' |     | r1 r2 r3 r4 r5 |   | R |
+// | G' |     | g1 g2 g3 g4 g5 |   | G |
+// | B' |  =  | b1 b2 b3 b4 b5 | * | B |
+// | A' |     | a1 a2 a3 a4 a5 |   | A |
+// | 1  |     | 0  0  0  0  1  |   | 1 |
+//
+// R' = r1*R + r2*G + r3*B + r4*A + r5
+// G' = g1*R + g2*G + g3*B + g4*A + g5
+// B' = b1*R + b2*G + b3*B + b4*A + b5
+// A' = a1*R + a2*G + a3*B + a4*A + a5
+String _srcInColorFilterToSvg(ui.Color color) {
+  _filterIdCounter += 1;
+  return '<svg width="0" height="0">'
+      '<filter id="_fcf$_filterIdCounter" '
+      'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
+      '<feColorMatrix values="0 0 0 0 1 ' // Ignore input, set it to absolute.
+          '0 0 0 0 1 '
+          '0 0 0 0 1 '
+          '0 0 0 1 0" result="destalpha"/>' // Just take alpha channel of destination
+      '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
+      '</feFlood>'
+      '<feComposite in="flood" in2="destalpha" '
+      'operator="arithmetic" k1="1" k2="0" k3="0" k4="0" result="comp">'
+      '</feComposite>'
+      '</filter></svg>';
+}
+
+String _srcOutColorFilterToSvg(ui.Color color) {
+  _filterIdCounter += 1;
+  return '<svg width="0" height="0">'
+      '<filter id="_fcf$_filterIdCounter" '
+      'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
+      '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
+      '</feFlood>'
+      '<feComposite in="flood" in2="SourceGraphic" operator="out" result="comp">'
+      '</feComposite>'
+      '</filter></svg>';
+}
+
+String _xorColorFilterToSvg(ui.Color color) {
+  _filterIdCounter += 1;
+  return '<svg width="0" height="0">'
+      '<filter id="_fcf$_filterIdCounter" '
+      'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
+      '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
+      '</feFlood>'
+      '<feComposite in="flood" in2="SourceGraphic" operator="xor" result="comp">'
+      '</feComposite>'
+      '</filter></svg>';
+}
+
+// The source image and color are composited using :
+// result = k1 *in*in2 + k2*in + k3*in2 + k4.
+String _compositeColorFilterToSvg(ui.Color color, double k1, double k2, double k3 , double k4) {
+  _filterIdCounter += 1;
+  return '<svg width="0" height="0">'
+      '<filter id="_fcf$_filterIdCounter" '
+      'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
+      '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
+      '</feFlood>'
+      '<feComposite in="flood" in2="SourceGraphic" '
+      'operator="arithmetic" k1="$k1" k2="$k2" k3="$k3" k4="$k4" result="comp">'
+      '</feComposite>'
+      '</filter></svg>';
+}
+
+// Porter duff source * destination , keep source alpha.
+// First apply color filter to source to change it to [color], then
+// composite using multiplication.
+String _modulateColorFilterToSvg(ui.Color color) {
+  _filterIdCounter += 1;
+  final double r = color.red / 255.0;
+  final double b = color.blue / 255.0;
+  final double g = color.green / 255.0;
+  return '<svg width="0" height="0">'
+      '<filter id="_fcf$_filterIdCounter" '
+      'filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">'
+      '<feColorMatrix values="0 0 0 0 $r ' // Ignore input, set it to absolute.
+      '0 0 0 0 $g '
+      '0 0 0 0 $b '
+      '0 0 0 1 0" result="recolor"/>'
+      '<feComposite in="recolor" in2="SourceGraphic" '
+      'operator="arithmetic" k1="1" k2="0" k3="0" k4="0" result="comp">'
+      '</feComposite>'
+      '</filter></svg>';
+}
+
+// Uses feBlend element to blend source image with a color.
+String _blendColorFilterToSvg(ui.Color color, String feBlend,
+    {bool swapLayers = false}) {
+  _filterIdCounter += 1;
+  return '<svg width="0" height="0">'
+      '<filter id="_fcf$_filterIdCounter" filterUnits="objectBoundingBox" '
+      'x="0%" y="0%" width="100%" height="100%">'
+      '<feFlood flood-color="${colorToCssString(color)}" flood-opacity="1" result="flood">'
+      '</feFlood>' +
+      (swapLayers
+      ? '<feBlend in="SourceGraphic" in2="flood" mode="$feBlend"/>'
+      : '<feBlend in="flood" in2="SourceGraphic" mode="$feBlend"/>') +
+      '</filter></svg>';
 }
