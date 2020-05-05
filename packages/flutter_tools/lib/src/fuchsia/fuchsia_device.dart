@@ -150,7 +150,8 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     if (!fuchsiaWorkflow.canListDevices) {
       return <Device>[];
     }
-    final List<String> text = await fuchsiaSdk.listDevices(timeout: timeout);
+    final List<String> text = (await fuchsiaSdk.listDevices(timeout: timeout))
+      ?.split('\n');
     if (text == null || text.isEmpty) {
       return <Device>[];
     }

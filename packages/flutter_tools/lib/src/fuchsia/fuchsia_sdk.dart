@@ -45,10 +45,12 @@ class FuchsiaSdk {
   FuchsiaKernelCompiler get fuchsiaKernelCompiler =>
       _fuchsiaKernelCompiler ??= FuchsiaKernelCompiler();
 
+  /// Returns any attached devices is a newline-denominated String.
+  ///
   /// Example output:
   ///    $ device-finder list -full
   ///    > 192.168.42.56 paper-pulp-bush-angel
-  Future<List<String>> listDevices({ Duration timeout }) async {
+  Future<String> listDevices({ Duration timeout }) async {
     if (globals.fuchsiaArtifacts.devFinder == null ||
         !globals.fuchsiaArtifacts.devFinder.existsSync()) {
       return null;
@@ -57,7 +59,7 @@ class FuchsiaSdk {
     if (devices == null) {
       return null;
     }
-    return devices.isNotEmpty ? devices : null;
+    return devices.isNotEmpty ? devices.join('\n') : null;
   }
 
   /// Returns the fuchsia system logs for an attached device where
