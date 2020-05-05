@@ -81,6 +81,7 @@ vars = {
   'dart_resource_rev': 'f8e37558a1c4f54550aa463b88a6a831e3e33cd6',
   'dart_root_certificates_rev': '16ef64be64c7dfdff2b9f4b910726e635ccc519e',
   'dart_shelf_packages_handler_tag': '2.0.0',
+  'dart_shelf_proxy_tag': '0.1.0+7',
   'dart_shelf_static_rev': 'v0.2.8',
   'dart_shelf_tag': '0.7.3+3',
   'dart_shelf_web_socket_tag': '0.2.2+3',
@@ -317,6 +318,9 @@ deps = {
 
   'src/third_party/dart/third_party/pkg/shelf_packages_handler':
    Var('dart_git') + '/shelf_packages_handler.git' + '@' + Var('dart_shelf_packages_handler_tag'),
+
+  'src/third_party/dart/third_party/pkg/shelf_proxy':
+   Var('dart_git') + '/shelf_proxy.git' + '@' + Var('dart_shelf_proxy_tag'),
 
   'src/third_party/dart/third_party/pkg/shelf_static':
    Var('dart_git') + '/shelf_static.git' + '@' + Var('dart_shelf_static_rev'),
