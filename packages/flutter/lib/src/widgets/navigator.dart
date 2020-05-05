@@ -697,12 +697,14 @@ abstract class RouteTransitionRecord {
 ///
 ///     }
 ///     for (final RouteTransitionRecord exitingPageRoute in locationToExitingPageRoute.values) {
-///       exitingPageRoute.markForRemove();
-///       final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
-///       if (pagelessRoutes != null) {
-///         for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
-///           pagelessRoute.markForRemove();
-///         }
+///       if (exitingPageRoute.isWaitingForExitingDecision) {
+///        exitingPageRoute.markForRemove();
+///        final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
+///        if (pagelessRoutes != null) {
+///          for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
+///             pagelessRoute.markForRemove();
+///           }
+///        }
 ///       }
 ///       results.add(exitingPageRoute);
 ///
