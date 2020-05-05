@@ -1071,6 +1071,73 @@ void main() {
   });
 
   testWidgets(
+    'Viewport.showOnScreen for floating headers',
+    (WidgetTester tester) async {
+      List<Widget> children;
+      ScrollController controller;
+
+      const Key headerKey = Key('header');
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Container(
+              height: 600.0,
+              width: 600.0,
+              child: CustomScrollView(
+                controller: controller = ScrollController(initialScrollOffset: 300.0),
+                slivers: children = List<Widget>.generate(20, (int i) {
+                  return i == 10
+                  ? SliverPersistentHeader(
+                    pinned: true,
+                    floating: true,
+                    delegate: _TestSliverPersistentHeaderDelegate(100, 300, headerKey),
+                  )
+                  : SliverToBoxAdapter(
+                    child: Container(
+                      height: 300.0,
+                      child: Text('Tile $i'),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Finder pinnedHeaderContent = find.descendant(
+        of: find.byWidget(children[10], skipOffstage: false),
+        matching: find.byKey(headerKey, skipOffstage: false),
+        skipOffstage: false,
+      );
+
+      controller.jumpTo(300.0 * 15);
+      await tester.pumpAndSettle();
+      expect(tester.getSize(pinnedHeaderContent).height, lessThan(300));
+
+      // The persistent header is pinned to the leading edge thus still visible,
+      // the viewport should not scroll.
+      tester.renderObject(pinnedHeaderContent).showOnScreen(
+        descendant: tester.renderObject(pinnedHeaderContent),
+        rect: Offset.zero & const Size(600, 300),
+      );
+      await tester.pumpAndSettle();
+      // The header expands but doesn't move.
+      expect(controller.offset, 300.0 * 15);
+      expect(tester.getSize(pinnedHeaderContent).height, 300);
+
+      // The rect specifies that the persistent header needs to be 1 pixel away
+      // from the leading edge of the viewport.
+      tester.renderObject(pinnedHeaderContent).showOnScreen(
+        descendant: tester.renderObject(pinnedHeaderContent),
+        rect: const Offset(0, -1) & const Size(600, 300),
+      );
+      await tester.pumpAndSettle();
+      expect(controller.offset, 10 * 300 - 1.0);
+  });
+
+  testWidgets(
     'Viewport showOnScreen should not scroll if the rect is already visible, '
     'even if it does not scroll linearly (reversed order version)',
     (WidgetTester tester) async {
