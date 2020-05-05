@@ -46,10 +46,6 @@ class TrackWidgetCreationEnabledTask {
           deviceIdOverride,
           path.join('lib/track_widget_creation.dart'),
         ]),
-        environment: <String, String>{
-          'FLUTTER_WEB': 'true',
-          'FLUTTER_MACOS': 'true'
-        }
       );
       runProcess.stdout
         .transform(utf8.decoder)
@@ -84,10 +80,6 @@ class TrackWidgetCreationEnabledTask {
           deviceIdOverride,
           path.join('lib/track_widget_creation.dart'),
         ]),
-        environment: <String, String>{
-          'FLUTTER_WEB': 'true',
-          'FLUTTER_MACOS': 'true'
-        }
       );
       runProcess.stdout
         .transform(utf8.decoder)

@@ -350,9 +350,7 @@ class WebCompileTest {
     rmTree(sampleDir);
 
     await inDirectory<void>(Directory.systemTemp, () async {
-      await flutter('create', options: <String>['--template=app', sampleAppName], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
+      await flutter('create', options: <String>['--template=app', sampleAppName]);
     });
 
     metrics.addAll(await runSingleBuildTest(
@@ -379,9 +377,7 @@ class WebCompileTest {
         '-v',
         '--release',
         '--no-pub',
-      ], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
+      ]);
       watch?.stop();
       final String outputFileName = path.join(directory, 'build/web/main.dart.js');
       metrics.addAll(await getSize(outputFileName, metric: metric));
