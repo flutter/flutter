@@ -226,13 +226,38 @@ class FlutterDevice {
     return completer.future;
   }
 
+  Future<void> refreshViews() async {
+    if (vmService == null) {
+      return;
+    }
+    final List<FlutterView> updatedViews = await vmService.getFlutterViews();
+    _views
+      ..clear()
+      ..addAll(updatedViews);
+  }
+  final List<FlutterView> _views = <FlutterView>[];
+
+  List<FlutterView> get views {
+    if (vmService == null) {
+      return <FlutterView>[];
+    }
+    if (viewFilter != null) {
+      return <FlutterView>[
+        for (final FlutterView flutterView in _views)
+          if (flutterView.uiIsolate.name.contains(viewFilter))
+            flutterView
+      ];
+    }
+    return _views;
+  }
+
   Future<void> exitApps({
     @visibleForTesting Duration timeoutDelay = const Duration(seconds: 10),
   }) async {
     if (!device.supportsFlutterExit) {
       return device.stopApp(package);
     }
-    final List<FlutterView> views = await vmService.getFlutterViews();
+    await refreshViews();
     if (views == null || views.isEmpty) {
       return device.stopApp(package);
     }
@@ -308,7 +333,6 @@ class FlutterDevice {
     final Uri deviceAssetsDirectoryUri = devFS.baseUri.resolveUri(
         globals.fs.path.toUri(getAssetBuildDirectory()));
     assert(deviceAssetsDirectoryUri != null);
-    final List<FlutterView> views = await vmService.getFlutterViews();
     await Future.wait<void>(views.map<Future<void>>(
       (FlutterView view) => vmService.setAssetDirectory(
         assetsDirectory: deviceAssetsDirectoryUri,
@@ -319,7 +343,6 @@ class FlutterDevice {
   }
 
   Future<void> debugDumpApp() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
       await vmService.flutterDebugDumpApp(
         isolateId: view.uiIsolate.id,
@@ -328,7 +351,6 @@ class FlutterDevice {
   }
 
   Future<void> debugDumpRenderTree() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
       await vmService.flutterDebugDumpRenderTree(
         isolateId: view.uiIsolate.id,
@@ -337,7 +359,6 @@ class FlutterDevice {
   }
 
   Future<void> debugDumpLayerTree() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
       await vmService.flutterDebugDumpLayerTree(
         isolateId: view.uiIsolate.id,
@@ -346,7 +367,6 @@ class FlutterDevice {
   }
 
   Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
       await vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(
         isolateId: view.uiIsolate.id,
@@ -355,7 +375,6 @@ class FlutterDevice {
   }
 
   Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
       await vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(
         isolateId: view.uiIsolate.id,
@@ -364,7 +383,6 @@ class FlutterDevice {
   }
 
   Future<void> toggleDebugPaintSizeEnabled() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
       await vmService.flutterToggleDebugPaintSizeEnabled(
         isolateId: view.uiIsolate.id,
@@ -373,7 +391,6 @@ class FlutterDevice {
   }
 
   Future<void> toggleDebugCheckElevationsEnabled() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
       await vmService.flutterToggleDebugCheckElevationsEnabled(
         isolateId: view.uiIsolate.id,
@@ -382,7 +399,6 @@ class FlutterDevice {
   }
 
   Future<void> debugTogglePerformanceOverlayOverride() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
       await vmService.flutterTogglePerformanceOverlayOverride(
         isolateId: view.uiIsolate.id,
@@ -391,7 +407,6 @@ class FlutterDevice {
   }
 
   Future<void> toggleWidgetInspector() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
       await vmService.flutterToggleWidgetInspector(
         isolateId: view.uiIsolate.id,
@@ -400,7 +415,6 @@ class FlutterDevice {
   }
 
   Future<void> toggleProfileWidgetBuilds() async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
     for (final FlutterView view in views) {
       await vmService.flutterToggleProfileWidgetBuilds(
         isolateId: view.uiIsolate.id,
@@ -409,7 +423,6 @@ class FlutterDevice {
   }
 
   Future<String> togglePlatform({ String from }) async {
-    final List<FlutterView> views = await vmService.getFlutterViews();
     final String to = nextPlatform(from, featureFlags);
     for (final FlutterView view in views) {
       await vmService.flutterPlatformOverride(
@@ -751,17 +764,15 @@ abstract class ResidentRunner {
   Future<Map<String, dynamic>> invokeFlutterExtensionRpcRawOnFirstIsolate(
     String method, {
     Map<String, dynamic> params,
-  }) async {
-    final List<FlutterView> views = await flutterDevices
-      .first
-      .vmService.getFlutterViews();
+  }) {
     return flutterDevices
       .first
       .vmService
       .invokeFlutterExtensionRpcRaw(
         method,
         args: params,
-        isolateId: views
+        isolateId: flutterDevices
+          .first.views
           .first.uiIsolate.id
       );
   }
@@ -800,23 +811,13 @@ abstract class ResidentRunner {
     throw Exception('Canvaskit not supported by this runner.');
   }
 
-  /// List the attached flutter views.
-  Future<List<FlutterView>> listFlutterViews() async {
-    return (await Future.wait(
-      flutterDevices.map((FlutterDevice d) => d.vmService.getFlutterViews()))
-    ).expand((List<FlutterView> views) => views).toList();
-  }
-
   /// Write the SkSL shaders to a zip file in build directory.
   Future<void> writeSkSL() async {
     if (!supportsWriteSkSL) {
       throw Exception('writeSkSL is not supported by this runner.');
     }
-    final List<FlutterView> views = await flutterDevices
-      .first
-      .vmService.getFlutterViews();
     final Map<String, Object> data = await flutterDevices.first.vmService.getSkSLs(
-      viewId: views.first.id,
+      viewId: flutterDevices.first.views.first.id,
     );
     if (data.isEmpty) {
       globals.logger.printStatus(
@@ -901,61 +902,78 @@ abstract class ResidentRunner {
     appFinished();
   }
 
+  Future<void> refreshViews() async {
+    final List<Future<void>> futures = <Future<void>>[
+      for (final FlutterDevice device in flutterDevices) device.refreshViews(),
+    ];
+    await Future.wait(futures);
+  }
+
   Future<void> debugDumpApp() async {
+    await refreshViews();
     for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpApp();
     }
   }
 
   Future<void> debugDumpRenderTree() async {
+    await refreshViews();
     for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpRenderTree();
     }
   }
 
   Future<void> debugDumpLayerTree() async {
+    await refreshViews();
     for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpLayerTree();
     }
   }
 
   Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
+    await refreshViews();
     for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpSemanticsTreeInTraversalOrder();
     }
   }
 
   Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
+    await refreshViews();
     for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpSemanticsTreeInInverseHitTestOrder();
     }
   }
 
   Future<void> debugToggleDebugPaintSizeEnabled() async {
+    await refreshViews();
     for (final FlutterDevice device in flutterDevices) {
       await device.toggleDebugPaintSizeEnabled();
     }
   }
 
   Future<void> debugToggleDebugCheckElevationsEnabled() async {
+    await refreshViews();
     for (final FlutterDevice device in flutterDevices) {
       await device.toggleDebugCheckElevationsEnabled();
     }
   }
 
   Future<void> debugTogglePerformanceOverlayOverride() async {
+    await refreshViews();
     for (final FlutterDevice device in flutterDevices) {
       await device.debugTogglePerformanceOverlayOverride();
     }
   }
 
   Future<void> debugToggleWidgetInspector() async {
+    await refreshViews();
     for (final FlutterDevice device in flutterDevices) {
       await device.toggleWidgetInspector();
     }
   }
 
   Future<void> debugToggleProfileWidgetBuilds() async {
+    await refreshViews();
     for (final FlutterDevice device in flutterDevices) {
       await device.toggleProfileWidgetBuilds();
     }
@@ -979,12 +997,11 @@ abstract class ResidentRunner {
       'flutter',
       'png',
     );
-    final List<FlutterView> views = await device
-      .vmService.getFlutterViews();
     try {
       if (supportsServiceProtocol && isRunningDebug) {
+        await device.refreshViews();
         try {
-          for (final FlutterView view in views) {
+          for (final FlutterView view in device.views) {
             await device.vmService.flutterDebugAllowBanner(
               false,
               isolateId: view.uiIsolate.id,
@@ -1001,7 +1018,7 @@ abstract class ResidentRunner {
       } finally {
         if (supportsServiceProtocol && isRunningDebug) {
           try {
-            for (final FlutterView view in views) {
+            for (final FlutterView view in device.views) {
               await device.vmService.flutterDebugAllowBanner(
                 true,
                 isolateId: view.uiIsolate.id,
@@ -1026,10 +1043,9 @@ abstract class ResidentRunner {
   }
 
   Future<void> debugTogglePlatform() async {
-    final List<FlutterView> views = await flutterDevices
-      .first
-      .vmService.getFlutterViews();
-    final String isolateId = views.first.uiIsolate.id;
+    await refreshViews();
+    final String isolateId = flutterDevices
+      .first.views.first.uiIsolate.id;
     final String from = await flutterDevices
       .first.vmService.flutterPlatformOverride(
         isolateId: isolateId,
@@ -1062,8 +1078,10 @@ abstract class ResidentRunner {
     if (!debuggingOptions.debuggingEnabled) {
       throw 'The service protocol is not enabled.';
     }
+
     _finished = Completer<int>();
-    // Listen for service protocol connection to close.
+
+    bool viewFound = false;
     for (final FlutterDevice device in flutterDevices) {
       await device.connect(
         reloadSources: reloadSources,
@@ -1071,16 +1089,21 @@ abstract class ResidentRunner {
         compileExpression: compileExpression,
         reloadMethod: reloadMethod,
       );
-      // This will wait for at least one flutter view before returning.
-      final Status status = globals.logger.startProgress(
-        'Waiting for ${device.device.name} to report its views...',
-        timeout: const Duration(milliseconds: 200),
-      );
-      try {
-        await device.vmService.getFlutterViews();
-      } finally {
-        status.stop();
+      await device.refreshViews();
+      if (device.views.isNotEmpty) {
+        viewFound = true;
       }
+    }
+    if (!viewFound) {
+      if (flutterDevices.length == 1) {
+        throw 'No Flutter view is available on ${flutterDevices.first.device.name}.';
+      }
+      throw 'No Flutter view is available on any device '
+            '(${flutterDevices.map<String>((FlutterDevice device) => device.device.name).join(', ')}).';
+    }
+
+    // Listen for service protocol connection to close.
+    for (final FlutterDevice device in flutterDevices) {
       // This hooks up callbacks for when the connection stops in the future.
       // We don't want to wait for them. We don't handle errors in those callbacks'
       // futures either because they just print to logger and is not critical.
@@ -1349,7 +1372,8 @@ class TerminalHandler {
         }
         return false;
       case 'l':
-        final List<FlutterView> views = await residentRunner.listFlutterViews();
+        final List<FlutterView> views = residentRunner.flutterDevices
+            .expand((FlutterDevice d) => d.views).toList();
         globals.printStatus('Connected ${pluralize('view', views.length)}:');
         for (final FlutterView v in views) {
           globals.printStatus('${v.uiIsolate.name} (${v.uiIsolate.id})', indent: 2);
