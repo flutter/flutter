@@ -685,7 +685,6 @@ VMServiceConnector getFakeVmServiceFactory({
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
-          id: '1',
           method: kListViewsMethod,
           args: null,
           jsonResponse: <String, Object>{
@@ -698,14 +697,12 @@ VMServiceConnector getFakeVmServiceFactory({
           },
         ),
         FakeVmServiceRequest(
-          id: '2',
           method: 'getVM',
           args: null,
           jsonResponse: vm_service.VM.parse(<String, Object>{})
             .toJson(),
         ),
         FakeVmServiceRequest(
-          id: '3',
           method: '_createDevFS',
           args: <String, Object>{
             'fsName': globals.fs.currentDirectory.absolute.path,
@@ -715,7 +712,6 @@ VMServiceConnector getFakeVmServiceFactory({
           },
         ),
         FakeVmServiceRequest(
-          id: '4',
           method: kListViewsMethod,
           args: null,
           jsonResponse: <String, Object>{
