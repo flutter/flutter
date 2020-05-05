@@ -3,58 +3,60 @@
 // found in the LICENSE file.
 
 
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 
 void main() {
-  setUpAll(() { });
+  BufferLogger logger;
+  setUp(() {
+    logger = BufferLogger.test();
+  });
 
   group('Validate build number', () {
-    setUp(() async { });
-
-    testUsingContext('CFBundleVersion for iOS', () async {
-      String buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, 'xyz');
+    testWithoutContext('CFBundleVersion for iOS', () async {
+      String buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, 'xyz', logger);
       expect(buildName, isNull);
-      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '0.0.1');
+      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '0.0.1', logger);
       expect(buildName, '0.0.1');
-      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '123.xyz');
+      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '123.xyz', logger);
       expect(buildName, '123');
-      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '123.456.xyz');
+      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '123.456.xyz', logger);
       expect(buildName, '123.456');
     });
 
-    testUsingContext('versionCode for Android', () async {
-      String buildName = validatedBuildNumberForPlatform(TargetPlatform.android_arm, '123.abc+-');
+    testWithoutContext('versionCode for Android', () async {
+      String buildName = validatedBuildNumberForPlatform(TargetPlatform.android_arm, '123.abc+-', logger);
       expect(buildName, '123');
-      buildName = validatedBuildNumberForPlatform(TargetPlatform.android_arm, 'abc');
+      buildName = validatedBuildNumberForPlatform(TargetPlatform.android_arm, 'abc', logger);
       expect(buildName, '1');
     });
   });
 
   group('Validate build name', () {
-    setUp(() async { });
-
-    testUsingContext('CFBundleShortVersionString for iOS', () async {
-      String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, 'xyz');
+    testWithoutContext('CFBundleShortVersionString for iOS', () async {
+      String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, 'xyz', logger);
       expect(buildName, isNull);
-      buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '0.0.1');
+      buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '0.0.1', logger);
       expect(buildName, '0.0.1');
-      buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '123.456.xyz');
+
+      buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '123.456.xyz', logger);
+      expect(logger.traceText, contains('Invalid build-name'));
       expect(buildName, '123.456.0');
-      buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '123.xyz');
+
+      buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '123.xyz', logger);
       expect(buildName, '123.0.0');
     });
 
-    testUsingContext('versionName for Android', () async {
-      String buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, '123.abc+-');
+    testWithoutContext('versionName for Android', () async {
+      String buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, '123.abc+-', logger);
       expect(buildName, '123.abc+-');
-      buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, 'abc+-');
+      buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, 'abc+-', logger);
       expect(buildName, 'abc+-');
     });
 
-    test('build mode configuration is correct', () {
+    testWithoutContext('build mode configuration is correct', () {
       expect(BuildMode.debug.isRelease, false);
       expect(BuildMode.debug.isPrecompiled, false);
       expect(BuildMode.debug.isJit, true);
@@ -79,14 +81,14 @@ void main() {
     });
   });
 
-  test('getNameForTargetPlatform on Darwin arches', () {
+  testWithoutContext('getNameForTargetPlatform on Darwin arches', () {
     expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.arm64), 'ios-arm64');
     expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.armv7), 'ios-armv7');
     expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.x86_64), 'ios-x86_64');
     expect(getNameForTargetPlatform(TargetPlatform.android), isNot(contains('ios')));
   });
 
-  test('getIOSArchForName on Darwin arches', () {
+  testWithoutContext('getIOSArchForName on Darwin arches', () {
     expect(getIOSArchForName('armv7'), DarwinArch.armv7);
     expect(getIOSArchForName('arm64'), DarwinArch.arm64);
     expect(getIOSArchForName('arm64e'), DarwinArch.arm64);
@@ -94,7 +96,7 @@ void main() {
     expect(() => getIOSArchForName('bogus'), throwsException);
   });
 
-  test('toEnvironmentConfig encoding of standard values', () {
+  testWithoutContext('toEnvironmentConfig encoding of standard values', () {
     const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
       treeShakeIcons: true,
       trackWidgetCreation: true,
