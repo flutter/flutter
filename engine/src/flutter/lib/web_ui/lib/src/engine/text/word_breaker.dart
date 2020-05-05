@@ -65,21 +65,21 @@ abstract class WordBreaker {
       return false;
     }
 
-    final CharProperty immediateRight = getCharProperty(text, index);
-    CharProperty immediateLeft = getCharProperty(text, index - 1);
+    final WordCharProperty immediateRight = wordLookup.find(text, index);
+    WordCharProperty immediateLeft = wordLookup.find(text, index - 1);
 
     // Do not break within CRLF.
     // WB3: CR × LF
-    if (immediateLeft == CharProperty.CR && immediateRight == CharProperty.LF)
+    if (immediateLeft == WordCharProperty.CR && immediateRight == WordCharProperty.LF)
       return false;
 
     // Otherwise break before and after Newlines (including CR and LF)
     // WB3a: (Newline | CR | LF) ÷
     if (_oneOf(
       immediateLeft,
-      CharProperty.Newline,
-      CharProperty.CR,
-      CharProperty.LF,
+      WordCharProperty.Newline,
+      WordCharProperty.CR,
+      WordCharProperty.LF,
     )) {
       return true;
     }
@@ -87,9 +87,9 @@ abstract class WordBreaker {
     // WB3b: ÷ (Newline | CR | LF)
     if (_oneOf(
       immediateRight,
-      CharProperty.Newline,
-      CharProperty.CR,
-      CharProperty.LF,
+      WordCharProperty.Newline,
+      WordCharProperty.CR,
+      WordCharProperty.LF,
     )) {
       return true;
     }
@@ -99,8 +99,8 @@ abstract class WordBreaker {
 
     // Keep horizontal whitespace together.
     // WB3d: WSegSpace × WSegSpace
-    if (immediateLeft == CharProperty.WSegSpace &&
-        immediateRight == CharProperty.WSegSpace) {
+    if (immediateLeft == WordCharProperty.WSegSpace &&
+        immediateRight == WordCharProperty.WSegSpace) {
       return false;
     }
 
@@ -109,9 +109,9 @@ abstract class WordBreaker {
     // WB4: X (Extend | Format | ZWJ)* → X
     if (_oneOf(
       immediateRight,
-      CharProperty.Extend,
-      CharProperty.Format,
-      CharProperty.ZWJ,
+      WordCharProperty.Extend,
+      WordCharProperty.Format,
+      WordCharProperty.ZWJ,
     )) {
       // The Extend|Format|ZWJ character is to the right, so it is attached
       // to a character to the left, don't split here
@@ -122,16 +122,16 @@ abstract class WordBreaker {
     int l = 0;
     while (_oneOf(
       immediateLeft,
-      CharProperty.Extend,
-      CharProperty.Format,
-      CharProperty.ZWJ,
+      WordCharProperty.Extend,
+      WordCharProperty.Format,
+      WordCharProperty.ZWJ,
     )) {
       l++;
       if (index - l - 1 < 0) {
         // Reached the beginning of text.
         return true;
       }
-      immediateLeft = getCharProperty(text, index - l - 1);
+      immediateLeft = wordLookup.find(text, index - l - 1);
     }
 
     // Do not break between most letters.
@@ -145,27 +145,27 @@ abstract class WordBreaker {
 
     // Skip all Format, Extend and ZWJ to the right.
     int r = 0;
-    CharProperty nextRight;
+    WordCharProperty nextRight;
     do {
       r++;
-      nextRight = getCharProperty(text, index + r);
+      nextRight = wordLookup.find(text, index + r);
     } while (_oneOf(
       nextRight,
-      CharProperty.Extend,
-      CharProperty.Format,
-      CharProperty.ZWJ,
+      WordCharProperty.Extend,
+      WordCharProperty.Format,
+      WordCharProperty.ZWJ,
     ));
 
     // Skip all Format, Extend and ZWJ to the left.
-    CharProperty nextLeft;
+    WordCharProperty nextLeft;
     do {
       l++;
-      nextLeft = getCharProperty(text, index - l - 1);
+      nextLeft = wordLookup.find(text, index - l - 1);
     } while (_oneOf(
       nextLeft,
-      CharProperty.Extend,
-      CharProperty.Format,
-      CharProperty.ZWJ,
+      WordCharProperty.Extend,
+      WordCharProperty.Format,
+      WordCharProperty.ZWJ,
     ));
 
     // Do not break letters across certain punctuation.
@@ -173,9 +173,9 @@ abstract class WordBreaker {
     if (_isAHLetter(immediateLeft) &&
         _oneOf(
           immediateRight,
-          CharProperty.MidLetter,
-          CharProperty.MidNumLet,
-          CharProperty.SingleQuote,
+          WordCharProperty.MidLetter,
+          WordCharProperty.MidNumLet,
+          WordCharProperty.SingleQuote,
         ) &&
         _isAHLetter(nextRight)) {
       return false;
@@ -185,79 +185,79 @@ abstract class WordBreaker {
     if (_isAHLetter(nextLeft) &&
         _oneOf(
           immediateLeft,
-          CharProperty.MidLetter,
-          CharProperty.MidNumLet,
-          CharProperty.SingleQuote,
+          WordCharProperty.MidLetter,
+          WordCharProperty.MidNumLet,
+          WordCharProperty.SingleQuote,
         ) &&
         _isAHLetter(immediateRight)) {
       return false;
     }
 
     // WB7a: Hebrew_Letter × Single_Quote
-    if (immediateLeft == CharProperty.HebrewLetter &&
-        immediateRight == CharProperty.SingleQuote) {
+    if (immediateLeft == WordCharProperty.HebrewLetter &&
+        immediateRight == WordCharProperty.SingleQuote) {
       return false;
     }
 
     // WB7b: Hebrew_Letter × Double_Quote Hebrew_Letter
-    if (immediateLeft == CharProperty.HebrewLetter &&
-        immediateRight == CharProperty.DoubleQuote &&
-        nextRight == CharProperty.HebrewLetter) {
+    if (immediateLeft == WordCharProperty.HebrewLetter &&
+        immediateRight == WordCharProperty.DoubleQuote &&
+        nextRight == WordCharProperty.HebrewLetter) {
       return false;
     }
 
     // WB7c: Hebrew_Letter Double_Quote × Hebrew_Letter
-    if (nextLeft == CharProperty.HebrewLetter &&
-        immediateLeft == CharProperty.DoubleQuote &&
-        immediateRight == CharProperty.HebrewLetter) {
+    if (nextLeft == WordCharProperty.HebrewLetter &&
+        immediateLeft == WordCharProperty.DoubleQuote &&
+        immediateRight == WordCharProperty.HebrewLetter) {
       return false;
     }
 
     // Do not break within sequences of digits, or digits adjacent to letters
     // (“3a”, or “A3”).
     // WB8: Numeric × Numeric
-    if (immediateLeft == CharProperty.Numeric &&
-        immediateRight == CharProperty.Numeric) {
+    if (immediateLeft == WordCharProperty.Numeric &&
+        immediateRight == WordCharProperty.Numeric) {
       return false;
     }
 
     // WB9: AHLetter × Numeric
-    if (_isAHLetter(immediateLeft) && immediateRight == CharProperty.Numeric)
+    if (_isAHLetter(immediateLeft) && immediateRight == WordCharProperty.Numeric)
       return false;
 
     // WB10: Numeric × AHLetter
-    if (immediateLeft == CharProperty.Numeric && _isAHLetter(immediateRight))
+    if (immediateLeft == WordCharProperty.Numeric && _isAHLetter(immediateRight))
       return false;
 
     // Do not break within sequences, such as “3.2” or “3,456.789”.
     // WB11: Numeric (MidNum | MidNumLet | Single_Quote) × Numeric
-    if (nextLeft == CharProperty.Numeric &&
+    if (nextLeft == WordCharProperty.Numeric &&
         _oneOf(
           immediateLeft,
-          CharProperty.MidNum,
-          CharProperty.MidNumLet,
-          CharProperty.SingleQuote,
+          WordCharProperty.MidNum,
+          WordCharProperty.MidNumLet,
+          WordCharProperty.SingleQuote,
         ) &&
-        immediateRight == CharProperty.Numeric) {
+        immediateRight == WordCharProperty.Numeric) {
       return false;
     }
 
     // WB12: Numeric × (MidNum | MidNumLet | Single_Quote) Numeric
-    if (immediateLeft == CharProperty.Numeric &&
+    if (immediateLeft == WordCharProperty.Numeric &&
         _oneOf(
           immediateRight,
-          CharProperty.MidNum,
-          CharProperty.MidNumLet,
-          CharProperty.SingleQuote,
+          WordCharProperty.MidNum,
+          WordCharProperty.MidNumLet,
+          WordCharProperty.SingleQuote,
         ) &&
-        nextRight == CharProperty.Numeric) {
+        nextRight == WordCharProperty.Numeric) {
       return false;
     }
 
     // Do not break between Katakana.
     // WB13: Katakana × Katakana
-    if (immediateLeft == CharProperty.Katakana &&
-        immediateRight == CharProperty.Katakana) {
+    if (immediateLeft == WordCharProperty.Katakana &&
+        immediateRight == WordCharProperty.Katakana) {
       return false;
     }
 
@@ -265,24 +265,24 @@ abstract class WordBreaker {
     // WB13a: (AHLetter | Numeric | Katakana | ExtendNumLet) × ExtendNumLet
     if (_oneOf(
           immediateLeft,
-          CharProperty.ALetter,
-          CharProperty.HebrewLetter,
-          CharProperty.Numeric,
-          CharProperty.Katakana,
-          CharProperty.ExtendNumLet,
+          WordCharProperty.ALetter,
+          WordCharProperty.HebrewLetter,
+          WordCharProperty.Numeric,
+          WordCharProperty.Katakana,
+          WordCharProperty.ExtendNumLet,
         ) &&
-        immediateRight == CharProperty.ExtendNumLet) {
+        immediateRight == WordCharProperty.ExtendNumLet) {
       return false;
     }
 
     // WB13b: ExtendNumLet × (AHLetter | Numeric | Katakana)
-    if (immediateLeft == CharProperty.ExtendNumLet &&
+    if (immediateLeft == WordCharProperty.ExtendNumLet &&
         _oneOf(
           immediateRight,
-          CharProperty.ALetter,
-          CharProperty.HebrewLetter,
-          CharProperty.Numeric,
-          CharProperty.Katakana,
+          WordCharProperty.ALetter,
+          WordCharProperty.HebrewLetter,
+          WordCharProperty.Numeric,
+          WordCharProperty.Katakana,
         )) {
       return false;
     }
@@ -306,12 +306,12 @@ abstract class WordBreaker {
   }
 
   static bool _oneOf(
-    CharProperty value,
-    CharProperty choice1,
-    CharProperty choice2, [
-    CharProperty choice3,
-    CharProperty choice4,
-    CharProperty choice5,
+    WordCharProperty value,
+    WordCharProperty choice1,
+    WordCharProperty choice2, [
+    WordCharProperty choice3,
+    WordCharProperty choice4,
+    WordCharProperty choice5,
   ]) {
     if (value == choice1) {
       return true;
@@ -331,7 +331,7 @@ abstract class WordBreaker {
     return false;
   }
 
-  static bool _isAHLetter(CharProperty property) {
-    return _oneOf(property, CharProperty.ALetter, CharProperty.HebrewLetter);
+  static bool _isAHLetter(WordCharProperty property) {
+    return _oneOf(property, WordCharProperty.ALetter, WordCharProperty.HebrewLetter);
   }
 }
