@@ -73,6 +73,11 @@ class CircleBorder extends ShapeBorder {
   }
 
   @override
+  ShapeBorder withSide(BorderSide side) {
+    return CircleBorder(side: side);
+  }
+
+  @override
   void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
     switch (side.style) {
       case BorderStyle.none:

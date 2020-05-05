@@ -135,6 +135,14 @@ class ContinuousRectangleBorder extends ShapeBorder {
   }
 
   @override
+  ShapeBorder withSide(BorderSide side) {
+    return ContinuousRectangleBorder(
+      side: side,
+      borderRadius: borderRadius,
+    );
+  }
+
+  @override
   void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
     if (rect.isEmpty)
       return;

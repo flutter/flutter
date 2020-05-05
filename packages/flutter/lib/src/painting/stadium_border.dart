@@ -84,6 +84,11 @@ class StadiumBorder extends ShapeBorder {
   }
 
   @override
+  ShapeBorder withSide(BorderSide side) {
+    return StadiumBorder(side: side);
+  }
+
+  @override
   Path getInnerPath(Rect rect, { TextDirection textDirection }) {
     final Radius radius = Radius.circular(rect.shortestSide / 2.0);
     return Path()
@@ -240,6 +245,14 @@ class _StadiumToCircleBorder extends ShapeBorder {
   }
 
   @override
+  ShapeBorder withSide(BorderSide side) {
+    return _StadiumToCircleBorder(
+      side: side,
+      circleness: circleness,
+    );
+  }
+
+  @override
   void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
     switch (side.style) {
       case BorderStyle.none:
@@ -379,6 +392,15 @@ class _StadiumToRoundedRectangleBorder extends ShapeBorder {
   Path getOuterPath(Rect rect, { TextDirection textDirection }) {
     return Path()
       ..addRRect(_adjustBorderRadius(rect).toRRect(rect));
+  }
+
+  @override
+  ShapeBorder withSide(BorderSide side) {
+    return _StadiumToRoundedRectangleBorder(
+      side: side,
+      borderRadius: borderRadius,
+      rectness: rectness,
+    );
   }
 
   @override

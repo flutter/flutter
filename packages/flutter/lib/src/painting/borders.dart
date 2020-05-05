@@ -436,6 +436,13 @@ abstract class ShapeBorder {
     return result ?? (t < 0.5 ? a : b);
   }
 
+  /// Returns a copy of this ShapeBorder that paints its outline with the
+  /// specified [side].
+  ///
+  /// Returns this ShapeBorder if the subclass does not support painting
+  /// an outline.
+  ShapeBorder withSide(BorderSide side) => this;
+
   /// Create a [Path] that describes the outer edge of the border.
   ///
   /// This path must not cross the path given by [getInnerPath] for the same
@@ -558,6 +565,13 @@ class _CompoundBorder extends ShapeBorder {
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
     return _CompoundBorder.lerp(this, b, t);
+  }
+
+  @override
+  ShapeBorder withSide(BorderSide side) {
+    return _CompoundBorder(
+      borders.map<ShapeBorder>((ShapeBorder border) => border.withSide(side)).toList()
+    );
   }
 
   static _CompoundBorder lerp(ShapeBorder a, ShapeBorder b, double t) {

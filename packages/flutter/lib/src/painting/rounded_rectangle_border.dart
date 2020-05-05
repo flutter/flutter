@@ -92,6 +92,14 @@ class RoundedRectangleBorder extends ShapeBorder {
   }
 
   @override
+  ShapeBorder withSide(BorderSide side) {
+    return RoundedRectangleBorder(
+      side: side,
+      borderRadius: borderRadius,
+    );
+  }
+
+  @override
   Path getInnerPath(Rect rect, { TextDirection textDirection }) {
     return Path()
       ..addRRect(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
@@ -261,6 +269,15 @@ class _RoundedRectangleToCircleBorder extends ShapeBorder {
   Path getOuterPath(Rect rect, { TextDirection textDirection }) {
     return Path()
       ..addRRect(_adjustBorderRadius(rect, textDirection).toRRect(_adjustRect(rect)));
+  }
+
+  @override
+  ShapeBorder withSide(BorderSide side) {
+    return _RoundedRectangleToCircleBorder(
+      side: side,
+      borderRadius: borderRadius,
+      circleness: circleness,
+    );
   }
 
   @override

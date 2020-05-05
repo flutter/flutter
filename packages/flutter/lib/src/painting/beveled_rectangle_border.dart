@@ -80,6 +80,14 @@ class BeveledRectangleBorder extends ShapeBorder {
     return super.lerpTo(b, t);
   }
 
+  @override
+  ShapeBorder withSide(BorderSide side) {
+    return BeveledRectangleBorder(
+      side: side,
+      borderRadius: borderRadius,
+    );
+  }
+
   Path _getPath(RRect rrect) {
     final Offset centerLeft = Offset(rrect.left, rrect.center.dy);
     final Offset centerRight = Offset(rrect.right, rrect.center.dy);
