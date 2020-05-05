@@ -8,6 +8,19 @@ part of ui;
 /// Initializes the platform.
 Future<void> webOnlyInitializePlatform({
   engine.AssetManager assetManager,
+}) {
+  final Future<void> initializationFuture = _initializePlatform(assetManager: assetManager);
+  scheduleMicrotask(() {
+    // Access [engine.lineLookup] to force the lazy unpacking of line break data
+    // now. Removing this line won't break anything. It's just an optimization
+    // to make the unpacking happen while we are waiting for network requests.
+    engine.lineLookup;
+  });
+  return initializationFuture;
+}
+
+Future<void> _initializePlatform({
+  engine.AssetManager assetManager,
 }) async {
   if (!debugEmulateFlutterTesterEnvironment) {
     engine.window.locationStrategy = const engine.HashLocationStrategy();
