@@ -663,12 +663,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
 
-#  TODO(jonahwilliams): investigate build failures on devicelab infra to re-enable.  
-#  mac_enable_twc:	
-#    description: >	
+#  TODO(jonahwilliams): investigate build failures on devicelab infra to re-enable.
+#  mac_enable_twc:
+#    description: >
 #      Verifies that track-widget-creation can be enabled and disabled.	
-#    stage: devicelab_ios	
-#    required_agent_capabilities: ["mac/ios"]	
+#    stage: devicelab_ios
+#    required_agent_capabilities: ["mac/ios"]
 #    flaky: true
 
   ios_app_with_watch_companion:
