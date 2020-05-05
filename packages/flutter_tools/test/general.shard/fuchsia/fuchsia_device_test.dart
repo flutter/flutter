@@ -637,7 +637,6 @@ void main() {
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           FakeVmServiceRequest(
-            id: '1',
             method: kListViewsMethod,
             jsonResponse: <String, Object>{
               'views': <Object>[
