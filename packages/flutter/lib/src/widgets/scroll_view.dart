@@ -21,6 +21,9 @@ import 'scrollable.dart';
 import 'sliver.dart';
 import 'viewport.dart';
 
+// Examples can assume:
+// int itemCount;
+
 /// A representation of how a [ScrollView] should dismiss the on-screen
 /// keyboard.
 enum ScrollViewKeyboardDismissBehavior {
