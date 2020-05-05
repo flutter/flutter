@@ -6,7 +6,7 @@ environment:
 dependencies:
   js: 0.6.1+1
   stream_channel: 2.0.0
-  test: 1.6.5
+  test: 1.14.3
   webkit_inspection_protocol: 0.5.0
   ui:
     path: ../../lib/web_ui
