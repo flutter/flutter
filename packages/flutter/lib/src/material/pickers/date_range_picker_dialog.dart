@@ -505,81 +505,84 @@ class _CalendarRangePickerDialog extends StatelessWidget {
       onPressed: onToggleEntryMode,
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: CloseButton(
-          onPressed: onCancel,
-        ),
-        actions: <Widget>[
-          if (orientation == Orientation.landscape) entryModeIcon,
-          ButtonTheme(
-            minWidth: 64,
-            child: FlatButton(
-              onPressed: onConfirm,
-              child: Text(confirmText, style: saveButtonStyle),
-            ),
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        appBar: AppBar(
+          leading: CloseButton(
+            onPressed: onCancel,
           ),
-          const SizedBox(width: 8),
-        ],
-        bottom: PreferredSize(
-          child: Row(children: <Widget>[
-            SizedBox(width: MediaQuery.of(context).size.width < 360 ? 42 : 72),
-            Expanded(
-              child: Semantics(
-                label: '$helpText $startDateText to $endDateText',
-                excludeSemantics: true,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      helpText,
-                      style: textTheme.overline.apply(
-                        color: headerForeground,
+          actions: <Widget>[
+            if (orientation == Orientation.landscape) entryModeIcon,
+            ButtonTheme(
+              minWidth: 64,
+              child: FlatButton(
+                onPressed: onConfirm,
+                child: Text(confirmText, style: saveButtonStyle),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
+          bottom: PreferredSize(
+            child: Row(children: <Widget>[
+              SizedBox(width: MediaQuery.of(context).size.width < 360 ? 42 : 72),
+              Expanded(
+                child: Semantics(
+                  label: '$helpText $startDateText to $endDateText',
+                  excludeSemantics: true,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        helpText,
+                        style: textTheme.overline.apply(
+                          color: headerForeground,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: <Widget>[
-                        Text(
-                          startDateText,
-                          style: startDateStyle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(' – ', style: startDateStyle,
-                        ),
-                        Flexible(
-                          child: Text(
-                            endDateText,
-                            style: endDateStyle,
+                      const SizedBox(height: 8),
+                      Row(
+                        children: <Widget>[
+                          Text(
+                            startDateText,
+                            style: startDateStyle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+                          Text(' – ', style: startDateStyle,
+                          ),
+                          Flexible(
+                            child: Text(
+                              endDateText,
+                              style: endDateStyle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            if (orientation == Orientation.portrait)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: entryModeIcon,
-              ),
-          ]),
-          preferredSize: const Size(double.infinity, 64),
+              if (orientation == Orientation.portrait)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: entryModeIcon,
+                ),
+            ]),
+            preferredSize: const Size(double.infinity, 64),
+          ),
         ),
-      ),
-      body: CalendarDateRangePicker(
-        initialStartDate: selectedStartDate,
-        initialEndDate: selectedEndDate,
-        firstDate: firstDate,
-        lastDate: lastDate,
-        currentDate: currentDate,
-        onStartDateChanged: onStartDateChanged,
-        onEndDateChanged: onEndDateChanged,
+        body: CalendarDateRangePicker(
+          initialStartDate: selectedStartDate,
+          initialEndDate: selectedEndDate,
+          firstDate: firstDate,
+          lastDate: lastDate,
+          currentDate: currentDate,
+          onStartDateChanged: onStartDateChanged,
+          onEndDateChanged: onEndDateChanged,
+        ),
       ),
     );
   }
