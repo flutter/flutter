@@ -983,16 +983,19 @@ class ListView extends BoxScrollView {
     bool addSemanticIndexes = true,
     double cacheExtent,
     int semanticChildCount,
+    Widget emptyListWidget,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : assert(itemCount == null || itemCount >= 0),
        assert(semanticChildCount == null || semanticChildCount <= itemCount),
-       childrenDelegate = SliverChildBuilderDelegate(
-         itemBuilder,
-         childCount: itemCount,
-         addAutomaticKeepAlives: addAutomaticKeepAlives,
-         addRepaintBoundaries: addRepaintBoundaries,
-         addSemanticIndexes: addSemanticIndexes,
-       ),
+       childrenDelegate = (itemCount == 0 && emptyListWidget != null)
+         ? SliverChildListDelegate.fixed(<Widget>[emptyListWidget])
+         : SliverChildBuilderDelegate(
+           itemBuilder,
+           childCount: itemCount,
+           addAutomaticKeepAlives: addAutomaticKeepAlives,
+           addRepaintBoundaries: addRepaintBoundaries,
+           addSemanticIndexes: addSemanticIndexes,
+         ),
        super(
          key: key,
          scrollDirection: scrollDirection,
