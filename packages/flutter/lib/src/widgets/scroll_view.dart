@@ -865,6 +865,35 @@ abstract class BoxScrollView extends ScrollView {
 /// ```
 /// {@end-tool}
 ///
+/// ## Special handling for an empty list
+///
+/// A common design pattern is to have a custom UI for an empty list. The best
+/// way to achieve this in Flutter is just conditionally replacing the
+/// [ListView] at build time with whatever widgets you need to show for the
+/// empty list state:
+///
+/// {@tool snippet}
+///
+/// Example of simple empty list interface:
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(title: const Text('Empty List Test')),
+///     body: itemCount > 0
+///       ? ListView.builder(
+///           itemCount: itemCount,
+///           itemBuilder: (BuildContext context, int index) {
+///             return ListTile(
+///               title: Text('Item ${index + 1}'),
+///             );
+///           },
+///         )
+///       : Center(child: const Text('No items')),
+///   );
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SingleChildScrollView], which is a scrollable widget that has a single
