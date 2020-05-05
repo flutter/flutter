@@ -90,7 +90,7 @@ class _TaskRunner {
       if (taskTimeout != null)
         futureResult = futureResult.timeout(taskTimeout);
 
-      print('enabling configs...');
+      print('enabling configs for macOS, Linux, Windows, and Web...');
       final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
         'config',
         '--enable-macos-desktop',
