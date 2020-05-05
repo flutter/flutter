@@ -426,15 +426,6 @@ self.addEventListener("install", (event) => {
   );
 });
 
-
-self.addEventListener("install", (event) => {
-  return event.waitUntil(
-    caches.open(TEMP).then((cache) => {
-      return cache.addAll(CORE);
-    })
-  );
-});
-
 self.addEventListener("activate", function(event) {
   return event.waitUntil(async function() {
     try {
