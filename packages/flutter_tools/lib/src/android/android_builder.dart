@@ -84,6 +84,8 @@ class _AndroidBuilderImpl extends AndroidBuilder {
         androidPackage: project.manifest.androidPackage,
         repoDirectory: getRepoDirectory(outputDirectory),
         buildNumber: buildNumber,
+        logger: globals.logger,
+        fileSystem: globals.fs,
       );
     } finally {
       globals.androidSdk?.reinitialize();
