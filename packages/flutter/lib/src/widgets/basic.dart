@@ -42,7 +42,6 @@ export 'package:flutter/rendering.dart' show
   MainAxisAlignment,
   MainAxisSize,
   MultiChildLayoutDelegate,
-  Overflow,
   PaintingContext,
   PointerCancelEvent,
   PointerCancelEventListener,
