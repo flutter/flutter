@@ -66,7 +66,7 @@ abstract class ChromiumDevice extends Device {
   bool get supportsStartPaused => true;
 
   @override
-  bool get supportsFlutterExit => true;
+  bool get supportsFlutterExit => false;
 
   @override
   bool get supportsScreenshot => false;
@@ -342,6 +342,9 @@ class WebServerDevice extends Device {
 
   @override
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => true;
+
+  @override
+  bool get supportsFlutterExit => false;
 
   @override
   Future<bool> get isLocalEmulator async => false;

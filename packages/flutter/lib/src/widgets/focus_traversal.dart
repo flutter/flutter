@@ -120,11 +120,12 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   /// A const constructor so subclasses can be const.
   const FocusTraversalPolicy();
 
-  /// Returns the node that should receive focus if there is no current focus
-  /// in the nearest [FocusScopeNode] that `currentNode` belongs to.
+  /// Returns the node that should receive focus if focus is traversing
+  /// forwards, and there is no current focus.
   ///
-  /// This is used by [next]/[previous]/[inDirection] to determine which node to
-  /// focus if they are called when no node is currently focused.
+  /// The node returned is the node that should receive focus if focus is
+  /// traversing forwards (i.e. with [next]), and there is no current focus in
+  /// the nearest [FocusScopeNode] that `currentNode` belongs to.
   ///
   /// The `currentNode` argument must not be null.
   ///
@@ -132,13 +133,46 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   /// set, on the nearest scope of the `currentNode`, otherwise, returns the
   /// first node from [sortDescendants], or the given `currentNode` if there are
   /// no descendants.
-  FocusNode findFirstFocus(FocusNode currentNode) {
+  ///
+  /// See also:
+  ///
+  ///  * [next], the function that is called to move the focus to the next node.
+  ///  * [DirectionalFocusTraversalPolicyMixin.findFirstFocusInDirection], a
+  ///    function that finds the first focusable widget in a particular direction.
+  FocusNode findFirstFocus(FocusNode currentNode) => _findInitialFocus(currentNode);
+
+  /// Returns the node that should receive focus if focus is traversing
+  /// backwards, and there is no current focus.
+  ///
+  /// The node returned is the one that should receive focus if focus is
+  /// traversing backwards (i.e. with [previous]), and there is no current focus
+  /// in the nearest [FocusScopeNode] that `currentNode` belongs to.
+  ///
+  /// The `currentNode` argument must not be null.
+  ///
+  /// The default implementation returns the [FocusScopeNode.focusedChild], if
+  /// set, on the nearest scope of the `currentNode`, otherwise, returns the
+  /// last node from [sortDescendants], or the given `currentNode` if there are
+  /// no descendants.
+  ///
+  /// See also:
+  ///
+  ///  * [previous], the function that is called to move the focus to the next node.
+  ///  * [DirectionalFocusTraversalPolicyMixin.findFirstFocusInDirection], a
+  ///    function that finds the first focusable widget in a particular direction.
+  FocusNode findLastFocus(FocusNode currentNode) => _findInitialFocus(currentNode, fromEnd: true);
+
+  FocusNode _findInitialFocus(FocusNode currentNode, {bool fromEnd = false}) {
     assert(currentNode != null);
     final FocusScopeNode scope = currentNode.nearestScope;
     FocusNode candidate = scope.focusedChild;
     if (candidate == null && scope.descendants.isNotEmpty) {
       final Iterable<FocusNode> sorted = _sortAllDescendants(scope);
-      candidate = sorted.isNotEmpty ? sorted.first : null;
+      if (sorted.isEmpty) {
+        candidate = null;
+      } else {
+        candidate = fromEnd ? sorted.last : sorted.first;
+      }
     }
 
     // If we still didn't find any candidate, use the current node as a
@@ -312,20 +346,20 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     return sortedDescendants;
   }
 
-  // Moves the focus to the next node in the FocusScopeNode nearest to the
-  // currentNode argument, either in a forward or reverse direction, depending
-  // on the value of the forward argument.
-  //
-  // This function is called by the next and previous members to move to the
-  // next or previous node, respectively.
-  //
-  // Uses findFirstFocus to find the first node if there is no
-  // FocusScopeNode.focusedChild set. If there is a focused child for the
-  // scope, then it calls sortDescendants to get a sorted list of descendants,
-  // and then finds the node after the current first focus of the scope if
-  // forward is true, and the node before it if forward is false.
-  //
-  // Returns true if a node requested focus.
+  /// Moves the focus to the next node in the FocusScopeNode nearest to the
+  /// currentNode argument, either in a forward or reverse direction, depending
+  /// on the value of the forward argument.
+  ///
+  /// This function is called by the next and previous members to move to the
+  /// next or previous node, respectively.
+  ///
+  /// Uses [findFirstFocus]/[findLastFocus] to find the first/last node if there is
+  /// no [FocusScopeNode.focusedChild] set. If there is a focused child for the
+  /// scope, then it calls sortDescendants to get a sorted list of descendants,
+  /// and then finds the node after the current first focus of the scope if
+  /// forward is true, and the node before it if forward is false.
+  ///
+  /// Returns true if a node requested focus.
   @protected
   bool _moveFocus(FocusNode currentNode, {@required bool forward}) {
     assert(forward != null);
@@ -336,7 +370,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     invalidateScopeData(nearestScope);
     final FocusNode focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
-      final FocusNode firstFocus = findFirstFocus(currentNode);
+      final FocusNode firstFocus = forward ? findFirstFocus(currentNode) : findLastFocus(currentNode);
       if (firstFocus != null) {
         _focusAndEnsureVisible(
           firstFocus,
