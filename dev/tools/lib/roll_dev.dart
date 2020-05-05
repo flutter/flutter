@@ -20,6 +20,7 @@ const String kOrigin = 'origin';
 const String kJustPrint = 'just-print';
 const String kYes = 'yes';
 const String kHelp = 'help';
+const String kForce = 'force';
 
 const String kUpstreamRemote = 'git@github.com:flutter/flutter.git';
 
@@ -48,6 +49,11 @@ void main(List<String> args) {
     help: 'Specifies the name of the upstream repository',
     valueHelp: 'repository',
     defaultsTo: 'upstream',
+  );
+  argParser.addFlag(
+    kForce,
+    help: 'Force push. Necessary when the previous release had cherry-picks.',
+    negatable: false,
   );
   argParser.addFlag(
     kJustPrint,
