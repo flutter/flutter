@@ -894,6 +894,7 @@ abstract class BoxScrollView extends ScrollView {
 ///         )
 ///       : Center(child: const Text('No items')),
 ///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
