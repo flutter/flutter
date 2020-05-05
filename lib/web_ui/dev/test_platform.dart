@@ -11,7 +11,7 @@ import 'dart:isolate';
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:image/image.dart';
-import 'package:package_resolver/package_resolver.dart';
+import 'package:package_config/package_config.dart';
 import 'package:path/path.dart' as p;
 import 'package:pool/pool.dart';
 import 'package:shelf/shelf.dart' as shelf;
@@ -816,10 +816,14 @@ class BrowserManager {
           'build',
           '$path.browser_test.dart.js.map',
         );
+        PackageConfig packageConfig = await loadPackageConfigUri(
+          await Isolate.packageConfig);
+        Map<String, Uri> packageMap =
+          {for (var p in packageConfig.packages) p.name: p.packageUriRoot};
         final JSStackTraceMapper mapper = JSStackTraceMapper(
           await File(mapPath).readAsString(),
           mapUrl: p.toUri(mapPath),
-          packageResolver: await PackageResolver.current.asSync,
+          packageMap: packageMap,
           sdkRoot: p.toUri(sdkDir),
         );
 

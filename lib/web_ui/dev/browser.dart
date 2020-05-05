@@ -11,7 +11,7 @@ import 'package:pedantic/pedantic.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:typed_data/typed_buffers.dart';
 
-import 'package:test_api/src/utils.dart';
+import 'package:test_api/src/utils.dart' show getErrorMessage;
 
 import 'common.dart'; // ignore: unused_import
 
