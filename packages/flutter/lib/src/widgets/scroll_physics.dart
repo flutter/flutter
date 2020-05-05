@@ -621,14 +621,6 @@ class AlwaysScrollableScrollPhysics extends ScrollPhysics {
 
   @override
   bool shouldAcceptUserOffset(ScrollMetrics position) => true;
-
-  @override
-  double adjustPositionForNewDimensions(ScrollMetrics position, {
-    @required bool isScrolling,
-    @required double velocity,
-  }) {
-    return position.pixels;
-  }
 }
 
 /// Scroll physics that does not allow the user to scroll.
