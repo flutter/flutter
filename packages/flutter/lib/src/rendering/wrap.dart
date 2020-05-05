@@ -422,9 +422,9 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
     while (child != null) {
       final double childHeight = child.getMaxIntrinsicHeight(double.infinity);
       final double childWidth = child.getMaxIntrinsicWidth(childHeight);
-      final double spaceWidth = childCount > 0 ? spacing : 0;
       // There must be at least one child before we move on to the next run.
       if (childCount > 0) {
+        final double spaceWidth = childCount > 0 ? spacing : 0;
         if (runHeight + childHeight + spaceWidth > height) {
           width += runWidth + runSpacing;
           runHeight = 0.0;
