@@ -196,6 +196,68 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     _lastStretchOffset = stretchOffset;
   }
 
+  @override
+  void showOnScreen({
+    RenderObject descendant,
+    Rect rect,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+  }) {
+    assert(child != null);
+    final Rect childBounds = descendant != null
+      ? MatrixUtils.transformRect(descendant.getTransformTo(child), rect ?? descendant.paintBounds)
+      : null;
+
+    // Trims the part of `rect` that protrudes `child`'s leading edge.
+    //
+    // If the `rect` a descendant specified in its showOnScreen call exceeds
+    // the leading edge of this sliver (which is usually the same as that of
+    // `child`), the viewport will move towards the leading edge (reduce its
+    // scroll offset) to unpin the persistent header. This is almost always
+    // undesirable.
+    //
+    // See: https://github.com/flutter/flutter/issues/25507.
+    Rect trim(Rect original, {
+      double top = -double.infinity,
+      double right = double.infinity,
+      double bottom = double.infinity,
+      double left = -double.infinity,
+    }) {
+      if (original == null)
+        return null;
+
+      return Rect.fromLTRB(
+        math.max(original.left, left),
+        math.max(original.top, top),
+        math.min(original.right, right),
+        math.min(original.bottom, bottom),
+      );
+    }
+
+    Rect newRect;
+    switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
+      case AxisDirection.up:
+        newRect = trim(childBounds ?? rect, bottom: childExtent);
+        break;
+      case AxisDirection.right:
+        newRect = trim(childBounds ?? rect, left: 0);
+        break;
+      case AxisDirection.down:
+        newRect = trim(childBounds ?? rect, top: 0);
+        break;
+      case AxisDirection.left:
+        newRect = trim(childBounds ?? rect, right: childExtent);
+        break;
+    }
+
+    super.showOnScreen(
+      descendant: descendant == null ? this : child,
+      rect: newRect,
+      duration: duration,
+      curve: curve,
+    );
+  }
+
   /// Returns the distance from the leading _visible_ edge of the sliver to the
   /// side of the child closest to that edge, in the scroll axis direction.
   ///
@@ -583,6 +645,61 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     );
     _childPosition = updateGeometry();
     _lastActualScrollOffset = constraints.scrollOffset;
+  }
+
+  @override
+  void showOnScreen({
+    RenderObject descendant,
+    Rect rect,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+  }) {
+    assert(child != null);
+    final Rect childBounds = descendant != null
+      ? MatrixUtils.transformRect(descendant.getTransformTo(child), rect ?? descendant.paintBounds)
+      : null;
+
+    double minTargetExtent;
+    switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
+      case AxisDirection.up:
+        minTargetExtent = childExtent - (childBounds?.top ?? 0);
+        break;
+      case AxisDirection.right:
+        minTargetExtent = childBounds?.right ?? childExtent;
+        break;
+      case AxisDirection.down:
+        minTargetExtent = childBounds?.bottom ?? childExtent;
+        break;
+      case AxisDirection.left:
+        minTargetExtent = childExtent - (childBounds?.left ?? 0);
+        break;
+    }
+
+    minTargetExtent = minTargetExtent.clamp(childExtent, maxExtent) as double;
+    // Expands the header if needed, with animation if possible.
+    if (minTargetExtent > childExtent) {
+      if (snapConfiguration != null) {
+        _controller ??= AnimationController(vsync: snapConfiguration.vsync, duration: duration);
+        _controller.duration = duration;
+        _animation = _controller
+        .drive(
+          Tween<double>(
+            begin: _effectiveScrollOffset,
+            end: maxExtent - minTargetExtent ,
+          ).chain(CurveTween(curve: curve)),
+        );
+      } else {
+        _effectiveScrollOffset = maxExtent - minTargetExtent;
+        markNeedsLayout();
+      }
+    }
+
+    super.showOnScreen(
+      descendant: descendant == null ? this : child,
+      rect: childBounds,
+      duration: duration,
+      curve: curve,
+    );
   }
 
   @override

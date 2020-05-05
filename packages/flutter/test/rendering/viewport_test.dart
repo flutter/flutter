@@ -1118,9 +1118,10 @@ void main() {
 
       // The persistent header is pinned to the leading edge thus still visible,
       // the viewport should not scroll.
+      // Also, cross axis extents don't matter
       tester.renderObject(pinnedHeaderContent).showOnScreen(
         descendant: tester.renderObject(pinnedHeaderContent),
-        rect: Offset.zero & const Size(600, 300),
+        rect: Offset.zero & const Size(60000, 300),
       );
       await tester.pumpAndSettle();
       // The header expands but doesn't move.
@@ -1128,13 +1129,17 @@ void main() {
       expect(tester.getSize(pinnedHeaderContent).height, 300);
 
       // The rect specifies that the persistent header needs to be 1 pixel away
-      // from the leading edge of the viewport.
+      // from the leading edge of the viewport. Ignore the 1 pixel, the viewport
+      // should not scroll.
+      //
+      // See: https://github.com/flutter/flutter/issues/25507.
       tester.renderObject(pinnedHeaderContent).showOnScreen(
         descendant: tester.renderObject(pinnedHeaderContent),
         rect: const Offset(0, -1) & const Size(600, 300),
       );
       await tester.pumpAndSettle();
-      expect(controller.offset, 10 * 300 - 1.0);
+      expect(controller.offset, 300.0 * 15);
+      expect(tester.getSize(pinnedHeaderContent).height, 300);
   });
 
   testWidgets(

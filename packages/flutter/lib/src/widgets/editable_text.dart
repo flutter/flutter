@@ -1686,13 +1686,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           bottomSpacing,
         );
       }
-      final Rect inflatedRect = Rect.fromLTRB(
-          newCaretRect.left - widget.scrollPadding.left,
-          newCaretRect.top - widget.scrollPadding.top,
-          newCaretRect.right + widget.scrollPadding.right,
-          newCaretRect.bottom + bottomSpacing,
-      );
-      _editableKey.currentContext.findRenderObject().showOnScreen(
+
+      final Rect inflatedRect = widget.scrollPadding
+        .copyWith(bottom: bottomSpacing)
+        .inflateRect(newCaretRect);
+      renderEditable.showOnScreen(
         rect: inflatedRect,
         duration: _caretAnimationDuration,
         curve: _caretAnimationCurve,
