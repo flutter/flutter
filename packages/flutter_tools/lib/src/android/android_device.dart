@@ -217,7 +217,7 @@ class AndroidDevice extends Device {
   _AndroidDevicePortForwarder _portForwarder;
 
   List<String> adbCommandForDevice(List<String> args) {
-    return <String>[getAdbPath(androidSdk), '-s', id, ...args];
+    return <String>[getAdbPath(globals.androidSdk), '-s', id, ...args];
   }
 
   String runAdbCheckedSync(
@@ -274,19 +274,19 @@ class AndroidDevice extends Device {
   }
 
   Future<bool> _checkForSupportedAdbVersion() async {
-    if (androidSdk == null) {
+    if (globals.androidSdk == null) {
       return false;
     }
 
     try {
       final RunResult adbVersion = await processUtils.run(
-        <String>[getAdbPath(androidSdk), 'version'],
+        <String>[getAdbPath(globals.androidSdk), 'version'],
         throwOnError: true,
       );
       if (_isValidAdbVersion(adbVersion.stdout)) {
         return true;
       }
-      globals.printError('The ADB at "${getAdbPath(androidSdk)}" is too old; please install version 1.0.39 or later.');
+      globals.printError('The ADB at "${getAdbPath(globals.androidSdk)}" is too old; please install version 1.0.39 or later.');
     } on Exception catch (error, trace) {
       globals.printError('Error running ADB: $error', stackTrace: trace);
     }
@@ -301,7 +301,7 @@ class AndroidDevice extends Device {
       //   adb server is out of date.  killing..
       //   * daemon started successfully *
       await processUtils.run(
-        <String>[getAdbPath(androidSdk), 'start-server'],
+        <String>[getAdbPath(globals.androidSdk), 'start-server'],
         throwOnError: true,
       );
 
@@ -507,7 +507,7 @@ class AndroidDevice extends Device {
         return LaunchResult.failed();
     }
 
-    if (!prebuiltApplication || androidSdk.licensesAvailable && androidSdk.latestVersion == null) {
+    if (!prebuiltApplication || globals.androidSdk.licensesAvailable && globals.androidSdk.latestVersion == null) {
       globals.printTrace('Building APK');
       final FlutterProject project = FlutterProject.current();
       await androidBuilder.buildApk(
