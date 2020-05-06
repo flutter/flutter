@@ -54,6 +54,7 @@ abstract class AssetBundle {
     String packagesPath,
     bool includeDefaultFonts = true,
     bool reportLicensedPackages = false,
+    bool warnOnWildcard = false,
   });
 }
 
@@ -125,6 +126,7 @@ class ManifestAssetBundle implements AssetBundle {
     String packagesPath,
     bool includeDefaultFonts = true,
     bool reportLicensedPackages = false,
+    bool warnOnWildcard = false,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
     packagesPath ??= globals.fs.path.absolute(globalPackagesPath);
@@ -267,6 +269,16 @@ class ManifestAssetBundle implements AssetBundle {
     final LicenseResult licenseResult = licenseCollector.obtainLicenses(packageConfig);
     final DevFSStringContent licenses = DevFSStringContent(licenseResult.combinedLicenses);
     additionalDependencies = licenseResult.dependencies;
+
+    if (warnOnWildcard && _wildcardDirectories.isNotEmpty) {
+      globals.printError(
+        'WARNING: wildcard asset directories are incompatible with incremental builds.\n'
+        'It is strongly recommended that the following directories are updated to '
+        'list the individual assets that should be included:\n\n'
+        '${_wildcardDirectories.keys.map((Uri uri) => '   - $uri').join(',\n')}\n'
+        'For more information, see https://github.com/flutter/flutter/issues/56466\n'
+      );
+    }
 
     _setIfChanged(_assetManifestJson, assetManifest);
     _setIfChanged(kFontManifestJson, fontManifest);
