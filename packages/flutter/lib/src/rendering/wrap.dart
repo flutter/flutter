@@ -392,14 +392,11 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
       final double childWidth = child.getMaxIntrinsicWidth(double.infinity);
       final double childHeight = child.getMaxIntrinsicHeight(childWidth);
       // There must be at least one child before we move on to the next run.
-      if (childCount > 0) {
-        final double spaceWidth = childCount > 0 ? spacing : 0;
-        if (runWidth + childWidth + spaceWidth > width) {
-          height += runHeight + runSpacing;
-          runWidth = 0.0;
-          runHeight = 0.0;
-          childCount = 0;
-        }
+      if (childCount > 0 && runWidth + childWidth + spacing > width) {
+        height += runHeight + runSpacing;
+        runWidth = 0.0;
+        runHeight = 0.0;
+        childCount = 0;
       }
       runWidth += childWidth;
       runHeight = math.max(runHeight, childHeight);
@@ -423,14 +420,11 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
       final double childHeight = child.getMaxIntrinsicHeight(double.infinity);
       final double childWidth = child.getMaxIntrinsicWidth(childHeight);
       // There must be at least one child before we move on to the next run.
-      if (childCount > 0) {
-        final double spaceWidth = childCount > 0 ? spacing : 0;
-        if (runHeight + childHeight + spaceWidth > height) {
-          width += runWidth + runSpacing;
-          runHeight = 0.0;
-          runWidth = 0.0;
-          childCount = 0;
-        }
+      if (childCount > 0 && runHeight + childHeight + spacing > height) {
+        width += runWidth + runSpacing;
+        runHeight = 0.0;
+        runWidth = 0.0;
+        childCount = 0;
       }
       runHeight += childHeight;
       runWidth = math.max(runWidth, childWidth);
