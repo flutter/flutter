@@ -651,6 +651,15 @@ class OverscrollIndicatorNotification extends Notification with ViewportNotifica
   final bool leading;
 
   /// Controls at which offset the glow should be drawn.
+  ///
+  /// A positive offset will move the glow away from its edge,
+  /// i.e. for a vertical, [leading] indicator, a [paintOffset] of 100.0 will
+  /// draw the indicator 100.0 pixels from the top of the edge.
+  /// For a vertical indicator with [leading] set to `false`, a [paintOffset]
+  /// of 100.0 will draw the indicator 100.0 pixels from the bottom instead.
+  ///
+  /// A negative [paintOffset] is generally not useful, since the glow will be
+  /// clipped.
   double paintOffset = 0.0;
 
   bool _accepted = true;
