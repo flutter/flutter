@@ -360,7 +360,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       lockResource.release();
     });
     if (_closed) {
-      return null;
+      throw StateError('Load called on a closed FlutterWebPlatform');
     }
     return suite;
   }
