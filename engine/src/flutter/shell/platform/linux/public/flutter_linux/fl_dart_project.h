@@ -71,7 +71,7 @@ const gchar* fl_dart_project_get_path(FlDartProject* project);
  * application.
  *
  * Returns: (type filename): a file path, e.g.
- * "/projects/my_dart_project/assets"
+ * "/projects/my_dart_project/flutter_assets"
  */
 gchar* fl_dart_project_get_assets_path(FlDartProject* project);
 

@@ -106,6 +106,10 @@ group("flutter") {
           "//flutter/shell/platform/windows/client_wrapper:client_wrapper_windows_unittests",
         ]
       }
+      if (is_linux) {
+        public_deps +=
+            [ "//flutter/shell/platform/linux:flutter_linux_unittests" ]
+      }
     }
   }
 }
