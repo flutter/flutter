@@ -576,6 +576,8 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
 void FlutterPlatformViewsController::BringLayersIntoView(LayersMap layer_map) {
   UIView* flutter_view = flutter_view_.get();
   auto zIndex = 0;
+  // Clear the `active_composition_order_`, which will be populated down below.
+  active_composition_order_.clear();
   for (size_t i = 0; i < composition_order_.size(); i++) {
     int64_t platform_view_id = composition_order_[i];
     std::vector<std::shared_ptr<FlutterPlatformViewLayer>> layers = layer_map[platform_view_id];
