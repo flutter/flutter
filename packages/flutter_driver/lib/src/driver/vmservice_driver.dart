@@ -189,19 +189,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
       });
     }
 
-    await enableIsolateStreams();
-
-    // We will never receive the extension event if the user does not register
-    // it. If that happens, show a message but continue waiting.
-    await _warnIfSlow<void>(
-      future: waitForServiceExtension(),
-      timeout: kUnusuallyLongTimeout,
-      message: 'Flutter Driver extension is taking a long time to become available. '
-          'Ensure your test app (often "lib/main.dart") imports '
-          '"package:flutter_driver/driver_extension.dart" and '
-          'calls enableFlutterDriverExtension() as the first call in main().',
-    );
-
     // Attempt to resume isolate if it was paused
     if (isolate.pauseEvent is VMPauseStartEvent) {
       _log('Isolate is paused at start.');
@@ -223,6 +210,19 @@ class VMServiceFlutterDriver extends FlutterDriver {
               'Assuming application is ready.'
       );
     }
+
+    await enableIsolateStreams();
+
+    // We will never receive the extension event if the user does not register
+    // it. If that happens, show a message but continue waiting.
+    await _warnIfSlow<void>(
+      future: waitForServiceExtension(),
+      timeout: kUnusuallyLongTimeout,
+      message: 'Flutter Driver extension is taking a long time to become available. '
+          'Ensure your test app (often "lib/main.dart") imports '
+          '"package:flutter_driver/driver_extension.dart" and '
+          'calls enableFlutterDriverExtension() as the first call in main().',
+    );
 
     final Health health = await driver.checkHealth();
     if (health.status != HealthStatus.ok) {

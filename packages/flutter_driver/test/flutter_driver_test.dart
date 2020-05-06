@@ -85,7 +85,7 @@ void main() {
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
       expectLogContains('Isolate is paused at start');
-      expect(connectionLog, <String>['streamListen', 'onExtensionAdded', 'resume']);
+      expect(connectionLog, <String>['resume', 'streamListen', 'onExtensionAdded']);
     });
 
     test('connects to isolate paused mid-flight', () async {
