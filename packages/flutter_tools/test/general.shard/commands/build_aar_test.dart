@@ -147,9 +147,7 @@ void main() {
         expect(androidBuildInfo.targetArchs, <AndroidArch>[AndroidArch.armeabi_v7a, AndroidArch.arm64_v8a, AndroidArch.x86_64]);
       }
       expect(buildModes.length, 3);
-      expect(buildModes, contains(BuildMode.debug));
-      expect(buildModes, contains(BuildMode.profile));
-      expect(buildModes, contains(BuildMode.release));
+      expect(buildModes, containsAll(<BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]));
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => mockAndroidBuilder,
     });
