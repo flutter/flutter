@@ -2343,7 +2343,7 @@ plugin1=${plugin1.path}
           '  1. Open <host>/app/build.gradle\n'
           '  2. Ensure you have the repositories configured, otherwise add them:\n'
           '\n'
-          '      String storageUrl = System.getenv(\'FLUTTER_STORAGE_BASE_URL\') ?: "storage.googleapis.com"\n'
+          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "storage.googleapis.com"\n'
           '      repositories {\n'
           '        maven {\n'
           "            url 'build/'\n"
@@ -2394,7 +2394,7 @@ plugin1=${plugin1.path}
           '  1. Open <host>/app/build.gradle\n'
           '  2. Ensure you have the repositories configured, otherwise add them:\n'
           '\n'
-          '      String storageUrl = System.getenv(\'FLUTTER_STORAGE_BASE_URL\') ?: "storage.googleapis.com"\n'
+          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "storage.googleapis.com"\n'
           '      repositories {\n'
           '        maven {\n'
           "            url 'build/'\n"
@@ -2432,7 +2432,7 @@ plugin1=${plugin1.path}
           '  1. Open <host>/app/build.gradle\n'
           '  2. Ensure you have the repositories configured, otherwise add them:\n'
           '\n'
-          '      String storageUrl = System.getenv(\'FLUTTER_STORAGE_BASE_URL\') ?: "storage.googleapis.com"\n'
+          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "storage.googleapis.com"\n'
           '      repositories {\n'
           '        maven {\n'
           "            url 'build/'\n"
@@ -2471,7 +2471,7 @@ plugin1=${plugin1.path}
           '  1. Open <host>/app/build.gradle\n'
           '  2. Ensure you have the repositories configured, otherwise add them:\n'
           '\n'
-          '      String storageUrl = System.getenv(\'FLUTTER_STORAGE_BASE_URL\') ?: "storage.googleapis.com"\n'
+          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "storage.googleapis.com"\n'
           '      repositories {\n'
           '        maven {\n'
           "            url 'build/'\n"
