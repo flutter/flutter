@@ -456,10 +456,10 @@ void main() {
       fail('Generating output should not fail: \n${e.message}');
     }
 
-    final Directory outputDirectory = fs.directory('lib').childDirectory('l10n');
-    expect(outputDirectory.existsSync(), isTrue);
-
-    final File inputsAndOutputsList = outputDirectory.childFile('gen_l10n_inputs_and_outputs.json');
+    final File inputsAndOutputsList = fs
+      .directory('lib')
+      .childDirectory('l10n')
+      .childFile('gen_l10n_inputs_and_outputs.json');
     expect(inputsAndOutputsList.existsSync(), isTrue);
 
     final Map<String, dynamic> jsonResult = json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
