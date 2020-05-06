@@ -19,5 +19,6 @@
   "copyButtonLabel": "Kopyahin",
   "pasteButtonLabel": "I-paste",
   "selectAllButtonLabel": "Piliin Lahat",
+  "tabSemanticsLabel": "TBD",
   "modalBarrierDismissLabel": "I-dismiss"
 }

@@ -383,7 +383,6 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
 
   double _computeIntrinsicHeightForWidth(double width) {
     assert(direction == Axis.horizontal);
-    int runCount = 0;
     double height = 0.0;
     double runWidth = 0.0;
     double runHeight = 0.0;
@@ -392,11 +391,9 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
     while (child != null) {
       final double childWidth = child.getMaxIntrinsicWidth(double.infinity);
       final double childHeight = child.getMaxIntrinsicHeight(childWidth);
-      if (runWidth + childWidth > width) {
-        height += runHeight;
-        if (runCount > 0)
-          height += runSpacing;
-        runCount += 1;
+      // There must be at least one child before we move on to the next run.
+      if (childCount > 0 && runWidth + childWidth + spacing > width) {
+        height += runHeight + runSpacing;
         runWidth = 0.0;
         runHeight = 0.0;
         childCount = 0;
@@ -408,14 +405,12 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
       childCount += 1;
       child = childAfter(child);
     }
-    if (childCount > 0)
-      height += runHeight + runSpacing;
+    height += runHeight;
     return height;
   }
 
   double _computeIntrinsicWidthForHeight(double height) {
     assert(direction == Axis.vertical);
-    int runCount = 0;
     double width = 0.0;
     double runHeight = 0.0;
     double runWidth = 0.0;
@@ -424,11 +419,9 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
     while (child != null) {
       final double childHeight = child.getMaxIntrinsicHeight(double.infinity);
       final double childWidth = child.getMaxIntrinsicWidth(childHeight);
-      if (runHeight + childHeight > height) {
-        width += runWidth;
-        if (runCount > 0)
-          width += runSpacing;
-        runCount += 1;
+      // There must be at least one child before we move on to the next run.
+      if (childCount > 0 && runHeight + childHeight + spacing > height) {
+        width += runWidth + runSpacing;
         runHeight = 0.0;
         runWidth = 0.0;
         childCount = 0;
@@ -440,8 +433,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
       childCount += 1;
       child = childAfter(child);
     }
-    if (childCount > 0)
-      width += runWidth + runSpacing;
+    width += runWidth;
     return width;
   }
 

@@ -350,9 +350,7 @@ class WebCompileTest {
     rmTree(sampleDir);
 
     await inDirectory<void>(Directory.systemTemp, () async {
-      await flutter('create', options: <String>['--template=app', sampleAppName], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
+      await flutter('create', options: <String>['--template=app', sampleAppName]);
     });
 
     metrics.addAll(await runSingleBuildTest(
@@ -379,9 +377,7 @@ class WebCompileTest {
         '-v',
         '--release',
         '--no-pub',
-      ], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
+      ]);
       watch?.stop();
       final String outputFileName = path.join(directory, 'build/web/main.dart.js');
       metrics.addAll(await getSize(outputFileName, metric: metric));
@@ -451,7 +447,15 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        final String appPath =  '$cwd/build/ios/Release-iphoneos/Runner.app/';
+        final Directory appBuildDirectory = dir(path.join(cwd, 'build/ios/Release-iphoneos'));
+        final Directory appBundle = appBuildDirectory
+            .listSync()
+            .whereType<Directory>()
+            .singleWhere((Directory directory) => path.extension(directory.path) == '.app', orElse: () => null);
+        if (appBundle == null) {
+          throw 'Failed to find app bundle in ${appBuildDirectory.path}';
+        }
+        final String appPath =  appBundle.path;
         // IPAs are created manually, https://flutter.dev/ios-release/
         await exec('tar', <String>['-zcf', 'build/app.ipa', appPath]);
         releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
