@@ -76,9 +76,9 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
         NSString* label = @(action.label.data());
         SEL selector = @selector(onCustomAccessibilityAction:);
         FlutterCustomAccessibilityAction* customAction =
-            [[FlutterCustomAccessibilityAction alloc] initWithName:label
-                                                            target:object
-                                                          selector:selector];
+            [[[FlutterCustomAccessibilityAction alloc] initWithName:label
+                                                             target:object
+                                                           selector:selector] autorelease];
         customAction.uid = action_id;
         [accessibilityCustomActions addObject:customAction];
       }
