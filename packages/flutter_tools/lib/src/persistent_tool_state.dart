@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'version.dart';
 
 /// A class that represents global (non-project-specific) internal state that
