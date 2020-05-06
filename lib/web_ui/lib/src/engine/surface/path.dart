@@ -1005,22 +1005,22 @@ class SurfacePath implements ui.Path {
             break;
           case PathCommandTypes.rect:
             final RectCommand cmd = op;
-            left = cmd.x;
+            minX = cmd.x;
             double width = cmd.width;
             if (cmd.width < 0) {
-              left -= width;
+              minX -= width;
               width = -width;
             }
-            double top = cmd.y;
+            minY = cmd.y;
             double height = cmd.height;
             if (cmd.height < 0) {
-              top -= height;
+              minY -= height;
               height = -height;
             }
-            curX = minX = left;
-            maxX = left + width;
-            curY = minY = top;
-            maxY = top + height;
+            curX = minX;
+            maxX = minX + width;
+            curY = minY;
+            maxY = minY + height;
             break;
           case PathCommandTypes.rRect:
             final RRectCommand cmd = op;
