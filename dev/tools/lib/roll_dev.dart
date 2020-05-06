@@ -10,6 +10,7 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:meta/meta.dart';
 
 const String kIncrement = 'increment';
 const String kX = 'x';
@@ -43,9 +44,32 @@ void main(List<String> args) {
   final bool autoApprove = argResults[kYes] as bool;
   final bool help = argResults[kHelp] as bool;
 
+  run(
+    usage: argParser.usage,
+    argResults: argResults,
+    level: level,
+    commit: commit,
+    origin: origin,
+    justPrint: justPrint,
+    autoApprove: autoApprove,
+    help: help,
+  );
+}
+
+/// Main script execution.
+void run({
+  @required String usage,
+  @required ArgResults argResults,
+  @required String level,
+  @required String commit,
+  @required String origin,
+  @required bool justPrint,
+  @required bool autoApprove,
+  @required bool help,
+}) {
   if (help || level == null || commit == null) {
     print('roll_dev.dart --increment=level --commit=hash • update the version tags and roll a new dev build.\n');
-    print(argParser.usage);
+    print(usage);
     exit(0);
   }
 
