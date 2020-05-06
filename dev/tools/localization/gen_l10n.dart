@@ -919,7 +919,7 @@ class LocalizationsGenerator {
       .replaceAll('@(delegateClass)', delegateClass);
   }
 
-  void writeOutputFile() {
+  void writeOutputFiles() {
     // First, generate the string contents of all necessary files.
     _generateCode();
 

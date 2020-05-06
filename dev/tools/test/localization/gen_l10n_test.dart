@@ -326,7 +326,7 @@ void main() {
           classNameString: defaultClassNameString,
         )
         ..loadResources()
-        ..writeOutputFile()
+        ..writeOutputFiles()
         ..outputUnimplementedMessages(path.join('lib', 'l10n', 'unimplemented_message_translations.json'));
     } on L10nException catch (e) {
       fail('Generating output should not fail: \n${e.message}');
@@ -359,7 +359,7 @@ void main() {
           classNameString: defaultClassNameString,
         )
         ..loadResources()
-        ..writeOutputFile();
+        ..writeOutputFiles();
     } on L10nException catch (e) {
       fail('Generating output should not fail: \n${e.message}');
     }
@@ -397,7 +397,7 @@ void main() {
           classNameString: defaultClassNameString,
         )
         ..loadResources()
-        ..writeOutputFile();
+        ..writeOutputFiles();
     } on L10nException catch (e) {
       fail('Generating output should not fail: \n${e.message}');
     }
@@ -424,7 +424,7 @@ void main() {
           classNameString: defaultClassNameString,
         )
         ..loadResources()
-        ..writeOutputFile();
+        ..writeOutputFiles();
     } on L10nException catch (e) {
       fail('Generating output should not fail: \n${e.message}');
     }
@@ -451,7 +451,7 @@ void main() {
           inputsAndOutputsListPath: defaultL10nPathString,
         )
         ..loadResources()
-        ..writeOutputFile();
+        ..writeOutputFiles();
     } on L10nException catch (e) {
       fail('Generating output should not fail: \n${e.message}');
     }
@@ -943,7 +943,7 @@ void main() {
     });
   });
 
-  group('writeOutputFile', () {
+  group('writeOutputFiles', () {
     test('should generate a file per language', () {
       const String singleEnCaMessageArbFileString = '''
 {
@@ -963,7 +963,7 @@ void main() {
           classNameString: defaultClassNameString,
         );
         generator.loadResources();
-        generator.writeOutputFile();
+        generator.writeOutputFiles();
       } on Exception catch (e) {
         fail('Generating output files should not fail: $e');
       }
@@ -996,7 +996,7 @@ void main() {
           preferredSupportedLocaleString: preferredSupportedLocaleString,
         );
         generator.loadResources();
-        generator.writeOutputFile();
+        generator.writeOutputFiles();
       } on Exception catch (e) {
         fail('Generating output files should not fail: $e');
       }
@@ -1027,7 +1027,7 @@ import 'output-localization-file_zh.dart';
           useDeferredLoading: true,
         );
         generator.loadResources();
-        generator.writeOutputFile();
+        generator.writeOutputFiles();
       } on Exception catch (e) {
         fail('Generating output files should not fail: $e');
       }
@@ -1072,7 +1072,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             classNameString: defaultClassNameString,
           );
           generator.loadResources();
-          generator.writeOutputFile();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
           expect(e.message, contains('asdf'));
           expect(e.message, contains('springStartDate'));
@@ -1111,7 +1111,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             classNameString: defaultClassNameString,
           );
           generator.loadResources();
-          generator.writeOutputFile();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
           expect(e.message, contains('the "format" attribute needs to be set'));
           return;
@@ -1149,7 +1149,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             classNameString: defaultClassNameString,
           );
           generator.loadResources();
-          generator.writeOutputFile();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
           expect(e.message, contains('asdf'));
           expect(e.message, contains('progress'));
@@ -1186,7 +1186,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             classNameString: defaultClassNameString,
           );
           generator.loadResources();
-          generator.writeOutputFile();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
           expect(e.message, contains('Check to see if the plural message is in the proper ICU syntax format'));
           return;
@@ -1219,7 +1219,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             classNameString: defaultClassNameString,
           );
           generator.loadResources();
-          generator.writeOutputFile();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
           expect(e.message, contains('Check to see if the plural message is in the proper ICU syntax format'));
           return;
@@ -1248,7 +1248,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             classNameString: defaultClassNameString,
           );
           generator.loadResources();
-          generator.writeOutputFile();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
           expect(e.message, contains('Resource attribute "@helloWorlds" was not found'));
           return;
@@ -1280,7 +1280,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             classNameString: defaultClassNameString,
           );
           generator.loadResources();
-          generator.writeOutputFile();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
           expect(e.message, contains('is not properly formatted'));
           expect(e.message, contains('Ensure that it is a map with string valued keys'));
@@ -1313,7 +1313,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           classNameString: defaultClassNameString,
         );
         generator.loadResources();
-        generator.writeOutputFile();
+        generator.writeOutputFiles();
       } on FormatException catch (e) {
         expect(e.message, contains('Unexpected character'));
         return;
@@ -1345,7 +1345,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           classNameString: defaultClassNameString,
         );
         generator.loadResources();
-        generator.writeOutputFile();
+        generator.writeOutputFiles();
       } on L10nException catch (e) {
         expect(e.message, contains('Resource attribute "@title" was not found'));
         return;
@@ -1381,7 +1381,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             classNameString: defaultClassNameString,
           );
           generator.loadResources();
-          generator.writeOutputFile();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
           expect(e.message, contains('Invalid ARB resource name'));
           return;
@@ -1413,7 +1413,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             classNameString: defaultClassNameString,
           );
           generator.loadResources();
-          generator.writeOutputFile();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
           expect(e.message, contains('Invalid ARB resource name'));
           return;
@@ -1445,7 +1445,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             classNameString: defaultClassNameString,
           );
           generator.loadResources();
-          generator.writeOutputFile();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
           expect(e.message, contains('Invalid ARB resource name'));
           return;
