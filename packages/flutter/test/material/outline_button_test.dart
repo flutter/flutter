@@ -133,6 +133,30 @@ void main() {
     expect(inkFeatures, paints..rect(color: focusColor));
   });
 
+  testWidgets('Does OutlineButton work with autofocus', (WidgetTester tester) async {
+    const Color focusColor = Color(0xff001122);
+
+    final FocusNode focusNode = FocusNode(debugLabel: 'OutlineButton Node');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: OutlineButton(
+          autofocus: true,
+          focusColor: focusColor,
+          focusNode: focusNode,
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: focusColor));
+  });
+
   testWidgets('OutlineButton implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     OutlineButton(
