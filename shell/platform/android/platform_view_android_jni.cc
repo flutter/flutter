@@ -7,6 +7,7 @@
 #include <android/native_window_jni.h>
 
 #include <utility>
+#include "unicode/uchar.h"
 
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/common/settings.h"
@@ -484,6 +485,35 @@ static void InvokePlatformMessageEmptyResponseCallback(JNIEnv* env,
       );
 }
 
+static jboolean FlutterTextUtilsIsEmoji(JNIEnv* env,
+                                        jobject obj,
+                                        jint codePoint) {
+  return u_hasBinaryProperty(codePoint, UProperty::UCHAR_EMOJI);
+}
+
+static jboolean FlutterTextUtilsIsEmojiModifier(JNIEnv* env,
+                                                jobject obj,
+                                                jint codePoint) {
+  return u_hasBinaryProperty(codePoint, UProperty::UCHAR_EMOJI_MODIFIER);
+}
+
+static jboolean FlutterTextUtilsIsEmojiModifierBase(JNIEnv* env,
+                                                    jobject obj,
+                                                    jint codePoint) {
+  return u_hasBinaryProperty(codePoint, UProperty::UCHAR_EMOJI_MODIFIER_BASE);
+}
+
+static jboolean FlutterTextUtilsIsVariationSelector(JNIEnv* env,
+                                                    jobject obj,
+                                                    jint codePoint) {
+  return u_hasBinaryProperty(codePoint, UProperty::UCHAR_VARIATION_SELECTOR);
+}
+
+static jboolean FlutterTextUtilsIsRegionalIndicator(JNIEnv* env,
+                                                    jobject obj,
+                                                    jint codePoint) {
+  return u_hasBinaryProperty(codePoint, UProperty::UCHAR_REGIONAL_INDICATOR);
+}
 bool RegisterApi(JNIEnv* env) {
   static const JNINativeMethod flutter_jni_methods[] = {
       // Start of methods from FlutterJNI
@@ -598,6 +628,36 @@ bool RegisterApi(JNIEnv* env) {
           .name = "nativeLookupCallbackInformation",
           .signature = "(J)Lio/flutter/view/FlutterCallbackInformation;",
           .fnPtr = reinterpret_cast<void*>(&LookupCallbackInformation),
+      },
+
+      // Start of methods for FlutterTextUtils
+      {
+          .name = "nativeFlutterTextUtilsIsEmoji",
+          .signature = "(I)Z",
+          .fnPtr = reinterpret_cast<void*>(&FlutterTextUtilsIsEmoji),
+      },
+      {
+          .name = "nativeFlutterTextUtilsIsEmojiModifier",
+          .signature = "(I)Z",
+          .fnPtr = reinterpret_cast<void*>(&FlutterTextUtilsIsEmojiModifier),
+      },
+      {
+          .name = "nativeFlutterTextUtilsIsEmojiModifierBase",
+          .signature = "(I)Z",
+          .fnPtr =
+              reinterpret_cast<void*>(&FlutterTextUtilsIsEmojiModifierBase),
+      },
+      {
+          .name = "nativeFlutterTextUtilsIsVariationSelector",
+          .signature = "(I)Z",
+          .fnPtr =
+              reinterpret_cast<void*>(&FlutterTextUtilsIsVariationSelector),
+      },
+      {
+          .name = "nativeFlutterTextUtilsIsRegionalIndicator",
+          .signature = "(I)Z",
+          .fnPtr =
+              reinterpret_cast<void*>(&FlutterTextUtilsIsRegionalIndicator),
       },
   };
 

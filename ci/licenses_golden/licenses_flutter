@@ -752,6 +752,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/PluginReg
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StandardMessageCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StandardMethodCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StringCodec.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/FlutterTextUtils.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/InputConnectionAdaptor.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/TextInputPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/AccessibilityEventsDelegate.java
