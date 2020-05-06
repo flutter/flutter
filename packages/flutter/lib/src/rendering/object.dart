@@ -1565,7 +1565,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// The [dependent] must be [attached], has the same [PipelineOwner] as this
   /// [RenderObject], and its [shouldDeferLayout] and [sizedByParent] must be true.
-  /// Additionally To prevent introducing circular dependencies, [dependent]'s
+  /// Additionally to prevent introducing circular dependencies, [dependent]'s
   /// [depth] must be strictly greater than that of this [RenderObject], its
   /// dependency.
   void markDependentNeedsLayout(RenderObject dependent) {
