@@ -1051,4 +1051,47 @@ void main() {
     expect(log, <String>['secondaryDown2']);
     log.clear();
   });
+
+  testGesture('Taps with uniqueDown is released upon pointer up', (GestureTester tester) {
+    final List<String> log = <String>[];
+
+    final TapGestureRecognizer tap1 = TapGestureRecognizer(uniqueDown: true)
+      ..onTapDown = (_) { log.add('down'); };
+
+    // Tap
+    final TestPointer pointer1 = TestPointer(1);
+    final PointerDownEvent down1 = pointer1.down(const Offset(0.0, 0.0));
+    tap1.addPointer(down1);
+    tester.closeArena(pointer1.pointer);
+    tester.route(down1);
+    tester.route(pointer1.up());
+    expect(log, <String>['down']);
+    log.clear();
+
+    // Press and cancel
+    tap1.addPointer(down1);
+    tester.closeArena(pointer1.pointer);
+    tester.route(pointer1.down(const Offset(0, 0)));
+    expect(log, <String>['down']);
+    tester.route(pointer1.cancel());
+    log.clear();
+
+    // Press and dispose
+    tap1.addPointer(down1);
+    tester.closeArena(pointer1.pointer);
+    tester.route(pointer1.down(const Offset(0, 0)));
+    expect(log, <String>['down']);
+    log.clear();
+    tap1.dispose();
+    pointer1.cancel();
+
+    final TapGestureRecognizer tap2 = TapGestureRecognizer(uniqueDown: true)
+      ..onTapDown = (_) { log.add('down'); };
+
+    // Pointer 1: press and dispose. (Test if dispose can release uniqueDown)
+    tap2.addPointer(down1);
+    tester.closeArena(pointer1.pointer);
+    tester.route(pointer1.down(const Offset(0, 0)));
+    expect(log, <String>['down']);
+  });
 }

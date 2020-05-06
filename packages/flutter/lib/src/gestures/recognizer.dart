@@ -225,6 +225,10 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   }) : super(debugOwner: debugOwner, kind: kind);
 
   final Map<int, GestureArenaEntry> _entries = <int, GestureArenaEntry>{};
+
+  /// The list of pointers that this recognizer is tracking.
+  @protected
+  Iterable<int> get trackedPointers => _trackedPointers;
   final Set<int> _trackedPointers = HashSet<int>();
 
   @override

@@ -337,6 +337,12 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   }
 
   @override
+  void dispose() {
+    trackedPointers.forEach(BaseTapGestureRecognizer._uniqueTapCoordinator.remove);
+    super.dispose();
+  }
+
+  @override
   String get debugDescription => 'base tap';
 
   @override
