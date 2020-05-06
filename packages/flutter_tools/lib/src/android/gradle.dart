@@ -566,7 +566,7 @@ Future<void> buildGradleAar({
   }
   if (buildInfo.dartObfuscation) {
     if (buildInfo.mode == BuildMode.debug || buildInfo.mode == BuildMode.profile) {
-      globals.printStatus('Dart obfuscation is not supported in ${toTitleCase(buildInfo.friendlyModeName)} mode, skipping.');
+      globals.printStatus('Dart obfuscation is not supported in ${toTitleCase(buildInfo.friendlyModeName)} mode, building as unobfuscated.');
     } else {
       command.add('-Pdart-obfuscation=true');
     }
