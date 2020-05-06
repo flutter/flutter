@@ -378,7 +378,7 @@ void main() {
       expect(longPressUp, 1);
     }, variant: buttonVariant);
 
-    testWidgets('Tap on nested detectors only triggers one onTapDown', (WidgetTester tester) async {
+    testWidgets('Tap on nested detectors with TapRecognizingBehavior.first only triggers one onTapDown', (WidgetTester tester) async {
       final List<String> log = <String>[];
       await tester.pumpWidget(
         GestureDetector(
@@ -391,6 +391,7 @@ void main() {
           onSecondaryTapDown: ButtonVariant.button == kSecondaryButton ? (_) {
             log.add('tap1');
           } : null,
+          tapRecognizingBehavior: TapRecognizingBehavior.first,
           child: GestureDetector(
             onTapDown: ButtonVariant.button == kPrimaryButton ? (_) {
               log.add('tap2');
@@ -398,6 +399,7 @@ void main() {
             onSecondaryTapDown: ButtonVariant.button == kSecondaryButton ? (_) {
               log.add('tap2');
             } : null,
+            tapRecognizingBehavior: TapRecognizingBehavior.first,
             behavior: HitTestBehavior.opaque,
           ),
         ),
@@ -407,7 +409,7 @@ void main() {
       expect(log, <String>['tap2']);
     }, variant: buttonVariant);
 
-    testWidgets('Tap on overlapping detectors only triggers one onTapDown', (WidgetTester tester) async {
+    testWidgets('Tap on overlapping detectors with TapRecognizingBehavior.first only triggers one onTapDown', (WidgetTester tester) async {
       final List<String> log = <String>[];
       await tester.pumpWidget(
         Stack(
@@ -423,6 +425,7 @@ void main() {
               onSecondaryTapDown: ButtonVariant.button == kSecondaryButton ? (_) {
                 log.add('tap1');
               } : null,
+              tapRecognizingBehavior: TapRecognizingBehavior.first,
               behavior: HitTestBehavior.translucent,
             ),
             GestureDetector(
@@ -435,6 +438,7 @@ void main() {
               onSecondaryTapDown: ButtonVariant.button == kSecondaryButton ? (_) {
                 log.add('tap2');
               } : null,
+              tapRecognizingBehavior: TapRecognizingBehavior.first,
               behavior: HitTestBehavior.translucent,
             ),
           ]

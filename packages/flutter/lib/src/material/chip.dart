@@ -1790,22 +1790,15 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       child: _wrapWithTooltip(
         widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context)?.deleteButtonTooltip,
         widget.onDeleted,
-        RawGestureDetector(
+        GestureDetector(
           key: deleteIconKey,
           behavior: HitTestBehavior.opaque,
-          gestures: <Type, GestureRecognizerFactory>{
-            TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-              () => TapGestureRecognizer(debugOwner: this, uniqueDown: false),
-              (TapGestureRecognizer instance) {
-                instance.onTap = widget.isEnabled
-                  ? () {
-                      Feedback.forTap(context);
-                      widget.onDeleted();
-                  }
-                  : null;
-              }
-            ),
-          },
+          onTap: widget.isEnabled
+            ? () {
+                Feedback.forTap(context);
+                widget.onDeleted();
+            }
+            : null,
           child: IconTheme(
             data: theme.iconTheme.copyWith(
               color: widget.deleteIconColor ?? chipTheme.deleteIconColor,

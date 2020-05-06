@@ -70,6 +70,35 @@ class TapUpDetails {
   final Offset localPosition;
 }
 
+/// Controls how a pointer event is recognized by multiple tap gesture
+/// recognizers.
+///
+/// This option is used enforce the gesture arena on [handleTapDown]. Usually,
+/// when a pointer event is received by multiple gesture recognizers, only one
+/// recognizer will have its callbacks triggered, which is the winner of the
+/// gesture arena. This limitation, however, does not apply to [handleTapDown]
+/// callbacks, such as [TapGestureRecognizer.onTapDown], because
+/// [handleTapDown] can be triggered without winning the arena, i.e. when
+/// [deadline] has elapsed since the press.
+enum TapRecognizingBehavior {
+  /// When multiple tap gesture recognizer with this option receives a pointer
+  /// event, only the first one is allowed to track it.
+  /// 
+  /// Subclasses of [BaseTapGestureRecognizer] with [tapRecognizingBehavior] being
+  /// [TapRecognizingBehavior.first] will be managed by a coordinator that tracks
+  /// whether a pointer has been tracked by a tap gesture recognizer, and only
+  /// tracks the pointer when no one else has.
+  first,
+
+  /// All tap gesture recognizer with this option are allowed to track all
+  /// pointer events.
+  /// 
+  /// Tap gesture recognizers with [tapRecognizingBehavior] being
+  /// [TapRecognizingBehavior.all] of false does not contribute to, or is managed
+  /// by the coordinator described in [TapRecognizingBehavior.first].
+  all,
+}
+
 /// Signature for when a pointer that will trigger a tap has stopped contacting
 /// the screen.
 ///
@@ -133,28 +162,13 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   /// Creates a tap gesture recognizer.
   BaseTapGestureRecognizer({
     Object debugOwner,
-    this.uniqueDown = false,
-  }) : assert(uniqueDown != null),
-       super(deadline: kPressTimeout , debugOwner: debugOwner);
+    this.tapRecognizingBehavior = TapRecognizingBehavior.all,
+  }) : super(deadline: kPressTimeout , debugOwner: debugOwner);
 
-  /// If true, one pointer event can trigger the [handleTapDown] callback on
-  /// multiple tap gesture recognizers.
-  ///
-  /// Usually, when a pointer event is received by multiple gesture recognizers,
-  /// only one recognizer will have its callbacks triggered, which is the winner
-  /// of the gesture arena. This limitation, however, does not apply to
-  /// [handleTapDown] callbacks, such as [TapGestureRecognizer.onTapDown],
-  /// because [handleTapDown] can be triggered without winning the arena, i.e.
-  /// when [deadline] has elapsed since the press.
+  /// How a pointer event is tracked by multiple tap gesture recognizers.
   /// 
-  /// Tap gesture recognizers with [uniqueDown] of true is managed by a
-  /// coordinator that tracks whether a pointer has been tracked by a tap gesture
-  /// recognizer, and only tracks the pointer when no one else has. Tap gesture
-  /// recognizers with [uniqueDown] of false does not contribute to, or is
-  /// managed by the coordinator.
-  /// 
-  /// The [uniqueDown] defaults to false.
-  final bool uniqueDown;
+  /// Defaults to [TapRecognizingBehavior.all].
+  final TapRecognizingBehavior tapRecognizingBehavior;
 
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
@@ -207,7 +221,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   @override
   void addAllowedPointer(PointerDownEvent event) {
     assert(event != null);
-    if (uniqueDown) {
+    if (tapRecognizingBehavior == TapRecognizingBehavior.first) {
       if (BaseTapGestureRecognizer._uniqueTapCoordinator.contains(event.pointer)) {
         return;
       }
@@ -246,7 +260,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
 
   @override
   void stopTrackingPointer(int pointer) {
-    if (uniqueDown) {
+    if (tapRecognizingBehavior == TapRecognizingBehavior.first) {
       BaseTapGestureRecognizer._uniqueTapCoordinator.remove(pointer);
     }
     super.stopTrackingPointer(pointer);
@@ -382,8 +396,8 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// Creates a tap gesture recognizer.
   TapGestureRecognizer({
     Object debugOwner,
-    bool uniqueDown = false,
-  }) : super(debugOwner: debugOwner, uniqueDown: uniqueDown);
+    TapRecognizingBehavior tapRecognizingBehavior = TapRecognizingBehavior.all,
+  }) : super(debugOwner: debugOwner, tapRecognizingBehavior: tapRecognizingBehavior);
 
   /// A pointer has contacted the screen at a particular location with a primary
   /// button, which might be the start of a tap.

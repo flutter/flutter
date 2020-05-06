@@ -229,6 +229,7 @@ class GestureDetector extends StatelessWidget {
     this.behavior,
     this.excludeFromSemantics = false,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.tapRecognizingBehavior = TapRecognizingBehavior.all,
   }) : assert(excludeFromSemantics != null),
        assert(dragStartBehavior != null),
        assert(() {
@@ -665,6 +666,11 @@ class GestureDetector extends StatelessWidget {
   ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
   final DragStartBehavior dragStartBehavior;
 
+  /// How a pointer event is tracked by multiple tap gesture recognizers.
+  /// 
+  /// Defaults to [TapRecognizingBehavior.all].
+  final TapRecognizingBehavior tapRecognizingBehavior;
+
   @override
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
@@ -680,7 +686,7 @@ class GestureDetector extends StatelessWidget {
       onSecondaryTapCancel != null
     ) {
       gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-        () => TapGestureRecognizer(debugOwner: this, uniqueDown: true),
+        () => TapGestureRecognizer(debugOwner: this, tapRecognizingBehavior: tapRecognizingBehavior),
         (TapGestureRecognizer instance) {
           instance
             ..onTapDown = onTapDown

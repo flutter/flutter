@@ -942,13 +942,13 @@ void main() {
   testGesture('Taps with uniqueDown of true only responds to a pointer once', (GestureTester tester) {
     final List<String> log = <String>[];
 
-    final TapGestureRecognizer tap1 = TapGestureRecognizer(uniqueDown: true)
+    final TapGestureRecognizer tap1 = TapGestureRecognizer(tapRecognizingBehavior: TapRecognizingBehavior.first)
       ..onTapDown = (_) { log.add('down1'); }
       ..onTapUp = (_) { log.add('up1'); };
-    final TapGestureRecognizer tap2 = TapGestureRecognizer() /* uniqueDown: false */
+    final TapGestureRecognizer tap2 = TapGestureRecognizer() /* tapRecognizingBehavior: TapRecognizingBehavior.true */
       ..onTapDown = (_) { log.add('down2'); }
       ..onTapUp = (_) { log.add('up2'); };
-    final TapGestureRecognizer tap3 = TapGestureRecognizer(uniqueDown: true)
+    final TapGestureRecognizer tap3 = TapGestureRecognizer(tapRecognizingBehavior: TapRecognizingBehavior.first)
       ..onTapDown = (_) { log.add('down3'); }
       ..onTapUp = (_) { log.add('up3'); };
 
@@ -1025,11 +1025,11 @@ void main() {
   testGesture('Taps with uniqueDown of true only coordinate allowed pointers', (GestureTester tester) {
     final List<String> log = <String>[];
 
-    final TapGestureRecognizer tap1 = TapGestureRecognizer(uniqueDown: true)
+    final TapGestureRecognizer tap1 = TapGestureRecognizer(tapRecognizingBehavior: TapRecognizingBehavior.first)
       ..onTapDown = (_) { log.add('down1'); };
-    final TapGestureRecognizer tap2 = TapGestureRecognizer(uniqueDown: true)
+    final TapGestureRecognizer tap2 = TapGestureRecognizer(tapRecognizingBehavior: TapRecognizingBehavior.first)
       ..onSecondaryTapDown = (_) { log.add('secondaryDown2'); };
-    final TapGestureRecognizer tap3 = TapGestureRecognizer(uniqueDown: true)
+    final TapGestureRecognizer tap3 = TapGestureRecognizer(tapRecognizingBehavior: TapRecognizingBehavior.first)
       ..onTapDown = (_) { log.add('down3'); }
       ..onSecondaryTapDown = (_) { log.add('secondaryDown3'); };
     final TapGestureRecognizer tap4 = TapGestureRecognizer() // For competition
@@ -1052,10 +1052,10 @@ void main() {
     log.clear();
   });
 
-  testGesture('Taps with uniqueDown is released upon pointer up', (GestureTester tester) {
+  testGesture('Taps with TapRecognizingBehavior.first is released upon pointer up', (GestureTester tester) {
     final List<String> log = <String>[];
 
-    final TapGestureRecognizer tap1 = TapGestureRecognizer(uniqueDown: true)
+    final TapGestureRecognizer tap1 = TapGestureRecognizer(tapRecognizingBehavior: TapRecognizingBehavior.first)
       ..onTapDown = (_) { log.add('down'); };
 
     // Tap
@@ -1085,7 +1085,7 @@ void main() {
     tap1.dispose();
     pointer1.cancel();
 
-    final TapGestureRecognizer tap2 = TapGestureRecognizer(uniqueDown: true)
+    final TapGestureRecognizer tap2 = TapGestureRecognizer(tapRecognizingBehavior: TapRecognizingBehavior.first)
       ..onTapDown = (_) { log.add('down'); };
 
     // Pointer 1: press and dispose. (Test if dispose can release uniqueDown)
