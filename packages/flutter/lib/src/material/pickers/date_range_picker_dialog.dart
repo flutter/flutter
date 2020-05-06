@@ -507,6 +507,8 @@ class _CalendarRangePickerDialog extends StatelessWidget {
 
     return SafeArea(
       top: false,
+      left: false,
+      right: false,
       child: Scaffold(
         appBar: AppBar(
           leading: CloseButton(

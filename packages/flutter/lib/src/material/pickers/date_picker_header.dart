@@ -170,13 +170,14 @@ class DatePickerHeader extends StatelessWidget {
                     child: help,
                   ),
                   SizedBox(height: isShort ? 16 : 56),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: _headerPaddingLandscape,
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: _headerPaddingLandscape,
+                      ),
+                      child: title,
                     ),
-                    child: title,
                   ),
-                  const Spacer(),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 4,
