@@ -27,47 +27,9 @@ const String kUpstreamRemote = 'git@github.com:flutter/flutter.git';
 void main(List<String> args) {
   final ArgParser argParser = ArgParser(allowTrailingOptions: false);
 
-  argParser.addOption(
-    kIncrement,
-    help: 'Specifies which part of the x.y.z version number to increment. Required.',
-    valueHelp: 'level',
-    allowed: <String>[kX, kY, kZ],
-    allowedHelp: <String, String>{
-      kX: 'Indicates a major development, e.g. typically changed after a big press event.',
-      kY: 'Indicates a minor development, e.g. typically changed after a beta release.',
-      kZ: 'Indicates the least notable level of change. You normally want this.',
-    },
-  );
-  argParser.addOption(
-    kCommit,
-    help: 'Specifies which git commit to roll to the dev branch. Required.',
-    valueHelp: 'hash',
-    defaultsTo: null, // This option is required
-  );
-  argParser.addOption(
-    kOrigin,
-    help: 'Specifies the name of the upstream repository',
-    valueHelp: 'repository',
-    defaultsTo: 'upstream',
-  );
-  argParser.addFlag(
-    kForce,
-    help: 'Force push. Necessary when the previous release had cherry-picks.',
-    negatable: false,
-  );
-  argParser.addFlag(
-    kJustPrint,
-    negatable: false,
-    help:
-        "Don't actually roll the dev channel; "
-        'just print the would-be version and quit.',
-  );
-  argParser.addFlag(kYes, negatable: false, abbr: 'y', help: 'Skip the confirmation prompt.');
-  argParser.addFlag(kHelp, negatable: false, help: 'Show this help message.', hide: true);
-
   ArgResults argResults;
   try {
-    argResults = argParser.parse(args);
+    argResults = parseArguments(argParser, args);
   } on ArgParserException catch (error) {
     print(error.message);
     print(argParser.usage);
@@ -135,6 +97,48 @@ void main(List<String> args) {
   print('Flutter version $version has been rolled to the "dev" channel!');
 }
 
+ArgResults parseArguments(ArgParser argParser, List<String> args) {
+  argParser.addOption(
+    kIncrement,
+    help: 'Specifies which part of the x.y.z version number to increment. Required.',
+    valueHelp: 'level',
+    allowed: <String>[kX, kY, kZ],
+    allowedHelp: <String, String>{
+      kX: 'Indicates a major development, e.g. typically changed after a big press event.',
+      kY: 'Indicates a minor development, e.g. typically changed after a beta release.',
+      kZ: 'Indicates the least notable level of change. You normally want this.',
+    },
+  );
+  argParser.addOption(
+    kCommit,
+    help: 'Specifies which git commit to roll to the dev branch. Required.',
+    valueHelp: 'hash',
+    defaultsTo: null, // This option is required
+  );
+  argParser.addOption(
+    kOrigin,
+    help: 'Specifies the name of the upstream repository',
+    valueHelp: 'repository',
+    defaultsTo: 'upstream',
+  );
+  argParser.addFlag(
+    kForce,
+    help: 'Force push. Necessary when the previous release had cherry-picks.',
+    negatable: false,
+  );
+  argParser.addFlag(
+    kJustPrint,
+    negatable: false,
+    help:
+        "Don't actually roll the dev channel; "
+        'just print the would-be version and quit.',
+  );
+  argParser.addFlag(kYes, negatable: false, abbr: 'y', help: 'Skip the confirmation prompt.');
+  argParser.addFlag(kHelp, negatable: false, help: 'Show this help message.', hide: true);
+
+  return argParser.parse(args);
+}
+
 /// Obtain the version tag of the previous dev release.
 String getFullTag() {
   const String glob = '*.*.*-*.*.pre';
@@ -196,13 +200,6 @@ String incrementLevel(String version, String level) {
   }
 
   final List<int> parts = match.groups(<int>[1, 2, 3, 4, 5]).map<int>(int.parse).toList();
-
-  if (match.group(6) == '0') {
-    throw Exception(
-      'This commit has already been released, as version '
-      '${getVersionFromParts(parts)}.'
-    );
-  }
 
   switch (level) {
     case kX:
