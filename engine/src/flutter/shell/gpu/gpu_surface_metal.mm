@@ -80,6 +80,11 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrame(const SkISize& frame
 
   auto submit_callback = [this](const SurfaceFrame& surface_frame, SkCanvas* canvas) -> bool {
     TRACE_EVENT0("flutter", "GPUSurfaceMetal::Submit");
+    if (canvas == nullptr) {
+      FML_DLOG(ERROR) << "Canvas not available.";
+      return false;
+    }
+
     canvas->flush();
 
     if (next_drawable_ == nullptr) {
