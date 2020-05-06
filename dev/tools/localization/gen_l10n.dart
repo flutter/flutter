@@ -678,7 +678,7 @@ class LocalizationsGenerator {
     if (inputsAndOutputsListPath == null)
       return;
 
-    _inputsAndOutputsListFile = File(
+    _inputsAndOutputsListFile = _fs.file(
       path.join(inputsAndOutputsListPath, 'gen_l10n_inputs_and_outputs.json'),
     );
     _inputFileList = <String>[];
@@ -807,8 +807,9 @@ class LocalizationsGenerator {
   }
 
   // Generate the AppLocalizations class, its LocalizationsDelegate subclass,
-  // and all AppLocalizations subclasses for every locale.
-  void generateCode() {
+  // and all AppLocalizations subclasses for every locale. This method by
+  // itself does not generate the output files.
+  void _generateCode() {
     bool isBaseClassLocale(LocaleInfo locale, String language) {
       return locale.languageCode == language
           && locale.countryCode == null
@@ -920,7 +921,7 @@ class LocalizationsGenerator {
 
   void writeOutputFile() {
     // First, generate the string contents of all necessary files.
-    generateCode();
+    _generateCode();
 
     // Since all validity checks have passed up to this point,
     // write the contents into the directory.
@@ -947,14 +948,17 @@ class LocalizationsGenerator {
     baseOutputFile.writeAsStringSync(_generatedLocalizationsFile);
     if (_inputsAndOutputsListFile != null) {
       _outputFileList.add(baseOutputFile.absolute.path);
-    }
 
-    // Generate a JSON file containing the inputs and outputs of the gen_l10n script.
-    _inputsAndOutputsListFile.writeAsStringSync(
-      inputAndOutputsJsonFileTemplate
-        .replaceAll('@(inputs)', _inputFileList.map((String file) => '"$file"').join(',\n    '))
-        .replaceAll('@(outputs)', _outputFileList.map((String file) => '"$file"').join(',\n    '))
-    );
+      // Generate a JSON file containing the inputs and outputs of the gen_l10n script.
+      if (!_inputsAndOutputsListFile.existsSync()) {
+        _inputsAndOutputsListFile.createSync(recursive: true);
+      }
+      _inputsAndOutputsListFile.writeAsStringSync(
+        inputAndOutputsJsonFileTemplate
+          .replaceAll('@(inputs)', _inputFileList.map((String file) => '"$file"').join(',\n    '))
+          .replaceAll('@(outputs)', _outputFileList.map((String file) => '"$file"').join(',\n    '))
+      );
+    }
   }
 
   void outputUnimplementedMessages(String untranslatedMessagesFile) {
