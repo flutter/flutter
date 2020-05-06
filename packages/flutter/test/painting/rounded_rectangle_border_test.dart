@@ -91,5 +91,5 @@ void main() {
     expect(direct50, indirect50);
     expect(direct50.hashCode, indirect50.hashCode);
     expect(direct50.toString(), indirect50.toString());
-  }, skip: isBrowser);
+  });
 }
