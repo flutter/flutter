@@ -128,6 +128,16 @@ void main() {
     expect(path.getBounds(), const Rect.fromLTRB(50, 60, 50, 60));
   });
 
+  test('Should compute bounds for multiple addRect calls', () {
+    final Path emptyPath = Path();
+    expect(emptyPath.getBounds(), Rect.zero);
+
+    final SurfacePath path = SurfacePath();
+    path.addRect(Rect.fromLTWH(0, 0, 270, 45));
+    path.addRect(Rect.fromLTWH(134.5, 0, 1, 45));
+    expect(path.getBounds(), const Rect.fromLTRB(0, 0, 270, 45));
+  });
+
   test('Should compute bounds for lines', () {
     final SurfacePath path = SurfacePath();
     path.moveTo(25, 30);

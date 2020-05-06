@@ -440,19 +440,22 @@ class RecordingCanvas {
         return;
       }
     }
-    _hasArbitraryPaint = true;
-    _didDraw = true;
-    ui.Rect pathBounds = path.getBounds();
-    final double paintSpread = _getPaintSpread(paint);
-    if (paintSpread != 0.0) {
-      pathBounds = pathBounds.inflate(paintSpread);
+    SurfacePath sPath = path;
+    if (sPath.subpaths.isNotEmpty) {
+      _hasArbitraryPaint = true;
+      _didDraw = true;
+      ui.Rect pathBounds = sPath.getBounds();
+      final double paintSpread = _getPaintSpread(paint);
+      if (paintSpread != 0.0) {
+        pathBounds = pathBounds.inflate(paintSpread);
+      }
+      // Clone path so it can be reused for subsequent draw calls.
+      final ui.Path clone = SurfacePath._shallowCopy(path);
+      final PaintDrawPath command = PaintDrawPath(clone, paint.paintData);
+      _paintBounds.grow(pathBounds, command);
+      clone.fillType = sPath.fillType;
+      _commands.add(command);
     }
-    // Clone path so it can be reused for subsequent draw calls.
-    final ui.Path clone = SurfacePath._shallowCopy(path);
-    final PaintDrawPath command = PaintDrawPath(clone, paint.paintData);
-    _paintBounds.grow(pathBounds, command);
-    clone.fillType = path.fillType;
-    _commands.add(command);
   }
 
   void drawImage(ui.Image image, ui.Offset offset, SurfacePaint paint) {

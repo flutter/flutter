@@ -501,8 +501,14 @@ class _CanvasPool extends _SaveStackTracking {
   /// 'Runs' the given [path] by applying all of its commands to the canvas.
   void _runPath(html.CanvasRenderingContext2D ctx, SurfacePath path) {
     ctx.beginPath();
-    for (Subpath subpath in path.subpaths) {
-      for (PathCommand command in subpath.commands) {
+    final List<Subpath> subpaths = path.subpaths;
+    final int subpathCount = subpaths.length;
+    for (int subPathIndex = 0; subPathIndex < subpathCount; subPathIndex++) {
+      final Subpath subpath = subpaths[subPathIndex];
+      final List<PathCommand> commands = subpath.commands;
+      final int commandCount = commands.length;
+      for (int c = 0; c < commandCount; c++) {
+        final PathCommand command = commands[c];
         switch (command.type) {
           case PathCommandTypes.bezierCurveTo:
             final BezierCurveTo curve = command;
@@ -587,7 +593,7 @@ class _CanvasPool extends _SaveStackTracking {
 
   void drawPath(ui.Path path, ui.PaintingStyle style) {
     _runPath(context, path);
-    contextHandle.paint(style);
+    contextHandle.paintPath(style, path.fillType);
   }
 
   void drawShadow(ui.Path path, ui.Color color, double elevation,
@@ -753,6 +759,18 @@ class ContextStateHandle {
       context.stroke();
     } else {
       context.fill();
+    }
+  }
+
+  void paintPath(ui.PaintingStyle style, ui.PathFillType pathFillType) {
+    if (style == ui.PaintingStyle.stroke) {
+      context.stroke();
+    } else {
+      if (pathFillType == ui.PathFillType.nonZero) {
+        context.fill();
+      } else {
+        context.fill('evenodd');
+      }
     }
   }
 
