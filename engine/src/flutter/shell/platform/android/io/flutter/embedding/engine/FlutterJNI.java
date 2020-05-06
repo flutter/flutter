@@ -146,6 +146,20 @@ public class FlutterJNI {
   @NonNull
   public static native FlutterCallbackInformation nativeLookupCallbackInformation(long handle);
 
+  // ----- Start FlutterTextUtils Methods ----
+
+  public native boolean nativeFlutterTextUtilsIsEmoji(int codePoint);
+
+  public native boolean nativeFlutterTextUtilsIsEmojiModifier(int codePoint);
+
+  public native boolean nativeFlutterTextUtilsIsEmojiModifierBase(int codePoint);
+
+  public native boolean nativeFlutterTextUtilsIsVariationSelector(int codePoint);
+
+  public native boolean nativeFlutterTextUtilsIsRegionalIndicator(int codePoint);
+
+  // ----- End Engine FlutterTextUtils Methods ----
+
   @Nullable private Long nativePlatformViewId;
   @Nullable private AccessibilityDelegate accessibilityDelegate;
   @Nullable private PlatformMessageHandler platformMessageHandler;

@@ -3,16 +3,19 @@ package io.flutter.plugin.editing;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.ClipboardManager;
 import android.content.res.AssetManager;
 import android.text.Editable;
+import android.text.Emoji;
 import android.text.InputType;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
@@ -316,7 +319,7 @@ public class InputConnectionAdaptorTest {
   @Test
   public void testSendKeyEvent_delKeyDeletesBackward() {
     int selStart = 29;
-    Editable editable = sampleRtlEditable(selStart, selStart);
+    Editable editable = sampleEditable(selStart, selStart, SAMPLE_RTL_TEXT);
     InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
 
     KeyEvent downKeyDown = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL);
@@ -334,8 +337,170 @@ public class InputConnectionAdaptorTest {
     assertEquals(Selection.getSelectionStart(editable), 10);
   }
 
+  @Test
+  public void testSendKeyEvent_delKeyDeletesBackwardComplexEmojis() {
+    int selStart = 75;
+    Editable editable = sampleEditable(selStart, selStart, SAMPLE_EMOJI_TEXT);
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
+
+    KeyEvent downKeyDown = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL);
+    boolean didConsume;
+
+    // Normal Character
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 74);
+
+    // Non-Spacing Mark
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 73);
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 72);
+
+    // Keycap
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 69);
+
+    // Keycap with invalid base
+    adaptor.setSelection(68, 68);
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 66);
+    adaptor.setSelection(67, 67);
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 66);
+
+    // Zero Width Joiner
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 55);
+
+    // Zero Width Joiner with invalid base
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 53);
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 52);
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 51);
+
+    // ----- Start Emoji Tag Sequence with invalid base testing ----
+    // Delete base tag
+    adaptor.setSelection(39, 39);
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 37);
+
+    // Delete the sequence
+    adaptor.setSelection(49, 49);
+    for (int i = 0; i < 6; i++) {
+      didConsume = adaptor.sendKeyEvent(downKeyDown);
+      assertTrue(didConsume);
+    }
+    assertEquals(Selection.getSelectionStart(editable), 37);
+    // ----- End Emoji Tag Sequence with invalid base testing ----
+
+    // Emoji Tag Sequence
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 23);
+
+    // Variation Selector with invalid base
+    adaptor.setSelection(22, 22);
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 21);
+    adaptor.setSelection(22, 22);
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 21);
+
+    // Variation Selector
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 19);
+
+    // Emoji Modifier
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 16);
+
+    // Emoji Modifier with invalid base
+    adaptor.setSelection(14, 14);
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 13);
+    adaptor.setSelection(14, 14);
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 13);
+
+    // Line Feed
+    adaptor.setSelection(12, 12);
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 11);
+
+    // Carriage Return
+    adaptor.setSelection(12, 12);
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 11);
+
+    // Carriage Return and Line Feed
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 9);
+
+    // Regional Indicator Symbol odd
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 7);
+
+    // Regional Indicator Symbol even
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 3);
+
+    // Simple Emoji
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 1);
+
+    // First CodePoint
+    didConsume = adaptor.sendKeyEvent(downKeyDown);
+    assertTrue(didConsume);
+    assertEquals(Selection.getSelectionStart(editable), 0);
+  }
+
   private static final String SAMPLE_TEXT =
       "Lorem ipsum dolor sit amet," + "\nconsectetur adipiscing elit.";
+
+  private static final String SAMPLE_EMOJI_TEXT =
+      "a" // First CodePoint
+          + "😂" // Simple Emoji
+          + "🇮🇷" // Regional Indicator Symbol even
+          + "🇷" // Regional Indicator Symbol odd
+          + "\r\n" // Carriage Return and Line Feed
+          + "\r\n"
+          + "✋🏿" // Emoji Modifier
+          + "✋🏿"
+          + "⚠️" // Variant Selector
+          + "⚠️"
+          + "🏴󠁧󠁢󠁥󠁮󠁧󠁿" // Emoji Tag Sequence
+          + "🏴󠁧󠁢󠁥󠁮󠁧󠁿"
+          + "a‍👨" // Zero Width Joiner
+          + "👨‍👩‍👧‍👦"
+          + "5️⃣" // Keycap
+          + "5️⃣"
+          + "عَ" // Non-Spacing Mark
+          + "a"; // Normal Character
 
   private static final String SAMPLE_RTL_TEXT = "متن ساختگی" + "\nبرای تستfor test😊";
 
@@ -345,8 +510,8 @@ public class InputConnectionAdaptorTest {
     return sample;
   }
 
-  private static Editable sampleRtlEditable(int selStart, int selEnd) {
-    SpannableStringBuilder sample = new SpannableStringBuilder(SAMPLE_RTL_TEXT);
+  private static Editable sampleEditable(int selStart, int selEnd, String text) {
+    SpannableStringBuilder sample = new SpannableStringBuilder(text);
     Selection.setSelection(sample, selStart, selEnd);
     return sample;
   }
@@ -355,7 +520,24 @@ public class InputConnectionAdaptorTest {
     View testView = new View(RuntimeEnvironment.application);
     int client = 0;
     TextInputChannel textInputChannel = mock(TextInputChannel.class);
-    return new InputConnectionAdaptor(testView, client, textInputChannel, editable, null);
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    when(mockFlutterJNI.nativeFlutterTextUtilsIsEmoji(anyInt()))
+        .thenAnswer((invocation) -> Emoji.isEmoji((int) invocation.getArguments()[0]));
+    when(mockFlutterJNI.nativeFlutterTextUtilsIsEmojiModifier(anyInt()))
+        .thenAnswer((invocation) -> Emoji.isEmojiModifier((int) invocation.getArguments()[0]));
+    when(mockFlutterJNI.nativeFlutterTextUtilsIsEmojiModifierBase(anyInt()))
+        .thenAnswer((invocation) -> Emoji.isEmojiModifierBase((int) invocation.getArguments()[0]));
+    when(mockFlutterJNI.nativeFlutterTextUtilsIsVariationSelector(anyInt()))
+        .thenAnswer(
+            (invocation) -> {
+              int codePoint = (int) invocation.getArguments()[0];
+              return 0xFE0E <= codePoint && codePoint <= 0xFE0F;
+            });
+    when(mockFlutterJNI.nativeFlutterTextUtilsIsRegionalIndicator(anyInt()))
+        .thenAnswer(
+            (invocation) -> Emoji.isRegionalIndicatorSymbol((int) invocation.getArguments()[0]));
+    return new InputConnectionAdaptor(
+        testView, client, textInputChannel, editable, null, mockFlutterJNI);
   }
 
   private class TestTextInputChannel extends TextInputChannel {
