@@ -44,45 +44,59 @@ void main(List<String> args) {
   final bool autoApprove = argResults[kYes] as bool;
   final bool help = argResults[kHelp] as bool;
 
-  run(
-    usage: argParser.usage,
-    argResults: argResults,
-    level: level,
-    commit: commit,
-    origin: origin,
-    justPrint: justPrint,
-    autoApprove: autoApprove,
-    help: help,
-  );
+  try {
+    run(
+      usage: argParser.usage,
+      level: level,
+      commit: commit,
+      origin: origin,
+      justPrint: justPrint,
+      autoApprove: autoApprove,
+      help: help,
+      getGitOutput: getGitOutput,
+    );
+  } on Exception catch (e) {
+    print(e.toString());
+    exit(1);
+  }
 }
 
+typedef GitWrapper = String Function(String command, String explanation);
+
 /// Main script execution.
-void run({
+///
+/// Returns true if publishing was successful, else false.
+bool run({
   @required String usage,
-  @required ArgResults argResults,
   @required String level,
   @required String commit,
   @required String origin,
   @required bool justPrint,
   @required bool autoApprove,
   @required bool help,
+  @required GitWrapper getGitOutput,
 }) {
   if (help || level == null || commit == null) {
-    print('roll_dev.dart --increment=level --commit=hash • update the version tags and roll a new dev build.\n');
-    print(usage);
-    exit(0);
+    print(
+      'roll_dev.dart --increment=level --commit=hash • update the version tags '
+      'and roll a new dev build.\n$usage'
+    );
+    return false;
   }
 
   if (getGitOutput('remote get-url $origin', 'check whether this is a flutter checkout') != kUpstreamRemote) {
-    print('The current directory is not a Flutter repository checkout with a correctly configured upstream remote.');
-    print('For more details see: https://github.com/flutter/flutter/wiki/Release-process');
-    exit(1);
+    throw Exception(
+      'The current directory is not a Flutter repository checkout with a '
+      'correctly configured upstream remote.\nFor more details see: '
+      'https://github.com/flutter/flutter/wiki/Release-process'
+    );
   }
 
   if (getGitOutput('status --porcelain', 'check status of your local checkout') != '') {
-    print('Your git repository is not clean. Try running "git clean -fd". Warning, this ');
-    print('will delete files! Run with -n to find out which ones.');
-    exit(1);
+    throw Exception(
+      'Your git repository is not clean. Try running "git clean -fd". Warning, '
+      'this will delete files! Run with -n to find out which ones.'
+    );
   }
 
   runGit('fetch $origin', 'fetch $origin');
@@ -94,7 +108,7 @@ void run({
 
   if (justPrint) {
     print(version);
-    exit(0);
+    return false;
   }
 
   final String hash = getGitOutput('rev-parse HEAD', 'Get git hash for $commit');
@@ -112,13 +126,14 @@ void run({
     if (stdin.readLineSync() != 'yes') {
       runGit('tag -d $version', 'remove the tag you did not want to publish');
       print('The dev roll has been aborted.');
-      exit(0);
+      return false;
     }
   }
 
   runGit('push $origin $version', 'publish the version');
   runGit('push $origin HEAD:dev', 'land the new version on the "dev" branch');
   print('Flutter version $version has been rolled to the "dev" channel!');
+  return true;
 }
 
 ArgResults parseArguments(ArgParser argParser, List<String> args) {

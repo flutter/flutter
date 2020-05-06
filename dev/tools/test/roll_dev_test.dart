@@ -6,6 +6,58 @@ import 'package:dev_tools/roll_dev.dart';
 import './common.dart';
 
 void main() {
+  group('run()', () {
+    const String usage = 'usage info...';
+    const String level = 'z';
+    const String commit = 'abc123';
+    const String origin = 'upstream';
+
+    test('returns false if help requested', () {
+      expect(
+        run(
+          usage: usage,
+          level: level,
+          commit: commit,
+          origin: origin,
+          justPrint: false,
+          autoApprove: false,
+          help: true,
+        ),
+        false,
+      );
+    });
+
+    test('returns false if level not provided', () {
+      expect(
+        run(
+          usage: usage,
+          level: null,
+          commit: commit,
+          origin: origin,
+          justPrint: false,
+          autoApprove: false,
+          help: false,
+        ),
+        false,
+      );
+    });
+
+    test('returns false if commit not provided', () {
+      expect(
+        run(
+          usage: usage,
+          level: level,
+          commit: null,
+          origin: origin,
+          justPrint: false,
+          autoApprove: false,
+          help: false,
+        ),
+        false,
+      );
+    });
+  });
+
   group('parseFullTag', () {
     test('returns match on valid version input', () {
       final List<String> validTags = <String>[
