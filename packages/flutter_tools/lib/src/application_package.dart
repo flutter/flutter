@@ -8,7 +8,6 @@ import 'dart:collection';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart' as xml;
 
-import 'android/android_sdk.dart';
 import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/context.dart';
@@ -40,7 +39,7 @@ class ApplicationPackageFactory {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-        if (androidSdk?.licensesAvailable == true  && androidSdk?.latestVersion == null) {
+        if (globals.androidSdk?.licensesAvailable == true  && globals.androidSdk?.latestVersion == null) {
           await checkGradleDependencies();
         }
         return applicationBinary == null
@@ -109,7 +108,7 @@ class AndroidApk extends ApplicationPackage {
 
   /// Creates a new AndroidApk from an existing APK.
   factory AndroidApk.fromApk(File apk) {
-    final String aaptPath = androidSdk?.latestVersion?.aaptPath;
+    final String aaptPath = globals.androidSdk?.latestVersion?.aaptPath;
     if (aaptPath == null) {
       globals.printError(userMessages.aaptNotFound);
       return null;
@@ -357,18 +356,22 @@ abstract class IOSApp extends ApplicationPackage {
 }
 
 class BuildableIOSApp extends IOSApp {
-  BuildableIOSApp(this.project, String projectBundleId)
-    : super(projectBundleId: projectBundleId);
+  BuildableIOSApp(this.project, String projectBundleId, String hostAppBundleName)
+    : _hostAppBundleName = hostAppBundleName,
+      super(projectBundleId: projectBundleId);
 
   static Future<BuildableIOSApp> fromProject(IosProject project) async {
     final String projectBundleId = await project.productBundleIdentifier;
-    return BuildableIOSApp(project, projectBundleId);
+    final String hostAppBundleName = await project.hostAppBundleName;
+    return BuildableIOSApp(project, projectBundleId, hostAppBundleName);
   }
 
   final IosProject project;
 
+  final String _hostAppBundleName;
+
   @override
-  String get name => project.hostAppBundleName;
+  String get name => _hostAppBundleName;
 
   @override
   String get simulatorBundlePath => _buildAppPath('iphonesimulator');
@@ -377,7 +380,7 @@ class BuildableIOSApp extends IOSApp {
   String get deviceBundlePath => _buildAppPath('iphoneos');
 
   String _buildAppPath(String type) {
-    return globals.fs.path.join(getIosBuildDirectory(), type, name);
+    return globals.fs.path.join(getIosBuildDirectory(), type, _hostAppBundleName);
   }
 }
 

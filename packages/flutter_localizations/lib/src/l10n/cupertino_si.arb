@@ -18,5 +18,7 @@
   "cutButtonLabel": "කපන්න",
   "copyButtonLabel": "පිටපත් කරන්න",
   "pasteButtonLabel": "අලවන්න",
-  "selectAllButtonLabel": "සියල්ල තෝරන්න"
+  "selectAllButtonLabel": "සියල්ල තෝරන්න",
+  "tabSemanticsLabel": "TBD",
+  "modalBarrierDismissLabel": "ඉවත ලන්න"
 }

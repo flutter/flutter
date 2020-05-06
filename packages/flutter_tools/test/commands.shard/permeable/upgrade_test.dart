@@ -4,17 +4,16 @@
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -186,6 +185,26 @@ void main() {
       Platform: () => fakePlatform,
     });
 
+    testUsingContext('git exception during attemptReset throwsToolExit', () async {
+      const String revision = 'abc123';
+      const String errorMessage = 'fatal: Could not parse object ´$revision´';
+      when(processManager.run(
+        <String>['git', 'reset', '--hard', revision]
+      )).thenThrow(const ProcessException(
+        'git',
+        <String>['reset', '--hard', revision],
+        errorMessage,
+      ));
+
+      expect(
+        () async => await realCommandRunner.attemptReset(revision),
+        throwsToolExit(message: errorMessage),
+      );
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
+    });
+
     testUsingContext('flutterUpgradeContinue passes env variables to child process', () async {
       await realCommandRunner.flutterUpgradeContinue();
 
@@ -315,7 +334,7 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   Future<void> upgradeChannel(FlutterVersion flutterVersion) async {}
 
   @override
-  Future<bool> attemptReset(FlutterVersion flutterVersion, String newRevision) async => alreadyUpToDate;
+  Future<void> attemptReset(String newRevision) async {}
 
   @override
   Future<void> precacheArtifacts() async {}

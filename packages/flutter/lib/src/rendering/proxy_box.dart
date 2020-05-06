@@ -1099,13 +1099,30 @@ class RenderBackdropFilter extends RenderProxyBox {
 ///  * [ClipOval], which can be customized with a [CustomClipper<Rect>].
 ///  * [ClipPath], which can be customized with a [CustomClipper<Path>].
 ///  * [ShapeBorderClipper], for specifying a clip path using a [ShapeBorder].
-abstract class CustomClipper<T> {
+abstract class CustomClipper<T> extends Listenable {
   /// Creates a custom clipper.
   ///
   /// The clipper will update its clip whenever [reclip] notifies its listeners.
   const CustomClipper({ Listenable reclip }) : _reclip = reclip;
 
   final Listenable _reclip;
+
+  /// Register a closure to be notified when it is time to reclip.
+  ///
+  /// The [CustomClipper] implementation merely forwards to the same method on
+  /// the [Listenable] provided to the constructor in the `reclip` argument, if
+  /// it was not null.
+  @override
+  void addListener(VoidCallback listener) => _reclip?.addListener(listener);
+
+  /// Remove a previously registered closure from the list of closures that the
+  /// object notifies when it is time to reclip.
+  ///
+  /// The [CustomClipper] implementation merely forwards to the same method on
+  /// the [Listenable] provided to the constructor in the `reclip` argument, if
+  /// it was not null.
+  @override
+  void removeListener(VoidCallback listener) => _reclip?.removeListener(listener);
 
   /// Returns a description of the clip given that the render object being
   /// clipped is of the given size.
@@ -1207,20 +1224,20 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
       _markNeedsClip();
     }
     if (attached) {
-      oldClipper?._reclip?.removeListener(_markNeedsClip);
-      newClipper?._reclip?.addListener(_markNeedsClip);
+      oldClipper?.removeListener(_markNeedsClip);
+      newClipper?.addListener(_markNeedsClip);
     }
   }
 
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    _clipper?._reclip?.addListener(_markNeedsClip);
+    _clipper?.addListener(_markNeedsClip);
   }
 
   @override
   void detach() {
-    _clipper?._reclip?.removeListener(_markNeedsClip);
+    _clipper?.removeListener(_markNeedsClip);
     super.detach();
   }
 

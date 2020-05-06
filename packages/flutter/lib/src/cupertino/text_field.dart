@@ -300,6 +300,11 @@ class CupertinoTextField extends StatefulWidget {
        assert(clearButtonMode != null),
        assert(prefixMode != null),
        assert(suffixMode != null),
+       // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
+       assert(!identical(textInputAction, TextInputAction.newline) ||
+         maxLines == 1 ||
+         !identical(keyboardType, TextInputType.text),
+         'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.'),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        toolbarOptions = toolbarOptions ?? (obscureText ?
          const ToolbarOptions(

@@ -91,60 +91,17 @@ final Map<String, Object> listViews = <String, dynamic>{
 typedef ServiceCallback = Future<Map<String, dynamic>> Function(Map<String, Object>);
 
 void main() {
-  testUsingContext('VMService can refreshViews', () async {
-    final MockVMService mockVmService = MockVMService();
-    final VMService vmService = VMService(
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      mockVmService,
-      Completer<void>(),
-      const Stream<dynamic>.empty(),
-    );
-
-    verify(mockVmService.registerService('flutterVersion', 'Flutter Tools')).called(1);
-
-    when(mockVmService.callServiceExtension('getVM',
-      args: anyNamed('args'), // Empty
-      isolateId: null
-    )).thenAnswer((Invocation invocation) async {
-      return vm_service.Response.parse(vm);
-    });
-    await vmService.getVMOld();
-
-
-    when(mockVmService.callServiceExtension('_flutter.listViews',
-      args: anyNamed('args'),
-      isolateId: anyNamed('isolateId')
-    )).thenAnswer((Invocation invocation) async {
-      return vm_service.Response.parse(listViews);
-    });
-    await vmService.refreshViews(waitForViews: true);
-
-    expect(vmService.vm.name, 'vm');
-    expect(vmService.vm.views.single.id, '_flutterView/0x4a4c1f8');
-  }, overrides: <Type, Generator>{
-    Logger: () => BufferLogger.test()
-  });
-
-  testUsingContext('VmService registers reloadSources', () {
+  testUsingContext('VmService registers reloadSources', () async {
     Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
+
     final MockVMService mockVMService = MockVMService();
-    VMService(
-      null,
-      null,
+    setUpVmService(
       reloadSources,
       null,
       null,
       null,
       null,
       mockVMService,
-      Completer<void>(),
-      const Stream<dynamic>.empty(),
     );
 
     verify(mockVMService.registerService('reloadSources', 'Flutter Tools')).called(1);
@@ -152,20 +109,17 @@ void main() {
     Logger: () => BufferLogger.test()
   });
 
-  testUsingContext('VmService registers reloadMethod', () {
+  testUsingContext('VmService registers reloadMethod', () async {
     Future<void> reloadMethod({  String classId, String libraryId,}) async {}
+
     final MockVMService mockVMService = MockVMService();
-    VMService(
-      null,
-      null,
+    setUpVmService(
       null,
       null,
       null,
       null,
       reloadMethod,
       mockVMService,
-      Completer<void>(),
-      const Stream<dynamic>.empty(),
     );
 
     verify(mockVMService.registerService('reloadMethod', 'Flutter Tools')).called(1);
@@ -173,20 +127,17 @@ void main() {
     Logger: () => BufferLogger.test()
   });
 
-  testUsingContext('VmService registers flutterMemoryInfo service', () {
+  testUsingContext('VmService registers flutterMemoryInfo service', () async {
     final MockDevice mockDevice = MockDevice();
+
     final MockVMService mockVMService = MockVMService();
-    VMService(
-      null,
-      null,
+    setUpVmService(
       null,
       null,
       null,
       mockDevice,
       null,
       mockVMService,
-      Completer<void>(),
-      const Stream<dynamic>.empty(),
     );
 
     verify(mockVMService.registerService('flutterMemoryInfo', 'Flutter Tools')).called(1);
@@ -196,17 +147,13 @@ void main() {
 
   testUsingContext('VMService returns correct FlutterVersion', () async {
     final MockVMService mockVMService = MockVMService();
-    VMService(
-      null,
-      null,
+    setUpVmService(
       null,
       null,
       null,
       null,
       null,
       mockVMService,
-      Completer<void>(),
-      const Stream<dynamic>.empty(),
     );
 
     verify(mockVMService.registerService('flutterVersion', 'Flutter Tools')).called(1);
@@ -284,10 +231,10 @@ void main() {
   testWithoutContext('runInView forwards arguments correctly', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(method: 'streamListen', id: '1', args: <String, Object>{
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
           'streamId': 'Isolate'
         }),
-        const FakeVmServiceRequest(method: kRunInViewMethod, id: '2', args: <String, Object>{
+        const FakeVmServiceRequest(method: kRunInViewMethod, args: <String, Object>{
           'viewId': '1234',
           'mainScript': 'main.dart',
           'assetDirectory': 'flutter_assets/',
@@ -306,6 +253,65 @@ void main() {
       viewId: '1234',
       main: Uri.file('main.dart'),
       assetsDirectory: Uri.file('flutter_assets/'),
+    );
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('getFlutterViews polls until a view is returned', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: kListViewsMethod,
+          jsonResponse: <String, Object>{
+            'views': <Object>[],
+          },
+        ),
+        const FakeVmServiceRequest(
+          method: kListViewsMethod,
+          jsonResponse: <String, Object>{
+            'views': <Object>[],
+          },
+        ),
+        const FakeVmServiceRequest(
+          method: kListViewsMethod,
+          jsonResponse: <String, Object>{
+            'views': <Object>[
+              <String, Object>{
+                'id': 'a',
+                'isolate': <String, Object>{},
+              },
+            ],
+          },
+        ),
+      ]
+    );
+
+    expect(
+      await fakeVmServiceHost.vmService.getFlutterViews(
+        delay: Duration.zero,
+      ),
+      isNotEmpty,
+    );
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('getFlutterViews does not poll if returnEarly is true', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: kListViewsMethod,
+          jsonResponse: <String, Object>{
+            'views': <Object>[],
+          },
+        ),
+      ]
+    );
+
+    expect(
+      await fakeVmServiceHost.vmService.getFlutterViews(
+        returnEarly: true,
+      ),
+      isEmpty,
     );
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });

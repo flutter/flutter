@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -27,12 +28,26 @@ typedef ShardRunner = Future<void> Function();
 /// appropriate error message.
 typedef OutputChecker = String Function(CapturedOutput);
 
+final String exe = Platform.isWindows ? '.exe' : '';
+final String bat = Platform.isWindows ? '.bat' : '';
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
-final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
-final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
-final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
+final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
+final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
+final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'pub$bat');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
+final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
+
+String get platformFolderName {
+  if (Platform.isWindows)
+    return 'windows-x64';
+  if (Platform.isMacOS)
+    return 'darwin-x64';
+  if (Platform.isLinux)
+    return 'linux-x64';
+  throw UnsupportedError('The platform ${Platform.operatingSystem} is not supported by this script.');
+}
+final String flutterTester = path.join(flutterRoot, 'bin', 'cache', 'artifacts', 'engine', platformFolderName, 'flutter_tester$exe');
 
 /// The arguments to pass to `flutter test` (typically the local engine
 /// configuration) -- prefilled with the arguments passed to test.dart.
@@ -117,8 +132,37 @@ Future<void> main(List<String> args) async {
   print('$clock ${bold}Test successful.$reset');
 }
 
+/// Verify the Flutter Engine is the revision in
+/// bin/cache/internal/engine.version.
+Future<void> _validateEngineHash() async {
+  final String luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
+  if (luciBotId.startsWith('luci-dart-')) {
+    // The Dart HHH bots intentionally modify the local artifact cache
+    // and then use this script to run Flutter's test suites.
+    // Because the artifacts have been changed, this particular test will return
+    // a false positive and should be skipped.
+    print('${yellow}Skipping Flutter Engine Version Validation for swarming '
+          'bot $luciBotId.');
+    return;
+  }
+  final String expectedVersion = File(engineVersionFile).readAsStringSync().trim();
+  final CapturedOutput flutterTesterOutput = CapturedOutput();
+  await runCommand(flutterTester, <String>['--help'], output: flutterTesterOutput, outputMode: OutputMode.capture);
+  final String actualVersion = flutterTesterOutput.stderr.split('\n').firstWhere((final String line) {
+    return line.startsWith('Flutter Engine Version:');
+  });
+  if (!actualVersion.contains(expectedVersion)) {
+    print('${red}Expected "Flutter Engine Version: $expectedVersion", '
+          'but found "$actualVersion".');
+    exit(1);
+  }
+}
+
 Future<void> _runSmokeTests() async {
   print('${green}Running smoketests...$reset');
+
+  await _validateEngineHash();
+
   // Verify that the tests actually return failure on failure and success on
   // success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
@@ -282,15 +326,18 @@ Future<void> _runToolTests() async {
   await selectSubshard(subshards);
 }
 
-/// Verifies that AOT, APK, and IPA (if on macOS) builds the examples apps
+/// Verifies that APK, and IPA (if on macOS) builds the examples apps
 /// without crashing. It does not actually launch the apps. That happens later
 /// in the devicelab. This is just a smoke-test. In particular, this will verify
 /// we can build when there are spaces in the path name for the Flutter SDK and
 /// target app.
 Future<void> _runBuildTests() async {
   final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
-    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')));
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')));
   for (final FileSystemEntity fileEntity in exampleDirectories) {
+    // Only verify caching with flutter gallery.
+    final bool verifyCaching = fileEntity.path.contains('flutter_gallery');
     if (fileEntity is! Directory) {
       continue;
     }
@@ -300,15 +347,15 @@ Future<void> _runBuildTests() async {
       ? <String>['--enable-experiment', 'non-nullable']
       : <String>[];
     if (Directory(path.join(examplePath, 'android')).existsSync()) {
-      await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs);
-      await _flutterBuildApk(examplePath, release: true, additionalArgs: additionalArgs);
+      await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+      await _flutterBuildApk(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
     } else {
       print('Example project ${path.basename(examplePath)} has no android directory, skipping apk');
     }
     if (Platform.isMacOS) {
       if (Directory(path.join(examplePath, 'ios')).existsSync()) {
-        await _flutterBuildIpa(examplePath, release: false, additionalArgs: additionalArgs);
-        await _flutterBuildIpa(examplePath, release: true, additionalArgs: additionalArgs);
+        await _flutterBuildIpa(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+        await _flutterBuildIpa(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
       } else {
         print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
       }
@@ -332,9 +379,10 @@ Future<void> _runBuildTests() async {
 
 Future<void> _flutterBuildApk(String relativePathToApplication, {
   @required bool release,
+  bool verifyCaching = false,
   List<String> additionalArgs = const <String>[],
 }) async {
-  print('${green}Testing APK --debug build$reset for $cyan$relativePathToApplication$reset...');
+  print('${green}Testing APK build$reset for $cyan$relativePathToApplication$reset...');
   await runCommand(flutter,
     <String>[
       'build',
@@ -348,11 +396,36 @@ Future<void> _flutterBuildApk(String relativePathToApplication, {
     ],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
   );
+
+  if (verifyCaching) {
+    print('${green}Testing APK cache$reset for $cyan$relativePathToApplication$reset...');
+    await runCommand(flutter,
+      <String>[
+        'build',
+        'apk',
+        '--performance-measurement-file=perf.json',
+        ...additionalArgs,
+        if (release)
+          '--release'
+        else
+          '--debug',
+        '-v',
+      ],
+      workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    );
+    final File file = File(path.join(flutterRoot, relativePathToApplication, 'perf.json'));
+    if (!_allTargetsCached(file)) {
+      print('${red}Not all build targets cached after second run.$reset');
+      print('The target performance data was: ${file.readAsStringSync()}');
+      exit(1);
+    }
+  }
 }
 
 Future<void> _flutterBuildIpa(String relativePathToApplication, {
   @required bool release,
   List<String> additionalArgs = const <String>[],
+  bool verifyCaching = false,
 }) async {
   assert(Platform.isMacOS);
   print('${green}Testing IPA build$reset for $cyan$relativePathToApplication$reset...');
@@ -382,6 +455,38 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {
     ],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
   );
+  if (verifyCaching) {
+    print('${green}Testing IPA cache$reset for $cyan$relativePathToApplication$reset...');
+    await runCommand(flutter,
+      <String>[
+        'build',
+        'ios',
+        '--performance-measurement-file=perf.json',
+        ...additionalArgs,
+        '--no-codesign',
+        if (release)
+          '--release'
+        else
+          '--debug',
+        '-v',
+      ],
+      workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    );
+    final File file = File(path.join(flutterRoot, relativePathToApplication, 'perf.json'));
+    if (!_allTargetsCached(file)) {
+      print('${red}Not all build targets cached after second run.$reset');
+      print('The target performance data was: ${file.readAsStringSync()}');
+      exit(1);
+    }
+  }
+}
+
+bool _allTargetsCached(File performanceFile) {
+  final Map<String, Object> data = json.decode(performanceFile.readAsStringSync())
+    as Map<String, Object>;
+  final List<Map<String, Object>> targets = (data['targets'] as List<Object>)
+    .cast<Map<String, Object>>();
+  return targets.every((Map<String, Object> element) => element['skipped'] == true);
 }
 
 Future<void> _flutterBuildDart2js(String relativePathToApplication, String target, { bool expectNonZeroExit = false }) async {
@@ -480,6 +585,10 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'),
+      options: <String>['--enable-experiment=non-nullable'],
+      skip: true, // TODO(jonahwilliams): re-enable after https://github.com/flutter/flutter/issues/55872
+    );
     await _runFlutterTest(
       path.join(flutterRoot, 'dev', 'tracing_tests'),
       options: <String>['--enable-vmservice'],
@@ -1183,7 +1292,6 @@ int get prNumber {
 }
 
 Future<String> _getAuthors() async {
-  final String exe = Platform.isWindows ? '.exe' : '';
   final String author = await runAndGetStdout(
     'git$exe', <String>['-c', 'log.showSignature=false', 'log', gitHash, '--pretty="%an <%ae>"'],
     workingDirectory: flutterRoot,

@@ -189,6 +189,7 @@ class GestureDetector extends StatelessWidget {
     this.onTapUp,
     this.onTap,
     this.onTapCancel,
+    this.onSecondaryTap,
     this.onSecondaryTapDown,
     this.onSecondaryTapUp,
     this.onSecondaryTapCancel,
@@ -198,6 +199,11 @@ class GestureDetector extends StatelessWidget {
     this.onLongPressMoveUpdate,
     this.onLongPressUp,
     this.onLongPressEnd,
+    this.onSecondaryLongPress,
+    this.onSecondaryLongPressStart,
+    this.onSecondaryLongPressMoveUpdate,
+    this.onSecondaryLongPressUp,
+    this.onSecondaryLongPressEnd,
     this.onVerticalDragDown,
     this.onVerticalDragStart,
     this.onVerticalDragUpdate,
@@ -304,6 +310,18 @@ class GestureDetector extends StatelessWidget {
   ///  * [kPrimaryButton], the button this callback responds to.
   final GestureTapCancelCallback onTapCancel;
 
+  /// A tap with a secondary button has occurred.
+  ///
+  /// This triggers when the tap gesture wins. If the tap gesture did not win,
+  /// [onSecondaryTapCancel] is called instead.
+  ///
+  /// See also:
+  ///
+  ///  * [kSecondaryButton], the button this callback responds to.
+  ///  * [onSecondaryTapUp], which is called at the same time but includes details
+  ///    regarding the pointer position.
+  final GestureTapCallback onSecondaryTap;
+
   /// A pointer that might cause a tap with a secondary button has contacted the
   /// screen at a particular location.
   ///
@@ -324,6 +342,8 @@ class GestureDetector extends StatelessWidget {
   ///
   /// See also:
   ///
+  ///  * [onSecondaryTap], a handler triggered right after this one that doesn't
+  ///    pass any details about the tap.
   ///  * [kSecondaryButton], the button this callback responds to.
   final GestureTapUpCallback onSecondaryTapUp;
 
@@ -393,6 +413,59 @@ class GestureDetector extends StatelessWidget {
   ///  * [onLongPressUp], which has the same timing but without the gesture
   ///    details.
   final GestureLongPressEndCallback onLongPressEnd;
+
+  /// Called when a long press gesture with a secondary button has been
+  /// recognized.
+  ///
+  /// Triggered when a pointer has remained in contact with the screen at the
+  /// same location for a long period of time.
+  ///
+  /// See also:
+  ///
+  ///  * [kSecondaryButton], the button this callback responds to.
+  ///  * [onSecondaryLongPressStart], which has the same timing but has gesture
+  ///    details.
+  final GestureLongPressCallback onSecondaryLongPress;
+
+  /// Called when a long press gesture with a secondary button has been
+  /// recognized.
+  ///
+  /// Triggered when a pointer has remained in contact with the screen at the
+  /// same location for a long period of time.
+  ///
+  /// See also:
+  ///
+  ///  * [kSecondaryButton], the button this callback responds to.
+  ///  * [onSecondaryLongPress], which has the same timing but without the
+  ///    gesture details.
+  final GestureLongPressStartCallback onSecondaryLongPressStart;
+
+  /// A pointer has been drag-moved after a long press with a secondary button.
+  ///
+  /// See also:
+  ///
+  ///  * [kSecondaryButton], the button this callback responds to.
+  final GestureLongPressMoveUpdateCallback onSecondaryLongPressMoveUpdate;
+
+  /// A pointer that has triggered a long-press with a secondary button has
+  /// stopped contacting the screen.
+  ///
+  /// See also:
+  ///
+  ///  * [kSecondaryButton], the button this callback responds to.
+  ///  * [onSecondaryLongPressEnd], which has the same timing but has gesture
+  ///    details.
+  final GestureLongPressUpCallback onSecondaryLongPressUp;
+
+  /// A pointer that has triggered a long-press with a secondary button has
+  /// stopped contacting the screen.
+  ///
+  /// See also:
+  ///
+  ///  * [kSecondaryButton], the button this callback responds to.
+  ///  * [onSecondaryLongPressUp], which has the same timing but without the
+  ///    gesture details.
+  final GestureLongPressEndCallback onSecondaryLongPressEnd;
 
   /// A pointer has contacted the screen with a primary button and might begin
   /// to move vertically.
@@ -601,6 +674,7 @@ class GestureDetector extends StatelessWidget {
       onTapUp != null ||
       onTap != null ||
       onTapCancel != null ||
+      onSecondaryTap != null ||
       onSecondaryTapDown != null ||
       onSecondaryTapUp != null ||
       onSecondaryTapCancel != null
@@ -613,6 +687,7 @@ class GestureDetector extends StatelessWidget {
             ..onTapUp = onTapUp
             ..onTap = onTap
             ..onTapCancel = onTapCancel
+            ..onSecondaryTap = onSecondaryTap
             ..onSecondaryTapDown = onSecondaryTapDown
             ..onSecondaryTapUp = onSecondaryTapUp
             ..onSecondaryTapCancel = onSecondaryTapCancel;
@@ -643,6 +718,24 @@ class GestureDetector extends StatelessWidget {
             ..onLongPressMoveUpdate = onLongPressMoveUpdate
             ..onLongPressEnd =onLongPressEnd
             ..onLongPressUp = onLongPressUp;
+        },
+      );
+    }
+
+    if (onSecondaryLongPress != null ||
+        onSecondaryLongPressUp != null ||
+        onSecondaryLongPressStart != null ||
+        onSecondaryLongPressMoveUpdate != null ||
+        onSecondaryLongPressEnd != null) {
+      gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+        () => LongPressGestureRecognizer(debugOwner: this),
+        (LongPressGestureRecognizer instance) {
+          instance
+            ..onSecondaryLongPress = onSecondaryLongPress
+            ..onSecondaryLongPressStart = onSecondaryLongPressStart
+            ..onSecondaryLongPressMoveUpdate = onSecondaryLongPressMoveUpdate
+            ..onSecondaryLongPressEnd =onSecondaryLongPressEnd
+            ..onSecondaryLongPressUp = onSecondaryLongPressUp;
         },
       );
     }
@@ -1110,7 +1203,7 @@ abstract class SemanticsGestureDelegate {
 // For readers who come here to learn how to write custom semantics delegates:
 // this is not a proper sample code. It has access to the detector state as well
 // as its private properties, which are inaccessible normally. It is designed
-// this way in order to work independenly in a [RawGestureRecognizer] to
+// this way in order to work independently in a [RawGestureRecognizer] to
 // preserve existing behavior.
 //
 // Instead, a normal delegate will store callbacks as properties, and use them

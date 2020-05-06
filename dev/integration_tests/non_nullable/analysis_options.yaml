@@ -3,3 +3,4 @@
 analyzer:
   exclude:
     - lib/main.dart
+    - test/test_test.dart

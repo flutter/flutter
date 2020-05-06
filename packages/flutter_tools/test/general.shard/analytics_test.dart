@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -19,7 +20,6 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:usage/usage_io.dart';
 
 import '../src/common.dart';

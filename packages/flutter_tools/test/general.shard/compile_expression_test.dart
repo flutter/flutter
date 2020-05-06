@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
@@ -14,7 +15,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
-import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
