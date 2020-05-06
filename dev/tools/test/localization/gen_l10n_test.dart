@@ -161,18 +161,18 @@ void main() {
       );
     });
 
-    test('setOutputFile fails if input string is null', () {
+    test('setBaseOutputFile fails if input string is null', () {
       _standardFlutterDirectoryL10nSetup(fs);
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
       try {
-        generator.setOutputFile(null);
+        generator.setBaseOutputFile(null);
       } on L10nException catch (e) {
         expect(e.message, contains('cannot be null'));
         return;
       }
 
       fail(
-        'Attempting to set LocalizationsGenerator.setOutputFile should fail if the '
+        'Attempting to set LocalizationsGenerator.setBaseOutputFile should fail if the '
         'the input string is null.'
       );
     });
@@ -202,7 +202,7 @@ void main() {
           generator.setInputDirectory(defaultL10nPathString);
           generator.setOutputDirectory(defaultL10nPathString);
           generator.setTemplateArbFile(defaultTemplateArbFileName);
-          generator.setOutputFile(defaultOutputFileString);
+          generator.setBaseOutputFile(defaultOutputFileString);
         } on L10nException catch (e) {
           throw TestFailure('Unexpected failure during test setup: ${e.message}');
         }
