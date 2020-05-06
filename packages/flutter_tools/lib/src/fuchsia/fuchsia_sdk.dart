@@ -4,11 +4,10 @@
 
 import 'dart:async';
 
-import 'package:platform/platform.dart';
-
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/platform.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 

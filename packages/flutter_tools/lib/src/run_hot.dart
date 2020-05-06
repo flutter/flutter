@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
-import 'package:platform/platform.dart';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 import 'base/async_guard.dart';
@@ -13,6 +12,7 @@ import 'base/async_guard.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'bundle.dart';
