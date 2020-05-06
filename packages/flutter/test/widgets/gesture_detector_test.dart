@@ -377,6 +377,73 @@ void main() {
       await longPress(kLongPressTimeout + const Duration(seconds: 1)); // To make sure the time for long press has occurred
       expect(longPressUp, 1);
     }, variant: buttonVariant);
+
+    testWidgets('Tap on nested detectors only triggers one onTapDown', (WidgetTester tester) async {
+      final List<String> log = <String>[];
+      await tester.pumpWidget(
+        GestureDetector(
+          // For competition
+          onLongPress: () {},
+          onSecondaryLongPress: () {},
+          onTapDown: ButtonVariant.button == kPrimaryButton ? (_) {
+            log.add('tap1');
+          } : null,
+          onSecondaryTapDown: ButtonVariant.button == kSecondaryButton ? (_) {
+            log.add('tap1');
+          } : null,
+          child: GestureDetector(
+            onTapDown: ButtonVariant.button == kPrimaryButton ? (_) {
+              log.add('tap2');
+            } : null,
+            onSecondaryTapDown: ButtonVariant.button == kSecondaryButton ? (_) {
+              log.add('tap2');
+            } : null,
+            behavior: HitTestBehavior.opaque,
+          ),
+        ),
+      );
+      expect(log, isEmpty);
+      await tester.longPressAt(const Offset(10, 10), buttons: ButtonVariant.button);
+      expect(log, <String>['tap2']);
+    }, variant: buttonVariant);
+
+    testWidgets('Tap on overlapping detectors only triggers one onTapDown', (WidgetTester tester) async {
+      final List<String> log = <String>[];
+      await tester.pumpWidget(
+        Stack(
+          textDirection: TextDirection.ltr,
+          children: <Widget>[
+            GestureDetector(
+              // For competition
+              onLongPress: () {},
+              onSecondaryLongPress: () {},
+              onTapDown: ButtonVariant.button == kPrimaryButton ? (_) {
+                log.add('tap1');
+              } : null,
+              onSecondaryTapDown: ButtonVariant.button == kSecondaryButton ? (_) {
+                log.add('tap1');
+              } : null,
+              behavior: HitTestBehavior.translucent,
+            ),
+            GestureDetector(
+              // For competition
+              onLongPress: () {},
+              onSecondaryLongPress: () {},
+              onTapDown: ButtonVariant.button == kPrimaryButton ? (_) {
+                log.add('tap2');
+              } : null,
+              onSecondaryTapDown: ButtonVariant.button == kSecondaryButton ? (_) {
+                log.add('tap2');
+              } : null,
+              behavior: HitTestBehavior.translucent,
+            ),
+          ]
+        ),
+      );
+      expect(log, isEmpty);
+      await tester.longPressAt(const Offset(10, 10), buttons: ButtonVariant.button);
+      expect(log, <String>['tap2']);
+    }, variant: buttonVariant);
   });
 
   testWidgets('Force Press Callback called after force press', (WidgetTester tester) async {

@@ -131,8 +131,30 @@ typedef GestureTapCancelCallback = void Function();
 ///    any buttons.
 abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a tap gesture recognizer.
-  BaseTapGestureRecognizer({ Object debugOwner })
-    : super(deadline: kPressTimeout , debugOwner: debugOwner);
+  BaseTapGestureRecognizer({
+    Object debugOwner,
+    this.uniqueDown = false,
+  }) : assert(uniqueDown != null),
+       super(deadline: kPressTimeout , debugOwner: debugOwner);
+
+  /// If true, one pointer event can trigger the [handleTapDown] callback on
+  /// multiple tap gesture recognizers.
+  ///
+  /// Usually, when a pointer event is received by multiple gesture recognizers,
+  /// only one recognizer will have its callbacks triggered, which is the winner
+  /// of the gesture arena. This limitation, however, does not apply to
+  /// [handleTapDown] callbacks, such as [TapGestureRecognizer.onTapDown],
+  /// because [handleTapDown] can be triggered without winning the arena, i.e.
+  /// when [deadline] has elapsed since the press.
+  /// 
+  /// Tap gesture recognizers with [uniqueDown] of true is managed by a
+  /// coordinator that tracks whether a pointer has been tracked by a tap gesture
+  /// recognizer, and only tracks the pointer when no one else has. Tap gesture
+  /// recognizers with [uniqueDown] of false does not contribute to, or is
+  /// managed by the coordinator.
+  /// 
+  /// The [uniqueDown] defaults to false.
+  final bool uniqueDown;
 
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
@@ -185,20 +207,32 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   @override
   void addAllowedPointer(PointerDownEvent event) {
     assert(event != null);
+    if (uniqueDown) {
+      if (BaseTapGestureRecognizer._uniqueTapCoordinator.contains(event.pointer)) {
+        return;
+      }
+      BaseTapGestureRecognizer._uniqueTapCoordinator.add(event.pointer);
+    }
     if (state == GestureRecognizerState.ready) {
       // `_down` must be assigned in this method instead of `handlePrimaryPointer`,
       // because `acceptGesture` might be called before `handlePrimaryPointer`,
       // which relies on `_down` to call `handleTapDown`.
       _down = event;
     }
-    if (_down != null) {
-      // This happens when this tap gesture has been rejected while the pointer
-      // is down (i.e. due to movement), when another allowed pointer is added,
-      // in which case all pointers are simply ignored. The `_down` being null
-      // means that _reset() has been called, since it is always set at the
-      // first allowed down event and will not be cleared except for reset(),
-      super.addAllowedPointer(event);
+    if (_down == null) {
+      // This indicates that an allowed pointer is received after this tap
+      // gesture has been rejected but before the pointer becomes up, which is
+      // likely caused by movement. In this case, the recognizer should ignore
+      // this pointer.
+      //
+      // This situation can be safely indicated by `_down` being null for the
+      // following reasoning: `_down` is always set at the first allowed down
+      // event, and will not be cleared except for reset(), therefore `_down`
+      // being null while the state was not `ready` can only mean _reset() has
+      // been called.
+      return;
     }
+    super.addAllowedPointer(event);
   }
 
   @override
@@ -208,6 +242,14 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
     // because calling `_checkDown` in this state will throw exception.
     assert(_down != null);
     super.startTrackingPointer(pointer, transform);
+  }
+
+  @override
+  void stopTrackingPointer(int pointer) {
+    if (uniqueDown) {
+      BaseTapGestureRecognizer._uniqueTapCoordinator.remove(pointer);
+    }
+    super.stopTrackingPointer(pointer);
   }
 
   @override
@@ -306,6 +348,8 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
     properties.add(DiagnosticsProperty<int>('button', _down?.buttons, defaultValue: null));
     properties.add(FlagProperty('sentTapDown', value: _sentTapDown, ifTrue: 'sent tap down'));
   }
+
+  static final Set<int> _uniqueTapCoordinator = <int>{};
 }
 
 /// Recognizes taps.
@@ -330,7 +374,10 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
 ///  * [MultiTapGestureRecognizer]
 class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// Creates a tap gesture recognizer.
-  TapGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  TapGestureRecognizer({
+    Object debugOwner,
+    bool uniqueDown = false,
+  }) : super(debugOwner: debugOwner, uniqueDown: uniqueDown);
 
   /// A pointer has contacted the screen at a particular location with a primary
   /// button, which might be the start of a tap.

@@ -938,4 +938,117 @@ void main() {
 
     expect(didTap, isFalse);
   });
+
+  testGesture('Taps with uniqueDown of true only responds to a pointer once', (GestureTester tester) {
+    final List<String> log = <String>[];
+
+    final TapGestureRecognizer tap1 = TapGestureRecognizer(uniqueDown: true)
+      ..onTapDown = (_) { log.add('down1'); }
+      ..onTapUp = (_) { log.add('up1'); };
+    final TapGestureRecognizer tap2 = TapGestureRecognizer() /* uniqueDown: false */
+      ..onTapDown = (_) { log.add('down2'); }
+      ..onTapUp = (_) { log.add('up2'); };
+    final TapGestureRecognizer tap3 = TapGestureRecognizer(uniqueDown: true)
+      ..onTapDown = (_) { log.add('down3'); }
+      ..onTapUp = (_) { log.add('up3'); };
+
+    // Pointer 1: tap on all 3 recognizers
+    final TestPointer pointer1 = TestPointer(1);
+    final PointerDownEvent down1 = pointer1.down(const Offset(0.0, 0.0));
+    tap1.addPointer(down1);
+    tap2.addPointer(down1);
+    tap3.addPointer(down1);
+    tester.closeArena(pointer1.pointer);
+    tester.route(down1);
+    expect(log, isEmpty);
+
+    tester.async.elapse(const Duration(seconds: 1));
+    expect(log, <String>['down1', 'down2']);
+    log.clear();
+
+    tester.route(pointer1.up());
+    GestureBinding.instance.gestureArena.sweep(pointer1.pointer);
+    expect(log, <String>['up1']);
+    log.clear();
+
+    // Pointer 2: tap on 2 and 3
+    final TestPointer pointer2 = TestPointer(2);
+    final PointerDownEvent down2 = pointer2.down(const Offset(0.0, 0.0));
+    tap2.addPointer(down2);
+    tap3.addPointer(down2);
+    tester.closeArena(pointer2.pointer);
+    tester.route(down2);
+    expect(log, isEmpty);
+
+    tester.async.elapse(const Duration(seconds: 1));
+    expect(log, <String>['down2', 'down3']);
+    log.clear();
+
+    tester.route(pointer2.up());
+    GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
+    expect(log, <String>['up2']);
+    log.clear();
+
+    // Pointer 3: tap on 1 and 2
+    // Pointer 4: tap on 2 and 3
+    final TestPointer pointer3 = TestPointer(3);
+    final PointerDownEvent down3 = pointer3.down(const Offset(0.0, 0.0));
+    tap1.addPointer(down3);
+    tap2.addPointer(down3);
+    tester.closeArena(pointer3.pointer);
+    tester.route(down3);
+    expect(log, isEmpty);
+
+    final TestPointer pointer4 = TestPointer(4);
+    final PointerDownEvent down4 = pointer4.down(const Offset(0.0, 0.0));
+    tap2.addPointer(down4);
+    tap3.addPointer(down4);
+    tester.closeArena(pointer4.pointer);
+    tester.route(down4);
+    expect(log, isEmpty);
+
+    tester.async.elapse(const Duration(seconds: 1));
+    expect(log, <String>['down1', 'down2', 'down3']);
+    log.clear();
+
+    tester.route(pointer3.up());
+    GestureBinding.instance.gestureArena.sweep(pointer3.pointer);
+    expect(log, <String>['up1']);
+    log.clear();
+
+    tester.route(pointer4.up());
+    GestureBinding.instance.gestureArena.sweep(pointer4.pointer);
+    expect(log, isEmpty);
+    log.clear();
+  });
+
+  testGesture('Taps with uniqueDown of true only coordinate allowed pointers', (GestureTester tester) {
+    final List<String> log = <String>[];
+
+    final TapGestureRecognizer tap1 = TapGestureRecognizer(uniqueDown: true)
+      ..onTapDown = (_) { log.add('down1'); };
+    final TapGestureRecognizer tap2 = TapGestureRecognizer(uniqueDown: true)
+      ..onSecondaryTapDown = (_) { log.add('secondaryDown2'); };
+    final TapGestureRecognizer tap3 = TapGestureRecognizer(uniqueDown: true)
+      ..onTapDown = (_) { log.add('down3'); }
+      ..onSecondaryTapDown = (_) { log.add('secondaryDown3'); };
+    final TapGestureRecognizer tap4 = TapGestureRecognizer() // For competition
+      ..onTapDown = (_) {}
+      ..onSecondaryTapDown = (_) {};
+
+    // Pointer 1: tap with secondary button
+    final TestPointer pointer1 = TestPointer(1);
+    final PointerDownEvent down1 = pointer1.down(const Offset(0.0, 0.0), buttons: kSecondaryButton);
+    tap1.addPointer(down1);
+    tap2.addPointer(down1);
+    tap3.addPointer(down1);
+    tap4.addPointer(down1);
+    tester.closeArena(pointer1.pointer);
+    tester.route(down1);
+    expect(log, isEmpty);
+
+    tester.async.elapse(const Duration(seconds: 1));
+    expect(log, <String>['secondaryDown2']);
+    log.clear();
+  });
 }
