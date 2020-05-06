@@ -1,4 +1,4 @@
-Signature: a796c0c6c1c0f4026259027ef49a46ed
+Signature: 6fb623ea465f52015725b66f5ed9afb7
 
 UNUSED LICENSES:
 
@@ -4619,9 +4619,6 @@ FILE: ../../../third_party/skia/docs/examples/Path_Iter_isCloseLine.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_Iter_isClosedContour.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_Iter_next.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_Iter_setPath.cpp
-FILE: ../../../third_party/skia/docs/examples/Path_RawIter_conicWeight.cpp
-FILE: ../../../third_party/skia/docs/examples/Path_RawIter_next.cpp
-FILE: ../../../third_party/skia/docs/examples/Path_RawIter_peek.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_SegmentMask.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_Verb.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_addArc.cpp
