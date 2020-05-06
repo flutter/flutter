@@ -51,4 +51,73 @@ void main() {
       expect(getVersionFromParts(parts), '11.2.33-1.0.pre');
     });
   });
+
+  group('incrementLevel()', () {
+    const String hash = 'abc123';
+
+    test('throws exception if hash is not valid release candidate', () {
+      String level = 'z';
+
+      String version = '1.0.0-0.0.pre';
+      expect(
+        () => incrementLevel(version, level),
+        throwsException,
+        reason: 'should throw because $version is not valid output of `git describe`',
+      );
+
+      version = '1.1.1-1.1.pre.1-0-g$hash';
+      expect(
+        () => incrementLevel(version, level),
+        throwsException,
+        reason: 'should throw because $version is 0 commits past last tag'
+      );
+
+      version = '1.0.0-0.0.pre-1-g$hash';
+      level = 'q';
+      expect(
+        () => incrementLevel(version, level),
+        throwsException,
+        reason: 'should throw because $level is unsupported',
+      );
+    });
+
+    test('successfully increments x', () {
+      const String level = 'x';
+
+      String version = '1.0.0-0.0.pre-1-g$hash';
+      expect(incrementLevel(version, level), '2.0.0-0.0.pre');
+
+      version = '10.20.0-40.50.pre-1-g$hash';
+      expect(incrementLevel(version, level), '11.0.0-0.0.pre');
+
+      version = '1.18.0-3.0.pre-912-g$hash';
+      expect(incrementLevel(version, level), '2.0.0-0.0.pre');
+    });
+
+    test('successfully increments y', () {
+      const String level = 'y';
+
+      String version = '1.0.0-0.0.pre-1-g$hash';
+      expect(incrementLevel(version, level), '1.1.0-0.0.pre');
+
+      version = '10.20.0-40.50.pre-1-g$hash';
+      expect(incrementLevel(version, level), '10.21.0-0.0.pre');
+
+      version = '1.18.0-3.0.pre-912-g$hash';
+      expect(incrementLevel(version, level), '1.19.0-0.0.pre');
+    });
+
+    test('successfully increments z', () {
+      const String level = 'z';
+
+      String version = '1.0.0-0.0.pre-1-g$hash';
+      expect(incrementLevel(version, level), '1.0.0-1.0.pre');
+
+      version = '10.20.0-40.50.pre-1-g$hash';
+      expect(incrementLevel(version, level), '10.20.0-41.0.pre');
+
+      version = '1.18.0-3.0.pre-912-g$hash';
+      expect(incrementLevel(version, level), '1.18.0-4.0.pre');
+    });
+  });
 }

@@ -103,45 +103,8 @@ void main(List<String> args) {
   runGit('reset $commit --hard', 'reset to the release commit');
 
   String version = getFullTag();
-  final Match match = parseFullTag(version);
-  if (match == null) {
-    print('Could not determine the version for this build.');
-    if (version.isNotEmpty)
-      print('Git reported the latest version as "$version", which does not fit the expected pattern.');
-    exit(1);
-  }
 
-  final List<int> parts = match.groups(<int>[1, 2, 3, 4, 5]).map<int>(int.parse).toList();
-
-  if (match.group(6) == '0') {
-    print('This commit has already been released, as version ${getVersionFromParts(parts)}.');
-    exit(0);
-  }
-
-  switch (level) {
-    case kX:
-      parts[0] += 1;
-      parts[1] = 0;
-      parts[2] = 0;
-      parts[3] = 0;
-      parts[4] = 0;
-      break;
-    case kY:
-      parts[1] += 1;
-      parts[2] = 0;
-      parts[3] = 0;
-      parts[4] = 0;
-      break;
-    case kZ:
-      parts[2] = 0;
-      parts[3] += 1;
-      parts[4] = 0;
-      break;
-    default:
-      print('Unknown increment level. The valid values are "$kX", "$kY", and "$kZ".');
-      exit(1);
-  }
-  version = getVersionFromParts(parts);
+  version = incrementLevel(version, level);
 
   if (justPrint) {
     print(version);
@@ -213,6 +176,54 @@ void runGit(String command, String explanation) {
   final ProcessResult result = _runGit(command);
   if (result.exitCode != 0)
     _reportGitFailureAndExit(result, explanation);
+}
+
+/// Return a copy of the [version] with [level] incremented by one.
+String incrementLevel(String version, String level) {
+  final Match match = parseFullTag(version);
+  if (match == null) {
+    String errorMessage;
+    if (version.isEmpty) {
+      errorMessage = 'Could not determine the version for this build.';
+    } else {
+      errorMessage = 'Git reported the latest version as "$version", which '
+          'does not fit the expected pattern.';
+    }
+    throw Exception(errorMessage);
+  }
+
+  final List<int> parts = match.groups(<int>[1, 2, 3, 4, 5]).map<int>(int.parse).toList();
+
+  if (match.group(6) == '0') {
+    throw Exception(
+      'This commit has already been released, as version '
+      '${getVersionFromParts(parts)}.'
+    );
+  }
+
+  switch (level) {
+    case kX:
+      parts[0] += 1;
+      parts[1] = 0;
+      parts[2] = 0;
+      parts[3] = 0;
+      parts[4] = 0;
+      break;
+    case kY:
+      parts[1] += 1;
+      parts[2] = 0;
+      parts[3] = 0;
+      parts[4] = 0;
+      break;
+    case kZ:
+      parts[2] = 0;
+      parts[3] += 1;
+      parts[4] = 0;
+      break;
+    default:
+      throw Exception('Unknown increment level. The valid values are "$kX", "$kY", and "$kZ".');
+  }
+  return getVersionFromParts(parts);
 }
 
 ProcessResult _runGit(String command) {
