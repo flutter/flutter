@@ -37,7 +37,7 @@ class BrowserAutofillHints {
           'creditCardSecurityCode': 'cc-csc',
           'creditCardType': 'cc-type',
           'email': 'email',
-          'familyName': 'familyName',
+          'familyName': 'family-name',
           'fullStreetAddress': 'street-address',
           'gender': 'sex',
           'givenName': 'given-name',

@@ -26,7 +26,6 @@ abstract class EngineInputType {
         return url;
       case 'TextInputType.multiline':
         return multiline;
-
       case 'TextInputType.text':
       default:
         return text;
