@@ -74,7 +74,13 @@ class Keyboard {
   /// Initializing with `0x0` which means no meta keys are pressed.
   int _lastMetaState = 0x0;
 
-  void _handleHtmlEvent(html.KeyboardEvent event) {
+  void _handleHtmlEvent(html.Event event) {
+    if (event is! html.KeyboardEvent) {
+      return;
+    }
+
+    final html.KeyboardEvent keyboardEvent = event as html.KeyboardEvent;
+
     if (window._onPlatformMessage == null) {
       return;
     }
@@ -83,7 +89,7 @@ class Keyboard {
       event.preventDefault();
     }
 
-    final String timerKey = event.code;
+    final String timerKey = keyboardEvent.code;
 
     // Don't synthesize a keyup event for modifier keys because the browser always
     // sends a keyup event for those.
@@ -111,8 +117,8 @@ class Keyboard {
     final Map<String, dynamic> eventData = <String, dynamic>{
       'type': event.type,
       'keymap': 'web',
-      'code': event.code,
-      'key': event.key,
+      'code': keyboardEvent.code,
+      'key': keyboardEvent.key,
       'metaState': _lastMetaState,
     };
 
