@@ -135,10 +135,13 @@ void main(List<String> args) {
   print('Flutter version $version has been rolled to the "dev" channel!');
 }
 
+/// Obtain the version tag of the previous dev release.
 String getFullTag() {
   const String glob = '*.*.*-*.*.pre';
+  // describe the latest dev release
+  const String ref = 'refs/heads/dev';
   return getGitOutput(
-    'describe --match $glob --first-parent --long --tags',
+    'describe --match $glob --exact-match --tags $ref',
     'obtain last released version number',
   );
 }
@@ -146,7 +149,7 @@ String getFullTag() {
 Match parseFullTag(String version) {
   // of the form: x.y.z-m.n.pre-c-g<revision>
   final RegExp versionPattern = RegExp(
-    r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre-(\d+)-g([a-f0-9]+)$');
+    r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre$');
   return versionPattern.matchAsPrefix(version);
 }
 
