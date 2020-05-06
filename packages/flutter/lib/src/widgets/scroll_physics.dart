@@ -267,9 +267,10 @@ class ScrollPhysics {
     @required bool isScrolling,
     @required double velocity,
   }) {
-    return (parent == null)
-      ? position.pixels
-      : parent.adjustPositionForNewDimensions(position, isScrolling: isScrolling, velocity: velocity);
+    if (parent == null) {
+      return position.pixels;
+    }
+    return parent.adjustPositionForNewDimensions(position, isScrolling: isScrolling, velocity: velocity);
   }
 
   /// Returns a simulation for ballistic scrolling starting from the given
