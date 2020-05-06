@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -392,7 +393,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-    }, skip: const LocalPlatform().isWindows); // mDNS does not work on Windows.
+    }, skip: io.Platform.isWindows); // mDNS does not work on Windows.
 
     group('forwarding to given port', () {
       const int devicePort = 499;
