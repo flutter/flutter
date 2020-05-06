@@ -682,12 +682,12 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         _controller ??= AnimationController(vsync: snapConfiguration.vsync, duration: duration);
         _controller.duration = duration;
         _animation = _controller
-        .drive(
-          Tween<double>(
-            begin: _effectiveScrollOffset,
-            end: maxExtent - minTargetExtent ,
-          ).chain(CurveTween(curve: curve)),
-        );
+          .drive(
+            Tween<double>(
+              begin: _effectiveScrollOffset,
+              end: maxExtent - minTargetExtent ,
+            ).chain(CurveTween(curve: curve)),
+          );
       } else {
         _effectiveScrollOffset = maxExtent - minTargetExtent;
         markNeedsLayout();
