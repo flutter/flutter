@@ -235,7 +235,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       canvas.drawRRect(RRect.fromRectAndRadius(_thumbRect, radius), _paint);
   }
 
-  double _thumbExtent() {
+  /// Calculates the current size of the thumb in pixels.
+  double thumbExtent() {
     // Thumb extent reflects fraction of content visible, as long as this
     // isn't less than the absolute minimum size.
     // _totalContentExtent >= viewportDimension, so (_totalContentExtent - _mainAxisPadding) > 0
@@ -300,7 +301,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   double getTrackToScroll(double thumbOffsetLocal) {
     assert(thumbOffsetLocal != null);
     final double scrollableExtent = _lastMetrics.maxScrollExtent - _lastMetrics.minScrollExtent;
-    final double thumbMovableExtent = _trackExtent - _thumbExtent();
+    final double thumbMovableExtent = _trackExtent - thumbExtent();
 
     return scrollableExtent * thumbOffsetLocal / thumbMovableExtent;
   }
@@ -330,7 +331,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     }
 
     final double beforePadding = _isVertical ? padding.top : padding.left;
-    final double thumbExtent = _thumbExtent();
+    final double thumbExtent = thumbExtent();
     final double thumbOffsetLocal = _getScrollToTrack(_lastMetrics, thumbExtent);
     final double thumbOffset = thumbOffsetLocal + mainAxisMargin + beforePadding;
 
