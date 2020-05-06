@@ -351,7 +351,6 @@ tasks:
       Verifies that track-widget-creation can be enabled and disabled.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    flaky: true
 
   android_defines_test:
     description: >
@@ -386,15 +385,12 @@ tasks:
   #   required_agent_capabilities: ["linux/android"]
   #   flaky: true
 
-  # TODO(jonahwilliams): marked as flaky to due unreproducible errors
-  # 55875 and 55811
   flutter_attach_test_android:
     description: >
       Tests the `flutter attach` command.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
     timeout_in_minutes: 20
-    flaky: true
 
   named_isolates_test:
     description: >
@@ -603,14 +599,6 @@ tasks:
       Verifies that track-widget-creation can be enabled and disabled.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
-
-  mac_enable_twc:
-    description: >
-      Verifies that track-widget-creation can be enabled and disabled.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   # TODO(fujino): does not pass on iOS13 https://github.com/flutter/flutter/issues/43029
   # system_debug_ios:
@@ -674,6 +662,14 @@ tasks:
       Checks the functionality and performance of hot reload on a macOS target platform
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
+
+#  TODO(jonahwilliams): investigate build failures on devicelab infra to re-enable.
+#  mac_enable_twc:
+#    description: >
+#      Verifies that track-widget-creation can be enabled and disabled.
+#    stage: devicelab_ios
+#    required_agent_capabilities: ["mac/ios"]
+#    flaky: true
 
   ios_app_with_watch_companion:
     description: >
