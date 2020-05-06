@@ -22,7 +22,6 @@ const double _singleLineVerticalPadding = 14.0;
 // See https://material.io/components/snackbars#specs, 'Longer Action Text' does
 // not match spec.
 
-
 const Duration _snackBarTransitionDuration = Duration(milliseconds: 250);
 const Duration _snackBarDisplayDuration = Duration(milliseconds: 4000);
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
