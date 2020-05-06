@@ -37,22 +37,10 @@ void main(List<String> args) {
     exit(1);
   }
 
-  final String level = argResults[kIncrement] as String;
-  final String commit = argResults[kCommit] as String;
-  final String origin = argResults[kOrigin] as String;
-  final bool justPrint = argResults[kJustPrint] as bool;
-  final bool autoApprove = argResults[kYes] as bool;
-  final bool help = argResults[kHelp] as bool;
-
   try {
     run(
       usage: argParser.usage,
-      level: level,
-      commit: commit,
-      origin: origin,
-      justPrint: justPrint,
-      autoApprove: autoApprove,
-      help: help,
+      argResults: argResults,
       getGitOutput: getGitOutput,
     );
   } on Exception catch (e) {
@@ -68,14 +56,16 @@ typedef GitWrapper = String Function(String command, String explanation);
 /// Returns true if publishing was successful, else false.
 bool run({
   @required String usage,
-  @required String level,
-  @required String commit,
-  @required String origin,
-  @required bool justPrint,
-  @required bool autoApprove,
-  @required bool help,
+  @required ArgResults argResults,
   @required GitWrapper getGitOutput,
 }) {
+  final String level = argResults[kIncrement] as String;
+  final String commit = argResults[kCommit] as String;
+  final String origin = argResults[kOrigin] as String;
+  final bool justPrint = argResults[kJustPrint] as bool;
+  final bool autoApprove = argResults[kYes] as bool;
+  final bool help = argResults[kHelp] as bool;
+
   if (help || level == null || commit == null) {
     print(
       'roll_dev.dart --increment=level --commit=hash • update the version tags '
