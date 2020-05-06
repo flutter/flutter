@@ -23,8 +23,6 @@ const double _singleLineVerticalPadding = 14.0;
 // not match spec.
 
 
-// TODO(ianh): Implement the Tablet version of snackbar if we're "on a tablet",
-// https://github.com/flutter/flutter/issues/52114
 
 const Duration _snackBarTransitionDuration = Duration(milliseconds: 250);
 const Duration _snackBarDisplayDuration = Duration(milliseconds: 4000);
