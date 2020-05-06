@@ -2079,7 +2079,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _primaryScrollController.animateTo(
         0.0,
         duration: const Duration(milliseconds: 300),
-        curve: Curves.linear, // Which one?
+        curve: Curves.linear, // TODO(ianh): Use a more appropriate curve.
       );
     }
   }
