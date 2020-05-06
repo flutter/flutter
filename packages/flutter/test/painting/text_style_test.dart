@@ -178,7 +178,7 @@ void main() {
     expect(ps2, equals(ui.ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
     final ui.ParagraphStyle ps5 = s5.getParagraphStyle();
     expect(ps5, equals(ui.ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56307
 
 
   test('TextStyle with text direction', () {
@@ -208,7 +208,7 @@ void main() {
 
     const TextStyle s10 = TextStyle(fontFamilyFallback: <String>[], package: 'p');
     expect(s10.fontFamilyFallback, <String>[]);
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56307
 
   test('TextStyle font family fallback', () {
     const TextStyle s1 = TextStyle(fontFamilyFallback: <String>['Roboto', 'test']);
@@ -238,7 +238,7 @@ void main() {
     expect(s2.apply().fontFamilyFallback, const <String>['Roboto', 'test']);
     expect(s2.apply(fontFamily: 'bar').fontFamily, 'bar');
     expect(s2.apply(fontFamilyFallback: const <String>['Banana']).fontFamilyFallback, const <String>['Banana']);
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/32233
 
   test('TextStyle.debugLabel', () {
     const TextStyle unknown = TextStyle();
