@@ -905,6 +905,8 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_messa
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/module.modulemap
@@ -1223,6 +1225,8 @@ FILE: ../../../flutter/shell/platform/windows/win32_window.cc
 FILE: ../../../flutter/shell/platform/windows/win32_window.h
 FILE: ../../../flutter/shell/platform/windows/win32_window_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/window_state.h
+FILE: ../../../flutter/shell/profiling/sampling_profiler.cc
+FILE: ../../../flutter/shell/profiling/sampling_profiler.h
 FILE: ../../../flutter/shell/version/version.cc
 FILE: ../../../flutter/shell/version/version.h
 FILE: ../../../flutter/sky/packages/flutter_services/lib/empty.dart

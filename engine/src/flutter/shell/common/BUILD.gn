@@ -126,6 +126,7 @@ source_set("common") {
     "//flutter/fml",
     "//flutter/lib/ui",
     "//flutter/runtime",
+    "//flutter/shell/profiling",
     "//third_party/dart/runtime:dart_api",
     "//third_party/skia",
   ]
