@@ -188,7 +188,7 @@ String getFullTag(Git git) {
 }
 
 Match parseFullTag(String version) {
-  // of the form: x.y.z-m.n.pre-c-g<revision>
+  // of the form: x.y.z-m.n.pre
   final RegExp versionPattern = RegExp(
     r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre$');
   return versionPattern.matchAsPrefix(version);
@@ -210,6 +210,7 @@ String getVersionFromParts(List<int> parts) {
 
 class Git {
   const Git();
+
   String getOutput(String command, String explanation) {
     final ProcessResult result = _run(command);
     if ((result.stderr as String).isEmpty && result.exitCode == 0)

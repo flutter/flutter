@@ -100,7 +100,7 @@ void main() {
       }
       const String pattern = r'The current directory is not a Flutter '
         'repository checkout with a correctly configured upstream remote.';
-      expect(exception.toString(), contains(pattern));
+      expect(exception?.toString(), contains(pattern));
     });
 
     test('throws exception if git checkout not clean', () {
@@ -129,7 +129,7 @@ void main() {
       const String pattern = r'Your git repository is not clean. Try running '
         '"git clean -fd". Warning, this will delete files! Run with -n to find '
         'out which ones.';
-      expect(exception.toString(), contains(pattern));
+      expect(exception?.toString(), contains(pattern));
     });
 
     test('does not tag if --just-print is specified', () {
