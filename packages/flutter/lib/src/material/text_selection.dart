@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -29,6 +30,7 @@ const double _kToolbarContentDistance = 8.0;
 /// Manages a copy/paste text selection toolbar.
 class _TextSelectionToolbar extends StatefulWidget {
   const _TextSelectionToolbar({
+    this.clipboardStatus,
     Key key,
     this.handleCut,
     this.handleCopy,
@@ -37,6 +39,7 @@ class _TextSelectionToolbar extends StatefulWidget {
     this.isAbove,
   }) : super(key: key);
 
+  final ClipboardStatusNotifier clipboardStatus;
   final VoidCallback handleCut;
   final VoidCallback handleCopy;
   final VoidCallback handlePaste;
@@ -50,6 +53,8 @@ class _TextSelectionToolbar extends StatefulWidget {
 }
 
 class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with TickerProviderStateMixin {
+  ClipboardStatusNotifier _clipboardStatus;
+
   // Whether or not the overflow menu is open. When it is closed, the menu
   // items that don't overflow are shown. When it is open, only the overflowing
   // menu items are shown.
@@ -66,33 +71,93 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
     );
   }
 
+  // Close the menu and reset layout calculations, as in when the menu has
+  // changed and saved values are no longer relevant. This should be called in
+  // setState or another context where a rebuild is happening.
+  void _reset() {
+    // Change _TextSelectionToolbarContainer's key when the menu changes in
+    // order to cause it to rebuild. This lets it recalculate its
+    // saved width for the new set of children, and it prevents AnimatedSize
+    // from animating the size change.
+    _containerKey = UniqueKey();
+    // If the menu items change, make sure the overflow menu is closed. This
+    // prevents an empty overflow menu.
+    _overflowOpen = false;
+  }
+
+  void _onChangedClipboardStatus() {
+    setState(() {
+      // Inform the widget that the value of clipboardStatus has changed.
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _clipboardStatus = widget.clipboardStatus ?? ClipboardStatusNotifier();
+    _clipboardStatus.addListener(_onChangedClipboardStatus);
+    _clipboardStatus.update();
+  }
+
   @override
   void didUpdateWidget(_TextSelectionToolbar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If the children are changing, the current page should be reset.
     if (((widget.handleCut == null) != (oldWidget.handleCut == null))
       || ((widget.handleCopy == null) != (oldWidget.handleCopy == null))
       || ((widget.handlePaste == null) != (oldWidget.handlePaste == null))
       || ((widget.handleSelectAll == null) != (oldWidget.handleSelectAll == null))) {
-      // Change _TextSelectionToolbarContainer's key when the menu changes in
-      // order to cause it to rebuild. This lets it recalculate its
-      // saved width for the new set of children, and it prevents AnimatedSize
-      // from animating the size change.
-      _containerKey = UniqueKey();
-      // If the menu items change, make sure the overflow menu is closed. This
-      // prevents an empty overflow menu.
-      _overflowOpen = false;
+      _reset();
     }
-    super.didUpdateWidget(oldWidget);
+    if (oldWidget.clipboardStatus == null && widget.clipboardStatus != null) {
+      _clipboardStatus.removeListener(_onChangedClipboardStatus);
+      _clipboardStatus.dispose();
+      _clipboardStatus = widget.clipboardStatus;
+    } else if (oldWidget.clipboardStatus != null) {
+      if (widget.clipboardStatus == null) {
+        _clipboardStatus = ClipboardStatusNotifier();
+        _clipboardStatus.addListener(_onChangedClipboardStatus);
+        oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
+      } else if (widget.clipboardStatus != oldWidget.clipboardStatus) {
+        _clipboardStatus = widget.clipboardStatus;
+        _clipboardStatus.addListener(_onChangedClipboardStatus);
+        oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
+      }
+    }
+    if (widget.handlePaste != null) {
+      _clipboardStatus.update();
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // When used in an Overlay, this can be disposed after its creator has
+    // already disposed _clipboardStatus.
+    if (!_clipboardStatus.disposed) {
+      _clipboardStatus.removeListener(_onChangedClipboardStatus);
+      if (widget.clipboardStatus == null) {
+        _clipboardStatus.dispose();
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Don't render the menu until the state of the clipboard is known.
+    if (widget.handlePaste != null
+        && _clipboardStatus.value == ClipboardStatus.unknown) {
+      return const SizedBox(width: 0.0, height: 0.0);
+    }
+
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final List<Widget> items = <Widget>[
       if (widget.handleCut != null)
         _getItem(widget.handleCut, localizations.cutButtonLabel),
       if (widget.handleCopy != null)
         _getItem(widget.handleCopy, localizations.copyButtonLabel),
-      if (widget.handlePaste != null)
+      if (widget.handlePaste != null
+          && _clipboardStatus.value == ClipboardStatus.pasteable)
         _getItem(widget.handlePaste, localizations.pasteButtonLabel),
       if (widget.handleSelectAll != null)
         _getItem(widget.handleSelectAll, localizations.selectAllButtonLabel),
@@ -102,7 +167,6 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
     if (items.isEmpty) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
-
 
     return _TextSelectionToolbarContainer(
       key: _containerKey,
@@ -527,6 +591,18 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     }
     return false;
   }
+
+  // Visit only the children that should be painted.
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
+      if (childParentData.shouldPaint) {
+        visitor(renderObjectChild);
+      }
+    });
+  }
 }
 
 /// Centers the toolbar around the given anchor, ensuring that it remains on
@@ -630,6 +706,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
+    ClipboardStatusNotifier clipboardStatus,
   ) {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
@@ -665,8 +742,9 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
             fitsAbove,
           ),
           child: _TextSelectionToolbar(
+            clipboardStatus: clipboardStatus,
             handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
-            handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
+            handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
             handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
             handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
             isAbove: fitsAbove,
