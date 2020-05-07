@@ -461,6 +461,16 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
 
+    // Cancel
+    await gesture.cancel();
+    await tester.pumpAndSettle();
+    expect(material, paintsNothing);
+
+    // Press again
+    await gesture.down(tester.getCenter(find.byKey(innerKey)));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
     // Use a second pointer to press
     final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 2);
     await tester.pump(const Duration(milliseconds: 200));
