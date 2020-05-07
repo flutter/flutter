@@ -12,7 +12,7 @@ void main() {
   group('run()', () {
     const String usage = 'usage info...';
     const String level = 'z';
-    const String commit = 'abc123';
+    const String commit = 'abcde012345';
     const String origin = 'upstream';
     FakeArgResults fakeArgResults;
     MockGit mockGit;
@@ -157,6 +157,32 @@ void main() {
       verifyNever(mockGit.getOutput('rev-parse HEAD', any));
     });
 
+    test('successfully tags and publishes release', () {
+      when(mockGit.getOutput('remote get-url $origin', any)).thenReturn(kUpstreamRemote);
+      when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
+      when(mockGit.getOutput(
+        'describe --match *.*.*-*.*.pre --exact-match --tags refs/heads/dev',
+        any,
+      )).thenReturn('1.2.3-0.0.pre');
+      when(mockGit.getOutput('rev-parse HEAD', any)).thenReturn(commit);
+      fakeArgResults = FakeArgResults(
+        level: level,
+        commit: commit,
+        origin: origin,
+        justPrint: false,
+        autoApprove: true,
+        help: false,
+      );
+      expect(run(
+        usage: usage,
+        argResults: fakeArgResults,
+        git: mockGit,
+      ), true);
+      verify(mockGit.run('fetch $origin', any));
+      verify(mockGit.run('reset $commit --hard', any));
+      verify(mockGit.run('tag 1.2.0-1.0.pre', any));
+      verify(mockGit.run('push $origin HEAD:dev', any));
+    });
   });
 
   group('parseFullTag', () {
