@@ -19,12 +19,14 @@ struct ThreadHost {
     UI = 1 << 1,
     GPU = 1 << 2,
     IO = 1 << 3,
+    Profiler = 1 << 4,
   };
 
   std::unique_ptr<fml::Thread> platform_thread;
   std::unique_ptr<fml::Thread> ui_thread;
   std::unique_ptr<fml::Thread> raster_thread;
   std::unique_ptr<fml::Thread> io_thread;
+  std::unique_ptr<fml::Thread> profiler_thread;
 
   ThreadHost();
 
