@@ -26,6 +26,10 @@ ThreadHost::ThreadHost(std::string name_prefix, uint64_t mask) {
   if (mask & ThreadHost::Type::IO) {
     io_thread = std::make_unique<fml::Thread>(name_prefix + ".io");
   }
+
+  if (mask & ThreadHost::Type::Profiler) {
+    profiler_thread = std::make_unique<fml::Thread>(name_prefix + ".profiler");
+  }
 }
 
 ThreadHost::~ThreadHost() = default;
@@ -35,6 +39,7 @@ void ThreadHost::Reset() {
   ui_thread.reset();
   raster_thread.reset();
   io_thread.reset();
+  profiler_thread.reset();
 }
 
 }  // namespace flutter

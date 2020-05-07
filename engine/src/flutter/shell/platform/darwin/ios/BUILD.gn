@@ -79,6 +79,8 @@ source_set("flutter_framework_source") {
     "framework/Source/platform_message_response_darwin.mm",
     "framework/Source/platform_message_router.h",
     "framework/Source/platform_message_router.mm",
+    "framework/Source/profiler_metrics_ios.h",
+    "framework/Source/profiler_metrics_ios.mm",
     "framework/Source/vsync_waiter_ios.h",
     "framework/Source/vsync_waiter_ios.mm",
     "ios_context.h",
@@ -131,6 +133,7 @@ source_set("flutter_framework_source") {
     "//flutter/shell/common",
     "//flutter/shell/platform/darwin/common",
     "//flutter/shell/platform/darwin/common:framework_shared",
+    "//flutter/shell/profiling:profiling",
     "//third_party/skia",
   ]
 

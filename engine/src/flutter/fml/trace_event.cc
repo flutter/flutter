@@ -219,6 +219,40 @@ void TraceEventInstant0(TraceArg category_group, TraceArg name) {
   );
 }
 
+void TraceEventInstant1(TraceArg category_group,
+                        TraceArg name,
+                        TraceArg arg1_name,
+                        TraceArg arg1_val) {
+  const char* arg_names[] = {arg1_name};
+  const char* arg_values[] = {arg1_val};
+  FlutterTimelineEvent(name,                         // label
+                       Dart_TimelineGetMicros(),     // timestamp0
+                       0,                            // timestamp1_or_async_id
+                       Dart_Timeline_Event_Instant,  // event type
+                       1,                            // argument_count
+                       arg_names,                    // argument_names
+                       arg_values                    // argument_values
+  );
+}
+
+void TraceEventInstant2(TraceArg category_group,
+                        TraceArg name,
+                        TraceArg arg1_name,
+                        TraceArg arg1_val,
+                        TraceArg arg2_name,
+                        TraceArg arg2_val) {
+  const char* arg_names[] = {arg1_name, arg2_name};
+  const char* arg_values[] = {arg1_val, arg2_val};
+  FlutterTimelineEvent(name,                         // label
+                       Dart_TimelineGetMicros(),     // timestamp0
+                       0,                            // timestamp1_or_async_id
+                       Dart_Timeline_Event_Instant,  // event type
+                       2,                            // argument_count
+                       arg_names,                    // argument_names
+                       arg_values                    // argument_values
+  );
+}
+
 void TraceEventFlowBegin0(TraceArg category_group,
                           TraceArg name,
                           TraceIDArg id) {
@@ -321,6 +355,18 @@ void TraceEventAsyncEnd1(TraceArg category_group,
                          TraceArg arg1_val) {}
 
 void TraceEventInstant0(TraceArg category_group, TraceArg name) {}
+
+void TraceEventInstant1(TraceArg category_group,
+                        TraceArg name,
+                        TraceArg arg1_name,
+                        TraceArg arg1_val) {}
+
+void TraceEventInstant2(TraceArg category_group,
+                        TraceArg name,
+                        TraceArg arg1_name,
+                        TraceArg arg1_val,
+                        TraceArg arg2_name,
+                        TraceArg arg2_val) {}
 
 void TraceEventFlowBegin0(TraceArg category_group,
                           TraceArg name,

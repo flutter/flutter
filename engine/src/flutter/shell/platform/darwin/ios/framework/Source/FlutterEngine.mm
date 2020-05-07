@@ -24,11 +24,14 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 #include "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
+#include "flutter/shell/profiling/sampling_profiler.h"
 
 NSString* const FlutterDefaultDartEntrypoint = nil;
+static constexpr int kNumProfilerSamplesPerSec = 5;
 
 @interface FlutterEngineRegistrar : NSObject <FlutterPluginRegistrar>
 @property(nonatomic, assign) FlutterEngine* flutterEngine;
@@ -56,6 +59,8 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
   fml::scoped_nsobject<FlutterObservatoryPublisher> _publisher;
 
   std::unique_ptr<flutter::FlutterPlatformViewsController> _platformViewsController;
+  std::unique_ptr<flutter::ProfilerMetricsIOS> _profiler_metrics;
+  std::unique_ptr<flutter::SamplingProfiler> _profiler;
 
   // Channels
   fml::scoped_nsobject<FlutterPlatformPlugin> _platformPlugin;
@@ -262,6 +267,7 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
   [self resetChannels];
   self.isolateId = nil;
   _shell.reset();
+  _profiler.reset();
   _threadHost.Reset();
   _platformViewsController.reset();
 }
@@ -317,6 +323,14 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
   _lifecycleChannel.reset();
   _systemChannel.reset();
   _settingsChannel.reset();
+}
+
+- (void)startProfiler {
+  _profiler_metrics = std::make_unique<flutter::ProfilerMetricsIOS>();
+  _profiler = std::make_unique<flutter::SamplingProfiler>(
+      _threadHost.profiler_thread->GetTaskRunner(),
+      [self]() { return self->_profiler_metrics->GenerateSample(); }, kNumProfilerSamplesPerSec);
+  _profiler->Start();
 }
 
 // If you add a channel, be sure to also update `resetChannels`.
@@ -438,9 +452,18 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
   // initialized.
   fml::MessageLoop::EnsureInitializedForCurrentThread();
 
+  uint32_t threadHostType = flutter::ThreadHost::Type::UI | flutter::ThreadHost::Type::GPU |
+                            flutter::ThreadHost::Type::IO;
+  bool profilerEnabled = false;
+#if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG) || \
+    (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE)
+  profilerEnabled = true;
+#endif
+  if (profilerEnabled) {
+    threadHostType = threadHostType | flutter::ThreadHost::Type::Profiler;
+  }
   _threadHost = {threadLabel.UTF8String,  // label
-                 flutter::ThreadHost::Type::UI | flutter::ThreadHost::Type::GPU |
-                     flutter::ThreadHost::Type::IO};
+                 threadHostType};
 
   // Lambda captures by pointers to ObjC objects are fine here because the
   // create call is
@@ -455,6 +478,10 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
       [](flutter::Shell& shell) {
         return std::make_unique<flutter::Rasterizer>(shell, shell.GetTaskRunners());
       };
+
+  if (profilerEnabled) {
+    [self startProfiler];
+  }
 
   if (flutter::IsIosEmbeddedViewsPreviewEnabled()) {
     // Embedded views requires the gpu and the platform views to be the same.
