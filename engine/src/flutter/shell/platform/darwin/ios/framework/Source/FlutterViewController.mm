@@ -417,10 +417,6 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
 
 #pragma mark - Properties
 
-- (FlutterView*)flutterView {
-  return _flutterView;
-}
-
 - (UIView*)splashScreenView {
   if (!_splashScreenView) {
     return nil;
@@ -515,8 +511,8 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
     _engineNeedsLaunch = NO;
   }
 
-  FML_DCHECK([_engine.get() viewController] != nil)
-      << "FlutterViewController::viewWillAppear:AttachView ViewController was nil";
+  FML_DCHECK([_engine.get() viewController] == self)
+      << "FlutterViewController's view is loaded but is not attached to a FlutterEngine";
   [_engine.get() attachView];
 
   [super viewDidLoad];

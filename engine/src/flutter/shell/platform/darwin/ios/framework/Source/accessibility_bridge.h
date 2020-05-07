@@ -27,6 +27,13 @@
 namespace flutter {
 class PlatformViewIOS;
 
+/**
+ * An accessibility instance is bound to one `FlutterViewController` and
+ * `FlutterView` instance.
+ *
+ * It helps populate the UIView's accessibilityElements property from Flutter's
+ * semantics nodes.
+ */
 class AccessibilityBridge final : public AccessibilityBridgeIos {
  public:
   AccessibilityBridge(UIView* view,
