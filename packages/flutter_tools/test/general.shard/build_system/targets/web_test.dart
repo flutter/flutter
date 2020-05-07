@@ -503,6 +503,23 @@ void main() {
       contains('"index.html": "d41d8cd98f00b204e9800998ecf8427e"'));
     expect(environment.buildDir.childFile('service_worker.d'), exists);
   }));
+
+  test('WebServiceWorker does not cache source maps', () => testbed.run(() async {
+    environment.outputDir
+      .childFile('main.dart.js')
+      .createSync(recursive: true);
+    environment.outputDir
+      .childFile('main.dart.js.map')
+      .createSync(recursive: true);
+    await const WebServiceWorker().build(environment);
+
+    // No caching of source maps.
+    expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
+      isNot(contains('"main.dart.js.map"')));
+    // Expected twice, once for RESOURCES and once for CORE.
+    expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
+      contains('"main.dart.js"'));
+  }));
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
