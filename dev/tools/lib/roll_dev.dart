@@ -91,6 +91,7 @@ bool run({
     );
   }
 
+  // TODO(fujino): move this after `justPrint`
   git.run('fetch $origin', 'fetch $origin');
   git.run('reset $commit --hard', 'reset to the release commit');
 

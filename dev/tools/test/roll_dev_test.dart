@@ -79,12 +79,7 @@ void main() {
     });
 
     test('throws exception if upstream remote wrong', () {
-      when(mockGit.getOutput(
-        'remote get-url $origin',
-        'check whether this is a flutter checkout',
-      )).thenReturn(
-        'wrong-remote',
-      );
+      when(mockGit.getOutput('remote get-url $origin', any)).thenReturn('wrong-remote');
       fakeArgResults = FakeArgResults(
         level: level,
         commit: commit,
@@ -107,6 +102,61 @@ void main() {
         'repository checkout with a correctly configured upstream remote.';
       expect(exception.toString(), contains(pattern));
     });
+
+    test('throws exception if git checkout not clean', () {
+      when(mockGit.getOutput('remote get-url $origin', any)).thenReturn(kUpstreamRemote);
+      when(mockGit.getOutput('status --porcelain', any)).thenReturn(
+        ' M dev/tools/test/roll_dev_test.dart',
+      );
+      fakeArgResults = FakeArgResults(
+        level: level,
+        commit: commit,
+        origin: origin,
+        justPrint: false,
+        autoApprove: true,
+        help: false,
+      );
+      Exception exception;
+      try {
+        run(
+          usage: usage,
+          argResults: fakeArgResults,
+          git: mockGit,
+        );
+      } on Exception catch (e) {
+        exception = e;
+      }
+      const String pattern = r'Your git repository is not clean. Try running '
+        '"git clean -fd". Warning, this will delete files! Run with -n to find '
+        'out which ones.';
+      expect(exception.toString(), contains(pattern));
+    });
+
+    test('does not tag if --just-print is specified', () {
+      when(mockGit.getOutput('remote get-url $origin', any)).thenReturn(kUpstreamRemote);
+      when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
+      when(mockGit.getOutput(
+        'describe --match *.*.*-*.*.pre --exact-match --tags refs/heads/dev',
+        any,
+      )).thenReturn('1.2.3-0.0.pre');
+      fakeArgResults = FakeArgResults(
+        level: level,
+        commit: commit,
+        origin: origin,
+        justPrint: true,
+        autoApprove: true,
+        help: false,
+      );
+      expect(run(
+        usage: usage,
+        argResults: fakeArgResults,
+        git: mockGit,
+      ), false);
+      verify(mockGit.run('fetch $origin', any));
+      verify(mockGit.run('reset $commit --hard', any));
+      verifyNever(mockGit.getOutput('rev-parse HEAD', any));
+    });
+
   });
 
   group('parseFullTag', () {
@@ -237,8 +287,8 @@ class FakeArgResults implements ArgResults {
     'increment': level,
     'commit': commit,
     'origin': origin,
-    'justPrint': justPrint,
-    'autoApprove': autoApprove,
+    'just-print': justPrint,
+    'yes': autoApprove,
     'help': help,
   };
 
