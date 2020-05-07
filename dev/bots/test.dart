@@ -118,6 +118,7 @@ Future<void> main(List<String> args) async {
       'add_to_app_tests': _runAddToAppTests,
       'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
       'build_tests': _runBuildTests,
+      'firebase_test_lab_tests': _runFirebaseTestLabTests,
       'framework_coverage': _runFrameworkCoverage,
       'framework_tests': _runFrameworkTests,
       'hostonly_devicelab_tests': _runHostOnlyDeviceLabTests,
@@ -632,6 +633,34 @@ Future<void> _runFrameworkTests() async {
     'libraries': runLibraries,
     'misc': runMisc,
   });
+}
+
+Future<void> _runFirebaseTestLabTests() async {
+  // Firebase Lab tests take ~20 minutes per integration test,
+  // so only one test is run per shard. Therefore, there are as
+  // many shards available as there are integration tests in this list.
+  // If you add a new test, add a corresponding firebase_test_lab-#-linux
+  // to .cirrus.yml
+  final List<String> integrationTests = <String>[
+    'release_smoke_test',
+    'abstract_method_smoke_test',
+    'android_embedding_v2_smoke_test',
+  ];
+  final Map<String, ShardRunner> subshards = <String, ShardRunner>{};
+
+  final String firebaseScript = path.join(flutterRoot, 'dev', 'bots', 'firebase_testlab.sh');
+  final String integrationTestDirectory = path.join(flutterRoot, 'dev', 'integration_tests');
+
+  for (int index = 0; index < integrationTests.length; index += 1) {
+    final String integrationTestPath = path.join(integrationTestDirectory, integrationTests[index]);
+    subshards['$index'] = () => runCommand(
+      firebaseScript,
+      <String>[ integrationTestPath ],
+      workingDirectory: flutterRoot,
+    );
+  }
+
+  await selectSubshard(subshards);
 }
 
 Future<void> _runFrameworkCoverage() async {

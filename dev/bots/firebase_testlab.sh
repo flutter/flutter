@@ -9,8 +9,7 @@
 #
 # When adding a test, ensure that there's at least a `print()` statement under lib/*.dart.
 #
-# The first and only parameter should be the name of an integration test
-# project in dev/integration_tests/.
+# The first and only parameter should be the path to an integration test.
 
 # The devices where the tests are run.
 #
@@ -77,4 +76,4 @@ function test_app_bundle() {
   popd
 }
 
-test_app_bundle "dev/integration_tests/$1"
+test_app_bundle "$1"
