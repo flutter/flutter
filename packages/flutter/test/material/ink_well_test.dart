@@ -479,7 +479,7 @@ void main() {
 
   });
 
-  testWidgets('Parent inkwell does not block child inkwells', (WidgetTester tester) async {
+  testWidgets('Parent inkwell does not block child inkwells from splashes', (WidgetTester tester) async {
     final GlobalKey middleKey = GlobalKey();
     final GlobalKey innerKey = GlobalKey();
     Widget paddedInkWell({Key key, Widget child}) {
@@ -524,7 +524,7 @@ void main() {
     expect(material, paintsExactlyCountTimes(#drawCircle, 2));
   });
 
-  testWidgets('Parent can differ which child is pressed', (WidgetTester tester) async {
+  testWidgets('Parent inkwell can count the number of pressed children to prevent splash', (WidgetTester tester) async {
     final GlobalKey parentKey = GlobalKey();
     final GlobalKey leftKey = GlobalKey();
     final GlobalKey rightKey = GlobalKey();
