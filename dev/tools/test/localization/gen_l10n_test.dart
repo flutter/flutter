@@ -94,7 +94,7 @@ void main() {
 
       fail(
         'LocalizationsGenerator.setInputDirectory should fail if the '
-        'the input string is null.'
+        'input string is null.'
       );
     });
 
@@ -110,7 +110,7 @@ void main() {
 
       fail(
         'LocalizationsGenerator.setOutputDirectory should fail if the '
-        'the input string is null.'
+        'input string is null.'
       );
     });
 
@@ -125,7 +125,7 @@ void main() {
 
       fail(
         'LocalizationsGenerator.setTemplateArbFile should fail if the '
-        'the inputDirectory is not specified.'
+        'inputDirectory is not specified.'
       );
     });
 
@@ -141,7 +141,7 @@ void main() {
 
       fail(
         'LocalizationsGenerator.setTemplateArbFile should fail if the '
-        'the templateArbFileName passed in is null.'
+        'templateArbFileName passed in is null.'
       );
     });
 
@@ -157,7 +157,7 @@ void main() {
 
       fail(
         'LocalizationsGenerator.setTemplateArbFile should fail if the '
-        'the input string is null.'
+        'input string is null.'
       );
     });
 
@@ -173,7 +173,7 @@ void main() {
 
       fail(
         'LocalizationsGenerator.setBaseOutputFile should fail if the '
-        'the input string is null.'
+        'input string is null.'
       );
     });
 
@@ -189,7 +189,7 @@ void main() {
 
       fail(
         'LocalizationsGenerator.className should fail if the '
-        'the input string is null.'
+        'input string is null.'
       );
     });
 
@@ -217,7 +217,7 @@ void main() {
         }
         fail(
           'LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid Dart class name.'
+          'input string is not a valid Dart class name.'
         );
       });
 
@@ -230,7 +230,7 @@ void main() {
         }
         fail(
           'LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid public Dart class name.'
+          'input string is not a valid public Dart class name.'
         );
       });
 
@@ -243,7 +243,7 @@ void main() {
         }
         fail(
           'LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid public Dart class name.'
+          'input string is not a valid public Dart class name.'
         );
       });
 
@@ -256,7 +256,7 @@ void main() {
         }
         fail(
           'LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid public Dart class name.'
+          'input string is not a valid public Dart class name.'
         );
       });
     });
