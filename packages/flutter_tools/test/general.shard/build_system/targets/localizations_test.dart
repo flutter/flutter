@@ -6,7 +6,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/localizations.dart';
 
 import '../../../src/common.dart';
@@ -51,7 +50,7 @@ void main() {
       templateArbFile: Uri.file('example.arb'),
       untranslatedMessagesFile: Uri.file('untranslated'),
     );
-    final Depfile depfile = await generateLocalizations(
+    await generateLocalizations(
       options: options,
       logger: logger,
       fileSystem: fileSystem,
@@ -59,17 +58,9 @@ void main() {
       projectDir: fileSystem.currentDirectory,
       dartBinaryPath: 'dart',
       flutterRoot: '',
+      dependenciesDir: fileSystem.currentDirectory,
     );
 
-    // Verify that the input/output files are tracked correctly, based on
-    // the inputs given in the LocalizationOptions.
-    expect(depfile.inputs.map((File file) => file.uri), unorderedEquals(<Uri>[
-      Uri.parse('arb/foo.arb'),
-      Uri.parse('arb/bar.arb'),
-    ]));
-    expect(depfile.outputs.map((File file) => file.uri), unorderedEquals(<Uri>[
-      Uri.parse('arb/bar'),
-    ]));
     expect(processManager.hasRemainingExpectations, false);
   });
 

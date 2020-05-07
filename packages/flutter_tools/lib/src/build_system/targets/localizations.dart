@@ -10,12 +10,15 @@ import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart';
+import '../../convert.dart';
 import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
 
+const String _kDependenciesFileName = 'gen_l10n_inputs_and_outputs.json';
+
 /// Run the localizations generation script with the configuration [options].
-Future<Depfile> generateLocalizations({
+Future<void> generateLocalizations({
   @required LocalizationOptions options,
   @required String flutterRoot,
   @required FileSystem fileSystem,
@@ -23,43 +26,8 @@ Future<Depfile> generateLocalizations({
   @required Logger logger,
   @required Directory projectDir,
   @required String dartBinaryPath,
+  @required Directory dependenciesDir,
 }) async {
-  // Setup project inputs and outputs. This currently makes some
-  // guess about the output and does not include all files.
-  // TODO(jonahwilliams): fix once https://github.com/flutter/flutter/issues/56321
-  // is complete.
-  final Directory inputArb = fileSystem.directory(
-    options.arbDirectory ?? projectDir
-      .childDirectory('lib')
-      .childFile('l10n').uri,
-  );
-
-  File outputLocalzations;
-  if (options.outputLocalizationsFile != null) {
-    outputLocalzations = fileSystem
-      .file(inputArb.uri.resolveUri(options.outputLocalizationsFile));
-  } else {
-    outputLocalzations = projectDir
-    .childDirectory('lib')
-    .childFile('app_localizations.dart');
-  }
-
-  if (!inputArb.existsSync()) {
-    logger.printError('arb-dir: ${inputArb.path} does not exist.');
-    throw Exception();
-  }
-
-  final List<File> inputs = <File>[
-    // Include all arb files as build inputs.
-    for (final File file in inputArb.listSync().whereType<File>())
-      if (fileSystem.path.extension(file.path) == '.arb')
-        file,
-  ];
-  final List<File> outputs = <File>[
-    outputLocalzations,
-  ];
-
-  final Depfile depfile = Depfile(inputs, outputs);
   final String genL10nPath = fileSystem.path.join(
     flutterRoot,
     'dev',
@@ -71,6 +39,7 @@ Future<Depfile> generateLocalizations({
   final ProcessResult result = await processManager.run(<String>[
     dartBinaryPath,
     genL10nPath,
+    '--gen-inputs-and-outputs-list=${dependenciesDir.path}',
     if (options.arbDirectory != null)
       '--arb-dir=${options.arbDirectory.toFilePath()}',
     if (options.templateArbFile != null)
@@ -94,7 +63,6 @@ Future<Depfile> generateLocalizations({
     logger.printError(result.stdout + result.stderr as String);
     throw Exception();
   }
-  return depfile;
 }
 
 /// A build step that runs the generate localizations script from
@@ -143,7 +111,7 @@ class GenerateLocalizationsTarget extends Target {
       fileSystem: environment.fileSystem,
     );
 
-    final Depfile depfile = await generateLocalizations(
+    await generateLocalizations(
       fileSystem: environment.fileSystem,
       flutterRoot: environment.flutterRootDir.path,
       logger: environment.logger,
@@ -152,8 +120,21 @@ class GenerateLocalizationsTarget extends Target {
       projectDir: environment.projectDir,
       dartBinaryPath: environment.artifacts
         .getArtifactPath(Artifact.engineDartBinary),
+      dependenciesDir: environment.buildDir,
     );
-    depfile.inputs.add(configFile);
+    final Map<String, Object> dependencies = json
+      .decode(environment.buildDir.childFile(_kDependenciesFileName).readAsStringSync()) as Map<String, Object>;
+    final Depfile depfile = Depfile(
+      <File>[
+        configFile,
+        for (dynamic inputFile in dependencies['inputs'] as List<dynamic>)
+          environment.fileSystem.file(inputFile)
+      ],
+      <File>[
+        for (dynamic outputFile in dependencies['outputs'] as List<dynamic>)
+          environment.fileSystem.file(outputFile)
+      ]
+    );
     depfileService.writeToFile(
       depfile,
       environment.buildDir.childFile('gen_localizations.d'),
