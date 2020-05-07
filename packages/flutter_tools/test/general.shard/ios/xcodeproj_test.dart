@@ -65,7 +65,7 @@ void main() {
         flakes: 1,
         delay: delay + const Duration(seconds: 1),
       );
-      platform.environment = Map<String, String>.unmodifiable(<String, String>{});
+      platform.environment = const <String, String>{};
 
       expect(await xcodeProjectInterpreter.getBuildSettings(
         '', '', timeout: delay),
@@ -239,7 +239,7 @@ void main() {
   });
 
   testWithoutContext('xcodebuild build settings is empty when xcodebuild failed to get the build settings', () async {
-    platform.environment = Map<String, String>.unmodifiable(<String, String>{});
+    platform.environment = const <String, String>{};
 
     fakeProcessManager.addCommand(const FakeCommand(
       command: <String>[
@@ -247,42 +247,42 @@ void main() {
         '-project',
         '/',
         '-target',
-        '',
+        'Runner',
         '-showBuildSettings'
       ],
       exitCode: 1,
     ));
 
-    expect(await xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
+    expect(await xcodeProjectInterpreter.getBuildSettings('', 'Runner'), const <String, String>{});
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
   testWithoutContext('xcodebuild build settings contains Flutter Xcode environment variables', () async {
-    platform.environment = Map<String, String>.unmodifiable(<String, String>{
+    platform.environment = const <String, String>{
       'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
       'FLUTTER_XCODE_ARCHS': 'arm64'
-    });
+    };
     fakeProcessManager.addCommand(FakeCommand(
       command: <String>[
         xcodebuild,
         '-project',
         fileSystem.path.separator,
         '-target',
-        '',
+        'Runner',
         '-showBuildSettings',
         'CODE_SIGN_STYLE=Manual',
         'ARCHS=arm64'
       ],
     ));
-    expect(await xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
+    expect(await xcodeProjectInterpreter.getBuildSettings('', 'Runner'), const <String, String>{});
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
   testWithoutContext('xcodebuild clean contains Flutter Xcode environment variables', () async {
-    platform.environment = Map<String, String>.unmodifiable(<String, String>{
+    platform.environment = const <String, String>{
       'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
       'FLUTTER_XCODE_ARCHS': 'arm64'
-    });
+    };
 
     fakeProcessManager.addCommand(const FakeCommand(
       command: <String>[
@@ -478,12 +478,12 @@ Information about project "Runner":
     });
 
     testWithoutContext('environment variables as Xcode build settings', () {
-      platform.environment = Map<String, String>.unmodifiable(<String, String>{
+      platform.environment = const <String, String>{
         'Ignored': 'Bogus',
         'FLUTTER_NOT_XCODE': 'Bogus',
         'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
         'FLUTTER_XCODE_ARCHS': 'arm64'
-      });
+      };
       final List<String> environmentVariablesAsBuildSettings = environmentVariablesAsXcodeBuildSettings(platform);
       expect(environmentVariablesAsBuildSettings, <String>['CODE_SIGN_STYLE=Manual', 'ARCHS=arm64']);
     });
