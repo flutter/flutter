@@ -24,14 +24,11 @@ import 'rounded_rectangle_border.dart';
 /// See also:
 ///
 ///  * [BorderSide], which is used to describe the border of the stadium.
-class StadiumBorder extends ShapeBorder {
+class StadiumBorder extends OutlinedBorder {
   /// Create a stadium border.
   ///
   /// The [side] argument must not be null.
-  const StadiumBorder({this.side = BorderSide.none}) : assert(side != null);
-
-  /// The style of this border.
-  final BorderSide side;
+  const StadiumBorder({ BorderSide side = BorderSide.none }) : assert(side != null), super(side: side);
 
   @override
   EdgeInsetsGeometry get dimensions {
@@ -84,8 +81,8 @@ class StadiumBorder extends ShapeBorder {
   }
 
   @override
-  ShapeBorder withSide(BorderSide side) {
-    return StadiumBorder(side: side);
+  StadiumBorder copyWith({ BorderSide side }) {
+    return StadiumBorder(side: side ?? this.side);
   }
 
   @override
@@ -134,14 +131,13 @@ class StadiumBorder extends ShapeBorder {
 }
 
 // Class to help with transitioning to/from a CircleBorder.
-class _StadiumToCircleBorder extends ShapeBorder {
+class _StadiumToCircleBorder extends OutlinedBorder {
   const _StadiumToCircleBorder({
-    this.side = BorderSide.none,
+    BorderSide side = BorderSide.none,
     this.circleness = 0.0,
   }) : assert(side != null),
-       assert(circleness != null);
-
-  final BorderSide side;
+       assert(circleness != null),
+       super(side: side);
 
   final double circleness;
 
@@ -245,10 +241,10 @@ class _StadiumToCircleBorder extends ShapeBorder {
   }
 
   @override
-  ShapeBorder withSide(BorderSide side) {
+  _StadiumToCircleBorder copyWith({ BorderSide side, double circleness }) {
     return _StadiumToCircleBorder(
-      side: side,
-      circleness: circleness,
+      side: side ?? this.side,
+      circleness: circleness ?? this.circleness,
     );
   }
 
@@ -291,16 +287,15 @@ class _StadiumToCircleBorder extends ShapeBorder {
 }
 
 // Class to help with transitioning to/from a RoundedRectBorder.
-class _StadiumToRoundedRectangleBorder extends ShapeBorder {
+class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
   const _StadiumToRoundedRectangleBorder({
-    this.side = BorderSide.none,
+    BorderSide side = BorderSide.none,
     this.borderRadius = BorderRadius.zero,
     this.rectness = 0.0,
   }) : assert(side != null),
        assert(borderRadius != null),
-       assert(rectness != null);
-
-  final BorderSide side;
+       assert(rectness != null),
+       super(side: side);
 
   final BorderRadius borderRadius;
 
@@ -395,11 +390,11 @@ class _StadiumToRoundedRectangleBorder extends ShapeBorder {
   }
 
   @override
-  ShapeBorder withSide(BorderSide side) {
+  _StadiumToRoundedRectangleBorder copyWith({ BorderSide side, BorderRadius borderRadius, double rectness }) {
     return _StadiumToRoundedRectangleBorder(
-      side: side,
-      borderRadius: borderRadius,
-      rectness: rectness,
+      side: side ?? this.side,
+      borderRadius: borderRadius ?? this.borderRadius,
+      rectness: rectness ?? this.rectness
     );
   }
 

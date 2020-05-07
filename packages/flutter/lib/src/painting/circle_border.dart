@@ -23,14 +23,11 @@ import 'edge_insets.dart';
 ///  * [BorderSide], which is used to describe each side of the box.
 ///  * [Border], which, when used with [BoxDecoration], can also
 ///    describe a circle.
-class CircleBorder extends ShapeBorder {
+class CircleBorder extends OutlinedBorder {
   /// Create a circle border.
   ///
   /// The [side] argument must not be null.
-  const CircleBorder({ this.side = BorderSide.none }) : assert(side != null);
-
-  /// The style of this border.
-  final BorderSide side;
+  const CircleBorder({ BorderSide side = BorderSide.none }) : assert(side != null), super(side: side);
 
   @override
   EdgeInsetsGeometry get dimensions {
@@ -73,7 +70,7 @@ class CircleBorder extends ShapeBorder {
   }
 
   @override
-  ShapeBorder withSide(BorderSide side) {
+  CircleBorder copyWith({ BorderSide side }) {
     return CircleBorder(side: side);
   }
 
