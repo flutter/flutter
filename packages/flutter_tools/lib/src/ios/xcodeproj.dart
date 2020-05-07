@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -13,6 +12,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
@@ -125,7 +125,7 @@ String parsedBuildName({
   @required BuildInfo buildInfo,
 }) {
   final String buildNameToParse = buildInfo?.buildName ?? manifest.buildName;
-  return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse);
+  return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse, globals.logger);
 }
 
 /// Build number parsed and validated from build info and manifest. Used for CFBundleVersion.
@@ -134,14 +134,22 @@ String parsedBuildNumber({
   @required BuildInfo buildInfo,
 }) {
   String buildNumberToParse = buildInfo?.buildNumber ?? manifest.buildNumber;
-  final String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.ios, buildNumberToParse);
+  final String buildNumber = validatedBuildNumberForPlatform(
+    TargetPlatform.ios,
+    buildNumberToParse,
+    globals.logger,
+  );
   if (buildNumber != null && buildNumber.isNotEmpty) {
     return buildNumber;
   }
   // Drop back to parsing build name if build number is not present. Build number is optional in the manifest, but
   // FLUTTER_BUILD_NUMBER is required as the backing value for the required CFBundleVersion.
   buildNumberToParse = buildInfo?.buildName ?? manifest.buildName;
-  return validatedBuildNumberForPlatform(TargetPlatform.ios, buildNumberToParse);
+  return validatedBuildNumberForPlatform(
+    TargetPlatform.ios,
+    buildNumberToParse,
+    globals.logger,
+  );
 }
 
 /// List of lines of build settings. Example: 'FLUTTER_BUILD_DIR=build'
@@ -164,16 +172,6 @@ List<String> _xcodeBuildSettingsLines({
   // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
   if (targetOverride != null) {
     xcodeBuildSettings.add('FLUTTER_TARGET=$targetOverride');
-  }
-
-  // This is an optional path to split debug info
-  if (buildInfo.splitDebugInfoPath != null) {
-    xcodeBuildSettings.add('SPLIT_DEBUG_INFO=${buildInfo.splitDebugInfoPath}');
-  }
-
-  // This is an optional path to obfuscate and output a mapping.
-  if (buildInfo.dartObfuscation) {
-    xcodeBuildSettings.add('DART_OBFUSCATION=true');
   }
 
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
@@ -226,31 +224,9 @@ List<String> _xcodeBuildSettingsLines({
     }
   }
 
-  if (buildInfo.trackWidgetCreation) {
-    xcodeBuildSettings.add('TRACK_WIDGET_CREATION=true');
+  for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {
+    xcodeBuildSettings.add('${config.key}=${config.value}');
   }
-
-  if (buildInfo.treeShakeIcons) {
-    xcodeBuildSettings.add('TREE_SHAKE_ICONS=true');
-  }
-
-  if (buildInfo.dartDefines?.isNotEmpty ?? false) {
-    xcodeBuildSettings.add('DART_DEFINES=${buildInfo.dartDefines.join(',')}');
-  }
-
-  if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false) {
-    xcodeBuildSettings.add(
-      'EXTRA_FRONT_END_OPTIONS='
-      '${buildInfo.extraFrontEndOptions.join(',')}',
-    );
-  }
-  if (buildInfo.extraGenSnapshotOptions?.isNotEmpty ?? false) {
-    xcodeBuildSettings.add(
-      'EXTRA_GEN_SNAPSHOT_OPTIONS='
-      '${buildInfo.extraGenSnapshotOptions.join(',')}',
-    );
-  }
-
   return xcodeBuildSettings;
 }
 

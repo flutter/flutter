@@ -120,10 +120,6 @@ class ButtonTheme extends InheritedTheme {
   }) : assert(data != null),
        super(key: key, child: child);
 
-  // TODO(darrenaustin): remove after this deprecation warning has been on
-  // stable for a couple of releases.
-  // See https://github.com/flutter/flutter/issues/37333
-  //
   /// Creates a button theme that is appropriate for button bars, as used in
   /// dialog footers and in the headers of data tables.
   ///

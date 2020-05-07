@@ -9,7 +9,37 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
+class MockClipboard {
+  Object _clipboardData = <String, dynamic>{
+    'text': null,
+  };
+
+  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
+    switch (methodCall.method) {
+      case 'Clipboard.getData':
+        return _clipboardData;
+      case 'Clipboard.setData':
+        _clipboardData = methodCall.arguments;
+        break;
+    }
+  }
+}
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  final MockClipboard mockClipboard = MockClipboard();
+
+  setUp(() async {
+    // Fill the clipboard so that the PASTE option is available in the text
+    // selection menu.
+    SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+  });
+
+  tearDown(() {
+    SystemChannels.platform.setMockMethodCallHandler(null);
+  });
+
   testWidgets('Can open and close search', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     final List<String> selectedResults = <String>[];
@@ -509,6 +539,23 @@ void main() {
     expect(find.text(searchHint), findsOneWidget);
   });
 
+  testWidgets('Custom searchFieldStyle value', (WidgetTester tester) async {
+    const TextStyle searchStyle = TextStyle(color: Colors.red, fontSize: 3);
+
+    final _TestSearchDelegate delegate = _TestSearchDelegate(searchFieldStyle: searchStyle);
+
+    await tester.pumpWidget(
+      TestHomePage(
+      delegate: delegate,
+    ));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+    final TextStyle hintStyle = textField.decoration.hintStyle;
+    expect(hintStyle, delegate.searchFieldStyle);
+  });
+
   testWidgets('keyboard show search button by default', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
@@ -697,9 +744,10 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     this.suggestions = 'Suggestions',
     this.result = 'Result',
     this.actions = const <Widget>[],
+    TextStyle searchFieldStyle,
     String searchHint,
     TextInputAction textInputAction = TextInputAction.search,
-  }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction);
+  }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction, searchFieldStyle: searchFieldStyle);
 
   final String suggestions;
   final String result;

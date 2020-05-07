@@ -357,6 +357,7 @@ class EditableText extends StatefulWidget {
     @required this.controller,
     @required this.focusNode,
     this.readOnly = false,
+    this.obscuringCharacter = '•',
     this.obscureText = false,
     this.autocorrect = true,
     SmartDashesType smartDashesType,
@@ -413,6 +414,7 @@ class EditableText extends StatefulWidget {
     this.autofillHints,
   }) : assert(controller != null),
        assert(focusNode != null),
+       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert(obscureText != null),
        assert(autocorrect != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -464,11 +466,20 @@ class EditableText extends StatefulWidget {
   /// Controls whether this widget has keyboard focus.
   final FocusNode focusNode;
 
+  /// {@template flutter.widgets.editableText.obscuringCharacter}
+  /// Character used for obscuring text if [obscureText] is true.
+  ///
+  /// Must be only a single character.
+  ///
+  /// Defaults to the character U+2022 BULLET (•).
+  /// {@endtemplate}
+  final String obscuringCharacter;
+
   /// {@template flutter.widgets.editableText.obscureText}
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
   /// When this is set to true, all the characters in the text field are
-  /// replaced by U+2022 BULLET characters (•).
+  /// replaced by [obscuringCharacter].
   ///
   /// Defaults to false. Cannot be null.
   /// {@endtemplate}
@@ -1133,6 +1144,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
   final GlobalKey _editableKey = GlobalKey();
+  final ClipboardStatusNotifier _clipboardStatus = ClipboardStatusNotifier();
 
   TextInputConnection _textInputConnection;
   TextSelectionOverlay _selectionOverlay;
@@ -1179,11 +1191,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool get selectAllEnabled => widget.toolbarOptions.selectAll;
 
+  void _onChangedClipboardStatus() {
+    setState(() {
+      // Inform the widget that the value of clipboardStatus has changed.
+    });
+  }
+
   // State lifecycle:
 
   @override
   void initState() {
     super.initState();
+    _clipboardStatus.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     _focusAttachment = widget.focusNode.attach(context);
     widget.focusNode.addListener(_handleFocusChanged);
@@ -1257,6 +1276,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         );
       }
     }
+    if (widget.selectionEnabled && pasteEnabled && widget.selectionControls?.canPaste(this) == true) {
+      _clipboardStatus.update();
+    }
   }
 
   @override
@@ -1273,6 +1295,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay = null;
     _focusAttachment.detach();
     widget.focusNode.removeListener(_handleFocusChanged);
+    WidgetsBinding.instance.removeObserver(this);
+    _clipboardStatus.removeListener(_onChangedClipboardStatus);
+    _clipboardStatus.dispose();
     super.dispose();
   }
 
@@ -1599,6 +1624,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (widget.selectionControls != null) {
       _selectionOverlay = TextSelectionOverlay(
+        clipboardStatus: _clipboardStatus,
         context: context,
         value: _value,
         debugRequiredFor: widget,
@@ -1969,7 +1995,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   VoidCallback _semanticsOnCopy(TextSelectionControls controls) {
     return widget.selectionEnabled && copyEnabled && _hasFocus && controls?.canCopy(this) == true
-      ? () => controls.handleCopy(this)
+      ? () => controls.handleCopy(this, _clipboardStatus)
       : null;
   }
 
@@ -1980,7 +2006,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   VoidCallback _semanticsOnPaste(TextSelectionControls controls) {
-    return widget.selectionEnabled && pasteEnabled &&_hasFocus && controls?.canPaste(this) == true
+    return widget.selectionEnabled && pasteEnabled && _hasFocus && controls?.canPaste(this) == true && _clipboardStatus.value == ClipboardStatus.pasteable
       ? () => controls.handlePaste(this)
       : null;
   }
@@ -2029,6 +2055,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textDirection: _textDirection,
               locale: widget.locale,
               textWidthBasis: widget.textWidthBasis,
+              obscuringCharacter: widget.obscuringCharacter,
               obscureText: widget.obscureText,
               autocorrect: widget.autocorrect,
               smartDashesType: widget.smartDashesType,
@@ -2063,7 +2090,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextSpan buildTextSpan() {
     if (widget.obscureText) {
       String text = _value.text;
-      text = RenderEditable.obscuringCharacter * text.length;
+      text = widget.obscuringCharacter * text.length;
       final int o =
         _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
       if (o != null && o >= 0 && o < text.length)
@@ -2101,6 +2128,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.textAlign,
     @required this.textDirection,
     this.locale,
+    this.obscuringCharacter,
     this.obscureText,
     this.autocorrect,
     this.smartDashesType,
@@ -2144,6 +2172,7 @@ class _Editable extends LeafRenderObjectWidget {
   final TextAlign textAlign;
   final TextDirection textDirection;
   final Locale locale;
+  final String obscuringCharacter;
   final bool obscureText;
   final TextWidthBasis textWidthBasis;
   final bool autocorrect;
@@ -2192,6 +2221,7 @@ class _Editable extends LeafRenderObjectWidget {
       onSelectionChanged: onSelectionChanged,
       onCaretChanged: onCaretChanged,
       ignorePointer: rendererIgnoresPointer,
+      obscuringCharacter: obscuringCharacter,
       obscureText: obscureText,
       textWidthBasis: textWidthBasis,
       cursorWidth: cursorWidth,
@@ -2234,6 +2264,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..onCaretChanged = onCaretChanged
       ..ignorePointer = rendererIgnoresPointer
       ..textWidthBasis = textWidthBasis
+      ..obscuringCharacter = obscuringCharacter
       ..obscureText = obscureText
       ..cursorWidth = cursorWidth
       ..cursorRadius = cursorRadius

@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -21,14 +21,13 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/proxy_validator.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:quiver/testing/async.dart';
-import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -577,7 +576,7 @@ void main() {
 
       expect(logger.statusText, equals(
         'Doctor summary (to see all details, run flutter doctor -v):\n'
-          '[!] Flutter (Channel unknown, v0.0.0, on fake OS name and version, locale en_US.UTF-8)\n'
+          '[!] Flutter (Channel unknown, 0.0.0, on fake OS name and version, locale en_US.UTF-8)\n'
           '    ✗ version error\n\n'
           '! Doctor found issues in 1 category.\n'
       ));

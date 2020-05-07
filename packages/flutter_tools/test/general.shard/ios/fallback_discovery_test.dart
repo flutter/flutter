@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/fallback_discovery.dart';
@@ -10,7 +11,6 @@ import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/protocol_discovery.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';

@@ -89,6 +89,9 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// each value of the [TestVariant.values]. If [variant] is not set, the test
 /// will be run once using the base test environment.
 ///
+/// If the [tags] are passed, they declare user-defined tags that are implemented by
+/// the `test` package.
+///
 /// See also:
 ///
 ///  * [AutomatedTestWidgetsFlutterBinding.addTime] to learn more about
@@ -112,6 +115,7 @@ void testWidgets(
   Duration initialTimeout,
   bool semanticsEnabled = true,
   TestVariant<Object> variant = const DefaultTestVariant(),
+  dynamic tags,
 }) {
   assert(variant != null);
   assert(variant.values.isNotEmpty, 'There must be at least on value to test in the testing variant');
@@ -150,6 +154,7 @@ void testWidgets(
       },
       skip: skip,
       timeout: timeout ?? binding.defaultTestTimeout,
+      tags: tags,
     );
   }
 }

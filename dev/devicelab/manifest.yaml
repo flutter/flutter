@@ -152,6 +152,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  android_view_scroll_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of Android views in the platform view layout sample app on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   home_scroll_perf__timeline_summary:
     description: >
       Measures the runtime performance of scrolling the material page in the
@@ -337,6 +343,12 @@ tasks:
   android_sample_catalog_generator:
     description: >
       Builds sample catalog markdown pages and Android screenshots
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  android_enable_twc:
+    description: >
+      Verifies that track-widget-creation can be enabled and disabled.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
@@ -582,6 +594,12 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
+  ios_enable_twc:
+    description: >
+      Verifies that track-widget-creation can be enabled and disabled.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
   # TODO(fujino): does not pass on iOS13 https://github.com/flutter/flutter/issues/43029
   # system_debug_ios:
   #   description: >
@@ -644,6 +662,14 @@ tasks:
       Checks the functionality and performance of hot reload on a macOS target platform
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
+
+#  TODO(jonahwilliams): investigate build failures on devicelab infra to re-enable.
+#  mac_enable_twc:
+#    description: >
+#      Verifies that track-widget-creation can be enabled and disabled.
+#    stage: devicelab_ios
+#    required_agent_capabilities: ["mac/ios"]
+#    flaky: true
 
   ios_app_with_watch_companion:
     description: >
@@ -749,6 +775,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+# TODO(https://github.com/flutter/flutter/issues/56135)
+#  new_gallery__transition_perf:
+#    description: >
+#      Measures the performance of screen transitions in the new Flutter Gallery on Android.
+#    stage: devicelab
+#    required_agent_capabilities: ["mac/android"]
+
   fast_scroll_large_images__memory:
     description: >
       Measures memory usage for scrolling through a list of large images.
@@ -780,6 +813,15 @@ tasks:
       Runs Web benchmarks on Chrome on a Linux machine using the CanvasKit rendering backend.
     stage: devicelab
     required_agent_capabilities: ["linux-vm"]
+
+  # TODO(jonahwilliams): This should stay off until
+  # https://github.com/flutter/flutter/issues/56212 is fixed.
+  # web_enable_twc:
+  #   description: >
+  #     Verifies that track-widget-creation can be enabled and disabled.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux-vm"]
+  #   flaky: true
 
   # run_without_leak_linux:
   #   description: >
@@ -817,7 +859,6 @@ tasks:
       Checks that the New Flutter Gallery runs successfully on Chrome.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery_v2_web_compile_test:
     description: >
@@ -825,4 +866,3 @@ tasks:
       and the size of the compiled code.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true

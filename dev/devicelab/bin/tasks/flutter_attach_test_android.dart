@@ -31,7 +31,7 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
       .listen((String line) {
     print('attach:stdout: $line');
     stdout.add(line);
-    if (line.contains('Waiting') && onListening != null)
+    if (line.contains('Waiting') && onListening != null && !listening.isCompleted)
       listening.complete(onListening());
     if (line.contains('Quit (terminate the application on the device)'))
       ready.complete();
@@ -53,7 +53,10 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
   process.exitCode.then<void>((int processExitCode) { exitCode = processExitCode; });
 
   Future<dynamic> eventOrExit(Future<void> event) {
-    return Future.any<dynamic>(<Future<dynamic>>[ event, process.exitCode ]);
+    return Future.any<dynamic>(<Future<dynamic>>[
+      event,
+      process.exitCode,
+    ]);
   }
 
   await eventOrExit(listening.future);
@@ -63,13 +66,18 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
     throw TaskResult.failure('Failed to attach to test app; command unexpected exited, with exit code $exitCode.');
 
   process.stdin.write('r');
-  process.stdin.flush();
+  print('run:stdin: r');
+  await process.stdin.flush();
   await eventOrExit(reloaded.future);
+
   process.stdin.write('R');
-  process.stdin.flush();
+  print('run:stdin: R');
+  await process.stdin.flush();
   await eventOrExit(restarted.future);
+
   process.stdin.write('q');
-  process.stdin.flush();
+  print('run:stdin: q');
+  await process.stdin.flush();
   await eventOrExit(finished.future);
 
   await process.exitCode;
@@ -107,7 +115,7 @@ void main() {
         section('Launching `flutter attach`');
         Process attachProcess = await startProcess(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
-          <String>['--suppress-analytics', 'attach', '-d', device.deviceId],
+          <String>['-v', '--suppress-analytics', 'attach', '-d', device.deviceId],
           isBot: false, // we just want to test the output, not have any debugging info
         );
 
@@ -134,7 +142,7 @@ void main() {
         section('Launching attach with given port');
         attachProcess = await startProcess(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
-          <String>['--suppress-analytics', 'attach', '--debug-uri',
+          <String>['-v', '--suppress-analytics', 'attach', '--debug-uri',
           observatoryUri, '-d', device.deviceId],
           isBot: false, // we just want to test the output, not have any debugging info
         );
@@ -155,14 +163,18 @@ void main() {
         // Attach again now that the VM is already running.
         attachProcess = await startProcess(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
-          <String>['--suppress-analytics', 'attach', '-d', device.deviceId],
+          <String>['-v', '--suppress-analytics', 'attach', '-d', device.deviceId],
           isBot: false, // we just want to test the output, not have any debugging info
         );
         // Verify that it can discover the observatory port from past logs.
         await testReload(attachProcess);
+      } catch (err, st) {
+        print('Uncaught exception: $err\n$st');
+        rethrow;
       } finally {
         section('Uninstalling');
         await device.adb(<String>['uninstall', kAppId]);
+        print('uninstall complete');
       }
     });
     return TaskResult.success(null);

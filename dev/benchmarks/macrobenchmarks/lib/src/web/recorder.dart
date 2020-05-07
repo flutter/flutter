@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:html' as html;
+import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -26,6 +27,16 @@ const int _kMeasuredSampleCount = 100;
 
 /// The total number of samples collected by a benchmark.
 const int kTotalSampleCount = _kWarmUpSampleCount + _kMeasuredSampleCount;
+
+/// A benchmark metric that includes frame-related computations prior to
+/// submitting layer and picture operations to the underlying renderer, such as
+/// HTML and CanvasKit. During this phase we compute transforms, clips, and
+/// other information needed for rendering.
+const String kProfilePrerollFrame = 'preroll_frame';
+
+/// A benchmark metric that includes submitting layer and picture information
+/// to the renderer.
+const String kProfileApplyFrame = 'apply_frame';
 
 /// Measures the amount of time [action] takes.
 Duration timeAction(VoidCallback action) {
@@ -221,9 +232,9 @@ abstract class SceneBuilderRecorder extends Recorder {
             final Scene scene = sceneBuilder.build();
             profile.record('windowRenderDuration', () {
               window.render(scene);
-            });
-          });
-        });
+            }, reported: false);
+          }, reported: false);
+        }, reported: true);
         endMeasureFrame();
 
         if (profile.shouldContinue()) {
@@ -331,7 +342,7 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
   @mustCallSuper
   void frameDidDraw() {
     endMeasureFrame();
-    profile.addDataPoint('drawFrameDuration', _drawFrameStopwatch.elapsed);
+    profile.addDataPoint('drawFrameDuration', _drawFrameStopwatch.elapsed, reported: true);
 
     if (profile.shouldContinue()) {
       window.scheduleFrame();
@@ -353,12 +364,30 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
     final _RecordingWidgetsBinding binding =
         _RecordingWidgetsBinding.ensureInitialized();
     final Widget widget = createWidget();
+
+    registerEngineBenchmarkValueListener(kProfilePrerollFrame, (num value) {
+      localProfile.addDataPoint(
+        kProfilePrerollFrame,
+        Duration(microseconds: value.toInt()),
+        reported: false,
+      );
+    });
+    registerEngineBenchmarkValueListener(kProfileApplyFrame, (num value) {
+      localProfile.addDataPoint(
+        kProfileApplyFrame,
+        Duration(microseconds: value.toInt()),
+        reported: false,
+      );
+    });
+
     binding._beginRecording(this, widget);
 
     try {
       await _runCompleter.future;
       return localProfile;
     } finally {
+      stopListeningToEngineBenchmarkValues(kProfilePrerollFrame);
+      stopListeningToEngineBenchmarkValues(kProfileApplyFrame);
       _runCompleter = null;
       profile = null;
     }
@@ -421,7 +450,7 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
     // Only record frames that show the widget.
     if (showWidget) {
       endMeasureFrame();
-      profile.addDataPoint('drawFrameDuration', _drawFrameStopwatch.elapsed);
+      profile.addDataPoint('drawFrameDuration', _drawFrameStopwatch.elapsed, reported: true);
     }
 
     if (profile.shouldContinue()) {
@@ -488,10 +517,20 @@ class _WidgetBuildRecorderHostState extends State<_WidgetBuildRecorderHost> {
 /// calculations will only apply to the latest [_kMeasuredSampleCount] data
 /// points.
 class Timeseries {
-  Timeseries(this.name);
+  Timeseries(this.name, this.isReported);
 
   /// The label of this timeseries used for debugging and result inspection.
   final String name;
+
+  /// Whether this timeseries is reported to the benchmark dashboard.
+  ///
+  /// If `true` a new benchmark card is created for the timeseries and is
+  /// visible on the dashboard.
+  ///
+  /// If `false` the data is stored but it does not show up on the dashboard.
+  /// Use unreported metrics for metrics that are useful for manual inspection
+  /// but that are too fine-grained to be useful for tracking on the dashboard.
+  final bool isReported;
 
   /// List of all the values that have been recorded.
   ///
@@ -700,14 +739,20 @@ class Profile {
   final Map<String, dynamic> extraData = <String, dynamic>{};
 
   /// Invokes [callback] and records the duration of its execution under [key].
-  Duration record(String key, VoidCallback callback) {
+  Duration record(String key, VoidCallback callback, { @required bool reported }) {
     final Duration duration = timeAction(callback);
-    addDataPoint(key, duration);
+    addDataPoint(key, duration, reported: reported);
     return duration;
   }
 
-  void addDataPoint(String key, Duration duration) {
-    scoreData.putIfAbsent(key, () => Timeseries(key)).add(duration.inMicroseconds.toDouble());
+  /// Adds a timed sample to the timeseries corresponding to [key].
+  ///
+  /// Set [reported] to `true` to report the timeseries to the dashboard UI.
+  ///
+  /// Set [reported] to `false` to store the data, but not show it on the
+  /// dashboard UI.
+  void addDataPoint(String key, Duration duration, { @required bool reported }) {
+    scoreData.putIfAbsent(key, () => Timeseries(key, reported)).add(duration.inMicroseconds.toDouble());
   }
 
   /// Decides whether the data collected so far is sufficient to stop, or
@@ -740,9 +785,16 @@ class Profile {
     };
 
     for (final String key in scoreData.keys) {
-      scoreKeys.add('$key.average');
-      scoreKeys.add('$key.outlierAverage');
       final Timeseries timeseries = scoreData[key];
+
+      if (timeseries.isReported) {
+        scoreKeys.add('$key.average');
+        // Report `outlierRatio` rather than `outlierAverage`, because
+        // the absolute value of outliers is less interesting than the
+        // ratio.
+        scoreKeys.add('$key.outlierRatio');
+      }
+
       final TimeseriesStats stats = timeseries.computeStats();
       json['$key.average'] = stats.average;
       json['$key.outlierAverage'] = stats.outlierAverage;
@@ -957,4 +1009,56 @@ void endMeasureFrame() {
     'measured_frame_end#$_currentFrameNumber',
   );
   _currentFrameNumber += 1;
+}
+
+/// A function that receives a benchmark value from the framework.
+typedef EngineBenchmarkValueListener = void Function(num value);
+
+// Maps from a value label name to a listener.
+final Map<String, EngineBenchmarkValueListener> _engineBenchmarkListeners = <String, EngineBenchmarkValueListener>{};
+
+/// Registers a [listener] for engine benchmark values labeled by [name].
+///
+/// If another listener is already registered, overrides it.
+void registerEngineBenchmarkValueListener(String name, EngineBenchmarkValueListener listener) {
+  if (listener == null) {
+    throw ArgumentError(
+      'Listener must not be null. To stop listening to engine benchmark values '
+      'under label "$name", call stopListeningToEngineBenchmarkValues(\'$name\').',
+    );
+  }
+
+  if (_engineBenchmarkListeners.containsKey(name)) {
+    throw StateError(
+      'A listener for "$name" is already registered.\n'
+      'Call `stopListeningToEngineBenchmarkValues` to unregister the previous '
+      'listener before registering a new one.'
+    );
+  }
+
+  if (_engineBenchmarkListeners.isEmpty) {
+    // The first listener is being registered. Register the global listener.
+    js_util.setProperty(html.window, '_flutter_internal_on_benchmark', _dispatchEngineBenchmarkValue);
+  }
+
+  _engineBenchmarkListeners[name] = listener;
+}
+
+/// Stops listening to engine benchmark values under labeled by [name].
+void stopListeningToEngineBenchmarkValues(String name) {
+  _engineBenchmarkListeners.remove(name);
+  if (_engineBenchmarkListeners.isEmpty) {
+    // The last listener unregistered. Remove the global listener.
+    js_util.setProperty(html.window, '_flutter_internal_on_benchmark', null);
+  }
+}
+
+// Dispatches a benchmark value reported by the engine to the relevant listener.
+//
+// If there are no listeners registered for [name], ignores the value.
+void _dispatchEngineBenchmarkValue(String name, double value) {
+  final EngineBenchmarkValueListener listener = _engineBenchmarkListeners[name];
+  if (listener != null) {
+    listener(value);
+  }
 }

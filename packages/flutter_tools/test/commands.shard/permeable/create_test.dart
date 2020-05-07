@@ -7,20 +7,18 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:args/command_runner.dart';
-import 'package:platform/platform.dart';
-
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/net.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
@@ -86,7 +84,14 @@ void main() {
     );
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
-    Pub: () => const Pub(),
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
   });
 
   testUsingContext('can create a default project if empty directory exists', () async {
@@ -104,7 +109,14 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
-    Pub: () => const Pub(),
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
   });
 
   testUsingContext('creates a module project correctly', () async {
@@ -126,7 +138,14 @@ void main() {
     ]);
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
-    Pub: () => const Pub(),
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
   });
 
   testUsingContext('cannot create a project if non-empty non-project directory exists with .metadata', () async {
@@ -144,7 +163,14 @@ void main() {
         ]),
       throwsToolExit(message: 'Sorry, unable to detect the type of project to recreate'));
   }, overrides: <Type, Generator>{
-    Pub: () => const Pub(),
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
     ...noColorTerminalOverride,
   });
 
@@ -170,7 +196,14 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
-    Pub: () => const Pub(),
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
   });
 
   testUsingContext('detects and recreates an app project correctly', () async {
@@ -195,7 +228,14 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
-    Pub: () => const Pub(),
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
   });
 
   testUsingContext('detects and recreates a plugin project correctly', () async {
@@ -220,7 +260,14 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
-    Pub: () => const Pub(),
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
   });
 
   testUsingContext('detects and recreates a package project correctly', () async {
@@ -251,7 +298,14 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
-    Pub: () => const Pub(),
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
   });
 
   testUsingContext('kotlin/swift legacy app project', () async {
@@ -273,7 +327,14 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
-    Pub: () => const Pub(),
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
   });
 
   testUsingContext('can create a package project', () async {
@@ -303,7 +364,14 @@ void main() {
     );
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
-    Pub: () => const Pub(),
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
   });
 
   testUsingContext('can create a plugin project', () async {
@@ -325,7 +393,14 @@ void main() {
     );
     return _runFlutterTest(projectDir.childDirectory('example'));
   }, overrides: <Type, Generator>{
-    Pub: () => const Pub(),
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
   });
 
   testUsingContext('plugin example app depends on plugin', () async {
@@ -344,7 +419,14 @@ void main() {
     final PathDependency pathDependency = pubspec.dependencies[pluginName] as PathDependency;
     expect(pathDependency.path, '../');
   }, overrides: <Type, Generator>{
-    Pub: () => const Pub(),
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
   });
 
   testUsingContext('kotlin/swift plugin project', () async {
@@ -429,7 +511,14 @@ void main() {
       <String>['lib/main.dart'],
     );
   }, overrides: <Type, Generator>{
-    Pub: () => const Pub(),
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
   });
 
   testUsingContext('module project with pub', () async {
@@ -464,7 +553,14 @@ void main() {
       '.android/Flutter/src/main/java/io/flutter/facade/Flutter.java',
     ]);
   }, overrides: <Type, Generator>{
-    Pub: () => const Pub(),
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
   });
 
 
@@ -1038,7 +1134,14 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
-    Pub: () => const Pub(),
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
   });
 
   testUsingContext('can re-gen module .ios/ folder, reusing custom org', () async {
@@ -1055,7 +1158,14 @@ void main() {
       'com.bar.foo.flutterProject',
     );
   }, overrides: <Type, Generator>{
-    Pub: () => const Pub(),
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
   });
 
   testUsingContext('can re-gen app android/ folder, reusing custom org', () async {
@@ -1210,7 +1320,14 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
-    Pub: () => const Pub(),
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
   });
 
   testUsingContext(
@@ -1227,7 +1344,14 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => loggingProcessManager,
-      Pub: () => const Pub(),
+      Pub: () => Pub(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+      ),
     },
   );
 
@@ -1245,7 +1369,14 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => loggingProcessManager,
-      Pub: () => const Pub(),
+      Pub: () => Pub(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+      ),
     },
   );
 

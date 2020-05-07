@@ -26,5 +26,5 @@ void main() {
       paints
         ..circle(x: 25.0, y: 40.0, radius: 10.0, strokeWidth: 10.0),
     );
-  }, skip: isBrowser);
+  });
 }
