@@ -282,4 +282,3 @@ String incrementLevel(String version, String level) {
   }
   return getVersionFromParts(parts);
 }
-
