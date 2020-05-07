@@ -12,6 +12,10 @@ ShaderMaskLayer::ShaderMaskLayer(sk_sp<SkShader> shader,
     : shader_(shader), mask_rect_(mask_rect), blend_mode_(blend_mode) {}
 
 void ShaderMaskLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+#if defined(OS_FUCHSIA)
+  CheckForChildLayerBelow(context);
+#endif
+
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
   ContainerLayer::Preroll(context, matrix);

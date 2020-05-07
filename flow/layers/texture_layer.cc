@@ -17,6 +17,10 @@ TextureLayer::TextureLayer(const SkPoint& offset,
 void TextureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "TextureLayer::Preroll");
 
+#if defined(OS_FUCHSIA)
+  CheckForChildLayerBelow(context);
+#endif
+
   set_paint_bounds(SkRect::MakeXYWH(offset_.x(), offset_.y(), size_.width(),
                                     size_.height()));
 }
