@@ -282,7 +282,7 @@ task:
          script: ./dev/bots/firebase_testlab.sh dev/integration_tests/release_smoke_test
        - name: firebase_lab_abstract_method_smoke_test-linux
          script: ./dev/bots/firebase_testlab.sh dev/integration_tests/abstract_method_smoke_test
-      - name: firebase_lab_android_embedding_v2_smoke_test-linux
+       - name: firebase_lab_android_embedding_v2_smoke_test-linux
          script: ./dev/bots/firebase_testlab.sh dev/integration_tests/android_embedding_v2_smoke_test
 
     - name: web_smoke_test
