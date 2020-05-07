@@ -222,7 +222,7 @@ class UserMessages {
   String get flutterNoSupportedDevices => 'No supported devices connected.';
   String flutterMissPlatformProject(String flutterProject) =>
       'Your project $flutterProject is missing some platform projects.'
-          '\n Consider running "flutter create ." in the root project to create them.';
+          '\nConsider running "flutter create ." in the root project to create them.';
   String get flutterFoundButUnSupportedDevices=> 'Follow devices are founded but not support in this project: ';
   String flutterFoundSpecifiedDevices(int count, String deviceId) =>
       'Found $count devices with name or id matching $deviceId:';
