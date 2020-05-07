@@ -34,15 +34,30 @@ class CalendarDateRangePicker extends StatefulWidget {
   /// Creates a scrollable calendar grid for picking date ranges.
   CalendarDateRangePicker({
     Key key,
-    this.initialStartDate,
-    this.initialEndDate,
-    @required this.firstDate,
-    @required this.lastDate,
+    DateTime initialStartDate,
+    DateTime initialEndDate,
+    @required DateTime firstDate,
+    @required DateTime lastDate,
     DateTime currentDate,
     @required this.onStartDateChanged,
     @required this.onEndDateChanged,
-  }) : currentDate = utils.dateOnly(currentDate ?? DateTime.now()),
-       super(key: key);
+  }) : initialStartDate = initialStartDate != null ? utils.dateOnly(initialStartDate) : null,
+       initialEndDate = initialEndDate != null ? utils.dateOnly(initialEndDate) : null,
+       assert(firstDate != null),
+       assert(lastDate != null),
+       firstDate = utils.dateOnly(firstDate),
+       lastDate = utils.dateOnly(lastDate),
+       currentDate = utils.dateOnly(currentDate ?? DateTime.now()),
+       super(key: key) {
+    assert(
+      this.initialStartDate == null || this.initialEndDate == null || !this.initialStartDate.isAfter(initialEndDate),
+      'initialStartDate must be on or before initialEndDate.'
+    );
+    assert(
+      !this.lastDate.isBefore(this.firstDate),
+      'firstDate must be on or before lastDate.'
+    );
+  }
 
   /// The [DateTime] that represents the start of the initial date range selection.
   final DateTime initialStartDate;
@@ -94,6 +109,12 @@ class _CalendarDateRangePickerState extends State<CalendarDateRangePicker> {
     }
 
     _showWeekBottomDivider = _initialMonthIndex != 0;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   void _scrollListener() {
@@ -551,7 +572,7 @@ class _MonthItem extends StatelessWidget {
     if (!isDisabled) {
       dayWidget = GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => onChanged(dayToBuild),
+        onTap: () { onChanged(dayToBuild); },
         child: dayWidget,
         dragStartBehavior: dragStartBehavior,
       );
@@ -609,8 +630,7 @@ class _MonthItem extends StatelessWidget {
       );
       final List<Widget> weekList = dayItems.sublist(start, end);
 
-      final DateTime dateAfterLeadingPadding =
-      DateTime(year, month, start - dayOffset + 1);
+      final DateTime dateAfterLeadingPadding = DateTime(year, month, start - dayOffset + 1);
       // Only color the edge container if it is after the start date and
       // on/before the end date.
       final bool isLeadingInRange =
