@@ -233,6 +233,12 @@ def main(argv):
       '--manifest-entry',
       action='append',
       help='Key:value pairs to add to the .jar manifest.')
+  parser.add_option(
+      '--additional-jar-files',
+      dest='additional_jar_files',
+      action='append',
+      help='Additional files to package into jar. By default, only Java .class '
+      'files are packaged into the jar.')
 
   parser.add_option('--stamp', help='Path to touch on success.')
 
@@ -257,6 +263,10 @@ def main(argv):
   if options.src_gendirs:
     src_gendirs = build_utils.ParseGypList(options.src_gendirs)
     java_files += build_utils.FindInDirectories(src_gendirs, '*.java')
+
+  additional_jar_files = []
+  for arg in options.additional_jar_files or []:
+    additional_jar_files += build_utils.ParseGypList(arg)
 
   input_files = bootclasspath + classpath + java_srcjars + java_files
   with build_utils.TempDir() as temp_dir:
@@ -298,10 +308,21 @@ def main(argv):
         CreateManifest(manifest_file, classpath, options.main_class, entries)
       else:
         manifest_file = None
+
+      if options.additional_jar_files:
+        for f in additional_jar_files:
+          # Also make the additional files available at the relative paths
+          # matching their original locations.
+          shutil.copyfile(f, os.path.join(
+              classes_dir, os.path.relpath(f, options.jar_source_base_dir)))
+        additional_jar_files = [os.path.relpath(
+            f, options.jar_source_base_dir) for f in additional_jar_files]
+
       jar.JarDirectory(classes_dir,
                        build_utils.ParseGypList(options.jar_excluded_classes),
                        options.jar_path,
-                       manifest_file=manifest_file)
+                       manifest_file=manifest_file,
+                       additional_jar_files=additional_jar_files)
 
       if options.jar_source_path:
         jar.Jar(java_files, options.jar_source_base_dir, options.jar_source_path)

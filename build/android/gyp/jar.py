@@ -13,7 +13,7 @@ from util import build_utils
 from util import md5_check
 
 
-def Jar(class_files, classes_dir, jar_path, manifest_file=None):
+def Jar(class_files, classes_dir, jar_path, manifest_file=None, additional_jar_files=None):
   jar_path = os.path.abspath(jar_path)
 
   # The paths of the files in the jar will be the same as they are passed in to
@@ -26,6 +26,8 @@ def Jar(class_files, classes_dir, jar_path, manifest_file=None):
     jar_cmd[1] += 'm'
     jar_cmd.append(os.path.abspath(manifest_file))
   jar_cmd.extend(class_files_rel)
+  if additional_jar_files:
+    jar_cmd.extend(additional_jar_files)
 
   with build_utils.TempDir() as temp_dir:
     empty_file = os.path.join(temp_dir, '.empty')
@@ -43,13 +45,14 @@ def Jar(class_files, classes_dir, jar_path, manifest_file=None):
     build_utils.Touch(jar_path, fail_if_missing=True)
 
 
-def JarDirectory(classes_dir, excluded_classes, jar_path, manifest_file=None):
+def JarDirectory(classes_dir, excluded_classes, jar_path, manifest_file=None, additional_jar_files=None):
   class_files = build_utils.FindInDirectory(classes_dir, '*.class')
   for exclude in excluded_classes:
     class_files = filter(
         lambda f: not fnmatch.fnmatch(f, exclude), class_files)
 
-  Jar(class_files, classes_dir, jar_path, manifest_file=manifest_file)
+  Jar(class_files, classes_dir, jar_path, manifest_file=manifest_file,
+      additional_jar_files=additional_jar_files)
 
 
 def main():
