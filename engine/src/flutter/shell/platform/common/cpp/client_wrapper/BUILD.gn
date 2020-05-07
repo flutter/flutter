@@ -44,6 +44,7 @@ executable("client_wrapper_unittests") {
   sources = [
     "basic_message_channel_unittests.cc",
     "encodable_value_unittests.cc",
+    "event_channel_unittests.cc",
     "method_call_unittests.cc",
     "method_channel_unittests.cc",
     "method_result_functions_unittests.cc",

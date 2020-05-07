@@ -788,10 +788,15 @@ FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/basic_message_ch
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/byte_stream_wrappers.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/encodable_value_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/engine_method_result.cc
+FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/event_channel_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/basic_message_channel.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/binary_messenger.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/encodable_value.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/engine_method_result.h
+FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/event_channel.h
+FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/event_sink.h
+FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/event_stream_handler.h
+FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/event_stream_handler_functions.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/message_codec.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/method_call.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/method_channel.h
