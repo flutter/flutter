@@ -41,7 +41,7 @@ android {
 apply plugin: FlutterPlugin
 
 class FlutterPlugin implements Plugin<Project> {
-    private static final String MAVEN_REPO      = "https://storage.googleapis.com/download.flutter.io";
+    private static final String DEFAULT_MAVEN_HOST = "storage.googleapis.com";
 
     // The platforms that can be passed to the `--Ptarget-platform` flag.
     private static final String PLATFORM_ARM32  = "android-arm";
@@ -200,10 +200,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (!supportsBuildMode(flutterBuildMode)) {
             return
         }
+        String hostedRepository = System.env.FLUTTER_STORAGE_BASE_URL ?: DEFAULT_MAVEN_HOST
         String repository = useLocalEngine()
             ? project.property('local-engine-repo')
-            : MAVEN_REPO
-
+            : "https://$hostedRepository/download.flutter.io"
         project.rootProject.allprojects {
             repositories {
                 maven {
