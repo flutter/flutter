@@ -19,6 +19,7 @@ class ContainerLayer : public Layer {
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) const override;
 #if defined(OS_FUCHSIA)
+  void CheckForChildLayerBelow(PrerollContext* context) override;
   void UpdateScene(SceneUpdateContext& context) override;
 #endif  // defined(OS_FUCHSIA)
 

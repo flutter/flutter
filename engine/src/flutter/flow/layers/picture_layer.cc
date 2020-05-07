@@ -19,6 +19,11 @@ PictureLayer::PictureLayer(const SkPoint& offset,
 
 void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "PictureLayer::Preroll");
+
+#if defined(OS_FUCHSIA)
+  CheckForChildLayerBelow(context);
+#endif
+
   SkPicture* sk_picture = picture();
 
   if (auto* cache = context->raster_cache) {
