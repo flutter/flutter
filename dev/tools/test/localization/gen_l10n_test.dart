@@ -77,7 +77,7 @@ void main() {
       }
 
       fail(
-        'Attempting to set LocalizationsGenerator.setInputDirectory should fail if the '
+        'LocalizationsGenerator.setInputDirectory should fail if the '
         'directory does not exist.'
       );
     });
@@ -93,7 +93,7 @@ void main() {
       }
 
       fail(
-        'Attempting to set LocalizationsGenerator.setInputDirectory should fail if the '
+        'LocalizationsGenerator.setInputDirectory should fail if the '
         'the input string is null.'
       );
     });
@@ -109,7 +109,7 @@ void main() {
       }
 
       fail(
-        'Attempting to set LocalizationsGenerator.setOutputDirectory should fail if the '
+        'LocalizationsGenerator.setOutputDirectory should fail if the '
         'the input string is null.'
       );
     });
@@ -124,7 +124,7 @@ void main() {
       }
 
       fail(
-        'Attempting to set LocalizationsGenerator.setTemplateArbFile should fail if the '
+        'LocalizationsGenerator.setTemplateArbFile should fail if the '
         'the inputDirectory is not specified.'
       );
     });
@@ -140,7 +140,7 @@ void main() {
       }
 
       fail(
-        'Attempting to set LocalizationsGenerator.setTemplateArbFile should fail if the '
+        'LocalizationsGenerator.setTemplateArbFile should fail if the '
         'the templateArbFileName passed in is null.'
       );
     });
@@ -156,7 +156,7 @@ void main() {
       }
 
       fail(
-        'Attempting to set LocalizationsGenerator.setTemplateArbFile should fail if the '
+        'LocalizationsGenerator.setTemplateArbFile should fail if the '
         'the input string is null.'
       );
     });
@@ -172,7 +172,7 @@ void main() {
       }
 
       fail(
-        'Attempting to set LocalizationsGenerator.setBaseOutputFile should fail if the '
+        'LocalizationsGenerator.setBaseOutputFile should fail if the '
         'the input string is null.'
       );
     });
@@ -188,7 +188,7 @@ void main() {
       }
 
       fail(
-        'Attempting to set LocalizationsGenerator.className should fail if the '
+        'LocalizationsGenerator.className should fail if the '
         'the input string is null.'
       );
     });
@@ -216,7 +216,7 @@ void main() {
           return;
         }
         fail(
-          'Attempting to set LocalizationsGenerator.className should fail if the '
+          'LocalizationsGenerator.className should fail if the '
           'the input string is not a valid Dart class name.'
         );
       });
@@ -229,7 +229,7 @@ void main() {
           return;
         }
         fail(
-          'Attempting to set LocalizationsGenerator.className should fail if the '
+          'LocalizationsGenerator.className should fail if the '
           'the input string is not a valid public Dart class name.'
         );
       });
@@ -242,7 +242,7 @@ void main() {
           return;
         }
         fail(
-          'Attempting to set LocalizationsGenerator.className should fail if the '
+          'LocalizationsGenerator.className should fail if the '
           'the input string is not a valid public Dart class name.'
         );
       });
@@ -255,7 +255,7 @@ void main() {
           return;
         }
         fail(
-          'Attempting to set LocalizationsGenerator.className should fail if the '
+          'LocalizationsGenerator.className should fail if the '
           'the input string is not a valid public Dart class name.'
         );
       });
