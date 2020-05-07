@@ -268,8 +268,7 @@ task:
         - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
-    matrix:
-     - environment:
+    - environment:
         # Empirically, this shard runs in 20-25 minutes with just one CPU and 4G of RAM, as of
         # October 2019. It does not seem to be sensitive to the number of CPUs or amount of RAM;
         # doubling CPUs had no effect (mere seconds under 20 minutes), increasing RAM to 24G left it
