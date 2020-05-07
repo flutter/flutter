@@ -13,6 +13,10 @@ PlatformViewLayer::PlatformViewLayer(const SkPoint& offset,
 
 void PlatformViewLayer::Preroll(PrerollContext* context,
                                 const SkMatrix& matrix) {
+#if defined(OS_FUCHSIA)
+  CheckForChildLayerBelow(context);
+#endif
+
   set_paint_bounds(SkRect::MakeXYWH(offset_.x(), offset_.y(), size_.width(),
                                     size_.height()));
 

@@ -165,6 +165,7 @@ class Layer {
 #if defined(OS_FUCHSIA)
   // Updates the system composited scene.
   virtual void UpdateScene(SceneUpdateContext& context);
+  virtual void CheckForChildLayerBelow(PrerollContext* context);
 #endif
 
   bool needs_system_composite() const { return needs_system_composite_; }
@@ -183,6 +184,11 @@ class Layer {
   bool needs_painting() const { return !paint_bounds_.isEmpty(); }
 
   uint64_t unique_id() const { return unique_id_; }
+
+ protected:
+#if defined(OS_FUCHSIA)
+  bool child_layer_exists_below_ = false;
+#endif
 
  private:
   SkRect paint_bounds_;
