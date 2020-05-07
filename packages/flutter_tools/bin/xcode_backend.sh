@@ -157,6 +157,9 @@ BuildApp() {
     performance_measurement_option="--performance-measurement-file=${PERFORMANCE_MEASUREMENT_FILE}"
   fi
 
+  build_inputs_path="${derived_dir}/FlutterInputs.xcfilelist"
+  build_outputs_path="${derived_dir}/FlutterOutputs.xcfilelist"
+
   RunCommand "${FLUTTER_ROOT}/bin/flutter"                                \
     ${verbose_flag}                                                       \
     ${flutter_engine_flag}                                                \
@@ -164,6 +167,8 @@ BuildApp() {
     assemble                                                              \
     --output="${derived_dir}/"                                            \
     ${performance_measurement_option}                                     \
+    --build-inputs="${build_inputs_path}"                                 \
+    --build-outputs="${build_outputs_path}"                               \
     -dTargetPlatform=ios                                                  \
     -dTargetFile="${target_path}"                                         \
     -dBuildMode=${build_mode}                                             \

@@ -206,7 +206,14 @@
 			buildActionMask = 2147483647;
 			files = (
 			);
+			inputFileListPaths = (
+				Flutter/FlutterInputs.xcfilelist,
+			);
+			outputFileListPaths = (
+				Flutter/FlutterOutputs.xcfilelist,
+			);
 			inputPaths = (
+				Flutter/Generated.xcconfig,
 			);
 			name = "Run Script";
 			outputPaths = (
