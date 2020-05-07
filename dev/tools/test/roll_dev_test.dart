@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
 import 'package:dev_tools/roll_dev.dart';
+import 'package:mockito/mockito.dart';
+
 import './common.dart';
 
 void main() {
@@ -11,50 +14,98 @@ void main() {
     const String level = 'z';
     const String commit = 'abc123';
     const String origin = 'upstream';
+    FakeArgResults fakeArgResults;
+    MockGit mockGit;
+
+    setUp(() {
+      mockGit = MockGit();
+    });
 
     test('returns false if help requested', () {
+      fakeArgResults = FakeArgResults(
+        level: level,
+        commit: commit,
+        origin: origin,
+        justPrint: false,
+        autoApprove: true,
+        help: true,
+      );
       expect(
         run(
           usage: usage,
-          level: level,
-          commit: commit,
-          origin: origin,
-          justPrint: false,
-          autoApprove: false,
-          help: true,
+          argResults: fakeArgResults,
+          git: mockGit,
         ),
         false,
       );
     });
 
     test('returns false if level not provided', () {
+      fakeArgResults = FakeArgResults(
+        level: level,
+        commit: commit,
+        origin: origin,
+        justPrint: false,
+        autoApprove: true,
+        help: true,
+      );
       expect(
         run(
           usage: usage,
-          level: null,
-          commit: commit,
-          origin: origin,
-          justPrint: false,
-          autoApprove: false,
-          help: false,
+          argResults: fakeArgResults,
+          git: mockGit,
         ),
         false,
       );
     });
 
     test('returns false if commit not provided', () {
+      fakeArgResults = FakeArgResults(
+        level: level,
+        commit: commit,
+        origin: origin,
+        justPrint: false,
+        autoApprove: true,
+        help: true,
+      );
       expect(
         run(
           usage: usage,
-          level: level,
-          commit: null,
-          origin: origin,
-          justPrint: false,
-          autoApprove: false,
-          help: false,
+          argResults: fakeArgResults,
+          git: mockGit,
         ),
         false,
       );
+    });
+
+    test('throws exception if upstream remote wrong', () {
+      when(mockGit.getOutput(
+        'remote get-url $origin',
+        'check whether this is a flutter checkout',
+      )).thenReturn(
+        'wrong-remote',
+      );
+      fakeArgResults = FakeArgResults(
+        level: level,
+        commit: commit,
+        origin: origin,
+        justPrint: false,
+        autoApprove: true,
+        help: false,
+      );
+      Exception exception;
+      try {
+        run(
+          usage: usage,
+          argResults: fakeArgResults,
+          git: mockGit,
+        );
+      } on Exception catch (e) {
+        exception = e;
+      }
+      const String pattern = r'The current directory is not a Flutter '
+        'repository checkout with a correctly configured upstream remote.';
+      expect(exception.toString(), contains(pattern));
     });
   });
 
@@ -173,3 +224,52 @@ void main() {
     });
   });
 }
+
+class FakeArgResults implements ArgResults {
+  FakeArgResults({
+    String level,
+    String commit,
+    String origin,
+    bool justPrint,
+    bool autoApprove,
+    bool help,
+  }) : _parsedArgs = <String, dynamic>{
+    'increment': level,
+    'commit': commit,
+    'origin': origin,
+    'justPrint': justPrint,
+    'autoApprove': autoApprove,
+    'help': help,
+  };
+
+  @override
+  String name;
+
+  @override
+  ArgResults command;
+
+  @override
+  final List<String> rest = <String>[];
+
+  @override
+  List<String> arguments;
+
+  final Map<String, dynamic> _parsedArgs;
+
+  @override
+  Iterable<String> get options {
+    return null;
+  }
+
+  @override
+  dynamic operator [](String name) {
+    return _parsedArgs[name];
+  }
+
+  @override
+  bool wasParsed(String name) {
+    return null;
+  }
+}
+
+class MockGit extends Mock implements Git {}

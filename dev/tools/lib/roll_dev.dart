@@ -41,7 +41,7 @@ void main(List<String> args) {
     run(
       usage: argParser.usage,
       argResults: argResults,
-      getGitOutput: getGitOutput,
+      git: const Git(),
     );
   } on Exception catch (e) {
     print(e.toString());
@@ -49,15 +49,13 @@ void main(List<String> args) {
   }
 }
 
-typedef GitWrapper = String Function(String command, String explanation);
-
 /// Main script execution.
 ///
 /// Returns true if publishing was successful, else false.
 bool run({
   @required String usage,
   @required ArgResults argResults,
-  @required GitWrapper getGitOutput,
+  @required Git git,
 }) {
   final String level = argResults[kIncrement] as String;
   final String commit = argResults[kCommit] as String;
@@ -74,7 +72,11 @@ bool run({
     return false;
   }
 
-  if (getGitOutput('remote get-url $origin', 'check whether this is a flutter checkout') != kUpstreamRemote) {
+  final String remote = git.getOutput(
+    'remote get-url $origin',
+    'check whether this is a flutter checkout',
+  );
+  if (remote != kUpstreamRemote) {
     throw Exception(
       'The current directory is not a Flutter repository checkout with a '
       'correctly configured upstream remote.\nFor more details see: '
@@ -82,17 +84,17 @@ bool run({
     );
   }
 
-  if (getGitOutput('status --porcelain', 'check status of your local checkout') != '') {
+  if (git.getOutput('status --porcelain', 'check status of your local checkout') != '') {
     throw Exception(
       'Your git repository is not clean. Try running "git clean -fd". Warning, '
       'this will delete files! Run with -n to find out which ones.'
     );
   }
 
-  runGit('fetch $origin', 'fetch $origin');
-  runGit('reset $commit --hard', 'reset to the release commit');
+  git.run('fetch $origin', 'fetch $origin');
+  git.run('reset $commit --hard', 'reset to the release commit');
 
-  String version = getFullTag();
+  String version = getFullTag(git);
 
   version = incrementLevel(version, level);
 
@@ -101,9 +103,9 @@ bool run({
     return false;
   }
 
-  final String hash = getGitOutput('rev-parse HEAD', 'Get git hash for $commit');
+  final String hash = git.getOutput('rev-parse HEAD', 'Get git hash for $commit');
 
-  runGit('tag $version', 'tag the commit with the version label');
+  git.run('tag $version', 'tag the commit with the version label');
 
   // PROMPT
 
@@ -114,14 +116,14 @@ bool run({
       'to the "dev" channel.');
     stdout.write('Are you? [yes/no] ');
     if (stdin.readLineSync() != 'yes') {
-      runGit('tag -d $version', 'remove the tag you did not want to publish');
+      git.run('tag -d $version', 'remove the tag you did not want to publish');
       print('The dev roll has been aborted.');
       return false;
     }
   }
 
-  runGit('push $origin $version', 'publish the version');
-  runGit('push $origin HEAD:dev', 'land the new version on the "dev" branch');
+  git.run('push $origin $version', 'publish the version');
+  git.run('push $origin HEAD:dev', 'land the new version on the "dev" branch');
   print('Flutter version $version has been rolled to the "dev" channel!');
   return true;
 }
@@ -169,11 +171,11 @@ ArgResults parseArguments(ArgParser argParser, List<String> args) {
 }
 
 /// Obtain the version tag of the previous dev release.
-String getFullTag() {
+String getFullTag(Git git) {
   const String glob = '*.*.*-*.*.pre';
   // describe the latest dev release
   const String ref = 'refs/heads/dev';
-  return getGitOutput(
+  return git.getOutput(
     'describe --match $glob --exact-match --tags $ref',
     'obtain last released version number',
   );
@@ -200,18 +202,38 @@ String getVersionFromParts(List<int> parts) {
   return buf.toString();
 }
 
-String getGitOutput(String command, String explanation) {
-  final ProcessResult result = _runGit(command);
-  if ((result.stderr as String).isEmpty && result.exitCode == 0)
-    return (result.stdout as String).trim();
-  _reportGitFailureAndExit(result, explanation);
-  return null; // for the analyzer's sake
-}
+class Git {
+  const Git();
+  String getOutput(String command, String explanation) {
+    final ProcessResult result = _run(command);
+    if ((result.stderr as String).isEmpty && result.exitCode == 0)
+      return (result.stdout as String).trim();
+    _reportFailureAndExit(result, explanation);
+    return null; // for the analyzer's sake
+  }
 
-void runGit(String command, String explanation) {
-  final ProcessResult result = _runGit(command);
-  if (result.exitCode != 0)
-    _reportGitFailureAndExit(result, explanation);
+  void run(String command, String explanation) {
+    final ProcessResult result = _run(command);
+    if (result.exitCode != 0)
+      _reportFailureAndExit(result, explanation);
+  }
+
+  ProcessResult _run(String command) {
+    return Process.runSync('git', command.split(' '));
+  }
+
+  void _reportFailureAndExit(ProcessResult result, String explanation) {
+    if (result.exitCode != 0) {
+      print('Failed to $explanation. Git exited with error code ${result.exitCode}.');
+    } else {
+      print('Failed to $explanation.');
+    }
+    if ((result.stdout as String).isNotEmpty)
+      print('stdout from git:\n${result.stdout}\n');
+    if ((result.stderr as String).isNotEmpty)
+      print('stderr from git:\n${result.stderr}\n');
+    exit(1);
+  }
 }
 
 /// Return a copy of the [version] with [level] incremented by one.
@@ -255,19 +277,3 @@ String incrementLevel(String version, String level) {
   return getVersionFromParts(parts);
 }
 
-ProcessResult _runGit(String command) {
-  return Process.runSync('git', command.split(' '));
-}
-
-void _reportGitFailureAndExit(ProcessResult result, String explanation) {
-  if (result.exitCode != 0) {
-    print('Failed to $explanation. Git exited with error code ${result.exitCode}.');
-  } else {
-    print('Failed to $explanation.');
-  }
-  if ((result.stdout as String).isNotEmpty)
-    print('stdout from git:\n${result.stdout}\n');
-  if ((result.stderr as String).isNotEmpty)
-    print('stderr from git:\n${result.stderr}\n');
-  exit(1);
-}
