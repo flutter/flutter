@@ -203,7 +203,7 @@ class LocalizationOptions {
 /// Parse the localizations configuration options from [file].
 ///
 /// Throws [Exception] if any of the contents are invalid. Returns a
-/// [LocalizationOptions] will all fields as `null` if the config file exists
+/// [LocalizationOptions] with all fields as `null` if the config file exists
 /// but is empty.
 LocalizationOptions parseLocalizationsOptions({
   @required File file,

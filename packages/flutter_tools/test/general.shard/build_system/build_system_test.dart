@@ -571,7 +571,7 @@ void main() {
     final File bar = environment.buildDir.childFile('bar');
     final File foo = environment.buildDir.childFile('foo');
 
-    /// The target will write a file `foo`, but only if `bar` already exists.
+    // The target will write a file `foo`, but only if `bar` already exists.
     final TestTarget target = TestTarget(
       (Environment environment) async {
         foo.writeAsStringSync(bar.readAsStringSync());
