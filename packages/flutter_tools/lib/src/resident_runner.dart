@@ -749,6 +749,7 @@ abstract class ResidentRunner {
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
   bool get supportsCanvasKit => false;
   bool get supportsWriteSkSL => supportsServiceProtocol;
+  bool get trackWidgetCreation => debuggingOptions.buildInfo.trackWidgetCreation;
 
   // Returns the Uri of the first connected device for mobile,
   // and only connected device for web.
@@ -1195,7 +1196,7 @@ abstract class ResidentRunner {
       final File outputDill = globals.fs.file(dillOutputPath);
       if (outputDill.existsSync()) {
         outputDill.copySync(FlutterDevice.getCachedDillPath(
-          trackWidgetCreation: flutterDevices.first.buildInfo.trackWidgetCreation,
+          trackWidgetCreation: trackWidgetCreation,
         ));
       }
       artifactDirectory.deleteSync(recursive: true);
