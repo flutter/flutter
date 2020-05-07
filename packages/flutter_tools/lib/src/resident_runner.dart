@@ -21,6 +21,7 @@ import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'bundle.dart';
 import 'codegen.dart';
 import 'compile.dart';
 import 'convert.dart';
@@ -62,6 +63,14 @@ class FlutterDevice {
          packagesPath: globalPackagesPath,
        );
 
+
+  static String getCachedDillPath({@required bool trackWidgetCreation}) {
+    return getKernelPathForTransformerOptions(
+      globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
+      trackWidgetCreation: trackWidgetCreation,
+    );
+  }
+
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
     Device device, {
@@ -98,7 +107,9 @@ class FlutterDevice {
         compilerMessageConsumer:
           (String message, {bool emphasis, TerminalColor color, }) =>
             globals.printTrace(message),
-        initializeFromDill: globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
+        initializeFromDill: getCachedDillPath(
+          trackWidgetCreation: buildInfo.trackWidgetCreation,
+        ),
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
         platformDill: globals.fs.file(globals.artifacts
@@ -123,7 +134,9 @@ class FlutterDevice {
         targetModel: targetModel,
         experimentalFlags: experimentalFlags,
         dartDefines: buildInfo.dartDefines,
-        initializeFromDill: globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
+        initializeFromDill: getCachedDillPath(
+          trackWidgetCreation: buildInfo.trackWidgetCreation,
+        ),
         packagesPath: globalPackagesPath,
       );
     }
@@ -1179,10 +1192,11 @@ abstract class ResidentRunner {
   Future<void> preExit() async {
     // If _dillOutputPath is null, we created a temporary directory for the dill.
     if (_dillOutputPath == null && artifactDirectory.existsSync()) {
-      final File outputDill = artifactDirectory.childFile('app.dill');
+      final File outputDill = globals.fs.file(dillOutputPath);
       if (outputDill.existsSync()) {
-        artifactDirectory.childFile('app.dill')
-          .copySync(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+        outputDill.copySync(FlutterDevice.getCachedDillPath(
+          trackWidgetCreation: flutterDevices.first.buildInfo.trackWidgetCreation,
+        ));
       }
       artifactDirectory.deleteSync(recursive: true);
     }
