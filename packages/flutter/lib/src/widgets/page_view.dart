@@ -564,6 +564,7 @@ class PageView extends StatefulWidget {
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
+    this.onDragEnd,
     List<Widget> children = const <Widget>[],
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
@@ -598,6 +599,7 @@ class PageView extends StatefulWidget {
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
+    this.onDragEnd,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -697,6 +699,7 @@ class PageView extends StatefulWidget {
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
+    this.onDragEnd,
     @required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
@@ -757,7 +760,10 @@ class PageView extends StatefulWidget {
 
   /// Called whenever the page in the center of the viewport changes.
   final ValueChanged<int> onPageChanged;
-
+  
+  /// Called whenever the drag End.
+  final  VoidCallback onDragEnd;
+  
   /// A delegate that provides the children for the [PageView].
   ///
   /// The [PageView.custom] constructor lets you specify this delegate
@@ -806,6 +812,9 @@ class _PageViewState extends State<PageView> {
 
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
+         if (notification is ScrollEndNotification && widget.onDragEnd != null) {
+          widget.onDragEnd();
+        }
         if (notification.depth == 0 && widget.onPageChanged != null && notification is ScrollUpdateNotification) {
           final PageMetrics metrics = notification.metrics as PageMetrics;
           final int currentPage = metrics.page.round();
