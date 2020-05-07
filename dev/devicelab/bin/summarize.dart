@@ -12,6 +12,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 
 String kRawSummaryOpt = 'raw-summary';
 String kTabTableOpt = 'tsv-table';
+String kAsciiTableOpt = 'ascii-table';
 
 void _usage(String error) {
   stderr.writeln(error);
@@ -56,11 +57,20 @@ Future<void> main(List<String> rawArgs) async {
       section('A/B comparison for "$filename"');
       print(test.printSummary());
     }
+    if (args[kAsciiTableOpt] as bool) {
+      section('Formatted summary for "$filename"');
+      print(test.asciiSummary());
+    }
   }
 }
 
 /// Command-line options for the `summarize.dart` command.
 final ArgParser _argParser = ArgParser()
+  ..addFlag(
+    kAsciiTableOpt,
+    defaultsTo: true,
+    help: 'Prints the summary in a table formatted nicely for terminal output.',
+  )
   ..addFlag(
     kTabTableOpt,
     defaultsTo: true,
