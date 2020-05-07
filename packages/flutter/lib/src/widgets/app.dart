@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection' show HashMap;
+import 'dart:ui' as ui show PlatformDispatcher;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -953,7 +954,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     _updateNavigator();
-    _locale = _resolveLocales(WidgetsBinding.instance.window.locales, widget.supportedLocales);
+    _locale = _resolveLocales(ui.PlatformDispatcher.instance.locales, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -1282,12 +1283,12 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     if (_navigator != null) {
       navigator = Navigator(
         key: _navigator,
-        // If window.defaultRouteName isn't '/', we should assume it was set
+        // If platformDispatcher.defaultRouteName isn't '/', we should assume it was set
         // intentionally via `setInitialRoute`, and should override whatever
-        // is in [widget.initialRoute].
-        initialRoute: WidgetsBinding.instance.window.defaultRouteName != Navigator.defaultRouteName
-            ? WidgetsBinding.instance.window.defaultRouteName
-            : widget.initialRoute ?? WidgetsBinding.instance.window.defaultRouteName,
+        // is in [platformDispatcher.initialRoute].
+        initialRoute: WidgetsBinding.instance.platformDispatcher.defaultRouteName != Navigator.defaultRouteName
+            ? WidgetsBinding.instance.platformDispatcher.defaultRouteName
+            : widget.initialRoute ?? WidgetsBinding.instance.platformDispatcher.defaultRouteName,
         onGenerateRoute: _onGenerateRoute,
         onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
           ? Navigator.defaultGenerateInitialRoutes
@@ -1473,7 +1474,10 @@ class _MediaQueryFromWindowsState extends State<_MediaQueryFromWindow> with Widg
   @override
   Widget build(BuildContext context) {
     return MediaQuery(
-      data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+      data: MediaQueryData.fromWindow(
+          WidgetsBinding.instance.window,
+          WidgetsBinding.instance.platformDispatcher,
+      ),
       child: widget.child,
     );
   }

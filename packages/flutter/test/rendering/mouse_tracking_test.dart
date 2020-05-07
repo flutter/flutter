@@ -144,7 +144,7 @@ void main() {
     expect(_mouseTracker.mouseIsConnected, isFalse);
 
     // Pointer enters the annotation.
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
     ]));
 
@@ -156,7 +156,7 @@ void main() {
     listenerLogs.clear();
 
     // Pointer hovers the annotation.
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
@@ -167,7 +167,7 @@ void main() {
     events.clear();
 
     // Pointer is removed while on the annotation.
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(1.0, 101.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
@@ -178,7 +178,7 @@ void main() {
     listenerLogs.clear();
 
     // Pointer is added on the annotation.
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 301.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
@@ -196,7 +196,7 @@ void main() {
     expect(_mouseTracker.mouseIsConnected, isFalse);
 
     // The first mouse is added on the annotation.
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
       _pointerData(PointerChange.hover, const Offset(0.0, 1.0)),
     ]));
@@ -208,7 +208,7 @@ void main() {
     events.clear();
 
     // The second mouse is added on the annotation.
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 401.0), device: 1),
       _pointerData(PointerChange.hover, const Offset(1.0, 401.0), device: 1),
     ]));
@@ -220,7 +220,7 @@ void main() {
     events.clear();
 
     // The first mouse moves on the annotation.
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(0.0, 101.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
@@ -230,7 +230,7 @@ void main() {
     events.clear();
 
     // The second mouse moves on the annotation.
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(1.0, 501.0), device: 1),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
@@ -240,7 +240,7 @@ void main() {
     events.clear();
 
     // The first mouse is removed while on the annotation.
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(0.0, 101.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
@@ -250,7 +250,7 @@ void main() {
     events.clear();
 
     // The second mouse still moves on the annotation.
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(1.0, 601.0), device: 1),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
@@ -260,7 +260,7 @@ void main() {
     events.clear();
 
     // The second mouse is removed while on the annotation.
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(1.0, 601.0), device: 1),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
@@ -274,7 +274,7 @@ void main() {
     final List<PointerEvent> events = <PointerEvent>[];
     _setUpWithOneAnnotation(logEvents: events);
 
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 101.0)),
       _pointerData(PointerChange.down, const Offset(0.0, 101.0)),
     ]));
@@ -285,14 +285,14 @@ void main() {
     ]));
     events.clear();
 
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.move, const Offset(0.0, 201.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
     events.clear();
 
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.up, const Offset(0.0, 301.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
@@ -317,7 +317,7 @@ void main() {
     isInHitRegion = false;
 
     // Connect a mouse when there is no annotation.
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 100.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
@@ -365,7 +365,7 @@ void main() {
     isInHitRegion = false;
 
     // Connect a mouse.
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 100.0)),
     ]));
     events.clear();
@@ -415,7 +415,7 @@ void main() {
 
     // Connect a mouse in the region. Should trigger Enter.
     isInHitRegion = true;
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 100.0)),
     ]));
 
@@ -426,7 +426,7 @@ void main() {
     events.clear();
 
     // Disconnect the mouse from the region. Should trigger Exit.
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(0.0, 100.0)),
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
@@ -450,7 +450,7 @@ void main() {
     });
 
     isInHitRegion = false;
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(200.0, 100.0)),
     ]));
 
@@ -459,7 +459,7 @@ void main() {
 
     // Moves the mouse into the region. Should trigger Enter.
     isInHitRegion = true;
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(0.0, 100.0)),
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
@@ -471,7 +471,7 @@ void main() {
 
     // Moves the mouse out of the region. Should trigger Exit.
     isInHitRegion = false;
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(200.0, 100.0)),
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
@@ -485,7 +485,7 @@ void main() {
     });
 
     // Connect a touch device, which should not be recognized by MouseTracker
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 100.0), kind: PointerDeviceKind.touch),
     ]));
     expect(_mouseTracker.mouseIsConnected, isFalse);
@@ -511,7 +511,8 @@ void main() {
 
     isInHitRegionOne = false;
     isInHitRegionTwo = true;
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 101.0)),
       _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
     ]));
@@ -551,14 +552,14 @@ void main() {
 
     // Starts out of A.
     isInB = false;
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 1.0)),
     ]));
     expect(logs, <String>[]);
 
     // Moves into B within one frame.
     isInB = true;
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(0.0, 10.0)),
     ]));
     expect(logs, <String>['enterA', 'enterB', 'hoverA', 'hoverB']);
@@ -566,7 +567,7 @@ void main() {
 
     // Moves out of A within one frame.
     isInB = false;
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(0.0, 20.0)),
     ]));
     expect(logs, <String>['exitB', 'exitA']);
@@ -605,7 +606,7 @@ void main() {
     // Starts within A.
     isInA = true;
     isInB = false;
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 1.0)),
     ]));
     expect(logs, <String>['enterA']);
@@ -614,7 +615,7 @@ void main() {
     // Moves into B within one frame.
     isInA = false;
     isInB = true;
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(0.0, 10.0)),
     ]));
     expect(logs, <String>['exitA', 'enterB', 'hoverB']);
@@ -623,7 +624,7 @@ void main() {
     // Moves into A within one frame.
     isInA = true;
     isInB = false;
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+    ui.PlatformDispatcher.instance.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(0.0, 1.0)),
     ]));
     expect(logs, <String>['exitB', 'enterA', 'hoverA']);

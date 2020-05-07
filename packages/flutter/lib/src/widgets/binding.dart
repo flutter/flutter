@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback;
+import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback, ScreenConfiguration;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -246,6 +246,16 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes notifications from [Window.onAccessibilityFeaturesChanged].
   void didChangeAccessibilityFeatures() { }
+
+  /// Called whenever a physical screen is added to the system, and at startup
+  /// when screens are detected.
+  void didAddScreen(Object id, ScreenConfiguration configuration) { }
+
+  /// Called whenever a physical screen is removed from the system.
+  void didRemoveScreen(Object id) { }
+
+  /// Called when the configuration of a physical screen has changed.
+  void didChangeScreenConfiguration(Object id, ScreenConfiguration configuration) { }
 }
 
 /// The glue between the widgets layer and the Flutter engine.
@@ -265,8 +275,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     // properly setup the [defaultBinaryMessenger] instance.
     _buildOwner = BuildOwner();
     buildOwner.onBuildScheduled = _handleBuildScheduled;
-    window.onLocaleChanged = handleLocaleChanged;
-    window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
+    platformDispatcher.onLocaleChanged = handleLocaleChanged;
+    platformDispatcher.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
     FlutterErrorDetails.propertiesTransformers.add(transformDebugCreator);
   }
@@ -567,7 +577,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   void handleLocaleChanged() {
-    dispatchLocalesChanged(window.locales);
+    dispatchLocalesChanged(platformDispatcher.configuration.locales);
   }
 
   /// Notify all the observers that the locale has changed (using

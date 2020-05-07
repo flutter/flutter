@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
-import 'dart:ui' show window;
+import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
@@ -15,14 +15,14 @@ void main() {
 
     // Preconditions.
     expect(WidgetsBinding.instance, isNull);
-    expect(window.onBeginFrame, isNull);
-    expect(window.onDrawFrame, isNull);
+    expect(PlatformDispatcher.instance.onBeginFrame, isNull);
+    expect(PlatformDispatcher.instance.onDrawFrame, isNull);
 
     // Instantiation does nothing with regards to frame scheduling.
     final WidgetsFlutterBinding binding = WidgetsFlutterBinding.ensureInitialized() as WidgetsFlutterBinding;
     expect(binding.hasScheduledFrame, isFalse);
-    expect(window.onBeginFrame, isNull);
-    expect(window.onDrawFrame, isNull);
+    expect(PlatformDispatcher.instance.onBeginFrame, isNull);
+    expect(PlatformDispatcher.instance.onDrawFrame, isNull);
 
     // Framework starts with detached statue. Sends resumed signal to enable frame.
     final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
@@ -33,7 +33,7 @@ void main() {
 
     // Frame callbacks are registered lazily when a frame is scheduled.
     binding.scheduleFrame();
-    expect(window.onBeginFrame, isNotNull);
-    expect(window.onDrawFrame, isNotNull);
+    expect(PlatformDispatcher.instance.onBeginFrame, isNotNull);
+    expect(PlatformDispatcher.instance.onDrawFrame, isNotNull);
   });
 }

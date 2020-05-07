@@ -59,7 +59,10 @@ void main() {
   });
 
   testWidgets('MediaQueryData is sane', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+    final MediaQueryData data = MediaQueryData.fromWindow(
+      WidgetsBinding.instance.window,
+      WidgetsBinding.instance.platformDispatcher,
+    );
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
     expect(data.size, equals(WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio));
@@ -73,7 +76,10 @@ void main() {
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+    final MediaQueryData data = MediaQueryData.fromWindow(
+      WidgetsBinding.instance.window,
+      WidgetsBinding.instance.platformDispatcher,
+    );
     final MediaQueryData copied = data.copyWith();
     expect(copied.size, data.size);
     expect(copied.devicePixelRatio, data.devicePixelRatio);
@@ -104,7 +110,10 @@ void main() {
     const EdgeInsets customSystemGestureInsets = EdgeInsets.all(1.5556);
     const double customPhysicalDepth = 120.0;
 
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+    final MediaQueryData data = MediaQueryData.fromWindow(
+      WidgetsBinding.instance.window,
+      WidgetsBinding.instance.platformDispatcher,
+    );
     final MediaQueryData copied = data.copyWith(
       size: customSize,
       devicePixelRatio: customDevicePixelRatio,

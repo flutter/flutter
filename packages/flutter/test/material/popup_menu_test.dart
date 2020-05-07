@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show window, SemanticsFlag;
+import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
@@ -1411,7 +1411,10 @@ class _TestAppState extends State<TestApp> {
         DefaultMaterialLocalizations.delegate,
       ],
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(window),
+        data: MediaQueryData.fromWindow(
+          WidgetsBinding.instance.window,
+          WidgetsBinding.instance.platformDispatcher,
+        ),
         child: Directionality(
           textDirection: widget.textDirection,
           child: Navigator(

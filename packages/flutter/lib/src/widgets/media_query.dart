@@ -126,22 +126,22 @@ class MediaQueryData {
   /// notifications so that you can update your [MediaQueryData] when the
   /// window's metrics change. For example, see
   /// [WidgetsBindingObserver.didChangeMetrics] or [Window.onMetricsChanged].
-  MediaQueryData.fromWindow(ui.Window window)
-    : size = window.physicalSize / window.devicePixelRatio,
-      devicePixelRatio = window.devicePixelRatio,
-      textScaleFactor = window.textScaleFactor,
-      platformBrightness = window.platformBrightness,
+  MediaQueryData.fromWindow(ui.Window window, ui.PlatformDispatcher platformDispatcher)
+    : size = window.screenConfiguration.geometry.size / window.screenConfiguration.devicePixelRatio,
+      devicePixelRatio = window.screenConfiguration.devicePixelRatio,
+      textScaleFactor = platformDispatcher.textScaleFactor,
+      platformBrightness = platformDispatcher.platformBrightness,
       padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
       viewPadding = EdgeInsets.fromWindowPadding(window.viewPadding, window.devicePixelRatio),
       viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
       systemGestureInsets = EdgeInsets.fromWindowPadding(window.systemGestureInsets, window.devicePixelRatio),
       physicalDepth = window.physicalDepth,
-      accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
-      invertColors = window.accessibilityFeatures.invertColors,
-      disableAnimations = window.accessibilityFeatures.disableAnimations,
-      boldText = window.accessibilityFeatures.boldText,
-      highContrast = window.accessibilityFeatures.highContrast,
-      alwaysUse24HourFormat = window.alwaysUse24HourFormat,
+      accessibleNavigation = platformDispatcher.accessibilityFeatures.accessibleNavigation,
+      invertColors = platformDispatcher.accessibilityFeatures.invertColors,
+      disableAnimations = platformDispatcher.accessibilityFeatures.disableAnimations,
+      boldText = platformDispatcher.accessibilityFeatures.boldText,
+      highContrast = platformDispatcher.accessibilityFeatures.highContrast,
+      alwaysUse24HourFormat = platformDispatcher.alwaysUse24HourFormat,
       navigationMode = NavigationMode.traditional;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).

@@ -7,7 +7,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/foundation/platform_configuration.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/painting.dart';
@@ -89,13 +88,7 @@ class TestBindingBase implements BindingBase {
   ui.Window get window => throw UnimplementedError();
 
   @override
-  PlatformDispatcher platformDispatcher;
-
-  @override
-  ScreenManager screenManager;
-
-  @override
-  WindowManager windowManager;
+  ui.PlatformDispatcher get platformDispatcher => throw UnimplementedError();
 }
 
 class TestPaintingBinding extends TestBindingBase with SchedulerBinding, ServicesBinding, PaintingBinding {

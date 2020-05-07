@@ -32,7 +32,7 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding {
   Future<void> test(VoidCallback callback) {
     assert(callback != null);
     return _binding.lockEvents(() async {
-      ui.window.onPointerDataPacket(packet);
+      ui.PlatformDispatcher.instance.onPointerDataPacket(packet);
       callback();
     });
   }

@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -35,13 +36,15 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
     );
     platformDispatcher
-      ..onPlatformConfigurationChanged = _handleConfigurationChanged;
-    window
-      ..onMetricsChanged = handleMetricsChanged
+      ..onPlatformConfigurationChanged = _handleConfigurationChanged
+      ..onSemanticsAction = _handleSemanticsAction
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsAction = _handleSemanticsAction;
+
+    window.onMetricsChanged = handleMetricsChanged;
+
     initRenderView();
     _handleSemanticsEnabledChanged();
     assert(renderView != null);
@@ -49,17 +52,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     initMouseTracker();
   }
 
-  void _handleConfigurationChanged(PlatformConfigurationEvent event) {
-    if (platformConfiguration is PlatformConfigurationChangedEvent) {
-      PlatformConfiguration newConfiguration = (event as PlatformConfigurationChangedEvent).configuration;
-      if (newConfiguration.textScaleFactor != platformConfiguration.textScaleFactor) {
-        handleTextScaleFactorChanged();
-      }
-      platformConfiguration = (event as PlatformConfigurationChangedEvent).configuration;
-    }
-  }
-
-  PlatformConfiguration platformConfiguration;
+  void _handleConfigurationChanged() {}
 
   /// The current [RendererBinding], if one has been created.
   static RendererBinding get instance => _instance;
@@ -244,9 +237,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// this to force the display into 800x600 when a test is run on the device
   /// using `flutter run`.
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = window.devicePixelRatio;
+    final double devicePixelRatio = ui.PlatformDispatcher.instance.windows.isEmpty ? 1.0 : window.devicePixelRatio;
+    final Size physicalSize = ui.PlatformDispatcher.instance.windows.isEmpty ? Size.zero : window.physicalSize;
     return ViewConfiguration(
-      size: window.physicalSize / devicePixelRatio,
+      size: physicalSize / devicePixelRatio,
       devicePixelRatio: devicePixelRatio,
     );
   }
@@ -264,7 +258,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 
   void _handleSemanticsEnabledChanged() {
-    setSemanticsEnabled(window.semanticsEnabled);
+    setSemanticsEnabled(platformDispatcher.semanticsEnabled);
   }
 
   /// Whether the render tree associated with this binding should produce a tree

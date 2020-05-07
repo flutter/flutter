@@ -25,7 +25,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     super.initInstances();
     _instance = this;
     _defaultBinaryMessenger = createBinaryMessenger();
-    window.onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
+    platformDispatcher.onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
     initLicenses();
     SystemChannels.system.setMessageHandler(handleSystemMessage);
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
@@ -185,7 +185,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     if (lifecycleState != null) {
       return;
     }
-    final AppLifecycleState state = _parseAppLifecycleMessage(window.initialLifecycleState);
+    final AppLifecycleState state = _parseAppLifecycleMessage(platformDispatcher.initialLifecycleState);
     if (state != null) {
       handleAppLifecycleStateChanged(state);
     }
@@ -231,13 +231,14 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
 
   Future<ByteData> _sendPlatformMessage(String channel, ByteData message) {
     final Completer<ByteData> completer = Completer<ByteData>();
-    // ui.window is accessed directly instead of using ServicesBinding.instance.window
-    // because this method might be invoked before any binding is initialized.
-    // This issue was reported in #27541. It is not ideal to statically access
-    // ui.window because the Window may be dependency injected elsewhere with
-    // a different instance. However, static access at this location seems to be
-    // the least bad option.
-    ui.window.sendPlatformMessage(channel, message, (ByteData reply) {
+    // ui.PlatformDispatcher.instance is accessed directly instead of using
+    // ServicesBinding.instance.platformDispatcher because this method might be
+    // invoked before any binding is initialized. This issue was reported in
+    // #27541. It is not ideal to statically access
+    // ui.PlatformDispatcher.instance because the PlatformDispatcher may be
+    // dependency injected elsewhere with a different instance. However, static
+    // access at this location seems to be the least bad option.
+    ui.PlatformDispatcher.instance.sendPlatformMessage(channel, message, (ByteData reply) {
       try {
         completer.complete(reply);
       } catch (exception, stack) {

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show window;
+import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -132,7 +132,7 @@ void main() {
   });
 
   test('Flutter.Frame event fired', () async {
-    window.onReportTimings(<FrameTiming>[FrameTiming(<int>[
+    PlatformDispatcher.instance.onReportTimings(<FrameTiming>[FrameTiming(<int>[
       // build start, build finish
       10000, 15000,
       // raster start, raster finish
@@ -158,7 +158,7 @@ void main() {
     SchedulerBinding.instance.addTimingsCallback((List<FrameTiming> timings) {
       throw Exception('Test');
     });
-    window.onReportTimings(<FrameTiming>[]);
+    PlatformDispatcher.instance.onReportTimings(<FrameTiming>[]);
     expect(errorCaught.exceptionAsString(), equals('Exception: Test'));
   });
 

@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' as ui show saveCompilationTrace, Window, window;
+import 'dart:ui' as ui show saveCompilationTrace, Window, window, PlatformDispatcher;
 // Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
@@ -17,7 +17,6 @@ import 'constants.dart';
 import 'debug.dart';
 import 'object.dart';
 import 'platform.dart';
-import 'platform_configuration.dart';
 import 'print.dart';
 
 /// Signature for service extensions.
@@ -88,7 +87,27 @@ abstract class BindingBase {
   /// different [Window] implementation, such as a [TestWindow].
   ui.Window get window => ui.window;
 
-  PlatformDispatcher platformDispatcher;
+  /// The platform dispatcher to which this binding is bound.
+  ///
+  /// A number of additional bindings are defined as extensions of
+  /// [BindingBase], e.g., [ServicesBinding], [RendererBinding], and
+  /// [WidgetsBinding]. Each of these bindings define behaviors that interact
+  /// with a [ui.PlatformDispatcher], e.g., [ServicesBinding] registers a
+  /// [ui.PlatformDispatcher.onPlatformMessage] handler, and [RendererBinding]
+  /// registers [ui.PlatformDispatcher.onMetricsChanged],
+  /// [ui.PlatformDispatcher.onTextScaleFactorChanged],
+  /// [ui.PlatformDispatcher.onSemanticsEnabledChanged], and
+  /// [ui.PlatformDispatcher.onSemanticsAction] handlers.
+  ///
+  /// Each of these other bindings could individually access the
+  /// [PlatformDispatcher] singleton statically, but that would preclude the
+  /// ability to test these behaviors with a fake platform dispatcher for
+  /// verification purposes.  Therefore, [BindingBase] exposes this
+  /// [PlatformDispatcher] for use by other bindings.  A subclass of
+  /// [BindingBase], such as [TestWidgetsFlutterBinding], can override this
+  /// accessor to return a different [ui.PlatformDispatcher] implementation,
+  /// such as a [TestPlatformDispatcher].
+  ui.PlatformDispatcher get platformDispatcher => ui.PlatformDispatcher.instance;
 
   /// The initialization method. Subclasses override this method to hook into
   /// the platform and otherwise configure their services. Subclasses must call
@@ -106,18 +125,12 @@ abstract class BindingBase {
       _debugInitialized = true;
       return true;
     }());
-    /// TODO: This should really be initialized to a singleton in dart:ui.
-    platformDispatcher = PlatformDispatcher();
-    windowManager = WindowManager(platformDispatcher);
-    screenManager = ScreenManager(platformDispatcher);
   }
 
   /// The current [BindingBase], if one has been created.
   static BindingBase get instance => _instance;
   static BindingBase _instance;
 
-  WindowManager windowManager;
-  ScreenManager screenManager;
 
   /// Called when the binding is initialized, to register service
   /// extensions.

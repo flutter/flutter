@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show window;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -376,7 +374,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScale),
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher).copyWith(textScaleFactor: textScale),
             child: Material(
               child: Row(
                 children: <Widget>[
@@ -553,7 +551,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScale),
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher).copyWith(textScaleFactor: textScale),
             child: Material(
               child: Row(
                 children: <Widget>[

@@ -85,7 +85,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(window),
+                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
                 child: Material(
                   child: Center(
                     child: Slider(
@@ -145,7 +145,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(window),
+                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
                 child: Material(
                   child: Center(
                     child: Slider(
@@ -199,7 +199,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(window),
+                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
                 child: Material(
                   child: Center(
                     child: Slider(
@@ -254,7 +254,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(window),
+                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
                 child: Material(
                   child: Center(
                     child: Slider(
@@ -309,7 +309,7 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(thumbShape: loggingThumb);
               return MediaQuery(
-                data: MediaQueryData.fromWindow(window),
+                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
                 child: Material(
                   child: Center(
                     child: SliderTheme(
@@ -379,7 +379,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(window),
+                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
                 child: Material(
                   child: Center(
                     child: Slider(
@@ -424,7 +424,7 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(thumbShape: loggingThumb);
               return MediaQuery(
-                data: MediaQueryData.fromWindow(window),
+                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
                 child: Material(
                   child: Center(
                     child: SliderTheme(
@@ -493,7 +493,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(window),
+                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
                 child: Material(
                   child: Center(
                     child: SizedBox(
@@ -545,7 +545,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(window),
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
             child: Material(
               child: Slider(
                 value: 0.0,
@@ -570,7 +570,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(window),
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
             child: Material(
               child: Slider(
                 value: 0.0,
@@ -629,7 +629,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(window),
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
             child: Material(
               child: Center(
                 child: Theme(
@@ -819,7 +819,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(window),
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
             child: Material(
               child: ListView(
                 children: <Widget>[
@@ -851,7 +851,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(window),
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
             child: Material(
               child: Center(
                 child: Slider(
@@ -886,7 +886,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(window),
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
             child: Material(
               child: Center(
                 child: Slider(
@@ -920,7 +920,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(window),
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
             child: const Material(
               child: Center(
                 child: Slider(
@@ -940,7 +940,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(window),
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
             child: const Material(
               child: Center(
                 child: IntrinsicWidth(
@@ -962,7 +962,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(window),
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
             child: const Material(
               child: Center(
                 child: OverflowBox(
@@ -1136,7 +1136,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(window),
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
             child: Material(
               child: Center(
                 child: Slider(
@@ -1208,7 +1208,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(window),
+                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
                 child: Material(
                   child: createParents(parents, setState),
                 ),
@@ -1319,7 +1319,7 @@ void main() {
       home: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: MediaQueryData.fromWindow(window),
+          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
           child: Material(
             child: Slider(
               value: 0.5,
@@ -1375,7 +1375,7 @@ void main() {
       home: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: MediaQueryData.fromWindow(window),
+          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
           child: const Material(
             child: Slider(
               value: 0.5,
@@ -1425,7 +1425,7 @@ void main() {
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: MediaQuery(
-                data: MediaQueryData.fromWindow(window),
+                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
                 child: Material(
                   child: Slider(
                     value: 100.0,
@@ -1487,7 +1487,7 @@ void main() {
       home: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: MediaQueryData.fromWindow(window),
+          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
           child: Material(
             child: Slider(
               value: 40.0,
@@ -1832,7 +1832,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(window),
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
             child: Material(
               child: Center(
                 child: Theme(
@@ -1916,7 +1916,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(window),
+                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
                 child: Material(
                   child: Center(
                     child: Slider(
@@ -2105,7 +2105,7 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(tickMarkShape: TallSliderTickMarkShape());
               return MediaQuery(
-                data: MediaQueryData.fromWindow(window),
+                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
                 child: Material(
                   child: Center(
                     child: IntrinsicHeight(

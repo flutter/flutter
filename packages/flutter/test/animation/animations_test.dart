@@ -20,8 +20,8 @@ void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
     WidgetsBinding.instance.resetEpoch();
-    ui.window.onBeginFrame = null;
-    ui.window.onDrawFrame = null;
+    ui.PlatformDispatcher.instance.onBeginFrame = null;
+    ui.PlatformDispatcher.instance.onDrawFrame = null;
   });
 
   test('toString control test', () {
