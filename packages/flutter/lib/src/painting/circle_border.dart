@@ -71,7 +71,7 @@ class CircleBorder extends OutlinedBorder {
 
   @override
   CircleBorder copyWith({ BorderSide side }) {
-    return CircleBorder(side: side);
+    return CircleBorder(side: side ?? this.side);
   }
 
   @override
