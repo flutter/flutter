@@ -220,6 +220,8 @@ class UserMessages {
       "matching '$deviceId'";
   String get flutterNoDevicesFound => 'No devices found';
   String get flutterNoSupportedDevices => 'No supported devices connected.';
+  String flutterMissPlatformProject(String flutterProject) => '`android`, `iOS` or other platform projects may missing in your project $flutterProject, please check it.';
+  String get flutterFoundButUnSupportedDevices=> 'Follow devices are founded but not support in this project: ';
   String flutterFoundSpecifiedDevices(int count, String deviceId) =>
       'Found $count devices with name or id matching $deviceId:';
   String get flutterSpecifyDeviceWithAllOption =>
