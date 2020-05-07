@@ -174,18 +174,22 @@ abstract class InteractiveInkFeatureFactory {
   });
 }
 
+abstract class _ParentInkResponseState {
+  void markChildInkResponsePressed(_ParentInkResponseState childState, bool value);
+}
+
 class _ParentInkResponseProvider extends InheritedWidget {
   const _ParentInkResponseProvider({
     this.state,
     Widget child,
   }) : super(child: child);
 
-  final _InkResponseState state;
+  final _ParentInkResponseState state;
 
   @override
   bool updateShouldNotify(_ParentInkResponseProvider oldWidget) => state != oldWidget.state;
 
-  static _InkResponseState of(BuildContext context) {
+  static _ParentInkResponseState of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_ParentInkResponseProvider>()?.state;
   }
 }
@@ -529,7 +533,7 @@ class InkResponse extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _InkResponseState parentState = _ParentInkResponseProvider.of(context);
+    final _ParentInkResponseState parentState = _ParentInkResponseProvider.of(context);
     return _InnerInkResponse(
       child: child,
       onTap: onTap,
@@ -636,7 +640,7 @@ class _InnerInkResponse extends StatefulWidget {
   final bool autofocus;
   final FocusNode focusNode;
   final bool canRequestFocus;
-  final _InkResponseState parentState;
+  final _ParentInkResponseState parentState;
   final _GetRectCallback getRectCallback;
   final _CheckContext debugCheckContext;
 
@@ -672,7 +676,9 @@ enum _HighlightType {
   focus,
 }
 
-class _InkResponseState extends State<_InnerInkResponse> with AutomaticKeepAliveClientMixin<_InnerInkResponse> {
+class _InkResponseState extends State<_InnerInkResponse>
+    with AutomaticKeepAliveClientMixin<_InnerInkResponse>
+    implements _ParentInkResponseState {
   Set<InteractiveInkFeature> _splashes;
   InteractiveInkFeature _currentSplash;
   bool _hovering = false;
@@ -681,8 +687,9 @@ class _InkResponseState extends State<_InnerInkResponse> with AutomaticKeepAlive
 
   bool get highlightsExist => _highlights.values.where((InkHighlight highlight) => highlight != null).isNotEmpty;
 
-  final ObserverList<_InkResponseState> _activeChildren = ObserverList<_InkResponseState>();
-  void markChildInkResponsePressed(_InkResponseState childState, bool value) {
+  final ObserverList<_ParentInkResponseState> _activeChildren = ObserverList<_ParentInkResponseState>();
+  @override
+  void markChildInkResponsePressed(_ParentInkResponseState childState, bool value) {
     assert(childState != null);
     final bool lastAnyPressed = _anyChildInkResponsePressed;
     if (value) {
