@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,16 +6,15 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
@@ -29,48 +28,48 @@ void main() {
       testInMemory('fails on null directory', () async {
         expect(
           () => FlutterProject.fromDirectory(null),
-          throwsA(isInstanceOf<AssertionError>()),
+          throwsAssertionError,
         );
       });
 
       testInMemory('fails on invalid pubspec.yaml', () async {
-        final Directory directory = fs.directory('myproject');
+        final Directory directory = globals.fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(invalidPubspec);
 
         expect(
           () => FlutterProject.fromDirectory(directory),
-          throwsA(isInstanceOf<ToolExit>()),
+          throwsToolExit(),
         );
       });
 
       testInMemory('fails on pubspec.yaml parse failure', () async {
-        final Directory directory = fs.directory('myproject');
+        final Directory directory = globals.fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(parseErrorPubspec);
 
         expect(
           () => FlutterProject.fromDirectory(directory),
-          throwsA(isInstanceOf<ToolExit>()),
+          throwsToolExit(),
         );
       });
 
       testInMemory('fails on invalid example/pubspec.yaml', () async {
-        final Directory directory = fs.directory('myproject');
+        final Directory directory = globals.fs.directory('myproject');
         directory.childDirectory('example').childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(invalidPubspec);
 
         expect(
           () => FlutterProject.fromDirectory(directory),
-          throwsA(isInstanceOf<ToolExit>()),
+          throwsToolExit(),
         );
       });
 
       testInMemory('treats missing pubspec.yaml as empty', () async {
-        final Directory directory = fs.directory('myproject')
+        final Directory directory = globals.fs.directory('myproject')
           ..createSync(recursive: true);
         expect((FlutterProject.fromDirectory(directory)).manifest.isEmpty,
           true,
@@ -78,7 +77,7 @@ void main() {
       });
 
       testInMemory('reads valid pubspec.yaml', () async {
-        final Directory directory = fs.directory('myproject');
+        final Directory directory = globals.fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(validPubspec);
@@ -89,7 +88,7 @@ void main() {
       });
 
       testInMemory('sets up location', () async {
-        final Directory directory = fs.directory('myproject');
+        final Directory directory = globals.fs.directory('myproject');
         expect(
           FlutterProject.fromDirectory(directory).directory.absolute.path,
           directory.absolute.path,
@@ -100,7 +99,7 @@ void main() {
         );
         expect(
           FlutterProject.current().directory.absolute.path,
-          fs.currentDirectory.absolute.path,
+          globals.fs.currentDirectory.absolute.path,
         );
       });
     });
@@ -110,7 +109,7 @@ void main() {
         final FlutterProject project = await someProject();
         await expectLater(
           project.android.makeHostAppEditable(),
-          throwsA(isInstanceOf<AssertionError>()),
+          throwsAssertionError,
         );
       });
       testInMemory('exits on already editable module', () async {
@@ -139,7 +138,7 @@ void main() {
         expectExists(project.directory.childDirectory('.android').childDirectory('Flutter'));
         expect(
           project.directory.childDirectory('android').childFile('settings.gradle').readAsStringSync(),
-          contains('new File(settingsDir.parentFile, \'.android/include_flutter.groovy\')'),
+          contains("new File(settingsDir.parentFile, '.android/include_flutter.groovy')"),
         );
       });
       testInMemory('can be redone after deletion', () async {
@@ -154,7 +153,7 @@ void main() {
     group('ensure ready for platform-specific tooling', () {
       testInMemory('does nothing, if project is not created', () async {
         final FlutterProject project = FlutterProject(
-          fs.directory('not_created'),
+          globals.fs.directory('not_created'),
           FlutterManifest.empty(),
           FlutterManifest.empty(),
         );
@@ -226,6 +225,20 @@ void main() {
       testUsingContext('injects plugins for Windows', () async {
         final FlutterProject project = await someProject();
         project.windows.managedDirectory.createSync(recursive: true);
+        project.windows.solutionFile.createSync(recursive: true);
+        // Just enough solution file to allow injection to pass.
+        // TODO(stuartmorgan): Consider allowing injecting a mock solution util
+        // class into the test environment instead.
+        project.windows.solutionFile.writeAsStringSync('''
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Runner", "Runner.vcxproj", "{3842E94C-E348-463A-ADBE-625A2B69B628}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6419BF13-6ECD-4CD2-9E85-E566A1F03F8F} = {6419BF13-6ECD-4CD2-9E85-E566A1F03F8F}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+	EndGlobalSection
+EndGlobal''');
         await project.ensureReadyForPlatformSpecificTooling();
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.cc'));
@@ -304,19 +317,12 @@ void main() {
 
       testInMemory('default host app language', () async {
         final FlutterProject project = await someProject();
-        expect(await project.ios.isSwift, isFalse);
         expect(project.android.isKotlin, isFalse);
       });
 
-      testUsingContext('swift and kotlin host app language', () async {
+      testUsingContext('kotlin host app language', () async {
         final FlutterProject project = await someProject();
 
-        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
-          (_) {
-            return Future<Map<String, String>>.value(<String, String>{
-              'SWIFT_VERSION': '5.0',
-            });
-        });
         addAndroidGradleFile(project.directory,
           gradleFileContent: () {
             return '''
@@ -324,7 +330,6 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 ''';
         });
-        expect(await project.ios.isSwift, isTrue);
         expect(project.android.isKotlin, isTrue);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -356,32 +361,54 @@ apply plugin: 'kotlin-android'
         });
       }
 
-      testWithMocks('null, if no pbxproj or plist entries', () async {
+      testWithMocks('null, if no build settings or plist entries', () async {
         final FlutterProject project = await someProject();
         expect(await project.ios.productBundleIdentifier, isNull);
       });
-      testWithMocks('from pbxproj file, if no plist', () async {
+
+      testWithMocks('from build settings, if no plist', () async {
+        final FlutterProject project = await someProject();
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
+                (_) {
+              return Future<Map<String,String>>.value(<String, String>{
+                'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+              });
+            }
+        );
+        expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
+      });
+
+      testWithMocks('from project file, if no plist or build settings', () async {
         final FlutterProject project = await someProject();
         addIosProjectFile(project.directory, projectFileContent: () {
           return projectFileWithBundleId('io.flutter.someProject');
         });
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
+
       testWithMocks('from plist, if no variables', () async {
         final FlutterProject project = await someProject();
+        project.ios.defaultHostInfoPlist.createSync(recursive: true);
         when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('io.flutter.someProject');
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
-      testWithMocks('from pbxproj and plist, if default variable', () async {
+
+      testWithMocks('from build settings and plist, if default variable', () async {
         final FlutterProject project = await someProject();
-        addIosProjectFile(project.directory, projectFileContent: () {
-          return projectFileWithBundleId('io.flutter.someProject');
-        });
-        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER)');
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
+                (_) {
+              return Future<Map<String,String>>.value(<String, String>{
+                'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+              });
+            }
+        );
+        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn(r'$(PRODUCT_BUNDLE_IDENTIFIER)');
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
-      testWithMocks('from pbxproj and plist, by substitution', () async {
+
+      testWithMocks('from build settings and plist, by substitution', () async {
         final FlutterProject project = await someProject();
+        project.ios.defaultHostInfoPlist.createSync(recursive: true);
         when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
           (_) {
             return Future<Map<String,String>>.value(<String, String>{
@@ -390,7 +417,7 @@ apply plugin: 'kotlin-android'
             });
           }
         );
-        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER).\$(SUFFIX)');
+        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn(r'$(PRODUCT_BUNDLE_IDENTIFIER).$(SUFFIX)');
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject.suffix');
       });
       testWithMocks('empty surrounded by quotes', () async {
@@ -410,7 +437,7 @@ apply plugin: 'kotlin-android'
       testWithMocks('surrounded by single quotes', () async {
         final FlutterProject project = await someProject();
         addIosProjectFile(project.directory, projectFileContent: () {
-          return projectFileWithBundleId('io.flutter.someProject', qualifier: '\'');
+          return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
         });
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
@@ -429,7 +456,7 @@ apply plugin: 'kotlin-android'
       testInMemory('is populated from iOS bundle identifier', () async {
         final FlutterProject project = await someProject();
         addIosProjectFile(project.directory, projectFileContent: () {
-          return projectFileWithBundleId('io.flutter.someProject', qualifier: '\'');
+          return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
         });
         expect(await project.organizationNames, <String>['io.flutter']);
       });
@@ -444,7 +471,7 @@ apply plugin: 'kotlin-android'
       testInMemory('is populated from iOS bundle identifier in plugin example', () async {
         final FlutterProject project = await someProject();
         addIosProjectFile(project.example.directory, projectFileContent: () {
-          return projectFileWithBundleId('io.flutter.someProject', qualifier: '\'');
+          return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
         });
         expect(await project.organizationNames, <String>['io.flutter']);
       });
@@ -499,7 +526,7 @@ apply plugin: 'kotlin-android'
     });
 
     test('Handles asking for builders from an invalid pubspec', () => testbed.run(() {
-      fs.file('pubspec.yaml')
+      globals.fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
 # Hello, World
@@ -512,7 +539,7 @@ apply plugin: 'kotlin-android'
     }));
 
     test('Handles asking for builders from a trivial pubspec', () => testbed.run(() {
-      fs.file('pubspec.yaml')
+      globals.fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
 # Hello, World
@@ -528,7 +555,7 @@ name: foo_bar
 }
 
 Future<FlutterProject> someProject() async {
-  final Directory directory = fs.directory('some_project');
+  final Directory directory = globals.fs.directory('some_project');
   directory.childFile('.packages').createSync(recursive: true);
   directory.childDirectory('ios').createSync(recursive: true);
   final Directory androidDirectory = directory
@@ -541,7 +568,7 @@ Future<FlutterProject> someProject() async {
 }
 
 Future<FlutterProject> aPluginProject({bool legacy = true}) async {
-  final Directory directory = fs.directory('plugin_project');
+  final Directory directory = globals.fs.directory('plugin_project');
   directory.childDirectory('ios').createSync(recursive: true);
   directory.childDirectory('android').createSync(recursive: true);
   directory.childDirectory('example').createSync(recursive: true);
@@ -579,7 +606,7 @@ flutter:
 }
 
 Future<FlutterProject> aModuleProject() async {
-  final Directory directory = fs.directory('module_project');
+  final Directory directory = globals.fs.directory('module_project');
   directory.childFile('.packages').createSync(recursive: true);
   directory.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_module
@@ -596,19 +623,28 @@ flutter:
 void testInMemory(String description, Future<void> testMethod()) {
   Cache.flutterRoot = getFlutterRoot();
   final FileSystem testFileSystem = MemoryFileSystem(
-    style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+    style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
   );
   // Transfer needed parts of the Flutter installation folder
   // to the in-memory file system used during testing.
   transfer(Cache().getArtifactDirectory('gradle_wrapper'), testFileSystem);
-  transfer(fs.directory(Cache.flutterRoot)
+  transfer(globals.fs.directory(Cache.flutterRoot)
       .childDirectory('packages')
       .childDirectory('flutter_tools')
       .childDirectory('templates'), testFileSystem);
-  transfer(fs.directory(Cache.flutterRoot)
+  transfer(globals.fs.directory(Cache.flutterRoot)
       .childDirectory('packages')
       .childDirectory('flutter_tools')
       .childDirectory('schema'), testFileSystem);
+  // Set up enough of the packages to satisfy the templating code.
+  final File packagesFile = testFileSystem.directory(Cache.flutterRoot)
+      .childDirectory('packages')
+      .childDirectory('flutter_tools')
+      .childFile('.packages');
+  final Directory dummyTemplateImagesDirectory = testFileSystem.directory(Cache.flutterRoot).parent;
+  dummyTemplateImagesDirectory.createSync(recursive: true);
+  packagesFile.createSync(recursive: true);
+  packagesFile.writeAsStringSync('flutter_template_images:${dummyTemplateImagesDirectory.uri}');
 
   final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory();
 
@@ -629,7 +665,7 @@ void testInMemory(String description, Future<void> testMethod()) {
 void transfer(FileSystemEntity entity, FileSystem target) {
   if (entity is Directory) {
     target.directory(entity.absolute.path).createSync(recursive: true);
-    for (FileSystemEntity child in entity.listSync()) {
+    for (final FileSystemEntity child in entity.listSync()) {
       transfer(child, target);
     }
   } else if (entity is File) {

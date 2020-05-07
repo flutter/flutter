@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,19 +7,20 @@ import 'dart:collection';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:quiver/testing/async.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -29,6 +30,10 @@ import '../../src/testbed.dart';
 void main() {
   setUpAll(() {
     Cache.flutterRoot = getFlutterRoot();
+  });
+
+  tearDown(() {
+    MockDirectory.findCache = false;
   });
 
   testUsingContext('pub get 69', () async {
@@ -187,7 +192,7 @@ void main() {
   testUsingContext('analytics sent on success', () async {
     MockDirectory.findCache = true;
     await pub.get(context: PubContext.flutterTests, checkLastModified: false);
-    verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
+    verify(globals.flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
   }, overrides: <Type, Generator>{
     FileSystem: () => MockFileSystem(),
     ProcessManager: () => MockProcessManager(0),
@@ -207,7 +212,7 @@ void main() {
     } on ToolExit {
       // Ignore.
     }
-    verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'failure')).called(1);
+    verify(globals.flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'failure')).called(1);
   }, overrides: <Type, Generator>{
     FileSystem: () => MockFileSystem(),
     ProcessManager: () => MockProcessManager(1),
@@ -227,7 +232,7 @@ void main() {
     } on ToolExit {
       // Ignore.
     }
-    verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'version-solving-failed')).called(1);
+    verify(globals.flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'version-solving-failed')).called(1);
   }, overrides: <Type, Generator>{
     FileSystem: () => MockFileSystem(),
     ProcessManager: () => MockProcessManager(
@@ -254,8 +259,8 @@ void main() {
           '--no-precompile',
         ],
         onRun: () {
-          fs.file('.packages')
-            ..setLastModifiedSync(DateTime(2002));
+          globals.fs.file('.packages')
+            .setLastModifiedSync(DateTime(2002));
         }
       ),
       const FakeCommand(
@@ -274,8 +279,8 @@ void main() {
           '--no-precompile',
         ],
         onRun: () {
-          fs.file('pubspec.yaml')
-            ..setLastModifiedSync(DateTime(2002));
+          globals.fs.file('pubspec.yaml')
+            .setLastModifiedSync(DateTime(2002));
         }
       ),
       const FakeCommand(
@@ -289,52 +294,51 @@ void main() {
     ]);
     await Testbed().run(() async {
       // the good scenario: .packages is old, pub updates the file.
-      fs.file('.packages')
+      globals.fs.file('.packages')
         ..createSync()
         ..setLastModifiedSync(DateTime(2000));
-      fs.file('pubspec.yaml')
+      globals.fs.file('pubspec.yaml')
         ..createSync()
         ..setLastModifiedSync(DateTime(2001));
       await pub.get(context: PubContext.flutterTests, checkLastModified: true); // pub sets date of .packages to 2002
       expect(testLogger.statusText, 'Running "flutter pub get" in /...\n');
       expect(testLogger.errorText, isEmpty);
-      expect(fs.file('pubspec.yaml').lastModifiedSync(), DateTime(2001)); // because nothing should touch it
-      expect(fs.file('.packages').lastModifiedSync(), isNot(DateTime(2000))); // because pub changes it to 2002
-      expect(fs.file('.packages').lastModifiedSync(), isNot(DateTime(2002))); // because we set the timestamp again after pub
+      expect(globals.fs.file('pubspec.yaml').lastModifiedSync(), DateTime(2001)); // because nothing should touch it
+      expect(globals.fs.file('.packages').lastModifiedSync(), isNot(DateTime(2000))); // because pub changes it to 2002
+      expect(globals.fs.file('.packages').lastModifiedSync(), isNot(DateTime(2002))); // because we set the timestamp again after pub
       testLogger.clear();
       // bad scenario 1: pub doesn't update file; doesn't matter, because we do instead
-      fs.file('.packages')
-        ..setLastModifiedSync(DateTime(2000));
-      fs.file('pubspec.yaml')
-        ..setLastModifiedSync(DateTime(2001));
+      globals.fs.file('.packages')
+        .setLastModifiedSync(DateTime(2000));
+      globals.fs.file('pubspec.yaml')
+        .setLastModifiedSync(DateTime(2001));
       await pub.get(context: PubContext.flutterTests, checkLastModified: true); // pub does nothing
       expect(testLogger.statusText, 'Running "flutter pub get" in /...\n');
       expect(testLogger.errorText, isEmpty);
-      expect(fs.file('pubspec.yaml').lastModifiedSync(), DateTime(2001)); // because nothing should touch it
-      expect(fs.file('.packages').lastModifiedSync(), isNot(DateTime(2000))); // because we set the timestamp
-      expect(fs.file('.packages').lastModifiedSync(), isNot(DateTime(2002))); // just in case FakeProcessManager is buggy
+      expect(globals.fs.file('pubspec.yaml').lastModifiedSync(), DateTime(2001)); // because nothing should touch it
+      expect(globals.fs.file('.packages').lastModifiedSync(), isNot(DateTime(2000))); // because we set the timestamp
+      expect(globals.fs.file('.packages').lastModifiedSync(), isNot(DateTime(2002))); // just in case FakeProcessManager is buggy
       testLogger.clear();
       // bad scenario 2: pub changes pubspec.yaml instead
-      fs.file('.packages')
-        ..setLastModifiedSync(DateTime(2000));
-      fs.file('pubspec.yaml')
-        ..setLastModifiedSync(DateTime(2001));
+      globals.fs.file('.packages')
+        .setLastModifiedSync(DateTime(2000));
+      globals.fs.file('pubspec.yaml')
+        .setLastModifiedSync(DateTime(2001));
       try {
         await pub.get(context: PubContext.flutterTests, checkLastModified: true);
         expect(true, isFalse, reason: 'pub.get did not throw');
-      } catch (error) {
-        expect(error, isInstanceOf<Exception>());
+      } on ToolExit catch (error) {
         expect(error.message, '/: unexpected concurrent modification of pubspec.yaml while running pub.');
       }
       expect(testLogger.statusText, 'Running "flutter pub get" in /...\n');
       expect(testLogger.errorText, isEmpty);
-      expect(fs.file('pubspec.yaml').lastModifiedSync(), DateTime(2002)); // because fake pub above touched it
-      expect(fs.file('.packages').lastModifiedSync(), DateTime(2000)); // because nothing touched it
+      expect(globals.fs.file('pubspec.yaml').lastModifiedSync(), DateTime(2002)); // because fake pub above touched it
+      expect(globals.fs.file('.packages').lastModifiedSync(), DateTime(2000)); // because nothing touched it
       // bad scenario 3: pubspec.yaml was created in the future
-      fs.file('.packages')
-        ..setLastModifiedSync(DateTime(2000));
-      fs.file('pubspec.yaml')
-        ..setLastModifiedSync(DateTime(9999));
+      globals.fs.file('.packages')
+        .setLastModifiedSync(DateTime(2000));
+      globals.fs.file('pubspec.yaml')
+        .setLastModifiedSync(DateTime(9999));
       assert(DateTime(9999).isAfter(DateTime.now()));
       await pub.get(context: PubContext.flutterTests, checkLastModified: true); // pub does nothing
       expect(testLogger.statusText, contains('Running "flutter pub get" in /...\n'));
@@ -360,7 +364,7 @@ void main() {
 class BotDetectorAlwaysNo implements BotDetector {
   const BotDetectorAlwaysNo();
   @override
-  bool get isRunningOnBot => false;
+  Future<bool> get isRunningOnBot async => false;
 }
 
 typedef StartCallback = void Function(List<dynamic> command);

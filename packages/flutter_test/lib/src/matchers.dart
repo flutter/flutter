@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import '_matchers_io.dart' if (dart.library.html) '_matchers_web.dart' show MatchesGoldenFile, captureImage;
 import 'accessibility.dart';
 import 'binding.dart';
 import 'finders.dart';
@@ -161,7 +162,7 @@ const Matcher hasAGoodToStringDeep = _HasGoodToStringDeep();
 
 /// A matcher for functions that throw [FlutterError].
 ///
-/// This is equivalent to `throwsA(isInstanceOf<FlutterError>())`.
+/// This is equivalent to `throwsA(isA<FlutterError>())`.
 ///
 /// If you are trying to test whether a call to [WidgetTester.pumpWidget]
 /// results in a [FlutterError], see [TestWidgetsFlutterBinding.takeException].
@@ -175,7 +176,7 @@ final Matcher throwsFlutterError = throwsA(isFlutterError);
 
 /// A matcher for functions that throw [AssertionError].
 ///
-/// This is equivalent to `throwsA(isInstanceOf<AssertionError>())`.
+/// This is equivalent to `throwsA(isA<AssertionError>())`.
 ///
 /// If you are trying to test whether a call to [WidgetTester.pumpWidget]
 /// results in an [AssertionError], see
@@ -196,7 +197,7 @@ final Matcher throwsAssertionError = throwsA(isAssertionError);
 ///
 ///  * [throwsFlutterError], to test if a function throws a [FlutterError].
 ///  * [isAssertionError], to test if any object is any kind of [AssertionError].
-final Matcher isFlutterError = isInstanceOf<FlutterError>();
+final test_package.TypeMatcher<FlutterError> isFlutterError = isA<FlutterError>();
 
 /// A matcher for [AssertionError].
 ///
@@ -206,11 +207,11 @@ final Matcher isFlutterError = isInstanceOf<FlutterError>();
 ///
 ///  * [throwsAssertionError], to test if a function throws any [AssertionError].
 ///  * [isFlutterError], to test if any object is a [FlutterError].
-final Matcher isAssertionError = isInstanceOf<AssertionError>();
+final test_package.TypeMatcher<AssertionError> isAssertionError = isA<AssertionError>();
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
-Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
+test_package.TypeMatcher<T> isInstanceOf<T>() => isA<T>();
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
@@ -326,7 +327,7 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 /// The master golden image files that are tested against can be created or
 /// updated by running `flutter test --update-goldens` on the test.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Sample invocations of [matchesGoldenFile].
 ///
 /// ```dart
@@ -366,9 +367,9 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 ///    may swap out the backend for this matcher.
 AsyncMatcher matchesGoldenFile(dynamic key, {int version}) {
   if (key is Uri) {
-    return _MatchesGoldenFile(key, version);
+    return MatchesGoldenFile(key, version);
   } else if (key is String) {
-    return _MatchesGoldenFile.forStringPath(key, version);
+    return MatchesGoldenFile.forStringPath(key, version);
   }
   throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
 }
@@ -1183,7 +1184,7 @@ class _IsMethodCall extends Matcher {
   bool _deepEqualsMap(Map<dynamic, dynamic> a, Map<dynamic, dynamic> b) {
     if (a.length != b.length)
       return false;
-    for (dynamic key in a.keys) {
+    for (final dynamic key in a.keys) {
       if (!b.containsKey(key) || !_deepEquals(a[key], b[key]))
         return false;
     }
@@ -1636,17 +1637,6 @@ class _ColorMatcher extends Matcher {
   Description describe(Description description) => description.add('matches color $targetColor');
 }
 
-Future<ui.Image> _captureImage(Element element) {
-  RenderObject renderObject = element.renderObject;
-  while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent as RenderObject;
-    assert(renderObject != null);
-  }
-  assert(!renderObject.debugNeedsPaint);
-  final OffsetLayer layer = renderObject.debugLayer as OffsetLayer;
-  return layer.toImage(renderObject.paintBounds);
-}
-
 int _countDifferentPixels(Uint8List imageA, Uint8List imageB) {
   assert(imageA.length == imageB.length);
   int delta = 0;
@@ -1681,7 +1671,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
       } else if (elements.length > 1) {
         return 'matched too many widgets';
       }
-      imageFuture = _captureImage(elements.single);
+      imageFuture = captureImage(elements.single);
     }
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
@@ -1709,60 +1699,6 @@ class _MatchesReferenceImage extends AsyncMatcher {
   @override
   Description describe(Description description) {
     return description.add('rasterized image matches that of a $referenceImage reference image');
-  }
-}
-
-class _MatchesGoldenFile extends AsyncMatcher {
-  const _MatchesGoldenFile(this.key, this.version);
-
-  _MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
-
-  final Uri key;
-  final int version;
-
-  @override
-  Future<String> matchAsync(dynamic item) async {
-    Future<ui.Image> imageFuture;
-    if (item is Future<ui.Image>) {
-      imageFuture = item;
-    } else if (item is ui.Image) {
-      imageFuture = Future<ui.Image>.value(item);
-    } else {
-      final Finder finder = item as Finder;
-      final Iterable<Element> elements = finder.evaluate();
-      if (elements.isEmpty) {
-        return 'could not be rendered because no widget was found';
-      } else if (elements.length > 1) {
-        return 'matched too many widgets';
-      }
-      imageFuture = _captureImage(elements.single);
-    }
-
-    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
-
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
-    return binding.runAsync<String>(() async {
-      final ui.Image image = await imageFuture;
-      final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (bytes == null)
-        return 'could not encode screenshot.';
-      if (autoUpdateGoldenFiles) {
-        await goldenFileComparator.update(testNameUri, bytes.buffer.asUint8List());
-        return null;
-      }
-      try {
-        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), testNameUri);
-        return success ? null : 'does not match';
-      } on TestFailure catch (ex) {
-        return ex.message;
-      }
-    }, additionalTime: const Duration(minutes: 1));
-  }
-
-  @override
-  Description describe(Description description) {
-    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
-    return description.add('one widget whose rasterized image matches golden image "$testNameUri"');
   }
 }
 
@@ -1846,7 +1782,7 @@ class _MatchesSemanticsData extends Matcher {
       description.add(' with custom hints: $hintOverrides');
     if (children != null) {
       description.add(' with children:\n');
-      for (_MatchesSemanticsData child in children.cast<_MatchesSemanticsData>())
+      for (final _MatchesSemanticsData child in children.cast<_MatchesSemanticsData>())
         child.describe(description);
     }
     return description;
@@ -1888,11 +1824,11 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'maxValueLength was: ${data.maxValueLength}');
     if (actions != null) {
       int actionBits = 0;
-      for (SemanticsAction action in actions)
+      for (final SemanticsAction action in actions)
         actionBits |= action.index;
       if (actionBits != data.actions) {
         final List<String> actionSummary = <String>[
-          for (SemanticsAction action in SemanticsAction.values.values)
+          for (final SemanticsAction action in SemanticsAction.values.values)
             if ((data.actions & action.index) != 0)
               describeEnum(action),
         ];
@@ -1922,11 +1858,11 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (flags != null) {
       int flagBits = 0;
-      for (SemanticsFlag flag in flags)
+      for (final SemanticsFlag flag in flags)
         flagBits |= flag.index;
       if (flagBits != data.flags) {
         final List<String> flagSummary = <String>[
-          for (SemanticsFlag flag in SemanticsFlag.values.values)
+          for (final SemanticsFlag flag in SemanticsFlag.values.values)
             if ((data.flags & flag.index) != 0)
               describeEnum(flag),
         ];

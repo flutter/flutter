@@ -1,10 +1,11 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart' show kMinFlingVelocity, kLongPressTimeout;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -39,7 +40,7 @@ typedef _ContextMenuPreviewBuilderChildless = Widget Function(
 // paintBounds in global coordinates.
 Rect _getRect(GlobalKey globalKey) {
   assert(globalKey.currentContext != null);
-  final RenderBox renderBoxContainer = globalKey.currentContext.findRenderObject();
+  final RenderBox renderBoxContainer = globalKey.currentContext.findRenderObject() as RenderBox;
   final Offset containerOffset = renderBoxContainer.localToGlobal(
     renderBoxContainer.paintBounds.topLeft,
   );
@@ -118,7 +119,7 @@ enum _ContextMenuLocation {
 ///
 /// See also:
 ///
-///   * [Apple's HIG for Context Menus](https://developer.apple.com/design/human-interface-guidelines/ios/controls/context-menus/)
+///  * [Apple's HIG for Context Menus](https://developer.apple.com/design/human-interface-guidelines/ios/controls/context-menus/)
 class CupertinoContextMenu extends StatefulWidget {
   /// Create a context menu.
   ///
@@ -172,7 +173,7 @@ class CupertinoContextMenu extends StatefulWidget {
   /// child parameter provides access to the child displayed when the
   /// CupertinoContextMenu is closed.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Below is an example of using `previewBuilder` to show an image tile that's
   /// similar to each tile in the iOS iPhoto app's context menu. Several of
@@ -511,17 +512,22 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
       : _mask.value;
     return Positioned.fromRect(
       rect: _rect.value,
-      child: ShaderMask(
-        key: _childGlobalKey,
-        shaderCallback: (Rect bounds) {
-          return LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: <Color>[color, color],
-          ).createShader(bounds);
-        },
-        child: widget.child,
-      ),
+      // TODO(justinmc): When ShaderMask is supported on web, remove this
+      // conditional and use ShaderMask everywhere.
+      // https://github.com/flutter/flutter/issues/52967.
+      child: kIsWeb
+          ? Container(key: _childGlobalKey, child: widget.child)
+          : ShaderMask(
+            key: _childGlobalKey,
+            shaderCallback: (Rect bounds) {
+              return LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[color, color],
+              ).createShader(bounds);
+            },
+            child: widget.child,
+          ),
     );
   }
 
@@ -990,7 +996,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
       _moveAnimation = Tween<Offset>(
         begin: Offset.zero,
         end: Offset(
-          endX.clamp(-_kPadding, _kPadding),
+          endX.clamp(-_kPadding, _kPadding) as double,
           endY,
         ),
       ).animate(

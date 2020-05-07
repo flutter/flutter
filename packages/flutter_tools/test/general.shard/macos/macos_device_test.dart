@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,25 +7,33 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:platform/platform.dart';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/macos/application_package.dart';
 import 'package:flutter_tools/src/macos/macos_device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/testbed.dart';
 
 void main() {
   group(MacOSDevice, () {
-    final MockPlatform notMac = MockPlatform();
     final MacOSDevice device = MacOSDevice();
     final MockProcessManager mockProcessManager = MockProcessManager();
+
+    final MockPlatform notMac = MockPlatform();
     when(notMac.isMacOS).thenReturn(false);
     when(notMac.environment).thenReturn(const <String, String>{});
+
+    final MockPlatform mockMacPlatform = MockPlatform();
+    when(mockMacPlatform.isMacOS).thenReturn(true);
+
     when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
       return ProcessResult(0, 1, '', '');
     });
@@ -47,10 +55,26 @@ void main() {
       Platform: () => notMac,
     });
 
+    testUsingContext('devices', () async {
+      expect(await MacOSDevices().devices, hasLength(1));
+    }, overrides: <Type, Generator>{
+      Platform: () => mockMacPlatform,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    });
+
+    testUsingContext('discoverDevices', () async {
+      // Timeout ignored.
+      final List<Device> devices = await MacOSDevices().discoverDevices(timeout: const Duration(seconds: 10));
+      expect(devices, hasLength(1));
+    }, overrides: <Type, Generator>{
+      Platform: () => mockMacPlatform,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    });
+
     testUsingContext('isSupportedForProject is true with editable host app', () async {
-      fs.file('pubspec.yaml').createSync();
-      fs.file('.packages').createSync();
-      fs.directory('macos').createSync();
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages').createSync();
+      globals.fs.directory('macos').createSync();
       final FlutterProject flutterProject = FlutterProject.current();
 
       expect(MacOSDevice().isSupportedForProject(flutterProject), true);
@@ -60,8 +84,8 @@ void main() {
     });
 
     testUsingContext('isSupportedForProject is false with no host app', () async {
-      fs.file('pubspec.yaml').createSync();
-      fs.file('.packages').createSync();
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages').createSync();
       final FlutterProject flutterProject = FlutterProject.current();
 
       expect(MacOSDevice().isSupportedForProject(flutterProject), false);

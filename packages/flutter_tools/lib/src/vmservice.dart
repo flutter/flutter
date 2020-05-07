@@ -1,11 +1,10 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:file/file.dart';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart' show required;
@@ -15,13 +14,12 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
-import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/utils.dart';
 import 'convert.dart' show base64, utf8;
-import 'globals.dart';
+import 'device.dart';
+import 'globals.dart' as globals;
 import 'version.dart';
-import 'vmservice_record_replay.dart';
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [WebSocket]s (used by tests).
@@ -61,7 +59,10 @@ typedef CompileExpression = Future<String> Function(
   bool isStatic,
 );
 
-const String _kRecordingType = 'vmservice';
+typedef ReloadMethod = Future<void> Function({
+  String classId,
+  String libraryId,
+});
 
 Future<StreamChannel<String>> _defaultOpenChannel(Uri uri, {io.CompressionOptions compression = io.CompressionOptions.compressionDefault}) async {
   Duration delay = const Duration(milliseconds: 100);
@@ -69,11 +70,11 @@ Future<StreamChannel<String>> _defaultOpenChannel(Uri uri, {io.CompressionOption
   io.WebSocket socket;
 
   Future<void> handleError(dynamic e) async {
-    printTrace('Exception attempting to connect to Observatory: $e');
-    printTrace('This was attempt #$attempts. Will retry in $delay.');
+    globals.printTrace('Exception attempting to connect to Observatory: $e');
+    globals.printTrace('This was attempt #$attempts. Will retry in $delay.');
 
     if (attempts == 10) {
-      printStatus('This is taking longer than expected...');
+      globals.printStatus('This is taking longer than expected...');
     }
 
     // Delay next attempt.
@@ -101,7 +102,14 @@ Future<StreamChannel<String>> _defaultOpenChannel(Uri uri, {io.CompressionOption
 
 /// Override `VMServiceConnector` in [context] to return a different VMService
 /// from [VMService.connect] (used by tests).
-typedef VMServiceConnector = Future<VMService> Function(Uri httpUri, { ReloadSources reloadSources, Restart restart, CompileExpression compileExpression, io.CompressionOptions compression });
+typedef VMServiceConnector = Future<VMService> Function(Uri httpUri, {
+  ReloadSources reloadSources,
+  Restart restart,
+  CompileExpression compileExpression,
+  ReloadMethod reloadMethod,
+  io.CompressionOptions compression,
+  Device device,
+});
 
 /// A connection to the Dart VM Service.
 // TODO(mklim): Test this, https://github.com/flutter/flutter/issues/23031
@@ -113,6 +121,8 @@ class VMService {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
+    Device device,
+    ReloadMethod reloadMethod,
   ) {
     _vm = VM._empty(this);
     _peer.listen().catchError(_connectionError.completeError);
@@ -128,14 +138,14 @@ class VMService {
         final bool pause = params.asMap['pause'] as bool ?? false;
 
         if (isolateId.isEmpty) {
-          throw rpc.RpcException.invalidParams('Invalid \'isolateId\': $isolateId');
+          throw rpc.RpcException.invalidParams("Invalid 'isolateId': $isolateId");
         }
         try {
           await reloadSources(isolateId, force: force, pause: pause);
           return <String, String>{'type': 'Success'};
         } on rpc.RpcException {
           rethrow;
-        } catch (e, st) {
+        } on Exception catch (e, st) {
           throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
               'Error during Sources Reload: $e\n$st');
         }
@@ -146,37 +156,40 @@ class VMService {
         'alias': 'Flutter Tools',
       });
 
+    }
+
+    if (reloadMethod != null) {
       // Register a special method for hot UI. while this is implemented
       // currently in the same way as hot reload, it leaves the tool free
       // to change to a more efficient implementation in the future.
+      //
+      // `library` should be the file URI of the updated code.
+      // `class` should be the name of the Widget subclass to be marked dirty. For example,
+      // if the build method of a StatelessWidget is updated, this is the name of class.
+      // If the build method of a StatefulWidget is updated, then this is the name
+      // of the Widget class that created the State object.
       _peer.registerMethod('reloadMethod', (rpc.Parameters params) async {
-        final String isolateId = params['isolateId'].value as String;
         final String libraryId = params['library'].value as String;
         final String classId = params['class'].value as String;
-        final String methodId = params['method'].value as String;
-        final String methodBody = params['methodBody'].value as String;
 
         if (libraryId.isEmpty) {
-          throw rpc.RpcException.invalidParams('Invalid \'libraryId\': $libraryId');
+          throw rpc.RpcException.invalidParams("Invalid 'libraryId': $libraryId");
         }
         if (classId.isEmpty) {
-          throw rpc.RpcException.invalidParams('Invalid \'classId\': $classId');
-        }
-        if (methodId.isEmpty) {
-          throw rpc.RpcException.invalidParams('Invalid \'methodId\': $methodId');
-        }
-        if (methodBody.isEmpty) {
-          throw rpc.RpcException.invalidParams('Invalid \'methodBody\': $methodBody');
+          throw rpc.RpcException.invalidParams("Invalid 'classId': $classId");
         }
 
-        printTrace('reloadMethod not yet supported, falling back to hot reload');
+        globals.printTrace('reloadMethod not yet supported, falling back to hot reload');
 
         try {
-          await reloadSources(isolateId);
+          await reloadMethod(
+            libraryId: libraryId,
+            classId: classId,
+          );
           return <String, String>{'type': 'Success'};
         } on rpc.RpcException {
           rethrow;
-        } catch (e, st) {
+        } on Exception catch (e, st) {
           throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
               'Error during Sources Reload: $e\n$st');
         }
@@ -192,7 +205,7 @@ class VMService {
         final bool pause = params.asMap['pause'] as bool ?? false;
 
         if (pause is! bool) {
-          throw rpc.RpcException.invalidParams('Invalid \'pause\': $pause');
+          throw rpc.RpcException.invalidParams("Invalid 'pause': $pause");
         }
 
         try {
@@ -200,7 +213,7 @@ class VMService {
           return <String, String>{'type': 'Success'};
         } on rpc.RpcException {
           rethrow;
-        } catch (e, st) {
+        } on Exception catch (e, st) {
           throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
               'Error during Hot Restart: $e\n$st');
         }
@@ -213,7 +226,7 @@ class VMService {
     }
 
     _peer.registerMethod('flutterVersion', (rpc.Parameters params) async {
-      final FlutterVersion version = FlutterVersion();
+      final FlutterVersion version = context.get<FlutterVersion>() ?? FlutterVersion();
       final Map<String, Object> versionJson = version.toJson();
       versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
       versionJson['engineRevisionShort'] = version.engineRevisionShort;
@@ -230,12 +243,12 @@ class VMService {
         final String isolateId = params['isolateId'].asString;
         if (isolateId is! String || isolateId.isEmpty) {
           throw rpc.RpcException.invalidParams(
-              'Invalid \'isolateId\': $isolateId');
+              "Invalid 'isolateId': $isolateId");
         }
         final String expression = params['expression'].asString;
         if (expression is! String || expression.isEmpty) {
           throw rpc.RpcException.invalidParams(
-              'Invalid \'expression\': $expression');
+              "Invalid 'expression': $expression");
         }
         final List<String> definitions =
             List<String>.from(params['definitions'].asList);
@@ -253,7 +266,7 @@ class VMService {
             'result': <String, dynamic> {'kernelBytes': kernelBytesBase64}};
         } on rpc.RpcException {
           rethrow;
-        } catch (e, st) {
+        } on Exception catch (e, st) {
           throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
               'Error during expression compilation: $e\n$st');
         }
@@ -264,35 +277,20 @@ class VMService {
         'alias': 'Flutter Tools',
       });
     }
-  }
-
-  /// Enables recording of VMService JSON-rpc activity to the specified base
-  /// recording [location].
-  ///
-  /// Activity will be recorded in a subdirectory of [location] named
-  /// `"vmservice"`. It is permissible for [location] to represent an existing
-  /// non-empty directory as long as there is no collision with the
-  /// `"vmservice"` subdirectory.
-  static void enableRecordingConnection(String location) {
-    final Directory dir = getRecordingSink(location, _kRecordingType);
-    _openChannel = (Uri uri, {io.CompressionOptions compression}) async {
-      final StreamChannel<String> delegate = await _defaultOpenChannel(uri);
-      return RecordingVMServiceChannel(delegate, dir);
-    };
-  }
-
-  /// Enables VMService JSON-rpc replay mode.
-  ///
-  /// [location] must represent a directory to which VMService JSON-rpc
-  /// activity has been recorded (i.e. the result of having been previously
-  /// passed to [enableRecordingConnection]), or a [ToolExit] will be thrown.
-  static void enableReplayConnection(String location) {
-    final Directory dir = getReplaySource(location, _kRecordingType);
-    _openChannel = (Uri uri, {io.CompressionOptions compression}) async => ReplayVMServiceChannel(dir);
+    if (device != null) {
+      _peer.registerMethod('flutterMemoryInfo', (rpc.Parameters params) async {
+        final MemoryInfo result = await device.queryMemoryInfo();
+        return result.toJson();
+      });
+      _peer.sendNotification('registerService', <String, String>{
+        'service': 'flutterMemoryInfo',
+        'alias': 'Flutter Tools',
+      });
+    }
   }
 
   static void _unhandledError(dynamic error, dynamic stack) {
-    logger.printTrace('Error in internal implementation of JSON RPC.\n$error\n$stack');
+    globals.logger.printTrace('Error in internal implementation of JSON RPC.\n$error\n$stack');
     assert(false);
   }
 
@@ -309,10 +307,19 @@ class VMService {
       ReloadSources reloadSources,
       Restart restart,
       CompileExpression compileExpression,
+      ReloadMethod reloadMethod,
       io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+      Device device,
     }) async {
     final VMServiceConnector connector = context.get<VMServiceConnector>() ?? VMService._connect;
-    return connector(httpUri, reloadSources: reloadSources, restart: restart, compileExpression: compileExpression, compression: compression);
+    return connector(httpUri,
+      reloadSources: reloadSources,
+      restart: restart,
+      compileExpression: compileExpression,
+      compression: compression,
+      device: device,
+      reloadMethod: reloadMethod,
+    );
   }
 
   static Future<VMService> _connect(
@@ -320,12 +327,23 @@ class VMService {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
+    ReloadMethod reloadMethod,
     io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+    Device device,
   }) async {
-    final Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
+    final Uri wsUri = httpUri.replace(scheme: 'ws', path: globals.fs.path.join(httpUri.path, 'ws'));
     final StreamChannel<String> channel = await _openChannel(wsUri, compression: compression);
     final rpc.Peer peer = rpc.Peer.withoutJson(jsonDocument.bind(channel), onUnhandledError: _unhandledError);
-    final VMService service = VMService(peer, httpUri, wsUri, reloadSources, restart, compileExpression);
+    final VMService service = VMService(
+      peer,
+      httpUri,
+      wsUri,
+      reloadSources,
+      restart,
+      compileExpression,
+      device,
+      reloadMethod,
+    );
     // This call is to ensure we are able to establish a connection instead of
     // keeping on trucking and failing farther down the process.
     await service._sendRequest('getVersion', const <String, dynamic>{});
@@ -401,7 +419,7 @@ class VMService {
     final Map<String, dynamic> eventIsolate = castStringKeyedMap(eventData['isolate']);
 
     // Log event information.
-    printTrace('Notification from VM: $data');
+    globals.printTrace('Notification from VM: $data');
 
     ServiceEvent event;
     if (eventIsolate != null) {
@@ -434,6 +452,8 @@ class VMService {
   Future<void> getVM() async => await vm.reload();
 
   Future<void> refreshViews({ bool waitForViews = false }) => vm.refreshViews(waitForViews: waitForViews);
+
+  Future<void> close() async => await _peer.close();
 }
 
 /// An error that is thrown when constructing/updating a service object.
@@ -605,7 +625,8 @@ abstract class ServiceObject {
           updateFromMap(response);
           completer.complete(this);
         }
-      } catch (e, st) {
+      // Catches all exceptions to propagate to the completer.
+      } catch (e, st) { // ignore: avoid_catches_without_on_clauses
         completer.completeError(e, st);
       }
       _inProgressReload = null;
@@ -838,7 +859,7 @@ class VM extends ServiceObjectOwner {
   void _removeDeadIsolates(List<Isolate> newIsolates) {
     // Build a set of new isolates.
     final Set<String> newIsolateSet = <String>{};
-    for (Isolate iso in newIsolates) {
+    for (final Isolate iso in newIsolates) {
       newIsolateSet.add(iso.id);
     }
 
@@ -879,7 +900,7 @@ class VM extends ServiceObjectOwner {
 
           // Eagerly load the isolate.
           isolate.load().catchError((dynamic e, StackTrace stack) {
-            printTrace('Eagerly loading an isolate failed: $e\n$stack');
+            globals.printTrace('Eagerly loading an isolate failed: $e\n$stack');
           });
         } else {
           // Existing isolate, update data.
@@ -929,20 +950,20 @@ class VM extends ServiceObjectOwner {
     Map<String, dynamic> params = const <String, dynamic>{},
     bool truncateLogs = true,
   }) async {
-    printTrace('Sending to VM service: $method($params)');
+    globals.printTrace('Sending to VM service: $method($params)');
     assert(params != null);
     try {
       final Map<String, dynamic> result = await _vmService._sendRequest(method, params);
       final String resultString =
           truncateLogs ? _truncate(result.toString(), 250, '...') : result.toString();
-      printTrace('Result: $resultString');
+      globals.printTrace('Result: $resultString');
       return result;
     } on WebSocketChannelException catch (error) {
       throwToolExit('Error connecting to observatory: $error');
       return null;
     } on rpc.RpcException catch (error) {
-      printError('Error ${error.code} received from application: ${error.message}');
-      printTrace('${error.data}');
+      globals.printError('Error ${error.code} received from application: ${error.message}');
+      globals.printTrace('${error.data}');
       rethrow;
     }
   }
@@ -1019,14 +1040,12 @@ class VM extends ServiceObjectOwner {
   Future<ServiceMap> runInView(
     String viewId,
     Uri main,
-    Uri packages,
     Uri assetsDirectory,
   ) {
     return invokeRpc<ServiceMap>('_flutter.runInView',
       params: <String, dynamic>{
         'viewId': viewId,
         'mainScript': main.toString(),
-        'packagesFile': packages.toString(),
         'assetDirectory': assetsDirectory.toString(),
     });
   }
@@ -1068,7 +1087,7 @@ class VM extends ServiceObjectOwner {
       }
       failCount += 1;
       if (failCount == 5) { // waited 200ms
-        printStatus('Flutter is taking longer than expected to report its views. Still trying...');
+        globals.printStatus('Flutter is taking longer than expected to report its views. Still trying...');
       }
       await Future<void>.delayed(const Duration(milliseconds: 50));
       await reload();
@@ -1235,7 +1254,6 @@ class Isolate extends ServiceObjectOwner {
   Future<Map<String, dynamic>> reloadSources({
     bool pause = false,
     Uri rootLibUri,
-    Uri packagesUri,
   }) async {
     try {
       final Map<String, dynamic> arguments = <String, dynamic>{
@@ -1243,9 +1261,6 @@ class Isolate extends ServiceObjectOwner {
       };
       if (rootLibUri != null) {
         arguments['rootLibUri'] = rootLibUri.toString();
-      }
-      if (packagesUri != null) {
-        arguments['packagesUri'] = packagesUri.toString();
       }
       final Map<String, dynamic> response = await invokeRpcRaw('_reloadSources', params: arguments);
       return response;
@@ -1337,6 +1352,12 @@ class Isolate extends ServiceObjectOwner {
 
   Future<Map<String, dynamic>> flutterReassemble() {
     return invokeFlutterExtensionRpcRaw('ext.flutter.reassemble');
+  }
+
+  Future<Map<String, dynamic>> flutterFastReassemble(String classId) {
+    return invokeFlutterExtensionRpcRaw('ext.flutter.fastReassemble', params: <String, Object>{
+      'class': classId,
+    });
   }
 
   Future<bool> flutterAlreadyPaintedFirstUsefulFrame() async {
@@ -1465,7 +1486,6 @@ class FlutterView extends ServiceObject {
   // TODO(johnmccutchan): Report errors when running failed.
   Future<void> runFromSource(
     Uri entryUri,
-    Uri packagesUri,
     Uri assetsDirectoryUri,
   ) async {
     final String viewId = id;
@@ -1476,7 +1496,7 @@ class FlutterView extends ServiceObject {
         // TODO(johnmccutchan): Listen to the debug stream and catch initial
         // launch errors.
         if (event.kind == ServiceEvent.kIsolateRunnable) {
-          printTrace('Isolate is runnable.');
+          globals.printTrace('Isolate is runnable.');
           if (!completer.isCompleted) {
             completer.complete();
           }
@@ -1484,7 +1504,6 @@ class FlutterView extends ServiceObject {
       });
     await owner.vm.runInView(viewId,
                              entryUri,
-                             packagesUri,
                              assetsDirectoryUri);
     await completer.future;
     await owner.vm.refreshViews(waitForViews: true);

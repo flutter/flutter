@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,11 +11,9 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/utils.dart';
 import '../cache.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'sdk.dart';
@@ -30,7 +28,7 @@ Pub get pub => context.get<Pub>();
 // We have server-side tooling that assumes the values are consistent.
 class PubContext {
   PubContext._(this._values) {
-    for (String item in _values) {
+    for (final String item in _values) {
       if (!_validContext.hasMatch(item)) {
         throw ArgumentError.value(
             _values, 'value', 'Must match RegExp ${_validContext.pattern}');
@@ -73,7 +71,7 @@ bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
   if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified)) {
     return true;
   }
-  final File flutterToolsStamp = Cache.instance.getStampFileFor('flutter_tools');
+  final File flutterToolsStamp = globals.cache.getStampFileFor('flutter_tools');
   if (flutterToolsStamp.existsSync() &&
       flutterToolsStamp.lastModifiedSync().isAfter(dotPackagesLastModified)) {
     return true;
@@ -98,6 +96,7 @@ abstract class Pub {
     bool offline = false,
     bool checkLastModified = true,
     bool skipPubspecYamlCheck = false,
+    String flutterRootOverride,
   });
 
   /// Runs pub in 'batch' mode.
@@ -145,11 +144,12 @@ class _DefaultPub implements Pub {
     bool offline = false,
     bool checkLastModified = true,
     bool skipPubspecYamlCheck = false,
+    String flutterRootOverride,
   }) async {
-    directory ??= fs.currentDirectory.path;
+    directory ??= globals.fs.currentDirectory.path;
 
-    final File pubSpecYaml = fs.file(fs.path.join(directory, 'pubspec.yaml'));
-    final File dotPackages = fs.file(fs.path.join(directory, '.packages'));
+    final File pubSpecYaml = globals.fs.file(globals.fs.path.join(directory, 'pubspec.yaml'));
+    final File dotPackages = globals.fs.file(globals.fs.path.join(directory, '.packages'));
 
     if (!skipPubspecYamlCheck && !pubSpecYaml.existsSync()) {
       if (!skipIfAbsent) {
@@ -162,8 +162,8 @@ class _DefaultPub implements Pub {
 
     if (!checkLastModified || _shouldRunPubGet(pubSpecYaml: pubSpecYaml, dotPackages: dotPackages)) {
       final String command = upgrade ? 'upgrade' : 'get';
-      final Status status = logger.startProgress(
-        'Running "flutter pub $command" in ${fs.path.basename(directory)}...',
+      final Status status = globals.logger.startProgress(
+        'Running "flutter pub $command" in ${globals.fs.path.basename(directory)}...',
         timeout: timeoutConfiguration.slowOperation,
       );
       final bool verbose = FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'] as bool;
@@ -180,9 +180,11 @@ class _DefaultPub implements Pub {
           filter: _filterOverrideWarnings,
           failureMessage: 'pub $command failed',
           retry: true,
+          flutterRootOverride: flutterRootOverride,
         );
         status.stop();
-      } catch (exception) {
+      // The exception is rethrown, so don't catch only Exceptions.
+      } catch (exception) { // ignore: avoid_catches_without_on_clauses
         status.cancel();
         rethrow;
       }
@@ -200,8 +202,8 @@ class _DefaultPub implements Pub {
     // file to be more recently modified.
     final DateTime now = DateTime.now();
     if (now.isBefore(originalPubspecYamlModificationTime)) {
-      printError(
-        'Warning: File "${fs.path.absolute(pubSpecYaml.path)}" was created in the future. '
+      globals.printError(
+        'Warning: File "${globals.fs.path.absolute(pubSpecYaml.path)}" was created in the future. '
         'Optimizations that rely on comparing time stamps will be unreliable. Check your '
         'system clock for accuracy.\n'
         'The timestamp was: $originalPubspecYamlModificationTime\n'
@@ -211,12 +213,12 @@ class _DefaultPub implements Pub {
       dotPackages.setLastModifiedSync(now);
       final DateTime newDotPackagesTimestamp = dotPackages.lastModifiedSync();
       if (newDotPackagesTimestamp.isBefore(originalPubspecYamlModificationTime)) {
-        printError(
-          'Warning: Failed to set timestamp of "${fs.path.absolute(dotPackages.path)}". '
+        globals.printError(
+          'Warning: Failed to set timestamp of "${globals.fs.path.absolute(dotPackages.path)}". '
           'Tried to set timestamp to $now, but new timestamp is $newDotPackagesTimestamp.'
         );
         if (newDotPackagesTimestamp.isAfter(now)) {
-          printError('Maybe the file was concurrently modified?');
+          globals.printError('Maybe the file was concurrently modified?');
         }
       }
     }
@@ -232,8 +234,9 @@ class _DefaultPub implements Pub {
     String failureMessage = 'pub failed',
     @required bool retry,
     bool showTraceForErrors,
+    String flutterRootOverride,
   }) async {
-    showTraceForErrors ??= isRunningOnBot;
+    showTraceForErrors ??= await globals.isRunningOnBot;
 
     String lastPubMessage = 'no message';
     bool versionSolvingFailed = false;
@@ -260,7 +263,7 @@ class _DefaultPub implements Pub {
         _pubCommand(arguments),
         workingDirectory: directory,
         mapFunction: filterWrapper, // may set versionSolvingFailed, lastPubMessage
-        environment: _createPubEnvironment(context),
+        environment: await _createPubEnvironment(context, flutterRootOverride),
       );
       String message;
       switch (code) {
@@ -272,7 +275,7 @@ class _DefaultPub implements Pub {
       }
       assert(message != null);
       versionSolvingFailed = false;
-      printStatus('$failureMessage ($message) -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
+      globals.printStatus('$failureMessage ($message) -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
       await Future<void>.delayed(Duration(seconds: duration));
       if (duration < 64) {
         duration *= 2;
@@ -305,17 +308,29 @@ class _DefaultPub implements Pub {
     final io.Process process = await processUtils.start(
       _pubCommand(arguments),
       workingDirectory: directory,
-      environment: _createPubEnvironment(PubContext.interactive),
+      environment: await _createPubEnvironment(PubContext.interactive),
     );
 
     // Pipe the Flutter tool stdin to the pub stdin.
-    unawaited(process.stdin.addStream(io.stdin));
+    unawaited(process.stdin.addStream(globals.stdio.stdin)
+      // If pub exits unexpectedly with an error, that will be reported below
+      // by the tool exit after the exit code check.
+      .catchError((dynamic err, StackTrace stack) {
+        globals.printTrace('Echoing stdin to the pub subprocess failed:');
+        globals.printTrace('$err\n$stack');
+      }
+    ));
 
-    // Pipe the put stdout and stderr to the tool stdout and stderr.
-    await Future.wait<dynamic>(<Future<dynamic>>[
-      io.stdout.addStream(process.stdout),
-      io.stderr.addStream(process.stderr),
-    ]);
+    // Pipe the pub stdout and stderr to the tool stdout and stderr.
+    try {
+      await Future.wait<dynamic>(<Future<dynamic>>[
+        globals.stdio.addStdoutStream(process.stdout),
+        globals.stdio.addStderrStream(process.stderr),
+      ]);
+    } on Exception catch (err, stack) {
+      globals.printTrace('Echoing stdout or stderr from the pub subprocess failed:');
+      globals.printTrace('$err\n$stack');
+    }
 
     // Wait for pub to exit.
     final int code = await process.exitCode;
@@ -337,10 +352,10 @@ typedef MessageFilter = String Function(String message);
 ///
 /// [context] provides extra information to package server requests to
 /// understand usage.
-Map<String, String> _createPubEnvironment(PubContext context) {
+Future<Map<String, String>> _createPubEnvironment(PubContext context, [ String flutterRootOverride ]) async {
   final Map<String, String> environment = <String, String>{
-    'FLUTTER_ROOT': Cache.flutterRoot,
-    _pubEnvironmentKey: _getPubEnvironmentValue(context),
+    'FLUTTER_ROOT': flutterRootOverride ?? Cache.flutterRoot,
+    _pubEnvironmentKey: await _getPubEnvironmentValue(context),
   };
   final String pubCache = _getRootPubCacheIfAvailable();
   if (pubCache != null) {
@@ -363,13 +378,13 @@ const String _pubCacheEnvironmentKey = 'PUB_CACHE';
 ///
 /// [context] provides extra information to package server requests to
 /// understand usage.
-String _getPubEnvironmentValue(PubContext pubContext) {
+Future<String> _getPubEnvironmentValue(PubContext pubContext) async {
   // DO NOT update this function without contacting kevmoo.
   // We have server-side tooling that assumes the values are consistent.
-  final String existing = platform.environment[_pubEnvironmentKey];
+  final String existing = globals.platform.environment[_pubEnvironmentKey];
   final List<String> values = <String>[
     if (existing != null && existing.isNotEmpty) existing,
-    if (isRunningOnBot) 'flutter_bot',
+    if (await globals.isRunningOnBot) 'flutter_bot',
     'flutter_cli',
     ...pubContext._values,
   ];
@@ -377,13 +392,13 @@ String _getPubEnvironmentValue(PubContext pubContext) {
 }
 
 String _getRootPubCacheIfAvailable() {
-  if (platform.environment.containsKey(_pubCacheEnvironmentKey)) {
-    return platform.environment[_pubCacheEnvironmentKey];
+  if (globals.platform.environment.containsKey(_pubCacheEnvironmentKey)) {
+    return globals.platform.environment[_pubCacheEnvironmentKey];
   }
 
-  final String cachePath = fs.path.join(Cache.flutterRoot, '.pub-cache');
-  if (fs.directory(cachePath).existsSync()) {
-    printTrace('Using $cachePath for the pub cache.');
+  final String cachePath = globals.fs.path.join(Cache.flutterRoot, '.pub-cache');
+  if (globals.fs.directory(cachePath).existsSync()) {
+    globals.printTrace('Using $cachePath for the pub cache.');
     return cachePath;
   }
 

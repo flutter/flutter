@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -32,8 +33,7 @@ void main() {
         ),
       );
 
-      expect(() => tester.getSemantics(find.text('hello')),
-        throwsA(isInstanceOf<StateError>()));
+      expect(() => tester.getSemantics(find.text('hello')), throwsStateError);
     }, semanticsEnabled: false);
 
     testWidgets('throws when there are multiple results from the finder', (WidgetTester tester) async {
@@ -52,8 +52,7 @@ void main() {
         ),
       );
 
-      expect(() => tester.getSemantics(find.text('hello')),
-          throwsA(isInstanceOf<StateError>()));
+      expect(() => tester.getSemantics(find.text('hello')), throwsStateError);
       semanticsHandle.dispose();
     });
 
@@ -471,7 +470,7 @@ void main() {
 
       expect(
         expectAsync0(tester.pageBack),
-        throwsA(isInstanceOf<TestFailure>()),
+        throwsA(isA<TestFailure>()),
       );
     });
 
@@ -628,7 +627,7 @@ void main() {
     testWidgets('disallows re-entry', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
       tester.runAsync<void>(() => completer.future);
-      expect(() => tester.runAsync(() async { }), throwsA(isInstanceOf<TestFailure>()));
+      expect(() => tester.runAsync(() async { }), throwsA(isA<TestFailure>()));
       completer.complete();
     });
 
@@ -665,40 +664,86 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
     await tester.pump();
   });
+
   testWidgets('verifyTickersWereDisposed control test', (WidgetTester tester) async {
-      FlutterError error;
-      final Ticker ticker = tester.createTicker((Duration duration) {});
-      ticker.start();
-      try {
-        tester.verifyTickersWereDisposed('');
-      } on FlutterError catch (e) {
-        error = e;
-      } finally {
-        expect(error, isNotNull);
-        expect(error.diagnostics.length, 4);
-        expect(error.diagnostics[2].level, DiagnosticLevel.hint);
-        expect(
-          error.diagnostics[2].toStringDeep(),
-          'Tickers used by AnimationControllers should be disposed by\n'
-          'calling dispose() on the AnimationController itself. Otherwise,\n'
-          'the ticker will leak.\n',
-        );
-        expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<Ticker>>());
-        expect(error.diagnostics.last.value, ticker);
-        expect(error.toStringDeep(), startsWith(
-          'FlutterError\n'
-          '   A Ticker was active .\n'
-          '   All Tickers must be disposed.\n'
-          '   Tickers used by AnimationControllers should be disposed by\n'
-          '   calling dispose() on the AnimationController itself. Otherwise,\n'
-          '   the ticker will leak.\n'
-          '   The offending ticker was:\n'
-          '     _TestTicker()\n',
-        ));
-      }
-      ticker.stop();
+    FlutterError error;
+    final Ticker ticker = tester.createTicker((Duration duration) {});
+    ticker.start();
+    try {
+      tester.verifyTickersWereDisposed('');
+    } on FlutterError catch (e) {
+      error = e;
+    } finally {
+      expect(error, isNotNull);
+      expect(error.diagnostics.length, 4);
+      expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+      expect(
+        error.diagnostics[2].toStringDeep(),
+        'Tickers used by AnimationControllers should be disposed by\n'
+        'calling dispose() on the AnimationController itself. Otherwise,\n'
+        'the ticker will leak.\n',
+      );
+      expect(error.diagnostics.last, isA<DiagnosticsProperty<Ticker>>());
+      expect(error.diagnostics.last.value, ticker);
+      expect(error.toStringDeep(), startsWith(
+        'FlutterError\n'
+        '   A Ticker was active .\n'
+        '   All Tickers must be disposed.\n'
+        '   Tickers used by AnimationControllers should be disposed by\n'
+        '   calling dispose() on the AnimationController itself. Otherwise,\n'
+        '   the ticker will leak.\n'
+        '   The offending ticker was:\n'
+        '     _TestTicker()\n',
+      ));
+    }
+    ticker.stop();
   });
 
+  group('testWidgets variants work', () {
+    int numberOfVariationsRun = 0;
+
+    testWidgets('variant tests run all values provided', (WidgetTester tester) async {
+      if (debugDefaultTargetPlatformOverride == null) {
+        expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
+      } else {
+        numberOfVariationsRun += 1;
+      }
+    }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
+
+    testWidgets('variant tests have descriptions with details', (WidgetTester tester) async {
+      if (debugDefaultTargetPlatformOverride == null) {
+        expect(tester.testDescription, equals('variant tests have descriptions with details'));
+      } else {
+        expect(tester.testDescription, equals('variant tests have descriptions with details ($debugDefaultTargetPlatformOverride)'));
+      }
+    }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
+  });
+
+  group('TargetPlatformVariant', () {
+    int numberOfVariationsRun = 0;
+    TargetPlatform origTargetPlatform;
+
+    setUpAll((){
+      origTargetPlatform = debugDefaultTargetPlatformOverride;
+    });
+
+    tearDownAll((){
+      expect(debugDefaultTargetPlatformOverride, equals(origTargetPlatform));
+    });
+
+    testWidgets('TargetPlatformVariant.only tests given value', (WidgetTester tester) async {
+      expect(debugDefaultTargetPlatformOverride, equals(TargetPlatform.iOS));
+      expect(defaultTargetPlatform, equals(TargetPlatform.iOS));
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+    testWidgets('TargetPlatformVariant.all tests run all variants', (WidgetTester tester) async {
+      if (debugDefaultTargetPlatformOverride == null) {
+        expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
+      } else {
+        numberOfVariationsRun += 1;
+      }
+    }, variant: TargetPlatformVariant.all());
+  });
 }
 
 class FakeMatcher extends AsyncMatcher {

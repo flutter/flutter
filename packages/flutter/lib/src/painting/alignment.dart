@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -126,13 +126,11 @@ abstract class AlignmentGeometry {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (other is! AlignmentGeometry)
-      return false;
-    final AlignmentGeometry typedOther = other;
-    return _x == typedOther._x &&
-           _start == typedOther._start &&
-           _y == typedOther._y;
+  bool operator ==(Object other) {
+    return other is AlignmentGeometry
+        && other._x == _x
+        && other._start == _start
+        && other._y == _y;
   }
 
   @override
@@ -671,6 +669,6 @@ class TextAlignVertical {
 
   @override
   String toString() {
-    return '$runtimeType(y: $y)';
+    return '${objectRuntimeType(this, 'TextAlignVertical')}(y: $y)';
   }
 }

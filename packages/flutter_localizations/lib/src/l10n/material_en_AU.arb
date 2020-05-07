@@ -1,4 +1,5 @@
 {
+  "moreButtonTooltip": "More",
   "tabLabel": "Tab $tabIndex of $tabCount",
   "showAccountsLabel": "Show accounts",
   "hideAccountsLabel": "Hide accounts",

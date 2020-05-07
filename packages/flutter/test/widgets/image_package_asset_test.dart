@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -29,7 +29,7 @@ void main() {
       package: 'test_package',
     );
     assert(imageWidget.image is AssetImage);
-    final AssetImage assetImage = imageWidget.image;
+    final AssetImage assetImage = imageWidget.image as AssetImage;
     expect(assetImage.keyName, 'packages/test_package/assets/image.png');
   });
 
@@ -40,7 +40,7 @@ void main() {
       package: 'test_package',
     );
     assert(imageWidget.image is ExactAssetImage);
-    final ExactAssetImage assetImage = imageWidget.image;
+    final ExactAssetImage assetImage = imageWidget.image as ExactAssetImage;
     expect(assetImage.keyName, 'packages/test_package/assets/image.png');
   });
 }

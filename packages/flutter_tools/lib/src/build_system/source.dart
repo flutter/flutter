@@ -1,11 +1,10 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
-import '../globals.dart';
 import 'build_system.dart';
 import 'exceptions.dart';
 
@@ -24,7 +23,7 @@ abstract class ResolvedFiles {
 /// Collects sources for a [Target] into a single list of [FileSystemEntities].
 class SourceVisitor implements ResolvedFiles {
   /// Create a new [SourceVisitor] from an [Environment].
-  SourceVisitor(this.environment, [this.inputs = true]);
+  SourceVisitor(this.environment, [ this.inputs = true ]);
 
   /// The current environment.
   final Environment environment;
@@ -56,7 +55,7 @@ class SourceVisitor implements ResolvedFiles {
     final String contents = depfile.readAsStringSync();
     final List<String> colonSeparated = contents.split(': ');
     if (colonSeparated.length != 2) {
-      printError('Invalid depfile: ${depfile.path}');
+      environment.logger.printError('Invalid depfile: ${depfile.path}');
       return;
     }
     if (inputs) {
@@ -78,7 +77,7 @@ class SourceVisitor implements ResolvedFiles {
         .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
         .where((String path) => path.isNotEmpty)
         .toSet()
-        .map((String path) => fs.file(path));
+        .map(environment.fileSystem.file);
   }
 
   /// Visit a [Source] which contains a file URL.
@@ -101,35 +100,36 @@ class SourceVisitor implements ResolvedFiles {
     switch (rawParts.first) {
       case Environment.kProjectDirectory:
         segments.addAll(
-            fs.path.split(environment.projectDir.resolveSymbolicLinksSync()));
+          environment.fileSystem.path.split(environment.projectDir.resolveSymbolicLinksSync()));
         break;
       case Environment.kBuildDirectory:
-        segments.addAll(fs.path.split(
-            environment.buildDir.resolveSymbolicLinksSync()));
+        segments.addAll(environment.fileSystem.path.split(
+          environment.buildDir.resolveSymbolicLinksSync()));
         break;
       case Environment.kCacheDirectory:
         segments.addAll(
-            fs.path.split(environment.cacheDir.resolveSymbolicLinksSync()));
+          environment.fileSystem.path.split(environment.cacheDir.resolveSymbolicLinksSync()));
         break;
       case Environment.kFlutterRootDirectory:
         // flutter root will not contain a symbolic link.
         segments.addAll(
-            fs.path.split(environment.flutterRootDir.absolute.path));
+          environment.fileSystem.path.split(environment.flutterRootDir.absolute.path));
         break;
       case Environment.kOutputDirectory:
         segments.addAll(
-            fs.path.split(environment.outputDir.resolveSymbolicLinksSync()));
+          environment.fileSystem.path.split(environment.outputDir.resolveSymbolicLinksSync()));
         break;
       default:
         throw InvalidPatternException(pattern);
     }
     rawParts.skip(1).forEach(segments.add);
-    final String filePath = fs.path.joinAll(segments);
+    final String filePath = environment.fileSystem.path.joinAll(segments);
     if (!hasWildcard) {
-      if (optional && !fs.isFileSync(filePath)) {
+      if (optional && !environment.fileSystem.isFileSync(filePath)) {
         return;
       }
-      sources.add(fs.file(fs.path.normalize(filePath)));
+      sources.add(environment.fileSystem.file(
+        environment.fileSystem.path.normalize(filePath)));
       return;
     }
     // Perform a simple match by splitting the wildcard containing file one
@@ -143,21 +143,21 @@ class SourceVisitor implements ResolvedFiles {
     if (wildcardSegments.length > 2) {
       throw InvalidPatternException(pattern);
     }
-    if (!fs.directory(filePath).existsSync()) {
+    if (!environment.fileSystem.directory(filePath).existsSync()) {
       throw Exception('$filePath does not exist!');
     }
-    for (FileSystemEntity entity in fs.directory(filePath).listSync()) {
-      final String filename = fs.path.basename(entity.path);
+    for (final FileSystemEntity entity in environment.fileSystem.directory(filePath).listSync()) {
+      final String filename = environment.fileSystem.path.basename(entity.path);
       if (wildcardSegments.isEmpty) {
-        sources.add(fs.file(entity.absolute));
+        sources.add(environment.fileSystem.file(entity.absolute));
       } else if (wildcardSegments.length == 1) {
         if (filename.startsWith(wildcardSegments[0]) ||
             filename.endsWith(wildcardSegments[0])) {
-          sources.add(fs.file(entity.absolute));
+          sources.add(environment.fileSystem.file(entity.absolute));
         }
       } else if (filename.startsWith(wildcardSegments[0])) {
         if (filename.substring(wildcardSegments[0].length).endsWith(wildcardSegments[1])) {
-          sources.add(fs.file(entity.absolute));
+          sources.add(environment.fileSystem.file(entity.absolute));
         }
       }
     }
@@ -167,15 +167,16 @@ class SourceVisitor implements ResolvedFiles {
   ///
   /// If the [Artifact] points to a directory then all child files are included.
   void visitArtifact(Artifact artifact, TargetPlatform platform, BuildMode mode) {
-    final String path = artifacts.getArtifactPath(artifact, platform: platform, mode: mode);
-    if (fs.isDirectorySync(path)) {
+    final String path = environment.artifacts
+      .getArtifactPath(artifact, platform: platform, mode: mode);
+    if (environment.fileSystem.isDirectorySync(path)) {
       sources.addAll(<File>[
-        for (FileSystemEntity entity in fs.directory(path).listSync(recursive: true))
+        for (FileSystemEntity entity in environment.fileSystem.directory(path).listSync(recursive: true))
           if (entity is File)
             entity,
       ]);
     } else {
-      sources.add(fs.file(path));
+      sources.add(environment.fileSystem.file(path));
     }
   }
 }

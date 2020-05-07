@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -192,7 +192,7 @@ class Stepper extends StatefulWidget {
   /// This callback which takes in a context and two functions,[onStepContinue]
   /// and [onStepCancel]. These can be used to control the stepper.
   ///
-  /// {@tool snippet --template=stateless_widget_scaffold}
+  /// {@tool dartpad --template=stateless_widget_scaffold}
   /// Creates a stepper control with custom buttons.
   ///
   /// ```dart
@@ -204,7 +204,7 @@ class Stepper extends StatefulWidget {
   ///            children: <Widget>[
   ///              FlatButton(
   ///                onPressed: onStepContinue,
-  ///                child: const Text('CONTINUE'),
+  ///                child: const Text('NEXT'),
   ///              ),
   ///              FlatButton(
   ///                onPressed: onStepCancel,
@@ -444,13 +444,13 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       case StepState.indexed:
       case StepState.editing:
       case StepState.complete:
-        return textTheme.body2;
+        return textTheme.bodyText1;
       case StepState.disabled:
-        return textTheme.body2.copyWith(
+        return textTheme.bodyText1.copyWith(
           color: _isDark() ? _kDisabledDark : _kDisabledLight
         );
       case StepState.error:
-        return textTheme.body2.copyWith(
+        return textTheme.bodyText1.copyWith(
           color: _isDark() ? _kErrorDark : _kErrorLight
         );
     }

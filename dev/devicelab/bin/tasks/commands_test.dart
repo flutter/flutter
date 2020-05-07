@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,7 +26,7 @@ void main() {
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>['run', '--verbose', '--disable-service-auth-codes', '-d', device.deviceId, 'lib/commands.dart'],
+        <String>['run', '--verbose', '--disable-service-auth-codes', '--no-fast-start', '-d', device.deviceId, 'lib/commands.dart'],
       );
       final StreamController<String> stdout = StreamController<String>.broadcast();
       run.stdout
@@ -74,7 +74,7 @@ void main() {
       run.stdin.write('P');
       await driver.drive('none');
       final Future<String> reloadStartingText =
-        stdout.stream.firstWhere((String line) => line.endsWith('] Initializing hot reload...'));
+        stdout.stream.firstWhere((String line) => line.endsWith('] Performing hot reload...'));
       final Future<String> reloadEndingText =
         stdout.stream.firstWhere((String line) => line.contains('] Reloaded ') && line.endsWith('ms.'));
       print('test: pressing "r" to perform a hot reload...');

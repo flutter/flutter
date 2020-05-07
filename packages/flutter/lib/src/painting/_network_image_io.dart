@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,6 +9,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
+import 'binding.dart';
 import 'debug.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
@@ -44,7 +45,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, chunkEvents, decode),
+      codec: _loadAsync(key as NetworkImage, chunkEvents, decode),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       informationCollector: () {
@@ -86,8 +87,13 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
         request.headers.add(name, value);
       });
       final HttpClientResponse response = await request.close();
-      if (response.statusCode != HttpStatus.ok)
+      if (response.statusCode != HttpStatus.ok) {
+        // The network may be only temporarily unavailable, or the file will be
+        // added on the server later. Avoid having future calls to resolve
+        // fail to check the network again.
+        PaintingBinding.instance.imageCache.evict(key);
         throw image_provider.NetworkImageLoadException(statusCode: response.statusCode, uri: resolved);
+      }
 
       final Uint8List bytes = await consolidateHttpClientResponseBytes(
         response,
@@ -108,17 +114,17 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final NetworkImage typedOther = other;
-    return url == typedOther.url
-        && scale == typedOther.scale;
+    return other is NetworkImage
+        && other.url == url
+        && other.scale == scale;
   }
 
   @override
   int get hashCode => ui.hashValues(url, scale);
 
   @override
-  String toString() => '$runtimeType("$url", scale: $scale)';
+  String toString() => '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: $scale)';
 }

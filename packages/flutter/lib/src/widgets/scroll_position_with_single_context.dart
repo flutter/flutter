@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -91,7 +91,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       return;
     }
     activity.updateDelegate(this);
-    final ScrollPositionWithSingleContext typedOther = other;
+    final ScrollPositionWithSingleContext typedOther = other as ScrollPositionWithSingleContext;
     _userScrollDirection = typedOther._userScrollDirection;
     assert(_currentDrag == null);
     if (typedOther._currentDrag != null) {
@@ -198,7 +198,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     if (pixels != value) {
       final double oldPixels = pixels;
       forcePixels(value);
-      notifyListeners();
       didStartScroll();
       didUpdateScrollPositionBy(pixels - oldPixels);
       didEndScroll();
@@ -213,7 +212,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     if (pixels != value) {
       final double oldPixels = pixels;
       forcePixels(value);
-      notifyListeners();
       didStartScroll();
       didUpdateScrollPositionBy(pixels - oldPixels);
       didEndScroll();

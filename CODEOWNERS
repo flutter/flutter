@@ -8,5 +8,6 @@
 
 /bin/internal/goldens.version @Piinks
 /CODEOWNERS @jmagman
+/dev/ci/ @christopherfujino
 /packages/flutter_tools/templates/module/ios/ @jmagman
 /packages/flutter_tools/templates/**/Podfile* @jmagman

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,7 +13,7 @@ class TestDataSource extends DataTableSource {
     this.onSelectChanged,
   });
 
-  final Function onSelectChanged;
+  final void Function(bool) onSelectChanged;
 
   int get generation => _generation;
   int _generation = 0;
@@ -50,6 +50,9 @@ class TestDataSource extends DataTableSource {
 }
 
 void main() {
+  final TestWidgetsFlutterBinding binding =
+      TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+
   testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
 
@@ -161,7 +164,7 @@ void main() {
 
     // the column overflows because we're forcing it to 600 pixels high
     final dynamic exception = tester.takeException();
-    expect(exception, isInstanceOf<FlutterError>());
+    expect(exception, isFlutterError);
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
     expect(exception.diagnostics.first.toString(), startsWith('A RenderFlex overflowed by '));
 
@@ -249,7 +252,7 @@ void main() {
     ));
     // the column overflows because we're forcing it to 600 pixels high
     final dynamic exception = tester.takeException();
-    expect(exception, isInstanceOf<FlutterError>());
+    expect(exception, isFlutterError);
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
     expect(exception.diagnostics.first.toString(), contains('A RenderFlex overflowed by'));
 
@@ -382,6 +385,16 @@ void main() {
     const double _defaultColumnSpacing = 56.0;
     const double _customHorizontalMargin = 10.0;
     const double _customColumnSpacing = 15.0;
+
+    const double _width = 400;
+    const double _height = 400;
+
+    final Size originalSize = binding.renderView.size;
+
+    // Ensure the containing Card is small enough that we don't expand too
+    // much, resulting in our custom margin being ignored.
+    await binding.setSurfaceSize(const Size(_width, _height));
+
     final TestDataSource source = TestDataSource(
       onSelectChanged: (bool value) {},
     );
@@ -527,6 +540,9 @@ void main() {
       tester.getRect(padding).right - tester.getRect(cellContent).right,
       _customHorizontalMargin,
     );
+
+    // Reset the surface size.
+    await binding.setSurfaceSize(originalSize);
   });
 
   testWidgets('PaginatedDataTable custom horizontal padding - no checkbox', (WidgetTester tester) async {
@@ -650,5 +666,64 @@ void main() {
       tester.getRect(padding).right - tester.getRect(cellContent).right,
       _customHorizontalMargin,
     );
+  });
+
+  testWidgets('PaginatedDataTable table fills Card width', (WidgetTester tester) async {
+    final TestDataSource source = TestDataSource();
+
+    // Note: 800 is wide enough to ensure that all of the columns fit in the
+    // Card. The DataTable can be larger than its containing Card, but this test
+    // is only concerned with ensuring the DataTable is at least as wide as the
+    // Card.
+    const double _originalWidth = 800;
+    const double _expandedWidth = 1600;
+    const double _height = 400;
+
+    final Size originalSize = binding.renderView.size;
+
+    Widget buildWidget() => MaterialApp(
+      home: PaginatedDataTable(
+        header: const Text('Test table'),
+        source: source,
+        rowsPerPage: 2,
+        availableRowsPerPage: const <int>[
+          2, 4, 8, 16,
+        ],
+        onRowsPerPageChanged: (int rowsPerPage) {},
+        onPageChanged: (int rowIndex) {},
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
+        ],
+      ),
+    );
+
+    await binding.setSurfaceSize(const Size(_originalWidth, _height));
+    await tester.pumpWidget(buildWidget());
+
+    // Widths should be equal before we resize...
+    expect(
+      tester.renderObject<RenderBox>(find.byType(DataTable).first).size.width,
+      moreOrLessEquals(
+        tester.renderObject<RenderBox>(find.byType(Card).first).size.width)
+    );
+
+    await binding.setSurfaceSize(const Size(_expandedWidth, _height));
+    await tester.pumpWidget(buildWidget());
+
+    final double cardWidth = tester.renderObject<RenderBox>(find.byType(Card).first).size.width;
+
+    // ... and should still be equal after the resize.
+    expect(
+      tester.renderObject<RenderBox>(find.byType(DataTable).first).size.width,
+      moreOrLessEquals(cardWidth)
+    );
+
+    // Double check to ensure we actually resized the surface properly.
+    expect(cardWidth, moreOrLessEquals(_expandedWidth));
+
+    // Reset the surface size.
+    await binding.setSurfaceSize(originalSize);
   });
 }

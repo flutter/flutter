@@ -1,37 +1,66 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
+
 import '../convert.dart';
-import '../globals.dart';
-import 'context.dart';
 import 'file_system.dart';
 import 'logger.dart';
 import 'utils.dart';
 
+/// A class to abstract configuration files.
 class Config {
-  Config([File configFile, Logger localLogger]) {
-    final Logger loggerInstance = localLogger ?? logger;
-    _configFile = configFile ?? fs.file(fs.path.join(userHomePath(), '.flutter_settings'));
-    if (_configFile.existsSync()) {
-      try {
-        _values = castStringKeyedMap(json.decode(_configFile.readAsStringSync()));
-      } on FormatException {
-        loggerInstance
-          ..printError('Failed to decode preferences in ${_configFile.path}.')
-          ..printError(
-              'You may need to reapply any previously saved configuration '
-              'with the "flutter config" command.',
-          );
-        _configFile.deleteSync();
-      }
+  /// Constructs a new [Config] object from a file called [name] in the
+  /// current user's home directory as determined by the [Platform] and
+  /// [FileSystem].
+  factory Config(
+    String name, {
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required Platform platform,
+  }) {
+    final File file = fileSystem.file(fileSystem.path.join(
+      _userHomePath(platform),
+      name,
+    ));
+    return Config._(file, logger);
+  }
+
+  /// Constructs a new [Config] object from a file called [name] in
+  /// the given [Directory].
+  factory Config.test(
+    String name, {
+    @required Directory directory,
+    @required Logger logger,
+  }) => Config._(directory.childFile(name), logger);
+
+  Config._(File file, Logger logger) : _file = file, _logger = logger {
+    if (!_file.existsSync()) {
+      return;
+    }
+    try {
+      _values = castStringKeyedMap(json.decode(_file.readAsStringSync()));
+    } on FormatException {
+      _logger
+        ..printError('Failed to decode preferences in ${_file.path}.')
+        ..printError(
+            'You may need to reapply any previously saved configuration '
+            'with the "flutter config" command.',
+        );
+      _file.deleteSync();
     }
   }
 
-  static Config get instance => context.get<Config>();
+  /// The default name for the Flutter config file.
+  static const String kFlutterSettings = '.flutter_settings';
 
-  File _configFile;
-  String get configPath => _configFile.path;
+  final Logger _logger;
+
+  File _file;
+
+  String get configPath => _file.path;
 
   Map<String, dynamic> _values = <String, dynamic>{};
 
@@ -54,6 +83,18 @@ class Config {
   void _flushValues() {
     String json = const JsonEncoder.withIndent('  ').convert(_values);
     json = '$json\n';
-    _configFile.writeAsStringSync(json);
+    _file.writeAsStringSync(json);
+  }
+
+  // Reads the process environment to find the current user's home directory.
+  //
+  // If the searched environment variables are not set, '.' is returned instead.
+  //
+  // Note that this is different from FileSystemUtils.homeDirPath.
+  static String _userHomePath(Platform platform) {
+    final String envKey = platform.operatingSystem == 'windows'
+      ? 'APPDATA'
+      : 'HOME';
+    return platform.environment[envKey] ?? '.';
   }
 }

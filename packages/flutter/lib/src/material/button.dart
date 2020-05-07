@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -52,6 +52,7 @@ class RawMaterialButton extends StatefulWidget {
     this.highlightElevation = 8.0,
     this.disabledElevation = 0.0,
     this.padding = EdgeInsets.zero,
+    this.visualDensity = const VisualDensity(),
     this.constraints = const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
     this.shape = const RoundedRectangleBorder(),
     this.animationDuration = kThemeChangeDuration,
@@ -185,7 +186,7 @@ class RawMaterialButton extends StatefulWidget {
   ///
   ///  * [elevation], the default elevation.
   ///  * [hoverElevation], the elevation when a pointer is hovering over the
-  ///  button.
+  ///    button.
   ///  * [focusElevation], the elevation when the button is focused.
   ///  * [disabledElevation], the elevation when the button is disabled.
   final double highlightElevation;
@@ -199,13 +200,23 @@ class RawMaterialButton extends StatefulWidget {
   ///
   ///  * [elevation], the default elevation.
   ///  * [hoverElevation], the elevation when a pointer is hovering over the
-  ///  button.
+  ///    button.
   ///  * [focusElevation], the elevation when the button is focused.
   ///  * [highlightElevation], the elevation when the button is pressed.
   final double disabledElevation;
 
   /// The internal padding for the button's [child].
   final EdgeInsetsGeometry padding;
+
+  /// Defines how compact the button's layout will be.
+  ///
+  /// {@macro flutter.material.themedata.visualDensity}
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all widgets
+  ///    within a [Theme].
+  final VisualDensity visualDensity;
 
   /// Defines the button's size.
   ///
@@ -354,9 +365,19 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
   Widget build(BuildContext context) {
     final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(widget.textStyle?.color, _states);
     final ShapeBorder effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder>(widget.shape, _states);
+    final Offset densityAdjustment = widget.visualDensity.baseSizeAdjustment;
+    final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(widget.constraints);
+    final EdgeInsetsGeometry padding = widget.padding.add(
+      EdgeInsets.only(
+        left: densityAdjustment.dx,
+        top: densityAdjustment.dy,
+        right: densityAdjustment.dx,
+        bottom: densityAdjustment.dy,
+      ),
+    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
     final Widget result = ConstrainedBox(
-      constraints: widget.constraints,
+      constraints: effectiveConstraints,
       child: Material(
         elevation: _effectiveElevation,
         textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
@@ -383,7 +404,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
           child: IconTheme.merge(
             data: IconThemeData(color: effectiveTextColor),
             child: Container(
-              padding: widget.padding,
+              padding: padding,
               child: Center(
                 widthFactor: 1.0,
                 heightFactor: 1.0,
@@ -397,7 +418,12 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     Size minSize;
     switch (widget.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
-        minSize = const Size(48.0, 48.0);
+        minSize = Size(
+          kMinInteractiveDimension + densityAdjustment.dx,
+          kMinInteractiveDimension + densityAdjustment.dy,
+        );
+        assert(minSize.width >= 0.0);
+        assert(minSize.height >= 0.0);
         break;
       case MaterialTapTargetSize.shrinkWrap:
         minSize = Size.zero;
@@ -483,13 +509,14 @@ class _RenderInputPadding extends RenderShiftedBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     if (child != null) {
       child.layout(constraints, parentUsesSize: true);
       final double height = math.max(child.size.width, minSize.width);
       final double width = math.max(child.size.height, minSize.height);
       size = constraints.constrain(Size(height, width));
-      final BoxParentData childParentData = child.parentData;
-      childParentData.offset = Alignment.center.alongOffset(size - child.size);
+      final BoxParentData childParentData = child.parentData as BoxParentData;
+      childParentData.offset = Alignment.center.alongOffset(size - child.size as Offset);
     } else {
       size = Size.zero;
     }

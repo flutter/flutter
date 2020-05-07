@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -26,7 +28,13 @@ void main() {
     BufferLogger mockLogger;
 
     setUp(() {
-      mockLogger = BufferLogger();
+      mockLogger = BufferLogger(
+        terminal: AnsiTerminal(
+          stdio: null,
+          platform: const LocalPlatform(),
+        ),
+        outputPreferences: OutputPreferences.test(),
+    );
       residentCompiler = MockResidentCompiler();
     });
 
@@ -114,23 +122,16 @@ void main() {
   });
 
   group('cold run', () {
-    BufferLogger mockLogger;
-
-    setUp(() {
-      mockLogger = BufferLogger();
-    });
-
     testUsingContext('returns 1 if not prebuilt mode & mainPath does not exist', () async {
       final MockDevice mockDevice = MockDevice();
       final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
       when(mockFlutterDevice.device).thenReturn(mockDevice);
       final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice];
       final int result = await ColdRunner(devices).run();
+
       expect(result, 1);
-      expect(mockLogger.errorText, matches(r'Tried to run .*, but that file does not exist\.'));
-      expect(mockLogger.errorText, matches(r'Consider using the -t option to specify the Dart file to start\.'));
-    }, overrides: <Type, Generator>{
-      Logger: () => mockLogger,
+      expect(testLogger.errorText, matches(r'Tried to run .*, but that file does not exist\.'));
+      expect(testLogger.errorText, matches(r'Consider using the -t option to specify the Dart file to start\.'));
     });
 
     testUsingContext('calls runCold on attached device', () async {
@@ -148,13 +149,12 @@ void main() {
         applicationBinary: applicationBinary,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ).run();
+
       expect(result, 1);
       verify(mockFlutterDevice.runCold(
           coldRunner: anyNamed('coldRunner'),
           route: anyNamed('route'),
       ));
-    }, overrides: <Type, Generator>{
-      Logger: () => mockLogger,
     });
   });
 }
@@ -173,7 +173,7 @@ class TestFlutterDevice extends FlutterDevice {
     @required this.exception,
     @required ResidentCompiler generator,
   })  : assert(exception != null),
-        super(device, buildMode: BuildMode.debug, generator: generator, trackWidgetCreation: false);
+        super(device, buildInfo: BuildInfo.debug, generator: generator);
 
   /// The exception to throw when the connect method is called.
   final Exception exception;
@@ -183,6 +183,7 @@ class TestFlutterDevice extends FlutterDevice {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
+    ReloadMethod reloadMethod,
   }) async {
     throw exception;
   }

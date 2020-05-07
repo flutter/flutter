@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -57,7 +57,7 @@ void main() {
   });
 
   testWidgets('SingleTickerProviderStateMixin can handle not being used', (WidgetTester tester) async {
-    final Widget widget = BoringTickerTest();
+    const Widget widget = BoringTickerTest();
     expect(widget.toString, isNot(throwsException));
 
     await tester.pumpWidget(widget);
@@ -72,7 +72,7 @@ void main() {
       final dynamic exception = tester.takeException();
       expect(exception, isNotNull);
       expect(exception, isFlutterError);
-      final FlutterError error = exception;
+      final FlutterError error = exception as FlutterError;
       expect(error.diagnostics.length, 3);
       expect(error.diagnostics[2].level, DiagnosticLevel.hint);
       expect(error.diagnostics[2].toStringDeep(), equalsIgnoringHashCodes(
@@ -118,7 +118,7 @@ void main() {
           'calling dispose() on the AnimationController itself. Otherwise,\n'
           'the ticker will leak.\n'
         );
-        expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Ticker>>());
+        expect(error.diagnostics[3], isA<DiagnosticsProperty<Ticker>>());
         expect(error.toStringDeep().split('\n').take(14).join('\n'), equalsIgnoringHashCodes(
           'FlutterError\n'
             '   _SingleTickerTestState#00000(ticker active) was disposed with an\n'
@@ -161,7 +161,7 @@ void main() {
           'calling dispose() on the AnimationController itself. Otherwise,\n'
           'the ticker will leak.\n'
         );
-        expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Ticker>>());
+        expect(error.diagnostics[3], isA<DiagnosticsProperty<Ticker>>());
         expect(error.toStringDeep().split('\n').take(14).join('\n'), equalsIgnoringHashCodes(
           'FlutterError\n'
           '   _SingleTickerTestState#00000(ticker active) was disposed with an\n'
@@ -204,7 +204,7 @@ void main() {
           'calling dispose() on the AnimationController itself. Otherwise,\n'
           'the ticker will leak.\n'
         );
-        expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Ticker>>());
+        expect(error.diagnostics[3], isA<DiagnosticsProperty<Ticker>>());
         expect(error.toStringDeep().split('\n').take(14).join('\n'), equalsIgnoringHashCodes(
           'FlutterError\n'
           '   _MultipleTickerTestState#00000(tickers: tracking 2 tickers) was\n'
@@ -228,6 +228,7 @@ void main() {
 }
 
 class BoringTickerTest extends StatefulWidget {
+  const BoringTickerTest({ Key key }) : super(key: key);
   @override
   _BoringTickerTestState createState() => _BoringTickerTestState();
 }
@@ -310,4 +311,3 @@ class _SingleTickerCreateMultipleTickerState extends State<_SingleTickerCreateMu
     return Container();
   }
 }
-

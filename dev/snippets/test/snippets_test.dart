@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -37,22 +37,22 @@ main() {
   {{code}}
 }
 ''');
-      configuration.getHtmlSkeletonFile(SnippetType.application).writeAsStringSync('''
+      configuration.getHtmlSkeletonFile(SnippetType.sample).writeAsStringSync('''
 <div>HTML Bits</div>
 {{description}}
 <pre>{{code}}</pre>
 <pre>{{app}}</pre>
 <div>More HTML Bits</div>
 ''');
-      configuration.getHtmlSkeletonFile(SnippetType.sample).writeAsStringSync('''
+      configuration.getHtmlSkeletonFile(SnippetType.snippet).writeAsStringSync('''
 <div>HTML Bits</div>
 {{description}}
 <pre>{{code}}</pre>
 <div>More HTML Bits</div>
 ''');
-      configuration.getHtmlSkeletonFile(SnippetType.application, showDartPad: true).writeAsStringSync('''
+      configuration.getHtmlSkeletonFile(SnippetType.sample, showDartPad: true).writeAsStringSync('''
 <div>HTML Bits (DartPad-style)</div>
-<iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&run=true&sample_id={{id}}"></iframe>
+<iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&run=true&sample_id={{id}}&sample_channel={{channel}}"></iframe>
 <div>More HTML Bits</div>
 ''');
       generator = SnippetGenerator(configuration: configuration);
@@ -61,10 +61,10 @@ main() {
       tmpDir.deleteSync(recursive: true);
     });
 
-    test('generates application snippets', () async {
+    test('generates samples', () async {
       final File inputFile = File(path.join(tmpDir.absolute.path, 'snippet_in.txt'))
         ..createSync(recursive: true)
-        ..writeAsStringSync('''
+        ..writeAsStringSync(r'''
 A description of the snippet.
 
 On several lines.
@@ -75,7 +75,7 @@ const String name = 'snippet';
 
 ```dart
 void main() {
-  print('The actual \$name.');
+  print('The actual $name.');
 }
 ```
 ''');
@@ -83,18 +83,20 @@ void main() {
 
       final String html = generator.generate(
         inputFile,
-        SnippetType.application,
+        SnippetType.sample,
         template: 'template',
         metadata: <String, Object>{
           'id': 'id',
+          'channel': 'stable',
           'element': 'MyElement',
         },
         output: outputFile,
       );
       expect(html, contains('<div>HTML Bits</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
-      expect(html, contains('print(&#39;The actual \$name.&#39;);'));
+      expect(html, contains(r'print(&#39;The actual $name.&#39;);'));
       expect(html, contains('A description of the snippet.\n'));
+      expect(html, isNot(contains('sample_channel=stable')));
       expect(
           html,
           contains('&#47;&#47; A description of the snippet.\n'
@@ -109,17 +111,45 @@ void main() {
       expect(outputContents, contains("const String name = 'snippet';"));
     });
 
-    test('generates sample snippets', () async {
+    test('generates snippets', () async {
       final File inputFile = File(path.join(tmpDir.absolute.path, 'snippet_in.txt'))
         ..createSync(recursive: true)
-        ..writeAsStringSync('''
+        ..writeAsStringSync(r'''
 A description of the snippet.
 
 On several lines.
 
 ```code
 void main() {
-  print('The actual \$name.');
+  print('The actual $name.');
+}
+```
+''');
+
+      final String html = generator.generate(
+        inputFile,
+        SnippetType.snippet,
+        metadata: <String, Object>{'id': 'id'},
+      );
+      expect(html, contains('<div>HTML Bits</div>'));
+      expect(html, contains('<div>More HTML Bits</div>'));
+      expect(html, contains(r'  print(&#39;The actual $name.&#39;);'));
+      expect(html, contains('<div class="snippet-description">{@end-inject-html}A description of the snippet.\n\n'
+          'On several lines.{@inject-html}</div>\n'));
+      expect(html, contains('main() {'));
+    });
+
+    test('generates dartpad samples', () async {
+      final File inputFile = File(path.join(tmpDir.absolute.path, 'snippet_in.txt'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'''
+A description of the snippet.
+
+On several lines.
+
+```code
+void main() {
+  print('The actual $name.');
 }
 ```
 ''');
@@ -127,55 +157,26 @@ void main() {
       final String html = generator.generate(
         inputFile,
         SnippetType.sample,
-        metadata: <String, Object>{'id': 'id'},
-      );
-      expect(html, contains('<div>HTML Bits</div>'));
-      expect(html, contains('<div>More HTML Bits</div>'));
-      expect(html, contains('  print(&#39;The actual \$name.&#39;);'));
-      expect(html, contains('<div class="snippet-description">'
-          '{@end-inject-html}A description of the snippet.\n\n'
-          'On several lines.{@inject-html}</div>\n'));
-      expect(html, contains('main() {'));
-    });
-
-    test('generates dartpad snippets', () async {
-      final File inputFile = File(path.join(tmpDir.absolute.path, 'snippet_in.txt'))
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
-A description of the snippet.
-
-On several lines.
-
-```code
-void main() {
-  print('The actual \$name.');
-}
-```
-''');
-
-      final String html = generator.generate(
-        inputFile,
-        SnippetType.application,
         showDartPad: true,
         template: 'template',
-        metadata: <String, Object>{'id': 'id'},
+        metadata: <String, Object>{'id': 'id', 'channel': 'stable'},
       );
       expect(html, contains('<div>HTML Bits (DartPad-style)</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
-      expect(html, contains('<iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&run=true&sample_id=id"></iframe>'));
+      expect(html, contains('<iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&run=true&sample_id=id&sample_channel=stable"></iframe>'));
     });
 
-    test('generates snippet application metadata', () async {
+    test('generates sample metadata', () async {
       final File inputFile = File(path.join(tmpDir.absolute.path, 'snippet_in.txt'))
         ..createSync(recursive: true)
-        ..writeAsStringSync('''
+        ..writeAsStringSync(r'''
 A description of the snippet.
 
 On several lines.
 
 ```code
 void main() {
-  print('The actual \$name.');
+  print('The actual $name.');
 }
 ```
 ''');
@@ -185,14 +186,15 @@ void main() {
 
       generator.generate(
         inputFile,
-        SnippetType.application,
+        SnippetType.sample,
         template: 'template',
         output: outputFile,
-        metadata: <String, Object>{'sourcePath': 'some/path.dart', 'id': 'id'},
+        metadata: <String, Object>{'sourcePath': 'some/path.dart', 'id': 'id', 'channel': 'stable'},
       );
       expect(expectedMetadataFile.existsSync(), isTrue);
-      final Map<String, dynamic> json = jsonDecode(expectedMetadataFile.readAsStringSync());
+      final Map<String, dynamic> json = jsonDecode(expectedMetadataFile.readAsStringSync()) as Map<String, dynamic>;
       expect(json['id'], equals('id'));
+      expect(json['channel'], equals('stable'));
       expect(json['file'], equals('snippet_out.dart'));
       expect(json['description'], equals('A description of the snippet.\n\nOn several lines.'));
       // Ensure any passed metadata is included in the output JSON too.

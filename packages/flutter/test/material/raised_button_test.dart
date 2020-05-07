@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -556,6 +556,106 @@ void main() {
         tester.renderObject(find.byType(RaisedButton)),
         paintsExactlyCountTimes(#clipPath, 0),
     );
+  });
+
+  testWidgets('RaisedButton responds to density changes.', (WidgetTester tester) async {
+    const Key key = Key('test');
+    const Key childKey = Key('test child');
+
+    Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
+      return await tester.pumpWidget(
+        MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Center(
+              child: RaisedButton(
+                visualDensity: visualDensity,
+                key: key,
+                onPressed: () {},
+                child: useText ? const Text('Text', key: childKey) : Container(key: childKey, width: 100, height: 100, color: const Color(0xffff0000)),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await buildTest(const VisualDensity());
+    final RenderBox box = tester.renderObject(find.byKey(key));
+    Rect childRect = tester.getRect(find.byKey(childKey));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(132, 100)));
+    expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(156, 124)));
+    expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
+
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(108, 100)));
+    expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
+
+    await buildTest(const VisualDensity(), useText: true);
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(88, 48)));
+    expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0), useText: true);
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(112, 60)));
+    expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
+
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0), useText: true);
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(76, 36)));
+    expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
+  });
+
+  testWidgets('RaisedButton.icon responds to applied padding', (WidgetTester tester) async {
+    const Key buttonKey = Key('test');
+    const Key labelKey = Key('label');
+    await tester.pumpWidget(
+      // When textDirection is set to TextDirection.ltr, the label appears on the
+      // right side of the icon. This is important in determining whether the
+      // horizontal padding is applied correctly later on
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Center(
+            child: RaisedButton.icon(
+              icon: const Icon(Icons.add),
+              padding: const EdgeInsets.fromLTRB(16, 5, 10, 12),
+              key: buttonKey,
+              onPressed: () {},
+              label: const Text(
+                'Hello',
+                key: labelKey,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Rect paddingRect = tester.getRect(find.byType(Padding));
+    final Rect labelRect = tester.getRect(find.byKey(labelKey));
+    final Rect iconRect = tester.getRect(find.byType(Icon));
+
+    // The right padding should be applied on the right of the label, whereas the
+    // left padding should be applied on the left side of the icon.
+    expect(paddingRect.right, labelRect.right + 10);
+    expect(paddingRect.left, iconRect.left - 16);
+    // Use the taller widget to check the top and bottom padding.
+    final Rect tallerWidget = iconRect.height > labelRect.height ? iconRect : labelRect;
+    expect(paddingRect.top, tallerWidget.top - 5);
+    expect(paddingRect.bottom, tallerWidget.bottom + 12);
   });
 }
 

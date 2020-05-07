@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -53,10 +53,10 @@ class CrashReportSender {
   }
 
   final http.Client _client;
-  final Usage _usage = Usage.instance;
+  final Usage _usage = globals.flutterUsage;
 
   Uri get _baseUrl {
-    final String overrideUrl = platform.environment['FLUTTER_CRASH_SERVER_BASE_URL'];
+    final String overrideUrl = globals.platform.environment['FLUTTER_CRASH_SERVER_BASE_URL'];
 
     if (overrideUrl != null) {
       return Uri.parse(overrideUrl);
@@ -90,7 +90,7 @@ class CrashReportSender {
         return;
       }
 
-      printStatus('Sending crash report to Google.');
+      globals.printTrace('Sending crash report to Google.');
 
       final Uri uri = _baseUrl.replace(
         queryParameters: <String, String>{
@@ -103,8 +103,8 @@ class CrashReportSender {
       req.fields['uuid'] = _usage.clientId;
       req.fields['product'] = _kProductId;
       req.fields['version'] = flutterVersion;
-      req.fields['osName'] = platform.operatingSystem;
-      req.fields['osVersion'] = os.name; // this actually includes version
+      req.fields['osName'] = globals.platform.operatingSystem;
+      req.fields['osVersion'] = globals.os.name; // this actually includes version
       req.fields['type'] = _kDartTypeId;
       req.fields['error_runtime_type'] = '${error.runtimeType}';
       req.fields['error_message'] = '$error';
@@ -121,17 +121,19 @@ class CrashReportSender {
       if (resp.statusCode == 200) {
         final String reportId = await http.ByteStream(resp.stream)
             .bytesToString();
-        printStatus('Crash report sent (report ID: $reportId)');
+        globals.printTrace('Crash report sent (report ID: $reportId)');
         _crashReportSent = true;
       } else {
-        printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
+        globals.printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
       }
-    } catch (sendError, sendStackTrace) {
+    // Catch all exceptions to print the message that makes clear that the
+    // crash logger crashed.
+    } catch (sendError, sendStackTrace) { // ignore: avoid_catches_without_on_clauses
       if (sendError is SocketException || sendError is HttpException) {
-        printError('Failed to send crash report due to a network error: $sendError');
+        globals.printError('Failed to send crash report due to a network error: $sendError');
       } else {
         // If the sender itself crashes, just print. We did our best.
-        printError('Crash report sender itself crashed: $sendError\n$sendStackTrace');
+        globals.printError('Crash report sender itself crashed: $sendError\n$sendStackTrace');
       }
     }
   }

@@ -1,10 +1,9 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -19,7 +18,17 @@ void main() {
     // TODO(jacobr): make these tests run with `trackWidgetCreation: true` as
     // well as the default flags.
     return TestRunner(
-      <FlutterDevice>[FlutterDevice(MockDevice(), trackWidgetCreation: false, buildMode: BuildMode.debug)],
+      <FlutterDevice>[
+        FlutterDevice(
+          MockDevice(),
+          buildInfo: const BuildInfo(
+            BuildMode.debug,
+            null,
+            trackWidgetCreation: false,
+            treeShakeIcons: false,
+          ),
+        ),
+      ],
     );
   }
 
@@ -97,6 +106,18 @@ void main() {
       await terminalHandler.processTerminalInput('?');
 
       verify(mockResidentRunner.printHelp(details: true)).called(3);
+    });
+
+    testUsingContext('k - toggles CanvasKit rendering and prints results', () async {
+      when(mockResidentRunner.supportsCanvasKit).thenReturn(true);
+      when(mockResidentRunner.toggleCanvaskit())
+        .thenAnswer((Invocation invocation) async {
+          return true;
+        });
+
+      await terminalHandler.processTerminalInput('k');
+
+      verify(mockResidentRunner.toggleCanvaskit()).called(1);
     });
 
     testUsingContext('i, I - debugToggleWidgetInspector with service protocol', () async {
@@ -249,7 +270,7 @@ void main() {
         .thenAnswer((Invocation invocation) async {
           return OperationResult(1, 'fail', fatal: true);
         });
-      expect(terminalHandler.processTerminalInput('r'), throwsA(isInstanceOf<ToolExit>()));
+      expect(terminalHandler.processTerminalInput('r'), throwsToolExit());
     });
 
     testUsingContext('r - hotReload unsupported', () async {
@@ -292,7 +313,7 @@ void main() {
         .thenAnswer((Invocation invocation) async {
           return OperationResult(1, 'fail', fatal: true);
         });
-      expect(() => terminalHandler.processTerminalInput('R'), throwsA(isInstanceOf<ToolExit>()));
+      expect(() => terminalHandler.processTerminalInput('R'), throwsToolExit());
     });
 
     testUsingContext('R - hot restart unsupported', () async {

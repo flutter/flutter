@@ -31,6 +31,11 @@
     "description": "The tooltip for the delete button of chips."
   },
 
+  "moreButtonTooltip": "More",
+  "@moreButtonTooltip": {
+    "description": "The tooltip for the more button in the text selection menu, which shows the overflowing menu items."
+  },
+
   "nextMonthTooltip": "Next month",
   "@nextMonthTooltip": {
     "description": "The tooltip for the month picker's 'next month' button."

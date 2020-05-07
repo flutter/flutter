@@ -1,13 +1,14 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart' as argslib;
 import 'package:meta/meta.dart';
+
+import 'language_subtag_registry.dart';
 
 typedef HeaderGenerator = String Function(String regenerateInstructions);
 typedef ConstructorGenerator = String Function(LocaleInfo locale);
@@ -112,12 +113,17 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   final int length;             // The number of fields. Ranges from 1-3.
   final String originalString;  // Original un-parsed locale string.
 
+  String camelCase() {
+    return originalString
+      .split('_')
+      .map<String>((String part) => part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
+      .join('');
+  }
+
   @override
   bool operator ==(Object other) {
-    if (!(other is LocaleInfo))
-      return false;
-    final LocaleInfo otherLocale = other;
-    return originalString == otherLocale.originalString;
+    return other is LocaleInfo
+        && other.originalString == originalString;
   }
 
   @override
@@ -157,7 +163,7 @@ void loadMatchingArbsIntoBundleMaps({
   /// overwrite the existing assumed data.
   final Set<LocaleInfo> assumedLocales = <LocaleInfo>{};
 
-  for (FileSystemEntity entity in directory.listSync().toList()..sort(sortFilesByPath)) {
+  for (final FileSystemEntity entity in directory.listSync().toList()..sort(sortFilesByPath)) {
     final String entityPath = entity.path;
     if (FileSystemEntity.isFileSync(entityPath) && filenamePattern.hasMatch(entityPath)) {
       final String localeString = filenamePattern.firstMatch(entityPath)[1];
@@ -167,13 +173,13 @@ void loadMatchingArbsIntoBundleMaps({
       void populateResources(LocaleInfo locale, File file) {
         final Map<String, String> resources = localeToResources[locale];
         final Map<String, dynamic> attributes = localeToResourceAttributes[locale];
-        final Map<String, dynamic> bundle = json.decode(file.readAsStringSync());
-        for (String key in bundle.keys) {
+        final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+        for (final String key in bundle.keys) {
           // The ARB file resource "attributes" for foo are called @foo.
           if (key.startsWith('@'))
             attributes[key.substring(1)] = bundle[key];
           else
-            resources[key] = bundle[key];
+            resources[key] = bundle[key] as String;
         }
       }
       // Only pre-assume scriptCode if there is a country or script code to assume off of.
@@ -222,13 +228,6 @@ void checkCwdIsRepoRoot(String commandName) {
   }
 }
 
-String camelCase(LocaleInfo locale) {
-  return locale.originalString
-    .split('_')
-    .map<String>((String part) => part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
-    .join('');
-}
-
 GeneratorOptions parseArgs(List<String> rawArgs) {
   final argslib.ArgParser argParser = argslib.ArgParser()
     ..addFlag(
@@ -247,9 +246,9 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
       defaultsTo: false,
     );
   final argslib.ArgResults args = argParser.parse(rawArgs);
-  final bool writeToFile = args['overwrite'];
-  final bool materialOnly = args['material'];
-  final bool cupertinoOnly = args['cupertino'];
+  final bool writeToFile = args['overwrite'] as bool;
+  final bool materialOnly = args['material'] as bool;
+  final bool cupertinoOnly = args['cupertino'] as bool;
 
   return GeneratorOptions(writeToFile: writeToFile, materialOnly: materialOnly, cupertinoOnly: cupertinoOnly);
 }
@@ -266,13 +265,11 @@ class GeneratorOptions {
   final bool cupertinoOnly;
 }
 
-const String registry = 'https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry';
-
 // See also //master/tools/gen_locale.dart in the engine repo.
 Map<String, List<String>> _parseSection(String section) {
   final Map<String, List<String>> result = <String, List<String>>{};
   List<String> lastHeading;
-  for (String line in section.split('\n')) {
+  for (final String line in section.split('\n')) {
     if (line == '')
       continue;
     if (line.startsWith('  ')) {
@@ -299,14 +296,10 @@ const String kParentheticalPrefix = ' (';
 /// Prepares the data for the [describeLocale] method below.
 ///
 /// The data is obtained from the official IANA registry.
-Future<void> precacheLanguageAndRegionTags() async {
-  final HttpClient client = HttpClient();
-  final HttpClientRequest request = await client.getUrl(Uri.parse(registry));
-  final HttpClientResponse response = await request.close();
-  final String body = (await response.cast<List<int>>().transform<String>(utf8.decoder).toList()).join('');
-  client.close(force: true);
-  final List<Map<String, List<String>>> sections = body.split('%%').skip(1).map<Map<String, List<String>>>(_parseSection).toList();
-  for (Map<String, List<String>> section in sections) {
+void precacheLanguageAndRegionTags() {
+  final List<Map<String, List<String>>> sections =
+      languageSubtagRegistry.split('%%').skip(1).map<Map<String, List<String>>>(_parseSection).toList();
+  for (final Map<String, List<String>> section in sections) {
     assert(section.containsKey('Type'), section.toString());
     final String type = section['Type'].single;
     if (type == 'language' || type == 'region' || type == 'script') {
@@ -341,7 +334,7 @@ String describeLocale(String tag) {
   assert(subtags.isNotEmpty);
   assert(_languages.containsKey(subtags[0]));
   final String language = _languages[subtags[0]];
-  String output = '$language';
+  String output = language;
   String region;
   String script;
   if (subtags.length == 2) {
@@ -366,53 +359,83 @@ String generateClassDeclaration(
   String classNamePrefix,
   String superClass,
 ) {
-  final String camelCaseName = camelCase(locale);
+  final String camelCaseName = locale.camelCase();
   return '''
 
 /// The translations for ${describeLocale(locale.originalString)} (`${locale.originalString}`).
 class $classNamePrefix$camelCaseName extends $superClass {''';
 }
 
-/// Return `s` as a Dart-parseable raw string in single or double quotes.
-///
-/// Double quotes are expanded:
+/// Return the input string as a Dart-parseable string.
 ///
 /// ```
-/// foo => r'foo'
-/// foo "bar" => r'foo "bar"'
-/// foo 'bar' => r'foo ' "'" r'bar' "'"
+/// foo => 'foo'
+/// foo "bar" => 'foo "bar"'
+/// foo 'bar' => "foo 'bar'"
+/// foo 'bar' "baz" => '''foo 'bar' "baz"'''
 /// ```
-String generateString(String s) {
-  if (!s.contains("'"))
-    return "r'$s'";
+///
+/// This function is used by tools that take in a JSON-formatted file to
+/// generate Dart code. For this reason, characters with special meaning
+/// in JSON files. For example, the backspace character (\b) have to be
+/// properly escaped by this function so that the generated Dart code
+/// correctly represents this character:
+/// ```
+/// foo\bar => 'foo\\bar'
+/// foo\nbar => 'foo\\nbar'
+/// foo\\nbar => 'foo\\\\nbar'
+/// foo\\bar => 'foo\\\\bar'
+/// foo\ bar => 'foo\\ bar'
+/// ```
+///
+/// When [shouldEscapeDollar] is set to true, the '$' characters in the
+/// input will be replaced by '$' in the returned string:
+/// ```
+/// foo$bar = 'foo\$bar'
+/// ```
+///
+/// When [shouldEscapeDollar] is set to false, '$' will be replaced
+/// by '\$' in the returned string:
+/// ```
+/// foo$bar => 'foo\\\$bar'
+/// ```
+///
+/// [shouldEscapeDollar] is true by default.
+String generateString(String value, { bool escapeDollar = true }) {
+  assert(escapeDollar != null);
 
-  final StringBuffer output = StringBuffer();
-  bool started = false; // Have we started writing a raw string.
-  for (int i = 0; i < s.length; i++) {
-    if (s[i] == "'") {
-      if (started)
-        output.write("'");
-      output.write(' "\'" ');
-      started = false;
-    } else if (!started) {
-      output.write("r'${s[i]}");
-      started = true;
-    } else {
-      output.write(s[i]);
-    }
-  }
-  if (started)
-    output.write("'");
-  return output.toString();
+  const String backslash = '__BACKSLASH__';
+  assert(
+    !value.contains(backslash),
+    'Input string cannot contain the sequence: '
+    '"__BACKSLASH__", as it is used as part of '
+    'backslash character processing.'
+  );
+  value = value.replaceAll('\\', backslash);
+
+  if (escapeDollar)
+    value = value.replaceAll('\$', '\\\$');
+
+  value = value
+    .replaceAll("'", "\\'")
+    .replaceAll('"', '\\"')
+    .replaceAll('\n', '\\n')
+    .replaceAll('\f', '\\f')
+    .replaceAll('\t', '\\t')
+    .replaceAll('\r', '\\r')
+    .replaceAll('\b', '\\b')
+    .replaceAll(backslash, '\\\\');
+
+  return "'$value'";
 }
 
 /// Only used to generate localization strings for the Kannada locale ('kn') because
 /// some of the localized strings contain characters that can crash Emacs on Linux.
 /// See packages/flutter_localizations/lib/src/l10n/README for more information.
-String generateEncodedString(String s) {
-  if (s.runes.every((int code) => code <= 0xFF))
-    return generateString(s);
+String generateEncodedString(String locale, String value) {
+  if (locale != 'kn' || value.runes.every((int code) => code <= 0xFF))
+    return generateString(value);
 
-  final String unicodeEscapes = s.runes.map((int code) => '\\u{${code.toRadixString(16)}}').join();
+  final String unicodeEscapes = value.runes.map((int code) => '\\u{${code.toRadixString(16)}}').join();
   return "'$unicodeEscapes'";
 }

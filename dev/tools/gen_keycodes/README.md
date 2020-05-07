@@ -9,9 +9,9 @@ It then generates `keyboard_key.dart` (containing the `LogicalKeyboardKey` and
 `PhysicalKeyboardKey` classes), and `keyboard_maps.dart`, containing
 platform-specific immutable maps for translating platform keycodes and
 information into the pre-defined key values in the `LogicalKeyboardKey` and
-`PhysicalKeyboardKey` classes. 
+`PhysicalKeyboardKey` classes.
 
-The `data` subdirectory contains both some local data files, and the templates 
+The `data` subdirectory contains both some local data files, and the templates
 used to generate the source files.
 
  - `data/key_data.json`: contains the merged data from all the other sources.
@@ -30,9 +30,9 @@ used to generate the source files.
  - `data/synonyms.json`: contains a mapping between pseudo-keys that represent
    other keys, and the sets of keys they represent. For example, this contains
    the "shift" key that represents either a "shiftLeft" or "shiftRight" key.
- 
+
  ## Running the tool
- 
+
 To run the `gen_keycodes` tool using the checked in `key_data.json` file, run
 it like so:
 
@@ -106,9 +106,9 @@ define. It has values in the following ranges.
     a unique prefix in the range 0x2-0xFE. If multiple systems define keys with
     the same usage (not the same number), then the value with the lowest prefix
     is used as the defining code.
- 
+
     Prefixes will be:
-    
+
     |Code|Platform|
     |----|--------|
     |0x02| Android|
@@ -139,7 +139,7 @@ define. It has values in the following ranges.
 
   - **0x200 0000 0000 - 0x2FF FFFF FFFF**: For pseudo-keys which represent
     combinations of other keys, and conceptual keys which don't have a physical
-    representation. This is where things like key synonyms are defined (e.g. 
+    representation. This is where things like key synonyms are defined (e.g.
     "shiftLeft" is a synonym for "shift": the "shift" key is a pseudo-key
     representing either the left or right shift key).
 

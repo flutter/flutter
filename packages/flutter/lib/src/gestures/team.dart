@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -34,7 +34,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
     assert(_winner != null || _members.isNotEmpty);
     _close();
     _winner ??= _owner.captain ?? _members[0];
-    for (GestureArenaMember member in _members) {
+    for (final GestureArenaMember member in _members) {
       if (member != _winner)
         member.rejectGesture(pointer);
     }
@@ -45,7 +45,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
   void rejectGesture(int pointer) {
     assert(_pointer == pointer);
     _close();
-    for (GestureArenaMember member in _members)
+    for (final GestureArenaMember member in _members)
       member.rejectGesture(pointer);
   }
 
@@ -112,7 +112,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
 ///
 /// [AndroidView] uses a team with a captain to decide which gestures are
 /// forwarded to the native view. For example if we want to forward taps and
-/// vertical scrolls to a native Android view, [TapGestureRecognizers] and
+/// vertical scrolls to a native Android view, [TapGestureRecognizer]s and
 /// [VerticalDragGestureRecognizer] are added to a team with a captain(the captain is set to be a
 /// gesture recognizer that never explicitly claims the gesture).
 /// The captain allows [AndroidView] to know when any gestures in the team has been

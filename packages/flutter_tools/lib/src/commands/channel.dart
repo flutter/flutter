@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,7 +7,7 @@ import 'dart:async';
 import '../base/common.dart';
 import '../base/process.dart';
 import '../cache.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
@@ -42,10 +42,10 @@ class ChannelCommand extends FlutterCommand {
           showAll: boolArg('all'),
           verbose: globalResults['verbose'] as bool,
         );
-        return null;
+        return FlutterCommandResult.success();
       case 1:
         await _switchChannel(argResults.rest[0]);
-        return null;
+        return FlutterCommandResult.success();
       default:
         throw ToolExit('Too many arguments.\n$usage');
     }
@@ -53,37 +53,19 @@ class ChannelCommand extends FlutterCommand {
 
   Future<void> _listChannels({ bool showAll, bool verbose }) async {
     // Beware: currentBranch could contain PII. See getBranchName().
-    final String currentChannel = FlutterVersion.instance.channel;
-    final String currentBranch = FlutterVersion.instance.getBranchName();
-    final Set<String> seenChannels = <String>{};
+    final String currentChannel = globals.flutterVersion.channel;
+    final String currentBranch = globals.flutterVersion.getBranchName();
+    final Set<String> seenUnofficialChannels = <String>{};
     final List<String> rawOutput = <String>[];
 
     showAll = showAll || currentChannel != currentBranch;
 
-    printStatus('Flutter channels:');
+    globals.printStatus('Flutter channels:');
     final int result = await processUtils.stream(
       <String>['git', 'branch', '-r'],
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) {
-        if (verbose) {
-          rawOutput.add(line);
-        }
-        final List<String> split = line.split('/');
-        if (split.length < 2) {
-          return null;
-        }
-        final String branchName = split[1];
-        if (seenChannels.contains(branchName)) {
-          return null;
-        }
-        seenChannels.add(branchName);
-        if (branchName == currentBranch) {
-          return '* $branchName';
-        }
-        if (!branchName.startsWith('HEAD ') &&
-            (showAll || FlutterVersion.officialChannels.contains(branchName))) {
-          return '  $branchName';
-        }
+        rawOutput.add(line);
         return null;
       },
     );
@@ -91,24 +73,67 @@ class ChannelCommand extends FlutterCommand {
       final String details = verbose ? '\n${rawOutput.join('\n')}' : '';
       throwToolExit('List channels failed: $result$details', exitCode: result);
     }
+
+    final List<String> officialChannels = FlutterVersion.officialChannels.toList();
+    final List<bool> availableChannels = List<bool>.filled(officialChannels.length, false);
+
+    for (final String line in rawOutput) {
+      final List<String> split = line.split('/');
+      final String branch = split[1];
+      if (split.length > 1) {
+        final int index = officialChannels.indexOf(branch);
+
+        if (index != -1) { // Mark all available channels official channels from output
+          availableChannels[index] = true;
+        } else if (showAll && !seenUnofficialChannels.contains(branch)) {
+        // add other branches to seenUnofficialChannels if --all flag is given (to print later)
+          seenUnofficialChannels.add(branch);
+        }
+      }
+    }
+
+    // print all available official channels in sorted manner
+    for (int i = 0; i < officialChannels.length; i++) {
+      // only print non-missing channels
+      if (availableChannels[i]) {
+        String currentIndicator = ' ';
+        if (officialChannels[i] == currentChannel){
+          currentIndicator = '*';
+        }
+        globals.printStatus('$currentIndicator ${officialChannels[i]}');
+      }
+    }
+
+    // print all remaining channels if showAll is true
+    if (showAll) {
+      for (final String branch in seenUnofficialChannels) {
+        if (currentBranch == branch) {
+          globals.printStatus('* $branch');
+        } else if (!branch.startsWith('HEAD ')) {
+          globals.printStatus('  $branch');
+        }
+      }
+    }
   }
 
-  Future<void> _switchChannel(String branchName) {
-    printStatus("Switching to flutter channel '$branchName'...");
+  Future<void> _switchChannel(String branchName) async {
+    globals.printStatus("Switching to flutter channel '$branchName'...");
     if (FlutterVersion.obsoleteBranches.containsKey(branchName)) {
       final String alternative = FlutterVersion.obsoleteBranches[branchName];
-      printStatus("This channel is obsolete. Consider switching to the '$alternative' channel instead.");
+      globals.printStatus("This channel is obsolete. Consider switching to the '$alternative' channel instead.");
     } else if (!FlutterVersion.officialChannels.contains(branchName)) {
-      printStatus('This is not an official channel. For a list of available channels, try "flutter channel".');
+      globals.printStatus('This is not an official channel. For a list of available channels, try "flutter channel".');
     }
-    return _checkout(branchName);
+    await _checkout(branchName);
+    globals.printStatus("Successfully switched to flutter channel '$branchName'.");
+    globals.printStatus("To ensure that you're on the latest build from this channel, run 'flutter upgrade'");
   }
 
   static Future<void> upgradeChannel() async {
-    final String channel = FlutterVersion.instance.channel;
+    final String channel = globals.flutterVersion.channel;
     if (FlutterVersion.obsoleteBranches.containsKey(channel)) {
       final String alternative = FlutterVersion.obsoleteBranches[channel];
-      printStatus("Transitioning from '$channel' to '$alternative'...");
+      globals.printStatus("Transitioning from '$channel' to '$alternative'...");
       return _checkout(alternative);
     }
   }

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,7 +23,7 @@ class TestTree extends Object with DiagnosticableTreeMixin {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[
-    for (TestTree child in children)
+    for (final TestTree child in children)
       child.toDiagnosticsNode(
         name: 'child ${child.name}',
         style: child.style,
@@ -49,7 +49,7 @@ enum ExampleEnum {
 /// Encode and decode to JSON to make sure all objects in the JSON for the
 /// [DiagnosticsNode] are valid JSON.
 Map<String, Object> simulateJsonSerialization(DiagnosticsNode node) {
-  return json.decode(json.encode(node.toJsonMap(const DiagnosticsSerializationDelegate())));
+  return json.decode(json.encode(node.toJsonMap(const DiagnosticsSerializationDelegate()))) as Map<String, Object>;
 }
 
 void validateNodeJsonSerialization(DiagnosticsNode node) {
@@ -138,7 +138,7 @@ void validateIterableFlagsPropertyJsonSerialization(FlagsSummary<Object> propert
 void validateIterablePropertyJsonSerialization(IterableProperty<Object> property) {
   final Map<String, Object> json = simulateJsonSerialization(property);
   if (property.value != null) {
-    final List<Object> valuesJson = json['values'];
+    final List<Object> valuesJson = json['values'] as List<Object>;
     final List<String> expectedValues = property.value.map<String>((Object value) => value.toString()).toList();
     expect(listEquals(valuesJson, expectedValues), isTrue);
   } else {
@@ -802,6 +802,30 @@ void main() {
     );
   });
 
+  test('toString test', () {
+    final TestTree tree = TestTree(
+      properties: <DiagnosticsNode>[
+        StringProperty('stringProperty1', 'value1', quoted: false),
+        DoubleProperty('doubleProperty1', 42.5),
+        DoubleProperty('roundedProperty', 1.0 / 3.0),
+        StringProperty('DO_NOT_SHOW', 'DO_NOT_SHOW', level: DiagnosticLevel.hidden, quoted: false),
+        StringProperty('DEBUG_ONLY', 'DEBUG_ONLY', level: DiagnosticLevel.debug, quoted: false),
+      ],
+      // child to verify that children are not included in the toString.
+      children: <TestTree>[TestTree(name: 'node A')],
+    );
+
+    expect(
+      tree.toString(),
+      equalsIgnoringHashCodes('TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3)'),
+    );
+
+    expect(
+      tree.toString(minLevel: DiagnosticLevel.debug),
+      equalsIgnoringHashCodes('TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, DEBUG_ONLY: DEBUG_ONLY)'),
+    );
+  });
+
   test('transition test', () {
     // Test multiple styles integrating together in the same tree due to using
     // transition to go between styles that would otherwise be incompatible.
@@ -1407,7 +1431,7 @@ void main() {
 
   test('object property test', () {
     const Rect rect = Rect.fromLTRB(0.0, 0.0, 20.0, 20.0);
-    final DiagnosticsNode simple = DiagnosticsProperty<Rect>(
+    final DiagnosticsProperty<Rect> simple = DiagnosticsProperty<Rect>(
       'name',
       rect,
     );
@@ -1416,7 +1440,7 @@ void main() {
     expect(simple.toString(), equals('name: Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)'));
     validatePropertyJsonSerialization(simple);
 
-    final DiagnosticsNode withDescription = DiagnosticsProperty<Rect>(
+    final DiagnosticsProperty<Rect> withDescription = DiagnosticsProperty<Rect>(
       'name',
       rect,
       description: 'small rect',
@@ -1445,7 +1469,7 @@ void main() {
     expect(hideNullProperty.toString(), equals('name: null'));
     validatePropertyJsonSerialization(hideNullProperty);
 
-    final DiagnosticsNode nullDescription = DiagnosticsProperty<Object>(
+    final DiagnosticsProperty<Object> nullDescription = DiagnosticsProperty<Object>(
       'name',
       null,
       ifNull: 'missing',
@@ -1482,7 +1506,7 @@ void main() {
 
   test('lazy object property test', () {
     const Rect rect = Rect.fromLTRB(0.0, 0.0, 20.0, 20.0);
-    final DiagnosticsNode simple = DiagnosticsProperty<Rect>.lazy(
+    final DiagnosticsProperty<Rect> simple = DiagnosticsProperty<Rect>.lazy(
       'name',
       () => rect,
       description: 'small rect',
@@ -1502,7 +1526,7 @@ void main() {
     expect(nullProperty.toString(), equals('name: missing'));
     validatePropertyJsonSerialization(nullProperty);
 
-    final DiagnosticsNode hideNullProperty = DiagnosticsProperty<Object>.lazy(
+    final DiagnosticsProperty<Object> hideNullProperty = DiagnosticsProperty<Object>.lazy(
       'name',
       () => null,
       description: 'missing',
@@ -1513,7 +1537,7 @@ void main() {
     expect(hideNullProperty.toString(), equals('name: missing'));
     validatePropertyJsonSerialization(hideNullProperty);
 
-    final DiagnosticsNode hideName = DiagnosticsProperty<Rect>.lazy(
+    final DiagnosticsProperty<Rect> hideName = DiagnosticsProperty<Rect>.lazy(
       'name',
       () => rect,
       description: 'small rect',
@@ -1849,18 +1873,18 @@ void main() {
 
   test('Stack trace test', () {
     final StackTrace stack = StackTrace.fromString(
-      '#0      someMethod()  file:///diagnostics_test.dart:42:19\n'
-      '#1      someMethod2()  file:///diagnostics_test.dart:12:3\n'
-      '#2      someMethod3()  file:///foo.dart:4:1\n'
+      '#0      someMethod  (file:///diagnostics_test.dart:42:19)\n'
+      '#1      someMethod2  (file:///diagnostics_test.dart:12:3)\n'
+      '#2      someMethod3  (file:///foo.dart:4:1)\n'
     );
 
     expect(
       DiagnosticsStackTrace('Stack trace', stack).toStringDeep(),
       equalsIgnoringHashCodes(
         'Stack trace:\n'
-        '#0      someMethod()  file:///diagnostics_test.dart:42:19\n'
-        '#1      someMethod2()  file:///diagnostics_test.dart:12:3\n'
-        '#2      someMethod3()  file:///foo.dart:4:1\n'
+        '#0      someMethod  (file:///diagnostics_test.dart:42:19)\n'
+        '#1      someMethod2  (file:///diagnostics_test.dart:12:3)\n'
+        '#2      someMethod3  (file:///foo.dart:4:1)\n'
       ),
     );
 
@@ -1868,9 +1892,9 @@ void main() {
       DiagnosticsStackTrace('-- callback 2 --', stack, showSeparator: false).toStringDeep(),
       equalsIgnoringHashCodes(
         '-- callback 2 --\n'
-        '#0      someMethod()  file:///diagnostics_test.dart:42:19\n'
-        '#1      someMethod2()  file:///diagnostics_test.dart:12:3\n'
-        '#2      someMethod3()  file:///foo.dart:4:1\n'
+        '#0      someMethod  (file:///diagnostics_test.dart:42:19)\n'
+        '#1      someMethod2  (file:///diagnostics_test.dart:12:3)\n'
+        '#2      someMethod3  (file:///foo.dart:4:1)\n'
       ),
     );
   });
@@ -1888,7 +1912,7 @@ void main() {
     expect(messageProperty.name, equals('diagnostics'));
     expect(messageProperty.value, isNull);
     expect(messageProperty.showName, isTrue);
-    validatePropertyJsonSerialization(messageProperty);
+    validatePropertyJsonSerialization(messageProperty as MessageProperty);
   });
 
   test('error message style wrap test', () {
@@ -1914,9 +1938,11 @@ void main() {
             '--- example property at max length --',
             style: propertyStyle,
           ),
-          DiagnosticsProperty<void>(null,
-              'Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap.',
-              allowWrap: false),
+          DiagnosticsProperty<String>(
+            null,
+            'Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap.',
+            allowWrap: false,
+          ),
           DiagnosticsNode.message(
             '--- example property at max length --',
             style: propertyStyle,

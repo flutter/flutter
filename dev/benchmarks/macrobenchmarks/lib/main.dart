@@ -1,36 +1,50 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:macrobenchmarks/src/color_filter_and_fade.dart';
+import 'package:macrobenchmarks/src/large_images.dart';
 import 'package:macrobenchmarks/src/picture_cache.dart';
 
 import 'common.dart';
+import 'src/animated_placeholder.dart';
 import 'src/backdrop_filter.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
+import 'src/post_backdrop_filter.dart';
 import 'src/simple_animation.dart';
+import 'src/text.dart';
 
-const String kMacrobenchmarks ='Macrobenchmarks';
+const String kMacrobenchmarks = 'Macrobenchmarks';
 
-void main() => runApp(MacrobenchmarksApp());
+void main() => runApp(const MacrobenchmarksApp());
 
 class MacrobenchmarksApp extends StatelessWidget {
+  const MacrobenchmarksApp({this.initialRoute = '/'});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: kMacrobenchmarks,
-      initialRoute: '/',
+      initialRoute: initialRoute,
       routes: <String, WidgetBuilder>{
         '/': (BuildContext context) => HomePage(),
         kCullOpacityRouteName: (BuildContext context) => CullOpacityPage(),
         kCubicBezierRouteName: (BuildContext context) => CubicBezierPage(),
         kBackdropFilterRouteName: (BuildContext context) => BackdropFilterPage(),
+        kPostBackdropFilterRouteName: (BuildContext context) => PostBackdropFilterPage(),
         kSimpleAnimationRouteName: (BuildContext conttext) => SimpleAnimationPage(),
-        kPictureCacheRouteName: (BuildContext conttext) => PictureCachePage(),
+        kPictureCacheRouteName: (BuildContext context) => PictureCachePage(),
+        kLargeImagesRouteName: (BuildContext context) => LargeImagesPage(),
+        kTextRouteName: (BuildContext context) => TextPage(),
+        kAnimatedPlaceholderRouteName: (BuildContext context) => AnimatedPlaceholderPage(),
+        kColorFilterAndFadeRouteName: (BuildContext context) => ColorFilterAndFadePage(),
       },
     );
   }
+
+  final String initialRoute;
 }
 
 class HomePage extends StatelessWidget {
@@ -62,6 +76,13 @@ class HomePage extends StatelessWidget {
             },
           ),
           RaisedButton(
+            key: const Key(kPostBackdropFilterRouteName),
+            child: const Text('Post Backdrop Filter'),
+            onPressed: () {
+              Navigator.pushNamed(context, kPostBackdropFilterRouteName);
+            },
+          ),
+          RaisedButton(
             key: const Key(kSimpleAnimationRouteName),
             child: const Text('Simple Animation'),
             onPressed: () {
@@ -73,6 +94,34 @@ class HomePage extends StatelessWidget {
             child: const Text('Picture Cache'),
             onPressed: () {
               Navigator.pushNamed(context, kPictureCacheRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kLargeImagesRouteName),
+            child: const Text('Large Images'),
+            onPressed: () {
+              Navigator.pushNamed(context, kLargeImagesRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kTextRouteName),
+            child: const Text('Text'),
+            onPressed: () {
+              Navigator.pushNamed(context, kTextRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kAnimatedPlaceholderRouteName),
+            child: const Text('Animated Placeholder'),
+            onPressed: () {
+              Navigator.pushNamed(context, kAnimatedPlaceholderRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kColorFilterAndFadeRouteName),
+            child: const Text('Color Filter and Fade'),
+            onPressed: () {
+              Navigator.pushNamed(context, kColorFilterAndFadeRouteName);
             },
           ),
         ],

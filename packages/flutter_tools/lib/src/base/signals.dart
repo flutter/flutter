@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -114,10 +114,10 @@ class _DefaultSignals implements Signals {
   }
 
   Future<void> _handleSignal(ProcessSignal s) async {
-    for (SignalHandler handler in _handlersList[s]) {
+    for (final SignalHandler handler in _handlersList[s]) {
       try {
         await asyncGuard<void>(() async => handler(s));
-      } catch (e) {
+      } on Exception catch (e) {
         if (_errorStreamController.hasListener) {
           _errorStreamController.add(e);
         }

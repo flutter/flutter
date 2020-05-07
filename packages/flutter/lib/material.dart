@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -46,7 +46,6 @@ export 'src/material/colors.dart';
 export 'src/material/constants.dart';
 export 'src/material/data_table.dart';
 export 'src/material/data_table_source.dart';
-export 'src/material/date_picker.dart';
 export 'src/material/debug.dart';
 export 'src/material/dialog.dart';
 export 'src/material/dialog_theme.dart';
@@ -82,10 +81,13 @@ export 'src/material/material_button.dart';
 export 'src/material/material_localizations.dart';
 export 'src/material/material_state.dart';
 export 'src/material/mergeable_material.dart';
+export 'src/material/navigation_rail.dart';
+export 'src/material/navigation_rail_theme.dart';
 export 'src/material/outline_button.dart';
 export 'src/material/page.dart';
 export 'src/material/page_transitions_theme.dart';
 export 'src/material/paginated_data_table.dart';
+export 'src/material/pickers/pickers.dart';
 export 'src/material/popup_menu.dart';
 export 'src/material/popup_menu_theme.dart';
 export 'src/material/progress_indicator.dart';

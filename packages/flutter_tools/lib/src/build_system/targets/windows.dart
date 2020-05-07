@@ -1,11 +1,10 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
-import '../../globals.dart';
 import '../build_system.dart';
 
 /// Copies the Windows desktop embedding files to the copy directory.
@@ -40,21 +39,24 @@ class UnpackWindows extends Target {
   @override
   Future<void> build(Environment environment) async {
     // This path needs to match the prefix in the rule below.
-    final String basePath = artifacts.getArtifactPath(Artifact.windowsDesktopPath);
-    for (File input in fs.directory(basePath)
+    final String basePath = environment.artifacts
+      .getArtifactPath(Artifact.windowsDesktopPath);
+    for (final File input in environment.fileSystem.directory(basePath)
         .listSync(recursive: true)
         .whereType<File>()) {
-      final String outputPath = fs.path.join(
+      final String outputPath = environment.fileSystem.path.join(
         environment.projectDir.path,
         'windows',
         'flutter',
-        fs.path.relative(input.path, from: basePath),
+        environment.fileSystem.path
+          .relative(input.path, from: basePath),
       );
-      final File destinationFile = fs.file(outputPath);
+      final File destinationFile = environment.fileSystem.file(outputPath);
       if (!destinationFile.parent.existsSync()) {
         destinationFile.parent.createSync(recursive: true);
       }
-      fs.file(input).copySync(destinationFile.path);
+      environment.fileSystem
+        .file(input).copySync(destinationFile.path);
     }
   }
 }

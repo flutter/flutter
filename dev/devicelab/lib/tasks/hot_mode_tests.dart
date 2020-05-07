@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,7 +13,7 @@ import '../framework/framework.dart';
 import '../framework/utils.dart';
 
 final Directory _editedFlutterGalleryDir = dir(path.join(Directory.systemTemp.path, 'edited_flutter_gallery'));
-final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'examples/flutter_gallery'));
+final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/flutter_gallery'));
 
 TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> environment}) {
   return () async {
@@ -55,7 +55,7 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
               .listen((String line) {
-            if (line.contains('\] Reloaded ')) {
+            if (line.contains('] Reloaded ')) {
               if (hotReloadCount == 0) {
                 // Update the file and reload again.
                 final File appDartSource = file(path.join(
@@ -90,7 +90,7 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
               <Future<void>>[stdoutDone.future, stderrDone.future]);
           await process.exitCode;
 
-          twoReloadsData = json.decode(benchmarkFile.readAsStringSync());
+          twoReloadsData = json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
         }
         benchmarkFile.deleteSync();
 
@@ -108,7 +108,7 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
               .listen((String line) {
-            if (line.contains('\] Reloaded ')) {
+            if (line.contains('] Reloaded ')) {
               process.stdin.writeln('q');
             }
             print('stdout: $line');
@@ -129,7 +129,7 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
           await process.exitCode;
 
           freshRestartReloadsData =
-              json.decode(benchmarkFile.readAsStringSync());
+              json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
         }
       });
     });

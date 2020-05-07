@@ -1,8 +1,9 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
@@ -85,20 +86,26 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildFrame(TargetPlatform.iOS));
-    expect(find.byType(CupertinoSwitch), findsOneWidget);
-    expect(value, isFalse);
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      value = false;
+      await tester.pumpWidget(buildFrame(platform));
+      expect(find.byType(CupertinoSwitch), findsOneWidget);
+      expect(value, isFalse, reason: 'on ${describeEnum(platform)}');
 
-    await tester.tap(find.byType(SwitchListTile));
-    expect(value, isTrue);
+      await tester.tap(find.byType(SwitchListTile));
+      expect(value, isTrue, reason: 'on ${describeEnum(platform)}');
+    }
 
-    await tester.pumpWidget(buildFrame(TargetPlatform.android));
-    await tester.pumpAndSettle(); // Finish the theme change animation.
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+      value = false;
+      await tester.pumpWidget(buildFrame(platform));
+      await tester.pumpAndSettle(); // Finish the theme change animation.
 
-    expect(find.byType(CupertinoSwitch), findsNothing);
-    expect(value, isTrue);
-    await tester.tap(find.byType(SwitchListTile));
-    expect(value, isFalse);
+      expect(find.byType(CupertinoSwitch), findsNothing);
+      expect(value, isFalse, reason: 'on ${describeEnum(platform)}');
+      await tester.tap(find.byType(SwitchListTile));
+      expect(value, isTrue, reason: 'on ${describeEnum(platform)}');
+    }
   });
 
   testWidgets('SwitchListTile contentPadding', (WidgetTester tester) async {

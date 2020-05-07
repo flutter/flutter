@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -165,7 +165,7 @@ abstract class RawKeyEventData {
   /// event, and the keyboard side or sides that the key was on.
   Map<ModifierKey, KeyboardSide> get modifiersPressed {
     final Map<ModifierKey, KeyboardSide> result = <ModifierKey, KeyboardSide>{};
-    for (ModifierKey key in ModifierKey.values) {
+    for (final ModifierKey key in ModifierKey.values) {
       if (isModifierPressed(key)) {
         result[key] = getModifierSide(key);
       }
@@ -236,7 +236,7 @@ abstract class RawKeyEventData {
 ///  * [RawKeyboard], which uses this interface to expose key data.
 ///  * [RawKeyboardListener], a widget that listens for raw key events.
 @immutable
-abstract class RawKeyEvent extends Diagnosticable {
+abstract class RawKeyEvent with Diagnosticable {
   /// Initializes fields for subclasses, and provides a const constructor for
   /// const subclasses.
   const RawKeyEvent({
@@ -249,51 +249,51 @@ abstract class RawKeyEvent extends Diagnosticable {
   factory RawKeyEvent.fromMessage(Map<String, dynamic> message) {
     RawKeyEventData data;
 
-    final String keymap = message['keymap'];
+    final String keymap = message['keymap'] as String;
     switch (keymap) {
       case 'android':
         data = RawKeyEventDataAndroid(
-          flags: message['flags'] ?? 0,
-          codePoint: message['codePoint'] ?? 0,
-          keyCode: message['keyCode'] ?? 0,
-          plainCodePoint: message['plainCodePoint'] ?? 0,
-          scanCode: message['scanCode'] ?? 0,
-          metaState: message['metaState'] ?? 0,
-          eventSource: message['source'] ?? 0,
-          vendorId: message['vendorId'] ?? 0,
-          productId: message['productId'] ?? 0,
-          deviceId: message['deviceId'] ?? 0,
-          repeatCount: message['repeatCount'] ?? 0,
+          flags: message['flags'] as int ?? 0,
+          codePoint: message['codePoint'] as int ?? 0,
+          keyCode: message['keyCode'] as int ?? 0,
+          plainCodePoint: message['plainCodePoint'] as int ?? 0,
+          scanCode: message['scanCode'] as int ?? 0,
+          metaState: message['metaState'] as int ?? 0,
+          eventSource: message['source'] as int ?? 0,
+          vendorId: message['vendorId'] as int ?? 0,
+          productId: message['productId'] as int ?? 0,
+          deviceId: message['deviceId'] as int ?? 0,
+          repeatCount: message['repeatCount'] as int ?? 0,
         );
         break;
       case 'fuchsia':
         data = RawKeyEventDataFuchsia(
-          hidUsage: message['hidUsage'] ?? 0,
-          codePoint: message['codePoint'] ?? 0,
-          modifiers: message['modifiers'] ?? 0,
+          hidUsage: message['hidUsage'] as int ?? 0,
+          codePoint: message['codePoint'] as int ?? 0,
+          modifiers: message['modifiers'] as int ?? 0,
         );
         break;
       case 'macos':
         data = RawKeyEventDataMacOs(
-            characters: message['characters'] ?? '',
-            charactersIgnoringModifiers: message['charactersIgnoringModifiers'] ?? '',
-            keyCode: message['keyCode'] ?? 0,
-            modifiers: message['modifiers'] ?? 0);
+            characters: message['characters'] as String ?? '',
+            charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String ?? '',
+            keyCode: message['keyCode'] as int ?? 0,
+            modifiers: message['modifiers'] as int ?? 0);
         break;
       case 'linux':
         data = RawKeyEventDataLinux(
-            keyHelper: KeyHelper(message['toolkit'] ?? ''),
-            unicodeScalarValues: message['unicodeScalarValues'] ?? 0,
-            keyCode: message['keyCode'] ?? 0,
-            scanCode: message['scanCode'] ?? 0,
-            modifiers: message['modifiers'] ?? 0,
+            keyHelper: KeyHelper(message['toolkit'] as String ?? ''),
+            unicodeScalarValues: message['unicodeScalarValues'] as int ?? 0,
+            keyCode: message['keyCode'] as int ?? 0,
+            scanCode: message['scanCode'] as int ?? 0,
+            modifiers: message['modifiers'] as int ?? 0,
             isDown: message['type'] == 'keydown');
         break;
       case 'web':
         data = RawKeyEventDataWeb(
-          code: message['code'],
-          key: message['key'],
-          metaState: message['metaState'],
+          code: message['code'] as String,
+          key: message['key'] as String,
+          metaState: message['metaState'] as int,
         );
         break;
       default:
@@ -303,10 +303,10 @@ abstract class RawKeyEvent extends Diagnosticable {
         throw FlutterError('Unknown keymap for key events: $keymap');
     }
 
-    final String type = message['type'];
+    final String type = message['type'] as String;
     switch (type) {
       case 'keydown':
-        return RawKeyDownEvent(data: data, character: message['character']);
+        return RawKeyDownEvent(data: data, character: message['character'] as String);
       case 'keyup':
         return RawKeyUpEvent(data: data);
       default:
@@ -498,7 +498,7 @@ class RawKeyboard {
   }
 
   Future<dynamic> _handleKeyEvent(dynamic message) async {
-    final RawKeyEvent event = RawKeyEvent.fromMessage(message);
+    final RawKeyEvent event = RawKeyEvent.fromMessage(message as Map<String, dynamic>);
     if (event == null) {
       return;
     }
@@ -512,10 +512,13 @@ class RawKeyboard {
       return;
     }
     if (event is RawKeyDownEvent) {
-      _keysPressed.add(event.logicalKey);
+      _keysPressed[event.physicalKey] = event.logicalKey;
     }
     if (event is RawKeyUpEvent) {
-      _keysPressed.remove(event.logicalKey);
+      // Use the physical key in the key up event to find the physical key from
+      // the corresponding key down event and remove it, even if the logical
+      // keys don't match.
+      _keysPressed.remove(event.physicalKey);
     }
     // Make sure that the modifiers reflect reality, in case a modifier key was
     // pressed/released while the app didn't have focus.
@@ -523,92 +526,101 @@ class RawKeyboard {
     if (_listeners.isEmpty) {
       return;
     }
-    for (ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners)) {
+    for (final ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners)) {
       if (_listeners.contains(listener)) {
         listener(event);
       }
     }
   }
 
-  static final Map<_ModifierSidePair, Set<LogicalKeyboardKey>> _modifierKeyMap = <_ModifierSidePair, Set<LogicalKeyboardKey>>{
-    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.left): <LogicalKeyboardKey>{LogicalKeyboardKey.altLeft},
-    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.right): <LogicalKeyboardKey>{LogicalKeyboardKey.altRight},
-    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.altLeft, LogicalKeyboardKey.altRight},
-    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.any): <LogicalKeyboardKey>{LogicalKeyboardKey.altLeft},
-    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.left): <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
-    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.right): <LogicalKeyboardKey>{LogicalKeyboardKey.shiftRight},
-    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight},
-    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.any): <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
-    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.left): <LogicalKeyboardKey>{LogicalKeyboardKey.controlLeft},
-    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.right): <LogicalKeyboardKey>{LogicalKeyboardKey.controlRight},
-    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.controlRight},
-    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.any): <LogicalKeyboardKey>{LogicalKeyboardKey.controlLeft},
-    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.left): <LogicalKeyboardKey>{LogicalKeyboardKey.metaLeft},
-    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.right): <LogicalKeyboardKey>{LogicalKeyboardKey.metaRight},
-    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.metaLeft, LogicalKeyboardKey.metaRight},
-    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.any): <LogicalKeyboardKey>{LogicalKeyboardKey.metaLeft},
-    const _ModifierSidePair(ModifierKey.capsLockModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.capsLock},
-    const _ModifierSidePair(ModifierKey.numLockModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.numLock},
-    const _ModifierSidePair(ModifierKey.scrollLockModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.scrollLock},
-    const _ModifierSidePair(ModifierKey.functionModifier, KeyboardSide.all): <LogicalKeyboardKey>{LogicalKeyboardKey.fn},
+  static final Map<_ModifierSidePair, Set<PhysicalKeyboardKey>> _modifierKeyMap = <_ModifierSidePair, Set<PhysicalKeyboardKey>>{
+    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.left): <PhysicalKeyboardKey>{PhysicalKeyboardKey.altLeft},
+    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.right): <PhysicalKeyboardKey>{PhysicalKeyboardKey.altRight},
+    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.all): <PhysicalKeyboardKey>{PhysicalKeyboardKey.altLeft, PhysicalKeyboardKey.altRight},
+    const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.any): <PhysicalKeyboardKey>{PhysicalKeyboardKey.altLeft},
+    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.left): <PhysicalKeyboardKey>{PhysicalKeyboardKey.shiftLeft},
+    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.right): <PhysicalKeyboardKey>{PhysicalKeyboardKey.shiftRight},
+    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.all): <PhysicalKeyboardKey>{PhysicalKeyboardKey.shiftLeft, PhysicalKeyboardKey.shiftRight},
+    const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.any): <PhysicalKeyboardKey>{PhysicalKeyboardKey.shiftLeft},
+    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.left): <PhysicalKeyboardKey>{PhysicalKeyboardKey.controlLeft},
+    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.right): <PhysicalKeyboardKey>{PhysicalKeyboardKey.controlRight},
+    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.all): <PhysicalKeyboardKey>{PhysicalKeyboardKey.controlLeft, PhysicalKeyboardKey.controlRight},
+    const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.any): <PhysicalKeyboardKey>{PhysicalKeyboardKey.controlLeft},
+    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.left): <PhysicalKeyboardKey>{PhysicalKeyboardKey.metaLeft},
+    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.right): <PhysicalKeyboardKey>{PhysicalKeyboardKey.metaRight},
+    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.all): <PhysicalKeyboardKey>{PhysicalKeyboardKey.metaLeft, PhysicalKeyboardKey.metaRight},
+    const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.any): <PhysicalKeyboardKey>{PhysicalKeyboardKey.metaLeft},
+    const _ModifierSidePair(ModifierKey.capsLockModifier, KeyboardSide.all): <PhysicalKeyboardKey>{PhysicalKeyboardKey.capsLock},
+    const _ModifierSidePair(ModifierKey.numLockModifier, KeyboardSide.all): <PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock},
+    const _ModifierSidePair(ModifierKey.scrollLockModifier, KeyboardSide.all): <PhysicalKeyboardKey>{PhysicalKeyboardKey.scrollLock},
+    const _ModifierSidePair(ModifierKey.functionModifier, KeyboardSide.all): <PhysicalKeyboardKey>{PhysicalKeyboardKey.fn},
     // The symbolModifier doesn't have a key representation on any of the
     // platforms, so don't map it here.
   };
 
-  // The list of all modifier keys that are represented in modifier key bit
+  // The map of all modifier keys except Fn, since that is treated differently
+  // on some platforms.
+  static final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _allModifiersExceptFn = <PhysicalKeyboardKey, LogicalKeyboardKey>{
+    PhysicalKeyboardKey.altLeft: LogicalKeyboardKey.altLeft,
+    PhysicalKeyboardKey.altRight: LogicalKeyboardKey.altRight,
+    PhysicalKeyboardKey.shiftLeft: LogicalKeyboardKey.shiftLeft,
+    PhysicalKeyboardKey.shiftRight: LogicalKeyboardKey.shiftRight,
+    PhysicalKeyboardKey.controlLeft: LogicalKeyboardKey.controlLeft,
+    PhysicalKeyboardKey.controlRight: LogicalKeyboardKey.controlRight,
+    PhysicalKeyboardKey.metaLeft: LogicalKeyboardKey.metaLeft,
+    PhysicalKeyboardKey.metaRight: LogicalKeyboardKey.metaRight,
+    PhysicalKeyboardKey.capsLock: LogicalKeyboardKey.capsLock,
+    PhysicalKeyboardKey.numLock: LogicalKeyboardKey.numLock,
+    PhysicalKeyboardKey.scrollLock: LogicalKeyboardKey.scrollLock,
+  };
+
+  // The map of all modifier keys that are represented in modifier key bit
   // masks on all platforms, so that they can be cleared out of pressedKeys when
   // synchronizing.
-  static final Set<LogicalKeyboardKey> _allModifiers = <LogicalKeyboardKey>{
-    LogicalKeyboardKey.altLeft,
-    LogicalKeyboardKey.altRight,
-    LogicalKeyboardKey.shiftLeft,
-    LogicalKeyboardKey.shiftRight,
-    LogicalKeyboardKey.controlLeft,
-    LogicalKeyboardKey.controlRight,
-    LogicalKeyboardKey.metaLeft,
-    LogicalKeyboardKey.metaRight,
-    LogicalKeyboardKey.capsLock,
-    LogicalKeyboardKey.numLock,
-    LogicalKeyboardKey.scrollLock,
+  static final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _allModifiers = <PhysicalKeyboardKey, LogicalKeyboardKey>{
+    PhysicalKeyboardKey.fn: LogicalKeyboardKey.fn,
+    ..._allModifiersExceptFn,
   };
 
   void _synchronizeModifiers(RawKeyEvent event) {
-    final Map<ModifierKey, KeyboardSide> modifiersPressed = event.data.modifiersPressed;
-    final Set<LogicalKeyboardKey> modifierKeys = <LogicalKeyboardKey>{};
-    for (ModifierKey key in modifiersPressed.keys) {
-      final Set<LogicalKeyboardKey> mappedKeys = _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
-      assert(mappedKeys != null,
-        'Platform key support for ${Platform.operatingSystem} is '
-        'producing unsupported modifier combinations.');
-      modifierKeys.addAll(mappedKeys);
-    }
     // Don't send any key events for these changes, since there *should* be
     // separate events for each modifier key down/up that occurs while the app
     // has focus. This is just to synchronize the modifier keys when they are
     // pressed/released while the app doesn't have focus, to make sure that
     // _keysPressed reflects reality at all times.
-    _keysPressed.removeAll(_allModifiers);
+
+    final Map<ModifierKey, KeyboardSide> modifiersPressed = event.data.modifiersPressed;
+    final Map<PhysicalKeyboardKey, LogicalKeyboardKey> modifierKeys = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
+    for (final ModifierKey key in modifiersPressed.keys) {
+      final Set<PhysicalKeyboardKey> mappedKeys = _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
+      assert(mappedKeys != null,
+        'Platform key support for ${Platform.operatingSystem} is '
+        'producing unsupported modifier combinations.');
+      for (final PhysicalKeyboardKey physicalModifier in mappedKeys) {
+        modifierKeys[physicalModifier] = _allModifiers[physicalModifier];
+      }
+    }
+    _allModifiersExceptFn.keys.forEach(_keysPressed.remove);
     if (event.data is! RawKeyEventDataFuchsia && event.data is! RawKeyEventDataMacOs) {
       // On Fuchsia and macOS, the Fn key is not considered a modifier key.
-      _keysPressed.remove(LogicalKeyboardKey.fn);
+      _keysPressed.remove(PhysicalKeyboardKey.fn);
     }
     _keysPressed.addAll(modifierKeys);
   }
 
-  final Set<LogicalKeyboardKey> _keysPressed = <LogicalKeyboardKey>{};
+  final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _keysPressed = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
 
   /// Returns the set of keys currently pressed.
-  Set<LogicalKeyboardKey> get keysPressed {
-    return _keysPressed.toSet();
-  }
+  Set<LogicalKeyboardKey> get keysPressed => _keysPressed.values.toSet();
+
+  /// Returns the set of physical keys currently pressed.
+  Set<PhysicalKeyboardKey> get physicalKeysPressed => _keysPressed.keys.toSet();
 
   /// Clears the list of keys returned from [keysPressed].
   ///
   /// This is used by the testing framework to make sure tests are hermetic.
   @visibleForTesting
-  void clearKeysPressed() {
-    _keysPressed.clear();
-  }
+  void clearKeysPressed() => _keysPressed.clear();
 }
 
 class _ModifierSidePair extends Object {
@@ -618,10 +630,12 @@ class _ModifierSidePair extends Object {
   final KeyboardSide side;
 
   @override
-  bool operator ==(dynamic other) {
-    return runtimeType == other.runtimeType
-        && modifier == other.modifier
-        && side == other.side;
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _ModifierSidePair
+        && other.modifier == modifier
+        && other.side == side;
   }
 
   @override

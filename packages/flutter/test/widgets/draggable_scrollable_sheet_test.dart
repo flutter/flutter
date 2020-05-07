@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -82,7 +82,7 @@ void main() {
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0.0, 325.0, 800.0, 600.0));
   });
 
-  for (TargetPlatform platform in TargetPlatform.values) {
+  for (final TargetPlatform platform in TargetPlatform.values) {
     group('$platform Scroll Physics', () {
       debugDefaultTargetPlatformOverride = platform;
 
@@ -105,7 +105,7 @@ void main() {
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsOneWidget);
         expect(find.text('Item 31'), findsOneWidget);
-      }, skip: isBrowser);
+      }, skip: isBrowser, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be dragged down when not full height', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(null));
@@ -118,7 +118,7 @@ void main() {
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsNothing);
         expect(find.text('Item 36'), findsNothing);
-      }, skip: isBrowser);
+      }, skip: isBrowser, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be dragged down when list is shorter than full height', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(null, itemCount: 30, initialChildSize: .25));
@@ -135,7 +135,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Item 1').hitTestable(), findsOneWidget);
         expect(find.text('Item 29').hitTestable(), findsNothing);
-      }, skip: isBrowser);
+      }, skip: isBrowser, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be dragged up and cover its container and scroll in single motion, and then dragged back down', (WidgetTester tester) async {
         int taps = 0;
@@ -164,7 +164,7 @@ void main() {
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 18'), findsOneWidget);
         expect(find.text('Item 36'), findsNothing);
-      }, skip: isBrowser);
+      }, skip: isBrowser, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be flung up gently', (WidgetTester tester) async {
         int taps = 0;
@@ -187,7 +187,7 @@ void main() {
         expect(find.text('Item 21'), findsOneWidget);
         expect(find.text('Item 36'), findsOneWidget);
         expect(find.text('Item 70'), findsNothing);
-      }, skip: isBrowser);
+      }, skip: isBrowser, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be flung up', (WidgetTester tester) async {
         int taps = 0;
@@ -208,7 +208,7 @@ void main() {
         expect(find.text('Item 1'), findsNothing);
         expect(find.text('Item 21'), findsNothing);
         expect(find.text('Item 70'), findsOneWidget);
-      }, skip: isBrowser);
+      }, skip: isBrowser, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be flung down when not full height', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(null));
@@ -221,7 +221,7 @@ void main() {
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsNothing);
         expect(find.text('Item 36'), findsNothing);
-      }, skip: isBrowser);
+      }, skip: isBrowser, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be flung up and then back down', (WidgetTester tester) async {
         int taps = 0;
@@ -260,7 +260,7 @@ void main() {
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsNothing);
         expect(find.text('Item 70'), findsNothing);
-      }, skip: isBrowser);
+      }, skip: isBrowser, variant: TargetPlatformVariant.all());
 
       debugDefaultTargetPlatformOverride = null;
     });

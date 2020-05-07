@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -84,7 +84,7 @@ Iterable<int> generateIterableList() {
 
 int sumIterable(Iterable<int> values) {
   int result = 0;
-  for (int value in values) {
+  for (final int value in values) {
     result += value;
   }
   return result;

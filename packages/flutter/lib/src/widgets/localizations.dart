@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:ui' show Locale;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -46,14 +47,14 @@ Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegat
   // locale.languageCode.
   final Set<Type> types = <Type>{};
   final List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[];
-  for (LocalizationsDelegate<dynamic> delegate in allDelegates) {
+  for (final LocalizationsDelegate<dynamic> delegate in allDelegates) {
     if (!types.contains(delegate.type) && delegate.isSupported(locale)) {
       types.add(delegate.type);
       delegates.add(delegate);
     }
   }
 
-  for (LocalizationsDelegate<dynamic> delegate in delegates) {
+  for (final LocalizationsDelegate<dynamic> delegate in delegates) {
     final Future<dynamic> inputValue = delegate.load(locale);
     dynamic completedValue;
     final Future<dynamic> futureValue = inputValue.then<dynamic>((dynamic value) {
@@ -134,7 +135,7 @@ abstract class LocalizationsDelegate<T> {
   Type get type => T;
 
   @override
-  String toString() => '$runtimeType[$type]';
+  String toString() => '${objectRuntimeType(this, 'LocalizationsDelegate')}[$type]';
 }
 
 /// Interface for localized resource values for the lowest levels of the Flutter
@@ -297,7 +298,7 @@ class _LocalizationsScope extends InheritedWidget {
 /// `Localizations.of(context)` will be rebuilt after the resources
 /// for the new locale have been loaded.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This following class is defined in terms of the
 /// [Dart `intl` package](https://github.com/dart-lang/intl). Using the `intl`
@@ -519,27 +520,27 @@ class _LocalizationsState extends State<Localizations> {
       // have finished loading. Until then the old locale will continue to be used.
       // - If we're running at app startup time then defer reporting the first
       // "useful" frame until after the async load has completed.
-      WidgetsBinding.instance.deferFirstFrameReport();
+      RendererBinding.instance.deferFirstFrame();
       typeToResourcesFuture.then<void>((Map<Type, dynamic> value) {
-        WidgetsBinding.instance.allowFirstFrameReport();
-        if (!mounted)
-          return;
-        setState(() {
-          _typeToResources = value;
-          _locale = locale;
-        });
+        if (mounted) {
+          setState(() {
+            _typeToResources = value;
+            _locale = locale;
+          });
+        }
+        RendererBinding.instance.allowFirstFrame();
       });
     }
   }
 
   T resourcesFor<T>(Type type) {
     assert(type != null);
-    final T resources = _typeToResources[type];
+    final T resources = _typeToResources[type] as T;
     return resources;
   }
 
   TextDirection get _textDirection {
-    final WidgetsLocalizations resources = _typeToResources[WidgetsLocalizations];
+    final WidgetsLocalizations resources = _typeToResources[WidgetsLocalizations] as WidgetsLocalizations;
     assert(resources != null);
     return resources.textDirection;
   }

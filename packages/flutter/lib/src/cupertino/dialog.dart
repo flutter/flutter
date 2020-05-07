@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -408,10 +408,10 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   Element _actionsElement;
 
   @override
-  _CupertinoDialogRenderWidget get widget => super.widget;
+  _CupertinoDialogRenderWidget get widget => super.widget as _CupertinoDialogRenderWidget;
 
   @override
-  _RenderCupertinoDialog get renderObject => super.renderObject;
+  _RenderCupertinoDialog get renderObject => super.renderObject as _RenderCupertinoDialog;
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -435,10 +435,10 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
     assert(slot != null);
     switch (slot) {
       case _AlertDialogSections.contentSection:
-        renderObject.contentSection = child;
+        renderObject.contentSection = child as RenderBox;
         break;
       case _AlertDialogSections.actionsSection:
-        renderObject.actionsSection = child;
+        renderObject.actionsSection = child as RenderBox;
         break;
     }
   }
@@ -464,6 +464,7 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
       assert(_actionsElement == child);
       _actionsElement = null;
     }
+    super.forgetChild(child);
   }
 
   @override
@@ -707,7 +708,7 @@ class _RenderCupertinoDialog extends RenderBox {
     // Set the position of the actions box to sit at the bottom of the dialog.
     // The content box defaults to the top left, which is where we want it.
     assert(actionsSection.parentData is BoxParentData);
-    final BoxParentData actionParentData = actionsSection.parentData;
+    final BoxParentData actionParentData = actionsSection.parentData as BoxParentData;
     actionParentData.offset = Offset(0.0, contentSize.height + dividerThickness);
   }
 
@@ -769,13 +770,13 @@ class _RenderCupertinoDialog extends RenderBox {
     // Set the position of the actions box to sit at the bottom of the dialog.
     // The content box defaults to the top left, which is where we want it.
     assert(actionsSection.parentData is BoxParentData);
-    final BoxParentData actionParentData = actionsSection.parentData;
+    final BoxParentData actionParentData = actionsSection.parentData as BoxParentData;
     actionParentData.offset = Offset(0.0, contentSize.height + dividerThickness);
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final BoxParentData contentParentData = contentSection.parentData;
+    final BoxParentData contentParentData = contentSection.parentData as BoxParentData;
     contentSection.paint(context, offset + contentParentData.offset);
 
     final bool hasDivider = contentSection.size.height > 0.0 && actionsSection.size.height > 0.0;
@@ -783,7 +784,7 @@ class _RenderCupertinoDialog extends RenderBox {
       _paintDividerBetweenContentAndActions(context.canvas, offset);
     }
 
-    final BoxParentData actionsParentData = actionsSection.parentData;
+    final BoxParentData actionsParentData = actionsSection.parentData as BoxParentData;
     actionsSection.paint(context, offset + actionsParentData.offset);
   }
 
@@ -801,8 +802,8 @@ class _RenderCupertinoDialog extends RenderBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    final BoxParentData contentSectionParentData = contentSection.parentData;
-    final BoxParentData actionsSectionParentData = actionsSection.parentData;
+    final BoxParentData contentSectionParentData = contentSection.parentData as BoxParentData;
+    final BoxParentData actionsSectionParentData = actionsSection.parentData as BoxParentData;
     return result.addWithPaintOffset(
              offset: contentSectionParentData.offset,
              position: position,
@@ -1020,7 +1021,7 @@ class _PressableActionButtonState extends State<_PressableActionButton> {
 // _ActionButtonParentData. _ActionButtonParentDataWidget is responsible for
 // updating the pressed state of an _ActionButtonParentData based on the
 // incoming [isPressed] property.
-class _ActionButtonParentDataWidget extends ParentDataWidget<_CupertinoDialogActionsRenderWidget> {
+class _ActionButtonParentDataWidget extends ParentDataWidget<_ActionButtonParentData> {
   const _ActionButtonParentDataWidget({
     Key key,
     this.isPressed,
@@ -1032,7 +1033,7 @@ class _ActionButtonParentDataWidget extends ParentDataWidget<_CupertinoDialogAct
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is _ActionButtonParentData);
-    final _ActionButtonParentData parentData = renderObject.parentData;
+    final _ActionButtonParentData parentData = renderObject.parentData as _ActionButtonParentData;
     if (parentData.isPressed != isPressed) {
       parentData.isPressed = isPressed;
 
@@ -1042,6 +1043,9 @@ class _ActionButtonParentDataWidget extends ParentDataWidget<_CupertinoDialogAct
         targetParent.markNeedsPaint();
     }
   }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => _CupertinoDialogActionsRenderWidget;
 }
 
 // ParentData applied to individual action buttons that report whether or not
@@ -1384,7 +1388,7 @@ class _RenderCupertinoDialogActions extends RenderBox
     RenderBox currentChild = firstChild;
     while (currentChild != null) {
       assert(currentChild.parentData is _ActionButtonParentData);
-      final _ActionButtonParentData parentData = currentChild.parentData;
+      final _ActionButtonParentData parentData = currentChild.parentData as _ActionButtonParentData;
       if (parentData.isPressed) {
         yield currentChild;
       }
@@ -1396,7 +1400,7 @@ class _RenderCupertinoDialogActions extends RenderBox
     RenderBox currentChild = firstChild;
     while (currentChild != null) {
       assert(currentChild.parentData is _ActionButtonParentData);
-      final _ActionButtonParentData parentData = currentChild.parentData;
+      final _ActionButtonParentData parentData = currentChild.parentData as _ActionButtonParentData;
       if (parentData.isPressed) {
         return true;
       }
@@ -1536,6 +1540,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     if (_isSingleButtonRow(dialogWidth)) {
       if (childCount == 1) {
         // We have 1 button. Our size is the width of the dialog and the height
@@ -1569,7 +1574,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
         // The 2nd button needs to be offset to the right.
         assert(lastChild.parentData is MultiChildLayoutParentData);
-        final MultiChildLayoutParentData secondButtonParentData = lastChild.parentData;
+        final MultiChildLayoutParentData secondButtonParentData = lastChild.parentData as MultiChildLayoutParentData;
         secondButtonParentData.offset = Offset(firstChild.size.width + dividerThickness, 0.0);
 
         // Calculate our size based on the button sizes.
@@ -1600,7 +1605,7 @@ class _RenderCupertinoDialogActions extends RenderBox
         );
 
         assert(child.parentData is MultiChildLayoutParentData);
-        final MultiChildLayoutParentData parentData = child.parentData;
+        final MultiChildLayoutParentData parentData = child.parentData as MultiChildLayoutParentData;
         parentData.offset = Offset(0.0, verticalOffset);
 
         verticalOffset += child.size.height;
@@ -1650,7 +1655,7 @@ class _RenderCupertinoDialogActions extends RenderBox
       : Rect.zero;
 
     final List<Rect> pressedButtonRects = _pressedButtons.map<Rect>((RenderBox pressedButton) {
-      final MultiChildLayoutParentData buttonParentData = pressedButton.parentData;
+      final MultiChildLayoutParentData buttonParentData = pressedButton.parentData as MultiChildLayoutParentData;
 
       return Rect.fromLTWH(
         offset.dx + buttonParentData.offset.dx,
@@ -1713,14 +1718,13 @@ class _RenderCupertinoDialogActions extends RenderBox
     RenderBox prevChild;
     while (child != null) {
       assert(child.parentData is _ActionButtonParentData);
-      final _ActionButtonParentData currentButtonParentData = child.parentData;
+      final _ActionButtonParentData currentButtonParentData = child.parentData as _ActionButtonParentData;
       final bool isButtonPressed = currentButtonParentData.isPressed;
 
       bool isPrevButtonPressed = false;
       if (prevChild != null) {
         assert(prevChild.parentData is _ActionButtonParentData);
-        final _ActionButtonParentData previousButtonParentData = prevChild
-            .parentData;
+        final _ActionButtonParentData previousButtonParentData = prevChild.parentData as _ActionButtonParentData;
         isPrevButtonPressed = previousButtonParentData.isPressed;
       }
 
@@ -1770,7 +1774,7 @@ class _RenderCupertinoDialogActions extends RenderBox
   void _drawButtons(PaintingContext context, Offset offset) {
     RenderBox child = firstChild;
     while (child != null) {
-      final MultiChildLayoutParentData childParentData = child.parentData;
+      final MultiChildLayoutParentData childParentData = child.parentData as MultiChildLayoutParentData;
       context.paintChild(child, childParentData.offset + offset);
       child = childAfter(child);
     }

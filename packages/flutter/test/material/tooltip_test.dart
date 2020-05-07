@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -521,7 +521,7 @@ void main() {
     expect(textStyle.color, Colors.white);
     expect(textStyle.fontFamily, 'Roboto');
     expect(textStyle.decoration, TextDecoration.none);
-    expect(textStyle.debugLabel, '((englishLike body1 2014).merge(blackMountainView body1)).copyWith');
+    expect(textStyle.debugLabel, '((englishLike body1 2014).merge(blackMountainView bodyText2)).copyWith');
   });
 
   testWidgets('Default tooltip message textStyle - dark', (WidgetTester tester) async {
@@ -547,7 +547,7 @@ void main() {
     expect(textStyle.color, Colors.black);
     expect(textStyle.fontFamily, 'Roboto');
     expect(textStyle.decoration, TextDecoration.none);
-    expect(textStyle.debugLabel, '((englishLike body1 2014).merge(whiteMountainView body1)).copyWith');
+    expect(textStyle.debugLabel, '((englishLike body1 2014).merge(whiteMountainView bodyText2)).copyWith');
   });
 
   testWidgets('Custom tooltip message textStyle', (WidgetTester tester) async {
@@ -1136,5 +1136,5 @@ void main() {
 SemanticsNode findDebugSemantics(RenderObject object) {
   if (object.debugSemantics != null)
     return object.debugSemantics;
-  return findDebugSemantics(object.parent);
+  return findDebugSemantics(object.parent as RenderObject);
 }

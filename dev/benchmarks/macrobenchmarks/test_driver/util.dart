@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,7 +12,9 @@ void macroPerfTest(
     String routeName,
     { Duration pageDelay,
       Duration duration = const Duration(seconds: 3),
+      Duration timeout = const Duration(seconds: 30),
       Future<void> driverOps(FlutterDriver driver),
+      Future<void> setupOps(FlutterDriver driver),
     }) {
   test(testName, () async {
     final FlutterDriver driver = await FlutterDriver.connect();
@@ -34,6 +36,10 @@ void macroPerfTest(
       await Future<void>.delayed(pageDelay);
     }
 
+    if (setupOps != null) {
+      await setupOps(driver);
+    }
+
     final Timeline timeline = await driver.traceAction(() async {
       final Future<void> durationFuture = Future<void>.delayed(duration);
       if (driverOps != null) {
@@ -47,5 +53,5 @@ void macroPerfTest(
     summary.writeTimelineToFile(testName, pretty: true);
 
     driver.close();
-  });
+  }, timeout: Timeout(timeout));
 }

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -91,7 +91,7 @@ void main() {
     expect(largeSize.height, equals(26.0));
   });
 
-  testWidgets('Text throws a nice error message if there\'s no Directionality', (WidgetTester tester) async {
+  testWidgets("Text throws a nice error message if there's no Directionality", (WidgetTester tester) async {
     await tester.pumpWidget(const Text('Hello'));
     final String message = tester.takeException().toString();
     expect(message, contains('Directionality'));
@@ -165,7 +165,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       const Text(
-        '\$\$',
+        r'$$',
         semanticsLabel: 'Double dollars',
         textDirection: TextDirection.ltr,
       )
@@ -191,7 +191,7 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Text('\$\$', semanticsLabel: 'Double dollars')),
+        child: Text(r'$$', semanticsLabel: 'Double dollars')),
     );
 
     expect(
@@ -772,8 +772,7 @@ void main() {
                 // Each word takes up more than a half of a line. Together they
                 // wrap onto two lines, but leave a lot of extra space.
                 child: Text(
-                  'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywr'
-                    'apwithlotsofextraspace',
+                  'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
                   textDirection: TextDirection.ltr,
                   textWidthBasis: textWidthBasis,
                 ),

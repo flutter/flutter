@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -96,7 +96,7 @@ Future<json_rpc.Peer> _waitAndConnect(
         await Future<void>.delayed(_kReconnectAttemptInterval);
         return attemptConnection(uri);
       } else {
-        _log.warning('Connection to Fuchsia\'s Dart VM timed out at '
+        _log.warning("Connection to Fuchsia's Dart VM timed out at "
             '${uri.toString()}');
         rethrow;
       }
@@ -170,7 +170,7 @@ class DartVm {
     final Map<String, dynamic> jsonVmRef =
         await invokeRpc('getVM', timeout: timeout);
     final List<IsolateRef> result = <IsolateRef>[];
-    for (Map<String, dynamic> jsonIsolate in jsonVmRef['isolates']) {
+    for (final Map<String, dynamic> jsonIsolate in (jsonVmRef['isolates'] as List<dynamic>).cast<Map<String, dynamic>>()) {
       final String name = jsonIsolate['name'] as String;
       if (pattern.matchAsPrefix(name) != null) {
         _log.fine('Found Isolate matching "$pattern": "$name"');
@@ -213,7 +213,7 @@ class DartVm {
     final List<FlutterView> views = <FlutterView>[];
     final Map<String, dynamic> rpcResponse =
         await invokeRpc('_flutter.listViews', timeout: timeout);
-    for (Map<String, dynamic> jsonView in rpcResponse['views']) {
+    for (final Map<String, dynamic> jsonView in (rpcResponse['views'] as List<dynamic>).cast<Map<String, dynamic>>()) {
       final FlutterView flutterView = FlutterView._fromJson(jsonView);
       if (flutterView != null) {
         views.add(flutterView);

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,7 +23,7 @@ import 'theme_data.dart';
 /// rebuilt if the theme later changes.
 ///
 /// The [ThemeData] object given by the [Theme.of] call also contains a default
-/// [Theme.chipTheme] that can be customized by copying it (using
+/// [ThemeData.chipTheme] that can be customized by copying it (using
 /// [ChipThemeData.copyWith]).
 ///
 /// See also:
@@ -62,7 +62,7 @@ class ChipTheme extends InheritedTheme {
   /// Defaults to the ambient [ThemeData.chipTheme] if there is no
   /// [ChipTheme] in the given build context.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// class Spaceship extends StatelessWidget {
@@ -120,7 +120,7 @@ class ChipTheme extends InheritedTheme {
 /// you get from [ChipTheme.of], or create an entirely new one with
 /// [ChipThemeData..fromDefaults].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// class CarColor extends StatefulWidget {
@@ -168,7 +168,7 @@ class ChipTheme extends InheritedTheme {
 ///  * [Theme] widget, which performs a similar function to [ChipTheme],
 ///    but for overall themes.
 ///  * [ThemeData], which has a default [ChipThemeData].
-class ChipThemeData extends Diagnosticable {
+class ChipThemeData with Diagnosticable {
   /// Create a [ChipThemeData] given a set of exact values. All the values
   /// must be specified except for [shadowColor], [selectedShadowColor],
   /// [elevation], and [pressElevation], which may be null.
@@ -484,23 +484,23 @@ class ChipThemeData extends Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final ChipThemeData otherData = other;
-    return otherData.backgroundColor == backgroundColor
-        && otherData.deleteIconColor == deleteIconColor
-        && otherData.disabledColor == disabledColor
-        && otherData.selectedColor == selectedColor
-        && otherData.secondarySelectedColor == secondarySelectedColor
-        && otherData.shadowColor == shadowColor
-        && otherData.selectedShadowColor == selectedShadowColor
-        && otherData.checkmarkColor == checkmarkColor
-        && otherData.labelPadding == labelPadding
-        && otherData.padding == padding
-        && otherData.shape == shape
-        && otherData.labelStyle == labelStyle
-        && otherData.secondaryLabelStyle == secondaryLabelStyle
-        && otherData.brightness == brightness
-        && otherData.elevation == elevation
-        && otherData.pressElevation == pressElevation;
+    return other is ChipThemeData
+        && other.backgroundColor == backgroundColor
+        && other.deleteIconColor == deleteIconColor
+        && other.disabledColor == disabledColor
+        && other.selectedColor == selectedColor
+        && other.secondarySelectedColor == secondarySelectedColor
+        && other.shadowColor == shadowColor
+        && other.selectedShadowColor == selectedShadowColor
+        && other.checkmarkColor == checkmarkColor
+        && other.labelPadding == labelPadding
+        && other.padding == padding
+        && other.shape == shape
+        && other.labelStyle == labelStyle
+        && other.secondaryLabelStyle == secondaryLabelStyle
+        && other.brightness == brightness
+        && other.elevation == elevation
+        && other.pressElevation == pressElevation;
   }
 
   @override
@@ -510,7 +510,7 @@ class ChipThemeData extends Diagnosticable {
     final ChipThemeData defaultData = ChipThemeData.fromDefaults(
       secondaryColor: defaultTheme.primaryColor,
       brightness: defaultTheme.brightness,
-      labelStyle: defaultTheme.textTheme.body2,
+      labelStyle: defaultTheme.textTheme.bodyText1,
     );
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
     properties.add(ColorProperty('deleteIconColor', deleteIconColor, defaultValue: defaultData.deleteIconColor));

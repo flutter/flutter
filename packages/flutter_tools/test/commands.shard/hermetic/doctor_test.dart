@@ -1,20 +1,23 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
+import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process_manager.dart';
+
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/proxy_validator.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
@@ -24,6 +27,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:quiver/testing/async.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -67,6 +71,17 @@ void main() {
       expect(message.message, contains('Flutter plugin version 0.1.3'));
       expect(message.message, contains('recommended minimum version'));
     }, overrides: noColorTerminalOverride);
+
+    testUsingContext('intellij plugins path checking on mac', () async {
+      final String pathViaToolbox = globals.fs.path.join('test', 'data', 'intellij', 'mac_via_toolbox');
+      final String pathNotViaToolbox = globals.fs.path.join('test', 'data', 'intellij', 'mac_not_via_toolbox');
+
+      final IntelliJValidatorOnMac validatorViaToolbox = IntelliJValidatorOnMac('Test', 'Test', pathViaToolbox);
+      expect(validatorViaToolbox.plistFile, 'test/data/intellij/mac_via_toolbox/Contents/Info.plist');
+
+      final IntelliJValidatorOnMac validatorNotViaToolbox = IntelliJValidatorOnMac('Test', 'Test', pathNotViaToolbox);
+      expect(validatorNotViaToolbox.plistFile, 'test/data/intellij/mac_not_via_toolbox/Contents/Info.plist');
+    });
 
     testUsingContext('vs code validator when both installed', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension.validate();
@@ -493,18 +508,18 @@ void main() {
 
     testUsingContext('gen_snapshot does not work', () async {
       when(mockProcessManager.runSync(
-        <String>[artifacts.getArtifactPath(Artifact.genSnapshot)],
+        <String>[globals.artifacts.getArtifactPath(Artifact.genSnapshot)],
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       )).thenReturn(ProcessResult(101, 1, '', ''));
 
       expect(await FlutterValidatorDoctor().diagnose(verbose: false), isTrue);
       final List<String> statusLines = testLogger.statusText.split('\n');
-      for (String msg in userMessages.flutterBinariesDoNotRun.split('\n')) {
+      for (final String msg in userMessages.flutterBinariesDoNotRun.split('\n')) {
         expect(statusLines, contains(contains(msg)));
       }
-      if (platform.isLinux) {
-        for (String msg in userMessages.flutterBinariesLinuxRepairCommands.split('\n')) {
+      if (globals.platform.isLinux) {
+        for (final String msg in userMessages.flutterBinariesLinuxRepairCommands.split('\n')) {
           expect(statusLines, contains(contains(msg)));
         }
       }
@@ -512,6 +527,16 @@ void main() {
       OutputPreferences: () => OutputPreferences(wrapText: false),
       ProcessManager: () => mockProcessManager,
       Platform: _kNoColorOutputPlatform,
+    });
+
+    testUsingContext('gen_snapshot binary not available', () async {
+        expect(await FlutterValidatorDoctor().diagnose(verbose: false), isTrue);
+        // gen_snapshot is downloaded on demand, and the doctor should not
+        // fail if the gen_snapshot binary is not present.
+        expect(testLogger.statusText, contains('No issues found!'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('version checking does not work', () async {
@@ -522,7 +547,7 @@ void main() {
       when(mockFlutterVersion.frameworkDate).thenThrow(versionCheckError);
 
       when(mockProcessManager.runSync(
-        <String>[artifacts.getArtifactPath(Artifact.genSnapshot)],
+        <String>[globals.artifacts.getArtifactPath(Artifact.genSnapshot)],
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       )).thenReturn(ProcessResult(101, 255, '', ''));
@@ -705,13 +730,58 @@ void main() {
   });
 
   testUsingContext('WebWorkflow is a part of validator workflows if enabled', () async {
-    when(processManager.canRun(any)).thenReturn(true);
+    when(globals.processManager.canRun(any)).thenReturn(true);
 
-    expect(DoctorValidatorsProvider.defaultInstance.workflows.contains(webWorkflow), true);
+    expect(DoctorValidatorsProvider.defaultInstance.workflows,
+      contains(isA<WebWorkflow>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     ProcessManager: () => MockProcessManager(),
   });
+
+  testUsingContext('Fetches tags to get the right version', () async {
+    Cache.disableLocking();
+
+    final DoctorCommand doctorCommand = DoctorCommand();
+    final CommandRunner<void> commandRunner = createTestCommandRunner(doctorCommand);
+
+    await commandRunner.run(<String>['doctor']);
+
+    verify(mockFlutterVersion.fetchTagsAndUpdate()).called(1);
+
+    Cache.enableLocking();
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
+    FileSystem: () => MemoryFileSystem.test(),
+    FlutterVersion: () => mockFlutterVersion,
+    Doctor: () => NoOpDoctor(),
+  }, initializeFlutterRoot: false);
+}
+
+class NoOpDoctor implements Doctor {
+  @override
+  bool get canLaunchAnything => true;
+
+  @override
+  bool get canListAnything => true;
+
+  @override
+  Future<bool> checkRemoteArtifacts(String engineRevision) async => true;
+
+  @override
+  Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true, bool showColor = true }) async => true;
+
+  @override
+  List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[];
+
+  @override
+  Future<void> summary() => null;
+
+  @override
+  List<DoctorValidator> get validators => <DoctorValidator>[];
+
+  @override
+  List<Workflow> get workflows => <Workflow>[];
 }
 
 class MockUsage extends Mock implements Usage {}
@@ -720,7 +790,7 @@ class IntelliJValidatorTestTarget extends IntelliJValidator {
   IntelliJValidatorTestTarget(String title, String installPath) : super(title, installPath);
 
   @override
-  String get pluginsPath => fs.path.join('test', 'data', 'intellij', 'plugins');
+  String get pluginsPath => globals.fs.path.join('test', 'data', 'intellij', 'plugins');
 
   @override
   String get version => 'test.test.test';
@@ -1046,10 +1116,9 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
   static VsCodeValidatorTestTargets get installedWithoutExtension =>
       VsCodeValidatorTestTargets._(validInstall, missingExtensions);
 
-  static final String validInstall = fs.path.join('test', 'data', 'vscode', 'application');
-  static final String validExtensions = fs.path.join('test', 'data', 'vscode', 'extensions');
-  static final String missingExtensions = fs.path.join('test', 'data', 'vscode', 'notExtensions');
+  static final String validInstall = globals.fs.path.join('test', 'data', 'vscode', 'application');
+  static final String validExtensions = globals.fs.path.join('test', 'data', 'vscode', 'extensions');
+  static final String missingExtensions = globals.fs.path.join('test', 'data', 'vscode', 'notExtensions');
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockFlutterVersion extends Mock implements FlutterVersion {}

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:mockito/mockito.dart';
 
 void main() {
   group('PhysicalShape', () {
@@ -145,6 +146,69 @@ void main() {
       await tester.tap(find.byKey(key1));
       expect(_pointerDown, isTrue);
     });
+
+    testWidgets('semantics bounds are updated', (WidgetTester tester) async {
+      final GlobalKey fractionalTranslationKey = GlobalKey();
+      final GlobalKey textKey = GlobalKey();
+      Offset offset = const Offset(0.4, 0.4);
+
+      await tester.pumpWidget(
+          StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: Semantics(
+                    explicitChildNodes: true,
+                    child: FractionalTranslation(
+                      key: fractionalTranslationKey,
+                      translation: offset,
+                      transformHitTests: true,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            offset = const Offset(0.8, 0.8);
+                          });
+                        },
+                        child: SizedBox(
+                          width: 100.0,
+                          height: 100.0,
+                          child: Text(
+                            'foo',
+                            key: textKey,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          )
+      );
+
+      expect(
+        tester.getSemantics(find.byKey(textKey)).transform,
+        Matrix4(
+          3.0, 0.0, 0.0, 0.0,
+          0.0, 3.0, 0.0, 0.0,
+          0.0, 0.0, 1.0, 0.0,
+          1170.0, 870.0, 0.0, 1.0,
+        ),
+      );
+
+      await tester.tap(find.byKey(fractionalTranslationKey));
+      await tester.pump();
+      expect(
+        tester.getSemantics(find.byKey(textKey)).transform,
+        Matrix4(
+          3.0, 0.0, 0.0, 0.0,
+          0.0, 3.0, 0.0, 0.0,
+          0.0, 0.0, 1.0, 0.0,
+          1290.0, 990.0, 0.0, 1.0,
+        ),
+      );
+    });
   });
 
   group('Row', () {
@@ -215,6 +279,114 @@ void main() {
       equals('UnconstrainedBox(alignment: topRight, constrainedAxis: horizontal, textDirection: rtl)'),
     );
   });
+
+  group('ColoredBox', () {
+    _MockCanvas mockCanvas;
+    _MockPaintingContext mockContext;
+    const Color colorToPaint = Color(0xFFABCDEF);
+
+    setUp(() {
+      mockContext = _MockPaintingContext();
+      mockCanvas = _MockCanvas();
+      when(mockContext.canvas).thenReturn(mockCanvas);
+    });
+
+    testWidgets('ColoredBox - no size, no child', (WidgetTester tester) async {
+      await tester.pumpWidget(Flex(
+        direction: Axis.horizontal,
+        textDirection: TextDirection.ltr,
+        children: const <Widget>[
+          SizedBox.shrink(
+            child: ColoredBox(color: colorToPaint),
+          ),
+        ],
+      ));
+      expect(find.byType(ColoredBox), findsOneWidget);
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
+
+      renderColoredBox.paint(mockContext, Offset.zero);
+
+      verifyNever(mockCanvas.drawRect(any, any));
+      verifyNever(mockContext.paintChild(any, any));
+    });
+
+    testWidgets('ColoredBox - no size, child', (WidgetTester tester) async {
+      const ValueKey<int> key = ValueKey<int>(0);
+      const Widget child = SizedBox.expand(key: key);
+      await tester.pumpWidget(Flex(
+        direction: Axis.horizontal,
+        textDirection: TextDirection.ltr,
+        children: const <Widget>[
+          SizedBox.shrink(
+            child: ColoredBox(color: colorToPaint, child: child),
+          ),
+        ],
+      ));
+      expect(find.byType(ColoredBox), findsOneWidget);
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
+      final RenderObject renderSizedBox = tester.renderObject(find.byKey(key));
+
+      renderColoredBox.paint(mockContext, Offset.zero);
+
+      verifyNever(mockCanvas.drawRect(any, any));
+      verify(mockContext.paintChild(renderSizedBox, Offset.zero)).called(1);
+    });
+
+    testWidgets('ColoredBox - size, no child', (WidgetTester tester) async {
+      await tester.pumpWidget(const ColoredBox(color: colorToPaint));
+      expect(find.byType(ColoredBox), findsOneWidget);
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
+
+      renderColoredBox.paint(mockContext, Offset.zero);
+
+      final List<dynamic> drawRect = verify(mockCanvas.drawRect(captureAny, captureAny)).captured;
+      expect(drawRect.length, 2);
+      expect(drawRect[0], const Rect.fromLTWH(0, 0, 800, 600));
+      expect(drawRect[1].color, colorToPaint);
+      verifyNever(mockContext.paintChild(any, any));
+    });
+
+    testWidgets('ColoredBox - size, child', (WidgetTester tester) async {
+      const ValueKey<int> key = ValueKey<int>(0);
+      const Widget child = SizedBox.expand(key: key);
+      await tester.pumpWidget(const ColoredBox(color: colorToPaint, child: child));
+      expect(find.byType(ColoredBox), findsOneWidget);
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
+      final RenderObject renderSizedBox = tester.renderObject(find.byKey(key));
+
+      renderColoredBox.paint(mockContext, Offset.zero);
+
+      final List<dynamic> drawRect = verify(mockCanvas.drawRect(captureAny, captureAny)).captured;
+      expect(drawRect.length, 2);
+      expect(drawRect[0], const Rect.fromLTWH(0, 0, 800, 600));
+      expect(drawRect[1].color, colorToPaint);
+      verify(mockContext.paintChild(renderSizedBox, Offset.zero)).called(1);
+    });
+
+    testWidgets('ColoredBox - properties', (WidgetTester tester) async {
+      const ColoredBox box = ColoredBox(color: colorToPaint);
+      final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
+      box.debugFillProperties(properties);
+
+      expect(properties.properties.first.value, colorToPaint);
+    });
+  });
+  testWidgets('Inconsequential golden test', (WidgetTester tester) async {
+    // The test validates the Flutter Gold integration. Any changes to the
+    // golden file can be approved at any time.
+    await tester.pumpWidget(RepaintBoundary(
+      child: Container(
+        color: const Color(0xFF42A5F5),
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('inconsequential_golden_file.png'),
+    );
+    // TODO(Piinks): Remove skip once web goldens are supported, https://github.com/flutter/flutter/issues/40297
+  }, skip: isBrowser);
 }
 
 HitsRenderBox hits(RenderBox renderBox) => HitsRenderBox(renderBox);
@@ -230,7 +402,7 @@ class HitsRenderBox extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    final HitTestResult hitTestResult = item;
+    final HitTestResult hitTestResult = item as HitTestResult;
     return hitTestResult.path.where(
       (HitTestEntry entry) => entry.target == renderBox
     ).isNotEmpty;
@@ -246,13 +418,16 @@ class DoesNotHitRenderBox extends Matcher {
 
   @override
   Description describe(Description description) =>
-    description.add('hit test result doesn\'t contain ').addDescriptionOf(renderBox);
+    description.add("hit test result doesn't contain ").addDescriptionOf(renderBox);
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    final HitTestResult hitTestResult = item;
+    final HitTestResult hitTestResult = item as HitTestResult;
     return hitTestResult.path.where(
       (HitTestEntry entry) => entry.target == renderBox
     ).isEmpty;
   }
 }
+
+class _MockPaintingContext extends Mock implements PaintingContext {}
+class _MockCanvas extends Mock implements Canvas {}

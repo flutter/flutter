@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -540,10 +540,10 @@ Future<void> main() async {
     await tester.pump();
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    final FlutterError error = exception;
+    final FlutterError error = exception as FlutterError;
     expect(error.diagnostics.length, 3);
     final DiagnosticsNode last = error.diagnostics.last;
-    expect(last, isInstanceOf<DiagnosticsProperty<StatefulElement>>());
+    expect(last, isA<DiagnosticsProperty<StatefulElement>>());
     expect(
       last.toStringDeep(),
       equalsIgnoringHashCodes(
@@ -834,6 +834,13 @@ Future<void> main() async {
     // Show a 100x100 Hero tagged 'H' with key homeHeroKey
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+            },
+          ),
+        ),
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) { // Navigator.push() needs context
@@ -1614,10 +1621,7 @@ Future<void> main() async {
 
   testWidgets('Heroes do not transition on back gestures by default', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        platform: TargetPlatform.iOS,
-      ),
-      routes: routes,
+     routes: routes,
     ));
 
     expect(find.byKey(firstKey), isOnstage);
@@ -1652,14 +1656,11 @@ Future<void> main() async {
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), isOnstage);
     expect(find.byKey(secondKey), isInCard);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Heroes can transition on gesture in one frame', (WidgetTester tester) async {
     transitionFromUserGestures = true;
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        platform: TargetPlatform.iOS,
-      ),
       routes: routes,
     ));
 
@@ -1698,14 +1699,11 @@ Future<void> main() async {
     expect(find.byKey(firstKey), isOnstage);
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), findsNothing);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Heroes animate should hide destination hero and display original hero in case of dismissed', (WidgetTester tester) async {
     transitionFromUserGestures = true;
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        platform: TargetPlatform.iOS,
-      ),
       routes: routes,
     ));
 
@@ -1737,7 +1735,7 @@ Future<void> main() async {
     expect(find.byKey(firstKey), findsNothing);
     expect(find.byKey(secondKey), isOnstage);
     expect(find.byKey(secondKey), isInCard);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Handles transitions when a non-default initial route is set', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -2197,7 +2195,7 @@ Future<void> main() async {
       // The element should be mounted and unique.
       expect(state1.mounted, isTrue);
 
-      expect(navigatorKey.currentState.pop(), isTrue);
+      navigatorKey.currentState.pop();
       await tester.pumpAndSettle();
 
       // State is preserved.
@@ -2298,9 +2296,6 @@ Future<void> main() async {
   testWidgets('Remove user gesture driven flights when the gesture is invalid', (WidgetTester tester) async {
     transitionFromUserGestures = true;
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        platform: TargetPlatform.iOS,
-      ),
       routes: routes,
     ));
 
@@ -2324,7 +2319,7 @@ Future<void> main() async {
     // The simple route should still be on top.
     expect(find.byKey(simpleKey), findsOneWidget);
     expect(tester.takeException(), isNull);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   // Regression test for https://github.com/flutter/flutter/issues/40239.
   testWidgets(

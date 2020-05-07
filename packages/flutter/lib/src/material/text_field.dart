@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
@@ -18,7 +20,7 @@ import 'selectable_text.dart' show iOSHorizontalOffset;
 import 'text_selection.dart';
 import 'theme.dart';
 
-export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization;
+export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
 /// Signature for the [TextField.buildCounter] callback.
 typedef InputCounterWidgetBuilder = Widget Function(
@@ -59,6 +61,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
           renderEditable.selectPositionAt(
             from: details.globalPosition,
             cause: SelectionChangedCause.longPress,
@@ -66,6 +69,8 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           renderEditable.selectWordsInRange(
             from: details.globalPosition - details.offsetFromOrigin,
             to: details.globalPosition,
@@ -82,10 +87,13 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
           renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           renderEditable.selectPosition(cause: SelectionChangedCause.tap);
           break;
       }
@@ -100,6 +108,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
           renderEditable.selectPositionAt(
             from: details.globalPosition,
             cause: SelectionChangedCause.longPress,
@@ -107,6 +116,8 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           renderEditable.selectWord(cause: SelectionChangedCause.longPress);
           Feedback.forLongPress(_state.context);
           break;
@@ -146,7 +157,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
 /// This will ensure we discard any resources used by the object.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// This example shows how to create a [TextField] that will obscure input. The
 /// [InputDecoration] surrounds the field in a border using [OutlineInputBorder]
 /// and adds a label.
@@ -276,9 +287,15 @@ class TextField extends StatefulWidget {
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
   ///
+  /// The [selectionHeightStyle] and [selectionWidthStyle] properties allow
+  /// changing the shape of the selection highlighting. These properties default
+  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
+  /// must not be null.
+  ///
   /// The [textAlign], [autofocus], [obscureText], [readOnly], [autocorrect],
-  /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength], and
-  /// [enableSuggestions] arguments must not be null.
+  /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
+  /// [selectionHeightStyle], [selectionWidthStyle], and [enableSuggestions]
+  /// arguments must not be null.
   ///
   /// See also:
   ///
@@ -303,6 +320,8 @@ class TextField extends StatefulWidget {
     this.autofocus = false,
     this.obscureText = false,
     this.autocorrect = true,
+    SmartDashesType smartDashesType,
+    SmartQuotesType smartQuotesType,
     this.enableSuggestions = true,
     this.maxLines = 1,
     this.minLines,
@@ -317,6 +336,8 @@ class TextField extends StatefulWidget {
     this.cursorWidth = 2.0,
     this.cursorRadius,
     this.cursorColor,
+    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
+    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
@@ -330,16 +351,20 @@ class TextField extends StatefulWidget {
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
        assert(enableInteractiveSelection != null),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
+       assert(selectionHeightStyle != null),
+       assert(selectionWidthStyle != null),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
        assert(
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-         'minLines can\'t be greater than maxLines',
+         "minLines can't be greater than maxLines",
        ),
        assert(expands != null),
        assert(
@@ -432,7 +457,7 @@ class TextField extends StatefulWidget {
   ///
   /// This text style is also used as the base style for the [decoration].
   ///
-  /// If null, defaults to the `subhead` text style from the current [Theme].
+  /// If null, defaults to the `subtitle1` text style from the current [Theme].
   final TextStyle style;
 
   /// {@macro flutter.widgets.editableText.strutStyle}
@@ -441,7 +466,7 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textAlign}
   final TextAlign textAlign;
 
-  /// {@macro flutter.material.inputDecorator.textAlignVertical}
+  /// {@macro flutter.widgets.inputDecorator.textAlignVertical}
   final TextAlignVertical textAlignVertical;
 
   /// {@macro flutter.widgets.editableText.textDirection}
@@ -455,6 +480,12 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
+
+  /// {@macro flutter.services.textInput.smartDashesType}
+  final SmartDashesType smartDashesType;
+
+  /// {@macro flutter.services.textInput.smartQuotesType}
+  final SmartQuotesType smartQuotesType;
 
   /// {@macro flutter.services.textInput.enableSuggestions}
   final bool enableSuggestions;
@@ -590,6 +621,16 @@ class TextField extends StatefulWidget {
   /// depending on [ThemeData.platform].
   final Color cursorColor;
 
+  /// Controls how tall the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxHeightStyle] for details on available styles.
+  final ui.BoxHeightStyle selectionHeightStyle;
+
+  /// Controls how wide the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxWidthStyle] for details on available styles.
+  final ui.BoxWidthStyle selectionWidthStyle;
+
   /// The appearance of the keyboard.
   ///
   /// This setting is only honored on iOS devices.
@@ -641,7 +682,7 @@ class TextField extends StatefulWidget {
   /// accessibility, but it also needs to be accessible itself.  For example,
   /// if returning a Text widget, set the [semanticsLabel] property.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// ```dart
   /// Widget counter(
   ///   BuildContext context,
@@ -658,9 +699,12 @@ class TextField extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
+  ///
+  /// If buildCounter returns null, then no counter and no Semantics widget will
+  /// be created at all.
   final InputCounterWidgetBuilder buildCounter;
 
-  /// {@macro flutter.widgets.edtiableText.scrollPhysics}
+  /// {@macro flutter.widgets.editableText.scrollPhysics}
   final ScrollPhysics scrollPhysics;
 
   /// {@macro flutter.widgets.editableText.scrollController}
@@ -681,6 +725,8 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
+    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
@@ -756,16 +802,20 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         && effectiveDecoration.counterText == null
         && widget.buildCounter != null) {
       final bool isFocused = _effectiveFocusNode.hasFocus;
-      counter = Semantics(
-        container: true,
-        liveRegion: isFocused,
-        child: widget.buildCounter(
-          context,
-          currentLength: currentLength,
-          maxLength: widget.maxLength,
-          isFocused: isFocused,
-        ),
+      final Widget builtCounter = widget.buildCounter(
+        context,
+        currentLength: currentLength,
+        maxLength: widget.maxLength,
+        isFocused: isFocused,
       );
+      // If buildCounter returns null, don't add a counter widget to the field.
+      if (builtCounter != null) {
+        counter = Semantics(
+          container: true,
+          liveRegion: isFocused,
+          child: builtCounter,
+        );
+      }
       return effectiveDecoration.copyWith(counter: counter);
     }
 
@@ -779,7 +829,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     if (widget.maxLength > 0) {
       // Show the maxLength in the counter
       counterText += '/${widget.maxLength}';
-      final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength);
+      final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength) as int;
       semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
 
       // Handle length exceeds maxLength
@@ -868,12 +918,15 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
 
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         if (cause == SelectionChangedCause.longPress) {
           _editableText?.bringIntoView(selection.base);
         }
         return;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         // Do nothing.
     }
   }
@@ -888,7 +941,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
   void _handleHover(bool hovering) {
     if (hovering != _isHovering) {
       setState(() {
-        return _isHovering = hovering;
+        _isHovering = hovering;
       });
     }
   }
@@ -906,7 +959,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     );
 
     final ThemeData themeData = Theme.of(context);
-    final TextStyle style = themeData.textTheme.subhead.merge(widget.style);
+    final TextStyle style = themeData.textTheme.subtitle1.merge(widget.style);
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.primaryColorBrightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
@@ -923,6 +976,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
 
     switch (themeData.platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         forcePressEnabled = true;
         textSelectionControls = cupertinoTextSelectionControls;
         paintCursorAboveText = true;
@@ -934,6 +988,8 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         forcePressEnabled = false;
         textSelectionControls = materialTextSelectionControls;
         paintCursorAboveText = false;
@@ -961,6 +1017,8 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         autofocus: widget.autofocus,
         obscureText: widget.obscureText,
         autocorrect: widget.autocorrect,
+        smartDashesType: widget.smartDashesType,
+        smartQuotesType: widget.smartQuotesType,
         enableSuggestions: widget.enableSuggestions,
         maxLines: widget.maxLines,
         minLines: widget.minLines,
@@ -977,6 +1035,8 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         cursorWidth: widget.cursorWidth,
         cursorRadius: cursorRadius,
         cursorColor: cursorColor,
+        selectionHeightStyle: widget.selectionHeightStyle,
+        selectionWidthStyle: widget.selectionWidthStyle,
         cursorOpacityAnimates: cursorOpacityAnimates,
         cursorOffset: cursorOffset,
         paintCursorAboveText: paintCursorAboveText,

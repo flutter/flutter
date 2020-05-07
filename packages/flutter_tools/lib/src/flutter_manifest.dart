@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,7 +10,7 @@ import 'base/file_system.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'plugins.dart';
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
@@ -27,10 +27,10 @@ class FlutterManifest {
 
   /// Returns null on invalid manifest. Returns empty manifest on missing file.
   static FlutterManifest createFromPath(String path) {
-    if (path == null || !fs.isFileSync(path)) {
+    if (path == null || !globals.fs.isFileSync(path)) {
       return _createFromYaml(null);
     }
-    final String manifest = fs.file(path).readAsStringSync();
+    final String manifest = globals.fs.file(path).readAsStringSync();
     return createFromString(manifest);
   }
 
@@ -91,7 +91,7 @@ class FlutterManifest {
       version = Version.parse(verStr);
     } on Exception {
       if (!_hasShowInvalidVersionMsg) {
-        printStatus(userMessages.invalidVersionSettingHintMessage(verStr), emphasis: true);
+        globals.printStatus(userMessages.invalidVersionSettingHintMessage(verStr), emphasis: true);
         _hasShowInvalidVersionMsg = true;
       }
     }
@@ -126,7 +126,10 @@ class FlutterManifest {
   ///
   /// If false the deprecated Android Support library will be used.
   bool get usesAndroidX {
-    return _flutterDescriptor['module']['androidX'] as bool ?? false;
+    if (_flutterDescriptor.containsKey('module')) {
+      return _flutterDescriptor['module']['androidX'] as bool;
+    }
+    return false;
   }
 
   /// True if this manifest declares a Flutter module project.
@@ -158,7 +161,11 @@ class FlutterManifest {
     if (isPlugin) {
       final YamlMap plugin = _flutterDescriptor['plugin'] as YamlMap;
       if (plugin.containsKey('platforms')) {
-        return plugin['platforms']['android']['package'] as String;
+        final YamlMap platforms = plugin['platforms'] as YamlMap;
+
+        if (platforms.containsKey('android')) {
+          return platforms['android']['package'] as String;
+        }
       } else {
         return plugin['androidPackage'] as String;
       }
@@ -194,16 +201,16 @@ class FlutterManifest {
       return const <Uri>[];
     }
     final List<Uri> results = <Uri>[];
-    for (Object asset in assets) {
+    for (final Object asset in assets) {
       if (asset is! String || asset == null || asset == '') {
-        printError('Asset manifest contains a null or empty uri.');
+        globals.printError('Asset manifest contains a null or empty uri.');
         continue;
       }
       final String stringAsset = asset as String;
       try {
-        results.add(Uri.parse(Uri.encodeFull(stringAsset)));
+        results.add(Uri(pathSegments: stringAsset.split('/')));
       } on FormatException {
-        printError('Asset manifest contains invalid uri: $asset.');
+        globals.printError('Asset manifest contains invalid uri: $asset.');
       }
     }
     return results;
@@ -222,23 +229,23 @@ class FlutterManifest {
     }
 
     final List<Font> fonts = <Font>[];
-    for (Map<String, dynamic> fontFamily in _rawFontsDescriptor) {
+    for (final Map<String, dynamic> fontFamily in _rawFontsDescriptor) {
       final YamlList fontFiles = fontFamily['fonts'] as YamlList;
       final String familyName = fontFamily['family'] as String;
       if (familyName == null) {
-        printError('Warning: Missing family name for font.', emphasis: true);
+        globals.printError('Warning: Missing family name for font.', emphasis: true);
         continue;
       }
       if (fontFiles == null) {
-        printError('Warning: No fonts specified for font $familyName', emphasis: true);
+        globals.printError('Warning: No fonts specified for font $familyName', emphasis: true);
         continue;
       }
 
       final List<FontAsset> fontAssets = <FontAsset>[];
-      for (Map<dynamic, dynamic> fontFile in fontFiles.cast<Map<dynamic, dynamic>>()) {
+      for (final Map<dynamic, dynamic> fontFile in fontFiles.cast<Map<dynamic, dynamic>>()) {
         final String asset = fontFile['asset'] as String;
         if (asset == null) {
-          printError('Warning: Missing asset in fonts for $familyName', emphasis: true);
+          globals.printError('Warning: Missing asset in fonts for $familyName', emphasis: true);
           continue;
         }
 
@@ -304,14 +311,14 @@ class FontAsset {
 
 @visibleForTesting
 String buildSchemaDir(FileSystem fs) {
-  return fs.path.join(
-    fs.path.absolute(Cache.flutterRoot), 'packages', 'flutter_tools', 'schema',
+  return globals.fs.path.join(
+    globals.fs.path.absolute(Cache.flutterRoot), 'packages', 'flutter_tools', 'schema',
   );
 }
 
 @visibleForTesting
 String buildSchemaPath(FileSystem fs) {
-  return fs.path.join(
+  return globals.fs.path.join(
     buildSchemaDir(fs),
     'pubspec_yaml.json',
   );
@@ -324,7 +331,7 @@ bool _validate(YamlMap manifest) {
   final List<String> errors = <String>[];
   for (final MapEntry<dynamic, dynamic> kvp in manifest.entries) {
     if (kvp.key is! String) {
-      errors.add('Expected YAML key to be a a string, but got ${kvp.key}.');
+      errors.add('Expected YAML key to be a string, but got ${kvp.key}.');
       continue;
     }
     switch (kvp.key as String) {
@@ -339,8 +346,9 @@ bool _validate(YamlMap manifest) {
         }
         if (kvp.value is! YamlMap) {
           errors.add('Expected "${kvp.key}" section to be an object or null, but got ${kvp.value}.');
+        } else {
+          _validateFlutter(kvp.value as YamlMap, errors);
         }
-        _validateFlutter(kvp.value as YamlMap, errors);
         break;
       default:
         // additionalProperties are allowed.
@@ -349,8 +357,8 @@ bool _validate(YamlMap manifest) {
   }
 
   if (errors.isNotEmpty) {
-    printStatus('Error detected in pubspec.yaml:', emphasis: true);
-    printError(errors.join('\n'));
+    globals.printStatus('Error detected in pubspec.yaml:', emphasis: true);
+    globals.printError(errors.join('\n'));
     return false;
   }
 
@@ -363,7 +371,7 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
   }
   for (final MapEntry<dynamic, dynamic> kvp in yaml.entries) {
     if (kvp.key is! String) {
-      errors.add('Expected YAML key to be a a string, but got ${kvp.key} (${kvp.value.runtimeType}).');
+      errors.add('Expected YAML key to be a string, but got ${kvp.key} (${kvp.value.runtimeType}).');
       continue;
     }
     switch (kvp.key as String) {
@@ -428,7 +436,7 @@ void _validateFonts(YamlList fonts, List<String> errors) {
       continue;
     }
     final YamlMap fontMap = fontListEntry as YamlMap;
-    for (dynamic key in fontMap.keys.where((dynamic key) => key != 'family' && key != 'fonts')) {
+    for (final dynamic key in fontMap.keys.where((dynamic key) => key != 'family' && key != 'fonts')) {
       errors.add('Unexpected child "$key" found under "fonts".');
     }
     if (fontMap['family'] != null && fontMap['family'] is! String) {

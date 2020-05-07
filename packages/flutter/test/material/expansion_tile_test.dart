@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -58,7 +58,6 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        platform: TargetPlatform.iOS,
         dividerColor: _dividerColor,
       ),
       home: Material(
@@ -112,12 +111,12 @@ void main() {
     expect(getHeight(topKey), getHeight(collapsedKey) - 2.0);
     expect(getHeight(topKey), getHeight(defaultKey) - 2.0);
 
-    BoxDecoration expandedContainerDecoration = getContainer(expandedKey).decoration;
+    BoxDecoration expandedContainerDecoration = getContainer(expandedKey).decoration as BoxDecoration;
     expect(expandedContainerDecoration.color, Colors.red);
     expect(expandedContainerDecoration.border.top.color, _dividerColor);
     expect(expandedContainerDecoration.border.bottom.color, _dividerColor);
 
-    BoxDecoration collapsedContainerDecoration = getContainer(collapsedKey).decoration;
+    BoxDecoration collapsedContainerDecoration = getContainer(collapsedKey).decoration as BoxDecoration;
     expect(collapsedContainerDecoration.color, Colors.transparent);
     expect(collapsedContainerDecoration.border.top.color, Colors.transparent);
     expect(collapsedContainerDecoration.border.bottom.color, Colors.transparent);
@@ -130,7 +129,7 @@ void main() {
 
     // Pump to the middle of the animation for expansion.
     await tester.pump(const Duration(milliseconds: 100));
-    final BoxDecoration collapsingContainerDecoration = getContainer(collapsedKey).decoration;
+    final BoxDecoration collapsingContainerDecoration = getContainer(collapsedKey).decoration as BoxDecoration;
     expect(collapsingContainerDecoration.color, Colors.transparent);
     // Opacity should change but color component should remain the same.
     expect(collapsingContainerDecoration.border.top.color, const Color(0x15333333));
@@ -144,17 +143,17 @@ void main() {
     expect(getHeight(topKey), getHeight(defaultKey) - getHeight(tileKey) - 2.0);
 
     // Expanded should be collapsed now.
-    expandedContainerDecoration = getContainer(expandedKey).decoration;
+    expandedContainerDecoration = getContainer(expandedKey).decoration as BoxDecoration;
     expect(expandedContainerDecoration.color, Colors.transparent);
     expect(expandedContainerDecoration.border.top.color, Colors.transparent);
     expect(expandedContainerDecoration.border.bottom.color, Colors.transparent);
 
     // Collapsed should be expanded now.
-    collapsedContainerDecoration = getContainer(collapsedKey).decoration;
+    collapsedContainerDecoration = getContainer(collapsedKey).decoration as BoxDecoration;
     expect(collapsedContainerDecoration.color, Colors.transparent);
     expect(collapsedContainerDecoration.border.top.color, _dividerColor);
     expect(collapsedContainerDecoration.border.bottom.color, _dividerColor);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('ListTileTheme', (WidgetTester tester) async {
     final Key expandedTitleKey = UniqueKey();
@@ -165,10 +164,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          platform: TargetPlatform.iOS,
           accentColor: _accentColor,
           unselectedWidgetColor: _unselectedWidgetColor,
-          textTheme: const TextTheme(subhead: TextStyle(color: _headerColor)),
+          textTheme: const TextTheme(subtitle1: TextStyle(color: _headerColor)),
         ),
         home: Material(
           child: SingleChildScrollView(
@@ -214,7 +212,7 @@ void main() {
     expect(textColor(collapsedTitleKey), _accentColor);
     expect(iconColor(expandedIconKey), _unselectedWidgetColor);
     expect(iconColor(collapsedIconKey), _accentColor);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('ExpansionTile subtitle', (WidgetTester tester) async {
     await tester.pumpWidget(

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -92,7 +92,7 @@ abstract class SearchDelegate<T> {
   /// Constructor to be called by subclasses which may specify [searchFieldLabel], [keyboardType] and/or
   /// [textInputAction].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// ```dart
   /// class CustomSearchHintDelegate extends SearchDelegate {
   ///   CustomSearchHintDelegate({
@@ -487,10 +487,13 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     String routeName;
     switch (theme.platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         routeName = '';
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         routeName = searchFieldLabel;
     }
 
@@ -509,7 +512,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
           title: TextField(
             controller: widget.delegate._queryTextController,
             focusNode: focusNode,
-            style: theme.textTheme.title,
+            style: theme.textTheme.headline6,
             textInputAction: widget.delegate.textInputAction,
             keyboardType: widget.delegate.keyboardType,
             onSubmitted: (String _) {

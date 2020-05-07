@@ -1,13 +1,12 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/features.dart';
 import 'package:mockito/mockito.dart';
-
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/macos/macos_workflow.dart';
 import 'package:process/process.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';

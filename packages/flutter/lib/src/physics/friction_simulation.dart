@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -65,7 +65,7 @@ class FrictionSimulation extends Simulation {
   // Solving for D given x(time) is trickier. Algebra courtesy of Wolfram Alpha:
   // x1 = x0 + (v0 * D^((log(v1) - log(v0)) / log(D))) / log(D) - v0 / log(D), find D
   static double _dragFor(double startPosition, double endPosition, double startVelocity, double endVelocity) {
-    return math.pow(math.e, (startVelocity - endVelocity) / (startPosition - endPosition));
+    return math.pow(math.e, (startVelocity - endVelocity) / (startPosition - endPosition)) as double;
   }
 
   @override
@@ -116,7 +116,7 @@ class BoundedFrictionSimulation extends FrictionSimulation {
 
   @override
   double x(double time) {
-    return super.x(time).clamp(_minX, _maxX);
+    return super.x(time).clamp(_minX, _maxX) as double;
   }
 
   @override

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -165,8 +165,8 @@ void main() {
 
   testWidgets('ModalBarrier pops the Navigator when dismissed by primay tap', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => FirstWidget(),
-      '/modal': (BuildContext context) => SecondWidget(),
+      '/': (BuildContext context) => const FirstWidget(),
+      '/modal': (BuildContext context) => const SecondWidget(),
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -195,8 +195,8 @@ void main() {
 
   testWidgets('ModalBarrier pops the Navigator when dismissed by non-primary tap', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => FirstWidget(),
-      '/modal': (BuildContext context) => SecondWidget(),
+      '/': (BuildContext context) => const FirstWidget(),
+      '/modal': (BuildContext context) => const SecondWidget(),
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -226,8 +226,8 @@ void main() {
 
   testWidgets('ModalBarrier may pop the Navigator when competing with other gestures', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => FirstWidget(),
-      '/modal': (BuildContext context) => SecondWidgetWithCompetence (),
+      '/': (BuildContext context) => const FirstWidget(),
+      '/modal': (BuildContext context) => const SecondWidgetWithCompetence(),
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -252,10 +252,10 @@ void main() {
   testWidgets('ModalBarrier does not pop the Navigator with a WillPopScope that returns false', (WidgetTester tester) async {
     bool willPopCalled = false;
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => FirstWidget(),
+      '/': (BuildContext context) => const FirstWidget(),
       '/modal': (BuildContext context) => Stack(
         children: <Widget>[
-          SecondWidget(),
+          const SecondWidget(),
           WillPopScope(
             child: const SizedBox(),
             onWillPop: () async {
@@ -292,10 +292,10 @@ void main() {
   testWidgets('ModalBarrier pops the Navigator with a WillPopScope that returns true', (WidgetTester tester) async {
     bool willPopCalled = false;
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => FirstWidget(),
+      '/': (BuildContext context) => const FirstWidget(),
       '/modal': (BuildContext context) => Stack(
         children: <Widget>[
-          SecondWidget(),
+          const SecondWidget(),
           WillPopScope(
             child: const SizedBox(),
             onWillPop: () async {
@@ -340,8 +340,6 @@ void main() {
   });
 
   testWidgets('Dismissible ModalBarrier includes button in semantic tree on iOS', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
@@ -364,8 +362,7 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 
     semantics.dispose();
-    debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -379,6 +376,7 @@ void main() {
 }
 
 class FirstWidget extends StatelessWidget {
+  const FirstWidget({ Key key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -393,6 +391,7 @@ class FirstWidget extends StatelessWidget {
 }
 
 class SecondWidget extends StatelessWidget {
+  const SecondWidget({ Key key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return const ModalBarrier(
@@ -403,6 +402,7 @@ class SecondWidget extends StatelessWidget {
 }
 
 class SecondWidgetWithCompetence extends StatelessWidget {
+  const SecondWidgetWithCompetence({ Key key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Stack(

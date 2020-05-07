@@ -1,13 +1,12 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import '../base/io.dart';
-import '../base/platform.dart';
-import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../macos/application_package.dart';
 import '../project.dart';
 import 'build_macos.dart';
@@ -59,7 +58,7 @@ class MacOSDevice extends DesktopDevice {
     // than post-attach, since this won't run for release builds, but there's
     // no general-purpose way of knowing when a process is far enoug along in
     // the launch process for 'open' to foreground it.
-    processManager.run(<String>[
+    globals.processManager.run(<String>[
       'open', package.applicationBundle(buildMode),
     ]).then((ProcessResult result) {
       if (result.exitCode != 0) {
@@ -73,13 +72,13 @@ class MacOSDevices extends PollingDeviceDiscovery {
   MacOSDevices() : super('macOS devices');
 
   @override
-  bool get supportsPlatform => platform.isMacOS;
+  bool get supportsPlatform => globals.platform.isMacOS;
 
   @override
   bool get canListAnything => macOSWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() async {
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

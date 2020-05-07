@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -31,6 +31,9 @@ import 'platform_channel.dart';
   'This feature was deprecated after v1.6.5.'
 )
 class BinaryMessages {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   BinaryMessages._();
 
   /// The messenger which sends the platform messages, not null.

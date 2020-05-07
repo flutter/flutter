@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -249,8 +249,8 @@ void main() {
       // RegExp matcher is required here due to flutter web and flutter mobile generating
       // slightly different floating point numbers
       // in Flutter web 0.0 sometimes just appears as 0. or 0
-      RegExp(
-        r'''FlutterError
+      RegExp(r'''
+FlutterError
    Invalid curve endpoint at \d+(\.\d*)?\.
    Curves must map 0\.0 to near zero and 1\.0 to near one but
    BogusCurve mapped \d+(\.\d*)? to \d+(\.\d*)?, which is near \d+(\.\d*)?\.

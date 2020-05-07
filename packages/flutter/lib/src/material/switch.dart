@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -71,7 +71,9 @@ class Switch extends StatefulWidget {
     this.inactiveThumbColor,
     this.inactiveTrackColor,
     this.activeThumbImage,
+    this.onActiveThumbImageError,
     this.inactiveThumbImage,
+    this.onInactiveThumbImageError,
     this.materialTapTargetSize,
     this.dragStartBehavior = DragStartBehavior.start,
     this.focusColor,
@@ -80,6 +82,8 @@ class Switch extends StatefulWidget {
     this.autofocus = false,
   })  : _switchType = _SwitchType.material,
         assert(dragStartBehavior != null),
+        assert(activeThumbImage != null || onActiveThumbImageError == null),
+        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
         super(key: key);
 
   /// Creates a [CupertinoSwitch] if the target platform is iOS, creates a
@@ -87,7 +91,8 @@ class Switch extends StatefulWidget {
   ///
   /// If a [CupertinoSwitch] is created, the following parameters are
   /// ignored: [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
-  /// [activeThumbImage], [inactiveThumbImage], [materialTapTargetSize].
+  /// [activeThumbImage], [onActiveThumbImageError], [inactiveThumbImage],
+  /// [onInactiveImageThumbError], [materialTapTargetSize].
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Switch.adaptive({
@@ -99,7 +104,9 @@ class Switch extends StatefulWidget {
     this.inactiveThumbColor,
     this.inactiveTrackColor,
     this.activeThumbImage,
+    this.onActiveThumbImageError,
     this.inactiveThumbImage,
+    this.onInactiveThumbImageError,
     this.materialTapTargetSize,
     this.dragStartBehavior = DragStartBehavior.start,
     this.focusColor,
@@ -107,6 +114,8 @@ class Switch extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
   })  : assert(autofocus != null),
+        assert(activeThumbImage != null || onActiveThumbImageError == null),
+        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
         _switchType = _SwitchType.adaptive,
         super(key: key);
 
@@ -170,10 +179,18 @@ class Switch extends StatefulWidget {
   /// Ignored if this switch is created with [Switch.adaptive].
   final ImageProvider activeThumbImage;
 
+  /// An optional error callback for errors emitted when loading
+  /// [activeThumbImage].
+  final ImageErrorListener onActiveThumbImageError;
+
   /// An image to use on the thumb of this switch when the switch is off.
   ///
   /// Ignored if this switch is created with [Switch.adaptive].
   final ImageProvider inactiveThumbImage;
+
+  /// An optional error callback for errors emitted when loading
+  /// [inactiveThumbImage].
+  final ImageErrorListener onInactiveThumbImageError;
 
   /// Configures the minimum size of the tap target.
   ///
@@ -219,8 +236,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _actionMap = <LocalKey, ActionFactory>{
-      SelectAction.key: _createAction,
-      if (!kIsWeb) ActivateAction.key: _createAction,
+      ActivateAction.key: _createAction,
     };
   }
 
@@ -234,7 +250,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
 
   Action _createAction() {
     return CallbackAction(
-      SelectAction.key,
+      ActivateAction.key,
       onInvoke: _actionHandler,
     );
   }
@@ -267,6 +283,12 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
   }
 
   bool get enabled => widget.onChanged != null;
+
+  void _didFinishDragging() {
+    // The user has finished dragging the thumb of this switch. Rebuild the switch
+    // to update the animation.
+    setState(() {});
+  }
 
   Widget buildMaterialSwitch(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -306,7 +328,9 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
             hoverColor: hoverColor,
             focusColor: focusColor,
             activeThumbImage: widget.activeThumbImage,
+            onActiveThumbImageError: widget.onActiveThumbImageError,
             inactiveThumbImage: widget.inactiveThumbImage,
+            onInactiveThumbImageError: widget.onInactiveThumbImageError,
             activeTrackColor: activeTrackColor,
             inactiveTrackColor: inactiveTrackColor,
             configuration: createLocalImageConfiguration(context),
@@ -314,7 +338,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
             additionalConstraints: BoxConstraints.tight(getSwitchSize(theme)),
             hasFocus: _focused,
             hovering: _hovering,
-            vsync: this,
+            state: this,
           );
         },
       ),
@@ -335,6 +359,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
           value: widget.value,
           onChanged: widget.onChanged,
           activeColor: widget.activeColor,
+          trackColor: widget.inactiveTrackColor
         ),
       ),
     );
@@ -352,8 +377,11 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
         switch (theme.platform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
             return buildMaterialSwitch(context);
           case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
             return buildCupertinoSwitch(context);
         }
       }
@@ -372,16 +400,18 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     this.hoverColor,
     this.focusColor,
     this.activeThumbImage,
+    this.onActiveThumbImageError,
     this.inactiveThumbImage,
+    this.onInactiveThumbImageError,
     this.activeTrackColor,
     this.inactiveTrackColor,
     this.configuration,
     this.onChanged,
-    this.vsync,
     this.additionalConstraints,
     this.dragStartBehavior,
     this.hasFocus,
     this.hovering,
+    this.state,
   }) : super(key: key);
 
   final bool value;
@@ -390,16 +420,18 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final Color hoverColor;
   final Color focusColor;
   final ImageProvider activeThumbImage;
+  final ImageErrorListener onActiveThumbImageError;
   final ImageProvider inactiveThumbImage;
+  final ImageErrorListener onInactiveThumbImageError;
   final Color activeTrackColor;
   final Color inactiveTrackColor;
   final ImageConfiguration configuration;
   final ValueChanged<bool> onChanged;
-  final TickerProvider vsync;
   final BoxConstraints additionalConstraints;
   final DragStartBehavior dragStartBehavior;
   final bool hasFocus;
   final bool hovering;
+  final _SwitchState state;
 
   @override
   _RenderSwitch createRenderObject(BuildContext context) {
@@ -411,7 +443,9 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       hoverColor: hoverColor,
       focusColor: focusColor,
       activeThumbImage: activeThumbImage,
+      onActiveThumbImageError: onActiveThumbImageError,
       inactiveThumbImage: inactiveThumbImage,
+      onInactiveThumbImageError: onInactiveThumbImageError,
       activeTrackColor: activeTrackColor,
       inactiveTrackColor: inactiveTrackColor,
       configuration: configuration,
@@ -420,7 +454,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       additionalConstraints: additionalConstraints,
       hasFocus: hasFocus,
       hovering: hovering,
-      vsync: vsync,
+      state: state,
     );
   }
 
@@ -433,7 +467,9 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..hoverColor = hoverColor
       ..focusColor = focusColor
       ..activeThumbImage = activeThumbImage
+      ..onActiveThumbImageError = onActiveThumbImageError
       ..inactiveThumbImage = inactiveThumbImage
+      ..onInactiveThumbImageError = onInactiveThumbImageError
       ..activeTrackColor = activeTrackColor
       ..inactiveTrackColor = inactiveTrackColor
       ..configuration = configuration
@@ -443,7 +479,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..dragStartBehavior = dragStartBehavior
       ..hasFocus = hasFocus
       ..hovering = hovering
-      ..vsync = vsync;
+      ..vsync = state;
   }
 }
 
@@ -455,7 +491,9 @@ class _RenderSwitch extends RenderToggleable {
     Color hoverColor,
     Color focusColor,
     ImageProvider activeThumbImage,
+    ImageErrorListener onActiveThumbImageError,
     ImageProvider inactiveThumbImage,
+    ImageErrorListener onInactiveThumbImageError,
     Color activeTrackColor,
     Color inactiveTrackColor,
     ImageConfiguration configuration,
@@ -465,10 +503,12 @@ class _RenderSwitch extends RenderToggleable {
     DragStartBehavior dragStartBehavior,
     bool hasFocus,
     bool hovering,
-    @required TickerProvider vsync,
+    @required this.state,
   }) : assert(textDirection != null),
        _activeThumbImage = activeThumbImage,
+       _onActiveThumbImageError = onActiveThumbImageError,
        _inactiveThumbImage = inactiveThumbImage,
+       _onInactiveThumbImageError = onInactiveThumbImageError,
        _activeTrackColor = activeTrackColor,
        _inactiveTrackColor = inactiveTrackColor,
        _configuration = configuration,
@@ -484,7 +524,7 @@ class _RenderSwitch extends RenderToggleable {
          additionalConstraints: additionalConstraints,
          hasFocus: hasFocus,
          hovering: hovering,
-         vsync: vsync,
+         vsync: state,
        ) {
     _drag = HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
@@ -502,12 +542,32 @@ class _RenderSwitch extends RenderToggleable {
     markNeedsPaint();
   }
 
+  ImageErrorListener get onActiveThumbImageError => _onActiveThumbImageError;
+  ImageErrorListener _onActiveThumbImageError;
+  set onActiveThumbImageError(ImageErrorListener value) {
+    if (value == _onActiveThumbImageError) {
+      return;
+    }
+    _onActiveThumbImageError = value;
+    markNeedsPaint();
+  }
+
   ImageProvider get inactiveThumbImage => _inactiveThumbImage;
   ImageProvider _inactiveThumbImage;
   set inactiveThumbImage(ImageProvider value) {
     if (value == _inactiveThumbImage)
       return;
     _inactiveThumbImage = value;
+    markNeedsPaint();
+  }
+
+  ImageErrorListener get onInactiveThumbImageError => _onInactiveThumbImageError;
+  ImageErrorListener _onInactiveThumbImageError;
+  set onInactiveThumbImageError(ImageErrorListener value) {
+    if (value == _onInactiveThumbImageError) {
+      return;
+    }
+    _onInactiveThumbImageError = value;
     markNeedsPaint();
   }
 
@@ -559,6 +619,26 @@ class _RenderSwitch extends RenderToggleable {
     _drag.dragStartBehavior = value;
   }
 
+  _SwitchState state;
+
+  @override
+  set value(bool newValue) {
+    assert(value != null);
+    super.value = newValue;
+    // The widget is rebuilt and we have pending position animation to play.
+    if (_needsPositionAnimation) {
+      _needsPositionAnimation = false;
+      position
+        ..curve = null
+        ..reverseCurve = null;
+      if (newValue)
+        positionController.forward();
+      else
+        positionController.reverse();
+    }
+  }
+
+
   @override
   void detach() {
     _cachedThumbPainter?.dispose();
@@ -569,6 +649,8 @@ class _RenderSwitch extends RenderToggleable {
   double get _trackInnerLength => size.width - 2.0 * kRadialReactionRadius;
 
   HorizontalDragGestureRecognizer _drag;
+
+  bool _needsPositionAnimation = false;
 
   void _handleDragStart(DragStartDetails details) {
     if (isInteractive)
@@ -593,11 +675,12 @@ class _RenderSwitch extends RenderToggleable {
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (position.value >= 0.5)
-      positionController.forward();
-    else
-      positionController.reverse();
+    _needsPositionAnimation = true;
+
+    if (position.value >= 0.5 != value)
+      onChanged(!value);
     reactionController.reverse();
+    state._didFinishDragging();
   }
 
   @override
@@ -610,12 +693,13 @@ class _RenderSwitch extends RenderToggleable {
 
   Color _cachedThumbColor;
   ImageProvider _cachedThumbImage;
+  ImageErrorListener _cachedThumbErrorListener;
   BoxPainter _cachedThumbPainter;
 
-  BoxDecoration _createDefaultThumbDecoration(Color color, ImageProvider image) {
+  BoxDecoration _createDefaultThumbDecoration(Color color, ImageProvider image, ImageErrorListener errorListener) {
     return BoxDecoration(
       color: color,
-      image: image == null ? null : DecorationImage(image: image),
+      image: image == null ? null : DecorationImage(image: image, onError: errorListener),
       shape: BoxShape.circle,
       boxShadow: kElevationToShadow[1],
     );
@@ -666,6 +750,10 @@ class _RenderSwitch extends RenderToggleable {
       ? (currentValue < 0.5 ? inactiveThumbImage : activeThumbImage)
       : inactiveThumbImage;
 
+    final ImageErrorListener thumbErrorListener = isEnabled
+      ? (currentValue < 0.5 ? onInactiveThumbImageError : onActiveThumbImageError)
+      : onInactiveThumbImageError;
+
     // Paint the track
     final Paint paint = Paint()
       ..color = trackColor;
@@ -689,10 +777,11 @@ class _RenderSwitch extends RenderToggleable {
     try {
       _isPainting = true;
       BoxPainter thumbPainter;
-      if (_cachedThumbPainter == null || thumbColor != _cachedThumbColor || thumbImage != _cachedThumbImage) {
+      if (_cachedThumbPainter == null || thumbColor != _cachedThumbColor || thumbImage != _cachedThumbImage || thumbErrorListener != _cachedThumbErrorListener) {
         _cachedThumbColor = thumbColor;
         _cachedThumbImage = thumbImage;
-        _cachedThumbPainter = _createDefaultThumbDecoration(thumbColor, thumbImage).createBoxPainter(_handleDecorationChanged);
+        _cachedThumbErrorListener = thumbErrorListener;
+        _cachedThumbPainter = _createDefaultThumbDecoration(thumbColor, thumbImage, thumbErrorListener).createBoxPainter(_handleDecorationChanged);
       }
       thumbPainter = _cachedThumbPainter;
 

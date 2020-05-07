@@ -1,20 +1,12 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  if (!kIsWeb && Platform.isMacOS) {
-    // TODO(gspencergoog): Update this when TargetPlatform includes macOS. https://github.com/flutter/flutter/issues/31366
-    // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
-    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-  }
-
   runApp(MaterialApp(
     title: 'Hardware Key Demo',
     home: Scaffold(
@@ -75,12 +67,12 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
               onTap: () {
                 _focusNode.requestFocus();
               },
-              child: Text('Tap to focus', style: textTheme.display1),
+              child: Text('Tap to focus', style: textTheme.headline4),
             );
           }
 
           if (_event == null) {
-            return Text('Press a key', style: textTheme.display1);
+            return Text('Press a key', style: textTheme.headline4);
           }
 
           final RawKeyEventData data = _event.data;
@@ -123,8 +115,8 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
           if (_event.character != null) {
             dataText.add(Text('character: ${_event.character}'));
           }
-          for (ModifierKey modifier in data.modifiersPressed.keys) {
-            for (KeyboardSide side in KeyboardSide.values) {
+          for (final ModifierKey modifier in data.modifiersPressed.keys) {
+            for (final KeyboardSide side in KeyboardSide.values) {
               if (data.isModifierPressed(modifier, side: side)) {
                 dataText.add(
                   Text('${_getEnumName(side)} ${_getEnumName(modifier).replaceAll('Modifier', '')} pressed'),
@@ -132,8 +124,13 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
               }
             }
           }
+          final List<String> pressed = <String>['Pressed:'];
+          for (final LogicalKeyboardKey key in RawKeyboard.instance.keysPressed) {
+            pressed.add(key.debugName);
+          }
+          dataText.add(Text(pressed.join(' ')));
           return DefaultTextStyle(
-            style: textTheme.subhead,
+            style: textTheme.subtitle1,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: dataText,

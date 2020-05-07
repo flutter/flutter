@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -30,7 +30,7 @@ import 'text_style.dart';
 /// span in a widget, use a [RichText]. For text with a single style, consider
 /// using the [Text] widget.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The text "Hello world!", in black:
 ///
@@ -110,7 +110,7 @@ class TextSpan extends InlineSpan {
   /// [GestureRecognizer.dispose] when the [InlineSpan] object is no longer
   /// used.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This example shows how to manage the lifetime of a gesture recognizer
   /// provided to an [InlineSpan] object. It defines a `BuzzingText` widget
@@ -206,7 +206,7 @@ class TextSpan extends InlineSpan {
     if (text != null)
       builder.addText(text);
     if (children != null) {
-      for (InlineSpan child in children) {
+      for (final InlineSpan child in children) {
         assert(child != null);
         child.build(
           builder,
@@ -231,7 +231,7 @@ class TextSpan extends InlineSpan {
         return false;
     }
     if (children != null) {
-      for (InlineSpan child in children) {
+      for (final InlineSpan child in children) {
         if (!child.visitChildren(visitor))
           return false;
       }
@@ -256,12 +256,12 @@ class TextSpan extends InlineSpan {
         return false;
     }
     if (children != null) {
-      for (InlineSpan child in children) {
+      for (final InlineSpan child in children) {
         assert(
           child is TextSpan,
           'visitTextSpan is deprecated. Use visitChildren to support InlineSpans',
         );
-        final TextSpan textSpanChild = child;
+        final TextSpan textSpanChild = child as TextSpan;
         if (!textSpanChild.visitTextSpan(visitor))
           return false;
       }
@@ -300,7 +300,7 @@ class TextSpan extends InlineSpan {
       buffer.write(text);
     }
     if (children != null) {
-      for (InlineSpan child in children) {
+      for (final InlineSpan child in children) {
         child.computeToPlainText(buffer,
           includeSemanticsLabels: includeSemanticsLabels,
           includePlaceholders: includePlaceholders,
@@ -320,7 +320,7 @@ class TextSpan extends InlineSpan {
       ));
     }
     if (children != null) {
-      for (InlineSpan child in children) {
+      for (final InlineSpan child in children) {
         child.computeSemanticsInformation(collector);
       }
     }
@@ -364,7 +364,7 @@ class TextSpan extends InlineSpan {
   bool debugAssertIsValid() {
     assert(() {
       if (children != null) {
-        for (InlineSpan child in children) {
+        for (final InlineSpan child in children) {
           if (child == null) {
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('TextSpan contains a null child.'),
@@ -388,7 +388,7 @@ class TextSpan extends InlineSpan {
       return RenderComparison.identical;
     if (other.runtimeType != runtimeType)
       return RenderComparison.layout;
-    final TextSpan textSpan = other;
+    final TextSpan textSpan = other as TextSpan;
     if (textSpan.text != text ||
         children?.length != textSpan.children?.length ||
         (style == null) != (textSpan.style == null))
@@ -416,18 +416,18 @@ class TextSpan extends InlineSpan {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
     if (super != other)
       return false;
-    final TextSpan typedOther = other;
-    return typedOther.text == text
-        && typedOther.recognizer == recognizer
-        && typedOther.semanticsLabel == semanticsLabel
-        && listEquals<InlineSpan>(typedOther.children, children);
+    return other is TextSpan
+        && other.text == text
+        && other.recognizer == recognizer
+        && other.semanticsLabel == semanticsLabel
+        && listEquals<InlineSpan>(other.children, children);
   }
 
   @override
@@ -440,7 +440,7 @@ class TextSpan extends InlineSpan {
   );
 
   @override
-  String toStringShort() => '$runtimeType';
+  String toStringShort() => objectRuntimeType(this, 'TextSpan');
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

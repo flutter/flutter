@@ -93,8 +93,17 @@ unlinked_spec.ds
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
 
+# macOS
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+**/macos/Flutter/Flutter-Debug.xcconfig
+**/macos/Flutter/Flutter-Release.xcconfig
+**/macos/Flutter/Flutter-Profile.xcconfig
+
 # Coverage
 coverage/
+
+# Symbols
+app.*.symbols
 
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3

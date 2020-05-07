@@ -1,24 +1,10 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-import 'file_system.dart';
-import 'platform.dart';
 
 /// Whether the tool started from the daemon, as opposed to the command line.
 // TODO(jonahwilliams): remove once IDE updates have rolled.
 bool isRunningFromDaemon = false;
-
-/// Return the absolute path of the user's home directory
-String get homeDirPath {
-  String path = platform.isWindows
-      ? platform.environment['USERPROFILE']
-      : platform.environment['HOME'];
-  if (path != null) {
-    path = fs.path.absolute(path);
-  }
-  return path;
-}
 
 /// Throw a specialized exception for expected situations
 /// where the tool should exit with a clear message to the user

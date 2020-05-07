@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,7 +9,6 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/scheduler/ticker.dart';
 import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
@@ -82,21 +81,25 @@ void main() {
   });
 
   test('RenderPhysicalModel compositing on non-Fuchsia', () {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    for (final TargetPlatform platform in TargetPlatform.values) {
+      if (platform == TargetPlatform.fuchsia) {
+        continue;
+      }
+      debugDefaultTargetPlatformOverride = platform;
 
-    final RenderPhysicalModel root = RenderPhysicalModel(color: const Color(0xffff00ff));
-    layout(root, phase: EnginePhase.composite);
-    expect(root.needsCompositing, isTrue);
+      final RenderPhysicalModel root = RenderPhysicalModel(color: const Color(0xffff00ff));
+      layout(root, phase: EnginePhase.composite);
+      expect(root.needsCompositing, isTrue);
 
-    // Flutter now composites physical shapes on all platforms.
-    root.elevation = 1.0;
-    pumpFrame(phase: EnginePhase.composite);
-    expect(root.needsCompositing, isTrue);
+      // Flutter now composites physical shapes on all platforms.
+      root.elevation = 1.0;
+      pumpFrame(phase: EnginePhase.composite);
+      expect(root.needsCompositing, isTrue);
 
-    root.elevation = 0.0;
-    pumpFrame(phase: EnginePhase.composite);
-    expect(root.needsCompositing, isTrue);
-
+      root.elevation = 0.0;
+      pumpFrame(phase: EnginePhase.composite);
+      expect(root.needsCompositing, isTrue);
+    }
     debugDefaultTargetPlatformOverride = null;
   });
 
@@ -122,44 +125,53 @@ void main() {
   });
 
   group('RenderPhysicalShape', () {
-    setUp(() {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-    });
-
     test('shape change triggers repaint', () {
-      final RenderPhysicalShape root = RenderPhysicalShape(
-        color: const Color(0xffff00ff),
-        clipper: const ShapeBorderClipper(shape: CircleBorder()),
-      );
-      layout(root, phase: EnginePhase.composite);
-      expect(root.debugNeedsPaint, isFalse);
+      for (final TargetPlatform platform in TargetPlatform.values) {
+        if (platform == TargetPlatform.fuchsia) {
+          continue;
+        }
+        debugDefaultTargetPlatformOverride = platform;
 
-      // Same shape, no repaint.
-      root.clipper = const ShapeBorderClipper(shape: CircleBorder());
-      expect(root.debugNeedsPaint, isFalse);
+        final RenderPhysicalShape root = RenderPhysicalShape(
+          color: const Color(0xffff00ff),
+          clipper: const ShapeBorderClipper(shape: CircleBorder()),
+        );
+        layout(root, phase: EnginePhase.composite);
+        expect(root.debugNeedsPaint, isFalse);
 
-      // Different shape triggers repaint.
-      root.clipper = const ShapeBorderClipper(shape: StadiumBorder());
-      expect(root.debugNeedsPaint, isTrue);
+        // Same shape, no repaint.
+        root.clipper = const ShapeBorderClipper(shape: CircleBorder());
+        expect(root.debugNeedsPaint, isFalse);
+
+        // Different shape triggers repaint.
+        root.clipper = const ShapeBorderClipper(shape: StadiumBorder());
+        expect(root.debugNeedsPaint, isTrue);
+      }
+      debugDefaultTargetPlatformOverride = null;
     });
 
     test('compositing on non-Fuchsia', () {
-      final RenderPhysicalShape root = RenderPhysicalShape(
-        color: const Color(0xffff00ff),
-        clipper: const ShapeBorderClipper(shape: CircleBorder()),
-      );
-      layout(root, phase: EnginePhase.composite);
-      expect(root.needsCompositing, isTrue);
+      for (final TargetPlatform platform in TargetPlatform.values) {
+        if (platform == TargetPlatform.fuchsia) {
+          continue;
+        }
+        debugDefaultTargetPlatformOverride = platform;
+        final RenderPhysicalShape root = RenderPhysicalShape(
+          color: const Color(0xffff00ff),
+          clipper: const ShapeBorderClipper(shape: CircleBorder()),
+        );
+        layout(root, phase: EnginePhase.composite);
+        expect(root.needsCompositing, isTrue);
 
-      // On non-Fuchsia platforms, we composite physical shape layers
-      root.elevation = 1.0;
-      pumpFrame(phase: EnginePhase.composite);
-      expect(root.needsCompositing, isTrue);
+        // On non-Fuchsia platforms, we composite physical shape layers
+        root.elevation = 1.0;
+        pumpFrame(phase: EnginePhase.composite);
+        expect(root.needsCompositing, isTrue);
 
-      root.elevation = 0.0;
-      pumpFrame(phase: EnginePhase.composite);
-      expect(root.needsCompositing, isTrue);
-
+        root.elevation = 0.0;
+        pumpFrame(phase: EnginePhase.composite);
+        expect(root.needsCompositing, isTrue);
+      }
       debugDefaultTargetPlatformOverride = null;
     });
   });
@@ -218,7 +230,7 @@ void main() {
     expect(getPixel(0, 0), equals(0x00000080));
     expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
-    final OffsetLayer layer = boundary.debugLayer;
+    final OffsetLayer layer = boundary.debugLayer as OffsetLayer;
 
     image = await layer.toImage(Offset.zero & const Size(20.0, 20.0));
     expect(image.width, equals(20));
@@ -277,7 +289,7 @@ void main() {
 
   test('RenderAnimatedOpacity does not composite if it is transparent', () async {
     final Animation<double> opacityAnimation = AnimationController(
-      vsync: _FakeTickerProvider(),
+      vsync: FakeTickerProvider(),
     )..value = 0.0;
 
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
@@ -292,7 +304,7 @@ void main() {
 
   test('RenderAnimatedOpacity does not composite if it is opaque', () {
     final Animation<double> opacityAnimation = AnimationController(
-      vsync: _FakeTickerProvider(),
+      vsync: FakeTickerProvider(),
     )..value = 1.0;
 
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
@@ -307,7 +319,7 @@ void main() {
 
   test('RenderAnimatedOpacity reuses its layer', () {
     final Animation<double> opacityAnimation = AnimationController(
-      vsync: _FakeTickerProvider(),
+      vsync: FakeTickerProvider(),
     )..value = 0.5;  // must not be 0 or 1.0. Otherwise, it won't create a layer
 
     _testLayerReuse<OpacityLayer>(RenderAnimatedOpacity(
@@ -455,6 +467,32 @@ void main() {
     // transform -> clip
     _testFittedBoxWithClipRectLayer();
   });
+
+  test('RenderMouseRegion can change properties when detached', () {
+    renderer.initMouseTracker(MouseTracker(
+      renderer.pointerRouter,
+      (_) => <MouseTrackerAnnotation>[],
+    ));
+    final RenderMouseRegion object = RenderMouseRegion();
+    object
+      ..opaque = false
+      ..onEnter = (_) {}
+      ..onExit = (_) {}
+      ..onHover = (_) {};
+    // Passes if no error is thrown
+  });
+
+  test('RenderFractionalTranslation updates its semantics after its translation value is set', () {
+    final _TestSemanticsUpdateRenderFractionalTranslation box = _TestSemanticsUpdateRenderFractionalTranslation(
+      translation: const Offset(0.5, 0.5),
+    );
+    layout(box, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
+    expect(box.markNeedsSemanticsUpdateCallCount, 1);
+    box.translation = const Offset(0.4, 0.4);
+    expect(box.markNeedsSemanticsUpdateCallCount, 2);
+    box.translation = const Offset(0.3, 0.3);
+    expect(box.markNeedsSemanticsUpdateCallCount, 3);
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
@@ -483,70 +521,15 @@ class _TestRRectClipper extends CustomClipper<RRect> {
   bool shouldReclip(_TestRRectClipper oldClipper) => true;
 }
 
-class _FakeTickerProvider implements TickerProvider {
-  @override
-  Ticker createTicker(TickerCallback onTick, [ bool disableAnimations = false ]) {
-    return _FakeTicker();
-  }
-}
-
-class _FakeTicker implements Ticker {
-  @override
-  bool muted;
-
-  @override
-  void absorbTicker(Ticker originalTicker) { }
-
-  @override
-  String get debugLabel => null;
-
-  @override
-  bool get isActive => null;
-
-  @override
-  bool get isTicking => null;
-
-  @override
-  bool get scheduled => null;
-
-  @override
-  bool get shouldScheduleTick => null;
-
-  @override
-  void dispose() { }
-
-  @override
-  void scheduleTick({ bool rescheduling = false }) { }
-
-  @override
-  TickerFuture start() {
-    return null;
-  }
-
-  @override
-  void stop({ bool canceled = false }) { }
-
-  @override
-  void unscheduleTick() { }
-
-  @override
-  String toString({ bool debugIncludeStack = false }) => super.toString();
-
-  @override
-  DiagnosticsNode describeForError(String name) {
-    return DiagnosticsProperty<Ticker>(name, this, style: DiagnosticsTreeStyle.errorProperty);
-  }
-}
-
 // Forces two frames and checks that:
 // - a layer is created on the first frame
 // - the layer is reused on the second frame
-void _testLayerReuse<L extends Layer>(RenderObject renderObject) {
+void _testLayerReuse<L extends Layer>(RenderBox renderObject) {
   expect(L, isNot(Layer));
   expect(renderObject.debugLayer, null);
   layout(renderObject, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));
   final Layer layer = renderObject.debugLayer;
-  expect(layer, isInstanceOf<L>());
+  expect(layer, isA<L>());
   expect(layer, isNotNull);
 
   // Mark for repaint otherwise pumpFrame is a noop.
@@ -565,4 +548,19 @@ class _TestPathClipper extends CustomClipper<Path> {
   }
   @override
   bool shouldReclip(_TestPathClipper oldClipper) => false;
+}
+
+class _TestSemanticsUpdateRenderFractionalTranslation extends RenderFractionalTranslation {
+  _TestSemanticsUpdateRenderFractionalTranslation({
+    @required Offset translation,
+    RenderBox child,
+  }) : super(translation: translation, child: child);
+
+  int markNeedsSemanticsUpdateCallCount = 0;
+
+  @override
+  void markNeedsSemanticsUpdate() {
+    markNeedsSemanticsUpdateCallCount++;
+    super.markNeedsSemanticsUpdate();
+  }
 }

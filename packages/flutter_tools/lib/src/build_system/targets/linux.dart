@@ -1,16 +1,17 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
-import '../../globals.dart';
+import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
+import 'icon_tree_shaker.dart';
 
 /// The only files/subdirectories we care out.
 const List<String> _kLinuxArtifacts = <String>[
@@ -48,10 +49,10 @@ class UnpackLinuxDebug extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final String basePath = artifacts.getArtifactPath(Artifact.linuxDesktopPath);
+    final String basePath = globals.artifacts.getArtifactPath(Artifact.linuxDesktopPath);
     final List<File> inputs = <File>[];
     final List<File> outputs = <File>[];
-    final String outputPrefix = fs.path.join(
+    final String outputPrefix = globals.fs.path.join(
       environment.projectDir.path,
       'linux',
       'flutter',
@@ -59,19 +60,19 @@ class UnpackLinuxDebug extends Target {
     );
     // The native linux artifacts are composed of 6 files and a directory (listed above)
     // which need to be copied to the target directory.
-    for (String artifact in _kLinuxArtifacts) {
-      final String entityPath = fs.path.join(basePath, artifact);
+    for (final String artifact in _kLinuxArtifacts) {
+      final String entityPath = globals.fs.path.join(basePath, artifact);
       // If this artifact is a file, just copy the source over.
-      if (fs.isFileSync(entityPath)) {
-        final String outputPath = fs.path.join(
+      if (globals.fs.isFileSync(entityPath)) {
+        final String outputPath = globals.fs.path.join(
           outputPrefix,
-          fs.path.relative(entityPath, from: basePath),
+          globals.fs.path.relative(entityPath, from: basePath),
         );
-        final File destinationFile = fs.file(outputPath);
+        final File destinationFile = globals.fs.file(outputPath);
         if (!destinationFile.parent.existsSync()) {
           destinationFile.parent.createSync(recursive: true);
         }
-        final File inputFile = fs.file(entityPath);
+        final File inputFile = globals.fs.file(entityPath);
         inputFile.copySync(destinationFile.path);
         inputs.add(inputFile);
         outputs.add(destinationFile);
@@ -79,25 +80,33 @@ class UnpackLinuxDebug extends Target {
       }
       // If the artifact is the directory cpp_client_wrapper, recursively
       // copy every file from it.
-      for (File input in fs.directory(entityPath)
+      for (final File input in globals.fs.directory(entityPath)
           .listSync(recursive: true)
           .whereType<File>()) {
-        final String outputPath = fs.path.join(
+        final String outputPath = globals.fs.path.join(
           outputPrefix,
-          fs.path.relative(input.path, from: basePath),
+          globals.fs.path.relative(input.path, from: basePath),
         );
-        final File destinationFile = fs.file(outputPath);
+        final File destinationFile = globals.fs.file(outputPath);
         if (!destinationFile.parent.existsSync()) {
           destinationFile.parent.createSync(recursive: true);
         }
-        final File inputFile = fs.file(input);
+        final File inputFile = globals.fs.file(input);
         inputFile.copySync(destinationFile.path);
         inputs.add(inputFile);
         outputs.add(destinationFile);
       }
     }
     final Depfile depfile = Depfile(inputs, outputs);
-    depfile.writeToFile(environment.buildDir.childFile('linux_engine_sources.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('linux_engine_sources.d'),
+    );
   }
 }
 
@@ -119,6 +128,7 @@ class DebugBundleLinuxAssets extends Target {
     Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    ...IconTreeShaker.inputs,
   ];
 
   @override
@@ -149,6 +159,14 @@ class DebugBundleLinuxAssets extends Target {
         .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
     final Depfile depfile = await copyAssets(environment, outputDirectory);
-    depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -107,7 +107,7 @@ TextStyle _resolveTextStyle(TextStyle style, BuildContext context, bool nullOk) 
 
 /// Cupertino typography theme in a [CupertinoThemeData].
 @immutable
-class CupertinoTextThemeData extends Diagnosticable {
+class CupertinoTextThemeData with Diagnosticable {
   /// Create a [CupertinoTextThemeData].
   ///
   /// The [primaryColor] is used to derive TextStyle defaults of other attributes

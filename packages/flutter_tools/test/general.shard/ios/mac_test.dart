@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,12 +7,15 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
+import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -33,151 +36,29 @@ class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterprete
 class MockIosProject extends Mock implements IosProject {}
 
 void main() {
+  BufferLogger logger;
+
+  setUp(() {
+    logger = BufferLogger.test();
+  });
+
   group('IMobileDevice', () {
-    final FakePlatform osx = FakePlatform.fromPlatform(const LocalPlatform())
-      ..operatingSystem = 'macos';
-    MockProcessManager mockProcessManager;
-    final String libimobiledevicePath = fs.path.join('bin', 'cache', 'artifacts', 'libimobiledevice');
-    final String ideviceIdPath = fs.path.join(libimobiledevicePath, 'idevice_id');
-    final String ideviceInfoPath = fs.path.join(libimobiledevicePath, 'ideviceinfo');
-    final String idevicescreenshotPath = fs.path.join(libimobiledevicePath, 'idevicescreenshot');
+    final String libimobiledevicePath = globals.fs.path.join('bin', 'cache', 'artifacts', 'libimobiledevice');
+    final String idevicescreenshotPath = globals.fs.path.join(libimobiledevicePath, 'idevicescreenshot');
     MockArtifacts mockArtifacts;
     MockCache mockCache;
 
     setUp(() {
-      mockProcessManager = MockProcessManager();
       mockCache = MockCache();
       mockArtifacts = MockArtifacts();
-      when(mockArtifacts.getArtifactPath(Artifact.ideviceId, platform: anyNamed('platform'))).thenReturn(ideviceIdPath);
+      when(mockArtifacts.getArtifactPath(Artifact.idevicescreenshot, platform: anyNamed('platform'))).thenReturn(idevicescreenshotPath);
       when(mockCache.dyLdLibEntry).thenReturn(
         MapEntry<String, String>('DYLD_LIBRARY_PATH', libimobiledevicePath)
       );
     });
 
-    testUsingContext('isWorking returns false if libimobiledevice is not installed', () async {
-      when(mockProcessManager.runSync(
-        <String>[ideviceIdPath, '-h'], environment: anyNamed('environment'),
-      )).thenReturn(ProcessResult(123, 1, '', ''));
-      expect(await iMobileDevice.isWorking, false);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Artifacts: () => mockArtifacts,
-    });
-
-    testUsingContext('getAvailableDeviceIDs throws ToolExit when libimobiledevice is not installed', () async {
-      when(mockProcessManager.run(
-        <String>[ideviceIdPath, '-l'],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenThrow(ProcessException(ideviceIdPath, <String>['-l']));
-      expect(() async => await iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Cache: () => mockCache,
-      Artifacts: () => mockArtifacts,
-    });
-
-    testUsingContext('getAvailableDeviceIDs throws ToolExit when idevice_id returns non-zero', () async {
-      when(mockProcessManager.run(
-        <String>[ideviceIdPath, '-l'],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 1, '', 'Sad today')));
-      expect(() async => await iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Cache: () => mockCache,
-      Artifacts: () => mockArtifacts,
-    });
-
-    testUsingContext('getAvailableDeviceIDs returns idevice_id output when installed', () async {
-      when(mockProcessManager.run(
-        <String>[ideviceIdPath, '-l'],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, 'foo', '')));
-      expect(await iMobileDevice.getAvailableDeviceIDs(), 'foo');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Cache: () => mockCache,
-      Artifacts: () => mockArtifacts,
-    });
-
-    testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when ideviceinfo returns specific error code and message', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
-      when(mockProcessManager.run(
-        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 255, 'No device found with udid foo, is it plugged in?', '')));
-      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotFoundError>()));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Cache: () => mockCache,
-      Artifacts: () => mockArtifacts,
-    });
-
-    testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when user has not yet trusted the host', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
-      when(mockProcessManager.run(
-        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenAnswer((_) {
-        final ProcessResult result = ProcessResult(
-          1,
-          255,
-          '',
-          'ERROR: Could not connect to lockdownd, error code -${LockdownReturnCode.pairingDialogResponsePending.code}',
-        );
-        return Future<ProcessResult>.value(result);
-      });
-      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotTrustedError>()));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Cache: () => mockCache,
-      Artifacts: () => mockArtifacts,
-    });
-
-    testUsingContext('getInfoForDevice throws ToolExit lockdownd fails for unknown reason', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
-      when(mockProcessManager.run(
-        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenAnswer((_) {
-        final ProcessResult result = ProcessResult(
-          1,
-          255,
-          '',
-          'ERROR: Could not connect to lockdownd, error code -12345',
-        );
-        return Future<ProcessResult>.value(result);
-      });
-      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsToolExit());
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Cache: () => mockCache,
-      Artifacts: () => mockArtifacts,
-    });
-
-    testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when host trust is revoked', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
-      when(mockProcessManager.run(
-        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenAnswer((_) {
-        final ProcessResult result = ProcessResult(
-          1,
-          255,
-          '',
-          'ERROR: Could not connect to lockdownd, error code -${LockdownReturnCode.invalidHostId.code}',
-        );
-        return Future<ProcessResult>.value(result);
-      });
-      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotTrustedError>()));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Cache: () => mockCache,
-      Artifacts: () => mockArtifacts,
-    });
-
     group('screenshot', () {
-      final String outputPath = fs.path.join('some', 'test', 'path', 'image.png');
+      final String outputPath = globals.fs.path.join('some', 'test', 'path', 'image.png');
       MockProcessManager mockProcessManager;
       MockFile mockOutputFile;
 
@@ -187,7 +68,7 @@ void main() {
         when(mockArtifacts.getArtifactPath(Artifact.idevicescreenshot, platform: anyNamed('platform'))).thenReturn(idevicescreenshotPath);
       });
 
-      testUsingContext('error if idevicescreenshot is not installed', () async {
+      testWithoutContext('error if idevicescreenshot is not installed', () async {
         when(mockOutputFile.path).thenReturn(outputPath);
 
         // Let `idevicescreenshot` fail with exit code 1.
@@ -196,27 +77,33 @@ void main() {
             workingDirectory: null,
         )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(4, 1, '', '')));
 
+        final IMobileDevice iMobileDevice = IMobileDevice(
+          artifacts: mockArtifacts,
+          cache: mockCache,
+          processManager: mockProcessManager,
+          logger: logger,
+        );
+
         expect(() async => await iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
-      }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
-        Platform: () => osx,
-        Cache: () => mockCache,
       });
 
-      testUsingContext('idevicescreenshot captures and returns screenshot', () async {
+      testWithoutContext('idevicescreenshot captures and returns screenshot', () async {
         when(mockOutputFile.path).thenReturn(outputPath);
         when(mockProcessManager.run(any, environment: anyNamed('environment'), workingDirectory: null)).thenAnswer(
             (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
+
+        final IMobileDevice iMobileDevice = IMobileDevice(
+          artifacts: mockArtifacts,
+          cache: mockCache,
+          processManager: mockProcessManager,
+          logger: logger,
+        );
 
         await iMobileDevice.takeScreenshot(mockOutputFile);
         verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath],
             environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
             workingDirectory: null,
         ));
-      }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
-        Cache: () => mockCache,
-        Artifacts: () => mockArtifacts,
       });
     });
   });
@@ -326,7 +213,7 @@ Error launching application on iPhone.''',
       await diagnoseXcodeBuildFailure(buildResult);
       expect(
         testLogger.errorText,
-        contains('No Provisioning Profile was found for your project\'s Bundle Identifier or your \ndevice.'),
+        contains("No Provisioning Profile was found for your project's Bundle Identifier or your \ndevice."),
       );
     }, overrides: noColorTerminalOverride);
 
@@ -410,6 +297,80 @@ Could not build the precompiled application for the device.''',
         contains('Building a deployable iOS app requires a selected Development Team with a \nProvisioning Profile.'),
       );
     }, overrides: noColorTerminalOverride);
+
+    testUsingContext('embedded and linked framework iOS mismatch shows message', () async {
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '''
+Launching lib/main.dart on iPhone in debug mode...
+Automatically signing iOS for device deployment using specified development team in Xcode project: blah
+Xcode build done. 5.7s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+** BUILD FAILED **
+Xcode's output:
+↳
+note: Using new build system
+note: Building targets in parallel
+note: Planning build
+note: Constructing build description
+error: Building for iOS Simulator, but the linked and embedded framework 'App.framework' was built for iOS. (in target 'Runner' from project 'Runner')
+Could not build the precompiled application for the device.
+
+Error launching application on iPhone.
+Exited (sigterm)''',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          buildForPhysicalDevice: true,
+          buildSettings: buildSettings,
+        ),
+      );
+
+      await diagnoseXcodeBuildFailure(buildResult);
+      expect(
+        testLogger.errorText,
+        contains('Your Xcode project requires migration.'),
+      );
+    }, overrides: noColorTerminalOverride);
+
+    testUsingContext('embedded and linked framework iOS simulator mismatch shows message', () async {
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '''
+Launching lib/main.dart on iPhone in debug mode...
+Automatically signing iOS for device deployment using specified development team in Xcode project: blah
+Xcode build done. 5.7s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+** BUILD FAILED **
+Xcode's output:
+↳
+note: Using new build system
+note: Building targets in parallel
+note: Planning build
+note: Constructing build description
+error: Building for iOS, but the linked and embedded framework 'App.framework' was built for iOS Simulator. (in target 'Runner' from project 'Runner')
+Could not build the precompiled application for the device.
+
+Error launching application on iPhone.
+Exited (sigterm)''',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          buildForPhysicalDevice: true,
+          buildSettings: buildSettings,
+        ),
+      );
+
+      await diagnoseXcodeBuildFailure(buildResult);
+      expect(
+        testLogger.errorText,
+        contains('Your Xcode project requires migration.'),
+      );
+    }, overrides: noColorTerminalOverride);
   });
 
   group('Upgrades project.pbxproj for old asset usage', () {
@@ -430,7 +391,7 @@ Could not build the precompiled application for the device.''',
       'another line',
     ];
 
-    testUsingContext('upgradePbxProjWithFlutterAssets', () async {
+    testWithoutContext('upgradePbxProjWithFlutterAssets', () async {
       final MockIosProject project = MockIosProject();
       final MockFile pbxprojFile = MockFile();
 
@@ -441,30 +402,30 @@ Could not build the precompiled application for the device.''',
       when(pbxprojFile.existsSync())
           .thenAnswer((_) => true);
 
-      bool result = upgradePbxProjWithFlutterAssets(project);
+      bool result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains('Removing obsolete reference to flutter_assets'),
       );
-      testLogger.clear();
+      logger.clear();
 
       when(pbxprojFile.readAsLinesSync())
           .thenAnswer((_) => appFlxPbxProjLines);
-      result = upgradePbxProjWithFlutterAssets(project);
+      result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains('Removing obsolete reference to app.flx'),
       );
-      testLogger.clear();
+      logger.clear();
 
       when(pbxprojFile.readAsLinesSync())
           .thenAnswer((_) => cleanPbxProjLines);
-      result = upgradePbxProjWithFlutterAssets(project);
+      result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);
       expect(
-        testLogger.statusText,
+        logger.statusText,
         isEmpty,
       );
     });

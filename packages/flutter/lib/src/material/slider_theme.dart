@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -155,7 +155,7 @@ class SliderTheme extends InheritedTheme {
   /// Defaults to the ambient [ThemeData.sliderTheme] if there is no
   /// [SliderTheme] in the given build context.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// class Launch extends StatefulWidget {
@@ -305,7 +305,7 @@ enum Thumb {
 /// {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
-class SliderThemeData extends Diagnosticable {
+class SliderThemeData with Diagnosticable {
   /// Create a [SliderThemeData] given a set of exact values. All the values
   /// must be specified.
   ///
@@ -316,7 +316,7 @@ class SliderThemeData extends Diagnosticable {
   /// [copyWith] on the one you get from [SliderTheme.of], or create an
   /// entirely new one with [SliderThemeData.fromPrimaryColors].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// class Blissful extends StatefulWidget {
@@ -578,7 +578,7 @@ class SliderThemeData extends Diagnosticable {
 
   /// The shape that will be used to draw the [RangeSlider]'s track.
   ///
-  /// The [SliderTrackShape.getPreferredRect] method is used to to map
+  /// The [SliderTrackShape.getPreferredRect] method is used to map
   /// slider-relative gesture coordinates to the correct thumb position on the
   /// track. It is also used to horizontally position the tick marks, when the
   /// slider is discrete.
@@ -615,8 +615,6 @@ class SliderThemeData extends Diagnosticable {
   final ShowValueIndicator showValueIndicator;
 
   /// The text style for the text on the value indicator.
-  ///
-  /// By default this is the [ThemeData.accentTextTheme.body2] text theme.
   final TextStyle valueIndicatorTextStyle;
 
   /// Limits the thumb's separation distance.
@@ -782,34 +780,34 @@ class SliderThemeData extends Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final SliderThemeData otherData = other;
-    return otherData.trackHeight == trackHeight
-      && otherData.activeTrackColor == activeTrackColor
-      && otherData.inactiveTrackColor == inactiveTrackColor
-      && otherData.disabledActiveTrackColor == disabledActiveTrackColor
-      && otherData.disabledInactiveTrackColor == disabledInactiveTrackColor
-      && otherData.activeTickMarkColor == activeTickMarkColor
-      && otherData.inactiveTickMarkColor == inactiveTickMarkColor
-      && otherData.disabledActiveTickMarkColor == disabledActiveTickMarkColor
-      && otherData.disabledInactiveTickMarkColor == disabledInactiveTickMarkColor
-      && otherData.thumbColor == thumbColor
-      && otherData.overlappingShapeStrokeColor == overlappingShapeStrokeColor
-      && otherData.disabledThumbColor == disabledThumbColor
-      && otherData.overlayColor == overlayColor
-      && otherData.valueIndicatorColor == valueIndicatorColor
-      && otherData.overlayShape == overlayShape
-      && otherData.tickMarkShape == tickMarkShape
-      && otherData.thumbShape == thumbShape
-      && otherData.trackShape == trackShape
-      && otherData.valueIndicatorShape == valueIndicatorShape
-      && otherData.rangeTickMarkShape == rangeTickMarkShape
-      && otherData.rangeThumbShape == rangeThumbShape
-      && otherData.rangeTrackShape == rangeTrackShape
-      && otherData.rangeValueIndicatorShape == rangeValueIndicatorShape
-      && otherData.showValueIndicator == showValueIndicator
-      && otherData.valueIndicatorTextStyle == valueIndicatorTextStyle
-      && otherData.minThumbSeparation == minThumbSeparation
-      && otherData.thumbSelector == thumbSelector;
+    return other is SliderThemeData
+        && other.trackHeight == trackHeight
+        && other.activeTrackColor == activeTrackColor
+        && other.inactiveTrackColor == inactiveTrackColor
+        && other.disabledActiveTrackColor == disabledActiveTrackColor
+        && other.disabledInactiveTrackColor == disabledInactiveTrackColor
+        && other.activeTickMarkColor == activeTickMarkColor
+        && other.inactiveTickMarkColor == inactiveTickMarkColor
+        && other.disabledActiveTickMarkColor == disabledActiveTickMarkColor
+        && other.disabledInactiveTickMarkColor == disabledInactiveTickMarkColor
+        && other.thumbColor == thumbColor
+        && other.overlappingShapeStrokeColor == overlappingShapeStrokeColor
+        && other.disabledThumbColor == disabledThumbColor
+        && other.overlayColor == overlayColor
+        && other.valueIndicatorColor == valueIndicatorColor
+        && other.overlayShape == overlayShape
+        && other.tickMarkShape == tickMarkShape
+        && other.thumbShape == thumbShape
+        && other.trackShape == trackShape
+        && other.valueIndicatorShape == valueIndicatorShape
+        && other.rangeTickMarkShape == rangeTickMarkShape
+        && other.rangeThumbShape == rangeThumbShape
+        && other.rangeTrackShape == rangeTrackShape
+        && other.rangeValueIndicatorShape == rangeValueIndicatorShape
+        && other.showValueIndicator == showValueIndicator
+        && other.valueIndicatorTextStyle == valueIndicatorTextStyle
+        && other.minThumbSeparation == minThumbSeparation
+        && other.thumbSelector == thumbSelector;
   }
 
   @override
@@ -1448,16 +1446,16 @@ abstract class RangeSliderTrackShape {
 /// Base track shape that provides an implementation of [getPreferredRect] for
 /// default sizing.
 ///
+/// The height is set from [SliderThemeData.trackHeight] and the width of the
+/// parent box less the larger of the widths of [SliderThemeData.thumbShape] and
+/// [SliderThemeData.overlayShape].
+///
 /// See also:
 ///
 ///  * [RectangularSliderTrackShape], which is a track shape with sharp
 ///    rectangular edges
 ///  * [RoundedRectSliderTrackShape], which is a track shape with round
 ///    stadium-like edges.
-///
-/// The height is set from [SliderThemeData.trackHeight] and the width of the
-/// parent box less the larger of the widths of [SliderThemeData.thumbShape] and
-/// [SliderThemeData.overlayShape].
 abstract class BaseSliderTrackShape {
   /// Returns a rect that represents the track bounds that fits within the
   /// [Slider].
@@ -2770,8 +2768,8 @@ class _PaddleSliderTrackShapePathPainter {
     // the top neck arc. We use this to shrink/expand it based on the scale
     // factor of the value indicator.
     final double neckStretchBaseline = math.max(0.0, rightBottomNeckCenterY - math.max(leftTopNeckCenter.dy, neckRightCenter.dy));
-    final double t = math.pow(inverseTextScale, 3.0);
-    final double stretch = (neckStretchBaseline * t).clamp(0.0, 10.0 * neckStretchBaseline);
+    final double t = math.pow(inverseTextScale, 3.0) as double;
+    final double stretch = (neckStretchBaseline * t).clamp(0.0, 10.0 * neckStretchBaseline) as double;
     final Offset neckStretch = Offset(0.0, neckStretchBaseline - stretch);
 
     assert(!_debuggingLabelLocation || () {
@@ -2888,9 +2886,9 @@ class RangeValues {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final RangeValues typedOther = other;
-    return typedOther.start == start
-        && typedOther.end == end;
+    return other is RangeValues
+        && other.start == start
+        && other.end == end;
   }
 
   @override
@@ -2898,7 +2896,7 @@ class RangeValues {
 
   @override
   String toString() {
-    return '$runtimeType($start, $end)';
+    return '${objectRuntimeType(this, 'RangeValues')}($start, $end)';
   }
 }
 
@@ -2927,9 +2925,9 @@ class RangeLabels {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final RangeLabels typedOther = other;
-    return typedOther.start == start
-        && typedOther.end == end;
+    return other is RangeLabels
+        && other.start == start
+        && other.end == end;
   }
 
   @override
@@ -2937,6 +2935,6 @@ class RangeLabels {
 
   @override
   String toString() {
-    return '$runtimeType($start, $end)';
+    return '${objectRuntimeType(this, 'RangeLabels')}($start, $end)';
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -320,17 +320,17 @@ void main() {
     );
   }
 
-  testWidgets('Tapping the status bar scrolls to top on iOS', (WidgetTester tester) async {
-    await tester.pumpWidget(_buildStatusBarTestApp(TargetPlatform.iOS));
+  testWidgets('Tapping the status bar scrolls to top', (WidgetTester tester) async {
+    await tester.pumpWidget(_buildStatusBarTestApp(debugDefaultTargetPlatformOverride));
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.jumpTo(500.0);
     expect(scrollable.position.pixels, equals(500.0));
     await tester.tapAt(const Offset(100.0, 10.0));
     await tester.pumpAndSettle();
     expect(scrollable.position.pixels, equals(0.0));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Tapping the status bar does not scroll to top on Android', (WidgetTester tester) async {
+  testWidgets('Tapping the status bar does not scroll to top', (WidgetTester tester) async {
     await tester.pumpWidget(_buildStatusBarTestApp(TargetPlatform.android));
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.jumpTo(500.0);
@@ -339,7 +339,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(scrollable.position.pixels, equals(500.0));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
   testWidgets('Bottom sheet cannot overlap app bar', (WidgetTester tester) async {
     final Key sheetKey = UniqueKey();
@@ -506,7 +506,7 @@ void main() {
   });
 
   group('back arrow', () {
-    Future<void> expectBackIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon) async {
+    Future<void> expectBackIcon(WidgetTester tester, IconData expectedIcon) async {
       final GlobalKey rootKey = GlobalKey();
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (_) => Container(key: rootKey, child: const Text('Home')),
@@ -515,9 +515,7 @@ void main() {
             body: const Text('Scaffold'),
         ),
       };
-      await tester.pumpWidget(
-        MaterialApp(theme: ThemeData(platform: platform), routes: routes)
-      );
+      await tester.pumpWidget(MaterialApp(routes: routes));
 
       Navigator.pushNamed(rootKey.currentContext, '/scaffold');
       await tester.pump();
@@ -527,24 +525,20 @@ void main() {
       expect(icon.icon, expectedIcon);
     }
 
-    testWidgets('Back arrow uses correct default on Android', (WidgetTester tester) async {
-      await expectBackIcon(tester, TargetPlatform.android, Icons.arrow_back);
-    });
+    testWidgets('Back arrow uses correct default', (WidgetTester tester) async {
+      await expectBackIcon(tester, Icons.arrow_back);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }));
 
-    testWidgets('Back arrow uses correct default on Fuchsia', (WidgetTester tester) async {
-      await expectBackIcon(tester, TargetPlatform.fuchsia, Icons.arrow_back);
-    });
-
-    testWidgets('Back arrow uses correct default on iOS', (WidgetTester tester) async {
-      await expectBackIcon(tester, TargetPlatform.iOS, Icons.arrow_back_ios);
-    });
+    testWidgets('Back arrow uses correct default', (WidgetTester tester) async {
+      await expectBackIcon(tester, Icons.arrow_back_ios);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
   });
 
   group('close button', () {
-    Future<void> expectCloseIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon, PageRoute<void> routeBuilder()) async {
+    Future<void> expectCloseIcon(WidgetTester tester, PageRoute<void> routeBuilder(), String type) async {
+      const IconData expectedIcon = Icons.close;
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: platform),
           home: Scaffold(appBar: AppBar(), body: const Text('Page 1')),
         ),
       );
@@ -555,8 +549,8 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
 
       final Icon icon = tester.widget(find.byType(Icon));
-      expect(icon.icon, expectedIcon);
-      expect(find.byType(CloseButton), findsOneWidget);
+      expect(icon.icon, expectedIcon, reason: "didn't find close icon for $type");
+      expect(find.byType(CloseButton), findsOneWidget, reason: "didn't find close button for $type");
     }
 
     PageRoute<void> materialRouteBuilder() {
@@ -586,41 +580,17 @@ void main() {
       );
     }
 
-    testWidgets('Close button shows correctly on Android', (WidgetTester tester) async {
-      await expectCloseIcon(tester, TargetPlatform.android, Icons.close, materialRouteBuilder);
-    });
+    testWidgets('Close button shows correctly', (WidgetTester tester) async {
+      await expectCloseIcon(tester, materialRouteBuilder, 'materialRouteBuilder');
+    }, variant: TargetPlatformVariant.all());
 
-    testWidgets('Close button shows correctly on Fuchsia', (WidgetTester tester) async {
-      await expectCloseIcon(tester, TargetPlatform.fuchsia, Icons.close, materialRouteBuilder);
-    });
+    testWidgets('Close button shows correctly with PageRouteBuilder', (WidgetTester tester) async {
+      await expectCloseIcon(tester, pageRouteBuilder, 'pageRouteBuilder');
+    }, variant: TargetPlatformVariant.all());
 
-    testWidgets('Close button shows correctly on iOS', (WidgetTester tester) async {
-      await expectCloseIcon(tester, TargetPlatform.iOS, Icons.close, materialRouteBuilder);
-    });
-
-    testWidgets('Close button shows correctly with PageRouteBuilder on Android', (WidgetTester tester) async {
-      await expectCloseIcon(tester, TargetPlatform.android, Icons.close, pageRouteBuilder);
-    });
-
-    testWidgets('Close button shows correctly with PageRouteBuilder on Fuchsia', (WidgetTester tester) async {
-      await expectCloseIcon(tester, TargetPlatform.fuchsia, Icons.close, pageRouteBuilder);
-    });
-
-    testWidgets('Close button shows correctly with PageRouteBuilder on iOS', (WidgetTester tester) async {
-      await expectCloseIcon(tester, TargetPlatform.iOS, Icons.close, pageRouteBuilder);
-    });
-
-    testWidgets('Close button shows correctly with custom page route on Android', (WidgetTester tester) async {
-      await expectCloseIcon(tester, TargetPlatform.android, Icons.close, customPageRouteBuilder);
-    });
-
-    testWidgets('Close button shows correctly with custom page route on Fuchsia', (WidgetTester tester) async {
-      await expectCloseIcon(tester, TargetPlatform.fuchsia, Icons.close, customPageRouteBuilder);
-    });
-
-    testWidgets('Close button shows correctly with custom page route on iOS', (WidgetTester tester) async {
-      await expectCloseIcon(tester, TargetPlatform.iOS, Icons.close, customPageRouteBuilder);
-    });
+    testWidgets('Close button shows correctly with custom page route', (WidgetTester tester) async {
+      await expectCloseIcon(tester, customPageRouteBuilder, 'customPageRouteBuilder');
+    }, variant: TargetPlatformVariant.all());
   });
 
   group('body size', () {
@@ -1626,6 +1596,142 @@ void main() {
     expect(scaffoldState.isDrawerOpen, true);
   });
 
+  testWidgets('Drawer does not open with a drag gesture when it is disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          drawer: const Drawer(
+            child: Text('Drawer'),
+          ),
+          drawerEnableOpenDragGesture: true,
+          body: const Text('Scaffold Body'),
+          appBar: AppBar(
+            centerTitle: true,
+            title: const Text('Title'),
+          ),
+        ),
+      ),
+    );
+    ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isDrawerOpen, false);
+
+    // Test that we can open the drawer with a drag gesture when
+    // `Scaffold.drawerEnableDragGesture` is true.
+    await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, true);
+
+    await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, false);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          drawer: const Drawer(
+            child: Text('Drawer'),
+          ),
+          drawerEnableOpenDragGesture: false,
+          body: const Text('Scaffold body'),
+          appBar: AppBar(
+            centerTitle: true,
+            title: const Text('Title'),
+          ),
+        ),
+      ),
+    );
+    scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isDrawerOpen, false);
+
+    // Test that we cannot open the drawer with a drag gesture when
+    // `Scaffold.drawerEnableDragGesture` is false.
+    await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, false);
+
+    // Test that we can close drawer with a drag gesture when
+    // `Scaffold.drawerEnableDragGesture` is false.
+    final Finder drawerOpenButton = find.byType(IconButton).first;
+    await tester.tap(drawerOpenButton);
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, true);
+
+    await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, false);
+  });
+
+  testWidgets('End drawer does not open with a drag gesture when it is disabled', (WidgetTester tester) async {
+    double screenWidth;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            screenWidth = MediaQuery.of(context).size.width;
+            return Scaffold(
+              endDrawer: const Drawer(
+                child: Text('Drawer'),
+              ),
+              endDrawerEnableOpenDragGesture: true,
+              body: const Text('Scaffold Body'),
+              appBar: AppBar(
+                centerTitle: true,
+                title: const Text('Title'),
+              ),
+            );
+          }
+        ),
+      ),
+    );
+    ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isEndDrawerOpen, false);
+
+    // Test that we can open the end drawer with a drag gesture when
+    // `Scaffold.endDrawerEnableDragGesture` is true.
+    await tester.dragFrom(Offset(screenWidth - 1, 100), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isEndDrawerOpen, true);
+
+    await tester.dragFrom(Offset(screenWidth - 300, 100), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isEndDrawerOpen, false);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          endDrawer: const Drawer(
+            child: Text('Drawer'),
+          ),
+          endDrawerEnableOpenDragGesture: false,
+          body: const Text('Scaffold body'),
+          appBar: AppBar(
+            centerTitle: true,
+            title: const Text('Title'),
+          ),
+        ),
+      ),
+    );
+    scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isEndDrawerOpen, false);
+
+    // Test that we cannot open the end drawer with a drag gesture when
+    // `Scaffold.endDrawerEnableDragGesture` is false.
+    await tester.dragFrom(Offset(screenWidth - 1, 100), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isEndDrawerOpen, false);
+
+    // Test that we can close the end drawer a with drag gesture when
+    // `Scaffold.endDrawerEnableDragGesture` is false.
+    final Finder endDrawerOpenButton = find.byType(IconButton).first;
+    await tester.tap(endDrawerOpenButton);
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isEndDrawerOpen, true);
+
+    await tester.dragFrom(Offset(screenWidth - 300, 100), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isEndDrawerOpen, false);
+  });
+
   testWidgets('Nested scaffold body insets', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/20295
     final Key bodyKey = UniqueKey();
@@ -1720,8 +1826,8 @@ void main() {
           expect(error, isNotNull);
           expect(error.toStringDeep(), equalsIgnoringHashCodes(
             'FlutterError\n'
-            '   Scaffold.bottomSheet cannot be specified while a bottom\n'
-            '   sheetdisplayed with showBottomSheet() is still visible.\n'
+            '   Scaffold.bottomSheet cannot be specified while a bottom sheet\n'
+            '   displayed with showBottomSheet() is still visible.\n'
             '   Rebuild the Scaffold with a null bottomSheet before calling\n'
             '   showBottomSheet().\n',
           ));
@@ -1761,7 +1867,7 @@ void main() {
         await tester.pump();
         expect(errors, isNotEmpty);
         expect(errors.first.exception, isFlutterError);
-        final FlutterError error = errors.first.exception;
+        final FlutterError error = errors.first.exception as FlutterError;
         expect(error.diagnostics.length, 2);
         expect(error.diagnostics.last.level, DiagnosticLevel.hint);
         expect(
@@ -1796,7 +1902,7 @@ void main() {
       );
       final dynamic exception = tester.takeException();
       expect(exception, isFlutterError);
-      final FlutterError error = exception;
+      final FlutterError error = exception as FlutterError;
       expect(error.diagnostics.length, 5);
       expect(error.diagnostics[2].level, DiagnosticLevel.hint);
       expect(
@@ -1824,7 +1930,7 @@ void main() {
           'the ScaffoldState rather than using the Scaffold.of() function.\n',
         ),
       );
-      expect(error.diagnostics[4], isInstanceOf<DiagnosticsProperty<Element>>());
+      expect(error.diagnostics[4], isA<DiagnosticsProperty<Element>>());
       expect(error.toStringDeep(),
         'FlutterError\n'
         '   Scaffold.of() called with a context that does not contain a\n'
@@ -1868,7 +1974,7 @@ void main() {
       final dynamic exception = tester.takeException();
       expect(exception, isFlutterError);
       expect(geometry, isNull);
-      final FlutterError error = exception;
+      final FlutterError error = exception as FlutterError;
       expect(error.diagnostics.length, 5);
       expect(error.diagnostics[2].level, DiagnosticLevel.hint);
       expect(
@@ -1893,7 +1999,7 @@ void main() {
           'Scaffold.geometryOf().\n',
         ),
       );
-      expect(error.diagnostics[4], isInstanceOf<DiagnosticsProperty<Element>>());
+      expect(error.diagnostics[4], isA<DiagnosticsProperty<Element>>());
       expect(error.toStringDeep(),
         'FlutterError\n'
         '   Scaffold.geometryOf() called with a context that does not contain\n'

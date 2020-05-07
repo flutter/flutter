@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -31,7 +31,7 @@ bool debugCheckHasMaterial(BuildContext context) {
           '${context.widget.runtimeType} widgets require a Material '
           'widget ancestor.\n'
           'In material design, most widgets are conceptually "printed" on '
-          'a sheet of material. In Flutter\'s material library, that '
+          "a sheet of material. In Flutter's material library, that "
           'material is represented by the Material widget. It is the '
           'Material widget that renders ink splashes, for instance. '
           'Because of this, many material library widgets require that '
@@ -76,7 +76,7 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
           'to be provided by a Localizations widget ancestor.'
         ),
         ErrorDescription(
-          'Localizations are used to generate many different messages, labels,'
+          'Localizations are used to generate many different messages, labels, '
           'and abbreviations which are used by the material library.'
         ),
         ErrorHint(

@@ -1,7 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:vector_math/vector_math_64.dart' show Matrix4;
 import 'package:flutter/foundation.dart';
 
 import 'arena.dart';
@@ -183,13 +184,30 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
+    assert(event != null);
     if (state == GestureRecognizerState.ready) {
       // `_down` must be assigned in this method instead of `handlePrimaryPointer`,
       // because `acceptGesture` might be called before `handlePrimaryPointer`,
       // which relies on `_down` to call `handleTapDown`.
       _down = event;
     }
-    super.addAllowedPointer(event);
+    if (_down != null) {
+      // This happens when this tap gesture has been rejected while the pointer
+      // is down (i.e. due to movement), when another allowed pointer is added,
+      // in which case all pointers are simply ignored. The `_down` being null
+      // means that _reset() has been called, since it is always set at the
+      // first allowed down event and will not be cleared except for reset(),
+      super.addAllowedPointer(event);
+    }
+  }
+
+  @override
+  @protected
+  void startTrackingPointer(int pointer, [Matrix4 transform]) {
+    // The recognizer should never track any pointers when `_down` is null,
+    // because calling `_checkDown` in this state will throw exception.
+    assert(_down != null);
+    super.startTrackingPointer(pointer, transform);
   }
 
   @override
@@ -390,7 +408,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// See also:
   ///
   ///  * [kSecondaryButton], the button this callback responds to.
-  ///  * [onPrimaryTapDown], a similar callback but for a primary button.
+  ///  * [onTapDown], a similar callback but for a primary button.
   ///  * [TapDownDetails], which is passed as an argument to this callback.
   ///  * [GestureDetector.onSecondaryTapDown], which exposes this callback.
   GestureTapDownCallback onSecondaryTapDown;
@@ -407,7 +425,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// See also:
   ///
   ///  * [kSecondaryButton], the button this callback responds to.
-  ///  * [onPrimaryTapUp], a similar callback but for a primary button.
+  ///  * [onTapUp], a similar callback but for a primary button.
   ///  * [TapUpDetails], which is passed as an argument to this callback.
   ///  * [GestureDetector.onSecondaryTapUp], which exposes this callback.
   GestureTapUpCallback onSecondaryTapUp;
@@ -423,7 +441,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// See also:
   ///
   ///  * [kSecondaryButton], the button this callback responds to.
-  ///  * [onPrimaryTapCancel], a similar callback but for a primary button.
+  ///  * [onTapCancel], a similar callback but for a primary button.
   ///  * [GestureDetector.onTapCancel], which exposes this callback.
   GestureTapCancelCallback onSecondaryTapCancel;
 

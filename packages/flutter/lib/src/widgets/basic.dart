@@ -1,8 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Image, ImageFilter;
+import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -136,7 +136,7 @@ class Directionality extends InheritedWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=9hltevOHQBw}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows some [Text] when the `_visible` member field is true, and
 /// hides it when it is false:
@@ -144,7 +144,7 @@ class Directionality extends InheritedWidget {
 /// ```dart
 /// Opacity(
 ///   opacity: _visible ? 1.0 : 0.0,
-///   child: const Text('Now you see me, now you don\'t!'),
+///   child: const Text("Now you see me, now you don't!"),
 /// )
 /// ```
 /// {@end-tool}
@@ -167,7 +167,7 @@ class Directionality extends InheritedWidget {
 /// For example, `Container(color: Color.fromRGBO(255, 0, 0, 0.5))` is much
 /// faster than `Opacity(opacity: 0.5, child: Container(color: Colors.red))`.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following example draws an [Image] with 0.5 opacity without using
 /// [Opacity]:
@@ -266,7 +266,7 @@ class Opacity extends SingleChildRenderObjectWidget {
 /// For example, [ShaderMask] can be used to gradually fade out the edge
 /// of a child by using a [new ui.Gradient.linear] mask.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example makes the text look like it is on fire:
 ///
@@ -345,7 +345,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=dYRs7Q1vfYI}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// If the [BackdropFilter] needs to be applied to an area that exactly matches
 /// its child, wraps the [BackdropFilter] with a clip widget that clips exactly
 /// to that child.
@@ -439,7 +439,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 /// [isComplex] and [willChange] are hints to the compositor's raster cache
 /// and must not be null.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows how the sample custom painter shown at [CustomPainter]
 /// could be used in a [CustomPaint] widget to display a background to some
@@ -479,6 +479,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
   }) : assert(size != null),
        assert(isComplex != null),
        assert(willChange != null),
+       assert(painter != null || foregroundPainter != null || (!isComplex && !willChange)),
        super(key: key, child: child);
 
   /// The painter that paints before the children.
@@ -503,10 +504,16 @@ class CustomPaint extends SingleChildRenderObjectWidget {
   /// frame. If this flag is not set, then the compositor will apply its own
   /// heuristics to decide whether the this layer is complex enough to benefit
   /// from caching.
+  ///
+  /// This flag can't be set to true if both [painter] and [foregroundPainter]
+  /// are null because this flag will be ignored in such case.
   final bool isComplex;
 
   /// Whether the raster cache should be told that this painting is likely
   /// to change in the next frame.
+  ///
+  /// This flag can't be set to true if both [painter] and [foregroundPainter]
+  /// are null because this flag will be ignored in such case.
   final bool willChange;
 
   @override
@@ -555,7 +562,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 ///  * [OverflowBox]
 ///  * [SizedOverflowBox]
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// For example, by combining a [ClipRect] with an [Align], one can show just
 /// the top half of an [Image]:
@@ -1056,7 +1063,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=9z_YNlRlWfA}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example rotates and skews an orange box containing text, keeping the
 /// top right corner pinned to its original position.
@@ -1085,6 +1092,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
 ///    that is relative to the child's size.
 ///  * [FittedBox], which sizes and positions its child widget to fit the parent
 ///    according to a given [BoxFit] discipline.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Transform extends SingleChildRenderObjectWidget {
   /// Creates a widget that transforms its child.
   ///
@@ -1105,7 +1113,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The `angle` argument must not be null. It gives the rotation in clockwise
   /// radians.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This example rotates an orange box containing text around its center by
   /// fifteen degrees.
@@ -1140,7 +1148,7 @@ class Transform extends SingleChildRenderObjectWidget {
   ///
   /// The `offset` argument must not be null. It specifies the translation.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This example shifts the silver-colored child down by fifteen pixels.
   ///
@@ -1173,7 +1181,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The [alignment] controls the origin of the scale; by default, this is
   /// the center of the box.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This example shrinks an orange box containing text such that each dimension
   /// is half the size it would otherwise be.
@@ -1207,7 +1215,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The matrix to transform the child by during painting.
   final Matrix4 transform;
 
-  /// The origin of the coordinate system (relative to the upper left corder of
+  /// The origin of the coordinate system (relative to the upper left corner of
   /// this render object) in which to apply the matrix.
   ///
   /// Setting an origin is equivalent to conjugating the transform matrix by a
@@ -1298,8 +1306,7 @@ class CompositedTransformTarget extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderLeaderLayer renderObject) {
-    renderObject
-      ..link = link;
+    renderObject.link = link;
   }
 }
 
@@ -1512,7 +1519,7 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
 /// this object applies its rotation prior to layout, which means the entire
 /// rotated box consumes only as much space as required by the rotated child.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This snippet rotates the child (some [Text]) so that it renders from bottom
 /// to top, like an axis label on a graph:
@@ -1561,7 +1568,7 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 /// size. Padding then sizes itself to its child's size, inflated by the
 /// padding, effectively creating empty space around the child.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This snippet creates "Hello World!" [Text] inside a [Card] that is indented
 /// by sixteen pixels in each direction.
@@ -1664,7 +1671,7 @@ class Padding extends SingleChildRenderObjectWidget {
 /// widget positions the `child` such that both points are lined up on top of
 /// each other.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// The [Align] widget in this example uses one of the defined constants from
 /// [Alignment], [topRight]. This places the [FlutterLogo] in the top right corner
 /// of the parent blue [Container].
@@ -1688,7 +1695,7 @@ class Padding extends SingleChildRenderObjectWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// The [Alignment] used in the following example defines a single point:
 ///
 ///   * (0.2 * width of [FlutterLogo]/2 + width of [FlutterLogo]/2, 0.6 * height
@@ -1719,7 +1726,7 @@ class Padding extends SingleChildRenderObjectWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// The [FractionalOffset] used in the following example defines two points:
 ///
 ///   * (0.2 * width of [FlutterLogo], 0.6 * height of [FlutterLogo]) = (12.0, 36.0)
@@ -1880,6 +1887,7 @@ class Center extends Align {
 ///    size and positions the child according to an [Alignment] value.
 ///  * [CustomMultiChildLayout], which uses a delegate to position multiple
 ///    children.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
   /// Creates a custom single child layout.
   ///
@@ -1910,7 +1918,7 @@ class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
 /// The [MultiChildLayoutDelegate.hasChild],
 /// [MultiChildLayoutDelegate.layoutChild], and
 /// [MultiChildLayoutDelegate.positionChild] methods use these identifiers.
-class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
+class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
   /// Marks a child with a layout identifier.
   ///
   /// Both the child and the id arguments must not be null.
@@ -1931,7 +1939,7 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is MultiChildLayoutParentData);
-    final MultiChildLayoutParentData parentData = renderObject.parentData;
+    final MultiChildLayoutParentData parentData = renderObject.parentData as MultiChildLayoutParentData;
     if (parentData.id != id) {
       parentData.id = id;
       final AbstractNode targetParent = renderObject.parent;
@@ -1939,6 +1947,9 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
         targetParent.markNeedsLayout();
     }
   }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => CustomMultiChildLayout;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1955,7 +1966,7 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
 /// the children.
 ///
 /// [CustomMultiChildLayout] is appropriate when there are complex relationships
-/// between the size and positioning of a multiple widgets. To control the
+/// between the size and positioning of multiple widgets. To control the
 /// layout of a single child, [CustomSingleChildLayout] is more appropriate. For
 /// simple cases, such as aligning a widget to one or another edge, the [Stack]
 /// widget is more appropriate.
@@ -1972,6 +1983,7 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
 ///  * [Stack], which arranges children relative to the edges of the container.
 ///  * [Flow], which provides paint-time control of its children using transform
 ///    matrices.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   /// Creates a custom multi-child layout.
   ///
@@ -2001,8 +2013,9 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///
 /// If given a child, this widget forces its child to have a specific width
 /// and/or height (assuming values are permitted by this widget's parent). If
-/// either the width or height is null, this widget will size itself to match
-/// the child's size in that dimension.
+/// either the width or height is null, this widget will try to size itself to
+/// match the child's size in that dimension. If the child's size depends on the
+/// size of its parent, the height and width must be provided.
 ///
 /// If not given a child, [SizedBox] will try to size itself as close to the
 /// specified height and width as possible given the parent's constraints. If
@@ -2014,7 +2027,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=EHPu_DzRfqA}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This snippet makes the child widget (a [Card] with some [Text]) have the
 /// exact size 200x300, parental constraints permitting:
@@ -2092,13 +2105,13 @@ class SizedBox extends SingleChildRenderObjectWidget {
   String toStringShort() {
     String type;
     if (width == double.infinity && height == double.infinity) {
-      type = '$runtimeType.expand';
+      type = '${objectRuntimeType(this, 'SizedBox')}.expand';
     } else if (width == 0.0 && height == 0.0) {
-      type = '$runtimeType.shrink';
+      type = '${objectRuntimeType(this, 'SizedBox')}.shrink';
     } else {
-      type = '$runtimeType';
+      type = objectRuntimeType(this, 'SizedBox');
     }
-    return key == null ? '$type' : '$type-$key';
+    return key == null ? type : '$type-$key';
   }
 
   @override
@@ -2124,7 +2137,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=o2KveVr7adg}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This snippet makes the child widget (a [Card] with some [Text]) fill the
 /// parent, by applying [BoxConstraints.expand] constraints:
@@ -2608,6 +2621,9 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// painting anything, without making the child available for hit testing, and
 /// without taking any room in the parent.
 ///
+/// Offstage children are still active: they can receive focus and have keyboard
+/// input directed to them.
+///
 /// Animations continue to run in offstage children, and therefore use battery
 /// and CPU time, regardless of whether the animations end up being visible.
 ///
@@ -2634,6 +2650,12 @@ class Offstage extends SingleChildRenderObjectWidget {
   /// painting anything, without making the child available for hit testing, and
   /// without taking any room in the parent.
   ///
+  /// Offstage children are still active: they can receive focus and have keyboard
+  /// input directed to them.
+  ///
+  /// Animations continue to run in offstage children, and therefore use battery
+  /// and CPU time, regardless of whether the animations end up being visible.
+  ///
   /// If false, the child is included in the tree as normal.
   final bool offstage;
 
@@ -2659,7 +2681,7 @@ class _OffstageElement extends SingleChildRenderObjectElement {
   _OffstageElement(Offstage widget) : super(widget);
 
   @override
-  Offstage get widget => super.widget;
+  Offstage get widget => super.widget as Offstage;
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
@@ -3019,6 +3041,7 @@ AxisDirection getAxisDirectionFromAxisReverseAndDirectionality(
 ///    this layout algorithm (at the cost of being slightly less efficient).
 ///  * [ListView], which implements an efficient scrolling version of this
 ///    layout algorithm.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class ListBody extends MultiChildRenderObjectWidget {
   /// Creates a layout widget that arranges its children sequentially along a
   /// given axis.
@@ -3096,7 +3119,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// [CustomMultiChildLayout] instead. In particular, when using a [Stack] you
 /// can't position children relative to their size or the stack's own size.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Using a [Stack] you can position widgets over one another.
 ///
@@ -3125,7 +3148,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows how [Stack] can be used to enhance text visibility
 /// by adding gradient backdrops.
@@ -3344,7 +3367,7 @@ class IndexedStack extends Stack {
 ///  * [PositionedTransition], which takes a provided [Animation] to transition
 ///    changes in the child's position over a given duration.
 ///  * [PositionedDirectional], which adapts to the ambient [Directionality].
-class Positioned extends ParentDataWidget<Stack> {
+class Positioned extends ParentDataWidget<StackParentData> {
   /// Creates a widget that controls where a child of a [Stack] is positioned.
   ///
   /// Only two out of the three horizontal values ([left], [right],
@@ -3528,7 +3551,7 @@ class Positioned extends ParentDataWidget<Stack> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
-    final StackParentData parentData = renderObject.parentData;
+    final StackParentData parentData = renderObject.parentData as StackParentData;
     bool needsLayout = false;
 
     if (parentData.left != left) {
@@ -3567,6 +3590,9 @@ class Positioned extends ParentDataWidget<Stack> {
         targetParent.markNeedsLayout();
     }
   }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => Stack;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -3959,7 +3985,7 @@ class Flex extends MultiChildRenderObjectWidget {
 /// If you only have one child, then consider using [Align] or [Center] to
 /// position the child.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example divides the available space into three (horizontally), and
 /// places text centered in the first two cells and the Flutter logo centered in
@@ -4007,7 +4033,7 @@ class Flex extends MultiChildRenderObjectWidget {
 /// Row(
 ///   children: <Widget>[
 ///     const FlutterLogo(),
-///     const Text('Flutter\'s hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android.'),
+///     const Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
 ///     const Icon(Icons.sentiment_very_satisfied),
 ///   ],
 /// )
@@ -4035,7 +4061,7 @@ class Flex extends MultiChildRenderObjectWidget {
 ///   children: <Widget>[
 ///     const FlutterLogo(),
 ///     const Expanded(
-///       child: Text('Flutter\'s hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android.'),
+///       child: Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
 ///     ),
 ///     const Icon(Icons.sentiment_very_satisfied),
 ///   ],
@@ -4149,7 +4175,7 @@ class Row extends Flex {
 /// If you only have one child, then consider using [Align] or [Center] to
 /// position the child.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example uses a [Column] to arrange three widgets vertically, the last
 /// being made to fill all the remaining space.
@@ -4171,7 +4197,7 @@ class Row extends Flex {
 /// )
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// In the sample above, the text and the logo are centered on each line. In the
 /// following example, the [crossAxisAlignment] is set to
@@ -4352,9 +4378,9 @@ class Column extends Flex {
 /// See also:
 ///
 ///  * [Expanded], which forces the child to expand to fill the available space.
-///  * [Spacer], a widget that takes up space proportional to it's flex value.
+///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class Flexible extends ParentDataWidget<Flex> {
+class Flexible extends ParentDataWidget<FlexParentData> {
   /// Creates a widget that controls how a child of a [Row], [Column], or [Flex]
   /// flexes.
   const Flexible({
@@ -4384,7 +4410,7 @@ class Flexible extends ParentDataWidget<Flex> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is FlexParentData);
-    final FlexParentData parentData = renderObject.parentData;
+    final FlexParentData parentData = renderObject.parentData as FlexParentData;
     bool needsLayout = false;
 
     if (parentData.flex != flex) {
@@ -4403,6 +4429,9 @@ class Flexible extends ParentDataWidget<Flex> {
         targetParent.markNeedsLayout();
     }
   }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => Flex;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -4426,7 +4455,7 @@ class Flexible extends ParentDataWidget<Flex> {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=_rnZaagadyo}
 ///
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material}
 /// This example shows how to use an [Expanded] widget in a [Column] so that
 /// it's middle child, a [Container] here, expands to fill the space.
 ///
@@ -4465,7 +4494,7 @@ class Flexible extends ParentDataWidget<Flex> {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material}
 /// This example shows how to use an [Expanded] widget in a [Row] with multiple
 /// children expanded, utilizing the [flex] factor to prioritize available space.
 ///
@@ -4539,7 +4568,7 @@ class Expanded extends Flexible {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=z5iw2SeFx2M}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example renders some [Chip]s representing four contacts in a [Wrap] so
 /// that they flow across lines as necessary.
@@ -4808,9 +4837,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 ///
 ///
-/// {@animation 450 100 https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4}
-///
-/// {@tool snippet --template=freeform}
+/// {@tool dartpad --template=freeform}
 ///
 /// This example uses the [Flow] widget to create a menu that opens and closes
 /// as it is interacted with, shown above. The color of the button in the menu
@@ -4966,8 +4993,7 @@ class Flow extends MultiChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderFlow renderObject) {
-    renderObject
-      ..delegate = delegate;
+    renderObject.delegate = delegate;
   }
 }
 
@@ -4992,7 +5018,13 @@ class Flow extends MultiChildRenderObjectWidget {
 /// spans with the default text style while still allowing specified styles per
 /// span.
 ///
-/// {@tool sample}
+/// {@tool snippet}
+///
+/// This sample demonstrates how to mix and match text with different text
+/// styles using the [RichText] Widget. It displays the text "Hello bold world,"
+/// emphasizing the word "bold" using a bold font weight.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/rich_text.png)
 ///
 /// ```dart
 /// RichText(
@@ -5039,6 +5071,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.locale,
     this.strutStyle,
     this.textWidthBasis = TextWidthBasis.parent,
+    this.textHeightBehavior,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
@@ -5120,6 +5153,9 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
+  /// {@macro flutter.dart:ui.textHeightBehavior}
+  final ui.TextHeightBehavior textHeightBehavior;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -5132,6 +5168,7 @@ class RichText extends MultiChildRenderObjectWidget {
       maxLines: maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
       locale: locale ?? Localizations.localeOf(context, nullOk: true),
     );
   }
@@ -5149,6 +5186,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..maxLines = maxLines
       ..strutStyle = strutStyle
       ..textWidthBasis = textWidthBasis
+      ..textHeightBehavior = textHeightBehavior
       ..locale = locale ?? Localizations.localeOf(context, nullOk: true);
   }
 
@@ -5374,7 +5412,7 @@ class RawImage extends LeafRenderObjectWidget {
 /// For example, used by [Image] to determine which bundle to use for
 /// [AssetImage]s if no bundle is specified explicitly.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This can be used in tests to override what the current asset bundle is, thus
 /// allowing specific resources to be injected into the widget under test.
@@ -5392,7 +5430,7 @@ class RawImage extends LeafRenderObjectWidget {
 /// }
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ...then wrap the widget under test with a [DefaultAssetBundle] using this
 /// bundle implementation:
@@ -5512,7 +5550,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 /// This example makes a [Container] react to being touched, showing a count of
 /// the number of pointer downs and ups.
 ///
@@ -5561,7 +5599,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 ///             Text('You have pressed or released in this area this many times:'),
 ///             Text(
 ///               '$_downCounter presses\n$_upCounter releases',
-///               style: Theme.of(context).textTheme.display1,
+///               style: Theme.of(context).textTheme.headline4,
 ///             ),
 ///             Text(
 ///               'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
@@ -5765,7 +5803,7 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 /// This example makes a [Container] react to being entered by a mouse
 /// pointer, showing a count of the number of entries and exits.
 ///
@@ -5812,7 +5850,7 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 ///             Text('You have entered or exited this box this many times:'),
 ///             Text(
 ///               '$_enterCounter Entries\n$_exitCounter Exits',
-///               style: Theme.of(context).textTheme.display1,
+///               style: Theme.of(context).textTheme.headline4,
 ///             ),
 ///             Text(
 ///               'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
@@ -5830,7 +5868,7 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 ///
 ///  * [Listener], a similar widget that tracks pointer events when the pointer
 ///    have buttons pressed.
-class MouseRegion extends SingleChildRenderObjectWidget {
+class MouseRegion extends StatefulWidget {
   /// Creates a widget that forwards mouse events to callbacks.
   const MouseRegion({
     Key key,
@@ -5838,22 +5876,214 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     this.onExit,
     this.onHover,
     this.opaque = true,
-    Widget child,
+    this.child,
   }) : assert(opaque != null),
-       super(key: key, child: child);
+       super(key: key);
 
-  /// Called when a mouse pointer (with or without buttons pressed) enters the
-  /// region defined by this widget, or when the widget appears under the
-  /// pointer.
+  /// Called when a mouse pointer has entered this widget.
+  ///
+  /// This callback is triggered when the pointer, with or without buttons
+  /// pressed, has started to be contained by the region of this widget. More
+  /// specifically, the callback is triggered by the following cases:
+  ///
+  ///  * This widget has appeared under a pointer.
+  ///  * This widget has moved to under a pointer.
+  ///  * A new pointer has been added to somewhere within this widget.
+  ///  * An existing pointer has moved into this widget.
+  ///
+  /// This callback is not always matched by an [onExit]. If the [MouseRegion]
+  /// is unmounted while being hovered by a pointer, the [onExit] of the widget
+  /// callback will never called. For more details, see [onExit].
+  ///
+  /// {@template flutter.mouseRegion.triggerTime}
+  /// The time that this callback is triggered is always between frames: either
+  /// during the post-frame callbacks, or during the callback of a pointer
+  /// event.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [onExit], which is triggered when a mouse pointer exits the region.
+  ///  * [MouseTrackerAnnotation.onEnter], which is how this callback is
+  ///    internally implemented.
   final PointerEnterEventListener onEnter;
 
-  /// Called when a mouse pointer (with or without buttons pressed) changes
-  /// position, and the new position is within the region defined by this widget.
+  /// Called when a mouse pointer moves within this widget without buttons
+  /// pressed.
+  ///
+  /// This callback is not triggered when the [MouseRegion] has moved
+  /// while being hovered by the mouse pointer.
+  ///
+  /// {@macro flutter.mouseRegion.triggerTime}
   final PointerHoverEventListener onHover;
 
-  /// Called when a mouse pointer (with or without buttons pressed) leaves the
-  /// region defined by this widget, or when the widget disappears from under
-  /// the pointer.
+  /// Called when a mouse pointer has exited this widget when the widget is
+  /// still mounted.
+  ///
+  /// This callback is triggered when the pointer, with or without buttons
+  /// pressed, has stopped being contained by the region of this widget, except
+  /// when the exit is caused by the disappearance of this widget. More
+  /// specifically, this callback is triggered by the following cases:
+  ///
+  ///  * A pointer that is hovering this widget has moved away.
+  ///  * A pointer that is hovering this widget has been removed.
+  ///  * This widget, which is being hovered by a pointer, has moved away.
+  ///
+  /// And is __not__ triggered by the following case:
+  ///
+  ///  * This widget, which is being hovered by a pointer, has disappeared.
+  ///
+  /// This means that a [MouseRegion.onExit] might not be matched by a
+  /// [MouseRegion.onEnter].
+  ///
+  /// This restriction aims to prevent a common misuse: if [setState] is called
+  /// during [MouseRegion.onExit] without checking whether the widget is still
+  /// mounted, an exception will occur. This is because the callback is
+  /// triggered during the post-frame phase, at which point the widget has been
+  /// unmounted. Since [setState] is exclusive to widgets, the restriction is
+  /// specific to [MouseRegion], and does not apply to its lower-level
+  /// counterparts, [RenderMouseRegion] and [MouseTrackerAnnotation].
+  ///
+  /// There are a few ways to mitigate this restriction:
+  ///
+  ///  * If the hover state is completely contained within a widget that
+  ///    unconditionally creates this [MouseRegion], then this will not be a
+  ///    concern, since after the [MouseRegion] is unmounted the state is no
+  ///    longer used.
+  ///  * Otherwise, the outer widget very likely has access to the variable that
+  ///    controls whether this [MouseRegion] is present. If so, call [onExit] at
+  ///    the event that turns the condition from true to false.
+  ///  * In cases where the solutions above won't work, you can always
+  ///    override [State.dispose] and call [onExit], or create your own widget
+  ///    using [RenderMouseRegion].
+  ///
+  /// {@tool dartpad --template=stateful_widget_scaffold_center}
+  /// The following example shows a blue rectangular that turns yellow when
+  /// hovered. Since the hover state is completely contained within a widget
+  /// that unconditionally creates the `MouseRegion`, you can ignore the
+  /// aforementioned restriction.
+  ///
+  /// ```dart
+  ///   bool hovered = false;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Container(
+  ///       height: 100,
+  ///       width: 100,
+  ///       decoration: BoxDecoration(color: hovered ? Colors.yellow : Colors.blue),
+  ///       child: MouseRegion(
+  ///         onEnter: (_) {
+  ///           setState(() { hovered = true; });
+  ///         },
+  ///         onExit: (_) {
+  ///           setState(() { hovered = false; });
+  ///         },
+  ///       ),
+  ///     );
+  ///   }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad --template=stateful_widget_scaffold_center}
+  /// The following example shows a widget that hides its content one second
+  /// after behing hovered, and also exposes the enter and exit callbacks.
+  /// Because the widget conditionally creates the `MouseRegion`, and leaks the
+  /// hover state, it needs to take the restriction into consideration. In this
+  /// case, since it has access to the event that triggers the disappearance of
+  /// the `MouseRegion`, it simply trigger the exit callback during that event
+  /// as well.
+  ///
+  /// ```dart preamble
+  /// // A region that hides its content one second after being hovered.
+  /// class MyTimedButton extends StatefulWidget {
+  ///   MyTimedButton({ Key key, this.onEnterButton, this.onExitButton })
+  ///     : super(key: key);
+  ///
+  ///   final VoidCallback onEnterButton;
+  ///   final VoidCallback onExitButton;
+  ///
+  ///   @override
+  ///   _MyTimedButton createState() => _MyTimedButton();
+  /// }
+  ///
+  /// class _MyTimedButton extends State<MyTimedButton> {
+  ///   bool regionIsHidden = false;
+  ///   bool hovered = false;
+  ///
+  ///   void startCountdown() async {
+  ///     await Future.delayed(const Duration(seconds: 1));
+  ///     hideButton();
+  ///   }
+  ///
+  ///   void hideButton() {
+  ///     setState(() { regionIsHidden = true; });
+  ///     // This statement is necessary.
+  ///     if (hovered)
+  ///       widget.onExitButton();
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Container(
+  ///       width: 100,
+  ///       height: 100,
+  ///       child: MouseRegion(
+  ///         child: regionIsHidden ? null : MouseRegion(
+  ///           onEnter: (_) {
+  ///             widget.onEnterButton();
+  ///             setState(() { hovered = true; });
+  ///             startCountdown();
+  ///           },
+  ///           onExit: (_) {
+  ///             setState(() { hovered = false; });
+  ///             widget.onExitButton();
+  ///           },
+  ///           child: Container(color: Colors.red),
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ```dart
+  ///   Key key = UniqueKey();
+  ///   bool hovering = false;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Column(
+  ///       children: <Widget>[
+  ///         RaisedButton(
+  ///           onPressed: () {
+  ///             setState(() { key = UniqueKey(); });
+  ///           },
+  ///           child: Text('Refresh'),
+  ///         ),
+  ///         hovering ? Text('Hovering') : Text('Not hovering'),
+  ///         MyTimedButton(
+  ///           key: key,
+  ///           onEnterButton: () {
+  ///             setState(() { hovering = true; });
+  ///           },
+  ///           onExitButton: () {
+  ///             setState(() { hovering = false; });
+  ///           },
+  ///         ),
+  ///       ],
+  ///     );
+  ///   }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@macro flutter.mouseRegion.triggerTime}
+  ///
+  /// See also:
+  ///
+  ///  * [onEnter], which is triggered when a mouse pointer enters the region.
+  ///  * [RenderMouseRegion] and [MouseTrackerAnnotation.onExit], which are how
+  ///    this callback is internally implemented, but without the restriction.
   final PointerExitEventListener onExit;
 
   /// Whether this widget should prevent other [MouseRegion]s visually behind it
@@ -5872,27 +6102,13 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// This defaults to true.
   final bool opaque;
 
-  @override
-  _MouseRegionElement createElement() => _MouseRegionElement(this);
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
 
   @override
-  RenderMouseRegion createRenderObject(BuildContext context) {
-    return RenderMouseRegion(
-      onEnter: onEnter,
-      onHover: onHover,
-      onExit: onExit,
-      opaque: opaque,
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, RenderMouseRegion renderObject) {
-    renderObject
-      ..onEnter = onEnter
-      ..onHover = onHover
-      ..onExit = onExit
-      ..opaque = opaque;
-  }
+  _MouseRegionState createState() => _MouseRegionState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -5909,21 +6125,46 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   }
 }
 
-class _MouseRegionElement extends SingleChildRenderObjectElement {
-  _MouseRegionElement(SingleChildRenderObjectWidget widget) : super(widget);
+class _MouseRegionState extends State<MouseRegion> {
+  void handleExit(PointerExitEvent event) {
+    if (widget.onExit != null && mounted)
+      widget.onExit(event);
+  }
 
-  @override
-  void activate() {
-    super.activate();
-    final RenderMouseRegion renderMouseRegion = renderObject;
-    renderMouseRegion.postActivate();
+  PointerExitEventListener getHandleExit() {
+    return widget.onExit == null ? null : handleExit;
   }
 
   @override
-  void deactivate() {
-    final RenderMouseRegion renderMouseRegion = renderObject;
-    renderMouseRegion.preDeactivate();
-    super.deactivate();
+  Widget build(BuildContext context) {
+    return _RawMouseRegion(this);
+  }
+}
+
+class _RawMouseRegion extends SingleChildRenderObjectWidget {
+  _RawMouseRegion(this.owner) : super(child: owner.widget.child);
+
+  final _MouseRegionState owner;
+
+  @override
+  RenderMouseRegion createRenderObject(BuildContext context) {
+    final MouseRegion widget = owner.widget;
+    return RenderMouseRegion(
+      onEnter: widget.onEnter,
+      onHover: widget.onHover,
+      onExit: owner.getHandleExit(),
+      opaque: widget.opaque,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderMouseRegion renderObject) {
+    final MouseRegion widget = owner.widget;
+    renderObject
+      ..onEnter = widget.onEnter
+      ..onHover = widget.onHover
+      ..onExit = owner.getHandleExit()
+      ..opaque = widget.opaque;
   }
 }
 
@@ -6363,12 +6604,12 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// Whether descendants of this widget are allowed to add semantic information
   /// to the [SemanticsNode] annotated by this widget.
   ///
-  /// When set to false descendants are allowed to annotate [SemanticNode]s of
+  /// When set to false descendants are allowed to annotate [SemanticsNode]s of
   /// their parent with the semantic information they want to contribute to the
   /// semantic tree.
   /// When set to true the only way for descendants to contribute semantic
   /// information to the semantic tree is to introduce new explicit
-  /// [SemanticNode]s to the tree.
+  /// [SemanticsNode]s to the tree.
   ///
   /// If the semantics properties of this node include
   /// [SemanticsProperties.scopesRoute] set to true, then [explicitChildNodes]
@@ -6634,7 +6875,7 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
 /// to manually provide semantic indexes if not all child of the scrollable
 /// contribute semantics.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The example below handles spacers in a scrollable that don't contribute
 /// semantics. The automatic indexes would give the spaces a semantic index,
@@ -6710,13 +6951,13 @@ class KeyedSubtree extends StatelessWidget {
 
   /// Wrap each item in a KeyedSubtree whose key is based on the item's existing key or
   /// the sum of its list index and `baseIndex`.
-  static List<Widget> ensureUniqueKeysForList(Iterable<Widget> items, { int baseIndex = 0 }) {
+  static List<Widget> ensureUniqueKeysForList(List<Widget> items, { int baseIndex = 0 }) {
     if (items == null || items.isEmpty)
       return items;
 
     final List<Widget> itemsWithUniqueKeys = <Widget>[];
     int itemIndex = baseIndex;
-    for (Widget item in items) {
+    for (final Widget item in items) {
       itemsWithUniqueKeys.add(KeyedSubtree.wrap(item, itemIndex));
       itemIndex += 1;
     }
@@ -6770,7 +7011,7 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 /// Since the [builder] is re-invoked when the [StateSetter] is called, any
 /// variables that represents state should be kept outside the [builder] function.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows using an inline StatefulBuilder that rebuilds and that
 /// also has state.
@@ -6832,4 +7073,64 @@ class StatefulBuilder extends StatefulWidget {
 class _StatefulBuilderState extends State<StatefulBuilder> {
   @override
   Widget build(BuildContext context) => widget.builder(context, setState);
+}
+
+/// A widget that paints its area with a specified [Color] and then draws its
+/// child on top of that color.
+class ColoredBox extends SingleChildRenderObjectWidget {
+  /// Creates a widget that paints its area with the specified [Color].
+  ///
+  /// The [color] parameter must not be null.
+  const ColoredBox({@required this.color, Widget child, Key key})
+      : assert(color != null),
+        super(key: key, child: child);
+
+  /// The color to paint the background area with.
+  final Color color;
+
+  @override
+  _RenderColoredBox createRenderObject(BuildContext context) {
+    return _RenderColoredBox(color: color);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderColoredBox renderObject) {
+    renderObject.color = color;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Color>('color', color));
+  }
+}
+
+class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
+  _RenderColoredBox({@required Color color})
+    : _color = color,
+      super(behavior: HitTestBehavior.opaque);
+
+  /// The fill color for this render object.
+  ///
+  /// This parameter must not be null.
+  Color get color => _color;
+  Color _color;
+  set color(Color value) {
+    assert(value != null);
+    if (value == _color) {
+      return;
+    }
+    _color = value;
+    markNeedsPaint();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (size > Size.zero) {
+      context.canvas.drawRect(offset & size, Paint()..color = color);
+    }
+    if (child != null) {
+      context.paintChild(child, offset);
+    }
+  }
 }

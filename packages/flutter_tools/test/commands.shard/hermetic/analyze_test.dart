@@ -1,14 +1,12 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/commands/analyze_base.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 const String _kFlutterRoot = '/data/flutter';
 
@@ -28,7 +26,22 @@ void main() {
   });
 
   group('analyze', () {
-    testUsingContext('inRepo', () {
+    testWithoutContext('inRepo', () {
+      bool inRepo(List<String> fileList) {
+        if (fileList == null || fileList.isEmpty) {
+          fileList = <String>[fs.path.current];
+        }
+        final String root = fs.path.normalize(fs.path.absolute(Cache.flutterRoot));
+        final String prefix = root + fs.path.separator;
+        for (String file in fileList) {
+          file = fs.path.normalize(fs.path.absolute(file));
+          if (file == root || file.startsWith(prefix)) {
+            return true;
+          }
+        }
+        return false;
+      }
+
       // Absolute paths
       expect(inRepo(<String>[tempDir.path]), isFalse);
       expect(inRepo(<String>[fs.path.join(tempDir.path, 'foo')]), isFalse);
@@ -46,9 +59,6 @@ void main() {
       // Ensure no exceptions
       inRepo(null);
       inRepo(<String>[]);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 }

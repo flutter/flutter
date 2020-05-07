@@ -1,11 +1,11 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
-import 'base/platform.dart';
 import 'doctor.dart';
+import 'globals.dart' as globals;
 
 class ProxyValidator extends DoctorValidator {
   ProxyValidator() : super('Proxy Configuration');
@@ -19,8 +19,8 @@ class ProxyValidator extends DoctorValidator {
   /// an empty string will be returned. Checks for the lowercase version of the
   /// environment variable first, then uppercase to match Dart's HTTP implementation.
   static String _getEnv(String key) =>
-      platform.environment[key.toLowerCase()]?.trim() ??
-      platform.environment[key.toUpperCase()]?.trim() ??
+      globals.platform.environment[key.toLowerCase()]?.trim() ??
+      globals.platform.environment[key.toUpperCase()]?.trim() ??
       '';
 
   @override
@@ -34,7 +34,7 @@ class ProxyValidator extends DoctorValidator {
         messages.add(ValidationMessage.hint('NO_PROXY is not set'));
       } else {
         messages.add(ValidationMessage('NO_PROXY is $_noProxy'));
-        for (String host in const <String>['127.0.0.1', 'localhost']) {
+        for (final String host in const <String>['127.0.0.1', 'localhost']) {
           final ValidationMessage msg = _noProxy.contains(host)
               ? ValidationMessage('NO_PROXY contains $host')
               : ValidationMessage.hint('NO_PROXY does not contain $host');

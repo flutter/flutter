@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -190,7 +190,6 @@ class TestCallbackPainter extends CustomPainter {
   bool shouldRepaint(TestCallbackPainter oldPainter) => true;
 }
 
-
 class RenderSizedBox extends RenderBox {
   RenderSizedBox(this._size);
 
@@ -229,4 +228,59 @@ class RenderSizedBox extends RenderBox {
 
   @override
   bool hitTestSelf(Offset position) => true;
+}
+
+class FakeTickerProvider implements TickerProvider {
+  @override
+  Ticker createTicker(TickerCallback onTick, [ bool disableAnimations = false ]) {
+    return FakeTicker();
+  }
+}
+
+class FakeTicker implements Ticker {
+  @override
+  bool muted;
+
+  @override
+  void absorbTicker(Ticker originalTicker) { }
+
+  @override
+  String get debugLabel => null;
+
+  @override
+  bool get isActive => null;
+
+  @override
+  bool get isTicking => null;
+
+  @override
+  bool get scheduled => null;
+
+  @override
+  bool get shouldScheduleTick => null;
+
+  @override
+  void dispose() { }
+
+  @override
+  void scheduleTick({ bool rescheduling = false }) { }
+
+  @override
+  TickerFuture start() {
+    return null;
+  }
+
+  @override
+  void stop({ bool canceled = false }) { }
+
+  @override
+  void unscheduleTick() { }
+
+  @override
+  String toString({ bool debugIncludeStack = false }) => super.toString();
+
+  @override
+  DiagnosticsNode describeForError(String name) {
+    return DiagnosticsProperty<Ticker>(name, this, style: DiagnosticsTreeStyle.errorProperty);
+  }
 }

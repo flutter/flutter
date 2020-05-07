@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,6 +8,51 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 
 import 'states.dart';
+
+class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
+
+  @override
+  bool shouldReload(MaterialLocalizationsDelegate old) => false;
+}
+
+class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
+
+  @override
+  bool shouldReload(WidgetsLocalizationsDelegate old) => false;
+}
+
+Widget textFieldBoilerplate({ Widget child }) {
+  return MaterialApp(
+    home: Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: <LocalizationsDelegate<dynamic>>[
+        WidgetsLocalizationsDelegate(),
+        MaterialLocalizationsDelegate(),
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(800.0, 600.0)),
+          child: Center(
+            child: Material(
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
 
 void main() {
   testWidgets('ListView control test', (WidgetTester tester) async {
@@ -50,6 +95,68 @@ void main() {
     await tester.tap(find.text('Massachusetts'));
     expect(log, equals(<String>['Massachusetts']));
     log.clear();
+  });
+
+  testWidgets('ListView dismiss keyboard onDrag test', (WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+
+    await tester.pumpWidget(textFieldBoilerplate(
+        child: ListView(
+      padding: const EdgeInsets.all(0),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      children: focusNodes.map((FocusNode focusNode) {
+        return Container(
+          height: 50,
+          color: Colors.green,
+          child: TextField(
+              focusNode: focusNode,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              )),
+        );
+      }).toList(),
+    )));
+
+    final Finder finder = find.byType(TextField).first;
+    final TextField textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode.hasFocus, isFalse);
+  });
+
+  testWidgets('ListView dismiss keyboard manual test', (WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+
+    await tester.pumpWidget(textFieldBoilerplate(
+        child: ListView(
+      padding: const EdgeInsets.all(0),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
+      children: focusNodes.map((FocusNode focusNode) {
+        return Container(
+          height: 50,
+          color: Colors.green,
+          child: TextField(
+              focusNode: focusNode,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              )),
+        );
+      }).toList(),
+    )));
+
+    final Finder finder = find.byType(TextField).first;
+    final TextField textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('ListView restart ballistic activity out of range', (WidgetTester tester) async {
@@ -326,22 +433,22 @@ void main() {
 
   testWidgets('Primary ListViews are always scrollable', (WidgetTester tester) async {
     final ListView view = ListView(primary: true);
-    expect(view.physics, isInstanceOf<AlwaysScrollableScrollPhysics>());
+    expect(view.physics, isA<AlwaysScrollableScrollPhysics>());
   });
 
   testWidgets('Non-primary ListViews are not always scrollable', (WidgetTester tester) async {
     final ListView view = ListView(primary: false);
-    expect(view.physics, isNot(isInstanceOf<AlwaysScrollableScrollPhysics>()));
+    expect(view.physics, isNot(isA<AlwaysScrollableScrollPhysics>()));
   });
 
   testWidgets('Defaulting-to-primary ListViews are always scrollable', (WidgetTester tester) async {
     final ListView view = ListView(scrollDirection: Axis.vertical);
-    expect(view.physics, isInstanceOf<AlwaysScrollableScrollPhysics>());
+    expect(view.physics, isA<AlwaysScrollableScrollPhysics>());
   });
 
   testWidgets('Defaulting-to-not-primary ListViews are not always scrollable', (WidgetTester tester) async {
     final ListView view = ListView(scrollDirection: Axis.horizontal);
-    expect(view.physics, isNot(isInstanceOf<AlwaysScrollableScrollPhysics>()));
+    expect(view.physics, isNot(isA<AlwaysScrollableScrollPhysics>()));
   });
 
   testWidgets('primary:true leads to scrolling', (WidgetTester tester) async {
@@ -459,7 +566,7 @@ void main() {
 
     // A separatorBuilder that returns null throws a FlutterError
     await tester.pumpWidget(buildFrame(null));
-    expect(tester.takeException(), isInstanceOf<FlutterError>());
+    expect(tester.takeException(), isFlutterError);
     expect(find.byType(ErrorWidget), findsOneWidget);
   });
 
@@ -520,7 +627,7 @@ void main() {
 
     // When it does throw, one error widget is rendered in the item's place
     await tester.pumpWidget(buildFrame(true));
-    expect(tester.takeException(), isInstanceOf<Exception>());
+    expect(tester.takeException(), isA<Exception>());
     expect(finder, findsOneWidget);
   });
 
@@ -556,7 +663,7 @@ void main() {
 
     // When it does throw, one error widget is rendered in the separator's place
     await tester.pumpWidget(buildFrame(true));
-    expect(tester.takeException(), isInstanceOf<Exception>());
+    expect(tester.takeException(), isA<Exception>());
     expect(finder, findsOneWidget);
   });
 
@@ -566,7 +673,7 @@ void main() {
         return const SizedBox();
       },
       itemCount: -1,
-    ), throwsA(isInstanceOf<AssertionError>()));
+    ), throwsAssertionError);
   });
 
   testWidgets('ListView.builder asserts on negative semanticChildCount', (WidgetTester tester) async {
@@ -576,7 +683,7 @@ void main() {
       },
       itemCount: 1,
       semanticChildCount: -1,
-    ), throwsA(isInstanceOf<AssertionError>()));
+    ), throwsAssertionError);
   });
 
   testWidgets('ListView.builder asserts on nonsensical childCount/semanticChildCount', (WidgetTester tester) async {
@@ -586,6 +693,6 @@ void main() {
       },
       itemCount: 1,
       semanticChildCount: 4,
-    ), throwsA(isInstanceOf<AssertionError>()));
+    ), throwsAssertionError);
   });
 }

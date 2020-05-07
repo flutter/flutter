@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../doctor.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class DoctorCommand extends FlutterCommand {
@@ -13,7 +14,7 @@ class DoctorCommand extends FlutterCommand {
     argParser.addFlag('android-licenses',
       defaultsTo: false,
       negatable: false,
-      help: 'Run the Android SDK manager tool to accept the SDK\'s licenses.',
+      help: "Run the Android SDK manager tool to accept the SDK's licenses.",
     );
     argParser.addOption('check-for-remote-artifacts',
       hide: !verbose,
@@ -33,7 +34,6 @@ class DoctorCommand extends FlutterCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
     return <DevelopmentArtifact>{
-      DevelopmentArtifact.universal,
       // This is required because we use gen_snapshot to check if the host
       // machine can execute the provided artifacts. See `_genSnapshotRuns`
       // in `doctor.dart`.
@@ -43,6 +43,7 @@ class DoctorCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    globals.flutterVersion.fetchTagsAndUpdate();
     if (argResults.wasParsed('check-for-remote-artifacts')) {
       final String engineRevision = stringArg('check-for-remote-artifacts');
       if (engineRevision.startsWith(RegExp(r'[a-f0-9]{1,40}'))) {

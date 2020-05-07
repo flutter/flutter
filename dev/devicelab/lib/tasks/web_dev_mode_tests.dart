@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,7 +12,7 @@ import '../framework/framework.dart';
 import '../framework/utils.dart';
 
 final Directory _editedFlutterGalleryDir = dir(path.join(Directory.systemTemp.path, 'edited_flutter_gallery'));
-final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'examples/flutter_gallery'));
+final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/flutter_gallery'));
 
 const String kInitialStartupTime = 'InitialStartupTime';
 const String kFirstRestartTime = 'FistRestartTime';

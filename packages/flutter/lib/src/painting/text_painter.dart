@@ -1,12 +1,11 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:math' show min, max;
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics, TextHeightBehavior, BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
@@ -143,6 +142,7 @@ class TextPainter {
     Locale locale,
     StrutStyle strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
+    ui.TextHeightBehavior textHeightBehavior,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textAlign != null),
        assert(textScaleFactor != null),
@@ -156,7 +156,8 @@ class TextPainter {
        _ellipsis = ellipsis,
        _locale = locale,
        _strutStyle = strutStyle,
-       _textWidthBasis = textWidthBasis;
+       _textWidthBasis = textWidthBasis,
+       _textHeightBehavior = textHeightBehavior;
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
@@ -170,6 +171,8 @@ class TextPainter {
   void markNeedsLayout() {
     _paragraph = null;
     _needsLayout = true;
+    _previousCaretPosition = null;
+    _previousCaretPrototype = null;
   }
 
   /// The (potentially styled) text to paint.
@@ -339,6 +342,15 @@ class TextPainter {
     markNeedsLayout();
   }
 
+  /// {@macro flutter.dart:ui.textHeightBehavior}
+  ui.TextHeightBehavior get textHeightBehavior => _textHeightBehavior;
+  ui.TextHeightBehavior _textHeightBehavior;
+  set textHeightBehavior(ui.TextHeightBehavior value) {
+    if (_textHeightBehavior == value)
+      return;
+    _textHeightBehavior = value;
+    markNeedsLayout();
+  }
 
   ui.Paragraph _layoutTemplate;
 
@@ -398,6 +410,7 @@ class TextPainter {
       textDirection: textDirection ?? defaultTextDirection,
       textScaleFactor: textScaleFactor,
       maxLines: _maxLines,
+      textHeightBehavior: _textHeightBehavior,
       ellipsis: _ellipsis,
       locale: _locale,
       strutStyle: _strutStyle,
@@ -405,6 +418,7 @@ class TextPainter {
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,
       maxLines: maxLines,
+      textHeightBehavior: _textHeightBehavior,
       ellipsis: ellipsis,
       locale: locale,
     );
@@ -549,7 +563,7 @@ class TextPainter {
     _lastMaxWidth = maxWidth;
     _paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
     if (minWidth != maxWidth) {
-      final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth);
+      final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth) as double;
       if (newWidth != width) {
         _paragraph.layout(ui.ParagraphConstraints(width: newWidth));
       }
@@ -588,6 +602,14 @@ class TextPainter {
     return value & 0xF800 == 0xD800;
   }
 
+  // Checks if the glyph is either [Unicode.RLM] or [Unicode.LRM]. These values take
+  // up zero space and do not have valid bounding boxes around them.
+  //
+  // We do not directly use the [Unicode] constants since they are strings.
+  bool _isUnicodeDirectionality(int value) {
+    return value == 0x200F || value == 0x200E;
+  }
+
   /// Returns the closest offset after `offset` at which the input cursor can be
   /// positioned.
   int getOffsetAfter(int offset) {
@@ -622,12 +644,14 @@ class TextPainter {
       return null;
 
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
-    final bool needsSearch = _isUtf16Surrogate(prevCodeUnit) || _text.codeUnitAt(offset) == _zwjUtf16;
+    final bool needsSearch = _isUtf16Surrogate(prevCodeUnit) || _text.codeUnitAt(offset) == _zwjUtf16 || _isUnicodeDirectionality(prevCodeUnit);
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty && flattenedText != null) {
       final int prevRuneOffset = offset - graphemeClusterLength;
-      boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
+      // Use BoxHeightStyle.strut to ensure that the caret's height fits within
+      // the line's height and is consistent throughout the line.
+      boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset, boxHeightStyle: ui.BoxHeightStyle.strut);
       // When the range does not include a full cluster, no boxes will be returned.
       if (boxes.isEmpty) {
         // When we are at the beginning of the line, a non-surrogate position will
@@ -671,12 +695,14 @@ class TextPainter {
     if (nextCodeUnit == null)
       return null;
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
-    final bool needsSearch = _isUtf16Surrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16;
+    final bool needsSearch = _isUtf16Surrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16 || _isUnicodeDirectionality(nextCodeUnit);
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty && flattenedText != null) {
       final int nextRuneOffset = offset + graphemeClusterLength;
-      boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
+      // Use BoxHeightStyle.strut to ensure that the caret's height fits within
+      // the line's height and is consistent throughout the line.
+      boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset, boxHeightStyle: ui.BoxHeightStyle.strut);
       // When the range does not include a full cluster, no boxes will be returned.
       if (boxes.isEmpty) {
         // When we are at the end of the line, a non-surrogate position will
@@ -793,12 +819,28 @@ class TextPainter {
 
   /// Returns a list of rects that bound the given selection.
   ///
+  /// The [boxHeightStyle] and [boxWidthStyle] arguments may be used to select
+  /// the shape of the [TextBox]s. These properties default to
+  /// [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
+  /// must not be null.
+  ///
   /// A given selection might have more than one rect if this text painter
   /// contains bidirectional text because logically contiguous text might not be
   /// visually contiguous.
-  List<TextBox> getBoxesForSelection(TextSelection selection) {
+  List<TextBox> getBoxesForSelection(
+    TextSelection selection, {
+    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+  }) {
     assert(!_needsLayout);
-    return _paragraph.getBoxesForRange(selection.start, selection.end);
+    assert(boxHeightStyle != null);
+    assert(boxWidthStyle != null);
+    return _paragraph.getBoxesForRange(
+      selection.start,
+      selection.end,
+      boxHeightStyle: boxHeightStyle,
+      boxWidthStyle: boxWidthStyle
+    );
   }
 
   /// Returns the position within the text for the given pixel offset.

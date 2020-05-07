@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,31 +7,36 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'theme.dart';
 
 /// Color of the 'magnifier' lens border.
-const Color _kHighlighterBorder = Color(0xFF7F7F7F);
-const Color _kDefaultBackground = Color(0xFFD2D4DB);
+const Color _kHighlighterBorder = CupertinoDynamicColor.withBrightness(
+  color: Color(0x33000000),
+  darkColor: Color(0x33FFFFFF),
+);
 // Eyeballed values comparing with a native picker to produce the right
 // curvatures and densities.
 const double _kDefaultDiameterRatio = 1.07;
 const double _kDefaultPerspective = 0.003;
 const double _kSqueeze = 1.45;
-/// Opacity fraction value that hides the wheel above and below the 'magnifier'
-/// lens with the same color as the background.
-const double _kForegroundScreenOpacityFraction = 0.7;
+
+// Opacity fraction value that dims the wheel above and below the "magnifier"
+// lens.
+const double _kOverAndUnderCenterOpacity = 0.447;
 
 /// An iOS-styled picker.
 ///
 /// Displays its children widgets on a wheel for selection and
 /// calls back when the currently selected item changes.
 ///
-/// By default, the first child in [children] will be the initially selected child.
+/// By default, the first child in `children` will be the initially selected child.
 /// The index of a different child can be specified in [scrollController], to make
 /// that child the initially selected child.
 ///
 /// Can be used with [showCupertinoModalPopup] to display the picker modally at the
-/// bottom of the screen.
+/// bottom of the screen. When calling [showCupertinoModalPopup], be sure to set
+/// `semanticsDismissible` to true to enable dismissing the modal via semantics.
 ///
 /// Sizes itself to its parent. All children are sized to the same size based
 /// on [itemExtent].
@@ -49,9 +54,9 @@ class CupertinoPicker extends StatefulWidget {
   /// The [diameterRatio] and [itemExtent] arguments must not be null. The
   /// [itemExtent] must be greater than zero.
   ///
-  /// The [backgroundColor] defaults to light gray. It can be set to null to
-  /// disable the background painting entirely; this is mildly more efficient
-  /// than using [Colors.transparent]. Also, if it has transparency, no gradient
+  /// The [backgroundColor] defaults to null, which disables background painting entirely.
+  /// (i.e. the picker is going to have a completely transparent background), to match
+  /// the native UIPicker and UIDatePicker. Also, if it has transparency, no gradient
   /// effect will be rendered.
   ///
   /// The [scrollController] argument can be used to specify a custom
@@ -65,7 +70,7 @@ class CupertinoPicker extends StatefulWidget {
   CupertinoPicker({
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
-    this.backgroundColor = _kDefaultBackground,
+    this.backgroundColor,
     this.offAxisFraction = 0.0,
     this.useMagnifier = false,
     this.magnification = 1.0,
@@ -102,13 +107,13 @@ class CupertinoPicker extends StatefulWidget {
   ///
   /// The [itemExtent] argument must be non-null and positive.
   ///
-  /// The [backgroundColor] defaults to light gray. It can be set to null to
-  /// disable the background painting entirely; this is mildly more efficient
-  /// than using [Colors.transparent].
+  /// The [backgroundColor] defaults to null, which disables background painting entirely.
+  /// (i.e. the picker is going to have a completely transparent background), to match
+  /// the native UIPicker and UIDatePicker.
   CupertinoPicker.builder({
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
-    this.backgroundColor = _kDefaultBackground,
+    this.backgroundColor,
     this.offAxisFraction = 0.0,
     this.useMagnifier = false,
     this.magnification = 1.0,
@@ -140,10 +145,9 @@ class CupertinoPicker extends StatefulWidget {
 
   /// Background color behind the children.
   ///
-  /// Defaults to a gray color in the iOS color palette.
-  ///
-  /// This can be set to null to disable the background painting entirely; this
-  /// is mildly more efficient than using [Colors.transparent].
+  /// Defaults to null, which disables background painting entirely.
+  /// (i.e. the picker is going to have a completely transparent background), to match
+  /// the native UIPicker and UIDatePicker.
   ///
   /// Any alpha value less 255 (fully opaque) will cause the removal of the
   /// wheel list edge fade gradient from rendering of the widget.
@@ -230,6 +234,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         hasSuitableHapticHardware = false;
         break;
     }
@@ -244,110 +251,32 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     }
   }
 
-  /// Makes the fade to [CupertinoPicker.backgroundColor] edge gradients.
-  Widget _buildGradientScreen() {
-    // Because BlendMode.dstOut doesn't work correctly with BoxDecoration we
-    // have to just do a color blend. And a due to the way we are layering
-    // the magnifier and the gradient on the background, using a transparent
-    // background color makes the picker look odd.
-    if (widget.backgroundColor != null && widget.backgroundColor.alpha < 255)
-      return Container();
-
-    final Color widgetBackgroundColor = widget.backgroundColor ?? const Color(0xFFFFFFFF);
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: <Color>[
-                widgetBackgroundColor,
-                widgetBackgroundColor.withAlpha(0xF2),
-                widgetBackgroundColor.withAlpha(0xDD),
-                widgetBackgroundColor.withAlpha(0),
-                widgetBackgroundColor.withAlpha(0),
-                widgetBackgroundColor.withAlpha(0xDD),
-                widgetBackgroundColor.withAlpha(0xF2),
-                widgetBackgroundColor,
-              ],
-              stops: const <double>[
-                0.0, 0.05, 0.09, 0.22, 0.78, 0.91, 0.95, 1.0,
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Makes the magnifier lens look so that the colors are normal through
-  /// the lens and partially grayed out around it.
+  /// Draws the magnifier borders.
   Widget _buildMagnifierScreen() {
-    final Color foreground = widget.backgroundColor?.withAlpha(
-      (widget.backgroundColor.alpha * _kForegroundScreenOpacityFraction).toInt()
-    );
+    final Color resolvedBorderColor = CupertinoDynamicColor.resolve(_kHighlighterBorder, context);
 
     return IgnorePointer(
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: Container(
-              color: foreground,
+      child: Center(
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(width: 0.0, color: resolvedBorderColor),
+              bottom: BorderSide(width: 0.0, color: resolvedBorderColor),
             ),
           ),
-          Container(
-            decoration: const BoxDecoration(
-              border: Border(
-                top: BorderSide(width: 0.0, color: _kHighlighterBorder),
-                bottom: BorderSide(width: 0.0, color: _kHighlighterBorder),
-              ),
-            ),
-            constraints: BoxConstraints.expand(
-                height: widget.itemExtent * widget.magnification,
-            ),
-          ),
-          Expanded(
-            child: Container(
-              color: foreground,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildUnderMagnifierScreen() {
-    final Color foreground = widget.backgroundColor?.withAlpha(
-        (widget.backgroundColor.alpha * _kForegroundScreenOpacityFraction).toInt()
-    );
-
-    return Column(
-      children: <Widget>[
-        Expanded(child: Container()),
-        Container(
-          color: foreground,
           constraints: BoxConstraints.expand(
             height: widget.itemExtent * widget.magnification,
           ),
         ),
-        Expanded(child: Container()),
-      ],
-    );
-  }
-
-  Widget _addBackgroundToChild(Widget child) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: widget.backgroundColor,
       ),
-      child: child,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget result = DefaultTextStyle(
+    final Color resolvedBackgroundColor = CupertinoDynamicColor.resolve(widget.backgroundColor, context);
+
+    final Widget result = DefaultTextStyle(
       style: CupertinoTheme.of(context).textTheme.pickerTextStyle,
       child: Stack(
         children: <Widget>[
@@ -362,6 +291,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
                 offAxisFraction: widget.offAxisFraction,
                 useMagnifier: widget.useMagnifier,
                 magnification: widget.magnification,
+                overAndUnderCenterOpacity: _kOverAndUnderCenterOpacity,
                 itemExtent: widget.itemExtent,
                 squeeze: widget.squeeze,
                 onSelectedItemChanged: _handleSelectedItemChanged,
@@ -369,24 +299,15 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               ),
             ),
           ),
-          _buildGradientScreen(),
           _buildMagnifierScreen(),
         ],
       ),
     );
-    // Adds the appropriate opacity under the magnifier if the background
-    // color is transparent.
-    if (widget.backgroundColor != null && widget.backgroundColor.alpha < 255) {
-      result = Stack(
-        children: <Widget> [
-          _buildUnderMagnifierScreen(),
-          _addBackgroundToChild(result),
-        ],
-      );
-    } else {
-      result = _addBackgroundToChild(result);
-    }
-    return result;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(color: resolvedBackgroundColor),
+      child: result,
+    );
   }
 }
 

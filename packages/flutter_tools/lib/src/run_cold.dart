@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 
 import 'base/file_system.dart';
 import 'device.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'resident_runner.dart';
 import 'tracing.dart';
 import 'vmservice.dart';
@@ -50,17 +50,17 @@ class ColdRunner extends ResidentRunner {
   }) async {
     final bool prebuiltMode = applicationBinary != null;
     if (!prebuiltMode) {
-      if (!fs.isFileSync(mainPath)) {
+      if (!globals.fs.isFileSync(mainPath)) {
         String message = 'Tried to run $mainPath, but that file does not exist.';
         if (target == null) {
           message += '\nConsider using the -t option to specify the Dart file to start.';
         }
-        printError(message);
+        globals.printError(message);
         return 1;
       }
     }
 
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       final int result = await device.runCold(
         coldRunner: this,
         route: route,
@@ -75,7 +75,7 @@ class ColdRunner extends ResidentRunner {
       try {
         await connectToServiceProtocol();
       } on String catch (message) {
-        printError(message);
+        globals.printError(message);
         return 2;
       }
     }
@@ -83,29 +83,29 @@ class ColdRunner extends ResidentRunner {
     if (flutterDevices.first.observatoryUris != null) {
       // For now, only support one debugger connection.
       connectionInfoCompleter?.complete(DebugConnectionInfo(
-        httpUri: flutterDevices.first.vmServices.first.httpAddress,
-        wsUri: flutterDevices.first.vmServices.first.wsAddress,
+        httpUri: flutterDevices.first.vmService.httpAddress,
+        wsUri: flutterDevices.first.vmService.wsAddress,
       ));
     }
 
-    printTrace('Application running.');
+    globals.printTrace('Application running.');
 
-    for (FlutterDevice device in flutterDevices) {
-      if (device.vmServices == null) {
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.vmService == null) {
         continue;
       }
-      device.initLogReader();
+      await device.initLogReader();
       await device.refreshViews();
-      printTrace('Connected to ${device.device.name}');
+      globals.printTrace('Connected to ${device.device.name}');
     }
 
     if (traceStartup) {
       // Only trace startup for the first device.
       final FlutterDevice device = flutterDevices.first;
-      if (device.vmServices != null && device.vmServices.isNotEmpty) {
-        printStatus('Tracing startup on ${device.device.name}.');
+      if (device.vmService != null) {
+        globals.printStatus('Tracing startup on ${device.device.name}.');
         await downloadStartupTrace(
-          device.vmServices.first,
+          device.vmService,
           awaitFirstFrame: awaitFirstFrameWhenTracing,
         );
       }
@@ -131,24 +131,24 @@ class ColdRunner extends ResidentRunner {
     _didAttach = true;
     try {
       await connectToServiceProtocol();
-    } catch (error) {
-      printError('Error connecting to the service protocol: $error');
+    } on Exception catch (error) {
+      globals.printError('Error connecting to the service protocol: $error');
       // https://github.com/flutter/flutter/issues/33050
       // TODO(blasten): Remove this check once https://issuetracker.google.com/issues/132325318 has been fixed.
       if (await hasDeviceRunningAndroidQ(flutterDevices) &&
           error.toString().contains(kAndroidQHttpConnectionClosedExp)) {
-        printStatus('🔨 If you are using an emulator running Android Q Beta, consider using an emulator running API level 29 or lower.');
-        printStatus('Learn more about the status of this issue on https://issuetracker.google.com/issues/132325318');
+        globals.printStatus('🔨 If you are using an emulator running Android Q Beta, consider using an emulator running API level 29 or lower.');
+        globals.printStatus('Learn more about the status of this issue on https://issuetracker.google.com/issues/132325318');
       }
       return 2;
     }
-    for (FlutterDevice device in flutterDevices) {
-      device.initLogReader();
+    for (final FlutterDevice device in flutterDevices) {
+      await device.initLogReader();
     }
     await refreshViews();
-    for (FlutterDevice device in flutterDevices) {
-      for (FlutterView view in device.views) {
-        printTrace('Connected to $view.');
+    for (final FlutterDevice device in flutterDevices) {
+      for (final FlutterView view in device.views) {
+        globals.printTrace('Connected to $view.');
       }
     }
     appStartedCompleter?.complete();
@@ -170,8 +170,8 @@ class ColdRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAtFinish() async {
-    for (FlutterDevice flutterDevice in flutterDevices) {
-      flutterDevice.device.dispose();
+    for (final FlutterDevice flutterDevice in flutterDevices) {
+      await flutterDevice.device.dispose();
     }
 
     await stopEchoingDeviceLog();
@@ -179,40 +179,35 @@ class ColdRunner extends ResidentRunner {
 
   @override
   void printHelp({ @required bool details }) {
-    bool haveDetails = false;
-    bool haveAnything = false;
-    for (FlutterDevice device in flutterDevices) {
-      final String dname = device.device.name;
-      if (device.vmServices != null) {
-        for (VMService vm in device.vmServices) {
-          printStatus('An Observatory debugger and profiler on $dname is available at: ${vm.httpAddress}');
-        }
-      }
-    }
+    globals.printStatus('Flutter run key commands.');
     if (supportsServiceProtocol) {
-      haveDetails = true;
       if (details) {
         printHelpDetails();
-        haveAnything = true;
       }
     }
-    final String quitMessage = _didAttach
-      ? 'To detach, press "d"; to quit, press "q".'
-      : 'To quit, press "q".';
-    if (haveDetails && !details) {
-      printStatus('For a more detailed help message, press "h". $quitMessage');
-    } else if (haveAnything) {
-      printStatus('To repeat this help message, press "h". $quitMessage');
-    } else {
-      printStatus(quitMessage);
+    commandHelp.h.print();
+    if (_didAttach) {
+      commandHelp.d.print();
+    }
+    commandHelp.c.print();
+    commandHelp.q.print();
+    for (final FlutterDevice device in flutterDevices) {
+      final String dname = device.device.name;
+      if (device.vmService != null) {
+        // Caution: This log line is parsed by device lab tests.
+        globals.printStatus(
+          'An Observatory debugger and profiler on $dname is available at: '
+          '${device.vmService.httpAddress}',
+        );
+      }
     }
   }
 
   @override
   Future<void> preExit() async {
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       // If we're running in release mode, stop the app using the device logic.
-      if (device.vmServices == null || device.vmServices.isEmpty) {
+      if (device.vmService == null) {
         await device.device.stopApp(device.package);
       }
     }

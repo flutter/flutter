@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -48,7 +48,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ZtfItHwFlZ8}
 ///
-/// {@tool snippet --template=freeform}
+/// {@tool dartpad --template=freeform}
 /// This sample application uses an [AnimatedList] to create an effect when
 /// items are removed or added to the list.
 ///
@@ -229,7 +229,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     TextStyle textStyle = Theme.of(context).textTheme.display1;
+///     TextStyle textStyle = Theme.of(context).textTheme.headline4;
 ///     if (selected)
 ///       textStyle = textStyle.copyWith(color: Colors.lightGreenAccent[400]);
 ///     return Padding(
@@ -241,7 +241,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///           behavior: HitTestBehavior.opaque,
 ///           onTap: onTap,
 ///           child: SizedBox(
-///             height: 128.0,
+///             height: 80.0,
 ///             child: Card(
 ///               color: Colors.primaries[item % Colors.primaries.length],
 ///               child: Center(
@@ -263,8 +263,8 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 /// See also:
 ///
-/// * [SliverAnimatedList], a sliver that animates items when they are inserted
-///   or removed from a list.
+///  * [SliverAnimatedList], a sliver that animates items when they are inserted
+///    or removed from a list.
 class AnimatedList extends StatefulWidget {
   /// Creates a scrolling container that animates items when they are inserted
   /// or removed.
@@ -490,7 +490,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 /// [GlobalKey] or use the static [SliverAnimatedList.of] method from an item's
 /// input callback.
 ///
-/// {@tool snippet --template=freeform}
+/// {@tool dartpad --template=freeform}
 /// This sample application uses a [SliverAnimatedList] to create an animated
 /// effect when items are removed or added to the list.
 ///
@@ -588,21 +588,21 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///                 'SliverAnimatedList',
 ///                 style: TextStyle(fontSize: 30),
 ///               ),
-///               expandedHeight: 100,
+///               expandedHeight: 60,
 ///               centerTitle: true,
 ///               backgroundColor: Colors.amber[900],
 ///               leading: IconButton(
 ///                 icon: const Icon(Icons.add_circle),
 ///                 onPressed: _insert,
 ///                 tooltip: 'Insert a new item.',
-///                 iconSize: 48,
+///                 iconSize: 32,
 ///               ),
 ///               actions: [
 ///                 IconButton(
 ///                   icon: const Icon(Icons.remove_circle),
 ///                   onPressed: _remove,
 ///                   tooltip: 'Remove the selected item.',
-///                   iconSize: 48,
+///                   iconSize: 32,
 ///                 ),
 ///               ],
 ///             ),
@@ -704,7 +704,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///         child: GestureDetector(
 ///           onTap: onTap,
 ///           child: SizedBox(
-///             height: 120.0,
+///             height: 80.0,
 ///             child: Card(
 ///               color: selected
 ///                 ? Colors.black12
@@ -712,7 +712,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///               child: Center(
 ///                 child: Text(
 ///                   'Item $item',
-///                   style: Theme.of(context).textTheme.display1,
+///                   style: Theme.of(context).textTheme.headline4,
 ///                 ),
 ///               ),
 ///             ),
@@ -727,10 +727,10 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///
 /// See also:
 ///
-/// * [SliverList], which does not animate items when they are inserted or
-///   removed.
-/// * [AnimatedList], a non-sliver scrolling container that animates items when
-///   they are inserted or removed.
+///  * [SliverList], which does not animate items when they are inserted or
+///    removed.
+///  * [AnimatedList], a non-sliver scrolling container that animates items when
+///    they are inserted or removed.
 class SliverAnimatedList extends StatefulWidget {
   /// Creates a sliver that animates items when they are inserted or removed.
   const SliverAnimatedList({
@@ -828,7 +828,7 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
 
   @override
   void dispose() {
-    for (_ActiveItem item in _incomingItems.followedBy(_outgoingItems)) {
+    for (final _ActiveItem item in _incomingItems.followedBy(_outgoingItems)) {
       item.controller.dispose();
     }
     super.dispose();
@@ -852,7 +852,7 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
 
   int _indexToItemIndex(int index) {
     int itemIndex = index;
-    for (_ActiveItem item in _outgoingItems) {
+    for (final _ActiveItem item in _outgoingItems) {
       if (item.itemIndex <= itemIndex)
         itemIndex += 1;
       else
@@ -863,7 +863,7 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
 
   int _itemIndexToIndex(int itemIndex) {
     int index = itemIndex;
-    for (_ActiveItem item in _outgoingItems) {
+    for (final _ActiveItem item in _outgoingItems) {
       assert(item.itemIndex != itemIndex);
       if (item.itemIndex < itemIndex)
         index -= 1;
@@ -892,11 +892,11 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
 
     // Increment the incoming and outgoing item indices to account
     // for the insertion.
-    for (_ActiveItem item in _incomingItems) {
+    for (final _ActiveItem item in _incomingItems) {
       if (item.itemIndex >= itemIndex)
         item.itemIndex += 1;
     }
-    for (_ActiveItem item in _outgoingItems) {
+    for (final _ActiveItem item in _outgoingItems) {
       if (item.itemIndex >= itemIndex)
         item.itemIndex += 1;
     }
@@ -956,11 +956,11 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
 
       // Decrement the incoming and outgoing item indices to account
       // for the removal.
-      for (_ActiveItem item in _incomingItems) {
+      for (final _ActiveItem item in _incomingItems) {
         if (item.itemIndex > outgoingItem.itemIndex)
           item.itemIndex -= 1;
       }
-      for (_ActiveItem item in _outgoingItems) {
+      for (final _ActiveItem item in _outgoingItems) {
         if (item.itemIndex > outgoingItem.itemIndex)
           item.itemIndex -= 1;
       }

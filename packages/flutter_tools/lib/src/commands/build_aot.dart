@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -14,11 +14,13 @@ import 'build.dart';
 
 /// Builds AOT snapshots into platform specific library containers.
 class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmentArtifacts {
-  BuildAotCommand({bool verboseHelp = false, this.aotBuilder}) {
+  BuildAotCommand({this.aotBuilder}) {
+    addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags();
     usesPubOption();
-    usesDartDefines();
+    usesDartDefineOption();
+    usesExtraFrontendOptions();
     argParser
       ..addOption('output-dir', defaultsTo: getAotBuildDirectory())
       ..addOption('target-platform',
@@ -26,20 +28,11 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         allowed: <String>['android-arm', 'android-arm64', 'ios', 'android-x64'],
       )
       ..addFlag('quiet', defaultsTo: false)
-      ..addFlag('report-timings',
-        negatable: false,
-        defaultsTo: false,
-        help: 'Report timing information about build steps in machine readable form,',
-      )
       ..addMultiOption('ios-arch',
         splitCommas: true,
         defaultsTo: defaultIOSArchs.map<String>(getNameForDarwinArch),
         allowed: DarwinArch.values.map<String>(getNameForDarwinArch),
         help: 'iOS architectures to build.',
-      )
-      ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
-        splitCommas: true,
-        hide: true,
       )
       ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
         splitCommas: true,
@@ -49,11 +42,8 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         defaultsTo: kBitcodeEnabledDefault,
         help: 'Build the AOT bundle with bitcode. Requires a compatible bitcode engine.',
         hide: true,
-      );
-    // --track-widget-creation is exposed as a flag here to deal with build
-    // invalidation issues, but it is ignored -- there are no plans to support
-    // it for AOT mode.
-    usesTrackWidgetCreation(hasEffect: false, verboseHelp: verboseHelp);
+      )
+      ..addFlag('report-timings', hide: true);
   }
 
   AotBuilder aotBuilder;
@@ -69,7 +59,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     final String targetPlatform = stringArg('target-platform');
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     final String outputPath = stringArg('output-dir') ?? getAotBuildDirectory();
-    final BuildMode buildMode = getBuildMode();
+    final BuildInfo buildInfo = getBuildInfo();
     if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
     }
@@ -79,16 +69,13 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     await aotBuilder.build(
       platform: platform,
       outputPath: outputPath,
-      buildMode: buildMode,
+      buildInfo: buildInfo,
       mainDartFile: findMainDartFile(targetFile),
       bitcode: boolArg('bitcode'),
       quiet: boolArg('quiet'),
-      reportTimings: boolArg('report-timings'),
       iosBuildArchs: stringsArg('ios-arch').map<DarwinArch>(getIOSArchForName),
-      extraFrontEndOptions: stringsArg(FlutterOptions.kExtraFrontEndOptions),
-      extraGenSnapshotOptions: stringsArg(FlutterOptions.kExtraGenSnapshotOptions),
-      dartDefines: dartDefines,
+      reportTimings: boolArg('report-timings'),
     );
-    return null;
+    return FlutterCommandResult.success();
   }
 }

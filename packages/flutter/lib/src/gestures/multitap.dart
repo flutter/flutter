@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -144,8 +144,8 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   /// Called when the user has tapped the screen with a primary button at the
   /// same location twice in quick succession.
   ///
-  /// This triggers when the pointer stops contacting the device after the 2nd tap,
-  /// immediately after [onDoubleTapUp].
+  /// This triggers when the pointer stops contacting the device after the
+  /// second tap.
   ///
   /// See also:
   ///
@@ -168,7 +168,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
           return false;
       }
     }
-    return super.isPointerAllowed(event);
+    return super.isPointerAllowed(event as PointerDownEvent);
   }
 
   @override
@@ -177,7 +177,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
       if (!_firstTap.isWithinGlobalTolerance(event, kDoubleTapSlop)) {
         // Ignore out-of-bounds second taps.
         return;
-      } else if (!_firstTap.hasElapsedMinTime() || !_firstTap.hasSameButton(event)) {
+      } else if (!_firstTap.hasElapsedMinTime() || !_firstTap.hasSameButton(event as PointerDownEvent)) {
         // Restart when the second tap is too close to the first, or when buttons
         // mismatch.
         _reset();
@@ -190,7 +190,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   void _trackFirstTap(PointerEvent event) {
     _stopDoubleTapTimer();
     final _TapTracker tracker = _TapTracker(
-      event: event,
+      event: event as PointerDownEvent,
       entry: GestureBinding.instance.gestureArena.add(event.pointer, this),
       doubleTapMinTime: kDoubleTapMinTime,
     );
@@ -322,7 +322,7 @@ class _TapGesture extends _TapTracker {
     Duration longTapDelay,
   }) : _lastPosition = OffsetPair.fromEventPosition(event),
        super(
-    event: event,
+    event: event as PointerDownEvent,
     entry: GestureBinding.instance.gestureArena.add(event.pointer, gestureRecognizer),
     doubleTapMinTime: kDoubleTapMinTime,
   ) {
@@ -505,7 +505,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   @override
   void dispose() {
     final List<_TapGesture> localGestures = List<_TapGesture>.from(_gestureMap.values);
-    for (_TapGesture gesture in localGestures)
+    for (final _TapGesture gesture in localGestures)
       gesture.cancel();
     // Rejection of each gesture should cause it to be removed from our map
     assert(_gestureMap.isEmpty);

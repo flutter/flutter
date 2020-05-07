@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,7 +6,7 @@ import 'package:meta/meta.dart';
 
 import '../base/process.dart';
 import '../base/terminal.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'gradle_utils.dart';
@@ -85,8 +85,8 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
     bool usesAndroidX,
     bool shouldBuildPluginAsAar,
   }) async {
-    printStatus('$warningMark Gradle does not have execution permission.', emphasis: true);
-    printStatus(
+    globals.printStatus('$warningMark Gradle does not have execution permission.', emphasis: true);
+    globals.printStatus(
       'You should change the ownership of the project directory to your user, '
       'or move the project to a directory with execute permissions.',
       indent: 4
@@ -108,6 +108,7 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
     'javax.net.ssl.SSLHandshakeException: Remote host closed connection during handshake',
     'java.net.SocketException: Connection reset',
     'java.io.FileNotFoundException',
+    'Gateway Time-out'
   ]),
   handler: ({
     String line,
@@ -115,9 +116,9 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
     bool usesAndroidX,
     bool shouldBuildPluginAsAar,
   }) async {
-    printError(
-      '$warningMark Gradle threw an error while trying to update itself. '
-      'Retrying the update...'
+    globals.printError(
+      '$warningMark Gradle threw an error while downloading artifacts from the network. '
+      'Retrying to download...'
     );
     return GradleBuildStatus.retry;
   },
@@ -136,9 +137,9 @@ final GradleHandledError r8FailureHandler = GradleHandledError(
     bool usesAndroidX,
     bool shouldBuildPluginAsAar,
   }) async {
-    printStatus('$warningMark The shrinker may have failed to optimize the Java bytecode.', emphasis: true);
-    printStatus('To disable the shrinker, pass the `--no-shrink` flag to this command.', indent: 4);
-    printStatus('To learn more, see: https://developer.android.com/studio/build/shrink-code', indent: 4);
+    globals.printStatus('$warningMark The shrinker may have failed to optimize the Java bytecode.', emphasis: true);
+    globals.printStatus('To disable the shrinker, pass the `--no-shrink` flag to this command.', indent: 4);
+    globals.printStatus('To learn more, see: https://developer.android.com/studio/build/shrink-code', indent: 4);
     return GradleBuildStatus.exit;
   },
   eventLabel: 'r8',
@@ -187,7 +188,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
     if (hasPlugins && !usesAndroidX) {
       // If the app isn't using AndroidX, then the app is likely using
       // a plugin already migrated to AndroidX.
-      printStatus(
+      globals.printStatus(
         'AndroidX incompatibilities may have caused this build to fail. '
         'Please migrate your app to AndroidX. See https://goo.gl/CP92wY.'
       );
@@ -206,7 +207,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
       ).send();
     }
     if (hasPlugins && usesAndroidX && !shouldBuildPluginAsAar) {
-      printStatus(
+      globals.printStatus(
         'The built failed likely due to AndroidX incompatibilities in a plugin. '
         'The tool is about to try using Jetfier to solve the incompatibility.'
       );
@@ -236,13 +237,12 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
     bool shouldBuildPluginAsAar,
   }) async {
     const String licenseNotAcceptedMatcher =
-      r'You have not accepted the license agreements of the following SDK components:'
-      r'\s*\[(.+)\]';
+      r'You have not accepted the license agreements of the following SDK components:\s*\[(.+)\]';
 
     final RegExp licenseFailure = RegExp(licenseNotAcceptedMatcher, multiLine: true);
     assert(licenseFailure != null);
     final Match licenseMatch = licenseFailure.firstMatch(line);
-    printStatus(
+    globals.printStatus(
       '$warningMark Unable to download needed Android SDK components, as the '
       'following licenses have not been accepted:\n'
       '${licenseMatch.group(1)}\n\n'
@@ -283,7 +283,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
     );
     // Extract build types and product flavors.
     final Set<String> variants = <String>{};
-    for (String task in tasksRunResult.stdout.split('\n')) {
+    for (final String task in tasksRunResult.stdout.split('\n')) {
       final Match match = _assembleTaskPattern.matchAsPrefix(task);
       if (match != null) {
         final String variant = match.group(1).toLowerCase();
@@ -303,18 +303,18 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
         }
       }
     }
-    printStatus(
+    globals.printStatus(
       '\n$warningMark  Gradle project does not define a task suitable '
       'for the requested build.'
     );
     if (productFlavors.isEmpty) {
-      printStatus(
+      globals.printStatus(
         'The android/app/build.gradle file does not define '
         'any custom product flavors. '
         'You cannot use the --flavor option.'
       );
     } else {
-      printStatus(
+      globals.printStatus(
         'The android/app/build.gradle file defines product '
         'flavors: ${productFlavors.join(', ')} '
         'You must specify a --flavor option to select one of them.'

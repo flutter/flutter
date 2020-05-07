@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -248,7 +248,7 @@ class ButtonTheme extends InheritedTheme {
 /// A button theme can be specified as part of the overall Material theme
 /// using [ThemeData.buttonTheme]. The Material theme's button theme data
 /// can be overridden with [ButtonTheme].
-class ButtonThemeData extends Diagnosticable {
+class ButtonThemeData with Diagnosticable {
   /// Create a button theme object that can be used with [ButtonTheme]
   /// or [ThemeData].
   ///
@@ -904,24 +904,24 @@ class ButtonThemeData extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ButtonThemeData typedOther = other;
-    return textTheme == typedOther.textTheme
-        && minWidth == typedOther.minWidth
-        && height == typedOther.height
-        && padding == typedOther.padding
-        && shape == typedOther.shape
-        && alignedDropdown == typedOther.alignedDropdown
-        && _buttonColor == typedOther._buttonColor
-        && _disabledColor == typedOther._disabledColor
-        && _focusColor == typedOther._focusColor
-        && _hoverColor == typedOther._hoverColor
-        && _highlightColor == typedOther._highlightColor
-        && _splashColor == typedOther._splashColor
-        && colorScheme == typedOther.colorScheme
-        && _materialTapTargetSize == typedOther._materialTapTargetSize;
+    return other is ButtonThemeData
+        && other.textTheme == textTheme
+        && other.minWidth == minWidth
+        && other.height == height
+        && other.padding == padding
+        && other.shape == shape
+        && other.alignedDropdown == alignedDropdown
+        && other._buttonColor == _buttonColor
+        && other._disabledColor == _disabledColor
+        && other._focusColor == _focusColor
+        && other._hoverColor == _hoverColor
+        && other._highlightColor == _highlightColor
+        && other._splashColor == _splashColor
+        && other.colorScheme == colorScheme
+        && other._materialTapTargetSize == _materialTapTargetSize;
   }
 
   @override

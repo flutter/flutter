@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -213,7 +213,7 @@ void main() {
     await gesture2.up();
   });
 
-  testWidgets('MaterialButton\'s disabledColor takes precedence over its default disabled color.', (WidgetTester tester) async {
+  testWidgets("MaterialButton's disabledColor takes precedence over its default disabled color.", (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/30012.
 
     final Finder rawButtonMaterial = find.descendant(
@@ -727,5 +727,65 @@ void main() {
       matching: find.byType(Material),
     );
     expect(tester.widget<Material>(rawButtonMaterial).shape, const StadiumBorder());
+  });
+
+  testWidgets('MaterialButton responds to density changes.', (WidgetTester tester) async {
+    const Key key = Key('test');
+    const Key childKey = Key('test child');
+
+    Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
+      return await tester.pumpWidget(
+        MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Center(
+              child: MaterialButton(
+                visualDensity: visualDensity,
+                key: key,
+                onPressed: () {},
+                child: useText ? const Text('Text', key: childKey) : Container(key: childKey, width: 100, height: 100, color: const Color(0xffff0000)),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await buildTest(const VisualDensity());
+    final RenderBox box = tester.renderObject(find.byKey(key));
+    Rect childRect = tester.getRect(find.byKey(childKey));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(132, 100)));
+    expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(156, 124)));
+    expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
+
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(108, 100)));
+    expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
+
+    await buildTest(const VisualDensity(), useText: true);
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(88, 48)));
+    expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0), useText: true);
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(112, 60)));
+    expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
+
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0), useText: true);
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(76, 36)));
+    expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 }

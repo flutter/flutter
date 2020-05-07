@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -854,7 +854,7 @@ void main() {
     // We must explicitly cause an "up" gesture to avoid a crash.
     // todo(mattcarroll) remove this call when #19540 is fixed
     await gesture.up();
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/52960
 
   testWidgets('ScaleTransition animation for showCupertinoDialog()', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1002,27 +1002,27 @@ void main() {
 
     // Exit animation, look at reverse FadeTransition.
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
     expect(transition.opacity.value, closeTo(0.500, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
     expect(transition.opacity.value, closeTo(0.332, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
     expect(transition.opacity.value, closeTo(0.188, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
     expect(transition.opacity.value, closeTo(0.081, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
     expect(transition.opacity.value, closeTo(0.019, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
     expect(transition.opacity.value, closeTo(0.0, 0.001));
   });
 
@@ -1090,7 +1090,7 @@ void main() {
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
   final RenderObject buttonBox = tester.renderObject(find.widgetWithText(CupertinoDialogAction, title));
   assert(buttonBox is RenderBox);
-  return buttonBox;
+  return buttonBox as RenderBox;
 }
 
 RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
@@ -1100,7 +1100,7 @@ RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
     }),
   );
   assert(actionsSection is RenderBox);
-  return actionsSection;
+  return actionsSection as RenderBox;
 }
 
 Widget createAppWithButtonThatLaunchesDialog({ WidgetBuilder dialogBuilder }) {

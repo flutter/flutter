@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -14,7 +14,10 @@ ScrollController _controller = ScrollController(
 );
 
 class ThePositiveNumbers extends StatelessWidget {
-  const ThePositiveNumbers({@required this.from});
+  const ThePositiveNumbers({
+    Key key,
+    @required this.from,
+  }) : super(key: key);
   final int from;
   @override
   Widget build(BuildContext context) {
@@ -138,6 +141,25 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
 }
 
 void main() {
+  testWidgets('ScrollPosition jumpTo() doesn\'t call notifyListeners twice', (WidgetTester tester) async {
+    int count = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: ListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          return Text('$index', textDirection: TextDirection.ltr);
+        },
+      ),
+    ));
+
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    position.addListener(() {
+      count++;
+    });
+    position.jumpTo(100);
+
+    expect(count, 1);
+  });
+
   testWidgets('whether we remember our scroll position', (WidgetTester tester) async {
     await performTest(tester, true);
     await performTest(tester, false);

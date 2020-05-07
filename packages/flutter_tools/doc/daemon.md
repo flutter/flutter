@@ -107,6 +107,15 @@ The `restart()` restarts the given application. It returns a Map of `{ int code,
 - `reason`: optional; the reason for the full restart (eg. `save`, `manual`) for reporting purposes
 - `pause`: optional; when doing a hot restart the isolate should enter a paused mode
 
+#### app.reloadMethod
+
+Performs a limited hot restart which does not sync assets and only marks elements as dirty, instead of reassembling the full application. A `code` of `0` indicates success, and non-zero indicates a failure.
+
+- `appId`: the id of a previously started app; this is required.
+- `library`: the absolute file URI of the library to be updated; this is required.
+- `class`: the name of the StatelessWidget that was updated, or the StatefulWidget
+corresponding to the updated State class; this is required.
+
 #### app.callServiceExtension
 
 The `callServiceExtension()` allows clients to make arbitrary calls to service protocol extensions. It returns a `Map` - the result returned by the service protocol method.
@@ -156,6 +165,22 @@ This is sent when an app is stopped or detached from. The `params` field will be
 #### app.webLaunchUrl
 
 This is sent once a web application is being served and available for the user to access. The `params` field will be a map with a string `url` field and a boolean `launched` indicating whether the application has already been launched in a browser (this will generally be true for a browser device unless `--no-web-browser-launch` was used, and false for the headless `web-server` device).
+
+### Daemon-to-Editor Requests
+
+These requests come _from_ the Flutter daemon and should be responded to by the client/editor.
+
+#### app.exposeUrl
+
+This request is enabled only if `flutter run` is run with the `--web-allow-expose-url` flag.
+
+This request is sent by the server when it has a local URL that needs to be exposed to the end user. This is to support running on a remote machine where a URL (for example `http://localhost:1234`) may not be directly accessible to the end user. With this URL clients can perform tunnelling and then provide the tunneled URL back to Flutter so that it can be used in code that will be executed on the end users machine (for example wehen a web application needs to be able to connect back to a service like the DWDS debugging service).
+
+This request will only be sent if a web application was run in a mode that requires mapped URLs (such as using `--no-web-browser-launch` for browser devices or the headless `web-server` device when debugging).
+
+The request will contain an `id` field and a `params` field that is a map containing a string `url` field.
+
+The response should be sent using the same `id` as the request with a `result` map containing the mapped `url` (or the same URL in the case where the client does not need to perform any mapping).
 
 ### device domain
 

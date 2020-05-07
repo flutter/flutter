@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -61,7 +61,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   @override
   void didAdoptChild(RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
-    final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }
 
@@ -287,7 +287,7 @@ void main() {
     );
     layout(root);
 
-    final SliverMultiBoxAdaptorParentData parentData = a.parentData;
+    final SliverMultiBoxAdaptorParentData parentData = a.parentData as SliverMultiBoxAdaptorParentData;
     parentData.layoutOffset = 0.001;
 
     root.offset = ViewportOffset.fixed(900.0);
@@ -322,7 +322,7 @@ void main() {
     );
     layout(root);
 
-    final SliverMultiBoxAdaptorParentData parentData = a.parentData;
+    final SliverMultiBoxAdaptorParentData parentData = a.parentData as SliverMultiBoxAdaptorParentData;
     // Simulate double precision error.
     parentData.layoutOffset = -0.0000000000001;
 
@@ -340,18 +340,20 @@ void main() {
     final SliverMultiBoxAdaptorParentData candidate = SliverMultiBoxAdaptorParentData();
     expect(candidate.keepAlive, isFalse);
     expect(candidate.index, isNull);
-    expect(candidate.toString(), 'index=null; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=null; layoutOffset=None');
     candidate.keepAlive = null;
-    expect(candidate.toString(), 'index=null; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=null; layoutOffset=None');
     candidate.keepAlive = true;
-    expect(candidate.toString(), 'index=null; keepAlive; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=null; keepAlive; layoutOffset=None');
     candidate.keepAlive = false;
-    expect(candidate.toString(), 'index=null; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=null; layoutOffset=None');
     candidate.index = 0;
-    expect(candidate.toString(), 'index=0; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=0; layoutOffset=None');
     candidate.index = 1;
-    expect(candidate.toString(), 'index=1; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=1; layoutOffset=None');
     candidate.index = -1;
-    expect(candidate.toString(), 'index=-1; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=-1; layoutOffset=None');
+    candidate.layoutOffset = 100.0;
+    expect(candidate.toString(), 'index=-1; layoutOffset=100.0');
   });
 }

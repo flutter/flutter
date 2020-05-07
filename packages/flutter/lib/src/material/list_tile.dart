@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -17,8 +17,8 @@ import 'theme.dart';
 
 /// Defines the title font used for [ListTile] descendants of a [ListTileTheme].
 ///
-/// List tiles that appear in a [Drawer] use the theme's [TextTheme.body2]
-/// text style, which is a little smaller than the theme's [TextTheme.subhead]
+/// List tiles that appear in a [Drawer] use the theme's [TextTheme.bodyText1]
+/// text style, which is a little smaller than the theme's [TextTheme.subtitle1]
 /// text style, which is used by default.
 enum ListTileStyle {
   /// Use a title font that's appropriate for a [ListTile] in a list.
@@ -195,7 +195,7 @@ enum ListTileControlAffinity {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example uses a [ListView] to demonstrate different configurations of
 /// [ListTile]s in [Card]s.
@@ -254,7 +254,7 @@ enum ListTileControlAffinity {
 /// )
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Tiles can be much more elaborate. Here is a tile which can be tapped, but
 /// which is disabled when the `_act` variable is not 2. When the tile is
@@ -265,7 +265,7 @@ enum ListTileControlAffinity {
 /// // ...
 /// ListTile(
 ///   leading: const Icon(Icons.flight_land),
-///   title: const Text('Trix\'s airplane'),
+///   title: const Text("Trix's airplane"),
 ///   subtitle: _act != 2 ? const Text('The airplane is only in Act II.') : null,
 ///   enabled: _act == 2,
 ///   onTap: () { /* react to the tile being tapped */ }
@@ -285,7 +285,7 @@ enum ListTileControlAffinity {
 /// that are large enough, but it is up to the developer to ensure that
 /// their widgets follow the Material spec.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Here is an example of a one-line, non-[dense] ListTile with a
 /// tappable leading widget that adheres to accessibility requirements and
@@ -317,7 +317,7 @@ enum ListTileControlAffinity {
 /// you're looking for, it's easy to create custom list items with a
 /// combination of other widgets, such as [Row]s and [Column]s.
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// Here is an example of a custom list item that resembles a Youtube related
 /// video list item created with [Expanded] and [Container] widgets.
@@ -438,7 +438,7 @@ enum ListTileControlAffinity {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// Here is an example of an article list item with multiline titles and
 /// subtitles. It utilizes [Row]s and [Column]s, as well as [Expanded] and
@@ -469,7 +469,7 @@ enum ListTileControlAffinity {
 ///       crossAxisAlignment: CrossAxisAlignment.start,
 ///       children: <Widget>[
 ///         Expanded(
-///           flex: 2,
+///           flex: 1,
 ///           child: Column(
 ///             crossAxisAlignment: CrossAxisAlignment.start,
 ///             children: <Widget>[
@@ -508,7 +508,7 @@ enum ListTileControlAffinity {
 ///                 ),
 ///               ),
 ///               Text(
-///                 '$publishDate · $readDuration ★',
+///                 '$publishDate - $readDuration',
 ///                 style: const TextStyle(
 ///                   fontSize: 12.0,
 ///                   color: Colors.black54,
@@ -806,14 +806,14 @@ class ListTile extends StatelessWidget {
     if (tileTheme != null) {
       switch (tileTheme.style) {
         case ListTileStyle.drawer:
-          style = theme.textTheme.body2;
+          style = theme.textTheme.bodyText1;
           break;
         case ListTileStyle.list:
-          style = theme.textTheme.subhead;
+          style = theme.textTheme.subtitle1;
           break;
       }
     } else {
-      style = theme.textTheme.subhead;
+      style = theme.textTheme.subtitle1;
     }
     final Color color = _textColor(theme, tileTheme, style.color);
     return _isDenseLayout(tileTheme)
@@ -822,7 +822,7 @@ class ListTile extends StatelessWidget {
   }
 
   TextStyle _subtitleTextStyle(ThemeData theme, ListTileTheme tileTheme) {
-    final TextStyle style = theme.textTheme.body1;
+    final TextStyle style = theme.textTheme.bodyText2;
     final Color color = _textColor(theme, tileTheme, theme.textTheme.caption.color);
     return _isDenseLayout(tileTheme)
       ? style.copyWith(color: color, fontSize: 12.0)
@@ -975,10 +975,10 @@ class _ListTileElement extends RenderObjectElement {
   final Map<Element, _ListTileSlot> childToSlot = <Element, _ListTileSlot>{};
 
   @override
-  _ListTile get widget => super.widget;
+  _ListTile get widget => super.widget as _ListTile;
 
   @override
-  _RenderListTile get renderObject => super.renderObject;
+  _RenderListTile get renderObject => super.renderObject as _RenderListTile;
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -992,6 +992,7 @@ class _ListTileElement extends RenderObjectElement {
     final _ListTileSlot slot = childToSlot[child];
     childToSlot.remove(child);
     slotToChild.remove(slot);
+    super.forgetChild(child);
   }
 
   void _mountChild(Widget widget, _ListTileSlot slot) {
@@ -1039,7 +1040,7 @@ class _ListTileElement extends RenderObjectElement {
     _updateChild(widget.trailing, _ListTileSlot.trailing);
   }
 
-  void _updateRenderObject(RenderObject child, _ListTileSlot slot) {
+  void _updateRenderObject(RenderBox child, _ListTileSlot slot) {
     switch (slot) {
       case _ListTileSlot.leading:
         renderObject.leading = child;
@@ -1060,8 +1061,8 @@ class _ListTileElement extends RenderObjectElement {
   void insertChildRenderObject(RenderObject child, dynamic slotValue) {
     assert(child is RenderBox);
     assert(slotValue is _ListTileSlot);
-    final _ListTileSlot slot = slotValue;
-    _updateRenderObject(child, slot);
+    final _ListTileSlot slot = slotValue as _ListTileSlot;
+    _updateRenderObject(child as RenderBox, slot);
     assert(renderObject.childToSlot.keys.contains(child));
     assert(renderObject.slotToChild.keys.contains(slot));
   }
@@ -1209,14 +1210,14 @@ class _RenderListTile extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (RenderBox child in _children)
+    for (final RenderBox child in _children)
       child.attach(owner);
   }
 
   @override
   void detach() {
     super.detach();
-    for (RenderBox child in _children)
+    for (final RenderBox child in _children)
       child.detach();
   }
 
@@ -1303,7 +1304,7 @@ class _RenderListTile extends RenderBox {
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(title != null);
-    final BoxParentData parentData = title.parentData;
+    final BoxParentData parentData = title.parentData as BoxParentData;
     return parentData.offset.dy + title.getDistanceToActualBaseline(baseline);
   }
 
@@ -1319,7 +1320,7 @@ class _RenderListTile extends RenderBox {
   }
 
   static void _positionBox(RenderBox box, Offset offset) {
-    final BoxParentData parentData = box.parentData;
+    final BoxParentData parentData = box.parentData as BoxParentData;
     parentData.offset = offset;
   }
 
@@ -1327,6 +1328,7 @@ class _RenderListTile extends RenderBox {
   // https://material.io/design/components/lists.html#specs
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     final bool hasLeading = leading != null;
     final bool hasSubtitle = subtitle != null;
     final bool hasTrailing = trailing != null;
@@ -1414,7 +1416,7 @@ class _RenderListTile extends RenderBox {
     // This attempts to implement the redlines for the vertical position of the
     // leading and trailing icons on the spec page:
     //   https://material.io/design/components/lists.html#specs
-    // The interpretation for these red lines is as follows:
+    // The interpretation for these redlines is as follows:
     //  - For large tiles (> 72dp), both leading and trailing controls should be
     //    a fixed distance from top. As per guidelines this is set to 16dp.
     //  - For smaller tiles, trailing should always be centered. Leading can be
@@ -1463,7 +1465,7 @@ class _RenderListTile extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     void doPaint(RenderBox child) {
       if (child != null) {
-        final BoxParentData parentData = child.parentData;
+        final BoxParentData parentData = child.parentData as BoxParentData;
         context.paintChild(child, parentData.offset + offset);
       }
     }
@@ -1479,8 +1481,8 @@ class _RenderListTile extends RenderBox {
   @override
   bool hitTestChildren(BoxHitTestResult result, { @required Offset position }) {
     assert(position != null);
-    for (RenderBox child in _children) {
-      final BoxParentData parentData = child.parentData;
+    for (final RenderBox child in _children) {
+      final BoxParentData parentData = child.parentData as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,
         position: position,

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -191,9 +191,9 @@ Future<String> getAndroidManifest(String apk) async {
  /// Checks that the classes are contained in the APK, throws otherwise.
 Future<void> checkApkContainsClasses(File apk, List<String> classes) async {
   final ApkExtractor extractor = ApkExtractor(apk);
-  for (String className in classes) {
+  for (final String className in classes) {
     if (!(await extractor.containsClass(className))) {
-      throw Exception('APK doesn\'t contain class `$className`.');
+      throw Exception("APK doesn't contain class `$className`.");
     }
   }
   extractor.dispose();
@@ -332,10 +332,10 @@ class FlutterPluginProject {
   String get rootPath => path.join(parent.path, name);
   String get examplePath => path.join(rootPath, 'example');
   String get exampleAndroidPath => path.join(examplePath, 'android');
-  String get debugApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'debug', 'app-debug.apk');
-  String get releaseApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'release', 'app-release.apk');
-  String get releaseArmApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'release', 'app-armeabi-v7a-release.apk');
-  String get releaseArm64ApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'release', 'app-arm64-v8a-release.apk');
+  String get debugApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk', 'app-debug.apk');
+  String get releaseApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk', 'app-release.apk');
+  String get releaseArmApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk','app-armeabi-v7a-release.apk');
+  String get releaseArm64ApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk', 'app-arm64-v8a-release.apk');
   String get releaseBundlePath => path.join(examplePath, 'build', 'app', 'outputs', 'bundle', 'release', 'app.aab');
 
   Future<void> runGradleTask(String task, {List<String> options}) async {

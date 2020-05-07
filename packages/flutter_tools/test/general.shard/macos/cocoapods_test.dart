@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,16 +6,19 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:platform/platform.dart';
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
+
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -29,6 +32,7 @@ void main() {
   FlutterProject projectUnderTest;
   CocoaPods cocoaPodsUnderTest;
   InvokeProcess resultOfPodVersion;
+  BufferLogger logger;
 
   void pretendPodVersionFails() {
     resultOfPodVersion = () async => exitsWithError();
@@ -39,11 +43,21 @@ void main() {
   }
 
   void podsIsInHomeDir() {
-    fs.directory(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master')).createSync(recursive: true);
+    fs.directory(fs.path.join(
+      globals.fsUtils.homeDirPath,
+      '.cocoapods',
+      'repos',
+      'master',
+    )).createSync(recursive: true);
   }
 
   String podsIsInCustomDir({String cocoapodsReposDir}) {
-    cocoapodsReposDir ??= fs.path.join(homeDirPath, 'cache', 'cocoapods', 'repos');
+    cocoapodsReposDir ??= fs.path.join(
+      globals.fsUtils.homeDirPath,
+      'cache',
+      'cocoapods',
+      'repos',
+    );
     fs.directory(fs.path.join(cocoapodsReposDir, 'master')).createSync(recursive: true);
     return cocoapodsReposDir;
   }
@@ -52,11 +66,19 @@ void main() {
     Cache.flutterRoot = 'flutter';
     fs = MemoryFileSystem();
     mockProcessManager = MockProcessManager();
+    logger = BufferLogger.test();
     mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
     projectUnderTest = FlutterProject.fromDirectory(fs.directory('project'));
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);
-    cocoaPodsUnderTest = CocoaPods();
-    pretendPodVersionIs('1.6.0');
+    cocoaPodsUnderTest = CocoaPods(
+      fileSystem: fs,
+      processManager: mockProcessManager,
+      logger: logger,
+      platform: FakePlatform(),
+      xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+      timeoutConfiguration: const TimeoutConfiguration(),
+    );
+    pretendPodVersionIs('1.8.0');
     fs.file(fs.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-ios-objc',
     ))
@@ -80,18 +102,34 @@ void main() {
     when(mockProcessManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: 'project/ios',
-      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
+      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
     )).thenAnswer((_) async => exitsHappy());
     when(mockProcessManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: 'project/macos',
-      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
+      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
     )).thenAnswer((_) async => exitsHappy());
   });
 
   void pretendPodIsNotInstalled() {
     when(mockProcessManager.run(
       <String>['which', 'pod'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenAnswer((_) async => exitsWithError());
+  }
+
+  void pretendPodIsBroken() {
+    // it is present
+    when(mockProcessManager.run(
+      <String>['which', 'pod'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenAnswer((_) async => exitsHappy());
+
+    // but is not working
+    when(mockProcessManager.run(
+      <String>['pod', '--version'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenAnswer((_) async => exitsWithError());
@@ -106,84 +144,79 @@ void main() {
   }
 
   group('Evaluate installation', () {
-    testUsingContext('detects not installed, if pod exec does not exist', () async {
-      pretendPodIsNotInstalled();
-      expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.notInstalled);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
+    setUp(() {
+      // Assume all binaries can run
+      when(mockProcessManager.canRun(any)).thenReturn(true);
     });
 
-    testUsingContext('detects not installed, if pod is installed but version fails', () async {
+    testWithoutContext('detects not installed, if pod exec does not exist', () async {
+      pretendPodIsNotInstalled();
+      expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.notInstalled);
+    });
+
+    testWithoutContext('detects not installed, if pod is installed but version fails', () async {
       pretendPodIsInstalled();
       pretendPodVersionFails();
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.brokenInstall);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('detects installed', () async {
+    testWithoutContext('detects installed', () async {
       pretendPodIsInstalled();
       pretendPodVersionIs('0.0.1');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, isNot(CocoaPodsStatus.notInstalled));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('detects unknown version', () async {
+    testWithoutContext('detects unknown version', () async {
       pretendPodIsInstalled();
       pretendPodVersionIs('Plugin loaded.\n1.5.3');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.unknownVersion);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('detects below minimum version', () async {
+    testWithoutContext('detects below minimum version', () async {
       pretendPodIsInstalled();
       pretendPodVersionIs('1.5.0');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.belowMinimumVersion);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('detects at recommended version', () async {
+    testWithoutContext('detects below recommended version', () async {
       pretendPodIsInstalled();
       pretendPodVersionIs('1.6.0');
-      expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.recommended);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
+      expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.belowRecommendedVersion);
     });
 
-    testUsingContext('detects above recommended version', () async {
+    testWithoutContext('detects at recommended version', () async {
       pretendPodIsInstalled();
-      pretendPodVersionIs('1.6.1');
+      pretendPodVersionIs('1.8.0');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.recommended);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('detects initialized over 1.8.0', () async {
+    testWithoutContext('detects above recommended version', () async {
+      pretendPodIsInstalled();
+      pretendPodVersionIs('1.8.1');
+      expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.recommended);
+    });
+
+    testWithoutContext('detects initialized over 1.8.0', () async {
       pretendPodIsInstalled();
       pretendPodVersionIs('1.8.0');
       expect(await cocoaPodsUnderTest.isCocoaPodsInitialized, isTrue);
-    }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform(),
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
     });
   });
 
   group('Setup Podfile', () {
-    testUsingContext('creates objective-c Podfile when not present', () async {
+    setUp(() {
+      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+    });
+
+    testWithoutContext('creates objective-c Podfile when not present', () async {
+      when(mockXcodeProjectInterpreter.getBuildSettings(any, any))
+        .thenAnswer((_) async => <String, String>{});
       await cocoaPodsUnderTest.setupPodfile(projectUnderTest.ios);
 
       expect(projectUnderTest.ios.podfile.readAsStringSync(), 'Objective-C iOS podfile template');
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('creates swift Podfile if swift', () async {
-      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
       when(mockXcodeProjectInterpreter.getBuildSettings(any, any))
         .thenAnswer((_) async => <String, String>{
           'SWIFT_VERSION': '5.0',
@@ -199,14 +232,11 @@ void main() {
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
     });
 
-    testUsingContext('creates macOS Podfile when not present', () async {
+    testWithoutContext('creates macOS Podfile when not present', () async {
       projectUnderTest.macos.xcodeProject.createSync(recursive: true);
       await cocoaPodsUnderTest.setupPodfile(projectUnderTest.macos);
 
       expect(projectUnderTest.macos.podfile.readAsStringSync(), 'macOS podfile template');
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('does not recreate Podfile when already present', () async {
@@ -292,29 +322,41 @@ void main() {
   group('Process pods', () {
     setUp(() {
       podsIsInHomeDir();
+      // Assume all binaries can run
+      when(mockProcessManager.canRun(any)).thenReturn(true);
     });
 
-    testUsingContext('prints error, if CocoaPods is not installed', () async {
+    testWithoutContext('throwsToolExit if CocoaPods is not installed', () async {
       pretendPodIsNotInstalled();
       projectUnderTest.ios.podfile.createSync();
-      final bool didInstall = await cocoaPodsUnderTest.processPods(
+      final Function invokeProcessPods = () async => await cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.ios,
         engineDir: 'engine/path',
       );
+      expect(invokeProcessPods, throwsToolExit());
       verifyNever(mockProcessManager.run(
       argThat(containsAllInOrder(<String>['pod', 'install'])),
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       ));
-      expect(testLogger.errorText, contains('not installed'));
-      expect(testLogger.errorText, contains('Skipping pod install'));
-      expect(didInstall, isFalse);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('prints warning, if Podfile is out of date', () async {
+    testWithoutContext('throwsToolExit if CocoaPods install is broken', () async {
+      pretendPodIsBroken();
+      projectUnderTest.ios.podfile.createSync();
+      final Function invokeProcessPods = () async => await cocoaPodsUnderTest.processPods(
+        xcodeProject: projectUnderTest.ios,
+        engineDir: 'engine/path',
+      );
+      expect(invokeProcessPods, throwsToolExit());
+      verifyNever(mockProcessManager.run(
+      argThat(containsAllInOrder(<String>['pod', 'install'])),
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      ));
+    });
+
+    testWithoutContext('prints warning, if Podfile is out of date', () async {
       pretendPodIsInstalled();
 
       fs.file(fs.path.join('project', 'ios', 'Podfile'))
@@ -329,13 +371,10 @@ void main() {
         xcodeProject: projectUnderTest.ios,
         engineDir: 'engine/path',
       );
-      expect(testLogger.errorText, contains('Warning: Podfile is out of date'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
+      expect(logger.errorText, contains('Warning: Podfile is out of date'));
     });
 
-    testUsingContext('throws, if Podfile is missing.', () async {
+    testWithoutContext('throws, if Podfile is missing.', () async {
       pretendPodIsInstalled();
       try {
         await cocoaPodsUnderTest.processPods(
@@ -343,20 +382,17 @@ void main() {
           engineDir: 'engine/path',
         );
         fail('ToolExit expected');
-      } catch(e) {
-        expect(e, isInstanceOf<ToolExit>());
+      } on Exception catch (e) {
+        expect(e, isA<ToolExit>());
         verifyNever(mockProcessManager.run(
         argThat(containsAllInOrder(<String>['pod', 'install'])),
           workingDirectory: anyNamed('workingDirectory'),
           environment: anyNamed('environment'),
         ));
       }
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('throws, if specs repo is outdated.', () async {
+    testWithoutContext('throws, if specs repo is outdated.', () async {
       pretendPodIsInstalled();
       fs.file(fs.path.join('project', 'ios', 'Podfile'))
         ..createSync()
@@ -368,6 +404,7 @@ void main() {
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
+          'LANG': 'en_US.UTF-8',
         },
       )).thenAnswer((_) async => exitsWithError(
         '''
@@ -391,19 +428,16 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
           engineDir: 'engine/path',
         );
         fail('ToolExit expected');
-      } catch (e) {
-        expect(e, isInstanceOf<ToolExit>());
+      } on Exception catch (e) {
+        expect(e, isA<ToolExit>());
         expect(
-          testLogger.errorText,
+          logger.errorText,
           contains("CocoaPods's specs repository is too out-of-date to satisfy dependencies"),
         );
       }
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('run pod install, if Podfile.lock is missing', () async {
+    testWithoutContext('run pod install, if Podfile.lock is missing', () async {
       pretendPodIsInstalled();
       projectUnderTest.ios.podfile
         ..createSync()
@@ -420,14 +454,11 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       verify(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',
-        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
+        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
       ));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('runs pod install, if Manifest.lock is missing', () async {
+    testWithoutContext('runs pod install, if Manifest.lock is missing', () async {
       pretendPodIsInstalled();
       projectUnderTest.ios.podfile
         ..createSync()
@@ -447,14 +478,12 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
+          'LANG': 'en_US.UTF-8',
         },
       ));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('runs pod install, if Manifest.lock different from Podspec.lock', () async {
+    testWithoutContext('runs pod install, if Manifest.lock different from Podspec.lock', () async {
       pretendPodIsInstalled();
       projectUnderTest.ios.podfile
         ..createSync()
@@ -477,14 +506,12 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
+          'LANG': 'en_US.UTF-8',
         },
       ));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('runs pod install, if flutter framework changed', () async {
+    testWithoutContext('runs pod install, if flutter framework changed', () async {
       pretendPodIsInstalled();
       projectUnderTest.ios.podfile
         ..createSync()
@@ -507,14 +534,12 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
+          'LANG': 'en_US.UTF-8',
         },
       ));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('runs pod install, if Podfile.lock is older than Podfile', () async {
+    testWithoutContext('runs pod install, if Podfile.lock is older than Podfile', () async {
       pretendPodIsInstalled();
       projectUnderTest.ios.podfile
         ..createSync()
@@ -527,7 +552,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         ..writeAsStringSync('Existing lock file.');
       await Future<void>.delayed(const Duration(milliseconds: 10));
       projectUnderTest.ios.podfile
-        ..writeAsStringSync('Updated Podfile');
+        .writeAsStringSync('Updated Podfile');
       await cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.ios,
         engineDir: 'engine/path',
@@ -539,14 +564,12 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
+          'LANG': 'en_US.UTF-8',
         },
       ));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('skips pod install, if nothing changed', () async {
+    testWithoutContext('skips pod install, if nothing changed', () async {
       pretendPodIsInstalled();
       projectUnderTest.ios.podfile
         ..createSync()
@@ -568,12 +591,9 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       ));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('a failed pod install deletes Pods/Manifest.lock', () async {
+    testWithoutContext('a failed pod install deletes Pods/Manifest.lock', () async {
       pretendPodIsInstalled();
       projectUnderTest.ios.podfile
         ..createSync()
@@ -591,6 +611,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
+          'LANG': 'en_US.UTF-8',
         },
       )).thenAnswer(
         (_) async => exitsWithError()
@@ -606,9 +627,6 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       } on ToolExit {
         expect(projectUnderTest.ios.podManifestLock.existsSync(), isFalse);
       }
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
     });
   });
 
@@ -616,20 +634,22 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     String cocoapodsRepoDir;
     Map<String, String> environment;
     setUp(() {
+      // Assume binaries exist and can run
+      when(mockProcessManager.canRun(any)).thenReturn(true);
       cocoapodsRepoDir = podsIsInCustomDir();
       environment = <String, String>{
         'FLUTTER_FRAMEWORK_DIR': 'engine/path',
         'COCOAPODS_DISABLE_STATS': 'true',
         'CP_REPOS_DIR': cocoapodsRepoDir,
+        'LANG': 'en_US.UTF8',
       };
     });
 
-    testUsingContext('succeeds, if specs repo is in CP_REPOS_DIR.', () async {
+    testWithoutContext('succeeds, if specs repo is in CP_REPOS_DIR.', () async {
       pretendPodIsInstalled();
       fs.file(fs.path.join('project', 'ios', 'Podfile'))
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
-
       when(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',
@@ -640,10 +660,6 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         engineDir: 'engine/path',
       );
       expect(success, true);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
-      Platform: () => FakePlatform(environment: environment),
     });
   });
 }

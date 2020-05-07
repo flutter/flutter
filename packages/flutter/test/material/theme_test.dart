@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -148,7 +148,7 @@ void main() {
     await tester.tap(find.byKey(dropdownMenuButtonKey));
     await tester.pump(const Duration(seconds: 1));
 
-    for (Element item in tester.elementList(find.text('menuItem')))
+    for (final Element item in tester.elementList(find.text('menuItem')))
       expect(Theme.of(item).brightness, equals(Brightness.light));
   });
 
@@ -336,12 +336,12 @@ void main() {
     final ThemeData fallback = ThemeData.fallback();
     final ThemeData customTheme = fallback.copyWith(
       primaryTextTheme: fallback.primaryTextTheme.copyWith(
-        body1: fallback.primaryTextTheme.body1.copyWith(
+        bodyText2: fallback.primaryTextTheme.bodyText2.copyWith(
           fontSize: _kMagicFontSize,
         ),
       ),
     );
-    expect(customTheme.primaryTextTheme.body1.fontSize, _kMagicFontSize);
+    expect(customTheme.primaryTextTheme.bodyText2.fontSize, _kMagicFontSize);
 
     double actualFontSize;
     await tester.pumpWidget(Directionality(
@@ -350,10 +350,10 @@ void main() {
         data: customTheme,
         child: Builder(builder: (BuildContext context) {
           final ThemeData theme = Theme.of(context);
-          actualFontSize = theme.primaryTextTheme.body1.fontSize;
+          actualFontSize = theme.primaryTextTheme.bodyText2.fontSize;
           return Text(
             'A',
-            style: theme.primaryTextTheme.body1,
+            style: theme.primaryTextTheme.bodyText2,
           );
         }),
       ),
@@ -376,22 +376,22 @@ void main() {
 
     List<TextStyle> extractStyles(TextTheme textTheme) {
       return <TextStyle>[
-        textTheme.display4,
-        textTheme.display3,
-        textTheme.display2,
-        textTheme.display1,
-        textTheme.headline,
-        textTheme.title,
-        textTheme.subhead,
-        textTheme.body2,
-        textTheme.body1,
+        textTheme.headline1,
+        textTheme.headline2,
+        textTheme.headline3,
+        textTheme.headline4,
+        textTheme.headline5,
+        textTheme.headline6,
+        textTheme.subtitle1,
+        textTheme.bodyText1,
+        textTheme.bodyText2,
         textTheme.caption,
         textTheme.button,
       ];
     }
 
-    for (TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme, theme.accentTextTheme]) {
-      for (TextStyle style in extractStyles(textTheme).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
+    for (final TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme, theme.accentTextTheme]) {
+      for (final TextStyle style in extractStyles(textTheme).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
         expect(style.inherit, false);
         expect(style.color, isNotNull);
         expect(style.fontFamily, isNotNull);
@@ -411,19 +411,21 @@ void main() {
       }
     }
 
-    expect(theme.textTheme.display4.debugLabel, '(englishLike display4 2014).merge(blackMountainView display4)');
+    expect(theme.textTheme.headline1.debugLabel, '(englishLike display4 2014).merge(blackMountainView headline1)');
   });
 
   group('Cupertino theme', () {
     int buildCount;
     CupertinoThemeData actualTheme;
     IconThemeData actualIconTheme;
+    BuildContext context;
 
     final Widget singletonThemeSubtree = Builder(
-      builder: (BuildContext context) {
+      builder: (BuildContext localContext) {
         buildCount++;
-        actualTheme = CupertinoTheme.of(context);
-        actualIconTheme = IconTheme.of(context);
+        actualTheme = CupertinoTheme.of(localContext);
+        actualIconTheme = IconTheme.of(localContext);
+        context = localContext;
         return const Placeholder();
       },
     );
@@ -437,6 +439,7 @@ void main() {
       buildCount = 0;
       actualTheme = null;
       actualIconTheme = null;
+      context = null;
     });
 
     testWidgets('Default theme has defaults', (WidgetTester tester) async {
@@ -459,6 +462,27 @@ void main() {
       expect(theme.scaffoldBackgroundColor, Colors.grey[850]);
       expect(theme.textTheme.textStyle.fontFamily, '.SF Pro Text');
       expect(theme.textTheme.textStyle.fontSize, 17.0);
+    });
+
+    testWidgets('MaterialTheme overrides the brightness', (WidgetTester tester) async {
+      await testTheme(tester, ThemeData.dark());
+      expect(CupertinoTheme.brightnessOf(context), Brightness.dark);
+
+      await testTheme(tester, ThemeData.light());
+      expect(CupertinoTheme.brightnessOf(context), Brightness.light);
+
+      // Overridable by cupertinoOverrideTheme.
+      await testTheme(tester, ThemeData(
+        brightness: Brightness.light,
+        cupertinoOverrideTheme: const CupertinoThemeData(brightness: Brightness.dark),
+      ));
+      expect(CupertinoTheme.brightnessOf(context), Brightness.dark);
+
+      await testTheme(tester, ThemeData(
+        brightness: Brightness.dark,
+        cupertinoOverrideTheme: const CupertinoThemeData(brightness: Brightness.light),
+      ));
+      expect(CupertinoTheme.brightnessOf(context), Brightness.light);
     });
 
     testWidgets('Can override material theme', (WidgetTester tester) async {
@@ -650,7 +674,7 @@ void main() {
 
 int testBuildCalled;
 class Test extends StatefulWidget {
-  const Test();
+  const Test({ Key key }) : super(key: key);
 
   @override
   _TestState createState() => _TestState();
@@ -723,7 +747,7 @@ class _TextStyleProxy implements TextStyle {
   List<ui.FontFeature> get fontFeatures => _delegate.fontFeatures;
 
   @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) =>
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) =>
       super.toString();
 
   @override
@@ -805,6 +829,7 @@ class _TextStyleProxy implements TextStyle {
     double textScaleFactor = 1.0,
     String ellipsis,
     int maxLines,
+    ui.TextHeightBehavior textHeightBehavior,
     Locale locale,
     String fontFamily,
     double fontSize,

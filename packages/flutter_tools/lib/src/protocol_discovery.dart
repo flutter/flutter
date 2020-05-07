@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 
 import 'base/io.dart';
 import 'device.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 
 /// Discovers a specific service protocol on a device, and forwards the service
 /// protocol device port to the host.
@@ -64,10 +64,17 @@ class ProtocolDiscovery {
   _BufferedStreamController<Uri> _uriStreamController;
 
   /// The discovered service URL.
+  ///
+  /// Returns null if the log reader shuts down before any uri is found.
+  ///
   /// Use [uris] instead.
   // TODO(egarciad): replace `uri` for `uris`.
-  Future<Uri> get uri {
-    return uris.first;
+  Future<Uri> get uri async {
+    try {
+      return await uris.first;
+    } on StateError {
+      return null;
+    }
   }
 
   /// The discovered service URLs.
@@ -94,7 +101,7 @@ class ProtocolDiscovery {
   }
 
   Match _getPatternMatch(String line) {
-    final RegExp r = RegExp('${RegExp.escape(serviceName)} listening on ((http|\/\/)[a-zA-Z0-9:/=_\\-\.\\[\\]]+)');
+    final RegExp r = RegExp(RegExp.escape(serviceName) + r' listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
     return r.firstMatch(line);
   }
 
@@ -110,27 +117,27 @@ class ProtocolDiscovery {
     Uri uri;
     try {
       uri = _getObservatoryUri(line);
-    } on FormatException catch(error, stackTrace) {
+    } on FormatException catch (error, stackTrace) {
       _uriStreamController.addError(error, stackTrace);
     }
     if (uri == null) {
       return;
     }
     if (devicePort != null && uri.port != devicePort) {
-      printTrace('skipping potential observatory $uri due to device port mismatch');
+      globals.printTrace('skipping potential observatory $uri due to device port mismatch');
       return;
     }
     _uriStreamController.add(uri);
   }
 
   Future<Uri> _forwardPort(Uri deviceUri) async {
-    printTrace('$serviceName URL on device: $deviceUri');
+    globals.printTrace('$serviceName URL on device: $deviceUri');
     Uri hostUri = deviceUri;
 
     if (portForwarder != null) {
       final int actualDevicePort = deviceUri.port;
       final int actualHostPort = await portForwarder.forward(actualDevicePort, hostPort: hostPort);
-      printTrace('Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
+      globals.printTrace('Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
       hostUri = deviceUri.replace(port: actualHostPort);
     }
 
@@ -157,8 +164,8 @@ class _BufferedStreamController<T> {
 
   StreamController<T> get _streamController {
     _streamControllerInstance ??= StreamController<T>.broadcast(onListen: () {
-      for (dynamic event in _events) {
-        assert(!(T is List));
+      for (final dynamic event in _events) {
+        assert(T is! List);
         if (event is T) {
           _streamControllerInstance.add(event);
         } else {

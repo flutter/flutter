@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -24,7 +24,7 @@ import 'theme.dart';
 ///
 ///  * [ToggleButtonsTheme], which describes the actual configuration of a
 ///    toggle buttons theme.
-class ToggleButtonsThemeData extends Diagnosticable {
+class ToggleButtonsThemeData with Diagnosticable {
   /// Creates the set of color and border properties used to configure
   /// [ToggleButtons].
   const ToggleButtonsThemeData({
@@ -195,22 +195,22 @@ class ToggleButtonsThemeData extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final ToggleButtonsThemeData typedOther = other;
-    return typedOther.textStyle == textStyle
-        && typedOther.constraints == constraints
-        && typedOther.color == color
-        && typedOther.selectedColor == selectedColor
-        && typedOther.disabledColor == disabledColor
-        && typedOther.fillColor == fillColor
-        && typedOther.focusColor == focusColor
-        && typedOther.highlightColor == highlightColor
-        && typedOther.hoverColor == hoverColor
-        && typedOther.splashColor == splashColor
-        && typedOther.borderColor == borderColor
-        && typedOther.selectedBorderColor == selectedBorderColor
-        && typedOther.disabledBorderColor == disabledBorderColor
-        && typedOther.borderRadius == borderRadius
-        && typedOther.borderWidth == borderWidth;
+    return other is ToggleButtonsThemeData
+        && other.textStyle == textStyle
+        && other.constraints == constraints
+        && other.color == color
+        && other.selectedColor == selectedColor
+        && other.disabledColor == disabledColor
+        && other.fillColor == fillColor
+        && other.focusColor == focusColor
+        && other.highlightColor == highlightColor
+        && other.hoverColor == hoverColor
+        && other.splashColor == splashColor
+        && other.borderColor == borderColor
+        && other.selectedBorderColor == selectedBorderColor
+        && other.disabledBorderColor == disabledBorderColor
+        && other.borderRadius == borderRadius
+        && other.borderWidth == borderWidth;
   }
 
   @override

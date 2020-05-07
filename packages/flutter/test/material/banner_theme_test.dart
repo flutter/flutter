@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -66,8 +66,9 @@ void main() {
 
     final Container container = _getContainerFromBanner(tester);
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
-    expect(container.decoration, const BoxDecoration(color: Color(0xffffffff)));
-    expect(content.text.style, Typography().englishLike.body1.merge(Typography().black.body1));
+    expect(container.color, const Color(0xffffffff));
+    // Default value for ThemeData.typography is Typography.material2014()
+    expect(content.text.style, Typography.material2014().englishLike.bodyText2.merge(Typography.material2014().black.bodyText2));
   });
 
   testWidgets('MaterialBanner uses values from MaterialBannerThemeData', (WidgetTester tester) async {
@@ -91,7 +92,7 @@ void main() {
 
     final Container container = _getContainerFromBanner(tester);
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
-    expect(container.decoration, BoxDecoration(color: bannerTheme.backgroundColor));
+    expect(container.color, bannerTheme.backgroundColor);
     expect(content.text.style, bannerTheme.contentTextStyle);
 
     final Offset contentTopLeft = tester.getTopLeft(_textFinder(contentText));
@@ -130,7 +131,7 @@ void main() {
 
     final Container container = _getContainerFromBanner(tester);
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
-    expect(container.decoration, const BoxDecoration(color: backgroundColor));
+    expect(container.color, backgroundColor);
     expect(content.text.style, textStyle);
 
     final Offset contentTopLeft = tester.getTopLeft(_textFinder(contentText));
@@ -160,7 +161,7 @@ void main() {
     ));
 
     final Container container = _getContainerFromBanner(tester);
-    expect(container.decoration, BoxDecoration(color: colorScheme.surface));
+    expect(container.color, colorScheme.surface);
   });
 }
 
@@ -182,7 +183,7 @@ Finder _containerFinder() {
 }
 
 RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(_textFinder(text)).renderObject;
+  return tester.element<StatelessElement>(_textFinder(text)).renderObject as RenderParagraph;
 }
 
 Finder _textFinder(String text) {

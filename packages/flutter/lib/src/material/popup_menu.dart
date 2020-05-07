@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -159,7 +159,7 @@ class _RenderMenuItem extends RenderShiftedBox {
       child.layout(constraints, parentUsesSize: true);
       size = constraints.constrain(child.size);
     }
-    final BoxParentData childParentData = child.parentData;
+    final BoxParentData childParentData = child.parentData as BoxParentData;
     childParentData.offset = Offset.zero;
     onLayout(size);
   }
@@ -178,7 +178,7 @@ class _RenderMenuItem extends RenderShiftedBox {
 /// [PopupMenuItem] is kMinInteractiveDimension pixels high. If you use a widget
 /// with a different height, it must be specified in the [height] property.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Here, a [Text] widget is used with a popup menu item. The `WhyFarther` type
 /// is an enum, not shown here.
@@ -239,7 +239,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// The text style of the popup menu item.
   ///
   /// If this property is null, then [PopupMenuThemeData.textStyle] is used.
-  /// If [PopupMenuThemeData.textStyle] is also null, then [ThemeData.textTheme.subhead] is used.
+  /// If [PopupMenuThemeData.textStyle] is also null, then [ThemeData.textTheme.subtitle1] is used.
   final TextStyle textStyle;
 
   /// The widget below this widget in the tree.
@@ -297,7 +297,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
-    TextStyle style = widget.textStyle ?? popupMenuTheme.textStyle ?? theme.textTheme.subhead;
+    TextStyle style = widget.textStyle ?? popupMenuTheme.textStyle ?? theme.textTheme.subtitle1;
 
     if (!widget.enabled)
       style = style.copyWith(color: theme.disabledColor);
@@ -339,7 +339,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 /// layout uses [ListTile]; the checkmark is an [Icons.done] icon, shown in the
 /// [ListTile.leading] position.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Suppose a `Commands` enum exists that lists the possible commands from a
 /// particular popup menu, including `Commands.heroAndScholar` and
@@ -490,7 +490,7 @@ class _PopupMenu<T> extends StatelessWidget {
 
     for (int i = 0; i < route.items.length; i += 1) {
       final double start = (i + 1) * unit;
-      final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
+      final double end = (start + 1.5 * unit).clamp(0.0, 1.0) as double;
       final CurvedAnimation opacity = CurvedAnimation(
         parent: route.animation,
         curve: Interval(start, end),
@@ -591,7 +591,9 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     // The menu can be at most the size of the overlay minus 8.0 pixels in each
     // direction.
-    return BoxConstraints.loose(constraints.biggest - const Offset(_kMenuScreenPadding * 2.0, _kMenuScreenPadding * 2.0));
+    return BoxConstraints.loose(
+      constraints.biggest - const Offset(_kMenuScreenPadding * 2.0, _kMenuScreenPadding * 2.0) as Size,
+    );
   }
 
   @override
@@ -677,7 +679,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final RelativeRect position;
   final List<PopupMenuEntry<T>> items;
   final List<Size> itemSizes;
-  final dynamic initialValue;
+  final T initialValue;
   final double elevation;
   final ThemeData theme;
   final String semanticLabel;
@@ -830,10 +832,13 @@ Future<T> showMenu<T>({
   String label = semanticLabel;
   switch (Theme.of(context).platform) {
     case TargetPlatform.iOS:
+    case TargetPlatform.macOS:
       label = semanticLabel;
       break;
     case TargetPlatform.android:
     case TargetPlatform.fuchsia:
+    case TargetPlatform.linux:
+    case TargetPlatform.windows:
       label = semanticLabel ?? MaterialLocalizations.of(context)?.popupMenuLabel;
   }
 
@@ -882,7 +887,7 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 /// If both are null, then a standard overflow icon is created (depending on the
 /// platform).
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows a menu with four items, selecting between an enum's
 /// values and setting a `_selection` field based on the selection.
@@ -1034,14 +1039,26 @@ class PopupMenuButton<T> extends StatefulWidget {
   final bool captureInheritedThemes;
 
   @override
-  _PopupMenuButtonState<T> createState() => _PopupMenuButtonState<T>();
+  PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
 
-class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
+/// The [State] for a [PopupMenuButton].
+///
+/// See [showButtonMenu] for a way to programmatically open the popup menu
+/// of your button state.
+class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
+  /// A method to show a popup menu with the items supplied to
+  /// [PopupMenuButton.itemBuilder] at the position of your [PopupMenuButton].
+  ///
+  /// By default, it is called when the user taps the button and [PopupMenuButton.enabled]
+  /// is set to `true`. Moreover, you can open the button by calling the method manually.
+  ///
+  /// You would access your [PopupMenuButtonState] using a [GlobalKey] and
+  /// show the menu of the button with `globalKey.currentState.showButtonMenu`.
   void showButtonMenu() {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
-    final RenderBox button = context.findRenderObject();
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject();
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(widget.offset, ancestor: overlay),
@@ -1081,8 +1098,11 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     switch (platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         return const Icon(Icons.more_vert);
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return const Icon(Icons.more_horiz);
     }
     return null;

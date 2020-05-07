@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -61,8 +61,9 @@ void main() {
     });
 
     testUsingContext('signal handler error goes on error stream', () async {
+      final Exception exn = Exception('Error');
       signals.addHandler(signalUnderTest, (ProcessSignal s) {
-        throw 'Error';
+        throw exn;
       });
 
       final Completer<void> completer = Completer<void>();
@@ -75,7 +76,7 @@ void main() {
       controller.add(mockSignal);
       await completer.future;
       await errSub.cancel();
-      expect(errList, <Object>['Error']);
+      expect(errList, contains(exn));
     }, overrides: <Type, Generator>{
       Signals: () => Signals(),
     });

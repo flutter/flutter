@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,8 +6,20 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../test_utils.dart';
+
+const String _kDefaultHtml  = '''
+<html>
+    <head>
+        <title>Hello, World</title>
+    </head>
+    <body>
+        <script src="main.dart.js"></script>
+    </body>
+</html>
+''';
 
 abstract class Project {
   Directory dir;
@@ -19,10 +31,11 @@ abstract class Project {
 
   Future<void> setUpIn(Directory dir) async {
     this.dir = dir;
-    writeFile(fs.path.join(dir.path, 'pubspec.yaml'), pubspec);
+    writeFile(globals.fs.path.join(dir.path, 'pubspec.yaml'), pubspec);
     if (main != null) {
-      writeFile(fs.path.join(dir.path, 'lib', 'main.dart'), main);
+      writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), main);
     }
+    writeFile(globals.fs.path.join(dir.path, 'web', 'index.html'), _kDefaultHtml);
     await getPackages(dir.path);
   }
 

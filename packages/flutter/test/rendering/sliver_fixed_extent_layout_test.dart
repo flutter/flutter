@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -57,7 +57,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
     _renderObject = RenderSliverFillViewport(
       childManager: this,
     );
-    return _renderObject;
+    return _renderObject as RenderSliverFillViewport;
   }
 
   int _currentlyUpdatingChildIndex;
@@ -97,7 +97,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   @override
   void didAdoptChild(RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
-    final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }
 

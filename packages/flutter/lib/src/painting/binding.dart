@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -96,6 +96,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   void evict(String asset) {
     super.evict(asset);
     imageCache.clear();
+    imageCache.clearLiveImages();
   }
 
   /// Listenable that notifies when the available fonts on the system have
@@ -113,8 +114,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   @override
   Future<void> handleSystemMessage(Object systemMessage) async {
     await super.handleSystemMessage(systemMessage);
-    final Map<String, dynamic> message = systemMessage;
-    final String type = message['type'];
+    final Map<String, dynamic> message = systemMessage as Map<String, dynamic>;
+    final String type = message['type'] as String;
     switch (type) {
       case 'fontsChange':
         _systemFonts.notifyListeners();
@@ -128,7 +129,7 @@ class _SystemFontsNotifier extends Listenable {
   final Set<VoidCallback> _systemFontsCallbacks = <VoidCallback>{};
 
   void notifyListeners () {
-    for (VoidCallback callback in _systemFontsCallbacks) {
+    for (final VoidCallback callback in _systemFontsCallbacks) {
       callback();
     }
   }

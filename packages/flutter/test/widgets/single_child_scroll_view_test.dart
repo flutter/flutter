@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -72,7 +72,7 @@ void main() {
     ));
 
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-    expect(scrollable.position, isInstanceOf<TestScrollPosition>());
+    expect(scrollable.position, isA<TestScrollPosition>());
   });
 
   testWidgets('Sets PrimaryScrollController when primary', (WidgetTester tester) async {
@@ -378,7 +378,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5]));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -425,7 +425,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5]));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -473,7 +473,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5]));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -522,7 +522,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5]));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);

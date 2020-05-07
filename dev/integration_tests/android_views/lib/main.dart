@@ -1,4 +1,4 @@
-// Copyright 2014 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,7 +7,7 @@ import 'package:flutter_driver/driver_extension.dart';
 import 'motion_events_page.dart';
 import 'page.dart';
 
-final List<Page> _allPages = <Page>[
+final List<PageWidget> _allPages = <PageWidget>[
   const MotionEventsPage(),
 ];
 
@@ -31,7 +31,7 @@ class Home extends StatelessWidget {
     );
   }
 
-  void _pushPage(BuildContext context, Page page) {
+  void _pushPage(BuildContext context, PageWidget page) {
     Navigator.of(context).push(MaterialPageRoute<void>(
         builder: (_) => Scaffold(
               body: page,

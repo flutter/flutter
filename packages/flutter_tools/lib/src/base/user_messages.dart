@@ -1,6 +1,8 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+import 'package:platform/platform.dart';
 
 import 'context.dart';
 
@@ -62,21 +64,19 @@ class UserMessages {
   String androidBadSdkDir(String envKey, String homeDir) =>
       '$envKey = $homeDir\n'
       'but Android SDK not found at this location.';
-  String androidMissingSdkInstructions(String envKey) =>
+  String androidMissingSdkInstructions(String envKey, Platform platform) =>
       'Unable to locate Android SDK.\n'
       'Install Android Studio from: https://developer.android.com/studio/index.html\n'
       'On first launch it will assist you in installing the Android SDK components.\n'
-      '(or visit https://flutter.dev/setup/#android-setup for detailed instructions).\n'
+      '(or visit ${_androidSdkInstallUrl(platform)} for detailed instructions).\n'
       'If the Android SDK has been installed to a custom location, set $envKey to that location.\n'
       'You may also want to add it to your PATH environment variable.\n';
   String androidSdkLocation(String directory) => 'Android SDK at $directory';
   String androidSdkPlatformToolsVersion(String platform, String tools) =>
       'Platform $platform, build-tools $tools';
-  String get androidSdkInstallHelp =>
+  String androidSdkInstallHelp(Platform platform) =>
       'Try re-installing or updating your Android SDK,\n'
-      'visit https://flutter.dev/setup/#android-setup for detailed instructions.';
-  String get androidMissingNdk => 'Android NDK location not configured (optional; useful for native profiling support)';
-  String androidNdkLocation(String directory) => 'Android NDK at $directory';
+      'visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
   // Also occurs in AndroidLicenseValidator
   String androidStatusInfo(String version) => 'Android SDK version $version';
 
@@ -89,29 +89,29 @@ class UserMessages {
   String get androidLicensesAll => 'All Android licenses accepted.';
   String get androidLicensesSome => 'Some Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
   String get androidLicensesNone => 'Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
-  String get androidLicensesUnknown =>
+  String androidLicensesUnknown(Platform platform) =>
       'Android license status unknown.\n'
       'Try re-installing or updating your Android SDK Manager.\n'
       'See https://developer.android.com/studio/#downloads or visit '
-      'https://flutter.dev/setup/#android-setup for detailed instructions.';
+      'visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
   String androidSdkManagerOutdated(String managerPath) =>
       'A newer version of the Android SDK is required. To update, run:\n'
       '$managerPath --update\n';
   String androidLicensesTimeout(String managerPath) => 'Intentionally killing $managerPath';
   String get androidSdkShort => 'Unable to locate Android SDK.';
-  String androidMissingSdkManager(String sdkManagerPath) =>
+  String androidMissingSdkManager(String sdkManagerPath, Platform platform) =>
       'Android sdkmanager tool not found ($sdkManagerPath).\n'
       'Try re-installing or updating your Android SDK,\n'
-      'visit https://flutter.dev/setup/#android-setup for detailed instructions.';
-  String androidCannotRunSdkManager(String sdkManagerPath, String error) =>
+      'visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
+  String androidCannotRunSdkManager(String sdkManagerPath, String error, Platform platform) =>
       'Android sdkmanager tool was found, but failed to run ($sdkManagerPath): "$error".\n'
       'Try re-installing or updating your Android SDK,\n'
-      'visit https://flutter.dev/setup/#android-setup for detailed instructions.';
-  String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion) =>
+      'visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
+  String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion, Platform platform) =>
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
       'To update using sdkmanager, run:\n'
       '  "$managerPath" "platforms;android-$sdkMinVersion" "build-tools;$buildToolsMinVersion"\n'
-      'or visit https://flutter.dev/setup/#android-setup for detailed instructions.';
+      'or visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
 
   // Messages used in AndroidStudioValidator
   String androidStudioVersion(String version) => 'version $version';
@@ -127,16 +127,16 @@ class UserMessages {
   String androidStudioMissing(String location) =>
       'android-studio-dir = $location\n'
       'but Android Studio not found at this location.';
-  String get androidStudioInstallation =>
+  String androidStudioInstallation(Platform platform) =>
       'Android Studio not found; download from https://developer.android.com/studio/index.html\n'
-      '(or visit https://flutter.dev/setup/#android-setup for detailed instructions).';
+      '(or visit ${_androidSdkInstallUrl(platform)} for detailed instructions).';
 
   // Messages used in XcodeValidator
   String xcodeLocation(String location) => 'Xcode at $location';
   String xcodeOutdated(int versionMajor, int versionMinor) =>
       'Flutter requires a minimum Xcode version of $versionMajor.$versionMinor.0.\n'
       'Download the latest version or update via the Mac App Store.';
-  String get xcodeEula => 'Xcode end user license agreement not signed; open Xcode or run the command \'sudo xcodebuild -license\'.';
+  String get xcodeEula => "Xcode end user license agreement not signed; open Xcode or run the command 'sudo xcodebuild -license'.";
   String get xcodeMissingSimct =>
       'Xcode requires additional components to be installed in order to run.\n'
       'Launch Xcode and install additional required components when prompted or run:\n'
@@ -159,7 +159,7 @@ class UserMessages {
       '$consequence\n'
       'To initialize CocoaPods, run:\n'
       '  pod setup\n'
-      'once to finalize CocoaPods\' installation.';
+      "once to finalize CocoaPods' installation.";
   String cocoaPodsMissing(String consequence, String installInstructions) =>
       'CocoaPods not installed.\n'
       '$consequence\n'
@@ -196,7 +196,11 @@ class UserMessages {
   String visualStudioMissing(String workload, List<String> components) =>
       'Visual Studio not installed; this is necessary for Windows development.\n'
       'Download at https://visualstudio.microsoft.com/downloads/.\n'
-      'Please install the "$workload" workload, including following components:\n  ${components.join('\n  ')}';
+      'Please install the "$workload" workload, including the following components:\n  ${components.join('\n  ')}';
+  String visualStudioTooOld(String minimumVersion, String workload, List<String> components) =>
+      'Visual Studio $minimumVersion or later is required.\n'
+      'Download at https://visualstudio.microsoft.com/downloads/.\n'
+      'Please install the "$workload" workload, including the following components:\n  ${components.join('\n  ')}';
   String get visualStudioIsPrerelease => 'The current Visual Studio installation is a pre-release version. It may not be '
       'supported by Flutter yet.';
   String get visualStudioNotLaunchable =>
@@ -249,37 +253,37 @@ class UserMessages {
       'use --local-engine-src-path to specify the path to the root of your flutter/engine repository.';
   String runnerNoEngineBuildDirInPath(String engineSourcePath) =>
       'Unable to detect a Flutter engine build directory in $engineSourcePath.\n'
-      'Please ensure that $engineSourcePath is a Flutter engine \'src\' directory and that '
-      'you have compiled the engine in that directory, which should produce an \'out\' directory';
+      "Please ensure that $engineSourcePath is a Flutter engine 'src' directory and that "
+      "you have compiled the engine in that directory, which should produce an 'out' directory";
   String get runnerLocalEngineRequired =>
       'You must specify --local-engine if you are using a locally built engine.';
   String runnerNoEngineBuild(String engineBuildPath) =>
       'No Flutter engine build found at $engineBuildPath.';
   String runnerWrongFlutterInstance(String flutterRoot, String currentDir) =>
-      'Warning: the \'flutter\' tool you are currently running is not the one from the current directory:\n'
+      "Warning: the 'flutter' tool you are currently running is not the one from the current directory:\n"
       '  running Flutter  : $flutterRoot\n'
       '  current directory: $currentDir\n'
       'This can happen when you have multiple copies of flutter installed. Please check your system path to verify '
-      'that you\'re running the expected version (run \'flutter --version\' to see which flutter is on your path).\n';
+      "that you're running the expected version (run 'flutter --version' to see which flutter is on your path).\n";
   String runnerRemovedFlutterRepo(String flutterRoot, String flutterPath) =>
       'Warning! This package referenced a Flutter repository via the .packages file that is '
-      'no longer available. The repository from which the \'flutter\' tool is currently '
+      "no longer available. The repository from which the 'flutter' tool is currently "
       'executing will be used instead.\n'
       '  running Flutter tool: $flutterRoot\n'
       '  previous reference  : $flutterPath\n'
       'This can happen if you deleted or moved your copy of the Flutter repository, or '
       'if it was on a volume that is no longer mounted or has been mounted at a '
       'different location. Please check your system path to verify that you are running '
-      'the expected version (run \'flutter --version\' to see which flutter is on your path).\n';
+      "the expected version (run 'flutter --version' to see which flutter is on your path).\n";
   String runnerChangedFlutterRepo(String flutterRoot, String flutterPath) =>
-      'Warning! The \'flutter\' tool you are currently running is from a different Flutter '
+      "Warning! The 'flutter' tool you are currently running is from a different Flutter "
       'repository than the one last used by this package. The repository from which the '
-      '\'flutter\' tool is currently executing will be used instead.\n'
+      "'flutter' tool is currently executing will be used instead.\n"
       '  running Flutter tool: $flutterRoot\n'
       '  previous reference  : $flutterPath\n'
       'This can happen when you have multiple copies of flutter installed. Please check '
       'your system path to verify that you are running the expected version (run '
-      '\'flutter --version\' to see which flutter is on your path).\n';
+      "'flutter --version' to see which flutter is on your path).\n";
   String invalidVersionSettingHintMessage(String invalidVersion) =>
       'Invalid version $invalidVersion found, default value will be used.\n'
       'In pubspec.yaml, a valid version should look like: build-name+build-number.\n'
@@ -288,4 +292,18 @@ class UserMessages {
       'In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.\n'
       'Read more about iOS versioning at\n'
       'https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html\n';
+
+  String _androidSdkInstallUrl(Platform platform) {
+    const String baseUrl = 'https://flutter.dev/docs/get-started/install';
+    const String fragment = '#android-setup';
+    if (platform.isMacOS) {
+      return '$baseUrl/macos$fragment';
+    } else if (platform.isLinux) {
+      return '$baseUrl/linux$fragment';
+    } else if (platform.isWindows) {
+      return '$baseUrl/windows$fragment';
+    } else {
+      return baseUrl;
+    }
+  }
 }

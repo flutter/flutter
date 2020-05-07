@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -150,7 +150,7 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 ///
 /// See also:
 ///
-///   * [isSingleButton], which checks if a `buttons` contains exactly one button.
+///  * [isSingleButton], which checks if a `buttons` contains exactly one button.
 int smallestButton(int buttons) => buttons & (-buttons);
 
 /// Returns whether `buttons` contains one and only one button.
@@ -170,8 +170,8 @@ int smallestButton(int buttons) => buttons & (-buttons);
 ///
 /// See also:
 ///
-///   * [smallestButton], which returns the button in a `buttons` bit field with
-///     the smallest integer button.
+///  * [smallestButton], which returns the button in a `buttons` bit field with
+///    the smallest integer button.
 bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == buttons);
 
 /// Base class for touch, stylus, or mouse events.
@@ -196,7 +196,7 @@ bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == 
 ///
 ///  * [Window.devicePixelRatio], which defines the device's current resolution.
 @immutable
-abstract class PointerEvent extends Diagnosticable {
+abstract class PointerEvent with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const PointerEvent({
@@ -257,11 +257,10 @@ abstract class PointerEvent extends Diagnosticable {
   /// system according to [transform].
   ///
   /// If this event has not been transformed, [position] is returned as-is.
-  ///
   /// See also:
   ///
-  ///  * [globalPosition], which is the position in the global coordinate
-  ///    system of the screen.
+  ///  * [position], which is the position in the global coordinate system of
+  ///    the screen.
   final Offset localPosition;
 
   /// Distance in logical pixels that the pointer moved since the last
@@ -367,7 +366,7 @@ abstract class PointerEvent extends Diagnosticable {
   /// for this pointer, in logical pixels.
   final double radiusMin;
 
-  /// The minimum value that could be reported for [radiusMajor] and [radiusMinor]
+  /// The maximum value that could be reported for [radiusMajor] and [radiusMinor]
   /// for this pointer, in logical pixels.
   final double radiusMax;
 
@@ -420,7 +419,7 @@ abstract class PointerEvent extends Diagnosticable {
   /// Set if the event was synthesized by Flutter.
   ///
   /// We occasionally synthesize PointerEvents that aren't exact translations
-  /// of [ui.PointerData] from the engine to cover small cross-OS discrepancies
+  /// of [PointerData] from the engine to cover small cross-OS discrepancies
   /// in pointer behaviors.
   ///
   /// For instance, on end events, Android always drops any location changes
@@ -632,7 +631,7 @@ class PointerAddedEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerAddedEvent ?? this,
     );
   }
 }
@@ -694,7 +693,7 @@ class PointerRemovedEvent extends PointerEvent {
       radiusMin: radiusMin,
       radiusMax: radiusMax,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerRemovedEvent ?? this,
     );
   }
 }
@@ -799,7 +798,7 @@ class PointerHoverEvent extends PointerEvent {
       tilt: tilt,
       synthesized: synthesized,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerHoverEvent ?? this,
     );
   }
 }
@@ -907,7 +906,7 @@ class PointerEnterEvent extends PointerEvent {
     down: event?.down,
     synthesized: event?.synthesized,
     transform: event?.transform,
-    original: event?.original,
+    original: event?.original as PointerEnterEvent,
   );
 
   @override
@@ -945,7 +944,7 @@ class PointerEnterEvent extends PointerEvent {
       down: down,
       synthesized: synthesized,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerEnterEvent ?? this,
     );
   }
 }
@@ -1053,7 +1052,7 @@ class PointerExitEvent extends PointerEvent {
     down: event?.down,
     synthesized: event?.synthesized,
     transform: event?.transform,
-    original: event?.original,
+    original: event?.original as PointerExitEvent,
   );
 
   @override
@@ -1091,7 +1090,7 @@ class PointerExitEvent extends PointerEvent {
       down: down,
       synthesized: synthesized,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerExitEvent ?? this,
     );
   }
 }
@@ -1175,7 +1174,7 @@ class PointerDownEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerDownEvent ?? this,
     );
   }
 }
@@ -1284,7 +1283,7 @@ class PointerMoveEvent extends PointerEvent {
       platformData: platformData,
       synthesized: synthesized,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerMoveEvent ?? this,
     );
   }
 }
@@ -1372,7 +1371,7 @@ class PointerUpEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerUpEvent ?? this,
     );
   }
 }
@@ -1454,7 +1453,7 @@ class PointerScrollEvent extends PointerSignalEvent {
       localPosition: PointerEvent.transformPosition(transform, position),
       scrollDelta: scrollDelta,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerScrollEvent ?? this,
     );
   }
 
@@ -1544,7 +1543,7 @@ class PointerCancelEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerCancelEvent ?? this,
     );
   }
 }

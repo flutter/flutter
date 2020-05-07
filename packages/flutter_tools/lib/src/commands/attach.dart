@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,19 +6,18 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../android/android_device.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/terminal.dart';
-import '../base/utils.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
 import '../device.dart';
 import '../fuchsia/fuchsia_device.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../mdns_discovery.dart';
@@ -63,7 +62,7 @@ class AttachCommand extends FlutterCommand {
     usesIpv6Flag();
     usesFilesystemOptions(hide: !verboseHelp);
     usesFuchsiaOptions(hide: !verboseHelp);
-    usesDartDefines();
+    usesDartDefineOption();
     argParser
       ..addOption(
         'debug-port',
@@ -116,7 +115,7 @@ class AttachCommand extends FlutterCommand {
     }
     try {
       return int.parse(stringArg('debug-port'));
-    } catch (error) {
+    } on Exception catch (error) {
       throwToolExit('Invalid port for `--debug-port`: $error');
     }
     return null;
@@ -172,14 +171,14 @@ class AttachCommand extends FlutterCommand {
 
     final Device device = await findTargetDevice();
 
-    final Artifacts artifacts = device.artifactOverrides ?? Artifacts.instance;
+    final Artifacts overrideArtifacts = device.artifactOverrides ?? globals.artifacts;
     await context.run<void>(
       body: () => _attachToDevice(device),
       overrides: <Type, Generator>{
-        Artifacts: () => artifacts,
+        Artifacts: () => overrideArtifacts,
     });
 
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<void> _attachToDevice(Device device) async {
@@ -203,7 +202,6 @@ class AttachCommand extends FlutterCommand {
           stdoutCommandResponse,
           notifyingLogger: NotifyingLogger(),
           logToStdout: true,
-          dartDefines: dartDefines,
         )
       : null;
 
@@ -217,17 +215,17 @@ class AttachCommand extends FlutterCommand {
       if (device is FuchsiaDevice) {
         final String module = stringArg('module');
         if (module == null) {
-          throwToolExit('\'--module\' is required for attaching to a Fuchsia device');
+          throwToolExit("'--module' is required for attaching to a Fuchsia device");
         }
-        usesIpv6 = await device.ipv6;
+        usesIpv6 = device.ipv6;
         FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
         try {
           isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);
           observatoryUri = Stream<Uri>.value(await isolateDiscoveryProtocol.uri).asBroadcastStream();
-        } catch (_) {
+        } on Exception {
           isolateDiscoveryProtocol?.dispose();
           final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
-          for (ForwardedPort port in ports) {
+          for (final ForwardedPort port in ports) {
             await device.portForwarder.unforward(port);
           }
           rethrow;
@@ -248,13 +246,15 @@ class AttachCommand extends FlutterCommand {
       if (observatoryUri == null) {
         final ProtocolDiscovery observatoryDiscovery =
           ProtocolDiscovery.observatory(
-            device.getLogReader(),
+            // If it's an Android device, attaching relies on past log searching
+            // to find the service protocol.
+            await device.getLogReader(includePastLogs: device is AndroidDevice),
             portForwarder: device.portForwarder,
             ipv6: ipv6,
             devicePort: deviceVmservicePort,
             hostPort: hostVmservicePort,
           );
-        printStatus('Waiting for a connection from Flutter on ${device.name}...');
+        globals.printStatus('Waiting for a connection from Flutter on ${device.name}...');
         observatoryUri = observatoryDiscovery.uris;
         // Determine ipv6 status from the scanned logs.
         usesIpv6 = observatoryDiscovery.ipv6;
@@ -272,7 +272,7 @@ class AttachCommand extends FlutterCommand {
         ).asBroadcastStream();
     }
 
-    terminal.usesTerminalUi = daemon == null;
+    globals.terminal.usesTerminalUi = daemon == null;
 
     try {
       int result;
@@ -291,10 +291,10 @@ class AttachCommand extends FlutterCommand {
             device,
             null,
             true,
-            fs.currentDirectory,
+            globals.fs.currentDirectory,
             LaunchMode.attach,
           );
-        } catch (error) {
+        } on Exception catch (error) {
           throwToolExit(error.toString());
         }
         result = await app.runner.waitForAppToFinish();
@@ -326,11 +326,11 @@ class AttachCommand extends FlutterCommand {
         if (runner.exited || !runner.isWaitingForObservatory) {
           break;
         }
-        printStatus('Waiting for a new connection from Flutter on ${device.name}...');
+        globals.printStatus('Waiting for a new connection from Flutter on ${device.name}...');
       }
     } finally {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
-      for (ForwardedPort port in ports) {
+      for (final ForwardedPort port in ports) {
         await device.portForwarder.unforward(port);
       }
     }
@@ -350,14 +350,12 @@ class AttachCommand extends FlutterCommand {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       flutterProject: flutterProject,
-      trackWidgetCreation: boolArg('track-widget-creation'),
       fileSystemRoots: stringsArg('filesystem-root'),
       fileSystemScheme: stringArg('filesystem-scheme'),
       viewFilter: stringArg('isolate-filter'),
       target: stringArg('target'),
       targetModel: TargetModel(stringArg('target-model')),
-      buildMode: getBuildMode(),
-      dartDefines: dartDefines,
+      buildInfo: getBuildInfo(),
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];

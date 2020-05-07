@@ -1,7 +1,3 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-//
 // This script is used to initialize the build in a module or plugin project.
 // During this phase, the script applies the Maven plugin and configures the
 // destination of the local repository.
@@ -24,14 +20,19 @@ void configureProject(Project project, String outputDir) {
 
     project.apply plugin: "maven"
 
-    project.android.libraryVariants.all { variant ->
-        addAarTask(project, variant)
-    }
     // Snapshot versions include the timestamp in the artifact name.
     // Therefore, remove the snapshot part, so new runs of `flutter build aar` overrides existing artifacts.
     // This version isn't relevant in Flutter since the pub version is used
     // to resolve dependencies.
     project.version = project.version.replace("-SNAPSHOT", "")
+
+    if (project.hasProperty("buildNumber")) {
+        project.version = project.property("buildNumber")
+    }
+
+    project.android.libraryVariants.all { variant ->
+        addAarTask(project, variant)
+    }
 
     project.uploadArchives {
         repositories {
@@ -43,6 +44,7 @@ void configureProject(Project project, String outputDir) {
     if (!project.property("is-plugin").toBoolean()) {
         return
     }
+
     if (project.hasProperty('localEngineOut')) {
         // TODO(egarciad): Support local engine.
         // This most likely requires refactoring `flutter.gradle`, so the logic can be reused.
@@ -55,7 +57,7 @@ void configureProject(Project project, String outputDir) {
     // as a result, add the dependency on the embedding.
     project.repositories {
         maven {
-            url "http://download.flutter.io"
+            url "https://storage.googleapis.com/download.flutter.io"
         }
     }
     String engineVersion = Paths.get(getFlutterRoot(project), "bin", "internal", "engine.version")

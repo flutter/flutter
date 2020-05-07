@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -68,7 +68,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Focus).last), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isEnabled: true,
@@ -83,7 +83,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Focus).last), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isChecked: true,
@@ -99,7 +99,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Focus).last), matchesSemantics(
+    expect(tester.getSemantics(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_CheckboxRenderObjectWidget')), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
     ));
@@ -111,7 +111,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Focus).last), matchesSemantics(
+    expect(tester.getSemantics(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_CheckboxRenderObjectWidget')), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isChecked: true,
@@ -564,5 +564,42 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pumpAndSettle();
     expect(value, isTrue);
+  });
+
+  testWidgets('Checkbox responds to density changes.', (WidgetTester tester) async {
+    const Key key = Key('test');
+    Future<void> buildTest(VisualDensity visualDensity) async {
+      return await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Checkbox(
+                visualDensity: visualDensity,
+                key: key,
+                onChanged: (bool value) {},
+                value: true,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await buildTest(const VisualDensity());
+    final RenderBox box = tester.renderObject(find.byKey(key));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(48, 48)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(60, 60)));
+
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(36, 36)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(60, 36)));
   });
 }

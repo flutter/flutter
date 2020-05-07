@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -205,8 +205,9 @@ void main() {
     // just set the start position.
     await gesture.moveBy(const Offset(20.0, 0.0));
     await gesture.moveBy(const Offset(20.0, 0.0));
-    expect(value, isTrue);
+    expect(value, isFalse);
     await gesture.up();
+    expect(value, isTrue);
     await tester.pump();
 
     gesture = await tester.startGesture(switchRect.center);
@@ -214,11 +215,14 @@ void main() {
     await gesture.moveBy(const Offset(20.0, 0.0));
     expect(value, isTrue);
     await gesture.up();
+    expect(value, isTrue);
     await tester.pump();
 
     gesture = await tester.startGesture(switchRect.center);
     await gesture.moveBy(const Offset(-20.0, 0.0));
     await gesture.moveBy(const Offset(-20.0, 0.0));
+    expect(value, isTrue);
+    await gesture.up();
     expect(value, isFalse);
   });
 
@@ -489,6 +493,84 @@ void main() {
     expect(tester.hasRunningAnimations, false);
   });
 
+  testWidgets('can veto switch dragging result', (WidgetTester tester) async {
+    bool value = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Center(
+                child: Switch(
+                  dragStartBehavior: DragStartBehavior.down,
+                  value: value,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      value = value || newValue;
+                    });
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Move a little to the right, not past the middle.
+    TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(Switch)).center);
+    await gesture.moveBy(const Offset(kTouchSlop + 0.1, 0.0));
+    await tester.pump();
+    await gesture.moveBy(const Offset(-kTouchSlop + 5.1, 0.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(value, isFalse);
+    final RenderToggleable renderObject = tester.renderObject<RenderToggleable>(
+      find.descendant(
+        of: find.byType(Switch),
+        matching: find.byWidgetPredicate(
+          (Widget widget) => widget.runtimeType.toString() == '_SwitchRenderObjectWidget',
+        ),
+      ),
+    );
+    expect(renderObject.position.value, lessThan(0.5));
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(value, isFalse);
+    expect(renderObject.position.value, 0);
+
+    // Move past the middle.
+    gesture = await tester.startGesture(tester.getRect(find.byType(Switch)).center);
+    await gesture.moveBy(const Offset(kTouchSlop + 0.1, 0.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(value, isTrue);
+    expect(renderObject.position.value, greaterThan(0.5));
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
+    expect(renderObject.position.value, 1.0);
+
+    // Now move back to the left, the revert animation should play.
+    gesture = await tester.startGesture(tester.getRect(find.byType(Switch)).center);
+    await gesture.moveBy(const Offset(-kTouchSlop - 0.1, 0.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(value, isTrue);
+    expect(renderObject.position.value, lessThan(0.5));
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
+    expect(renderObject.position.value, 1.0);
+  });
+
   testWidgets('switch has semantic events', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool value = false;
@@ -585,6 +667,7 @@ void main() {
 
   testWidgets('Switch.adaptive', (WidgetTester tester) async {
     bool value = false;
+    const Color inactiveTrackColor = Colors.pink;
 
     Widget buildFrame(TargetPlatform platform) {
       return MaterialApp(
@@ -595,6 +678,7 @@ void main() {
               child: Center(
                 child: Switch.adaptive(
                   value: value,
+                  inactiveTrackColor: inactiveTrackColor,
                   onChanged: (bool newValue) {
                     setState(() {
                       value = newValue;
@@ -608,20 +692,28 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildFrame(TargetPlatform.iOS));
-    expect(find.byType(CupertinoSwitch), findsOneWidget);
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      value = false;
+      await tester.pumpWidget(buildFrame(platform));
+      expect(find.byType(CupertinoSwitch), findsOneWidget, reason: 'on ${describeEnum(platform)}');
 
-    expect(value, isFalse);
-    await tester.tap(find.byType(Switch));
-    expect(value, isTrue);
+      final CupertinoSwitch adaptiveSwitch = tester.widget(find.byType(CupertinoSwitch));
+      expect(adaptiveSwitch.trackColor, inactiveTrackColor, reason: 'on ${describeEnum(platform)}');
 
-    await tester.pumpWidget(buildFrame(TargetPlatform.android));
-    await tester.pumpAndSettle(); // Finish the theme change animation.
-    expect(find.byType(CupertinoSwitch), findsNothing);
-    expect(value, isTrue);
-    await tester.tap(find.byType(Switch));
-    expect(value, isFalse);
+      expect(value, isFalse, reason: 'on ${describeEnum(platform)}');
+      await tester.tap(find.byType(Switch));
+      expect(value, isTrue, reason: 'on ${describeEnum(platform)}');
+    }
 
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+      value = false;
+      await tester.pumpWidget(buildFrame(platform));
+      await tester.pumpAndSettle(); // Finish the theme change animation.
+      expect(find.byType(CupertinoSwitch), findsNothing);
+      expect(value, isFalse, reason: 'on ${describeEnum(platform)}');
+      await tester.tap(find.byType(Switch));
+      expect(value, isTrue, reason: 'on ${describeEnum(platform)}');
+    }
   });
 
   testWidgets('Switch is focusable and has correct focus color', (WidgetTester tester) async {
@@ -744,6 +836,7 @@ void main() {
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
     addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
 

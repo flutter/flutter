@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,7 +19,7 @@ import 'package:flutter/foundation.dart';
 ///    that are returned from [RawKeyEvent.physicalKey].
 ///  * [LogicalKeyboardKey], a class with static values that describe the keys
 ///    that are returned from [RawKeyEvent.logicalKey].
-abstract class KeyboardKey extends Diagnosticable {
+abstract class KeyboardKey with Diagnosticable {
   /// A const constructor so that subclasses may be const.
   const KeyboardKey();
 }
@@ -45,7 +45,7 @@ abstract class KeyboardKey extends Diagnosticable {
 /// look at the physical key to make sure that regardless of the character the
 /// key produces, you got the key that is in that location on the keyboard.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 /// This example shows how to detect if the user has selected the logical "Q"
 /// key.
 ///
@@ -91,7 +91,7 @@ abstract class KeyboardKey extends Diagnosticable {
 ///     color: Colors.white,
 ///     alignment: Alignment.center,
 ///     child: DefaultTextStyle(
-///       style: textTheme.display1,
+///       style: textTheme.headline4,
 ///       child: RawKeyboardListener(
 ///         focusNode: _focusNode,
 ///         onKey: _handleKeyEvent,
@@ -127,7 +127,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   ///
   /// [keyId] must not be null.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// To save executable size, it is recommended that the [debugName] be null in
   /// release mode. You can do this by using the [kReleaseMode] constant.
   ///
@@ -167,12 +167,12 @@ class LogicalKeyboardKey extends KeyboardKey {
   int get hashCode => keyId.hashCode;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final LogicalKeyboardKey typedOther = other;
-    return keyId == typedOther.keyId;
+    return other is LogicalKeyboardKey
+        && other.keyId == keyId;
   }
 
   /// Returns the [LogicalKeyboardKey] constant that matches the given ID, or
@@ -246,7 +246,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// [control], so that the question "is any control key down?" can be asked.
   static Set<LogicalKeyboardKey> collapseSynonyms(Set<LogicalKeyboardKey> input) {
     final Set<LogicalKeyboardKey> result = <LogicalKeyboardKey>{};
-    for (LogicalKeyboardKey key in input) {
+    for (final LogicalKeyboardKey key in input) {
       final LogicalKeyboardKey synonym = _synonyms[key];
       result.add(synonym ?? key);
     }
@@ -334,6 +334,11 @@ class LogicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey turbo = LogicalKeyboardKey(0x00100000016, debugName: kReleaseMode ? null : 'Turbo');
+
+  /// Represents the logical "Privacy Screen Toggle" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey privacyScreenToggle = LogicalKeyboardKey(0x00100000017, debugName: kReleaseMode ? null : 'Privacy Screen Toggle');
 
   /// Represents the logical "Sleep" key on the keyboard.
   ///
@@ -1220,6 +1225,11 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey mediaPlay = LogicalKeyboardKey(0x001000c00b0, debugName: kReleaseMode ? null : 'Media Play');
 
+  /// Represents the logical "Media Pause" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaPause = LogicalKeyboardKey(0x001000c00b1, debugName: kReleaseMode ? null : 'Media Pause');
+
   /// Represents the logical "Media Record" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -1663,6 +1673,7 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0100000014: suspend,
     0x0100000015: resume,
     0x0100000016: turbo,
+    0x0100000017: privacyScreenToggle,
     0x0100010082: sleep,
     0x0100010083: wakeUp,
     0x01000100b5: displayToggleIntExt,
@@ -1840,6 +1851,7 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x01000c009c: channelUp,
     0x01000c009d: channelDown,
     0x01000c00b0: mediaPlay,
+    0x01000c00b1: mediaPause,
     0x01000c00b2: mediaRecord,
     0x01000c00b3: mediaFastForward,
     0x01000c00b4: mediaRewind,
@@ -1960,7 +1972,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 /// looking for "the key next next to the TAB key", since on a French keyboard,
 /// the key next to the TAB key has an "A" on it.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 /// This example shows how to detect if the user has selected the physical key
 /// to the right of the CAPS LOCK key.
 ///
@@ -2000,7 +2012,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 ///     color: Colors.white,
 ///     alignment: Alignment.center,
 ///     child: DefaultTextStyle(
-///       style: textTheme.display1,
+///       style: textTheme.headline4,
 ///       child: RawKeyboardListener(
 ///         focusNode: _focusNode,
 ///         onKey: _handleKeyEvent,
@@ -2036,7 +2048,7 @@ class PhysicalKeyboardKey extends KeyboardKey {
   ///
   /// The [usbHidUsage] must not be null.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// To save executable size, it is recommended that the [debugName] be null in
   /// release mode. You can do this using the [kReleaseMode] constant.
   ///
@@ -2069,12 +2081,12 @@ class PhysicalKeyboardKey extends KeyboardKey {
   int get hashCode => usbHidUsage.hashCode;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final PhysicalKeyboardKey typedOther = other;
-    return usbHidUsage == typedOther.usbHidUsage;
+    return other is PhysicalKeyboardKey
+        && other.usbHidUsage == usbHidUsage;
   }
 
   @override
@@ -2121,6 +2133,12 @@ class PhysicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey turbo = PhysicalKeyboardKey(0x00000016, debugName: kReleaseMode ? null : 'Turbo');
+
+  /// Represents the location of the "Privacy Screen Toggle" key on a
+  /// generalized keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey privacyScreenToggle = PhysicalKeyboardKey(0x00000017, debugName: kReleaseMode ? null : 'Privacy Screen Toggle');
 
   /// Represents the location of the "Sleep" key on a generalized keyboard.
   ///
@@ -3054,6 +3072,12 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey mediaPlay = PhysicalKeyboardKey(0x000c00b0, debugName: kReleaseMode ? null : 'Media Play');
 
+  /// Represents the location of the "Media Pause" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey mediaPause = PhysicalKeyboardKey(0x000c00b1, debugName: kReleaseMode ? null : 'Media Pause');
+
   /// Represents the location of the "Media Record" key on a generalized
   /// keyboard.
   ///
@@ -3536,6 +3560,7 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x00000014: suspend,
     0x00000015: resume,
     0x00000016: turbo,
+    0x00000017: privacyScreenToggle,
     0x00010082: sleep,
     0x00010083: wakeUp,
     0x000100b5: displayToggleIntExt,
@@ -3713,6 +3738,7 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x000c009c: channelUp,
     0x000c009d: channelDown,
     0x000c00b0: mediaPlay,
+    0x000c00b1: mediaPause,
     0x000c00b2: mediaRecord,
     0x000c00b3: mediaFastForward,
     0x000c00b4: mediaRewind,

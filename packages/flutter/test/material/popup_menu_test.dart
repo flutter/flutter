@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -325,6 +325,12 @@ void main() {
 
     expect(find.byIcon(Icons.more_vert), findsNothing);
     expect(find.byIcon(Icons.more_horiz), findsOneWidget);
+
+    await tester.pumpWidget(build(TargetPlatform.macOS));
+    await tester.pumpAndSettle(); // Run theme change animation.
+
+    expect(find.byIcon(Icons.more_vert), findsNothing);
+    expect(find.byIcon(Icons.more_horiz), findsOneWidget);
   });
 
   group('PopupMenuButton with Icon', () {
@@ -345,7 +351,7 @@ void main() {
             icon: const Icon(Icons.view_carousel),
             itemBuilder: simplePopupMenuItemBuilder,
         );
-      }, throwsA(isInstanceOf<AssertionError>()));
+      }, throwsAssertionError);
     });
 
     testWidgets('PopupMenuButton creates IconButton when given an icon', (WidgetTester tester) async {
@@ -791,7 +797,7 @@ void main() {
                   onPressed: () {
                     // Ensure showMenu throws an assertion without a position
                     expect(() {
-                      // ignore: missing_required_param_with_details
+                      // ignore: missing_required_param
                       showMenu<int>(
                         context: context,
                         items: <PopupMenuItem<int>>[
@@ -910,7 +916,7 @@ void main() {
             textDirection: textDirection,
             child: PopupMenuTheme(
               data: PopupMenuTheme.of(context).copyWith(
-                textStyle: Theme.of(context).textTheme.subhead.copyWith(fontSize: fontSize),
+                textStyle: Theme.of(context).textTheme.subtitle1.copyWith(fontSize: fontSize),
               ),
               child: child,
             ),
@@ -1191,12 +1197,53 @@ void main() {
     expect(rootObserver.menuCount, 1);
     expect(nestedObserver.menuCount, 0);
   });
+
+  testWidgets('PopupMenuButton calling showButtonMenu manually', (WidgetTester tester) async {
+    final GlobalKey<PopupMenuButtonState<int>> globalKey = GlobalKey();
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                PopupMenuButton<int>(
+                  key: globalKey,
+                  itemBuilder: (BuildContext context) {
+                    return <PopupMenuEntry<int>>[
+                      const PopupMenuItem<int>(
+                        value: 1,
+                        child: Text('Tap me please!'),
+                      ),
+                    ];
+                  },
+                ),
+              ],
+            ),
+          ),
+        )
+    );
+
+    expect(find.text('Tap me please!'), findsNothing);
+
+    globalKey.currentState.showButtonMenu();
+    // The PopupMenuItem will appear after an animation, hence,
+    // we have to first wait for the tester to settle.
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tap me please!'), findsOneWidget);
+  });
 }
 
 class TestApp extends StatefulWidget {
-  const TestApp({ this.textDirection, this.child });
+  const TestApp({
+    Key key,
+    this.textDirection,
+    this.child,
+  }) : super(key: key);
+
   final TextDirection textDirection;
   final Widget child;
+
   @override
   _TestAppState createState() => _TestAppState();
 }

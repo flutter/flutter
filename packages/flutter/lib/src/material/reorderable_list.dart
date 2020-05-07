@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -27,7 +27,7 @@ import 'material_localizations.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// final List<MyDataObject> backingList = <MyDataObject>[/* ... */];
@@ -58,9 +58,11 @@ class ReorderableListView extends StatefulWidget {
 
   /// Creates a reorderable list.
   ReorderableListView({
+    Key key,
     this.header,
     @required this.children,
     @required this.onReorder,
+    this.scrollController,
     this.scrollDirection = Axis.vertical,
     this.padding,
     this.reverse = false,
@@ -70,7 +72,8 @@ class ReorderableListView extends StatefulWidget {
        assert(
          children.every((Widget w) => w.key != null),
          'All children of this widget must have a key.',
-       );
+       ),
+       super(key: key);
 
   /// A non-reorderable header widget to show before the list.
   ///
@@ -84,6 +87,15 @@ class ReorderableListView extends StatefulWidget {
   ///
   /// List [children] can only drag along this [Axis].
   final Axis scrollDirection;
+
+  /// Creates a [ScrollPosition] to manage and determine which portion
+  /// of the content is visible in the scroll view.
+  ///
+  /// This can be used in many ways, such as setting an initial scroll offset,
+  /// (via [ScrollController.initialScrollOffset]), reading the current scroll position
+  /// (via [ScrollController.offset]), or changing it (via [ScrollController.jumpTo] or
+  /// [ScrollController.animateTo]).
+  final ScrollController scrollController;
 
   /// The amount of space by which to inset the [children].
   final EdgeInsets padding;
@@ -138,6 +150,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         return _ReorderableListContent(
           header: widget.header,
           children: widget.children,
+          scrollController: widget.scrollController,
           scrollDirection: widget.scrollDirection,
           onReorder: widget.onReorder,
           padding: widget.padding,
@@ -163,6 +176,7 @@ class _ReorderableListContent extends StatefulWidget {
   const _ReorderableListContent({
     @required this.header,
     @required this.children,
+    @required this.scrollController,
     @required this.scrollDirection,
     @required this.padding,
     @required this.onReorder,
@@ -171,6 +185,7 @@ class _ReorderableListContent extends StatefulWidget {
 
   final Widget header;
   final List<Widget> children;
+  final ScrollController scrollController;
   final Axis scrollDirection;
   final EdgeInsets padding;
   final ReorderCallback onReorder;
@@ -260,7 +275,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
   @override
   void didChangeDependencies() {
-    _scrollController = PrimaryScrollController.of(context) ?? ScrollController();
+    _scrollController = widget.scrollController ?? PrimaryScrollController.of(context) ?? ScrollController();
     super.didChangeDependencies();
   }
 
@@ -530,7 +545,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           return _dragging == toAccept && toAccept != toWrap.key;
         },
         onAccept: (Key accepted) { },
-        onLeave: (Key leaving) { },
+        onLeave: (Object leaving) { },
       );
     });
   }

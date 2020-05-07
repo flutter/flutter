@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,7 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  for (String language in kCupertinoSupportedLanguages) {
+  for (final String language in kCupertinoSupportedLanguages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
       final Locale locale = Locale(language);
 
@@ -93,7 +93,7 @@ void main() {
     const Locale locale = Locale('fr');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
     final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
-    expect(localizations is CupertinoLocalizationFr, true);
+    expect(localizations, isA<CupertinoLocalizationFr>());
     expect(localizations.alertDialogLabel, 'Alerte');
     expect(localizations.datePickerHourSemanticsLabel(1), '1 heure');
     expect(localizations.datePickerHourSemanticsLabel(12), '12 heures');
@@ -108,7 +108,7 @@ void main() {
     const Locale locale = Locale('zh');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
     final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
-    expect(localizations is CupertinoLocalizationZh, true);
+    expect(localizations, isA<CupertinoLocalizationZh>());
     expect(localizations.alertDialogLabel, '提醒');
     expect(localizations.datePickerHourSemanticsLabel(1), '1 点');
     expect(localizations.datePickerHourSemanticsLabel(12), '12 点');

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,17 +9,18 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/runner.dart' as tools;
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:quiver/testing/async.dart';
+import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -55,7 +56,7 @@ void main() {
 
       await verifyCrashReportSent(requestInfo);
     }, overrides: <Type, Generator>{
-      Stdio: () => const _NoStderr(),
+      Stdio: () => _NoStderr(),
     });
 
     testUsingContext('should print an explanatory message when there is a SocketException', () async {
@@ -76,7 +77,7 @@ void main() {
       expect(await exitCodeCompleter.future, 1);
       expect(testLogger.errorText, contains('Failed to send crash report due to a network error'));
     }, overrides: <Type, Generator>{
-      Stdio: () => const _NoStderr(),
+      Stdio: () => _NoStderr(),
     });
 
     testUsingContext('should print an explanatory message when there is an HttpException', () async {
@@ -97,7 +98,7 @@ void main() {
       expect(await exitCodeCompleter.future, 1);
       expect(testLogger.errorText, contains('Failed to send crash report due to a network error'));
     }, overrides: <Type, Generator>{
-      Stdio: () => const _NoStderr(),
+      Stdio: () => _NoStderr(),
     });
 
     testUsingContext('should send crash reports when async throws', () async {
@@ -119,7 +120,7 @@ void main() {
       expect(await exitCodeCompleter.future, 1);
       await verifyCrashReportSent(requestInfo);
     }, overrides: <Type, Generator>{
-      Stdio: () => const _NoStderr(),
+      Stdio: () => _NoStderr(),
     });
 
     testUsingContext('should send only one crash report when async throws many', () async {
@@ -150,7 +151,7 @@ void main() {
       await verifyCrashReportSent(requestInfo, crashes: 4);
     }, overrides: <Type, Generator>{
       DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
-      Stdio: () => const _NoStderr(),
+      Stdio: () => _NoStderr(),
     });
 
     testUsingContext('should not send a crash report if on a user-branch', () async {
@@ -180,9 +181,9 @@ void main() {
       expect(method, null);
       expect(uri, null);
 
-      expect(testLogger.statusText, '');
+      expect(testLogger.traceText, isNot(contains('Crash report sent')));
     }, overrides: <Type, Generator>{
-      Stdio: () => const _NoStderr(),
+      Stdio: () => _NoStderr(),
     });
 
     testUsingContext('can override base URL', () async {
@@ -222,7 +223,7 @@ void main() {
         },
         script: Uri(scheme: 'data'),
       ),
-      Stdio: () => const _NoStderr(),
+      Stdio: () => _NoStderr(),
     });
   });
 }
@@ -251,15 +252,15 @@ Future<void> verifyCrashReportSent(RequestInfo crashInfo, {
   expect(crashInfo.fields['uuid'], '00000000-0000-4000-0000-000000000000');
   expect(crashInfo.fields['product'], 'Flutter_Tools');
   expect(crashInfo.fields['version'], 'test-version');
-  expect(crashInfo.fields['osName'], platform.operatingSystem);
+  expect(crashInfo.fields['osName'], globals.platform.operatingSystem);
   expect(crashInfo.fields['osVersion'], 'fake OS name and version');
   expect(crashInfo.fields['type'], 'DartError');
   expect(crashInfo.fields['error_runtime_type'], 'StateError');
   expect(crashInfo.fields['error_message'], 'Bad state: Test bad state error');
   expect(crashInfo.fields['comments'], 'crash');
 
-  expect(testLogger.statusText, 'Sending crash report to Google.\n'
-      'Crash report sent (report ID: test-report-id)\n');
+  expect(testLogger.traceText, contains('Sending crash report to Google.'));
+  expect(testLogger.traceText, contains('Crash report sent (report ID: test-report-id)'));
 
   // Verify that we've written the crash report to disk.
   final List<String> writtenFiles =
@@ -341,7 +342,7 @@ class _CrashCommand extends FlutterCommand {
 
     fn3();
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 
@@ -399,7 +400,7 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
 }
 
 class _NoStderr extends Stdio {
-  const _NoStderr();
+  _NoStderr();
 
   @override
   IOSink get stderr => const _NoopIOSink();

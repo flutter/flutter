@@ -1,23 +1,14 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
 
-import 'artifacts.dart';
 import 'base/context.dart';
-import 'base/file_system.dart';
-import 'base/platform.dart';
 import 'build_info.dart';
 import 'compile.dart';
-import 'dart/package_map.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'project.dart';
-
-// Arbitrarily chosen multi-root file scheme. This is used to configure the
-// frontend_server to resolve a package uri to multiple filesystem directories.
-// In this case, the source directory and a generated directory.
-const String kMultiRootScheme = 'org-dartlang-app';
 
 /// The [CodeGenerator] instance.
 ///
@@ -27,9 +18,6 @@ CodeGenerator get codeGenerator => context.get<CodeGenerator>();
 
 /// A wrapper for a build_runner process which delegates to a generated
 /// build script.
-///
-/// This is only enabled if [experimentalBuildEnabled] is true, and only for
-/// external flutter users.
 abstract class CodeGenerator {
   const CodeGenerator();
 
@@ -42,18 +30,6 @@ abstract class CodeGenerator {
   // Generates a synthetic package under .dart_tool/flutter_tool which is in turn
   // used to generate a build script.
   Future<void> generateBuildScript(FlutterProject flutterProject);
-
-  /// Create generated packages file which adds a multi-root scheme to the user's
-  /// project directory. Currently we only replace the root package with a multi-root
-  /// scheme. To support codegen on arbitrary packages we would need to do
-  /// this for each dependency.
-  void updatePackages(FlutterProject flutterProject) {
-    final String oldPackagesContents = fs.file(PackageMap.globalPackagesPath).readAsStringSync();
-    final String appName = flutterProject.manifest.appName;
-    final String newPackagesContents = oldPackagesContents.replaceFirst('$appName:lib/', '$appName:$kMultiRootScheme:/');
-    final String generatedPackagesPath = fs.path.setExtension(PackageMap.globalPackagesPath, '.generated');
-    fs.file(generatedPackagesPath).writeAsStringSync(newPackagesContents);
-  }
 }
 
 class UnsupportedCodeGenerator extends CodeGenerator {
@@ -97,10 +73,8 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     bool linkPlatformKernelIn = false,
     bool aot = false,
     @required BuildMode buildMode,
-    bool causalAsyncStacks = true,
     bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
-    // These arguments are currently unused.
     String sdkRoot,
     String packagesPath,
     List<String> fileSystemRoots,
@@ -111,18 +85,12 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     String platformDill,
     List<String> dartDefines,
   }) async {
-    if (fileSystemRoots != null || fileSystemScheme != null || depFilePath != null || targetModel != null || sdkRoot != null || packagesPath != null) {
-      printTrace('fileSystemRoots, fileSystemScheme, depFilePath, targetModel,'
-        'sdkRoot, packagesPath are not supported when using the experimental '
-        'build* pipeline');
-    }
     final FlutterProject flutterProject = FlutterProject.current();
-    codeGenerator.updatePackages(flutterProject);
     final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
     codegenDaemon.startBuild();
-    await for (CodegenStatus codegenStatus in codegenDaemon.buildResults) {
+    await for (final CodegenStatus codegenStatus in codegenDaemon.buildResults) {
       if (codegenStatus == CodegenStatus.Failed) {
-        printError('Code generation failed, build may have compile errors.');
+        globals.printError('Code generation failed, build may have compile errors.');
         break;
       }
       if (codegenStatus == CodegenStatus.Succeeded) {
@@ -135,16 +103,12 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
       linkPlatformKernelIn: linkPlatformKernelIn,
       aot: aot,
       buildMode: buildMode,
-      causalAsyncStacks: causalAsyncStacks,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions,
       sdkRoot: sdkRoot,
-      packagesPath: PackageMap.globalGeneratedPackagesPath,
-      fileSystemRoots: <String>[
-        fs.path.join(flutterProject.generated.path, 'lib${platform.pathSeparator}'),
-        fs.path.join(flutterProject.directory.path, 'lib${platform.pathSeparator}'),
-      ],
-      fileSystemScheme: kMultiRootScheme,
+      packagesPath: packagesPath,
+      fileSystemRoots: fileSystemRoots,
+      fileSystemScheme: fileSystemScheme,
       depFilePath: depFilePath,
       targetModel: targetModel,
       initializeFromDill: initializeFromDill,
@@ -156,7 +120,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
 /// An implementation of a [ResidentCompiler] which runs a [BuildRunner] before
 /// talking to the CFE.
 class CodeGeneratingResidentCompiler implements ResidentCompiler {
-  CodeGeneratingResidentCompiler._(this._residentCompiler, this._codegenDaemon, this._flutterProject);
+  CodeGeneratingResidentCompiler._(this._residentCompiler, this._codegenDaemon);
 
   /// Creates a new [ResidentCompiler] and configures a [BuildDaemonClient] to
   /// run builds.
@@ -165,37 +129,10 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   /// compiler will only be initialized with the correct configuration for
   /// codegen mode.
   static Future<ResidentCompiler> create({
+    @required ResidentCompiler residentCompiler,
     @required FlutterProject flutterProject,
-    @required BuildMode buildMode,
-    bool trackWidgetCreation = false,
-    CompilerMessageConsumer compilerMessageConsumer = printError,
-    bool unsafePackageSerialization = false,
-    String outputPath,
-    String initializeFromDill,
     bool runCold = false,
-    TargetPlatform targetPlatform,
-    @required List<String> dartDefines,
   }) async {
-    codeGenerator.updatePackages(flutterProject);
-    final ResidentCompiler residentCompiler = ResidentCompiler(
-      artifacts.getArtifactPath(
-        Artifact.flutterPatchedSdkPath,
-        platform: targetPlatform,
-        mode: buildMode,
-      ),
-      buildMode: buildMode,
-      trackWidgetCreation: trackWidgetCreation,
-      packagesPath: PackageMap.globalGeneratedPackagesPath,
-      fileSystemRoots: <String>[
-        fs.path.join(flutterProject.generated.path, 'lib${platform.pathSeparator}'),
-        fs.path.join(flutterProject.directory.path, 'lib${platform.pathSeparator}'),
-      ],
-      fileSystemScheme: kMultiRootScheme,
-      targetModel: TargetModel.flutter,
-      unsafePackageSerialization: unsafePackageSerialization,
-      initializeFromDill: initializeFromDill,
-      dartDefines: dartDefines,
-    );
     if (runCold) {
       return residentCompiler;
     }
@@ -205,14 +142,13 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
       return status == CodegenStatus.Succeeded || status == CodegenStatus.Failed;
     });
     if (status == CodegenStatus.Failed) {
-      printError('Code generation failed, build may have compile errors.');
+      globals.printError('Code generation failed, build may have compile errors.');
     }
-    return CodeGeneratingResidentCompiler._(residentCompiler, codegenDaemon, flutterProject);
+    return CodeGeneratingResidentCompiler._(residentCompiler, codegenDaemon);
   }
 
   final ResidentCompiler _residentCompiler;
   final CodegenDaemon _codegenDaemon;
-  final FlutterProject _flutterProject;
 
   @override
   void accept() {
@@ -225,6 +161,15 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   }
 
   @override
+  Future<CompilerOutput> compileExpressionToJs(
+    String libraryUri, int line, int column, Map<String, String> jsModules,
+    Map<String, String> jsFrameValues, String moduleName, String expression
+  ) {
+    return _residentCompiler.compileExpressionToJs(
+      libraryUri, line, column, jsModules, jsFrameValues, moduleName, expression);
+  }
+
+  @override
   Future<CompilerOutput> recompile(String mainPath, List<Uri> invalidatedFiles, {String outputPath, String packagesFilePath}) async {
     if (_codegenDaemon.lastStatus != CodegenStatus.Succeeded && _codegenDaemon.lastStatus != CodegenStatus.Failed) {
       await _codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
@@ -232,19 +177,13 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
       });
     }
     if (_codegenDaemon.lastStatus == CodegenStatus.Failed) {
-      printError('Code generation failed, build may have compile errors.');
-    }
-    // Update the generated packages file if the original packages file has changes.
-    if (fs.statSync(PackageMap.globalPackagesPath).modified.millisecondsSinceEpoch >
-        fs.statSync(PackageMap.globalGeneratedPackagesPath).modified.millisecondsSinceEpoch) {
-      codeGenerator.updatePackages(_flutterProject);
-      invalidatedFiles.add(fs.file(PackageMap.globalGeneratedPackagesPath).uri);
+      globals.printError('Code generation failed, build may have compile errors.');
     }
     return _residentCompiler.recompile(
       mainPath,
       invalidatedFiles,
       outputPath: outputPath,
-      packagesFilePath: PackageMap.globalGeneratedPackagesPath,
+      packagesFilePath: packagesFilePath,
     );
   }
 
@@ -261,6 +200,11 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   @override
   Future<void> shutdown() {
     return _residentCompiler.shutdown();
+  }
+
+  @override
+  void addFileSystemRoot(String root) {
+    _residentCompiler.addFileSystemRoot(root);
   }
 }
 

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,12 +7,13 @@ import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/utils.dart';
 import '../convert.dart';
-import '../globals.dart';
 import 'build_system.dart';
 
 /// An encoded representation of all file hashes.
@@ -24,7 +25,7 @@ class FileStorage {
     final int version = json['version'] as int;
     final List<Map<String, Object>> rawCachedFiles = (json['files'] as List<dynamic>).cast<Map<String, Object>>();
     final List<FileHash> cachedFiles = <FileHash>[
-      for (Map<String, Object> rawFile in rawCachedFiles) FileHash.fromJson(rawFile),
+      for (final Map<String, Object> rawFile in rawCachedFiles) FileHash.fromJson(rawFile),
     ];
     return FileStorage(version, cachedFiles);
   }
@@ -36,7 +37,7 @@ class FileStorage {
     final Map<String, Object> json = <String, Object>{
       'version': version,
       'files': <Object>[
-        for (FileHash file in files) file.toJson(),
+        for (final FileHash file in files) file.toJson(),
       ],
     };
     return utf8.encode(jsonEncode(json));
@@ -71,12 +72,18 @@ class FileHash {
 ///
 /// The format of the file store is subject to change and not part of its API.
 class FileHashStore {
-  FileHashStore(this.environment, this.fileSystem) :
-    _cachePath = environment.buildDir.childFile(_kFileCache).path;
+  FileHashStore({
+    @required Environment environment,
+    @required FileSystem fileSystem,
+    @required Logger logger,
+  }) : _cachePath = environment.buildDir.childFile(_kFileCache).path,
+       _logger = logger,
+       _fileSystem = fileSystem;
 
-  final FileSystem fileSystem;
+  final FileSystem _fileSystem;
   final String _cachePath;
-  final Environment environment;
+  final Logger _logger;
+
   final HashMap<String, String> previousHashes = HashMap<String, String>();
   final HashMap<String, String> currentHashes = HashMap<String, String>();
 
@@ -88,8 +95,8 @@ class FileHashStore {
 
   /// Read file hashes from disk.
   void initialize() {
-    printTrace('Initializing file store');
-    final File cacheFile = fileSystem.file(_cachePath);
+    _logger.printTrace('Initializing file store');
+    final File cacheFile = _fileSystem.file(_cachePath);
     if (!cacheFile.existsSync()) {
       return;
     }
@@ -97,7 +104,7 @@ class FileHashStore {
     try {
       data = cacheFile.readAsBytesSync();
     } on FileSystemException catch (err) {
-      printError(
+      _logger.printError(
         'Failed to read file store at ${cacheFile.path} due to $err.\n'
         'Build artifacts will not be cached. Try clearing the cache directories '
         'with "flutter clean"',
@@ -108,31 +115,31 @@ class FileHashStore {
     FileStorage fileStorage;
     try {
       fileStorage = FileStorage.fromBuffer(data);
-    } catch (err) {
-      printTrace('Filestorage format changed');
+    } on Exception catch (err) {
+      _logger.printTrace('Filestorage format changed: $err');
       cacheFile.deleteSync();
       return;
     }
     if (fileStorage.version != _kVersion) {
-      printTrace('file cache format updating, clearing old hashes.');
+      _logger.printTrace('file cache format updating, clearing old hashes.');
       cacheFile.deleteSync();
       return;
     }
-    for (FileHash fileHash in fileStorage.files) {
+    for (final FileHash fileHash in fileStorage.files) {
       previousHashes[fileHash.path] = fileHash.hash;
     }
-    printTrace('Done initializing file store');
+    _logger.printTrace('Done initializing file store');
   }
 
   /// Persist file hashes to disk.
   void persist() {
-    printTrace('Persisting file store');
-    final File cacheFile = fileSystem.file(_cachePath);
+    _logger.printTrace('Persisting file store');
+    final File cacheFile = _fileSystem.file(_cachePath);
     if (!cacheFile.existsSync()) {
       cacheFile.createSync(recursive: true);
     }
     final List<FileHash> fileHashes = <FileHash>[];
-    for (MapEntry<String, String> entry in currentHashes.entries) {
+    for (final MapEntry<String, String> entry in currentHashes.entries) {
       fileHashes.add(FileHash(entry.key, entry.value));
     }
     final FileStorage fileStorage = FileStorage(
@@ -143,13 +150,13 @@ class FileHashStore {
     try {
       cacheFile.writeAsBytesSync(buffer);
     } on FileSystemException catch (err) {
-      printError(
+      _logger.printError(
         'Failed to persist file store at ${cacheFile.path} due to $err.\n'
         'Build artifacts will not be cached. Try clearing the cache directories '
         'with "flutter clean"',
       );
     }
-    printTrace('Done persisting file store');
+    _logger.printTrace('Done persisting file store');
   }
 
   /// Computes a hash of the provided files and returns a list of entities
@@ -158,7 +165,7 @@ class FileHashStore {
     final List<File> dirty = <File>[];
     final Pool openFiles = Pool(kMaxOpenFiles);
     await Future.wait(<Future<void>>[
-       for (File file in files) _hashFile(file, dirty, openFiles)
+       for (final File file in files) _hashFile(file, dirty, openFiles)
     ]);
     return dirty;
   }

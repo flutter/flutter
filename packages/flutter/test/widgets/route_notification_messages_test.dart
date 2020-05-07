@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,7 +26,7 @@ class OnTapPage extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         child: Container(
           child: Center(
-            child: Text(id, style: Theme.of(context).textTheme.display2),
+            child: Text(id, style: Theme.of(context).textTheme.headline3),
           ),
         ),
       ),
@@ -63,7 +63,7 @@ void main() {
     expect(
         log.last,
         isMethodCall(
-          'routePushed',
+          'routeUpdated',
           arguments: <String, dynamic>{
             'previousRouteName': null,
             'routeName': '/',
@@ -78,7 +78,7 @@ void main() {
     expect(
         log.last,
         isMethodCall(
-          'routePushed',
+          'routeUpdated',
           arguments: <String, dynamic>{
             'previousRouteName': '/',
             'routeName': '/A',
@@ -93,10 +93,10 @@ void main() {
     expect(
         log.last,
         isMethodCall(
-          'routePopped',
+          'routeUpdated',
           arguments: <String, dynamic>{
-            'previousRouteName': '/',
-            'routeName': '/A',
+            'previousRouteName': '/A',
+            'routeName': '/',
           },
         ));
   });
@@ -130,7 +130,7 @@ void main() {
     expect(
         log.last,
         isMethodCall(
-          'routePushed',
+          'routeUpdated',
           arguments: <String, dynamic>{
             'previousRouteName': null,
             'routeName': '/',
@@ -145,7 +145,7 @@ void main() {
     expect(
         log.last,
         isMethodCall(
-          'routePushed',
+          'routeUpdated',
           arguments: <String, dynamic>{
             'previousRouteName': '/',
             'routeName': '/A',
@@ -160,7 +160,7 @@ void main() {
     expect(
         log.last,
         isMethodCall(
-          'routeReplaced',
+          'routeUpdated',
           arguments: <String, dynamic>{
             'previousRouteName': '/A',
             'routeName': '/B',
@@ -195,7 +195,7 @@ void main() {
     expect(log, hasLength(1));
     expect(
       log.last,
-      isMethodCall('routePushed', arguments: <String, dynamic>{
+      isMethodCall('routeUpdated', arguments: <String, dynamic>{
         'previousRouteName': null,
         'routeName': '/home',
       }),
@@ -208,7 +208,7 @@ void main() {
     expect(log, hasLength(2));
     expect(
       log.last,
-      isMethodCall('routePushed', arguments: <String, dynamic>{
+      isMethodCall('routeUpdated', arguments: <String, dynamic>{
         'previousRouteName': '/home',
         'routeName': null,
       }),

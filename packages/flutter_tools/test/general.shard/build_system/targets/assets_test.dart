@@ -1,80 +1,102 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
+import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 
 import '../../../src/common.dart';
-import '../../../src/testbed.dart';
+import '../../../src/context.dart';
 
 void main() {
-  const BuildSystem buildSystem = BuildSystem();
   Environment environment;
-  Testbed testbed;
+  FileSystem fileSystem;
+  Platform platform;
 
   setUp(() {
-    testbed = Testbed(setup: () {
-      environment = Environment(
-        outputDir: fs.currentDirectory,
-        projectDir: fs.currentDirectory,
-      );
-      fs.file(fs.path.join('packages', 'flutter_tools', 'lib', 'src',
-          'build_system', 'targets', 'assets.dart'))
-        ..createSync(recursive: true);
-      fs.file(fs.path.join('assets', 'foo', 'bar.png'))
-        ..createSync(recursive: true);
-      fs.file('.packages')
-        ..createSync();
-      fs.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync('''
-name: example
-
-flutter:
-  assets:
-    - assets/foo/bar.png
-''');
-    });
-  });
-
-  test('Copies files to correct asset directory', () => testbed.run(() async {
-    await buildSystem.build(const CopyAssets(), environment);
-
-    expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'AssetManifest.json')).existsSync(), true);
-    expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'FontManifest.json')).existsSync(), true);
-    expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'LICENSE')).existsSync(), true);
-    expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets', 'foo', 'bar.png')).existsSync(), true);
-  }));
-
-  test('Does not leave stale files in build directory', () => testbed.run(() async {
-    await buildSystem.build(const CopyAssets(), environment);
-    final File assetFile = fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets', 'foo', 'bar.png'));
-
-    expect(assetFile.existsSync(), true);
-    // Modify manifest to remove asset.
-    fs.file('pubspec.yaml')
+    platform = FakePlatform();
+    fileSystem = MemoryFileSystem.test();
+    environment = Environment.test(
+      fileSystem.currentDirectory,
+      processManager: FakeProcessManager.any(),
+      artifacts: MockArtifacts(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    fileSystem.file(environment.buildDir.childFile('app.dill')).createSync(recursive: true);
+    fileSystem.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
+      .createSync(recursive: true);
+    fileSystem.file('assets/foo/bar.png')
+      .createSync(recursive: true);
+    fileSystem.file('assets/wildcard/#bar.png')
+      .createSync(recursive: true);
+    fileSystem.file('.packages')
+      .createSync();
+    fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('''
 name: example
 
 flutter:
+  assets:
+    - assets/foo/bar.png
+    - assets/wildcard/
 ''');
-    await buildSystem.build(const CopyAssets(), environment);
+  });
 
-    expect(assetFile.existsSync(), false);
-  }));
+  testUsingContext('includes LICENSE file inputs in dependencies', () async {
+    fileSystem.file('.packages')
+      .writeAsStringSync('foo:file:///bar/lib');
+    fileSystem.file('bar/LICENSE')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('THIS IS A LICENSE');
 
-  test('FlutterPlugins updates required files as needed', () => testbed.run(() async {
-    fs.file('pubspec.yaml')
-      ..writeAsStringSync('name: foo\ndependencies:\n  foo: any\n');
+    await const CopyAssets().build(environment);
 
-    await const FlutterPlugins().build(Environment(
-      outputDir: fs.currentDirectory,
-      projectDir: fs.currentDirectory,
-    ));
+    final File depfile = environment.buildDir.childFile('flutter_assets.d');
 
-    expect(fs.file('.flutter-plugins').existsSync(), true);
-  }));
+    expect(depfile, exists);
+
+    final DepfileService depfileService = DepfileService(
+      logger: null,
+      fileSystem: fileSystem,
+      platform: platform,
+    );
+    final Depfile dependencies = depfileService.parse(depfile);
+
+    expect(
+      dependencies.inputs.firstWhere((File file) => file.path == '/bar/LICENSE', orElse: () => null),
+      isNotNull,
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => platform,
+  });
+
+  testUsingContext('Copies files to correct asset directory', () async {
+    await const CopyAssets().build(environment);
+
+    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/AssetManifest.json'), exists);
+    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/FontManifest.json'), exists);
+    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/LICENSE'), exists);
+    // See https://github.com/flutter/flutter/issues/35293
+    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/foo/bar.png'), exists);
+    // See https://github.com/flutter/flutter/issues/46163
+    expect(fileSystem.file('${environment.buildDir.path}/flutter_assets/assets/wildcard/%23bar.png'), exists);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => platform,
+  });
 }
+
+class MockArtifacts extends Mock implements Artifacts {}

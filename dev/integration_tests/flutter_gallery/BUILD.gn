@@ -1,0 +1,45 @@
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(is_fuchsia)
+
+import("//topaz/runtime/flutter_runner/flutter_app.gni")
+
+flutter_app("flutter_gallery") {
+  package_name = "flutter_gallery"
+  main_dart = "lib/main.dart"
+
+  manifest = "pubspec.yaml"
+
+  disable_analysis = true
+
+  meta = [
+    {
+      path = rebase_path("meta/flutter_gallery.cmx")
+      dest = "flutter_gallery.cmx"
+    },
+  ]
+
+  deps = [
+    "../../packages/flutter",
+    "//third_party/dart-pkg/pub/charcode",
+    "//third_party/dart-pkg/pub/collection",
+    "//third_party/dart-pkg/pub/connectivity",
+    "//third_party/dart-pkg/pub/cupertino_icons",
+    "//third_party/dart-pkg/pub/device_info",
+    "//third_party/dart-pkg/pub/flutter_gallery_assets",
+    "//third_party/dart-pkg/pub/meta",
+    "//third_party/dart-pkg/pub/path",
+    "//third_party/dart-pkg/pub/scoped_model",
+    "//third_party/dart-pkg/pub/shrine_images",
+    "//third_party/dart-pkg/pub/source_span",
+    "//third_party/dart-pkg/pub/string_scanner",
+    "//third_party/dart-pkg/pub/typed_data",
+    "//third_party/dart-pkg/pub/url_launcher",
+    "//third_party/dart-pkg/pub/vector_math",
+    "//third_party/dart-pkg/pub/video_player",
+    "//third_party/dart/third_party/pkg/intl",
+  ]
+
+}

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -57,9 +57,8 @@ void main() {
     expect(find.text('header'), findsOneWidget);
   });
 
-  testWidgets('Drawer dismiss barrier has label on iOS', (WidgetTester tester) async {
+  testWidgets('Drawer dismiss barrier has label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -80,10 +79,9 @@ void main() {
     ));
 
     semantics.dispose();
-    debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Drawer dismiss barrier has no label on Android', (WidgetTester tester) async {
+  testWidgets('Drawer dismiss barrier has no label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       const MaterialApp(
@@ -105,7 +103,7 @@ void main() {
     )));
 
     semantics.dispose();
-  });
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('Scaffold drawerScrimColor', (WidgetTester tester) async {
     // The scrim is a Container within a Semantics node labeled "Dismiss",
@@ -116,10 +114,8 @@ void main() {
           of: find.descendant(
             of: find.byType(DrawerController),
             matching: find.byWidgetPredicate((Widget widget) {
-              if (widget is! Semantics)
-                return false;
-              final Semantics semantics = widget;
-              return semantics.properties.label == 'Dismiss';
+              return widget is Semantics
+                  && widget.properties.label == 'Dismiss';
             }),
           ),
           matching: find.byType(Container),
@@ -152,9 +148,7 @@ void main() {
     scaffoldKey.currentState.openDrawer();
     await tester.pumpAndSettle();
 
-    BoxDecoration decoration = getScrim().decoration;
-    expect(decoration.color, Colors.black54);
-    expect(decoration.shape, BoxShape.rectangle);
+    expect(getScrim().color, Colors.black54);
 
     await tester.tap(find.byType(Drawer));
     await tester.pumpAndSettle();
@@ -166,12 +160,59 @@ void main() {
     scaffoldKey.currentState.openDrawer();
     await tester.pumpAndSettle();
 
-    decoration = getScrim().decoration;
-    expect(decoration.color, const Color(0xFF323232));
-    expect(decoration.shape, BoxShape.rectangle);
+    expect(getScrim().color, const Color(0xFF323232));
 
     await tester.tap(find.byType(Drawer));
     await tester.pumpAndSettle();
     expect(find.byType(Drawer), findsNothing);
+  });
+
+  testWidgets('Open/close drawers by flinging', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          drawer: Drawer(
+            child: Container(
+              child: const Text('start drawer'),
+            ),
+          ),
+          endDrawer: Drawer(
+            child: Container(
+              child: const Text('end drawer'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // In the beginning, drawers are closed
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    expect(state.isDrawerOpen, equals(false));
+    expect(state.isEndDrawerOpen, equals(false));
+    final Size size = tester.getSize(find.byType(Scaffold));
+
+    // A fling from the left opens the start drawer
+    await tester.flingFrom(Offset(0, size.height / 2), const Offset(80, 0), 500);
+    await tester.pumpAndSettle();
+    expect(state.isDrawerOpen, equals(true));
+    expect(state.isEndDrawerOpen, equals(false));
+
+    // Now, a fling from the right closes the drawer
+    await tester.flingFrom(Offset(size.width - 1, size.height / 2), const Offset(-80, 0), 500);
+    await tester.pumpAndSettle();
+    expect(state.isDrawerOpen, equals(false));
+    expect(state.isEndDrawerOpen, equals(false));
+
+    // Another fling from the right opens the end drawer
+    await tester.flingFrom(Offset(size.width - 1, size.height / 2), const Offset(-80, 0), 500);
+    await tester.pumpAndSettle();
+    expect(state.isDrawerOpen, equals(false));
+    expect(state.isEndDrawerOpen, equals(true));
+
+    // And a fling from the left closes it
+    await tester.flingFrom( Offset(0, size.height / 2), const Offset(80, 0), 500);
+    await tester.pumpAndSettle();
+    expect(state.isDrawerOpen, equals(false));
+    expect(state.isEndDrawerOpen, equals(false));
   });
 }

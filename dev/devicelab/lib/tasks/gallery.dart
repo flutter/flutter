@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,7 +26,7 @@ class GalleryTransitionTest {
     await device.unlock();
     final String deviceId = device.deviceId;
     final Directory galleryDirectory =
-        dir('${flutterDirectory.path}/examples/flutter_gallery');
+        dir('${flutterDirectory.path}/dev/integration_tests/flutter_gallery');
     await inDirectory<void>(galleryDirectory, () async {
       await flutter('packages', options: <String>['get']);
 
@@ -46,16 +46,17 @@ class GalleryTransitionTest {
 
     // Route paths contains slashes, which Firebase doesn't accept in keys, so we
     // remove them.
-    final Map<String, dynamic> original = Map<String, dynamic>.from(
-        json.decode(
-            file('${galleryDirectory.path}/build/transition_durations.timeline.json').readAsStringSync()
-        ));
+    final Map<String, dynamic> original = json.decode(
+      file('${galleryDirectory.path}/build/transition_durations.timeline.json').readAsStringSync(),
+    ) as Map<String, dynamic>;
     final Map<String, List<int>> transitions = <String, List<int>>{};
-    for (String key in original.keys) {
-      transitions[key.replaceAll('/', '')] = List<int>.from(original[key]);
+    for (final String key in original.keys) {
+      transitions[key.replaceAll('/', '')] = List<int>.from(original[key] as List<dynamic>);
     }
 
-    final Map<String, dynamic> summary = json.decode(file('${galleryDirectory.path}/build/transitions.timeline_summary.json').readAsStringSync());
+    final Map<String, dynamic> summary = json.decode(
+      file('${galleryDirectory.path}/build/transitions.timeline_summary.json').readAsStringSync(),
+    ) as Map<String, dynamic>;
 
     final Map<String, dynamic> data = <String, dynamic>{
       'transitions': transitions,
@@ -67,12 +68,10 @@ class GalleryTransitionTest {
       'missed_transition_count',
       'average_frame_build_time_millis',
       'worst_frame_build_time_millis',
-      'missed_frame_build_budget_count',
       '90th_percentile_frame_build_time_millis',
       '99th_percentile_frame_build_time_millis',
       'average_frame_rasterizer_time_millis',
       'worst_frame_rasterizer_time_millis',
-      'missed_frame_rasterizer_budget_count',
       '90th_percentile_frame_rasterizer_time_millis',
       '99th_percentile_frame_rasterizer_time_millis',
     ]);

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -36,12 +36,29 @@ void main() {
   });
 
   test('newly added code executes during hot reload', () async {
-    await _flutter.run();
-    _project.uncommentHotReloadPrint();
     final StringBuffer stdout = StringBuffer();
     final StreamSubscription<String> subscription = _flutter.stdout.listen(stdout.writeln);
+    await _flutter.run();
+    _project.uncommentHotReloadPrint();
     try {
       await _flutter.hotReload();
+      expect(stdout.toString(), contains('(((((RELOAD WORKED)))))'));
+    } finally {
+      await subscription.cancel();
+    }
+  });
+
+  test('reloadMethod triggers hot reload behavior', () async {
+    final StringBuffer stdout = StringBuffer();
+    final StreamSubscription<String> subscription = _flutter.stdout.listen(stdout.writeln);
+    await _flutter.run();
+    _project.uncommentHotReloadPrint();
+    try {
+      final String libraryId = _project.buildBreakpointUri.toString();
+      await _flutter.reloadMethod(libraryId: libraryId, classId: 'MyApp');
+      // reloadMethod does not wait for the next frame, to allow scheduling a new
+      // update while the previous update was pending.
+      await Future<void>.delayed(const Duration(seconds: 1));
       expect(stdout.toString(), contains('(((((RELOAD WORKED)))))'));
     } finally {
       await subscription.cancel();
@@ -55,9 +72,7 @@ void main() {
 
   test('breakpoints are hit after hot reload', () async {
     Isolate isolate;
-    await _flutter.run(withDebugger: true, startPaused: true);
     final Completer<void> sawTick1 = Completer<void>();
-    final Completer<void> sawTick3 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage = Completer<void>();
     final StreamSubscription<String> subscription = _flutter.stdout.listen(
       (String line) {
@@ -65,16 +80,13 @@ void main() {
           expect(sawTick1.isCompleted, isFalse);
           sawTick1.complete();
         }
-        if (line.contains('((((TICK 3))))')) {
-          expect(sawTick3.isCompleted, isFalse);
-          sawTick3.complete();
-        }
         if (line.contains('The application is paused in the debugger on a breakpoint.')) {
           expect(sawDebuggerPausedMessage.isCompleted, isFalse);
           sawDebuggerPausedMessage.complete();
         }
       },
     );
+    await _flutter.run(withDebugger: true, startPaused: true);
     await _flutter.resume(); // we start paused so we can set up our TICK 1 listener before the app starts
     unawaited(sawTick1.future.timeout(
       const Duration(seconds: 5),
@@ -95,29 +107,32 @@ void main() {
     );
     bool reloaded = false;
     final Future<void> reloadFuture = _flutter.hotReload().then((void value) { reloaded = true; });
-    await sawTick3.future; // this should happen before it pauses
+    print('waiting for pause...');
     isolate = await _flutter.waitForPause();
     expect(isolate.pauseEvent.kind, equals(EventKind.kPauseBreakpoint));
+    print('waiting for debugger message...');
     await sawDebuggerPausedMessage.future;
     expect(reloaded, isFalse);
+    print('waiting for resume...');
     await _flutter.resume();
+    print('waiting for reload future...');
     await reloadFuture;
     expect(reloaded, isTrue);
     reloaded = false;
+    print('subscription cancel...');
     await subscription.cancel();
   });
 
-  test('hot reload doesn\'t reassemble if paused', () async {
-    await _flutter.run(withDebugger: true);
-    final Completer<void> sawTick2 = Completer<void>();
-    final Completer<void> sawTick3 = Completer<void>();
+  test("hot reload doesn't reassemble if paused", () async {
+    final Completer<void> sawTick1 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage1 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage2 = Completer<void>();
     final StreamSubscription<String> subscription = _flutter.stdout.listen(
       (String line) {
-        if (line.contains('((((TICK 2))))')) {
-          expect(sawTick2.isCompleted, isFalse);
-          sawTick2.complete();
+        print('[LOG]:"$line"');
+        if (line.contains('(((TICK 1)))')) {
+          expect(sawTick1.isCompleted, isFalse);
+          sawTick1.complete();
         }
         if (line.contains('The application is paused in the debugger on a breakpoint.')) {
           expect(sawDebuggerPausedMessage1.isCompleted, isFalse);
@@ -129,13 +144,16 @@ void main() {
         }
       },
     );
+    await _flutter.run(withDebugger: true);
+    await Future<void>.delayed(const Duration(seconds: 1));
+    await sawTick1.future;
     await _flutter.addBreakpoint(
       _project.buildBreakpointUri,
       _project.buildBreakpointLine,
     );
     bool reloaded = false;
+    await Future<void>.delayed(const Duration(seconds: 1));
     final Future<void> reloadFuture = _flutter.hotReload().then((void value) { reloaded = true; });
-    await sawTick2.future; // this should happen before it pauses
     final Isolate isolate = await _flutter.waitForPause();
     expect(isolate.pauseEvent.kind, equals(EventKind.kPauseBreakpoint));
     expect(reloaded, isFalse);
@@ -143,7 +161,6 @@ void main() {
     await reloadFuture; // this is the one where it times out because you're in the debugger
     expect(reloaded, isTrue);
     await _flutter.hotReload(); // now we're already paused
-    expect(sawTick3.isCompleted, isFalse);
     await sawDebuggerPausedMessage2.future; // so we just get told that nothing is going to happen
     await _flutter.resume();
     await subscription.cancel();

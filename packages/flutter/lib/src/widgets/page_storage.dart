@@ -1,6 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
@@ -45,15 +47,11 @@ class _StorageEntryIdentifier {
   bool get isNotEmpty => keys.isNotEmpty;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final _StorageEntryIdentifier typedOther = other;
-    for (int index = 0; index < keys.length; index += 1) {
-      if (keys[index] != typedOther.keys[index])
-        return false;
-    }
-    return true;
+    return other is _StorageEntryIdentifier
+        && listEquals<PageStorageKey<dynamic>>(other.keys, keys);
   }
 
   @override

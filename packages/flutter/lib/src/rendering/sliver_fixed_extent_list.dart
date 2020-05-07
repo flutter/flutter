@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -164,6 +164,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
   @override
   void performLayout() {
+    final SliverConstraints constraints = this.constraints;
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
 
@@ -235,7 +236,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         geometry = SliverGeometry(scrollOffsetCorrection: index * itemExtent);
         return;
       }
-      final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+      final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = indexToLayoutOffset(itemExtent, index);
       assert(childParentData.index == index);
       trailingChildWithLayout ??= child;
@@ -243,7 +244,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
     if (trailingChildWithLayout == null) {
       firstChild.layout(childConstraints);
-      final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData;
+      final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = indexToLayoutOffset(itemExtent, firstIndex);
       trailingChildWithLayout = firstChild;
     }
@@ -263,7 +264,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       }
       trailingChildWithLayout = child;
       assert(child != null);
-      final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+      final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
       assert(childParentData.index == index);
       childParentData.layoutOffset = indexToLayoutOffset(itemExtent, childParentData.index);
     }

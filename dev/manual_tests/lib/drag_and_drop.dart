@@ -1,8 +1,7 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -100,7 +99,7 @@ class ExampleDragSource extends StatelessWidget {
       size *= kHeavyMultiplier;
 
     final Widget contents = DefaultTextStyle(
-      style: Theme.of(context).textTheme.body1,
+      style: Theme.of(context).textTheme.bodyText2,
       textAlign: TextAlign.center,
       child: Dot(
         color: color,
@@ -188,7 +187,7 @@ class MovableBall extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Widget ball = DefaultTextStyle(
-      style: Theme.of(context).primaryTextTheme.body1,
+      style: Theme.of(context).primaryTextTheme.bodyText2,
       textAlign: TextAlign.center,
       child: Dot(
         key: kBallKey,
@@ -297,12 +296,6 @@ class DragAndDropAppState extends State<DragAndDropApp> {
 }
 
 void main() {
-  if (!kIsWeb && Platform.isMacOS) {
-    // TODO(gspencergoog): Update this when TargetPlatform includes macOS. https://github.com/flutter/flutter/issues/31366
-    // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
-    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-  }
-
   runApp(MaterialApp(
     title: 'Drag and Drop Flutter Demo',
     home: DragAndDropApp(),
