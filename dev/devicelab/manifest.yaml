@@ -818,7 +818,7 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux-vm"]
 
-   web_enable_twc:
+  web_enable_twc:
      description: >
        Verifies that track-widget-creation can be enabled and disabled.
      stage: devicelab
