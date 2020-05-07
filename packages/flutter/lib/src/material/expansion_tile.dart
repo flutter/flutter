@@ -42,6 +42,7 @@ class ExpansionTile extends StatefulWidget {
     this.trailing,
     this.initiallyExpanded = false,
     this.maintainState = false,
+    this.tilePadding,
   }) : assert(initiallyExpanded != null),
        assert(maintainState != null),
        super(key: key);
@@ -88,6 +89,15 @@ class ExpansionTile extends StatefulWidget {
   /// When false (default), the children are removed from the tree when the tile is
   /// collapsed and recreated upon expansion.
   final bool maintainState;
+  
+  /// Specifies padding for the [ListTile].
+  ///
+  /// Analogous to [ListTile.contentPadding], this property defines the insets for
+  /// the [leading], [title], [subtitle] and [trailing] widgets. It does not inset
+  /// the expanded [children] widgets.
+  ///
+  /// When the value is null, the tile's padding is `EdgeInsets.symmetric(horizontal: 16.0)`.
+  final EdgeInsetsGeometry tilePadding;
 
   @override
   _ExpansionTileState createState() => _ExpansionTileState();
@@ -174,6 +184,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
             textColor: _headerColor.value,
             child: ListTile(
               onTap: _handleTap,
+              contentPadding: widget.tilePadding,
               leading: widget.leading,
               title: widget.title,
               subtitle: widget.subtitle,
@@ -197,16 +208,14 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   @override
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
-    _borderColorTween
-      ..end = theme.dividerColor;
+    _borderColorTween.end = theme.dividerColor;
     _headerColorTween
       ..begin = theme.textTheme.subtitle1.color
       ..end = theme.accentColor;
     _iconColorTween
       ..begin = theme.unselectedWidgetColor
       ..end = theme.accentColor;
-    _backgroundColorTween
-      ..end = widget.backgroundColor;
+    _backgroundColorTween.end = widget.backgroundColor;
     super.didChangeDependencies();
   }
 
