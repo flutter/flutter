@@ -25,6 +25,18 @@
 
 namespace flutter {
 
+/**
+ * A bridge connecting the platform agnostic shell and the iOS embedding.
+ *
+ * The shell provides and requests for UI related data and this PlatformView subclass fulfills
+ * it with iOS specific capabilities. As an example, the iOS embedding (the `FlutterEngine` and the
+ * `FlutterViewController`) sends pointer data to the shell and receives the shell's request for a
+ * Skia GrContext and supplies it.
+ *
+ * Despite the name "view", this class is unrelated to UIViews on iOS and doesn't have the same
+ * lifecycle. It's a long lived bridge owned by the `FlutterEngine` and can be attached and
+ * detached sequentially to multiple `FlutterViewController`s and `FlutterView`s.
+ */
 class PlatformViewIOS final : public PlatformView {
  public:
   explicit PlatformViewIOS(PlatformView::Delegate& delegate,
@@ -33,20 +45,42 @@ class PlatformViewIOS final : public PlatformView {
 
   ~PlatformViewIOS() override;
 
+  /**
+   * The `PlatformMessageRouter` is the iOS bridge connecting the shell's
+   * platform agnostic `PlatformMessage` to iOS's channel message handler.
+   */
   PlatformMessageRouter& GetPlatformMessageRouter();
 
+  /**
+   * Returns the `FlutterViewController` currently attached to the `FlutterEngine` owning
+   * this PlatformViewIOS.
+   */
   fml::WeakPtr<FlutterViewController> GetOwnerViewController() const;
+
+  /**
+   * Updates the `FlutterViewController` currently attached to the `FlutterEngine` owning
+   * this PlatformViewIOS. This should be updated when the `FlutterEngine`
+   * is given a new `FlutterViewController`.
+   */
   void SetOwnerViewController(fml::WeakPtr<FlutterViewController> owner_controller);
+
+  /**
+   * Called one time per `FlutterViewController` when the `FlutterViewController`'s
+   * UIView is first loaded.
+   *
+   * Can be used to perform late initialization after `FlutterViewController`'s
+   * init.
+   */
   void attachView();
 
+  /**
+   * Called through when an external texture such as video or camera is
+   * given to the `FlutterEngine` or `FlutterViewController`.
+   */
   void RegisterExternalTexture(int64_t id, NSObject<FlutterTexture>* texture);
 
   // |PlatformView|
   PointerDataDispatcherMaker GetDispatcherMaker() override;
-
-  fml::scoped_nsprotocol<FlutterTextInputPlugin*> GetTextInputPlugin() const;
-
-  void SetTextInputPlugin(fml::scoped_nsprotocol<FlutterTextInputPlugin*> plugin);
 
   // |PlatformView|
   void SetSemanticsEnabled(bool enabled) override;
