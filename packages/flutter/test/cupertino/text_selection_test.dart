@@ -221,7 +221,7 @@ void main() {
     expect(find.text('Paste'), findsOneWidget);
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsOneWidget);
-  });
+  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   group('Text selection menu overflow (iOS)', () {
     testWidgets('All menu items show when they fit.', (WidgetTester tester) async {
