@@ -103,10 +103,8 @@ public class FlutterJNI {
       @NonNull String[] args,
       @Nullable String bundlePath,
       @NonNull String appStoragePath,
-      @NonNull String engineCachesPath);
-
-  // TODO(mattcarroll): add javadocs
-  public static native void nativeRecordStartTimestamp(long initTimeMillis);
+      @NonNull String engineCachesPath,
+      long initTimeMillis);
 
   // TODO(mattcarroll): add javadocs
   @UiThread

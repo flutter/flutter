@@ -25,7 +25,6 @@
 #include "flutter/runtime/dart_isolate.h"
 #include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/runtime/ptrace_ios.h"
-#include "flutter/runtime/start_up.h"
 #include "third_party/dart/runtime/include/bin/dart_io_api.h"
 #include "third_party/skia/include/core/SkExecutor.h"
 #include "third_party/tonic/converter/dart_converter.h"
@@ -426,14 +425,15 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
     // the very first frame gives us a good idea about Flutter's startup time.
     // Use a duration event so about:tracing will consider this event when
     // deciding the earliest event to use as time 0.
-    if (engine_main_enter_ts != 0) {
-      Dart_TimelineEvent("FlutterEngineMainEnter",  // label
-                         engine_main_enter_ts,      // timestamp0
-                         Dart_TimelineGetMicros(),  // timestamp1_or_async_id
-                         Dart_Timeline_Event_Duration,  // event type
-                         0,                             // argument_count
-                         nullptr,                       // argument_names
-                         nullptr                        // argument_values
+    if (settings_.engine_start_timestamp.count()) {
+      Dart_TimelineEvent(
+          "FlutterEngineMainEnter",                  // label
+          settings_.engine_start_timestamp.count(),  // timestamp0
+          Dart_TimelineGetMicros(),                  // timestamp1_or_async_id
+          Dart_Timeline_Event_Duration,              // event type
+          0,                                         // argument_count
+          nullptr,                                   // argument_names
+          nullptr                                    // argument_values
       );
     }
   }

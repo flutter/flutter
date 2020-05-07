@@ -78,6 +78,7 @@ public class FlutterLoader {
   private boolean initialized = false;
   @Nullable private ResourceExtractor resourceExtractor;
   @Nullable private Settings settings;
+  private long initStartTimestampMillis;
 
   /**
    * Starts initialization of the native system.
@@ -113,8 +114,7 @@ public class FlutterLoader {
 
     this.settings = settings;
 
-    long initStartTimestampMillis = SystemClock.uptimeMillis();
-    initConfig(applicationContext);
+    initStartTimestampMillis = SystemClock.uptimeMillis();
     initResources(applicationContext);
 
     System.loadLibrary("flutter");
@@ -122,14 +122,6 @@ public class FlutterLoader {
     VsyncWaiter.getInstance(
             (WindowManager) applicationContext.getSystemService(Context.WINDOW_SERVICE))
         .init();
-
-    // We record the initialization time using SystemClock because at the start of the
-    // initialization we have not yet loaded the native library to call into dart_tools_api.h.
-    // To get Timeline timestamp of the start of initialization we simply subtract the delta
-    // from the Timeline timestamp at the current moment (the assumption is that the overhead
-    // of the JNI call is negligible).
-    long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
-    FlutterJNI.nativeRecordStartTimestamp(initTimeMillis);
   }
 
   /**
@@ -202,12 +194,14 @@ public class FlutterLoader {
 
       String appStoragePath = PathUtils.getFilesDir(applicationContext);
       String engineCachesPath = PathUtils.getCacheDirectory(applicationContext);
+      long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
       FlutterJNI.nativeInit(
           applicationContext,
           shellArgs.toArray(new String[0]),
           kernelPath,
           appStoragePath,
-          engineCachesPath);
+          engineCachesPath,
+          initTimeMillis);
 
       initialized = true;
     } catch (Exception e) {

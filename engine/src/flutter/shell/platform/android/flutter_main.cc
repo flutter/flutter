@@ -18,7 +18,6 @@
 #include "flutter/fml/size.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/runtime/dart_vm.h"
-#include "flutter/runtime/start_up.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
@@ -62,7 +61,8 @@ void FlutterMain::Init(JNIEnv* env,
                        jobjectArray jargs,
                        jstring kernelPath,
                        jstring appStoragePath,
-                       jstring engineCachesPath) {
+                       jstring engineCachesPath,
+                       jlong initTimeMillis) {
   std::vector<std::string> args;
   args.push_back("flutter");
   for (auto& arg : fml::jni::StringArrayToVector(env, jargs)) {
@@ -71,6 +71,10 @@ void FlutterMain::Init(JNIEnv* env,
   auto command_line = fml::CommandLineFromIterators(args.begin(), args.end());
 
   auto settings = SettingsFromCommandLine(command_line);
+
+  int64_t init_time_micros = initTimeMillis * 1000;
+  settings.engine_start_timestamp =
+      std::chrono::microseconds(Dart_TimelineGetMicros() - init_time_micros);
 
   // Restore the callback cache.
   // TODO(chinmaygarde): Route all cache file access through FML and remove this
@@ -151,26 +155,13 @@ void FlutterMain::SetupObservatoryUriCallback(JNIEnv* env) {
       });
 }
 
-static void RecordStartTimestamp(JNIEnv* env,
-                                 jclass jcaller,
-                                 jlong initTimeMillis) {
-  int64_t initTimeMicros =
-      static_cast<int64_t>(initTimeMillis) * static_cast<int64_t>(1000);
-  flutter::engine_main_enter_ts = Dart_TimelineGetMicros() - initTimeMicros;
-}
-
 bool FlutterMain::Register(JNIEnv* env) {
   static const JNINativeMethod methods[] = {
       {
           .name = "nativeInit",
           .signature = "(Landroid/content/Context;[Ljava/lang/String;Ljava/"
-                       "lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+                       "lang/String;Ljava/lang/String;Ljava/lang/String;J)V",
           .fnPtr = reinterpret_cast<void*>(&Init),
-      },
-      {
-          .name = "nativeRecordStartTimestamp",
-          .signature = "(J)V",
-          .fnPtr = reinterpret_cast<void*>(&RecordStartTimestamp),
       },
   };
 
