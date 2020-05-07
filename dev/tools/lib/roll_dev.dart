@@ -159,6 +159,7 @@ ArgResults parseArguments(ArgParser argParser, List<String> args) {
   );
   argParser.addFlag(
     kForce,
+    abbr: 'f',
     help: 'Force push. Necessary when the previous release had cherry-picks.',
     negatable: false,
   );
