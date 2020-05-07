@@ -39,7 +39,7 @@ typedef struct _FlBinaryMessengerResponseHandle FlBinaryMessengerResponseHandle;
  * @messenger: a #FlBinaryMessenger
  * @channel: channel message received on
  * @message: message content received from Dart
- * @response_handle: a handle to respond to the message with
+ * @response_handle: (transfer full): a handle to respond to the message with
  * @user_data: (closure): data provided when registering this callback
  *
  * Function called when platform messages are received. The receiver must
@@ -74,7 +74,8 @@ void fl_binary_messenger_set_message_handler_on_channel(
 /**
  * fl_binary_messenger_send_response:
  * @binary_messenger: a #FlBinaryMessenger
- * @response_handle: handle that was provided in a #FlBinaryMessengerCallback
+ * @response_handle: (transfer full): handle that was provided in a
+ * #FlBinaryMessengerCallback
  * @response: (allow-none): response to send or %NULL for an empty response
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
  * to ignore
