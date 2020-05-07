@@ -109,13 +109,13 @@ void main(List<String> arguments) {
     'gen-inputs-and-outputs-list',
     valueHelp: 'path-to-output-directory',
     help: 'When specified, the tool generates a JSON file containing the '
-      'tool\'s inputs and outputs titled gen_l10n_inputs_and_outputs.json.'
+      'tool\'s inputs and outputs named gen_l10n_inputs_and_outputs.json.'
       '\n\n'
       'This can be useful for keeping track of which files of the Flutter '
       'project were used when generating the latest set of localizations. '
       'For example, the Flutter tool\'s build system uses this file to '
       'keep track of when to call gen_l10n during hot reload.\n\n'
-      'This option takes in the directory where the JSON file will be '
+      'The value of this option is the directory where the JSON file will be '
       'generated.'
       '\n\n'
       'When null, the JSON file will not be generated.'
