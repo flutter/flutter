@@ -63,14 +63,6 @@ class FlutterDevice {
          packagesPath: globalPackagesPath,
        );
 
-
-  static String getCachedDillPath({@required bool trackWidgetCreation}) {
-    return getKernelPathForTransformerOptions(
-      globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
-      trackWidgetCreation: trackWidgetCreation,
-    );
-  }
-
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
     Device device, {
@@ -107,7 +99,7 @@ class FlutterDevice {
         compilerMessageConsumer:
           (String message, {bool emphasis, TerminalColor color, }) =>
             globals.printTrace(message),
-        initializeFromDill: getCachedDillPath(
+        initializeFromDill: getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
         ),
         targetModel: TargetModel.dartdevc,
@@ -134,7 +126,7 @@ class FlutterDevice {
         targetModel: targetModel,
         experimentalFlags: experimentalFlags,
         dartDefines: buildInfo.dartDefines,
-        initializeFromDill: getCachedDillPath(
+        initializeFromDill: getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
         ),
         packagesPath: globalPackagesPath,
@@ -1195,7 +1187,7 @@ abstract class ResidentRunner {
     if (_dillOutputPath == null && artifactDirectory.existsSync()) {
       final File outputDill = globals.fs.file(dillOutputPath);
       if (outputDill.existsSync()) {
-        outputDill.copySync(FlutterDevice.getCachedDillPath(
+        outputDill.copySync(getDefaultCachedKernelPath(
           trackWidgetCreation: trackWidgetCreation,
         ));
       }
