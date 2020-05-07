@@ -465,14 +465,14 @@ void main() {
     final Map<String, dynamic> jsonResult = json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
     expect(jsonResult.containsKey('inputs'), isTrue);
     final List<dynamic> inputList = jsonResult['inputs'] as List<dynamic>;
-    expect(inputList, contains(fs.directory(path.join('lib', 'l10n', 'app_en.arb')).absolute.path));
-    expect(inputList, contains(fs.directory(path.join('lib', 'l10n', 'app_es.arb')).absolute.path));
+    expect(inputList, contains(fs.path.absolute('lib', 'l10n', 'app_en.arb')));
+    expect(inputList, contains(fs.path.absolute('lib', 'l10n', 'app_es.arb')));
 
     expect(jsonResult.containsKey('outputs'), isTrue);
     final List<dynamic> outputList = jsonResult['outputs'] as List<dynamic>;
-    expect(outputList, contains(fs.directory(path.join('lib', 'l10n', 'output-localization-file.dart')).absolute.path));
-    expect(outputList, contains(fs.directory(path.join('lib', 'l10n', 'output-localization-file_en.dart')).absolute.path));
-    expect(outputList, contains(fs.directory(path.join('lib', 'l10n', 'output-localization-file_es.dart')).absolute.path));
+    expect(outputList, contains(fs.path.absolute('lib', 'l10n', 'output-localization-file.dart')));
+    expect(outputList, contains(fs.path.absolute('lib', 'l10n', 'output-localization-file_en.dart')));
+    expect(outputList, contains(fs.path.absolute('lib', 'l10n', 'output-localization-file_es.dart')));
   });
 
   test('setting both a headerString and a headerFile should fail', () {
