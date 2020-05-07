@@ -465,14 +465,14 @@ void main() {
     final Map<String, dynamic> jsonResult = json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
     expect(jsonResult.containsKey('inputs'), isTrue);
     final List<dynamic> inputList = jsonResult['inputs'] as List<dynamic>;
-    expect(inputList, contains('/lib/l10n/app_en.arb'));
-    expect(inputList, contains('/lib/l10n/app_es.arb'));
+    expect(inputList, contains(path.join('/lib', 'l10n', 'app_en.arb')));
+    expect(inputList, contains(path.join('/lib', 'l10n', 'app_es.arb')));
 
     expect(jsonResult.containsKey('outputs'), isTrue);
     final List<dynamic> outputList = jsonResult['outputs'] as List<dynamic>;
-    expect(outputList, contains('/lib/l10n/output-localization-file.dart'));
-    expect(outputList, contains('/lib/l10n/output-localization-file_en.dart'));
-    expect(outputList, contains('/lib/l10n/output-localization-file_es.dart'));
+    expect(outputList, contains(path.join('/lib', 'l10n', 'output-localization-file.dart')));
+    expect(outputList, contains(path.join('/lib', 'l10n', 'output-localization-file_en.dart')));
+    expect(outputList, contains(path.join('/lib', 'l10n', 'output-localization-file_es.dart')));
   });
 
   test('setting both a headerString and a headerFile should fail', () {
@@ -749,15 +749,9 @@ void main() {
         fail('Setting language and locales should not fail: \n${e.message}');
       }
 
-      if (Platform.isWindows) {
-        expect(generator.arbPathStrings.first, r'lib\l10n\app_en.arb');
-        expect(generator.arbPathStrings.elementAt(1), r'lib\l10n\app_es.arb');
-        expect(generator.arbPathStrings.elementAt(2), r'lib\l10n\app_zh.arb');
-      } else {
-        expect(generator.arbPathStrings.first, 'lib/l10n/app_en.arb');
-        expect(generator.arbPathStrings.elementAt(1), 'lib/l10n/app_es.arb');
-        expect(generator.arbPathStrings.elementAt(2), 'lib/l10n/app_zh.arb');
-      }
+      expect(generator.arbPathStrings.first, path.join('lib', 'l10n', 'app_en.arb'));
+      expect(generator.arbPathStrings.elementAt(1), path.join('lib', 'l10n', 'app_es.arb'));
+      expect(generator.arbPathStrings.elementAt(2), path.join('lib', 'l10n', 'app_zh.arb'));
     });
 
     test('correctly parses @@locale property in arb file', () {
