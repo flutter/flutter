@@ -42,7 +42,7 @@ void main() {
     const BorderSide side = BorderSide(width: 4.0);
     expect(const BeveledRectangleBorder(side: side).getOuterPath(rect1), looksLikeRect1);
     expect(const BeveledRectangleBorder(side: side).getInnerPath(rect1), looksLikeInnerPath);
-  }, skip: isBrowser);
+  });
 
   test('BeveledRectangleBorder non-zero BorderRadius', () {
     const Rect rect = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
@@ -55,6 +55,6 @@ void main() {
     );
     expect(border.getOuterPath(rect), looksLikeRect);
     expect(border.getInnerPath(rect), looksLikeRect);
-  }, skip: isBrowser);
+  });
 
 }

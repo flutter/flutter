@@ -125,8 +125,10 @@ class _TaskRunner {
 
       _completer.complete(result);
       return result;
-    } on TimeoutException catch (_) {
+    } on TimeoutException catch (err, stackTrace) {
       print('Task timed out in framework.dart after $taskTimeout.');
+      print(err);
+      print(stackTrace);
       return TaskResult.failure('Task timed out after $taskTimeout');
     } finally {
       print('Cleaning up after task...');
