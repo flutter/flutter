@@ -5,9 +5,9 @@
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import 'logger.dart';
+import 'platform.dart';
 import 'terminal.dart';
 
 // ignore_for_file: non_constant_identifier_names

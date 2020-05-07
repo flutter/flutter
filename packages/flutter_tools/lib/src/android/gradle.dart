@@ -8,7 +8,6 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart' as xml;
 
-import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -23,7 +22,6 @@ import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import 'android_sdk.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
 
@@ -149,7 +147,7 @@ Future<void> checkGradleDependencies() async {
     workingDirectory: flutterProject.android.hostAppGradleRoot.path,
     environment: gradleEnvironment,
   );
-  androidSdk?.reinitialize();
+  globals.androidSdk?.reinitialize();
   progress.stop();
 }
 
@@ -229,7 +227,7 @@ Future<void> buildGradleApp({
   assert(target != null);
   assert(isBuildingBundle != null);
   assert(localGradleErrors != null);
-  assert(androidSdk != null);
+  assert(globals.androidSdk != null);
 
   if (!project.android.isUsingGradle) {
     _exitWithProjectNotUsingGradleMessage();
@@ -520,7 +518,7 @@ Future<void> buildGradleAar({
   assert(target != null);
   assert(androidBuildInfo != null);
   assert(outputDirectory != null);
-  assert(androidSdk != null);
+  assert(globals.androidSdk != null);
 
   final FlutterManifest manifest = project.manifest;
   if (!manifest.isModule && !manifest.isPlugin) {
@@ -636,6 +634,8 @@ void printHowToConsumeAar({
   @required Set<String> buildModes,
   @required String androidPackage,
   @required Directory repoDirectory,
+  @required Logger logger,
+  @required FileSystem fileSystem,
   String buildNumber,
 }) {
   assert(buildModes != null && buildModes.isNotEmpty);
@@ -643,18 +643,18 @@ void printHowToConsumeAar({
   assert(repoDirectory != null);
   buildNumber ??= '1.0';
 
-  globals.printStatus('''
-
-${globals.terminal.bolden('Consuming the Module')}
-  1. Open ${globals.fs.path.join('<host>', 'app', 'build.gradle')}
+  logger.printStatus('\nConsuming the Module', emphasis: true);
+  logger.printStatus('''
+  1. Open ${fileSystem.path.join('<host>', 'app', 'build.gradle')}
   2. Ensure you have the repositories configured, otherwise add them:
 
+      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "storage.googleapis.com"
       repositories {
         maven {
             url '${repoDirectory.path}'
         }
         maven {
-            url 'https://storage.googleapis.com/download.flutter.io'
+            url 'https://\$storageUrl/download.flutter.io'
         }
       }
 
@@ -663,16 +663,16 @@ ${globals.terminal.bolden('Consuming the Module')}
     dependencies {''');
 
   for (final String buildMode in buildModes) {
-    globals.printStatus("""
+    logger.printStatus("""
       ${buildMode}Implementation '$androidPackage:flutter_$buildMode:$buildNumber'""");
   }
 
-  globals.printStatus('''
+  logger.printStatus('''
     }
 ''');
 
   if (buildModes.contains('profile')) {
-    globals.printStatus('''
+    logger.printStatus('''
 
   4. Add the `profile` build type:
 
@@ -686,7 +686,7 @@ ${globals.terminal.bolden('Consuming the Module')}
 ''');
   }
 
-  globals.printStatus('To learn more, visit https://flutter.dev/go/build-aar');
+  logger.printStatus('To learn more, visit https://flutter.dev/go/build-aar');
 }
 
 String _hex(List<int> bytes) {

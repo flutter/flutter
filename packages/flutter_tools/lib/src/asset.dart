@@ -74,7 +74,8 @@ class ManifestAssetBundle implements AssetBundle {
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
 
   // If an asset corresponds to a wildcard directory, then it may have been
-  // updated without changes to the manifest.
+  // updated without changes to the manifest. These are only tracked for
+  // the current project.
   final Map<Uri, Directory> _wildcardDirectories = <Uri, Directory>{};
 
   final LicenseCollector licenseCollector = LicenseCollector(fileSystem: globals.fs);
@@ -203,7 +204,8 @@ class ManifestAssetBundle implements AssetBundle {
         final Map<_Asset, List<_Asset>> packageAssets = _parseAssets(
           packageConfig,
           packageFlutterManifest,
-          wildcardDirectories,
+          // Do not track wildcard directories for dependencies.
+          <Uri>[],
           packageBasePath,
           packageName: package.name,
         );

@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../base/bot_detector.dart';
@@ -14,6 +13,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../reporting/reporting.dart';

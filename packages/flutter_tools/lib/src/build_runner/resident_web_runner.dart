@@ -191,6 +191,11 @@ abstract class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
+  Future<List<FlutterView>> listFlutterViews() async {
+    return <FlutterView>[];
+  }
+
+  @override
   Future<void> debugDumpApp() async {
     try {
       await _vmService
@@ -714,6 +719,11 @@ class _ResidentWebRunner extends ResidentWebRunner {
       }
     }
     if (websocketUri != null) {
+      if (debuggingOptions.vmserviceOutFile != null) {
+        globals.fs.file(debuggingOptions.vmserviceOutFile)
+          ..createSync(recursive: true)
+          ..writeAsStringSync(websocketUri.toString());
+      }
       globals.printStatus('Debug service listening on $websocketUri');
     }
     appStartedCompleter?.complete();

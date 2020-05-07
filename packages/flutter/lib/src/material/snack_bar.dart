@@ -18,9 +18,9 @@ const double _singleLineVerticalPadding = 14.0;
 
 // TODO(ianh): We should check if the given text and actions are going to fit on
 // one line or not, and if they are, use the single-line layout, and if not, use
-// the multiline layout. See link above.
-
-// TODO(ianh): Implement the Tablet version of snackbar if we're "on a tablet".
+// the multiline layout, https://github.com/flutter/flutter/issues/32782
+// See https://material.io/components/snackbars#specs, 'Longer Action Text' does
+// not match spec.
 
 const Duration _snackBarTransitionDuration = Duration(milliseconds: 250);
 const Duration _snackBarDisplayDuration = Duration(milliseconds: 4000);

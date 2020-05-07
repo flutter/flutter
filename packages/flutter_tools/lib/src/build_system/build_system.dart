@@ -8,13 +8,13 @@ import 'package:async/async.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';

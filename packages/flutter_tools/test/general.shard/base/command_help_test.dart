@@ -4,9 +4,9 @@
 
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart' show AnsiTerminal, OutputPreferences;
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/mocks.dart' show MockStdio;

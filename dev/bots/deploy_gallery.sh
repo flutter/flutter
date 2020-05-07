@@ -73,15 +73,15 @@ elif [[ "$OS" == "darwin" ]]; then
       exit 1
     fi
 
-    if [[ ! -d "build/ios/iphoneos/Runner.app/Frameworks/App.framework/flutter_assets" ]]; then
+    if [[ ! -d "build/ios/iphoneos/Flutter Gallery.app/Frameworks/App.framework/flutter_assets" ]]; then
       echo "Error: flutter_assets not assembled"
       exit 1
     fi
 
     if [[
-      -d "build/ios/iphoneos/Runner.app/Frameworks/App.framework/flutter_assets/isolate_snapshot_data" ||
-      -d "build/ios/iphoneos/Runner.app/Frameworks/App.framework/flutter_assets/kernel_blob.bin" ||
-      -d "build/ios/iphoneos/Runner.app/Frameworks/App.framework/flutter_assets/vm_snapshot_data"
+      -d "build/ios/iphoneos/Flutter Gallery.app/Frameworks/App.framework/flutter_assets/isolate_snapshot_data" ||
+      -d "build/ios/iphoneos/Flutter Gallery.app/Frameworks/App.framework/flutter_assets/kernel_blob.bin" ||
+      -d "build/ios/iphoneos/Flutter Gallery.app/Frameworks/App.framework/flutter_assets/vm_snapshot_data"
      ]]; then
       echo "Error: compiled debug version of app with --release flag"
       exit 1

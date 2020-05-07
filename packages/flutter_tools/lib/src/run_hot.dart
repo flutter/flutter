@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
-import 'package:platform/platform.dart';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
@@ -13,6 +12,7 @@ import 'base/async_guard.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'bundle.dart';
@@ -198,7 +198,8 @@ class HotRunner extends ResidentRunner {
     }
 
     for (final FlutterDevice device in flutterDevices) {
-      for (final FlutterView view in device.views) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         await device.vmService.flutterFastReassemble(
           classId,
           isolateId: view.uiIsolate.id,
@@ -277,14 +278,14 @@ class HotRunner extends ResidentRunner {
       return 3;
     }
 
-    await refreshViews();
     for (final FlutterDevice device in flutterDevices) {
       // VM must have accepted the kernel binary, there will be no reload
       // report, so we let incremental compiler know that source code was accepted.
       if (device.generator != null) {
         device.generator.accept();
       }
-      for (final FlutterView view in device.views) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         globals.printTrace('Connected to $view.');
       }
     }
@@ -475,15 +476,15 @@ class HotRunner extends ResidentRunner {
     Uri main,
     Uri assetsDirectory,
   ) async {
+    final List<FlutterView> views = await device.vmService.getFlutterViews();
     await Future.wait(<Future<void>>[
-      for (final FlutterView view in device.views)
+      for (final FlutterView view in views)
         device.vmService.runInView(
           viewId: view.id,
           main: main,
           assetsDirectory: assetsDirectory,
         ),
     ]);
-    await device.refreshViews();
   }
 
   Future<void> _launchFromDevFS(String mainScript) async {
@@ -502,7 +503,8 @@ class HotRunner extends ResidentRunner {
     if (benchmarkMode) {
       futures.clear();
       for (final FlutterDevice device in flutterDevices) {
-        for (final FlutterView view in device.views) {
+        final List<FlutterView> views = await device.vmService.getFlutterViews();
+        for (final FlutterView view in views) {
           futures.add(device.vmService
             .flushUIThreadTasks(uiIsolateId: view.uiIsolate.id));
         }
@@ -515,9 +517,6 @@ class HotRunner extends ResidentRunner {
     String reason,
     bool benchmarkMode = false,
   }) async {
-    globals.printTrace('Refreshing active FlutterViews before restarting.');
-    await refreshViews();
-
     final Stopwatch restartTimer = Stopwatch()..start();
     // TODO(aam): Add generator reset logic once we switch to using incremental
     // compiler for full application recompilation on restart.
@@ -542,7 +541,8 @@ class HotRunner extends ResidentRunner {
     final List<Future<void>> operations = <Future<void>>[];
     for (final FlutterDevice device in flutterDevices) {
       final Set<String> uiIsolatesIds = <String>{};
-      for (final FlutterView view in device.views) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         if (view.uiIsolate == null) {
           continue;
         }
@@ -815,7 +815,8 @@ class HotRunner extends ResidentRunner {
     void Function(String message) onSlow,
   }) async {
     for (final FlutterDevice device in flutterDevices) {
-      for (final FlutterView view in device.views) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         if (view.uiIsolate == null) {
           return OperationResult(2, 'Application isolate not found', fatal: true);
         }
@@ -823,10 +824,6 @@ class HotRunner extends ResidentRunner {
     }
 
     final Stopwatch reloadTimer = Stopwatch()..start();
-
-    globals.printTrace('Refreshing active FlutterViews before reloading.');
-    await refreshViews();
-
     final Stopwatch devFSTimer = Stopwatch()..start();
     final UpdateFSReport updatedDevFS = await _updateDevFS();
     // Record time it took to synchronize to DevFS.
@@ -917,14 +914,6 @@ class HotRunner extends ResidentRunner {
     // Record time it took for the VM to reload the sources.
     _addBenchmarkData('hotReloadVMReloadMilliseconds', vmReloadTimer.elapsed.inMilliseconds);
     final Stopwatch reassembleTimer = Stopwatch()..start();
-
-    // Reload the isolate data.
-    await Future.wait(<Future<void>>[
-      for (final FlutterDevice device in flutterDevices)
-        device.refreshViews()
-    ]);
-
-    globals.printTrace('Evicting dirty assets');
     await _evictDirtyAssets();
 
     // Check if any isolates are paused and reassemble those
@@ -935,7 +924,8 @@ class HotRunner extends ResidentRunner {
     int pausedIsolatesFound = 0;
     bool failedReassemble = false;
     for (final FlutterDevice device in flutterDevices) {
-      for (final FlutterView view in device.views) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         // Check if the isolate is paused, and if so, don't reassemble. Ignore the
         // PostPauseEvent event - the client requesting the pause will resume the app.
         final vm_service.Isolate isolate = await device.vmService
@@ -1060,11 +1050,7 @@ class HotRunner extends ResidentRunner {
     final StringBuffer message = StringBuffer();
     bool plural;
     if (pausedIsolatesFound == 1) {
-      if (flutterDevices.length == 1 && flutterDevices.single.views.length == 1) {
-        message.write('The application is ');
-      } else {
-        message.write('An isolate is ');
-      }
+      message.write('The application is ');
       plural = false;
     } else {
       message.write('$pausedIsolatesFound isolates are ');
@@ -1126,13 +1112,14 @@ class HotRunner extends ResidentRunner {
     }
   }
 
-  Future<void> _evictDirtyAssets() {
+  Future<void> _evictDirtyAssets() async {
     final List<Future<Map<String, dynamic>>> futures = <Future<Map<String, dynamic>>>[];
     for (final FlutterDevice device in flutterDevices) {
       if (device.devFS.assetPathsToEvict.isEmpty) {
         continue;
       }
-      if (device.views.first.uiIsolate == null) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      if (views.first.uiIsolate == null) {
         globals.printError('Application isolate not found for $device');
         continue;
       }
@@ -1141,7 +1128,7 @@ class HotRunner extends ResidentRunner {
           device.vmService
             .flutterEvictAsset(
               assetPath,
-              isolateId: device.views.first.uiIsolate.id,
+              isolateId: views.first.uiIsolate.id,
             )
         );
       }
