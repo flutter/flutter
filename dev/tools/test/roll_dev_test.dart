@@ -4,7 +4,6 @@
 
 import 'package:args/args.dart';
 import 'package:dev_tools/roll_dev.dart';
-import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
 import './common.dart';
