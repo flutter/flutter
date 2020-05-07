@@ -35,7 +35,8 @@ class FlutterMain {
                    jobjectArray jargs,
                    jstring kernelPath,
                    jstring appStoragePath,
-                   jstring engineCachesPath);
+                   jstring engineCachesPath,
+                   jlong initTimeMillis);
 
   void SetupObservatoryUriCallback(JNIEnv* env);
 
