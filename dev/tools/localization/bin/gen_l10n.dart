@@ -159,7 +159,7 @@ void main(List<String> arguments) {
         inputsAndOutputsListPath: inputsAndOutputsListPath,
       )
       ..loadResources()
-      ..writeOutputFile()
+      ..writeOutputFiles()
       ..outputUnimplementedMessages(untranslatedMessagesFile);
   } on FileSystemException catch (e) {
     exitWithError(e.message);

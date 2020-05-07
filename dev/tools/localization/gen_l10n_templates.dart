@@ -263,15 +263,3 @@ const String allCodesLookupTemplate = '''// Lookup logic when language+script+co
     @(allCodesSwitchClauses)
   }
 ''';
-
-/// Generates inputs and outputs JSON file containing input and output files
-/// for an iteration of the gen_l10n tool.
-const String inputAndOutputsJsonFileTemplate = '''{
-  "inputs": [
-    @(inputs)
-  ],
-  "outputs": [
-    @(outputs)
-  ]
-}
-''';

@@ -953,10 +953,12 @@ class LocalizationsGenerator {
       if (!_inputsAndOutputsListFile.existsSync()) {
         _inputsAndOutputsListFile.createSync(recursive: true);
       }
+
       _inputsAndOutputsListFile.writeAsStringSync(
-        inputAndOutputsJsonFileTemplate
-          .replaceAll('@(inputs)', _inputFileList.map((String file) => '"$file"').join(',\n    '))
-          .replaceAll('@(outputs)', _outputFileList.map((String file) => '"$file"').join(',\n    '))
+        json.encode(<String, Object> {
+          'inputs': _inputFileList,
+          'outputs': _outputFileList,
+        }),
       );
     }
   }
