@@ -170,7 +170,7 @@ Future<void> _runABTest() async {
   }
   abTest.finalize();
 
-  final File jsonFile = _uniqueFile(args['abresultfile'] as String ?? 'ABresults#.json');
+  final File jsonFile = _uniqueFile(args['ab-result-file'] as String ?? 'ABresults#.json');
   jsonFile.writeAsString(const JsonEncoder.withIndent('  ').convert(abTest.jsonMap));
 
   if (!silent) {
@@ -267,8 +267,10 @@ final ArgParser _argParser = ArgParser()
     },
   )
   ..addOption(
-    'abresultfile',
-    help: 'The filename in which to place the json encoded results of an A/B test.',
+    'ab-result-file',
+    help: 'The filename in which to place the json encoded results of an A/B test.\n'
+          'The filename may contain a single # character to be replaced by a sequence\n'
+          'number if the name already exists.',
   )
   ..addFlag(
     'all',

@@ -2,56 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-import 'dart:io';
 import 'dart:math' as math;
-
 import 'package:meta/meta.dart';
-import 'package:args/args.dart';
 
-const String kBenchmarkTypeKeyName = 'benchmark results type';
+const String kBenchmarkTypeKeyName = 'benchmark_type';
 const String kBenchmarkVersionKeyName = 'version';
-const String kLocalEngineKeyName = 'local engine name';
-const String kTaskNameKeyName = 'task name';
-const String kRunStartKeyName = 'run start date';
-const String kRunEndKeyName = 'run end date';
-const String kAResultsKeyName = 'default engine results';
-const String kBResultsKeyName = 'local engine results';
+const String kLocalEngineKeyName = 'local_engine';
+const String kTaskNameKeyName = 'task_name';
+const String kRunStartKeyName = 'run_start';
+const String kRunEndKeyName = 'run_end';
+const String kAResultsKeyName = 'default_results';
+const String kBResultsKeyName = 'local_engine_results';
 
 const String kBenchmarkResultsType = 'A/B summaries';
 const String kBenchmarkABVersion = '1.0';
-
-void _usage(String error) {
-  stderr.writeln(error);
-  stderr.writeln('Usage:\n');
-  stderr.writeln(_argParser.usage);
-  exitCode = 1;
-}
-
-Future<void> main(List<String> rawArgs) async {
-  ArgResults args;
-  try {
-    args = _argParser.parse(rawArgs);
-  } on FormatException catch (error) {
-    _usage('${error.message}\n');
-    return;
-  }
-
-  if (args.rest.length > 1) {
-    _usage('Too many file name arguments');
-    return;
-  }
-  final String filename = args.rest.isEmpty ? 'ABresults.json' : args.rest[0];
-  final ABTest test = ABTest.fromJsonMap(
-      const JsonDecoder().convert(await File(filename).readAsString()) as Map<String, dynamic>
-  );
-  if (args['raw'] as bool) {
-    print(test.rawResults());
-  }
-  if (args['tsv'] as bool) {
-    print(test.printSummary());
-  }
-}
 
 /// Collects data from an A/B test and produces a summary for human evaluation.
 ///
@@ -93,11 +57,10 @@ class ABTest {
   ///
   /// [result] is expected to be a serialization of [TaskResult].
   void addAResult(Map<String, dynamic> result) {
-    if (_runEnd == null) {
-      _addResult(result, _aResults);
-    } else {
+    if (_runEnd != null) {
       throw StateError('Cannot add results to ABTest after it is finalized');
     }
+    _addResult(result, _aResults);
   }
 
   /// Adds the result of a single B run of the benchmark.
@@ -106,11 +69,10 @@ class ABTest {
   ///
   /// [result] is expected to be a serialization of [TaskResult].
   void addBResult(Map<String, dynamic> result) {
-    if (_runEnd == null) {
-      _addResult(result, _bResults);
-    } else {
+    if (_runEnd != null) {
       throw StateError('Cannot add results to ABTest after it is finalized');
     }
+    _addResult(result, _bResults);
   }
 
   void finalize() {
@@ -264,17 +226,3 @@ double _computeStandardDeviationForPopulation(Iterable<double> population) {
 String _ratioToPercent(double value) {
   return '${(value * 100).toStringAsFixed(2)}%';
 }
-
-/// Command-line options for the `ab.dart` command.
-final ArgParser _argParser = ArgParser(allowTrailingOptions: true)
-  ..addFlag(
-    'tsv',
-    defaultsTo: true,
-    help: 'Prints the summary as a tab-separated spreadsheet.',
-  )
-  ..addFlag(
-    'raw',
-    defaultsTo: true,
-    help: 'Returns unprocessed data collected by the A/B test formatted as\n'
-        'a tab-separated spreadsheet.',
-  );

@@ -28,6 +28,7 @@ void main() {
         'benchmarkScoreKeys': <String>['i', 'k'],
       });
     }
+    ab.finalize();
 
     expect(
       ab.rawResults(),
