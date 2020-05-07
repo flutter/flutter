@@ -19,5 +19,6 @@
   "copyButtonLabel": "คัดลอก",
   "pasteButtonLabel": "วาง",
   "selectAllButtonLabel": "เลือกทั้งหมด",
+  "tabSemanticsLabel": "TBD",
   "modalBarrierDismissLabel": "ปิด"
 }

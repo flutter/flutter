@@ -570,17 +570,17 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-              data: MediaQueryData.fromWindow(window),
-              child: Material(
-                child: Slider(
-                  value: 0.0,
-                  min: 0.0,
-                  max: 0.0,
-                  onChanged: (double newValue) {
-                    log.add(newValue);
-                  },
-                ),
+            data: MediaQueryData.fromWindow(window),
+            child: Material(
+              child: Slider(
+                value: 0.0,
+                min: 0.0,
+                max: 0.0,
+                onChanged: (double newValue) {
+                  log.add(newValue);
+                },
               ),
+            ),
           ),
         ),
       ),
@@ -591,7 +591,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('Slider V2 uses the right theme colors for the right components', (WidgetTester tester) async {
+  testWidgets('Slider uses the right theme colors for the right components', (WidgetTester tester) async {
     const Color customColor1 = Color(0xcafefeed);
     const Color customColor2 = Color(0xdeadbeef);
     final ThemeData theme = ThemeData(
@@ -641,8 +641,6 @@ void main() {
                     activeColor: activeColor,
                     inactiveColor: inactiveColor,
                     onChanged: onChanged,
-                    // ignore: deprecated_member_use_from_same_package
-                    useV2Slider: true,
                   ),
                 ),
               ),
@@ -814,220 +812,6 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Slider uses the right theme colors for the right components', (WidgetTester tester) async {
-    const Color customColor1 = Color(0xcafefeed);
-    const Color customColor2 = Color(0xdeadbeef);
-    final ThemeData theme = ThemeData(
-      platform: TargetPlatform.android,
-      primarySwatch: Colors.blue,
-      sliderTheme: const SliderThemeData(
-        disabledThumbColor: Color(0xff000001),
-        disabledActiveTickMarkColor: Color(0xff000002),
-        disabledActiveTrackColor: Color(0xff000003),
-        disabledInactiveTickMarkColor: Color(0xff000004),
-        disabledInactiveTrackColor: Color(0xff000005),
-        activeTrackColor: Color(0xff000006),
-        activeTickMarkColor: Color(0xff000007),
-        inactiveTrackColor: Color(0xff000008),
-        inactiveTickMarkColor: Color(0xff000009),
-        overlayColor: Color(0xff000010),
-        thumbColor: Color(0xff000011),
-        valueIndicatorColor: Color(0xff000012),
-      ),
-    );
-    final SliderThemeData sliderTheme = theme.sliderTheme;
-    double value = 0.45;
-    Widget buildApp({
-      Color activeColor,
-      Color inactiveColor,
-      int divisions,
-      bool enabled = true,
-    }) {
-      final ValueChanged<double> onChanged = !enabled
-          ? null
-          : (double d) {
-        value = d;
-      };
-      return MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: MediaQueryData.fromWindow(window),
-            child: Material(
-              child: Center(
-                child: Theme(
-                  data: theme,
-                  child: Slider(
-                    // ignore: deprecated_member_use_from_same_package
-                    useV2Slider: false,
-                    value: value,
-                    label: '$value',
-                    divisions: divisions,
-                    activeColor: activeColor,
-                    inactiveColor: inactiveColor,
-                    onChanged: onChanged,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildApp());
-
-    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
-
-    // Check default theme for enabled widget.
-    expect(material, paints..rect(color: sliderTheme.activeTrackColor)..rect(color: sliderTheme.inactiveTrackColor));
-    expect(material, paints..circle(color: sliderTheme.thumbColor));
-    expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
-    expect(material, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
-    expect(material, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
-
-    // Test setting only the activeColor.
-    await tester.pumpWidget(buildApp(activeColor: customColor1));
-    expect(material, paints..rect(color: customColor1)..rect(color: sliderTheme.inactiveTrackColor));
-    expect(material, paints..circle(color: customColor1));
-    expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
-    expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
-
-    // Test setting only the inactiveColor.
-    await tester.pumpWidget(buildApp(inactiveColor: customColor1));
-    expect(material, paints..rect(color: sliderTheme.activeTrackColor)..rect(color: customColor1));
-    expect(material, paints..circle(color: sliderTheme.thumbColor));
-    expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
-
-    // Test setting both activeColor and inactiveColor.
-    await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2));
-    expect(material, paints..rect(color: customColor1)..rect(color: customColor2));
-    expect(material, paints..circle(color: customColor1));
-    expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
-    expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
-
-    // Test colors for discrete slider.
-    await tester.pumpWidget(buildApp(divisions: 3));
-    expect(material, paints..rect(color: sliderTheme.activeTrackColor)..rect(color: sliderTheme.inactiveTrackColor));
-    expect(
-        material,
-        paints
-          ..circle(color: sliderTheme.activeTickMarkColor)
-          ..circle(color: sliderTheme.activeTickMarkColor)
-          ..circle(color: sliderTheme.inactiveTickMarkColor)
-          ..circle(color: sliderTheme.inactiveTickMarkColor)
-          ..circle(color: sliderTheme.thumbColor));
-    expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
-
-    // Test colors for discrete slider with inactiveColor and activeColor set.
-    await tester.pumpWidget(buildApp(
-      activeColor: customColor1,
-      inactiveColor: customColor2,
-      divisions: 3,
-    ));
-    expect(material, paints..rect(color: customColor1)..rect(color: customColor2));
-    expect(
-        material,
-        paints
-          ..circle(color: customColor2)
-          ..circle(color: customColor2)
-          ..circle(color: customColor1)
-          ..circle(color: customColor1)
-          ..circle(color: customColor1));
-    expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
-    expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
-    expect(material, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
-    expect(material, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
-
-    // Test default theme for disabled widget.
-    await tester.pumpWidget(buildApp(enabled: false));
-    await tester.pumpAndSettle();
-    expect(
-        material,
-        paints
-          ..rect(color: sliderTheme.disabledActiveTrackColor)
-          ..rect(color: sliderTheme.disabledInactiveTrackColor));
-    expect(material, paints..circle(color: sliderTheme.disabledThumbColor));
-    expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
-
-    // Test setting the activeColor and inactiveColor for disabled widget.
-    await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2, enabled: false));
-    expect(
-        material,
-        paints
-          ..rect(color: sliderTheme.disabledActiveTrackColor)
-          ..rect(color: sliderTheme.disabledInactiveTrackColor));
-    expect(material, paints..circle(color: sliderTheme.disabledThumbColor));
-    expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
-
-    // Test that the default value indicator has the right colors.
-    await tester.pumpWidget(buildApp(divisions: 3));
-    Offset center = tester.getCenter(find.byType(Slider));
-    TestGesture gesture = await tester.startGesture(center);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-    expect(value, equals(2.0 / 3.0));
-    expect(
-      material,
-      paints
-        ..rect(color: sliderTheme.activeTrackColor)
-        ..rect(color: sliderTheme.inactiveTrackColor)
-        ..circle(color: sliderTheme.overlayColor)
-        ..circle(color: sliderTheme.activeTickMarkColor)
-        ..circle(color: sliderTheme.activeTickMarkColor)
-        ..circle(color: sliderTheme.inactiveTickMarkColor)
-        ..circle(color: sliderTheme.inactiveTickMarkColor)
-        ..circle(color: sliderTheme.thumbColor),
-    );
-    expect(valueIndicatorBox, paints..path(color: sliderTheme.valueIndicatorColor));
-    await gesture.up();
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-
-    // Testing the custom colors are used for the indicator.
-    await tester.pumpWidget(buildApp(
-      divisions: 3,
-      activeColor: customColor1,
-      inactiveColor: customColor2,
-    ));
-    center = tester.getCenter(find.byType(Slider));
-    gesture = await tester.startGesture(center);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-    expect(value, equals(2.0 / 3.0));
-    expect(
-      material,
-      paints
-        ..rect(color: customColor1) // active track
-        ..rect(color: customColor2) // inactive track
-        ..circle(color: customColor1.withOpacity(0.12)) // overlay
-        ..circle(color: customColor2) // 1st tick mark
-        ..circle(color: customColor2) // 2nd tick mark
-        ..circle(color: customColor2) // 3rd tick mark
-        ..circle(color: customColor1) // 4th tick mark
-        ..circle(color: customColor1) // thumb,
-    );
-    expect(valueIndicatorBox, paints..path(color: customColor1));
-    await gesture.up();
-  });
-
   testWidgets('Slider can tap in vertical scroller', (WidgetTester tester) async {
     double value = 0.0;
     await tester.pumpWidget(
@@ -1138,12 +922,12 @@ void main() {
           child: MediaQuery(
             data: MediaQueryData.fromWindow(window),
             child: const Material(
-                child: Center(
-                  child: Slider(
-                    value: 0.5,
-                    onChanged: null,
-                  ),
+              child: Center(
+                child: Slider(
+                  value: 0.5,
+                  onChanged: null,
                 ),
+              ),
             ),
           ),
         ),
@@ -1198,7 +982,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(144.0 + 2.0 * 24.0, 48.0));
   });
 
-  testWidgets('Slider V2 respects textScaleFactor', (WidgetTester tester) async {
+  testWidgets('Slider respects textScaleFactor', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
 
@@ -1235,8 +1019,6 @@ void main() {
                               value = newValue;
                             });
                           },
-                          // ignore: deprecated_member_use_from_same_package
-                          useV2Slider: true,
                         ),
                       ),
                     ),
@@ -1329,123 +1111,22 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-        tester.firstRenderObject(find.byType(Overlay)),
-        paints
-          ..path(
-            includes: const <Offset>[
-              Offset(0.0, 0.0),
-              Offset(0.0, -52.0),
-              Offset(-44.0, -16.0),
-              Offset(44.0, -16.0),
-            ],
-            color: const Color(0xf55f5f5f),
-          ),
+      tester.firstRenderObject(find.byType(Overlay)),
+      paints
+        ..path(
+          includes: const <Offset>[
+            Offset(0.0, 0.0),
+            Offset(0.0, -52.0),
+            Offset(-44.0, -16.0),
+            Offset(44.0, -16.0),
+          ],
+          color: const Color(0xf55f5f5f),
+        ),
     );
 
     await gesture.up();
     await tester.pumpAndSettle();
-  });
-
-  testWidgets('Slider respects textScaleFactor', (WidgetTester tester) async {
-    final Key sliderKey = UniqueKey();
-    double value = 0.0;
-
-    Widget buildSlider({
-      double textScaleFactor,
-      bool isDiscrete = true,
-      ShowValueIndicator show = ShowValueIndicator.onlyForDiscrete,
-    }) {
-      return MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return MediaQuery(
-                data: MediaQueryData(textScaleFactor: textScaleFactor),
-                child: Material(
-                  child: Theme(
-                    data: Theme.of(context).copyWith(
-                      sliderTheme: Theme.of(context).sliderTheme.copyWith(showValueIndicator: show),
-                    ),
-                    child: Center(
-                      child: OverflowBox(
-                        maxWidth: double.infinity,
-                        maxHeight: double.infinity,
-                        child: Slider(
-                          // ignore: deprecated_member_use_from_same_package
-                          useV2Slider: false,
-                          key: sliderKey,
-                          min: 0.0,
-                          max: 100.0,
-                          divisions: isDiscrete ? 10 : null,
-                          label: '${value.round()}',
-                          value: value,
-                          onChanged: (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildSlider(textScaleFactor: 1.0));
-    Offset center = tester.getCenter(find.byType(Slider));
-    TestGesture gesture = await tester.startGesture(center);
-    await tester.pumpAndSettle();
-
-    expect(tester.firstRenderObject(find.byType(Overlay)), paints..scale(x: 1.0, y: 1.0));
-
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    await tester.pumpWidget(buildSlider(textScaleFactor: 2.0));
-    center = tester.getCenter(find.byType(Slider));
-    gesture = await tester.startGesture(center);
-    await tester.pumpAndSettle();
-
-    expect(tester.firstRenderObject(find.byType(Overlay)), paints..scale(x: 2.0, y: 2.0));
-
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    // Check continuous
-    await tester.pumpWidget(buildSlider(
-      textScaleFactor: 1.0,
-      isDiscrete: false,
-      show: ShowValueIndicator.onlyForContinuous,
-    ));
-    center = tester.getCenter(find.byType(Slider));
-    gesture = await tester.startGesture(center);
-    await tester.pumpAndSettle();
-
-    expect(tester.firstRenderObject(find.byType(Overlay)), paints..scale(x: 1.0, y: 1.0));
-
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    await tester.pumpWidget(buildSlider(
-      textScaleFactor: 2.0,
-      isDiscrete: false,
-      show: ShowValueIndicator.onlyForContinuous,
-    ));
-    center = tester.getCenter(find.byType(Slider));
-    gesture = await tester.startGesture(center);
-    await tester.pumpAndSettle();
-
-    expect(tester.firstRenderObject(find.byType(Overlay)), paints..scale(x: 2.0, y: 2.0));
-
-    await gesture.up();
-    await tester.pumpAndSettle();
-  });
+  }, skip: isBrowser);
 
   testWidgets('Tick marks are skipped when they are too dense', (WidgetTester tester) async {
     Widget buildSlider({
@@ -1498,140 +1179,6 @@ void main() {
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
   });
 
-  testWidgets('Slider V2 has correct animations when reparented', (WidgetTester tester) async {
-    final Key sliderKey = GlobalKey(debugLabel: 'A');
-    double value = 0.0;
-
-    Widget buildSlider(int parents) {
-      Widget createParents(int parents, StateSetter setState) {
-        Widget slider = Slider(
-          key: sliderKey,
-          value: value,
-          divisions: 4,
-          onChanged: (double newValue) {
-            setState(() {
-              value = newValue;
-            });
-          },
-          // ignore: deprecated_member_use_from_same_package
-          useV2Slider: true,
-        );
-
-        for (int i = 0; i < parents; ++i) {
-          slider = Column(children: <Widget>[slider]);
-        }
-        return slider;
-      }
-
-      return MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return MediaQuery(
-                data: MediaQueryData.fromWindow(window),
-                child: Material(
-                  child: createParents(parents, setState),
-                ),
-              );
-            },
-          ),
-        ),
-      );
-    }
-
-    Future<void> testReparenting(bool reparent) async {
-      final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
-      final Offset center = tester.getCenter(find.byType(Slider));
-      // Move to 0.0.
-      TestGesture gesture = await tester.startGesture(Offset.zero);
-      await tester.pump();
-      await gesture.up();
-      await tester.pumpAndSettle();
-      expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
-      expect(
-        sliderBox,
-        paints
-          ..circle(x: 26.0, y: 24.0, radius: 1.0)
-          ..circle(x: 213.0, y: 24.0, radius: 1.0)
-          ..circle(x: 400.0, y: 24.0, radius: 1.0)
-          ..circle(x: 587.0, y: 24.0, radius: 1.0)
-          ..circle(x: 774.0, y: 24.0, radius: 1.0)
-          ..circle(x: 24.0, y: 24.0, radius: 10.0),
-      );
-
-      gesture = await tester.startGesture(center);
-      await tester.pump();
-      // Wait for animations to start.
-      await tester.pump(const Duration(milliseconds: 25));
-      expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
-      expect(
-        sliderBox,
-        paints
-          ..circle(x: 111.20703125, y: 24.0, radius: 5.687664985656738)
-          ..circle(x: 26.0, y: 24.0, radius: 1.0)
-          ..circle(x: 213.0, y: 24.0, radius: 1.0)
-          ..circle(x: 400.0, y: 24.0, radius: 1.0)
-          ..circle(x: 587.0, y: 24.0, radius: 1.0)
-          ..circle(x: 774.0, y: 24.0, radius: 1.0)
-          ..circle(x: 111.20703125, y: 24.0, radius: 10.0),
-      );
-
-      // Reparenting in the middle of an animation should do nothing.
-      if (reparent) {
-        await tester.pumpWidget(buildSlider(2));
-      }
-
-      // Move a little further in the animations.
-      await tester.pump(const Duration(milliseconds: 10));
-      expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
-      expect(
-        sliderBox,
-        paints
-          ..circle(x: 190.0135726928711, y: 24.0, radius: 12.0)
-          ..circle(x: 26.0, y: 24.0, radius: 1.0)
-          ..circle(x: 213.0, y: 24.0, radius: 1.0)
-          ..circle(x: 400.0, y: 24.0, radius: 1.0)
-          ..circle(x: 587.0, y: 24.0, radius: 1.0)
-          ..circle(x: 774.0, y: 24.0, radius: 1.0)
-          ..circle(x: 190.0135726928711, y: 24.0, radius: 10.0),
-      );
-      // Wait for animations to finish.
-      await tester.pumpAndSettle();
-      expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
-      expect(
-        sliderBox,
-        paints
-          ..circle(x: 400.0, y: 24.0, radius: 24.0)
-          ..circle(x: 26.0, y: 24.0, radius: 1.0)
-          ..circle(x: 213.0, y: 24.0, radius: 1.0)
-          ..circle(x: 400.0, y: 24.0, radius: 1.0)
-          ..circle(x: 587.0, y: 24.0, radius: 1.0)
-          ..circle(x: 774.0, y: 24.0, radius: 1.0)
-          ..circle(x: 400.0, y: 24.0, radius: 10.0),
-      );
-      await gesture.up();
-      await tester.pumpAndSettle();
-      expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
-      expect(
-        sliderBox,
-        paints
-          ..circle(x: 26.0, y: 24.0, radius: 1.0)
-          ..circle(x: 213.0, y: 24.0, radius: 1.0)
-          ..circle(x: 400.0, y: 24.0, radius: 1.0)
-          ..circle(x: 587.0, y: 24.0, radius: 1.0)
-          ..circle(x: 774.0, y: 24.0, radius: 1.0)
-          ..circle(x: 400.0, y: 24.0, radius: 10.0),
-      );
-    }
-
-    await tester.pumpWidget(buildSlider(1));
-    // Do it once without reparenting in the middle of an animation
-    await testReparenting(false);
-    // Now do it again with reparenting in the middle of an animation.
-    await testReparenting(true);
-  });
-
   testWidgets('Slider has correct animations when reparented', (WidgetTester tester) async {
     final Key sliderKey = GlobalKey(debugLabel: 'A');
     double value = 0.0;
@@ -1639,8 +1186,6 @@ void main() {
     Widget buildSlider(int parents) {
       Widget createParents(int parents, StateSetter setState) {
         Widget slider = Slider(
-          // ignore: deprecated_member_use_from_same_package
-          useV2Slider: false,
           key: sliderKey,
           value: value,
           divisions: 4,
@@ -1686,11 +1231,11 @@ void main() {
       expect(
         material,
         paints
-          ..circle(x: 25.0, y: 24.0, radius: 1.0)
-          ..circle(x: 212.5, y: 24.0, radius: 1.0)
+          ..circle(x: 26.0, y: 24.0, radius: 1.0)
+          ..circle(x: 213.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 1.0)
-          ..circle(x: 587.5, y: 24.0, radius: 1.0)
-          ..circle(x: 775.0, y: 24.0, radius: 1.0)
+          ..circle(x: 587.0, y: 24.0, radius: 1.0)
+          ..circle(x: 774.0, y: 24.0, radius: 1.0)
           ..circle(x: 24.0, y: 24.0, radius: 10.0),
       );
 
@@ -1703,11 +1248,11 @@ void main() {
         material,
         paints
           ..circle(x: 111.20703125, y: 24.0, radius: 5.687664985656738)
-          ..circle(x: 25.0, y: 24.0, radius: 1.0)
-          ..circle(x: 212.5, y: 24.0, radius: 1.0)
+          ..circle(x: 26.0, y: 24.0, radius: 1.0)
+          ..circle(x: 213.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 1.0)
-          ..circle(x: 587.5, y: 24.0, radius: 1.0)
-          ..circle(x: 775.0, y: 24.0, radius: 1.0)
+          ..circle(x: 587.0, y: 24.0, radius: 1.0)
+          ..circle(x: 774.0, y: 24.0, radius: 1.0)
           ..circle(x: 111.20703125, y: 24.0, radius: 10.0),
       );
 
@@ -1723,11 +1268,11 @@ void main() {
         material,
         paints
           ..circle(x: 190.0135726928711, y: 24.0, radius: 12.0)
-          ..circle(x: 25.0, y: 24.0, radius: 1.0)
-          ..circle(x: 212.5, y: 24.0, radius: 1.0)
+          ..circle(x: 26.0, y: 24.0, radius: 1.0)
+          ..circle(x: 213.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 1.0)
-          ..circle(x: 587.5, y: 24.0, radius: 1.0)
-          ..circle(x: 775.0, y: 24.0, radius: 1.0)
+          ..circle(x: 587.0, y: 24.0, radius: 1.0)
+          ..circle(x: 774.0, y: 24.0, radius: 1.0)
           ..circle(x: 190.0135726928711, y: 24.0, radius: 10.0),
       );
       // Wait for animations to finish.
@@ -1737,11 +1282,11 @@ void main() {
         material,
         paints
           ..circle(x: 400.0, y: 24.0, radius: 24.0)
-          ..circle(x: 25.0, y: 24.0, radius: 1.0)
-          ..circle(x: 212.5, y: 24.0, radius: 1.0)
+          ..circle(x: 26.0, y: 24.0, radius: 1.0)
+          ..circle(x: 213.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 1.0)
-          ..circle(x: 587.5, y: 24.0, radius: 1.0)
-          ..circle(x: 775.0, y: 24.0, radius: 1.0)
+          ..circle(x: 587.0, y: 24.0, radius: 1.0)
+          ..circle(x: 774.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 10.0),
       );
       await gesture.up();
@@ -1750,11 +1295,11 @@ void main() {
       expect(
         material,
         paints
-          ..circle(x: 25.0, y: 24.0, radius: 1.0)
-          ..circle(x: 212.5, y: 24.0, radius: 1.0)
+          ..circle(x: 26.0, y: 24.0, radius: 1.0)
+          ..circle(x: 213.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 1.0)
-          ..circle(x: 587.5, y: 24.0, radius: 1.0)
-          ..circle(x: 775.0, y: 24.0, radius: 1.0)
+          ..circle(x: 587.0, y: 24.0, radius: 1.0)
+          ..circle(x: 774.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 10.0),
       );
     }
@@ -1874,25 +1419,25 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Theme(
-          data: ThemeData.light(),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: MediaQuery(
-              data: MediaQueryData.fromWindow(window),
-              child: Material(
-                child: Slider(
-                  value: 100.0,
-                  min: 0.0,
-                  max: 200.0,
-                  onChanged: (double v) { },
+        MaterialApp(
+          home: Theme(
+            data: ThemeData.light(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: MediaQuery(
+                data: MediaQueryData.fromWindow(window),
+                child: Material(
+                  child: Slider(
+                    value: 100.0,
+                    min: 0.0,
+                    max: 200.0,
+                    onChanged: (double v) { },
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      )
+        )
     );
 
     expect(
@@ -2505,8 +2050,6 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     const Slider(
-      // ignore: deprecated_member_use_from_same_package
-      useV2Slider: false,
       activeColor: Colors.blue,
       divisions: 10,
       inactiveColor: Colors.grey,
@@ -2533,7 +2076,6 @@ void main() {
       'label: "Set a value"',
       'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
       'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
-      'useV1Slider',
     ]);
   });
 }

@@ -139,7 +139,9 @@ void main() {
       final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
       when(mockResidentRunner.isRunningDebug).thenReturn(true);
       when(mockResidentRunner.flutterDevices).thenReturn(<FlutterDevice>[mockFlutterDevice]);
-      when(mockFlutterDevice.views).thenReturn(<FlutterView>[]);
+      when(mockResidentRunner.listFlutterViews()).thenAnswer((Invocation invocation) async {
+        return <FlutterView>[];
+      });
 
       await terminalHandler.processTerminalInput('l');
 

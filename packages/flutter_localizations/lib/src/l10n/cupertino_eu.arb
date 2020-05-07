@@ -19,5 +19,6 @@
   "copyButtonLabel": "Kopiatu",
   "pasteButtonLabel": "Itsatsi",
   "selectAllButtonLabel": "Hautatu guztiak",
+  "tabSemanticsLabel": "TBD",
   "modalBarrierDismissLabel": "Baztertu"
 }
