@@ -922,15 +922,7 @@ plugin1=${plugin1.path}
         const AndroidBuildInfo(BuildInfo.release),
         buildDirectory: buildDirectory,
       );
-
-      final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);
-      final String initScript = globals.fs.path.join(
-        flutterRoot,
-        'packages',
-        'flutter_tools',
-        'gradle',
-        'aar_init_script.gradle',
-      );
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FileSystem: () => fs,
