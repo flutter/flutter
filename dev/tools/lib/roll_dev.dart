@@ -63,6 +63,7 @@ bool run({
   final bool justPrint = argResults[kJustPrint] as bool;
   final bool autoApprove = argResults[kYes] as bool;
   final bool help = argResults[kHelp] as bool;
+  final bool force = argResults[kForce] as bool;
 
   if (help || level == null || commit == null) {
     print(
@@ -124,7 +125,10 @@ bool run({
   }
 
   git.run('push $origin $version', 'publish the version');
-  git.run('push $origin HEAD:dev', 'land the new version on the "dev" branch');
+  git.run(
+    'push ${force ? "--force " : ""}$origin HEAD:dev',
+    'land the new version on the "dev" branch',
+  );
   print('Flutter version $version has been rolled to the "dev" channel!');
   return true;
 }

@@ -4,6 +4,7 @@
 
 import 'package:args/args.dart';
 import 'package:dev_tools/roll_dev.dart';
+import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
 import './common.dart';
@@ -183,6 +184,34 @@ void main() {
       verify(mockGit.run('tag 1.2.0-1.0.pre', any));
       verify(mockGit.run('push $origin HEAD:dev', any));
     });
+
+    test('successfully publishes release with --force', () {
+      when(mockGit.getOutput('remote get-url $origin', any)).thenReturn(kUpstreamRemote);
+      when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
+      when(mockGit.getOutput(
+        'describe --match *.*.*-*.*.pre --exact-match --tags refs/heads/dev',
+        any,
+      )).thenReturn('1.2.3-0.0.pre');
+      when(mockGit.getOutput('rev-parse HEAD', any)).thenReturn(commit);
+      fakeArgResults = FakeArgResults(
+        level: level,
+        commit: commit,
+        origin: origin,
+        justPrint: false,
+        autoApprove: true,
+        help: false,
+        force: true,
+      );
+      expect(run(
+        usage: usage,
+        argResults: fakeArgResults,
+        git: mockGit,
+      ), true);
+      verify(mockGit.run('fetch $origin', any));
+      verify(mockGit.run('reset $commit --hard', any));
+      verify(mockGit.run('tag 1.2.0-1.0.pre', any));
+      verify(mockGit.run('push --force $origin HEAD:dev', any));
+    });
   });
 
   group('parseFullTag', () {
@@ -309,6 +338,7 @@ class FakeArgResults implements ArgResults {
     bool justPrint,
     bool autoApprove,
     bool help,
+    bool force = false,
   }) : _parsedArgs = <String, dynamic>{
     'increment': level,
     'commit': commit,
@@ -316,6 +346,7 @@ class FakeArgResults implements ArgResults {
     'just-print': justPrint,
     'yes': autoApprove,
     'help': help,
+    'force': force,
   };
 
   @override
