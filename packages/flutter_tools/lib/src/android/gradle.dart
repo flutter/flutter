@@ -648,12 +648,13 @@ void printHowToConsumeAar({
   1. Open ${fileSystem.path.join('<host>', 'app', 'build.gradle')}
   2. Ensure you have the repositories configured, otherwise add them:
 
+      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "storage.googleapis.com"
       repositories {
         maven {
             url '${repoDirectory.path}'
         }
         maven {
-            url 'https://storage.googleapis.com/download.flutter.io'
+            url 'https://\$storageUrl/download.flutter.io'
         }
       }
 
