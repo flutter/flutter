@@ -6,12 +6,12 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';

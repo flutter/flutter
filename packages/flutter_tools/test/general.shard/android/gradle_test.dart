@@ -8,23 +8,23 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
-import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -2343,12 +2343,13 @@ plugin1=${plugin1.path}
           '  1. Open <host>/app/build.gradle\n'
           '  2. Ensure you have the repositories configured, otherwise add them:\n'
           '\n'
+          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "storage.googleapis.com"\n'
           '      repositories {\n'
           '        maven {\n'
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
+          "            url 'https://\$storageUrl/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2393,12 +2394,13 @@ plugin1=${plugin1.path}
           '  1. Open <host>/app/build.gradle\n'
           '  2. Ensure you have the repositories configured, otherwise add them:\n'
           '\n'
+          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "storage.googleapis.com"\n'
           '      repositories {\n'
           '        maven {\n'
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
+          "            url 'https://\$storageUrl/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2430,12 +2432,13 @@ plugin1=${plugin1.path}
           '  1. Open <host>/app/build.gradle\n'
           '  2. Ensure you have the repositories configured, otherwise add them:\n'
           '\n'
+          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "storage.googleapis.com"\n'
           '      repositories {\n'
           '        maven {\n'
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
+          "            url 'https://\$storageUrl/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2468,12 +2471,13 @@ plugin1=${plugin1.path}
           '  1. Open <host>/app/build.gradle\n'
           '  2. Ensure you have the repositories configured, otherwise add them:\n'
           '\n'
+          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "storage.googleapis.com"\n'
           '      repositories {\n'
           '        maven {\n'
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
+          "            url 'https://\$storageUrl/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'

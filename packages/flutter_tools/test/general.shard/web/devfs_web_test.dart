@@ -12,15 +12,15 @@ import 'package:dwds/src/readers/asset_reader.dart';
 import 'package:dwds/src/services/expression_compiler.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/build_runner/devfs_web.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:logging/logging.dart';
 import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
-import 'package:platform/platform.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
