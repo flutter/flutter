@@ -157,14 +157,33 @@ class TextInputType {
   /// Requests a keyboard with ready access to both letters and numbers.
   static const TextInputType visiblePassword = TextInputType._(7);
 
+  /// Optimized for a person's name.
+  ///
+  /// On iOS, requests the
+  /// [UIKeyboardType.namePhonePad](https://developer.apple.com/documentation/uikit/uikeyboardtype/namephonepad)
+  /// keyboard, a keyboard optimized for entering a person’s name or phone number.
+  /// Does not support auto-capitalization.
+  ///
+  /// On Android, requests a keyboard optimized for
+  /// [TYPE_TEXT_VARIATION_PERSON_NAME](https://developer.android.com/reference/android/text/InputType#TYPE_TEXT_VARIATION_PERSON_NAME).
+  static const TextInputType name = TextInputType._(8);
+
+  /// Optimized for postal mailing addresses.
+  ///
+  /// On iOS, requests the default keyboard.
+  ///
+  /// On Android, requests a keyboard optimized for
+  /// [TYPE_TEXT_VARIATION_POSTAL_ADDRESS](https://developer.android.com/reference/android/text/InputType#TYPE_TEXT_VARIATION_POSTAL_ADDRESS).
+  static const TextInputType streetAddress = TextInputType._(9);
+
   /// All possible enum values.
   static const List<TextInputType> values = <TextInputType>[
-    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword,
+    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword, name, streetAddress,
   ];
 
   // Corresponding string name for each of the [values].
   static const List<String> _names = <String>[
-    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword',
+    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword', 'name', 'address',
   ];
 
   // Enum value name, this is what enum.toString() would normally return.

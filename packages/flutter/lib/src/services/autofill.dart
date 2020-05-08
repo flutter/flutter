@@ -651,7 +651,7 @@ class AutofillConfiguration {
   /// autofill service. The common values of hint strings can be found in
   /// [AutofillHints], as well as the platforms that understand each of them.
   ///
-  /// If an autofillable input field needs to use a custom hint that translate to
+  /// If an autofillable input field needs to use a custom hint that translates to
   /// different strings on different platforms, the easiest way to achieve that
   /// is to return different hint strings based on the value of
   /// [defaultTargetPlatform].
