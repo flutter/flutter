@@ -1092,10 +1092,9 @@ abstract class Gradient extends Shader {
     List<Color> colors, [
     List<double> colorStops,
     TileMode tileMode = TileMode.clamp,
-    // TODO(flutter_web): see https://github.com/flutter/flutter/issues/32819
     Float64List matrix4,
   ]) =>
-      engine.GradientLinear(from, to, colors, colorStops, tileMode);
+      engine.GradientLinear(from, to, colors, colorStops, tileMode, matrix4);
 
   /// Creates a radial gradient centered at `center` that ends at `radius`
   /// distance from the center.

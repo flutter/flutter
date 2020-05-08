@@ -80,17 +80,21 @@ void _validateColorStops(List<ui.Color> colors, List<double> colorStops) {
 
 class GradientLinear extends EngineGradient {
   GradientLinear(
-    this.from,
-    this.to,
-    this.colors,
-    this.colorStops,
-    this.tileMode,
+  this.from,
+  this.to,
+  this.colors,
+  this.colorStops,
+  this.tileMode,
+  Float64List matrix,
   )   : assert(_offsetIsValid(from)),
         assert(_offsetIsValid(to)),
         assert(colors != null),
         assert(tileMode != null),
+        this.matrix4 = matrix == null ? null : _FastMatrix64(matrix),
         super._() {
-    _validateColorStops(colors, colorStops);
+    if (assertionsEnabled) {
+      _validateColorStops(colors, colorStops);
+    }
   }
 
   final ui.Offset from;
@@ -98,11 +102,25 @@ class GradientLinear extends EngineGradient {
   final List<ui.Color> colors;
   final List<double> colorStops;
   final ui.TileMode tileMode;
+  final _FastMatrix64 matrix4;
 
   @override
   html.CanvasGradient createPaintStyle(html.CanvasRenderingContext2D ctx) {
-    final html.CanvasGradient gradient =
-        ctx.createLinearGradient(from.dx, from.dy, to.dx, to.dy);
+    final bool hasMatrix = matrix4 != null;
+    html.CanvasGradient gradient;
+    if (hasMatrix) {
+      final centerX = (from.dx + to.dx) / 2.0;
+      final centerY = (from.dy + to.dy) / 2.0;
+      matrix4.transform(from.dx - centerX, from.dy - centerY);
+      final double fromX = matrix4.transformedX + centerX;
+      final double fromY = matrix4.transformedY + centerY;
+      matrix4.transform(to.dx - centerX, to.dy - centerY);
+      gradient = ctx.createLinearGradient(fromX, fromY,
+          matrix4.transformedX + centerX, matrix4.transformedY + centerY);
+    } else {
+      gradient = ctx.createLinearGradient(from.dx, from.dy, to.dx, to.dy);
+    }
+
     if (colorStops == null) {
       assert(colors.length == 2);
       gradient.addColorStop(0, colorToCssString(colors[0]));
@@ -154,7 +172,9 @@ class GradientLinear extends EngineGradient {
 }
 
 // TODO(flutter_web): For transforms and tile modes implement as webgl
-// shader instead. See https://github.com/flutter/flutter/issues/32819
+// For now only GradientRotation is supported in flutter which is implemented
+// for linear gradient.
+// See https://github.com/flutter/flutter/issues/32819
 class GradientRadial extends EngineGradient {
   GradientRadial(this.center, this.radius, this.colors, this.colorStops,
       this.tileMode, this.matrix4)
@@ -170,11 +190,6 @@ class GradientRadial extends EngineGradient {
   @override
   Object createPaintStyle(html.CanvasRenderingContext2D ctx) {
     if (!experimentalUseSkia) {
-      // The DOM backend does not (yet) support all parameters.
-      if (matrix4 != null && !Matrix4.fromFloat32List(matrix4).isIdentity()) {
-        throw UnimplementedError(
-            'matrix4 not supported in GradientRadial shader');
-      }
       if (tileMode != ui.TileMode.clamp) {
         throw UnimplementedError(
             'TileMode not supported in GradientRadial shader');
