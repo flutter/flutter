@@ -131,7 +131,7 @@ class AnimationSheetBuilder {
     bool recording = true,
   }) {
     assert(child != null);
-    return _FrameRecorderRecorder(
+    return _AnimationSheetRecorder(
       key: key,
       child: child,
       size: size,
@@ -199,8 +199,8 @@ class AnimationSheetBuilder {
 
 typedef _RecordedHandler = void Function(Future<ui.Image> image);
 
-class _FrameRecorderRecorder extends StatefulWidget {
-  const _FrameRecorderRecorder({
+class _AnimationSheetRecorder extends StatefulWidget {
+  const _AnimationSheetRecorder({
     this.handleRecorded,
     this.child,
     this.size,
@@ -212,10 +212,10 @@ class _FrameRecorderRecorder extends StatefulWidget {
   final Size size;
 
   @override
-  State<StatefulWidget> createState() => _FrameRecorderRecorderState();
+  State<StatefulWidget> createState() => _AnimationSheetRecorderState();
 }
 
-class _FrameRecorderRecorderState extends State<_FrameRecorderRecorder> {
+class _AnimationSheetRecorderState extends State<_AnimationSheetRecorder> {
   GlobalKey boundaryKey = GlobalKey();
 
   void _record(Duration duration) {
