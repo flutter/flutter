@@ -52,6 +52,7 @@ compiled_action("generate_snapshot_bin") {
   ]
 
   args = [
+    "--enable-experiment=non-nullable",
     "--snapshot_kind=core",
     "--enable_mirrors=false",
     "--vm_snapshot_data=" + rebase_path(vm_snapshot_data),
@@ -248,6 +249,8 @@ compile_platform("strong_platform") {
       flutter_runtime_mode == "release" || flutter_runtime_mode == "jit_release"
   allow_causal_async_stacks = !is_runtime_mode_release
   args = [
+    "--enable-experiment=non-nullable",
+    "--nnbd-agnostic",
     "--target=flutter",
     "-Ddart.vm.product=$is_runtime_mode_release",
     "-Ddart.developer.causal_async_stacks=$allow_causal_async_stacks",
