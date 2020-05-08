@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  /* 
+  /*
    * Here lies tests for packages/flutter_test/lib/src/animation_sheet.dart
    * because [matchesGoldenFile] does not work in its native package.
    */

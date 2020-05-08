@@ -168,7 +168,7 @@ class AnimationSheetBuilder {
   }
 
   /// Returns the smallest size that can contain all recorded frames.
-  /// 
+  ///
   /// This is usually used to adjust the viewport during unit tests, i.e. the
   /// size of virtual screen. Having too many frames recoded than the default
   /// viewport size can contain will lead to overflow errors, while having too
@@ -178,7 +178,7 @@ class AnimationSheetBuilder {
   /// recorded frames, each of which has a size specified by [size], in a
   /// row-major grid with a maximum width specified by `maxWidth`, and returns
   /// the size of that grid.
-  /// 
+  ///
   /// Setting the viewport size during a widget test usually involves
   /// [TestWidgetsFlutterBinding.setSurfaceSize] and [WidgetTester.binding].
   ///
