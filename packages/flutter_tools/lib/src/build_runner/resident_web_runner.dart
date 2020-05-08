@@ -640,7 +640,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
       pathToReload: getReloadPath(fullRestart: fullRestart),
       invalidatedFiles: invalidationResult.uris,
       packageConfig: invalidationResult.packageConfig,
-      trackWidgetCreation: true,
+      trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
     );
     devFSStatus.stop();
     globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');

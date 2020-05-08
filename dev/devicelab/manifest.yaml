@@ -814,14 +814,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux-vm"]
 
-  # TODO(jonahwilliams): This should stay off until
-  # https://github.com/flutter/flutter/issues/56212 is fixed.
-  # web_enable_twc:
-  #   description: >
-  #     Verifies that track-widget-creation can be enabled and disabled.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux-vm"]
-  #   flaky: true
+  web_enable_twc:
+     description: >
+       Verifies that track-widget-creation can be enabled and disabled.
+     stage: devicelab
+     required_agent_capabilities: ["linux-vm"]
+     flaky: true
 
   # run_without_leak_linux:
   #   description: >
