@@ -14,9 +14,11 @@ Once you have updated the dependencies, you can upload a new version by running
 `cipd create --pkg-def cipd.yaml`. For more, see the Chromium instructions on ["Updating a CIPD
 dependency"](https://chromium.googlesource.com/chromium/src/+/master/docs/cipd.md#Updating-a-CIPD-dependency) for how to upload a package update to CIPD.
 
-Once you've uploaded the new version, also make sure to tag it with the updated
-timestamp and robolectric version (most likely still 3.8, unless you've migrated
-all the packages to 4+).
+On successful upload, you will receive a hash for the upload such as
+
+`cipd: successfully uploaded and verified flutter/android/embedding_bundle:NZvE-rL3E66nHQZb5Vyl9-1Y_1MWEX7KURgOHqX2cYcC`
+
+Let's further annotate the new upload with the current timestamp.
 
     $ cipd set-tag flutter/android/embedding_bundle --version=<new_version_hash> -tag=last_updated:<timestamp>
 

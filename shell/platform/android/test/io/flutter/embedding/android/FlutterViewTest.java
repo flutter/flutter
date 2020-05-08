@@ -37,13 +37,9 @@ import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
-// TODO(xster): we have 2 versions of robolectric Android shadows in
-// shell/platform/android/embedding_bundle/build.gradle. Remove the older
-// org.robolectric:android-all:4.1.2_r1-robolectric-r1 which doesn't have the right shadow
-// behaviors.
-@Config(manifest = Config.NONE, sdk = 27)
+@Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
-@TargetApi(27)
+@TargetApi(29)
 public class FlutterViewTest {
   @Mock FlutterJNI mockFlutterJni;
   @Mock FlutterLoader mockFlutterLoader;
