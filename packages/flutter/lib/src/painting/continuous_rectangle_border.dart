@@ -32,13 +32,14 @@ import 'edge_insets.dart';
 ///    however its straight sides change into a rounded corner with a circular
 ///    radius in a step function instead of gradually like the
 ///    [ContinuousRectangleBorder].
-class ContinuousRectangleBorder extends ShapeBorder {
+class ContinuousRectangleBorder extends OutlinedBorder {
   /// The arguments must not be null.
   const ContinuousRectangleBorder({
-    this.side = BorderSide.none,
+    BorderSide side = BorderSide.none,
     this.borderRadius = BorderRadius.zero,
   }) : assert(side != null),
-       assert(borderRadius != null);
+       assert(borderRadius != null),
+       super(side: side);
 
   /// The radius for each corner.
   ///
@@ -46,10 +47,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
   /// [getOuterPath].
   final BorderRadiusGeometry borderRadius;
 
-  /// The style of this border.
-  final BorderSide side;
-
-  @override
+   @override
   EdgeInsetsGeometry get dimensions => EdgeInsets.all(side.width);
 
   @override
@@ -132,6 +130,14 @@ class ContinuousRectangleBorder extends ShapeBorder {
   @override
   Path getOuterPath(Rect rect, { TextDirection textDirection }) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect));
+  }
+
+  @override
+  ContinuousRectangleBorder copyWith({ BorderSide side, BorderRadius borderRadius }) {
+    return ContinuousRectangleBorder(
+      side: side ?? this.side,
+      borderRadius: borderRadius ?? this.borderRadius,
+    );
   }
 
   @override

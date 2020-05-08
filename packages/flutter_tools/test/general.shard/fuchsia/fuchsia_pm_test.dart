@@ -65,7 +65,7 @@ void main() {
         '-repo',
         '<repo>',
         '-l',
-        '[fe80::ec4:7aff:fecc:ea8f%25eno2]:43819',
+        '[fe80::ec4:7aff:fecc:ea8f%eno2]:43819',
       ])).called(1);
     }, overrides: <Type, Generator>{
       FuchsiaArtifacts: () => mockFuchsiaArtifacts,
@@ -78,6 +78,11 @@ void main() {
 
       expect(
         FuchsiaPackageServer('a', 'b', host, port).url,
+        'http://[fe80::ec4:7aff:fecc:ea8f%25eno2]:23',
+      );
+
+      expect(
+        FuchsiaPackageServer('a', 'b', host, port).interfaceStrippedUrl,
         'http://[fe80::ec4:7aff:fecc:ea8f]:23',
       );
     });

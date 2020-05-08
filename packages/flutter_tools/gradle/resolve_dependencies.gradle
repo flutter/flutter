@@ -14,11 +14,13 @@
 
 import java.nio.file.Paths
 
+String storageUrl = System.getenv('FLUTTER_STORAGE_BASE_URL') ?: "storage.googleapis.com"
+
 repositories {
     google()
     jcenter()
     maven {
-        url "https://storage.googleapis.com/download.flutter.io"
+        url "https://$storageUrl/download.flutter.io"
     }
 }
 

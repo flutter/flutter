@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:vm_service/vm_service.dart' as vmservice;
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'asset.dart';
 import 'base/context.dart';
@@ -223,40 +223,22 @@ abstract class DevFSOperations {
 class ServiceProtocolDevFSOperations implements DevFSOperations {
   ServiceProtocolDevFSOperations(this.vmService);
 
-  final VMService vmService;
+  final vm_service.VmService vmService;
 
   @override
   Future<Uri> create(String fsName) async {
-    final Map<String, dynamic> response = await vmService.vm.createDevFS(fsName);
-    return Uri.parse(response['uri'] as String);
+    final vm_service.Response response = await vmService.createDevFS(fsName);
+    return Uri.parse(response.json['uri'] as String);
   }
 
   @override
   Future<dynamic> destroy(String fsName) async {
-    await vmService.vm.deleteDevFS(fsName);
+    await vmService.deleteDevFS(fsName);
   }
 
   @override
   Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
-    List<int> bytes;
-    try {
-      bytes = await content.contentsAsBytes();
-    } on Exception catch (e) {
-      return e;
-    }
-    final String fileContents = base64.encode(bytes);
-    try {
-      return await vmService.vm.invokeRpcRaw(
-        '_writeDevFSFile',
-        params: <String, dynamic>{
-          'fsName': fsName,
-          'uri': deviceUri.toString(),
-          'fileContents': fileContents,
-        },
-      );
-    } on Exception catch (error) {
-      globals.printTrace('DevFS: Failed to write $deviceUri: $error');
-    }
+    throw UnsupportedError('Use the HTTP devFS api.');
   }
 }
 
@@ -270,7 +252,7 @@ class DevFSException implements Exception {
 class _DevFSHttpWriter {
   _DevFSHttpWriter(
     this.fsName,
-    VMService serviceProtocol, {
+    vm_service.VmService serviceProtocol, {
     @required OperatingSystemUtils osUtils,
   })
     : httpAddress = serviceProtocol.httpAddress,
@@ -392,22 +374,25 @@ class UpdateFSReport {
 class DevFS {
   /// Create a [DevFS] named [fsName] for the local files in [rootDirectory].
   DevFS(
-    VMService serviceProtocol,
+    vm_service.VmService serviceProtocol,
     this.fsName,
     this.rootDirectory, {
     @required OperatingSystemUtils osUtils,
+    @visibleForTesting bool disableUpload = false,
   }) : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
        _httpWriter = _DevFSHttpWriter(
         fsName,
         serviceProtocol,
         osUtils: osUtils,
-      );
+      ),
+      _disableUpload = disableUpload;
 
   DevFS.operations(
     this._operations,
     this.fsName,
     this.rootDirectory,
-  ) : _httpWriter = null;
+  ) : _httpWriter = null,
+      _disableUpload = false;
 
   final DevFSOperations _operations;
   final _DevFSHttpWriter _httpWriter;
@@ -417,6 +402,7 @@ class DevFS {
   List<Uri> sources = <Uri>[];
   DateTime lastCompiled;
   PackageConfig lastPackageConfig;
+  final bool _disableUpload;
 
   Uri _baseUri;
   Uri get baseUri => _baseUri;
@@ -435,7 +421,7 @@ class DevFS {
     globals.printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
     try {
       _baseUri = await _operations.create(fsName);
-    } on vmservice.RPCError catch (rpcException) {
+    } on vm_service.RPCError catch (rpcException) {
       // 1001 is kFileSystemAlreadyExists in //dart/runtime/vm/json_stream.h
       if (rpcException.code != 1001) {
         rethrow;
@@ -542,7 +528,9 @@ class DevFS {
     globals.printTrace('Updating files');
     if (dirtyEntries.isNotEmpty) {
       try {
-        await _httpWriter.write(dirtyEntries);
+        if (!_disableUpload) {
+          await _httpWriter.write(dirtyEntries);
+        }
       } on SocketException catch (socketException, stackTrace) {
         globals.printTrace('DevFS sync failed. Lost connection to device: $socketException');
         throw DevFSException('Lost connection to device.', socketException, stackTrace);

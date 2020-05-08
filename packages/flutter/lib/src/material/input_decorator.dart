@@ -1075,7 +1075,7 @@ class _RenderDecoration extends RenderBox {
       + contentPadding.bottom
       + densityOffset.dy,
     );
-    final double minContainerHeight = decoration.isDense || expands
+    final double minContainerHeight = decoration.isDense || decoration.isCollapsed || expands
       ? 0.0
       : kMinInteractiveDimension + densityOffset.dy;
     final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight + densityOffset.dy;
@@ -1489,7 +1489,7 @@ class _RenderDecoration extends RenderBox {
   bool hitTestChildren(BoxHitTestResult result, { @required Offset position }) {
     assert(position != null);
     for (final RenderBox child in _children) {
-      // TODO(hansmuller): label must be handled specially since we've transformed it
+      // The label must be handled specially since we've transformed it.
       final Offset offset = _boxParentData(child).offset;
       final bool isHit = result.addWithPaintOffset(
         offset: offset,
@@ -1915,8 +1915,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     super.initState();
 
     final bool labelIsInitiallyFloating = widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always
-        // ignore: deprecated_member_use_from_same_package
-        || (widget.decoration.hasFloatingPlaceholder && widget._labelShouldWithdraw);
+        || (widget.decoration.floatingLabelBehavior != FloatingLabelBehavior.never &&
+            // ignore: deprecated_member_use_from_same_package
+            widget.decoration.hasFloatingPlaceholder &&
+            widget._labelShouldWithdraw);
 
     _floatingLabelController = AnimationController(
       duration: _kTransitionDuration,
@@ -2509,6 +2511,7 @@ class InputDecoration {
     )
     this.hasFloatingPlaceholder = true, // ignore: deprecated_member_use_from_same_package
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
+    this.isCollapsed = false,
     this.isDense,
     this.contentPadding,
     this.prefixIcon,
@@ -2539,8 +2542,7 @@ class InputDecoration {
     this.alignLabelWithHint,
   }) : assert(enabled != null),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
-       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.'),
-       isCollapsed = false;
+       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
 
   /// Defines an [InputDecorator] that is the same size as the input field.
   ///
@@ -3301,8 +3303,6 @@ class InputDecoration {
 
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
-  ///
-  /// Always sets [isCollapsed] to false.
   InputDecoration copyWith({
     Widget icon,
     String labelText,
@@ -3318,6 +3318,7 @@ class InputDecoration {
     int errorMaxLines,
     bool hasFloatingPlaceholder,
     FloatingLabelBehavior floatingLabelBehavior,
+    bool isCollapsed,
     bool isDense,
     EdgeInsetsGeometry contentPadding,
     Widget prefixIcon,
@@ -3363,6 +3364,7 @@ class InputDecoration {
       // ignore: deprecated_member_use_from_same_package
       hasFloatingPlaceholder: hasFloatingPlaceholder ?? this.hasFloatingPlaceholder,
       floatingLabelBehavior: floatingLabelBehavior ?? this.floatingLabelBehavior,
+      isCollapsed: isCollapsed ?? this.isCollapsed,
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
       prefixIcon: prefixIcon ?? this.prefixIcon,
@@ -3410,6 +3412,7 @@ class InputDecoration {
       // ignore: deprecated_member_use_from_same_package
       hasFloatingPlaceholder: hasFloatingPlaceholder ?? theme.hasFloatingPlaceholder,
       floatingLabelBehavior: floatingLabelBehavior ?? theme.floatingLabelBehavior,
+      isCollapsed: isCollapsed ?? theme.isCollapsed,
       isDense: isDense ?? theme.isDense,
       contentPadding: contentPadding ?? theme.contentPadding,
       prefixStyle: prefixStyle ?? theme.prefixStyle,

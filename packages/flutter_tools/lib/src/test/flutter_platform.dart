@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
@@ -199,9 +200,10 @@ void catchIsolateErrors() {
   errorPort.listen((dynamic message) {
     // Masquerade as an IsolateSpawnException because that's what this would
     // be if the error had been detected statically.
-    final IsolateSpawnException error = IsolateSpawnException(message[0]);
-    final Trace stackTrace =
-        message[1] == null ? Trace(const <Frame>[]) : Trace.parse(message[1]);
+    final IsolateSpawnException error = IsolateSpawnException(
+        message[0] as String);
+    final Trace stackTrace = message[1] == null ?
+        Trace(const <Frame>[]) : Trace.parse(message[1] as String);
     Zone.current.handleUncaughtError(error, stackTrace);
   });
 }
@@ -229,8 +231,7 @@ void main() {
   });
   WebSocket.connect(server).then((WebSocket socket) {
     socket.map((dynamic x) {
-      assert(x is String);
-      return json.decode(x);
+      return json.decode(x as String);
     }).pipe(channel.sink);
     socket.addStream(channel.stream.map(json.encode));
   });
@@ -521,9 +522,9 @@ class FlutterPlatform extends PlatformPlugin {
           processObservatoryUri = detectedUri;
           {
             globals.printTrace('Connecting to service protocol: $processObservatoryUri');
-            final Future<VMService> localVmService = VMService.connect(processObservatoryUri,
+            final Future<vm_service.VmService> localVmService = connectToVmService(processObservatoryUri,
               compileExpression: _compileExpressionService);
-            localVmService.then((VMService vmservice) {
+            localVmService.then((vm_service.VmService vmservice) {
               globals.printTrace('Successfully connected to service protocol: $processObservatoryUri');
             });
           }

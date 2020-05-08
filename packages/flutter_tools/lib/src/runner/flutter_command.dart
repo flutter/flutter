@@ -108,6 +108,8 @@ class FlutterOptions {
   static const String kSplitDebugInfoOption = 'split-debug-info';
   static const String kDartObfuscationOption = 'obfuscate';
   static const String kDartDefinesOption = 'dart-define';
+  static const String kBundleSkSLPathOption = 'bundle-sksl-path';
+  static const String kPerformanceMeasurementFile = 'performance-measurement-file';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -425,10 +427,23 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addTreeShakeIconsFlag() {
+  void addBundleSkSLPathOption({ @required bool hide }) {
+    argParser.addOption(FlutterOptions.kBundleSkSLPathOption,
+      help: 'A path to a file containing precompiled SkSL shaders generated '
+        'during "flutter run". These can be included in an application to '
+        'improve the first frame render times.',
+      hide: hide,
+      valueHelp: '/project-name/flutter_1.sksl'
+    );
+  }
+
+  void addTreeShakeIconsFlag({
+    bool enabledByDefault
+  }) {
     argParser.addFlag('tree-shake-icons',
       negatable: true,
-      defaultsTo: kIconTreeShakerEnabledDefault,
+      defaultsTo: enabledByDefault
+        ?? kIconTreeShakerEnabledDefault,
       help: 'Tree shake icon fonts so that only glyphs used by the application remain.',
     );
   }
@@ -478,6 +493,15 @@ abstract class FlutterCommand extends Command<void> {
         'see: https://github.com/dart-lang/sdk/blob/master/docs/process/'
         'experimental-flags.md',
       hide: hide,
+    );
+  }
+
+  void addBuildPerformanceFile({ bool hide = false }) {
+    argParser.addOption(
+      FlutterOptions.kPerformanceMeasurementFile,
+      help:
+        'The name of a file where flutter assemble performance and '
+        'cachedness information will be written in a JSON format.'
     );
   }
 
@@ -534,10 +558,12 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// Compute the [BuildInfo] for the current flutter command.
+  /// Commands that build multiple build modes can pass in a [forcedBuildMode]
+  /// to be used instead of parsing flags.
   ///
   /// Throws a [ToolExit] if the current set of options is not compatible with
-  /// eachother.
-  BuildInfo getBuildInfo() {
+  /// each other.
+  BuildInfo getBuildInfo({ BuildMode forcedBuildMode }) {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
 
@@ -579,8 +605,20 @@ abstract class FlutterCommand extends Command<void> {
         'combination with "--${FlutterOptions.kSplitDebugInfoOption}"',
       );
     }
+    final BuildMode buildMode = forcedBuildMode ?? getBuildMode();
+    final bool treeShakeIcons = argParser.options.containsKey('tree-shake-icons')
+      && buildMode.isPrecompiled
+      && boolArg('tree-shake-icons');
 
-    return BuildInfo(getBuildMode(),
+    final String bundleSkSLPath = argParser.options.containsKey(FlutterOptions.kBundleSkSLPathOption)
+      ? stringArg(FlutterOptions.kBundleSkSLPathOption)
+      : null;
+
+    final String performanceMeasurementFile = argParser.options.containsKey(FlutterOptions.kPerformanceMeasurementFile)
+      ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
+      : null;
+
+    return BuildInfo(buildMode,
       argParser.options.containsKey('flavor')
         ? stringArg('flavor')
         : null,
@@ -601,15 +639,15 @@ abstract class FlutterCommand extends Command<void> {
       buildName: argParser.options.containsKey('build-name')
           ? stringArg('build-name')
           : null,
-      treeShakeIcons: argParser.options.containsKey('tree-shake-icons')
-          ? boolArg('tree-shake-icons')
-          : kIconTreeShakerEnabledDefault,
+      treeShakeIcons: treeShakeIcons,
       splitDebugInfoPath: splitDebugInfoPath,
       dartObfuscation: dartObfuscation,
       dartDefines: argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
           ? stringsArg(FlutterOptions.kDartDefinesOption)
           : const <String>[],
+      bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
+      performanceMeasurementFile: performanceMeasurementFile,
     );
   }
 

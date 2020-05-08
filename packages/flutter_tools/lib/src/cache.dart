@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import 'android/gradle_utils.dart';
 import 'base/common.dart';
@@ -14,6 +13,7 @@ import 'base/io.dart' show SocketException;
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
+import 'base/platform.dart';
 import 'base/process.dart';
 import 'features.dart';
 import 'globals.dart' as globals;

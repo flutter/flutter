@@ -97,12 +97,12 @@ class FlutterWebPlatform extends PlatformPlugin {
     );
   }
 
-  final Future<PackageConfig> _packagesFuture = loadPackageConfigOrFail(
+  final Future<PackageConfig> _packagesFuture = loadPackageConfigWithLogging(
     globals.fs.file(globalPackagesPath),
     logger: globals.logger,
   );
 
-  final Future<PackageConfig> _flutterToolsPackageMap = loadPackageConfigOrFail(
+  final Future<PackageConfig> _flutterToolsPackageMap = loadPackageConfigWithLogging(
     globals.fs.file(globals.fs.path.join(
       Cache.flutterRoot,
       'packages',
@@ -335,7 +335,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     Object message,
   ) async {
     if (_closed) {
-      return null;
+      throw StateError('Load called on a closed FlutterWebPlatform');
     }
     final PoolResource lockResource = await _suiteLock.request();
 
@@ -348,7 +348,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     }
 
     if (_closed) {
-      return null;
+      throw StateError('Load called on a closed FlutterWebPlatform');
     }
 
     final Uri suiteUrl = url.resolveUri(globals.fs.path.toUri(globals.fs.path.withoutExtension(
@@ -360,7 +360,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       lockResource.release();
     });
     if (_closed) {
-      return null;
+      throw StateError('Load called on a closed FlutterWebPlatform');
     }
     return suite;
   }

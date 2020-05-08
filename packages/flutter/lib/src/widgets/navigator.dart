@@ -612,26 +612,31 @@ abstract class RouteTransitionRecord {
   /// Retrieves the wrapped [Route].
   Route<dynamic> get route;
 
-  /// Whether this route is entering the screen.
+  /// Whether this route is waiting for the decision on how to enter the screen.
   ///
   /// If this property is true, this route requires an explicit decision on how
   /// to transition into the screen. Such a decision should be made in the
   /// [TransitionDelegate.resolve].
-  bool get isEntering;
+  bool get isWaitingForEnteringDecision;
 
-  bool _debugWaitingForExitDecision = false;
+  /// Whether this route is waiting for the decision on how to exit the screen.
+  ///
+  /// If this property is true, this route requires an explicit decision on how
+  /// to transition off the screen. Such a decision should be made in the
+  /// [TransitionDelegate.resolve].
+  bool get isWaitingForExitingDecision;
 
   /// Marks the [route] to be pushed with transition.
   ///
   /// During [TransitionDelegate.resolve], this can be called on an entering
-  /// route (where [RouteTransitionRecord.isEntering] is true) in indicate that the
+  /// route (where [RouteTransitionRecord.isWaitingForEnteringDecision] is true) in indicate that the
   /// route should be pushed onto the [Navigator] with an animated transition.
   void markForPush();
 
   /// Marks the [route] to be added without transition.
   ///
   /// During [TransitionDelegate.resolve], this can be called on an entering
-  /// route (where [RouteTransitionRecord.isEntering] is true) in indicate that the
+  /// route (where [RouteTransitionRecord.isWaitingForEnteringDecision] is true) in indicate that the
   /// route should be added onto the [Navigator] without an animated transition.
   void markForAdd();
 
@@ -685,19 +690,21 @@ abstract class RouteTransitionRecord {
 ///     final List<RouteTransitionRecord> results = <RouteTransitionRecord>[];
 ///
 ///     for (final RouteTransitionRecord pageRoute in newPageRouteHistory) {
-///       if (pageRoute.isEntering) {
+///       if (pageRoute.isWaitingForEnteringDecision) {
 ///         pageRoute.markForAdd();
 ///       }
 ///       results.add(pageRoute);
 ///
 ///     }
 ///     for (final RouteTransitionRecord exitingPageRoute in locationToExitingPageRoute.values) {
-///       exitingPageRoute.markForRemove();
-///       final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
-///       if (pagelessRoutes != null) {
-///         for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
-///           pagelessRoute.markForRemove();
-///         }
+///       if (exitingPageRoute.isWaitingForExitingDecision) {
+///        exitingPageRoute.markForRemove();
+///        final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
+///        if (pagelessRoutes != null) {
+///          for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
+///             pagelessRoute.markForRemove();
+///           }
+///        }
 ///       }
 ///       results.add(exitingPageRoute);
 ///
@@ -758,10 +765,10 @@ abstract class TransitionDelegate<T> {
       final Set<RouteTransitionRecord> exitingPageRoutes = locationToExitingPageRoute.values.toSet();
       // Firstly, verifies all exiting routes have been marked.
       for (final RouteTransitionRecord exitingPageRoute in exitingPageRoutes) {
-        assert(!exitingPageRoute._debugWaitingForExitDecision);
+        assert(!exitingPageRoute.isWaitingForExitingDecision);
         if (pageRouteToPagelessRoutes.containsKey(exitingPageRoute)) {
           for (final RouteTransitionRecord pagelessRoute in pageRouteToPagelessRoutes[exitingPageRoute]) {
-            assert(!pagelessRoute._debugWaitingForExitDecision);
+            assert(!pagelessRoute.isWaitingForExitingDecision);
           }
         }
       }
@@ -771,7 +778,7 @@ abstract class TransitionDelegate<T> {
 
       for (final _RouteEntry routeEntry in resultsToVerify.cast<_RouteEntry>()) {
         assert(routeEntry != null);
-        assert(!routeEntry.isEntering && !routeEntry._debugWaitingForExitDecision);
+        assert(!routeEntry.isWaitingForEnteringDecision && !routeEntry.isWaitingForExitingDecision);
         if (
           indexOfNextRouteInNewHistory >= newPageRouteHistory.length ||
           routeEntry != newPageRouteHistory[indexOfNextRouteInNewHistory]
@@ -785,7 +792,9 @@ abstract class TransitionDelegate<T> {
 
       assert(
         indexOfNextRouteInNewHistory == newPageRouteHistory.length &&
-        exitingPageRoutes.isEmpty
+        exitingPageRoutes.isEmpty,
+        'The merged result from the $runtimeType.resolve does not include all '
+        'required routes. Do you remember to merge all exiting routes?'
       );
       return true;
     }());
@@ -799,51 +808,61 @@ abstract class TransitionDelegate<T> {
   /// The `newPageRouteHistory` list contains all page-based routes in the order
   /// that will be on the [Navigator]'s history stack after this update
   /// completes. If a route in `newPageRouteHistory` has its
-  /// [RouteTransitionRecord.isEntering] set to true, this route requires explicit
-  /// decision on how it should transition onto the Navigator. To make a
-  /// decision, call [RouteTransitionRecord.markForPush] or
+  /// [RouteTransitionRecord.isWaitingForEnteringDecision] set to true, this
+  /// route requires explicit decision on how it should transition onto the
+  /// Navigator. To make a decision, call [RouteTransitionRecord.markForPush] or
   /// [RouteTransitionRecord.markForAdd].
   ///
   /// The `locationToExitingPageRoute` contains the pages-based routes that
-  /// are removed from the routes history after page update and require explicit
-  /// decision on how to transition off the screen. This map records page-based
-  /// routes to be removed with the location of the route in the original route
-  /// history before the update. The keys are the locations represented by the
-  /// page-based routes that are directly below the removed routes, and the value
-  /// are the page-based routes to be removed. The location is null if the route
-  /// to be removed is the bottom most route. To make a decision for a removed
-  /// route, call [RouteTransitionRecord.markForPop],
+  /// are removed from the routes history after page update. This map records
+  /// page-based routes to be removed with the location of the route in the
+  /// original route history before the update. The keys are the locations
+  /// represented by the page-based routes that are directly below the removed
+  /// routes, and the value are the page-based routes to be removed. The
+  /// location is null if the route to be removed is the bottom most route. If
+  /// a route in `locationToExitingPageRoute` has its
+  /// [RouteTransitionRecord.isWaitingForExitingDecision] set to true, this
+  /// route requires explicit decision on how it should transition off the
+  /// Navigator. To make a decision for a removed route, call
+  /// [RouteTransitionRecord.markForPop],
   /// [RouteTransitionRecord.markForComplete] or
-  /// [RouteTransitionRecord.markForRemove].
+  /// [RouteTransitionRecord.markForRemove]. It is possible that decisions are
+  /// not required for routes in the `locationToExitingPageRoute`. This can
+  /// happen if the routes have already been popped in earlier page updates and
+  /// are still waiting for popping animations to finish. In such case, those
+  /// routes are still included in the `locationToExitingPageRoute` with their
+  /// [RouteTransitionRecord.isWaitingForExitingDecision] set to false and no
+  /// decisions are required.
   ///
   /// The `pageRouteToPagelessRoutes` records the page-based routes and their
-  /// associated pageless routes. If a page-based route is to be removed, its
-  /// associated pageless routes also require explicit decisions on how to
-  /// transition off the screen.
+  /// associated pageless routes. If a page-based route is waiting for exiting
+  /// decision, its associated pageless routes also require explicit decisions
+  /// on how to transition off the screen.
   ///
   /// Once all the decisions have been made, this method must merge the removed
-  /// routes and the `newPageRouteHistory` and return the merged result. The
-  /// order in the result will be the order the [Navigator] uses for updating
-  /// the route history. The return list must preserve the same order of routes
-  /// in `newPageRouteHistory`. The removed routes, however, can be inserted
-  /// into the return list freely as long as all of them are included.
+  /// routes (whether or not they require decisions) and the
+  /// `newPageRouteHistory` and return the merged result. The order in the
+  /// result will be the order the [Navigator] uses for updating the route
+  /// history. The return list must preserve the same order of routes in
+  /// `newPageRouteHistory`. The removed routes, however, can be inserted into
+  /// the return list freely as long as all of them are included.
   ///
   /// For example, consider the following case.
   ///
-  ///    newPageRouteHistory = [A, B, C]
+  /// newPageRouteHistory = [A, B, C]
   ///
-  ///    locationToExitingPageRoute = {A -> D, C -> E}
+  /// locationToExitingPageRoute = {A -> D, C -> E}
   ///
   /// The following outputs are valid.
   ///
-  ///    result = [A, B ,C ,D ,E] is valid
-  ///    result = [D, A, B ,C ,E] is also valid because exiting route can be
-  ///    inserted in any place
+  /// result = [A, B ,C ,D ,E] is valid.
+  /// result = [D, A, B ,C ,E] is also valid because exiting route can be
+  /// inserted in any place.
   ///
   /// The following outputs are invalid.
   ///
-  ///    result = [B, A, C ,D ,E] is invalid because B must be after A.
-  ///    result = [A, B, C ,E] is invalid because results must include D.
+  /// result = [B, A, C ,D ,E] is invalid because B must be after A.
+  /// result = [A, B, C ,E] is invalid because results must include D.
   ///
   /// See also:
   ///
@@ -892,27 +911,28 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
       final RouteTransitionRecord exitingPageRoute = locationToExitingPageRoute[location];
       if (exitingPageRoute == null)
         return;
-      assert(exitingPageRoute._debugWaitingForExitDecision);
-      final bool hasPagelessRoute = pageRouteToPagelessRoutes.containsKey(exitingPageRoute);
-      final bool isLastExitingPageRoute = isLast && !locationToExitingPageRoute.containsKey(exitingPageRoute);
-      if (isLastExitingPageRoute && !hasPagelessRoute) {
-        exitingPageRoute.markForPop(exitingPageRoute.route.currentResult);
-      } else {
-        exitingPageRoute.markForComplete(exitingPageRoute.route.currentResult);
-      }
-      results.add(exitingPageRoute);
-
-      if (hasPagelessRoute) {
-        final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
-        for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
-          assert(pagelessRoute._debugWaitingForExitDecision);
-          if (isLastExitingPageRoute && pagelessRoute == pagelessRoutes.last) {
-            pagelessRoute.markForPop(pagelessRoute.route.currentResult);
-          } else {
-            pagelessRoute.markForComplete(pagelessRoute.route.currentResult);
+      if (exitingPageRoute.isWaitingForExitingDecision) {
+        final bool hasPagelessRoute = pageRouteToPagelessRoutes.containsKey(exitingPageRoute);
+        final bool isLastExitingPageRoute = isLast && !locationToExitingPageRoute.containsKey(exitingPageRoute);
+        if (isLastExitingPageRoute && !hasPagelessRoute) {
+          exitingPageRoute.markForPop(exitingPageRoute.route.currentResult);
+        } else {
+          exitingPageRoute.markForComplete(exitingPageRoute.route.currentResult);
+        }
+        if (hasPagelessRoute) {
+          final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
+          for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
+            assert(pagelessRoute.isWaitingForExitingDecision);
+            if (isLastExitingPageRoute && pagelessRoute == pagelessRoutes.last) {
+              pagelessRoute.markForPop(pagelessRoute.route.currentResult);
+            } else {
+              pagelessRoute.markForComplete(pagelessRoute.route.currentResult);
+            }
           }
         }
       }
+      results.add(exitingPageRoute);
+
       // It is possible there is another exiting route above this exitingPageRoute.
       handleExitingRoute(exitingPageRoute, isLast);
     }
@@ -922,7 +942,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 
     for (final RouteTransitionRecord pageRoute in newPageRouteHistory) {
       final bool isLastIteration = newPageRouteHistory.last == pageRoute;
-      if (pageRoute.isEntering) {
+      if (pageRoute.isWaitingForEnteringDecision) {
         if (!locationToExitingPageRoute.containsKey(pageRoute) && isLastIteration) {
           pageRoute.markForPush();
         } else {
@@ -2248,7 +2268,7 @@ enum _RouteLifecycle {
   // routes that are present:
   //
   add, // we'll want to run install, didAdd, etc; a route created by onGenerateInitialRoutes or by the initial widget.pages
-  adding, // we'll want to run install, didAdd, etc; a route created by onGenerateInitialRoutes or by the initial widget.pages
+  adding, // we'll waiting for the future from didPush of top-most route to complete
   // routes that are ready for transition.
   push, // we'll want to run install, didPush, etc; a route added via push() and friends
   pushReplace, // we'll want to run install, didPush, etc; a route added via pushReplace() and friends
@@ -2407,7 +2427,7 @@ class _RouteEntry extends RouteTransitionRecord {
   // Route is removed without being completed.
   void remove({ bool isReplaced = false }) {
     assert(
-      !hasPage || _debugWaitingForExitDecision,
+      !hasPage || isWaitingForExitingDecision,
       'A page-based route cannot be completed using imperative api, provide a '
       'new list without the corresponding Page to Navigator.pages instead. '
     );
@@ -2421,7 +2441,7 @@ class _RouteEntry extends RouteTransitionRecord {
   // Route completes with `result` and is removed.
   void complete<T>(T result, { bool isReplaced = false }) {
     assert(
-      !hasPage || _debugWaitingForExitDecision,
+      !hasPage || isWaitingForExitingDecision,
       'A page-based route cannot be completed using imperative api, provide a '
       'new list without the corresponding Page to Navigator.pages instead. '
     );
@@ -2485,12 +2505,18 @@ class _RouteEntry extends RouteTransitionRecord {
   }
 
   @override
-  bool get isEntering => currentState == _RouteLifecycle.staging;
+  bool get isWaitingForEnteringDecision => currentState == _RouteLifecycle.staging;
+
+  @override
+  bool get isWaitingForExitingDecision => _isWaitingForExitingDecision;
+  bool _isWaitingForExitingDecision = false;
+
+  void markNeedsExitingDecision() => _isWaitingForExitingDecision = true;
 
   @override
   void markForPush() {
     assert(
-      isEntering && !_debugWaitingForExitDecision,
+      isWaitingForEnteringDecision && !isWaitingForExitingDecision,
       'This route cannot be marked for push. Either a decision has already been '
       'made or it does not require an explicit decision on how to transition in.'
     );
@@ -2500,7 +2526,7 @@ class _RouteEntry extends RouteTransitionRecord {
   @override
   void markForAdd() {
     assert(
-      isEntering && !_debugWaitingForExitDecision,
+      isWaitingForEnteringDecision && !isWaitingForExitingDecision,
       'This route cannot be marked for add. Either a decision has already been '
       'made or it does not require an explicit decision on how to transition in.'
     );
@@ -2510,36 +2536,36 @@ class _RouteEntry extends RouteTransitionRecord {
   @override
   void markForPop([dynamic result]) {
     assert(
-      !isEntering && _debugWaitingForExitDecision,
+      !isWaitingForEnteringDecision && isWaitingForExitingDecision && isPresent,
       'This route cannot be marked for pop. Either a decision has already been '
       'made or it does not require an explicit decision on how to transition out.'
     );
     pop<dynamic>(result);
-    _debugWaitingForExitDecision = false;
+    _isWaitingForExitingDecision = false;
   }
 
   @override
   void markForComplete([dynamic result]) {
     assert(
-      !isEntering && _debugWaitingForExitDecision,
+      !isWaitingForEnteringDecision && isWaitingForExitingDecision && isPresent,
       'This route cannot be marked for complete. Either a decision has already '
       'been made or it does not require an explicit decision on how to transition '
       'out.'
     );
     complete<dynamic>(result);
-    _debugWaitingForExitDecision = false;
+    _isWaitingForExitingDecision = false;
   }
 
   @override
   void markForRemove() {
     assert(
-      !isEntering && _debugWaitingForExitDecision,
+      !isWaitingForEnteringDecision && isWaitingForExitingDecision && isPresent,
       'This route cannot be marked for remove. Either a decision has already '
       'been made or it does not require an explicit decision on how to transition '
       'out.'
     );
     remove();
-    _debugWaitingForExitDecision = false;
+    _isWaitingForExitingDecision = false;
   }
 }
 
@@ -2838,14 +2864,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         assert(previousOldPageRouteEntry != null);
         final List<_RouteEntry> pagelessRoutes = pageRouteToPagelessRoutes
           .putIfAbsent(
-          previousOldPageRouteEntry,
-            () => <_RouteEntry>[]
-        );
+            previousOldPageRouteEntry,
+            () => <_RouteEntry>[],
+          );
         pagelessRoutes.add(potentialEntryToRemove);
-        assert(() {
-          potentialEntryToRemove._debugWaitingForExitDecision = previousOldPageRouteEntry._debugWaitingForExitDecision;
-          return true;
-        }());
+        if (previousOldPageRouteEntry.isWaitingForExitingDecision)
+          potentialEntryToRemove.markNeedsExitingDecision();
         continue;
       }
 
@@ -2857,10 +2881,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         pageKeyToOldEntry.containsKey(potentialPageToRemove.key)
       ) {
         locationToExitingPageRoute[previousOldPageRouteEntry] = potentialEntryToRemove;
-        assert(() {
-          potentialEntryToRemove._debugWaitingForExitDecision = true;
-          return true;
-        }());
+        // We only need a decision if it has not already been popped.
+        if (potentialEntryToRemove.isPresent)
+          potentialEntryToRemove.markNeedsExitingDecision();
       }
       previousOldPageRouteEntry = potentialEntryToRemove;
     }

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import 'android/android_sdk.dart';
@@ -17,6 +16,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
+import 'base/platform.dart';
 import 'base/template.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
@@ -39,7 +39,9 @@ Artifacts get artifacts => context.get<Artifacts>();
 BuildSystem get buildSystem => context.get<BuildSystem>();
 Cache get cache => context.get<Cache>();
 Config get config => context.get<Config>();
+CrashReporter get crashReporter => context.get<CrashReporter>();
 Doctor get doctor => context.get<Doctor>();
+HttpClientFactory get httpClientFactory => context.get<HttpClientFactory>();
 Logger get logger => context.get<Logger>();
 OperatingSystemUtils get os => context.get<OperatingSystemUtils>();
 PersistentToolState get persistentToolState => PersistentToolState.instance;
