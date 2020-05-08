@@ -836,7 +836,7 @@ abstract class ResidentRunner {
     final File outputFile = globals.fsUtils.getUniqueFile(
       globals.fs.currentDirectory,
       'flutter',
-      'sksl',
+      'sksl.json',
     );
     final Device device = flutterDevices.first.device;
 

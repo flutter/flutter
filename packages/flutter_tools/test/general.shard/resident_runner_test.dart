@@ -630,9 +630,9 @@ void main() {
     when(mockDevice.name).thenReturn('test device');
     await residentRunner.writeSkSL();
 
-    expect(testLogger.statusText, contains('flutter_01.sksl'));
-    expect(globals.fs.file('flutter_01.sksl'), exists);
-    expect(json.decode(globals.fs.file('flutter_01.sksl').readAsStringSync()), <String, Object>{
+    expect(testLogger.statusText, contains('flutter_01.sksl.json'));
+    expect(globals.fs.file('flutter_01.sksl.json'), exists);
+    expect(json.decode(globals.fs.file('flutter_01.sksl.json').readAsStringSync()), <String, Object>{
       'platform': 'android',
       'name': 'test device',
       'engineRevision': '42.2', // From FakeFlutterVersion
