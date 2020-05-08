@@ -1194,10 +1194,13 @@ FILE: ../../../flutter/shell/platform/linux/fl_renderer.cc
 FILE: ../../../flutter/shell/platform/linux/fl_renderer.h
 FILE: ../../../flutter/shell/platform/linux/fl_renderer_x11.cc
 FILE: ../../../flutter/shell/platform/linux/fl_renderer_x11.h
+FILE: ../../../flutter/shell/platform/linux/fl_value.cc
+FILE: ../../../flutter/shell/platform/linux/fl_value_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_view.cc
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_engine.h
+FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_value.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_view.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/flutter_linux.h
 FILE: ../../../flutter/shell/platform/windows/angle_surface_manager.cc
