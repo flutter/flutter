@@ -121,7 +121,7 @@ void main() {
     final TextField textField =
         tester.widget<TextField>(find.byType(TextField));
     final InputBorder border = textField.decoration.focusedBorder;
-    expect(border, delegate.hintTextColor);
+    expect(border, delegate.focusedBorder);
   });
 
   testWidgets('enabled border overridden', (WidgetTester tester) async {
@@ -136,7 +136,7 @@ void main() {
     final TextField textField =
         tester.widget<TextField>(find.byType(TextField));
     final InputBorder border = textField.decoration.enabledBorder;
-    expect(border, delegate.hintTextColor);
+    expect(border, delegate.enabledBorder);
   });
 
   testWidgets('Requests suggestions', (WidgetTester tester) async {
@@ -789,13 +789,18 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   final String result;
   final List<Widget> actions;
   final Color hintTextColor = Colors.green;
+  final InputBorder enabledBorder = InputBorder.none;
+  final InputBorder focusedBorder = InputBorder.none;
 
   @override
   ThemeData appBarTheme(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return theme.copyWith(
-      inputDecorationTheme:
-          InputDecorationTheme(hintStyle: TextStyle(color: hintTextColor)),
+      inputDecorationTheme: InputDecorationTheme(
+        hintStyle: TextStyle(color: hintTextColor),
+        enabledBorder: enabledBorder,
+        focusedBorder: focusedBorder,
+      ),
     );
   }
 
