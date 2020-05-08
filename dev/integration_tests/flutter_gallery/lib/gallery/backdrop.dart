@@ -215,6 +215,14 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
       value: 1.0,
       vsync: this,
     );
+    _controller.addStatusListener((AnimationStatus status) {
+      setState(() {
+        // This is intentionally left empty. The state change itself takes
+        // place inside the AnimationController, so there's nothing to update.
+        // All we want is for the widget to rebuild and read the new animation
+        // state from the AnimationController.
+      });
+    });
     _frontOpacity = _controller.drive(_frontOpacityTween);
   }
 
@@ -249,11 +257,9 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   }
 
   void _toggleFrontLayer() {
-    setState(() {
-      final AnimationStatus status = _controller.status;
-      final bool isOpen = status == AnimationStatus.completed || status == AnimationStatus.forward;
-      _controller.fling(velocity: isOpen ? -2.0 : 2.0);
-    });
+    final AnimationStatus status = _controller.status;
+    final bool isOpen = status == AnimationStatus.completed || status == AnimationStatus.forward;
+    _controller.fling(velocity: isOpen ? -2.0 : 2.0);
   }
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
