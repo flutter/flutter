@@ -392,11 +392,25 @@ class TestCommand extends Command<bool> with ArgUtils {
           '--build-filter=${path.relativeToWebUi}.browser_test.dart.js',
         ],
     ];
+    final Stopwatch stopwatch = Stopwatch()..start();
+
     final int exitCode = await runProcess(
       environment.pubExecutable,
       arguments,
       workingDirectory: environment.webUiRootDir.path,
+      environment: <String, String>{
+        // This determines the number of concurrent dart2js processes.
+        //
+        // By default build_runner uses 4 workers.
+        //
+        // In a testing on a 32-core 132GB workstation increasing this number to
+        // 32 sped up the build from ~4min to ~1.5min.
+        if (io.Platform.environment.containsKey('BUILD_MAX_WORKERS_PER_TASK'))
+          'BUILD_MAX_WORKERS_PER_TASK': io.Platform.environment['BUILD_MAX_WORKERS_PER_TASK'],
+      },
     );
+    stopwatch.stop();
+    print('The build took ${stopwatch.elapsedMilliseconds ~/ 1000} seconds.');
 
     if (exitCode != 0) {
       throw ToolException(
