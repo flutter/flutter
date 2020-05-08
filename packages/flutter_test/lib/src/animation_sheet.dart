@@ -10,12 +10,12 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Records the frames of an animating widget, and later displays it in an
-/// animation sheet.
+/// Records the frames of an animating widget, and later displays the frames as a
+/// grid in an animation sheet.
 ///
 /// This class does not support Web, because taking screenshots is unsupported,
-/// which is necessary to build an animation sheet. Tests thatuse this class must
-/// be noted with `skip: isBrowser`.
+/// which is necessary to build an animation sheet. Tests that use this class
+/// must be noted with `skip: isBrowser`.
 /// (https://github.com/flutter/flutter/issues/56001)
 ///
 /// Using this class takes the following steps:
@@ -23,8 +23,8 @@ import 'package:flutter_test/flutter_test.dart';
 ///  * Create an instance of this class.
 ///  * Pump frames that render the target widget wrapped in [record]. Every frame
 ///    that has `recording` being true will be recorded.
-///  * Optionally, adjust the size of the test view port to the
-///    [sheetSize].
+///  * Optionally, adjust the size of the test viewport to the [sheetSize] (see
+///    the documentation of [sheetSize] for more information).
 ///  * Pump a frame that renders [display], which shows all recorded frames in an
 ///    animation sheet, and can be matched against the golden test.
 ///
@@ -168,21 +168,23 @@ class AnimationSheetBuilder {
   }
 
   /// Returns the smallest size that can contain all recorded frames.
+  /// 
+  /// This is usually used to adjust the viewport during unit tests, i.e. the
+  /// size of virtual screen. Having too many frames recoded than the default
+  /// viewport size can contain will lead to overflow errors, while having too
+  /// few frames means the golden file might be larger than necessary.
   ///
-  /// The [sheetSize] tries to place the recorded frames, each having a size
-  /// specified by [size], in a row-major grid with a maximum width specified by
-  /// `maxWidth`, and returns the size of that grid.
+  /// The [sheetSize] returns the smallest possible size by placing the
+  /// recorded frames, each of which has a size specified by [size], in a
+  /// row-major grid with a maximum width specified by `maxWidth`, and returns
+  /// the size of that grid.
+  /// 
+  /// Setting the viewport size during a widget test usually involves
+  /// [TestWidgetsFlutterBinding.setSurfaceSize] and [WidgetTester.binding].
   ///
-  /// The `maxWidth defaults to the width of the default view port, 800.0.
+  /// The `maxWidth` defaults to the width of the default view port, 800.0.
   ///
   /// This method can only be called if at least one frame has been recorded.
-  ///
-  /// See also:
-  ///
-  ///  * [TestWidgetsFlutterBinding.setSurfaceSize], which artificially changes
-  ///    the screen size during a widget test.
-  ///  * [WidgetTester.binding], which returns the [TestWidgetsFlutterBinding]
-  ///    during a widget test.
   Size sheetSize({double maxWidth = _kDefaultTestViewportWidth}) {
     assert(_recordedFrames.isNotEmpty);
     final int cellsPerRow = (maxWidth / size.width).floor();
