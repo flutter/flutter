@@ -18,9 +18,13 @@ final Directory integrationTestDir = Directory(
 
 /// Verifies that track-widget-creation can be enabled and disabled.
 class TrackWidgetCreationEnabledTask {
-  TrackWidgetCreationEnabledTask([this.deviceIdOverride]);
+  TrackWidgetCreationEnabledTask([
+    this.deviceIdOverride,
+    this.additionalArgs = const <String>[],
+  ]);
 
   String deviceIdOverride;
+  final List<String> additionalArgs;
 
   Future<TaskResult> task() async {
     final File file = File(path.join(integrationTestDir.path, 'info'));
@@ -39,6 +43,7 @@ class TrackWidgetCreationEnabledTask {
       final Process runProcess = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
         flutterCommandArgs('run', <String>[
+          ...?additionalArgs,
           '--vmservice-out-file=info',
           '--track-widget-creation',
           '-v',
@@ -73,6 +78,7 @@ class TrackWidgetCreationEnabledTask {
       final Process runProcess = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
         flutterCommandArgs('run', <String>[
+           ...?additionalArgs,
            '--vmservice-out-file=info',
           '--no-track-widget-creation',
           '-v',
