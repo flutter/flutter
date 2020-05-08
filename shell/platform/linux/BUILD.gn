@@ -44,9 +44,12 @@ if (build_glfw_shell) {
 }
 
 _public_headers = [
+  "public/flutter_linux/fl_binary_codec.h",
   "public/flutter_linux/fl_binary_messenger.h",
   "public/flutter_linux/fl_dart_project.h",
   "public/flutter_linux/fl_engine.h",
+  "public/flutter_linux/fl_message_codec.h",
+  "public/flutter_linux/fl_string_codec.h",
   "public/flutter_linux/fl_value.h",
   "public/flutter_linux/fl_view.h",
   "public/flutter_linux/flutter_linux.h",
@@ -60,11 +63,14 @@ source_set("flutter_linux") {
   public = _public_headers
 
   sources = [
+    "fl_binary_codec.cc",
     "fl_binary_messenger.cc",
     "fl_dart_project.cc",
     "fl_engine.cc",
+    "fl_message_codec.cc",
     "fl_renderer.cc",
     "fl_renderer_x11.cc",
+    "fl_string_codec.cc",
     "fl_value.cc",
     "fl_view.cc",
   ]
@@ -91,8 +97,12 @@ executable("flutter_linux_unittests") {
   testonly = true
 
   sources = [
+    "fl_binary_codec_test.cc",
     "fl_dart_project_test.cc",
+    "fl_message_codec_test.cc",
+    "fl_string_codec_test.cc",
     "fl_value_test.cc",
+    "testing/fl_test.cc",
   ]
 
   public_configs = [ "//flutter:config" ]

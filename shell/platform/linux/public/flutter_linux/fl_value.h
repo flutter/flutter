@@ -33,6 +33,8 @@ G_BEGIN_DECLS
  * - #FL_VALUE_TYPE_FLOAT_LIST: Float64List
  * - #FL_VALUE_TYPE_LIST: List
  * - #FL_VALUE_TYPE_MAP: Map
+ *
+ * See #FlMessageCodec to encode and decode these values to a binary form.
  */
 typedef struct _FlValue FlValue;
 
