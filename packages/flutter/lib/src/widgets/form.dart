@@ -417,7 +417,6 @@ class FormFieldState<T> extends State<FormField<T>> {
   @protected
   void setValue(T value) {
     _value = value;
-    _valueChanged = true;
   }
 
   @override
