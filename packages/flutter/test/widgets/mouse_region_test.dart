@@ -1509,9 +1509,12 @@ void main() {
         height: 10,
         width: 10,
         child: MouseRegion(
-          cursor: SystemMouseCursors.text,
-          onEnter: (_) { logEnters.add('enter'); },
-          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+          cursor: SystemMouseCursors.forbidden,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.text,
+            onEnter: (_) { logEnters.add('enter'); },
+            child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+          ),
         ),
       ),
     ));
@@ -1528,16 +1531,19 @@ void main() {
         height: 10,
         width: 10,
         child: MouseRegion(
-          cursor: null,
-          onEnter: (_) { logEnters.add('enter'); },
-          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+          cursor: SystemMouseCursors.forbidden,
+          child: MouseRegion(
+            cursor: null,
+            onEnter: (_) { logEnters.add('enter'); },
+            child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+          ),
         ),
       ),
     ));
 
     expect(logPaints, <String>['paint']);
     expect(logEnters, isEmpty);
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
     logPaints.clear();
     logEnters.clear();
 
@@ -1546,9 +1552,12 @@ void main() {
         height: 10,
         width: 10,
         child: MouseRegion(
-          cursor: SystemMouseCursors.text,
-          opaque: true,
-          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+          cursor: SystemMouseCursors.forbidden,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.text,
+            opaque: true,
+            child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+          ),
         ),
       ),
     ));

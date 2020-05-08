@@ -516,6 +516,11 @@ class BaseMouseTracker extends ChangeNotifier {
   }
 }
 
+// A mixin for [BaseMouseTracker] that dispatches mouse events on device update.
+//
+// See also:
+//
+//  * [MouseTracker], which uses this mixin.
 mixin _MouseTrackerEventMixin on BaseMouseTracker {
   // Handles device update and dispatches mouse event callbacks.
   static void _handleDeviceUpdateMouseEvents(MouseTrackerUpdateDetails details) {
