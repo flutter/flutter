@@ -6,12 +6,16 @@ import("//flutter/shell/platform/common/cpp/client_wrapper/publish.gni")
 import("//flutter/testing/testing.gni")
 
 _wrapper_includes = [
+  "include/flutter/flutter_engine.h",
   "include/flutter/flutter_window.h",
   "include/flutter/flutter_window_controller.h",
   "include/flutter/plugin_registrar_glfw.h",
 ]
 
-_wrapper_sources = [ "flutter_window_controller.cc" ]
+_wrapper_sources = [
+  "flutter_engine.cc",
+  "flutter_window_controller.cc",
+]
 
 # This code will be merged into .../common/cpp/client_wrapper for client use,
 # so uses header paths that assume the merged state. Include the header
@@ -70,8 +74,8 @@ test_fixtures("client_wrapper_glfw_fixtures") {
 executable("client_wrapper_glfw_unittests") {
   testonly = true
 
-  # TODO: Add more unit tests.
   sources = [
+    "flutter_engine_unittests.cc",
     "flutter_window_controller_unittests.cc",
     "flutter_window_unittests.cc",
   ]

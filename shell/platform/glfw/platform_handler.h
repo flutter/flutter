@@ -29,7 +29,7 @@ class PlatformHandler {
   // The MethodChannel used for communication with the Flutter engine.
   std::unique_ptr<flutter::MethodChannel<rapidjson::Document>> channel_;
 
-  // A reference to the GLFW window.
+  // A reference to the GLFW window, if any. Null in headless mode.
   GLFWwindow* window_;
 };
 
