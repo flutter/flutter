@@ -22,6 +22,7 @@ void main() {
         command: <String>[
           'dart',
           'dev/tools/localization/bin/gen_l10n.dart',
+          '--gen-inputs-and-outputs-list=/',
           '--arb-dir=arb',
           '--template-arb-file=example.arb',
           '--output-localization-file=bar',

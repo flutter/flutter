@@ -75,7 +75,7 @@ class GenerateLocalizationsTarget extends Target {
 
   @override
   List<Source> get inputs => <Source>[
-    // This is added as a convience for developing the tool.
+    // This is added as a convenience for developing the tool.
     const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/localizations.dart'),
     // TODO(jonahwilliams): once https://github.com/flutter/flutter/issues/56321 is
     // complete, we should add the artifact as a dependency here. Since the tool runs

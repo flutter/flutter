@@ -540,11 +540,20 @@ void main() {
 
   test('ResidentRunner can run source generation', () => testbed.run(() async {
     final FakeProcessManager processManager = globals.processManager as FakeProcessManager;
+    final Directory dependencies = globals.fs.directory(
+      globals.fs.path.join('build', '6ec2559087977927717927ede0a147f1'));
     processManager.addCommand(FakeCommand(
       command: <String>[
         globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
         globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
+        '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
       ],
+      onRun: () {
+        dependencies
+          .childFile('gen_l10n_inputs_and_outputs.json')
+          ..createSync()
+          ..writeAsStringSync('{"inputs":[],"outputs":[]}');
+      }
     ));
     globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
       .createSync(recursive: true);
@@ -559,10 +568,13 @@ void main() {
 
   test('ResidentRunner can run source generation - generation fails', () => testbed.run(() async {
     final FakeProcessManager processManager = globals.processManager as FakeProcessManager;
+    final Directory dependencies = globals.fs.directory(
+      globals.fs.path.join('build', '6ec2559087977927717927ede0a147f1'));
     processManager.addCommand(FakeCommand(
       command: <String>[
         globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
         globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
+        '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
       ],
       exitCode: 1,
       stderr: 'stderr'
