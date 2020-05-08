@@ -82,12 +82,20 @@ TaskFunction createCubicBezierPerfTest() {
   ).run;
 }
 
+TaskFunction createCubicBezierPerfSkSLWarmupTest() {
+  return PerfTestWithSkSL(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/cubic_bezier_perf.dart',
+    'cubic_bezier_perf',
+  ).run;
+}
+
 TaskFunction createBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/backdrop_filter_perf.dart',
     'backdrop_filter_perf',
-    needsMeasureCpuGPu: needsMeasureCpuGpu,
+    needsMeasureCpuGpu: needsMeasureCpuGpu,
   ).run;
 }
 
@@ -96,7 +104,7 @@ TaskFunction createPostBackdropFilterPerfTest({bool needsMeasureCpuGpu = false})
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/post_backdrop_filter_perf.dart',
     'post_backdrop_filter_perf',
-    needsMeasureCpuGPu: needsMeasureCpuGpu,
+    needsMeasureCpuGpu: needsMeasureCpuGpu,
   ).run;
 }
 
@@ -105,7 +113,7 @@ TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/simple_animation_perf.dart',
     'simple_animation_perf',
-    needsMeasureCpuGPu: needsMeasureCpuGpu,
+    needsMeasureCpuGpu: needsMeasureCpuGpu,
   ).run;
 }
 
@@ -114,7 +122,7 @@ TaskFunction createAnimatedPlaceholderPerfTest({bool needsMeasureCpuGpu = false}
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/animated_placeholder_perf.dart',
     'animated_placeholder_perf',
-    needsMeasureCpuGPu: needsMeasureCpuGpu,
+    needsMeasureCpuGpu: needsMeasureCpuGpu,
   ).run;
 }
 
@@ -266,7 +274,7 @@ class PerfTest {
     this.testDirectory,
     this.testTarget,
     this.timelineFileName, {
-    this.needsMeasureCpuGPu = false,
+    this.needsMeasureCpuGpu = false,
     this.testDriver,
   });
 
@@ -279,9 +287,14 @@ class PerfTest {
   /// The test file to run on the host.
   final String testDriver;
   /// Whether to collect CPU and GPU metrics.
-  final bool needsMeasureCpuGPu;
+  final bool needsMeasureCpuGpu;
 
   Future<TaskResult> run() {
+    return internalRun();
+  }
+
+  @protected
+  Future<TaskResult> internalRun({bool keepRunning = false, bool cacheSkSL = false, String existingApp}) {
     return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
@@ -295,7 +308,11 @@ class PerfTest {
         '-t',
         testTarget,
         if (testDriver != null)
-          '--driver', testDriver,
+          ...<String>['--driver', testDriver],
+        if (existingApp != null)
+          ...<String>['--use-existing-app', existingApp],
+        if (cacheSkSL) '--cache-sksl',
+        if (keepRunning) '--keep-app-running',
         '-d',
         deviceId,
       ]);
@@ -310,7 +327,7 @@ class PerfTest {
         );
       }
 
-      if (needsMeasureCpuGPu) {
+      if (needsMeasureCpuGpu) {
         await inDirectory<void>('$testDirectory/build', () async {
           data.addAll(await measureIosCpuGpu(deviceId: deviceId));
         });
@@ -328,11 +345,146 @@ class PerfTest {
         'average_vsync_transitions_missed',
         '90th_percentile_vsync_transitions_missed',
         '99th_percentile_vsync_transitions_missed',
-        if (needsMeasureCpuGPu) 'cpu_percentage',
-        if (needsMeasureCpuGPu) 'gpu_percentage',
+        if (needsMeasureCpuGpu) 'cpu_percentage',
+        if (needsMeasureCpuGpu) 'gpu_percentage',
       ]);
     });
   }
+}
+
+class PerfTestWithSkSL extends PerfTest {
+  PerfTestWithSkSL(
+    String testDirectory,
+    String testTarget,
+    String timelineFileName, {
+    bool needsMeasureCpuGpu = false,
+    String testDriver,
+  }) : super(
+    testDirectory,
+    testTarget,
+    timelineFileName,
+    needsMeasureCpuGpu: needsMeasureCpuGpu,
+    testDriver: testDriver,
+  );
+
+  @override
+  Future<TaskResult> run() async {
+    return inDirectory<TaskResult>(testDirectory, () async {
+      // Some initializations
+      _device = await devices.workingDevice;
+      _flutterPath = path.join(flutterDirectory.path, 'bin', 'flutter');
+
+      // Prepare the SkSL by running the driver test.
+      await _generateSkSL();
+
+      // Build the app with SkSL artifacts and run that app
+      final String observatoryUri = await _buildAndRun();
+
+      // Attach to the running app and run the final driver test to get metrics.
+      final TaskResult result = await internalRun(
+        existingApp: observatoryUri,
+      );
+
+      _runProcess.kill();
+      await _runProcess.exitCode;
+
+      return result;
+    });
+  }
+
+  Future<void> _generateSkSL() async {
+    // First, clear all old sksl.json file so they won't affect the test.
+    for (final FileSystemEntity file in Directory(testDirectory).listSync()) {
+      if (file.path.endsWith('.sksl.json')) {
+        file.deleteSync();
+      }
+    }
+
+    await super.internalRun(keepRunning: true, cacheSkSL: true);
+    final Process process = await startProcess(
+      _flutterPath,
+      <String>[
+        'attach',
+        '-d', _device.deviceId,
+      ],
+    );
+    final Stream<List<int>> broadcastOut = process.stdout.asBroadcastStream();
+    _forwardStream(broadcastOut, 'attach stdout');
+    _forwardStream(process.stderr, 'attach stderr');
+
+    final Completer<bool> attachReady = Completer<bool>();
+    final Completer<bool> skslWritten = Completer<bool>();
+
+    _transform(broadcastOut).listen((String line) {
+      if (!attachReady.isCompleted && _kObservatoryReadyRegExp.hasMatch(line)) {
+        attachReady.complete(true);
+      }
+      if (!skslWritten.isCompleted && RegExp('Wrote SkSL data to').hasMatch(line)) {
+        skslWritten.complete(true);
+      }
+    });
+
+    await attachReady.future;
+    process.stdin.write('M');
+    await skslWritten.future;
+    process.stdin.write('q');
+    await process.exitCode;
+  }
+
+  // Return the Observatory URI.
+  Future<String> _buildAndRun() async {
+    await flutter('build', options: <String>[
+      // TODO(liyuqian): also supports iOS once https://github.com/flutter/flutter/issues/53115 is fully closed.
+      'apk',
+      '--profile',
+      '--bundle-sksl-path', '$testDirectory/flutter_01.sksl.json',
+      '-t', testTarget,
+    ]);
+
+    _runProcess = await startProcess(
+      _flutterPath,
+      <String>[
+        'run',
+        '--verbose',
+        '--profile',
+        '-d', _device.deviceId,
+        '-t', testTarget,
+        '--use-application-binary', '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk',
+        // Getting Observatory URI from --vmservice-out-file is flaky as we're
+        // not sure when the file is written. Hence we
+      ],
+    );
+
+    final Stream<List<int>> broadcastOut = _runProcess.stdout.asBroadcastStream();
+    _forwardStream(broadcastOut, 'run stdout');
+    _forwardStream(_runProcess.stderr, 'run stderr');
+
+    // Getting Observatory URI from --vmservice-out-file is flaky as we're
+    // not sure when the file is written. Hence we just listen for the stdout.
+    final Completer<String> uri = Completer<String>();
+    _transform(broadcastOut).listen((String line) {
+      if (_kObservatoryReadyRegExp.hasMatch(line) && !uri.isCompleted) {
+        uri.complete(_kObservatoryReadyRegExp.firstMatch(line)[1]);
+      }
+    });
+
+    return uri.future;
+  }
+
+  Stream<String> _transform(Stream<List<int>> stream) =>
+      stream.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
+
+  void _forwardStream(Stream<List<int>> stream, String label) {
+    _transform(stream).listen((String line) {
+      print('$label: $line');
+    });
+  }
+
+  String _flutterPath;
+  Device _device;
+  Process _runProcess;
+
+  static final RegExp _kObservatoryReadyRegExp = RegExp(r'An Observatory debugger and profiler on .+ is available at: ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 }
 
 /// Measures how long it takes to compile a Flutter app to JavaScript and how
