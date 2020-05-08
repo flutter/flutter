@@ -101,8 +101,10 @@ class AnimationSheetBuilder {
     final List<ui.Image> frames = await Future.wait<ui.Image>(_recordedFrames, eagerError: true);
     assert(() {
       for (final ui.Image frame in frames) {
-        assert(frame.width == size.width);
-        assert(frame.height == size.height);
+        assert(frame.width == size.width && frame.height == size.height,
+          'Unexpected size mismatch: frame has (${frame.width}, ${frame.height}) '
+          'while `size` is $size.'
+        );
       }
       return true;
     }());

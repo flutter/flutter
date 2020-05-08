@@ -52,7 +52,7 @@ void main() {
   }, skip: isBrowser);
 
   testWidgets('correctly wraps a row', (WidgetTester tester) async {
-    final AnimationSheetBuilder builder = AnimationSheetBuilder(size: const Size(12, 3));
+    final AnimationSheetBuilder builder = AnimationSheetBuilder(size: _DecuplePixels.size);
 
     const Duration duration = Duration(seconds: 2);
     await tester.pumpFrames(
@@ -74,7 +74,7 @@ void main() {
 class _DecuplePixels extends StatefulWidget {
   const _DecuplePixels(this.duration);
 
-  static const Size size = Size(12, 2);
+  static const Size size = Size(12, 3);
 
   final Duration duration;
 
