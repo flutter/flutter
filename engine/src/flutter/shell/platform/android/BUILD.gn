@@ -455,6 +455,8 @@ action("robolectric_tests") {
     jar_path + ".md5.stamp",
   ]
 
+  additional_jar_files = [ "robolectric.properties" ]
+
   _jar_dependencies = [
                         android_sdk_jar,
                         embedding_jar_path,
@@ -462,16 +464,20 @@ action("robolectric_tests") {
 
   inputs = _jar_dependencies
 
+  _rebased_current_path = rebase_path(".")
   _rebased_jar_path = rebase_path(jar_path, root_build_dir)
   _rebased_depfile = rebase_path(depfile, root_build_dir)
   _rebased_classpath = rebase_path(_jar_dependencies, root_build_dir)
   _rebased_srcjars = rebase_path(_jar_dependencies, root_build_dir)
+  _rebased_additional_files = rebase_path(additional_jar_files, root_build_dir)
 
   args = [
     "--depfile=$_rebased_depfile",
     "--jar-path=$_rebased_jar_path",
     "--classpath=$_rebased_classpath",
+    "--jar-source-base-dir=$_rebased_current_path",
     "--java-srcjars=$_rebased_srcjars",
+    "--additional-jar-files=$_rebased_additional_files",
   ]
 
   args += rebase_path(sources, root_build_dir)

@@ -33,7 +33,7 @@ configurations {
   embedding
   // Use any of these configurations for dependencies required for testing the embedding.
   embeddingTesting
-  embeddingTesting_duplicated
+  embeddingTesting_v16
 }
 
 android {
@@ -49,9 +49,13 @@ android {
     embedding "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
 
     // Testing
+    // TODO(xster): remove these android-all compile time dependencies.
+    // Use https://github.com/robolectric/robolectric/blob/master/robolectric/src/main/java/org/robolectric/plugins/LegacyDependencyResolver.java#L24
+    // and specify them as runtime dependencies.
     embeddingTesting "org.robolectric:android-all:8.1.0-robolectric-4611349"
-    // This is required by the robolectric test.
-    embeddingTesting_duplicated "org.robolectric:android-all:4.1.2_r1-robolectric-r1"
+    // Get robolectric shadows for SDK=16 used by PlatformPluginTest.
+    embeddingTesting_v16 "org.robolectric:android-all:4.1.2_r1-robolectric-r1"
+    embeddingTesting "androidx.fragment:fragment-testing:1.1.0"
     embeddingTesting "org.mockito:mockito-all:1.10.19"
     embeddingTesting ("org.robolectric:robolectric:4.3") {
       // org.hamcrest is added by org.mockito:mockito-all
@@ -71,7 +75,7 @@ task updateDependencies() {
   copy {
     from configurations.embedding
     from configurations.embeddingTesting
-    from configurations.embeddingTesting_duplicated
+    from configurations.embeddingTesting_v16
     into destinationDir
   }
   doLast {

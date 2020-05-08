@@ -22,14 +22,6 @@ integration tests in other repos.
 
 ## Q&A
 
-### Why are we using Robolectric 3.8 when Robolectric 4+ is current?
-
-Robolectric 4+ uses the AndroidX libraries, and the engine sources use the
-deprecated android.support ones. See
-[flutter/flutter#23586](https://github.com/flutter/flutter/issues/23586). If
-this is an issue we could use Jetifier on `flutter.jar` first and _then_ run
-the tests, but it would add an extra point of failure.
-
 ### My new test won't run. There's a "ClassNotFoundException".
 
 See [Updating Embedding Dependencies](../embedding_bundle).
