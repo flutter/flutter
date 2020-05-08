@@ -144,7 +144,7 @@ class FloatingActionButton extends StatelessWidget {
     @required this.onPressed,
     this.mini = false,
     this.shape,
-    this.mouseCursor,
+    this.mouseCursor = SystemMouseCursors.click,
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,

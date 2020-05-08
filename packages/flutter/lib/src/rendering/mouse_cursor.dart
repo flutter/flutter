@@ -17,19 +17,6 @@ class _MouseCursorState {
   MouseCursorSession session;
 }
 
-class _FallbackAnnotation with Diagnosticable implements MouseTrackerAnnotation {
-  const _FallbackAnnotation();
-
-  @override
-  PointerEnterEventListener get onEnter => null;
-  @override
-  PointerHoverEventListener get onHover => null;
-  @override
-  PointerExitEventListener get onExit => null;
-  @override
-  MouseCursor get cursor => SystemMouseCursors.basic;
-}
-
 /// A mixin for [BaseMouseTracker] that sets the mouse pointer's cursors
 /// on device update.
 ///
@@ -63,17 +50,18 @@ mixin MouseTrackerCursorMixin on BaseMouseTracker {
 
   final Map<int, _MouseCursorState> _mouseCursorStates = <int, _MouseCursorState>{};
 
-  // Find the mouse cursor, which fallbacks to _fallbackAnnotation.
-  // The `annotations` is the current annotations that the device is
-  // hovering in visual order from front the back.
+  // Find the mouse cursor, which fallbacks to SystemMouseCursors.basic.
+  //
+  // The `annotations` is the current annotations that the device is hovering in
+  // visual order from front the back.
   // The return value is never null.
-  MouseTrackerAnnotation _findCursorAnnotation(LinkedHashSet<MouseTrackerAnnotation> annotations) {
+  MouseCursor _findFirstCursor(LinkedHashSet<MouseTrackerAnnotation> annotations) {
     for (final MouseTrackerAnnotation annotation in annotations) {
       if (annotation.cursor != null) {
-        return annotation;
+        return annotation.cursor;
       }
     }
-    return const _FallbackAnnotation();
+    return SystemMouseCursors.basic;
   }
 
   // Handles device update and changes mouse cursors.
@@ -94,11 +82,11 @@ mixin MouseTrackerCursorMixin on BaseMouseTracker {
 
     final MouseCursorSession lastSession = state.session;
     assert(lastSession != null || !debugHadState);
-    final MouseTrackerAnnotation nextAnnotation = _findCursorAnnotation(details.nextAnnotations);
-    if (lastSession?.cursor == nextAnnotation.cursor)
+    final MouseCursor nextCursor = _findFirstCursor(details.nextAnnotations);
+    if (lastSession?.cursor == nextCursor)
       return;
 
-    final MouseCursorSession nextSession = nextAnnotation.cursor.createSession(device);
+    final MouseCursorSession nextSession = nextCursor.createSession(device);
     state.session = nextSession;
 
     lastSession?.dispose();
@@ -115,7 +103,7 @@ mixin MouseTrackerCursorMixin on BaseMouseTracker {
 /// needs to load resources might want to set a temporary cursor first, then
 /// switch to the correct cursor after the load is completed.
 ///
-/// A [MouseCursorSession] have the following lifecycle:
+/// A [MouseCursorSession] has the following lifecycle:
 /// 
 ///  * When a pointing device should start displaying a cursor, [MouseTracker]
 ///    creates a session by calling [MouseCursor.createSession] on the target

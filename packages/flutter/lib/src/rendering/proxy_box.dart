@@ -2705,8 +2705,6 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
     }
   }
 
-  /// Called when a mouse pointer starts being contained by the region (with or
-  /// without buttons pressed) for any reason.
   @override
   PointerEnterEventListener get onEnter => _onEnter;
   PointerEnterEventListener _onEnter;
@@ -2717,8 +2715,6 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
     }
   }
 
-  /// Called when a pointer changes position without buttons pressed and the end
-  /// position is within the region.
   @override
   PointerHoverEventListener get onHover => _onHover;
   PointerHoverEventListener _onHover;
@@ -2729,8 +2725,6 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
     }
   }
 
-  /// Called when a pointer is no longer contained by the region (with or
-  /// without buttons pressed) for any reason.
   @override
   PointerExitEventListener get onExit => _onExit;
   PointerExitEventListener _onExit;
@@ -2741,20 +2735,6 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
     }
   }
 
-  /// The mouse cursor for mouse pointers that are hovering over the annotated
-  /// region.
-  ///
-  /// When a mouse enters the region, its cursor will be changed to the
-  /// [cursor]. The [cursor] defaults to null, meaning the region does not
-  /// control cursors, but defers the choice to the next region behind this
-  /// one on the screen in hit-test order, or [SystemMouseCursors.basic] if no
-  /// others can be found.
-  ///
-  /// See also:
-  ///
-  ///  * [MouseCursor] for a general introduction to the mouse cursor system.
-  ///  * [MouseRegion.cursor], which is the widget-layer counterpart, and
-  ///    allows general (unprepared) mouse cursors.
   @override
   MouseCursor get cursor => _cursor;
   MouseCursor _cursor;

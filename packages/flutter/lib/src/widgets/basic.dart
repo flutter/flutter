@@ -5893,7 +5893,7 @@ class MouseRegion extends StatefulWidget {
   }) : assert(opaque != null),
        super(key: key);
 
-  /// Called when a mouse pointer has entered this widget.
+  /// Triggered when a mouse pointer has entered this widget.
   ///
   /// This callback is triggered when the pointer, with or without buttons
   /// pressed, has started to be contained by the region of this widget. More
@@ -5921,16 +5921,16 @@ class MouseRegion extends StatefulWidget {
   ///    internally implemented.
   final PointerEnterEventListener onEnter;
 
-  /// Called when a mouse pointer moves within this widget without buttons
-  /// pressed.
+  /// Triggered when a mouse pointer has moved onto or within the widget without
+  /// buttons pressed.
   ///
-  /// This callback is not triggered when the [MouseRegion] has moved
-  /// while being hovered by the mouse pointer.
+  /// This callback is not triggered by the movement of an annotation.
   ///
-  /// {@macro flutter.mouseRegion.triggerTime}
+  /// The time that this callback is triggered is during the callback of a
+  /// pointer event, which is always between frames.
   final PointerHoverEventListener onHover;
 
-  /// Called when a mouse pointer has exited this widget when the widget is
+  /// Triggered when a mouse pointer has exited this widget when the widget is
   /// still mounted.
   ///
   /// This callback is triggered when the pointer, with or without buttons
@@ -6102,11 +6102,12 @@ class MouseRegion extends StatefulWidget {
   /// The mouse cursor for mouse pointers that are hovering over the annotated
   /// region.
   ///
-  /// When a mouse enters the region, its cursor will be changed to the
-  /// [cursor]. The [cursor] defaults to null, meaning the region does not
-  /// control cursors, but defers the choice to the next region behind this
-  /// one on the screen in hit-test order, or [SystemMouseCursors.basic] if no
-  /// others can be found.
+  /// When a mouse enters the region, its cursor will be changed to the [cursor].
+  /// The [cursor] defaults to null, meaning the region does not control cursors,
+  /// but defers the choice to the next region behind this one on the screen in
+  /// hit-test order, or [SystemMouseCursors.basic] if no others can be found.
+  /// When the mouse leaves the region, the cursor will be decided by the region
+  /// found at the new location.
   final MouseCursor cursor;
 
   /// Whether this widget should prevent other [MouseRegion]s visually behind it

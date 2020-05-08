@@ -41,11 +41,11 @@ typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 /// `onEnter`.
 ///
 /// This class is also the type parameter of the annotation search started by
-/// [MouseTracker].
+/// [BaseMouseTracker].
 ///
 /// See also:
 ///
-///  * [MouseTracker], which uses [MouseTrackerAnnotation].
+///  * [BaseMouseTracker], which uses [MouseTrackerAnnotation].
 class MouseTrackerAnnotation with Diagnosticable {
   /// Creates an immutable [MouseTrackerAnnotation].
   const MouseTrackerAnnotation({
@@ -56,11 +56,12 @@ class MouseTrackerAnnotation with Diagnosticable {
   });
 
   /// Triggered when a mouse pointer, with or without buttons pressed, has
-  /// entered the annotated region.
+  /// entered the region.
   ///
-  /// This callback is triggered when the pointer has started to be contained
-  /// by the annotationed region for any reason, which means it always matches a
-  /// later [onExit].
+  /// This callback is triggered when the pointer has started to be contained by
+  /// the region, either due to a pointer event, or due to the movement or
+  /// disappearance of the region. This method is always matched by a later
+  /// [onExit].
   ///
   /// See also:
   ///
@@ -68,20 +69,10 @@ class MouseTrackerAnnotation with Diagnosticable {
   ///  * [MouseRegion.onEnter], which uses this callback.
   final PointerEnterEventListener onEnter;
 
-  /// Triggered when a pointer has moved within the annotated region without
+  /// Triggered when a mouse pointer has moved onto or within the region without
   /// buttons pressed.
   ///
-  /// This callback is triggered when:
-  ///
-  ///  * An annotation that did not contain the pointer has moved to under a
-  ///    pointer that has no buttons pressed.
-  ///  * A pointer has moved onto, or moved within an annotation without buttons
-  ///    pressed.
-  ///
-  /// This callback is not triggered when:
-  ///
-  ///  * An annotation that is containing the pointer has moved, and still
-  ///    contains the pointer.
+  /// This callback is not triggered by the movement of an annotation.
   ///
   /// See also:
   ///
@@ -89,16 +80,16 @@ class MouseTrackerAnnotation with Diagnosticable {
   final PointerHoverEventListener onHover;
 
   /// Triggered when a mouse pointer, with or without buttons pressed, has
-  /// exited the annotated region when the annotated region still exists.
+  /// exited the region.
   ///
   /// This callback is triggered when the pointer has stopped being contained
-  /// by the region for any reason, which means it always matches an earlier
+  /// by the region, either due to a pointer event, or due to the movement or
+  /// disappearance of the region. This method always matches an earlier
   /// [onEnter].
   ///
   /// See also:
   ///
   ///  * [onEnter], which is triggered when a mouse pointer enters the region.
-  ///  * [RenderMouseRegion.onExit], which uses this callback.
   ///  * [MouseRegion.onExit], which uses this callback, but is not triggered in
   ///    certain cases and does not always match its earier [MouseRegion.onEnter].
   final PointerExitEventListener onExit;
@@ -110,15 +101,12 @@ class MouseTrackerAnnotation with Diagnosticable {
   /// [cursor]. If the [cursor] is null, then the annotated region does not
   /// control cursors, but defers the choice to the next annotation behind this
   /// one on the screen in hit-test order, or [SystemMouseCursors.basic] if no
-  /// others can be found.
+  /// others can be found. When the mouse leaves the region, the cursor will be
+  /// set by the region found at the new location.
   ///
   /// See also:
   ///
-  ///  * [MouseCursor] for a general introduction to the mouse cursor system.
-  ///  * [SystemMouseCursors], which is a collection of system cursors of all
-  ///    platforms.
-  ///  * [RenderMouseRegion.cursor] and [MouseRegion.cursor], which provide
-  ///    values to this field.
+  ///  * [MouseRegion.cursor], which provide values to this field.
   final MouseCursor cursor;
 
   @override
@@ -139,11 +127,11 @@ class MouseTrackerAnnotation with Diagnosticable {
 
 /// Signature for searching for [MouseTrackerAnnotation]s at the given offset.
 ///
-/// It is used by the [MouseTracker] to fetch annotations for the mouse
+/// It is used by the [BaseMouseTracker] to fetch annotations for the mouse
 /// position.
 typedef MouseDetectorAnnotationFinder = Iterable<MouseTrackerAnnotation> Function(Offset offset);
 
-// Various states of a connected mouse device used by [MouseTracker].
+// Various states of a connected mouse device used by [BaseMouseTracker].
 class _MouseState {
   _MouseState({
     @required PointerEvent initialEvent,
@@ -188,7 +176,7 @@ class _MouseState {
   }
 }
 
-/// Used by [MouseTracker] to provide the details of an update of a mouse
+/// Used by [BaseMouseTracker] to provide the details of an update of a mouse
 /// device.
 ///
 /// This class contains the information needed to handle the update that might
@@ -330,7 +318,7 @@ class BaseMouseTracker extends ChangeNotifier {
   /// Find annotations at a given offset in global logical coordinate space
   /// in visual order from front to back.
   ///
-  /// [MouseTracker] uses this callback to know which annotations are
+  /// [BaseMouseTracker] uses this callback to know which annotations are
   /// affected by each device.
   ///
   /// The annotations should be returned in visual order from front to
@@ -438,7 +426,7 @@ class BaseMouseTracker extends ChangeNotifier {
 
   /// A callback that is called on the update of a device.
   ///
-  /// This method should be called only by [MouseTracker].
+  /// This method should be called only by [BaseMouseTracker].
   ///
   /// Override this method to receive updates when the relationship between a
   /// device and annotations have changed. Subclasses should override this method
