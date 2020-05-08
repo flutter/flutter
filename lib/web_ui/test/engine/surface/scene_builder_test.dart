@@ -10,7 +10,7 @@ import 'package:ui/ui.dart';
 
 import 'package:test/test.dart';
 
-import 'matchers.dart';
+import '../../matchers.dart';
 
 void main() {
   group('SceneBuilder', () {
@@ -239,6 +239,31 @@ void main() {
     });
   });
 
+  test('skips painting picture when picture fully clipped out', () async {
+    final Picture picture = _drawPicture();
+
+    // Picture not clipped out, so we should see a `<flt-canvas>`
+    {
+      final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+      builder.pushOffset(0, 0);
+      builder.addPicture(Offset.zero, picture);
+      builder.pop();
+      html.HtmlElement content = builder.build().webOnlyRootElement;
+      expect(content.querySelectorAll('flt-picture').single.children, isNotEmpty);
+    }
+
+    // Picture fully clipped out, so we should not see a `<flt-canvas>`
+    {
+      final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+      builder.pushOffset(0, 0);
+      builder.pushClipRect(const Rect.fromLTRB(1000, 1000, 2000, 2000));
+      builder.addPicture(Offset.zero, picture);
+      builder.pop();
+      builder.pop();
+      html.HtmlElement content = builder.build().webOnlyRootElement;
+      expect(content.querySelectorAll('flt-picture').single.children, isEmpty);
+    }
+  });
 }
 
 typedef TestLayerBuilder = EngineLayer Function(

@@ -180,7 +180,11 @@ class PersistedStandardPicture extends PersistedPicture {
       return 1.0;
     } else {
       final BitmapCanvas oldCanvas = existingSurface._canvas;
-      if (!oldCanvas.doesFitBounds(_exactLocalCullRect)) {
+      if (oldCanvas == null) {
+        // We did not allocate a canvas last time. This can happen when the
+        // picture is completely clipped out of the view.
+        return 1.0;
+      } else if (!oldCanvas.doesFitBounds(_exactLocalCullRect)) {
         // The canvas needs to be resized before painting.
         return 1.0;
       } else {
@@ -547,7 +551,10 @@ abstract class PersistedPicture extends PersistedLeafSurface {
 
   void _applyPaint(PersistedPicture oldSurface) {
     final EngineCanvas oldCanvas = oldSurface?._canvas;
-    if (!picture.recordingCanvas.didDraw) {
+    if (!picture.recordingCanvas.didDraw || _optimalLocalCullRect.isEmpty) {
+      // The picture is empty, or it has been completely clipped out. Skip
+      // painting. This removes all the setup work and scaffolding objects
+      // that won't be useful for anything anyway.
       _recycleCanvas(oldCanvas);
       domRenderer.clearDom(rootElement);
       return;
@@ -642,7 +649,7 @@ abstract class PersistedPicture extends PersistedLeafSurface {
     super.debugValidate(validationErrors);
 
     if (picture.recordingCanvas.didDraw) {
-      if (debugCanvas == null) {
+      if (!_optimalLocalCullRect.isEmpty && debugCanvas == null) {
         validationErrors
             .add('$runtimeType has non-trivial picture but it has null canvas');
       }
