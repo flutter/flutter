@@ -281,13 +281,13 @@ task:
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
     # firebase_test_lab_tests are linux-only
+    - name: firebase_test_lab_tests-0-linux
+      <<: *FIREBASE_SHARD_TEMPLATE
+
     - name: firebase_test_lab_tests-1-linux
       <<: *FIREBASE_SHARD_TEMPLATE
 
     - name: firebase_test_lab_tests-2-linux
-      <<: *FIREBASE_SHARD_TEMPLATE
-
-    - name: firebase_test_lab_tests-3-linux
       <<: *FIREBASE_SHARD_TEMPLATE
 
     - name: web_smoke_test
