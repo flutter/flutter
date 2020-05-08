@@ -7,9 +7,12 @@
 
 #define __FLUTTER_LINUX_INSIDE__
 
+#include <flutter_linux/fl_binary_codec.h>
 #include <flutter_linux/fl_binary_messenger.h>
 #include <flutter_linux/fl_dart_project.h>
 #include <flutter_linux/fl_engine.h>
+#include <flutter_linux/fl_message_codec.h>
+#include <flutter_linux/fl_string_codec.h>
 #include <flutter_linux/fl_value.h>
 #include <flutter_linux/fl_view.h>
 
