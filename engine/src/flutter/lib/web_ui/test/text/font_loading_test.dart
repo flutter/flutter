@@ -26,8 +26,10 @@ Future<void> main() async {
           ui.loadFontFromList(Uint8List(0), fontFamily: 'test-font'),
           throwsA(TypeMatcher<Exception>()));
     },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/56702
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
-        skip: browserEngine == BrowserEngine.edge);
+        skip: (browserEngine == BrowserEngine.edge ||
+            browserEngine == BrowserEngine.webkit));
 
     test('loads Blehm font from buffer', () async {
       expect(_containsFontFamily('Blehm'), false);
@@ -40,8 +42,10 @@ Future<void> main() async {
 
       expect(_containsFontFamily('Blehm'), true);
     },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/56702
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
-        skip: browserEngine == BrowserEngine.edge);
+        skip: (browserEngine == BrowserEngine.edge ||
+            browserEngine == BrowserEngine.webkit));
 
     test('loading font should clear measurement caches', () async {
       final ui.ParagraphStyle style = ui.ParagraphStyle();
@@ -66,8 +70,10 @@ Future<void> main() async {
       expect(_containsFontFamily('Blehm'), true);
       expect(TextMeasurementService.rulerManager.rulers.length, 0);
     },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/56702
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
-        skip: browserEngine == BrowserEngine.edge);
+        skip: (browserEngine == BrowserEngine.edge ||
+            browserEngine == BrowserEngine.webkit));
 
     test('loading font should send font change message', () async {
       final ui.PlatformMessageCallback oldHandler = ui.window.onPlatformMessage;
@@ -93,8 +99,10 @@ Future<void> main() async {
       expect(actualName, 'flutter/system');
       expect(message, '{"type":"fontsChange"}');
     },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/56702
         // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
-        skip: browserEngine == BrowserEngine.edge);
+        skip: (browserEngine == BrowserEngine.edge ||
+            browserEngine == BrowserEngine.webkit));
   });
 }
 
