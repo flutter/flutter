@@ -140,7 +140,11 @@ void main() {
       for (final AndroidBuildInfo androidBuildInfo in androidBuildInfos) {
         final BuildInfo buildInfo = androidBuildInfo.buildInfo;
         buildModes.add(buildInfo.mode);
-        expect(buildInfo.treeShakeIcons, isFalse);
+        if (buildInfo.mode.isPrecompiled) {
+          expect(buildInfo.treeShakeIcons, isTrue);
+        } else {
+          expect(buildInfo.treeShakeIcons, isFalse);
+        }
         expect(buildInfo.flavor, isNull);
         expect(buildInfo.splitDebugInfoPath, isNull);
         expect(buildInfo.dartObfuscation, isFalse);
