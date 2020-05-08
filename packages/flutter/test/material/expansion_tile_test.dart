@@ -332,42 +332,6 @@ void main() {
     expect(child1Rect.left, 700.0);
   });
 
-  test('ExpansionTile alignment can not be null', () {
-    try{
-       MaterialApp(
-        home: Material(
-          child: ExpansionTile(
-            title: const Text('title'),
-            alignment: null,
-          ),
-        ),
-      );
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('alignment != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('ExpansionTile did not throw AssertionError when alignment was null');
-  });
-
-  test('ExpansionTile crossAxisAlignment can not be null', () {
-    try{
-      MaterialApp(
-        home: Material(
-          child: ExpansionTile(
-            title: const Text('title'),
-            crossAxisAlignment: null,
-          ),
-        ),
-      );
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('crossAxisAlignment != null'));
-      expect(error.toString(), contains('is not true'));
-      return;
-    }
-    fail('ExpansionTile did not throw AssertionError when crossAxisAlignment was null');
-  });
-
   testWidgets('ExpansionTile crossAxisAlignment.baseline', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(

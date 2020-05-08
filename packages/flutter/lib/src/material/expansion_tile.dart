@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -42,12 +43,10 @@ class ExpansionTile extends StatefulWidget {
     this.trailing,
     this.initiallyExpanded = false,
     this.tilePadding,
-    this.crossAxisAlignment = CrossAxisAlignment.center,
-    this.alignment = Alignment.center,
+    this.crossAxisAlignment,
+    this.alignment,
     this.textBaseline,
   }) : assert(initiallyExpanded != null),
-       assert(crossAxisAlignment != null),
-       assert(alignment != null),
        super(key: key);
 
   /// A widget to display before the title.
@@ -105,7 +104,7 @@ class ExpansionTile extends StatefulWidget {
   /// When the width of children is different, then [crossAxisAlignment] property
   /// can be used with `alignment` property to place the children along the cross axis.
   ///
-  /// The default value for `alignment` is [Alignment.center].
+  /// When the value is null, the value of `alignment` is [Alignment.center].
   final Alignment alignment;
 
   /// Specifies the position of [children] inside [Column].
@@ -113,7 +112,8 @@ class ExpansionTile extends StatefulWidget {
   /// When the value of `crossAxisAlignment` is [CrossAxisAlignment.baseline], then
   /// the value of [textBaseline] can not be null.
   ///
-  /// The default value for `crossAxisAlignment` is [CrossAxisAlignment.center].
+  /// When the value is null, the value of `crossAxisAlignment` is
+  /// [CrossAxisAlignment.center].
   final CrossAxisAlignment crossAxisAlignment;
 
   /// Defines the baseline for the alignment to be considered when the value
@@ -217,7 +217,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           ),
           ClipRect(
             child: Align(
-              alignment: widget.alignment,
+              alignment: widget.alignment ?? Alignment.center,
               heightFactor: _heightFactor.value,
               child: child,
             ),
@@ -248,7 +248,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       animation: _controller.view,
       builder: _buildChildren,
       child: closed ? null : Column(
-        crossAxisAlignment: widget.crossAxisAlignment,
+        crossAxisAlignment: widget.crossAxisAlignment ?? CrossAxisAlignment.center,
         textBaseline: widget.textBaseline,
         children: widget.children,
       ),
