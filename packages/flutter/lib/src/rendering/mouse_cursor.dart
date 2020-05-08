@@ -92,15 +92,15 @@ mixin MouseTrackerCursorMixin on BaseMouseTracker {
 /// switch to the correct cursor after the load is completed.
 ///
 /// A [MouseCursorSession] has the following lifecycle:
-/// 
+///
 ///  * When a pointing device should start displaying a cursor, [MouseTracker]
 ///    creates a session by calling [MouseCursor.createSession] on the target
 ///    cursor, and stores it in a table associated with the device.
 ///  * [MouseTracker] then immediately calls the session's [activate], where the
 ///    session should fetch resources and make system calls.
-///  * When the pointing device should start displaying a different cursor, which
-///    is determined by [MouseCursor]'s `==`, [MouseTracker] calls [dispose] on the
-///    session, and this session will no longer be used in the future.
+///  * When the pointing device should start displaying a different cursor,
+///    [MouseTracker] calls [dispose] on this session. After [dispose], this session
+///    will no longer be used in the future.
 abstract class MouseCursorSession {
   /// Create a session.
   ///
@@ -119,9 +119,10 @@ abstract class MouseCursorSession {
   ///
   /// Called right after this session is created.
   ///
-  /// This method should collect necessary resources, then make system calls
-  /// (usually through [SystemChannels.mouseCursor]) to apply the effect.
-  /// This method may change the state of this class.
+  /// This method has full control over the cursor until the [dispose] call, and
+  /// can make system calls to change the pointer cursor as many times as
+  /// necessary (usually through [SystemChannels.mouseCursor]). It can also
+  /// collect resources, and store the result in this object.
   @protected
   Future<void> activate();
 
@@ -129,8 +130,11 @@ abstract class MouseCursorSession {
   ///
   /// After this call, this session instance will no longer be used in the
   /// future.
+  ///
+  /// When implementing this method in subclasses, you should release resources
+  /// and prevent [activate] from causing side effects after disposal.
   @protected
-  void dispose() {}
+  void dispose();
 }
 
 /// An interface for mouse cursor definitions.
@@ -198,7 +202,7 @@ abstract class MouseCursorSession {
 /// [MouseCursorSession] represents the duration when a pointing device displays
 /// a cursor, and defines the states and behaviors of the cursor. Every mouse
 /// cursor class usually has a corresponding [MouseCursorSession] class.
-/// 
+///
 /// [MouseTrackerCursorMixin] is a mixin that adds the feature of changing
 /// cursors to [BaseMouseTracker], which tracks the relationship between mouse
 /// devices and annotations. [MouseTrackerCursorMixin] is usually used as a part
@@ -245,6 +249,9 @@ class _NoopMouseCursorSession extends MouseCursorSession {
 
   @override
   Future<void> activate() async { /* Nothing */ }
+
+  @override
+  void dispose() { /* Nothing */ }
 }
 
 /// A mouse cursor that doesn't change the cursor when activated.
@@ -287,6 +294,9 @@ class _SystemMouseCursorSession extends MouseCursorSession {
       },
     );
   }
+
+  @override
+  void dispose() { /* Nothing */ }
 }
 
 /// A mouse cursor that is natively supported on the platform that the

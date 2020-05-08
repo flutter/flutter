@@ -2701,6 +2701,8 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
   set opaque(bool value) {
     if (_opaque != value) {
       _opaque = value;
+      // A repaint is needed in order to propagate the new value to
+      // AnnotatedRegionLayer via [paint].
       _markPropertyUpdated(mustRepaint: true);
     }
   }
@@ -2741,6 +2743,8 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
   set cursor(MouseCursor value) {
     if (_cursor != value) {
       _cursor = value;
+      // A repaint is needed in order to trigger a device update of
+      // [MouseTracker] so that this new value can be found.
       _markPropertyUpdated(mustRepaint: true);
     }
   }

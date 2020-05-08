@@ -33,7 +33,7 @@ typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 /// To use an annotation, push it with [AnnotatedRegionLayer] during painting.
 /// The annotation's callbacks or configurations will be used depending on the
 /// relationship between annotations and mouse pointers.
-/// 
+///
 /// A [RenderObject] who uses this class must not dispose this class in its
 /// `detach`, even if it recreates a new one in `attach`, because the object
 /// might be detached and attached during the same frame during a reparent, and
@@ -221,9 +221,12 @@ class MouseTrackerUpdateDetails with Diagnosticable {
 
   /// The last event that the device observed before the update.
   ///
-  /// If the update is triggered by a frame, it is not null, since the pointer
-  /// must have been added before. If the update is triggered by an event,
-  /// it might be null.
+  /// If the update is triggered by a frame, the [previousEvent] is never null,
+  /// since the pointer must have been added before.
+  ///
+  /// If the update is triggered by a pointer event, the [previousEvent] is not
+  /// null except for cases where the event is the first event observed by the
+  /// pointer (which is not necessarily a [PointerAddedEvent]).
   final PointerEvent previousEvent;
 
   /// The event that triggered this update.
@@ -356,7 +359,7 @@ class BaseMouseTracker extends ChangeNotifier {
     }
   }
 
-  /// Whether or not a mouse is connected and has produced events.
+  /// Whether or not at least one mouse is connected and has produced events.
   bool get mouseIsConnected => _mouseStates.isNotEmpty;
 
   // Tracks the state of connected mouse devices.
