@@ -340,6 +340,36 @@ void main() {
     ]));
   });
 
+  test('Removing a pointer resets it back to the default cursor', () {
+    final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
+    MouseTrackerAnnotation annotation;
+    _setUpMouseTracker(
+      annotationFinder: (Offset position) => <MouseTrackerAnnotation>[if (annotation != null) annotation],
+      logCursors: logCursors,
+    );
+
+    // Pointer is added to the annotation, then removed
+    annotation = const MouseTrackerAnnotation(cursor: SystemMouseCursors.click);
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
+      _pointerData(PointerChange.hover, const Offset(5.0, 0.0)),
+      _pointerData(PointerChange.remove, const Offset(5.0, 0.0)),
+    ]));
+
+    logCursors.clear();
+
+    // Pointer is added out of the annotation
+    annotation = null;
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
+    ]));
+
+    expect(logCursors, <_CursorUpdateDetails>[
+      _CursorUpdateDetails.activateSystemCursor(device: 0, shapeCode: SystemMouseCursors.basic.shapeCode),
+    ]);
+    logCursors.clear();
+  });
+
   test('Pointing devices display cursors separately', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     _setUpMouseTracker(

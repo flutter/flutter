@@ -13,10 +13,6 @@ import 'package:flutter/services.dart';
 
 import 'mouse_tracking.dart';
 
-class _MouseCursorState {
-  MouseCursorSession session;
-}
-
 /// A mixin for [BaseMouseTracker] that sets the mouse pointer's cursors
 /// on device update.
 ///
@@ -35,7 +31,7 @@ mixin MouseTrackerCursorMixin on BaseMouseTracker {
   MouseCursor debugDeviceActiveCursor(int device) {
     MouseCursor result;
     assert(() {
-      result = _mouseCursorStates[device]?.session?.cursor;
+      result = _lastSession[device]?.cursor;
       return true;
     }());
     return result;
@@ -48,7 +44,7 @@ mixin MouseTrackerCursorMixin on BaseMouseTracker {
     _handleDeviceUpdateMouseCursor(details);
   }
 
-  final Map<int, _MouseCursorState> _mouseCursorStates = <int, _MouseCursorState>{};
+  final Map<int, MouseCursorSession> _lastSession = <int, MouseCursorSession>{};
 
   // Find the mouse cursor, which fallbacks to SystemMouseCursors.basic.
   //
@@ -69,25 +65,17 @@ mixin MouseTrackerCursorMixin on BaseMouseTracker {
     final int device = details.device;
 
     if (details.triggeringEvent is PointerRemovedEvent) {
-      _mouseCursorStates.remove(device);
+      _lastSession.remove(device);
       return;
     }
 
-    bool debugHadState;
-    assert(() {
-      debugHadState = _mouseCursorStates.containsKey(device);
-      return true;
-    }());
-    final _MouseCursorState state = _mouseCursorStates.putIfAbsent(device, () => _MouseCursorState());
-
-    final MouseCursorSession lastSession = state.session;
-    assert(lastSession != null || !debugHadState);
+    final MouseCursorSession lastSession = _lastSession[device];
     final MouseCursor nextCursor = _findFirstCursor(details.nextAnnotations);
     if (lastSession?.cursor == nextCursor)
       return;
 
     final MouseCursorSession nextSession = nextCursor.createSession(device);
-    state.session = nextSession;
+    _lastSession[device] = nextSession;
 
     lastSession?.dispose();
     nextSession.activate();

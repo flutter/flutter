@@ -2745,13 +2745,6 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
     }
   }
 
-  /// Object used for annotation of the layer used for hover hit detection.
-  ///
-  /// This is only public to allow for testing of Listener widgets. Do not call
-  /// in other contexts.
-  @visibleForTesting
-  MouseTrackerAnnotation get hoverAnnotation => this;
-
   // Call this method when a property has changed and might affect the
   // `_annotationIsActive` bit.
   //
