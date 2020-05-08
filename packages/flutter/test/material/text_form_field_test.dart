@@ -208,10 +208,9 @@ void main() {
       ),
     );
 
-    expect(_validateCalled, 1);
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
-    expect(_validateCalled, 2);
+    expect(_validateCalled, 1);
   });
 
   testWidgets('validate is called if widget is enabled', (WidgetTester tester) async {
@@ -234,10 +233,9 @@ void main() {
       ),
     );
 
-    expect(_validateCalled, 1);
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
-    expect(_validateCalled, 2);
+    expect(_validateCalled, 1);
   });
 
 
