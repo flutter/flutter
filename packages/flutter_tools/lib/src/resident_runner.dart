@@ -23,6 +23,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/targets/localizations.dart';
+import 'bundle.dart';
 import 'cache.dart';
 import 'codegen.dart';
 import 'compile.dart';
@@ -101,7 +102,9 @@ class FlutterDevice {
         compilerMessageConsumer:
           (String message, {bool emphasis, TerminalColor color, }) =>
             globals.printTrace(message),
-        initializeFromDill: globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
+        initializeFromDill: getDefaultCachedKernelPath(
+          trackWidgetCreation: buildInfo.trackWidgetCreation,
+        ),
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
         platformDill: globals.fs.file(globals.artifacts
@@ -126,7 +129,9 @@ class FlutterDevice {
         targetModel: targetModel,
         experimentalFlags: experimentalFlags,
         dartDefines: buildInfo.dartDefines,
-        initializeFromDill: globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
+        initializeFromDill: getDefaultCachedKernelPath(
+          trackWidgetCreation: buildInfo.trackWidgetCreation,
+        ),
         packagesPath: globalPackagesPath,
       );
     }
@@ -726,6 +731,7 @@ abstract class ResidentRunner {
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
   bool get supportsCanvasKit => false;
   bool get supportsWriteSkSL => supportsServiceProtocol;
+  bool get trackWidgetCreation => debuggingOptions.buildInfo.trackWidgetCreation;
 
   // Returns the Uri of the first connected device for mobile,
   // and only connected device for web.
@@ -1193,10 +1199,11 @@ abstract class ResidentRunner {
   Future<void> preExit() async {
     // If _dillOutputPath is null, we created a temporary directory for the dill.
     if (_dillOutputPath == null && artifactDirectory.existsSync()) {
-      final File outputDill = artifactDirectory.childFile('app.dill');
+      final File outputDill = globals.fs.file(dillOutputPath);
       if (outputDill.existsSync()) {
-        artifactDirectory.childFile('app.dill')
-          .copySync(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+        outputDill.copySync(getDefaultCachedKernelPath(
+          trackWidgetCreation: trackWidgetCreation,
+        ));
       }
       artifactDirectory.deleteSync(recursive: true);
     }

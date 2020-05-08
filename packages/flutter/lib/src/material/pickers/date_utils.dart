@@ -12,9 +12,16 @@
 
 import '../material_localizations.dart';
 
+import 'date_picker_common.dart';
+
 /// Returns a [DateTime] with just the date of the original, but no time set.
 DateTime dateOnly(DateTime date) {
   return DateTime(date.year, date.month, date.day);
+}
+
+/// Returns a [DateTimeRange] with the dates of the original without any times set.
+DateTimeRange datesOnly(DateTimeRange range) {
+  return DateTimeRange(start: dateOnly(range.start), end: dateOnly(range.end));
 }
 
 /// Returns true if the two [DateTime] objects have the same day, month, and
@@ -119,4 +126,32 @@ int getDaysInMonth(int year, int month) {
   }
   const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   return daysInMonth[month - 1];
+}
+
+/// Returns a locale-appropriate string to describe the start of a date range.
+///
+/// If `startDate` is null, then it defaults to 'Start Date', otherwise if it
+/// is in the same year as the `endDate` then it will use the short month
+/// day format (i.e. 'Jan 21'). Otherwise it will return the short date format
+/// (i.e. 'Jan 21, 2020').
+String formatRangeStartDate(MaterialLocalizations localizations, DateTime startDate, DateTime endDate) {
+  return startDate == null
+    ? 'Start Date'
+    : (endDate == null || startDate.year == endDate.year)
+      ? localizations.formatShortMonthDay(startDate)
+      : localizations.formatShortDate(startDate);
+}
+
+/// Returns an locale-appropriate string to describe the end of a date range.
+///
+/// If `endDate` is null, then it defaults to 'End Date', otherwise if it
+/// is in the same year as the `startDate` and the `currentDate` then it will
+/// just use the short month day format (i.e. 'Jan 21'), otherwise it will
+/// include the year (i.e. 'Jan 21, 2020').
+String formatRangeEndDate(MaterialLocalizations localizations, DateTime startDate, DateTime endDate, DateTime currentDate) {
+  return endDate == null
+    ? 'End Date'
+    : (startDate != null && startDate.year == endDate.year && startDate.year == currentDate.year)
+      ? localizations.formatShortMonthDay(endDate)
+      : localizations.formatShortDate(endDate);
 }

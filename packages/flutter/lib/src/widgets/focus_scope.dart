@@ -997,6 +997,7 @@ class ExcludeFocus extends StatelessWidget {
     return Focus(
       canRequestFocus: false,
       skipTraversal: true,
+      includeSemantics: false,
       descendantsAreFocusable: !excluding,
       child: child,
     );

@@ -1284,40 +1284,46 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       });
     });
 
-    test('should throw when failing to parse the arb file', () {
-      const String arbFileWithTrailingComma = '''
+    test(
+      'should throw with descriptive error message when failing to parse the '
+      'arb file',
+      () {
+        const String arbFileWithTrailingComma = '''
 {
   "title": "Stocks",
   "@title": {
     "description": "Title for the Stocks application"
   },
 }''';
-      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-        ..createSync(recursive: true);
-      l10nDirectory.childFile(defaultTemplateArbFileName)
-        .writeAsStringSync(arbFileWithTrailingComma);
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(arbFileWithTrailingComma);
 
-      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-      try {
-        generator.initialize(
-          inputPathString: defaultL10nPathString,
-          outputPathString: defaultL10nPathString,
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
+        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+        try {
+          generator.initialize(
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+          );
+          generator.loadResources();
+          generator.writeOutputFiles();
+        } on L10nException catch (e) {
+          expect(e.message, contains('app_en.arb'));
+          expect(e.message, contains('FormatException'));
+          expect(e.message, contains('Unexpected character'));
+          return;
+        }
+
+        fail(
+          'should fail with an L10nException due to a trailing comma in the '
+          'arb file.'
         );
-        generator.loadResources();
-        generator.writeOutputFiles();
-      } on FormatException catch (e) {
-        expect(e.message, contains('Unexpected character'));
-        return;
-      }
-
-      fail(
-        'should fail with a FormatException due to a trailing comma in the '
-        'arb file.'
-      );
-    });
+      },
+    );
 
     test('should throw when resource is missing resource attribute', () {
       const String arbFileWithMissingResourceAttribute = '''

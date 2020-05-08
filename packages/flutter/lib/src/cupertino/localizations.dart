@@ -262,7 +262,7 @@ class _CupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLoc
   String toString() => 'DefaultCupertinoLocalizations.delegate(en_US)';
 }
 
-/// US English strings for the cupertino widgets.
+/// US English strings for the Cupertino widgets.
 class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   /// Constructs an object that defines the cupertino widgets' localized strings
   /// for US English (only).
@@ -367,7 +367,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String tabSemanticsLabel({int tabIndex, int tabCount}) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
-    return 'tab, $tabIndex of $tabCount';
+    return 'Tab $tabIndex of $tabCount';
   }
 
   @override
