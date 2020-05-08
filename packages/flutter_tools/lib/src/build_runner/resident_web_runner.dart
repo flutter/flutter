@@ -370,7 +370,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
     firstBuildTime = DateTime.now();
     final ApplicationPackage package = await ApplicationPackageFactory.instance.getPackageForPlatform(
       TargetPlatform.web_javascript,
-      debuggingOptions.buildInfo,
+      buildInfo: debuggingOptions.buildInfo,
       applicationBinary: null,
     );
     if (package == null) {

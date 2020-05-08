@@ -53,8 +53,8 @@ class MockApplicationPackageFactory extends Mock implements ApplicationPackageFa
 
   @override
   Future<ApplicationPackage> getPackageForPlatform(
-    TargetPlatform platform,
-    BuildInfo buildInfo, {
+    TargetPlatform platform, {
+    BuildInfo buildInfo,
     File applicationBinary,
   }) async {
     return _store.getPackageForPlatform(platform, buildInfo);

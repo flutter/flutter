@@ -91,7 +91,7 @@ void main() {
 
       final ApplicationPackage applicationPackage = await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
-        null,
+        buildInfo: null,
         applicationBinary: apkFile,
       );
       expect(applicationPackage.name, 'app.apk');
@@ -118,7 +118,7 @@ void main() {
 
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
-        null,
+        buildInfo: null,
         applicationBinary: globals.fs.file('app.apk'),
       );
       verify(
@@ -136,7 +136,7 @@ void main() {
 
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
-        null,
+        buildInfo: null,
       );
       verifyNever(
         mockProcessManager.run(

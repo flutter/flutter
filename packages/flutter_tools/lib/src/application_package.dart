@@ -30,8 +30,8 @@ class ApplicationPackageFactory {
   static ApplicationPackageFactory get instance => context.get<ApplicationPackageFactory>();
 
   Future<ApplicationPackage> getPackageForPlatform(
-    TargetPlatform platform,
-    BuildInfo buildInfo, {
+    TargetPlatform platform, {
+    BuildInfo buildInfo,
     File applicationBinary,
   }) async {
     switch (platform) {
