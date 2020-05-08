@@ -134,6 +134,12 @@ abstract class Target {
   /// A list of zero or more depfiles, located directly under {BUILD_DIR}.
   List<String> get depfiles => const <String>[];
 
+  /// Whether this target can be executed with the given [environment].
+  ///
+  /// Returning `true` will cause [build] to be skipped. This is equivalent
+  /// to a build that produces no outputs.
+  bool canSkip(Environment environment) => false;
+
   /// The action which performs this build step.
   Future<void> build(Environment environment);
 
@@ -754,18 +760,26 @@ class _BuildInstance {
         updateGraph();
         return succeeded;
       }
-      logger.printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
-      await node.target.build(environment);
-      logger.printTrace('${node.target.name}: Complete');
+      // Clear old inputs. These will be replaced with new inputs/outputs
+      // after the target is run. In the case of a runtime skip, each list
+      // must be empty to ensure the previous outputs are purged.
+      node.inputs.clear();
+      node.outputs.clear();
 
-      node.inputs
-        ..clear()
-        ..addAll(node.target.resolveInputs(environment).sources);
-      node.outputs
-        ..clear()
-        ..addAll(node.target.resolveOutputs(environment).sources);
+      // Check if we can skip via runtime dependencies.
+      final bool runtimeSkip = node.target.canSkip(environment);
+      if (runtimeSkip) {
+        logger.printTrace('Skipping target: ${node.target.name}');
+        skipped = true;
+      } else {
+        logger.printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
+        await node.target.build(environment);
+        logger.printTrace('${node.target.name}: Complete');
+        node.inputs.addAll(node.target.resolveInputs(environment).sources);
+        node.outputs.addAll(node.target.resolveOutputs(environment).sources);
+      }
 
-      // If we were missing the depfile, resolve  input files after executing the
+      // If we were missing the depfile, resolve input files after executing the
       // target so that all file hashes are up to date on the next run.
       if (node.missingDepfile) {
         await fileCache.diffFileList(node.inputs);
