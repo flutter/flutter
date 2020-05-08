@@ -1164,7 +1164,7 @@ class EditableText extends StatefulWidget {
             AutofillHints.newPassword : TextInputType.text,
             AutofillHints.newUsername : TextInputType.text,
             AutofillHints.nickname : TextInputType.name,            // Autofill not working.
-            AutofillHints.oneTimeCode : TextInputType.number,      
+            AutofillHints.oneTimeCode : TextInputType.number,
             AutofillHints.organizationName : TextInputType.text,    // Autofill not working.
             AutofillHints.password : TextInputType.text,
             AutofillHints.postalCode : TextInputType.name,

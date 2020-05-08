@@ -266,7 +266,6 @@ void main() {
   group('Infer keyboardType from autofillHints', () {
     testWidgets('infer keyboard types from autofillHints: ios',
       (WidgetTester tester) async {
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
         await tester.pumpWidget(
           MediaQuery(
             data: const MediaQueryData(devicePixelRatio: 1.0),
@@ -294,8 +293,7 @@ void main() {
         await tester.idle();
         expect(tester.testTextInput.editingState['text'], equals('test'));
         expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.name'));
-        debugDefaultTargetPlatformOverride = null;
-    });
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
     testWidgets('infer keyboard types from autofillHints: non-ios',
       (WidgetTester tester) async {
@@ -330,7 +328,6 @@ void main() {
 
     testWidgets('inferred keyboard types can be overridden: ios',
       (WidgetTester tester) async {
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
         await tester.pumpWidget(
           MediaQuery(
             data: const MediaQueryData(devicePixelRatio: 1.0),
@@ -359,8 +356,7 @@ void main() {
         await tester.idle();
         expect(tester.testTextInput.editingState['text'], equals('test'));
         expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.text'));
-        debugDefaultTargetPlatformOverride = null;
-    });
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
     testWidgets('inferred keyboard types can be overridden: non-ios',
       (WidgetTester tester) async {
