@@ -244,7 +244,9 @@ void main() {
       expect(message, contains('Actual: _TextFinder:<exactly one widget with text "foo" (ignoring offstage widgets): Text("foo", textDirection: ltr)>\n'));
       expect(message, contains('Which: means one was found but none were expected\n'));
     });
+  });
 
+  group('pumping', () {
     testWidgets('pumping', (WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
       int count;
@@ -281,10 +283,13 @@ void main() {
 
     testWidgets('pumpFrames', (WidgetTester tester) async {
       final List<int> logPaints = <int>[];
+      int initial;
 
       final Widget target = _AlwaysAnimating(
         onPaint: () {
-          logPaints.add(SchedulerBinding.instance.currentFrameTimeStamp.inMicroseconds);
+          final int current = SchedulerBinding.instance.currentFrameTimeStamp.inMicroseconds;
+          initial ??= current;
+          logPaints.add(current - initial);
         },
       );
 
