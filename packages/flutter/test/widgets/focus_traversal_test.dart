@@ -2044,6 +2044,46 @@ void main() {
       expect(unfocusableNode.hasFocus, isFalse);
     });
   });
+  group(RawKeyboardListener, () {
+    testWidgets('Raw keyboard listener introduces a Semantics node by default', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(
+        RawKeyboardListener(
+          focusNode: focusNode,
+          child: Container(),
+        ),
+      );
+      final TestSemantics expectedSemantics = TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isFocusable,
+            ],
+          ),
+        ],
+      );
+      expect(semantics, hasSemantics(
+        expectedSemantics,
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ));
+    });
+    testWidgets("Raw keyboard listener doesn't introduce a Semantics node when specified", (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(
+          RawKeyboardListener(
+              focusNode: focusNode,
+              includeSemantics: false,
+              child: Container(),
+          ),
+      );
+      final TestSemantics expectedSemantics = TestSemantics.root();
+      expect(semantics, hasSemantics(expectedSemantics));
+    });
+  });
 }
 
 class TestRoute extends PageRouteBuilder<void> {
