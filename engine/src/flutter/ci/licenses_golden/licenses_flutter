@@ -576,12 +576,12 @@ FILE: ../../../flutter/shell/common/fixtures/shelltest_screenshot.png
 FILE: ../../../flutter/shell/common/input_events_unittests.cc
 FILE: ../../../flutter/shell/common/isolate_configuration.cc
 FILE: ../../../flutter/shell/common/isolate_configuration.h
+FILE: ../../../flutter/shell/common/layer_tree_holder.cc
+FILE: ../../../flutter/shell/common/layer_tree_holder.h
+FILE: ../../../flutter/shell/common/layer_tree_holder_unittests.cc
 FILE: ../../../flutter/shell/common/persistent_cache.cc
 FILE: ../../../flutter/shell/common/persistent_cache.h
 FILE: ../../../flutter/shell/common/persistent_cache_unittests.cc
-FILE: ../../../flutter/shell/common/pipeline.cc
-FILE: ../../../flutter/shell/common/pipeline.h
-FILE: ../../../flutter/shell/common/pipeline_unittests.cc
 FILE: ../../../flutter/shell/common/platform_view.cc
 FILE: ../../../flutter/shell/common/platform_view.h
 FILE: ../../../flutter/shell/common/pointer_data_dispatcher.cc
