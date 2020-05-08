@@ -367,17 +367,15 @@ class Focus extends StatefulWidget {
   /// still be focused explicitly.
   final bool skipTraversal;
 
-  /// {@template flutter.widgets.Focus.includeSemantics}
-  /// Include semantics information in this widget.
+  /// Include semantics information in this [Focus] widget.
   ///
-  /// If true, this widget will include a [Semantics] node that
+  /// If true, this [Focus] widget will include a [Semantics] node that
   /// indicates the [Semantics.focusable] and [Semantics.focused] properties.
   ///
   /// It is not typical to set this to false, as that can affect the semantics
   /// information available to accessibility systems.
   ///
   /// Must not be null, defaults to true.
-  /// {@endtemplate}
   final bool includeSemantics;
 
   /// {@template flutter.widgets.Focus.canRequestFocus}
