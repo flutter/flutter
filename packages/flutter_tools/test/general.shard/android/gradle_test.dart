@@ -761,19 +761,12 @@ flutter:
 
   group('buildPluginsAsAar', () {
     FileSystem fs;
-    MockProcessManager mockProcessManager;
+    FakeProcessManager fakeProcessManager;
     MockAndroidSdk mockAndroidSdk;
 
     setUp(() {
       fs = MemoryFileSystem();
-
-      mockProcessManager = MockProcessManager();
-      when(mockProcessManager.run(
-        any,
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      )).thenAnswer((_) async => ProcessResult(1, 0, '', ''));
-
+      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
       mockAndroidSdk = MockAndroidSdk();
       when(mockAndroidSdk.directory).thenReturn('irrelevant');
     });
@@ -830,12 +823,6 @@ plugin2=${plugin2.path}
         .childDirectory('repo')
         .createSync(recursive: true);
 
-      await buildPluginsAsAar(
-        FlutterProject.fromPath(androidDirectory.path),
-        const AndroidBuildInfo(BuildInfo.release),
-        buildDirectory: buildDirectory,
-      );
-
       final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);
       final String initScript = globals.fs.path.join(
         flutterRoot,
@@ -844,40 +831,55 @@ plugin2=${plugin2.path}
         'gradle',
         'aar_init_script.gradle',
       );
-      verify(mockProcessManager.run(
-        <String>[
-          'gradlew',
-          '-I=$initScript',
-          '-Pflutter-root=$flutterRoot',
-          '-Poutput-dir=${buildDirectory.path}',
-          '-Pis-plugin=true',
-          '-PbuildNumber=1.0',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
-          'assembleAarRelease',
-        ],
-        environment: anyNamed('environment'),
-        workingDirectory: plugin1.childDirectory('android').path),
-      ).called(1);
 
-      verify(mockProcessManager.run(
-        <String>[
-          'gradlew',
-          '-I=$initScript',
-          '-Pflutter-root=$flutterRoot',
-          '-Poutput-dir=${buildDirectory.path}',
-          '-Pis-plugin=true',
-          '-PbuildNumber=1.0',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
-          'assembleAarRelease',
-        ],
-        environment: anyNamed('environment'),
-        workingDirectory: plugin2.childDirectory('android').path),
-      ).called(1);
+      fakeProcessManager
+        ..addCommand(FakeCommand(
+          command: <String>[
+            'gradlew',
+            '-I=$initScript',
+            '-Pflutter-root=$flutterRoot',
+            '-Poutput-dir=${buildDirectory.path}',
+            '-Pis-plugin=true',
+            '-PbuildNumber=1.0',
+            '-q',
+            '-Pfont-subset=true',
+            '-Ptarget-platform=android-arm,android-arm64,android-x64',
+            'assembleAarRelease',
+          ],
+          workingDirectory: plugin1.childDirectory('android').path,
+        ))
+        ..addCommand(FakeCommand(
+          command: <String>[
+            'gradlew',
+            '-I=$initScript',
+            '-Pflutter-root=$flutterRoot',
+            '-Poutput-dir=${buildDirectory.path}',
+            '-Pis-plugin=true',
+            '-PbuildNumber=1.0',
+            '-q',
+            '-Pfont-subset=true',
+            '-Ptarget-platform=android-arm,android-arm64,android-x64',
+            'assembleAarRelease',
+          ],
+          workingDirectory: plugin2.childDirectory('android').path,
+        ));
 
+      await buildPluginsAsAar(
+        FlutterProject.fromPath(androidDirectory.path),
+        const AndroidBuildInfo(BuildInfo(
+          BuildMode.release,
+          '',
+          treeShakeIcons: true,
+          dartObfuscation: true,
+          buildNumber: '2.0'
+        )),
+        buildDirectory: buildDirectory,
+      );
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => fakeProcessManager,
       GradleUtils: () => FakeGradleUtils(),
     });
 
@@ -920,32 +922,11 @@ plugin1=${plugin1.path}
         const AndroidBuildInfo(BuildInfo.release),
         buildDirectory: buildDirectory,
       );
-
-      final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);
-      final String initScript = globals.fs.path.join(
-        flutterRoot,
-        'packages',
-        'flutter_tools',
-        'gradle',
-        'aar_init_script.gradle',
-      );
-      verifyNever(mockProcessManager.run(
-        <String>[
-          'gradlew',
-          '-I=$initScript',
-          '-Pflutter-root=$flutterRoot',
-          '-Poutput-dir=${buildDirectory.path}',
-          '-Pis-plugin=true',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
-          'assembleAarRelease',
-        ],
-        environment: anyNamed('environment'),
-        workingDirectory: plugin1.childDirectory('android').path),
-      );
+      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => fakeProcessManager,
       GradleUtils: () => FakeGradleUtils(),
     });
   });

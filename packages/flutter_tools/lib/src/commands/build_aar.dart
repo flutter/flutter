@@ -38,6 +38,8 @@ class BuildAarCommand extends BuildSubCommand {
     usesFlavorOption();
     usesBuildNumberOption();
     usesPubOption();
+    addSplitDebugInfoOption();
+    addDartObfuscationOption();
     argParser
       ..addMultiOption(
         'target-platform',
@@ -104,15 +106,18 @@ class BuildAarCommand extends BuildSubCommand {
 
     for (final String buildMode in const <String>['debug', 'profile', 'release']) {
       if (boolArg(buildMode)) {
-        androidBuildInfo.add(AndroidBuildInfo(
-          BuildInfo(BuildMode.fromName(buildMode), stringArg('flavor'), treeShakeIcons: boolArg('tree-shake-icons')),
-          targetArchs: targetArchitectures,
-        ));
+        androidBuildInfo.add(
+          AndroidBuildInfo(
+            getBuildInfo(forcedBuildMode: BuildMode.fromName(buildMode)),
+            targetArchs: targetArchitectures,
+          )
+        );
       }
     }
     if (androidBuildInfo.isEmpty) {
       throwToolExit('Please specify a build mode and try again.');
     }
+
     await androidBuilder.buildAar(
       project: _getProject(),
       target: '', // Not needed because this command only builds Android's code.
