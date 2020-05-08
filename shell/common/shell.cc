@@ -952,16 +952,17 @@ void Shell::OnAnimatorNotifyIdle(int64_t deadline) {
 }
 
 // |Animator::Delegate|
-void Shell::OnAnimatorDraw(std::shared_ptr<LayerTreeHolder> layer_tree_holder) {
+void Shell::OnAnimatorDraw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
   FML_DCHECK(is_setup_);
 
   task_runners_.GetRasterTaskRunner()->PostTask(
       [&waiting_for_first_frame = waiting_for_first_frame_,
        &waiting_for_first_frame_condition = waiting_for_first_frame_condition_,
        rasterizer = rasterizer_->GetWeakPtr(),
-       layer_tree_holder = std::move(layer_tree_holder)]() {
+       pipeline = std::move(pipeline)]() {
         if (rasterizer) {
-          rasterizer->Draw(std::move(layer_tree_holder));
+          rasterizer->Draw(pipeline);
+
           if (waiting_for_first_frame.load()) {
             waiting_for_first_frame.store(false);
             waiting_for_first_frame_condition.notify_all();
