@@ -406,18 +406,25 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///             will cause the jank in the Flutter application:
   ///             * The time taken by this method to create a layer-tree exceeds
   ///               on frame interval (for example, 16.66 ms on a 60Hz display).
-  ///             * A new layer-tree produced by this method replaces a stale
-  ///               layer tree in `LayerTreeHolder`. See:
-  ///               `LayerTreeHolder::ReplaceIfNewer`. This could happen if
-  ///               rasterizer takes more than one frame interval to rasterize a
-  ///               layer tree. This would cause some frames to be skipped and
-  ///               could result in perceptible jank.
+  ///             * The time take by this method to generate a new layer-tree
+  ///               causes the current layer-tree pipeline depth to change. To
+  ///               illustrate this point, note that maximum pipeline depth used
+  ///               by layer tree in the engine is 2. If both the UI and GPU
+  ///               task runner tasks finish within one frame interval, the
+  ///               pipeline depth is one. If the UI thread happens to be
+  ///               working on a frame when the raster thread is still not done
+  ///               with the previous frame, the pipeline depth is 2. When the
+  ///               pipeline depth changes from 1 to 2, animations and UI
+  ///               interactions that cause the generation of the new layer tree
+  ///               appropriate for (frame_time + one frame interval) will
+  ///               actually end up at (frame_time + two frame intervals). This
+  ///               is not what code running on the UI thread expected would
+  ///               happen. This causes perceptible jank.
   ///
   /// @param[in]  frame_time  The point at which the current frame interval
   ///                         began. May be used by animation interpolators,
   ///                         physics simulations, etc..
   ///
-  /// @see         `LayerTreeHolder::ReplaceIfNewer`
   void BeginFrame(fml::TimePoint frame_time);
 
   //----------------------------------------------------------------------------
