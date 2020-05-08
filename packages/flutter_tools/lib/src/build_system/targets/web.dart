@@ -15,6 +15,7 @@ import '../build_system.dart';
 import '../depfile.dart';
 import 'assets.dart';
 import 'dart.dart';
+import 'localizations.dart';
 
 /// Whether web builds should call the platform initialization logic.
 const String kInitializePlatform = 'InitializePlatform';
@@ -132,7 +133,8 @@ class Dart2JSTarget extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-    WebEntrypointTarget()
+    WebEntrypointTarget(),
+    GenerateLocalizationsTarget(),
   ];
 
   @override
