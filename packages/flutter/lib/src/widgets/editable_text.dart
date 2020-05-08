@@ -338,9 +338,10 @@ class EditableText extends StatefulWidget {
   /// the number of lines. By default, it is one, meaning this is a single-line
   /// text field. [maxLines] must be null or greater than zero.
   ///
-  /// If [keyboardType] is not set or is null, it will default to
-  /// [TextInputType.text] unless [maxLines] is greater than one, when it will
-  /// default to [TextInputType.multiline].
+  /// If [keyboardType] is not set or is null, its value will be inferred from
+  /// [autofillHints], if [autofillHints] is not empty. Otherwise it defaults to
+  /// [TextInputType.text] if [maxLines] is exactly one, and
+  /// [TextInputType.multiline] if [maxLines] is null or greater than one.
   ///
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
@@ -1115,10 +1116,9 @@ class EditableText extends StatefulWidget {
   /// - Some autofill hints only work with specific [keyboardType]s. For example,
   ///   [AutofillHints.name] requires [TextInputType.name] and [AutofillHints.email]
   ///   works only with [TextInputType.email]. Make sure the input field has a
-  ///   compatible [keyboardType].
-  ///
-  /// {@macro flutter.services.autofill.autofillHints}
+  ///   compatible [keyboardType].  
   /// {@endtemplate}
+  /// {@macro flutter.services.autofill.autofillHints}
   final Iterable<String> autofillHints;
 
   // Infer the keyboard type of an `EditableText` if it's not specified.

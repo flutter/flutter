@@ -350,7 +350,7 @@ class AutofillHints {
   /// * Otherwise, the hint string will be used as-is.
   static const String nickname = 'nickname';
 
-  /// The input field expects a single-factor SMS login code.
+  /// The input field expects a SMS one-time code.
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
@@ -649,7 +649,7 @@ class AutofillConfiguration {
   /// {@template flutter.services.autofill.autofillHints}
   /// For the best results, hint strings need to be understood by the platform's
   /// autofill service. The common values of hint strings can be found in
-  /// [AutofillHints], as well as the platforms that understand each of them.
+  /// [AutofillHints], as well as their availability on different platforms.
   ///
   /// If an autofillable input field needs to use a custom hint that translates to
   /// different strings on different platforms, the easiest way to achieve that
