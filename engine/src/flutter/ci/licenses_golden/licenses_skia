@@ -1,4 +1,4 @@
-Signature: d7c01d039a6521dd63bb395e4c6f6c6a
+Signature: 3d8487c427c3cf3771c8417310023d9e
 
 UNUSED LICENSES:
 
@@ -3891,11 +3891,13 @@ FILE: ../../../third_party/skia/bench/GrQuadBench.cpp
 FILE: ../../../third_party/skia/experimental/skottiekit/skottiekit_bindings.cpp
 FILE: ../../../third_party/skia/gm/crbug_1041204.cpp
 FILE: ../../../third_party/skia/gm/crbug_224618.cpp
+FILE: ../../../third_party/skia/gm/userfont.cpp
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DBackendContext.h
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DTypes.h
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DTypesMinimal.h
 FILE: ../../../third_party/skia/include/private/GrD3DTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkIDChangeListener.h
+FILE: ../../../third_party/skia/include/utils/SkCustomTypeface.h
 FILE: ../../../third_party/skia/modules/canvaskit/viewer_bindings.cpp
 FILE: ../../../third_party/skia/src/core/SkIDChangeListener.cpp
 FILE: ../../../third_party/skia/src/core/SkMatrixProvider.h
@@ -3951,6 +3953,7 @@ FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSampleMatrix.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLSampleMatrix.h
+FILE: ../../../third_party/skia/src/utils/SkCustomTypeface.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google LLC
 
