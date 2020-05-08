@@ -2001,6 +2001,20 @@ void main() {
       expect(unfocusableNode.hasFocus, isFalse);
     });
   });
+  group(RawKeyboardListener, () {
+    testWidgets("Raw keyboard listener doesn't introduce a Semantics node", (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(
+          RawKeyboardListener(
+              focusNode: focusNode,
+              child: Container(),
+          ),
+      );
+      final TestSemantics expectedSemantics = TestSemantics.root();
+      expect(semantics, hasSemantics(expectedSemantics));
+    });
+  });
 }
 
 class TestRoute extends PageRouteBuilder<void> {
