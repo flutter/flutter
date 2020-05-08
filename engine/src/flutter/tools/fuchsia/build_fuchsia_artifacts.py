@@ -32,8 +32,7 @@ def IsLinux():
 def IsMac():
   return platform.system() == 'Darwin'
 
-
-def GetPMBinPath():
+def GetFuchsiaSDKPath():
   # host_os references the gn host_os
   # https://gn.googlesource.com/gn/+/master/docs/reference.md#var_host_os
   host_os = ''
@@ -44,7 +43,11 @@ def GetPMBinPath():
   else:
     host_os = 'windows'
 
-  return os.path.join(_src_root_dir, 'fuchsia', 'sdk', host_os, 'tools', 'pm')
+  return os.path.join(_src_root_dir, 'fuchsia', 'sdk', host_os)
+
+
+def GetPMBinPath():
+  return os.path.join(GetFuchsiaSDKPath(), 'tools', 'pm')
 
 
 def RunExecutable(command):
@@ -149,10 +152,20 @@ def CopyToBucket(src, dst, product=False):
   CopyToBucketWithMode(src, dst, True, product, 'dart')
 
 
+def CopyVulkanDepsToBucket(src, dst, arch):
+  sdk_path = GetFuchsiaSDKPath()
+  deps_bucket_path = os.path.join(_bucket_directory, dst)
+  if not os.path.exists(deps_bucket_path):
+    FindFileAndCopyTo('VkLayer_khronos_validation.json', '%s/pkg' % (sdk_path), deps_bucket_path)
+    FindFileAndCopyTo('VkLayer_khronos_validation.so', '%s/arch/%s' % (sdk_path, arch), deps_bucket_path)
+
+
 def BuildBucket(runtime_mode, arch, product):
   out_dir = 'fuchsia_%s_%s/' % (runtime_mode, arch)
   bucket_dir = 'flutter/%s/%s/' % (arch, runtime_mode)
+  deps_dir = 'flutter/%s/deps/' % (arch)
   CopyToBucket(out_dir, bucket_dir, product)
+  CopyVulkanDepsToBucket(out_dir, deps_dir, arch)
 
 
 def ProcessCIPDPackage(upload, engine_version):
