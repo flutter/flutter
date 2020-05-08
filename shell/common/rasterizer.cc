@@ -4,12 +4,11 @@
 
 #include "flutter/shell/common/rasterizer.h"
 
-#include "flutter/shell/common/persistent_cache.h"
-
 #include <utility>
 
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
+#include "flutter/shell/common/persistent_cache.h"
 #include "third_party/skia/include/core/SkEncodedImageFormat.h"
 #include "third_party/skia/include/core/SkImageEncoder.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
@@ -111,7 +110,7 @@ void Rasterizer::DrawLastLayerTree() {
   DrawToSurface(*last_layer_tree_);
 }
 
-void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
+void Rasterizer::Draw(std::shared_ptr<LayerTreeHolder> layer_tree_holder) {
   TRACE_EVENT0("flutter", "GPURasterizer::Draw");
   if (raster_thread_merger_ &&
       !raster_thread_merger_->IsOnRasterizingThread()) {
@@ -120,50 +119,32 @@ void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
   }
   FML_DCHECK(task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread());
 
-  RasterStatus raster_status = RasterStatus::kFailed;
-  Pipeline<flutter::LayerTree>::Consumer consumer =
-      [&](std::unique_ptr<LayerTree> layer_tree) {
-        raster_status = DoDraw(std::move(layer_tree));
-      };
-
-  PipelineConsumeResult consume_result = pipeline->Consume(consumer);
-  // if the raster status is to resubmit the frame, we push the frame to the
-  // front of the queue and also change the consume status to more available.
-  if (raster_status == RasterStatus::kResubmit) {
-    auto front_continuation = pipeline->ProduceIfEmpty();
-    bool result =
-        front_continuation.Complete(std::move(resubmitted_layer_tree_));
-    if (result) {
-      consume_result = PipelineConsumeResult::MoreAvailable;
-    }
-  } else if (raster_status == RasterStatus::kEnqueuePipeline) {
-    consume_result = PipelineConsumeResult::MoreAvailable;
-  }
+  std::unique_ptr<LayerTree> layer_tree = layer_tree_holder->Get();
+  RasterStatus raster_status =
+      layer_tree ? DoDraw(std::move(layer_tree)) : RasterStatus::kFailed;
 
   // Merging the thread as we know the next `Draw` should be run on the platform
   // thread.
   if (raster_status == RasterStatus::kResubmit) {
+    layer_tree_holder->ReplaceIfNewer(std::move(resubmitted_layer_tree_));
     auto* external_view_embedder = surface_->GetExternalViewEmbedder();
-    // We know only the `external_view_embedder` can
-    // causes|RasterStatus::kResubmit|. Check to make sure.
-    FML_DCHECK(external_view_embedder != nullptr);
+    FML_DCHECK(external_view_embedder != nullptr)
+        << "kResubmit is an invalid raster status without external view "
+           "embedder.";
     external_view_embedder->EndFrame(raster_thread_merger_);
   }
 
-  // Consume as many pipeline items as possible. But yield the event loop
+  // Consume as many layer trees as possible. But yield the event loop
   // between successive tries.
-  switch (consume_result) {
-    case PipelineConsumeResult::MoreAvailable: {
-      task_runners_.GetRasterTaskRunner()->PostTask(
-          [weak_this = weak_factory_.GetTaskRunnerAffineWeakPtr(), pipeline]() {
-            if (weak_this) {
-              weak_this->Draw(pipeline);
-            }
-          });
-      break;
-    }
-    default:
-      break;
+  // Note: This behaviour is left as-is to be inline with the pipeline
+  // semantics. TODO(kaushikiska): explore removing this block.
+  if (!layer_tree_holder->IsEmpty()) {
+    task_runners_.GetRasterTaskRunner()->PostTask(
+        [weak_this = weak_factory_.GetWeakPtr(), layer_tree_holder]() {
+          if (weak_this) {
+            weak_this->Draw(layer_tree_holder);
+          }
+        });
   }
 }
 
