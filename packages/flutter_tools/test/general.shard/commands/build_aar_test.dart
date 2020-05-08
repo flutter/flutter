@@ -8,6 +8,7 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -24,6 +25,18 @@ import '../../src/mocks.dart';
 void main() {
   Cache.disableLocking();
 
+  Future<BuildAarCommand> runCommandIn(String target, { List<String> arguments }) async {
+    final BuildAarCommand command = BuildAarCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>[
+      'aar',
+      '--no-pub',
+      ...?arguments,
+      target,
+    ]);
+    return command;
+  }
+
   group('Usage', () {
     Directory tempDir;
     Usage mockUsage;
@@ -36,18 +49,6 @@ void main() {
     tearDown(() {
       tryToDelete(tempDir);
     });
-
-    Future<BuildAarCommand> runCommandIn(String target, { List<String> arguments }) async {
-      final BuildAarCommand command = BuildAarCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      await runner.run(<String>[
-        'aar',
-        '--no-pub',
-        ...?arguments,
-        target,
-      ]);
-      return command;
-    }
 
     testUsingContext('indicate that project is a module', () async {
       final String projectPath = await createProject(tempDir,
@@ -104,6 +105,93 @@ void main() {
     overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
       Usage: () => mockUsage,
+    });
+  });
+
+  group('flag parsing', () {
+    Directory tempDir;
+    MockAndroidBuilder mockAndroidBuilder;
+
+    setUp(() {
+      mockAndroidBuilder = MockAndroidBuilder();
+      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_build_aar_test.');
+    });
+
+    tearDown(() {
+      tryToDelete(tempDir);
+    });
+
+    testUsingContext('defaults', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub']);
+      await runCommandIn(projectPath);
+
+      final Set<AndroidBuildInfo> androidBuildInfos = verify(mockAndroidBuilder.buildAar(
+        project: anyNamed('project'),
+        target: anyNamed('target'),
+        androidBuildInfo: captureAnyNamed('androidBuildInfo'),
+        outputDirectoryPath: anyNamed('outputDirectoryPath'),
+        buildNumber: '1.0',
+      )).captured[0] as Set<AndroidBuildInfo>;
+
+      expect(androidBuildInfos.length, 3);
+
+      final List<BuildMode> buildModes = <BuildMode>[];
+      for (final AndroidBuildInfo androidBuildInfo in androidBuildInfos) {
+        final BuildInfo buildInfo = androidBuildInfo.buildInfo;
+        buildModes.add(buildInfo.mode);
+        expect(buildInfo.treeShakeIcons, isFalse);
+        expect(buildInfo.flavor, isNull);
+        expect(buildInfo.splitDebugInfoPath, isNull);
+        expect(buildInfo.dartObfuscation, isFalse);
+        expect(androidBuildInfo.targetArchs, <AndroidArch>[AndroidArch.armeabi_v7a, AndroidArch.arm64_v8a, AndroidArch.x86_64]);
+      }
+      expect(buildModes.length, 3);
+      expect(buildModes, containsAll(<BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]));
+    }, overrides: <Type, Generator>{
+      AndroidBuilder: () => mockAndroidBuilder,
+    });
+
+    testUsingContext('parses flags', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub']);
+      await runCommandIn(
+        projectPath,
+        arguments: <String>[
+          '--no-debug',
+          '--no-profile',
+          '--target-platform',
+          'android-x86',
+          '--tree-shake-icons',
+          '--flavor',
+          'free',
+          '--build-number',
+          '200',
+          '--split-debug-info',
+          '/project-name/v1.2.3/',
+          '--obfuscate',
+        ],
+      );
+
+      final Set<AndroidBuildInfo> androidBuildInfos = verify(mockAndroidBuilder.buildAar(
+        project: anyNamed('project'),
+        target: anyNamed('target'),
+        androidBuildInfo: captureAnyNamed('androidBuildInfo'),
+        outputDirectoryPath: anyNamed('outputDirectoryPath'),
+        buildNumber: '200',
+      )).captured[0] as Set<AndroidBuildInfo>;
+
+      final AndroidBuildInfo androidBuildInfo = androidBuildInfos.single;
+      expect(androidBuildInfo.targetArchs, <AndroidArch>[AndroidArch.x86]);
+
+      final BuildInfo buildInfo = androidBuildInfo.buildInfo;
+      expect(buildInfo.mode, BuildMode.release);
+      expect(buildInfo.treeShakeIcons, isTrue);
+      expect(buildInfo.flavor, 'free');
+      expect(buildInfo.splitDebugInfoPath, '/project-name/v1.2.3/');
+      expect(buildInfo.dartObfuscation, isTrue);
+    }, overrides: <Type, Generator>{
+      AndroidBuilder: () => mockAndroidBuilder,
     });
   });
 
@@ -199,6 +287,7 @@ Future<BuildAarCommand> runBuildAarCommand(
   return command;
 }
 
+class MockAndroidBuilder extends Mock implements AndroidBuilder {}
 class MockAndroidSdk extends Mock implements AndroidSdk {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}

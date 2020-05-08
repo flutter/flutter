@@ -525,7 +525,8 @@ Future<void> buildGradleAar({
     throwToolExit('AARs can only be built for plugin or module projects.');
   }
 
-  final String aarTask = getAarTaskFor(androidBuildInfo.buildInfo);
+  final BuildInfo buildInfo = androidBuildInfo.buildInfo;
+  final String aarTask = getAarTaskFor(buildInfo);
   final Status status = globals.logger.startProgress(
     "Running Gradle task '$aarTask'...",
     timeout: timeoutConfiguration.slowOperation,
@@ -548,9 +549,27 @@ Future<void> buildGradleAar({
     '-Pis-plugin=${manifest.isPlugin}',
     '-PbuildNumber=$buildNumber'
   ];
+  if (globals.logger.isVerbose) {
+    command.add('-Pverbose=true');
+  } else {
+    command.add('-q');
+  }
 
   if (target != null && target.isNotEmpty) {
     command.add('-Ptarget=$target');
+  }
+  if (buildInfo.splitDebugInfoPath != null) {
+    command.add('-Psplit-debug-info=${buildInfo.splitDebugInfoPath}');
+  }
+  if (buildInfo.treeShakeIcons) {
+    command.add('-Pfont-subset=true');
+  }
+  if (buildInfo.dartObfuscation) {
+    if (buildInfo.mode == BuildMode.debug || buildInfo.mode == BuildMode.profile) {
+      globals.printStatus('Dart obfuscation is not supported in ${toTitleCase(buildInfo.friendlyModeName)} mode, building as unobfuscated.');
+    } else {
+      command.add('-Pdart-obfuscation=true');
+    }
   }
 
   if (globals.artifacts is LocalEngineArtifacts) {
@@ -564,11 +583,8 @@ Future<void> buildGradleAar({
       'Local Maven repo: ${localEngineRepo.path}'
     );
     command.add('-Plocal-engine-repo=${localEngineRepo.path}');
-    command.add('-Plocal-engine-build-mode=${androidBuildInfo.buildInfo.modeName}');
+    command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
     command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
-    if (androidBuildInfo.buildInfo.treeShakeIcons) {
-      command.add('-Pfont-subset=true');
-    }
 
     // Copy the local engine repo in the output directory.
     try {
