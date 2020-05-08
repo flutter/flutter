@@ -9,6 +9,23 @@ import '../rendering/mock_canvas.dart';
 import 'common_matchers.dart';
 
 void main() {
+  test('RoundedRectangleBorder defaults', () {
+    const RoundedRectangleBorder border = RoundedRectangleBorder();
+    expect(border.side, BorderSide.none);
+    expect(border.borderRadius, BorderRadius.zero);
+  });
+
+  test('RoundedRectangleBorder copyWith, ==, hashCode', () {
+    expect(const RoundedRectangleBorder(), const RoundedRectangleBorder().copyWith());
+    expect(const RoundedRectangleBorder().hashCode, const RoundedRectangleBorder().copyWith().hashCode);
+    const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
+    const BorderRadius radius = BorderRadius.all(Radius.circular(16.0));
+    expect(
+      const RoundedRectangleBorder().copyWith(side: side, borderRadius: radius),
+      const RoundedRectangleBorder(side: side, borderRadius: radius),
+    );
+  });
+
   test('RoundedRectangleBorder', () {
     final RoundedRectangleBorder c10 = RoundedRectangleBorder(side: const BorderSide(width: 10.0), borderRadius: BorderRadius.circular(100.0));
     final RoundedRectangleBorder c15 = RoundedRectangleBorder(side: const BorderSide(width: 15.0), borderRadius: BorderRadius.circular(150.0));
