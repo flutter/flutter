@@ -52,5 +52,21 @@
   "remainingTextFieldCharacterCountOne": "เหลือ 1 อักขระ",
   "remainingTextFieldCharacterCountOther": "เหลือ $remainingCount อักขระ",
   "refreshIndicatorSemanticLabel": "รีเฟรช",
-  "moreButtonTooltip": "เพิ่มเติม"
+  "moreButtonTooltip": "เพิ่มเติม",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

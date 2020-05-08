@@ -52,5 +52,21 @@
   "remainingTextFieldCharacterCountOne": "1 character ang natitira",
   "remainingTextFieldCharacterCountOther": "$remainingCount na character ang natitira",
   "refreshIndicatorSemanticLabel": "Nagre-refresh",
-  "moreButtonTooltip": "Higit Pa"
+  "moreButtonTooltip": "Higit Pa",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

@@ -543,10 +543,9 @@ class _MonthItem extends StatelessWidget {
     // formatted full date.
     String semanticLabel = '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}';
     if (isSelectedDayStart) {
-      // TODO(darrenaustin): localize 'Start Date' and 'End Date'
-      semanticLabel = 'Start Date ' + semanticLabel;
+      semanticLabel = '${localizations.dateRangeStartLabel} $semanticLabel';
     } else if (isSelectedDayEnd) {
-      semanticLabel = 'End Date ' + semanticLabel;
+      semanticLabel = '${localizations.dateRangeEndLabel} $semanticLabel';
     }
 
     Widget dayWidget = Container(

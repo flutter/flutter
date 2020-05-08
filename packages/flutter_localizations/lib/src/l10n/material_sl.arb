@@ -56,5 +56,21 @@
   "remainingTextFieldCharacterCountOne": "Še 1 znak",
   "remainingTextFieldCharacterCountOther": "Še $remainingCount znakov",
   "refreshIndicatorSemanticLabel": "Osveži",
-  "moreButtonTooltip": "Več"
+  "moreButtonTooltip": "Več",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

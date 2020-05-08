@@ -51,5 +51,21 @@
   "remainingTextFieldCharacterCountOne": "1 అక్షరం మిగిలి ఉంది",
   "remainingTextFieldCharacterCountOther": "$remainingCount అక్షరాలు మిగిలి ఉన్నాయి",
   "refreshIndicatorSemanticLabel": "రిఫ్రెష్ చేయి",
-  "moreButtonTooltip": "మరిన్ని"
+  "moreButtonTooltip": "మరిన్ని",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

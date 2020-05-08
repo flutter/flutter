@@ -57,5 +57,21 @@
   "remainingTextFieldCharacterCountOne": "Остался 1 символ",
   "remainingTextFieldCharacterCountOther": "Осталось $remainingCount символа",
   "refreshIndicatorSemanticLabel": "Обновление",
-  "moreButtonTooltip": "Ещё"
+  "moreButtonTooltip": "Ещё",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

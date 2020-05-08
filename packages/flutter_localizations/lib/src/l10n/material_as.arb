@@ -51,5 +51,21 @@
   "remainingTextFieldCharacterCountOne": "১টা বর্ণ বাকী আছে",
   "remainingTextFieldCharacterCountOther": "$remainingCountটা বর্ণ বাকী আছে",
   "refreshIndicatorSemanticLabel": "ৰিফ্ৰেশ্ব কৰক",
-  "moreButtonTooltip": "অধিক"
+  "moreButtonTooltip": "অধিক",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

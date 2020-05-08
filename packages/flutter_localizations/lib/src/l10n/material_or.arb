@@ -51,5 +51,21 @@
   "remainingTextFieldCharacterCountOne": "1ଟି ଅକ୍ଷର ବାକି ଅଛି",
   "remainingTextFieldCharacterCountOther": "$remainingCountଟି ଅକ୍ଷର ବାକି ଅଛି",
   "refreshIndicatorSemanticLabel": "ରିଫ୍ରେସ୍ କରନ୍ତୁ",
-  "moreButtonTooltip": "ଅଧିକ"
+  "moreButtonTooltip": "ଅଧିକ",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

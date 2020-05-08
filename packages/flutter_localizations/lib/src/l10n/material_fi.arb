@@ -52,5 +52,21 @@
   "remainingTextFieldCharacterCountOne": "1 merkki jäljellä",
   "remainingTextFieldCharacterCountOther": "$remainingCount merkkiä jäljellä",
   "refreshIndicatorSemanticLabel": "Päivitys",
-  "moreButtonTooltip": "Lisää"
+  "moreButtonTooltip": "Lisää",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

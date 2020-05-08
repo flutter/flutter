@@ -53,5 +53,21 @@
   "remainingTextFieldCharacterCountOne": "1 carácter restante",
   "remainingTextFieldCharacterCountOther": "$remainingCount caracteres restantes",
   "refreshIndicatorSemanticLabel": "Actualizar",
-  "moreButtonTooltip": "Máis"
+  "moreButtonTooltip": "Máis",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

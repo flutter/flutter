@@ -53,5 +53,21 @@
   "remainingTextFieldCharacterCountOne": "Atlikusi 1 rakstzīme.",
   "remainingTextFieldCharacterCountOther": "Atlikušas $remainingCount rakstzīmes.",
   "refreshIndicatorSemanticLabel": "Atsvaidzināt",
-  "moreButtonTooltip": "Vairāk"
+  "moreButtonTooltip": "Vairāk",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

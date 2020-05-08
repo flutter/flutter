@@ -52,5 +52,21 @@
   "remainingTextFieldCharacterCountOne": "Còn lại 1 ký tự",
   "remainingTextFieldCharacterCountOther": "Còn lại $remainingCount ký tự",
   "refreshIndicatorSemanticLabel": "Làm mới",
-  "moreButtonTooltip": "Thêm"
+  "moreButtonTooltip": "Thêm",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

@@ -319,6 +319,70 @@ abstract class MaterialLocalizations {
   /// ```
   int get firstDayOfWeekIndex;
 
+  /// The character string used to separate the parts of a compact date format
+  /// (i.e. mm/dd/yyyy has a separator of '/').
+  String get dateSeparator;
+
+  /// The help text used on an empty [InputDatePickerFormField] to indicate
+  /// to the user the date format being asked for.
+  String get dateHelpText;
+
+  /// The semantic label used to announce when the user has entered the year
+  /// selection mode of the [CalendarDatePicker] which is used in the data picker
+  /// dialog created with [showDatePicker].
+  String get selectYearLabel;
+
+  /// The label used to indicate a date that has not been entered or selected
+  /// yet in the date picker.
+  String get unspecifiedDate;
+
+  /// The label used to indicate a date range that has not been entered or
+  /// selected yet in the date range picker.
+  String get unspecifiedDateRange;
+
+  /// The label used to describe the text field used in an [InputDatePickerFormField].
+  String get dateInputLabel;
+
+  /// The label used for the starting date input field in the date range picker
+  /// created with [showDateRangePicker].
+  String get dateRangeStartLabel;
+
+  /// The label used for the ending date input field in the date range picker
+  /// created with [showDateRangePicker].
+  String get dateRangeEndLabel;
+
+  /// Error message displayed to the user when they have entered a text string
+  /// in an [InputDatePickerFormField] that is not in a valid date format.
+  String get invalidDateFormatLabel;
+
+  /// Error message displayed to the user when they have entered an invalid
+  /// date range in the input mode of the date range picker created with
+  /// [showDateRangePicker].
+  String get invalidDateRangeLabel;
+
+  /// Error message displayed to the user when they have entered a date that
+  /// is outside the valid range for the date picker.
+  /// [showDateRangePicker].
+  String get dateOutOfRangeLabel;
+
+  /// Label for a 'SAVE' button. Currently used by the full screen mode of the
+  /// date range picker.
+  String get saveButtonLabel;
+
+  /// Label used in the header of the date picker dialog created with
+  /// [showDatePicker].
+  String get datePickerHelpText;
+
+  /// Label used in the header of the date range picker dialog created with
+  /// [showDateRangePicker].
+  String get dateRangePickerHelpText;
+
+  /// Tooltip used for the calendar mode button of the date pickers.
+  String get calendarModeButtonLabel;
+
+  /// Tooltip used for the text input mode button of the date pickers.
+  String get inputDateModeButtonLabel;
+
   /// The semantics label used to indicate which account is signed in in the
   /// [UserAccountsDrawerHeader] widget.
   String get signedInLabel;
@@ -599,6 +663,54 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   int get firstDayOfWeekIndex => 0; // narrowWeekdays[0] is 'S' for Sunday
+
+  @override
+  String get dateSeparator => '/';
+
+  @override
+  String get dateHelpText => 'mm/dd/yyyy';
+
+  @override
+  String get selectYearLabel => 'Select year';
+
+  @override
+  String get unspecifiedDate => 'Date';
+
+  @override
+  String get unspecifiedDateRange => 'Date Range';
+
+  @override
+  String get dateInputLabel => 'Enter Date';
+
+  @override
+  String get dateRangeStartLabel => 'Start Date';
+
+  @override
+  String get dateRangeEndLabel => 'End Date';
+
+  @override
+  String get invalidDateFormatLabel => 'Invalid format.';
+
+  @override
+  String get invalidDateRangeLabel => 'Invalid range.';
+
+  @override
+  String get dateOutOfRangeLabel => 'Out of range.';
+
+  @override
+  String get saveButtonLabel => 'SAVE';
+
+  @override
+  String get datePickerHelpText => 'SELECT DATE';
+
+  @override
+  String get dateRangePickerHelpText => 'SELECT DATE RANGE';
+
+  @override
+  String get calendarModeButtonLabel => 'Switch to calendar';
+
+  @override
+  String get inputDateModeButtonLabel => 'Switch to input';
 
   String _formatDayPeriod(TimeOfDay timeOfDay) {
     switch (timeOfDay.period) {

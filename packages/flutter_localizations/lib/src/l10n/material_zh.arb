@@ -52,5 +52,21 @@
   "remainingTextFieldCharacterCountOne": "还可输入 1 个字符",
   "remainingTextFieldCharacterCountOther": "还可输入 $remainingCount 个字符",
   "refreshIndicatorSemanticLabel": "刷新",
-  "moreButtonTooltip": "更多"
+  "moreButtonTooltip": "更多",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

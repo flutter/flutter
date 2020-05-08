@@ -53,5 +53,21 @@
   "remainingTextFieldCharacterCountOne": "1 எழுத்து மீதமுள்ளது",
   "remainingTextFieldCharacterCountOther": "$remainingCount எழுத்துகள் மீதமுள்ளன",
   "refreshIndicatorSemanticLabel": "ரெஃப்ரெஷ் செய்யும்",
-  "moreButtonTooltip": "மேலும்"
+  "moreButtonTooltip": "மேலும்",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

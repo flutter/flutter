@@ -52,5 +52,21 @@
   "remainingTextFieldCharacterCountOne": "απομένει 1 χαρακτήρας",
   "remainingTextFieldCharacterCountOther": "απομένουν $remainingCount χαρακτήρες",
   "refreshIndicatorSemanticLabel": "Ανανέωση",
-  "moreButtonTooltip": "Περισσότερα"
+  "moreButtonTooltip": "Περισσότερα",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

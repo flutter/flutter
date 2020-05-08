@@ -52,5 +52,21 @@
   "remainingTextFieldCharacterCountOne": "एक वर्ण आैर डाला जा सकता है",
   "remainingTextFieldCharacterCountOther": "$remainingCount वर्ण आैर डाले जा सकते हैं",
   "refreshIndicatorSemanticLabel": "रीफ़्रेश करें",
-  "moreButtonTooltip": "ज़्यादा"
+  "moreButtonTooltip": "ज़्यादा",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

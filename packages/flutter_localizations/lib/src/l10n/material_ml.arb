@@ -51,5 +51,21 @@
   "remainingTextFieldCharacterCountOne": "ഒരു പ്രതീകം ശേഷിക്കുന്നു",
   "remainingTextFieldCharacterCountOther": "$remainingCount പ്രതീകങ്ങൾ ശേഷിക്കുന്നു",
   "refreshIndicatorSemanticLabel": "പുതുക്കിയെടുക്കുക",
-  "moreButtonTooltip": "കൂടുതൽ"
+  "moreButtonTooltip": "കൂടുതൽ",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

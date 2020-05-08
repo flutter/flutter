@@ -52,5 +52,21 @@
   "remainingTextFieldCharacterCountOne": "Остава 1 знак",
   "remainingTextFieldCharacterCountOther": "Остават $remainingCount знака",
   "refreshIndicatorSemanticLabel": "Опресняване",
-  "moreButtonTooltip": "Още"
+  "moreButtonTooltip": "Още",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

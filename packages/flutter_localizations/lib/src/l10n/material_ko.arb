@@ -52,5 +52,21 @@
   "remainingTextFieldCharacterCountOne": "1자 남음",
   "remainingTextFieldCharacterCountOther": "$remainingCount자 남음",
   "refreshIndicatorSemanticLabel": "새로고침",
-  "moreButtonTooltip": "더보기"
+  "moreButtonTooltip": "더보기",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }

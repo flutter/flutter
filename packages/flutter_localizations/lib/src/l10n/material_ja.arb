@@ -52,5 +52,21 @@
   "remainingTextFieldCharacterCountOne": "残り 1 文字（半角相当）",
   "remainingTextFieldCharacterCountOther": "残り $remainingCount 文字（半角相当）",
   "refreshIndicatorSemanticLabel": "更新",
-  "moreButtonTooltip": "その他"
+  "moreButtonTooltip": "その他",
+  "dateSeparator": "TBD",
+  "dateHelpText": "TBD",
+  "selectYearLabel": "TBD",
+  "unspecifiedDate": "TBD",
+  "unspecifiedDateRange": "TBD",
+  "dateInputLabel": "TBD",
+  "dateRangeStartLabel": "TBD",
+  "dateRangeEndLabel": "TBD",
+  "invalidDateFormatLabel": "TBD",
+  "invalidDateRangeLabel": "TBD",
+  "dateOutOfRangeLabel": "TBD",
+  "saveButtonLabel": "TBD",
+  "datePickerHelpText": "TBD",
+  "dateRangePickerHelpText": "TBD",
+  "calendarModeButtonLabel": "TBD",
+  "inputDateModeButtonLabel": "TBD"
 }
