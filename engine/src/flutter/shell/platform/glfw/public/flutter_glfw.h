@@ -119,11 +119,18 @@ FLUTTER_EXPORT bool FlutterDesktopRunWindowEventLoopWithTimeout(
 FLUTTER_EXPORT FlutterDesktopWindowRef
 FlutterDesktopGetWindow(FlutterDesktopWindowControllerRef controller);
 
+// Returns the handle for the engine running in
+// FlutterDesktopWindowControllerRef.
+//
+// Its lifetime is the same as the |controller|'s.
+FLUTTER_EXPORT FlutterDesktopEngineRef
+FlutterDesktopGetEngine(FlutterDesktopWindowControllerRef controller);
+
 // Returns the plugin registrar handle for the plugin with the given name.
 //
 // The name must be unique across the application.
 FLUTTER_EXPORT FlutterDesktopPluginRegistrarRef
-FlutterDesktopGetPluginRegistrar(FlutterDesktopWindowControllerRef controller,
+FlutterDesktopGetPluginRegistrar(FlutterDesktopEngineRef engine,
                                  const char* plugin_name);
 
 // Enables or disables hover tracking.
@@ -193,10 +200,19 @@ FLUTTER_EXPORT void FlutterDesktopWindowSetSizeLimits(
 FLUTTER_EXPORT FlutterDesktopEngineRef
 FlutterDesktopRunEngine(const FlutterDesktopEngineProperties& properties);
 
+// Waits for and processes the next event before |timeout_milliseconds|.
+//
+// If |timeout_milliseconds| is zero, it will wait for the next event
+// indefinitely. A non-zero timeout is needed only if processing unrelated to
+// the event loop is necessary (e.g., to handle events from another source).
+FLUTTER_EXPORT void FlutterDesktopRunEngineEventLoopWithTimeout(
+    FlutterDesktopEngineRef engine,
+    uint32_t timeout_milliseconds);
+
 // Shuts down the given engine instance. Returns true if the shutdown was
 // successful. |engine_ref| is no longer valid after this call.
 FLUTTER_EXPORT bool FlutterDesktopShutDownEngine(
-    FlutterDesktopEngineRef engine_ref);
+    FlutterDesktopEngineRef engine);
 
 // Returns the window associated with this registrar's engine instance.
 // This is a GLFW shell-specific extension to flutter_plugin_registrar.h

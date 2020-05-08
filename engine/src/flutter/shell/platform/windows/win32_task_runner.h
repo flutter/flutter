@@ -57,7 +57,6 @@ class Win32TaskRunner {
   TaskExpiredCallback on_task_expired_;
   std::mutex task_queue_mutex_;
   std::priority_queue<Task, std::deque<Task>, Task::Comparer> task_queue_;
-  std::condition_variable task_queue_cv_;
 
   Win32TaskRunner(const Win32TaskRunner&) = delete;
 

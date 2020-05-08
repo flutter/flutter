@@ -30,9 +30,13 @@ source_set("flutter_glfw_headers") {
 
 source_set("flutter_glfw") {
   sources = [
+    "event_loop.cc",
+    "event_loop.h",
     "flutter_glfw.cc",
     "glfw_event_loop.cc",
     "glfw_event_loop.h",
+    "headless_event_loop.cc",
+    "headless_event_loop.h",
     "key_event_handler.cc",
     "key_event_handler.h",
     "keyboard_hook_handler.h",

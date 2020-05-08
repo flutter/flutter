@@ -17,6 +17,7 @@ static constexpr char kSystemNavigatorPopMethod[] = "SystemNavigator.pop";
 static constexpr char kTextPlainFormat[] = "text/plain";
 static constexpr char kTextKey[] = "text";
 
+static constexpr char kNoWindowError[] = "Missing window error";
 static constexpr char kUnknownClipboardFormatError[] =
     "Unknown clipboard format error";
 
@@ -43,6 +44,11 @@ void PlatformHandler::HandleMethodCall(
   const std::string& method = method_call.method_name();
 
   if (method.compare(kGetClipboardDataMethod) == 0) {
+    if (!window_) {
+      result->Error(kNoWindowError,
+                    "Clipboard is not available in GLFW headless mode.");
+      return;
+    }
     // Only one string argument is expected.
     const rapidjson::Value& format = method_call.arguments()[0];
 
@@ -65,6 +71,11 @@ void PlatformHandler::HandleMethodCall(
                        rapidjson::Value(clipboardData, allocator), allocator);
     result->Success(&document);
   } else if (method.compare(kSetClipboardDataMethod) == 0) {
+    if (!window_) {
+      result->Error(kNoWindowError,
+                    "Clipboard is not available in GLFW headless mode.");
+      return;
+    }
     const rapidjson::Value& document = *method_call.arguments();
     rapidjson::Value::ConstMemberIterator itr = document.FindMember(kTextKey);
     if (itr == document.MemberEnd()) {

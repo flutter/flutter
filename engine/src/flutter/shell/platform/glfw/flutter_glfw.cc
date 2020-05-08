@@ -18,6 +18,7 @@
 #include "flutter/shell/platform/common/cpp/path_utils.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/glfw/glfw_event_loop.h"
+#include "flutter/shell/platform/glfw/headless_event_loop.h"
 #include "flutter/shell/platform/glfw/key_event_handler.h"
 #include "flutter/shell/platform/glfw/keyboard_hook_handler.h"
 #include "flutter/shell/platform/glfw/platform_handler.h"
@@ -49,30 +50,15 @@ struct FlutterDesktopWindowControllerState {
   UniqueGLFWwindowPtr resource_window =
       UniqueGLFWwindowPtr(nullptr, glfwDestroyWindow);
 
-  // The handle to the Flutter engine instance.
-  FLUTTER_API_SYMBOL(FlutterEngine) engine;
+  // The state associated with the engine.
+  std::unique_ptr<FlutterDesktopEngineState> engine;
 
   // The window handle given to API clients.
   std::unique_ptr<FlutterDesktopWindow> window_wrapper;
 
-  // The plugin registrar handle given to API clients.
-  std::unique_ptr<FlutterDesktopPluginRegistrar> plugin_registrar;
-
-  // Message dispatch manager for messages from the Flutter engine.
-  std::unique_ptr<flutter::IncomingMessageDispatcher> message_dispatcher;
-
-  // The plugin registrar managing internal plugins.
-  std::unique_ptr<flutter::PluginRegistrar> internal_plugin_registrar;
-
   // Handlers for keyboard events from GLFW.
   std::vector<std::unique_ptr<flutter::KeyboardHookHandler>>
       keyboard_hook_handlers;
-
-  // Handler for the flutter/platform channel.
-  std::unique_ptr<flutter::PlatformHandler> platform_handler;
-
-  // The event loop for the main thread that allows for delayed task execution.
-  std::unique_ptr<flutter::GLFWEventLoop> event_loop;
 
   // Whether or not the pointer has been added (or if tracking is enabled,
   // has been added since it was last removed).
@@ -108,16 +94,35 @@ struct FlutterDesktopWindow {
 // Struct for storing state of a Flutter engine instance.
 struct FlutterDesktopEngineState {
   // The handle to the Flutter engine instance.
-  FLUTTER_API_SYMBOL(FlutterEngine) engine;
+  FLUTTER_API_SYMBOL(FlutterEngine) flutter_engine;
+
+  // The event loop for the main thread that allows for delayed task execution.
+  std::unique_ptr<flutter::EventLoop> event_loop;
+
+  // The plugin messenger handle given to API clients.
+  std::unique_ptr<FlutterDesktopMessenger> messenger;
+
+  // Message dispatch manager for messages from the Flutter engine.
+  std::unique_ptr<flutter::IncomingMessageDispatcher> message_dispatcher;
+
+  // The plugin registrar handle given to API clients.
+  std::unique_ptr<FlutterDesktopPluginRegistrar> plugin_registrar;
+
+  // The plugin registrar managing internal plugins.
+  std::unique_ptr<flutter::PluginRegistrar> internal_plugin_registrar;
+
+  // Handler for the flutter/platform channel.
+  std::unique_ptr<flutter::PlatformHandler> platform_handler;
+
+  // The controller associated with this engine instance, if any.
+  // This will always be null for a headless engine.
+  FlutterDesktopWindowControllerState* window_controller = nullptr;
 };
 
 // State associated with the plugin registrar.
 struct FlutterDesktopPluginRegistrar {
-  // The plugin messenger handle given to API clients.
-  std::unique_ptr<FlutterDesktopMessenger> messenger;
-
-  // The handle for the window associated with this registrar.
-  FlutterDesktopWindow* window;
+  // The engine that backs this registrar.
+  FlutterDesktopEngineState* engine;
 
   // Callback to be called on registrar destruction.
   FlutterDesktopOnRegistrarDestroyed destruction_handler;
@@ -125,15 +130,12 @@ struct FlutterDesktopPluginRegistrar {
 
 // State associated with the messenger used to communicate with the engine.
 struct FlutterDesktopMessenger {
-  // The Flutter engine this messenger sends outgoing messages to.
-  FLUTTER_API_SYMBOL(FlutterEngine) engine;
-
-  // The message dispatcher for handling incoming messages.
-  flutter::IncomingMessageDispatcher* dispatcher;
+  // The engine that backs this messenger.
+  FlutterDesktopEngineState* engine;
 };
 
 // Retrieves state bag for the window in question from the GLFWWindow.
-static FlutterDesktopWindowControllerState* GetSavedWindowState(
+static FlutterDesktopWindowControllerState* GetWindowController(
     GLFWwindow* window) {
   return reinterpret_cast<FlutterDesktopWindowControllerState*>(
       glfwGetWindowUserPointer(window));
@@ -181,25 +183,44 @@ static double GetScreenCoordinatesPerInch() {
 
 // Sends a window metrics update to the Flutter engine using the given
 // framebuffer size and the current window information in |state|.
-static void SendWindowMetrics(FlutterDesktopWindowControllerState* state,
+static void SendWindowMetrics(FlutterDesktopWindowControllerState* controller,
                               int width,
                               int height) {
-  double dpi = state->window_wrapper->pixels_per_screen_coordinate *
-               state->monitor_screen_coordinates_per_inch;
+  double dpi = controller->window_wrapper->pixels_per_screen_coordinate *
+               controller->monitor_screen_coordinates_per_inch;
 
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
   event.width = width;
   event.height = height;
-  if (state->window_wrapper->pixel_ratio_override == 0.0) {
+  if (controller->window_wrapper->pixel_ratio_override == 0.0) {
     // The Flutter pixel_ratio is defined as DPI/dp. Limit the ratio to a
     // minimum of 1 to avoid rendering a smaller UI on standard resolution
     // monitors.
     event.pixel_ratio = std::max(dpi / kDpPerInch, 1.0);
   } else {
-    event.pixel_ratio = state->window_wrapper->pixel_ratio_override;
+    event.pixel_ratio = controller->window_wrapper->pixel_ratio_override;
   }
-  FlutterEngineSendWindowMetricsEvent(state->engine, &event);
+  FlutterEngineSendWindowMetricsEvent(controller->engine->flutter_engine,
+                                      &event);
+}
+
+// Populates |task_runner| with a description that uses |engine_state|'s event
+// loop to run tasks.
+static void ConfigurePlatformTaskRunner(
+    FlutterTaskRunnerDescription* task_runner,
+    FlutterDesktopEngineState* engine_state) {
+  task_runner->struct_size = sizeof(FlutterTaskRunnerDescription);
+  task_runner->user_data = engine_state;
+  task_runner->runs_task_on_current_thread_callback = [](void* state) -> bool {
+    return reinterpret_cast<FlutterDesktopEngineState*>(state)
+        ->event_loop->RunsTasksOnCurrentThread();
+  };
+  task_runner->post_task_callback =
+      [](FlutterTask task, uint64_t target_time_nanos, void* state) -> void {
+    reinterpret_cast<FlutterDesktopEngineState*>(state)->event_loop->PostTask(
+        task, target_time_nanos);
+  };
 }
 
 // When GLFW calls back to the window with a framebuffer size change, notify
@@ -209,19 +230,19 @@ static void GLFWFramebufferSizeCallback(GLFWwindow* window,
                                         int height_px) {
   int width;
   glfwGetWindowSize(window, &width, nullptr);
-  auto* state = GetSavedWindowState(window);
-  state->window_wrapper->pixels_per_screen_coordinate =
+  auto* controller = GetWindowController(window);
+  controller->window_wrapper->pixels_per_screen_coordinate =
       width > 0 ? width_px / width : 1;
 
-  SendWindowMetrics(state, width_px, height_px);
-  state->window_wrapper->skip_next_window_refresh = true;
+  SendWindowMetrics(controller, width_px, height_px);
+  controller->window_wrapper->skip_next_window_refresh = true;
 }
 
 // Indicates that the window needs to be redrawn.
 void GLFWWindowRefreshCallback(GLFWwindow* window) {
-  auto* state = GetSavedWindowState(window);
-  if (state->window_wrapper->skip_next_window_refresh) {
-    state->window_wrapper->skip_next_window_refresh = false;
+  auto* controller = GetWindowController(window);
+  if (controller->window_wrapper->skip_next_window_refresh) {
+    controller->window_wrapper->skip_next_window_refresh = false;
     return;
   }
   // There's no engine API to request a redraw explicitly, so instead send a
@@ -229,7 +250,7 @@ void GLFWWindowRefreshCallback(GLFWwindow* window) {
   int width_px, height_px;
   glfwGetFramebufferSize(window, &width_px, &height_px);
   if (width_px > 0 && height_px > 0) {
-    SendWindowMetrics(state, width_px, height_px);
+    SendWindowMetrics(controller, width_px, height_px);
   }
 }
 
@@ -239,10 +260,10 @@ void GLFWWindowRefreshCallback(GLFWwindow* window) {
 // coordinates; they will be adjusted to pixel values before being sent.
 static void SendPointerEventWithData(GLFWwindow* window,
                                      const FlutterPointerEvent& event_data) {
-  auto* state = GetSavedWindowState(window);
+  auto* controller = GetWindowController(window);
   // If sending anything other than an add, and the pointer isn't already added,
   // synthesize an add to satisfy Flutter's expectations about events.
-  if (!state->pointer_currently_added &&
+  if (!controller->pointer_currently_added &&
       event_data.phase != FlutterPointerPhase::kAdd) {
     FlutterPointerEvent event = {};
     event.phase = FlutterPointerPhase::kAdd;
@@ -252,7 +273,7 @@ static void SendPointerEventWithData(GLFWwindow* window,
   }
   // Don't double-add (e.g., if events are delivered out of order, so an add has
   // already been synthesized).
-  if (state->pointer_currently_added &&
+  if (controller->pointer_currently_added &&
       event_data.phase == FlutterPointerPhase::kAdd) {
     return;
   }
@@ -266,18 +287,18 @@ static void SendPointerEventWithData(GLFWwindow* window,
           .count();
   // Convert all screen coordinates to pixel coordinates.
   double pixels_per_coordinate =
-      state->window_wrapper->pixels_per_screen_coordinate;
+      controller->window_wrapper->pixels_per_screen_coordinate;
   event.x *= pixels_per_coordinate;
   event.y *= pixels_per_coordinate;
   event.scroll_delta_x *= pixels_per_coordinate;
   event.scroll_delta_y *= pixels_per_coordinate;
 
-  FlutterEngineSendPointerEvent(state->engine, &event, 1);
+  FlutterEngineSendPointerEvent(controller->engine->flutter_engine, &event, 1);
 
   if (event_data.phase == FlutterPointerPhase::kAdd) {
-    state->pointer_currently_added = true;
+    controller->pointer_currently_added = true;
   } else if (event_data.phase == FlutterPointerPhase::kRemove) {
-    state->pointer_currently_added = false;
+    controller->pointer_currently_added = false;
   }
 }
 
@@ -337,7 +358,7 @@ static void GLFWMouseButtonCallback(GLFWwindow* window,
   // If mouse tracking isn't already enabled, turn it on for the duration of
   // the drag to generate kMove events.
   bool hover_enabled =
-      GetSavedWindowState(window)->window_wrapper->hover_tracking_enabled;
+      GetWindowController(window)->window_wrapper->hover_tracking_enabled;
   if (!hover_enabled) {
     glfwSetCursorPosCallback(
         window, (action == GLFW_PRESS) ? GLFWCursorPositionCallback : nullptr);
@@ -370,7 +391,7 @@ static void GLFWScrollCallback(GLFWwindow* window,
 // Passes character input events to registered handlers.
 static void GLFWCharCallback(GLFWwindow* window, unsigned int code_point) {
   for (const auto& handler :
-       GetSavedWindowState(window)->keyboard_hook_handlers) {
+       GetWindowController(window)->keyboard_hook_handlers) {
     handler->CharHook(window, code_point);
   }
 }
@@ -382,7 +403,7 @@ static void GLFWKeyCallback(GLFWwindow* window,
                             int action,
                             int mods) {
   for (const auto& handler :
-       GetSavedWindowState(window)->keyboard_hook_handlers) {
+       GetWindowController(window)->keyboard_hook_handlers) {
     handler->KeyboardHook(window, key, scancode, action, mods);
   }
 }
@@ -402,7 +423,7 @@ static void GLFWAssignEventCallbacks(GLFWwindow* window) {
   glfwSetCharCallback(window, GLFWCharCallback);
   glfwSetMouseButtonCallback(window, GLFWMouseButtonCallback);
   glfwSetScrollCallback(window, GLFWScrollCallback);
-  if (GetSavedWindowState(window)->window_wrapper->hover_tracking_enabled) {
+  if (GetWindowController(window)->window_wrapper->hover_tracking_enabled) {
     SetHoverCallbacksEnabled(window, true);
   }
 }
@@ -418,7 +439,7 @@ static void GLFWClearEventCallbacks(GLFWwindow* window) {
 
 // The Flutter Engine calls out to this function when new platform messages are
 // available
-static void GLFWOnFlutterPlatformMessage(
+static void EngineOnFlutterPlatformMessage(
     const FlutterPlatformMessage* engine_message,
     void* user_data) {
   if (engine_message->struct_size != sizeof(FlutterPlatformMessage)) {
@@ -428,40 +449,83 @@ static void GLFWOnFlutterPlatformMessage(
     return;
   }
 
-  GLFWwindow* window = reinterpret_cast<GLFWwindow*>(user_data);
-  auto state = GetSavedWindowState(window);
+  FlutterDesktopEngineState* engine_state =
+      static_cast<FlutterDesktopEngineState*>(user_data);
+  GLFWwindow* window = engine_state->window_controller == nullptr
+                           ? nullptr
+                           : engine_state->window_controller->window.get();
 
   auto message = ConvertToDesktopMessage(*engine_message);
-  state->message_dispatcher->HandleMessage(
-      message, [window] { GLFWClearEventCallbacks(window); },
-      [window] { GLFWAssignEventCallbacks(window); });
+  engine_state->message_dispatcher->HandleMessage(
+      message,
+      [window] {
+        if (window) {
+          GLFWClearEventCallbacks(window);
+        }
+      },
+      [window] {
+        if (window) {
+          GLFWAssignEventCallbacks(window);
+        }
+      });
 }
 
-static bool GLFWMakeContextCurrent(void* user_data) {
-  GLFWwindow* window = reinterpret_cast<GLFWwindow*>(user_data);
-  glfwMakeContextCurrent(window);
+static bool EngineMakeContextCurrent(void* user_data) {
+  FlutterDesktopEngineState* engine_state =
+      static_cast<FlutterDesktopEngineState*>(user_data);
+  FlutterDesktopWindowControllerState* window_controller =
+      engine_state->window_controller;
+  if (!window_controller) {
+    return false;
+  }
+  glfwMakeContextCurrent(window_controller->window.get());
   return true;
 }
 
-static bool GLFWMakeResourceContextCurrent(void* user_data) {
-  GLFWwindow* window = reinterpret_cast<GLFWwindow*>(user_data);
-  glfwMakeContextCurrent(GetSavedWindowState(window)->resource_window.get());
+static bool EngineMakeResourceContextCurrent(void* user_data) {
+  FlutterDesktopEngineState* engine_state =
+      static_cast<FlutterDesktopEngineState*>(user_data);
+  FlutterDesktopWindowControllerState* window_controller =
+      engine_state->window_controller;
+  if (!window_controller) {
+    return false;
+  }
+  glfwMakeContextCurrent(window_controller->resource_window.get());
   return true;
 }
 
-static bool GLFWClearContext(void* user_data) {
+static bool EngineClearContext(void* user_data) {
+  FlutterDesktopEngineState* engine_state =
+      static_cast<FlutterDesktopEngineState*>(user_data);
+  FlutterDesktopWindowControllerState* window_controller =
+      engine_state->window_controller;
+  if (!window_controller) {
+    return false;
+  }
   glfwMakeContextCurrent(nullptr);
   return true;
 }
 
-static bool GLFWPresent(void* user_data) {
-  GLFWwindow* window = reinterpret_cast<GLFWwindow*>(user_data);
-  glfwSwapBuffers(window);
+static bool EnginePresent(void* user_data) {
+  FlutterDesktopEngineState* engine_state =
+      static_cast<FlutterDesktopEngineState*>(user_data);
+  FlutterDesktopWindowControllerState* window_controller =
+      engine_state->window_controller;
+  if (!window_controller) {
+    return false;
+  }
+  glfwSwapBuffers(window_controller->window.get());
   return true;
 }
 
-static uint32_t GLFWGetActiveFbo(void* user_data) {
+static uint32_t EngineGetActiveFbo(void* user_data) {
   return 0;
+}
+
+// Resolves the address of the specified OpenGL or OpenGL ES
+// core or extension function, if it is supported by the current context.
+static void* EngineProcResolver(void* user_data, const char* name) {
+  return reinterpret_cast<void*>(glfwGetProcAddress(name));
 }
 
 // Clears the GLFW window to Material Blue-Grey.
@@ -482,27 +546,21 @@ static void GLFWClearCanvas(GLFWwindow* window) {
   glfwMakeContextCurrent(nullptr);
 }
 
-// Resolves the address of the specified OpenGL or OpenGL ES
-// core or extension function, if it is supported by the current context.
-static void* GLFWProcResolver(void* user_data, const char* name) {
-  return reinterpret_cast<void*>(glfwGetProcAddress(name));
-}
-
 static void GLFWErrorCallback(int error_code, const char* description) {
   std::cerr << "GLFW error " << error_code << ": " << description << std::endl;
 }
 
-// Spins up an instance of the Flutter Engine.
+// Starts an instance of the Flutter Engine.
 //
-// This function launches the Flutter Engine in a background thread, supplying
-// the necessary callbacks for rendering within a GLFWwindow (if one is
-// provided).
+// Configures the engine according to |engine_propreties| and using |event_loop|
+// to schedule engine tasks.
 //
-// Returns a caller-owned pointer to the engine.
-static FLUTTER_API_SYMBOL(FlutterEngine)
-    RunFlutterEngine(GLFWwindow* window,
-                     const FlutterDesktopEngineProperties& engine_properties,
-                     const FlutterCustomTaskRunners* custom_task_runners) {
+// Returns true on success, in which case |engine_state|'s 'engine' field will
+// be updated to point to the started engine.
+static bool RunFlutterEngine(
+    FlutterDesktopEngineState* engine_state,
+    const FlutterDesktopEngineProperties& engine_properties,
+    std::unique_ptr<flutter::EventLoop> event_loop) {
   // FlutterProjectArgs is expecting a full argv, so when processing it for
   // flags the first item is treated as the executable and ignored. Add a dummy
   // value so that all provided arguments are used.
@@ -523,7 +581,7 @@ static FLUTTER_API_SYMBOL(FlutterEngine)
     if (executable_location.empty()) {
       std::cerr << "Unable to find executable location to resolve paths."
                 << std::endl;
-      return nullptr;
+      return false;
     }
     assets_path = std::filesystem::path(executable_location) / assets_path;
     icu_path = std::filesystem::path(executable_location) / icu_path;
@@ -531,24 +589,26 @@ static FLUTTER_API_SYMBOL(FlutterEngine)
   std::string assets_path_string = assets_path.u8string();
   std::string icu_path_string = icu_path.u8string();
 
+  // Configure a task runner using the event loop.
+  engine_state->event_loop = std::move(event_loop);
+  FlutterTaskRunnerDescription platform_task_runner = {};
+  ConfigurePlatformTaskRunner(&platform_task_runner, engine_state);
+  FlutterCustomTaskRunners task_runners = {};
+  task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
+  task_runners.platform_task_runner = &platform_task_runner;
+
   FlutterRendererConfig config = {};
-  if (window == nullptr) {
-    config.type = kOpenGL;
-    config.open_gl.struct_size = sizeof(config.open_gl);
-    config.open_gl.make_current = [](void* data) -> bool { return false; };
-    config.open_gl.clear_current = [](void* data) -> bool { return false; };
-    config.open_gl.present = [](void* data) -> bool { return false; };
-    config.open_gl.fbo_callback = [](void* data) -> uint32_t { return 0; };
-  } else {
-    // Provide the necessary callbacks for rendering within a GLFWwindow.
-    config.type = kOpenGL;
-    config.open_gl.struct_size = sizeof(config.open_gl);
-    config.open_gl.make_current = GLFWMakeContextCurrent;
-    config.open_gl.clear_current = GLFWClearContext;
-    config.open_gl.present = GLFWPresent;
-    config.open_gl.fbo_callback = GLFWGetActiveFbo;
-    config.open_gl.make_resource_current = GLFWMakeResourceContextCurrent;
-    config.open_gl.gl_proc_resolver = GLFWProcResolver;
+  config.type = kOpenGL;
+  config.open_gl.struct_size = sizeof(config.open_gl);
+  config.open_gl.make_current = EngineMakeContextCurrent;
+  config.open_gl.clear_current = EngineClearContext;
+  config.open_gl.present = EnginePresent;
+  config.open_gl.fbo_callback = EngineGetActiveFbo;
+  config.open_gl.make_resource_current = EngineMakeResourceContextCurrent;
+  // Don't provide a resolver in headless mode, since headless mode should
+  // work even if GLFW initialization failed.
+  if (engine_state->window_controller != nullptr) {
+    config.open_gl.gl_proc_resolver = EngineProcResolver;
   }
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
@@ -556,17 +616,43 @@ static FLUTTER_API_SYMBOL(FlutterEngine)
   args.icu_data_path = icu_path_string.c_str();
   args.command_line_argc = static_cast<int>(argv.size());
   args.command_line_argv = &argv[0];
-  args.platform_message_callback = GLFWOnFlutterPlatformMessage;
-  args.custom_task_runners = custom_task_runners;
+  args.platform_message_callback = EngineOnFlutterPlatformMessage;
+  args.custom_task_runners = &task_runners;
   FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
-  auto result =
-      FlutterEngineRun(FLUTTER_ENGINE_VERSION, &config, &args, window, &engine);
+  auto result = FlutterEngineRun(FLUTTER_ENGINE_VERSION, &config, &args,
+                                 engine_state, &engine);
   if (result != kSuccess || engine == nullptr) {
     std::cerr << "Failed to start Flutter engine: error " << result
               << std::endl;
-    return nullptr;
+    return false;
   }
-  return engine;
+  engine_state->flutter_engine = engine;
+  return true;
+}
+
+// Populates |state|'s helper object fields that are common to normal and
+// headless mode.
+//
+// Window is optional; if present it will be provided to the created
+// PlatformHandler.
+static void SetUpCommonEngineState(FlutterDesktopEngineState* state,
+                                   GLFWwindow* window) {
+  // Messaging.
+  state->messenger = std::make_unique<FlutterDesktopMessenger>();
+  state->messenger->engine = state;
+  state->message_dispatcher =
+      std::make_unique<flutter::IncomingMessageDispatcher>(
+          state->messenger.get());
+
+  // Plugins.
+  state->plugin_registrar = std::make_unique<FlutterDesktopPluginRegistrar>();
+  state->plugin_registrar->engine = state;
+  state->internal_plugin_registrar =
+      std::make_unique<flutter::PluginRegistrar>(state->plugin_registrar.get());
+
+  // System channel handler.
+  state->platform_handler = std::make_unique<flutter::PlatformHandler>(
+      state->internal_plugin_registrar->messenger(), nullptr);
 }
 
 bool FlutterDesktopInit() {
@@ -604,71 +690,39 @@ FlutterDesktopWindowControllerRef FlutterDesktopCreateWindow(
   glfwSetWindowUserPointer(window, state.get());
 
   // Create the share window before starting the engine, since it may call
-  // GLFWMakeResourceContextCurrent immediately.
+  // EngineMakeResourceContextCurrent immediately.
   state->resource_window = CreateShareWindowForWindow(window);
 
+  state->engine = std::make_unique<FlutterDesktopEngineState>();
+  state->engine->window_controller = state.get();
+
   // Create an event loop for the window. It is not running yet.
-  state->event_loop = std::make_unique<flutter::GLFWEventLoop>(
+  auto event_loop = std::make_unique<flutter::GLFWEventLoop>(
       std::this_thread::get_id(),  // main GLFW thread
-      [state = state.get()](const auto* task) {
-        if (FlutterEngineRunTask(state->engine, task) != kSuccess) {
+      [engine_state = state->engine.get()](const auto* task) {
+        if (FlutterEngineRunTask(engine_state->flutter_engine, task) !=
+            kSuccess) {
           std::cerr << "Could not post an engine task." << std::endl;
         }
       });
 
-  // Configure task runner interop.
-  FlutterTaskRunnerDescription platform_task_runner = {};
-  platform_task_runner.struct_size = sizeof(FlutterTaskRunnerDescription);
-  platform_task_runner.user_data = state.get();
-  platform_task_runner.runs_task_on_current_thread_callback =
-      [](void* state) -> bool {
-    return reinterpret_cast<FlutterDesktopWindowControllerState*>(state)
-        ->event_loop->RunsTasksOnCurrentThread();
-  };
-  platform_task_runner.post_task_callback =
-      [](FlutterTask task, uint64_t target_time_nanos, void* state) -> void {
-    reinterpret_cast<FlutterDesktopWindowControllerState*>(state)
-        ->event_loop->PostTask(task, target_time_nanos);
-  };
-
-  FlutterCustomTaskRunners custom_task_runners = {};
-  custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
-  custom_task_runners.platform_task_runner = &platform_task_runner;
-
   // Start the engine.
-  state->engine =
-      RunFlutterEngine(window, engine_properties, &custom_task_runners);
-  if (state->engine == nullptr) {
+  if (!RunFlutterEngine(state->engine.get(), engine_properties,
+                        std::move(event_loop))) {
     return nullptr;
   }
-
-  // TODO: Restructure the internals to follow the structure of the C++ API, so
-  // that this isn't a tangle of references.
-  auto messenger = std::make_unique<FlutterDesktopMessenger>();
-  state->message_dispatcher =
-      std::make_unique<flutter::IncomingMessageDispatcher>(messenger.get());
-  messenger->engine = state->engine;
-  messenger->dispatcher = state->message_dispatcher.get();
+  SetUpCommonEngineState(state->engine.get(), window);
 
   state->window_wrapper = std::make_unique<FlutterDesktopWindow>();
   state->window_wrapper->window = window;
 
-  state->plugin_registrar = std::make_unique<FlutterDesktopPluginRegistrar>();
-  state->plugin_registrar->messenger = std::move(messenger);
-  state->plugin_registrar->window = state->window_wrapper.get();
-
-  state->internal_plugin_registrar =
-      std::make_unique<flutter::PluginRegistrar>(state->plugin_registrar.get());
-
-  // Set up the keyboard handlers.
+  // Set up the keyboard handlers
   auto internal_plugin_messenger =
-      state->internal_plugin_registrar->messenger();
+      state->engine->internal_plugin_registrar->messenger();
   state->keyboard_hook_handlers.push_back(
       std::make_unique<flutter::KeyEventHandler>(internal_plugin_messenger));
   state->keyboard_hook_handlers.push_back(
       std::make_unique<flutter::TextInputPlugin>(internal_plugin_messenger));
-  state->platform_handler = std::make_unique<flutter::PlatformHandler>(
-      internal_plugin_messenger, state->window.get());
 
   // Trigger an initial size callback to send size information to Flutter.
   state->monitor_screen_coordinates_per_inch = GetScreenCoordinatesPerInch();
@@ -686,11 +740,11 @@ FlutterDesktopWindowControllerRef FlutterDesktopCreateWindow(
 
 void FlutterDesktopDestroyWindow(FlutterDesktopWindowControllerRef controller) {
   FlutterDesktopPluginRegistrarRef registrar =
-      controller->plugin_registrar.get();
+      controller->engine->plugin_registrar.get();
   if (registrar->destruction_handler) {
     registrar->destruction_handler(registrar);
   }
-  FlutterEngineShutdown(controller->engine);
+  FlutterEngineShutdown(controller->engine->flutter_engine);
   delete controller;
 }
 
@@ -768,8 +822,8 @@ void FlutterDesktopWindowSetPixelRatioOverride(
   int width_px, height_px;
   glfwGetFramebufferSize(flutter_window->window, &width_px, &height_px);
   if (width_px > 0 && height_px > 0) {
-    auto* state = GetSavedWindowState(flutter_window->window);
-    SendWindowMetrics(state, width_px, height_px);
+    auto* controller = GetWindowController(flutter_window->window);
+    SendWindowMetrics(controller, width_px, height_px);
   }
 }
 
@@ -784,12 +838,8 @@ void FlutterDesktopWindowSetSizeLimits(FlutterDesktopWindowRef flutter_window,
 bool FlutterDesktopRunWindowEventLoopWithTimeout(
     FlutterDesktopWindowControllerRef controller,
     uint32_t timeout_milliseconds) {
-  std::chrono::nanoseconds wait_duration =
-      timeout_milliseconds == 0
-          ? std::chrono::nanoseconds::max()
-          : std::chrono::milliseconds(timeout_milliseconds);
-  controller->event_loop->WaitForEvents(wait_duration);
-
+  FlutterDesktopRunEngineEventLoopWithTimeout(controller->engine.get(),
+                                              timeout_milliseconds);
   return !glfwWindowShouldClose(controller->window.get());
 }
 
@@ -801,43 +851,66 @@ FlutterDesktopWindowRef FlutterDesktopGetWindow(
   return controller->window_wrapper.get();
 }
 
+FlutterDesktopEngineRef FlutterDesktopGetEngine(
+    FlutterDesktopWindowControllerRef controller) {
+  return controller->engine.get();
+}
+
 FlutterDesktopPluginRegistrarRef FlutterDesktopGetPluginRegistrar(
-    FlutterDesktopWindowControllerRef controller,
+    FlutterDesktopEngineRef engine,
     const char* plugin_name) {
   // Currently, one registrar acts as the registrar for all plugins, so the
   // name is ignored. It is part of the API to reduce churn in the future when
   // aligning more closely with the Flutter registrar system.
-  return controller->plugin_registrar.get();
+  return engine->plugin_registrar.get();
 }
 
 FlutterDesktopEngineRef FlutterDesktopRunEngine(
     const FlutterDesktopEngineProperties& properties) {
-  auto engine =
-      RunFlutterEngine(nullptr, properties, nullptr /* custom task runners */);
-  if (engine == nullptr) {
+  auto engine_state = std::make_unique<FlutterDesktopEngineState>();
+
+  auto event_loop = std::make_unique<flutter::HeadlessEventLoop>(
+      std::this_thread::get_id(),
+      [state = engine_state.get()](const auto* task) {
+        if (FlutterEngineRunTask(state->flutter_engine, task) != kSuccess) {
+          std::cerr << "Could not post an engine task." << std::endl;
+        }
+      });
+
+  if (!RunFlutterEngine(engine_state.get(), properties,
+                        std::move(event_loop))) {
     return nullptr;
   }
-  auto engine_state = new FlutterDesktopEngineState();
-  engine_state->engine = engine;
-  return engine_state;
+  SetUpCommonEngineState(engine_state.get(), nullptr);
+
+  return engine_state.release();
 }
 
-bool FlutterDesktopShutDownEngine(FlutterDesktopEngineRef engine_ref) {
-  std::cout << "Shutting down flutter engine process." << std::endl;
-  auto result = FlutterEngineShutdown(engine_ref->engine);
-  delete engine_ref;
+void FlutterDesktopRunEngineEventLoopWithTimeout(
+    FlutterDesktopEngineRef engine,
+    uint32_t timeout_milliseconds) {
+  std::chrono::nanoseconds wait_duration =
+      timeout_milliseconds == 0
+          ? std::chrono::nanoseconds::max()
+          : std::chrono::milliseconds(timeout_milliseconds);
+  engine->event_loop->WaitForEvents(wait_duration);
+}
+
+bool FlutterDesktopShutDownEngine(FlutterDesktopEngineRef engine) {
+  auto result = FlutterEngineShutdown(engine->flutter_engine);
+  delete engine;
   return (result == kSuccess);
 }
 
 void FlutterDesktopRegistrarEnableInputBlocking(
     FlutterDesktopPluginRegistrarRef registrar,
     const char* channel) {
-  registrar->messenger->dispatcher->EnableInputBlockingForChannel(channel);
+  registrar->engine->message_dispatcher->EnableInputBlockingForChannel(channel);
 }
 
 FlutterDesktopMessengerRef FlutterDesktopRegistrarGetMessenger(
     FlutterDesktopPluginRegistrarRef registrar) {
-  return registrar->messenger.get();
+  return registrar->engine->messenger.get();
 }
 
 void FlutterDesktopRegistrarSetDestructionHandler(
@@ -848,7 +921,12 @@ void FlutterDesktopRegistrarSetDestructionHandler(
 
 FlutterDesktopWindowRef FlutterDesktopRegistrarGetWindow(
     FlutterDesktopPluginRegistrarRef registrar) {
-  return registrar->window;
+  FlutterDesktopWindowControllerState* controller =
+      registrar->engine->window_controller;
+  if (!controller) {
+    return nullptr;
+  }
+  return controller->window_wrapper.get();
 }
 
 bool FlutterDesktopMessengerSendWithReply(FlutterDesktopMessengerRef messenger,
@@ -860,7 +938,7 @@ bool FlutterDesktopMessengerSendWithReply(FlutterDesktopMessengerRef messenger,
   FlutterPlatformMessageResponseHandle* response_handle = nullptr;
   if (reply != nullptr && user_data != nullptr) {
     FlutterEngineResult result = FlutterPlatformMessageCreateResponseHandle(
-        messenger->engine, reply, user_data, &response_handle);
+        messenger->engine->flutter_engine, reply, user_data, &response_handle);
     if (result != kSuccess) {
       std::cout << "Failed to create response handle\n";
       return false;
@@ -875,12 +953,12 @@ bool FlutterDesktopMessengerSendWithReply(FlutterDesktopMessengerRef messenger,
       response_handle,
   };
 
-  FlutterEngineResult message_result =
-      FlutterEngineSendPlatformMessage(messenger->engine, &platform_message);
+  FlutterEngineResult message_result = FlutterEngineSendPlatformMessage(
+      messenger->engine->flutter_engine, &platform_message);
 
   if (response_handle != nullptr) {
-    FlutterPlatformMessageReleaseResponseHandle(messenger->engine,
-                                                response_handle);
+    FlutterPlatformMessageReleaseResponseHandle(
+        messenger->engine->flutter_engine, response_handle);
   }
 
   return message_result == kSuccess;
@@ -899,13 +977,14 @@ void FlutterDesktopMessengerSendResponse(
     const FlutterDesktopMessageResponseHandle* handle,
     const uint8_t* data,
     size_t data_length) {
-  FlutterEngineSendPlatformMessageResponse(messenger->engine, handle, data,
-                                           data_length);
+  FlutterEngineSendPlatformMessageResponse(messenger->engine->flutter_engine,
+                                           handle, data, data_length);
 }
 
 void FlutterDesktopMessengerSetCallback(FlutterDesktopMessengerRef messenger,
                                         const char* channel,
                                         FlutterDesktopMessageCallback callback,
                                         void* user_data) {
-  messenger->dispatcher->SetMessageCallback(channel, callback, user_data);
+  messenger->engine->message_dispatcher->SetMessageCallback(channel, callback,
+                                                            user_data);
 }

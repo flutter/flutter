@@ -83,6 +83,9 @@ class StubFlutterGlfwApi {
     return nullptr;
   }
 
+  // Called for FlutterDesktopRunEngineEventLoopWithTimeout.
+  virtual void RunEngineEventLoopWithTimeout(uint32_t millisecond_timeout) {}
+
   // Called for FlutterDesktopShutDownEngine.
   virtual bool ShutDownEngine() { return true; }
 };

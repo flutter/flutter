@@ -84,7 +84,8 @@ FlutterDesktopPluginRegistrarRef FlutterWindowController::GetRegistrarForPlugin(
               << std::endl;
     return nullptr;
   }
-  return FlutterDesktopGetPluginRegistrar(controller_, plugin_name.c_str());
+  return FlutterDesktopGetPluginRegistrar(FlutterDesktopGetEngine(controller_),
+                                          plugin_name.c_str());
 }
 
 bool FlutterWindowController::RunEventLoopWithTimeout(
