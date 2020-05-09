@@ -168,11 +168,6 @@ abstract class MouseCursorSession {
 /// with a system mouse cursor. The mouse pointer becomes an I-beam when
 /// hovering over the region.
 ///
-/// ```dart imports
-/// import 'package:flutter/widgets.dart';
-/// import 'package:flutter/gestures.dart';
-/// ```
-///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Center(
