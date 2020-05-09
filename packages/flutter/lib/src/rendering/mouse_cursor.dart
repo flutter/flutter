@@ -290,7 +290,7 @@ class _SystemMouseCursorSession extends MouseCursorSession {
       'activateSystemCursor',
       <String, dynamic>{
         'device': device,
-        'shapeCode': cursor.shapeCode,
+        'kind': cursor.kind,
       },
     );
   }
@@ -320,17 +320,15 @@ class SystemMouseCursor extends MouseCursor {
   // Application code shouldn't directly instantiate system mouse cursors, since
   // the supported system cursors are enumerated in [SystemMouseCursors].
   const SystemMouseCursor._({
-    @required this.shapeCode,
+    @required this.kind,
     @required this.debugDescription,
-  }) : assert(shapeCode != null),
+  }) : assert(kind != null),
        assert(debugDescription != null);
 
-  /// A globally unique number that identifies the shape of the cursor.
+  /// A string that identifies the kind of the cursor.
   ///
-  /// A [shapeCode] is an opaque, platform-dependent value.
-  ///
-  /// See the documentation of [SystemMouseCursor] for introduction.
-  final int shapeCode;
+  /// The interpretation of [kind] is platform-dependent.
+  final String kind;
 
   @override
   final String debugDescription;
@@ -344,16 +342,16 @@ class SystemMouseCursor extends MouseCursor {
     if (other.runtimeType != runtimeType)
       return false;
     return other is SystemMouseCursor
-        && other.shapeCode == shapeCode;
+        && other.kind == kind;
   }
 
   @override
-  int get hashCode => shapeCode;
+  int get hashCode => kind.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IntProperty('shapeCode', shapeCode, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<String>('kind', kind, level: DiagnosticLevel.debug));
   }
 }
 
@@ -391,44 +389,38 @@ class SystemMouseCursors {
   /// change cursors.
   static const MouseCursor uncontrolled = _NoopMouseCursor._();
 
-  // The `shapeCode` values are chosen as the first 6 bytes of the MD5 hash of the
-  // cursor's name at the time of creation. The reason for the 6-byte limit
-  // is because JavaScript only supports 54 bits of integer.
-  //
-  // The `shapeCode` values must be kept in sync with the engine implementations.
-
   /// Hide the cursor.
   ///
   /// Any cursor other than [none] or [uncontrolled] unhides the cursor.
-  static const SystemMouseCursor none = SystemMouseCursor._(shapeCode: 0x334c4a, debugDescription: 'none');
+  static const SystemMouseCursor none = SystemMouseCursor._(kind: 'none', debugDescription: 'none');
 
   /// The platform-dependent basic cursor.
   ///
   /// Typically the shape of an arrow.
-  static const SystemMouseCursor basic = SystemMouseCursor._(shapeCode: 0xf17aaa, debugDescription: 'basic');
+  static const SystemMouseCursor basic = SystemMouseCursor._(kind: 'basic', debugDescription: 'basic');
 
   /// A cursor that indicates a user interface element that is clickable, such as a hyperlink.
   ///
   /// Typically the shape of a pointing hand.
-  static const SystemMouseCursor click = SystemMouseCursor._(shapeCode: 0xa8affc, debugDescription: 'click');
+  static const SystemMouseCursor click = SystemMouseCursor._(kind: 'click', debugDescription: 'click');
 
   /// A cursor that indicates selectable text.
   ///
   /// Typically the shape of a capital I.
-  static const SystemMouseCursor text = SystemMouseCursor._(shapeCode: 0x1cb251, debugDescription: 'text');
+  static const SystemMouseCursor text = SystemMouseCursor._(kind: 'text', debugDescription: 'text');
 
   /// A cursor that indicates a forbidden action.
   ///
   /// Typically the shape of a circle with a diagnal line.
-  static const SystemMouseCursor forbidden = SystemMouseCursor._(shapeCode: 0x350f9d, debugDescription: 'forbidden');
+  static const SystemMouseCursor forbidden = SystemMouseCursor._(kind: 'forbidden', debugDescription: 'forbidden');
 
   /// A cursor that indicates something that can be dragged.
   ///
   /// Typically the shape of an open hand.
-  static const SystemMouseCursor grab = SystemMouseCursor._(shapeCode: 0x28b91f, debugDescription: 'grab');
+  static const SystemMouseCursor grab = SystemMouseCursor._(kind: 'grab', debugDescription: 'grab');
 
   /// A cursor that indicates something that is being dragged.
   ///
   /// Typically the shape of a closed hand.
-  static const SystemMouseCursor grabbing = SystemMouseCursor._(shapeCode: 0x6631ce, debugDescription: 'grabbing');
+  static const SystemMouseCursor grabbing = SystemMouseCursor._(kind: 'grabbing', debugDescription: 'grabbing');
 }

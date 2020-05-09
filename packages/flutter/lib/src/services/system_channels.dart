@@ -279,7 +279,7 @@ class SystemChannels {
   ///
   ///  * `activateSystemCursor`: Request to set the cursor of a pointer
   ///    device to a system cursor. The parameters are
-  ///    integer `device`, and integer `shapeCode`.
+  ///    integer `device`, and string `kind`.
   static const MethodChannel mouseCursor = OptionalMethodChannel(
     'flutter/mousecursor',
     StandardMethodCodec(),

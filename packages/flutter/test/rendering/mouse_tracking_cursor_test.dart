@@ -90,7 +90,7 @@ void main() {
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 0, shapeCode: SystemMouseCursors.basic.shapeCode),
+      _CursorUpdateDetails.activateSystemCursor(device: 0, kind: SystemMouseCursors.basic.kind),
     ]);
     logCursors.clear();
 
@@ -101,7 +101,7 @@ void main() {
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 0, shapeCode: SystemMouseCursors.grabbing.shapeCode),
+      _CursorUpdateDetails.activateSystemCursor(device: 0, kind: SystemMouseCursors.grabbing.kind),
     ]);
     logCursors.clear();
 
@@ -122,7 +122,7 @@ void main() {
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 0, shapeCode: SystemMouseCursors.basic.shapeCode),
+      _CursorUpdateDetails.activateSystemCursor(device: 0, kind: SystemMouseCursors.basic.kind),
     ]);
     logCursors.clear();
 
@@ -150,7 +150,7 @@ void main() {
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 0, shapeCode: SystemMouseCursors.grabbing.shapeCode),
+      _CursorUpdateDetails.activateSystemCursor(device: 0, kind: SystemMouseCursors.grabbing.kind),
     ]);
     logCursors.clear();
 
@@ -161,7 +161,7 @@ void main() {
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 0, shapeCode: SystemMouseCursors.basic.shapeCode),
+      _CursorUpdateDetails.activateSystemCursor(device: 0, kind: SystemMouseCursors.basic.kind),
     ]);
     logCursors.clear();
 
@@ -182,7 +182,7 @@ void main() {
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 0, shapeCode: SystemMouseCursors.grabbing.shapeCode),
+      _CursorUpdateDetails.activateSystemCursor(device: 0, kind: SystemMouseCursors.grabbing.kind),
     ]);
     logCursors.clear();
 
@@ -209,7 +209,7 @@ void main() {
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 0, shapeCode: SystemMouseCursors.basic.shapeCode),
+      _CursorUpdateDetails.activateSystemCursor(device: 0, kind: SystemMouseCursors.basic.kind),
     ]);
     logCursors.clear();
 
@@ -219,7 +219,7 @@ void main() {
     _binding.flushPostFrameCallbacks(Duration.zero);
 
     expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 0, shapeCode: SystemMouseCursors.grabbing.shapeCode),
+      _CursorUpdateDetails.activateSystemCursor(device: 0, kind: SystemMouseCursors.grabbing.kind),
     ]);
     logCursors.clear();
 
@@ -258,7 +258,7 @@ void main() {
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 0, shapeCode: SystemMouseCursors.click.shapeCode),
+      _CursorUpdateDetails.activateSystemCursor(device: 0, kind: SystemMouseCursors.click.kind),
     ]);
     logCursors.clear();
 
@@ -286,7 +286,7 @@ void main() {
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 0, shapeCode: SystemMouseCursors.grabbing.shapeCode),
+      _CursorUpdateDetails.activateSystemCursor(device: 0, kind: SystemMouseCursors.grabbing.kind),
     ]);
     logCursors.clear();
 
@@ -310,7 +310,7 @@ void main() {
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 0, shapeCode: SystemMouseCursors.basic.shapeCode),
+      _CursorUpdateDetails.activateSystemCursor(device: 0, kind: SystemMouseCursors.basic.kind),
     ]);
     logCursors.clear();
 
@@ -365,7 +365,7 @@ void main() {
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 0, shapeCode: SystemMouseCursors.basic.shapeCode),
+      _CursorUpdateDetails.activateSystemCursor(device: 0, kind: SystemMouseCursors.basic.kind),
     ]);
     logCursors.clear();
   });
@@ -390,8 +390,8 @@ void main() {
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.basic.shapeCode),
-      _CursorUpdateDetails.activateSystemCursor(device: 2, shapeCode: SystemMouseCursors.basic.shapeCode),
+      _CursorUpdateDetails.activateSystemCursor(device: 1, kind: SystemMouseCursors.basic.kind),
+      _CursorUpdateDetails.activateSystemCursor(device: 2, kind: SystemMouseCursors.basic.kind),
     ]);
     logCursors.clear();
 
@@ -401,7 +401,7 @@ void main() {
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.click.shapeCode),
+      _CursorUpdateDetails.activateSystemCursor(device: 1, kind: SystemMouseCursors.click.kind),
     ]);
     logCursors.clear();
 
@@ -411,7 +411,7 @@ void main() {
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 2, shapeCode: SystemMouseCursors.click.shapeCode),
+      _CursorUpdateDetails.activateSystemCursor(device: 2, kind: SystemMouseCursors.click.kind),
     ]);
     logCursors.clear();
 
@@ -421,7 +421,7 @@ void main() {
     ]));
 
     expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 2, shapeCode: SystemMouseCursors.forbidden.shapeCode),
+      _CursorUpdateDetails.activateSystemCursor(device: 2, kind: SystemMouseCursors.forbidden.kind),
     ]);
     logCursors.clear();
 
@@ -455,9 +455,8 @@ class _CursorUpdateDetails extends MethodCall {
   _CursorUpdateDetails.wrap(MethodCall call)
     : super(call.method, Map<String, dynamic>.from(call.arguments as Map<dynamic, dynamic>));
 
-  _CursorUpdateDetails.activateSystemCursor({int device, int shapeCode})
-    : this('activateSystemCursor', <String, dynamic>{'device': device, 'shapeCode': shapeCode});
-
+  _CursorUpdateDetails.activateSystemCursor({int device, String kind})
+    : this('activateSystemCursor', <String, dynamic>{'device': device, 'kind': kind}); 
   @override
   Map<String, dynamic> get arguments => super.arguments as Map<String, dynamic>;
 
