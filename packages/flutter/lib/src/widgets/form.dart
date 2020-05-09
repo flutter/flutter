@@ -373,6 +373,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   /// Resets the field to its initial value.
   void reset() {
     setState(() {
+      _isStateDirty = false;
       _value = widget.initialValue;
       _errorText = null;
     });
