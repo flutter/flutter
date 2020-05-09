@@ -639,7 +639,7 @@ Future<void> _runFrameworkCoverage() async {
   if (!coverageFile.existsSync()) {
     print('${red}Coverage file not found.$reset');
     print('Expected to find: $cyan${coverageFile.absolute}$reset');
-    print('This file is normally obtained by running `${green}flutter update-packages$reset`.');
+    print('This file is normally obtained by running `${green}dart dev/tools/lib/update-packages.dart$reset`.');
     exit(1);
   }
   coverageFile.deleteSync();

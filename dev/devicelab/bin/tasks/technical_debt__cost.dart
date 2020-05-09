@@ -98,10 +98,9 @@ Future<int> findGlobalsForTool() async {
 }
 
 Future<int> countDependencies() async {
-  final List<String> lines = (await evalFlutter(
-    'update-packages',
-    options: <String>['--transitive-closure'],
-  )).split('\n');
+  final List<String> lines = (await Process.run(dartBin,
+    <String>[path.join('dev', 'tools', 'lib', 'update_packages.dart'), '--transitive-closure'],
+  )).stdout.split('\n') as List<String>;
   final int count = lines.where((String line) => line.contains('->')).length;
   if (count < 2) // we'll always have flutter and flutter_test, at least...
     throw Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
@@ -109,10 +108,9 @@ Future<int> countDependencies() async {
 }
 
 Future<int> countConsumerDependencies() async {
-  final List<String> lines = (await evalFlutter(
-    'update-packages',
-    options: <String>['--transitive-closure', '--consumer-only'],
-  )).split('\n');
+  final List<String> lines = (await Process.run(dartBin,
+    <String>[path.join('dev', 'tools', 'lib', 'update_packages.dart'), '--transitive-closure', '--consumer-only'],
+  )).stdout.split('\n') as List<String>;
   final int count = lines.where((String line) => line.contains('->')).length;
   if (count < 2) // we'll always have flutter and flutter_test, at least...
     throw Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');

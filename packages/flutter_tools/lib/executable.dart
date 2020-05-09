@@ -44,7 +44,6 @@ import 'src/commands/shell_completion.dart';
 import 'src/commands/symbolize.dart';
 import 'src/commands/test.dart';
 import 'src/commands/train.dart';
-import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/commands/version.dart';
 import 'src/globals.dart' as globals;
@@ -101,7 +100,6 @@ Future<void> main(List<String> args) async {
     ShellCompletionCommand(),
     TestCommand(verboseHelp: verboseHelp),
     TrainingCommand(),
-    UpdatePackagesCommand(hidden: !verboseHelp),
     UpgradeCommand(),
     VersionCommand(),
     SymbolizeCommand(
