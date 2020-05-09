@@ -633,7 +633,15 @@ Future<T> _warnIfSlow<T>({
   assert(future != null);
   assert(timeout != null);
   assert(message != null);
-  return future..timeout(timeout, onTimeout: () { _log(message); return null; });
+  future
+    .timeout(timeout, onTimeout: () {
+      _log(message);
+      return null;
+    })
+    // Don't duplicate errors if [future] completes with an error.
+    .catchError((dynamic e) => null);
+
+  return future;
 }
 
 /// Encapsulates connection information to an instance of a Flutter application.

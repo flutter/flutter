@@ -4,9 +4,9 @@
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import 'common.dart' show throwToolExit;
+import 'platform.dart';
 
 export 'package:file/file.dart';
 export 'package:file/local.dart';

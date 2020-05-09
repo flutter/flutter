@@ -2367,6 +2367,66 @@ void main() {
       expect(find.text('forth'), findsOneWidget);
     });
 
+    testWidgets('can repush a page that was previously popped before it has finished popping', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      List<Page<dynamic>> myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      ];
+      bool onPopPage(Route<dynamic> route, dynamic result) {
+        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        return route.didPop(result);
+      }
+      await tester.pumpWidget(buildNavigator(myPages, onPopPage, navigator));
+
+      // Pops the second page route.
+      myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+      ];
+      await tester.pumpWidget(buildNavigator(myPages, onPopPage, navigator));
+
+      // Re-push the second page again before it finishes popping.
+      myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      ];
+      await tester.pumpWidget(buildNavigator(myPages, onPopPage, navigator));
+
+      // It should not crash the app.
+      expect(tester.takeException(), isNull);
+      await tester.pumpAndSettle();
+      expect(find.text('second'), findsOneWidget);
+    });
+
+    testWidgets('can update pages before a route has finished popping', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      List<Page<dynamic>> myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      ];
+      bool onPopPage(Route<dynamic> route, dynamic result) {
+        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        return route.didPop(result);
+      }
+      await tester.pumpWidget(buildNavigator(myPages, onPopPage, navigator));
+
+      // Pops the second page route.
+      myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+      ];
+      await tester.pumpWidget(buildNavigator(myPages, onPopPage, navigator));
+
+      // Updates the pages again before second page finishes popping.
+      myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+      ];
+      await tester.pumpWidget(buildNavigator(myPages, onPopPage, navigator));
+
+      // It should not crash the app.
+      expect(tester.takeException(), isNull);
+      await tester.pumpAndSettle();
+      expect(find.text('initial'), findsOneWidget);
+    });
   });
 }
 
@@ -2415,23 +2475,24 @@ class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
         return;
 
       final RouteTransitionRecord exitingPageRoute = locationToExitingPageRoute[location];
-      final bool hasPagelessRoute = pageRouteToPagelessRoutes.containsKey(exitingPageRoute);
-
-      exitingPageRoute.markForRemove();
-      results.add(exitingPageRoute);
-
-      if (hasPagelessRoute) {
-        final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
-        for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
-          pagelessRoute.markForRemove();
+      if (exitingPageRoute.isWaitingForExitingDecision) {
+        final bool hasPagelessRoute = pageRouteToPagelessRoutes.containsKey(exitingPageRoute);
+        exitingPageRoute.markForRemove();
+        if (hasPagelessRoute) {
+          final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
+          for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
+            pagelessRoute.markForRemove();
+          }
         }
       }
+      results.add(exitingPageRoute);
+
       handleExitingRoute(exitingPageRoute);
     }
     handleExitingRoute(null);
 
     for (final RouteTransitionRecord pageRoute in newPageRouteHistory) {
-      if (pageRoute.isEntering) {
+      if (pageRoute.isWaitingForEnteringDecision) {
         pageRoute.markForAdd();
       }
       results.add(pageRoute);

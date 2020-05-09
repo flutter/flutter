@@ -5,9 +5,9 @@
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import 'logger.dart';
+import 'platform.dart';
 import 'terminal.dart';
 
 // ignore_for_file: non_constant_identifier_names
@@ -86,6 +86,12 @@ class CommandHelp {
   CommandHelpOption get d => _d ??= _makeOption(
     'd',
     'Detach (terminate "flutter run" but leave application running).',
+  );
+
+  CommandHelpOption _g;
+  CommandHelpOption get g => _g ??= _makeOption(
+    'g',
+    'Run source code generators.'
   );
 
   CommandHelpOption _h;

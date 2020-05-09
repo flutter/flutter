@@ -1,6 +1,8 @@
 # CIRRUS CONFIGURATION FILE
 # https://cirrus-ci.org/guide/writing-tasks/
 
+# YAML anchors used to share fields between tasks.
+# See https://confluence.atlassian.com/bitbucket/yaml-anchors-960154027.html
 web_shard_template: &WEB_SHARD_TEMPLATE
   only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
   environment:
@@ -30,6 +32,18 @@ macos_shard_template: &MACOS_SHARD_TEMPLATE
   only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
   script:
     - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+    - dart --enable-asserts ./dev/bots/test.dart
+
+firebase_shard_template: &FIREBASE_SHARD_TEMPLATE
+  environment:
+    # Empirically, this shard runs in 20-25 minutes with just one CPU and 4G of RAM, as of
+    # October 2019. It does not seem to be sensitive to the number of CPUs or amount of RAM;
+    # doubling CPUs had no effect (mere seconds under 20 minutes), increasing RAM to 24G left it
+    # on the high end of the 20-25 minute range. (This makes sense, as it's just driving the
+    # Firebase test lab remotely.) Less than 4G of RAM made it go OOM.
+    CLOUDSDK_CORE_DISABLE_PROMPTS: 1
+    GCLOUD_FIREBASE_TESTLAB_KEY: ENCRYPTED[1c140257edc48f5578fa5a0e5038b84c8e53270c405efa5a8e35ea303a4e0d135853989f448f72136206de854d17fbec]
+  script:
     - dart --enable-asserts ./dev/bots/test.dart
 
 use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
@@ -268,17 +282,15 @@ task:
         - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
-    - name: firebase_test_lab_tests-linux # linux-only
-      environment:
-        # Empirically, this shard runs in 20-25 minutes with just one CPU and 4G of RAM, as of
-        # October 2019. It does not seem to be sensitive to the number of CPUs or amount of RAM;
-        # doubling CPUs had no effect (mere seconds under 20 minutes), increasing RAM to 24G left it
-        # on the high end of the 20-25 minute range. (This makes sense, as it's just driving the
-        # Firebase test lab remotely.) Less than 4G of RAM made it go OOM.
-        CLOUDSDK_CORE_DISABLE_PROMPTS: 1
-        GCLOUD_FIREBASE_TESTLAB_KEY: ENCRYPTED[1c140257edc48f5578fa5a0e5038b84c8e53270c405efa5a8e35ea303a4e0d135853989f448f72136206de854d17fbec]
-      script:
-        - ./dev/bots/firebase_testlab.sh
+    # firebase_test_lab_tests are linux-only
+    - name: firebase_test_lab_tests-0-linux
+      <<: *FIREBASE_SHARD_TEMPLATE
+
+    - name: firebase_test_lab_tests-1-linux
+      <<: *FIREBASE_SHARD_TEMPLATE
+
+    - name: firebase_test_lab_tests-2-linux
+      <<: *FIREBASE_SHARD_TEMPLATE
 
     - name: web_smoke_test
       only_if: "changesInclude('.cirrus.yml', 'examples/hello_world/**' ,'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"

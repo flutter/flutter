@@ -101,7 +101,6 @@ void main() {
             actions: <AndroidSemanticsAction>[
               AndroidSemanticsAction.clearAccessibilityFocus,
               AndroidSemanticsAction.click,
-              AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
             ],
           ),
@@ -123,7 +122,35 @@ void main() {
             actions: <AndroidSemanticsAction>[
               AndroidSemanticsAction.clearAccessibilityFocus,
               AndroidSemanticsAction.click,
+              AndroidSemanticsAction.setSelection,
+            ],
+          ),
+        );
+
+        // Copy the text so that the clipboard contains something pasteable.
+        await driver.tap(normalTextField);
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await driver.tap(normalTextField);
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await driver.tap(find.text('SELECT ALL'));
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await driver.tap(find.text('COPY'));
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        expect(
+          await getSemantics(normalTextField),
+          hasAndroidSemantics(
+            text: 'hello world',
+            className: AndroidClassName.editText,
+            isFocusable: true,
+            isFocused: true,
+            isEditable: true,
+            isPassword: false,
+            actions: <AndroidSemanticsAction>[
+              AndroidSemanticsAction.clearAccessibilityFocus,
+              AndroidSemanticsAction.click,
               AndroidSemanticsAction.copy,
+              AndroidSemanticsAction.nextAtMovementGranularity,
               AndroidSemanticsAction.setSelection,
             ],
           ),
@@ -166,7 +193,6 @@ void main() {
             actions: <AndroidSemanticsAction>[
               AndroidSemanticsAction.clearAccessibilityFocus,
               AndroidSemanticsAction.click,
-              AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
             ],
           ),
@@ -188,7 +214,6 @@ void main() {
             actions: <AndroidSemanticsAction>[
               AndroidSemanticsAction.clearAccessibilityFocus,
               AndroidSemanticsAction.click,
-              AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
             ],
           ),
