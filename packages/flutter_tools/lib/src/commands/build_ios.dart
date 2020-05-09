@@ -22,7 +22,7 @@ class BuildIOSCommand extends BuildSubCommand {
   BuildIOSCommand({ @required bool verboseHelp }) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
-    addBuildModeFlags(defaultToRelease: false);
+    addBuildModeFlags(defaultToRelease: true);
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
@@ -35,7 +35,8 @@ class BuildIOSCommand extends BuildSubCommand {
     addBuildPerformanceFile(hide: !verboseHelp);
     argParser
       ..addFlag('simulator',
-        help: 'Build for the iOS simulator instead of the device.',
+        help: 'Build for the iOS simulator instead of the device. This changes '
+          'the default build mode to debug if otherwise unspecified.',
       )
       ..addFlag('codesign',
         defaultsTo: true,
