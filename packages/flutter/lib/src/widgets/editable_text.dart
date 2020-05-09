@@ -1111,12 +1111,13 @@ class EditableText extends StatefulWidget {
   /// To provide the best user experience and ensure your app fully supports
   /// password autofill on iOS, follow these steps:
   ///
-  /// - Set up your iOS app's
+  /// * Set up your iOS app's
   ///   [associated domains](https://developer.apple.com/documentation/safariservices/supporting_associated_domains_in_your_app).
-  /// - Some autofill hints only work with specific [keyboardType]s. For example,
+  /// * Some autofill hints only work with specific [keyboardType]s. For example,
   ///   [AutofillHints.name] requires [TextInputType.name] and [AutofillHints.email]
   ///   works only with [TextInputType.email]. Make sure the input field has a
-  ///   compatible [keyboardType].  
+  ///   compatible [keyboardType]. Empirically, [TextInputType.name] works well
+  ///   with many autofill hints that are predefined on iOS.
   /// {@endtemplate}
   /// {@macro flutter.services.autofill.autofillHints}
   final Iterable<String> autofillHints;
