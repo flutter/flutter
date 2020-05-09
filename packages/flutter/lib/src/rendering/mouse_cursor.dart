@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:collection' show LinkedHashSet;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 import 'mouse_tracking.dart';
