@@ -257,17 +257,17 @@ void main() {
     expect(listTileRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 10);
   });
 
-  testWidgets('ExpansionTile alignment test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile expandedAlignment test', (WidgetTester tester) async {
     const Key childKey = Key('key');
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
           child: ExpansionTile(
             title: const Text('title'),
-            alignment: Alignment.centerLeft,
+            expandedAlignment: Alignment.centerLeft,
             children: <Widget>[
               Container(height: 100, width: 100),
-              Container(height: 100, width: 80, key: childKey,)
+              Container(height: 100, width: 80, key: childKey)
             ],
           ),
         ),
@@ -287,14 +287,14 @@ void main() {
     expect(columnRect.right, 100.0);
 
     // The alignment doesn't define the position of the children inside the Column.
-    // Considering the default value for CrossAxisAlignment is CrossAxisAlignment.center,
+    // Considering the default value for expandedCrossAxisAlignment is CrossAxisAlignment.center,
     // the offset of the left edge of second Container from X-axis should be greater
     // than 0.
     expect(secondChild.left, greaterThan(0.0));
     expect(secondChild.right, lessThan(100.0));
   });
 
-  testWidgets('ExpansionTile crossAxisAlignment test', (WidgetTester tester) async {
+  testWidgets('ExpansionTile expandedCrossAxisAlignment test', (WidgetTester tester) async {
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
     await tester.pumpWidget(MaterialApp(
@@ -302,11 +302,11 @@ void main() {
         child: Center(
           child: ExpansionTile(
             title: const Text('title'),
-            alignment: Alignment.centerRight,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            expandedAlignment: Alignment.centerRight,
+            expandedCrossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Container(height: 100, width: 100, key: child0Key,),
-              Container(height: 100, width: 80, key: child1Key,)
+              Container(height: 100, width: 100, key: child0Key),
+              Container(height: 100, width: 80, key: child1Key)
             ],
           ),
         ),
@@ -326,29 +326,63 @@ void main() {
     // be 700.0.
     expect(columnRect.left, 700.0);
 
-    // Considering the value of CrossAxisAlignment is CrossAxisAlignment.start,
+    // Considering the value of expandedCrossAxisAlignment is CrossAxisAlignment.start,
     // the offset of the left edge of both the children from X-axis should be 700.0.
     expect(child0Rect.left, 700.0);
     expect(child1Rect.left, 700.0);
   });
 
-  testWidgets('ExpansionTile crossAxisAlignment.baseline', (WidgetTester tester) async {
+  testWidgets('ExpansionTile CrossAxisAlignment.baseline', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: ExpansionTile(
           initiallyExpanded: true,
           title: const Text('title'),
-          crossAxisAlignment: CrossAxisAlignment.baseline,
+          expandedCrossAxisAlignment: CrossAxisAlignment.baseline,
           children: <Widget>[
-             Container(height: 100, width: 100,),
+             Container(height: 100, width: 100),
           ],
         ),
       ),
     ));
 
-    // When the value of crossAxisAlignment is CrossAxisAlignment.baseline,
-    // the textBaseline can not be null.
+    // When the value of expandedCrossAxisAlignment is CrossAxisAlignment.baseline,
+    // the extendedTextBaseline can not be null.
     expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('expandedCrossAxisAlignment and expandedAlignment default values', (WidgetTester tester) async {
+    const Key child1Key = Key('child1');
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: ExpansionTile(
+            title: const Text('title'),
+            children: <Widget>[
+              Container(height: 100, width: 100),
+              Container(height: 100, width: 80, key: child1Key)
+            ],
+          ),
+        ),
+      ),
+    ));
+
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    final Rect columnRect = tester.getRect(find.byType(Column).last);
+    final Rect child1Rect = tester.getRect(find.byKey(child1Key));
+
+    // The default viewport size is Size(800, 600).
+    // By default the value of extendedAlignment is Alignment.center, hence the offset
+    // of left and right edges from x axis should be equal.
+    expect(columnRect.left, 800 - columnRect.right);
+
+    // By default the value of extendedCrossAxisAlignment is CrossAxisAlignment.center, hence
+    // the offset of left and right edges from Column should be equal.
+    expect(child1Rect.left - columnRect.left, columnRect.right - child1Rect.right);
+
   });
 
 }

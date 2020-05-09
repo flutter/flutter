@@ -42,9 +42,9 @@ class ExpansionTile extends StatefulWidget {
     this.trailing,
     this.initiallyExpanded = false,
     this.tilePadding,
-    this.crossAxisAlignment,
-    this.alignment,
-    this.textBaseline,
+    this.expandedCrossAxisAlignment,
+    this.expandedAlignment,
+    this.expandedTextBaseline,
   }) : assert(initiallyExpanded != null),
        super(key: key);
 
@@ -93,31 +93,43 @@ class ExpansionTile extends StatefulWidget {
   /// When the value is null, the tile's padding is `EdgeInsets.symmetric(horizontal: 16.0)`.
   final EdgeInsetsGeometry tilePadding;
 
-  /// Specifies the alignment of [Column] used for [children].
+  /// Specifies the alignment of [children], which are arranged in a column when
+  /// the tile is expanded.
   ///
-  /// It does not specifies how the children are positioned inside the [Column].
-  /// The width of the `Column` is the maximum width of the children. If the
-  /// children have same width, then the `alignment` property will properly align
-  /// all the children to specified value of [Alignment].
+  /// The internals of the expanded tile make use of a [Column] widget for
+  /// [children], and [Align] widget to align the column. The `expandedAlignment`
+  /// parameter is passed directly into the [Align].
   ///
-  /// When the width of children is different, then [crossAxisAlignment] property
-  /// can be used with `alignment` property to place the children along the cross axis.
+  /// Modifying this property controls the alignment of the column within the
+  /// expanded tile, not the alignment of [children] widgets within the column.
+  /// To align each child within [children], see [expandedCrossAxisAlignment].
   ///
-  /// When the value is null, the value of `alignment` is [Alignment.center].
-  final Alignment alignment;
+  /// The width of the column is the width of the widest child widget in [children].
+  ///
+  /// When the value is null, the value of `expandedAlignment` is [Alignment.center].
+  final Alignment expandedAlignment;
 
-  /// Specifies the position of [children] inside [Column].
+  /// Specifies the alignment of each child within [children] when the tile is expanded.
   ///
-  /// When the value of `crossAxisAlignment` is [CrossAxisAlignment.baseline], then
-  /// the value of [textBaseline] can not be null.
+  /// The internals of the expanded tile make use of a [Column] widget for
+  /// [children], and the `crossAxisAlignment` parameter is passed directly into the [Column].
   ///
-  /// When the value is null, the value of `crossAxisAlignment` is
-  /// [CrossAxisAlignment.center].
-  final CrossAxisAlignment crossAxisAlignment;
+  /// Modifying this property controls the cross axis alignment of each child
+  /// within its [Column]. Note that the width of the [Column] that houses
+  /// [children] will be the same as the widest child widget in [children]. It is
+  /// not necessarily the width of [Column] is equal to the width of expanded tile.
+  ///
+  /// To align the [Column] along the expanded tile, use the [expandedAlignment] property
+  /// instead.
+  ///
+  /// When the value is null, the value of `expandedCrossAxisAlignment` is [CrossAxisAlignment.center].
+  final CrossAxisAlignment expandedCrossAxisAlignment;
 
   /// Defines the baseline for the alignment to be considered when the value
-  /// of [crossAxisAlignment] is [CrossAxisAlignment.baseline].
-  final TextBaseline textBaseline;
+  /// of [expandedCrossAxisAlignment] is [CrossAxisAlignment.baseline].
+  ///
+  /// The `expandedTextBaseline` cannot be null when [CrossAxisAlignment.baseline] is used.
+  final TextBaseline expandedTextBaseline;
 
   @override
   _ExpansionTileState createState() => _ExpansionTileState();
@@ -216,7 +228,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           ),
           ClipRect(
             child: Align(
-              alignment: widget.alignment ?? Alignment.center,
+              alignment: widget.expandedAlignment ?? Alignment.center,
               heightFactor: _heightFactor.value,
               child: child,
             ),
@@ -247,8 +259,8 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       animation: _controller.view,
       builder: _buildChildren,
       child: closed ? null : Column(
-        crossAxisAlignment: widget.crossAxisAlignment ?? CrossAxisAlignment.center,
-        textBaseline: widget.textBaseline,
+        crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
+        textBaseline: widget.expandedTextBaseline,
         children: widget.children,
       ),
     );
