@@ -426,7 +426,8 @@ const CORE = [
 self.addEventListener("install", (event) => {
   return event.waitUntil(
     caches.open(TEMP).then((cache) => {
-      return cache.addAll(CORE);
+      // Apply a cache-busting URL param to ensure the latest version is downloaded.
+      return cache.addAll(CORE.map((value) => `\${value}?id=\${RESOURCES[value]}`));
     })
   );
 });
@@ -494,7 +495,11 @@ self.addEventListener("activate", function(event) {
 self.addEventListener("fetch", (event) => {
   var origin = self.location.origin;
   var key = event.request.url.substring(origin.length + 1);
-  // If the URL is not the the RESOURCE list, skip the cache.
+  // If the URL is not the the RESOURCE list, skip the cache. Handle requests
+  // for the #/ base.
+  if (key == '#/') {
+    key = '/';
+  }
   if (!RESOURCES[key]) {
     return event.respondWith(fetch(event.request));
   }
@@ -502,8 +507,10 @@ self.addEventListener("fetch", (event) => {
     .then((cache) =>  {
       return cache.match(event.request).then((response) => {
         // Either respond with the cached resource, or perform a fetch and
-        // lazily populate the cache.
-        return response || fetch(event.request).then((response) => {
+        // lazily populate the cache. Ensure the resources are not cached
+        // by the browser for longer than the service worker expects.
+        var modifiedRequest = new Request(event.request, {'cache': 'no-cache'});
+        return response || fetch(modifiedRequest).then((response) => {
           cache.put(event.request, response.clone());
           return response;
         });
@@ -512,5 +519,37 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
+self.addEventListener('message', (event) => {
+  // SkipWaiting can be used to immediately activate a waiting service worker.
+  // This will also require a page refresh triggered by the main worker.
+  if (event.message == 'skipWaiting') {
+    return self.skipWaiting();
+  }
+
+  if (event.message = 'downloadOffline') {
+    downloadOffline();
+  }
+});
+
+// Download offline will check the RESOURCES for all files not in the cache
+// and populate them.
+async function downloadOffline() {
+  var resources = [];
+  var contentCache = await caches.open(CACHE_NAME);
+  var currentContent = {};
+  for (var request of await contentCache.keys()) {
+    var key = request.url.substring(origin.length + 1);
+    if (key == "") {
+      key = "/";
+    }
+    currentContent[key] = true;
+  }
+  for (var resourceKey in Object.keys(RESOURCES)) {
+    if (!currentContent[resourceKey]) {
+      resources.add(resourceKey);
+    }
+  }
+  return Cache.addAll(resources);
+}
 ''';
 }
