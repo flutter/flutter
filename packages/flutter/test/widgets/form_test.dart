@@ -578,4 +578,75 @@ void main() {
     formKey.currentState.save();
     expect(formKey.currentState.validate(), isTrue);
   });
+  
+  testWidgets('Do not autovalidate before value changes', (WidgetTester tester) async {
+    FormFieldState<String> formFieldState;
+
+    String errorText(String value) => '$value/error';
+
+    Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: FormField<String>(
+                  initialValue: 'foo',
+                  builder: (FormFieldState<String> state) {
+                    formFieldState = state;
+                    return Container();
+                  },
+                  validator: errorText,
+                  autovalidate: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    expect(formFieldState.hasError, isFalse);
+  });
+  
+  testWidgets('only autovalidate after value changes', (WidgetTester tester) async {
+    FormFieldState<String> formFieldState;
+    const String initialValue = 'foo';
+
+    String errorText(String value) => '$value/error';
+
+    Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: FormField<String>(
+                  initialValue: 'foo',
+                  builder: (FormFieldState<String> state) {
+                    formFieldState = state;
+                    return Container();
+                  },
+                  validator: errorText,
+                  autovalidate: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    formFieldState.didChange(initialValue);
+    await tester.pump();
+    expect(formFieldState.errorText, equals(errorText(initialValue)));
+  });
 }
