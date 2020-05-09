@@ -2091,6 +2091,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (widget.obscureText) {
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
+      // Obscure latest character only on mobile
       if ((defaultTargetPlatform == TargetPlatform.android ||
               defaultTargetPlatform == TargetPlatform.iOS ||
               defaultTargetPlatform == TargetPlatform.fuchsia) &&
