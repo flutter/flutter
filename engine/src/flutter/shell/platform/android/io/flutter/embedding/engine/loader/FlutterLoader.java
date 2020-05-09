@@ -115,6 +115,7 @@ public class FlutterLoader {
     this.settings = settings;
 
     initStartTimestampMillis = SystemClock.uptimeMillis();
+    initConfig(applicationContext);
     initResources(applicationContext);
 
     System.loadLibrary("flutter");
