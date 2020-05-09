@@ -52,6 +52,9 @@ void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 
   {
     set_paint_bounds(paint_bounds().makeOffset(offset_.fX, offset_.fY));
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+    child_matrix = RasterCache::GetIntegralTransCTM(child_matrix);
+#endif
     TryToPrepareRasterCache(context, container, child_matrix);
   }
 
@@ -68,6 +71,11 @@ void OpacityLayer::Paint(PaintContext& context) const {
 
   SkAutoCanvasRestore save(context.internal_nodes_canvas, true);
   context.internal_nodes_canvas->translate(offset_.fX, offset_.fY);
+
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+  context.internal_nodes_canvas->setMatrix(RasterCache::GetIntegralTransCTM(
+      context.leaf_nodes_canvas->getTotalMatrix()));
+#endif
 
   if (context.raster_cache &&
       context.raster_cache->Draw(GetChildContainer(),
