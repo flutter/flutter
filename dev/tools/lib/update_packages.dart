@@ -40,12 +40,6 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
 };
 
-void main(List<String> args) {
-  CommandRunner<void>('update-packages', 'upgrade packages')
-    ..addCommand(UpdatePackagesCommand())
-    ..run(args);
-}
-
 class UpdatePackagesCommand extends Command<void> {
   UpdatePackagesCommand() {
     argParser

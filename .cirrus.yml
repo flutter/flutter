@@ -89,7 +89,8 @@ task:
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
     - flutter doctor -v
-    - ./bin/cache/dart-sdk/bin/dart ./dev/tools/lib/update_packages.dart update-packages
+    - ./bin/cache/dart-sdk/bin/pub global activate --source=path ./dev/tools
+    - ./bin/cache/dart-sdk/bin/pub global run dev_tools:update_packages update-packages
     - ./dev/bots/accept_android_sdk_licenses.sh
     - date
   on_failure:
@@ -344,7 +345,8 @@ task:
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
     - flutter doctor -v
-    - ./bin/cache/dart-sdk/bin/dart ./dev/tools/lib/update_packages.dart update-packages
+    - ./bin/cache/dart-sdk/bin/pub global activate --source=path ./dev/tools
+    - ./bin/cache/dart-sdk/bin/pub global run dev_tools:update_packages update-packages
     - git fetch origin master
   matrix:
     - name: framework_tests-widgets-windows
@@ -510,7 +512,8 @@ task:
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
     - flutter doctor -v
-    - ./bin/cache/dart-sdk/bin/dart ./dev/tools/lib/update_packages.dart update-packages
+    - ./bin/cache/dart-sdk/bin/pub global activate --source=path ./dev/tools
+    - ./bin/cache/dart-sdk/bin/pub global run dev_tools:update_packages update-packages
     - date
     - which flutter
   on_failure:

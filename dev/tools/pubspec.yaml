@@ -5,6 +5,9 @@ environment:
   # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
   sdk: ">=2.2.2 <3.0.0"
 
+executables:
+  update_packages: update_packages
+
 dependencies:
   archive: 2.0.13
   args: 1.6.0
