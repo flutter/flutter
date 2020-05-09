@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/flow/layers/clip_rect_layer.h"
 #include "flutter/flow/layers/opacity_layer.h"
 
+#include "flutter/flow/layers/clip_rect_layer.h"
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
@@ -59,6 +59,10 @@ TEST_F(OpacityLayerTest, FullyOpaque) {
   const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 0.5f);
   const SkMatrix layer_transform =
       SkMatrix::MakeTrans(layer_offset.fX, layer_offset.fY);
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+  const SkMatrix integral_layer_transform = RasterCache::GetIntegralTransCTM(
+      SkMatrix::Concat(initial_transform, layer_transform));
+#endif
   const SkPaint child_paint = SkPaint(SkColors::kGreen);
   const SkRect expected_layer_bounds =
       layer_transform.mapRect(child_path.getBounds());
@@ -83,6 +87,10 @@ TEST_F(OpacityLayerTest, FullyOpaque) {
   auto expected_draw_calls = std::vector(
       {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
        MockCanvas::DrawCall{1, MockCanvas::ConcatMatrixData{layer_transform}},
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+       MockCanvas::DrawCall{
+           1, MockCanvas::SetMatrixData{integral_layer_transform}},
+#endif
        MockCanvas::DrawCall{
            1, MockCanvas::SaveLayerData{opacity_bounds, opacity_paint, nullptr,
                                         2}},
@@ -100,6 +108,10 @@ TEST_F(OpacityLayerTest, FullyTransparent) {
   const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 0.5f);
   const SkMatrix layer_transform =
       SkMatrix::MakeTrans(layer_offset.fX, layer_offset.fY);
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+  const SkMatrix integral_layer_transform = RasterCache::GetIntegralTransCTM(
+      SkMatrix::Concat(initial_transform, layer_transform));
+#endif
   const SkPaint child_paint = SkPaint(SkColors::kGreen);
   const SkRect expected_layer_bounds =
       layer_transform.mapRect(child_path.getBounds());
@@ -122,6 +134,10 @@ TEST_F(OpacityLayerTest, FullyTransparent) {
   auto expected_draw_calls = std::vector(
       {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
        MockCanvas::DrawCall{1, MockCanvas::ConcatMatrixData{layer_transform}},
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+       MockCanvas::DrawCall{
+           1, MockCanvas::SetMatrixData{integral_layer_transform}},
+#endif
        MockCanvas::DrawCall{1, MockCanvas::SaveData{2}},
        MockCanvas::DrawCall{
            2, MockCanvas::ClipRectData{kEmptyRect, SkClipOp::kIntersect,
@@ -140,6 +156,10 @@ TEST_F(OpacityLayerTest, HalfTransparent) {
   const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 0.5f);
   const SkMatrix layer_transform =
       SkMatrix::MakeTrans(layer_offset.fX, layer_offset.fY);
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+  const SkMatrix integral_layer_transform = RasterCache::GetIntegralTransCTM(
+      SkMatrix::Concat(initial_transform, layer_transform));
+#endif
   const SkPaint child_paint = SkPaint(SkColors::kGreen);
   const SkRect expected_layer_bounds =
       layer_transform.mapRect(child_path.getBounds());
@@ -166,6 +186,10 @@ TEST_F(OpacityLayerTest, HalfTransparent) {
   auto expected_draw_calls = std::vector(
       {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
        MockCanvas::DrawCall{1, MockCanvas::ConcatMatrixData{layer_transform}},
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+       MockCanvas::DrawCall{
+           1, MockCanvas::SetMatrixData{integral_layer_transform}},
+#endif
        MockCanvas::DrawCall{
            1, MockCanvas::SaveLayerData{opacity_bounds, opacity_paint, nullptr,
                                         2}},
@@ -188,6 +212,13 @@ TEST_F(OpacityLayerTest, Nested) {
       SkMatrix::MakeTrans(layer1_offset.fX, layer1_offset.fY);
   const SkMatrix layer2_transform =
       SkMatrix::MakeTrans(layer2_offset.fX, layer2_offset.fY);
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+  const SkMatrix integral_layer1_transform = RasterCache::GetIntegralTransCTM(
+      SkMatrix::Concat(initial_transform, layer1_transform));
+  const SkMatrix integral_layer2_transform = RasterCache::GetIntegralTransCTM(
+      SkMatrix::Concat(SkMatrix::Concat(initial_transform, layer1_transform),
+                       layer2_transform));
+#endif
   const SkPaint child1_paint = SkPaint(SkColors::kRed);
   const SkPaint child2_paint = SkPaint(SkColors::kBlue);
   const SkPaint child3_paint = SkPaint(SkColors::kGreen);
@@ -248,6 +279,10 @@ TEST_F(OpacityLayerTest, Nested) {
   auto expected_draw_calls = std::vector(
       {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
        MockCanvas::DrawCall{1, MockCanvas::ConcatMatrixData{layer1_transform}},
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+       MockCanvas::DrawCall{
+           1, MockCanvas::SetMatrixData{integral_layer1_transform}},
+#endif
        MockCanvas::DrawCall{
            1, MockCanvas::SaveLayerData{opacity1_bounds, opacity1_paint,
                                         nullptr, 2}},
@@ -255,6 +290,10 @@ TEST_F(OpacityLayerTest, Nested) {
            2, MockCanvas::DrawPathData{child1_path, child1_paint}},
        MockCanvas::DrawCall{2, MockCanvas::SaveData{3}},
        MockCanvas::DrawCall{3, MockCanvas::ConcatMatrixData{layer2_transform}},
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+       MockCanvas::DrawCall{
+           3, MockCanvas::SetMatrixData{integral_layer2_transform}},
+#endif
        MockCanvas::DrawCall{
            3, MockCanvas::SaveLayerData{opacity2_bounds, opacity2_paint,
                                         nullptr, 4}},
