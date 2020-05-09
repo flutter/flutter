@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:dev_tools/update_packages.dart';
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/commands/update_packages.dart';
 
-import 'common.dart';
+import '../src/common.dart';
 
 // An example pubspec.yaml from flutter, not necessary for it to be up to date.
 const String kFlutterPubspecYaml = r'''
@@ -43,7 +43,7 @@ dev_dependencies:
 ''';
 
 void main() {
-  test('createTemporaryFlutterSdk creates an unpinned flutter SDK', () {
+  testWithoutContext('createTemporaryFlutterSdk creates an unpinned flutter SDK', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
 
     // Setup simplified FLutter SDK.

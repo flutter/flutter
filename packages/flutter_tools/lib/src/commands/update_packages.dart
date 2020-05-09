@@ -4,30 +4,19 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:io';
 
-import 'package:args/command_runner.dart';
-import 'package:http/http.dart' as http;
-import 'package:file/file.dart';
-import 'package:file/local.dart';
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as path;
 
-const FileSystem fileSystem = LocalFileSystem();
-
-String get flutterRoot {
-  final String value = Platform.environment['FLUTTER_ROOT'];
-  if (value != null) {
-    return  value;
-  }
-  // The resolved executable is bin/cache/dart-sdk/bin/dart
-  return fileSystem.file(Platform.resolvedExecutable)
-    .parent
-    .parent
-    .parent
-    .parent
-    .parent.path;
-}
+import '../base/common.dart';
+import '../base/context.dart';
+import '../base/file_system.dart';
+import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/net.dart';
+import '../cache.dart';
+import '../dart/pub.dart';
+import '../globals.dart' as globals;
+import '../runner/flutter_command.dart';
 
 /// Map from package name to package version, used to artificially pin a pub
 /// package version in cases when upgrading to the latest breaks Flutter.
@@ -40,14 +29,8 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
 };
 
-void main(List<String> args) {
-  CommandRunner<void>('update-packages', 'upgrade packages')
-    ..addCommand(UpdatePackagesCommand())
-    ..run(args);
-}
-
-class UpdatePackagesCommand extends Command<void> {
-  UpdatePackagesCommand() {
+class UpdatePackagesCommand extends FlutterCommand {
+  UpdatePackagesCommand({ this.hidden = false }) {
     argParser
       ..addFlag(
         'force-upgrade',
@@ -108,30 +91,45 @@ class UpdatePackagesCommand extends Command<void> {
   @override
   final String description = 'Update the packages inside the Flutter repo.';
 
-  Future<void> _downloadCoverageData() async {
-    print('Downloading lcov data for package:flutter...',);
-    final String urlBase = Platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
-    final Uri coverageUri = Uri.parse('$urlBase/flutter_infra/flutter/coverage/lcov.info');
-    final http.Response response = await http.get(coverageUri);
-    final String coverageDir = fileSystem.path.join(
-      flutterRoot,
-      'packages/flutter/coverage',
-    );
-    fileSystem.file(path.join(coverageDir, 'lcov.base.info'))
-      ..createSync(recursive: true)
-      ..writeAsBytesSync(response.bodyBytes, flush: true);
-    fileSystem.file(path.join(coverageDir, 'lcov.info'))
-      ..createSync(recursive: true)
-      ..writeAsBytesSync(response.bodyBytes, flush: true);
-  }
-
-  bool boolArg(String value) => argResults[value] as bool;
-
-  String stringArg(String value) => argResults[value] as String;
+  @override
+  final List<String> aliases = <String>['upgrade-packages'];
 
   @override
-  Future<void> run() async {
-    final List<Directory> packages = getRepoPackages();
+  final bool hidden;
+
+
+  // Lazy-initialize the net utilities with values from the context.
+  Net _cachedNet;
+  Net get _net => _cachedNet ??= Net(
+    httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
+    logger: globals.logger,
+    platform: globals.platform,
+  );
+
+  Future<void> _downloadCoverageData() async {
+    final Status status = globals.logger.startProgress(
+      'Downloading lcov data for package:flutter...',
+      timeout: timeoutConfiguration.slowOperation,
+    );
+    final String urlBase = globals.platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
+    final Uri coverageUri = Uri.parse('$urlBase/flutter_infra/flutter/coverage/lcov.info');
+    final List<int> data = await _net.fetchUrl(coverageUri);
+    final String coverageDir = globals.fs.path.join(
+      Cache.flutterRoot,
+      'packages/flutter/coverage',
+    );
+    globals.fs.file(globals.fs.path.join(coverageDir, 'lcov.base.info'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(data, flush: true);
+    globals.fs.file(globals.fs.path.join(coverageDir, 'lcov.info'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(data, flush: true);
+    status.stop();
+  }
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    final List<Directory> packages = runner.getRepoPackages();
 
     final bool upgrade = boolArg('force-upgrade');
     final bool isPrintPaths = boolArg('paths');
@@ -141,15 +139,15 @@ class UpdatePackagesCommand extends Command<void> {
     final bool offline = boolArg('offline');
 
     if (upgrade && offline) {
-      throw Exception(
-        '--force-upgrade cannot be used with the --offline flag'
+      throwToolExit(
+          '--force-upgrade cannot be used with the --offline flag'
       );
     }
 
     // "consumer" packages are those that constitute our public API (e.g. flutter, flutter_test, flutter_driver, flutter_localizations).
     if (isConsumerOnly) {
       if (!isPrintTransitiveClosure) {
-        throw Exception(
+        throwToolExit(
           '--consumer-only can only be used with the --transitive-closure flag'
         );
       }
@@ -158,26 +156,26 @@ class UpdatePackagesCommand extends Command<void> {
       // ensure we only get flutter/packages
       packages.retainWhere((Directory directory) {
         return consumerPackages.any((String package) {
-          return directory.path.endsWith('packages${fileSystem.path.separator}$package');
+          return directory.path.endsWith('packages${globals.fs.path.separator}$package');
         });
       });
     }
 
     if (isVerifyOnly) {
       bool needsUpdate = false;
-      print('Verifying pubspecs...');
+      globals.printStatus('Verifying pubspecs...');
       for (final Directory directory in packages) {
         PubspecYaml pubspec;
         try {
           pubspec = PubspecYaml(directory);
         } on String catch (message) {
-          throw Exception(message);
+          throwToolExit(message);
         }
-        print('Reading pubspec.yaml from ${directory.path}');
+        globals.printTrace('Reading pubspec.yaml from ${directory.path}');
         if (pubspec.checksum.value == null) {
           // If the checksum is invalid or missing, we can just ask them run to run
           // upgrade again to compute it.
-          stderr.writeln(
+          globals.printError(
             'Warning: pubspec in ${directory.path} has out of date dependencies. '
             'Please run "flutter update-packages --force-upgrade" to update them correctly.'
           );
@@ -194,28 +192,29 @@ class UpdatePackagesCommand extends Command<void> {
         if (checksum != pubspec.checksum.value) {
           // If the checksum doesn't match, they may have added or removed some dependencies.
           // we need to run update-packages to recapture the transitive deps.
-          stderr.writeln(
+          globals.printError(
             'Warning: pubspec in ${directory.path} has invalid dependencies. '
             'Please run "flutter update-packages --force-upgrade" to update them correctly.'
           );
           needsUpdate = true;
         } else {
           // everything is correct in the pubspec.
-          print('pubspec in ${directory.path} is up to date!');
+          globals.printTrace('pubspec in ${directory.path} is up to date!');
         }
       }
       if (needsUpdate) {
-        throw Exception(
+        throwToolExit(
           'Warning: one or more pubspecs have invalid dependencies. '
           'Please run "flutter update-packages --force-upgrade" to update them correctly.',
+          exitCode: 1,
         );
       }
-      print('All pubspecs were up to date.');
-      return true;
+      globals.printStatus('All pubspecs were up to date.');
+      return FlutterCommandResult.success();
     }
 
     if (upgrade || isPrintPaths || isPrintTransitiveClosure) {
-      print('Upgrading packages...');
+      globals.printStatus('Upgrading packages...');
       // This feature attempts to collect all the packages used across all the
       // pubspec.yamls in the repo (including via transitive dependencies), and
       // find the latest version of each that can be used while keeping each
@@ -226,12 +225,12 @@ class UpdatePackagesCommand extends Command<void> {
       final Map<String, PubspecDependency> dependencies = <String, PubspecDependency>{};
       final Set<String> specialDependencies = <String>{};
       for (final Directory directory in packages) { // these are all the directories with pubspec.yamls we care about
-        print('Reading pubspec.yaml from: ${directory.path}');
+        globals.printTrace('Reading pubspec.yaml from: ${directory.path}');
         PubspecYaml pubspec;
         try {
           pubspec = PubspecYaml(directory); // this parses the pubspec.yaml
         } on String catch (message) {
-          throw Exception(message);
+          throwToolExit(message);
         }
         pubspecs.add(pubspec); // remember it for later
         for (final PubspecDependency dependency in pubspec.allDependencies) { // this is all the explicit dependencies
@@ -248,7 +247,7 @@ class UpdatePackagesCommand extends Command<void> {
             // saying "path: ../../..." in another.
             final PubspecDependency previous = dependencies[dependency.name];
             if (dependency.kind != previous.kind || dependency.lockTarget != previous.lockTarget) {
-              throw Exception(
+              throwToolExit(
                 'Inconsistent requirements around ${dependency.name}; '
                 'saw ${dependency.kind} (${dependency.lockTarget}) in "${dependency.sourcePath}" '
                 'and ${previous.kind} (${previous.lockTarget}) in "${previous.sourcePath}".'
@@ -272,7 +271,7 @@ class UpdatePackagesCommand extends Command<void> {
       // pub tool will attempt to bring these dependencies up to the most recent
       // possible versions while honoring all their constraints.
       final PubDependencyTree tree = PubDependencyTree(); // object to collect results
-      final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_update_packages.');
+      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_update_packages.');
       try {
         final File fakePackage = _pubspecFor(tempDir);
         fakePackage.createSync();
@@ -282,25 +281,22 @@ class UpdatePackagesCommand extends Command<void> {
         Directory temporaryFlutterSdk;
         if (upgrade) {
           temporaryFlutterSdk = createTemporaryFlutterSdk(
-            fileSystem,
-            fileSystem.directory(flutterRoot),
+            globals.fs,
+            globals.fs.directory(Cache.flutterRoot),
             pubspecs,
           );
         }
 
         // Next we run "pub upgrade" on this generated package:
-        await Process.run(path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'pub'),
-          <String>[
-            'upgrade',
-            if (offline)
-              '--offline',
-          ],
-          workingDirectory: tempDir.path,
-          environment: <String, String>{
-            'FLUTTER_ROOT': upgrade
-              ? temporaryFlutterSdk.path
-              : flutterRoot,
-          }
+        await pub.get(
+          context: PubContext.updatePackages,
+          directory: tempDir.path,
+          upgrade: true,
+          checkLastModified: false,
+          offline: offline,
+          flutterRootOverride: upgrade
+            ? temporaryFlutterSdk.path
+            : null,
         );
         // Cleanup the temporary SDK
         try {
@@ -314,12 +310,12 @@ class UpdatePackagesCommand extends Command<void> {
         // of all the dependencies so that we can figure out the transitive
         // dependencies later. It also remembers which version was selected for
         // each package.
-        await Process.run(path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'pub'),
+        await pub.batch(
           <String>['deps', '--style=compact'],
-          workingDirectory: tempDir.path,
-          environment: <String, String>{
-            'FLUTTER_ROOT': flutterRoot,
-          }
+          context: PubContext.updatePackages,
+          directory: tempDir.path,
+          filter: tree.fill,
+          retry: false, // errors here are usually fatal since we're not hitting the network
         );
       } finally {
         tempDir.deleteSync(recursive: true);
@@ -343,14 +339,14 @@ class UpdatePackagesCommand extends Command<void> {
 
       if (isPrintTransitiveClosure) {
         tree._dependencyTree.forEach((String from, Set<String> to) {
-          print('$from -> $to');
+          globals.printStatus('$from -> $to');
         });
-        return true;
+        return FlutterCommandResult.success();
       }
 
       if (isPrintPaths) {
         showDependencyPaths(from: stringArg('from'), to: stringArg('to'), tree: tree);
-        return true;
+        return FlutterCommandResult.success();
       }
 
       // Now that we have collected all the data, we can apply our dependency
@@ -375,16 +371,11 @@ class UpdatePackagesCommand extends Command<void> {
     int count = 0;
 
     for (final Directory dir in packages) {
-      await Process.run(path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'pub'),
-        <String>[
-          'get',
-          if (offline)
-            '--offline',
-        ],
-        workingDirectory: dir.path,
-        environment: <String, String>{
-          'FLUTTER_ROOT':  flutterRoot,
-        }
+      await pub.get(
+        context: PubContext.updatePackages,
+        directory: dir.path,
+        checkLastModified: false,
+        offline: offline,
       );
       count += 1;
     }
@@ -392,9 +383,9 @@ class UpdatePackagesCommand extends Command<void> {
     await _downloadCoverageData();
 
     final double seconds = timer.elapsedMilliseconds / 1000.0;
-    print("\nRan 'pub' $count time${count == 1 ? "" : "s"} and fetched coverage data in ${seconds.toStringAsFixed(1)}s.");
+    globals.printStatus("\nRan 'pub' $count time${count == 1 ? "" : "s"} and fetched coverage data in ${seconds.toStringAsFixed(1)}s.");
 
-    return true;
+    return FlutterCommandResult.success();
   }
 
   void showDependencyPaths({
@@ -403,10 +394,10 @@ class UpdatePackagesCommand extends Command<void> {
     @required PubDependencyTree tree,
   }) {
     if (!tree.contains(from)) {
-      throw Exception('Package $from not found in the dependency tree.');
+      throwToolExit('Package $from not found in the dependency tree.');
     }
     if (!tree.contains(to)) {
-      throw Exception('Package $to not found in the dependency tree.');
+      throwToolExit('Package $to not found in the dependency tree.');
     }
 
     final Queue<_DependencyLink> traversalQueue = Queue<_DependencyLink>();
@@ -438,11 +429,11 @@ class UpdatePackagesCommand extends Command<void> {
           buf.write(' <- ');
         }
       }
-      print(buf.toString());
+      globals.printStatus(buf.toString(), wrap: false);
     }
 
     if (paths.isEmpty) {
-      print('No paths found from $from to $to');
+      globals.printStatus('No paths found from $from to $to');
     }
   }
 }
@@ -1113,8 +1104,8 @@ class PubspecDependency extends PubspecLine {
     }
 
     if (_kind == DependencyKind.path &&
-        !path.isWithin(fileSystem.path.join(flutterRoot, 'bin'), _lockTarget) &&
-        path.isWithin(flutterRoot, _lockTarget)) {
+        !globals.fs.path.isWithin(globals.fs.path.join(Cache.flutterRoot, 'bin'), _lockTarget) &&
+        globals.fs.path.isWithin(Cache.flutterRoot, _lockTarget)) {
       return true;
     }
 
@@ -1130,8 +1121,8 @@ class PubspecDependency extends PubspecLine {
     assert(kind == DependencyKind.unknown);
     if (line.startsWith(_pathPrefix)) {
       // We're a path dependency; remember the (absolute) path.
-      _lockTarget = path.canonicalize(
-        path.absolute(path.dirname(pubspecPath), line.substring(_pathPrefix.length, line.length))
+      _lockTarget = globals.fs.path.canonicalize(
+          globals.fs.path.absolute(globals.fs.path.dirname(pubspecPath), line.substring(_pathPrefix.length, line.length))
       );
       _kind = DependencyKind.path;
     } else if (line.startsWith(_sdkPrefix)) {
@@ -1213,7 +1204,7 @@ String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
   result.writeln('dependencies:');
   overrides.writeln('dependency_overrides:');
   if (_kManuallyPinnedDependencies.isNotEmpty) {
-    print('WARNING: the following packages use hard-coded version constraints:');
+    globals.printStatus('WARNING: the following packages use hard-coded version constraints:');
     final Set<String> allTransitive = <String>{
       for (final PubspecDependency dependency in dependencies)
         dependency.name,
@@ -1221,12 +1212,12 @@ String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
     for (final String package in _kManuallyPinnedDependencies.keys) {
       // Don't add pinned dependency if it is not in the set of all transitive dependencies.
       if (!allTransitive.contains(package)) {
-        print('Skipping $package because it was not transitive');
+        globals.printStatus('Skipping $package because it was not transitive');
         continue;
       }
       final String version = _kManuallyPinnedDependencies[package];
       result.writeln('  $package: $version');
-      print('  - $package: $version');
+      globals.printStatus('  - $package: $version');
     }
   }
   for (final PubspecDependency dependency in dependencies) {
@@ -1438,44 +1429,4 @@ environment:
 ''');
 
   return directory;
-}
-
-/// Get all pub packages in the Flutter repo.
-List<Directory> getRepoPackages() {
-  return getRepoRoots()
-    .expand<String>((String root) => _gatherProjectPaths(root))
-    .map<Directory>((String dir) => fileSystem.directory(dir))
-    .toList();
-}
-
-List<String> _gatherProjectPaths(String rootPath) {
-  if (fileSystem.isFileSync(fileSystem.path.join(rootPath, '.dartignore'))) {
-    return <String>[];
-  }
-
-
-  final List<String> projectPaths = fileSystem.directory(rootPath)
-    .listSync(followLinks: false)
-    .expand((FileSystemEntity entity) {
-      if (entity is Directory && !fileSystem.path.split(entity.path).contains('.dart_tool')) {
-        return _gatherProjectPaths(entity.path);
-      }
-      return <String>[];
-    })
-    .toList();
-
-  if (fileSystem.isFileSync(fileSystem.path.join(rootPath, 'pubspec.yaml'))) {
-    projectPaths.add(rootPath);
-  }
-
-  return projectPaths;
-}
-
-/// Get the root directories of the repo - the directories containing Dart packages.
-List<String> getRepoRoots() {
-  final String root = path.absolute(flutterRoot);
-  // not bin, and not the root
-  return <String>['dev', 'examples', 'packages'].map<String>((String item) {
-    return path.join(root, item);
-  }).toList();
 }
