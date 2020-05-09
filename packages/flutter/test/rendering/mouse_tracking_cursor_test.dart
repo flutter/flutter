@@ -456,7 +456,7 @@ class _CursorUpdateDetails extends MethodCall {
     : super(call.method, Map<String, dynamic>.from(call.arguments as Map<dynamic, dynamic>));
 
   _CursorUpdateDetails.activateSystemCursor({int device, String kind})
-    : this('activateSystemCursor', <String, dynamic>{'device': device, 'kind': kind}); 
+    : this('activateSystemCursor', <String, dynamic>{'device': device, 'kind': kind});
   @override
   Map<String, dynamic> get arguments => super.arguments as Map<String, dynamic>;
 
