@@ -624,8 +624,9 @@ mixin _BasePlatformViewScenarioMixin on Scenario {
       'flutter/platform_views',
       message.buffer.asByteData(),
       (ByteData response) {
-        if (Platform.isAndroid) {
-          _textureId = response.getInt64(2);
+        if (response != null && Platform.isAndroid) {
+          // Envelope.
+          _textureId = response.getUint8(0);
         }
       },
     );

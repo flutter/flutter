@@ -115,17 +115,17 @@ Future<Map<String, dynamic>> _getJson(Uri uri) async {
 }
 
 void _onBeginFrame(Duration duration) {
-  _currentScenario.onBeginFrame(duration);
+  _currentScenario?.onBeginFrame(duration);
 }
 
 void _onDrawFrame() {
-  _currentScenario.onDrawFrame();
+  _currentScenario?.onDrawFrame();
 }
 
 void _onMetricsChanged() {
-  _currentScenario.onMetricsChanged();
+  _currentScenario?.onMetricsChanged();
 }
 
 void _onPointerDataPacket(PointerDataPacket packet) {
-  _currentScenario.onPointerDataPacket(packet);
+  _currentScenario?.onPointerDataPacket(packet);
 }
