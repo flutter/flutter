@@ -1,4 +1,10 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.facebook.testing.screenshot'
+
+screenshots {
+    failureDir = "${rootProject.buildDir}/reports/diff_failures"
+    recordDir = "${rootProject.projectDir}/reports/screenshots"
+}
 
 android {
     compileSdkVersion 28
@@ -8,11 +14,11 @@ android {
     }
     defaultConfig {
         applicationId "dev.flutter.scenarios"
-        minSdkVersion 16
+        minSdkVersion 18
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "dev.flutter.TestRunner"
     }
     buildTypes {
         release {
@@ -23,6 +29,7 @@ android {
 }
 
 dependencies {
+    compile 'com.facebook.testing.screenshot:layout-hierarchy-common:0.12.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'

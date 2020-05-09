@@ -74,6 +74,25 @@ Studio and running it, or by running `./gradlew assemble` in the `android/`
 folder and installing the APK from the correct folder in
 `android/app/build/outputs/apk`.
 
+
+### Generating Golden Images on Android
+
+In the `android` directory, run:
+
+```bash
+./gradlew app:recordDebugAndroidTestScreenshotTest
+```
+
+The screenshots are recorded into `android/reports/screenshots`.
+
+### Verifying Golden Images on Android
+
+In the `android` directory, run:
+
+```bash
+./gradlew app:verifyDebugAndroidTestScreenshotTest
+```
+
 ## Changing dart:ui code
 
 If you change the dart:ui interface, remember to point the sky_engine and

@@ -23,18 +23,11 @@
 
                 <data android:mimeType="application/javascript" />
             </intent-filter>
-        </activity>
-        <activity android:name=".BlankActivity"
-            android:launchMode="singleTop"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-            android:hardwareAccelerated="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

@@ -19,6 +19,6 @@ cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd
 
 pushd android
 
-set -o pipefail && ./gradlew assembleAndroidTest && ./gradlew connectedAndroidTest
+set -o pipefail && ./gradlew app:verifyDebugAndroidTestScreenshotTest
 
 popd
