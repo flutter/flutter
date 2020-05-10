@@ -44,7 +44,7 @@ Future<void> runRecordingServer({
     shelf_io.serveRequests(server, cascade.handler);
     final Directory userDataDirectory = Directory.systemTemp.createTempSync('chrome_user_data_');
     chrome = await Chrome.launch(ChromeOptions(
-      headless: false,
+      headless: true,
       debugPort: browserDebugPort,
       url: appUrl,
       userDataDirectory: userDataDirectory.path,
@@ -56,7 +56,7 @@ Future<void> runRecordingServer({
     chrome.stop();
     completer = Completer<void>();
     chrome = await Chrome.launch(ChromeOptions(
-      headless: false,
+      headless: true,
       debugPort: browserDebugPort,
       url: appUrl,
       userDataDirectory: userDataDirectory.path,
