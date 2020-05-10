@@ -959,6 +959,57 @@ typedef enum {
 typedef void (*FlutterNativeThreadCallback)(FlutterNativeThreadType type,
                                             void* user_data);
 
+/// AOT data source type.
+typedef enum {
+  kFlutterEngineAOTDataSourceTypeElfPath
+} FlutterEngineAOTDataSourceType;
+
+/// This struct specifies one of the various locations the engine can look for
+/// AOT data sources.
+typedef struct {
+  FlutterEngineAOTDataSourceType type;
+  union {
+    /// Absolute path to an ELF library file.
+    const char* elf_path;
+  };
+} FlutterEngineAOTDataSource;
+
+/// An opaque object that describes the AOT data that can be used to launch a
+/// FlutterEngine instance in AOT mode.
+typedef struct _FlutterEngineAOTData* FlutterEngineAOTData;
+
+//------------------------------------------------------------------------------
+/// @brief      Creates the necessary data structures to launch a Flutter Dart
+///             application in AOT mode. The data may only be collected after
+///             all FlutterEngine instances launched using this data have been
+///             terminated.
+///
+/// @param[in]  source    The source of the AOT data.
+/// @param[out] data_out  The AOT data on success. Unchanged on failure.
+///
+/// @return     Returns if the AOT data could be successfully resolved.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineCreateAOTData(
+    const FlutterEngineAOTDataSource* source,
+    FlutterEngineAOTData* data_out);
+
+//------------------------------------------------------------------------------
+/// @brief      Collects the AOT data.
+///
+/// @warning    The embedder must ensure that this call is made only after all
+///             FlutterEngine instances launched using this data have been
+///             terminated, and that all of those instances were launched with
+///             the FlutterProjectArgs::shutdown_dart_vm_when_done flag set to
+///             true.
+///
+/// @param[in]  data   The data to collect.
+///
+/// @return     Returns if the AOT data was successfully collected.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineCollectAOTData(FlutterEngineAOTData data);
+
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterProjectArgs).
   size_t struct_size;
@@ -1146,6 +1197,14 @@ typedef struct {
   /// See also:
   /// https://github.com/dart-lang/sdk/blob/ca64509108b3e7219c50d6c52877c85ab6a35ff2/runtime/vm/flag_list.h#L150
   int64_t dart_old_gen_heap_size;
+
+  /// The AOT data to be used in AOT operation.
+  ///
+  /// Embedders should instantiate and destroy this object via the
+  /// FlutterEngineCreateAOTData and FlutterEngineCollectAOTData methods.
+  ///
+  /// Embedders can provide either snapshot buffers or aot_data, but not both.
+  FlutterEngineAOTData aot_data;
 } FlutterProjectArgs;
 
 //------------------------------------------------------------------------------

@@ -4207,5 +4207,114 @@ TEST_F(EmbedderTest, CompositorRenderTargetsAreInStableOrder) {
   latch.Wait();
 }
 
+TEST_F(EmbedderTest, InvalidAOTDataSourcesMustReturnError) {
+  if (!DartVM::IsRunningPrecompiledCode()) {
+    GTEST_SKIP();
+    return;
+  }
+  FlutterEngineAOTDataSource data_in = {};
+  FlutterEngineAOTData data_out = nullptr;
+
+  // Null source specified.
+  ASSERT_EQ(FlutterEngineCreateAOTData(nullptr, &data_out), kInvalidArguments);
+  ASSERT_EQ(data_out, nullptr);
+
+  // Null data_out specified.
+  ASSERT_EQ(FlutterEngineCreateAOTData(&data_in, nullptr), kInvalidArguments);
+
+  // Invalid FlutterEngineAOTDataSourceType type specified.
+  data_in.type = FlutterEngineAOTDataSourceType(-1);
+  ASSERT_EQ(FlutterEngineCreateAOTData(&data_in, &data_out), kInvalidArguments);
+  ASSERT_EQ(data_out, nullptr);
+
+  // Invalid ELF path specified.
+  data_in.type = kFlutterEngineAOTDataSourceTypeElfPath;
+  data_in.elf_path = nullptr;
+  ASSERT_EQ(FlutterEngineCreateAOTData(&data_in, &data_out), kInvalidArguments);
+  ASSERT_EQ(data_in.type, kFlutterEngineAOTDataSourceTypeElfPath);
+  ASSERT_EQ(data_in.elf_path, nullptr);
+  ASSERT_EQ(data_out, nullptr);
+
+  // Invalid ELF path specified.
+  data_in.elf_path = "";
+  ASSERT_EQ(FlutterEngineCreateAOTData(&data_in, &data_out), kInvalidArguments);
+  ASSERT_EQ(data_in.type, kFlutterEngineAOTDataSourceTypeElfPath);
+  ASSERT_EQ(data_in.elf_path, "");
+  ASSERT_EQ(data_out, nullptr);
+
+  // Could not find VM snapshot data.
+  data_in.elf_path = "/bin/true";
+  ASSERT_EQ(FlutterEngineCreateAOTData(&data_in, &data_out), kInvalidArguments);
+  ASSERT_EQ(data_in.type, kFlutterEngineAOTDataSourceTypeElfPath);
+  ASSERT_EQ(data_in.elf_path, "/bin/true");
+  ASSERT_EQ(data_out, nullptr);
+}
+
+TEST_F(EmbedderTest, MustNotRunWithMultipleAOTSources) {
+  if (!DartVM::IsRunningPrecompiledCode()) {
+    GTEST_SKIP();
+    return;
+  }
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(
+      context,
+      EmbedderConfigBuilder::InitializationPreference::kMultiAOTInitialize);
+
+  builder.SetSoftwareRendererConfig();
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_FALSE(engine.is_valid());
+}
+
+TEST_F(EmbedderTest, CanCreateAndCollectAValidElfSource) {
+  if (!DartVM::IsRunningPrecompiledCode()) {
+    GTEST_SKIP();
+    return;
+  }
+  FlutterEngineAOTDataSource data_in = {};
+  FlutterEngineAOTData data_out = nullptr;
+
+  // Collecting a null object should be allowed
+  ASSERT_EQ(FlutterEngineCollectAOTData(data_out), kSuccess);
+
+  const auto elf_path =
+      fml::paths::JoinPaths({GetFixturesPath(), kAOTAppELFFileName});
+
+  data_in.type = kFlutterEngineAOTDataSourceTypeElfPath;
+  data_in.elf_path = elf_path.c_str();
+
+  ASSERT_EQ(FlutterEngineCreateAOTData(&data_in, &data_out), kSuccess);
+  ASSERT_EQ(data_in.type, kFlutterEngineAOTDataSourceTypeElfPath);
+  ASSERT_EQ(data_in.elf_path, elf_path.c_str());
+  ASSERT_NE(data_out, nullptr);
+
+  ASSERT_EQ(FlutterEngineCollectAOTData(data_out), kSuccess);
+}
+
+TEST_F(EmbedderTest, CanLaunchAndShutdownWithAValidElfSource) {
+  if (!DartVM::IsRunningPrecompiledCode()) {
+    GTEST_SKIP();
+    return;
+  }
+  auto& context = GetEmbedderContext();
+
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+
+  EmbedderConfigBuilder builder(
+      context,
+      EmbedderConfigBuilder::InitializationPreference::kAOTDataInitialize);
+
+  builder.SetSoftwareRendererConfig();
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Wait for the root isolate to launch.
+  latch.Wait();
+  engine.reset();
+}
+
 }  // namespace testing
 }  // namespace flutter

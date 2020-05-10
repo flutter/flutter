@@ -12,8 +12,6 @@
 namespace flutter {
 namespace testing {
 
-static constexpr const char* kAOTAppELFFileName = "app_elf_snapshot.so";
-
 ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary() {
   if (!DartVM::IsRunningPrecompiledCode()) {
     return {};
