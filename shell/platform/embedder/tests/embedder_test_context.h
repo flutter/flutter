@@ -28,6 +28,16 @@ using SemanticsNodeCallback = std::function<void(const FlutterSemanticsNode*)>;
 using SemanticsActionCallback =
     std::function<void(const FlutterSemanticsCustomAction*)>;
 
+struct AOTDataDeleter {
+  void operator()(FlutterEngineAOTData aot_data) {
+    if (aot_data) {
+      FlutterEngineCollectAOTData(aot_data);
+    }
+  }
+};
+
+using UniqueAOTData = std::unique_ptr<_FlutterEngineAOTData, AOTDataDeleter>;
+
 class EmbedderTestContext {
  public:
   EmbedderTestContext(std::string assets_path = "");
@@ -43,6 +53,8 @@ class EmbedderTestContext {
   const fml::Mapping* GetIsolateSnapshotData() const;
 
   const fml::Mapping* GetIsolateSnapshotInstructions() const;
+
+  FlutterEngineAOTData GetAOTData() const;
 
   void SetRootSurfaceTransformation(SkMatrix matrix);
 
@@ -79,6 +91,7 @@ class EmbedderTestContext {
   std::unique_ptr<fml::Mapping> vm_snapshot_instructions_;
   std::unique_ptr<fml::Mapping> isolate_snapshot_data_;
   std::unique_ptr<fml::Mapping> isolate_snapshot_instructions_;
+  UniqueAOTData aot_data_;
   std::vector<fml::closure> isolate_create_callbacks_;
   std::shared_ptr<TestDartNativeResolver> native_resolver_;
   SemanticsNodeCallback update_semantics_node_callback_;
@@ -100,6 +113,8 @@ class EmbedderTestContext {
   GetUpdateSemanticsCustomActionCallbackHook();
 
   void SetupAOTMappingsIfNecessary();
+
+  void SetupAOTDataIfNecessary();
 
   void SetupCompositor();
 

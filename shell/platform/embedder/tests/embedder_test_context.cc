@@ -8,6 +8,7 @@
 #include "flutter/fml/paths.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
+#include "flutter/testing/testing.h"
 #include "third_party/dart/runtime/bin/elf_loader.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
@@ -19,6 +20,7 @@ EmbedderTestContext::EmbedderTestContext(std::string assets_path)
       aot_symbols_(LoadELFSymbolFromFixturesIfNeccessary()),
       native_resolver_(std::make_shared<TestDartNativeResolver>()) {
   SetupAOTMappingsIfNecessary();
+  SetupAOTDataIfNecessary();
   isolate_create_callbacks_.push_back(
       [weak_resolver =
            std::weak_ptr<TestDartNativeResolver>{native_resolver_}]() {
@@ -44,6 +46,24 @@ void EmbedderTestContext::SetupAOTMappingsIfNecessary() {
       aot_symbols_.vm_isolate_instrs, 0u);
 }
 
+void EmbedderTestContext::SetupAOTDataIfNecessary() {
+  if (!DartVM::IsRunningPrecompiledCode()) {
+    return;
+  }
+  FlutterEngineAOTDataSource data_in = {};
+  FlutterEngineAOTData data_out = nullptr;
+
+  const auto elf_path =
+      fml::paths::JoinPaths({GetFixturesPath(), kAOTAppELFFileName});
+
+  data_in.type = kFlutterEngineAOTDataSourceTypeElfPath;
+  data_in.elf_path = elf_path.c_str();
+
+  ASSERT_EQ(FlutterEngineCreateAOTData(&data_in, &data_out), kSuccess);
+
+  aot_data_.reset(data_out);
+}
+
 const std::string& EmbedderTestContext::GetAssetsPath() const {
   return assets_path_;
 }
@@ -63,6 +83,10 @@ const fml::Mapping* EmbedderTestContext::GetIsolateSnapshotData() const {
 const fml::Mapping* EmbedderTestContext::GetIsolateSnapshotInstructions()
     const {
   return isolate_snapshot_instructions_.get();
+}
+
+FlutterEngineAOTData EmbedderTestContext::GetAOTData() const {
+  return aot_data_.get();
 }
 
 void EmbedderTestContext::SetRootSurfaceTransformation(SkMatrix matrix) {
