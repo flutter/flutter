@@ -13,8 +13,6 @@ REM --------------------------------------------------------------------------
 
 SETLOCAL ENABLEDELAYEDEXPANSION
 
-FOR %%i IN ("%~dp0..") DO SET FLUTTER_ROOT=%%~fi
-
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
 SET cache_dir=%FLUTTER_ROOT%\bin\cache
 SET snapshot_path=%cache_dir%\flutter_tools.snapshot

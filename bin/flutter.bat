@@ -13,10 +13,11 @@ REM --------------------------------------------------------------------------
 
 SETLOCAL ENABLEDELAYEDEXPANSION
 
-REM Include shared scripts in shared.bat
-CALL shared.bat
-
 FOR %%i IN ("%~dp0..") DO SET FLUTTER_ROOT=%%~fi
+
+REM Include shared scripts in shared.bat
+SET shared_bin=%FLUTTER_ROOT%/bin/internal/shared.bat
+CALL "%shared_bin%"
 
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
 SET cache_dir=%FLUTTER_ROOT%\bin\cache
@@ -31,13 +32,8 @@ SET pub_cache_path=%FLUTTER_ROOT%\.pub-cache
 SET dart=%dart_sdk_path%\bin\dart.exe
 SET pub=%dart_sdk_path%\bin\pub.bat
 
-REM If available, add location of bundled mingit to PATH
-SET mingit_path=%FLUTTER_ROOT%\bin\mingit\cmd
-IF EXIST "%mingit_path%" SET PATH=%PATH%;%mingit_path%
-
 REM To debug the tool, you can uncomment the following lines to enable checked mode and set an observatory port:
 REM SET FLUTTER_TOOL_ARGS="--enable-asserts %FLUTTER_TOOL_ARGS%"
-REM SET FLUTTER_TOOL_ARGS="%FLUTTER_TOOL_ARGS% --observe=65432"
 
 REM Chaining the call to 'dart' and 'exit' with an ampersand ensures that
 REM Windows reads both commands into memory once before executing them. This
