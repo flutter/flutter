@@ -88,12 +88,6 @@ class CommandHelp {
     'Detach (terminate "flutter run" but leave application running).',
   );
 
-  CommandHelpOption _g;
-  CommandHelpOption get g => _g ??= _makeOption(
-    'g',
-    'Run source code generators.'
-  );
-
   CommandHelpOption _h;
   CommandHelpOption get h => _h ??= _makeOption(
     'h',
