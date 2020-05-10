@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 
+#include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 
@@ -75,12 +76,20 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
   // to do this manually.
   AddCommandLineArgument("embedder_unittest");
 
-  if (preference == InitializationPreference::kInitialize) {
+  if (preference != InitializationPreference::kNoInitialize) {
     SetAssetsPath();
-    SetSnapshots();
     SetIsolateCreateCallbackHook();
     SetSemanticsCallbackHooks();
     AddCommandLineArgument("--disable-observatory");
+
+    if (preference == InitializationPreference::kSnapshotsInitialize ||
+        preference == InitializationPreference::kMultiAOTInitialize) {
+      SetSnapshots();
+    }
+    if (preference == InitializationPreference::kAOTDataInitialize ||
+        preference == InitializationPreference::kMultiAOTInitialize) {
+      SetAOTDataElf();
+    }
   }
 }
 
@@ -130,6 +139,10 @@ void EmbedderConfigBuilder::SetSnapshots() {
     project_args_.isolate_snapshot_instructions = mapping->GetMapping();
     project_args_.isolate_snapshot_instructions_size = mapping->GetSize();
   }
+}
+
+void EmbedderConfigBuilder::SetAOTDataElf() {
+  project_args_.aot_data = context_.GetAOTData();
 }
 
 void EmbedderConfigBuilder::SetIsolateCreateCallbackHook() {

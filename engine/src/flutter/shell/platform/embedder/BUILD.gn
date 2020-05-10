@@ -71,6 +71,7 @@ template("embedder_source_set") {
       "//flutter/shell/common",
       "//flutter/third_party/tonic",
       "//third_party/dart/runtime/bin:dart_io_api",
+      "//third_party/dart/runtime/bin:elf_loader",
       "//third_party/skia",
     ]
 
