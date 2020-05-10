@@ -4,10 +4,10 @@
 
 import 'dart:async';
 
+import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -21,10 +21,7 @@ import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'build_system/build_system.dart';
-import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
-import 'cache.dart';
 import 'codegen.dart';
 import 'compile.dart';
 import 'convert.dart';
@@ -801,40 +798,6 @@ abstract class ResidentRunner {
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
   }
 
-
-  BuildResult _lastBuild;
-  Environment _environment;
-  Future<void> runSourceGenerators() async {
-    _environment ??= Environment(
-      artifacts: globals.artifacts,
-      logger: globals.logger,
-      cacheDir: globals.cache.getRoot(),
-      engineVersion: globals.flutterVersion.engineRevision,
-      fileSystem: globals.fs,
-      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      outputDir: globals.fs.directory(getBuildDirectory()),
-      processManager: globals.processManager,
-      projectDir: globals.fs.currentDirectory,
-    );
-    globals.logger.printTrace('Starting incremental build...');
-    _lastBuild = await globals.buildSystem.buildIncremental(
-      const GenerateLocalizationsTarget(),
-      _environment,
-      _lastBuild,
-    );
-    if (!_lastBuild.success) {
-      for (final ExceptionMeasurement exceptionMeasurement in _lastBuild.exceptions.values) {
-        globals.logger.printError(
-          exceptionMeasurement.exception.toString(),
-          stackTrace: globals.logger.isVerbose
-            ? exceptionMeasurement.stackTrace
-            : null,
-        );
-      }
-    }
-    globals.logger.printTrace('complete');
-  }
-
   /// Toggle whether canvaskit is being used for rendering, returning the new
   /// state.
   ///
@@ -1235,7 +1198,6 @@ abstract class ResidentRunner {
         commandHelp.p.print();
         commandHelp.o.print();
         commandHelp.z.print();
-        commandHelp.g.print();
       } else {
         commandHelp.S.print();
         commandHelp.U.print();
@@ -1372,9 +1334,6 @@ class TerminalHandler {
       case 'd':
       case 'D':
         await residentRunner.detach();
-        return true;
-      case 'g':
-        await residentRunner.runSourceGenerators();
         return true;
       case 'h':
       case 'H':
