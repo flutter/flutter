@@ -16,6 +16,7 @@ import 'package:path/path.dart' as path;
 import 'browser.dart';
 import 'flutter_compact_formatter.dart';
 import 'run_command.dart';
+import 'service_worker.dart';
 import 'utils.dart';
 
 typedef ShardRunner = Future<void> Function();
@@ -765,6 +766,7 @@ Future<void> _runWebIntegrationTests() async {
       '--dart-define=test.valueB=Value',
     ]
   );
+  await _runWebServiceWorkerTest('lib/service_worker_test.dart');
 }
 
 Future<void> _runWebStackTraceTest(String buildMode) async {
@@ -849,6 +851,51 @@ Future<void> _runWebReleaseTest(String target, {
     print('${red}Web release mode test failed.$reset');
     exit(1);
   }
+}
+
+// Run a web service worker test. The expectations are currently stored here
+// instead of in the application.
+Future<void> _runWebServiceWorkerTest(String target, {
+  List<String> additionalArguments = const<String>[],
+}) async {
+  final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
+  final String appBuildDirectory = path.join(testAppDirectory, 'build', 'web');
+
+  // Build the app.
+  await runCommand(
+    flutter,
+    <String>[ 'clean' ],
+    workingDirectory: testAppDirectory,
+  );
+  await runCommand(
+    flutter,
+    <String>[
+      'build',
+      'web',
+      '--release',
+      ...additionalArguments,
+      '-t',
+      target,
+    ],
+    workingDirectory: testAppDirectory,
+    environment: <String, String>{
+      'FLUTTER_WEB': 'true',
+    },
+  );
+  final List<Uri> requests = <Uri>[];
+  final List<Map<String, String>> headers = <Map<String, String>>[];
+  await runRecordingServer(
+    appUrl: 'http://localhost:8080/index.html',
+    appDirectory: appBuildDirectory,
+    requests: requests,
+    headers: headers,
+  );
+  final List<Uri> expectedUris = [
+    Uri.parse('index.html'),
+    Uri.parse('main.dart.js'),
+    Uri.parse('assets/AssetManifest.json'),
+  ];
+  print('${green}${requests}${headers}.$reset');
 }
 
 /// Debug mode is special because `flutter build web` doesn't build in debug mode.
