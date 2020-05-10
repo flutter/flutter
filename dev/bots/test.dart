@@ -885,17 +885,41 @@ Future<void> _runWebServiceWorkerTest(String target, {
   final List<Uri> requests = <Uri>[];
   final List<Map<String, String>> headers = <Map<String, String>>[];
   await runRecordingServer(
-    appUrl: 'http://localhost:8080/index.html',
+    appUrl: 'http://localhost:8080/',
     appDirectory: appBuildDirectory,
     requests: requests,
     headers: headers,
+    browserDebugPort: null,
   );
-  final List<Uri> expectedUris = [
-    Uri.parse('index.html'),
-    Uri.parse('main.dart.js'),
-    Uri.parse('assets/AssetManifest.json'),
+
+  final List<String> requestedPaths = requests.map((Uri uri) => uri.toString()).toList();
+  final List<String> expectedPaths = <String>[
+    // Initial page load
+    '',
+    'main.dart.js',
+    'assets/FontManifest.json',
+    'flutter_service_worker.js',
+    'manifest.json',
+    'favicon.ico',
+    // Service worker install.
+    'main.dart.js?id=18f7de7f7ebd8ff11a8e835cd99d45bc',
+    'index.html?id=2bf1add7d31d6eae65be59fc94410cfc',
+    'assets/LICENSE?id=26ebaee28308d77d6cc49ff2b4c031c0',
+    'assets/AssetManifest.json?id=620fcd99a5e4f896300f80aafdfe2d69',
+    'assets/FontManifest.json?id=d751713988987e9331980363e24189ce',
+    // Second page load all cached.
   ];
-  print('${green}${requests}${headers}.$reset');
+  // The exact order isn't important or deterministic.
+  for (final String path in requestedPaths) {
+    if (!expectedPaths.remove(path)) {
+      print('unexpected service worker request: $path');
+      exit(1);
+    }
+  }
+  if (expectedPaths.isNotEmpty) {
+    print('Missing service worker requests from expected paths: $expectedPaths');
+    exit(1);
+  }
 }
 
 /// Debug mode is special because `flutter build web` doesn't build in debug mode.

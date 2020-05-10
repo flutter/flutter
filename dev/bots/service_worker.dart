@@ -3,6 +3,9 @@ import 'dart:io';
 
 import 'package:flutter_devicelab/framework/browser.dart';
 import 'package:meta/meta.dart';
+import 'package:shelf/shelf.dart';
+import 'package:shelf_static/shelf_static.dart';
+import 'package:shelf/shelf_io.dart' as shelf_io;
 
 /// This server runs a release web application and verifies that the service worker
 /// caches files correctly, by checking the request resources over HTTP.
@@ -20,39 +23,45 @@ Future<void> runRecordingServer({
 }) async {
   Chrome chrome;
   HttpServer server;
+  Completer<void> completer = Completer<void>();
   try {
-    server = await HttpServer.bind(InternetAddress.anyIPv4, serverPort);
-    final Completer<void> completer = Completer<void>();
-    server.listen((HttpRequest request) async {
-      if (request.uri.toString().contains('CLOSE')) {
-        await server.close(force: true);
-      }
-      final Uri recordedUri = Directory(appDirectory).uri.resolveUri(request.uri);
-      request.response.write(File(recordedUri.toFilePath()).readAsBytesSync());
-      requests.add(request.uri);
-      headers.add(headersToMap(request.headers));
-      await request.response.close();
-    });
+    server = await HttpServer.bind('localhost', serverPort);
+    final Cascade cascade = Cascade()
+      .add((Request request) async {
+        if (request.url.toString().contains('CLOSE')) {
+          completer.complete();
+          return Response.notFound('');
+        }
+        requests.add(request.url);
+        headers.add(request.headers);
+        return Response.notFound('');
+      })
+      .add(createStaticHandler(appDirectory, defaultDocument: 'index.html'));
+    shelf_io.serveRequests(server, cascade.handler);
     final Directory userDataDirectory = Directory.systemTemp.createTempSync('chrome_user_data_');
     chrome = await Chrome.launch(ChromeOptions(
-      headless: true,
+      headless: false,
       debugPort: browserDebugPort,
       url: appUrl,
       userDataDirectory: userDataDirectory.path,
       windowHeight: 500,
       windowWidth: 500,
     ), onError: completer.completeError);
-    return completer.future;
+    await completer.future;
+
+    chrome.stop();
+    completer = Completer<void>();
+    chrome = await Chrome.launch(ChromeOptions(
+      headless: false,
+      debugPort: browserDebugPort,
+      url: appUrl,
+      userDataDirectory: userDataDirectory.path,
+      windowHeight: 500,
+      windowWidth: 500,
+    ), onError: completer.completeError);
+    await completer.future;
   } finally {
     chrome?.stop();
     await server?.close();
   }
-}
-
-Map<String, String> headersToMap(HttpHeaders httpHeaders) {
-  final Map<String, String> headers = <String, String>{};
-  httpHeaders.forEach((String key, List<String> value) {
-    headers[key] = value.join(',');
-  });
-  return headers;
 }

@@ -381,10 +381,10 @@ class WebServiceWorker extends Target {
     final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
     final String serviceWorker = generateServiceWorker(urlToHash, <String>[
       'main.dart.js',
-      '/',
       'index.html',
       'assets/LICENSE',
-      'assets/AssetManifest.json',
+      if (urlToHash.containsKey('assets/AssetManifest.json'))
+        'assets/AssetManifest.json',
       if (urlToHash.containsKey('assets/FontManifest.json'))
         'assets/FontManifest.json',
     ]);
@@ -495,11 +495,7 @@ self.addEventListener("activate", function(event) {
 self.addEventListener("fetch", (event) => {
   var origin = self.location.origin;
   var key = event.request.url.substring(origin.length + 1);
-  // If the URL is not the the RESOURCE list, skip the cache. Handle requests
-  // for the #/ base.
-  if (key == '#/') {
-    key = '/';
-  }
+  // If the URL is not the the RESOURCE list, skip the cache.
   if (!RESOURCES[key]) {
     return event.respondWith(fetch(event.request));
   }

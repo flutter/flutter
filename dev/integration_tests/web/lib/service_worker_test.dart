@@ -3,10 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
-import 'package:flutter/services.dart';
-
 Future<void> main() async {
-  await rootBundle.load('lib/a.dart');
-  await rootBundle.load('lib/b.dart');
-  await html.HttpRequest.getString('CLOSE');
+  final html.ServiceWorkerRegistration worker = await html.window.navigator.serviceWorker.ready;
+  if (worker.active != null) {
+    await html.HttpRequest.getString('CLOSE');
+    return;
+  }
+  worker.addEventListener('statechange', (event) async {
+    if (worker.active != null) {
+      await html.HttpRequest.getString('CLOSE');
+    }
+  });
 }
