@@ -35,10 +35,6 @@ REM If available, add location of bundled mingit to PATH
 SET mingit_path=%FLUTTER_ROOT%\bin\mingit\cmd
 IF EXIST "%mingit_path%" SET PATH=%PATH%;%mingit_path%
 
-REM To debug the tool, you can uncomment the following lines to enable checked mode and set an observatory port:
-REM SET FLUTTER_TOOL_ARGS="--enable-asserts %FLUTTER_TOOL_ARGS%"
-REM SET FLUTTER_TOOL_ARGS="%FLUTTER_TOOL_ARGS% --observe=65432"
-
 REM Chaining the call to 'dart' and 'exit' with an ampersand ensures that
 REM Windows reads both commands into memory once before executing them. This
 REM avoids nasty errors that may otherwise occur when the dart command (e.g. as
@@ -47,7 +43,7 @@ REM
 REM Do not use the CALL command in the next line to execute Dart. CALL causes
 REM Windows to re-read the line from disk after the CALL command has finished
 REM regardless of the ampersand chain.
-"%dart%" --packages="%flutter_tools_dir%\.packages" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %* & exit /B !ERRORLEVEL!
+"%dart%" %* & exit /B !ERRORLEVEL!
 
 :final_exit
 EXIT /B %exit_code%
