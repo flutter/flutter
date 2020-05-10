@@ -49,6 +49,7 @@ ALL_LIBS_OUT=$(FLUTTER_LIB_OUT) \
 # issues if they start with one or more '../'s.
 WRAPPER_ROOT=$(abspath $(FLUTTER_EPHEMERAL_DIR)/cpp_client_wrapper_glfw)
 WRAPPER_SOURCES= \
+	$(WRAPPER_ROOT)/flutter_engine.cc \
 	$(WRAPPER_ROOT)/flutter_window_controller.cc \
 	$(WRAPPER_ROOT)/plugin_registrar.cc \
 	$(WRAPPER_ROOT)/engine_method_result.cc
