@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -996,8 +997,20 @@ void main() {
     await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.example', tmpProjectDir]);
     FlutterProject project = FlutterProject.fromDirectory(globals.fs.directory(tmpProjectDir));
     expect(
-        await project.ios.productBundleIdentifier,
-        'com.example.helloFlutter',
+      await project.ios.productBundleIdentifier(BuildInfo.debug),
+      'com.example.helloFlutter',
+    );
+    expect(
+      await project.ios.productBundleIdentifier(BuildInfo.profile),
+      'com.example.helloFlutter',
+    );
+    expect(
+      await project.ios.productBundleIdentifier(BuildInfo.release),
+      'com.example.helloFlutter',
+    );
+    expect(
+      await project.ios.productBundleIdentifier(null),
+      'com.example.helloFlutter',
     );
     expect(
         project.android.applicationId,
@@ -1008,7 +1021,7 @@ void main() {
     await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'abc^*.1#@', tmpProjectDir]);
     project = FlutterProject.fromDirectory(globals.fs.directory(tmpProjectDir));
     expect(
-        await project.ios.productBundleIdentifier,
+        await project.ios.productBundleIdentifier(BuildInfo.debug),
         'abc.1.testAbc',
     );
     expect(
@@ -1020,7 +1033,7 @@ void main() {
     await runner.run(<String>['create', '--template=app', '--no-pub', '--org', '#+^%', tmpProjectDir]);
     project = FlutterProject.fromDirectory(globals.fs.directory(tmpProjectDir));
     expect(
-        await project.ios.productBundleIdentifier,
+        await project.ios.productBundleIdentifier(BuildInfo.debug),
         'flutterProject.untitled',
     );
     expect(
@@ -1154,7 +1167,7 @@ void main() {
     await _createProject(projectDir, <String>[], <String>[]);
     final FlutterProject project = FlutterProject.fromDirectory(projectDir);
     expect(
-      await project.ios.productBundleIdentifier,
+      await project.ios.productBundleIdentifier(BuildInfo.debug),
       'com.bar.foo.flutterProject',
     );
   }, overrides: <Type, Generator>{
@@ -1203,7 +1216,7 @@ void main() {
     await _createProject(projectDir, <String>['--no-pub'], <String>[]);
     final FlutterProject project = FlutterProject.fromDirectory(projectDir);
     expect(
-      await project.ios.productBundleIdentifier,
+      await project.ios.productBundleIdentifier(BuildInfo.debug),
       'com.bar.foo.flutterProject',
     );
   });
@@ -1236,7 +1249,7 @@ void main() {
     );
     final FlutterProject project = FlutterProject.fromDirectory(projectDir);
     expect(
-      await project.example.ios.productBundleIdentifier,
+      await project.example.ios.productBundleIdentifier(BuildInfo.debug),
       'com.bar.foo.flutterProjectExample',
     );
   });

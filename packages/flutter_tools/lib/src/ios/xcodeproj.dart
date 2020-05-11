@@ -309,9 +309,12 @@ class XcodeProjectInterpreter {
 
   /// Asynchronously retrieve xcode build settings. This one is preferred for
   /// new call-sites.
+  ///
+  /// If [scheme] is null, xcodebuild will return build settings for the first discovered
+  /// target (by default this is Runner).
   Future<Map<String, String>> getBuildSettings(
-    String projectPath,
-    String target, {
+    String projectPath, {
+    String scheme,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     final Status status = Status.withSpinner(
@@ -324,8 +327,8 @@ class XcodeProjectInterpreter {
       _executable,
       '-project',
       _fileSystem.path.absolute(projectPath),
-      '-target',
-      target,
+      if (scheme != null)
+        ...<String>['-scheme', scheme],
       '-showBuildSettings',
       ...environmentVariablesAsXcodeBuildSettings(_platform)
     ];
@@ -465,7 +468,6 @@ class XcodeProjectInfo {
   final List<String> buildConfigurations;
   final List<String> schemes;
 
-  bool get definesCustomTargets => !(targets.contains('Runner') && targets.length == 1);
   bool get definesCustomSchemes => !(schemes.contains('Runner') && schemes.length == 1);
   bool get definesCustomBuildConfigurations {
     return !(buildConfigurations.contains('Debug') &&
@@ -475,7 +477,7 @@ class XcodeProjectInfo {
 
   /// The expected scheme for [buildInfo].
   static String expectedSchemeFor(BuildInfo buildInfo) {
-    return toTitleCase(buildInfo.flavor ?? 'runner');
+    return toTitleCase(buildInfo?.flavor ?? 'runner');
   }
 
   /// The expected build configuration for [buildInfo] and [scheme].
