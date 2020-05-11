@@ -136,7 +136,7 @@ void main() {
       when(mockGit.getOutput('remote get-url $origin', any)).thenReturn(kUpstreamRemote);
       when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
       when(mockGit.getOutput(
-        'describe --match *.*.*-*.*.pre --exact-match --tags refs/heads/dev',
+        'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
         any,
       )).thenReturn('1.2.3-0.0.pre');
       fakeArgResults = FakeArgResults(
@@ -161,7 +161,7 @@ void main() {
       when(mockGit.getOutput('remote get-url $origin', any)).thenReturn(kUpstreamRemote);
       when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
       when(mockGit.getOutput(
-        'describe --match *.*.*-*.*.pre --exact-match --tags refs/heads/dev',
+        'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
         any,
       )).thenReturn('1.2.3-0.0.pre');
       when(mockGit.getOutput('rev-parse HEAD', any)).thenReturn(commit);
@@ -188,7 +188,7 @@ void main() {
       when(mockGit.getOutput('remote get-url $origin', any)).thenReturn(kUpstreamRemote);
       when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
       when(mockGit.getOutput(
-        'describe --match *.*.*-*.*.pre --exact-match --tags refs/heads/dev',
+        'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
         any,
       )).thenReturn('1.2.3-0.0.pre');
       when(mockGit.getOutput('rev-parse HEAD', any)).thenReturn(commit);
