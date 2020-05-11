@@ -24,7 +24,7 @@ import 'object.dart';
 /// level [debug] is appropriate.
 ///
 /// In release mode, this level may not have any effect, as diagnostics in
-/// release mode are compatected or truncated to reduce binary size.
+/// release mode are compacted or truncated to reduce binary size.
 enum DiagnosticLevel {
   /// Diagnostics that should not be shown.
   ///
