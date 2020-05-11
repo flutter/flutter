@@ -22,23 +22,23 @@ struct _FlBinaryMessenger {
 G_DEFINE_TYPE(FlBinaryMessenger, fl_binary_messenger, G_TYPE_OBJECT)
 
 typedef struct {
-  FlBinaryMessengerCallback callback;
-  gpointer user_data;
+  FlBinaryMessengerMessageHandler message_handler;
+  gpointer message_handler_data;
 } PlatformMessageHandler;
 
 PlatformMessageHandler* platform_message_handler_new(
-    FlBinaryMessengerCallback callback,
+    FlBinaryMessengerMessageHandler handler,
     gpointer user_data) {
-  PlatformMessageHandler* handler = static_cast<PlatformMessageHandler*>(
+  PlatformMessageHandler* self = static_cast<PlatformMessageHandler*>(
       g_malloc0(sizeof(PlatformMessageHandler)));
-  handler->callback = callback;
-  handler->user_data = user_data;
-  return handler;
+  self->message_handler = handler;
+  self->message_handler_data = user_data;
+  return self;
 }
 
 void platform_message_handler_free(gpointer data) {
-  PlatformMessageHandler* handler = static_cast<PlatformMessageHandler*>(data);
-  g_free(handler);
+  PlatformMessageHandler* self = static_cast<PlatformMessageHandler*>(data);
+  g_free(self);
 }
 
 struct _FlBinaryMessengerResponseHandle {
@@ -47,16 +47,16 @@ struct _FlBinaryMessengerResponseHandle {
 
 static FlBinaryMessengerResponseHandle* response_handle_new(
     const FlutterPlatformMessageResponseHandle* response_handle) {
-  FlBinaryMessengerResponseHandle* handle =
+  FlBinaryMessengerResponseHandle* self =
       static_cast<FlBinaryMessengerResponseHandle*>(
           g_malloc0(sizeof(FlBinaryMessengerResponseHandle)));
-  handle->response_handle = response_handle;
+  self->response_handle = response_handle;
 
-  return handle;
+  return self;
 }
 
-static void response_handle_free(FlBinaryMessengerResponseHandle* handle) {
-  g_free(handle);
+static void response_handle_free(FlBinaryMessengerResponseHandle* self) {
+  g_free(self);
 }
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(FlBinaryMessengerResponseHandle,
@@ -67,7 +67,7 @@ static void engine_weak_notify_cb(gpointer user_data, GObject* object) {
   self->engine = nullptr;
 }
 
-static gboolean fl_binary_messenger_platform_message_callback(
+static gboolean fl_binary_messenger_platform_message_cb(
     FlEngine* engine,
     const gchar* channel,
     GBytes* message,
@@ -83,7 +83,8 @@ static gboolean fl_binary_messenger_platform_message_callback(
   if (handler == nullptr)
     return FALSE;
 
-  handler->callback(self, channel, message, handle, handler->user_data);
+  handler->message_handler(self, channel, message, handle,
+                           handler->message_handler_data);
 
   return TRUE;
 }
@@ -120,7 +121,7 @@ FlBinaryMessenger* fl_binary_messenger_new(FlEngine* engine) {
   g_object_weak_ref(G_OBJECT(engine), engine_weak_notify_cb, self);
 
   fl_engine_set_platform_message_handler(
-      engine, fl_binary_messenger_platform_message_callback, self);
+      engine, fl_binary_messenger_platform_message_cb, self);
 
   return self;
 }
@@ -128,16 +129,16 @@ FlBinaryMessenger* fl_binary_messenger_new(FlEngine* engine) {
 G_MODULE_EXPORT void fl_binary_messenger_set_message_handler_on_channel(
     FlBinaryMessenger* self,
     const gchar* channel,
-    FlBinaryMessengerCallback callback,
+    FlBinaryMessengerMessageHandler handler,
     gpointer user_data) {
   g_return_if_fail(FL_IS_BINARY_MESSENGER(self));
   g_return_if_fail(channel != nullptr);
-  g_return_if_fail(callback != nullptr);
 
-  PlatformMessageHandler* handler =
-      platform_message_handler_new(callback, user_data);
-  g_hash_table_replace(self->platform_message_handlers, g_strdup(channel),
-                       handler);
+  if (handler != nullptr)
+    g_hash_table_replace(self->platform_message_handlers, g_strdup(channel),
+                         platform_message_handler_new(handler, user_data));
+  else
+    g_hash_table_remove(self->platform_message_handlers, channel);
 }
 
 G_MODULE_EXPORT gboolean fl_binary_messenger_send_response(
