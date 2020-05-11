@@ -363,8 +363,16 @@ class AppResourceBundle {
   factory AppResourceBundle(File file) {
     assert(file != null);
     // Assuming that the caller has verified that the file exists and is readable.
+    Map<String, dynamic> resources;
+    try {
+      resources = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+    } on FormatException catch (e) {
+      throw L10nException(
+        'The arb file ${file.path} has the following formatting issue: \n'
+        '${e.toString()}',
+      );
+    }
 
-    final Map<String, dynamic> resources = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
     String localeString = resources['@@locale'] as String;
     if (localeString == null) {
       final RegExp filenameRE = RegExp(r'^[^_]*_(\w+)\.arb$');

@@ -231,10 +231,10 @@ void main() {
   testWithoutContext('runInView forwards arguments correctly', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(method: 'streamListen', id: '1', args: <String, Object>{
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
           'streamId': 'Isolate'
         }),
-        const FakeVmServiceRequest(method: kRunInViewMethod, id: '2', args: <String, Object>{
+        const FakeVmServiceRequest(method: kRunInViewMethod, args: <String, Object>{
           'viewId': '1234',
           'mainScript': 'main.dart',
           'assetDirectory': 'flutter_assets/',
@@ -253,6 +253,65 @@ void main() {
       viewId: '1234',
       main: Uri.file('main.dart'),
       assetsDirectory: Uri.file('flutter_assets/'),
+    );
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('getFlutterViews polls until a view is returned', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: kListViewsMethod,
+          jsonResponse: <String, Object>{
+            'views': <Object>[],
+          },
+        ),
+        const FakeVmServiceRequest(
+          method: kListViewsMethod,
+          jsonResponse: <String, Object>{
+            'views': <Object>[],
+          },
+        ),
+        const FakeVmServiceRequest(
+          method: kListViewsMethod,
+          jsonResponse: <String, Object>{
+            'views': <Object>[
+              <String, Object>{
+                'id': 'a',
+                'isolate': <String, Object>{},
+              },
+            ],
+          },
+        ),
+      ]
+    );
+
+    expect(
+      await fakeVmServiceHost.vmService.getFlutterViews(
+        delay: Duration.zero,
+      ),
+      isNotEmpty,
+    );
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('getFlutterViews does not poll if returnEarly is true', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: kListViewsMethod,
+          jsonResponse: <String, Object>{
+            'views': <Object>[],
+          },
+        ),
+      ]
+    );
+
+    expect(
+      await fakeVmServiceHost.vmService.getFlutterViews(
+        returnEarly: true,
+      ),
+      isEmpty,
     );
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });

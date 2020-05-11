@@ -485,7 +485,8 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   }
 }
 
-// TODO(guidezpl): Look into making this public. A copy of this class is in scaffold.dart, for now.
+// TODO(guidezpl): Look into making this public. A copy of this class is in
+//  scaffold.dart, for now, https://github.com/flutter/flutter/issues/51627
 /// A curve that progresses linearly until a specified [startingPoint], at which
 /// point [curve] will begin. Unlike [Interval], [curve] will not start at zero,
 /// but will use [startingPoint] as the Y position.

@@ -21,6 +21,36 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
+final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
+  id: '1',
+  pauseEvent: vm_service.Event(
+    kind: vm_service.EventKind.kResume,
+    timestamp: 0
+  ),
+  breakpoints: <vm_service.Breakpoint>[],
+  exceptionPauseMode: null,
+  libraries: <vm_service.LibraryRef>[],
+  livePorts: 0,
+  name: 'test',
+  number: '1',
+  pauseOnExit: false,
+  runnable: true,
+  startTime: 0,
+);
+
+final FlutterView fakeFlutterView = FlutterView(
+  id: 'a',
+  uiIsolate: fakeUnpausedIsolate,
+);
+
+final FakeVmServiceRequest listViews = FakeVmServiceRequest(
+  method: kListViewsMethod,
+  jsonResponse: <String, Object>{
+    'views': <Object>[
+      fakeFlutterView.toJson(),
+    ],
+  },
+);
 void main() {
   group('validateReloadReport', () {
     testUsingContext('invalid', () async {
@@ -172,42 +202,72 @@ void main() {
 
     testUsingContext('Does hot restarts when all devices support it', () async {
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          id: '1',
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          }
-        ),
-         const FakeVmServiceRequest(
-          id: '2',
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          }
+        listViews,
+        FakeVmServiceRequest(
+          method: 'getIsolate',
+          args: <String, Object>{
+            'isolateId': fakeUnpausedIsolate.id,
+          },
+          jsonResponse: fakeUnpausedIsolate.toJson(),
         ),
         FakeVmServiceRequest(
-          id: '3',
           method: 'getVM',
           jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
         ),
+        listViews,
         FakeVmServiceRequest(
-          id: '4',
+          method: 'getIsolate',
+          args: <String, Object>{
+            'isolateId': fakeUnpausedIsolate.id,
+          },
+          jsonResponse: fakeUnpausedIsolate.toJson(),
+        ),
+        FakeVmServiceRequest(
           method: 'getVM',
           jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
         ),
+        listViews,
+        listViews,
         const FakeVmServiceRequest(
-          id: '5',
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
+          method: 'streamListen',
+          args: <String, Object>{
+            'streamId': 'Isolate',
           }
         ),
         const FakeVmServiceRequest(
-          id: '6',
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
+          method: 'streamListen',
+          args: <String, Object>{
+            'streamId': 'Isolate',
+          }
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Isolate',
+          event: vm_service.Event(
+            timestamp: 0,
+            kind: vm_service.EventKind.kIsolateRunnable,
+          )
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Isolate',
+          event: vm_service.Event(
+            timestamp: 0,
+            kind: vm_service.EventKind.kIsolateRunnable,
+          )
+        ),
+        FakeVmServiceRequest(
+          method: kRunInViewMethod,
+          args: <String, Object>{
+            'viewId': fakeFlutterView.id,
+            'mainScript': 'lib/main.dart.dill',
+            'assetDirectory': 'build/flutter_assets',
+          }
+        ),
+        FakeVmServiceRequest(
+          method: kRunInViewMethod,
+          args: <String, Object>{
+            'viewId': fakeFlutterView.id,
+            'mainScript': 'lib/main.dart.dill',
+            'assetDirectory': 'build/flutter_assets',
           }
         ),
       ]);
@@ -257,24 +317,39 @@ void main() {
     testUsingContext('hot restart supported', () async {
       // Setup mocks
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        listViews,
+        FakeVmServiceRequest(
+          method: 'getIsolate',
+          args: <String, Object>{
+            'isolateId': fakeUnpausedIsolate.id,
+          },
+          jsonResponse: fakeUnpausedIsolate.toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getVM',
+          jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
+        ),
+        listViews,
         const FakeVmServiceRequest(
-          id: '1',
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
+          method: 'streamListen',
+          args: <String, Object>{
+            'streamId': 'Isolate',
           }
         ),
         FakeVmServiceRequest(
-          id: '2',
-          method: 'getVM',
-          jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
-        ),
-        const FakeVmServiceRequest(
-          id: '3',
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
+          method: kRunInViewMethod,
+          args: <String, Object>{
+            'viewId': fakeFlutterView.id,
+            'mainScript': 'lib/main.dart.dill',
+            'assetDirectory': 'build/flutter_assets',
           }
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Isolate',
+          event: vm_service.Event(
+            timestamp: 0,
+            kind: vm_service.EventKind.kIsolateRunnable,
+          )
         ),
       ]);
       final MockDevice mockDevice = MockDevice();

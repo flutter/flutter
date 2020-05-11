@@ -665,6 +665,16 @@ void main() {
           expect(error.message, 'Error in Flutter application: {message: This is a failure}');
         }
       });
+
+      test('uncaught remote error', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          return Future<Map<String, dynamic>>.error(
+            rpc.RpcException(9999, 'test error'),
+          );
+        });
+
+        expect(driver.waitFor(find.byTooltip('foo')), throwsDriverError);
+      });
     });
   });
 

@@ -684,15 +684,29 @@ extension FlutterVmService on vm_service.VmService {
   }
 
   /// List all [FlutterView]s attached to the current VM.
-  Future<List<FlutterView>> getFlutterViews() async {
-    final vm_service.Response response = await callMethod(
-      kListViewsMethod,
-    );
-    final List<Object> rawViews = response.json['views'] as List<Object>;
-    return <FlutterView>[
-      for (final Object rawView in rawViews)
-        FlutterView.parse(rawView as Map<String, Object>)
-    ];
+  ///
+  /// If this returns an empty list, it will poll forever unless [returnEarly]
+  /// is set to true.
+  ///
+  /// By default, the poll duration is 50 milliseconds.
+  Future<List<FlutterView>> getFlutterViews({
+    bool returnEarly = false,
+    Duration delay = const Duration(milliseconds: 50),
+  }) async {
+    while (true) {
+      final vm_service.Response response = await callMethod(
+        kListViewsMethod,
+      );
+      final List<Object> rawViews = response.json['views'] as List<Object>;
+      final List<FlutterView> views = <FlutterView>[
+        for (final Object rawView in rawViews)
+          FlutterView.parse(rawView as Map<String, Object>)
+      ];
+      if (views.isNotEmpty || returnEarly) {
+        return views;
+      }
+      await Future<void>.delayed(delay);
+    }
   }
 
   /// Attempt to retrieve the isolate with id [isolateId], or `null` if it has

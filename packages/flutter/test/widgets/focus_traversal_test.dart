@@ -54,6 +54,49 @@ void main() {
       expect(scope.hasFocus, isTrue);
     });
 
+    testWidgets('Find the initial focus if there is none yet and traversing backwards.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      final GlobalKey key3 = GlobalKey(debugLabel: '3');
+      final GlobalKey key4 = GlobalKey(debugLabel: '4');
+      final GlobalKey key5 = GlobalKey(debugLabel: '5');
+      await tester.pumpWidget(FocusTraversalGroup(
+        policy: WidgetOrderTraversalPolicy(),
+        child: FocusScope(
+          key: key1,
+          child: Column(
+            children: <Widget>[
+              Focus(
+                key: key2,
+                child: Container(key: key3, width: 100, height: 100),
+              ),
+              Focus(
+                key: key4,
+                child: Container(key: key5, width: 100, height: 100),
+              ),
+            ],
+          ),
+        ),
+      ));
+
+      final Element firstChild = tester.element(find.byKey(key3));
+      final Element secondChild = tester.element(find.byKey(key5));
+      final FocusNode firstFocusNode = Focus.of(firstChild);
+      final FocusNode secondFocusNode = Focus.of(secondChild);
+      final FocusNode scope = Focus.of(firstChild).enclosingScope;
+
+      expect(firstFocusNode.hasFocus, isFalse);
+      expect(secondFocusNode.hasFocus, isFalse);
+
+      secondFocusNode.previousFocus();
+
+      await tester.pump();
+
+      expect(firstFocusNode.hasFocus, isFalse);
+      expect(secondFocusNode.hasFocus, isTrue);
+      expect(scope.hasFocus, isTrue);
+    });
+
     testWidgets('Move focus to next node.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -1999,6 +2042,46 @@ void main() {
       expect(gotFocus, isNull);
       expect(containerNode.hasFocus, isFalse);
       expect(unfocusableNode.hasFocus, isFalse);
+    });
+  });
+  group(RawKeyboardListener, () {
+    testWidgets('Raw keyboard listener introduces a Semantics node by default', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(
+        RawKeyboardListener(
+          focusNode: focusNode,
+          child: Container(),
+        ),
+      );
+      final TestSemantics expectedSemantics = TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isFocusable,
+            ],
+          ),
+        ],
+      );
+      expect(semantics, hasSemantics(
+        expectedSemantics,
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ));
+    });
+    testWidgets("Raw keyboard listener doesn't introduce a Semantics node when specified", (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(
+          RawKeyboardListener(
+              focusNode: focusNode,
+              includeSemantics: false,
+              child: Container(),
+          ),
+      );
+      final TestSemantics expectedSemantics = TestSemantics.root();
+      expect(semantics, hasSemantics(expectedSemantics));
     });
   });
 }

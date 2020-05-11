@@ -40,6 +40,7 @@ class RawMaterialButton extends StatefulWidget {
     @required this.onPressed,
     this.onLongPress,
     this.onHighlightChanged,
+    this.mouseCursor,
     this.textStyle,
     this.fillColor,
     this.focusColor,
@@ -101,6 +102,11 @@ class RawMaterialButton extends StatefulWidget {
   /// this can fire during the build phase (in which case calling
   /// [State.setState] is not allowed).
   final ValueChanged<bool> onHighlightChanged;
+
+  /// {@macro flutter.material.inkwell.mousecursor}
+  ///
+  /// Defaults to null.
+  final MouseCursor mouseCursor;
 
   /// Defines the default text style, with [Material.textStyle], for the
   /// button's [child].
@@ -401,6 +407,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
           onLongPress: widget.onLongPress,
           enableFeedback: widget.enableFeedback,
           customBorder: effectiveShape,
+          mouseCursor: widget.mouseCursor,
           child: IconTheme.merge(
             data: IconThemeData(color: effectiveTextColor),
             child: Container(
