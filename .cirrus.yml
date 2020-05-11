@@ -236,7 +236,17 @@ task:
     - name: web_tests-7_last-linux # last Web shard must end with _last
       << : *WEB_SHARD_TEMPLATE
 
-    - name: build_tests-linux
+    - name: build_tests-0-linux
+      environment:
+        # With 1 CPU and 4G of RAM, as of October 2019, build_tests-linux would get OOM-killed.
+        # Increasing the RAM to 12G allowed it to finish in about 30 minutes, any extra CPU (tried 2
+        # and 4) reduced that to just over 20 minutes. 6G was enough not to get OOM-killed.
+        CPU: 2
+        MEMORY: 6G
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: build_tests-1_last-linux
       environment:
         # With 1 CPU and 4G of RAM, as of October 2019, build_tests-linux would get OOM-killed.
         # Increasing the RAM to 12G allowed it to finish in about 30 minutes, any extra CPU (tried 2
@@ -289,7 +299,7 @@ task:
     - name: firebase_test_lab_tests-1-linux
       <<: *FIREBASE_SHARD_TEMPLATE
 
-    - name: firebase_test_lab_tests-2-linux
+    - name: firebase_test_lab_tests-2_last-linux
       <<: *FIREBASE_SHARD_TEMPLATE
 
     - name: web_smoke_test
@@ -436,7 +446,18 @@ task:
 
     # TODO(ianh): Enable Web tests on Windows
 
-    - name: build_tests-windows
+    - name: build_tests-0-windows
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      environment:
+        # As of December 2019, the build_tests-windows shard requires 6 GB RAM to pass.
+        # Emperically, using 6 CPUs and 10 GB RAM yielded optimal results (~33 minutes);
+        # bumping beyond these limits yielded no extra gain.
+        CPU: 6
+        MEMORY: 10G
+      script:
+        - dart --enable-asserts dev\bots\test.dart
+
+    - name: build_tests-1_last-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
       environment:
         # As of December 2019, the build_tests-windows shard requires 6 GB RAM to pass.
@@ -577,7 +598,12 @@ task:
 
     # TODO(ianh): Enable Web tests on macOS.
 
-    - name: build_tests-macos
+    - name: build_tests-0-macos
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
+      script:
+        - dart --enable-asserts ./dev/bots/test.dart
+
+    - name: build_tests-1_last-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
       script:
         - dart --enable-asserts ./dev/bots/test.dart
