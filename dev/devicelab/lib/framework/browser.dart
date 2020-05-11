@@ -100,6 +100,7 @@ class Chrome {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
+      '--enable-features=NetworkService',
     ];
     final io.Process chromeProcess = await io.Process.start(
       _findSystemChromeExecutable(),
