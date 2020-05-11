@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show window, FrameTiming;
+import 'dart:ui' show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
