@@ -142,8 +142,11 @@ void main() {
     kThreeLines +
     "\nFourth line won't display and ends at";
 
-  setUp(() {
+  setUp(() async {
     debugResetSemanticsIdCounter();
+    // Fill the clipboard so that the PASTE option is available in the text
+    // selection menu.
+    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
   final Key textFieldKey = UniqueKey();
@@ -1045,7 +1048,7 @@ void main() {
     const int dIndex = 3;
     final Offset dPos = textOffsetToPosition(tester, dIndex);
     await tester.longPressAt(dPos);
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // Context menu should not have paste and cut.
     expect(find.text('COPY'), findsOneWidget);
@@ -1783,6 +1786,8 @@ void main() {
       renderEditable,
     );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
+    // Pump an extra frame to allow the selection menu to read the clipboard.
+    await tester.pump();
     await tester.pump();
 
     // Toolbar should fade in. Starting at 0% opacity.
@@ -1893,7 +1898,7 @@ void main() {
     // Long press to select text.
     final Offset bPos = textOffsetToPosition(tester, 1);
     await tester.longPressAt(bPos, pointer: 7);
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // Should only have paste option when whole obscure text is selected.
     expect(find.text('PASTE'), findsOneWidget);
@@ -1905,7 +1910,7 @@ void main() {
     final Offset iPos = textOffsetToPosition(tester, 10);
     final Offset slightRight = iPos + const Offset(30.0, 0.0);
     await tester.longPressAt(slightRight, pointer: 7);
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // Should have paste and select all options when collapse.
     expect(find.text('PASTE'), findsOneWidget);
@@ -5037,6 +5042,78 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('When clipboard empty, no semantics paste option', (WidgetTester tester) async {
+    const String textInTextField = 'Hello';
+
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    final TextEditingController controller = TextEditingController()
+      ..text = textInTextField;
+    final Key key = UniqueKey();
+
+    // Clear the clipboard.
+    await Clipboard.setData(const ClipboardData(text: ''));
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+        ),
+      ),
+    );
+
+    const int inputFieldId = 1;
+
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: inputFieldId,
+            flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+            actions: <SemanticsAction>[SemanticsAction.tap],
+            value: textInTextField,
+            textDirection: TextDirection.ltr,
+          ),
+        ],
+      ),
+      ignoreRect: true, ignoreTransform: true,
+    ));
+
+    semanticsOwner.performAction(inputFieldId, SemanticsAction.tap);
+    await tester.pump();
+
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: inputFieldId,
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isTextField,
+              SemanticsFlag.isFocused,
+            ],
+            actions: <SemanticsAction>[
+              SemanticsAction.tap,
+              SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.moveCursorBackwardByWord,
+              SemanticsAction.setSelection,
+              // No paste option.
+            ],
+            value: textInTextField,
+            textDirection: TextDirection.ltr,
+            textSelection: const TextSelection(
+              baseOffset: textInTextField.length,
+              extentOffset: textInTextField.length,
+            ),
+          ),
+        ],
+      ),
+      ignoreRect: true, ignoreTransform: true,
+    ));
+
+    semantics.dispose();
+  });
+
   testWidgets('TextField throws when not descended from a Material widget', (WidgetTester tester) async {
     const Widget textField = TextField();
     await tester.pumpWidget(textField);
@@ -5798,7 +5875,7 @@ void main() {
         const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
       );
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Second tap selects the word around the cursor.
       expect(
@@ -5843,7 +5920,7 @@ void main() {
         const TextSelection.collapsed(offset: 9),
       );
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Second tap selects the word around the cursor.
       expect(
@@ -5894,7 +5971,7 @@ void main() {
 
       // Second tap selects the word around the cursor.
       await tester.tapAt(textOffsetToPosition(tester, index));
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
@@ -5926,14 +6003,14 @@ void main() {
       await tester.tapAt(textOffsetToPosition(tester, 0));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, 0));
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.text('PASTE'), findsOneWidget);
 
       // Double tap again keeps the selection menu visible.
       await tester.tapAt(textOffsetToPosition(tester, 0));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, 0));
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.text('PASTE'), findsOneWidget);
     },
   );
@@ -5958,7 +6035,7 @@ void main() {
 
       // Long press shows the selection menu.
       await tester.longPressAt(textOffsetToPosition(tester, 0));
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.text('PASTE'), findsOneWidget);
 
       // Long press again keeps the selection menu visible.
@@ -5988,7 +6065,7 @@ void main() {
 
       // Long press shows the selection menu.
       await tester.longPress(find.byType(TextField));
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.text('PASTE'), findsOneWidget);
 
       // Tap hides the selection menu.
@@ -6023,7 +6100,7 @@ void main() {
       // Long press shows the selection menu.
       expect(find.text('PASTE'), findsNothing);
       await tester.longPress(find.byType(TextField));
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.text('PASTE'), findsOneWidget);
     },
   );
@@ -6053,7 +6130,7 @@ void main() {
       final TestGesture gesture =
          await tester.startGesture(textfieldStart + const Offset(150.0, 9.0));
       // Hold the press.
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
 
       expect(
         controller.selection,
@@ -6142,7 +6219,7 @@ void main() {
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
 
       await tester.longPressAt(textfieldStart + const Offset(50.0, 9.0));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Collapsed cursor for iOS long press.
       expect(
@@ -6175,7 +6252,7 @@ void main() {
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
 
       await tester.longPressAt(textfieldStart + const Offset(50.0, 9.0));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(
         controller.selection,
@@ -6278,7 +6355,7 @@ void main() {
       expect(find.byType(CupertinoButton), findsNothing);
 
       await gesture.up();
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // The selection isn't affected by the gesture lift.
       expect(
@@ -6352,7 +6429,7 @@ void main() {
     expect(find.byType(CupertinoButton), findsNothing);
 
     await gesture.up();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // The selection isn't affected by the gesture lift.
     expect(
@@ -6409,7 +6486,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
 
       await tester.longPressAt(textfieldStart + const Offset(100.0, 9.0));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Plain collapsed selection at the exact tap position.
       expect(
@@ -6452,7 +6529,7 @@ void main() {
         const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
       );
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Double tap selection.
       expect(
@@ -6487,7 +6564,7 @@ void main() {
         const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
       await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pumpAndSettle();
       expect(
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
@@ -6503,7 +6580,7 @@ void main() {
         const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
       await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pumpAndSettle();
       expect(
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
@@ -6518,7 +6595,7 @@ void main() {
         const TextSelection.collapsed(offset: 8, affinity: TextAffinity.downstream),
       );
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pumpAndSettle();
       expect(
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),
@@ -6610,7 +6687,7 @@ void main() {
     );
 
     await gesture.up();
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.byType(CupertinoButton), findsNWidgets(3));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
