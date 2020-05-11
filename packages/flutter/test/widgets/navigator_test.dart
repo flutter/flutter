@@ -686,7 +686,7 @@ void main() {
     // Regression https://github.com/flutter/flutter/issues/56688
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/' : (BuildContext context) => const Text('home'),
+      '/': (BuildContext context) => const Text('home'),
       '/A': (BuildContext context) => const Text('page A'),
       '/A/B': (BuildContext context) => OnTapPage(
         id: 'B',
