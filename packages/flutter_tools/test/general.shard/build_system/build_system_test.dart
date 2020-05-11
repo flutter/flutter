@@ -568,7 +568,7 @@ void main() {
 }
 
 BuildSystem setUpBuildSystem(FileSystem fileSystem) {
-  return BuildSystem(
+  return FlutterBuildSystem(
     fileSystem: fileSystem,
     logger: BufferLogger.test(),
     platform: FakePlatform(operatingSystem: 'linux'),

@@ -486,93 +486,18 @@ class BuildResult {
 }
 
 /// The build system is responsible for invoking and ordering [Target]s.
-class BuildSystem {
-  const BuildSystem({
-    @required FileSystem fileSystem,
-    @required Platform platform,
-    @required Logger logger,
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _logger = logger;
+abstract class BuildSystem {
+  /// Const constructor to allow subclasses to be const.
+  const BuildSystem();
 
-  final FileSystem _fileSystem;
-  final Platform _platform;
-  final Logger _logger;
-
-  /// Build `target` and all of its dependencies.
+  /// Build [target] and all of its dependencies.
   Future<BuildResult> build(
     Target target,
     Environment environment, {
     BuildSystemConfig buildSystemConfig = const BuildSystemConfig(),
-  }) async {
-    environment.buildDir.createSync(recursive: true);
-    environment.outputDir.createSync(recursive: true);
+  });
 
-    // Load file store from previous builds.
-    final File cacheFile = environment.buildDir.childFile(FileStore.kFileCache);
-    final FileStore fileCache = FileStore(
-      cacheFile: cacheFile,
-      logger: _logger,
-    )..initialize();
-
-    // Perform sanity checks on build.
-    checkCycles(target);
-
-    final Node node = target._toNode(environment);
-    final _BuildInstance buildInstance = _BuildInstance(
-      environment: environment,
-      fileCache: fileCache,
-      buildSystemConfig: buildSystemConfig,
-      logger: _logger,
-      fileSystem: _fileSystem,
-      platform: _platform,
-    );
-    bool passed = true;
-    try {
-      passed = await buildInstance.invokeTarget(node);
-    } finally {
-      // Always persist the file cache to disk.
-      fileCache.persist();
-    }
-    // TODO(jonahwilliams): this is a bit of a hack, due to various parts of
-    // the flutter tool writing these files unconditionally. Since Xcode uses
-    // timestamps to track files, this leads to unnecessary rebuilds if they
-    // are included. Once all the places that write these files have been
-    // tracked down and moved into assemble, these checks should be removable.
-    // We also remove files under .dart_tool, since these are intermediaries
-    // and don't need to be tracked by external systems.
-    {
-      buildInstance.inputFiles.removeWhere((String path, File file) {
-        return path.contains('.flutter-plugins') ||
-                       path.contains('xcconfig') ||
-                     path.contains('.dart_tool');
-      });
-      buildInstance.outputFiles.removeWhere((String path, File file) {
-        return path.contains('.flutter-plugins') ||
-                       path.contains('xcconfig') ||
-                     path.contains('.dart_tool');
-      });
-    }
-    trackSharedBuildDirectory(
-      environment, _fileSystem, buildInstance.outputFiles,
-    );
-    environment.buildDir.childFile('outputs.json')
-      .writeAsStringSync(json.encode(buildInstance.outputFiles.keys.toList()));
-
-    return BuildResult(
-      success: passed,
-      exceptions: buildInstance.exceptionMeasurements,
-      performance: buildInstance.stepTimings,
-      inputFiles: buildInstance.inputFiles.values.toList()
-          ..sort((File a, File b) => a.path.compareTo(b.path)),
-      outputFiles: buildInstance.outputFiles.values.toList()
-          ..sort((File a, File b) => a.path.compareTo(b.path)),
-    );
-  }
-
-  static final Expando<FileStore> _incrementalFileStore = Expando<FileStore>();
-
-  /// Perform an incremental build of `target` and all of its dependencies.
+  /// Perform an incremental build of [target] and all of its dependencies.
   ///
   /// If [previousBuild] is not provided, a new incremental build is
   /// initialized.
@@ -580,44 +505,7 @@ class BuildSystem {
     Target target,
     Environment environment,
     BuildResult previousBuild,
-  ) async {
-    environment.buildDir.createSync(recursive: true);
-    environment.outputDir.createSync(recursive: true);
-
-    FileStore fileCache;
-    if (previousBuild == null || _incrementalFileStore[previousBuild] == null) {
-      final File cacheFile = environment.buildDir.childFile(FileStore.kFileCache);
-      fileCache = FileStore(
-        cacheFile: cacheFile,
-        logger: _logger,
-        strategy: FileStoreStrategy.timestamp,
-      )..initialize();
-    } else {
-      fileCache = _incrementalFileStore[previousBuild];
-    }
-    final Node node = target._toNode(environment);
-    final _BuildInstance buildInstance = _BuildInstance(
-      environment: environment,
-      fileCache: fileCache,
-      buildSystemConfig: const BuildSystemConfig(),
-      logger: _logger,
-      fileSystem: _fileSystem,
-      platform: _platform,
-    );
-    bool passed = true;
-    try {
-      passed = await buildInstance.invokeTarget(node);
-    } finally {
-      fileCache.persistIncremental();
-    }
-    final BuildResult result = BuildResult(
-      success: passed,
-      exceptions: buildInstance.exceptionMeasurements,
-      performance: buildInstance.stepTimings,
-    );
-    _incrementalFileStore[result] = fileCache;
-    return result;
-  }
+  );
 
   /// Write the identifier of the last build into the output directory and
   /// remove the previous build's output.
@@ -672,6 +560,137 @@ class BuildSystem {
         }
       }
     }
+  }
+}
+
+class FlutterBuildSystem extends BuildSystem {
+  const FlutterBuildSystem({
+    @required FileSystem fileSystem,
+    @required Platform platform,
+    @required Logger logger,
+  }) : _fileSystem = fileSystem,
+       _platform = platform,
+       _logger = logger;
+
+  final FileSystem _fileSystem;
+  final Platform _platform;
+  final Logger _logger;
+
+  @override
+  Future<BuildResult> build(
+    Target target,
+    Environment environment, {
+    BuildSystemConfig buildSystemConfig = const BuildSystemConfig(),
+  }) async {
+    environment.buildDir.createSync(recursive: true);
+    environment.outputDir.createSync(recursive: true);
+
+    // Load file store from previous builds.
+    final File cacheFile = environment.buildDir.childFile(FileStore.kFileCache);
+    final FileStore fileCache = FileStore(
+      cacheFile: cacheFile,
+      logger: _logger,
+    )..initialize();
+
+    // Perform sanity checks on build.
+    checkCycles(target);
+
+    final Node node = target._toNode(environment);
+    final _BuildInstance buildInstance = _BuildInstance(
+      environment: environment,
+      fileCache: fileCache,
+      buildSystemConfig: buildSystemConfig,
+      logger: _logger,
+      fileSystem: _fileSystem,
+      platform: _platform,
+    );
+    bool passed = true;
+    try {
+      passed = await buildInstance.invokeTarget(node);
+    } finally {
+      // Always persist the file cache to disk.
+      fileCache.persist();
+    }
+    // TODO(jonahwilliams): this is a bit of a hack, due to various parts of
+    // the flutter tool writing these files unconditionally. Since Xcode uses
+    // timestamps to track files, this leads to unnecessary rebuilds if they
+    // are included. Once all the places that write these files have been
+    // tracked down and moved into assemble, these checks should be removable.
+    // We also remove files under .dart_tool, since these are intermediaries
+    // and don't need to be tracked by external systems.
+    {
+      buildInstance.inputFiles.removeWhere((String path, File file) {
+        return path.contains('.flutter-plugins') ||
+                       path.contains('xcconfig') ||
+                     path.contains('.dart_tool');
+      });
+      buildInstance.outputFiles.removeWhere((String path, File file) {
+        return path.contains('.flutter-plugins') ||
+                       path.contains('xcconfig') ||
+                     path.contains('.dart_tool');
+      });
+    }
+    BuildSystem.trackSharedBuildDirectory(
+      environment, _fileSystem, buildInstance.outputFiles,
+    );
+    environment.buildDir.childFile('outputs.json')
+      .writeAsStringSync(json.encode(buildInstance.outputFiles.keys.toList()));
+
+    return BuildResult(
+      success: passed,
+      exceptions: buildInstance.exceptionMeasurements,
+      performance: buildInstance.stepTimings,
+      inputFiles: buildInstance.inputFiles.values.toList()
+          ..sort((File a, File b) => a.path.compareTo(b.path)),
+      outputFiles: buildInstance.outputFiles.values.toList()
+          ..sort((File a, File b) => a.path.compareTo(b.path)),
+    );
+  }
+
+  static final Expando<FileStore> _incrementalFileStore = Expando<FileStore>();
+
+  @override
+  Future<BuildResult> buildIncremental(
+    Target target,
+    Environment environment,
+    BuildResult previousBuild,
+  ) async {
+    environment.buildDir.createSync(recursive: true);
+    environment.outputDir.createSync(recursive: true);
+
+    FileStore fileCache;
+    if (previousBuild == null || _incrementalFileStore[previousBuild] == null) {
+      final File cacheFile = environment.buildDir.childFile(FileStore.kFileCache);
+      fileCache = FileStore(
+        cacheFile: cacheFile,
+        logger: _logger,
+        strategy: FileStoreStrategy.timestamp,
+      )..initialize();
+    } else {
+      fileCache = _incrementalFileStore[previousBuild];
+    }
+    final Node node = target._toNode(environment);
+    final _BuildInstance buildInstance = _BuildInstance(
+      environment: environment,
+      fileCache: fileCache,
+      buildSystemConfig: const BuildSystemConfig(),
+      logger: _logger,
+      fileSystem: _fileSystem,
+      platform: _platform,
+    );
+    bool passed = true;
+    try {
+      passed = await buildInstance.invokeTarget(node);
+    } finally {
+      fileCache.persistIncremental();
+    }
+    final BuildResult result = BuildResult(
+      success: passed,
+      exceptions: buildInstance.exceptionMeasurements,
+      performance: buildInstance.stepTimings,
+    );
+    _incrementalFileStore[result] = fileCache;
+    return result;
   }
 }
 
