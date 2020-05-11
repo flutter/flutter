@@ -14,7 +14,7 @@
 G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE(FlBinaryCodec,
-                     fl_standard_codec,
+                     fl_binary_codec,
                      FL,
                      BINARY_CODEC,
                      FlMessageCodec)
