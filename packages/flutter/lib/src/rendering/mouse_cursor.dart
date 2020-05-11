@@ -314,9 +314,7 @@ class SystemMouseCursor extends MouseCursor {
   // the supported system cursors are enumerated in [SystemMouseCursors].
   const SystemMouseCursor._({
     @required this.kind,
-    @required this.debugDescription,
-  }) : assert(kind != null),
-       assert(debugDescription != null);
+  }) : assert(kind != null);
 
   /// A string that identifies the kind of the cursor.
   ///
@@ -324,7 +322,7 @@ class SystemMouseCursor extends MouseCursor {
   final String kind;
 
   @override
-  final String debugDescription;
+  String get debugDescription => kind;
 
   @override
   @protected
@@ -385,35 +383,35 @@ class SystemMouseCursors {
   /// Hide the cursor.
   ///
   /// Any cursor other than [none] or [uncontrolled] unhides the cursor.
-  static const SystemMouseCursor none = SystemMouseCursor._(kind: 'none', debugDescription: 'none');
+  static const SystemMouseCursor none = SystemMouseCursor._(kind: 'none');
 
   /// The platform-dependent basic cursor.
   ///
   /// Typically the shape of an arrow.
-  static const SystemMouseCursor basic = SystemMouseCursor._(kind: 'basic', debugDescription: 'basic');
+  static const SystemMouseCursor basic = SystemMouseCursor._(kind: 'basic');
 
   /// A cursor that indicates a user interface element that is clickable, such as a hyperlink.
   ///
   /// Typically the shape of a pointing hand.
-  static const SystemMouseCursor click = SystemMouseCursor._(kind: 'click', debugDescription: 'click');
+  static const SystemMouseCursor click = SystemMouseCursor._(kind: 'click');
 
   /// A cursor that indicates selectable text.
   ///
   /// Typically the shape of a capital I.
-  static const SystemMouseCursor text = SystemMouseCursor._(kind: 'text', debugDescription: 'text');
+  static const SystemMouseCursor text = SystemMouseCursor._(kind: 'text');
 
   /// A cursor that indicates a forbidden action.
   ///
   /// Typically the shape of a circle with a diagnal line.
-  static const SystemMouseCursor forbidden = SystemMouseCursor._(kind: 'forbidden', debugDescription: 'forbidden');
+  static const SystemMouseCursor forbidden = SystemMouseCursor._(kind: 'forbidden');
 
   /// A cursor that indicates something that can be dragged.
   ///
   /// Typically the shape of an open hand.
-  static const SystemMouseCursor grab = SystemMouseCursor._(kind: 'grab', debugDescription: 'grab');
+  static const SystemMouseCursor grab = SystemMouseCursor._(kind: 'grab');
 
   /// A cursor that indicates something that is being dragged.
   ///
   /// Typically the shape of a closed hand.
-  static const SystemMouseCursor grabbing = SystemMouseCursor._(kind: 'grabbing', debugDescription: 'grabbing');
+  static const SystemMouseCursor grabbing = SystemMouseCursor._(kind: 'grabbing');
 }
