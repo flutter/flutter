@@ -2605,7 +2605,7 @@ void main() {
     expect(value, equals('two'));
     expect(menuItemTapCounters, <int>[0, 2, 1, 0]);
   });
-  
+
   testWidgets('throws AssertionError if value param is not provide', (WidgetTester tester) async {
     expect(() async {
       await tester.pumpWidget(
