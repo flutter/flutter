@@ -13,18 +13,21 @@ TaskRunnerChecker::~TaskRunnerChecker() = default;
 
 bool TaskRunnerChecker::RunsOnCreationTaskRunner() const {
   FML_CHECK(fml::MessageLoop::IsInitializedForCurrentThread());
-
   const auto current_queue_id = MessageLoop::GetCurrentTaskQueueId();
+  return RunsOnTheSameThread(current_queue_id, initialized_queue_id_);
+};
 
-  if (current_queue_id == initialized_queue_id_) {
+bool TaskRunnerChecker::RunsOnTheSameThread(TaskQueueId queue_a,
+                                            TaskQueueId queue_b) {
+  if (queue_a == queue_b) {
     return true;
   }
 
   auto queues = MessageLoopTaskQueues::GetInstance();
-  if (queues->Owns(current_queue_id, initialized_queue_id_)) {
+  if (queues->Owns(queue_a, queue_b)) {
     return true;
   }
-  if (queues->Owns(initialized_queue_id_, current_queue_id)) {
+  if (queues->Owns(queue_b, queue_a)) {
     return true;
   }
   return false;
