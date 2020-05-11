@@ -566,8 +566,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     }).then<int>((_) => count);
   }
 
-  /// Repeatedly pump frames that renders the `target` widget with a fixed
-  /// time `interval` as many as `maxDuration` allows.
+  /// Repeatedly pump frames that render the `target` widget with a fixed time
+  /// `interval` as many as `maxDuration` allows.
   /// 
   /// The `maxDuration` argument is required. The `interval` argument defaults to
   /// 16.683 milliseconds (59.94 FPS).

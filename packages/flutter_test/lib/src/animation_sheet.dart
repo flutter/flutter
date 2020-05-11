@@ -13,12 +13,12 @@ import 'package:flutter_test/flutter_test.dart';
 /// Records the frames of an animating widget, and later displays the frames as a
 /// grid in an animation sheet.
 ///
-/// This class does not support Web, because taking screenshots is unsupported,
-/// which is necessary to build an animation sheet. Tests that use this class
-/// must be noted with `skip: isBrowser`.
+/// This class does not support Web, because the animation sheet utilizes taking
+/// screenshots, which is unsupported on the Web. Tests that use this class must
+/// be noted with `skip: isBrowser`.
 /// (https://github.com/flutter/flutter/issues/56001)
 ///
-/// Using this class takes the following steps:
+/// Using this class includes the following steps:
 ///
 ///  * Create an instance of this class.
 ///  * Pump frames that render the target widget wrapped in [record]. Every frame
@@ -49,8 +49,8 @@ import 'package:flutter_test/flutter_test.dart';
 ///
 ///   // Optional: setup before recording (`recording` is false)
 ///   await tester.pumpWidget(animationSheet.record(
+///     target,
 ///     recording: false,
-///     child: target,
 ///   ));
 ///
 ///   final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(InkWell)));
@@ -76,13 +76,17 @@ import 'package:flutter_test/flutter_test.dart';
 ///   await tester.pumpWidget(display);
 ///
 ///   // Compare against golden file
-///   expect(
+///   await expectLater(
 ///     find.byWidget(display),
 ///     matchesGoldenFile('inkwell.press.animation.png'),
 ///   );
 /// }, skip: isBrowser); // Animation sheet does not support browser https://github.com/flutter/flutter/issues/56001
 /// ```
 /// {@end-tool}
+/// 
+/// See also:
+///
+///  * [GoldenFileComparator], which introduces Golden File Testing.
 class AnimationSheetBuilder {
   /// Starts a session of building an animation sheet.
   ///
@@ -148,7 +152,7 @@ class AnimationSheetBuilder {
   /// having a size specified by [size], chronologically from top-left to
   /// bottom-right in a row-major order.
   ///
-  /// If too many frames have be recorded, overflow errors might be thrown,
+  /// If too many frames have been recorded, overflow errors might be thrown,
   /// therefore it is recommended to adjust the screen size to [sheetSize] before
   /// calling this method.
   ///
@@ -172,7 +176,7 @@ class AnimationSheetBuilder {
   /// Returns the smallest size that can contain all recorded frames.
   ///
   /// This is usually used to adjust the viewport during unit tests, i.e. the
-  /// size of virtual screen. Having too many frames recoded than the default
+  /// size of virtual screen. Having too many frames recorded than the default
   /// viewport size can contain will lead to overflow errors, while having too
   /// few frames means the golden file might be larger than necessary.
   ///
@@ -184,7 +188,7 @@ class AnimationSheetBuilder {
   /// Setting the viewport size during a widget test usually involves
   /// [TestWidgetsFlutterBinding.setSurfaceSize] and [WidgetTester.binding].
   ///
-  /// The `maxWidth` defaults to the width of the default view port, 800.0.
+  /// The `maxWidth` defaults to the width of the default viewport, 800.0.
   ///
   /// This method can only be called if at least one frame has been recorded.
   Size sheetSize({double maxWidth = _kDefaultTestViewportWidth}) {

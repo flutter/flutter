@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   /*
    * Here lies tests for packages/flutter_test/lib/src/animation_sheet.dart
-   * because [matchesGoldenFile] does not work in its native package.
+   * because [matchesGoldenFile] does not use Skia Gold in its native package.
    */
 
   testWidgets('correctly records frames', (WidgetTester tester) async {
