@@ -555,6 +555,7 @@ class InkResponse extends StatelessWidget {
       onLongPress: onLongPress,
       onHighlightChanged: onHighlightChanged,
       onHover: onHover,
+      mouseCursor: mouseCursor,
       containedInkWell: containedInkWell,
       highlightShape: highlightShape,
       radius: radius,
