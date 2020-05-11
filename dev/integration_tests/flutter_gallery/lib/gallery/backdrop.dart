@@ -215,6 +215,14 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
       value: 1.0,
       vsync: this,
     );
+    _controller.addStatusListener((AnimationStatus status) {
+      setState(() {
+        // This is intentionally left empty. The state change itself takes
+        // place inside the AnimationController, so there's nothing to update.
+        // All we want is for the widget to rebuild and read the new animation
+        // state from the AnimationController.
+      });
+    });
     _frontOpacity = _controller.drive(_frontOpacityTween);
   }
 

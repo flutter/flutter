@@ -191,6 +191,11 @@ abstract class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
+  Future<List<FlutterView>> listFlutterViews() async {
+    return <FlutterView>[];
+  }
+
+  @override
   Future<void> debugDumpApp() async {
     try {
       await _vmService
@@ -635,7 +640,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
       pathToReload: getReloadPath(fullRestart: fullRestart),
       invalidatedFiles: invalidationResult.uris,
       packageConfig: invalidationResult.packageConfig,
-      trackWidgetCreation: true,
+      trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
     );
     devFSStatus.stop();
     globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');

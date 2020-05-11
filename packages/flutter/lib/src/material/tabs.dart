@@ -70,7 +70,7 @@ class Tab extends StatelessWidget {
     this.iconMargin = const EdgeInsets.only(bottom: 10.0),
     this.child,
   }) : assert(text != null || child != null || icon != null),
-       assert(!(text != null && null != child)), // TODO(goderbauer): https://github.com/dart-lang/sdk/issues/34180
+       assert(text == null || child == null),
        super(key: key);
 
   /// The text to display as the tab's label.

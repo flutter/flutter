@@ -34,9 +34,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       '--profile',
       '-t',
       'lib/web_benchmarks.dart',
-    ], environment: <String, String>{
-      'FLUTTER_WEB': 'true',
-    });
+    ]);
     final Completer<List<Map<String, dynamic>>> profileData = Completer<List<Map<String, dynamic>>>();
     final List<Map<String, dynamic>> collectedProfiles = <Map<String, dynamic>>[];
     List<String> benchmarks;
