@@ -26,18 +26,18 @@ typedef enum {
 GQuark fl_engine_error_quark(void) G_GNUC_CONST;
 
 /**
- * FlEnginePlatformMessageCallback:
+ * FlEnginePlatformMessageHandler:
  * @engine: a #FlEngine
  * @channel: channel message received on.
  * @message: message content received from Dart
  * @response_handle: a handle to respond to the message with
- * @user_data: (closure): data provided when registering this callback
+ * @user_data: (closure): data provided when registering this handler
  *
  * Function called when platform messages are received.
  *
  * Returns: %TRUE if message has been accepted.
  */
-typedef gboolean (*FlEnginePlatformMessageCallback)(
+typedef gboolean (*FlEnginePlatformMessageHandler)(
     FlEngine* engine,
     const gchar* channel,
     GBytes* message,
@@ -58,10 +58,10 @@ FlEngine* fl_engine_new(FlDartProject* project, FlRenderer* renderer);
 /**
  * fl_engine_set_platform_message_handler:
  * @engine: a #FlEngine
- * @callback: function to call when a platform message is received
- * @user_data: (closure): user data to pass to @callback
+ * @handler: function to call when a platform message is received
+ * @user_data: (closure): user data to pass to @handler
  *
- * Register a callback to handle platform messages. Call
+ * Register a handler to handle platform messages. Call
  * fl_engine_send_platform_message_response() when this message should be
  * responded to. Ownership of #FlutterPlatformMessageResponseHandle is
  * transferred to the caller, and the call must be responded to to avoid
@@ -69,7 +69,7 @@ FlEngine* fl_engine_new(FlDartProject* project, FlRenderer* renderer);
  */
 void fl_engine_set_platform_message_handler(
     FlEngine* engine,
-    FlEnginePlatformMessageCallback callback,
+    FlEnginePlatformMessageHandler handler,
     gpointer user_data);
 
 /**
@@ -119,7 +119,7 @@ void fl_engine_send_mouse_pointer_event(FlEngine* engine,
 /**
  * fl_engine_send_platform_message_response:
  * @engine: a #FlEngine
- * @response_handle: handle that was provided in the callback.
+ * @handle: handle that was provided in #FlEnginePlatformMessageHandler
  * @response: (allow-none): response to send or %NULL for an empty response.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
  * to ignore.

@@ -35,18 +35,17 @@ G_DECLARE_FINAL_TYPE(FlBinaryMessenger,
 typedef struct _FlBinaryMessengerResponseHandle FlBinaryMessengerResponseHandle;
 
 /**
- * FlBinaryMessengerCallback:
+ * FlBinaryMessengerMessageHandler:
  * @messenger: a #FlBinaryMessenger
  * @channel: channel message received on
  * @message: message content received from Dart
  * @response_handle: (transfer full): a handle to respond to the message with
- * @user_data: (closure): data provided when registering this callback
+ * @user_data: (closure): data provided when registering this handler
  *
  * Function called when platform messages are received. The receiver must
- * respond to the message to avoid leaking the handle, see the documentation on
- * the code that generated the callback as to which function to call.
+ * call fl_binary_messenger_send_response() to avoid leaking the handle.
  */
-typedef void (*FlBinaryMessengerCallback)(
+typedef void (*FlBinaryMessengerMessageHandler)(
     FlBinaryMessenger* messenger,
     const gchar* channel,
     GBytes* message,
@@ -57,8 +56,9 @@ typedef void (*FlBinaryMessengerCallback)(
  * fl_binary_messenger_set_platform_message_handler:
  * @binary_messenger: a #FlBinaryMessenger
  * @channel: channel to listen on
- * @callback: function to call when a message is received on this channel
- * @user_data: (closure): user data to pass to @callback
+ * @handler: (allow-none): function to call when a message is received on this
+ * channel or %NULL to disable a handler
+ * @user_data: (closure): user data to pass to @handler
  *
  * Set the function called when a platform message is received on the given
  * channel. Call fl_binary_messenger_send_response() when the message is
@@ -68,14 +68,14 @@ typedef void (*FlBinaryMessengerCallback)(
 void fl_binary_messenger_set_message_handler_on_channel(
     FlBinaryMessenger* messenger,
     const gchar* channel,
-    FlBinaryMessengerCallback callback,
+    FlBinaryMessengerMessageHandler handler,
     gpointer user_data);
 
 /**
  * fl_binary_messenger_send_response:
  * @binary_messenger: a #FlBinaryMessenger
  * @response_handle: (transfer full): handle that was provided in a
- * #FlBinaryMessengerCallback
+ * #FlBinaryMessengerMessageHandler
  * @response: (allow-none): response to send or %NULL for an empty response
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
  * to ignore

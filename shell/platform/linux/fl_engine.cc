@@ -27,8 +27,8 @@ struct _FlEngine {
   FLUTTER_API_SYMBOL(FlutterEngine) engine;
 
   // Function to call when a platform message is received
-  FlEnginePlatformMessageCallback platform_message_callback;
-  gpointer platform_message_callback_data;
+  FlEnginePlatformMessageHandler platform_message_handler;
+  gpointer platform_message_handler_data;
 };
 
 G_DEFINE_QUARK(fl_engine_error_quark, fl_engine_error)
@@ -92,7 +92,7 @@ static bool fl_engine_gl_clear_current(void* user_data) {
   return result;
 }
 
-static uint32_t fl_engine_gl_fbo_callback(void* user_data) {
+static uint32_t fl_engine_gl_get_fbo(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
   return fl_renderer_get_fbo(self->renderer);
 }
@@ -111,9 +111,9 @@ static bool fl_engine_runs_task_on_current_thread(void* user_data) {
   return self->thread == g_thread_self();
 }
 
-static void fl_engine_post_task_callback(FlutterTask task,
-                                         uint64_t target_time_nanos,
-                                         void* user_data) {
+static void fl_engine_post_task(FlutterTask task,
+                                uint64_t target_time_nanos,
+                                void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
 
   g_autoptr(GSource) source =
@@ -126,18 +126,17 @@ static void fl_engine_post_task_callback(FlutterTask task,
   g_source_attach(source, nullptr);
 }
 
-static void fl_engine_platform_message_callback(
-    const FlutterPlatformMessage* message,
-    void* user_data) {
+static void fl_engine_platform_message_cb(const FlutterPlatformMessage* message,
+                                          void* user_data) {
   FlEngine* self = FL_ENGINE(user_data);
 
   gboolean handled = FALSE;
-  if (self->platform_message_callback != nullptr) {
+  if (self->platform_message_handler != nullptr) {
     g_autoptr(GBytes) data =
         g_bytes_new(message->message, message->message_size);
-    handled = self->platform_message_callback(
+    handled = self->platform_message_handler(
         self, message->channel, data, message->response_handle,
-        self->platform_message_callback_data);
+        self->platform_message_handler_data);
   }
 
   if (!handled)
@@ -145,9 +144,9 @@ static void fl_engine_platform_message_callback(
                                              nullptr, nullptr);
 }
 
-static void fl_engine_platform_message_response_callback(const uint8_t* data,
-                                                         size_t data_length,
-                                                         void* user_data) {
+static void fl_engine_platform_message_response_cb(const uint8_t* data,
+                                                   size_t data_length,
+                                                   void* user_data) {
   g_autoptr(GTask) task = G_TASK(user_data);
   g_task_return_pointer(task, g_bytes_new(data, data_length),
                         (GDestroyNotify)g_bytes_unref);
@@ -198,7 +197,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   config.open_gl.gl_proc_resolver = fl_engine_gl_proc_resolver;
   config.open_gl.make_current = fl_engine_gl_make_current;
   config.open_gl.clear_current = fl_engine_gl_clear_current;
-  config.open_gl.fbo_callback = fl_engine_gl_fbo_callback;
+  config.open_gl.fbo_callback = fl_engine_gl_get_fbo;
   config.open_gl.present = fl_engine_gl_present;
 
   FlutterTaskRunnerDescription platform_task_runner = {};
@@ -206,7 +205,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   platform_task_runner.user_data = self;
   platform_task_runner.runs_task_on_current_thread_callback =
       fl_engine_runs_task_on_current_thread;
-  platform_task_runner.post_task_callback = fl_engine_post_task_callback;
+  platform_task_runner.post_task_callback = fl_engine_post_task;
   platform_task_runner.identifier = kPlatformTaskRunnerIdentifier;
 
   FlutterCustomTaskRunners custom_task_runners = {};
@@ -217,7 +216,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   args.struct_size = sizeof(FlutterProjectArgs);
   args.assets_path = fl_dart_project_get_assets_path(self->project);
   args.icu_data_path = fl_dart_project_get_icu_data_path(self->project);
-  args.platform_message_callback = fl_engine_platform_message_callback;
+  args.platform_message_callback = fl_engine_platform_message_cb;
   args.custom_task_runners = &custom_task_runners;
 
   FlutterEngineResult result = FlutterEngineInitialize(
@@ -240,13 +239,13 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
 
 void fl_engine_set_platform_message_handler(
     FlEngine* self,
-    FlEnginePlatformMessageCallback callback,
+    FlEnginePlatformMessageHandler handler,
     gpointer user_data) {
   g_return_if_fail(FL_IS_ENGINE(self));
-  g_return_if_fail(callback != nullptr);
+  g_return_if_fail(handler != nullptr);
 
-  self->platform_message_callback = callback;
-  self->platform_message_callback_data = user_data;
+  self->platform_message_handler = handler;
+  self->platform_message_handler_data = user_data;
 }
 
 gboolean fl_engine_send_platform_message_response(
@@ -288,7 +287,7 @@ void fl_engine_send_platform_message(FlEngine* self,
     task = g_task_new(self, cancellable, callback, user_data);
 
     FlutterEngineResult result = FlutterPlatformMessageCreateResponseHandle(
-        self->engine, fl_engine_platform_message_response_callback, task,
+        self->engine, fl_engine_platform_message_response_cb, task,
         &response_handle);
     if (result != kSuccess) {
       g_task_return_new_error(task, fl_engine_error_quark(),
