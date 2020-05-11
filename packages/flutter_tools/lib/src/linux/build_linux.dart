@@ -64,15 +64,6 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
     ..writeAsStringSync(buffer.toString());
   createPluginSymlinks(linuxProject.project);
 
-  if (!buildInfo.isDebug) {
-    const String warning = '🚧 ';
-    globals.printStatus(warning * 20);
-    globals.printStatus('Warning: Only debug is currently implemented for Linux. This is effectively a debug build.');
-    globals.printStatus('See https://github.com/flutter/flutter/issues/38478 for details and updates.');
-    globals.printStatus(warning * 20);
-    globals.printStatus('');
-  }
-
   // Invoke make.
   final String buildFlag = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
   final Stopwatch sw = Stopwatch()..start();

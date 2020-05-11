@@ -44,9 +44,16 @@ or
 
   final String flutterExecutable = path.join(
     flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
-  final String target = targetPlatform == 'windows-x64'
-    ? 'debug_bundle_windows_assets'
-    : 'debug_bundle_linux_assets';
+  if (targetPlatform == 'windows-x64') {
+    final String target = 'debug_bundle_windows_assets'
+  } else {
+    if (buildMode == 'debug')
+      final String target = 'debug_bundle_linux_assets'
+    else if (buildMode == 'release')
+      final String target = 'release_bundle_linux_assets'
+    else if (buildMode == 'profile')
+      final String target = 'profile_bundle_linux_assets'
+  }
 
   // TODO(jonahwilliams): currently all builds are debug builds. Remove the
   // hardcoded mode when profile and release support is added.
@@ -61,7 +68,7 @@ or
       '--output=build',
       '-dTargetPlatform=$targetPlatform',
       '-dTrackWidgetCreation=$trackWidgetCreation',
-      '-dBuildMode=debug',
+      '-dBuildMode=$buildMode',
       '-dTargetFile=$flutterTarget',
       '-dTreeShakeIcons="$treeShakeIcons"',
       '-dDartObfuscation=$dartObfuscation',

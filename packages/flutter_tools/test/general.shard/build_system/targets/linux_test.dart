@@ -90,6 +90,66 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
+
+  testUsingContext('ProfileBundleLinuxAssets copies artifacts to out directory', () async {
+    final Environment testEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{
+        kBuildMode: 'profile',
+      },
+      artifacts: MockArtifacts(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
+    testEnvironment.buildDir.createSync(recursive: true);
+
+    // Create input files.
+    testEnvironment.buildDir.childFile('app.so').createSync();
+
+    await const ProfileBundleLinuxAssets().build(testEnvironment);
+    final Directory output = testEnvironment.outputDir
+      .childDirectory('flutter_assets');
+
+    expect(output.childFile('libapp.so'), exists);
+    expect(output.childFile('AssetManifest.json'), exists);
+    // No bundled fonts
+    expect(output.childFile('FontManifest.json'), isNot(exists));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('ReleaseBundleLinuxAssets copies artifacts to out directory', () async {
+    final Environment testEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{
+        kBuildMode: 'release',
+      },
+      artifacts: MockArtifacts(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
+    testEnvironment.buildDir.createSync(recursive: true);
+
+    // Create input files.
+    testEnvironment.buildDir.childFile('app.so').createSync();
+
+    await const ReleaseBundleLinuxAssets().build(testEnvironment);
+    final Directory output = testEnvironment.outputDir
+      .childDirectory('flutter_assets');
+
+    expect(output.childFile('libapp.so'), exists);
+    expect(output.childFile('AssetManifest.json'), exists);
+    // No bundled fonts
+    expect(output.childFile('FontManifest.json'), isNot(exists));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 }
 
 void setUpCacheDirectory(FileSystem fileSystem) {
