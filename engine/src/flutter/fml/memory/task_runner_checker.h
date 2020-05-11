@@ -18,6 +18,8 @@ class TaskRunnerChecker final {
 
   bool RunsOnCreationTaskRunner() const;
 
+  static bool RunsOnTheSameThread(TaskQueueId queue_a, TaskQueueId queue_b);
+
  private:
   TaskQueueId initialized_queue_id_;
 

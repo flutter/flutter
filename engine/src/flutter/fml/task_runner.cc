@@ -5,6 +5,7 @@
 #define FML_USED_ON_EMBEDDER
 
 #include "flutter/fml/task_runner.h"
+#include "flutter/fml/memory/task_runner_checker.h"
 
 #include <utility>
 
@@ -47,19 +48,8 @@ bool TaskRunner::RunsTasksOnCurrentThread() {
   const auto current_queue_id = MessageLoop::GetCurrentTaskQueueId();
   const auto loop_queue_id = loop_->GetTaskQueueId();
 
-  if (current_queue_id == loop_queue_id) {
-    return true;
-  }
-
-  auto queues = MessageLoopTaskQueues::GetInstance();
-  if (queues->Owns(current_queue_id, loop_queue_id)) {
-    return true;
-  }
-  if (queues->Owns(loop_queue_id, current_queue_id)) {
-    return true;
-  }
-
-  return false;
+  return TaskRunnerChecker::RunsOnTheSameThread(current_queue_id,
+                                                loop_queue_id);
 }
 
 void TaskRunner::RunNowOrPostTask(fml::RefPtr<fml::TaskRunner> runner,
