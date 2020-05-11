@@ -386,19 +386,19 @@ apply plugin: 'kotlin-android'
 
       testWithMocks('null, if no build settings or plist entries', () async {
         final FlutterProject project = await someProject();
-        expect(await project.ios.productBundleIdentifier, isNull);
+        expect(await project.ios.productBundleIdentifier(null), isNull);
       });
 
       testWithMocks('from build settings, if no plist', () async {
         final FlutterProject project = await someProject();
-        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: anyNamed('scheme'))).thenAnswer(
                 (_) {
               return Future<Map<String,String>>.value(<String, String>{
                 'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
               });
             }
         );
-        expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
+        expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
       });
 
       testWithMocks('from project file, if no plist or build settings', () async {
@@ -406,19 +406,19 @@ apply plugin: 'kotlin-android'
         addIosProjectFile(project.directory, projectFileContent: () {
           return projectFileWithBundleId('io.flutter.someProject');
         });
-        expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
+        expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
       });
 
       testWithMocks('from plist, if no variables', () async {
         final FlutterProject project = await someProject();
         project.ios.defaultHostInfoPlist.createSync(recursive: true);
         when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('io.flutter.someProject');
-        expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
+        expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
       });
 
       testWithMocks('from build settings and plist, if default variable', () async {
         final FlutterProject project = await someProject();
-        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: anyNamed('scheme'))).thenAnswer(
                 (_) {
               return Future<Map<String,String>>.value(<String, String>{
                 'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
@@ -426,13 +426,13 @@ apply plugin: 'kotlin-android'
             }
         );
         when(mockPlistUtils.getValueFromFile(any, any)).thenReturn(r'$(PRODUCT_BUNDLE_IDENTIFIER)');
-        expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
+        expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
       });
 
       testWithMocks('from build settings and plist, by substitution', () async {
         final FlutterProject project = await someProject();
         project.ios.defaultHostInfoPlist.createSync(recursive: true);
-        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: anyNamed('scheme'))).thenAnswer(
           (_) {
             return Future<Map<String,String>>.value(<String, String>{
               'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
@@ -441,28 +441,28 @@ apply plugin: 'kotlin-android'
           }
         );
         when(mockPlistUtils.getValueFromFile(any, any)).thenReturn(r'$(PRODUCT_BUNDLE_IDENTIFIER).$(SUFFIX)');
-        expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject.suffix');
+        expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject.suffix');
       });
       testWithMocks('empty surrounded by quotes', () async {
         final FlutterProject project = await someProject();
         addIosProjectFile(project.directory, projectFileContent: () {
           return projectFileWithBundleId('', qualifier: '"');
         });
-        expect(await project.ios.productBundleIdentifier, '');
+        expect(await project.ios.productBundleIdentifier(null), '');
       });
       testWithMocks('surrounded by double quotes', () async {
         final FlutterProject project = await someProject();
         addIosProjectFile(project.directory, projectFileContent: () {
           return projectFileWithBundleId('io.flutter.someProject', qualifier: '"');
         });
-        expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
+        expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
       });
       testWithMocks('surrounded by single quotes', () async {
         final FlutterProject project = await someProject();
         addIosProjectFile(project.directory, projectFileContent: () {
           return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
         });
-        expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
+        expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
       });
     });
 
@@ -476,7 +476,7 @@ apply plugin: 'kotlin-android'
 
       testUsingContext('app product name defaults to Runner.app', () async {
         final FlutterProject project = await someProject();
-        expect(await project.ios.hostAppBundleName, 'Runner.app');
+        expect(await project.ios.hostAppBundleName(null), 'Runner.app');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -485,13 +485,13 @@ apply plugin: 'kotlin-android'
 
       testUsingContext('app product name xcodebuild settings', () async {
         final FlutterProject project = await someProject();
-        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer((_) {
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: anyNamed('scheme'))).thenAnswer((_) {
           return Future<Map<String,String>>.value(<String, String>{
             'FULL_PRODUCT_NAME': 'My App.app'
           });
         });
 
-        expect(await project.ios.hostAppBundleName, 'My App.app');
+        expect(await project.ios.hostAppBundleName(null), 'My App.app');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -630,7 +630,7 @@ name: foo_bar
 
     testUsingContext('cannot find bundle identifier', () async {
       final FlutterProject project = await someProject();
-      expect(await project.ios.containsWatchCompanion(<String>['WatchTarget']), isFalse);
+      expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null), isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
@@ -641,7 +641,7 @@ name: foo_bar
 
     group('with bundle identifier', () {
       setUp(() {
-        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: anyNamed('scheme'))).thenAnswer(
             (_) {
             return Future<Map<String,String>>.value(<String, String>{
               'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
@@ -652,7 +652,7 @@ name: foo_bar
 
       testUsingContext('no Info.plist in target', () async {
         final FlutterProject project = await someProject();
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget']), isFalse);
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null), isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -665,7 +665,7 @@ name: foo_bar
         final FlutterProject project = await someProject();
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
 
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget']), isFalse);
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null), isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -679,7 +679,7 @@ name: foo_bar
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
 
         when(mockPlistUtils.getValueFromFile(any, 'WKCompanionAppBundleIdentifier')).thenReturn('io.flutter.someOTHERproject');
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget']), isFalse);
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null), isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -693,7 +693,7 @@ name: foo_bar
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
         when(mockPlistUtils.getValueFromFile(any, 'WKCompanionAppBundleIdentifier')).thenReturn('io.flutter.someProject');
 
-        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget']), isTrue);
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget'], null), isTrue);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
