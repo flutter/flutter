@@ -2616,6 +2616,7 @@ void main() {
               child: DropdownButton<String>(
                 onChanged: onChanged,
                 items: menuItems.map<DropdownMenuItem<String>>((String item) {
+                  // ignore: missing_required_param
                   return DropdownMenuItem<String>(
                     onTap: () {},
                     child: Text(item),
