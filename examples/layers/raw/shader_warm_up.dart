@@ -26,10 +26,10 @@ Future<void> beginFrame(Duration timeStamp) async {
     ..pushClipRect(paintBounds)
     ..addPicture(ui.Offset.zero, picture)
     ..pop();
-  ui.window.render(sceneBuilder.build());
+  ui.PlatformDispatcher.instance.render(sceneBuilder.build());
 }
 
 Future<void> main() async {
-  ui.window.onBeginFrame = beginFrame;
-  ui.window.scheduleFrame();
+  ui.PlatformDispatcher.instance.onBeginFrame = beginFrame;
+  ui.PlatformDispatcher.instance.scheduleFrame();
 }

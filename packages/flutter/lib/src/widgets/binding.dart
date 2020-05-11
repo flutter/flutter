@@ -249,13 +249,35 @@ abstract class WidgetsBindingObserver {
 
   /// Called whenever a physical screen is added to the system, and at startup
   /// when screens are detected.
-  void didAddScreen(Object id, ScreenConfiguration configuration) { }
+  ///
+  /// The configuration of the screen can be obtained with
+  /// `WidgetsBinding.instance.platformDispatcher.screens[id]`.
+  void didAddScreen(Object id) { }
 
   /// Called whenever a physical screen is removed from the system.
   void didRemoveScreen(Object id) { }
 
   /// Called when the configuration of a physical screen has changed.
-  void didChangeScreenConfiguration(Object id, ScreenConfiguration configuration) { }
+  ///
+  /// The configuration of the screen can be obtained with
+  /// `WidgetsBinding.instance.platformDispatcher.screens[id]`.
+  void didChangeScreenConfiguration(Object id) { }
+
+  /// Called whenever a window is added to the system, and at startup
+  /// when the initial window is opened.
+  ///
+  /// The configuration of the window can be obtained with
+  /// `WidgetsBinding.instance.platformDispatcher.windows[id]`.
+  void didOpenWindow(Object id) { }
+
+  /// Called whenever a window is closed.
+  void didCloseWindow(Object id) { }
+
+  /// Called when the configuration of a window has changed.
+  ///
+  /// The configuration of the window can be obtained with
+  /// `WidgetsBinding.instance.platformDispatcher.windows[id]`.
+  void didChangeWindowConfiguration(Object id) { }
 }
 
 /// The glue between the widgets layer and the Flutter engine.
@@ -540,6 +562,54 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///  * [addObserver], for the method that adds observers in the first place.
   ///  * [WidgetsBindingObserver], which has an example of using this method.
   bool removeObserver(WidgetsBindingObserver observer) => _observers.remove(observer);
+
+  @override
+  void handleScreenAdded(Object id) {
+    super.handleScreenAdded(id);
+    for (final WidgetsBindingObserver observer in _observers) {
+      observer.didAddScreen(id);
+    }
+  }
+
+  @override
+  void handleScreenConfigurationChanged(Object id) {
+    super.handleScreenConfigurationChanged(id);
+    for (final WidgetsBindingObserver observer in _observers) {
+      observer.didChangeScreenConfiguration(id);
+    }
+  }
+
+  @override
+  void handleScreenRemoved(Object id) {
+    super.handleScreenRemoved(id);
+    for (final WidgetsBindingObserver observer in _observers) {
+      observer.didRemoveScreen(id);
+    }
+  }
+
+  @override
+  void handleWindowOpened(Object id) {
+    super.handleWindowOpened(id);
+    for (final WidgetsBindingObserver observer in _observers) {
+      observer.didOpenWindow(id);
+    }
+  }
+
+  @override
+  void handleWindowConfigurationChanged(Object id) {
+    super.handleWindowConfigurationChanged(id);
+    for (final WidgetsBindingObserver observer in _observers) {
+      observer.didChangeScreenConfiguration(id);
+    }
+  }
+
+  @override
+  void handleWindowClosed(Object id) {
+    super.handleWindowClosed(id);
+    for (final WidgetsBindingObserver observer in _observers) {
+      observer.didCloseWindow(id);
+    }
+  }
 
   @override
   void handleMetricsChanged() {

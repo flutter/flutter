@@ -41,9 +41,13 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
-      ..onSemanticsAction = _handleSemanticsAction;
-
-    window.onMetricsChanged = handleMetricsChanged;
+      ..onSemanticsAction = _handleSemanticsAction
+      ..onWindowOpened = handleWindowOpened
+      ..onWindowConfigurationChanged = handleWindowConfigurationChanged
+      ..onWindowClosed = handleWindowClosed
+      ..onScreenAdded = handleScreenAdded
+      ..onScreenConfigurationChanged = handleScreenConfigurationChanged
+      ..onScreenRemoved = handleScreenRemoved;
 
     initRenderView();
     _handleSemanticsEnabledChanged();
@@ -174,9 +178,37 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     _pipelineOwner.rootNode = value;
   }
 
+  @protected
+  void handleWindowOpened(Object id) => handleMetricsChanged();
+
+  /// Called when the configuration of a specific window changes.
+  ///
+  /// The `id` parameter contains the ID of the window that changed.
+  /// The updated configuration can be obtained using
+  /// `RendererBinding.instance.platformDispatcher.windows[id]`.
+  @protected
+  void handleWindowConfigurationChanged(Object id) => handleMetricsChanged();
+
+  @protected
+  void handleWindowClosed(Object id) => handleMetricsChanged();
+
+  @protected
+  void handleScreenAdded(Object id) => handleMetricsChanged();
+
+  /// Called when the configuration of a specific screen changes.
+  ///
+  /// The `id` parameter contains the ID of the screen that changed.
+  /// The updated configuration can be obtained using
+  /// `RendererBinding.instance.platformDispatcher.screens[id]`.
+  @protected
+  void handleScreenConfigurationChanged(Object id) => handleMetricsChanged();
+
+  @protected
+  void handleScreenRemoved(Object id) => handleMetricsChanged();
+
   /// Called when the system metrics change.
   ///
-  /// See [Window.onMetricsChanged].
+  /// See [ui.PlatformDispatcher.onMetricsChanged].
   @protected
   void handleMetricsChanged() {
     assert(renderView != null);

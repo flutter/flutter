@@ -118,10 +118,10 @@ void beginFrame(Duration timeStamp) {
   final ui.Rect paintBounds = ui.Offset.zero & (ui.window.physicalSize / ui.window.devicePixelRatio);
   final ui.Picture picture = paint(paintBounds);
   final ui.Scene scene = composite(picture, paintBounds);
-  ui.window.render(scene);
+  ui.PlatformDispatcher.instance.render(scene);
 }
 
 void main() {
-  ui.window.onBeginFrame = beginFrame;
-  ui.window.scheduleFrame();
+  ui.PlatformDispatcher.instance.onBeginFrame = beginFrame;
+  ui.PlatformDispatcher.instance.scheduleFrame();
 }

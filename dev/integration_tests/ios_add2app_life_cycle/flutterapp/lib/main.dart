@@ -14,8 +14,8 @@ VoidCallback originalSemanticsListener;
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   // Disconnects semantics listener for testing purposes.
-  originalSemanticsListener = ui.window.onSemanticsEnabledChanged;
-  ui.window.onSemanticsEnabledChanged = null;
+  originalSemanticsListener = ui.PlatformDispatcher.instance.onSemanticsEnabledChanged;
+  ui.PlatformDispatcher.instance.onSemanticsEnabledChanged = null;
   RendererBinding.instance.setSemanticsEnabled(false);
   // If the test passes, LifeCycleSpy will rewire the semantics listener back.
   runApp(const LifeCycleSpy());
@@ -71,7 +71,7 @@ class _LifeCycleSpyState extends State<LifeCycleSpy> with WidgetsBindingObserver
     if (const ListEquality<AppLifecycleState>().equals(_actualLifeCycleSequence, _expectedLifeCycleSequence)) {
       // Rewires the semantics harness if test passes.
       RendererBinding.instance.setSemanticsEnabled(true);
-      ui.window.onSemanticsEnabledChanged = originalSemanticsListener;
+      ui.PlatformDispatcher.instance.onSemanticsEnabledChanged = originalSemanticsListener;
     }
     return const MaterialApp(
       title: 'Flutter View',

@@ -685,8 +685,8 @@ void main() {
           const OnlyRTLDefaultWidgetsLocalizationsDelegate(),
         ],
         buildContent: (BuildContext context) {
-          final Locale locale1 = ui.window.locales.first;
-          final Locale locale2 = ui.window.locales[1];
+          final Locale locale1 = ui.PlatformDispatcher.instance.locales.first;
+          final Locale locale2 = ui.PlatformDispatcher.instance.locales[1];
           return Text('$locale1 $locale2');
         },
       )

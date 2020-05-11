@@ -101,5 +101,5 @@ void _renderElement(ui.Window window, RenderObject renderObject) {
   // ignore: invalid_use_of_protected_member
   layer.addToScene(sceneBuilder);
   sceneBuilder.pop();
-  window.render(sceneBuilder.build());
+  ui.PlatformDispatcher.instance.render(sceneBuilder.build());
 }

@@ -45,15 +45,15 @@ void beginFrame(Duration timeStamp) {
     ..pushTransform(deviceTransform)
     ..addPicture(ui.Offset.zero, picture)
     ..pop();
-  ui.window.render(sceneBuilder.build());
+  ui.PlatformDispatcher.instance.render(sceneBuilder.build());
 
   // After rendering the current frame of the animation, we ask the engine to
   // schedule another frame. The engine will call beginFrame again when its time
   // to produce the next frame.
-  ui.window.scheduleFrame();
+  ui.PlatformDispatcher.instance.scheduleFrame();
 }
 
 void main() {
-  ui.window.onBeginFrame = beginFrame;
-  ui.window.scheduleFrame();
+  ui.PlatformDispatcher.instance.onBeginFrame = beginFrame;
+  ui.PlatformDispatcher.instance.scheduleFrame();
 }

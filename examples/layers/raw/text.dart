@@ -47,7 +47,7 @@ void beginFrame(Duration timeStamp) {
   final ui.Rect paintBounds = ui.Offset.zero & (ui.window.physicalSize / ui.window.devicePixelRatio);
   final ui.Picture picture = paint(paintBounds);
   final ui.Scene scene = composite(picture, paintBounds);
-  ui.window.render(scene);
+  ui.PlatformDispatcher.instance.render(scene);
 }
 
 void main() {
@@ -87,6 +87,6 @@ void main() {
     ..layout(const ui.ParagraphConstraints(width: 180.0));
 
   // Finally, we register our beginFrame callback and kick off the first frame.
-  ui.window.onBeginFrame = beginFrame;
-  ui.window.scheduleFrame();
+  ui.PlatformDispatcher.instance.onBeginFrame = beginFrame;
+  ui.PlatformDispatcher.instance.scheduleFrame();
 }

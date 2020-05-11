@@ -35,7 +35,7 @@ void main() {
   // will be made to let us know when we should be changing the app state.
   _kReloadChannel.setMessageHandler(run);
   // Start off with whatever the initial route is supposed to be.
-  run(ui.window.defaultRouteName);
+  run(ui.PlatformDispatcher.instance.defaultRouteName);
 }
 
 Future<String> run(String name) async {
