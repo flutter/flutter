@@ -61,6 +61,12 @@ final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTE
 /// and make sure it runs _all_ shards.
 const int kDeviceLabShardCount = 4;
 
+/// The number of Cirrus jobs that run build tests in parallel.
+///
+/// WARNING: if you change this number, also change .cirrus.yml
+/// and make sure it runs _all_ shards.
+const int kBuildTestShardCount = 2;
+
 /// The number of Cirrus jobs that run Web tests in parallel.
 ///
 /// The default is 8 shards. Typically .cirrus.yml would define the
@@ -336,45 +342,55 @@ Future<void> _runBuildTests() async {
   final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')));
-  for (final FileSystemEntity fileEntity in exampleDirectories) {
-    // Only verify caching with flutter gallery.
-    final bool verifyCaching = fileEntity.path.contains('flutter_gallery');
-    if (fileEntity is! Directory) {
-      continue;
-    }
-    final String examplePath = fileEntity.path;
-    final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
-    final List<String> additionalArgs = hasNullSafety
-      ? <String>['--enable-experiment', 'non-nullable']
-      : <String>[];
-    if (Directory(path.join(examplePath, 'android')).existsSync()) {
-      await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
-      await _flutterBuildApk(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
-    } else {
-      print('Example project ${path.basename(examplePath)} has no android directory, skipping apk');
-    }
-    if (Platform.isMacOS) {
-      if (Directory(path.join(examplePath, 'ios')).existsSync()) {
-        await _flutterBuildIpa(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
-        await _flutterBuildIpa(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
-      } else {
-        print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
-      }
-    }
-  }
 
   final String branch = Platform.environment['CIRRUS_BRANCH'];
-  if (branch != 'beta' && branch != 'stable') {
-    // Web compilation tests.
-    await _flutterBuildDart2js(
-      path.join('dev', 'integration_tests', 'web'),
-      path.join('lib', 'main.dart'),
-    );
-    // Should not fail to compile with dart:io.
-    await _flutterBuildDart2js(
-      path.join('dev', 'integration_tests', 'web_compile_tests'),
-      path.join('lib', 'dart_io_import.dart'),
-    );
+  // The tests are randomly distributed into subshards so as to get a uniform
+  // distribution of costs, but the seed is fixed so that issues are reproducible.
+  final List<ShardRunner> tests = <ShardRunner>[
+    for (final FileSystemEntity exampleDirectory in exampleDirectories)
+        () => _runExampleProjectBuildTests(exampleDirectory),
+    if (branch != 'beta' && branch != 'stable')
+      ...<ShardRunner>[
+        // Web compilation tests.
+          () =>  _flutterBuildDart2js(
+          path.join('dev', 'integration_tests', 'web'),
+          path.join('lib', 'main.dart'),
+        ),
+        // Should not fail to compile with dart:io.
+          () =>  _flutterBuildDart2js(
+          path.join('dev', 'integration_tests', 'web_compile_tests'),
+          path.join('lib', 'dart_io_import.dart'),
+        ),
+      ],
+  ]..shuffle(math.Random(0));
+
+  await _selectIndexedSubshard(tests, kBuildTestShardCount);
+}
+
+Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) async {
+  // Only verify caching with flutter gallery.
+  final bool verifyCaching = exampleDirectory.path.contains('flutter_gallery');
+  if (exampleDirectory is! Directory) {
+    return;
+  }
+  final String examplePath = exampleDirectory.path;
+  final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
+  final List<String> additionalArgs = hasNullSafety
+    ? <String>['--enable-experiment', 'non-nullable']
+    : <String>[];
+  if (Directory(path.join(examplePath, 'android')).existsSync()) {
+    await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+    await _flutterBuildApk(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+  } else {
+    print('Example project ${path.basename(examplePath)} has no android directory, skipping apk');
+  }
+  if (Platform.isMacOS) {
+    if (Directory(path.join(examplePath, 'ios')).existsSync()) {
+      await _flutterBuildIpa(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+      await _flutterBuildIpa(examplePath, release: true, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
+    } else {
+      print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
+    }
   }
 }
 
@@ -646,21 +662,15 @@ Future<void> _runFirebaseTestLabTests() async {
     'abstract_method_smoke_test',
     'android_embedding_v2_smoke_test',
   ];
-  final Map<String, ShardRunner> subshards = <String, ShardRunner>{};
 
   final String firebaseScript = path.join(flutterRoot, 'dev', 'bots', 'firebase_testlab.sh');
   final String integrationTestDirectory = path.join(flutterRoot, 'dev', 'integration_tests');
 
-  for (int index = 0; index < integrationTests.length; index += 1) {
-    final String integrationTestPath = path.join(integrationTestDirectory, integrationTests[index]);
-    subshards['$index'] = () => runCommand(
-      firebaseScript,
-      <String>[ integrationTestPath ],
-      workingDirectory: flutterRoot,
-    );
-  }
+  final List<ShardRunner> tests = integrationTests.map((String integrationTest) =>
+    () => runCommand(firebaseScript, <String>[ path.join(integrationTestDirectory, integrationTest) ])
+  ).toList();
 
-  await selectSubshard(subshards);
+  await _selectIndexedSubshard(tests, integrationTests.length);
 }
 
 Future<void> _runFrameworkCoverage() async {
@@ -1169,27 +1179,7 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     if (Platform.isLinux) () => _runDevicelabTest('web_benchmarks_canvaskit', environment: kChromeVariables),
   ]..shuffle(math.Random(0));
 
-  final int testsPerShard = tests.length ~/ kDeviceLabShardCount;
-  final Map<String, ShardRunner> subshards = <String, ShardRunner>{};
-
-  for (int subshard = 0; subshard < kDeviceLabShardCount; subshard += 1) {
-    String last = '';
-    List<ShardRunner> sublist;
-    if (subshard < kDeviceLabShardCount - 1) {
-      sublist = tests.sublist(subshard * testsPerShard, (subshard + 1) * testsPerShard);
-    } else {
-      sublist = tests.sublist(subshard * testsPerShard, tests.length);
-      // We make sure the last shard ends in _last so it's easier to catch mismatches
-      // between `.cirrus.yml` and `test.dart`.
-      last = '_last';
-    }
-    subshards['$subshard$last'] = () async {
-      for (final ShardRunner test in sublist)
-        await test();
-    };
-  }
-
-  await selectSubshard(subshards);
+  await _selectIndexedSubshard(tests, kDeviceLabShardCount);
 }
 
 Future<void> _runDevicelabTest(String testName, {
@@ -1364,6 +1354,37 @@ Future<String> verifyVersion(File file) async {
   if (!version.contains(pattern))
     return 'The version logic generated an invalid version string: "$version".';
   return null;
+}
+
+/// Parse (zero-)index-named subshards and equally distribute [tests]
+/// between them. Last shard should end in "_last" to catch mismatches
+/// between `.cirrus.yml` and `test.dart`. See [selectShard] for naming details.
+///
+/// Examples:
+/// build_tests-0-linux
+/// build_tests-1-linux
+/// build_tests-2_last-linux
+Future<void> _selectIndexedSubshard(List<ShardRunner> tests, int numberOfShards) async {
+  final int testsPerShard = tests.length ~/ numberOfShards;
+  final Map<String, ShardRunner> subshards = <String, ShardRunner>{};
+
+  for (int subshard = 0; subshard < numberOfShards; subshard += 1) {
+    String last = '';
+    List<ShardRunner> sublist;
+    if (subshard < numberOfShards - 1) {
+      sublist = tests.sublist(subshard * testsPerShard, (subshard + 1) * testsPerShard);
+    } else {
+      sublist = tests.sublist(subshard * testsPerShard, tests.length);
+      // We make sure the last shard ends in _last.
+      last = '_last';
+    }
+    subshards['$subshard$last'] = () async {
+      for (final ShardRunner test in sublist)
+        await test();
+    };
+  }
+
+  await selectSubshard(subshards);
 }
 
 /// If the CIRRUS_TASK_NAME environment variable exists, we use that to determine
