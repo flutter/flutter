@@ -57,6 +57,7 @@ export 'src/widgets/inherited_model.dart';
 export 'src/widgets/inherited_notifier.dart';
 export 'src/widgets/inherited_theme.dart';
 export 'src/widgets/layout_builder.dart';
+export 'src/widgets/link.dart';
 export 'src/widgets/list_wheel_scroll_view.dart';
 export 'src/widgets/localizations.dart';
 export 'src/widgets/media_query.dart';

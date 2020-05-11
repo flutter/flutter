@@ -12,6 +12,7 @@ import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
+import 'link.dart';
 import 'mouse_tracking.dart';
 
 /// Information collected for an annotation that is found in the layer tree.
@@ -1774,6 +1775,69 @@ class OpacityLayer extends ContainerLayer {
     super.debugFillProperties(properties);
     properties.add(IntProperty('alpha', alpha));
     properties.add(DiagnosticsProperty<Offset>('offset', offset));
+  }
+}
+
+///
+class LinkLayer extends ContainerLayer {
+  ///
+  LinkLayer({
+    @required String destination,
+    @required String label,
+    @required LinkTarget target,
+    @required Rect rect,
+  })  : _destination = destination,
+        _label = label,
+        _target = target,
+        _rect = rect;
+
+  String _destination;
+  ///
+  set destination(String value) {
+    if (value != _destination) {
+      _destination = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  String _label;
+  ///
+  set label(String value) {
+    if (value != _label) {
+      _label = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  LinkTarget _target;
+  ///
+  set target(LinkTarget value) {
+    if (value != _target) {
+      _target = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  Rect _rect;
+  ///
+  set rect(Rect value) {
+    if (value != _rect) {
+      _rect = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  @override
+  void addToScene(ui.SceneBuilder builder, [ui.Offset layerOffset = Offset.zero]) {
+    engineLayer = builder.pushLink(
+      destination: _destination,
+      label: _label,
+      target: _target.index,
+      rect: _rect, // Maybe _rect.shift(layerOffset) ?
+      oldLayer: _engineLayer as ui.LinkEngineLayer,
+    );
+    addChildrenToScene(builder, layerOffset);
+    builder.pop();
   }
 }
 
