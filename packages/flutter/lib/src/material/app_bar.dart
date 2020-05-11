@@ -744,8 +744,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.topPadding,
     @required this.floating,
     @required this.pinned,
+    @required this.vsync,
     @required this.snapConfiguration,
     @required this.stretchConfiguration,
+    @required this.showOnScreenConfiguration,
     @required this.shape,
   }) : assert(primary || topPadding == 0.0),
        _bottomHeight = bottom?.preferredSize?.height ?? 0.0;
@@ -783,10 +785,16 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => math.max(topPadding + (expandedHeight ?? kToolbarHeight + _bottomHeight), minExtent);
 
   @override
+  final TickerProvider vsync;
+
+  @override
   final FloatingHeaderSnapConfiguration snapConfiguration;
 
   @override
   final OverScrollHeaderStretchConfiguration stretchConfiguration;
+
+  @override
+  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
@@ -861,8 +869,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || topPadding != oldDelegate.topPadding
         || pinned != oldDelegate.pinned
         || floating != oldDelegate.floating
+        || vsync != oldDelegate.vsync
         || snapConfiguration != oldDelegate.snapConfiguration
-        || stretchConfiguration != oldDelegate.stretchConfiguration;
+        || stretchConfiguration != oldDelegate.stretchConfiguration
+        || showOnScreenConfiguration != oldDelegate.showOnScreenConfiguration;
   }
 
   @override
@@ -1261,11 +1271,11 @@ class SliverAppBar extends StatefulWidget {
 class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMixin {
   FloatingHeaderSnapConfiguration _snapConfiguration;
   OverScrollHeaderStretchConfiguration _stretchConfiguration;
+  PersistentHeaderShowOnScreenConfiguration _showOnScreenConfiguration;
 
   void _updateSnapConfiguration() {
     if (widget.snap && widget.floating) {
       _snapConfiguration = FloatingHeaderSnapConfiguration(
-        vsync: this,
         curve: Curves.easeOut,
         duration: const Duration(milliseconds: 200),
       );
@@ -1285,11 +1295,20 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     }
   }
 
+  void _updateShowOnScreenConfiguration() {
+    if (widget.floating || widget.pinned) {
+      _showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration(ignoreLeading: true);
+    } else {
+      _showOnScreenConfiguration = null;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _updateSnapConfiguration();
     _updateStretchConfiguration();
+    _updateShowOnScreenConfiguration();
   }
 
   @override
@@ -1299,6 +1318,8 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
       _updateSnapConfiguration();
     if (widget.stretch != oldWidget.stretch)
       _updateStretchConfiguration();
+
+    _updateShowOnScreenConfiguration();
   }
 
   @override
@@ -1315,6 +1336,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
         floating: widget.floating,
         pinned: widget.pinned,
         delegate: _SliverAppBarDelegate(
+          vsync: this,
           leading: widget.leading,
           automaticallyImplyLeading: widget.automaticallyImplyLeading,
           title: widget.title,
@@ -1340,6 +1362,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           shape: widget.shape,
           snapConfiguration: _snapConfiguration,
           stretchConfiguration: _stretchConfiguration,
+          showOnScreenConfiguration: _showOnScreenConfiguration,
         ),
       ),
     );

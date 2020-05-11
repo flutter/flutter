@@ -17,6 +17,32 @@ import 'sliver.dart';
 import 'viewport.dart';
 import 'viewport_offset.dart';
 
+// Trims the part of `rect` that protrudes `child`'s leading edge.
+//
+// If the `rect` a descendant specified in its showOnScreen call exceeds
+// the leading edge of this sliver (which is usually the same as that of
+// `child`), the viewport will move towards the leading edge (reduce its
+// scroll offset) to unpin the persistent header. This is almost always
+// undesirable.
+//
+// See: https://github.com/flutter/flutter/issues/25507.
+Rect _trim(Rect original, {
+  double top = -double.infinity,
+  double right = double.infinity,
+  double bottom = double.infinity,
+  double left = -double.infinity,
+}) {
+  if (original == null)
+    return null;
+
+  return Rect.fromLTRB(
+    math.max(original.left, left),
+    math.max(original.top, top),
+    math.min(original.right, right),
+    math.min(original.bottom, bottom),
+  );
+}
+
 /// Specifies how a stretched header is to trigger an [AsyncCallback].
 ///
 /// See also:
@@ -37,6 +63,75 @@ class OverScrollHeaderStretchConfiguration {
   /// The callback function to be executed when a user over-scrolls to the
   /// offset specified by [stretchTriggerOffset].
   final AsyncCallback onStretchTrigger;
+}
+
+/// Specifies how a pinned header or a floating header should react to
+/// [RenderObject.showOnScreen] calls.
+@immutable
+class PersistentHeaderShowOnScreenConfiguration {
+  /// Creates an object that specifies how a pinned or floating persistent header
+  /// should behave in response to [RenderObject.showOnScreen] calls.
+  const PersistentHeaderShowOnScreenConfiguration({
+    this.ignoreLeading = true,
+    this.minExpandExtent,
+    this.maxExpandExtent,
+  }) : assert(ignoreLeading != null),
+       assert(minExpandExtent == null || maxExpandExtent == null || minExpandExtent < maxExpandExtent);
+
+  /// Whether to ignore the part of the `rect` specified in [RenderObject.showOnScreen]
+  /// that exceeds the leading edge of the sliver's child [RenderBox].
+  ///
+  /// When this parameter is set to false, the framework will try to reveal the
+  /// entire `rect` specified in [RenderObject.showOnScreen], even if it exceeds
+  /// the leading edge of the persistent header. As a result, the viewport will
+  /// attempt to reveal the part of the preceeding sliver(s) that intersects with
+  /// `rect`. This could potentially lead to unintended overscrolling if there's
+  /// no preceeding slivers. Additionally, if the sliver is initially pinned
+  /// (or floating) at the leading edge, this would also reveal the slivers that
+  /// are immediately after the pinned header.
+  ///
+  /// Setting the parameter to true will cause the framework to trim the incoming
+  /// `rect` if it exceeds the leading edge of the `child` [RenderBox]. The new
+  /// `rect` will have the same leading edge as the `child` [RenderBox], or that
+  /// of the persistent header when `child` is null.
+  ///
+  /// Defaults to true and must not be null.
+  final bool ignoreLeading;
+
+  /// The [TickerProvider] for the [AnimationController] used to expand the
+  /// floating header in response to [RenderObject.showOnScreen] calls.
+  ///
+  /// Defaults to null. If not provided, the header will expand immediately to
+  /// the target size, with no animation. Has no effect unless the persistent
+  /// header is a floating header.
+  // final TickerProvider vsync;
+
+  /// The smallest the floating header object can become in the main axis
+  /// direction, when `showOnScreen` is called, in addition to the persistent
+  /// header's `minExtent`.
+  ///
+  /// This parameter can be set to the persistent header's `maxExtent` so the
+  /// persistent header always expands to its `maxExtent` when `showOnScreen` is
+  /// called.
+  ///
+  /// Defaults null. Must be less than [maxExpandExtent] if both of them are not
+  /// null. This parameter has no effect if set to null or a value smaller than
+  /// the persistent header's `minExtent`. Has no effect unless the persistent
+  /// header is a floating header.
+  final double minExpandExtent;
+
+  /// The biggest the floating header object can become in the main axis
+  /// direction, when `showOnScreen` is called, in addition to the persistent
+  /// header's `maxExtent`.
+  ///
+  /// This parameter can be set to the persistent header's `minExtent` so the
+  /// persistent header will not try to expand when `showOnScreen` is called.
+  ///
+  /// Defaults null. Must be greater than [minExpandExtent] if both of them are
+  /// not null. This parameter has no effect if set to null or a value bigger
+  /// than the persistent header's `maxExtent`. Has no effect unless the
+  /// persistent header is a floating header.
+  final double maxExpandExtent;
 }
 
 /// A base class for slivers that have a [RenderBox] child which scrolls
@@ -194,68 +289,6 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
       stretchConfiguration.onStretchTrigger();
     }
     _lastStretchOffset = stretchOffset;
-  }
-
-  @override
-  void showOnScreen({
-    RenderObject descendant,
-    Rect rect,
-    Duration duration = Duration.zero,
-    Curve curve = Curves.ease,
-  }) {
-    assert(child != null);
-    final Rect childBounds = descendant != null
-      ? MatrixUtils.transformRect(descendant.getTransformTo(child), rect ?? descendant.paintBounds)
-      : null;
-
-    // Trims the part of `rect` that protrudes `child`'s leading edge.
-    //
-    // If the `rect` a descendant specified in its showOnScreen call exceeds
-    // the leading edge of this sliver (which is usually the same as that of
-    // `child`), the viewport will move towards the leading edge (reduce its
-    // scroll offset) to unpin the persistent header. This is almost always
-    // undesirable.
-    //
-    // See: https://github.com/flutter/flutter/issues/25507.
-    Rect trim(Rect original, {
-      double top = -double.infinity,
-      double right = double.infinity,
-      double bottom = double.infinity,
-      double left = -double.infinity,
-    }) {
-      if (original == null)
-        return null;
-
-      return Rect.fromLTRB(
-        math.max(original.left, left),
-        math.max(original.top, top),
-        math.min(original.right, right),
-        math.min(original.bottom, bottom),
-      );
-    }
-
-    Rect newRect;
-    switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-      case AxisDirection.up:
-        newRect = trim(childBounds ?? rect, bottom: childExtent);
-        break;
-      case AxisDirection.right:
-        newRect = trim(childBounds ?? rect, left: 0);
-        break;
-      case AxisDirection.down:
-        newRect = trim(childBounds ?? rect, top: 0);
-        break;
-      case AxisDirection.left:
-        newRect = trim(childBounds ?? rect, right: childExtent);
-        break;
-    }
-
-    super.showOnScreen(
-      descendant: descendant == null ? this : child,
-      rect: newRect,
-      duration: duration,
-      curve: curve,
-    );
   }
 
   /// Returns the distance from the leading _visible_ edge of the sliver to the
@@ -425,10 +458,17 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
   RenderSliverPinnedPersistentHeader({
     RenderBox child,
     OverScrollHeaderStretchConfiguration stretchConfiguration,
+    this.showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration(),
   }) : super(
     child: child,
     stretchConfiguration: stretchConfiguration,
   );
+
+  /// Specifies the persistent header's behavior when `showOnScreen` is called.
+  ///
+  /// If set to null, the persistent header will delegate the `showOnScreen` call
+  /// to it's parent [RenderObject].
+  PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration;
 
   @override
   void performLayout() {
@@ -456,6 +496,44 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
 
   @override
   double childMainAxisPosition(RenderBox child) => 0.0;
+
+  @override
+  void showOnScreen({
+    RenderObject descendant,
+    Rect rect,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+  }) {
+    if (showOnScreenConfiguration?.ignoreLeading != true)
+      return super.showOnScreen(descendant: descendant, rect: rect, duration: duration, curve: curve);
+
+    final Rect localBounds = descendant != null
+      ? MatrixUtils.transformRect(descendant.getTransformTo(this), rect ?? descendant.paintBounds)
+      : rect;
+
+    Rect newRect;
+    switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
+      case AxisDirection.up:
+        newRect = _trim(localBounds, bottom: childExtent);
+        break;
+      case AxisDirection.right:
+        newRect = _trim(localBounds, left: 0);
+        break;
+      case AxisDirection.down:
+        newRect = _trim(localBounds, top: 0);
+        break;
+      case AxisDirection.left:
+        newRect = _trim(localBounds, right: childExtent);
+        break;
+    }
+
+    super.showOnScreen(
+      descendant: this,
+      rect: newRect,
+      duration: duration,
+      curve: curve,
+    );
+  }
 }
 
 /// Specifies how a floating header is to be "snapped" (animated) into or out
@@ -472,15 +550,15 @@ class FloatingHeaderSnapConfiguration {
   /// Creates an object that specifies how a floating header is to be "snapped"
   /// (animated) into or out of view.
   FloatingHeaderSnapConfiguration({
-    @required this.vsync,
+    @deprecated this.vsync,
     this.curve = Curves.ease,
     this.duration = const Duration(milliseconds: 300),
-  }) : assert(vsync != null),
-       assert(curve != null),
+  }) : assert(curve != null),
        assert(duration != null);
 
   /// The [TickerProvider] for the [AnimationController] that causes a
   /// floating header to snap in or out of view.
+  @deprecated
   final TickerProvider vsync;
 
   /// The snap animation curve.
@@ -489,6 +567,7 @@ class FloatingHeaderSnapConfiguration {
   /// The snap animation's duration.
   final Duration duration;
 }
+
 
 /// A sliver with a [RenderBox] child which shrinks and scrolls like a
 /// [RenderSliverScrollingPersistentHeader], but immediately comes back when the
@@ -504,13 +583,15 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   /// direction.
   RenderSliverFloatingPersistentHeader({
     RenderBox child,
-    FloatingHeaderSnapConfiguration snapConfiguration,
+    @required TickerProvider vsync,
+    this.snapConfiguration,
     OverScrollHeaderStretchConfiguration stretchConfiguration,
-  }) : _snapConfiguration = snapConfiguration,
+    @required this.showOnScreenConfiguration,
+  }) : _vsync = vsync,
        super(
-      child: child,
-      stretchConfiguration: stretchConfiguration,
-    );
+    child: child,
+    stretchConfiguration: stretchConfiguration,
+  );
 
   AnimationController _controller;
   Animation<double> _animation;
@@ -528,6 +609,22 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     super.detach();
   }
 
+
+  /// A [TickerProvider] to use when animating the scroll position.
+  TickerProvider get vsync => _vsync;
+  TickerProvider _vsync;
+  set vsync(TickerProvider value) {
+    if (value == _vsync)
+      return;
+    _vsync = value;
+    if (value == null) {
+      _controller?.dispose();
+      _controller = null;
+    } else {
+      _controller?.resync(_vsync);
+    }
+  }
+
   /// Defines the parameters used to snap (animate) the floating header in and
   /// out of view.
   ///
@@ -540,20 +637,13 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   ///    start or stop the floating header's animation.
   ///  * [SliverAppBar], which creates a header that can be pinned, floating,
   ///    and snapped into view via the corresponding parameters.
-  FloatingHeaderSnapConfiguration get snapConfiguration => _snapConfiguration;
-  FloatingHeaderSnapConfiguration _snapConfiguration;
-  set snapConfiguration(FloatingHeaderSnapConfiguration value) {
-    if (value == _snapConfiguration)
-      return;
-    if (value == null) {
-      _controller?.dispose();
-      _controller = null;
-    } else {
-      if (_snapConfiguration != null && value.vsync != _snapConfiguration.vsync)
-        _controller?.resync(value.vsync);
-    }
-    _snapConfiguration = value;
-  }
+  FloatingHeaderSnapConfiguration snapConfiguration;
+
+  /// Specifies the persistent header's behavior when `showOnScreen` is called.
+  ///
+  /// If set to null, the persistent header will delegate the `showOnScreen` call
+  /// to it's parent [RenderObject].
+  PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration;
 
   /// Updates [geometry], and returns the new value for [childMainAxisPosition].
   ///
@@ -578,6 +668,31 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     return stretchOffset > 0 ? 0.0 : math.min(0.0, paintExtent - childExtent);
   }
 
+  void _updateAnimation(Duration duration, double endValue, Curve curve) {
+    assert(duration != null);
+    assert(endValue != null);
+    assert(curve != null);
+    if (_controller == null) {
+      assert(
+        vsync != null,
+        'vsync must not be null if the floating header changes size animatedly.',
+      );
+      _controller = AnimationController(vsync: vsync, duration: duration)
+        ..addListener(() {
+          if (_effectiveScrollOffset == _animation.value)
+            return;
+          _effectiveScrollOffset = _animation.value;
+          markNeedsLayout();
+        });
+    }
+    _animation = _controller.drive(
+      Tween<double>(
+        begin: _effectiveScrollOffset,
+        end: endValue,
+      ).chain(CurveTween(curve: curve)),
+    );
+  }
+
   /// If the header isn't already fully exposed, then scroll it into view.
   void maybeStartSnapAnimation(ScrollDirection direction) {
     if (snapConfiguration == null)
@@ -587,29 +702,16 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     if (direction == ScrollDirection.reverse && _effectiveScrollOffset >= maxExtent)
       return;
 
-    final TickerProvider vsync = snapConfiguration.vsync;
-    final Duration duration = snapConfiguration.duration;
-    _controller ??= AnimationController(vsync: vsync, duration: duration)
-      ..addListener(() {
-        if (_effectiveScrollOffset == _animation.value)
-          return;
-        _effectiveScrollOffset = _animation.value;
-        markNeedsLayout();
-      });
-
-    _animation = _controller.drive(
-      Tween<double>(
-        begin: _effectiveScrollOffset,
-        end: direction == ScrollDirection.forward ? 0.0 : maxExtent,
-      ).chain(CurveTween(
-        curve: snapConfiguration.curve,
-      )),
+    _updateAnimation(
+      snapConfiguration.duration,
+      direction == ScrollDirection.forward ? 0.0 : maxExtent,
+      snapConfiguration.curve,
     );
-
     _controller.forward(from: 0.0);
   }
 
-  /// If a header snap animation is underway then stop it.
+  /// If a header snap animation or a [showOnScreen] expand animation is underway
+  /// then stop it.
   void maybeStopSnapAnimation(ScrollDirection direction) {
     _controller?.stop();
   }
@@ -654,49 +756,67 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
   }) {
-    assert(child != null);
+    if (showOnScreenConfiguration == null)
+      return super.showOnScreen(descendant: descendant, rect: rect, duration: duration, curve: curve);
+
+    assert(child != null || descendant == null);
+    // We prefer the child's coordinate space (instead of the sliver's) because
+    // its easier for us to convert the target rect into target extents: when
+    // the sliver is sitting above the leading edge (not possible with pinned
+    // headers), the leading edge of the sliver and the leading edge of the child
+    // will not be aligned.
+    // The only exception is when child is null (and thus descendant == null).
     final Rect childBounds = descendant != null
       ? MatrixUtils.transformRect(descendant.getTransformTo(child), rect ?? descendant.paintBounds)
-      : null;
+      : rect;
 
     double minTargetExtent;
+    Rect targetRect;
     switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
       case AxisDirection.up:
         minTargetExtent = childExtent - (childBounds?.top ?? 0);
+        targetRect = showOnScreenConfiguration.ignoreLeading
+          ? _trim(childBounds, bottom: childExtent) : childBounds;
         break;
       case AxisDirection.right:
         minTargetExtent = childBounds?.right ?? childExtent;
+        targetRect = showOnScreenConfiguration.ignoreLeading
+          ? _trim(childBounds, left: 0) : childBounds;
         break;
       case AxisDirection.down:
         minTargetExtent = childBounds?.bottom ?? childExtent;
+        targetRect = showOnScreenConfiguration.ignoreLeading
+          ? _trim(childBounds, top: 0) : childBounds;
         break;
       case AxisDirection.left:
         minTargetExtent = childExtent - (childBounds?.left ?? 0);
+        targetRect = showOnScreenConfiguration.ignoreLeading
+          ? _trim(childBounds, right: childExtent) : childBounds;
         break;
     }
 
-    minTargetExtent = minTargetExtent.clamp(childExtent, maxExtent) as double;
+    minTargetExtent = minTargetExtent
+      .clamp(
+        showOnScreenConfiguration.minExpandExtent ?? childExtent,
+        math.max(showOnScreenConfiguration.maxExpandExtent ?? maxExtent, childExtent),
+      )
+      .clamp(childExtent, maxExtent) as double;
+     
     // Expands the header if needed, with animation if possible.
     if (minTargetExtent > childExtent) {
-      if (snapConfiguration != null) {
-        _controller ??= AnimationController(vsync: snapConfiguration.vsync, duration: duration);
-        _controller.duration = duration;
-        _animation = _controller
-          .drive(
-            Tween<double>(
-              begin: _effectiveScrollOffset,
-              end: maxExtent - minTargetExtent ,
-            ).chain(CurveTween(curve: curve)),
-          );
+      final double targetScrollOffset = maxExtent - minTargetExtent;
+      if (vsync != null) {
+        _updateAnimation(duration, targetScrollOffset, curve);
+        _controller.forward(from: 0.0);
       } else {
-        _effectiveScrollOffset = maxExtent - minTargetExtent;
+        _effectiveScrollOffset = targetScrollOffset;
         markNeedsLayout();
       }
     }
 
     super.showOnScreen(
       descendant: descendant == null ? this : child,
-      rect: childBounds,
+      rect: targetRect,
       duration: duration,
       curve: curve,
     );
@@ -729,12 +849,16 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
   /// scroll direction.
   RenderSliverFloatingPinnedPersistentHeader({
     RenderBox child,
+    @required TickerProvider vsync,
     FloatingHeaderSnapConfiguration snapConfiguration,
     OverScrollHeaderStretchConfiguration stretchConfiguration,
+    @required PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration,
   }) : super(
     child: child,
+    vsync: vsync,
     snapConfiguration: snapConfiguration,
     stretchConfiguration: stretchConfiguration,
+    showOnScreenConfiguration: showOnScreenConfiguration,
   );
 
   @override
