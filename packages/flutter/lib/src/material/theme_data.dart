@@ -270,8 +270,8 @@ class ThemeData with Diagnosticable {
     BottomNavigationBarThemeData bottomNavigationBarTheme,
     bool fixTextFieldOutlineLabel,
   }) {
-    brightness ??= Brightness.light;
-    final bool isDark = brightness == Brightness.dark;
+    final Brightness _brightness = brightness ?? Brightness.light;
+    final bool isDark = _brightness == Brightness.dark;
     visualDensity ??= const VisualDensity();
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900] : primarySwatch;
@@ -298,7 +298,7 @@ class ThemeData with Diagnosticable {
       cardColor: cardColor,
       backgroundColor: backgroundColor,
       errorColor: errorColor,
-      brightness: brightness,
+      brightness: _brightness,
     );
 
     splashFactory ??= InkSplash.splashFactory;
@@ -364,7 +364,7 @@ class ThemeData with Diagnosticable {
     cardTheme ??= const CardTheme();
     chipTheme ??= ChipThemeData.fromDefaults(
       secondaryColor: primaryColor,
-      brightness: brightness,
+      brightness: _brightness,
       labelStyle: textTheme.bodyText1,
     );
     dialogTheme ??= const DialogTheme();
@@ -382,7 +382,7 @@ class ThemeData with Diagnosticable {
     fixTextFieldOutlineLabel ??= false;
 
     return ThemeData.raw(
-      brightness: brightness,
+      //brightness: brightness,
       visualDensity: visualDensity,
       primaryColor: primaryColor,
       primaryColorBrightness: primaryColorBrightness,
@@ -462,7 +462,7 @@ class ThemeData with Diagnosticable {
     // Warning: make sure these properties are in the exact same order as in
     // operator == and in the hashValues method and in the order of fields
     // in this class, and in the lerp() method.
-    @required this.brightness,
+    //@required this.brightness,
     @required this.visualDensity,
     @required this.primaryColor,
     @required this.primaryColorBrightness,
@@ -528,7 +528,7 @@ class ThemeData with Diagnosticable {
     @required this.buttonBarTheme,
     @required this.bottomNavigationBarTheme,
     @required this.fixTextFieldOutlineLabel,
-  }) : assert(brightness != null),
+  }) : //assert(brightness != null),
        assert(visualDensity != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -690,7 +690,8 @@ class ThemeData with Diagnosticable {
   /// primaryColorBrightness. The primaryColor does not contrast well with the
   /// card and canvas colors when the brightness is dark; when the brightness is
   /// dark, use Colors.white or the accentColor for a contrasting color.
-  final Brightness brightness;
+  //final Brightness brightness;
+  Brightness get brightness => colorScheme.brightness;
 
   /// The density value for specifying the compactness of various UI components.
   ///
@@ -1055,7 +1056,7 @@ class ThemeData with Diagnosticable {
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
-    Brightness brightness,
+    //Brightness brightness,
     VisualDensity visualDensity,
     Color primaryColor,
     Brightness primaryColorBrightness,
@@ -1124,7 +1125,7 @@ class ThemeData with Diagnosticable {
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
-      brightness: brightness ?? this.brightness,
+      //brightness: brightness ?? this.brightness,
       visualDensity: visualDensity ?? this.visualDensity,
       primaryColor: primaryColor ?? this.primaryColor,
       primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
@@ -1271,7 +1272,7 @@ class ThemeData with Diagnosticable {
     // hashValues() and in the raw constructor and in the order of fields in
     // the class and in the lerp() method.
     return ThemeData.raw(
-      brightness: t < 0.5 ? a.brightness : b.brightness,
+      //brightness: t < 0.5 ? a.brightness : b.brightness,
       visualDensity: VisualDensity.lerp(a.visualDensity, b.visualDensity, t),
       primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t),
       primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
@@ -1348,7 +1349,7 @@ class ThemeData with Diagnosticable {
     // hashValues() and in the raw constructor and in the order of fields in
     // the class and in the lerp() method.
     return other is ThemeData
-        && other.brightness == brightness
+        //&& other.brightness == brightness
         && other.visualDensity == visualDensity
         && other.primaryColor == primaryColor
         && other.primaryColorBrightness == primaryColorBrightness
@@ -1420,7 +1421,7 @@ class ThemeData with Diagnosticable {
     // are in the exact same order as in operator == and in the raw constructor
     // and in the order of fields in the class and in the lerp() method.
     final List<Object> values = <Object>[
-      brightness,
+      //brightness,
       visualDensity,
       primaryColor,
       primaryColorBrightness,

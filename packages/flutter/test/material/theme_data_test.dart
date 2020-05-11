@@ -216,7 +216,7 @@ void main() {
     );
 
     final ThemeData theme = ThemeData.raw(
-      brightness: Brightness.dark,
+      //brightness: Brightness.dark,
       visualDensity: const VisualDensity(),
       primaryColor: Colors.black,
       primaryColorBrightness: Brightness.dark,
@@ -298,7 +298,7 @@ void main() {
     );
 
     final ThemeData otherTheme = ThemeData.raw(
-      brightness: Brightness.light,
+      //brightness: Brightness.light,
       visualDensity: const VisualDensity(),
       primaryColor: Colors.white,
       primaryColorBrightness: Brightness.light,
@@ -367,7 +367,7 @@ void main() {
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
-      brightness: otherTheme.brightness,
+      //brightness: otherTheme.brightness,
       primaryColor: otherTheme.primaryColor,
       primaryColorBrightness: otherTheme.primaryColorBrightness,
       primaryColorLight: otherTheme.primaryColorLight,
