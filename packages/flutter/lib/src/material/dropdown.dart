@@ -672,9 +672,10 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
   const DropdownMenuItem({
     Key key,
     this.onTap,
-    this.value,
+    @required this.value,
     @required Widget child,
   }) : assert(child != null),
+       assert(value != null),
        super(key: key, child: child);
 
   /// Called when the dropdown menu item is tapped.
