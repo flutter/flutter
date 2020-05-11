@@ -43,6 +43,19 @@ IF NOT EXIST "%flutter_root%\.git" (
   EXIT /B 1
 )
 
+REM Detect which PowerShell executable is available on the Host
+REM PowerShell version <= 5: PowerShell.exe
+REM PowerShell version >= 6: pwsh.exe
+WHERE /Q pwsh.exe && (
+    SET powershell_executable=pwsh.exe
+) || WHERE /Q PowerShell.exe && (
+    SET powershell_executable=PowerShell.exe
+) || (
+    ECHO Error: PowerShell executable not found.
+    ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH.
+    EXIT /B 1
+)
+
 REM Ensure that bin/cache exists.
 IF NOT EXIST "%cache_dir%" MKDIR "%cache_dir%"
 
@@ -101,7 +114,7 @@ GOTO :after_subroutine
     SET update_dart_bin=%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1
     REM Escape apostrophes from the executable path
     SET "update_dart_bin=!update_dart_bin:'=''!"
-    PowerShell.exe -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'"
+    %powershell_executable% -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'"
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to update Dart SDK. Retrying...
       timeout /t 5 /nobreak
