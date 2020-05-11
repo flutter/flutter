@@ -295,6 +295,7 @@ class InkResponse extends StatelessWidget {
     this.onLongPress,
     this.onHighlightChanged,
     this.onHover,
+    this.mouseCursor,
     this.containedInkWell = false,
     this.highlightShape = BoxShape.circle,
     this.radius,
@@ -360,6 +361,17 @@ class InkResponse extends StatelessWidget {
   /// part of the material and false if a pointer has exited this part of the
   /// material.
   final ValueChanged<bool> onHover;
+
+  /// {@template flutter.material.inkwell.mousecursor}
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// region.
+  ///
+  /// If the [mouseCursor] is null, then the hovering pointer's cursor will be
+  /// decided by the widget behind it on the screen in hit-test order.
+  /// {@endtemplate}
+  ///
+  /// Defaults to null.
+  final MouseCursor mouseCursor;
 
   /// Whether this ink response should be clipped its bounds.
   ///
@@ -543,6 +555,7 @@ class InkResponse extends StatelessWidget {
       onLongPress: onLongPress,
       onHighlightChanged: onHighlightChanged,
       onHover: onHover,
+      mouseCursor: mouseCursor,
       containedInkWell: containedInkWell,
       highlightShape: highlightShape,
       radius: radius,
@@ -590,6 +603,7 @@ class _InnerInkResponse extends StatefulWidget {
     this.onLongPress,
     this.onHighlightChanged,
     this.onHover,
+    this.mouseCursor,
     this.containedInkWell = false,
     this.highlightShape = BoxShape.circle,
     this.radius,
@@ -624,6 +638,7 @@ class _InnerInkResponse extends StatefulWidget {
   final GestureLongPressCallback onLongPress;
   final ValueChanged<bool> onHighlightChanged;
   final ValueChanged<bool> onHover;
+  final MouseCursor mouseCursor;
   final bool containedInkWell;
   final BoxShape highlightShape;
   final double radius;
@@ -997,6 +1012,7 @@ class _InkResponseState extends State<_InnerInkResponse>
           onFocusChange: _handleFocusUpdate,
           autofocus: widget.autofocus,
           child: MouseRegion(
+            cursor: widget.mouseCursor,
             onEnter: enabled ? _handleMouseEnter : null,
             onExit: enabled ? _handleMouseExit : null,
             child: GestureDetector(
@@ -1121,6 +1137,7 @@ class InkWell extends InkResponse {
     GestureTapCancelCallback onTapCancel,
     ValueChanged<bool> onHighlightChanged,
     ValueChanged<bool> onHover,
+    MouseCursor mouseCursor,
     Color focusColor,
     Color hoverColor,
     Color highlightColor,
@@ -1145,6 +1162,7 @@ class InkWell extends InkResponse {
     onTapCancel: onTapCancel,
     onHighlightChanged: onHighlightChanged,
     onHover: onHover,
+    mouseCursor: mouseCursor,
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
     focusColor: focusColor,
