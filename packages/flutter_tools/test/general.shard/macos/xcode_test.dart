@@ -25,7 +25,8 @@ void main() {
     logger = BufferLogger.test();
   });
 
-  // Work around https://github.com/flutter/flutter/issues/56415.
+  // Group exists to work around https://github.com/flutter/flutter/issues/56415.
+  // Do not add more `MockProcessManager` tests.
   group('MockProcessManager', () {
     ProcessManager processManager;
 
