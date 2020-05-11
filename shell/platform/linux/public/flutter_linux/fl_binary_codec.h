@@ -22,7 +22,7 @@ G_DECLARE_FINAL_TYPE(FlBinaryCodec,
 /**
  * FlBinaryCodec:
  *
- * #FlBinaryCodec is a #FlMessageCodec that implements the Flutter binary
+ * #FlBinaryCodec is an #FlMessageCodec that implements the Flutter binary
  * message encoding. This encodes and decodes #FlValue of type
  * #FL_VALUE_TYPE_UINT8_LIST.
  *

@@ -22,7 +22,7 @@ G_DECLARE_FINAL_TYPE(FlStringCodec,
 /**
  * FlStringCodec:
  *
- * #FlStringCodec is a #FlMessageCodec that implements the Flutter string
+ * #FlStringCodec is an #FlMessageCodec that implements the Flutter string
  * message encoding. This encodes and decodes #FlValue of type
  * #FL_VALUE_TYPE_STRING.
  *
