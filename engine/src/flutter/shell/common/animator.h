@@ -35,7 +35,8 @@ class Animator final {
     virtual void OnAnimatorNotifyIdle(int64_t deadline) = 0;
 
     virtual void OnAnimatorDraw(
-        fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) = 0;
+        fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline,
+        fml::TimePoint frame_target_time) = 0;
 
     virtual void OnAnimatorDrawLastLayerTree() = 0;
   };
