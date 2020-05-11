@@ -578,7 +578,7 @@ void main() {
     formKey.currentState.save();
     expect(formKey.currentState.validate(), isTrue);
   });
-  
+
   testWidgets('Do not autovalidate before value changes', (WidgetTester tester) async {
     FormFieldState<String> formFieldState;
 
@@ -612,7 +612,7 @@ void main() {
 
     expect(formFieldState.hasError, isFalse);
   });
-  
+
   testWidgets('only autovalidate after value changes', (WidgetTester tester) async {
     FormFieldState<String> formFieldState;
     const String initialValue = 'foo';
