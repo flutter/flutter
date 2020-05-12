@@ -23,7 +23,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -80,7 +80,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -137,7 +137,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -199,7 +199,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -261,7 +261,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -308,7 +308,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -355,7 +355,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -405,7 +405,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -455,7 +455,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -508,7 +508,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -561,7 +561,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -617,7 +617,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -673,7 +673,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -726,7 +726,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -779,7 +779,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -835,7 +835,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -893,7 +893,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -951,7 +951,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: RangeSlider(
@@ -1040,7 +1040,7 @@ void main() {
       home: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+          data: MediaQueryData.fromWindow(window),
           child: Material(
             child: Center(
               child: Theme(
@@ -1296,7 +1296,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+            data: MediaQueryData.fromWindow(window),
             child: Material(
               child: Center(
                 child: Theme(
@@ -1453,7 +1453,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: Theme(
@@ -1524,7 +1524,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher),
+                data: MediaQueryData.fromWindow(window),
                 child: Material(
                   child: Center(
                     child: Theme(
@@ -1600,7 +1600,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window, WidgetsBinding.instance.platformDispatcher).copyWith(textScaleFactor: 2.0),
+                data: MediaQueryData.fromWindow(window).copyWith(textScaleFactor: 2.0),
                 child: Material(
                   child: Center(
                     child: Theme(

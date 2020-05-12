@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show window;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -89,10 +90,7 @@ class _TestAppState extends State<TestApp> {
         DefaultMaterialLocalizations.delegate,
       ],
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(
-          WidgetsBinding.instance.window,
-          WidgetsBinding.instance.platformDispatcher,
-        ).copyWith(size: widget.mediaSize),
+        data: MediaQueryData.fromWindow(window).copyWith(size: widget.mediaSize),
         child: Directionality(
           textDirection: widget.textDirection,
           child: Navigator(

@@ -43,7 +43,7 @@ void main() {
     final List<PointerEvent> events = <PointerEvent>[];
     _binding.callback = events.add;
 
-    ui.PlatformDispatcher.instance.onPointerDataPacket(packet);
+    ui.window.onPointerDataPacket(packet);
     expect(events.length, 2);
     expect(events[0].runtimeType, equals(PointerDownEvent));
     expect(events[1].runtimeType, equals(PointerUpEvent));
@@ -61,7 +61,7 @@ void main() {
     final List<PointerEvent> events = <PointerEvent>[];
     _binding.callback = events.add;
 
-    ui.PlatformDispatcher.instance.onPointerDataPacket(packet);
+    ui.window.onPointerDataPacket(packet);
     expect(events.length, 3);
     expect(events[0].runtimeType, equals(PointerDownEvent));
     expect(events[1].runtimeType, equals(PointerMoveEvent));
@@ -86,7 +86,7 @@ void main() {
     final List<PointerEvent> events = <PointerEvent>[];
     _binding.callback = events.add;
 
-    ui.PlatformDispatcher.instance.onPointerDataPacket(packet);
+    ui.window.onPointerDataPacket(packet);
     expect(events.length, 0);
     expect(pointerRouterEvents.length, 6,
         reason: 'pointerRouterEvents contains: $pointerRouterEvents');
@@ -109,7 +109,7 @@ void main() {
     final List<PointerEvent> events = <PointerEvent>[];
     _binding.callback = events.add;
 
-    ui.PlatformDispatcher.instance.onPointerDataPacket(packet);
+    ui.window.onPointerDataPacket(packet);
     expect(events.length, 2);
     expect(events[0].runtimeType, equals(PointerDownEvent));
     expect(events[1].runtimeType, equals(PointerCancelEvent));
@@ -130,7 +130,7 @@ void main() {
         _binding.cancelPointer(event.pointer);
     };
 
-    ui.PlatformDispatcher.instance.onPointerDataPacket(packet);
+    ui.window.onPointerDataPacket(packet);
     expect(events.length, 2);
     expect(events[0].runtimeType, equals(PointerDownEvent));
     expect(events[1].runtimeType, equals(PointerCancelEvent));

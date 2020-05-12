@@ -126,11 +126,11 @@ class MediaQueryData {
   /// notifications so that you can update your [MediaQueryData] when the
   /// window's metrics change. For example, see
   /// [WidgetsBindingObserver.didChangeMetrics] or [Window.onMetricsChanged].
-  MediaQueryData.fromWindow(ui.Window window, ui.PlatformDispatcher platformDispatcher)
-    : size = window.screenConfiguration.geometry.size / window.screenConfiguration.devicePixelRatio,
-      devicePixelRatio = window.screenConfiguration.devicePixelRatio,
-      textScaleFactor = platformDispatcher.textScaleFactor,
-      platformBrightness = platformDispatcher.platformBrightness,
+  MediaQueryData.fromWindow(ui.Window window)
+    : size = window.physicalSize / window.devicePixelRatio,
+      devicePixelRatio = window.devicePixelRatio,
+      textScaleFactor = window.textScaleFactor,
+      platformBrightness = window.platformBrightness,
       padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
       viewPadding = EdgeInsets.fromWindowPadding(window.viewPadding, window.devicePixelRatio),
       viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),

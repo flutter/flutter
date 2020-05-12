@@ -954,7 +954,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     _updateNavigator();
-    _locale = _resolveLocales(ui.PlatformDispatcher.instance.locales, widget.supportedLocales);
+    _locale = _resolveLocales(WidgetsBinding.instance.platformDispatcher.locales, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -1474,10 +1474,7 @@ class _MediaQueryFromWindowsState extends State<_MediaQueryFromWindow> with Widg
   @override
   Widget build(BuildContext context) {
     return MediaQuery(
-      data: MediaQueryData.fromWindow(
-          WidgetsBinding.instance.window,
-          WidgetsBinding.instance.platformDispatcher,
-      ),
+      data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
       child: widget.child,
     );
   }

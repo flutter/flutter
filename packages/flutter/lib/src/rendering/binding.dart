@@ -36,7 +36,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
     );
     platformDispatcher
-      ..onPlatformConfigurationChanged = _handleConfigurationChanged
+      ..onPlatformConfigurationChanged = handleConfigurationChanged
       ..onSemanticsAction = _handleSemanticsAction
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
@@ -47,7 +47,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       ..onWindowClosed = handleWindowClosed
       ..onScreenAdded = handleScreenAdded
       ..onScreenConfigurationChanged = handleScreenConfigurationChanged
-      ..onScreenRemoved = handleScreenRemoved;
+      ..onScreenRemoved = handleScreenRemoved
+      ..onMetricsChanged = handleMetricsChanged;
 
     initRenderView();
     _handleSemanticsEnabledChanged();
@@ -56,7 +57,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     initMouseTracker();
   }
 
-  void _handleConfigurationChanged() {}
+  /// Called if the platform configuration changed.
+  @protected
+  void handleConfigurationChanged() { }
 
   /// The current [RendererBinding], if one has been created.
   static RendererBinding get instance => _instance;

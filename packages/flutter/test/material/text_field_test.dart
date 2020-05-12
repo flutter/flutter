@@ -5,7 +5,7 @@
 @TestOn('!chrome') // This whole test suite needs triage.
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+import 'dart:ui' as ui show window, BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -5385,10 +5385,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: MediaQuery(
-              data: MediaQueryData.fromWindow(
-                WidgetsBinding.instance.window,
-                WidgetsBinding.instance.platformDispatcher,
-              ).copyWith(textScaleFactor: 4.0),
+              data: MediaQueryData.fromWindow(ui.window).copyWith(textScaleFactor: 4.0),
               child: Center(
                 child: TextField(
                   decoration: const InputDecoration(labelText: 'Label', border: UnderlineInputBorder()),

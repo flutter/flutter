@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show window;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
@@ -79,10 +81,7 @@ Widget _wrapForChip({
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(
-            WidgetsBinding.instance.window,
-            WidgetsBinding.instance.platformDispatcher,
-        ).copyWith(textScaleFactor: textScaleFactor),
+        data: MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScaleFactor),
         child: Material(child: child),
       ),
     ),

@@ -49,15 +49,10 @@ class TestWindow implements Window {
   /// unless explicitly overridden for test purposes.
   TestWindow({
     @required Window window,
-    @required PlatformDispatcher platformDispatcher,
-  }) : _window = window,
-       _platformDispatcher = platformDispatcher;
+  }) : _window = window;
 
   /// The [Window] that is wrapped by this [TestWindow].
   final Window _window;
-
-  /// The [PlatformDispatcher] that is used by this [TestWindow].
-  final PlatformDispatcher _platformDispatcher;
 
   @override
   double get devicePixelRatio => _devicePixelRatio ?? _window.devicePixelRatio;
@@ -175,7 +170,7 @@ class TestWindow implements Window {
   }
 
   @override
-  Locale get locale => _localeTestValue ?? _platformDispatcher.locale;
+  Locale get locale => _localeTestValue ?? _window.locale;
   Locale _localeTestValue;
   /// Hides the real locale and reports the given [localeTestValue] instead.
   set localeTestValue(Locale localeTestValue) {
@@ -189,7 +184,7 @@ class TestWindow implements Window {
   }
 
   @override
-  List<Locale> get locales => _localesTestValue ?? _platformDispatcher.locales;
+  List<Locale> get locales => _localesTestValue ?? _window.locales;
   List<Locale> _localesTestValue;
   /// Hides the real locales and reports the given [localesTestValue] instead.
   set localesTestValue(List<Locale> localesTestValue) {
@@ -203,10 +198,10 @@ class TestWindow implements Window {
   }
 
   @override
-  VoidCallback get onLocaleChanged => _platformDispatcher.onLocaleChanged;
+  VoidCallback get onLocaleChanged => _window.onLocaleChanged;
   @override
   set onLocaleChanged(VoidCallback callback) {
-    _platformDispatcher.onLocaleChanged = callback;
+    _window.onLocaleChanged = callback;
   }
 
   @override
@@ -218,7 +213,7 @@ class TestWindow implements Window {
   }
 
   @override
-  double get textScaleFactor => _textScaleFactorTestValue ?? _platformDispatcher.textScaleFactor;
+  double get textScaleFactor => _textScaleFactorTestValue ?? _window.textScaleFactor;
   double _textScaleFactorTestValue;
   /// Hides the real text scale factor and reports the given
   /// [textScaleFactorTestValue] instead.
@@ -234,13 +229,13 @@ class TestWindow implements Window {
   }
 
   @override
-  Brightness get platformBrightness => _platformBrightnessTestValue ?? _platformDispatcher.platformBrightness;
+  Brightness get platformBrightness => _platformBrightnessTestValue ?? _window.platformBrightness;
   Brightness _platformBrightnessTestValue;
   @override
-  VoidCallback get onPlatformBrightnessChanged => _platformDispatcher.onPlatformBrightnessChanged;
+  VoidCallback get onPlatformBrightnessChanged => _window.onPlatformBrightnessChanged;
   @override
   set onPlatformBrightnessChanged(VoidCallback callback) {
-    _platformDispatcher.onPlatformBrightnessChanged = callback;
+    _window.onPlatformBrightnessChanged = callback;
   }
   /// Hides the real text scale factor and reports the given
   /// [platformBrightnessTestValue] instead.
@@ -256,7 +251,7 @@ class TestWindow implements Window {
   }
 
   @override
-  bool get alwaysUse24HourFormat => _alwaysUse24HourFormatTestValue ?? _platformDispatcher.alwaysUse24HourFormat;
+  bool get alwaysUse24HourFormat => _alwaysUse24HourFormatTestValue ?? _window.alwaysUse24HourFormat;
   bool _alwaysUse24HourFormatTestValue;
   /// Hides the real clock format and reports the given
   /// [alwaysUse24HourFormatTestValue] instead.
@@ -270,42 +265,42 @@ class TestWindow implements Window {
   }
 
   @override
-  VoidCallback get onTextScaleFactorChanged => _platformDispatcher.onTextScaleFactorChanged;
+  VoidCallback get onTextScaleFactorChanged => _window.onTextScaleFactorChanged;
   @override
   set onTextScaleFactorChanged(VoidCallback callback) {
-    _platformDispatcher.onTextScaleFactorChanged = callback;
+    _window.onTextScaleFactorChanged = callback;
   }
 
   @override
-  FrameCallback get onBeginFrame => _platformDispatcher.onBeginFrame;
+  FrameCallback get onBeginFrame => _window.onBeginFrame;
   @override
   set onBeginFrame(FrameCallback callback) {
-    _platformDispatcher.onBeginFrame = callback;
+    _window.onBeginFrame = callback;
   }
 
   @override
-  VoidCallback get onDrawFrame => _platformDispatcher.onDrawFrame;
+  VoidCallback get onDrawFrame => _window.onDrawFrame;
   @override
   set onDrawFrame(VoidCallback callback) {
-    _platformDispatcher.onDrawFrame = callback;
+    _window.onDrawFrame = callback;
   }
 
   @override
-  TimingsCallback get onReportTimings => _platformDispatcher.onReportTimings;
+  TimingsCallback get onReportTimings => _window.onReportTimings;
   @override
   set onReportTimings(TimingsCallback callback) {
-    _platformDispatcher.onReportTimings = callback;
+    _window.onReportTimings = callback;
   }
 
   @override
-  PointerDataPacketCallback get onPointerDataPacket => _platformDispatcher.onPointerDataPacket;
+  PointerDataPacketCallback get onPointerDataPacket => _window.onPointerDataPacket;
   @override
   set onPointerDataPacket(PointerDataPacketCallback callback) {
-    _platformDispatcher.onPointerDataPacket = callback;
+    _window.onPointerDataPacket = callback;
   }
 
   @override
-  String get defaultRouteName => _defaultRouteNameTestValue ?? _platformDispatcher.defaultRouteName;
+  String get defaultRouteName => _defaultRouteNameTestValue ?? _window.defaultRouteName;
   String _defaultRouteNameTestValue;
   /// Hides the real default route name and reports the given
   /// [defaultRouteNameTestValue] instead.
@@ -320,16 +315,16 @@ class TestWindow implements Window {
 
   @override
   void scheduleFrame() {
-    _platformDispatcher.scheduleFrame();
+    _window.scheduleFrame();
   }
 
   @override
   void render(Scene scene) {
-    _platformDispatcher.render(scene);
+    _window.render(scene);
   }
 
   @override
-  bool get semanticsEnabled => _semanticsEnabledTestValue ?? _platformDispatcher.semanticsEnabled;
+  bool get semanticsEnabled => _semanticsEnabledTestValue ?? _window.semanticsEnabled;
   bool _semanticsEnabledTestValue;
   /// Hides the real semantics enabled and reports the given
   /// [semanticsEnabledTestValue] instead.
@@ -345,21 +340,21 @@ class TestWindow implements Window {
   }
 
   @override
-  VoidCallback get onSemanticsEnabledChanged => _platformDispatcher.onSemanticsEnabledChanged;
+  VoidCallback get onSemanticsEnabledChanged => _window.onSemanticsEnabledChanged;
   @override
   set onSemanticsEnabledChanged(VoidCallback callback) {
-    _platformDispatcher.onSemanticsEnabledChanged = callback;
+    _window.onSemanticsEnabledChanged = callback;
   }
 
   @override
-  SemanticsActionCallback get onSemanticsAction => _platformDispatcher.onSemanticsAction;
+  SemanticsActionCallback get onSemanticsAction => _window.onSemanticsAction;
   @override
   set onSemanticsAction(SemanticsActionCallback callback) {
-    _platformDispatcher.onSemanticsAction = callback;
+    _window.onSemanticsAction = callback;
   }
 
   @override
-  AccessibilityFeatures get accessibilityFeatures => _accessibilityFeaturesTestValue ?? _platformDispatcher.accessibilityFeatures;
+  AccessibilityFeatures get accessibilityFeatures => _accessibilityFeaturesTestValue ?? _window.accessibilityFeatures;
   AccessibilityFeatures _accessibilityFeaturesTestValue;
   /// Hides the real accessibility features and reports the given
   /// [accessibilityFeaturesTestValue] instead.
@@ -375,20 +370,20 @@ class TestWindow implements Window {
   }
 
   @override
-  VoidCallback get onAccessibilityFeaturesChanged => _platformDispatcher.onAccessibilityFeaturesChanged;
+  VoidCallback get onAccessibilityFeaturesChanged => _window.onAccessibilityFeaturesChanged;
   @override
   set onAccessibilityFeaturesChanged(VoidCallback callback) {
-    _platformDispatcher.onAccessibilityFeaturesChanged = callback;
+    _window.onAccessibilityFeaturesChanged = callback;
   }
 
   @override
   void updateSemantics(SemanticsUpdate update) {
-    _platformDispatcher.updateSemantics(update);
+    _window.updateSemantics(update);
   }
 
   @override
   void setIsolateDebugName(String name) {
-    _platformDispatcher.setIsolateDebugName(name);
+    _window.setIsolateDebugName(name);
   }
 
   @override
@@ -397,14 +392,14 @@ class TestWindow implements Window {
     ByteData data,
     PlatformMessageResponseCallback callback,
   ) {
-    _platformDispatcher.sendPlatformMessage(name, data, callback);
+    _window.sendPlatformMessage(name, data, callback);
   }
 
   @override
-  PlatformMessageCallback get onPlatformMessage => _platformDispatcher.onPlatformMessage;
+  PlatformMessageCallback get onPlatformMessage => _window.onPlatformMessage;
   @override
   set onPlatformMessage(PlatformMessageCallback callback) {
-    _platformDispatcher.onPlatformMessage = callback;
+    _window.onPlatformMessage = callback;
   }
 
   /// Delete any test value properties that have been set on this [TestWindow]

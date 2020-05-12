@@ -132,7 +132,7 @@ void main() {
   });
 
   test('Flutter.Frame event fired', () async {
-    PlatformDispatcher.instance.onReportTimings(<FrameTiming>[FrameTiming(<int>[
+    window.onReportTimings(<FrameTiming>[FrameTiming(<int>[
       // build start, build finish
       10000, 15000,
       // raster start, raster finish
@@ -158,7 +158,7 @@ void main() {
     SchedulerBinding.instance.addTimingsCallback((List<FrameTiming> timings) {
       throw Exception('Test');
     });
-    PlatformDispatcher.instance.onReportTimings(<FrameTiming>[]);
+    window.onReportTimings(<FrameTiming>[]);
     expect(errorCaught.exceptionAsString(), equals('Exception: Test'));
   });
 

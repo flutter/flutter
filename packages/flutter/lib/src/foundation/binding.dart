@@ -127,11 +127,6 @@ abstract class BindingBase {
     }());
   }
 
-  /// The current [BindingBase], if one has been created.
-  static BindingBase get instance => _instance;
-  static BindingBase _instance;
-
-
   /// Called when the binding is initialized, to register service
   /// extensions.
   ///

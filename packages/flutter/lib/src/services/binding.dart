@@ -185,7 +185,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     if (lifecycleState != null) {
       return;
     }
-    final AppLifecycleState state = _parseAppLifecycleMessage(platformDispatcher.initialLifecycleState);
+    final AppLifecycleState state = _parseAppLifecycleMessage(window.initialLifecycleState);
     if (state != null) {
       handleAppLifecycleStateChanged(state);
     }
