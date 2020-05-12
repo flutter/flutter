@@ -718,7 +718,6 @@ void main() {
 
   testWidgets('DropdownButtonFormField should re-render if value param changes', (WidgetTester tester) async {
     String currentValue = 'two';
-    final GlobalKey<FormFieldState<String>> key = GlobalKey<FormFieldState<String>>();
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -729,9 +728,6 @@ void main() {
                 key: key,
                 value: currentValue,
                 hint: const Text('Select Value'),
-                decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.fastfood)
-                ),
                 items: menuItems.map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
