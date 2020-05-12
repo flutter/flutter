@@ -755,7 +755,7 @@ void main() {
 
     expect(currentValue, equals('two'));
 
-    await tester.tap(find.byType(dropdownButtonType).last);
+    await tester.tap(find.byType(dropdownButtonType));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('one').last);
