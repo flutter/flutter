@@ -194,6 +194,10 @@ public class TextInputPlugin {
       textType |= InputType.TYPE_TEXT_VARIATION_URI;
     } else if (type.type == TextInputChannel.TextInputType.VISIBLE_PASSWORD) {
       textType |= InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
+    } else if (type.type == TextInputChannel.TextInputType.NAME) {
+      textType |= InputType.TYPE_TEXT_VARIATION_PERSON_NAME;
+    } else if (type.type == TextInputChannel.TextInputType.POSTAL_ADDRESS) {
+      textType |= InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS;
     }
 
     if (obscureText) {
