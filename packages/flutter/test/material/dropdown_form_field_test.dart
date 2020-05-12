@@ -715,4 +715,52 @@ void main() {
     expect(value, equals('two'));
     expect(dropdownButtonTapCounter, 2); // Should not change.
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/56898.
+  testWidgets('DropdownButtonFormField - value can be updated programmatically', (WidgetTester tester) async {
+    final List<String> itemList = <String>['a', 'b', 'c'];
+    String currentItem = 'c';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return DropdownButtonFormField<String>(
+                value: currentItem,
+                onChanged: (String newValue) {},
+                items: itemList.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                    onTap: () {
+                      setState(() {
+                        currentItem = value;
+                      });
+                    }
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // DropdownButtonFormField should show currentItem - 'c'
+    expect(currentItem, 'c');
+    expect(find.text(currentItem), findsOneWidget);
+
+    // Tap dropdown button.
+    await tester.tap(find.text('c'));
+    await tester.pumpAndSettle();
+
+    // Tap dropdown menu item.
+    await tester.tap(find.text('a').last);
+    await tester.pumpAndSettle();
+
+    // DropdownButtonFormField should show currentItem - 'a'
+    expect(currentItem, 'a');
+    expect(find.text(currentItem), findsOneWidget);
+  });
 }
