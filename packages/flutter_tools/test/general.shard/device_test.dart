@@ -71,10 +71,13 @@ void main() {
         pollingDeviceDiscovery.startPolling();
         time.elapse(const Duration(milliseconds: 4001));
         time.flushMicrotasks();
+        // First check should use the default polling timeout
+        // to quickly populate the list.
         expect(pollingDeviceDiscovery.lastPollingTimeout, isNull);
 
         time.elapse(const Duration(milliseconds: 4001));
         time.flushMicrotasks();
+        // Subsequent polling should be much longer.
         expect(pollingDeviceDiscovery.lastPollingTimeout, const Duration(seconds: 30));
         pollingDeviceDiscovery.stopPolling();
       });
