@@ -101,7 +101,7 @@ class WrapParentData extends ContainerBoxParentData<RenderBox> {
 ///
 /// The runs themselves are then positioned in the cross axis according to the
 /// [runSpacing] and [runAlignment].
-class RenderWrap extends ClippableRenderBox
+class RenderWrap extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, WrapParentData>,
          RenderBoxContainerDefaultsMixin<RenderBox, WrapParentData> {
   /// Creates a wrap render object.
@@ -133,9 +133,9 @@ class RenderWrap extends ClippableRenderBox
        _runSpacing = runSpacing,
        _crossAxisAlignment = crossAxisAlignment,
        _textDirection = textDirection,
-       _verticalDirection = verticalDirection {
+       _verticalDirection = verticalDirection,
+       _clipBehavior = clipBehavior {
     addAll(children);
-    this.clipBehavior = clipBehavior;
   }
 
   /// The direction to use as the main axis.
@@ -327,6 +327,20 @@ class RenderWrap extends ClippableRenderBox
     if (_verticalDirection != value) {
       _verticalDirection = value;
       markNeedsLayout();
+    }
+  }
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.none;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
     }
   }
 

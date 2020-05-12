@@ -174,7 +174,7 @@ bool _isTrailingSurrogate(int codeUnit) {
 /// Keyboard handling, IME handling, scrolling, toggling the [showCursor] value
 /// to actually blink the cursor, and other features not mentioned above are the
 /// responsibility of higher layers and not handled by this object.
-class RenderEditable extends ClippableRenderBox with RelayoutWhenSystemFontsChangeMixin {
+class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// Creates a render object that implements the visual aspects of a text field.
   ///
   /// The [textAlign] argument must not be null. It defaults to [TextAlign.start].
@@ -292,11 +292,11 @@ class RenderEditable extends ClippableRenderBox with RelayoutWhenSystemFontsChan
        _obscureText = obscureText,
        _readOnly = readOnly,
        _forceLine = forceLine,
-       _promptRectRange = promptRectRange {
+       _promptRectRange = promptRectRange,
+       _clipBehavior = clipBehavior {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
     this.hasFocus = hasFocus ?? false;
-    this.clipBehavior = clipBehavior;
     if (promptRectColor != null)
       _promptRectPaint.color = promptRectColor;
   }
@@ -1243,6 +1243,20 @@ class RenderEditable extends ClippableRenderBox with RelayoutWhenSystemFontsChan
   double _maxScrollExtent = 0;
 
   double get _caretMargin => _kCaretGap + cursorWidth;
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.hardEdge;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
+  }
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {

@@ -364,9 +364,7 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
   }
 }
 
-class _RenderSingleChildViewport extends ClippableRenderBox
-    with RenderObjectWithChildMixin<RenderBox>
-    implements RenderAbstractViewport {
+class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox> implements RenderAbstractViewport {
   _RenderSingleChildViewport({
     AxisDirection axisDirection = AxisDirection.down,
     @required ViewportOffset offset,
@@ -379,9 +377,9 @@ class _RenderSingleChildViewport extends ClippableRenderBox
        assert(clipBehavior != null),
        _axisDirection = axisDirection,
        _offset = offset,
-       _cacheExtent = cacheExtent {
+       _cacheExtent = cacheExtent,
+       _clipBehavior = clipBehavior {
     this.child = child;
-    this.clipBehavior = clipBehavior;
   }
 
   AxisDirection get axisDirection => _axisDirection;
@@ -419,6 +417,20 @@ class _RenderSingleChildViewport extends ClippableRenderBox
       return;
     _cacheExtent = value;
     markNeedsLayout();
+  }
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.none;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
   }
 
   void _hasScrolled() {

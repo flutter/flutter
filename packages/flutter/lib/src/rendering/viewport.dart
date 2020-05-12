@@ -162,7 +162,7 @@ class RevealedOffset {
 ///  * [RenderSliverToBoxAdapter], which allows a [RenderBox] object to be
 ///    placed inside a [RenderSliver] (the opposite of this class).
 abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMixin<RenderSliver>>
-    extends ClippableRenderBox with ContainerRenderObjectMixin<RenderSliver, ParentDataClass>
+    extends RenderBox with ContainerRenderObjectMixin<RenderSliver, ParentDataClass>
     implements RenderAbstractViewport {
   /// Initializes fields for subclasses.
   RenderViewportBase({
@@ -183,9 +183,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
        _crossAxisDirection = crossAxisDirection,
        _offset = offset,
        _cacheExtent = cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
-       _cacheExtentStyle = cacheExtentStyle {
-    this.clipBehavior = clipBehavior;
-  }
+       _cacheExtentStyle = cacheExtentStyle,
+       _clipBehavior = clipBehavior;
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
@@ -316,6 +315,20 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     }
     _cacheExtentStyle = value;
     markNeedsLayout();
+  }
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.hardEdge;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
   }
 
   @override

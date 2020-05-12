@@ -2283,7 +2283,7 @@ class RenderTransform extends RenderProxyBox {
 }
 
 /// Scales and positions its child within itself according to [fit].
-class RenderFittedBox extends RenderProxyBox with ClipBehaviorMixin {
+class RenderFittedBox extends RenderProxyBox {
   /// Scales and positions its child within itself.
   ///
   /// The [fit] and [alignment] arguments must not be null.
@@ -2299,9 +2299,8 @@ class RenderFittedBox extends RenderProxyBox with ClipBehaviorMixin {
        _fit = fit,
        _alignment = alignment,
        _textDirection = textDirection,
-       super(child) {
-    this.clipBehavior = clipBehavior;
-  }
+       _clipBehavior = clipBehavior,
+       super(child);
 
   Alignment _resolvedAlignment;
 
@@ -2376,6 +2375,20 @@ class RenderFittedBox extends RenderProxyBox with ClipBehaviorMixin {
 
   bool _hasVisualOverflow;
   Matrix4 _transform;
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.none;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
+  }
 
   void _clearPaintData() {
     _hasVisualOverflow = null;

@@ -261,10 +261,9 @@ typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
 ///
 ///  * [Flex], the widget equivalent.
 ///  * [Row] and [Column], direction-specific variants of [Flex].
-class RenderFlex extends ClippableRenderBox
-    with ContainerRenderObjectMixin<RenderBox, FlexParentData>,
-         RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData>,
-         DebugOverflowIndicatorMixin {
+class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>,
+                                        RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData>,
+                                        DebugOverflowIndicatorMixin {
   /// Creates a flex render object.
   ///
   /// By default, the flex layout is horizontal and children are aligned to the
@@ -290,9 +289,9 @@ class RenderFlex extends ClippableRenderBox
        _crossAxisAlignment = crossAxisAlignment,
        _textDirection = textDirection,
        _verticalDirection = verticalDirection,
-       _textBaseline = textBaseline {
+       _textBaseline = textBaseline,
+       _clipBehavior = clipBehavior {
     addAll(children);
-    this.clipBehavior = clipBehavior;
   }
 
   /// The direction to use as the main axis.
@@ -477,6 +476,20 @@ class RenderFlex extends ClippableRenderBox
   // Check whether any meaningful overflow is present. Values below an epsilon
   // are treated as not overflowing.
   bool get _hasOverflow => _overflow > precisionErrorTolerance;
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.none;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
+  }
 
   @override
   void setupParentData(RenderBox child) {

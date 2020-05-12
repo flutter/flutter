@@ -3916,20 +3916,3 @@ class DiagnosticsDebugCreator extends DiagnosticsProperty<Object> {
         level: DiagnosticLevel.hidden,
       );
 }
-
-/// A mixin for [RenderObject] subclasses that can configure its clip behavior.
-mixin ClipBehaviorMixin on RenderObject {
-  /// {@macro flutter.widgets.Clip}
-  ///
-  /// Defaults to [Clip.none], and must not be null.
-  Clip get clipBehavior => _clipBehavior;
-  Clip _clipBehavior = Clip.none;
-  set clipBehavior(Clip value) {
-    assert(value != null);
-    if (value != _clipBehavior) {
-      _clipBehavior = value;
-      markNeedsPaint();
-      markNeedsSemanticsUpdate();
-    }
-  }
-}

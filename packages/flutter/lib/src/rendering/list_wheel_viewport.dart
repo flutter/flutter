@@ -126,7 +126,7 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> {
 ///    in the center of that plane will be mostly untransformed with children
 ///    above and below it being transformed more as the angle increases.
 class RenderListWheelViewport
-    extends ClippableRenderBox
+    extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, ListWheelParentData>
     implements RenderAbstractViewport {
   /// Creates a [RenderListWheelViewport] which renders children on a wheel.
@@ -178,9 +178,9 @@ class RenderListWheelViewport
        _overAndUnderCenterOpacity = overAndUnderCenterOpacity,
        _itemExtent = itemExtent,
        _squeeze = squeeze,
-       _renderChildrenOutsideViewport = renderChildrenOutsideViewport {
+       _renderChildrenOutsideViewport = renderChildrenOutsideViewport,
+       _clipBehavior = clipBehavior {
     addAll(children);
-    this.clipBehavior = clipBehavior;
   }
 
   /// An arbitrary but aesthetically reasonable default value for [diameterRatio].
@@ -464,6 +464,20 @@ class RenderListWheelViewport
     _renderChildrenOutsideViewport = value;
     markNeedsLayout();
     markNeedsSemanticsUpdate();
+  }
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.hardEdge;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
   }
 
   void _hasScrolled() {

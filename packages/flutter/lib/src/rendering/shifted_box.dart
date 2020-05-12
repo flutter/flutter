@@ -616,7 +616,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 ///  * [RenderSizedOverflowBox], a render object that is a specific size but
 ///    passes its original constraints through to its child, which it allows to
 ///    overflow.
-class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin, ClipBehaviorMixin {
+class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
   /// Create a render object that sizes itself to the child but does not
   /// pass the [constraints] down to that child.
   ///
@@ -630,9 +630,8 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
   }) : assert(alignment != null),
        assert(clipBehavior != null),
        _constrainedAxis = constrainedAxis,
-       super.mixin(alignment, textDirection, child) {
-    this.clipBehavior = clipBehavior;
-  }
+       _clipBehavior = clipBehavior,
+       super.mixin(alignment, textDirection, child);
 
   /// The axis to retain constraints on, if any.
   ///
@@ -652,6 +651,20 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
   Rect _overflowContainerRect = Rect.zero;
   Rect _overflowChildRect = Rect.zero;
   bool _isOverflowing = false;
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.none;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
+  }
 
   @override
   void performLayout() {

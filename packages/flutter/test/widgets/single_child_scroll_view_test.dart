@@ -42,8 +42,7 @@ void main() {
     await tester.pumpWidget(SingleChildScrollView(child: Container(height: 2000.0)));
 
     // 1st, check that the render object has received the default clip behavior.
-    final ClippableRenderBox renderObject = tester.allRenderObjects.whereType<ClippableRenderBox>().first;
-    expect(renderObject.runtimeType.toString(), equals('_RenderSingleChildViewport'));
+    final dynamic renderObject = tester.allRenderObjects.where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport').first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // 2nd, check that the painting context has received the default clip behavior.

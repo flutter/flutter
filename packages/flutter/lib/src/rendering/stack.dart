@@ -304,7 +304,7 @@ enum StackFit {
 /// See also:
 ///
 ///  * [RenderFlow]
-class RenderStack extends ClippableRenderBox
+class RenderStack extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, StackParentData>,
          RenderBoxContainerDefaultsMixin<RenderBox, StackParentData> {
   /// Creates a stack render object.
@@ -316,15 +316,15 @@ class RenderStack extends ClippableRenderBox
     AlignmentGeometry alignment = AlignmentDirectional.topStart,
     TextDirection textDirection,
     StackFit fit = StackFit.loose,
-    Clip clipBehavior = Clip.none,
+    Clip clipBehavior = Clip.hardEdge,
   }) : assert(alignment != null),
        assert(fit != null),
        assert(clipBehavior != null),
        _alignment = alignment,
        _textDirection = textDirection,
-       _fit = fit {
+       _fit = fit,
+       _clipBehavior = clipBehavior {
     addAll(children);
-    this.clipBehavior = clipBehavior;
   }
 
   bool _hasVisualOverflow = false;
@@ -398,6 +398,20 @@ class RenderStack extends ClippableRenderBox
     if (_fit != value) {
       _fit = value;
       markNeedsLayout();
+    }
+  }
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.hardEdge;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
     }
   }
 
@@ -596,7 +610,7 @@ class RenderStack extends ClippableRenderBox
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection));
     properties.add(EnumProperty<StackFit>('fit', fit));
-    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior));
+    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
   }
 }
 
