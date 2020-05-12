@@ -725,9 +725,7 @@ void main() {
           return MaterialApp(
             home: Material(
               child: DropdownButtonFormField<String>(
-                key: key,
                 value: currentValue,
-                hint: const Text('Select Value'),
                 onChanged: onChanged,
                 items: menuItems.map((String value) {
                   return DropdownMenuItem<String>(
@@ -747,6 +745,7 @@ void main() {
       ),
     );
 
+    // Make sure the rendered text value matches the initial state value.
     expect(currentValue, equals('two'));
     expect(find.text(currentValue), findsOneWidget);
 
@@ -758,6 +757,7 @@ void main() {
     await tester.tap(find.text('one').last);
     await tester.pumpAndSettle();
 
+    // Make sure the rendered text value matches the updated state value.
     expect(currentValue, equals('one'));
     expect(find.text(currentValue), findsOneWidget);
   });
