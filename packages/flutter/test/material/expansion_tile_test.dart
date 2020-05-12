@@ -332,23 +332,22 @@ void main() {
     expect(child1Rect.left, 700.0);
   });
 
-  testWidgets('ExpansionTile CrossAxisAlignment.baseline', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: ExpansionTile(
-          initiallyExpanded: true,
-          title: const Text('title'),
-          expandedCrossAxisAlignment: CrossAxisAlignment.baseline,
-          children: <Widget>[
-             Container(height: 100, width: 100),
-          ],
+  testWidgets('CrossAxisAlignment.baseline is not allowed', (WidgetTester tester) async {
+    try {
+      MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            initiallyExpanded: true,
+            title: const Text('title'),
+            expandedCrossAxisAlignment: CrossAxisAlignment.baseline,
+          ),
         ),
-      ),
-    ));
-
-    // When the value of expandedCrossAxisAlignment is CrossAxisAlignment.baseline,
-    // the extendedTextBaseline can not be null.
-    expect(tester.takeException(), isAssertionError);
+      );
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('CrossAxisAlignment.baseline is not supported, try to use another constant.'));
+      return;
+    }
+    fail('AssertionError was not thrown when epxandedCrossAxisAlignment was CrossAxisalignment.baseline');
   });
 
   testWidgets('expandedCrossAxisAlignment and expandedAlignment default values', (WidgetTester tester) async {

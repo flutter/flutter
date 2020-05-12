@@ -44,8 +44,9 @@ class ExpansionTile extends StatefulWidget {
     this.tilePadding,
     this.expandedCrossAxisAlignment,
     this.expandedAlignment,
-    this.expandedTextBaseline,
   }) : assert(initiallyExpanded != null),
+       assert(expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
+       'CrossAxisAlignment.baseline is not supported, try to use another constant.'),
        super(key: key);
 
   /// A widget to display before the title.
@@ -124,12 +125,6 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// When the value is null, the value of `expandedCrossAxisAlignment` is [CrossAxisAlignment.center].
   final CrossAxisAlignment expandedCrossAxisAlignment;
-
-  /// Defines the baseline for the alignment to be considered when the value
-  /// of [expandedCrossAxisAlignment] is [CrossAxisAlignment.baseline].
-  ///
-  /// The `expandedTextBaseline` cannot be null when [CrossAxisAlignment.baseline] is used.
-  final TextBaseline expandedTextBaseline;
 
   @override
   _ExpansionTileState createState() => _ExpansionTileState();
@@ -260,7 +255,6 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       builder: _buildChildren,
       child: closed ? null : Column(
         crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
-        textBaseline: widget.expandedTextBaseline,
         children: widget.children,
       ),
     );
