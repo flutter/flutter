@@ -739,9 +739,7 @@ void main() {
                     },
                   );
                 }).toList(),
-                onChanged: (String _) {
-                  // Ignored
-                },
+                onChanged: onChanged,
               ),
             ),
           );
