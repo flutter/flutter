@@ -682,6 +682,42 @@ void main() {
     expect(find.text('B'), isOnstage);
   });
 
+  testWidgets('pushAndRemoveUntil does not remove routes below the first route that pass the predicate', (WidgetTester tester) async {
+    // Regression https://github.com/flutter/flutter/issues/56688
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const Text('home'),
+      '/A': (BuildContext context) => const Text('page A'),
+      '/A/B': (BuildContext context) => OnTapPage(
+        id: 'B',
+        onTap: () {
+          Navigator.of(context).pushNamedAndRemoveUntil('/D', ModalRoute.withName('/A'));
+        },
+      ),
+      '/D': (BuildContext context) => const Text('page D'),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        routes: routes,
+        initialRoute: '/A/B',
+      )
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('B'));
+    await tester.pumpAndSettle();
+    expect(find.text('page D'), isOnstage);
+
+    navigator.currentState.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('page A'), isOnstage);
+
+    navigator.currentState.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('home'), isOnstage);
+  });
+
   testWidgets('replaceNamed returned value', (WidgetTester tester) async {
     Future<String> value;
 
