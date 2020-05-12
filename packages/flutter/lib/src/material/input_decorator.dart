@@ -1707,10 +1707,14 @@ class _Decorator extends RenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderDecoration renderObject) {
     renderObject
      ..decoration = decoration
-     ..textDirection = textDirection
-     ..textBaseline = textBaseline
      ..expands = expands
-     ..isFocused = isFocused;
+     ..isFocused = isFocused
+     ..textBaseline = textBaseline
+     ..textDirection = textDirection;
+
+    if (textAlignVertical != null) {
+      renderObject.textAlignVertical = textAlignVertical;
+    }
   }
 }
 
