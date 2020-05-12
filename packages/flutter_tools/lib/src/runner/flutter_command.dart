@@ -445,7 +445,6 @@ abstract class FlutterCommand extends Command<void> {
       defaultsTo: enabledByDefault
         ?? kIconTreeShakerEnabledDefault,
       help: 'Tree shake icon fonts so that only glyphs used by the application remain.',
-      hide: true,
     );
   }
 
