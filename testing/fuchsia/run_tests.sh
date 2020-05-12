@@ -96,16 +96,16 @@ echo "$(date) START:fml_tests ---------------------------------------"
     --timeout-seconds 300 \
     --packages-directory packages
 
-echo "$(date) START:flow_tests --------------------------------------"
-./fuchsia_ctl -d $device_name test \
-    -f flow_tests-0.far  \
-    -t flow_tests \
-    --identity-file $pkey \
-    --timeout-seconds 300 \
-    --packages-directory packages
-
-# TODO (kaushikiska): Re-enable runtime and shell tests,
+# TODO (kaushikiska): Re-enable flow, shell and runtime tests.
 # see: https://github.com/flutter/flutter/issues/57061
+# echo "$(date) START:flow_tests --------------------------------------"
+# ./fuchsia_ctl -d $device_name test \
+#     -f flow_tests-0.far  \
+#     -t flow_tests \
+#     --identity-file $pkey \
+#     --timeout-seconds 300 \
+#     --packages-directory packages
+
 # echo "$(date) START:runtime_tests -----------------------------------"
 # ./fuchsia_ctl -d $device_name test \
 #     -f runtime_tests-0.far  \
