@@ -270,12 +270,8 @@ class SimdMatrixUtils {
     final Int32x4 col3Equals = a._column3.equal(b._column3);
     final Int32x4 temp = col0Equals & col1Equals & col2Equals & col3Equals;
 
-    // This could be reduced to a single operation if there was a method like
-    // bool allEqual(Int32x4 other).
-    return temp.x == -1
-      && temp.y == -1
-      && temp.z == -1
-      && temp.w == -1;
+    // This command is not efficient on ARM.
+    return temp.signMask == 15;
   }
 
   /// Returns a rect that bounds the result of applying the given matrix as a
