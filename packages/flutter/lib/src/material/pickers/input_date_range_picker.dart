@@ -9,6 +9,7 @@ import '../input_border.dart';
 import '../input_decorator.dart';
 import '../material_localizations.dart';
 import '../text_field.dart';
+import '../theme.dart';
 
 import 'date_utils.dart' as utils;
 import 'input_date_picker.dart' show DateTextInputFormatter;
@@ -230,6 +231,7 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
   @override
   Widget build(BuildContext context) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final InputDecorationTheme inputTheme = Theme.of(context).inputDecorationTheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -237,8 +239,8 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
           child: TextField(
             controller: _startController,
             decoration: InputDecoration(
-              border: const UnderlineInputBorder(),
-              filled: true,
+              border: inputTheme.border ?? const UnderlineInputBorder(),
+              filled: inputTheme.filled ?? true,
               hintText: widget.fieldStartHintText ?? localizations.dateHelpText,
               labelText: widget.fieldStartLabelText ?? localizations.dateRangeStartLabel,
               errorText: _startErrorText,
@@ -254,8 +256,8 @@ class InputDateRangePickerState extends State<InputDateRangePicker> {
           child: TextField(
             controller: _endController,
             decoration: InputDecoration(
-              border: const UnderlineInputBorder(),
-              filled: true,
+              border: inputTheme.border ?? const UnderlineInputBorder(),
+              filled: inputTheme.filled ?? true,
               hintText: widget.fieldEndHintText ?? localizations.dateHelpText,
               labelText: widget.fieldEndLabelText ?? localizations.dateRangeEndLabel,
               errorText: _endErrorText,
