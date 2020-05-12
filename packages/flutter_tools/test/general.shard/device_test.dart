@@ -69,11 +69,11 @@ void main() {
       FakeAsync().run((FakeAsync time) async {
         final FakePollingDeviceDiscovery pollingDeviceDiscovery = FakePollingDeviceDiscovery();
         pollingDeviceDiscovery.startPolling();
-        time.elapse(const Duration(milliseconds: 5000));
+        time.elapse(const Duration(milliseconds: 4001));
         time.flushMicrotasks();
         expect(pollingDeviceDiscovery.lastPollingTimeout, isNull);
 
-        time.elapse(const Duration(milliseconds: 5000));
+        time.elapse(const Duration(milliseconds: 4001));
         time.flushMicrotasks();
         expect(pollingDeviceDiscovery.lastPollingTimeout, const Duration(seconds: 30));
         pollingDeviceDiscovery.stopPolling();
