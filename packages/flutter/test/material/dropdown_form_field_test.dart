@@ -715,4 +715,52 @@ void main() {
     expect(value, equals('two'));
     expect(dropdownButtonTapCounter, 2); // Should not change.
   });
+
+  testWidgets('DropdownButtonFormField should re-render if value param changes', (WidgetTester tester) async {
+    String currentValue = 'two';
+    final GlobalKey<FormFieldState<String>> key = GlobalKey<FormFieldState<String>>();
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            home: Material(
+              child: DropdownButtonFormField<String>(
+                key: key,
+                value: currentValue,
+                hint: const Text('Select Value'),
+                decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.fastfood)
+                ),
+                items: menuItems.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                    onTap: () {
+                      setState(() {
+                        currentValue = value;
+                      });
+                    },
+                  );
+                }).toList(),
+                onChanged: (String _) {
+                  // Ignored
+                },
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(currentValue, equals('two'));
+
+    await tester.tap(find.byType(dropdownButtonType).last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('one').last);
+    await tester.pumpAndSettle();
+
+    expect(currentValue, equals('one'));
+  });
 }
