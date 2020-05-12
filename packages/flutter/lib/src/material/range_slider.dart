@@ -31,6 +31,71 @@ typedef PaintRangeValueIndicator = void Function(PaintingContext context, Offset
 ///
 /// Used to select a range from a range of values.
 ///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// This is what it looks like when run:
+///
+/// ![A range slider widget, consisting of 5 divisions and showing the default
+/// value indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/range_slider.png)
+///
+/// This sample shows creation of a [RangeSlider] widget with 5 divisions.
+///
+/// ```dart
+/// RangeValues _rangeSliderDiscreteValues = const RangeValues(40, 80);
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return RangeSlider(
+///     values: _rangeSliderDiscreteValues,
+///     min: 0,
+///     max: 100,
+///     divisions: 5,
+///     labels: RangeLabels(
+///       _rangeSliderDiscreteValues.start.round().toString(),
+///       _rangeSliderDiscreteValues.end.round().toString(),
+///     ),
+///     onChanged: (values) {
+///       setState(() {
+///         _rangeSliderDiscreteValues = values;
+///       });
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+///
+/// This is what it looks like when run:
+///
+/// ![A range slider widget, consisting of 5 divisions and showing the default
+/// value indicator.]()
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This sample shows creation of a [RangeSlider] widget with 5 divisions.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   RangeValues _rangeSliderDiscreteValues = const RangeValues(40, 80);
+///   return RangeSlider(
+///     values: _rangeSliderDiscreteValues,
+///     min: 0,
+///     max: 100,
+///     divisions: 5,
+///     labels: RangeLabels(
+///       _rangeSliderDiscreteValues.start.round().toString(),
+///       _rangeSliderDiscreteValues.end.round().toString(),
+///     ),
+///     onChanged: (values) {
+///       setState(() {
+///         _rangeSliderDiscreteValues = values;
+///       });
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// A range slider can be used to select from either a continuous or a discrete
 /// set of values. The default is to use a continuous range of values from [min]
 /// to [max]. To use discrete values, use a non-null value for [divisions], which

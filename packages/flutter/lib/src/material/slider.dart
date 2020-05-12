@@ -44,6 +44,36 @@ enum _SliderType { material, adaptive }
 ///
 /// Used to select from a range of values.
 ///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// This is what it looks like when run:
+///
+/// ![A slider widget, consisting of 5 divisions and showing the default value
+/// indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/slider.png)
+///
+/// This sample shows creation of a [Slider] widget with 5 divisions.
+///
+/// ```dart
+/// double _sliderDiscreteValue = 20;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Slider(
+///     value: _sliderDiscreteValue,
+///     min: 0,
+///     max: 100,
+///     divisions: 5,
+///     label: _sliderDiscreteValue.round().toString(),
+///     onChanged: (value) {
+///       setState(() {
+///         _sliderDiscreteValue = value;
+///       });
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// A slider can be used to select from either a continuous or a discrete set of
 /// values. The default is to use a continuous range of values from [min] to
 /// [max]. To use discrete values, use a non-null value for [divisions], which
