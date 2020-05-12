@@ -728,6 +728,7 @@ void main() {
                 key: key,
                 value: currentValue,
                 hint: const Text('Select Value'),
+                onChanged: onChanged,
                 items: menuItems.map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -739,7 +740,6 @@ void main() {
                     },
                   );
                 }).toList(),
-                onChanged: onChanged,
               ),
             ),
           );
