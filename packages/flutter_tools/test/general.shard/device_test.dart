@@ -66,7 +66,7 @@ void main() {
 
   group('PollingDeviceDiscovery', () {
     testUsingContext('startPolling', () async {
-      FakeAsync().run((FakeAsync time) async {
+      FakeAsync().run((FakeAsync time) {
         final FakePollingDeviceDiscovery pollingDeviceDiscovery = FakePollingDeviceDiscovery();
         pollingDeviceDiscovery.startPolling();
         time.elapse(const Duration(milliseconds: 4001));
