@@ -506,61 +506,6 @@ abstract class BuildSystem {
     Environment environment,
     BuildResult previousBuild,
   );
-
-  /// Write the identifier of the last build into the output directory and
-  /// remove the previous build's output.
-  ///
-  /// The build identifier is the basename of the build directory where
-  /// outputs and intermediaries are written, under `.dart_tool/flutter_build`.
-  /// This is computed from a hash of the build's configuration.
-  ///
-  /// This identifier is used to perform a targeted cleanup of the last output
-  /// files, if these were not already covered by the built-in cleanup. This
-  /// cleanup is only necessary when multiple different build configurations
-  /// output to the same directory.
-  @visibleForTesting
-  static void trackSharedBuildDirectory(
-    Environment environment,
-    FileSystem fileSystem,
-    Map<String, File> currentOutputs,
-  ) {
-    final String currentBuildId = fileSystem.path.basename(environment.buildDir.path);
-    final File lastBuildIdFile = environment.outputDir.childFile('.last_build_id');
-    if (!lastBuildIdFile.existsSync()) {
-      lastBuildIdFile.writeAsStringSync(currentBuildId);
-      // No config file, either output was cleaned or this is the first build.
-      return;
-    }
-    final String lastBuildId = lastBuildIdFile.readAsStringSync().trim();
-    if (lastBuildId == currentBuildId) {
-      // The last build was the same configuration as the current build
-      return;
-    }
-    // Update the output dir with the latest config.
-    lastBuildIdFile
-      ..createSync()
-      ..writeAsStringSync(currentBuildId);
-    final File outputsFile = environment.buildDir
-      .parent
-      .childDirectory(lastBuildId)
-      .childFile('outputs.json');
-
-    if (!outputsFile.existsSync()) {
-      // There is no output list. This could happen if the user manually
-      // edited .last_config or deleted .dart_tool.
-      return;
-    }
-    final List<String> lastOutputs = (json.decode(outputsFile.readAsStringSync()) as List<Object>)
-      .cast<String>();
-    for (final String lastOutput in lastOutputs) {
-      if (!currentOutputs.containsKey(lastOutput)) {
-        final File lastOutputFile = fileSystem.file(lastOutput);
-        if (lastOutputFile.existsSync()) {
-          lastOutputFile.deleteSync();
-        }
-      }
-    }
-  }
 }
 
 class FlutterBuildSystem extends BuildSystem {
@@ -630,7 +575,7 @@ class FlutterBuildSystem extends BuildSystem {
                      path.contains('.dart_tool');
       });
     }
-    BuildSystem.trackSharedBuildDirectory(
+    trackSharedBuildDirectory(
       environment, _fileSystem, buildInstance.outputFiles,
     );
     environment.buildDir.childFile('outputs.json')
@@ -691,6 +636,61 @@ class FlutterBuildSystem extends BuildSystem {
     );
     _incrementalFileStore[result] = fileCache;
     return result;
+  }
+
+  /// Write the identifier of the last build into the output directory and
+  /// remove the previous build's output.
+  ///
+  /// The build identifier is the basename of the build directory where
+  /// outputs and intermediaries are written, under `.dart_tool/flutter_build`.
+  /// This is computed from a hash of the build's configuration.
+  ///
+  /// This identifier is used to perform a targeted cleanup of the last output
+  /// files, if these were not already covered by the built-in cleanup. This
+  /// cleanup is only necessary when multiple different build configurations
+  /// output to the same directory.
+  @visibleForTesting
+  void trackSharedBuildDirectory(
+    Environment environment,
+    FileSystem fileSystem,
+    Map<String, File> currentOutputs,
+  ) {
+    final String currentBuildId = fileSystem.path.basename(environment.buildDir.path);
+    final File lastBuildIdFile = environment.outputDir.childFile('.last_build_id');
+    if (!lastBuildIdFile.existsSync()) {
+      lastBuildIdFile.writeAsStringSync(currentBuildId);
+      // No config file, either output was cleaned or this is the first build.
+      return;
+    }
+    final String lastBuildId = lastBuildIdFile.readAsStringSync().trim();
+    if (lastBuildId == currentBuildId) {
+      // The last build was the same configuration as the current build
+      return;
+    }
+    // Update the output dir with the latest config.
+    lastBuildIdFile
+      ..createSync()
+      ..writeAsStringSync(currentBuildId);
+    final File outputsFile = environment.buildDir
+      .parent
+      .childDirectory(lastBuildId)
+      .childFile('outputs.json');
+
+    if (!outputsFile.existsSync()) {
+      // There is no output list. This could happen if the user manually
+      // edited .last_config or deleted .dart_tool.
+      return;
+    }
+    final List<String> lastOutputs = (json.decode(outputsFile.readAsStringSync()) as List<Object>)
+      .cast<String>();
+    for (final String lastOutput in lastOutputs) {
+      if (!currentOutputs.containsKey(lastOutput)) {
+        final File lastOutputFile = fileSystem.file(lastOutput);
+        if (lastOutputFile.existsSync()) {
+          lastOutputFile.deleteSync();
+        }
+      }
+    }
   }
 }
 
