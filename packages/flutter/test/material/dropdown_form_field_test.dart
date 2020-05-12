@@ -758,6 +758,7 @@ void main() {
     await tester.tap(find.byType(dropdownButtonType));
     await tester.pumpAndSettle();
 
+    // Tap the first dropdown menu item.
     await tester.tap(find.text('one').last);
     await tester.pumpAndSettle();
 
