@@ -750,7 +750,9 @@ void main() {
     );
 
     expect(currentValue, equals('two'));
+    expect(find.text(currentValue), findsOneWidget);
 
+    // Tap the DropdownButtonFormField widget
     await tester.tap(find.byType(dropdownButtonType));
     await tester.pumpAndSettle();
 
@@ -759,5 +761,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(currentValue, equals('one'));
+    expect(find.text(currentValue), findsOneWidget);
   });
 }
