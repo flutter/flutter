@@ -2368,7 +2368,7 @@ class _RouteEntry extends RouteTransitionRecord {
 
     if (previousState == _RouteLifecycle.replace || previousState == _RouteLifecycle.pushReplace) {
       for (final NavigatorObserver observer in navigator.widget.observers)
-        observer.didReplace(newRoute: route, oldRoute: previous);
+        observer.didReplace(newRoute: route, oldRoute: previousPresent);
     } else {
       assert(previousState == _RouteLifecycle.push);
       for (final NavigatorObserver observer in navigator.widget.observers)

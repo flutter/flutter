@@ -628,6 +628,61 @@ void main() {
     expect(aOffset.dx, lessThan(aOffsetOriginal.dx));
   });
 
+  testWidgets('pushReplacement correctly reports didReplace to the observer', (WidgetTester tester) async {
+    // Regression https://github.com/flutter/flutter/issues/56892.
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/' : (BuildContext context) => const OnTapPage(
+        id: '/',
+      ),
+      '/A': (BuildContext context) => const OnTapPage(
+        id: 'A',
+      ),
+      '/A/B': (BuildContext context) => OnTapPage(
+        id: 'B',
+        onTap: (){
+          Navigator.of(context).popUntil((r) => r.isFirst);
+          Navigator.of(context).pushReplacementNamed('/C');
+        },
+      ),
+      '/C': (BuildContext context) => const OnTapPage(id: 'C',
+      ),
+    };
+    final List<List<Route<dynamic>>> didPopped = <List<Route<dynamic>>>[];
+    final List<List<Route<dynamic>>> didReplaced = <List<Route<dynamic>>>[];
+    final TestObserver observer = TestObserver()
+      ..onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        didPopped.add(<Route<dynamic>>[route, previousRoute]);
+      }
+      ..onReplaced = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        didReplaced.add(<Route<dynamic>>[route, previousRoute]);
+      };
+    await tester.pumpWidget(
+      MaterialApp(
+        routes: routes,
+        navigatorObservers: <NavigatorObserver>[observer],
+        initialRoute: '/A/B',
+      )
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('B'), isOnstage);
+
+    await tester.tap(find.text('B'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(didPopped.length, 2);
+    expect(didPopped[0][0].settings.name, '/A/B');
+    expect(didPopped[0][1].settings.name, '/A');
+    expect(didPopped[1][0].settings.name, '/A');
+    expect(didPopped[1][1].settings.name, '/');
+
+    expect(didReplaced.length, 1);
+    expect(didReplaced[0][0].settings.name, '/C');
+    expect(didReplaced[0][1].settings.name, '/');
+
+    await tester.pumpAndSettle();
+    expect(find.text('C'), isOnstage);
+  });
+
   testWidgets('pushAndRemoveUntil triggers secondaryAnimation', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(
