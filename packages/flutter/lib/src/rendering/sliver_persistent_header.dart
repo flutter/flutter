@@ -73,10 +73,10 @@ class PersistentHeaderShowOnScreenConfiguration {
   /// should behave in response to [RenderObject.showOnScreen] calls.
   const PersistentHeaderShowOnScreenConfiguration({
     this.ignoreLeading = true,
-    this.minExpandExtent,
-    this.maxExpandExtent,
+    this.minShowOnScreenExtent,
+    this.maxShowOnScreenExtent,
   }) : assert(ignoreLeading != null),
-       assert(minExpandExtent == null || maxExpandExtent == null || minExpandExtent < maxExpandExtent);
+       assert(minShowOnScreenExtent == null || minShowOnScreenExtent < maxShowOnScreenExtent);
 
   /// Whether to ignore the part of the `rect` specified in [RenderObject.showOnScreen]
   /// that exceeds the leading edge of the sliver's child [RenderBox].
@@ -114,24 +114,24 @@ class PersistentHeaderShowOnScreenConfiguration {
   /// persistent header always expands to its `maxExtent` when `showOnScreen` is
   /// called.
   ///
-  /// Defaults null. Must be less than [maxExpandExtent] if both of them are not
-  /// null. This parameter has no effect if set to null or a value smaller than
+  /// Defaults null. Must be less than [maxShowOnScreenExtent] if both of them
+  /// are not null. This parameter has no effect if set to null or a value smaller than
   /// the persistent header's `minExtent`. Has no effect unless the persistent
   /// header is a floating header.
-  final double minExpandExtent;
+  final double minShowOnScreenExtent;
 
   /// The biggest the floating header object can become in the main axis
   /// direction, when `showOnScreen` is called, in addition to the persistent
   /// header's `maxExtent`.
   ///
   /// This parameter can be set to the persistent header's `minExtent` so the
-  /// persistent header will not try to expand when `showOnScreen` is called.
+  /// persistent header will try not to expand when `showOnScreen` is called.
   ///
-  /// Defaults null. Must be greater than [minExpandExtent] if both of them are
-  /// not null. This parameter has no effect if set to null or a value bigger
-  /// than the persistent header's `maxExtent`. Has no effect unless the
+  /// Defaults null. Must be greater than [minShowOnScreenExtent] if both of them
+  /// are not null. This parameter has no effect if set to null or a value
+  /// bigger than the persistent header's `maxExtent`. Has no effect unless the
   /// persistent header is a floating header.
-  final double maxExpandExtent;
+  final double maxShowOnScreenExtent;
 }
 
 /// A base class for slivers that have a [RenderBox] child which scrolls
@@ -568,7 +568,6 @@ class FloatingHeaderSnapConfiguration {
   final Duration duration;
 }
 
-
 /// A sliver with a [RenderBox] child which shrinks and scrolls like a
 /// [RenderSliverScrollingPersistentHeader], but immediately comes back when the
 /// user scrolls in the reverse direction.
@@ -770,6 +769,8 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       ? MatrixUtils.transformRect(descendant.getTransformTo(child), rect ?? descendant.paintBounds)
       : rect;
 
+    // A stretch header can have a bigger childExtent than maxExtent.
+    final double effectiveMaxExtent = math.max(childExtent, maxExtent);
     double minTargetExtent;
     Rect targetRect;
     switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
@@ -797,10 +798,10 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
 
     minTargetExtent = minTargetExtent
       .clamp(
-        showOnScreenConfiguration.minExpandExtent ?? childExtent,
-        math.max(showOnScreenConfiguration.maxExpandExtent ?? maxExtent, childExtent),
+        showOnScreenConfiguration.minShowOnScreenExtent ?? childExtent,
+        math.max(showOnScreenConfiguration.maxShowOnScreenExtent ?? effectiveMaxExtent, childExtent),
       )
-      .clamp(childExtent, maxExtent) as double;
+      .clamp(childExtent, effectiveMaxExtent) as double;
      
     // Expands the header if needed, with animation if possible.
     if (minTargetExtent > childExtent) {
