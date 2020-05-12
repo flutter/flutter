@@ -3435,9 +3435,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(predicate != null);
     int index = _history.length - 1;
     _history.add(_RouteEntry(newRoute, initialState: _RouteLifecycle.push));
-    while (index >= 0) {
-      final _RouteEntry entry = _history[index];
-      if (entry.isPresent && !predicate(entry.route))
+    while (index >= 0 && !predicate(_history[index].route)) {
+      if (_history[index].isPresent)
         _history[index].remove();
       index -= 1;
     }

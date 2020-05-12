@@ -384,11 +384,26 @@ void main() {
         ),
       ),
     );
+    expect(find.text('Page 0'), findsNothing);
+    expect(find.text('Page 6'), findsNothing);
+
     await tester.drag(find.text('Page 5'), const Offset(0, -1000));
-    // Controller will be temporarily over-scrolled.
+    // Controller will be temporarily over-scrolled (before the frame triggered by the drag) because
+    // SliverFixedExtentList doesn't report its size until it has built its last child, so the
+    // maxScrollExtent is infinite, so when we move by 1000 pixels in one go, we go all the way.
+    //
+    // This never actually gets rendered, it's just the controller state before we lay out.
     expect(controller.offset, 1600.0);
-    await tester.pumpAndSettle();
-    // It will be corrected after a auto scroll animation.
+
+    // However, once we pump, the scroll offset gets clamped to the newly discovered maximum, which
+    // is the itemExtent (200) times the number of items (7) minus the height of the viewport (600).
+    // This adds up to 800.0.
+    await tester.pump();
+    expect(find.text('Page 0'), findsNothing);
+    expect(find.text('Page 6'), findsOneWidget);
+    expect(controller.offset, 800.0);
+
+    expect(await tester.pumpAndSettle(), 1); // there should be no animation here
     expect(controller.offset, 800.0);
   });
 
