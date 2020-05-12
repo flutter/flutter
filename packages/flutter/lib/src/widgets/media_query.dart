@@ -102,7 +102,21 @@ class MediaQueryData {
     this.highContrast = false,
     this.disableAnimations = false,
     this.boldText = false,
-  });
+  }) : assert(size != null),
+       assert(devicePixelRatio != null),
+       assert(textScaleFactor != null),
+       assert(platformBrightness != null),
+       assert(padding != null),
+       assert(viewInsets != null),
+       assert(systemGestureInsets != null),
+       assert(viewPadding != null),
+       assert(physicalDepth != null),
+       assert(alwaysUse24HourFormat != null),
+       assert(accessibleNavigation != null),
+       assert(invertColors != null),
+       assert(highContrast != null),
+       assert(disableAnimations != null),
+       assert(boldText != null);
 
   /// Creates data for a media query based on the given window.
   ///
@@ -124,7 +138,7 @@ class MediaQueryData {
       invertColors = window.accessibilityFeatures.invertColors,
       disableAnimations = window.accessibilityFeatures.disableAnimations,
       boldText = window.accessibilityFeatures.boldText,
-      highContrast = false,
+      highContrast = window.accessibilityFeatures.highContrast,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).

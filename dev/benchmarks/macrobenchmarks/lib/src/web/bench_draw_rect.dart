@@ -9,7 +9,7 @@ import 'recorder.dart';
 /// Repeatedly paints a grid of rectangles.
 ///
 /// Measures the performance of the `drawRect` operation.
-class BenchDrawRect extends RawRecorder {
+class BenchDrawRect extends SceneBuilderRecorder {
   BenchDrawRect() : super(name: benchmarkName);
 
   static const String benchmarkName = 'draw_rect';

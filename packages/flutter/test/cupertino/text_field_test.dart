@@ -3623,7 +3623,7 @@ void main() {
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
-                    prefix: Container(
+                    prefix: const SizedBox(
                       height: 100,
                       width: 10,
                     ),
@@ -3676,7 +3676,7 @@ void main() {
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
-                    prefix: Container(
+                    prefix: const SizedBox(
                       height: 100,
                       width: 10,
                     ),
@@ -3730,7 +3730,7 @@ void main() {
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
-                    prefix: Container(
+                    prefix: const SizedBox(
                       height: 100,
                       width: 10,
                     ),
@@ -3784,7 +3784,7 @@ void main() {
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
-                    prefix: Container(
+                    prefix: const SizedBox(
                       height: 100,
                       width: 10,
                     ),
@@ -4028,7 +4028,8 @@ void main() {
 
     await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
     await tester.pump(const Duration(milliseconds: 150));
-    await tester.tapAt(textfieldStart + const Offset(20.0, 146.0));
+    // Tap the Select All button.
+    await tester.tapAt(textfieldStart + const Offset(20.0, 100.0));
     await tester.pump(const Duration(milliseconds: 300));
 
     await expectLater(
@@ -4074,7 +4075,8 @@ void main() {
 
     await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
     await tester.pump(const Duration(milliseconds: 150));
-    await tester.tapAt(textfieldStart + const Offset(20.0, 146.0));
+    // Tap the Select All button.
+    await tester.tapAt(textfieldStart + const Offset(20.0, 100.0));
     await tester.pump(const Duration(milliseconds: 300));
 
     await expectLater(

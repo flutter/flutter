@@ -615,11 +615,11 @@ class WidgetsApp extends StatefulWidget {
   /// `basicLocaleListResolution`, attempts to match by the following priority:
   ///
   ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
-  ///  1. [Locale.languageCode] and [Locale.countryCode] only
-  ///  1. [Locale.languageCode] and [Locale.countryCode] only
-  ///  1. [Locale.languageCode] only
-  ///  1. [Locale.countryCode] only when all preferred locales fail to match
-  ///  1. Returns the first element of [supportedLocales] as a fallback
+  ///  2. [Locale.languageCode] and [Locale.scriptCode] only
+  ///  3. [Locale.languageCode] and [Locale.countryCode] only
+  ///  4. [Locale.languageCode] only
+  ///  5. [Locale.countryCode] only when all preferred locales fail to match
+  ///  6. Returns the first element of [supportedLocales] as a fallback
   ///
   /// When more than one supported locale matches one of these criteria, only
   /// the first matching locale is returned.
@@ -743,7 +743,7 @@ class WidgetsApp extends StatefulWidget {
   ///   return WidgetsApp(
   ///     shortcuts: <LogicalKeySet, Intent>{
   ///       ... WidgetsApp.defaultShortcuts,
-  ///       LogicalKeySet(LogicalKeyboardKey.select): const Intent(ActivateAction.key),
+  ///       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
   ///     },
   ///     color: const Color(0xFFFF0000),
   ///     builder: (BuildContext context, Widget child) {
@@ -790,12 +790,12 @@ class WidgetsApp extends StatefulWidget {
   /// ```dart
   /// Widget build(BuildContext context) {
   ///   return WidgetsApp(
-  ///     actions: <LocalKey, ActionFactory>{
+  ///     actions: <Type, Action<Intent>>{
   ///       ... WidgetsApp.defaultActions,
-  ///       ActivateAction.key: () => CallbackAction(
-  ///         ActivateAction.key,
-  ///         onInvoke: (FocusNode focusNode, Intent intent) {
+  ///       ActivateAction: CallbackAction(
+  ///         onInvoke: (Intent intent) {
   ///           // Do something here...
+  ///           return null;
   ///         },
   ///       ),
   ///     },
@@ -818,7 +818,7 @@ class WidgetsApp extends StatefulWidget {
   ///  * The [Intent] and [Action] classes, which allow definition of new
   ///    actions.
   /// {@endtemplate}
-  final Map<LocalKey, ActionFactory> actions;
+  final Map<Type, Action<Intent>> actions;
 
   /// If true, forces the performance overlay to be visible in all instances.
   ///
@@ -845,13 +845,13 @@ class WidgetsApp extends StatefulWidget {
 
   static final Map<LogicalKeySet, Intent> _defaultShortcuts = <LogicalKeySet, Intent>{
     // Activation
-    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
-    LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
-    LogicalKeySet(LogicalKeyboardKey.gameButtonA): const Intent(ActivateAction.key),
+    LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
+    LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
+    LogicalKeySet(LogicalKeyboardKey.gameButtonA): const ActivateIntent(),
 
     // Keyboard traversal.
-    LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const PreviousFocusIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
     LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
     LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
@@ -869,11 +869,11 @@ class WidgetsApp extends StatefulWidget {
   // Default shortcuts for the web platform.
   static final Map<LogicalKeySet, Intent> _defaultWebShortcuts = <LogicalKeySet, Intent>{
     // Activation
-    LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
+    LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
 
     // Keyboard traversal.
-    LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const PreviousFocusIntent(),
 
     // Scrolling
     LogicalKeySet(LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
@@ -887,12 +887,12 @@ class WidgetsApp extends StatefulWidget {
   // Default shortcuts for the macOS platform.
   static final Map<LogicalKeySet, Intent> _defaultMacOsShortcuts = <LogicalKeySet, Intent>{
     // Activation
-    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
-    LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
+    LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
+    LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
 
     // Keyboard traversal
-    LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const PreviousFocusIntent(),
     LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
     LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
     LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
@@ -919,6 +919,8 @@ class WidgetsApp extends StatefulWidget {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         return _defaultShortcuts;
       case TargetPlatform.macOS:
         return _defaultMacOsShortcuts;
@@ -930,13 +932,13 @@ class WidgetsApp extends StatefulWidget {
   }
 
   /// The default value of [WidgetsApp.actions].
-  static final Map<LocalKey, ActionFactory> defaultActions = <LocalKey, ActionFactory>{
-    DoNothingAction.key: () => const DoNothingAction(),
-    RequestFocusAction.key: () => RequestFocusAction(),
-    NextFocusAction.key: () => NextFocusAction(),
-    PreviousFocusAction.key: () => PreviousFocusAction(),
-    DirectionalFocusAction.key: () => DirectionalFocusAction(),
-    ScrollAction.key: () => ScrollAction(),
+  static Map<Type, Action<Intent>> defaultActions = <Type, Action<Intent>>{
+    DoNothingIntent: DoNothingAction(),
+    RequestFocusIntent: RequestFocusAction(),
+    NextFocusIntent: NextFocusAction(),
+    PreviousFocusIntent: PreviousFocusAction(),
+    DirectionalFocusIntent: DirectionalFocusAction(),
+    ScrollIntent: ScrollAction(),
   };
 
   @override

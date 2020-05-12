@@ -236,8 +236,8 @@ void main() {
 
     testUsingContext('returns the gradlew path', () {
       final Directory androidDirectory = globals.fs.directory('/android')..createSync();
-      androidDirectory.childFile('gradlew')..createSync();
-      androidDirectory.childFile('gradlew.bat')..createSync();
+      androidDirectory.childFile('gradlew').createSync();
+      androidDirectory.childFile('gradlew.bat').createSync();
       androidDirectory.childFile('gradle.properties').createSync();
 
       when(gradleUtils.injectGradleWrapperIfNeeded(any)).thenReturn(null);

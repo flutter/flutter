@@ -9,12 +9,11 @@ import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -135,7 +134,29 @@ void main() {
         .thenAnswer((_) => Future<Process>.value(process));
       when(mockProcessManager.canRun(any)).thenReturn(false);
 
+      when(mockProcessManager.runSync(
+        argThat(contains(contains('gen_snapshot'))),
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenReturn(ProcessResult(0, 255, '', ''));
+
+      when(mockProcessManager.runSync(
+        <String>['/usr/bin/xcode-select', '--print-path'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenReturn(ProcessResult(0, 0, '', ''));
+
+      when(mockProcessManager.run(
+        <String>['which', 'pod'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) {
+        return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
+      });
+
       mockAndroidSdk = MockAndroidSdk();
+      when(mockAndroidSdk.licensesAvailable).thenReturn(true);
+      when(mockAndroidSdk.platformToolsAvailable).thenReturn(true);
       when(mockAndroidSdk.validateSdkWellFormed()).thenReturn(const <String>[]);
       when(mockAndroidSdk.directory).thenReturn('irrelevant');
     });
@@ -200,10 +221,11 @@ void main() {
         <String>[
           gradlew,
           '-q',
-          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
-          '-Ptrack-widget-creation=false',
-          '-Pshrink=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
+          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptrack-widget-creation=true',
+          '-Pshrink=true',
+          '-Ptree-shake-icons=true',
           'bundleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -233,9 +255,10 @@ void main() {
         <String>[
           gradlew,
           '-q',
-          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
-          '-Ptrack-widget-creation=false',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
+          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptrack-widget-creation=true',
+          '-Ptree-shake-icons=true',
           'bundleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -251,15 +274,15 @@ void main() {
     testUsingContext('guides the user when the shrinker fails', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
-
       when(mockProcessManager.start(
         <String>[
           gradlew,
           '-q',
-          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
-          '-Ptrack-widget-creation=false',
-          '-Pshrink=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
+          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptrack-widget-creation=true',
+          '-Pshrink=true',
+          '-Ptree-shake-icons=true',
           'bundleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -282,12 +305,18 @@ void main() {
         );
       }, throwsToolExit(message: 'Gradle task bundleRelease failed with exit code 1'));
 
-      expect(testLogger.statusText,
-          contains('The shrinker may have failed to optimize the Java bytecode.'));
-      expect(testLogger.statusText,
-          contains('To disable the shrinker, pass the `--no-shrink` flag to this command.'));
-      expect(testLogger.statusText,
-          contains('To learn more, see: https://developer.android.com/studio/build/shrink-code'));
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace('The shrinker may have failed to optimize the Java bytecode.'),
+      );
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace('To disable the shrinker, pass the `--no-shrink` flag to this command.'),
+      );
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace('To learn more, see: https://developer.android.com/studio/build/shrink-code'),
+      );
 
       verify(mockUsage.sendEvent(
         'build',
@@ -305,16 +334,22 @@ void main() {
 
     testUsingContext("reports when the app isn't using AndroidX", () async {
       final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--no-androidx', '--template=app']);
+          arguments: <String>['--no-pub', '--template=app']);
+      // Simulate a non-androidx project.
+      tempDir
+        .childDirectory('flutter_project')
+        .childDirectory('android')
+        .childFile('gradle.properties')
+        .writeAsStringSync('android.useAndroidX=false');
 
       when(mockProcessManager.start(
         <String>[
           gradlew,
           '-q',
-          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
-          '-Ptrack-widget-creation=false',
-          '-Pshrink=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
+          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptrack-widget-creation=true',
+          '-Pshrink=true',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -334,11 +369,16 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText, contains("Your app isn't using AndroidX"));
-      expect(testLogger.statusText, contains(
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace("Your app isn't using AndroidX"),
+      );
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace(
         'To avoid potential build failures, you can quickly migrate your app by '
         'following the steps on https://goo.gl/CP92wY'
-        )
+        ),
       );
       verify(mockUsage.sendEvent(
         'build',
@@ -362,10 +402,10 @@ void main() {
         <String>[
           gradlew,
           '-q',
-          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
-          '-Ptrack-widget-creation=false',
-          '-Pshrink=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
+          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptrack-widget-creation=true',
+          '-Pshrink=true',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -385,13 +425,17 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText.contains("Your app isn't using AndroidX"), isFalse);
       expect(
-        testLogger.statusText.contains(
-          'To avoid potential build failures, you can quickly migrate your app by '
-          'following the steps on https://goo.gl/CP92wY'
-        ),
-        isFalse,
+        testLogger.statusText,
+        not(containsIgnoringWhitespace("Your app isn't using AndroidX")),
+      );
+      expect(
+        testLogger.statusText,
+        not(
+          containsIgnoringWhitespace(
+            'To avoid potential build failures, you can quickly migrate your app by '
+            'following the steps on https://goo.gl/CP92wY'),
+        )
       );
       verify(mockUsage.sendEvent(
         'build',
@@ -422,6 +466,10 @@ Future<BuildAppBundleCommand> runBuildAppBundleCommand(
     globals.fs.path.join(target, 'lib', 'main.dart'),
   ]);
   return command;
+}
+
+Matcher not(Matcher target){
+  return isNot(target);
 }
 
 class MockAndroidSdk extends Mock implements AndroidSdk {}

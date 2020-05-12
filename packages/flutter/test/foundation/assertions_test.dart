@@ -14,7 +14,7 @@ void main() {
     });
     expect(log[0], contains('Example label'));
     expect(log[1], contains('debugPrintStack'));
-  }, skip: isBrowser);
+  });
 
   test('debugPrintStack', () {
     final List<String> log = captureOutput(() {
@@ -39,7 +39,7 @@ void main() {
 
     expect(joined, contains('captureOutput'));
     expect(joined, contains('\nExample information\n'));
-  }, skip: isBrowser);
+  });
 
   test('FlutterErrorDetails.toString', () {
     expect(

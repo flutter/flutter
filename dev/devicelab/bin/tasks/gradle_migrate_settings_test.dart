@@ -117,7 +117,7 @@ plugins.each { name, path ->
 
       section('Override settings.gradle with custom logic');
 
-      const String customDeprecatedFileContent = '''
+      const String customDeprecatedFileContent = r'''
 include ':app'
 
 def flutterProjectRoot = rootProject.projectDir.parentFile.toPath()
@@ -130,8 +130,8 @@ if (pluginsFile.exists()) {
 
 plugins.each { name, path ->
     def pluginDirectory = flutterProjectRoot.resolve(path).resolve('android').toFile()
-    include ":\$name"
-    project(":\$name").projectDir = pluginDirectory
+    include ":$name"
+    project(":$name").projectDir = pluginDirectory
 }
 // some custom logic
 ''';

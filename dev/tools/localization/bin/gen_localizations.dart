@@ -40,7 +40,6 @@
 // dart dev/tools/localization/bin/gen_localizations.dart --overwrite
 // ```
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -50,6 +49,8 @@ import '../gen_cupertino_localizations.dart';
 import '../gen_material_localizations.dart';
 import '../localizations_utils.dart';
 import '../localizations_validator.dart';
+
+import 'encode_kn_arb_files.dart';
 
 /// This is the core of this script; it generates the code used for translations.
 String generateArbBasedLocalizationSubclasses({
@@ -77,6 +78,11 @@ String generateArbBasedLocalizationSubclasses({
   assert(supportedLanguagesConstant.isNotEmpty);
   assert(supportedLanguagesDocMacro.isNotEmpty);
 
+  // See https://github.com/flutter/flutter/issues/53036 for context on why
+  // 'no' is being used as a synonym for 'nb'. It only uses this synonym
+  // if 'nb' is not detected as a valid arb file.
+  bool isNbSynonymOfNo = false;
+
   final StringBuffer output = StringBuffer();
   output.writeln(generateHeader('dart dev/tools/localization/bin/gen_localizations.dart --overwrite'));
 
@@ -102,6 +108,12 @@ String generateArbBasedLocalizationSubclasses({
     allResourceIdentifiers.addAll(localeToResources[locale].keys.toList()..sort());
   }
 
+  if (languageToLocales['no'] != null && languageToLocales['nb'] == null) {
+    languageToLocales['nb'] ??= <LocaleInfo>[];
+    languageToLocales['nb'].add(LocaleInfo.fromString('nb'));
+    isNbSynonymOfNo = true;
+  }
+
   // We generate one class per supported language (e.g.
   // `MaterialLocalizationEn`). These implement everything that is needed by the
   // superclass (e.g. GlobalMaterialLocalizations).
@@ -118,7 +130,7 @@ String generateArbBasedLocalizationSubclasses({
 
   // If scriptCodes for a language are defined, we expect a scriptCode to be
   // defined for locales that contain a countryCode. The superclass becomes
-  // the script sublcass (e.g. `MaterialLocalizationZhHant`) and the generated
+  // the script subclass (e.g. `MaterialLocalizationZhHant`) and the generated
   // subclass will also contain the script code (e.g. `MaterialLocalizationZhHantTW`).
 
   // When scriptCodes are not defined for languages that use scriptCodes to distinguish
@@ -131,6 +143,22 @@ String generateArbBasedLocalizationSubclasses({
   final LocaleInfo canonicalLocale = LocaleInfo.fromString('en');
   for (final String languageName in languageCodes) {
     final LocaleInfo languageLocale = LocaleInfo.fromString(languageName);
+
+    // See https://github.com/flutter/flutter/issues/53036 for context on why
+    // 'no' is being used as a synonym for 'nb'. It only uses this synonym
+    // if 'nb' is not detected as a valid arb file.
+    if (languageName == 'nb' && isNbSynonymOfNo) {
+      output.writeln(generateClassDeclaration(
+        languageLocale,
+        generatedClassPrefix,
+        '${generatedClassPrefix}No'),
+      );
+      output.writeln(generateConstructor(languageLocale));
+      output.writeln('}');
+      supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)}, which, in this library, is a synonym of `no`');
+      continue;
+    }
+
     output.writeln(generateClassDeclaration(languageLocale, generatedClassPrefix, baseClass));
     output.writeln(generateConstructor(languageLocale));
 
@@ -213,6 +241,7 @@ String generateArbBasedLocalizationSubclasses({
        output.writeln('}');
       }
     }
+
     final String scriptCodeMessage = scriptCodeCount == 0 ? '' : ' and $scriptCodeCount script' + (scriptCodeCount == 1 ? '' : 's');
     if (countryCodeCount == 0) {
       if (scriptCodeCount == 0)
@@ -480,7 +509,7 @@ String generateGetter(String key, String value, Map<String, dynamic> attributes,
   $type get $key => $value;''';
 }
 
-Future<void> main(List<String> rawArgs) async {
+void main(List<String> rawArgs) {
   checkCwdIsRepoRoot('gen_localizations');
   final GeneratorOptions options = parseArgs(rawArgs);
 
@@ -499,7 +528,17 @@ Future<void> main(List<String> rawArgs) async {
     exitWithError('$exception');
   }
 
-  await precacheLanguageAndRegionTags();
+  // Only rewrite material_kn.arb and cupertino_en.arb if overwriting the
+  // Material and Cupertino localizations files.
+  if (options.writeToFile) {
+    // Encodes the material_kn.arb file and the cupertino_en.arb files before
+    // generating localizations. This prevents a subset of Emacs users from
+    // crashing when opening up the Flutter source code.
+    // See https://github.com/flutter/flutter/issues/36704 for more context.
+    encodeKnArbFiles(directory);
+  }
+
+  precacheLanguageAndRegionTags();
 
   // Maps of locales to resource key/value pairs for Material ARBs.
   final Map<LocaleInfo, Map<String, String>> materialLocaleToResources = <LocaleInfo, Map<String, String>>{};

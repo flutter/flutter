@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 import '../flutter_test_alternative.dart';
 import 'scheduler_tester.dart';
 
-class TestSchedulerBinding extends BindingBase with ServicesBinding, SchedulerBinding {
+class TestSchedulerBinding extends BindingBase with SchedulerBinding, ServicesBinding {
   final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
 
   @override

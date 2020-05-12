@@ -340,18 +340,20 @@ void main() {
     final SliverMultiBoxAdaptorParentData candidate = SliverMultiBoxAdaptorParentData();
     expect(candidate.keepAlive, isFalse);
     expect(candidate.index, isNull);
-    expect(candidate.toString(), 'index=null; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=null; layoutOffset=None');
     candidate.keepAlive = null;
-    expect(candidate.toString(), 'index=null; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=null; layoutOffset=None');
     candidate.keepAlive = true;
-    expect(candidate.toString(), 'index=null; keepAlive; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=null; keepAlive; layoutOffset=None');
     candidate.keepAlive = false;
-    expect(candidate.toString(), 'index=null; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=null; layoutOffset=None');
     candidate.index = 0;
-    expect(candidate.toString(), 'index=0; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=0; layoutOffset=None');
     candidate.index = 1;
-    expect(candidate.toString(), 'index=1; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=1; layoutOffset=None');
     candidate.index = -1;
-    expect(candidate.toString(), 'index=-1; layoutOffset=0.0');
+    expect(candidate.toString(), 'index=-1; layoutOffset=None');
+    candidate.layoutOffset = 100.0;
+    expect(candidate.toString(), 'index=-1; layoutOffset=100.0');
   });
 }

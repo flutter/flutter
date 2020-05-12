@@ -39,7 +39,7 @@ void main() {
     processManager = FakeProcessManager.any();
     terminal = MockTerminal();
     fileSystem = MemoryFileSystem.test();
-    bufferLogger = BufferLogger(terminal: terminal, outputPreferences: OutputPreferences.test());
+    bufferLogger = BufferLogger.test(terminal: terminal);
   });
 
   testUsingContext('Downgrade exits on unknown channel', () async {

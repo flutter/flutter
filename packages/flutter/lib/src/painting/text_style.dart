@@ -391,7 +391,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///  * [TextStyle](https://api.flutter.dev/flutter/dart-ui/TextStyle-class.html), the class in the [dart:ui] library.
 ///
 @immutable
-class TextStyle extends Diagnosticable {
+class TextStyle with Diagnosticable {
   /// Creates a text style.
   ///
   /// The `package` argument must be non-null if the font family is defined in a
@@ -482,7 +482,7 @@ class TextStyle extends Diagnosticable {
   ///
   /// When [fontFamily] is null or not provided, the first value in [fontFamilyFallback]
   /// acts as the preferred/first font family. When neither is provided, then
-  /// the default platform font will be used. Providing and empty list or null
+  /// the default platform font will be used. Providing an empty list or null
   /// for this property is the same as omitting it.
   ///
   /// For example, if a glyph is not found in [fontFamily], then each font family
@@ -794,12 +794,17 @@ class TextStyle extends Diagnosticable {
     double fontSizeFactor = 1.0,
     double fontSizeDelta = 0.0,
     int fontWeightDelta = 0,
+    FontStyle fontStyle,
     double letterSpacingFactor = 1.0,
     double letterSpacingDelta = 0.0,
     double wordSpacingFactor = 1.0,
     double wordSpacingDelta = 0.0,
     double heightFactor = 1.0,
     double heightDelta = 0.0,
+    TextBaseline textBaseline,
+    Locale locale,
+    List<ui.Shadow> shadows,
+    List<ui.FontFeature> fontFeatures,
   }) {
     assert(fontSizeFactor != null);
     assert(fontSizeDelta != null);
@@ -834,16 +839,16 @@ class TextStyle extends Diagnosticable {
       fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
       fontSize: fontSize == null ? null : fontSize * fontSizeFactor + fontSizeDelta,
       fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1) as int],
-      fontStyle: fontStyle,
+      fontStyle: fontStyle ?? this.fontStyle,
       letterSpacing: letterSpacing == null ? null : letterSpacing * letterSpacingFactor + letterSpacingDelta,
       wordSpacing: wordSpacing == null ? null : wordSpacing * wordSpacingFactor + wordSpacingDelta,
-      textBaseline: textBaseline,
+      textBaseline: textBaseline ?? this.textBaseline,
       height: height == null ? null : height * heightFactor + heightDelta,
-      locale: locale,
+      locale: locale ?? this.locale,
       foreground: foreground,
       background: background,
-      shadows: shadows,
-      fontFeatures: fontFeatures,
+      shadows: shadows ?? this.shadows,
+      fontFeatures: fontFeatures ?? this.fontFeatures,
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
       decorationStyle: decorationStyle ?? this.decorationStyle,

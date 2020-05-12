@@ -270,4 +270,18 @@ class SystemChannels {
     'flutter/skia',
     JSONMethodCodec(),
   );
+
+  /// A [MethodChannel] for configuring mouse cursors.
+  ///
+  /// All outgoing methods defined for this channel uses a `Map<String, dynamic>`
+  /// to contain multiple parameters, including the following methods (invoked
+  /// using [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `activateSystemCursor`: Request to set the cursor of a pointer
+  ///    device to a system cursor. The parameters are
+  ///    integer `device`, and string `kind`.
+  static const MethodChannel mouseCursor = OptionalMethodChannel(
+    'flutter/mousecursor',
+    StandardMethodCodec(),
+  );
 }

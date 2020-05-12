@@ -39,6 +39,23 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     echo
     exit 1
   }
+  command -v unzip > /dev/null 2>&1 || {
+    echo
+    echo 'Missing "unzip" tool. Unable to extract Dart SDK.'
+    case "$(uname -s)" in
+      Darwin)
+        echo 'Consider running "brew install unzip".'
+        ;;
+      Linux)
+        echo 'Consider running "sudo apt-get install unzip".'
+        ;;
+      *)
+        echo "Please install unzip."
+        ;;
+    esac
+    echo
+    exit 1
+  }
   echo "Downloading Dart SDK from Flutter engine $ENGINE_VERSION..."
 
   case "$(uname -s)" in
@@ -81,7 +98,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
   mkdir -m 755 -p -- "$DART_SDK_PATH"
   DART_SDK_ZIP="$FLUTTER_ROOT/bin/cache/$DART_ZIP_NAME"
 
-  curl --continue-at - --location --output "$DART_SDK_ZIP" "$DART_SDK_URL" 2>&1 || {
+  curl --retry 3 --continue-at - --location --output "$DART_SDK_ZIP" "$DART_SDK_URL" 2>&1 || {
     echo
     echo "Failed to retrieve the Dart SDK from: $DART_SDK_URL"
     echo "If you're located in China, please see this page:"

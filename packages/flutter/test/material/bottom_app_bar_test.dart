@@ -79,7 +79,8 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('bottom_app_bar.custom_shape.2.png'),
     );
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/51675,
+  // https://github.com/flutter/flutter/issues/44572
 
   testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -384,7 +385,7 @@ void main() {
 
 // The bottom app bar clip path computation is only available at paint time.
 // In order to examine the notch path we implement this caching painter which
-// at paint time looks for for a descendant PhysicalShape and caches the
+// at paint time looks for a descendant PhysicalShape and caches the
 // clip path it is using.
 class ClipCachePainter extends CustomPainter {
   ClipCachePainter(this.context);

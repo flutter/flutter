@@ -6,25 +6,25 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/runner.dart' as runner;
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
-import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/reporting/github_template.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 
+const String kCustomBugInstructions = 'These are instructions to report with a custom bug tracker.';
+
 void main() {
   group('runner', () {
-    MockGitHubTemplateCreator mockGitHubTemplateCreator;
     setUp(() {
-      mockGitHubTemplateCreator = MockGitHubTemplateCreator();
-      runner.crashFileSystem = MemoryFileSystem();
       // Instead of exiting with dart:io exit(), this causes an exception to
       // be thrown, which we catch with the onError callback in the zone below.
       io.setExitFunctionForTests((int _) { throw 'test exit';});
@@ -32,7 +32,6 @@ void main() {
     });
 
     tearDown(() {
-      runner.crashFileSystem = const LocalFileSystem();
       io.restoreExitFunction();
       Cache.enableLocking();
     });
@@ -54,7 +53,7 @@ void main() {
           ));
           return null;
         },
-        onError: (Object error) {
+        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
           expect(error, 'test exit');
           completer.complete();
         },
@@ -67,7 +66,7 @@ void main() {
       // exception on the first attempt, the second attempt tries to report the
       // *original* crash, and not the crash from the first crash report
       // attempt.
-      final CrashingUsage crashingUsage = flutterUsage as CrashingUsage;
+      final CrashingUsage crashingUsage = globals.flutterUsage as CrashingUsage;
       expect(crashingUsage.sentException, 'an exception % --');
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(environment: <String, String>{
@@ -79,13 +78,7 @@ void main() {
       Usage: () => CrashingUsage(),
     });
 
-    testUsingContext('GitHub issue template', () async {
-      const String similarURL = 'https://example.com/1';
-      when(mockGitHubTemplateCreator.toolCrashSimilarIssuesGitHubURL(any))
-        .thenAnswer((_) async => similarURL);
-      const String templateURL = 'https://example.com/2';
-      when(mockGitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(any, any, any, any, any))
-        .thenAnswer((_) async => templateURL);
+    testUsingContext('create local report', () async {
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.
@@ -102,7 +95,7 @@ void main() {
         ));
         return null;
         },
-        onError: (Object error) {
+        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
           expect(error, 'test exit');
           completer.complete();
         },
@@ -110,14 +103,25 @@ void main() {
       await completer.future;
 
       final String errorText = testLogger.errorText;
-      expect(errorText, contains('A crash report has been written to /flutter_01.log.'));
-      expect(errorText, contains('Oops; flutter has exited unexpectedly: "an exception % --".\n'));
+      expect(
+        errorText,
+        containsIgnoringWhitespace('Oops; flutter has exited unexpectedly: "an exception % --".\n'),
+      );
 
-      final String statusText = testLogger.statusText;
-      expect(statusText, contains(similarURL));
-      expect(statusText, contains('https://flutter.dev/docs/resources/bug-reports'));
-      expect(statusText, contains(templateURL));
+      final File log = globals.fs.file('/flutter_01.log');
+      final String logContents = log.readAsStringSync();
+      expect(logContents, contains(kCustomBugInstructions));
+      expect(logContents, contains('flutter test'));
+      expect(logContents, contains('String: an exception % --'));
+      expect(logContents, contains('CrashingFlutterCommand.runCommand'));
+      expect(logContents, contains('[✓] Flutter'));
 
+      final VerificationResult argVerification = verify(globals.crashReporter.informUser(captureAny, any));
+      final CrashDetails sentDetails = argVerification.captured.first as CrashDetails;
+      expect(sentDetails.command, 'flutter test');
+      expect(sentDetails.error, 'an exception % --');
+      expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
+      expect(sentDetails.doctorText, contains('[✓] Flutter'));
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(
         environment: <String, String>{
@@ -128,7 +132,7 @@ void main() {
       ),
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
-      GitHubTemplateCreator: () => mockGitHubTemplateCreator,
+      UserMessages: () => CustomBugInstructions(),
     });
   });
 }
@@ -226,4 +230,9 @@ class CrashingUsage implements Usage {
 
   @override
   void printWelcome() => _impl.printWelcome();
+}
+
+class CustomBugInstructions extends UserMessages {
+  @override
+  String get flutterToolBugInstructions => kCustomBugInstructions;
 }

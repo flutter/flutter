@@ -40,22 +40,28 @@ class DecorationImage {
   /// must not be null.
   const DecorationImage({
     @required this.image,
+    this.onError,
     this.colorFilter,
     this.fit,
     this.alignment = Alignment.center,
     this.centerSlice,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
+    this.scale = 1.0
   }) : assert(image != null),
        assert(alignment != null),
        assert(repeat != null),
-       assert(matchTextDirection != null);
+       assert(matchTextDirection != null),
+       assert(scale != null);
 
   /// The image to be painted into the decoration.
   ///
   /// Typically this will be an [AssetImage] (for an image shipped with the
   /// application) or a [NetworkImage] (for an image obtained from the network).
   final ImageProvider image;
+
+  /// An optional error callback for errors emitted when loading [image].
+  final ImageErrorListener onError;
 
   /// A color filter to apply to the image before painting it.
   final ColorFilter colorFilter;
@@ -125,6 +131,12 @@ class DecorationImage {
   /// in the top right.
   final bool matchTextDirection;
 
+  /// Defines image pixels to be shown per logical pixels.
+  ///
+  /// By default the the value of scale is 1.0. The scale for the image is
+  /// calculated by multiplying [scale] with `scale` of the given [ImageProvider].
+  final double scale;
+
   /// Creates a [DecorationImagePainter] for this [DecorationImage].
   ///
   /// The `onChanged` argument must not be null. It will be called whenever the
@@ -148,11 +160,12 @@ class DecorationImage {
         && other.alignment == alignment
         && other.centerSlice == centerSlice
         && other.repeat == repeat
-        && other.matchTextDirection == matchTextDirection;
+        && other.matchTextDirection == matchTextDirection
+        && other.scale == scale;
   }
 
   @override
-  int get hashCode => hashValues(image, colorFilter, fit, alignment, centerSlice, repeat, matchTextDirection);
+  int get hashCode => hashValues(image, colorFilter, fit, alignment, centerSlice, repeat, matchTextDirection, scale);
 
   @override
   String toString() {
@@ -171,6 +184,7 @@ class DecorationImage {
         '$repeat',
       if (matchTextDirection)
         'match text direction',
+      'scale: $scale'
     ];
     return '${objectRuntimeType(this, 'DecorationImage')}(${properties.join(", ")})';
   }
@@ -239,7 +253,10 @@ class DecorationImagePainter {
 
     final ImageStream newImageStream = _details.image.resolve(configuration);
     if (newImageStream.key != _imageStream?.key) {
-      final ImageStreamListener listener = ImageStreamListener(_handleImage);
+      final ImageStreamListener listener = ImageStreamListener(
+        _handleImage,
+        onError: _details.onError,
+      );
       _imageStream?.removeListener(listener);
       _imageStream = newImageStream;
       _imageStream.addListener(listener);
@@ -256,7 +273,7 @@ class DecorationImagePainter {
       canvas: canvas,
       rect: rect,
       image: _image.image,
-      scale: _image.scale,
+      scale: _details.scale * _image.scale,
       colorFilter: _details.colorFilter,
       fit: _details.fit,
       alignment: _details.alignment.resolve(configuration.textDirection),
@@ -286,7 +303,10 @@ class DecorationImagePainter {
   /// After this method has been called, the object is no longer usable.
   @mustCallSuper
   void dispose() {
-    _imageStream?.removeListener(ImageStreamListener(_handleImage));
+    _imageStream?.removeListener(ImageStreamListener(
+      _handleImage,
+      onError: _details.onError,
+    ));
   }
 
   @override
@@ -376,12 +396,14 @@ void paintImage({
   bool flipHorizontally = false,
   bool invertColors = false,
   FilterQuality filterQuality = FilterQuality.low,
+  bool isAntiAlias = false,
 }) {
   assert(canvas != null);
   assert(image != null);
   assert(alignment != null);
   assert(repeat != null);
   assert(flipHorizontally != null);
+  assert(isAntiAlias != null);
   if (rect.isEmpty)
     return;
   Size outputSize = rect.size;
@@ -412,7 +434,7 @@ void paintImage({
     // output rect with the image.
     repeat = ImageRepeat.noRepeat;
   }
-  final Paint paint = Paint()..isAntiAlias = false;
+  final Paint paint = Paint()..isAntiAlias = isAntiAlias;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
   if (sourceSize != destinationSize) {

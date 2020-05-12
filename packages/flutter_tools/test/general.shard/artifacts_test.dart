@@ -3,15 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
-import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
-
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -32,7 +31,7 @@ void main() {
         rootOverride: cacheRoot,
         fileSystem: fileSystem,
         platform: platform,
-        logger: MockLogger(),
+        logger: BufferLogger.test(),
         osUtils: MockOperatingSystemUtils(),
       );
       artifacts = CachedArtifacts(
@@ -84,10 +83,10 @@ void main() {
         rootOverride: cacheRoot,
         fileSystem: fileSystem,
         platform: platform,
-        logger: MockLogger(),
+        logger: BufferLogger.test(),
         osUtils: MockOperatingSystemUtils(),
       );
-      artifacts = LocalEngineArtifacts(fileSystem.currentDirectory.path,
+      artifacts = LocalEngineArtifacts(
         fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
         fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
         cache: cache,
@@ -128,7 +127,7 @@ void main() {
     });
 
     testWithoutContext('Looks up dart.exe on windows platforms', () async {
-      artifacts = LocalEngineArtifacts(fileSystem.currentDirectory.path,
+      artifacts = LocalEngineArtifacts(
         fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
         fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
         cache: cache,
@@ -146,5 +145,4 @@ void main() {
   });
 }
 
-class MockLogger extends Mock implements Logger {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}

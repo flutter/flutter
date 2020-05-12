@@ -34,6 +34,13 @@ String getDefaultApplicationKernelPath({ @required bool trackWidgetCreation }) {
   );
 }
 
+String getDefaultCachedKernelPath({ @required bool trackWidgetCreation }) {
+  return getKernelPathForTransformerOptions(
+    globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
+    trackWidgetCreation: trackWidgetCreation,
+  );
+}
+
 String getKernelPathForTransformerOptions(
   String path, {
   @required bool trackWidgetCreation,
@@ -54,7 +61,7 @@ class BundleBuilder {
   /// The default  `manifestPath` is `pubspec.yaml`
   Future<void> build({
     @required TargetPlatform platform,
-    BuildMode buildMode,
+    BuildInfo buildInfo,
     String mainPath,
     String manifestPath = defaultManifestPath,
     String applicationKernelFilePath,
@@ -74,10 +81,10 @@ class BundleBuilder {
     mainPath ??= defaultMainPath;
     depfilePath ??= defaultDepfilePath;
     assetDirPath ??= getAssetBuildDirectory();
-    packagesPath ??= globals.fs.path.absolute(PackageMap.globalPackagesPath);
+    packagesPath ??= globals.fs.path.absolute(globalPackagesPath);
     final FlutterProject flutterProject = FlutterProject.current();
     await buildWithAssemble(
-      buildMode: buildMode ?? BuildMode.debug,
+      buildMode: buildInfo.mode,
       targetPlatform: platform,
       mainPath: mainPath,
       flutterProject: flutterProject,
@@ -86,6 +93,7 @@ class BundleBuilder {
       precompiled: precompiledSnapshot,
       trackWidgetCreation: trackWidgetCreation,
       treeShakeIcons: treeShakeIcons,
+      dartDefines: buildInfo.dartDefines,
     );
     // Work around for flutter_tester placing kernel artifacts in odd places.
     if (applicationKernelFilePath != null) {
@@ -111,6 +119,7 @@ Future<void> buildWithAssemble({
   @required bool precompiled,
   bool trackWidgetCreation,
   @required bool treeShakeIcons,
+  List<String> dartDefines,
 }) async {
   // If the precompiled flag was not passed, force us into debug mode.
   buildMode = precompiled ? buildMode : BuildMode.debug;
@@ -120,18 +129,27 @@ Future<void> buildWithAssemble({
     buildDir: flutterProject.dartTool.childDirectory('flutter_build'),
     cacheDir: globals.cache.getRoot(),
     flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+    engineVersion: globals.artifacts.isLocalEngine
+      ? null
+      : globals.flutterVersion.engineRevision,
     defines: <String, String>{
       kTargetFile: mainPath,
       kBuildMode: getNameForBuildMode(buildMode),
       kTargetPlatform: getNameForTargetPlatform(targetPlatform),
       kTrackWidgetCreation: trackWidgetCreation?.toString(),
       kIconTreeShakerFlag: treeShakeIcons ? 'true' : null,
+      if (dartDefines != null && dartDefines.isNotEmpty)
+        kDartDefines: dartDefines.join(','),
     },
+    artifacts: globals.artifacts,
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    processManager: globals.processManager,
   );
   final Target target = buildMode == BuildMode.debug
     ? const CopyFlutterBundle()
     : const ReleaseCopyFlutterBundle();
-  final BuildResult result = await buildSystem.build(target, environment);
+  final BuildResult result = await globals.buildSystem.build(target, environment);
 
   if (!result.success) {
     for (final ExceptionMeasurement measurement in result.exceptions.values) {
@@ -152,7 +170,6 @@ Future<void> buildWithAssemble({
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
-      platform: globals.platform,
     );
     depfileService.writeToFile(depfile, outputDepfile);
   }
@@ -166,7 +183,7 @@ Future<AssetBundle> buildAssets({
   bool reportLicensedPackages = false,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
-  packagesPath ??= globals.fs.path.absolute(PackageMap.globalPackagesPath);
+  packagesPath ??= globals.fs.path.absolute(globalPackagesPath);
 
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();

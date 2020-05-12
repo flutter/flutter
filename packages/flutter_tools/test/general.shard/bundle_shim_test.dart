@@ -23,7 +23,7 @@ void main() {
   });
 
   test('Copies assets to expected directory after building', () => testbed.run(() async {
-    when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+    when(globals.buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
       final Environment environment = invocation.positionalArguments[1] as Environment;
       environment.outputDir.childFile('kernel_blob.bin').createSync(recursive: true);
       environment.outputDir.childFile('isolate_snapshot_data').createSync();
@@ -47,7 +47,7 @@ void main() {
   }));
 
   test('Handles build system failure', () => testbed.run(() {
-    when(buildSystem.build(any, any)).thenAnswer((Invocation _) async {
+    when(globals.buildSystem.build(any, any)).thenAnswer((Invocation _) async {
       return BuildResult(
         success: false,
         exceptions: <String, ExceptionMeasurement>{},

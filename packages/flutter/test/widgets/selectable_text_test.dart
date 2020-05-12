@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
+import 'package:flutter/gestures.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -995,7 +995,6 @@ void main() {
           dragStartBehavior: DragStartBehavior.down,
           style: TextStyle(color: Colors.black, fontSize: 34.0),
           maxLines: 3,
-          strutStyle: StrutStyle.disabled,
         ),
       ),
     );
@@ -1316,7 +1315,6 @@ void main() {
               child: SelectableText(
                 text,
                 maxLines: 3,
-                strutStyle: StrutStyle.disabled,
               ),
             ),
           ),
@@ -3575,13 +3573,13 @@ void main() {
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pumpAndSettle();
 
-    final List<Widget> transitions =
-    find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
-    // On Android, an empty app contains a single FadeTransition. The following
-    // two are the left and right text selection handles, respectively.
-    expect(transitions.length, 3);
-    final FadeTransition left = transitions[1] as FadeTransition;
-    final FadeTransition right = transitions[2] as FadeTransition;
+    final List<FadeTransition> transitions = find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
+      matching: find.byType(FadeTransition),
+    ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
+    expect(transitions.length, 2);
+    final FadeTransition left = transitions[0];
+    final FadeTransition right = transitions[1];
 
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));
@@ -3745,4 +3743,105 @@ void main() {
       expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
     },
   );
+
+  testWidgets('text span with tap gesture recognizer works in selectable rich text', (WidgetTester tester) async {
+    int spyTaps = 0;
+    final TapGestureRecognizer spyRecognizer = TapGestureRecognizer()
+      ..onTap = () {
+        spyTaps += 1;
+      };
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SelectableText.rich(
+              TextSpan(
+                children: <TextSpan>[
+                  const TextSpan(text: 'Atwater '),
+                  TextSpan(text: 'Peel', recognizer: spyRecognizer),
+                  const TextSpan(text: ' Sherbrooke Bonaventure'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(spyTaps, 0);
+    final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+    await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
+    expect(spyTaps, 1);
+
+    // Waits for a while to avoid double taps.
+    await tester.pump(const Duration(seconds: 1));
+
+    // Starts a long press.
+    final TestGesture gesture =
+      await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    await tester.pump();
+    final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+
+    final TextEditingController controller = editableTextWidget.controller;
+    // Long press still triggers selection.
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 8, extentOffset: 12),
+    );
+    // Long press does not trigger gesture recognizer.
+    expect(spyTaps, 1);
+  });
+
+  testWidgets('text span with long press gesture recognizer works in selectable rich text', (WidgetTester tester) async {
+    int spyLongPress = 0;
+    final LongPressGestureRecognizer spyRecognizer = LongPressGestureRecognizer()
+      ..onLongPress = () {
+        spyLongPress += 1;
+      };
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SelectableText.rich(
+              TextSpan(
+                children: <TextSpan>[
+                  const TextSpan(text: 'Atwater '),
+                  TextSpan(text: 'Peel', recognizer: spyRecognizer),
+                  const TextSpan(text: ' Sherbrooke Bonaventure'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(spyLongPress, 0);
+    final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+    await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
+    expect(spyLongPress, 0);
+
+    // Waits for a while to avoid double taps.
+    await tester.pump(const Duration(seconds: 1));
+
+    // Starts a long press.
+    final TestGesture gesture =
+    await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    await tester.pump();
+    final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+
+    final TextEditingController controller = editableTextWidget.controller;
+    // Long press does not trigger selection if there is text span with long
+    // press recognizer.
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 11, extentOffset: 11, affinity: TextAffinity.upstream),
+    );
+    // Long press triggers gesture recognizer.
+    expect(spyLongPress, 1);
+  });
 }

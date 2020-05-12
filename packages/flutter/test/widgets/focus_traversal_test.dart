@@ -54,6 +54,49 @@ void main() {
       expect(scope.hasFocus, isTrue);
     });
 
+    testWidgets('Find the initial focus if there is none yet and traversing backwards.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      final GlobalKey key3 = GlobalKey(debugLabel: '3');
+      final GlobalKey key4 = GlobalKey(debugLabel: '4');
+      final GlobalKey key5 = GlobalKey(debugLabel: '5');
+      await tester.pumpWidget(FocusTraversalGroup(
+        policy: WidgetOrderTraversalPolicy(),
+        child: FocusScope(
+          key: key1,
+          child: Column(
+            children: <Widget>[
+              Focus(
+                key: key2,
+                child: Container(key: key3, width: 100, height: 100),
+              ),
+              Focus(
+                key: key4,
+                child: Container(key: key5, width: 100, height: 100),
+              ),
+            ],
+          ),
+        ),
+      ));
+
+      final Element firstChild = tester.element(find.byKey(key3));
+      final Element secondChild = tester.element(find.byKey(key5));
+      final FocusNode firstFocusNode = Focus.of(firstChild);
+      final FocusNode secondFocusNode = Focus.of(secondChild);
+      final FocusNode scope = Focus.of(firstChild).enclosingScope;
+
+      expect(firstFocusNode.hasFocus, isFalse);
+      expect(secondFocusNode.hasFocus, isFalse);
+
+      secondFocusNode.previousFocus();
+
+      await tester.pump();
+
+      expect(firstFocusNode.hasFocus, isFalse);
+      expect(secondFocusNode.hasFocus, isTrue);
+      expect(scope.hasFocus, isTrue);
+    });
+
     testWidgets('Move focus to next node.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -559,15 +602,15 @@ void main() {
                     child: Row(children: <Widget>[
                       Focus(
                         focusNode: nodes[0],
-                        child: Container(width: 10, height: 10),
+                        child: const SizedBox(width: 10, height: 10),
                       ),
                       Focus(
                         focusNode: nodes[1],
-                        child: Container(width: 10, height: 10),
+                        child: const SizedBox(width: 10, height: 10),
                       ),
                       Focus(
                         focusNode: nodes[2],
-                        child: Container(width: 10, height: 10),
+                        child: const SizedBox(width: 10, height: 10),
                       ),
                     ]),
                   ),
@@ -578,21 +621,21 @@ void main() {
                         textDirection: TextDirection.rtl,
                         child: Focus(
                           focusNode: nodes[3],
-                          child: Container(width: 10, height: 10),
+                          child: const SizedBox(width: 10, height: 10),
                         ),
                       ),
                       Directionality(
                         textDirection: TextDirection.rtl,
                         child: Focus(
                           focusNode: nodes[4],
-                          child: Container(width: 10, height: 10),
+                          child: const SizedBox(width: 10, height: 10),
                         ),
                       ),
                       Directionality(
                         textDirection: TextDirection.ltr,
                         child: Focus(
                           focusNode: nodes[5],
-                          child: Container(width: 10, height: 10),
+                          child: const SizedBox(width: 10, height: 10),
                         ),
                       ),
                     ]),
@@ -602,28 +645,28 @@ void main() {
                       textDirection: TextDirection.ltr,
                       child: Focus(
                         focusNode: nodes[6],
-                        child: Container(width: 10, height: 10),
+                        child: const SizedBox(width: 10, height: 10),
                       ),
                     ),
                     Directionality(
                       textDirection: TextDirection.rtl,
                       child: Focus(
                         focusNode: nodes[7],
-                        child: Container(width: 10, height: 10),
+                        child: const SizedBox(width: 10, height: 10),
                       ),
                     ),
                     Directionality(
                       textDirection: TextDirection.rtl,
                       child: Focus(
                         focusNode: nodes[8],
-                        child: Container(width: 10, height: 10),
+                        child: const SizedBox(width: 10, height: 10),
                       ),
                     ),
                     Directionality(
                       textDirection: TextDirection.ltr,
                       child: Focus(
                         focusNode: nodes[9],
-                        child: Container(width: 10, height: 10),
+                        child: const SizedBox(width: 10, height: 10),
                       ),
                     ),
                   ]),
@@ -670,7 +713,7 @@ void main() {
                 // Boxes that all have the same upper left origin corner.
                 return Focus(
                   focusNode: nodes[index],
-                  child: Container(width: 10.0 * (index + 1), height: 10.0 * (index + 1)),
+                  child: SizedBox(width: 10.0 * (index + 1), height: 10.0 * (index + 1)),
                 );
               }),
             ),
@@ -697,7 +740,7 @@ void main() {
               children: List<Widget>.generate(nodeCount, (int index) {
                 return Focus(
                   focusNode: nodes[index],
-                  child: Container(width: 10.0 * (index + 1), height: 10.0 * (index + 1)),
+                  child: SizedBox(width: 10.0 * (index + 1), height: 10.0 * (index + 1)),
                 );
               }),
             ),
@@ -805,7 +848,7 @@ void main() {
                   nodeCount,
                   (int index) => Focus(
                     focusNode: nodes[index],
-                    child: Container(width: 10, height: 10),
+                    child: const SizedBox(width: 10, height: 10),
                   ),
                 ),
               ),
@@ -846,7 +889,7 @@ void main() {
                     order: NumericFocusOrder(nodeCount - index.toDouble()),
                     child: Focus(
                       focusNode: nodes[index],
-                      child: Container(width: 10, height: 10),
+                      child: const SizedBox(width: 10, height: 10),
                     ),
                   ),
                 ),
@@ -890,7 +933,7 @@ void main() {
                     order: LexicalFocusOrder(keys[index]),
                     child: Focus(
                       focusNode: nodes[index],
-                      child: Container(width: 10, height: 10),
+                      child: const SizedBox(width: 10, height: 10),
                     ),
                   ),
                 ),
@@ -939,21 +982,21 @@ void main() {
                             order: const NumericFocusOrder(9),
                             child: Focus(
                               focusNode: nodes[9],
-                              child: Container(width: 10, height: 10),
+                              child: const SizedBox(width: 10, height: 10),
                             ),
                           ),
                           FocusTraversalOrder(
                             order: const NumericFocusOrder(8),
                             child: Focus(
                               focusNode: nodes[8],
-                              child: Container(width: 10, height: 10),
+                              child: const SizedBox(width: 10, height: 10),
                             ),
                           ),
                           FocusTraversalOrder(
                             order: const NumericFocusOrder(7),
                             child: Focus(
                               focusNode: nodes[7],
-                              child: Container(width: 10, height: 10),
+                              child: const SizedBox(width: 10, height: 10),
                             ),
                           ),
                         ]),
@@ -968,21 +1011,21 @@ void main() {
                             order: const NumericFocusOrder(4),
                             child: Focus(
                               focusNode: nodes[4],
-                              child: Container(width: 10, height: 10),
+                              child: const SizedBox(width: 10, height: 10),
                             ),
                           ),
                           FocusTraversalOrder(
                             order: const NumericFocusOrder(5),
                             child: Focus(
                               focusNode: nodes[5],
-                              child: Container(width: 10, height: 10),
+                              child: const SizedBox(width: 10, height: 10),
                             ),
                           ),
                           FocusTraversalOrder(
                             order: const NumericFocusOrder(6),
                             child: Focus(
                               focusNode: nodes[6],
-                              child: Container(width: 10, height: 10),
+                              child: const SizedBox(width: 10, height: 10),
                             ),
                           ),
                         ]),
@@ -997,28 +1040,28 @@ void main() {
                             order: const LexicalFocusOrder('D'),
                             child: Focus(
                               focusNode: nodes[3],
-                              child: Container(width: 10, height: 10),
+                              child: const SizedBox(width: 10, height: 10),
                             ),
                           ),
                           FocusTraversalOrder(
                             order: const LexicalFocusOrder('C'),
                             child: Focus(
                               focusNode: nodes[2],
-                              child: Container(width: 10, height: 10),
+                              child: const SizedBox(width: 10, height: 10),
                             ),
                           ),
                           FocusTraversalOrder(
                             order: const LexicalFocusOrder('B'),
                             child: Focus(
                               focusNode: nodes[1],
-                              child: Container(width: 10, height: 10),
+                              child: const SizedBox(width: 10, height: 10),
                             ),
                           ),
                           FocusTraversalOrder(
                             order: const LexicalFocusOrder('A'),
                             child: Focus(
                               focusNode: nodes[0],
-                              child: Container(width: 10, height: 10),
+                              child: const SizedBox(width: 10, height: 10),
                             ),
                           ),
                         ]),
@@ -1426,9 +1469,9 @@ void main() {
                         debugLabel: 'lowerLeft',
                         child: Container(width: 100, height: 100, key: lowerLeftKey),
                       ),
-                      Focus(
+                      const Focus(
                         debugLabel: 'lowerRight',
-                        child: Container(width: 100, height: 100),
+                        child: SizedBox(width: 100, height: 100),
                       ),
                     ],
                   ),
@@ -1466,9 +1509,9 @@ void main() {
           debugLabel: 'Scope',
           child: Column(
             children: <Widget>[
-              Focus(focusNode: focusTop, child: Container(width: 100, height: 100)),
-              Focus(focusNode: focusCenter, child: Container(width: 100, height: 100)),
-              Focus(focusNode: focusBottom, child: Container(width: 100, height: 100)),
+              Focus(focusNode: focusTop, child: const SizedBox(width: 100, height: 100)),
+              Focus(focusNode: focusCenter, child: const SizedBox(width: 100, height: 100)),
+              Focus(focusNode: focusBottom, child: const SizedBox(width: 100, height: 100)),
             ],
           ),
         ),
@@ -1490,8 +1533,8 @@ void main() {
           debugLabel: 'Scope',
           child: Column(
             children: <Widget>[
-              Focus(focusNode: focusTop, child: Container(width: 100, height: 100)),
-              Focus(focusNode: focusBottom, child: Container(width: 100, height: 100)),
+              Focus(focusNode: focusTop, child: const SizedBox(width: 100, height: 100)),
+              Focus(focusNode: focusBottom, child: const SizedBox(width: 100, height: 100)),
             ],
           ),
         ),
@@ -1959,6 +2002,84 @@ void main() {
     testWidgets("Focus traversal group doesn't introduce a Semantics node", (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(FocusTraversalGroup(child: Container()));
+      final TestSemantics expectedSemantics = TestSemantics.root();
+      expect(semantics, hasSemantics(expectedSemantics));
+    });
+    testWidgets("Descendants of FocusTraversalGroup aren't focusable if descendantsAreFocusable is false.", (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      final FocusNode focusNode = FocusNode();
+      bool gotFocus;
+      await tester.pumpWidget(
+        FocusTraversalGroup(
+          descendantsAreFocusable: false,
+          child: Focus(
+            onFocusChange: (bool focused) => gotFocus = focused,
+            child: Focus(
+              key: key1,
+              focusNode: focusNode,
+              child: Container(key: key2),
+            ),
+          ),
+        ),
+      );
+
+      final Element childWidget = tester.element(find.byKey(key1));
+      final FocusNode unfocusableNode = Focus.of(childWidget);
+      final Element containerWidget = tester.element(find.byKey(key2));
+      final FocusNode containerNode = Focus.of(containerWidget);
+
+      unfocusableNode.requestFocus();
+      await tester.pump();
+
+      expect(gotFocus, isNull);
+      expect(containerNode.hasFocus, isFalse);
+      expect(unfocusableNode.hasFocus, isFalse);
+
+      containerNode.requestFocus();
+      await tester.pump();
+
+      expect(gotFocus, isNull);
+      expect(containerNode.hasFocus, isFalse);
+      expect(unfocusableNode.hasFocus, isFalse);
+    });
+  });
+  group(RawKeyboardListener, () {
+    testWidgets('Raw keyboard listener introduces a Semantics node by default', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(
+        RawKeyboardListener(
+          focusNode: focusNode,
+          child: Container(),
+        ),
+      );
+      final TestSemantics expectedSemantics = TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isFocusable,
+            ],
+          ),
+        ],
+      );
+      expect(semantics, hasSemantics(
+        expectedSemantics,
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ));
+    });
+    testWidgets("Raw keyboard listener doesn't introduce a Semantics node when specified", (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(
+          RawKeyboardListener(
+              focusNode: focusNode,
+              includeSemantics: false,
+              child: Container(),
+          ),
+      );
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
     });

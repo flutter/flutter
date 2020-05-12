@@ -40,8 +40,8 @@ void main() {
       expect(
           viewsController.views,
           unorderedEquals(<FakeAndroidPlatformView>[
-            FakeAndroidPlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
-            FakeAndroidPlatformView(1, 'webview', const Size(200.0, 300.0), AndroidViewController.kAndroidLayoutDirectionRtl),
+            const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
+            const FakeAndroidPlatformView(1, 'webview', Size(200.0, 300.0), AndroidViewController.kAndroidLayoutDirectionRtl),
           ]));
     });
 
@@ -70,7 +70,7 @@ void main() {
       expect(
           viewsController.views,
           unorderedEquals(<FakeAndroidPlatformView>[
-            FakeAndroidPlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
+            const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
           ]));
     });
 
@@ -96,8 +96,8 @@ void main() {
       expect(
           viewsController.views,
           unorderedEquals(<FakeAndroidPlatformView>[
-            FakeAndroidPlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
-            FakeAndroidPlatformView(1, 'webview', const Size(500.0, 500.0), AndroidViewController.kAndroidLayoutDirectionLtr),
+            const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
+            const FakeAndroidPlatformView(1, 'webview', Size(500.0, 500.0), AndroidViewController.kAndroidLayoutDirectionLtr),
           ]));
     });
 
@@ -137,7 +137,7 @@ void main() {
       expect(
           viewsController.views,
           unorderedEquals(<FakeAndroidPlatformView>[
-            FakeAndroidPlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
+            const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr),
           ]));
     });
 
@@ -150,7 +150,7 @@ void main() {
       expect(
           viewsController.views,
           unorderedEquals(<FakeAndroidPlatformView>[
-            FakeAndroidPlatformView(0, 'webview', const Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionRtl),
+            const FakeAndroidPlatformView(0, 'webview', Size(100.0, 100.0), AndroidViewController.kAndroidLayoutDirectionRtl),
           ]));
     });
   });
@@ -183,8 +183,8 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeUiKitView>[
-          FakeUiKitView(0, 'webview'),
-          FakeUiKitView(1, 'webview'),
+          const FakeUiKitView(0, 'webview'),
+          const FakeUiKitView(1, 'webview'),
         ]),
       );
     });
@@ -214,7 +214,7 @@ void main() {
       expect(
           viewsController.views,
           unorderedEquals(<FakeUiKitView>[
-            FakeUiKitView(0, 'webview'),
+            const FakeUiKitView(0, 'webview'),
           ]));
     });
 

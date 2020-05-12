@@ -3,20 +3,19 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/fallback_discovery.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/protocol_discovery.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/mocks.dart';
 
-// This test still uses `testUsingContext` due to analytics usage.
 void main() {
   BufferLogger logger;
   FallbackDiscovery fallbackDiscovery;
@@ -39,23 +38,51 @@ void main() {
       mDnsObservatoryDiscovery: mockMDnsObservatoryDiscovery,
       portForwarder: mockPortForwarder,
       protocolDiscovery: mockPrototcolDiscovery,
+      flutterUsage: Usage.test(),
       vmServiceConnectUri: (String uri, {Log log}) async {
         return mockVmService;
       },
+      pollingDelay: Duration.zero,
     );
     when(mockPortForwarder.forward(23, hostPort: anyNamed('hostPort')))
       .thenAnswer((Invocation invocation) async => 1);
   });
 
-  testUsingContext('Selects assumed port if VM service connection is successful', () async {
+  testWithoutContext('Selects assumed port if VM service connection is successful', () async {
     when(mockVmService.getVM()).thenAnswer((Invocation invocation) async {
-      return VM()..isolates = <IsolateRef>[
-        IsolateRef(),
+      return VM.parse(<String, Object>{})..isolates = <IsolateRef>[
+        IsolateRef.parse(<String, Object>{}),
       ];
     });
     when(mockVmService.getIsolate(any)).thenAnswer((Invocation invocation) async {
-      return Isolate()
-        ..rootLib = (LibraryRef()..uri = 'package:hello/main.dart');
+      return Isolate.parse(<String, Object>{})
+        ..rootLib = (LibraryRef(name: 'main', uri: 'package:hello/main.dart'));
+    });
+
+    expect(await fallbackDiscovery.discover(
+      assumedDevicePort: 23,
+      deivce: null,
+      hostVmservicePort: 1,
+      packageId: null,
+      usesIpv6: false,
+      packageName: 'hello',
+    ), Uri.parse('http://localhost:1'));
+  });
+
+  testWithoutContext('Selects assumed port when another isolate has no root library', () async {
+    when(mockVmService.getVM()).thenAnswer((Invocation invocation) async {
+      return VM.parse(<String, Object>{})..isolates = <IsolateRef>[
+        IsolateRef.parse(<String, Object>{})..id = '1',
+        IsolateRef.parse(<String, Object>{})..id = '2',
+      ];
+    });
+    when(mockVmService.getIsolate('1')).thenAnswer((Invocation invocation) async {
+      return Isolate.parse(<String, Object>{})
+        ..rootLib = null;
+    });
+    when(mockVmService.getIsolate('2')).thenAnswer((Invocation invocation) async {
+      return Isolate.parse(<String, Object>{})
+        ..rootLib = (LibraryRef.parse(<String, Object>{})..uri = 'package:hello/main.dart');
     });
     expect(await fallbackDiscovery.discover(
       assumedDevicePort: 23,
@@ -67,16 +94,18 @@ void main() {
     ), Uri.parse('http://localhost:1'));
   });
 
-  testUsingContext('Selects mdns discovery if VM service connecton fails due to Sentinel', () async {
+  testWithoutContext('Selects mdns discovery if VM service connecton fails due to Sentinel', () async {
     when(mockVmService.getVM()).thenAnswer((Invocation invocation) async {
-      return VM()..isolates = <IsolateRef>[
-        IsolateRef(),
+      return VM.parse(<String, Object>{})..isolates = <IsolateRef>[
+        IsolateRef(
+          id: 'a',
+          name: 'isolate',
+          number: '1',
+        ),
       ];
     });
-    when(mockVmService.getIsolate(any)).thenAnswer((Invocation invocation) async {
-      return Sentinel();
-    });
-
+    when(mockVmService.getIsolate(any))
+      .thenThrow(SentinelException.parse('Something', <String, dynamic>{}));
     when(mockMDnsObservatoryDiscovery.getObservatoryUri(
       'hello',
       null, // Device
@@ -96,7 +125,7 @@ void main() {
     ), Uri.parse('http://localhost:1234'));
   });
 
-  testUsingContext('Selects mdns discovery if VM service connecton fails', () async {
+  testWithoutContext('Selects mdns discovery if VM service connecton fails', () async {
     when(mockVmService.getVM()).thenThrow(Exception());
 
     when(mockMDnsObservatoryDiscovery.getObservatoryUri(
@@ -118,7 +147,7 @@ void main() {
     ), Uri.parse('http://localhost:1234'));
   });
 
-  testUsingContext('Selects log scanning if both VM Service and mDNS fails', () async {
+  testWithoutContext('Selects log scanning if both VM Service and mDNS fails', () async {
     when(mockVmService.getVM()).thenThrow(Exception());
     when(mockMDnsObservatoryDiscovery.getObservatoryUri(
       'hello',

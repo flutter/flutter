@@ -50,11 +50,7 @@ Future<void> main(List<String> arguments) async {
   final StringBuffer buf = StringBuffer();
   buf.writeln('name: Flutter');
   buf.writeln('homepage: https://flutter.dev');
-  // TODO(dnfield): We should make DartDoc able to avoid emitting this. If we
-  // use the real value here, every file will get marked as new instead of only
-  // files that have otherwise changed. Instead, we replace it dynamically using
-  // JavaScript so that fewer files get marked as changed.
-  // https://github.com/dart-lang/dartdoc/issues/1982
+  // TODO(dnfield): Re-factor for proper versioning, https://github.com/flutter/flutter/issues/55409
   buf.writeln('version: 0.0.0');
   buf.writeln('dependencies:');
   for (final String package in findPackageNames()) {
@@ -136,6 +132,7 @@ Future<void> main(List<String> arguments) async {
     '--link-to-source-root', '../..',
     '--link-to-source-uri-template', 'https://github.com/flutter/flutter/blob/master/%f%#L%l%',
     '--inject-html',
+    '--use-base-href',
     '--header', 'styles.html',
     '--header', 'analytics.html',
     '--header', 'survey.html',

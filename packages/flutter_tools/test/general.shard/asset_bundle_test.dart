@@ -6,9 +6,9 @@ import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -134,7 +134,7 @@ name: example''')
 
       // touch .packages to make sure its change time is after pubspec.yaml's
       globals.fs.file('.packages')
-        ..setLastModifiedSync(modifiedTime);
+        .setLastModifiedSync(modifiedTime);
 
       // Even though the previous file was removed, it is left in the
       // asset manifest and not updated. This is due to the devfs not
@@ -191,6 +191,79 @@ flutter:
 
     verify(mockDirectory.createSync(recursive: true)).called(1);
     expect(testLogger.errorText, contains('ABCD'));
+  });
+
+  testUsingContext('does not unnecessarily recreate asset manifest, font manifest, license', () async {
+    globals.fs.file('.packages').createSync();
+    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+    globals.fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+flutter:
+assets:
+  - assets/foo/bar.txt
+''');
+    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+    await bundle.build(manifestPath: 'pubspec.yaml');
+
+    final DevFSStringContent assetManifest = bundle.entries['AssetManifest.json']
+      as DevFSStringContent;
+    final DevFSStringContent fontManifest = bundle.entries['FontManifest.json']
+      as DevFSStringContent;
+    final DevFSStringContent license = bundle.entries['LICENSE']
+      as DevFSStringContent;
+
+    await bundle.build(manifestPath: 'pubspec.yaml');
+
+    expect(assetManifest, bundle.entries['AssetManifest.json']);
+    expect(fontManifest, bundle.entries['FontManifest.json']);
+    expect(license, bundle.entries['LICENSE']);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('does not track wildcard directories from dependencies', () async {
+    globals.fs.file('.packages').writeAsStringSync(r'''
+example:lib/
+foo:foo/lib/
+''');
+    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+      .createSync(recursive: true);
+    globals.fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+dependencies:
+  foo: any
+''');
+    globals.fs.file('foo/pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'''
+name: foo
+
+flutter:
+  assets:
+    - bar/
+''');
+    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+    globals.fs.file('foo/bar/fizz.txt').createSync(recursive: true);
+
+    await bundle.build(manifestPath: 'pubspec.yaml');
+
+    expect(bundle.entries, hasLength(4));
+    expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
+
+    // Does not track dependency's wildcard directories.
+    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+      .deleteSync();
+
+    expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
   });
 }
 

@@ -28,7 +28,7 @@ class Fingerprinter {
     Iterable<String> depfilePaths = const <String>[],
     FingerprintPathFilter pathFilter,
   }) : _paths = paths.toList(),
-       _properties = Map<String, String>.from(properties),
+       _properties = Map<String, String>.of(properties),
        _depfilePaths = depfilePaths.toList(),
        _pathFilter = pathFilter,
        assert(fingerprintPath != null),
@@ -66,7 +66,7 @@ class Fingerprinter {
       final Fingerprint oldFingerprint = Fingerprint.fromJson(fingerprintFile.readAsStringSync());
       final Fingerprint newFingerprint = buildFingerprint();
       return oldFingerprint == newFingerprint;
-    } catch (e) {
+    } on Exception catch (e) {
       // Log exception and continue, fingerprinting is only a performance improvement.
       globals.printTrace('Fingerprint check error: $e');
     }
@@ -77,7 +77,7 @@ class Fingerprinter {
     try {
       final Fingerprint fingerprint = buildFingerprint();
       globals.fs.file(fingerprintPath).writeAsStringSync(fingerprint.toJson());
-    } catch (e) {
+    } on Exception catch (e) {
       // Log exception and continue, fingerprinting is only a performance improvement.
       globals.printTrace('Fingerprint write error: $e');
     }
@@ -98,39 +98,49 @@ class Fingerprinter {
 /// properties.
 ///
 /// See [Fingerprinter].
+@immutable
 class Fingerprint {
-  Fingerprint.fromBuildInputs(Map<String, String> properties, Iterable<String> inputPaths) {
+  const Fingerprint._({
+    Map<String, String> checksums,
+    Map<String, String> properties,
+  })  : _checksums = checksums,
+        _properties = properties;
+
+  factory Fingerprint.fromBuildInputs(Map<String, String> properties, Iterable<String> inputPaths) {
     final Iterable<File> files = inputPaths.map<File>(globals.fs.file);
     final Iterable<File> missingInputs = files.where((File file) => !file.existsSync());
     if (missingInputs.isNotEmpty) {
-      throw ArgumentError('Missing input files:\n' + missingInputs.join('\n'));
+      throw Exception('Missing input files:\n' + missingInputs.join('\n'));
     }
-
-    _checksums = <String, String>{};
-    for (final File file in files) {
-      final List<int> bytes = file.readAsBytesSync();
-      _checksums[file.path] = md5.convert(bytes).toString();
-    }
-    _properties = <String, String>{...properties};
+    return Fingerprint._(
+      // ignore: prefer_const_literals_to_create_immutables, https://github.com/dart-lang/linter/issues/2025
+      checksums: <String, String>{
+        for (final File file in files)
+          file.path: md5.convert(file.readAsBytesSync()).toString(),
+      },
+      properties: <String, String>{...properties},
+    );
   }
 
   /// Creates a Fingerprint from serialized JSON.
   ///
-  /// Throws [ArgumentError], if there is a version mismatch between the
+  /// Throws [Exception], if there is a version mismatch between the
   /// serializing framework and this framework.
-  Fingerprint.fromJson(String jsonData) {
+  factory Fingerprint.fromJson(String jsonData) {
     final Map<String, dynamic> content = castStringKeyedMap(json.decode(jsonData));
 
     final String version = content['version'] as String;
     if (version != globals.flutterVersion.frameworkRevision) {
-      throw ArgumentError('Incompatible fingerprint version: $version');
+      throw Exception('Incompatible fingerprint version: $version');
     }
-    _checksums = castStringKeyedMap(content['files'])?.cast<String,String>() ?? <String, String>{};
-    _properties = castStringKeyedMap(content['properties'])?.cast<String,String>() ?? <String, String>{};
+    return Fingerprint._(
+      checksums: castStringKeyedMap(content['files'])?.cast<String,String>() ?? <String, String>{},
+      properties: castStringKeyedMap(content['properties'])?.cast<String,String>() ?? <String, String>{},
+    );
   }
 
-  Map<String, String> _checksums;
-  Map<String, String> _properties;
+  final Map<String, String> _checksums;
+  final Map<String, String> _properties;
 
   String toJson() => json.encode(<String, dynamic>{
     'version': globals.flutterVersion.frameworkRevision,
@@ -182,8 +192,11 @@ Set<String> readDepfile(String depfilePath) {
   // outfile1 outfile2 : file1.dart file2.dart file3.dart
   final String contents = globals.fs.file(depfilePath).readAsStringSync();
 
-  final String dependencies = contents.split(': ')[1];
-  return dependencies
+  final List<String> dependencies = contents.split(': ');
+  if (dependencies.length < 2) {
+    throw Exception('malformed depfile');
+  }
+  return dependencies[1]
       .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
       .split('\n')
       .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())

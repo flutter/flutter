@@ -263,7 +263,7 @@ class ListItem extends StatelessWidget {
           ),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 250),
-            child: Text(
+            child: const Text(
               kMockName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

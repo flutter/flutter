@@ -28,6 +28,9 @@ void main() {
     final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
 
+    // A frame can only be scheduled when there is a root widget.
+    binding.attachRootWidget(const Placeholder());
+
     // Frame callbacks are registered lazily when a frame is scheduled.
     binding.scheduleFrame();
     expect(window.onBeginFrame, isNotNull);

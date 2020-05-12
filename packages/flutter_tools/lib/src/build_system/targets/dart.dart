@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:package_config/package_config.dart';
+
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
-import '../../convert.dart';
+import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
 import '../../project.dart';
 import '../build_system.dart';
@@ -17,7 +19,7 @@ import 'assets.dart';
 import 'icon_tree_shaker.dart';
 
 /// The define to pass a [BuildMode].
-const String kBuildMode= 'BuildMode';
+const String kBuildMode = 'BuildMode';
 
 /// The define to pass whether we compile 64-bit android-arm code.
 const String kTargetPlatform = 'TargetPlatform';
@@ -65,6 +67,9 @@ const String kDartDefines = 'DartDefines';
 ///
 /// The other supported value is armv7, the 32-bit iOS architecture.
 const String kIosArchs = 'IosArchs';
+
+/// Whether to enable Dart obfuscation and where to save the symbol map.
+const String kDartObfuscation = 'DartObfuscation';
 
 /// Copies the pre-built flutter bundle.
 // This is a one-off rule for implementing build bundle in terms of assemble.
@@ -117,7 +122,6 @@ class CopyFlutterBundle extends Target {
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
-      platform: globals.platform,
     );
     depfileService.writeToFile(
       assetDepfile,
@@ -194,16 +198,17 @@ class KernelSnapshot extends Target {
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String targetFile = environment.defines[kTargetFile] ?? globals.fs.path.join('lib', 'main.dart');
-    final String packagesPath = environment.projectDir.childFile('.packages').path;
+    final File packagesFile = environment.projectDir.childFile('.packages');
     final String targetFileAbsolute = globals.fs.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
     final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
 
     // This configuration is all optional.
-    final List<String> extraFrontEndOptions = <String>[
-      ...?environment.defines[kExtraFrontEndOptions]?.split(',')
-    ];
+    final String rawFrontEndOption = environment.defines[kExtraFrontEndOptions];
+    final List<String> extraFrontEndOptions = (rawFrontEndOption?.isNotEmpty ?? false)
+      ? rawFrontEndOption?.split(',')
+      : null;
     final List<String> fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String fileSystemScheme = environment.defines[kFileSystemScheme];
 
@@ -226,6 +231,11 @@ class KernelSnapshot extends Target {
         forceLinkPlatform = false;
     }
 
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      environment.projectDir.childFile('.packages'),
+      logger: environment.logger,
+    );
+
     final CompilerOutput output = await compiler.compile(
       sdkRoot: globals.artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
@@ -237,7 +247,7 @@ class KernelSnapshot extends Target {
       trackWidgetCreation: trackWidgetCreation && buildMode == BuildMode.debug,
       targetModel: targetModel,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
-      packagesPath: packagesPath,
+      packagesPath: packagesFile.path,
       linkPlatformKernelIn: forceLinkPlatform || buildMode.isPrecompiled,
       mainPath: targetFileAbsolute,
       depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
@@ -245,6 +255,7 @@ class KernelSnapshot extends Target {
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme: fileSystemScheme,
       dartDefines: parseDartDefines(environment),
+      packageConfig: packageConfig,
     );
     if (output == null || output.errorCount != 0) {
       throw Exception('Errors during snapshot creation: $output');
@@ -257,8 +268,18 @@ abstract class AotElfBase extends Target {
   const AotElfBase();
 
   @override
+  String get analyticsName => 'android_aot';
+
+  @override
   Future<void> build(Environment environment) async {
-    final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
+    final AOTSnapshotter snapshotter = AOTSnapshotter(
+      reportTimings: false,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      xcode: globals.xcode,
+      processManager: globals.processManager,
+      artifacts: globals.artifacts,
+    );
     final String outputPath = environment.buildDir.path;
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'aot_elf');
@@ -270,7 +291,8 @@ abstract class AotElfBase extends Target {
       ?? const <String>[];
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
-    final String saveDebuggingInformation = environment.defines[kSplitDebugInfo];
+    final String splitDebugInfo = environment.defines[kSplitDebugInfo];
+    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
       buildMode: buildMode,
@@ -279,7 +301,8 @@ abstract class AotElfBase extends Target {
       outputPath: outputPath,
       bitcode: false,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
-      splitDebugInfo: saveDebuggingInformation
+      splitDebugInfo: splitDebugInfo,
+      dartObfuscation: dartObfuscation,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');
@@ -374,21 +397,10 @@ abstract class CopyFlutterAotBundle extends Target {
   }
 }
 
-/// Dart defines are encoded inside [Environment] as a JSON array.
+/// Dart defines are encoded inside [Environment] as a comma-separated list.
 List<String> parseDartDefines(Environment environment) {
-  if (!environment.defines.containsKey(kDartDefines)) {
+  if (!environment.defines.containsKey(kDartDefines) || environment.defines[kDartDefines].isEmpty) {
     return const <String>[];
   }
-
-  final String dartDefinesJson = environment.defines[kDartDefines];
-  try {
-    final List<Object> parsedDefines = jsonDecode(dartDefinesJson) as List<Object>;
-    return parsedDefines.cast<String>();
-  } on FormatException catch (_) {
-    throw Exception(
-      'The value of -D$kDartDefines is not formatted correctly.\n'
-      'The value must be a JSON-encoded list of strings but was:\n'
-      '$dartDefinesJson'
-    );
-  }
+  return environment.defines[kDartDefines].split(',');
 }

@@ -581,7 +581,8 @@ void main() {
                   children: List<Widget>.generate(10, (int y) {
                     return Row(
                       children: children[y] = List<Widget>.generate(10, (int x) {
-                        return Container(
+                        return SizedBox(
+                          key: UniqueKey(),
                           height: 100.0,
                           width: 100.0,
                         );

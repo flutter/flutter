@@ -95,7 +95,7 @@ void main() {
   test('analyze.dart - verifyNoBinaries - positive', () async {
     final String result = await capture(() => verifyNoBinaries(
       testRootPath,
-      grandfatheredBinaries: <Hash256>{Hash256(0x39A050CD69434936, 0, 0, 0)},
+      grandfatheredBinaries: <Hash256>{const Hash256(0x39A050CD69434936, 0, 0, 0)},
     ), exitCode: Platform.isWindows ? 0 : 1);
     if (!Platform.isWindows) {
       // The output starts with the call to git ls-files, the details of which
@@ -117,8 +117,8 @@ void main() {
     await capture(() => verifyNoBinaries(
       testRootPath,
       grandfatheredBinaries: <Hash256>{
-        Hash256(0xA8100AE6AA1940D0, 0xB663BB31CD466142, 0xEBBDBD5187131B92, 0xD93818987832EB89), // sha256("\xff")
-        Hash256(0x155644D3F13D98BF, 0, 0, 0),
+        const Hash256(0xA8100AE6AA1940D0, 0xB663BB31CD466142, 0xEBBDBD5187131B92, 0xD93818987832EB89), // sha256("\xff")
+        const Hash256(0x155644D3F13D98BF, 0, 0, 0),
       },
     ), exitCode: 0);
   });

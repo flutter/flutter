@@ -61,7 +61,7 @@ void main() {
                         padding: const EdgeInsets.all(5.0),
                         verticalOffset: 20.0,
                         preferBelow: false,
-                        child: Container(
+                        child: const SizedBox(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -118,7 +118,7 @@ void main() {
                         padding: const EdgeInsets.all(5.0),
                         verticalOffset: 20.0,
                         preferBelow: false,
-                        child: Container(
+                        child: const SizedBox(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -149,7 +149,7 @@ void main() {
     );
     expect(tip.size.height, equals(24.0)); // 14.0 height + 5.0 padding * 2 (top, bottom)
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)), equals(const Offset(10.0, 20.0)));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Does tooltip end up in the right place - center prefer above fits', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -172,7 +172,7 @@ void main() {
                         padding: const EdgeInsets.all(0.0),
                         verticalOffset: 100.0,
                         preferBelow: false,
-                        child: Container(
+                        child: const SizedBox(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -228,7 +228,7 @@ void main() {
                         padding: const EdgeInsets.all(0.0),
                         verticalOffset: 100.0,
                         preferBelow: false,
-                        child: Container(
+                        child: const SizedBox(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -295,7 +295,7 @@ void main() {
                         padding: const EdgeInsets.all(0.0),
                         verticalOffset: 100.0,
                         preferBelow: true,
-                        child: Container(
+                        child: const SizedBox(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -350,7 +350,7 @@ void main() {
                         padding: const EdgeInsets.all(0.0),
                         verticalOffset: 10.0,
                         preferBelow: true,
-                        child: Container(
+                        child: const SizedBox(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -384,7 +384,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(324.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Does tooltip end up in the right place - near the edge', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -407,7 +407,7 @@ void main() {
                         padding: const EdgeInsets.all(0.0),
                         verticalOffset: 10.0,
                         preferBelow: true,
-                        child: Container(
+                        child: const SizedBox(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -441,7 +441,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(324.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Custom tooltip margin', (WidgetTester tester) async {
     const double _customMarginValue = 10.0;
@@ -458,7 +458,7 @@ void main() {
                   message: tooltipText,
                   padding: const EdgeInsets.all(0.0),
                   margin: const EdgeInsets.all(_customMarginValue),
-                  child: Container(
+                  child: const SizedBox(
                     width: 0.0,
                     height: 0.0,
                   ),
@@ -654,7 +654,7 @@ void main() {
                 return Tooltip(
                   key: key,
                   message: tooltipText,
-                  child: Container(
+                  child: const SizedBox(
                     width: 0.0,
                     height: 0.0,
                   ),
@@ -677,7 +677,7 @@ void main() {
       rrect: RRect.fromRectAndRadius(tip.paintBounds, const Radius.circular(4.0)),
       color: const Color(0xe6616161),
     ));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Can tooltip decoration be customized', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -696,7 +696,7 @@ void main() {
                   key: key,
                   decoration: customDecoration,
                   message: tooltipText,
-                  child: Container(
+                  child: const SizedBox(
                     width: 0.0,
                     height: 0.0,
                   ),
@@ -718,7 +718,7 @@ void main() {
     expect(tip, paints..path(
       color: const Color(0x80800000),
     ));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Tooltip stays after long press', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -780,12 +780,12 @@ void main() {
     await gesture.moveTo(Offset.zero);
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Center(
           child: Tooltip(
             message: tooltipText,
             waitDuration: waitDuration,
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
             ),
@@ -838,7 +838,7 @@ void main() {
                       child: Tooltip(
                         key: key,
                         message: tooltipText,
-                        child: Container(width: 10.0, height: 10.0),
+                        child: const SizedBox(width: 10.0, height: 10.0),
                       ),
                     ),
                   ],
@@ -946,7 +946,7 @@ void main() {
       _findTooltipContainer(tooltipText),
     );
     expect(tip.size.height, equals(56.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Haptic feedback', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();

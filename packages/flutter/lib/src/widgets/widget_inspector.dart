@@ -635,7 +635,7 @@ class _DiagnosticsPathNode {
 }
 
 List<_DiagnosticsPathNode> _followDiagnosticableChain(
-  List<DiagnosticableMixin> chain, {
+  List<Diagnosticable> chain, {
   String name,
   DiagnosticsTreeStyle style,
 }) {
@@ -644,7 +644,7 @@ List<_DiagnosticsPathNode> _followDiagnosticableChain(
     return path;
   DiagnosticsNode diagnostic = chain.first.toDiagnosticsNode(name: name, style: style);
   for (int i = 1; i < chain.length; i += 1) {
-    final DiagnosticableMixin target = chain[i];
+    final Diagnosticable target = chain[i];
     bool foundMatch = false;
     final List<DiagnosticsNode> children = diagnostic.getChildren();
     for (int j = 0; j < children.length; j += 1) {
@@ -959,13 +959,13 @@ mixin WidgetInspectorService {
     SchedulerBinding.instance.addPersistentFrameCallback(_onFrameStart);
 
     final FlutterExceptionHandler structuredExceptionHandler = _reportError;
-    final FlutterExceptionHandler defaultExceptionHandler = FlutterError.onError;
+    final FlutterExceptionHandler defaultExceptionHandler = FlutterError.presentError;
 
     _registerBoolServiceExtension(
       name: 'structuredErrors',
-      getter: () async => FlutterError.onError == structuredExceptionHandler,
+      getter: () async => FlutterError.presentError == structuredExceptionHandler,
       setter: (bool value) {
-        FlutterError.onError = value ? structuredExceptionHandler : defaultExceptionHandler;
+        FlutterError.presentError = value ? structuredExceptionHandler : defaultExceptionHandler;
         return Future<void>.value();
       },
     );
@@ -1550,7 +1550,7 @@ mixin WidgetInspectorService {
       return true;
     }
     final Object value = node.value;
-    if (value is! DiagnosticableMixin) {
+    if (value is! Diagnosticable) {
       return true;
     }
     if (value is! Element || !isWidgetCreationTracked()) {
@@ -2426,6 +2426,7 @@ class _RenderInspectorOverlay extends RenderBox {
   }
 }
 
+@immutable
 class _TransformedRect {
   _TransformedRect(RenderObject object)
     : rect = object.semanticBounds,
@@ -2451,8 +2452,9 @@ class _TransformedRect {
 ///
 /// The equality operator can be used to determine whether the overlay needs to
 /// be rendered again.
+@immutable
 class _InspectorOverlayRenderState {
-  _InspectorOverlayRenderState({
+  const _InspectorOverlayRenderState({
     @required this.overlayRect,
     @required this.selected,
     @required this.candidates,

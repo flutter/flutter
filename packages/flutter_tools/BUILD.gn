@@ -18,7 +18,6 @@ dart_library("flutter_tools") {
     "//third_party/dart-pkg/pub/archive",
     "//third_party/dart-pkg/pub/args",
     "//third_party/dart-pkg/pub/build_daemon",
-    "//third_party/dart-pkg/pub/build_runner_core",
     "//third_party/dart-pkg/pub/collection",
     "//third_party/dart-pkg/pub/completion",
     "//third_party/dart-pkg/pub/coverage",
@@ -33,7 +32,7 @@ dart_library("flutter_tools") {
     "//third_party/dart-pkg/pub/mime",
     "//third_party/dart-pkg/pub/multi_server_socket",
     "//third_party/dart-pkg/pub/multicast_dns",
-    "//third_party/dart-pkg/pub/mustache",
+    "//third_party/dart-pkg/pub/mustache_template",
     "//third_party/dart-pkg/pub/native_stack_traces",
     "//third_party/dart-pkg/pub/node_preamble",
     "//third_party/dart-pkg/pub/package_config",
@@ -58,6 +57,7 @@ dart_library("flutter_tools") {
 
 dart_tool("fuchsia_builder") {
   main_dart = "bin/fuchsia_builder.dart"
+  package_root = "fuchsia_entrypoint_shim/fuchsia_builder"
 
   disable_analysis = true
 
@@ -68,6 +68,7 @@ dart_tool("fuchsia_builder") {
 
 dart_tool("fuchsia_asset_builder") {
   main_dart = "bin/fuchsia_asset_builder.dart"
+  package_root = "fuchsia_entrypoint_shim/fuchsia_asset_builder"
 
   disable_analysis = true
 
@@ -154,6 +155,7 @@ dart_tool("fuchsia_asset_builder") {
 
 dart_tool("fuchsia_tester") {
   main_dart = "bin/fuchsia_tester.dart"
+  package_root = "fuchsia_entrypoint_shim/tester"
 
   disable_analysis = true
 
@@ -249,6 +251,7 @@ dart_tool("fuchsia_tester") {
 dart_tool("fuchsia_attach") {
   package_name = "fuchsia_attach"
   main_dart = "bin/fuchsia_attach.dart"
+  package_root = "fuchsia_entrypoint_shim/attach"
 
   # Can be left empty as analysis is disabled.
   sources = []

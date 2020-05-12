@@ -66,8 +66,6 @@ Map<String, String> _useCdKeys(Map<CustomDimensions, String> parameters) {
       MapEntry<String, String>(cdKey(k), v));
 }
 
-Usage get flutterUsage => Usage.instance;
-
 abstract class Usage {
   /// Create a new Usage instance; [versionOverride], [configDirOverride], and
   /// [logFile] are used for testing.
@@ -76,20 +74,21 @@ abstract class Usage {
     String versionOverride,
     String configDirOverride,
     String logFile,
+    AnalyticsFactory analyticsIOFactory,
     @required bool runningOnBot,
   }) => _DefaultUsage(settingsName: settingsName,
                       versionOverride: versionOverride,
                       configDirOverride: configDirOverride,
                       logFile: logFile,
+                      analyticsIOFactory: analyticsIOFactory,
                       runningOnBot: runningOnBot);
 
-  /// Returns [Usage] active in the current app context.
-  static Usage get instance => context.get<Usage>();
+  factory Usage.test() => _DefaultUsage.test();
 
   /// Uses the global [Usage] instance to send a 'command' to analytics.
   static void command(String command, {
     Map<CustomDimensions, String> parameters,
-  }) => flutterUsage.sendCommand(command, parameters: _useCdKeys(parameters));
+  }) => globals.flutterUsage.sendCommand(command, parameters: _useCdKeys(parameters));
 
   /// Whether this is the first run of the tool.
   bool get isFirstRun;
@@ -157,12 +156,37 @@ abstract class Usage {
   void printWelcome();
 }
 
+typedef AnalyticsFactory = Analytics Function(
+  String trackingId,
+  String applicationName,
+  String applicationVersion, {
+  String analyticsUrl,
+  Directory documentDirectory,
+});
+
+Analytics _defaultAnalyticsIOFactory(
+  String trackingId,
+  String applicationName,
+  String applicationVersion, {
+  String analyticsUrl,
+  Directory documentDirectory,
+}) {
+  return AnalyticsIO(
+    trackingId,
+    applicationName,
+    applicationVersion,
+    analyticsUrl: analyticsUrl,
+    documentDirectory: documentDirectory,
+  );
+}
+
 class _DefaultUsage implements Usage {
   _DefaultUsage({
     String settingsName = 'flutter',
     String versionOverride,
     String configDirOverride,
     String logFile,
+    AnalyticsFactory analyticsIOFactory,
     @required bool runningOnBot,
   }) {
     final FlutterVersion flutterVersion = globals.flutterVersion;
@@ -170,6 +194,8 @@ class _DefaultUsage implements Usage {
     final bool suppressEnvFlag = globals.platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
     final String logFilePath = logFile ?? globals.platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
     final bool usingLogFile = logFilePath != null && logFilePath.isNotEmpty;
+
+    analyticsIOFactory ??= _defaultAnalyticsIOFactory;
 
     if (// To support testing, only allow other signals to supress analytics
         // when analytics are not being shunted to a file.
@@ -192,13 +218,21 @@ class _DefaultUsage implements Usage {
     if (usingLogFile) {
       _analytics = LogToFileAnalytics(logFilePath);
     } else {
-      _analytics = AnalyticsIO(
-            _kFlutterUA,
-            settingsName,
-            version,
-            documentDirectory:
-                configDirOverride != null ? globals.fs.directory(configDirOverride) : null,
-          );
+      try {
+        _analytics = analyticsIOFactory(
+          _kFlutterUA,
+          settingsName,
+          version,
+          documentDirectory: configDirOverride != null
+            ? globals.fs.directory(configDirOverride)
+            : null,
+        );
+      } on Exception catch (e) {
+        globals.printTrace('Failed to initialize analytics reporting: $e');
+        suppressAnalytics = true;
+        _analytics = AnalyticsMock();
+        return;
+      }
     }
     assert(_analytics != null);
 
@@ -232,6 +266,10 @@ class _DefaultUsage implements Usage {
     }
     _analytics.analyticsOpt = AnalyticsOpt.optOut;
   }
+
+  _DefaultUsage.test() :
+      _suppressAnalytics = true,
+      _analytics = AnalyticsMock();
 
   Analytics _analytics;
 

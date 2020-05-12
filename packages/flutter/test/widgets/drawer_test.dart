@@ -97,7 +97,7 @@ void main() {
               onEnter: (_) { logs.add('enter'); },
               onHover: (_) { logs.add('hover'); },
               onExit: (_) { logs.add('exit'); },
-              child: Container(width: 10, height: 10),
+              child: const SizedBox(width: 10, height: 10),
             ),
           ),
         ),
@@ -357,7 +357,7 @@ void main() {
     expect(semantics, isNot(includesNodeWith(label: 'Dismiss')));
 
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('Drawer contains route semantics flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);

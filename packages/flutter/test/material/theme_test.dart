@@ -774,12 +774,17 @@ class _TextStyleProxy implements TextStyle {
     double fontSizeFactor = 1.0,
     double fontSizeDelta = 0.0,
     int fontWeightDelta = 0,
+    FontStyle fontStyle,
     double letterSpacingFactor = 1.0,
     double letterSpacingDelta = 0.0,
     double wordSpacingFactor = 1.0,
     double wordSpacingDelta = 0.0,
     double heightFactor = 1.0,
     double heightDelta = 0.0,
+    TextBaseline textBaseline,
+    Locale locale,
+    List<ui.Shadow> shadows,
+    List<ui.FontFeature> fontFeatures,
   }) {
     throw UnimplementedError();
   }

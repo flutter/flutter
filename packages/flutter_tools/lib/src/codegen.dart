@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 
 import 'base/context.dart';
 import 'build_info.dart';
@@ -72,7 +73,6 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     String outputFilePath,
     bool linkPlatformKernelIn = false,
     bool aot = false,
-    @required BuildMode buildMode,
     bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
     String sdkRoot,
@@ -84,6 +84,8 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     String initializeFromDill,
     String platformDill,
     List<String> dartDefines,
+    @required BuildMode buildMode,
+    @required PackageConfig packageConfig,
   }) async {
     final FlutterProject flutterProject = FlutterProject.current();
     final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
@@ -113,6 +115,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
       targetModel: targetModel,
       initializeFromDill: initializeFromDill,
       dartDefines: dartDefines,
+      packageConfig: packageConfig,
     );
   }
 }
@@ -161,7 +164,21 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   }
 
   @override
-  Future<CompilerOutput> recompile(String mainPath, List<Uri> invalidatedFiles, {String outputPath, String packagesFilePath}) async {
+  Future<CompilerOutput> compileExpressionToJs(
+    String libraryUri, int line, int column, Map<String, String> jsModules,
+    Map<String, String> jsFrameValues, String moduleName, String expression
+  ) {
+    return _residentCompiler.compileExpressionToJs(
+      libraryUri, line, column, jsModules, jsFrameValues, moduleName, expression);
+  }
+
+  @override
+  Future<CompilerOutput> recompile(
+    Uri mainUri,
+    List<Uri> invalidatedFiles, {
+      String outputPath,
+      PackageConfig packageConfig,
+    }) async {
     if (_codegenDaemon.lastStatus != CodegenStatus.Succeeded && _codegenDaemon.lastStatus != CodegenStatus.Failed) {
       await _codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
         return status == CodegenStatus.Succeeded || status == CodegenStatus.Failed;
@@ -171,10 +188,10 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
       globals.printError('Code generation failed, build may have compile errors.');
     }
     return _residentCompiler.recompile(
-      mainPath,
+      mainUri,
       invalidatedFiles,
       outputPath: outputPath,
-      packagesFilePath: packagesFilePath,
+      packageConfig: packageConfig,
     );
   }
 

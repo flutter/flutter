@@ -2,10 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
+import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
 import '../../src/mocks.dart';
@@ -18,6 +24,7 @@ void main() {
     MockHttpClientRequest mockHttpClientRequest;
     MockHttpHeaders mockHttpHeaders;
     BotDetector botDetector;
+    PersistentToolState persistentToolState;
 
     setUp(() {
       fakePlatform = FakePlatform()..environment = <String, String>{};
@@ -25,9 +32,14 @@ void main() {
       mockHttpClient = MockHttpClient();
       mockHttpClientRequest = MockHttpClientRequest();
       mockHttpHeaders = MockHttpHeaders();
+      persistentToolState = PersistentToolState.test(
+        directory: MemoryFileSystem.test().currentDirectory,
+        logger: BufferLogger.test(),
+      );
       botDetector = BotDetector(
         platform: fakePlatform,
         httpClientFactory: () => mockHttpClient,
+        persistentToolState: persistentToolState,
       );
     });
 
@@ -35,13 +47,17 @@ void main() {
       testWithoutContext('returns false unconditionally if BOT=false is set', () async {
         fakePlatform.environment['BOT'] = 'false';
         fakePlatform.environment['TRAVIS'] = 'true';
+
         expect(await botDetector.isRunningOnBot, isFalse);
+        expect(persistentToolState.isRunningOnBot, isFalse);
       });
 
       testWithoutContext('returns false unconditionally if FLUTTER_HOST is set', () async {
         fakePlatform.environment['FLUTTER_HOST'] = 'foo';
         fakePlatform.environment['TRAVIS'] = 'true';
+
         expect(await botDetector.isRunningOnBot, isFalse);
+        expect(persistentToolState.isRunningOnBot, isFalse);
       });
 
       testWithoutContext('returns false with and without a terminal attached', () async {
@@ -52,12 +68,14 @@ void main() {
         expect(await botDetector.isRunningOnBot, isFalse);
         mockStdio.stdout.hasTerminal = false;
         expect(await botDetector.isRunningOnBot, isFalse);
+        expect(persistentToolState.isRunningOnBot, isFalse);
       });
 
       testWithoutContext('can test analytics outputs on bots when outputting to a file', () async {
         fakePlatform.environment['TRAVIS'] = 'true';
         fakePlatform.environment['FLUTTER_ANALYTICS_LOG_FILE'] = '/some/file';
         expect(await botDetector.isRunningOnBot, isFalse);
+        expect(persistentToolState.isRunningOnBot, isFalse);
       });
 
       testWithoutContext('returns true when azure metadata is reachable', () async {
@@ -65,12 +83,31 @@ void main() {
           return Future<HttpClientRequest>.value(mockHttpClientRequest);
         });
         when(mockHttpClientRequest.headers).thenReturn(mockHttpHeaders);
+
         expect(await botDetector.isRunningOnBot, isTrue);
+        expect(persistentToolState.isRunningOnBot, isTrue);
+      });
+
+      testWithoutContext('caches azure bot detection results across instances', () async {
+        when(mockHttpClient.getUrl(any)).thenAnswer((_) {
+          return Future<HttpClientRequest>.value(mockHttpClientRequest);
+        });
+        when(mockHttpClientRequest.headers).thenReturn(mockHttpHeaders);
+
+        expect(await botDetector.isRunningOnBot, isTrue);
+        expect(await BotDetector(
+          platform: fakePlatform,
+          httpClientFactory: () => mockHttpClient,
+          persistentToolState: persistentToolState,
+        ).isRunningOnBot, isTrue);
+        verify(mockHttpClient.getUrl(any)).called(1);
       });
 
       testWithoutContext('returns true when running on borg', () async {
         fakePlatform.environment['BORG_ALLOC_DIR'] = 'true';
+
         expect(await botDetector.isRunningOnBot, isTrue);
+        expect(persistentToolState.isRunningOnBot, isTrue);
       });
     });
   });
@@ -94,7 +131,21 @@ void main() {
       when(mockHttpClient.getUrl(any)).thenAnswer((_) {
         throw const SocketException('HTTP connection timed out');
       });
+
       expect(await azureDetector.isRunningOnAzure, isFalse);
+    });
+
+    testWithoutContext('isRunningOnAzure returns false when the http request times out', () {
+      FakeAsync().run((FakeAsync time) async {
+        when(mockHttpClient.getUrl(any)).thenAnswer((_) {
+          final Completer<HttpClientRequest> completer = Completer<HttpClientRequest>();
+          return completer.future;  // Never completed to test timeout behavior.
+        });
+        final Future<bool> onBot = azureDetector.isRunningOnAzure;
+        time.elapse(const Duration(seconds: 2));
+
+        expect(await onBot, isFalse);
+      });
     });
 
     testWithoutContext('isRunningOnAzure returns true when azure metadata is reachable', () async {
@@ -102,6 +153,7 @@ void main() {
         return Future<HttpClientRequest>.value(mockHttpClientRequest);
       });
       when(mockHttpClientRequest.headers).thenReturn(mockHttpHeaders);
+
       expect(await azureDetector.isRunningOnAzure, isTrue);
     });
   });

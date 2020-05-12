@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart' show kMinFlingVelocity, kLongPressTimeout;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -377,8 +378,8 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     // decoy will pop on top of the AppBar if the child is partially behind it,
     // such as a top item in a partially scrolled view. However, if we don't use
     // an overlay, then the decoy will appear behind its neighboring widget when
-    // it expands. This may be solveable by adding a widget to Scaffold that's
-    // undernearth the AppBar.
+    // it expands. This may be solvable by adding a widget to Scaffold that's
+    // underneath the AppBar.
     _lastOverlayEntry = OverlayEntry(
       opaque: false,
       builder: (BuildContext context) {
@@ -511,17 +512,22 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
       : _mask.value;
     return Positioned.fromRect(
       rect: _rect.value,
-      child: ShaderMask(
-        key: _childGlobalKey,
-        shaderCallback: (Rect bounds) {
-          return LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: <Color>[color, color],
-          ).createShader(bounds);
-        },
-        child: widget.child,
-      ),
+      // TODO(justinmc): When ShaderMask is supported on web, remove this
+      // conditional and use ShaderMask everywhere.
+      // https://github.com/flutter/flutter/issues/52967.
+      child: kIsWeb
+          ? Container(key: _childGlobalKey, child: widget.child)
+          : ShaderMask(
+            key: _childGlobalKey,
+            shaderCallback: (Rect bounds) {
+              return LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[color, color],
+              ).createShader(bounds);
+            },
+            child: widget.child,
+          ),
     );
   }
 
@@ -1030,7 +1036,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
         ),
       ),
     );
-    final Container spacer = Container(
+    const SizedBox spacer = SizedBox(
       width: _kPadding,
       height: _kPadding,
     );

@@ -41,7 +41,7 @@ android {
 apply plugin: FlutterPlugin
 
 class FlutterPlugin implements Plugin<Project> {
-    private static final String MAVEN_REPO      = "http://download.flutter.io";
+    private static final String DEFAULT_MAVEN_HOST = "https://storage.googleapis.com";
 
     // The platforms that can be passed to the `--Ptarget-platform` flag.
     private static final String PLATFORM_ARM32  = "android-arm";
@@ -200,10 +200,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (!supportsBuildMode(flutterBuildMode)) {
             return
         }
+        String hostedRepository = System.env.FLUTTER_STORAGE_BASE_URL ?: DEFAULT_MAVEN_HOST
         String repository = useLocalEngine()
             ? project.property('local-engine-repo')
-            : MAVEN_REPO
-
+            : "$hostedRepository/download.flutter.io"
         project.rootProject.allprojects {
             repositories {
                 maven {
@@ -607,9 +607,25 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('split-debug-info')) {
             splitDebugInfoValue = project.property('split-debug-info')
         }
+        Boolean dartObfuscationValue = false
+        if (project.hasProperty('dart-obfuscation')) {
+            dartObfuscationValue = project.property('dart-obfuscation').toBoolean();
+        }
         Boolean treeShakeIconsOptionsValue = false
         if (project.hasProperty('tree-shake-icons')) {
             treeShakeIconsOptionsValue = project.property('tree-shake-icons').toBoolean()
+        }
+        String dartDefinesValue = null
+        if (project.hasProperty('dart-defines')) {
+            dartDefinesValue = project.property('dart-defines')
+        }
+        String bundleSkSLPathValue;
+        if (project.hasProperty('bundle-sksl-path')) {
+            bundleSkSLPathValue = project.property('bundle-sksl-path')
+        }
+        String performanceMeasurementFileValue;
+        if (project.hasProperty('performance-measurement-file')) {
+            performanceMeasurementFileValue = project.property('performance-measurement-file')
         }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
@@ -647,6 +663,10 @@ class FlutterPlugin implements Plugin<Project> {
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 splitDebugInfo splitDebugInfoValue
                 treeShakeIcons treeShakeIconsOptionsValue
+                dartObfuscation dartObfuscationValue
+                dartDefines dartDefinesValue
+                bundleSkSLPath bundleSkSLPathValue
+                performanceMeasurementFile performanceMeasurementFileValue
                 doLast {
                     project.exec {
                         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -711,8 +731,9 @@ class FlutterPlugin implements Plugin<Project> {
                 return
             }
             // Flutter module included as a subproject in add to app.
-            Project appProject = project.rootProject.findProject(':app')
-            assert appProject != null
+            String hostAppProjectName = project.rootProject.hasProperty('flutter.hostAppProjectName') ? project.rootProject.property('flutter.hostAppProjectName')  : "app"
+            Project appProject = project.rootProject.findProject(":${hostAppProjectName}")
+            assert appProject != null : "Project :${hostAppProjectName} doesn't exist. To custom the host app project name, set `org.gradle.project.flutter.hostAppProjectName=<project-name>` in gradle.properties."
             appProject.afterEvaluate {
                 assert appProject.android != null
                 appProject.android.applicationVariants.all { appProjectVariant ->
@@ -740,14 +761,56 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                     Task mergeAssets = project
                         .tasks
-                        .findByPath(":app:merge${appProjectVariant.name.capitalize()}Assets")
+                        .findByPath(":${hostAppProjectName}:merge${appProjectVariant.name.capitalize()}Assets")
                     assert mergeAssets
                     mergeAssets.dependsOn(copyFlutterAssetsTask)
                 }
             }
         }
         if (project.android.hasProperty("applicationVariants")) {
-            project.android.applicationVariants.all addFlutterDeps
+            project.android.applicationVariants.all { variant ->
+                addFlutterDeps(variant)
+                // Copy the output APKs into a known location, so `flutter run` or `flutter build apk`
+                // can discover them. By default, this is `<app-dir>/build/app/outputs/flutter-apk/<filename>.apk`.
+                //
+                // The filename consists of `app<-abi>?<-flavor-name>?-<build-mode>.apk`.
+                // Where:
+                //   * `abi` can be `armeabi-v7a|arm64-v8a|x86|x86_64` only if the flag `split-per-abi` is set.
+                //   * `flavor-name` is the flavor used to build the app in lower case if the assemble task is called.
+                //   * `build-mode` can be `release|debug|profile`.
+                variant.outputs.all { output ->
+                    // `assemble` became `assembleProvider` in AGP 3.3.0.
+                    def assembleTask = variant.hasProperty("assembleProvider")
+                        ? variant.assembleProvider.get()
+                        : variant.assemble
+                    assembleTask.doLast {
+                        // `packageApplication` became `packageApplicationProvider` in AGP 3.3.0.
+                        def outputDirectory = variant.hasProperty("packageApplicationProvider")
+                            ? variant.packageApplicationProvider.get().outputDirectory
+                            : variant.packageApplication.outputDirectory
+                        //  `outputDirectory` is a `DirectoryProperty` in AGP 4.1.
+                        String outputDirectoryStr = outputDirectory.metaClass.respondsTo(outputDirectory, "get")
+                            ? outputDirectory.get()
+                            : outputDirectory
+                        String filename = "app"
+                        String abi = output.getFilter(OutputFile.ABI)
+                        if (abi != null && !abi.isEmpty()) {
+                            filename += "-${abi}"
+                        }
+                        if (variant.flavorName != null && !variant.flavorName.isEmpty()) {
+                            filename += "-${variant.flavorName.toLowerCase()}"
+                        }
+                        filename += "-${buildModeFor(variant.buildType)}"
+                        project.copy {
+                            from new File("$outputDirectoryStr/${output.outputFileName}")
+                            into new File("${project.buildDir}/outputs/flutter-apk");
+                            rename {
+                                return "${filename}.apk"
+                            }
+                        }
+                    }
+                }
+            }
         } else {
             project.android.libraryVariants.all addFlutterDeps
         }
@@ -792,6 +855,13 @@ abstract class BaseFlutterTask extends DefaultTask {
     String splitDebugInfo
     @Optional @Input
     Boolean treeShakeIcons
+    @Optional @Input
+    Boolean dartObfuscation
+    @Optional @Input
+    String dartDefines
+    @Optional @Input
+    String bundleSkSLPath
+    String performanceMeasurementFile;
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -824,6 +894,7 @@ abstract class BaseFlutterTask extends DefaultTask {
             ruleNames = targetPlatformValues.collect { "android_aot_bundle_${buildMode}_$it" }
         }
         project.exec {
+            logging.captureStandardError LogLevel.ERROR
             executable flutterExecutable.absolutePath
             workingDir sourceDir
             if (localEngine != null) {
@@ -838,6 +909,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "assemble"
             args "--depfile", "${intermediateDir}/flutter_build.d"
             args "--output", "${intermediateDir}"
+            if (performanceMeasurementFile != null) {
+                args "--performance-measurement-file=${performanceMeasurementFile}"
+            }
             if (!fastStart || buildMode != "debug") {
                 args "-dTargetFile=${targetPath}"
             } else {
@@ -848,11 +922,23 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (extraFrontEndOptions != null) {
                 args "-dExtraFrontEndOptions=${extraFrontEndOptions}"
             }
+            if (trackWidgetCreation != null) {
+                args "-dTrackWidgetCreation=${trackWidgetCreation}"
+            }
             if (splitDebugInfo != null) {
                 args "-dSplitDebugInfo=${splitDebugInfo}"
             }
             if (treeShakeIcons == true) {
                 args "-dTreeShakeIcons=true"
+            }
+            if (dartObfuscation == true) {
+                args "-dDartObfuscation=true"
+            }
+            if (dartDefines != null) {
+                args "--DartDefines=${dartDefines}"
+            }
+            if (bundleSkSLPath != null) {
+                args "-iBundleSkSLPath=${bundleSkSLPath}"
             }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"

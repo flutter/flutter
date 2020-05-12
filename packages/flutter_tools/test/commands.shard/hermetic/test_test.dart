@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -27,6 +28,7 @@ void main() {
   setUp(() {
     fs = MemoryFileSystem();
     fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
     fs.directory('test').childFile('some_test.dart').createSync(recursive: true);
   });
 
@@ -47,6 +49,28 @@ void main() {
       fakePackageTest.lastArgs,
       contains('--test-randomize-ordering-seed=random'),
     );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => FakeCache(),
+  });
+
+  testUsingContext('Supports coverage and machine', () async {
+    final FakePackageTest fakePackageTest = FakePackageTest();
+
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+
+    expect(() => commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--machine',
+      '--coverage',
+      '--',
+      'test/fake_test.dart',
+    ]), throwsA(isA<ToolExit>()
+      .having((ToolExit toolExit) => toolExit.message, 'message', isNull)));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
@@ -140,6 +164,8 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     Directory workDir,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
+    String tags,
+    String excludeTags,
     bool enableObservatory = false,
     bool startPaused = false,
     bool disableServiceAuthCodes = false,
@@ -157,7 +183,8 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String icudtlPath,
     Directory coverageDirectory,
     bool web = false,
-    String randomSeed = '0',
+    String randomSeed,
+    @override List<String> dartExperiments,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     return exitCode;

@@ -5,18 +5,16 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:platform/platform.dart';
-
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:mockito/mockito.dart';
 
@@ -57,30 +55,9 @@ void main() {
       fileSystem.path.join('lib', 'main.dart'),
       BuildInfo.debug,
       false,
-      const <String>[],
       false,
+      <String>[],
     ), throwsToolExit());
-  }, overrides: <Type, Generator>{
-    Platform: () => fakePlatform,
-    FileSystem: () => fileSystem,
-    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    Pub: () => MockPub(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
-
-  testUsingContext('Refuses to build using runner when missing index.html', () async {
-    fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
-
-    final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
-      null,
-      flutterProject: FlutterProject.current(),
-      ipv6: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      stayResident: true,
-      dartDefines: const <String>[],
-      urlTunneller: null,
-    ) as ResidentWebRunner;
-    expect(await runner.run(), 1);
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
@@ -134,12 +111,12 @@ void main() {
 
     // Project files.
     fileSystem.file('.packages')
-      ..writeAsStringSync('''
+      .writeAsStringSync('''
 foo:lib/
 fizz:bar/lib/
 ''');
     fileSystem.file('pubspec.yaml')
-      ..writeAsStringSync('''
+      .writeAsStringSync('''
 name: foo
 
 dependencies:
@@ -167,11 +144,11 @@ flutter:
 class UrlLauncherPlugin {}
 ''');
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
-      ..writeAsStringSync('void main() { }');
+      .writeAsStringSync('void main() { }');
 
     // Process calls. We're not testing that these invocations are correct because
     // that is covered in targets/web_test.dart.
-    when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+    when(globals.buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
       return BuildResult(success: true);
     });
     await runner.run(<String>['build', 'web']);
@@ -187,7 +164,7 @@ class UrlLauncherPlugin {}
   });
 
   testUsingContext('hidden if feature flag is not enabled', () async {
-    expect(BuildWebCommand().hidden, true);
+    expect(BuildWebCommand(verboseHelp: false).hidden, true);
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
@@ -197,7 +174,7 @@ class UrlLauncherPlugin {}
   });
 
   testUsingContext('not hidden if feature flag is enabled', () async {
-    expect(BuildWebCommand().hidden, false);
+    expect(BuildWebCommand(verboseHelp: false).hidden, false);
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,

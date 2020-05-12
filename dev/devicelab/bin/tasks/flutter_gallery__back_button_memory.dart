@@ -16,7 +16,7 @@ const String packageName = 'io.flutter.demo.gallery';
 const String activityName = 'io.flutter.demo.gallery.MainActivity';
 
 class BackButtonMemoryTest extends MemoryTest {
-  BackButtonMemoryTest() : super('${flutterDirectory.path}/examples/flutter_gallery', 'test_memory/back_button.dart', packageName);
+  BackButtonMemoryTest() : super('${flutterDirectory.path}/dev/integration_tests/flutter_gallery', 'test_memory/back_button.dart', packageName);
 
   @override
   AndroidDevice get device => super.device as AndroidDevice;

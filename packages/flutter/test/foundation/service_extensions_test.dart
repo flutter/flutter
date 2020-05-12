@@ -16,9 +16,9 @@ import 'package:flutter/widgets.dart';
 import '../flutter_test_alternative.dart';
 
 class TestServiceExtensionsBinding extends BindingBase
-  with ServicesBinding,
+  with SchedulerBinding,
+       ServicesBinding,
        GestureBinding,
-       SchedulerBinding,
        PaintingBinding,
        SemanticsBinding,
        RendererBinding,
@@ -530,11 +530,27 @@ void main() {
     extensionChangedEvent = extensionChangedEvents.last;
     expect(extensionChangedEvent['extension'], 'ext.flutter.platformOverride');
     expect(extensionChangedEvent['value'], 'iOS');
+    result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'linux'}));
+    expect(result, <String, String>{'value': 'linux'});
+    expect(binding.reassembled, 7);
+    expect(defaultTargetPlatform, TargetPlatform.linux);
+    expect(extensionChangedEvents.length, 7);
+    extensionChangedEvent = extensionChangedEvents.last;
+    expect(extensionChangedEvent['extension'], 'ext.flutter.platformOverride');
+    expect(extensionChangedEvent['value'], 'linux');
+    result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'windows'}));
+    expect(result, <String, String>{'value': 'windows'});
+    expect(binding.reassembled, 8);
+    expect(defaultTargetPlatform, TargetPlatform.windows);
+    expect(extensionChangedEvents.length, 8);
+    extensionChangedEvent = extensionChangedEvents.last;
+    expect(extensionChangedEvent['extension'], 'ext.flutter.platformOverride');
+    expect(extensionChangedEvent['value'], 'windows');
     result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'bogus'}));
     expect(result, <String, String>{'value': 'android'});
-    expect(binding.reassembled, 7);
+    expect(binding.reassembled, 9);
     expect(defaultTargetPlatform, TargetPlatform.android);
-    expect(extensionChangedEvents.length, 7);
+    expect(extensionChangedEvents.length, 9);
     extensionChangedEvent = extensionChangedEvents.last;
     expect(extensionChangedEvent['extension'], 'ext.flutter.platformOverride');
     expect(extensionChangedEvent['value'], 'android');
@@ -700,12 +716,13 @@ void main() {
     expect(trace, contains('dart:core,Object,Object.\n'));
     expect(trace, contains('package:test_api/test_api.dart,::,test\n'));
     expect(trace, contains('service_extensions_test.dart,::,main\n'));
-  }, skip: isBrowser);
+  }, skip: isBrowser); // Compilation trace is Dart VM specific and not
+  // supported in browsers.
 
   test('Service extensions - fastReassemble', () async {
     Map<String, dynamic> result;
     result = await binding.testExtension('fastReassemble', <String, String>{'class': 'Foo'});
 
     expect(result, containsPair('Success', 'true'));
-  }, skip: isBrowser);
+  });
 }

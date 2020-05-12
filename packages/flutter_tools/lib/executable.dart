@@ -6,13 +6,14 @@ import 'dart:async';
 
 import 'runner.dart' as runner;
 import 'src/base/context.dart';
+import 'src/base/template.dart';
 // The build_runner code generation is provided here to make it easier to
 // avoid introducing the dependency into google3. Not all build* packages
 // are synced internally.
 import 'src/build_runner/build_runner.dart';
+import 'src/build_runner/mustache_template.dart';
 import 'src/build_runner/resident_web_runner.dart';
 import 'src/build_runner/web_compilation_delegate.dart';
-
 import 'src/codegen.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
@@ -43,7 +44,6 @@ import 'src/commands/shell_completion.dart';
 import 'src/commands/symbolize.dart';
 import 'src/commands/test.dart';
 import 'src/commands/train.dart';
-import 'src/commands/unpack.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/commands/version.dart';
@@ -66,12 +66,19 @@ Future<void> main(List<String> args) async {
   final bool verboseHelp = help && verbose;
 
   await runner.run(args, <FlutterCommand>[
-    AnalyzeCommand(verboseHelp: verboseHelp),
+    AnalyzeCommand(
+      verboseHelp: verboseHelp,
+      fileSystem: globals.fs,
+      platform: globals.platform,
+      processManager: globals.processManager,
+      logger: globals.logger,
+      terminal: globals.terminal,
+    ),
     AssembleCommand(),
     AttachCommand(verboseHelp: verboseHelp),
     BuildCommand(verboseHelp: verboseHelp),
     ChannelCommand(verboseHelp: verboseHelp),
-    CleanCommand(),
+    CleanCommand(verbose: verbose),
     ConfigCommand(verboseHelp: verboseHelp),
     CreateCommand(),
     DaemonCommand(hidden: !verboseHelp),
@@ -94,7 +101,6 @@ Future<void> main(List<String> args) async {
     ShellCompletionCommand(),
     TestCommand(verboseHelp: verboseHelp),
     TrainingCommand(),
-    UnpackCommand(),
     UpdatePackagesCommand(hidden: !verboseHelp),
     UpgradeCommand(),
     VersionCommand(),
@@ -110,8 +116,10 @@ Future<void> main(List<String> args) async {
        // the build runner packages are not synced internally.
        CodeGenerator: () => const BuildRunner(),
        WebCompilationProxy: () => BuildRunnerWebCompilationProxy(),
-       // The web runner is not supported internally because it depends
+       // The web runner is not supported in google3 because it depends
        // on dwds.
        WebRunnerFactory: () => DwdsWebRunnerFactory(),
+       // The mustache dependency is different in google3
+       TemplateRenderer: () => const MustacheTemplateRenderer(),
      });
 }

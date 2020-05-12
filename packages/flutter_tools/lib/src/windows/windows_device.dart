@@ -66,7 +66,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
   bool get canListAnything => windowsWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() async {
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

@@ -161,14 +161,20 @@ abstract class BindingBase {
               case 'android':
                 debugDefaultTargetPlatformOverride = TargetPlatform.android;
                 break;
+              case 'fuchsia':
+                debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+                break;
               case 'iOS':
                 debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+                break;
+              case 'linux':
+                debugDefaultTargetPlatformOverride = TargetPlatform.linux;
                 break;
               case 'macOS':
                 debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
                 break;
-              case 'fuchsia':
-                debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+              case 'windows':
+                debugDefaultTargetPlatformOverride = TargetPlatform.windows;
                 break;
               case 'default':
               default:

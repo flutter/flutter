@@ -1,8 +1,3 @@
-{{#includeTargetPlatformWorkaround}}
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
-{{/includeTargetPlatformWorkaround}}
 import 'package:flutter/material.dart';
 {{#withDriverTest}}
 import 'package:flutter_driver/driver_extension.dart';
@@ -13,39 +8,15 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart';
 {{/withPluginHook}}
-{{#includeTargetPlatformWorkaround}}
 
-// Sets a platform override for desktop to avoid exceptions. See
-// https://flutter.dev/desktop#target-platform-override for more info.
-void _enablePlatformOverrideForDesktop() {
-  if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
-    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-  }
-}
-{{/includeTargetPlatformWorkaround}}
-
-{{^withDriverTest}}
-{{^includeTargetPlatformWorkaround}}
-void main() => runApp(MyApp());
-{{/includeTargetPlatformWorkaround}}
-{{#includeTargetPlatformWorkaround}}
 void main() {
-  _enablePlatformOverrideForDesktop();
-  runApp(MyApp());
-}
-{{/includeTargetPlatformWorkaround}}
-{{/withDriverTest}}
 {{#withDriverTest}}
-void main() {
-{{#includeTargetPlatformWorkaround}}
-  _enablePlatformOverrideForDesktop();
-{{/includeTargetPlatformWorkaround}}
   // Enable integration testing with the Flutter Driver extension.
   // See https://flutter.dev/testing/ for more info.
   enableFlutterDriverExtension();
+{{/withDriverTest}}
   runApp(MyApp());
 }
-{{/withDriverTest}}
 
 {{^withPluginHook}}
 class MyApp extends StatelessWidget {
@@ -65,6 +36,10 @@ class MyApp extends StatelessWidget {
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
         primarySwatch: Colors.blue,
+        // This makes the visual density adapt to the platform that you run
+        // the app on. For desktop platforms, the controls will be smaller and
+        // closer together (more dense) than on mobile platforms.
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
     );

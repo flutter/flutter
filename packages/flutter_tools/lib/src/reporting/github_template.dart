@@ -2,31 +2,62 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:file/file.dart';
-
-import '../base/context.dart';
-import '../base/file_system.dart';
-import '../base/io.dart';
-import '../base/net.dart';
-import '../convert.dart';
-import '../flutter_manifest.dart';
-import '../globals.dart' as globals;
-import '../project.dart';
+part of reporting;
 
 /// Provide suggested GitHub issue templates to user when Flutter encounters an error.
 class GitHubTemplateCreator {
-  GitHubTemplateCreator() :
-      _client = (context.get<HttpClientFactory>() == null)
-        ? HttpClient()
-        : context.get<HttpClientFactory>()();
+  GitHubTemplateCreator({
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required FlutterProjectFactory flutterProjectFactory,
+    @required HttpClient client,
+  }) : _fileSystem = fileSystem,
+      _logger = logger,
+      _flutterProjectFactory = flutterProjectFactory,
+      _client = client;
 
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final FlutterProjectFactory _flutterProjectFactory;
   final HttpClient _client;
 
-  Future<String> toolCrashSimilarIssuesGitHubURL(String errorString) async {
-    final String fullURL = 'https://github.com/flutter/flutter/issues?q=is%3Aissue+${Uri.encodeQueryComponent(errorString)}';
-    return await _shortURL(fullURL);
+  static String toolCrashSimilarIssuesURL(String errorString) {
+    return 'https://github.com/flutter/flutter/issues?q=is%3Aissue+${Uri.encodeQueryComponent(errorString)}';
+  }
+
+  /// Restricts exception object strings to contain only information about tool internals.
+  static String sanitizedCrashException(dynamic error) {
+    if (error is ProcessException) {
+      // Suppress args.
+      return 'ProcessException: ${error.message} Command: ${error.executable}, OS error code: ${error.errorCode}';
+    } else if (error is FileSystemException) {
+      // Suppress path.
+      return 'FileSystemException: ${error.message}, ${error.osError}';
+    } else if (error is SocketException) {
+      // Suppress address and port.
+      return 'SocketException: ${error.message}, ${error.osError}';
+    } else if (error is DevFSException) {
+      // Suppress underlying error.
+      return 'DevFSException: ${error.message}';
+    } else if (error is NoSuchMethodError
+      || error is ArgumentError
+      || error is VersionCheckError
+      || error is MissingDefineException
+      || error is UnsupportedError
+      || error is UnimplementedError
+      || error is StateError
+      || error is ProcessExit
+      || error is OSError) {
+      // These exception objects only reference tool internals, print the whole error.
+      return '${error.runtimeType}: $error';
+    } else if (error is Error) {
+      return '${error.runtimeType}: ${LineSplitter.split(error.stackTrace.toString()).take(1)}';
+    } else if (error is String) {
+      // Force comma separator to standardize.
+      return 'String: <${NumberFormat(null, 'en_US').format(error.length)} characters>';
+    }
+    // Exception, other.
+    return error.runtimeType.toString();
   }
 
   /// GitHub URL to present to the user containing encoded suggested template.
@@ -34,11 +65,11 @@ class GitHubTemplateCreator {
   /// Shorten the URL, if possible.
   Future<String> toolCrashIssueTemplateGitHubURL(
       String command,
-      String errorString,
-      String exception,
+      dynamic error,
       StackTrace stackTrace,
       String doctorText
     ) async {
+    final String errorString = sanitizedCrashException(error);
     final String title = '[tool_crash] $errorString';
     final String body = '''
 ## Command
@@ -52,9 +83,9 @@ $command
 3. ...
 
 ## Logs
-$exception
+$errorString
 ```
-${LineSplitter.split(stackTrace.toString()).take(20).join('\n')}
+${LineSplitter.split(stackTrace.toString()).take(25).join('\n')}
 ```
 ```
 $doctorText
@@ -76,7 +107,7 @@ ${_projectMetadataInformation()}
   String _projectMetadataInformation() {
     FlutterProject project;
     try {
-      project = FlutterProject.current();
+      project = _flutterProjectFactory.fromDirectory(_fileSystem.currentDirectory);
     } on Exception catch (exception) {
       // pubspec may be malformed.
       return exception.toString();
@@ -86,14 +117,18 @@ ${_projectMetadataInformation()}
       if (project == null || manifest == null || manifest.isEmpty) {
         return 'No pubspec in working directory.';
       }
+      final FlutterProjectMetadata metadata = FlutterProjectMetadata(project.metadataFile, _logger);
       final StringBuffer description = StringBuffer()
+        ..writeln('**Type**: ${metadata.projectType?.name}')
         ..writeln('**Version**: ${manifest.appVersion}')
         ..writeln('**Material**: ${manifest.usesMaterialDesign}')
         ..writeln('**Android X**: ${manifest.usesAndroidX}')
         ..writeln('**Module**: ${manifest.isModule}')
         ..writeln('**Plugin**: ${manifest.isPlugin}')
         ..writeln('**Android package**: ${manifest.androidPackage}')
-        ..writeln('**iOS bundle identifier**: ${manifest.iosBundleIdentifier}');
+        ..writeln('**iOS bundle identifier**: ${manifest.iosBundleIdentifier}')
+        ..writeln('**Creation channel**: ${metadata.versionChannel}')
+        ..writeln('**Creation framework version**: ${metadata.versionRevision}');
 
       final File file = project.flutterPluginsFile;
       if (file.existsSync()) {
@@ -107,7 +142,7 @@ ${_projectMetadataInformation()}
           }
           // Write the last part of the path, which includes the plugin name and version.
           // Example: camera-0.5.7+2
-          final List<String> pathParts = globals.fs.path.split(pluginParts[1]);
+          final List<String> pathParts = _fileSystem.path.split(pluginParts[1]);
           description.writeln(pathParts.isEmpty ? pluginParts.first : pathParts.last);
         }
       }
@@ -124,7 +159,7 @@ ${_projectMetadataInformation()}
   Future<String> _shortURL(String fullURL) async {
     String url;
     try {
-      globals.printTrace('Attempting git.io shortener: $fullURL');
+      _logger.printTrace('Attempting git.io shortener: $fullURL');
       final List<int> bodyBytes = utf8.encode('url=${Uri.encodeQueryComponent(fullURL)}');
       final HttpClientRequest request = await _client.postUrl(Uri.parse('https://git.io'));
       request.headers.set(HttpHeaders.contentLengthHeader, bodyBytes.length.toString());
@@ -134,10 +169,10 @@ ${_projectMetadataInformation()}
       if (response.statusCode == 201) {
         url = response.headers[HttpHeaders.locationHeader]?.first;
       } else {
-        globals.printTrace('Failed to shorten GitHub template URL. Server responded with HTTP status code ${response.statusCode}');
+        _logger.printTrace('Failed to shorten GitHub template URL. Server responded with HTTP status code ${response.statusCode}');
       }
-    } catch (sendError) {
-      globals.printTrace('Failed to shorten GitHub template URL: $sendError');
+    } on Exception catch (sendError) {
+      _logger.printTrace('Failed to shorten GitHub template URL: $sendError');
     }
 
     return url ?? fullURL;

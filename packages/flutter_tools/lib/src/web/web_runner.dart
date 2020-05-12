@@ -24,7 +24,6 @@ abstract class WebRunnerFactory {
     @required FlutterProject flutterProject,
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
-    @required List<String> dartDefines,
     @required UrlTunneller urlTunneller,
   });
 }

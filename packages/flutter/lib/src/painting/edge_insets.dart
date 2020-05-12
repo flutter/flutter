@@ -503,6 +503,16 @@ class EdgeInsets extends EdgeInsetsGeometry {
     return super.add(other);
   }
 
+  @override
+  EdgeInsetsGeometry clamp(EdgeInsetsGeometry min, EdgeInsetsGeometry max) {
+    return EdgeInsets.fromLTRB(
+      _left.clamp(min._left, max._left) as double,
+      _top.clamp(min._top, max._top) as double,
+      _right.clamp(min._right, max._right) as double,
+      _bottom.clamp(min._bottom, max._bottom) as double,
+    );
+  }
+
   /// Returns the difference between two [EdgeInsets].
   EdgeInsets operator -(EdgeInsets other) {
     return EdgeInsets.fromLTRB(

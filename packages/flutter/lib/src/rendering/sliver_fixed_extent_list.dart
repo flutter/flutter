@@ -164,6 +164,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
   @override
   void performLayout() {
+    final SliverConstraints constraints = this.constraints;
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
 
@@ -213,7 +214,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
           ) {
             possibleFirstIndex -= 1;
           }
-          max = possibleFirstIndex * itemExtent;
+          max = (possibleFirstIndex + 1) * itemExtent;
         }
         geometry = SliverGeometry(
           scrollExtent: max,

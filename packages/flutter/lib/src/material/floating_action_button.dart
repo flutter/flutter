@@ -144,6 +144,7 @@ class FloatingActionButton extends StatelessWidget {
     @required this.onPressed,
     this.mini = false,
     this.shape,
+    this.mouseCursor,
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
@@ -183,6 +184,7 @@ class FloatingActionButton extends StatelessWidget {
     this.disabledElevation,
     @required this.onPressed,
     this.shape,
+    this.mouseCursor,
     this.isExtended = true,
     this.materialTapTargetSize,
     this.clipBehavior = Clip.none,
@@ -376,6 +378,11 @@ class FloatingActionButton extends StatelessWidget {
   /// shape as well.
   final ShapeBorder shape;
 
+  /// {@macro flutter.material.inkwell.mousecursor}
+  ///
+  /// Defaults to null.
+  final MouseCursor mouseCursor;
+
   /// {@macro flutter.widgets.Clip}
   ///
   /// Defaults to [Clip.none], and must not be null.
@@ -436,7 +443,7 @@ class FloatingActionButton extends StatelessWidget {
           'FloatingActionButtons using ThemeData.accentIconTheme '
           'has been deprecated. Please use ThemeData.floatingActionButtonTheme '
           'instead. See '
-          'https://flutter.dev/docs/release/breaking-changes/fab_accent_dependency. '
+          'https://flutter.dev/go/remove-fab-accent-theme-dependency. '
           'This feature was deprecated after v1.13.2.'
         );
       }
@@ -484,6 +491,7 @@ class FloatingActionButton extends StatelessWidget {
 
     Widget result = RawMaterialButton(
       onPressed: onPressed,
+      mouseCursor: mouseCursor,
       elevation: elevation,
       focusElevation: focusElevation,
       hoverElevation: hoverElevation,
@@ -563,8 +571,7 @@ class _ChildOverflowBox extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _RenderChildOverflowBox renderObject) {
-    renderObject
-      ..textDirection = Directionality.of(context);
+    renderObject.textDirection = Directionality.of(context);
   }
 }
 
@@ -582,6 +589,7 @@ class _RenderChildOverflowBox extends RenderAligningShiftedBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     if (child != null) {
       child.layout(const BoxConstraints(), parentUsesSize: true);
       size = Size(

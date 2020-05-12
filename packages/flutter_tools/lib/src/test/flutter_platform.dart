@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
@@ -87,6 +88,7 @@ FlutterPlatform installHook({
   FlutterProject flutterProject,
   String icudtlPath,
   PlatformPluginRegistration platformPluginRegistration,
+  @required List<String> dartExperiments,
 }) {
   assert(testWrapper != null);
   assert(enableObservatory || (!startPaused && observatoryPort == null));
@@ -119,6 +121,7 @@ FlutterPlatform installHook({
     projectRootDirectory: projectRootDirectory,
     flutterProject: flutterProject,
     icudtlPath: icudtlPath,
+    dartExperiments: dartExperiments,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -139,11 +142,14 @@ FlutterPlatform installHook({
 ///
 /// The [updateGoldens] argument will set the [autoUpdateGoldens] global
 /// variable in the [flutter_test] package before invoking the test.
+// NOTE: this API is used by the fuchsia source tree, do not add new
+// required or position parameters.
 String generateTestBootstrap({
   @required Uri testUrl,
   @required InternetAddress host,
   File testConfigFile,
   bool updateGoldens = false,
+  bool nullSafety = false,
 }) {
   assert(testUrl != null);
   assert(host != null);
@@ -173,11 +179,15 @@ import '$testUrl' as test;
 import '${Uri.file(testConfigFile.path)}' as test_config;
 ''');
   }
+  // This type is sensitive to the non-nullable experiment.
+  final String beforeLoadTypedef = nullSafety
+    ? 'Future<dynamic> Function()?'
+    : 'Future<dynamic> Function()';
   buffer.write('''
 
 /// Returns a serialized test suite.
 StreamChannel<dynamic> serializeSuite(Function getMain(),
-    {bool hidePrints = true, Future<dynamic> beforeLoad()}) {
+    {bool hidePrints = true, $beforeLoadTypedef beforeLoad}) {
   return RemoteListener.start(getMain,
       hidePrints: hidePrints, beforeLoad: beforeLoad);
 }
@@ -192,9 +202,10 @@ void catchIsolateErrors() {
   errorPort.listen((dynamic message) {
     // Masquerade as an IsolateSpawnException because that's what this would
     // be if the error had been detected statically.
-    final IsolateSpawnException error = IsolateSpawnException(message[0]);
-    final Trace stackTrace =
-        message[1] == null ? Trace(const <Frame>[]) : Trace.parse(message[1]);
+    final IsolateSpawnException error = IsolateSpawnException(
+        message[0] as String);
+    final Trace stackTrace = message[1] == null ?
+        Trace(const <Frame>[]) : Trace.parse(message[1] as String);
     Zone.current.handleUncaughtError(error, stackTrace);
   });
 }
@@ -222,8 +233,7 @@ void main() {
   });
   WebSocket.connect(server).then((WebSocket socket) {
     socket.map((dynamic x) {
-      assert(x is String);
-      return json.decode(x);
+      return json.decode(x as String);
     }).pipe(channel.sink);
     socket.addStream(channel.stream.map(json.encode));
   });
@@ -259,6 +269,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.projectRootDirectory,
     this.flutterProject,
     this.icudtlPath,
+    @required this.dartExperiments,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -279,6 +290,7 @@ class FlutterPlatform extends PlatformPlugin {
   final Uri projectRootDirectory;
   final FlutterProject flutterProject;
   final String icudtlPath;
+  final List<String> dartExperiments;
 
   Directory fontsDirectory;
 
@@ -313,7 +325,7 @@ class FlutterPlatform extends PlatformPlugin {
       final RunnerSuiteController controller = deserializeSuite(path, platform,
         suiteConfig, const PluginEnvironment(), channel, message);
       return await controller.suite;
-    } catch (err) {
+    } on Exception catch (err) {
       /// Rethrow a less confusing error if it is a test incompatibility.
       if (err.toString().contains("type 'Declarer' is not a subtype of type 'Declarer'")) {
         throw UnsupportedError('Package incompatibility between flutter and test packages:\n'
@@ -447,8 +459,8 @@ class FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= TestCompiler(buildMode, trackWidgetCreation, flutterProject);
-        mainDart = await compiler.compile(mainDart);
+        compiler ??= TestCompiler(buildMode, trackWidgetCreation, flutterProject, dartExperiments);
+        mainDart = await compiler.compile(globals.fs.file(mainDart).uri);
 
         if (mainDart == null) {
           controller.sink.addError(_getErrorMessage('Compilation failed', testPath, shellPath));
@@ -459,7 +471,7 @@ class FlutterPlatform extends PlatformPlugin {
       final Process process = await _startProcess(
         shellPath,
         mainDart,
-        packages: PackageMap.globalPackagesPath,
+        packages: globalPackagesPath,
         enableObservatory: enableObservatory,
         startPaused: startPaused,
         disableServiceAuthCodes: disableServiceAuthCodes,
@@ -512,9 +524,9 @@ class FlutterPlatform extends PlatformPlugin {
           processObservatoryUri = detectedUri;
           {
             globals.printTrace('Connecting to service protocol: $processObservatoryUri');
-            final Future<VMService> localVmService = VMService.connect(processObservatoryUri,
+            final Future<vm_service.VmService> localVmService = connectToVmService(processObservatoryUri,
               compileExpression: _compileExpressionService);
-            localVmService.then((VMService vmservice) {
+            localVmService.then((vm_service.VmService vmservice) {
               globals.printTrace('Successfully connected to service protocol: $processObservatoryUri');
             });
           }
@@ -667,7 +679,7 @@ class FlutterPlatform extends PlatformPlugin {
           }
           break;
       }
-    } catch (error, stack) {
+    } on Exception catch (error, stack) {
       globals.printTrace('test $ourTestCount: error caught during test; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
       if (!controllerSinkClosed) {
         controller.sink.addError(error, stack);
@@ -681,7 +693,7 @@ class FlutterPlatform extends PlatformPlugin {
       for (final Finalizer finalizer in finalizers.reversed) {
         try {
           await finalizer();
-        } catch (error, stack) {
+        } on Exception catch (error, stack) {
           globals.printTrace('test $ourTestCount: error while cleaning up; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
           if (!controllerSinkClosed) {
             controller.sink.addError(error, stack);
@@ -739,6 +751,7 @@ class FlutterPlatform extends PlatformPlugin {
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl)),
       host: host,
       updateGoldens: updateGoldens,
+      nullSafety: dartExperiments.contains('non-nullable'),
     );
   }
 
@@ -873,7 +886,7 @@ class FlutterPlatform extends PlatformPlugin {
               if (reportObservatoryUri != null) {
                 reportObservatoryUri(uri);
               }
-            } catch (error) {
+            } on Exception catch (error) {
               globals.printError('Could not parse shell observatory port message: $error');
             }
           } else if (line != null) {

@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'localizations.dart';
@@ -1092,6 +1093,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
 ///    that is relative to the child's size.
 ///  * [FittedBox], which sizes and positions its child widget to fit the parent
 ///    according to a given [BoxFit] discipline.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Transform extends SingleChildRenderObjectWidget {
   /// Creates a widget that transforms its child.
   ///
@@ -1214,7 +1216,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The matrix to transform the child by during painting.
   final Matrix4 transform;
 
-  /// The origin of the coordinate system (relative to the upper left corder of
+  /// The origin of the coordinate system (relative to the upper left corner of
   /// this render object) in which to apply the matrix.
   ///
   /// Setting an origin is equivalent to conjugating the transform matrix by a
@@ -1305,8 +1307,7 @@ class CompositedTransformTarget extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderLeaderLayer renderObject) {
-    renderObject
-      ..link = link;
+    renderObject.link = link;
   }
 }
 
@@ -1887,6 +1888,7 @@ class Center extends Align {
 ///    size and positions the child according to an [Alignment] value.
 ///  * [CustomMultiChildLayout], which uses a delegate to position multiple
 ///    children.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
   /// Creates a custom single child layout.
   ///
@@ -1982,6 +1984,7 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
 ///  * [Stack], which arranges children relative to the edges of the container.
 ///  * [Flow], which provides paint-time control of its children using transform
 ///    matrices.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   /// Creates a custom multi-child layout.
   ///
@@ -2011,8 +2014,9 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///
 /// If given a child, this widget forces its child to have a specific width
 /// and/or height (assuming values are permitted by this widget's parent). If
-/// either the width or height is null, this widget will size itself to match
-/// the child's size in that dimension.
+/// either the width or height is null, this widget will try to size itself to
+/// match the child's size in that dimension. If the child's size depends on the
+/// size of its parent, the height and width must be provided.
 ///
 /// If not given a child, [SizedBox] will try to size itself as close to the
 /// specified height and width as possible given the parent's constraints. If
@@ -3038,6 +3042,7 @@ AxisDirection getAxisDirectionFromAxisReverseAndDirectionality(
 ///    this layout algorithm (at the cost of being slightly less efficient).
 ///  * [ListView], which implements an efficient scrolling version of this
 ///    layout algorithm.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class ListBody extends MultiChildRenderObjectWidget {
   /// Creates a layout widget that arranges its children sequentially along a
   /// given axis.
@@ -3778,7 +3783,7 @@ class PositionedDirectional extends StatelessWidget {
 ///  * [Column], for a version of this widget that is always vertical.
 ///  * [Expanded], to indicate children that should take all the remaining room.
 ///  * [Flexible], to indicate children that should share the remaining room.
-///  * [Spacer], a widget that takes up space proportional to it's flex value.
+///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///    that may be sized smaller (leaving some remaining room unused).
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Flex extends MultiChildRenderObjectWidget {
@@ -4118,7 +4123,7 @@ class Flex extends MultiChildRenderObjectWidget {
 ///  * [Expanded], to indicate children that should take all the remaining room.
 ///  * [Flexible], to indicate children that should share the remaining room but
 ///    that may by sized smaller (leaving some remaining room unused).
-///  * [Spacer], a widget that takes up space proportional to it's flex value.
+///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Row extends Flex {
   /// Creates a horizontal array of children.
@@ -4320,7 +4325,7 @@ class Row extends Flex {
 ///    that may size smaller (leaving some remaining room unused).
 ///  * [SingleChildScrollView], whose documentation discusses some ways to
 ///    use a [Column] inside a scrolling container.
-///  * [Spacer], a widget that takes up space proportional to it's flex value.
+///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Column extends Flex {
   /// Creates a vertical array of children.
@@ -4453,7 +4458,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 ///
 /// {@tool dartpad --template=stateless_widget_material}
 /// This example shows how to use an [Expanded] widget in a [Column] so that
-/// it's middle child, a [Container] here, expands to fill the space.
+/// its middle child, a [Container] here, expands to fill the space.
 ///
 /// ![This results in two thin blue boxes with a larger amber box in between.](https://flutter.github.io/assets-for-api-docs/assets/widgets/expanded_column.png)
 ///
@@ -4535,7 +4540,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 /// See also:
 ///
 ///  * [Flexible], which does not force the child to fill the available space.
-///  * [Spacer], a widget that takes up space proportional to it's flex value.
+///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Expanded extends Flexible {
   /// Creates a widget that expands a child of a [Row], [Column], or [Flex]
@@ -4989,8 +4994,7 @@ class Flow extends MultiChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderFlow renderObject) {
-    renderObject
-      ..delegate = delegate;
+    renderObject.delegate = delegate;
   }
 }
 
@@ -5227,10 +5231,12 @@ class RawImage extends LeafRenderObjectWidget {
     this.matchTextDirection = false,
     this.invertColors = false,
     this.filterQuality = FilterQuality.low,
+    this.isAntiAlias = false,
   }) : assert(scale != null),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert(isAntiAlias != null),
        super(key: key);
 
   /// The image to display.
@@ -5345,6 +5351,11 @@ class RawImage extends LeafRenderObjectWidget {
   ///  * [Paint.invertColors], for the dart:ui implementation.
   final bool invertColors;
 
+  /// Whether to paint the image with anti-aliasing.
+  ///
+  /// Anti-aliasing alleviates the sawtooth artifact when the image is rotated.
+  final bool isAntiAlias;
+
   @override
   RenderImage createRenderObject(BuildContext context) {
     assert((!matchTextDirection && alignment is Alignment) || debugCheckHasDirectionality(context));
@@ -5363,6 +5374,7 @@ class RawImage extends LeafRenderObjectWidget {
       textDirection: matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null,
       invertColors: invertColors,
       filterQuality: filterQuality,
+      isAntiAlias: isAntiAlias,
     );
   }
 
@@ -5867,17 +5879,21 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 ///    have buttons pressed.
 class MouseRegion extends StatefulWidget {
   /// Creates a widget that forwards mouse events to callbacks.
+  ///
+  /// By default, all callbacks are empty, `cursor` is unset, and `opaque` is
+  /// `true`.
   const MouseRegion({
     Key key,
     this.onEnter,
     this.onExit,
     this.onHover,
+    this.cursor,
     this.opaque = true,
     this.child,
   }) : assert(opaque != null),
        super(key: key);
 
-  /// Called when a mouse pointer has entered this widget.
+  /// Triggered when a mouse pointer has entered this widget.
   ///
   /// This callback is triggered when the pointer, with or without buttons
   /// pressed, has started to be contained by the region of this widget. More
@@ -5905,16 +5921,16 @@ class MouseRegion extends StatefulWidget {
   ///    internally implemented.
   final PointerEnterEventListener onEnter;
 
-  /// Called when a mouse pointer moves within this widget without buttons
-  /// pressed.
+  /// Triggered when a mouse pointer has moved onto or within the widget without
+  /// buttons pressed.
   ///
-  /// This callback is not triggered when the [MouseRegion] has moved
-  /// while being hovered by the mouse pointer.
+  /// This callback is not triggered by the movement of an annotation.
   ///
-  /// {@macro flutter.mouseRegion.triggerTime}
+  /// The time that this callback is triggered is during the callback of a
+  /// pointer event, which is always between frames.
   final PointerHoverEventListener onHover;
 
-  /// Called when a mouse pointer has exited this widget when the widget is
+  /// Triggered when a mouse pointer has exited this widget when the widget is
   /// still mounted.
   ///
   /// This callback is triggered when the pointer, with or without buttons
@@ -6083,9 +6099,22 @@ class MouseRegion extends StatefulWidget {
   ///    this callback is internally implemented, but without the restriction.
   final PointerExitEventListener onExit;
 
+  /// The mouse cursor for mouse pointers that are hovering over the annotated
+  /// region.
+  ///
+  /// When a mouse enters the region, its cursor will be changed to the [cursor].
+  /// The [cursor] defaults to null, meaning the region does not control cursors,
+  /// but defers the choice to the next region behind this one on the screen in
+  /// hit-test order, or [SystemMouseCursors.basic] if no others can be found.
+  /// When the mouse leaves the region, the cursor will be decided by the region
+  /// found at the new location.
+  final MouseCursor cursor;
+
   /// Whether this widget should prevent other [MouseRegion]s visually behind it
-  /// from detecting the pointer, thus affecting how their [onHover], [onEnter],
-  /// and [onExit] behave.
+  /// from detecting the pointer.
+  ///
+  /// This changes the list of regions that a pointer hovers, thus affecting how
+  /// their [onHover], [onEnter], [onExit], and [cursor] behave.
   ///
   /// If [opaque] is true, this widget will absorb the mouse pointer and
   /// prevent this widget's siblings (or any other widgets that are not
@@ -6118,6 +6147,7 @@ class MouseRegion extends StatefulWidget {
     if (onHover != null)
       listeners.add('hover');
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
+    properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
   }
 }
@@ -6150,6 +6180,7 @@ class _RawMouseRegion extends SingleChildRenderObjectWidget {
       onEnter: widget.onEnter,
       onHover: widget.onHover,
       onExit: owner.getHandleExit(),
+      cursor: widget.cursor,
       opaque: widget.opaque,
     );
   }
@@ -6161,6 +6192,7 @@ class _RawMouseRegion extends SingleChildRenderObjectWidget {
       ..onEnter = widget.onEnter
       ..onHover = widget.onHover
       ..onExit = owner.getHandleExit()
+      ..cursor = widget.cursor
       ..opaque = widget.opaque;
   }
 }
@@ -7070,4 +7102,64 @@ class StatefulBuilder extends StatefulWidget {
 class _StatefulBuilderState extends State<StatefulBuilder> {
   @override
   Widget build(BuildContext context) => widget.builder(context, setState);
+}
+
+/// A widget that paints its area with a specified [Color] and then draws its
+/// child on top of that color.
+class ColoredBox extends SingleChildRenderObjectWidget {
+  /// Creates a widget that paints its area with the specified [Color].
+  ///
+  /// The [color] parameter must not be null.
+  const ColoredBox({@required this.color, Widget child, Key key})
+      : assert(color != null),
+        super(key: key, child: child);
+
+  /// The color to paint the background area with.
+  final Color color;
+
+  @override
+  _RenderColoredBox createRenderObject(BuildContext context) {
+    return _RenderColoredBox(color: color);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderColoredBox renderObject) {
+    renderObject.color = color;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Color>('color', color));
+  }
+}
+
+class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
+  _RenderColoredBox({@required Color color})
+    : _color = color,
+      super(behavior: HitTestBehavior.opaque);
+
+  /// The fill color for this render object.
+  ///
+  /// This parameter must not be null.
+  Color get color => _color;
+  Color _color;
+  set color(Color value) {
+    assert(value != null);
+    if (value == _color) {
+      return;
+    }
+    _color = value;
+    markNeedsPaint();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (size > Size.zero) {
+      context.canvas.drawRect(offset & size, Paint()..color = color);
+    }
+    if (child != null) {
+      context.paintChild(child, offset);
+    }
+  }
 }

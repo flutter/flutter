@@ -32,7 +32,7 @@ import 'typography.dart';
 ///
 /// The Material Design typography scheme was significantly changed in the
 /// current (2018) version of the specification
-/// (https://material.io/design/typography).
+/// ([https://material.io/design/typography](https://material.io/design/typography)).
 ///
 /// The 2018 spec has thirteen text styles:
 /// ```
@@ -103,7 +103,7 @@ import 'typography.dart';
 ///    globally adjusted, such as the color scheme.
 ///  * <https://material.io/design/typography/>
 @immutable
-class TextTheme extends Diagnosticable {
+class TextTheme with Diagnosticable {
   /// Creates a text theme that uses the given values.
   ///
   /// Rather than creating a new text theme, consider using [Typography.black]

@@ -10,11 +10,23 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../test_utils.dart';
 
+const String _kDefaultHtml  = '''
+<html>
+    <head>
+        <title>Hello, World</title>
+    </head>
+    <body>
+        <script src="main.dart.js"></script>
+    </body>
+</html>
+''';
+
 abstract class Project {
   Directory dir;
 
   String get pubspec;
   String get main;
+  String get test => null;
 
   Uri get mainDart => Uri.parse('package:test/main.dart');
 
@@ -24,6 +36,11 @@ abstract class Project {
     if (main != null) {
       writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), main);
     }
+    if (test != null) {
+      writeFile(globals.fs.path.join(dir.path, 'test', 'test.dart'), test);
+    }
+    writeFile(globals.fs.path.join(dir.path, 'web', 'index.html'), _kDefaultHtml);
+    writePackages(dir.path);
     await getPackages(dir.path);
   }
 

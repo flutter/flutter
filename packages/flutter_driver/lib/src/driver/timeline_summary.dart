@@ -10,6 +10,7 @@ import 'package:file/file.dart';
 import 'package:path/path.dart' as path;
 
 import 'common.dart';
+import 'scene_display_lag_summarizer.dart';
 import 'timeline.dart';
 
 const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
@@ -74,8 +75,8 @@ class TimelineSummary {
     return _percentileInMillis(_extractGpuRasterizerDrawDurations(), p);
   }
 
-  /// The number of frames that missed the [kBuildBudget] on the GPU and
-  /// therefore are in the danger of missing frames.
+  /// The number of frames that missed the [kBuildBudget] on the raster thread
+  /// and therefore are in the danger of missing frames.
   int computeMissedFrameRasterizerBudgetCount([ Duration frameBuildBudget = kBuildBudget ]) => _extractGpuRasterizerDrawDurations()
       .where((Duration duration) => duration > kBuildBudget)
       .length;
@@ -85,6 +86,8 @@ class TimelineSummary {
 
   /// Encodes this summary as JSON.
   Map<String, dynamic> get summaryJson {
+    final SceneDisplayLagSummarizer sceneDisplayLagSummarizer = _sceneDisplayLagSummarizer();
+
     return <String, dynamic>{
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
       '90th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(90.0),
@@ -103,6 +106,12 @@ class TimelineSummary {
       'frame_rasterizer_times': _extractGpuRasterizerDrawDurations()
         .map<int>((Duration duration) => duration.inMicroseconds)
         .toList(),
+      'frame_begin_times': _extractBeginTimestamps('Frame')
+        .map<int>((Duration duration) => duration.inMicroseconds)
+        .toList(),
+      'average_vsync_transitions_missed': sceneDisplayLagSummarizer.computeAverageVsyncTransitionsMissed(),
+      '90th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(90.0),
+      '99th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(99.0)
     };
   }
 
@@ -142,23 +151,54 @@ class TimelineSummary {
       .toList();
   }
 
+  List<Duration> _extractDurations(
+    String name,
+    Duration extractor(TimelineEvent beginEvent, TimelineEvent endEvent),
+  ) {
+    final List<Duration> result = <Duration>[];
+    final List<TimelineEvent> events = _extractNamedEvents(name);
+
+    // Timeline does not guarantee that the first event is the "begin" event.
+    TimelineEvent begin;
+    for (final TimelineEvent event in events) {
+      if (event.phase == 'B') {
+        begin = event;
+      } else {
+        if (begin != null) {
+          result.add(extractor(begin, event));
+          // each begin only gets used once.
+          begin = null;
+        }
+      }
+    }
+
+    return result;
+  }
+
   /// Extracts Duration list that are reported as a pair of begin/end events.
   ///
   /// See: https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU
   List<Duration> _extractBeginEndEvents(String name) {
-    final List<Duration> result = <Duration>[];
+    return _extractDurations(
+      name,
+      (TimelineEvent beginEvent, TimelineEvent endEvent) {
+        return Duration(microseconds: endEvent.timestampMicros - beginEvent.timestampMicros);
+      },
+    );
+  }
 
-    // Timeline does not guarantee that the first event is the "begin" event.
-    final Iterator<TimelineEvent> events = _extractNamedEvents(name)
-        .skipWhile((TimelineEvent evt) => evt.phase != 'B').iterator;
-    while (events.moveNext()) {
-      final TimelineEvent beginEvent = events.current;
-      if (events.moveNext()) {
-        final TimelineEvent endEvent = events.current;
-        result.add(Duration(microseconds: endEvent.timestampMicros - beginEvent.timestampMicros));
-      }
+  List<Duration> _extractBeginTimestamps(String name) {
+    final List<Duration> result = _extractDurations(
+      name,
+      (TimelineEvent beginEvent, TimelineEvent endEvent) {
+        return Duration(microseconds: beginEvent.timestampMicros);
+      },
+    );
+
+    // Align timestamps so the first event is at 0.
+    for (int i = result.length - 1; i >= 0; i -= 1) {
+      result[i] = result[i] - result[0];
     }
-
     return result;
   }
 
@@ -174,9 +214,7 @@ class TimelineSummary {
       throw ArgumentError('durations is empty!');
     assert(percentile >= 0.0 && percentile <= 100.0);
     final List<double> doubles = durations.map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0).toList();
-    doubles.sort();
-    return doubles[((doubles.length - 1) * (percentile / 100)).round()];
-
+    return findPercentile(doubles, percentile);
   }
 
   double _maxInMillis(Iterable<Duration> durations) {
@@ -186,6 +224,8 @@ class TimelineSummary {
         .map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0)
         .reduce(math.max);
   }
+
+  SceneDisplayLagSummarizer _sceneDisplayLagSummarizer() => SceneDisplayLagSummarizer(_extractNamedEvents(kSceneDisplayLagEvent));
 
   List<Duration> _extractGpuRasterizerDrawDurations() => _extractBeginEndEvents('GPURasterizer::Draw');
 

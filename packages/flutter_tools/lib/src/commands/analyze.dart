@@ -4,14 +4,33 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+import 'package:process/process.dart';
+
 import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../base/platform.dart';
+import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import 'analyze_continuously.dart';
 import 'analyze_once.dart';
 
 class AnalyzeCommand extends FlutterCommand {
-  AnalyzeCommand({bool verboseHelp = false, this.workingDirectory}) {
+  AnalyzeCommand({
+    bool verboseHelp = false,
+    this.workingDirectory,
+    @required FileSystem fileSystem,
+    @required Platform platform,
+    @required AnsiTerminal terminal,
+    @required Logger logger,
+    @required ProcessManager processManager,
+  }) : _fileSystem = fileSystem,
+       _processManager = processManager,
+       _logger = logger,
+       _terminal = terminal,
+       _platform = platform {
+    addEnableExperimentation(hide: !verboseHelp);
     argParser.addFlag('flutter-repo',
         negatable: false,
         help: 'Include all the examples and tests from the Flutter repository.',
@@ -59,6 +78,12 @@ class AnalyzeCommand extends FlutterCommand {
   /// The working directory for testing analysis using dartanalyzer.
   final Directory workingDirectory;
 
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final AnsiTerminal _terminal;
+  final ProcessManager _processManager;
+  final Platform _platform;
+
   @override
   String get name => 'analyze';
 
@@ -73,7 +98,7 @@ class AnalyzeCommand extends FlutterCommand {
     }
 
     // Or we're not in a project directory.
-    if (!globals.fs.file('pubspec.yaml').existsSync()) {
+    if (!_fileSystem.file('pubspec.yaml').existsSync()) {
       return false;
     }
 
@@ -87,6 +112,14 @@ class AnalyzeCommand extends FlutterCommand {
         argResults,
         runner.getRepoRoots(),
         runner.getRepoPackages(),
+        fileSystem: _fileSystem,
+        // TODO(jonahwilliams): determine a better way to inject the logger,
+        // since it is constructed on-demand.
+        logger: _logger ?? globals.logger,
+        platform: _platform,
+        processManager: _processManager,
+        terminal: _terminal,
+        experiments: stringsArg('enable-experiment'),
       ).analyze();
     } else {
       await AnalyzeOnce(
@@ -94,6 +127,14 @@ class AnalyzeCommand extends FlutterCommand {
         runner.getRepoRoots(),
         runner.getRepoPackages(),
         workingDirectory: workingDirectory,
+        fileSystem: _fileSystem,
+        // TODO(jonahwilliams): determine a better way to inject the logger,
+        // since it is constructed on-demand.
+        logger: _logger ?? globals.logger,
+        platform: _platform,
+        processManager: _processManager,
+        terminal: _terminal,
+        experiments: stringsArg('enable-experiment'),
       ).analyze();
     }
     return FlutterCommandResult.success();

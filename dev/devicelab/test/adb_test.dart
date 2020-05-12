@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:collection/collection.dart' show ListEquality, MapEquality;
 
 import 'package:flutter_devicelab/framework/adb.dart';
+import 'package:meta/meta.dart';
 
 import 'common.dart';
 
@@ -124,8 +125,9 @@ CommandArgs cmd({
 
 typedef ExitErrorFactory = dynamic Function();
 
+@immutable
 class CommandArgs {
-  CommandArgs({ this.command, this.arguments, this.environment });
+  const CommandArgs({ this.command, this.arguments, this.environment });
 
   final String command;
   final List<String> arguments;

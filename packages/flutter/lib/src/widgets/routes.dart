@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'focus_manager.dart';
@@ -606,8 +607,18 @@ mixin LocalHistoryRoute<T> on Route<T> {
     _localHistory.remove(entry);
     entry._owner = null;
     entry._notifyRemoved();
-    if (_localHistory.isEmpty)
-      changedInternalState();
+    if (_localHistory.isEmpty) {
+      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+        // The local history might be removed as a result of disposing inactive
+        // elements during finalizeTree. The state is locked at this moment, and
+        // we can only notify state has changed in the next frame.
+        SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+          changedInternalState();
+        });
+      } else {
+        changedInternalState();
+      }
+    }
   }
 
   @override
@@ -1228,9 +1239,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
-  /// Returns the value of the first callback added with
-  /// [addScopedWillPopCallback] that returns false. If they all return true,
-  /// returns the inherited method's result (see [Route.willPop]).
+  /// Returns [RoutePopDisposition.doNotPop] if any of callbacks added with
+  /// [addScopedWillPopCallback] returns either false or null. If they all
+  /// return true, the base [Route.willPop]'s result will be returned. The
+  /// callbacks will be called in the order they were added, and will only be
+  /// called if all previous callbacks returned true.
   ///
   /// Typically this method is not overridden because applications usually
   /// don't create modal routes directly, they use higher level primitives
@@ -1249,7 +1262,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     final _ModalScopeState<T> scope = _scopeKey.currentState;
     assert(scope != null);
     for (final WillPopCallback callback in List<WillPopCallback>.from(_willPopCallbacks)) {
-      if (!await callback())
+      if (await callback() != true)
         return RoutePopDisposition.doNotPop;
     }
     return await super.willPop();
@@ -1727,6 +1740,9 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// and leaves off the screen. By default, the transition is a linear fade of
 /// the page's contents.
 ///
+/// The `routeSettings` will be used in the construction of the dialog's route.
+/// See [RouteSettings] for more details.
+///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
 ///
@@ -1743,6 +1759,7 @@ Future<T> showGeneralDialog<T>({
   Duration transitionDuration,
   RouteTransitionsBuilder transitionBuilder,
   bool useRootNavigator = true,
+  RouteSettings routeSettings,
 }) {
   assert(pageBuilder != null);
   assert(useRootNavigator != null);
@@ -1754,6 +1771,7 @@ Future<T> showGeneralDialog<T>({
     barrierColor: barrierColor,
     transitionDuration: transitionDuration,
     transitionBuilder: transitionBuilder,
+    settings: routeSettings,
   ));
 }
 

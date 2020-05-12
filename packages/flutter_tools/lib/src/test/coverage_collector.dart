@@ -5,10 +5,10 @@
 import 'dart:async';
 
 import 'package:coverage/coverage.dart' as coverage;
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../dart/package_map.dart';
@@ -19,15 +19,27 @@ import 'watcher.dart';
 
 /// A class that's used to collect coverage data during tests.
 class CoverageCollector extends TestWatcher {
-  CoverageCollector({this.libraryPredicate});
+  CoverageCollector({this.libraryPredicate, this.verbose = true});
 
+  final bool verbose;
   Map<String, Map<int, int>> _globalHitmap;
   bool Function(String) libraryPredicate;
 
   @override
   Future<void> handleFinishedTest(ProcessEvent event) async {
-    globals.printTrace('test ${event.childIndex}: collecting coverage');
+    _logMessage('test ${event.childIndex}: collecting coverage');
     await collectCoverage(event.process, event.observatoryUri);
+  }
+
+  void _logMessage(String line, { bool error = false }) {
+    if (!verbose) {
+      return;
+    }
+    if (error) {
+      globals.printError(line);
+    } else {
+      globals.printTrace(line);
+    }
   }
 
   void _addHitmap(Map<String, Map<int, int>> hitmap) {
@@ -46,16 +58,16 @@ class CoverageCollector extends TestWatcher {
   /// The returned [Future] completes when the coverage is collected.
   Future<void> collectCoverageIsolate(Uri observatoryUri) async {
     assert(observatoryUri != null);
-    print('collecting coverage data from $observatoryUri...');
+    _logMessage('collecting coverage data from $observatoryUri...');
     final Map<String, dynamic> data = await collect(observatoryUri, libraryPredicate);
     if (data == null) {
       throw Exception('Failed to collect coverage.');
     }
     assert(data != null);
 
-    print('($observatoryUri): collected coverage data; merging...');
+    _logMessage('($observatoryUri): collected coverage data; merging...');
     _addHitmap(coverage.createHitmap(data['coverage'] as List<Map<String, dynamic>>));
-    print('($observatoryUri): done merging coverage data into global coverage map.');
+    _logMessage('($observatoryUri): done merging coverage data into global coverage map.');
   }
 
   /// Collects coverage for the given [Process] using the given `port`.
@@ -68,7 +80,7 @@ class CoverageCollector extends TestWatcher {
     assert(process != null);
     assert(observatoryUri != null);
     final int pid = process.pid;
-    globals.printTrace('pid $pid: collecting coverage data from $observatoryUri...');
+    _logMessage('pid $pid: collecting coverage data from $observatoryUri...');
 
     Map<String, dynamic> data;
     final Future<void> processComplete = process.exitCode
@@ -85,9 +97,9 @@ class CoverageCollector extends TestWatcher {
     await Future.any<void>(<Future<void>>[ processComplete, collectionComplete ]);
     assert(data != null);
 
-    globals.printTrace('pid $pid ($observatoryUri): collected coverage data; merging...');
+    _logMessage('pid $pid ($observatoryUri): collected coverage data; merging...');
     _addHitmap(coverage.createHitmap(data['coverage'] as List<Map<String, dynamic>>));
-    globals.printTrace('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
+    _logMessage('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
   }
 
   /// Returns a future that will complete with the formatted coverage data
@@ -103,7 +115,7 @@ class CoverageCollector extends TestWatcher {
       return null;
     }
     if (formatter == null) {
-      final coverage.Resolver resolver = coverage.Resolver(packagesPath: PackageMap.globalPackagesPath);
+      final coverage.Resolver resolver = coverage.Resolver(packagesPath: globalPackagesPath);
       final String packagePath = globals.fs.currentDirectory.path;
       final List<String> reportOn = coverageDirectory == null
         ? <String>[globals.fs.path.join(packagePath, 'lib')]
@@ -116,12 +128,10 @@ class CoverageCollector extends TestWatcher {
   }
 
   Future<bool> collectCoverageData(String coveragePath, { bool mergeCoverageData = false, Directory coverageDirectory }) async {
-    final Status status = globals.logger.startProgress('Collecting coverage information...', timeout: timeoutConfiguration.fastOperation);
     final String coverageData = await finalizeCoverage(
       coverageDirectory: coverageDirectory,
     );
-    status.stop();
-    globals.printTrace('coverage information collection complete');
+    _logMessage('coverage information collection complete');
     if (coverageData == null) {
       return false;
     }
@@ -129,12 +139,12 @@ class CoverageCollector extends TestWatcher {
     final File coverageFile = globals.fs.file(coveragePath)
       ..createSync(recursive: true)
       ..writeAsStringSync(coverageData, flush: true);
-    globals.printTrace('wrote coverage data to $coveragePath (size=${coverageData.length})');
+    _logMessage('wrote coverage data to $coveragePath (size=${coverageData.length})');
 
     const String baseCoverageData = 'coverage/lcov.base.info';
     if (mergeCoverageData) {
       if (!globals.fs.isFileSync(baseCoverageData)) {
-        globals.printError('Missing "$baseCoverageData". Unable to merge coverage data.');
+        _logMessage('Missing "$baseCoverageData". Unable to merge coverage data.', error: true);
         return false;
       }
 
@@ -145,7 +155,7 @@ class CoverageCollector extends TestWatcher {
         } else if (globals.platform.isMacOS) {
           installMessage = 'Consider running "brew install lcov".';
         }
-        globals.printError('Missing "lcov" tool. Unable to merge coverage data.\n$installMessage');
+        _logMessage('Missing "lcov" tool. Unable to merge coverage data.\n$installMessage', error: true);
         return false;
       }
 
@@ -167,32 +177,42 @@ class CoverageCollector extends TestWatcher {
     }
     return true;
   }
+
+  @override
+  Future<void> handleTestCrashed(ProcessEvent event) async { }
+
+  @override
+  Future<void> handleTestTimedOut(ProcessEvent event) async { }
 }
 
-Future<VMService> _defaultConnect(Uri serviceUri) {
-  return VMService.connect(
+Future<vm_service.VmService> _defaultConnect(Uri serviceUri) {
+  return connectToVmService(
       serviceUri, compression: CompressionOptions.compressionOff);
 }
 
 Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate, {
   bool waitPaused = false,
   String debugName,
-  Future<VMService> Function(Uri) connector = _defaultConnect,
+  Future<vm_service.VmService> Function(Uri) connector = _defaultConnect,
 }) async {
-  final VMService vmService = await connector(serviceUri);
-  await vmService.getVM();
+  final vm_service.VmService vmService = await connector(serviceUri);
   final Map<String, dynamic> result = await _getAllCoverage(
       vmService, libraryPredicate);
-  await vmService.close();
+  vmService.dispose();
   return result;
 }
 
-Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(String) libraryPredicate) async {
-  await service.getVM();
+Future<Map<String, dynamic>> _getAllCoverage(vm_service.VmService service, bool Function(String) libraryPredicate) async {
+  final vm_service.VM vm = await service.getVM();
   final List<Map<String, dynamic>> coverage = <Map<String, dynamic>>[];
-  for (final Isolate isolateRef in service.vm.isolates) {
-    await isolateRef.load();
-    final Map<String, dynamic> scriptList = await isolateRef.invokeRpcRaw('getScripts', params: <String, dynamic>{'isolateId': isolateRef.id});
+  for (final vm_service.IsolateRef isolateRef in vm.isolates) {
+    Map<String, Object> scriptList;
+    try {
+      final vm_service.ScriptList actualScriptList = await service.getScripts(isolateRef.id);
+      scriptList = actualScriptList.json;
+    } on vm_service.SentinelException {
+      continue;
+    }
     final List<Future<void>> futures = <Future<void>>[];
 
     final Map<String, Map<String, dynamic>> scripts = <String, Map<String, dynamic>>{};
@@ -200,36 +220,28 @@ Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(St
     // For each ScriptRef loaded into the VM, load the corresponding Script and
     // SourceReport object.
 
-    // We may receive such objects as
-    // {type: Sentinel, kind: Collected, valueAsString: <collected>}
-    // that need to be skipped.
-    if (scriptList['scripts'] == null) {
-      continue;
-    }
-    for (final Map<String, dynamic> script in scriptList['scripts']) {
+    for (final Map<String, dynamic> script in (scriptList['scripts'] as List<dynamic>).cast<Map<String, dynamic>>()) {
       if (!libraryPredicate(script['uri'] as String)) {
         continue;
       }
       final String scriptId = script['id'] as String;
       futures.add(
-        isolateRef.invokeRpcRaw('getSourceReport', params: <String, dynamic>{
-          'forceCompile': true,
-          'scriptId': scriptId,
-          'isolateId': isolateRef.id,
-          'reports': <String>['Coverage'],
-        })
-        .then((Map<String, dynamic> report) {
-          sourceReports[scriptId] = report;
+        service.getSourceReport(
+          isolateRef.id,
+          <String>['Coverage'],
+          scriptId: scriptId,
+          forceCompile: true,
+        )
+        .then((vm_service.SourceReport report) {
+          sourceReports[scriptId] = report.json;
         })
       );
       futures.add(
-        isolateRef.invokeRpcRaw('getObject', params: <String, dynamic>{
-          'isolateId': isolateRef.id,
-          'objectId': scriptId,
-        })
-        .then((Map<String, dynamic> script) {
-          scripts[scriptId] = script;
-        })
+        service
+          .getObject(isolateRef.id, scriptId)
+          .then((vm_service.Obj script) {
+            scripts[scriptId] = script.json;
+          })
       );
     }
     await Future.wait(futures);
@@ -247,7 +259,7 @@ void _buildCoverageMap(
   final Map<String, Map<int, int>> hitMaps = <String, Map<int, int>>{};
   for (final String scriptId in scripts.keys) {
     final Map<String, dynamic> sourceReport = sourceReports[scriptId];
-    for (final Map<String, dynamic> range in sourceReport['ranges']) {
+    for (final Map<String, dynamic> range in (sourceReport['ranges'] as List<dynamic>).cast<Map<String, dynamic>>()) {
       final Map<String, dynamic> coverage = castStringKeyedMap(range['coverage']);
       // Coverage reports may sometimes be null for a Script.
       if (coverage == null) {

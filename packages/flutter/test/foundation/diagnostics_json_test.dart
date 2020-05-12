@@ -225,6 +225,9 @@ class _TestElement extends Element {
   void performRebuild() {
     // Intentionally left empty.
   }
+
+  @override
+  bool get debugDoingBuild => throw UnimplementedError();
 }
 
 class TestTree extends Object with DiagnosticableTreeMixin {

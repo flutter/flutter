@@ -19,14 +19,36 @@ void main() {
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
       final Completer<void> ready = Completer<void>();
+      final List<String> stdout = <String>[];
+      final List<String> stderr = <String>[];
+
+      // Uninstall if the app is already installed on the device to get to a clean state.
+      print('uninstalling...');
+      final Process uninstall = await startProcess(
+        path.join(flutterDirectory.path, 'bin', 'flutter'),
+        <String>['--suppress-analytics', 'install', '--uninstall-only', '-d', device.deviceId],
+      )..stdout
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+        print('uninstall:stdout: $line');
+      })..stderr
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+        print('uninstall:stderr: $line');
+        stderr.add(line);
+      });
+      if (await uninstall.exitCode != 0) {
+        throw 'flutter install --uninstall-only failed.';
+      }
+
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
         <String>['--suppress-analytics', 'run', '--release', '-d', device.deviceId, 'lib/main.dart'],
         isBot: false, // we just want to test the output, not have any debugging info
       );
-      final List<String> stdout = <String>[];
-      final List<String> stderr = <String>[];
       int runExitCode;
       run.stdout
         .transform<String>(utf8.decoder)
@@ -84,14 +106,14 @@ void main() {
 
       _findNextMatcherInList(
         stdout,
-        (String line) => line.contains('Built build/app/outputs/apk/release/app-release.apk (') && line.contains('MB).'),
-        'Built build/app/outputs/apk/release/app-release.apk',
+        (String line) => line.contains('Built build/app/outputs/flutter-apk/app-release.apk (') && line.contains('MB).'),
+        'Built build/app/outputs/flutter-apk/app-release.apk',
       );
 
       _findNextMatcherInList(
         stdout,
-        (String line) => line.startsWith('Installing build/app/outputs/apk/app.apk...'),
-        'Installing build/app/outputs/apk/app.apk...',
+        (String line) => line.startsWith('Installing build/app/outputs/flutter-apk/app.apk...'),
+        'Installing build/app/outputs/flutter-apk/app.apk...',
       );
 
       _findNextMatcherInList(

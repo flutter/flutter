@@ -32,7 +32,7 @@ class AnimatedPlaceholderPage extends StatelessWidget {
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 10),
       itemBuilder: (BuildContext context, int index) {
         return FadeInImage(
-          placeholder: DelayedBase64Image(Duration.zero, kAnimatedGif),
+          placeholder: const DelayedBase64Image(Duration.zero, kAnimatedGif),
           image: DelayedBase64Image(Duration(milliseconds: 100 * index), kBlueSquare),
         );
       },

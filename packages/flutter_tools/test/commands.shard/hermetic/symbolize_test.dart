@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/symbolize.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -36,6 +38,24 @@ void main() {
       dwarfSymbolizationService: mockDwarfSymbolizationService,
     );
     applyMocksToCommand(command);
+  });
+
+  testUsingContext('Regression test for type error in codec', () async {
+    final DwarfSymbolizationService symbolizationService = DwarfSymbolizationService.test();
+    final StreamController<List<int>> output = StreamController<List<int>>();
+
+    unawaited(symbolizationService.decode(
+      input: Stream<Uint8List>.fromIterable(<Uint8List>[
+        utf8.encode('Hello, World\n') as Uint8List,
+      ]),
+      symbols: Uint8List(0),
+      output: IOSink(output.sink),
+    ));
+
+    await expectLater(
+      output.stream.transform(utf8.decoder),
+      emits('Hello, World'),
+    );
   });
 
 

@@ -6,8 +6,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
-import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 
@@ -18,9 +16,8 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     depfileService = DepfileService(
-      logger: MockLogger(),
+      logger: BufferLogger.test(),
       fileSystem: fileSystem,
-      platform: FakePlatform(operatingSystem: 'linux'),
     );
   });
   testWithoutContext('Can parse depfile from file', () {
@@ -64,9 +61,8 @@ a.txt c.txt d.txt: b.txt
   testWithoutContext('Can parse depfile with windows file paths', () {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     depfileService = DepfileService(
-      logger: MockLogger(),
+      logger: BufferLogger.test(),
       fileSystem: fileSystem,
-      platform: FakePlatform(operatingSystem: 'windows'),
     );
     final File depfileSource = fileSystem.file('example.d')..writeAsStringSync(r'''
 C:\\a.txt: C:\\b.txt
@@ -80,9 +76,8 @@ C:\\a.txt: C:\\b.txt
   testWithoutContext('Can escape depfile with windows file paths and spaces in directory names', () {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     depfileService = DepfileService(
-      logger: MockLogger(),
+      logger: BufferLogger.test(),
       fileSystem: fileSystem,
-      platform: FakePlatform(operatingSystem: 'windows'),
     );
     final File inputFile = fileSystem.directory(r'Hello Flutter').childFile('a.txt').absolute
       ..createSync(recursive: true);
@@ -176,5 +171,3 @@ file:///Users/foo/canonicalized_map.dart
     expect(depfile.outputs.single.path, 'foo.dart.js');
   });
 }
-
-class MockLogger extends Mock implements Logger {}

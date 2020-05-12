@@ -66,7 +66,7 @@ abstract class MacOSApp extends ApplicationPackage {
       globals.printError('Invalid prebuilt macOS app. Does not contain Info.plist.');
       return null;
     }
-    final Map<String, dynamic> propertyValues = PlistParser.instance.parseFile(plistPath);
+    final Map<String, dynamic> propertyValues = globals.plistParser.parseFile(plistPath);
     final String id = propertyValues[PlistParser.kCFBundleIdentifierKey] as String;
     final String executableName = propertyValues[PlistParser.kCFBundleExecutable] as String;
     if (id == null) {

@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
-import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:mockito/mockito.dart';
@@ -19,8 +19,6 @@ import '../../src/mocks.dart' show MockProcess,
                                    MockStdio,
                                    flakyProcessFactory;
 
-class MockLogger extends Mock implements Logger {}
-
 void main() {
   group('process exceptions', () {
     ProcessManager mockProcessManager;
@@ -30,7 +28,7 @@ void main() {
       mockProcessManager = PlainMockProcessManager();
       processUtils = ProcessUtils(
         processManager: mockProcessManager,
-        logger: MockLogger(),
+        logger: BufferLogger.test(),
       );
     });
 
@@ -50,7 +48,7 @@ void main() {
       int postProcessRecording;
       int cleanup;
 
-      final ShutdownHooks shutdownHooks = ShutdownHooks(logger: MockLogger());
+      final ShutdownHooks shutdownHooks = ShutdownHooks(logger: BufferLogger.test());
 
       shutdownHooks.addShutdownHook(() async {
         serializeRecording1 = i++;
@@ -87,7 +85,7 @@ void main() {
       mockLogger = BufferLogger(
         terminal: AnsiTerminal(
           stdio: MockStdio(),
-          platform: FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false,
+          platform: FakePlatform(stdoutSupportsAnsi: false),
         ),
         outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 40),
       );
@@ -132,11 +130,11 @@ void main() {
       mockProcessManager = MockProcessManager();
       processUtils = ProcessUtils(
         processManager: mockProcessManager,
-        logger: MockLogger(),
+        logger: BufferLogger.test(),
       );
       flakyProcessUtils = ProcessUtils(
         processManager: flakyProcessManager,
-        logger: MockLogger(),
+        logger: BufferLogger.test(),
       );
     });
 
@@ -250,7 +248,7 @@ void main() {
       testLogger = BufferLogger(
         terminal: AnsiTerminal(
           stdio: MockStdio(),
-          platform: FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false,
+          platform: FakePlatform(stdinSupportsAnsi: false),
         ),
         outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 40),
       );
@@ -338,14 +336,14 @@ void main() {
   });
 
   group('exitsHappySync', () {
-    ProcessManager mockProcessManager;
+    MockProcessManager mockProcessManager;
     ProcessUtils processUtils;
 
     setUp(() {
       mockProcessManager = MockProcessManager();
       processUtils = ProcessUtils(
         processManager: mockProcessManager,
-        logger: MockLogger(),
+        logger: BufferLogger.test(),
       );
     });
 
@@ -362,32 +360,82 @@ void main() {
       );
       expect(processUtils.exitsHappySync(<String>['boohoo']), isFalse);
     });
+
+    testWithoutContext('catches Exception and returns false', () {
+      when(mockProcessManager.runSync(<String>['boohoo'])).thenThrow(
+        const ProcessException('Process failed', <String>[]),
+      );
+      expect(processUtils.exitsHappySync(<String>['boohoo']), isFalse);
+    });
+
+    testWithoutContext('does not throw Exception and returns false if binary cannot run', () {
+      mockProcessManager.canRunSucceeds = false;
+      expect(processUtils.exitsHappySync(<String>['nonesuch']), isFalse);
+      verifyNever(
+        mockProcessManager.runSync(any, environment: anyNamed('environment')),
+      );
+    });
+
+    testWithoutContext('does not catch ArgumentError', () async {
+      when(mockProcessManager.runSync(<String>['invalid'])).thenThrow(
+        ArgumentError('Bad input'),
+      );
+      expect(
+        () => processUtils.exitsHappySync(<String>['invalid']),
+        throwsArgumentError,
+      );
+    });
   });
 
   group('exitsHappy', () {
-    ProcessManager mockProcessManager;
+    MockProcessManager mockProcessManager;
     ProcessUtils processUtils;
 
     setUp(() {
       mockProcessManager = MockProcessManager();
       processUtils = ProcessUtils(
         processManager: mockProcessManager,
-        logger: MockLogger(),
+        logger: BufferLogger.test(),
       );
     });
 
-    testWithoutContext(' succeeds on success', () async {
+    testWithoutContext('succeeds on success', () async {
       when(mockProcessManager.run(<String>['whoohoo'])).thenAnswer((_) {
         return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
       });
       expect(await processUtils.exitsHappy(<String>['whoohoo']), isTrue);
     });
 
-    testWithoutContext(' fails on failure', () async {
+    testWithoutContext('fails on failure', () async {
       when(mockProcessManager.run(<String>['boohoo'])).thenAnswer((_) {
         return Future<ProcessResult>.value(ProcessResult(0, 1, '', ''));
       });
       expect(await processUtils.exitsHappy(<String>['boohoo']), isFalse);
+    });
+
+    testWithoutContext('catches Exception and returns false', () async {
+      when(mockProcessManager.run(<String>['boohoo'])).thenThrow(
+        const ProcessException('Process failed', <String>[]),
+      );
+      expect(await processUtils.exitsHappy(<String>['boohoo']), isFalse);
+    });
+
+    testWithoutContext('does not throw Exception and returns false if binary cannot run', () async {
+      mockProcessManager.canRunSucceeds = false;
+      expect(await processUtils.exitsHappy(<String>['nonesuch']), isFalse);
+      verifyNever(
+        mockProcessManager.runSync(any, environment: anyNamed('environment')),
+      );
+    });
+
+    testWithoutContext('does not catch ArgumentError', () async {
+      when(mockProcessManager.run(<String>['invalid'])).thenThrow(
+        ArgumentError('Bad input'),
+      );
+      expect(
+        () async => await processUtils.exitsHappy(<String>['invalid']),
+        throwsArgumentError,
+      );
     });
   });
 

@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../base/common.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -16,11 +18,17 @@ import 'build.dart';
 
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
-  BuildMacosCommand() {
+  BuildMacosCommand({ @required bool verboseHelp }) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
     usesTargetOption();
     addBuildModeFlags();
+    addDartObfuscationOption();
+    usesExtraFrontendOptions();
+    usesBuildNumberOption();
+    usesBuildNameOption();
+    addEnableExperimentation(hide: !verboseHelp);
+    addBuildPerformanceFile(hide: !verboseHelp);
   }
 
   @override
@@ -52,6 +60,7 @@ class BuildMacosCommand extends BuildSubCommand {
       flutterProject: flutterProject,
       buildInfo: buildInfo,
       targetOverride: targetFile,
+      verboseLogging: globals.logger.isVerbose,
     );
     return FlutterCommandResult.success();
   }

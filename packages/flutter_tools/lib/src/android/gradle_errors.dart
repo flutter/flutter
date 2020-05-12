@@ -183,6 +183,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
       BuildEvent(
         'gradle-android-x-failure',
         eventError: 'app-not-using-plugins',
+        flutterUsage: globals.flutterUsage,
       ).send();
     }
     if (hasPlugins && !usesAndroidX) {
@@ -195,6 +196,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
       BuildEvent(
         'gradle-android-x-failure',
         eventError: 'app-not-using-androidx',
+        flutterUsage: globals.flutterUsage,
       ).send();
     }
     if (hasPlugins && usesAndroidX && shouldBuildPluginAsAar) {
@@ -204,6 +206,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
       BuildEvent(
         'gradle-android-x-failure',
         eventError: 'using-jetifier',
+        flutterUsage: globals.flutterUsage,
       ).send();
     }
     if (hasPlugins && usesAndroidX && !shouldBuildPluginAsAar) {
@@ -214,6 +217,7 @@ final GradleHandledError androidXFailureHandler = GradleHandledError(
       BuildEvent(
         'gradle-android-x-failure',
         eventError: 'not-using-jetifier',
+        flutterUsage: globals.flutterUsage,
       ).send();
       return GradleBuildStatus.retryWithAarPlugins;
     }

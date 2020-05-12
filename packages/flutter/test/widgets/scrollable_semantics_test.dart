@@ -253,7 +253,7 @@ void main() {
     ));
 
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 
   testWidgets('correct scrollProgress for unbound', (WidgetTester tester) async {
     semantics = SemanticsTester(tester);

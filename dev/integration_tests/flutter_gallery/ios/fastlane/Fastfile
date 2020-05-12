@@ -1,0 +1,84 @@
+# Prevent Fastlane from overwriting README.md
+skip_docs
+
+default_platform(:ios)
+
+def suppress_output
+  original_stdout, original_stderr = $stdout.clone, $stderr.clone
+  $stderr.reopen File.new('/dev/null', 'w')
+  $stdout.reopen File.new('/dev/null', 'w')
+  yield
+ensure
+  $stdout.reopen original_stdout
+  $stderr.reopen original_stderr
+end
+
+# This should be run after running
+# flutter build ios --release --no-codesign
+# to build the app using the Flutter toolchain. This lane is meant to only
+# rebuild the app by:
+# 1- Signing using the publishing credentials; and
+# 2- xcodebuild with archive option
+platform :ios do
+  desc 'Push a new release to TestFlight'
+  lane :build_and_deploy_testflight do |options|
+    # Doesn't do anything when not on a CI bot. Even though it's called
+    # "setup_travis", this also runs on Cirrus, since the CI environment
+    # variable is set. When on a CI bot, it creates a temporary keychain and
+    # switches "match" to readonly mode to not create new profiles/certs on CI.
+    setup_travis
+
+    # Relative to this file.
+    raw_version = File.read('../../../../../version')
+    puts "Building and deploying version #{raw_version}..."
+
+    update_app_identifier(
+      plist_path: 'Runner/Info.plist',
+      # Let the checked-in bundle ID be different so users don't collide on
+      # provisioning profile creation when building locally.
+      app_identifier: 'io.flutter.demo.gallery'
+    )
+
+    increment_version_number(
+      # Only major, minor, patch digits and dots.
+      version_number: /\d+\.\d+\.\d+/.match(raw_version)[0]
+    )
+
+    # Stop fastlane from echoing back PUBLISHING_MATCH_CERTIFICATE_REPO var.
+    # Doesn't matter too much since Cirrus doesn't echo back encrypted variables
+    # anyway.
+    suppress_output {
+      # Retrieves all the necessary certs and provisioning profiles.
+      sync_code_signing(
+        git_url:  "https://x-access-token:#{ENV['PUBLISHING_MATCH_REPO_TOKEN']}@#{ENV['PUBLISHING_MATCH_CERTIFICATE_REPO']}" ,
+        type: 'appstore',
+        readonly: true,
+      )
+    }
+    puts 'Certificates and profiles installed'
+
+    # Modify the Xcode project to use the new team and profile.
+    # It will put the git state to dirty but Travis will be wiped after
+    # then run session.
+    disable_automatic_code_signing
+    update_project_provisioning(
+      xcodeproj: 'Runner.xcodeproj',
+      target_filter: 'Runner',
+      build_configuration: 'Release',
+      profile: ENV['sigh_io.flutter.demo.gallery_appstore_profile-path'],
+    )
+
+    # Build and archive the app again.
+    build_ios_app(
+      workspace: 'Runner.xcworkspace',
+      scheme: 'Runner',
+      export_method: 'app-store',
+      # Verify that the right signing identity is used for publishing.
+      codesigning_identity: 'Apple Distribution: FLUTTER.IO LLC (S8QB4VV633)',
+    )
+
+    if options[:upload]
+      upload_to_testflight
+    end
+  end
+end

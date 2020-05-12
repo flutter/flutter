@@ -367,7 +367,7 @@ class _DefaultProcessUtils implements ProcessUtils {
           stdioFuture = stdioFuture.timeout(const Duration(seconds: 1));
         }
         await stdioFuture;
-      } catch (_) {
+      } on Exception catch (_) {
         // Ignore errors on the process' stdout and stderr streams. Just capture
         // whatever we got, and use the exit code
       }
@@ -537,9 +537,14 @@ class _DefaultProcessUtils implements ProcessUtils {
     Map<String, String> environment,
   }) {
     _traceCommand(cli);
+    if (!_processManager.canRun(cli.first)) {
+      _logger.printTrace('$cli either does not exist or is not executable.');
+      return false;
+    }
+
     try {
       return _processManager.runSync(cli, environment: environment).exitCode == 0;
-    } catch (error) {
+    } on Exception catch (error) {
       _logger.printTrace('$cli failed with $error');
       return false;
     }
@@ -551,9 +556,14 @@ class _DefaultProcessUtils implements ProcessUtils {
     Map<String, String> environment,
   }) async {
     _traceCommand(cli);
+    if (!_processManager.canRun(cli.first)) {
+      _logger.printTrace('$cli either does not exist or is not executable.');
+      return false;
+    }
+
     try {
       return (await _processManager.run(cli, environment: environment)).exitCode == 0;
-    } catch (error) {
+    } on Exception catch (error) {
       _logger.printTrace('$cli failed with $error');
       return false;
     }

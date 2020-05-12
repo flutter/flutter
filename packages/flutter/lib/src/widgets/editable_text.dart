@@ -7,12 +7,13 @@ import 'dart:math' as math;
 import 'dart:ui' as ui hide TextStyle;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
+import 'autofill.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'binding.dart';
@@ -29,8 +30,8 @@ import 'scrollable.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
 
-export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType, SmartQuotesType, SmartDashesType;
 export 'package:flutter/rendering.dart' show SelectionChangedCause;
+export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType, SmartQuotesType, SmartDashesType;
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -79,6 +80,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 /// final _controller = TextEditingController();
 ///
 /// void initState() {
+///   super.initState();
 ///   _controller.addListener(() {
 ///     final text = _controller.text.toLowerCase();
 ///     _controller.value = _controller.value.copyWith(
@@ -87,7 +89,6 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 ///       composing: TextRange.empty,
 ///     );
 ///   });
-///   super.initState();
 /// }
 ///
 /// void dispose() {
@@ -189,7 +190,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].
   set selection(TextSelection newSelection) {
-    if (newSelection.start > text.length || newSelection.end > text.length)
+    if (!isSelectionWithinTextBounds(newSelection))
       throw FlutterError('invalid text selection: $newSelection');
     value = value.copyWith(selection: newSelection, composing: TextRange.empty);
   }
@@ -219,6 +220,11 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// actions, not during the build, layout, or paint phases.
   void clearComposing() {
     value = value.copyWith(composing: TextRange.empty);
+  }
+
+  /// Check that the [selection] is inside of the bounds of [text].
+  bool isSelectionWithinTextBounds(TextSelection selection) {
+    return selection.start <= text.length && selection.end <= text.length;
   }
 }
 
@@ -351,6 +357,7 @@ class EditableText extends StatefulWidget {
     @required this.controller,
     @required this.focusNode,
     this.readOnly = false,
+    this.obscuringCharacter = '•',
     this.obscureText = false,
     this.autocorrect = true,
     SmartDashesType smartDashesType,
@@ -397,14 +404,17 @@ class EditableText extends StatefulWidget {
     this.enableInteractiveSelection = true,
     this.scrollController,
     this.scrollPhysics,
+    this.autocorrectionTextRectColor,
     this.toolbarOptions = const ToolbarOptions(
       copy: true,
       cut: true,
       paste: true,
       selectAll: true,
     ),
+    this.autofillHints,
   }) : assert(controller != null),
        assert(focusNode != null),
+       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert(obscureText != null),
        assert(autocorrect != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -456,11 +466,20 @@ class EditableText extends StatefulWidget {
   /// Controls whether this widget has keyboard focus.
   final FocusNode focusNode;
 
+  /// {@template flutter.widgets.editableText.obscuringCharacter}
+  /// Character used for obscuring text if [obscureText] is true.
+  ///
+  /// Must be only a single character.
+  ///
+  /// Defaults to the character U+2022 BULLET (•).
+  /// {@endtemplate}
+  final String obscuringCharacter;
+
   /// {@template flutter.widgets.editableText.obscureText}
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
   /// When this is set to true, all the characters in the text field are
-  /// replaced by U+2022 BULLET characters (•).
+  /// replaced by [obscuringCharacter].
   ///
   /// Defaults to false. Cannot be null.
   /// {@endtemplate}
@@ -564,7 +583,7 @@ class EditableText extends StatefulWidget {
   /// [TextStyle] instead. See [StrutStyle.inheritFromTextStyle].
   StrutStyle get strutStyle {
     if (_strutStyle == null) {
-      return style != null ? StrutStyle.fromTextStyle(style, forceStrutHeight: true) : StrutStyle.disabled;
+      return style != null ? StrutStyle.fromTextStyle(style, forceStrutHeight: true) : const StrutStyle();
     }
     return _strutStyle.inheritFromTextStyle(style);
   }
@@ -637,6 +656,18 @@ class EditableText extends StatefulWidget {
   ///
   /// Cannot be null.
   final Color cursorColor;
+
+  /// The color to use when painting the autocorrection Rect.
+  ///
+  /// For [CupertinoTextField]s, the value is set to the ambient
+  /// [CupertinoThemeData.primaryColor] with 20% opacity. For [TextField]s, the
+  /// value is null on non-iOS platforms and the same color used in [CupertinoTextField]
+  /// on iOS.
+  ///
+  /// Currently the autocorrection Rect only appears on iOS.
+  ///
+  /// Defaults to null, which disables autocorrection Rect painting.
+  final Color autocorrectionTextRectColor;
 
   /// The color to use when painting the background cursor aligned with the text
   /// while rendering the floating cursor.
@@ -741,6 +772,10 @@ class EditableText extends StatefulWidget {
   final bool autofocus;
 
   /// The color to use when painting the selection.
+  ///
+  /// For [CupertinoTextField]s, the value is set to the ambient
+  /// [CupertinoThemeData.primaryColor] with 20% opacity. For [TextField]s, the
+  /// value is set to the ambient [ThemeData.textSelectionColor].
   final Color selectionColor;
 
   /// Optional delegate for building the text selection handles and toolbar.
@@ -1057,6 +1092,23 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.rendering.editable.selectionEnabled}
   bool get selectionEnabled => enableInteractiveSelection;
 
+  /// {@template flutter.widgets.editableText.autofillHints}
+  /// A list of strings that helps the autofill service identify the type of this
+  /// text input.
+  ///
+  /// When set to null or empty, the text input will not send any autofill related
+  /// information to the platform. As a result, it will not participate in
+  /// autofills triggered by a different [AutofillClient], even if they're in the
+  /// same [AutofillScope]. Additionally, on Android and web, setting this to null
+  /// or empty will disable autofill for this text field.
+  ///
+  /// The minimum platform SDK version that supports Autofill is API level 26
+  /// for Android, and iOS 10.0 for iOS.
+  ///
+  /// {@macro flutter.services.autofill.autofillHints}
+  /// {@endtemplate}
+  final Iterable<String> autofillHints;
+
   @override
   EditableTextState createState() => EditableTextState();
 
@@ -1082,11 +1134,12 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
+    properties.add(DiagnosticsProperty<Iterable<String>>('autofillHints', autofillHints, defaultValue: null));
   }
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText> implements TextInputClient, TextSelectionDelegate {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText> implements TextSelectionDelegate, TextInputClient, AutofillClient {
   Timer _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
@@ -1105,6 +1158,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   bool _didAutoFocus = false;
   FocusAttachment _focusAttachment;
+
+  AutofillGroupState _currentAutofillScope;
+  @override
+  AutofillScope get currentAutofillScope => _currentAutofillScope;
 
   // This value is an eyeball estimation of the time it takes for the iOS cursor
   // to ease in and out.
@@ -1153,6 +1210,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    final AutofillGroupState newAutofillGroup = AutofillGroup.of(context);
+    if (currentAutofillScope != newAutofillGroup) {
+      _currentAutofillScope?.unregister(autofillId);
+      _currentAutofillScope = newAutofillGroup;
+      newAutofillGroup?.register(this);
+    }
+
     if (!_didAutoFocus && widget.autofocus) {
       _didAutoFocus = true;
       SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -1188,6 +1253,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (oldWidget.readOnly && _hasFocus)
         _openInputConnection();
     }
+
     if (widget.style != oldWidget.style) {
       final TextStyle style = widget.style;
       // The _textInputConnection will pick up the new style when it attaches in
@@ -1206,6 +1272,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void dispose() {
+    _currentAutofillScope?.unregister(autofillId);
     widget.controller.removeListener(_didChangeTextEditingValue);
     _cursorBlinkOpacityController.removeListener(_onCursorColorTick);
     _floatingCursorResetController.removeListener(_onFloatingCursorResetTick);
@@ -1225,6 +1292,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // _lastFormattedUnmodifiedTextEditingValue tracks the last value
   // that the formatter ran on and is used to prevent double-formatting.
   TextEditingValue _lastFormattedUnmodifiedTextEditingValue;
+  // _lastFormattedValue tracks the last post-format value, so that it can be
+  // reused without rerunning the formatter when the input value is repeated.
+  TextEditingValue _lastFormattedValue;
   // _receivedRemoteTextEditingValue is the direct value last passed in
   // updateEditingValue. This value does not get updated with the formatted
   // version.
@@ -1244,6 +1314,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (value.text != _value.text) {
       hideToolbar();
       _showCaretOnScreen();
+      _currentPromptRectRange = null;
       if (widget.obscureText && value.text.length == _value.text.length + 1) {
         _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
         _obscureLatestCharIndex = _value.selection.baseOffset;
@@ -1252,10 +1323,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     _formatAndSetValue(value);
 
-    // To keep the cursor from blinking while typing, we want to restart the
-    // cursor timer every time a new character is typed.
-    _stopCursorTimer(resetCharTicks: false);
-    _startCursorTimer();
+    if (_hasInputConnection) {
+      // To keep the cursor from blinking while typing, we want to restart the
+      // cursor timer every time a new character is typed.
+      _stopCursorTimer(resetCharTicks: false);
+      _startCursorTimer();
+    }
   }
 
   @override
@@ -1439,26 +1512,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
       _lastFormattedUnmodifiedTextEditingValue = localValue;
-      _textInputConnection = TextInput.attach(
-        this,
-        TextInputConfiguration(
-          inputType: widget.keyboardType,
-          obscureText: widget.obscureText,
-          autocorrect: widget.autocorrect,
-          smartDashesType: widget.smartDashesType ?? (widget.obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-          smartQuotesType: widget.smartQuotesType ?? (widget.obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-          enableSuggestions: widget.enableSuggestions,
-          inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
-              ? TextInputAction.newline
-              : TextInputAction.done
-          ),
-          textCapitalization: widget.textCapitalization,
-          keyboardAppearance: widget.keyboardAppearance,
-        ),
-      );
-      _textInputConnection.show();
 
+      _textInputConnection = (widget.autofillHints?.isNotEmpty ?? false) && currentAutofillScope != null
+        ? currentAutofillScope.attach(this, textInputConfiguration)
+        : TextInput.attach(this, textInputConfiguration);
+      _textInputConnection.show();
       _updateSizeAndTransform();
+      // Request autofill AFTER the size and the transform have been sent to the
+      // platform side.
+      _textInputConnection.requestAutofill();
+
       final TextStyle style = widget.style;
       _textInputConnection
         ..setStyle(
@@ -1530,6 +1593,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+    // We return early if the selection is not valid. This can happen when the
+    // text of [EditableText] is updated at the same time as the selection is
+    // changed by a gesture event.
+    if (!widget.controller.isSelectionWithinTextBounds(selection))
+      return;
+
     widget.controller.selection = selection;
 
     // This will show the keyboard for all selection changes on the
@@ -1641,19 +1710,40 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
   }
 
+  _WhitespaceDirectionalityFormatter _whitespaceFormatter;
+
   void _formatAndSetValue(TextEditingValue value) {
+    _whitespaceFormatter ??= _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
+
     // Check if the new value is the same as the current local value, or is the same
-    // as the post-formatting value of the previous pass.
+    // as the pre-formatting value of the previous pass (repeat call).
     final bool textChanged = _value?.text != value?.text;
-    final bool isRepeat = value?.text == _lastFormattedUnmodifiedTextEditingValue?.text;
-    if (textChanged && !isRepeat && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
-      for (final TextInputFormatter formatter in widget.inputFormatters)
+    final bool isRepeat = value == _lastFormattedUnmodifiedTextEditingValue;
+
+    if (textChanged && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
+      // Only format when the text has changed and there are available formatters.
+      // Pass through the formatter regardless of repeat status if the input value is
+      // different than the stored value.
+      for (final TextInputFormatter formatter in widget.inputFormatters) {
         value = formatter.formatEditUpdate(_value, value);
-      _value = value;
-      _updateRemoteEditingValueIfNeeded();
-    } else {
-      _value = value;
+      }
+      // Always pass the text through the whitespace directionality formatter to
+      // maintain expected behavior with carets on trailing whitespace.
+      value = _whitespaceFormatter.formatEditUpdate(_value, value);
+      _lastFormattedValue = value;
     }
+
+    // Setting _value here ensures the selection and composing region info is passed.
+    _value = value;
+    // Use the last formatted value when an identical repeat pass is detected.
+    if (isRepeat && textChanged && _lastFormattedValue != null) {
+      _value = _lastFormattedValue;
+    }
+
+    // Always attempt to send the value. If the value has changed, then it will send,
+    // otherwise, it will short-circuit.
+    _updateRemoteEditingValueIfNeeded();
+
     if (textChanged && widget.onChanged != null)
       widget.onChanged(value.text);
     _lastFormattedUnmodifiedTextEditingValue = _receivedRemoteTextEditingValue;
@@ -1772,6 +1862,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       WidgetsBinding.instance.removeObserver(this);
       // Clear the selection and composition state if this widget lost focus.
       _value = TextEditingValue(text: _value.text);
+      _currentPromptRectRange = null;
     }
     updateKeepAlive();
   }
@@ -1850,6 +1941,43 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  @override
+  String get autofillId => 'EditableText-$hashCode';
+
+  @override
+  TextInputConfiguration get textInputConfiguration {
+    final bool isAutofillEnabled = widget.autofillHints?.isNotEmpty ?? false;
+    return TextInputConfiguration(
+      inputType: widget.keyboardType,
+      obscureText: widget.obscureText,
+      autocorrect: widget.autocorrect,
+      smartDashesType: widget.smartDashesType ?? (widget.obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+      smartQuotesType: widget.smartQuotesType ?? (widget.obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+      enableSuggestions: widget.enableSuggestions,
+      inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
+        ? TextInputAction.newline
+        : TextInputAction.done
+      ),
+      textCapitalization: widget.textCapitalization,
+      keyboardAppearance: widget.keyboardAppearance,
+      autofillConfiguration: !isAutofillEnabled ? null : AutofillConfiguration(
+        uniqueIdentifier: autofillId,
+        autofillHints: widget.autofillHints.toList(growable: false),
+        currentEditingValue: currentTextEditingValue,
+      ),
+    );
+  }
+
+  // null if no promptRect should be shown.
+  TextRange _currentPromptRectRange;
+
+  @override
+  void showAutocorrectionPromptRect(int start, int end) {
+    setState(() {
+      _currentPromptRectRange = TextRange(start: start, end: end);
+    });
+  }
+
   VoidCallback _semanticsOnCopy(TextSelectionControls controls) {
     return widget.selectionEnabled && copyEnabled && _hasFocus && controls?.canCopy(this) == true
       ? () => controls.handleCopy(this)
@@ -1912,6 +2040,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textDirection: _textDirection,
               locale: widget.locale,
               textWidthBasis: widget.textWidthBasis,
+              obscuringCharacter: widget.obscuringCharacter,
               obscureText: widget.obscureText,
               autocorrect: widget.autocorrect,
               smartDashesType: widget.smartDashesType,
@@ -1930,6 +2059,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               enableInteractiveSelection: widget.enableInteractiveSelection,
               textSelectionDelegate: this,
               devicePixelRatio: _devicePixelRatio,
+              promptRectRange: _currentPromptRectRange,
+              promptRectColor: widget.autocorrectionTextRectColor,
             ),
           ),
         );
@@ -1944,7 +2075,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextSpan buildTextSpan() {
     if (widget.obscureText) {
       String text = _value.text;
-      text = RenderEditable.obscuringCharacter * text.length;
+      text = widget.obscuringCharacter * text.length;
       final int o =
         _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
       if (o != null && o >= 0 && o < text.length)
@@ -1982,6 +2113,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.textAlign,
     @required this.textDirection,
     this.locale,
+    this.obscuringCharacter,
     this.obscureText,
     this.autocorrect,
     this.smartDashesType,
@@ -2000,6 +2132,8 @@ class _Editable extends LeafRenderObjectWidget {
     this.enableInteractiveSelection = true,
     this.textSelectionDelegate,
     this.devicePixelRatio,
+    this.promptRectRange,
+    this.promptRectColor,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key);
@@ -2023,6 +2157,7 @@ class _Editable extends LeafRenderObjectWidget {
   final TextAlign textAlign;
   final TextDirection textDirection;
   final Locale locale;
+  final String obscuringCharacter;
   final bool obscureText;
   final TextWidthBasis textWidthBasis;
   final bool autocorrect;
@@ -2042,6 +2177,8 @@ class _Editable extends LeafRenderObjectWidget {
   final bool enableInteractiveSelection;
   final TextSelectionDelegate textSelectionDelegate;
   final double devicePixelRatio;
+  final TextRange promptRectRange;
+  final Color promptRectColor;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -2069,6 +2206,7 @@ class _Editable extends LeafRenderObjectWidget {
       onSelectionChanged: onSelectionChanged,
       onCaretChanged: onCaretChanged,
       ignorePointer: rendererIgnoresPointer,
+      obscuringCharacter: obscuringCharacter,
       obscureText: obscureText,
       textWidthBasis: textWidthBasis,
       cursorWidth: cursorWidth,
@@ -2080,6 +2218,8 @@ class _Editable extends LeafRenderObjectWidget {
       enableInteractiveSelection: enableInteractiveSelection,
       textSelectionDelegate: textSelectionDelegate,
       devicePixelRatio: devicePixelRatio,
+      promptRectRange: promptRectRange,
+      promptRectColor: promptRectColor,
     );
   }
 
@@ -2109,6 +2249,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..onCaretChanged = onCaretChanged
       ..ignorePointer = rendererIgnoresPointer
       ..textWidthBasis = textWidthBasis
+      ..obscuringCharacter = obscuringCharacter
       ..obscureText = obscureText
       ..cursorWidth = cursorWidth
       ..cursorRadius = cursorRadius
@@ -2117,6 +2258,177 @@ class _Editable extends LeafRenderObjectWidget {
       ..selectionWidthStyle = selectionWidthStyle
       ..textSelectionDelegate = textSelectionDelegate
       ..devicePixelRatio = devicePixelRatio
-      ..paintCursorAboveText = paintCursorAboveText;
+      ..paintCursorAboveText = paintCursorAboveText
+      ..promptRectColor = promptRectColor
+      ..setPromptRectRange(promptRectRange);
+  }
+}
+
+// This formatter inserts [Unicode.RLM] and [Unicode.LRM] into the
+// string in order to preserve expected caret behavior when trailing
+// whitespace is inserted.
+//
+// When typing in a direction that opposes the base direction
+// of the paragraph, un-enclosed whitespace gets the directionality
+// of the paragraph. This is often at odds with what is immeditely
+// being typed causing the caret to jump to the wrong side of the text.
+// This formatter makes use of the RLM and LRM to cause the text
+// shaper to inherently treat the whitespace as being surrounded
+// by the directionality of the previous non-whitespace codepoint.
+class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
+  // The [textDirection] should be the base directionality of the
+  // paragraph/editable.
+  _WhitespaceDirectionalityFormatter({TextDirection textDirection})
+    : _baseDirection = textDirection,
+      _previousNonWhitespaceDirection = textDirection;
+
+  // Using regex here instead of ICU is suboptimal, but is enough
+  // to produce the correct results for any reasonable input where this
+  // is even relevant. Using full ICU would be a much heavier change,
+  // requiring exposure of the C++ ICU API.
+  //
+  // LTR covers most scripts and symbols, including but not limited to Latin,
+  // ideographic scripts (Chinese, Japanese, etc), Cyrilic, Indic, and
+  // SE Asian scripts.
+  final RegExp _ltrRegExp = RegExp(r'[A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF]');
+  // RTL covers Arabic, Hebrew, and other RTL languages such as Urdu,
+  // Aramic, Farsi, Dhivehi.
+  final RegExp _rtlRegExp = RegExp(r'[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]');
+  // Although whitespaces are not the only codepoints that have weak directionality,
+  // these are the primary cause of the caret being misplaced.
+  final RegExp _whitespaceRegExp = RegExp(r'\s');
+
+  final TextDirection _baseDirection;
+  // Tracks the directionality of the most recently encountered
+  // codepoint that was not whitespace. This becomes the direction of
+  // marker inserted to fully surround ambiguous whitespace.
+  TextDirection _previousNonWhitespaceDirection;
+
+  // Prevents the formatter from attempting more expensive formatting
+  // operations mixed directionality is found.
+  bool _hasOpposingDirection = false;
+
+  // See [Unicode.RLM] and [Unicode.LRM].
+  //
+  // We do not directly use the [Unicode] constants since they are strings.
+  static const int _rlm = 0x200F;
+  static const int _lrm = 0x200E;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Skip formatting (which can be more expensive) if there are no cases of
+    // mixing directionality. Once a case of mixed directionality is found,
+    // always perform the formatting.
+    if (!_hasOpposingDirection) {
+      _hasOpposingDirection = _baseDirection == TextDirection.ltr ?
+        _rtlRegExp.hasMatch(newValue.text) : _ltrRegExp.hasMatch(newValue.text);
+    }
+
+    if (_hasOpposingDirection) {
+      _previousNonWhitespaceDirection = _baseDirection;
+
+      final List<int> outputCodepoints = <int>[];
+
+      // We add/subtract from these as we insert/remove markers.
+      int selectionBase = newValue.selection.baseOffset;
+      int selectionExtent = newValue.selection.extentOffset;
+      int composingStart = newValue.composing.start;
+      int composingEnd = newValue.composing.end;
+
+      void addToLength() {
+        selectionBase += outputCodepoints.length <= selectionBase ? 1 : 0;
+        selectionExtent += outputCodepoints.length <= selectionExtent ? 1 : 0;
+
+        composingStart += outputCodepoints.length <= composingStart ? 1 : 0;
+        composingEnd += outputCodepoints.length <= composingEnd ? 1 : 0;
+      }
+      void subtractFromLength() {
+        selectionBase -= outputCodepoints.length < selectionBase ? 1 : 0;
+        selectionExtent -= outputCodepoints.length < selectionExtent ? 1 : 0;
+
+        composingStart -= outputCodepoints.length < composingStart ? 1 : 0;
+        composingEnd -= outputCodepoints.length < composingEnd ? 1 : 0;
+      }
+
+      bool previousWasWhitespace = false;
+      bool previousWasDirectionalityMarker = false;
+      int previousNonWhitespaceCodepoint;
+      for (final int codepoint in newValue.text.runes) {
+        if (isWhitespace(codepoint)) {
+          // Only compute the directionality of the non-whitespace
+          // when the value is needed.
+          if (!previousWasWhitespace && previousNonWhitespaceCodepoint != null) {
+            _previousNonWhitespaceDirection = getDirection(previousNonWhitespaceCodepoint);
+          }
+          // If we already added directionality for this run of whitespace,
+          // "shift" the marker added to the end of the whitespace run.
+          if (previousWasWhitespace) {
+            subtractFromLength();
+            outputCodepoints.removeLast();
+          }
+          outputCodepoints.add(codepoint);
+          addToLength();
+          outputCodepoints.add(_previousNonWhitespaceDirection == TextDirection.rtl ? _rlm : _lrm);
+
+          previousWasWhitespace = true;
+          previousWasDirectionalityMarker = false;
+        } else if (isDirectionalityMarker(codepoint)) {
+          // Handle pre-existing directionality markers. Use pre-existing marker
+          // instead of the one we add.
+          if (previousWasWhitespace) {
+            subtractFromLength();
+            outputCodepoints.removeLast();
+          }
+          outputCodepoints.add(codepoint);
+
+          previousWasWhitespace = false;
+          previousWasDirectionalityMarker = true;
+        } else {
+          // If the whitespace was already enclosed by the same directionality,
+          // we can remove the artifically added marker.
+          if (!previousWasDirectionalityMarker &&
+              previousWasWhitespace &&
+              getDirection(codepoint) == _previousNonWhitespaceDirection) {
+            subtractFromLength();
+            outputCodepoints.removeLast();
+          }
+          // Normal character, track its codepoint add it to the string.
+          previousNonWhitespaceCodepoint = codepoint;
+          outputCodepoints.add(codepoint);
+
+          previousWasWhitespace = false;
+          previousWasDirectionalityMarker = false;
+        }
+      }
+      final String formatted = String.fromCharCodes(outputCodepoints);
+      return TextEditingValue(
+        text: formatted,
+        selection: TextSelection(
+          baseOffset: selectionBase,
+          extentOffset: selectionExtent,
+          affinity: newValue.selection.affinity,
+          isDirectional: newValue.selection.isDirectional
+        ),
+        composing: TextRange(start: composingStart, end: composingEnd),
+      );
+    }
+    return newValue;
+  }
+
+  bool isWhitespace(int value) {
+    return _whitespaceRegExp.hasMatch(String.fromCharCode(value));
+  }
+
+  bool isDirectionalityMarker(int value) {
+    return value == _rlm || value == _lrm;
+  }
+
+  TextDirection getDirection(int value) {
+    // Use the LTR version as short-circuiting will be more efficient since
+    // there are more LTR codepoints.
+    return _ltrRegExp.hasMatch(String.fromCharCode(value)) ? TextDirection.ltr : TextDirection.rtl;
   }
 }

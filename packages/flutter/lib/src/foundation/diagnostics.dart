@@ -22,6 +22,9 @@ import 'object.dart';
 /// Trees of Flutter diagnostics can be very large so filtering the diagnostics
 /// shown matters. Typically filtering to only show diagnostics with at least
 /// level [debug] is appropriate.
+///
+/// In release mode, this level may not have any effect, as diagnostics in
+/// release mode are compacted or truncated to reduce binary size.
 enum DiagnosticLevel {
   /// Diagnostics that should not be shown.
   ///
@@ -84,7 +87,11 @@ enum DiagnosticLevel {
   /// filter which diagnostics are shown.
   off,
 }
+
 /// Styles for displaying a node in a [DiagnosticsNode] tree.
+///
+/// In release mode, these styles may be ignored, as diagnostics are compacted
+/// or truncated to save on binary size.
 ///
 /// See also:
 ///
@@ -179,6 +186,9 @@ enum DiagnosticsTreeStyle {
 
 /// Configuration specifying how a particular [DiagnosticsTreeStyle] should be
 /// rendered as text art.
+///
+/// In release mode, these configurations may be ignored, as diagnostics are
+/// compacted or truncated to save on binary size.
 ///
 /// See also:
 ///
@@ -1112,7 +1122,21 @@ class TextTreeRenderer {
   }) {
     if (kReleaseMode) {
       return '';
+    } else {
+      return _debugRender(
+          node,
+          prefixLineOne: prefixLineOne,
+          prefixOtherLines: prefixOtherLines,
+          parentConfiguration: parentConfiguration);
     }
+  }
+
+  String _debugRender(
+    DiagnosticsNode node, {
+    String prefixLineOne = '',
+    String prefixOtherLines,
+    TextTreeConfiguration parentConfiguration,
+  }) {
     final bool isSingleLine = _isSingleLine(node.style) && parentConfiguration?.lineBreakProperties != true;
     prefixOtherLines ??= prefixLineOne;
     if (node.linePrefix != null) {
@@ -1536,49 +1560,51 @@ abstract class DiagnosticsNode {
   ///    plugin.
   @mustCallSuper
   Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    if (kReleaseMode) {
-      return <String, Object>{};
-    }
-    final bool hasChildren = getChildren().isNotEmpty;
-    return <String, Object>{
-      'description': toDescription(),
-      'type': runtimeType.toString(),
-      if (name != null)
-        'name': name,
-      if (!showSeparator)
-        'showSeparator': showSeparator,
-      if (level != DiagnosticLevel.info)
-        'level': describeEnum(level),
-      if (showName == false)
-        'showName': showName,
-      if (emptyBodyDescription != null)
-        'emptyBodyDescription': emptyBodyDescription,
-      if (style != DiagnosticsTreeStyle.sparse)
-        'style': describeEnum(style),
-      if (allowTruncate)
-        'allowTruncate': allowTruncate,
-      if (hasChildren)
-        'hasChildren': hasChildren,
-      if (linePrefix?.isNotEmpty == true)
-        'linePrefix': linePrefix,
-      if (!allowWrap)
-        'allowWrap': allowWrap,
-      if (allowNameWrap)
-        'allowNameWrap': allowNameWrap,
-      ...delegate.additionalNodeProperties(this),
-      if (delegate.includeProperties)
-        'properties': toJsonList(
-          delegate.filterProperties(getProperties(), this),
-          this,
-          delegate,
-        ),
-      if (delegate.subtreeDepth > 0)
-        'children': toJsonList(
-          delegate.filterChildren(getChildren(), this),
-          this,
-          delegate,
-        ),
-    };
+    Map<String, Object> result = <String, Object>{};
+    assert(() {
+      final bool hasChildren = getChildren().isNotEmpty;
+      result = <String, Object>{
+        'description': toDescription(),
+        'type': runtimeType.toString(),
+        if (name != null)
+          'name': name,
+        if (!showSeparator)
+          'showSeparator': showSeparator,
+        if (level != DiagnosticLevel.info)
+          'level': describeEnum(level),
+        if (showName == false)
+          'showName': showName,
+        if (emptyBodyDescription != null)
+          'emptyBodyDescription': emptyBodyDescription,
+        if (style != DiagnosticsTreeStyle.sparse)
+          'style': describeEnum(style),
+        if (allowTruncate)
+          'allowTruncate': allowTruncate,
+        if (hasChildren)
+          'hasChildren': hasChildren,
+        if (linePrefix?.isNotEmpty == true)
+          'linePrefix': linePrefix,
+        if (!allowWrap)
+          'allowWrap': allowWrap,
+        if (allowNameWrap)
+          'allowNameWrap': allowNameWrap,
+        ...delegate.additionalNodeProperties(this),
+        if (delegate.includeProperties)
+          'properties': toJsonList(
+            delegate.filterProperties(getProperties(), this),
+            this,
+            delegate,
+          ),
+        if (delegate.subtreeDepth > 0)
+          'children': toJsonList(
+            delegate.filterChildren(getChildren(), this),
+            this,
+            delegate,
+          ),
+      };
+      return true;
+    }());
+    return result;
   }
 
   /// Serializes a [List] of [DiagnosticsNode]s to a JSON list according to
@@ -1617,27 +1643,36 @@ abstract class DiagnosticsNode {
   ///
   /// `minLevel` specifies the minimum [DiagnosticLevel] for properties included
   /// in the output.
+  ///
+  /// In release mode, far less information is retained and some information may
+  /// not print at all.
   @override
   String toString({
     TextTreeConfiguration parentConfiguration,
     DiagnosticLevel minLevel = DiagnosticLevel.info,
   }) {
-    if (kReleaseMode) {
-      return super.toString();
-    }
+    String result = super.toString();
     assert(style != null);
     assert(minLevel != null);
-    if (_isSingleLine(style))
-      return toStringDeep(parentConfiguration: parentConfiguration, minLevel: minLevel);
+    assert(() {
+      if (_isSingleLine(style)) {
+        result = toStringDeep(
+            parentConfiguration: parentConfiguration, minLevel: minLevel);
+      } else {
+        final String description = toDescription(
+            parentConfiguration: parentConfiguration);
+        assert(description != null);
 
-    final String description = toDescription(parentConfiguration: parentConfiguration);
-    assert(description != null);
-
-    if (name == null || name.isEmpty || !showName)
-      return description;
-
-    return description.contains('\n') ? '$name$_separator\n$description'
-                                      : '$name$_separator $description';
+        if (name == null || name.isEmpty || !showName) {
+          result = description;
+        } else {
+          result = description.contains('\n') ? '$name$_separator\n$description'
+              : '$name$_separator $description';
+        }
+      }
+      return true;
+    }());
+    return result;
   }
 
   /// Returns a configuration specifying how this object should be rendered
@@ -1689,6 +1724,9 @@ abstract class DiagnosticsNode {
   /// The [toStringDeep] method takes other arguments, but those are intended
   /// for internal use when recursing to the descendants, and so can be ignored.
   ///
+  /// In release mode, far less information is retained and some information may
+  /// not print at all.
+  ///
   /// See also:
   ///
   ///  * [toString], for a brief description of the [value] but not its
@@ -1699,19 +1737,21 @@ abstract class DiagnosticsNode {
     TextTreeConfiguration parentConfiguration,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    if (kReleaseMode) {
-      return '';
-    }
-    return TextTreeRenderer(
-      minLevel: minLevel,
-      wrapWidth: 65,
-      wrapWidthProperties: 65,
-    ).render(
-      this,
-      prefixLineOne: prefixLineOne,
-      prefixOtherLines: prefixOtherLines,
-      parentConfiguration: parentConfiguration,
-    );
+    String result = '';
+    assert(() {
+      result = TextTreeRenderer(
+        minLevel: minLevel,
+        wrapWidth: 65,
+        wrapWidthProperties: 65,
+      ).render(
+        this,
+        prefixLineOne: prefixLineOne,
+        prefixOtherLines: prefixOtherLines,
+        parentConfiguration: parentConfiguration,
+      );
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -2640,7 +2680,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final T v = value;
     List<Map<String, Object>> properties;
-    if (delegate.expandPropertyValues && delegate.includeProperties && v is DiagnosticableMixin && getProperties().isEmpty) {
+    if (delegate.expandPropertyValues && delegate.includeProperties && v is Diagnosticable && getProperties().isEmpty) {
       // Exclude children for expanded nodes to avoid cycles.
       delegate = delegate.copyWith(subtreeDepth: 0, includeProperties: false);
       properties = DiagnosticsNode.toJsonList(
@@ -2666,7 +2706,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       json['exception'] = exception.toString();
     json['propertyType'] = propertyType.toString();
     json['defaultLevel'] = describeEnum(_defaultLevel);
-    if (value is DiagnosticableMixin || value is DiagnosticsNode)
+    if (value is Diagnosticable || value is DiagnosticsNode)
       json['isDiagnosticableValue'] = true;
     if (v is num)
       // Workaround for https://github.com/flutter/flutter/issues/39937#issuecomment-529558033.
@@ -2846,7 +2886,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       if (object is DiagnosticsNode) {
         return object.getProperties();
       }
-      if (object is DiagnosticableMixin) {
+      if (object is Diagnosticable) {
         return object.toDiagnosticsNode(style: style).getProperties();
       }
     }
@@ -2860,7 +2900,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       if (object is DiagnosticsNode) {
         return object.getChildren();
       }
-      if (object is DiagnosticableMixin) {
+      if (object is Diagnosticable) {
         return object.toDiagnosticsNode(style: style).getChildren();
       }
     }
@@ -2870,7 +2910,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
 
 /// [DiagnosticsNode] that lazily calls the associated [Diagnosticable] [value]
 /// to implement [getChildren] and [getProperties].
-class DiagnosticableNode<T extends DiagnosticableMixin> extends DiagnosticsNode {
+class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
   /// Create a diagnostics describing a [DiagnosticableMixin] value.
   ///
   /// The [value] argument must not be null.
@@ -2893,13 +2933,18 @@ class DiagnosticableNode<T extends DiagnosticableMixin> extends DiagnosticsNode 
   ///
   /// It will cache the result to prevent duplicate operation.
   DiagnosticPropertiesBuilder get builder {
-    if (kReleaseMode)
+    if (kReleaseMode) {
       return null;
-    if (_cachedBuilder == null) {
-      _cachedBuilder = DiagnosticPropertiesBuilder();
-      value?.debugFillProperties(_cachedBuilder);
+    } else {
+      assert(() {
+        if (_cachedBuilder == null) {
+          _cachedBuilder = DiagnosticPropertiesBuilder();
+          value?.debugFillProperties(_cachedBuilder);
+        }
+        return true;
+      }());
+      return _cachedBuilder;
     }
-    return _cachedBuilder;
   }
 
   @override
@@ -2908,10 +2953,10 @@ class DiagnosticableNode<T extends DiagnosticableMixin> extends DiagnosticsNode 
   }
 
   @override
-  String get emptyBodyDescription => kReleaseMode ? '' : builder.emptyBodyDescription;
+  String get emptyBodyDescription => (kReleaseMode || kProfileMode) ? '' : builder.emptyBodyDescription;
 
   @override
-  List<DiagnosticsNode> getProperties() => kReleaseMode ? const <DiagnosticsNode>[] : builder.properties;
+  List<DiagnosticsNode> getProperties() => (kReleaseMode || kProfileMode) ? const <DiagnosticsNode>[] : builder.properties;
 
   @override
   List<DiagnosticsNode> getChildren() {
@@ -2920,10 +2965,12 @@ class DiagnosticableNode<T extends DiagnosticableMixin> extends DiagnosticsNode 
 
   @override
   String toDescription({ TextTreeConfiguration parentConfiguration }) {
-    if (kReleaseMode) {
-      return '';
-    }
-    return value.toStringShort();
+    String result = '';
+    assert(() {
+      result = value.toStringShort();
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -3002,9 +3049,10 @@ class DiagnosticPropertiesBuilder {
 
   /// Add a property to the list of properties.
   void add(DiagnosticsNode property) {
-    if (!kReleaseMode) {
+    assert(() {
       properties.add(property);
-    }
+      return true;
+    }());
   }
 
   /// List of properties accumulated so far.
@@ -3017,41 +3065,50 @@ class DiagnosticPropertiesBuilder {
   String emptyBodyDescription;
 }
 
-// Examples can assume:
-// class ExampleSuperclass extends Diagnosticable { String message; double stepWidth; double scale; double paintExtent; double hitTestExtent; double paintExtend; double maxWidth; bool primary; double progress; int maxLines; Duration duration; int depth; dynamic boxShadow; dynamic style; bool hasSize; Matrix4 transform; Map<Listenable, VoidCallback> handles; Color color; bool obscureText; ImageRepeat repeat; Size size; Widget widget; bool isCurrent; bool keepAlive; TextAlign textAlign; }
+// TODO(gspencergoog): Remove DiagnosticableMixin once the mixin Diagnosticable is in stable.
+// https://github.com/flutter/flutter/issues/50498
 
-/// A base class for providing string and [DiagnosticsNode] debug
-/// representations describing the properties of an object.
+/// A mixin class implementing the [Diagnosticable] interface that provides
+/// string and [DiagnosticsNode] debug representations describing the properties
+/// of an object.
 ///
-/// The string debug representation is generated from the intermediate
-/// [DiagnosticsNode] representation. The [DiagnosticsNode] representation is
-/// also used by debugging tools displaying interactive trees of objects and
-/// properties.
-///
-/// See also:
-///
-///  * [DiagnosticableTree], which extends this class to also describe the
-///    children of a tree structured object.
-///  * [DiagnosticableMixin], which provides the implementation for
-///    [Diagnosticable], and can be used to add diagnostics to classes which
-///    already have a base class.
-///  * [DiagnosticableMixin.debugFillProperties], which lists best practices
-///    for specifying the properties of a [DiagnosticsNode]. The most common use
-///    case is to override [debugFillProperties] defining custom properties for
-///    a subclass of [DiagnosticableTreeMixin] using the existing
-///    [DiagnosticsProperty] subclasses.
-///  * [DiagnosticableTree.debugDescribeChildren], which lists best practices
-///    for describing the children of a [DiagnosticsNode]. Typically the base
-///    class already describes the children of a node properly or a node has
-///    no children.
-///  * [DiagnosticsProperty], which should be used to create leaf diagnostic
-///    nodes without properties or children. There are many
-///    [DiagnosticsProperty] subclasses to handle common use cases.
-abstract class Diagnosticable with DiagnosticableMixin {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const Diagnosticable();
+/// _This mixin exists only to support plugins and packages that require older
+/// Flutter versions: Use the identical mixin [Diagnosticable] instead for all
+/// new code. If you are authoring code that needs to work on the stable branch
+/// as well as master (in a package, for instance), mix this in instead of
+/// extending [Diagnosticable]. Once [Diagnosticable] as a mixin reaches the
+/// stable channel, this class will be deprecated._
+mixin DiagnosticableMixin implements Diagnosticable {
+  @override
+  String toStringShort() => describeIdentity(this);
+
+  @override
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+    String fullString;
+    assert(() {
+      fullString = toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);
+      return true;
+    }());
+    return fullString ?? toStringShort();
+  }
+
+  @override
+  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
+    return DiagnosticableNode<Diagnosticable>(
+      name: name,
+      value: this,
+      style: style,
+    );
+  }
+
+  @override
+  @protected
+  @mustCallSuper
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) { }
 }
+
+// Examples can assume:
+// class ExampleSuperclass with Diagnosticable { String message; double stepWidth; double scale; double paintExtent; double hitTestExtent; double paintExtend; double maxWidth; bool primary; double progress; int maxLines; Duration duration; int depth; dynamic boxShadow; dynamic style; bool hasSize; Matrix4 transform; Map<Listenable, VoidCallback> handles; Color color; bool obscureText; ImageRepeat repeat; Size size; Widget widget; bool isCurrent; bool keepAlive; TextAlign textAlign; }
 
 /// A mixin class for providing string and [DiagnosticsNode] debug
 /// representations describing the properties of an object.
@@ -3077,7 +3134,7 @@ abstract class Diagnosticable with DiagnosticableMixin {
 ///  * [DiagnosticsProperty], which should be used to create leaf diagnostic
 ///    nodes without properties or children. There are many
 ///    [DiagnosticsProperty] subclasses to handle common use cases.
-mixin DiagnosticableMixin {
+mixin Diagnosticable {
   /// A brief description of this object, usually just the [runtimeType] and the
   /// [hashCode].
   ///
@@ -3106,7 +3163,7 @@ mixin DiagnosticableMixin {
   /// relationship between the parent and the node. For example, pass
   /// [DiagnosticsTreeStyle.offstage] to indicate that a node is offstage.
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return DiagnosticableNode<DiagnosticableMixin>(
+    return DiagnosticableNode<Diagnosticable>(
       name: name,
       value: this,
       style: style,
@@ -3338,7 +3395,7 @@ mixin DiagnosticableMixin {
 ///  * [DiagnosticableTreeMixin], a mixin that implements this class.
 ///  * [DiagnosticableMixin], which should be used instead of this class to
 ///    provide diagnostics for objects without children.
-abstract class DiagnosticableTree extends Diagnosticable {
+abstract class DiagnosticableTree with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const DiagnosticableTree();
@@ -3367,15 +3424,21 @@ abstract class DiagnosticableTree extends Diagnosticable {
     if (kReleaseMode) {
       return toString();
     }
-    final StringBuffer result = StringBuffer();
-    result.write(toString());
-    result.write(joiner);
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    debugFillProperties(builder);
-    result.write(
-      builder.properties.where((DiagnosticsNode n) => !n.isFiltered(minLevel)).join(joiner),
-    );
-    return result.toString();
+    String shallowString;
+    assert(() {
+      final StringBuffer result = StringBuffer();
+      result.write(toString());
+      result.write(joiner);
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      debugFillProperties(builder);
+      result.write(
+        builder.properties.where((DiagnosticsNode n) => !n.isFiltered(minLevel))
+            .join(joiner),
+      );
+      shallowString = result.toString();
+      return true;
+    }());
+    return shallowString;
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -3454,15 +3517,21 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
     if (kReleaseMode) {
       return toString();
     }
-    final StringBuffer result = StringBuffer();
-    result.write(toStringShort());
-    result.write(joiner);
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    debugFillProperties(builder);
-    result.write(
-      builder.properties.where((DiagnosticsNode n) => !n.isFiltered(minLevel)).join(joiner),
-    );
-    return result.toString();
+    String shallowString;
+    assert(() {
+      final StringBuffer result = StringBuffer();
+      result.write(toStringShort());
+      result.write(joiner);
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      debugFillProperties(builder);
+      result.write(
+        builder.properties.where((DiagnosticsNode n) => !n.isFiltered(minLevel))
+            .join(joiner),
+      );
+      shallowString = result.toString();
+      return true;
+    }());
+    return shallowString;
   }
 
   @override

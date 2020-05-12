@@ -69,6 +69,8 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           renderEditable.selectWordsInRange(
             from: details.globalPosition - details.offsetFromOrigin,
             to: details.globalPosition,
@@ -90,6 +92,8 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           renderEditable.selectPosition(cause: SelectionChangedCause.tap);
           break;
       }
@@ -112,6 +116,8 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           renderEditable.selectWord(cause: SelectionChangedCause.longPress);
           Feedback.forLongPress(_state.context);
           break;
@@ -312,6 +318,7 @@ class TextField extends StatefulWidget {
     ToolbarOptions toolbarOptions,
     this.showCursor,
     this.autofocus = false,
+    this.obscuringCharacter = '•',
     this.obscureText = false,
     this.autocorrect = true,
     SmartDashesType smartDashesType,
@@ -340,9 +347,11 @@ class TextField extends StatefulWidget {
     this.buildCounter,
     this.scrollController,
     this.scrollPhysics,
+    this.autofillHints,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
+       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert(obscureText != null),
        assert(autocorrect != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -367,6 +376,11 @@ class TextField extends StatefulWidget {
        ),
        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
+       // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
+       assert(!identical(textInputAction, TextInputAction.newline) ||
+         maxLines == 1 ||
+         !identical(keyboardType, TextInputType.text),
+         'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.'),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        toolbarOptions = toolbarOptions ?? (obscureText ?
          const ToolbarOptions(
@@ -468,6 +482,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
+
+  /// {@macro flutter.widgets.editableText.obscuringCharacter}
+  final String obscuringCharacter;
 
   /// {@macro flutter.widgets.editableText.obscureText}
   final bool obscureText;
@@ -704,6 +721,9 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.scrollController}
   final ScrollController scrollController;
 
+  /// {@macro flutter.widgets.editableText.autofillHints}
+  final Iterable<String> autofillHints;
+
   @override
   _TextFieldState createState() => _TextFieldState();
 
@@ -717,6 +737,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
     properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    properties.add(DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter, defaultValue: '•'));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
     properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
@@ -781,7 +802,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     final InputDecoration effectiveDecoration = (widget.decoration ?? const InputDecoration())
       .applyDefaults(themeData.inputDecorationTheme)
       .copyWith(
-        enabled: widget.enabled,
+        enabled: _isEnabled,
         hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines,
       );
 
@@ -919,6 +940,8 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         return;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         // Do nothing.
     }
   }
@@ -964,6 +987,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     bool cursorOpacityAnimates;
     Offset cursorOffset;
     Color cursorColor = widget.cursorColor;
+    Color autocorrectionTextRectColor;
     Radius cursorRadius = widget.cursorRadius;
 
     switch (themeData.platform) {
@@ -976,10 +1000,13 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         cursorColor ??= CupertinoTheme.of(context).primaryColor;
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        autocorrectionTextRectColor = themeData.textSelectionColor;
         break;
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         forcePressEnabled = false;
         textSelectionControls = materialTextSelectionControls;
         paintCursorAboveText = false;
@@ -1005,6 +1032,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         textAlign: widget.textAlign,
         textDirection: widget.textDirection,
         autofocus: widget.autofocus,
+        obscuringCharacter: widget.obscuringCharacter,
         obscureText: widget.obscureText,
         autocorrect: widget.autocorrect,
         smartDashesType: widget.smartDashesType,
@@ -1037,6 +1065,8 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         dragStartBehavior: widget.dragStartBehavior,
         scrollController: widget.scrollController,
         scrollPhysics: widget.scrollPhysics,
+        autofillHints: widget.autofillHints,
+        autocorrectionTextRectColor: autocorrectionTextRectColor,
       ),
     );
 

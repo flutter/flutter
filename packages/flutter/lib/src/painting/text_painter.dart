@@ -564,7 +564,7 @@ class TextPainter {
     _paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
     if (minWidth != maxWidth) {
       final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth) as double;
-      if (newWidth != width) {
+      if (newWidth != _applyFloatingPointHack(_paragraph.width)) {
         _paragraph.layout(ui.ParagraphConstraints(width: newWidth));
       }
     }
@@ -602,6 +602,14 @@ class TextPainter {
     return value & 0xF800 == 0xD800;
   }
 
+  // Checks if the glyph is either [Unicode.RLM] or [Unicode.LRM]. These values take
+  // up zero space and do not have valid bounding boxes around them.
+  //
+  // We do not directly use the [Unicode] constants since they are strings.
+  bool _isUnicodeDirectionality(int value) {
+    return value == 0x200F || value == 0x200E;
+  }
+
   /// Returns the closest offset after `offset` at which the input cursor can be
   /// positioned.
   int getOffsetAfter(int offset) {
@@ -636,12 +644,14 @@ class TextPainter {
       return null;
 
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
-    final bool needsSearch = _isUtf16Surrogate(prevCodeUnit) || _text.codeUnitAt(offset) == _zwjUtf16;
+    final bool needsSearch = _isUtf16Surrogate(prevCodeUnit) || _text.codeUnitAt(offset) == _zwjUtf16 || _isUnicodeDirectionality(prevCodeUnit);
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty && flattenedText != null) {
       final int prevRuneOffset = offset - graphemeClusterLength;
-      boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
+      // Use BoxHeightStyle.strut to ensure that the caret's height fits within
+      // the line's height and is consistent throughout the line.
+      boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset, boxHeightStyle: ui.BoxHeightStyle.strut);
       // When the range does not include a full cluster, no boxes will be returned.
       if (boxes.isEmpty) {
         // When we are at the beginning of the line, a non-surrogate position will
@@ -685,12 +695,14 @@ class TextPainter {
     if (nextCodeUnit == null)
       return null;
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
-    final bool needsSearch = _isUtf16Surrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16;
+    final bool needsSearch = _isUtf16Surrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16 || _isUnicodeDirectionality(nextCodeUnit);
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty && flattenedText != null) {
       final int nextRuneOffset = offset + graphemeClusterLength;
-      boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
+      // Use BoxHeightStyle.strut to ensure that the caret's height fits within
+      // the line's height and is consistent throughout the line.
+      boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset, boxHeightStyle: ui.BoxHeightStyle.strut);
       // When the range does not include a full cluster, no boxes will be returned.
       if (boxes.isEmpty) {
         // When we are at the end of the line, a non-surrogate position will

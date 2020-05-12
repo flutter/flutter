@@ -125,222 +125,258 @@ void main() {
     expect(didEndPan, isTrue);
   });
 
-  testWidgets('Translucent', (WidgetTester tester) async {
-    bool didReceivePointerDown;
-    bool didTap;
+  group('Tap', () {
+    final ButtonVariant buttonVariant = ButtonVariant(
+      values: <int>[kPrimaryButton, kSecondaryButton],
+      descriptions: <int, String>{
+        kPrimaryButton: 'primary',
+        kSecondaryButton: 'secondary',
+      },
+    );
 
-    Future<void> pumpWidgetTree(HitTestBehavior behavior) {
-      return tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Listener(
-                onPointerDown: (_) {
-                  didReceivePointerDown = true;
-                },
-                child: Container(
+    testWidgets('Translucent', (WidgetTester tester) async {
+      bool didReceivePointerDown;
+      bool didTap;
+
+      Future<void> pumpWidgetTree(HitTestBehavior behavior) {
+        return tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: <Widget>[
+                Listener(
+                  onPointerDown: (_) {
+                    didReceivePointerDown = true;
+                  },
+                  child: Container(
+                    width: 100.0,
+                    height: 100.0,
+                    color: const Color(0xFF00FF00),
+                  ),
+                ),
+                Container(
                   width: 100.0,
                   height: 100.0,
-                  color: const Color(0xFF00FF00),
+                  child: GestureDetector(
+                    onTap: ButtonVariant.button == kPrimaryButton ? () {
+                      didTap = true;
+                    } : null,
+                    onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
+                      didTap = true;
+                    } : null,
+                    behavior: behavior,
+                  ),
                 ),
-              ),
-              Container(
-                width: 100.0,
-                height: 100.0,
-                child: GestureDetector(
-                  onTap: () {
-                    didTap = true;
-                  },
-                  behavior: behavior,
-                ),
-              ),
-            ],
+              ],
+            ),
+          ),
+        );
+      }
+
+      didReceivePointerDown = false;
+      didTap = false;
+      await pumpWidgetTree(null);
+      await tester.tapAt(const Offset(10.0, 10.0), buttons: ButtonVariant.button);
+      expect(didReceivePointerDown, isTrue);
+      expect(didTap, isTrue);
+
+      didReceivePointerDown = false;
+      didTap = false;
+      await pumpWidgetTree(HitTestBehavior.deferToChild);
+      await tester.tapAt(const Offset(10.0, 10.0), buttons: ButtonVariant.button);
+      expect(didReceivePointerDown, isTrue);
+      expect(didTap, isFalse);
+
+      didReceivePointerDown = false;
+      didTap = false;
+      await pumpWidgetTree(HitTestBehavior.opaque);
+      await tester.tapAt(const Offset(10.0, 10.0), buttons: ButtonVariant.button);
+      expect(didReceivePointerDown, isFalse);
+      expect(didTap, isTrue);
+
+      didReceivePointerDown = false;
+      didTap = false;
+      await pumpWidgetTree(HitTestBehavior.translucent);
+      await tester.tapAt(const Offset(10.0, 10.0), buttons: ButtonVariant.button);
+      expect(didReceivePointerDown, isTrue);
+      expect(didTap, isTrue);
+    }, variant: buttonVariant);
+
+    testWidgets('Empty', (WidgetTester tester) async {
+      bool didTap = false;
+      await tester.pumpWidget(
+        Center(
+          child: GestureDetector(
+            onTap: ButtonVariant.button == kPrimaryButton ? () {
+              didTap = true;
+            } : null,
+            onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
+              didTap = true;
+            } : null,
           ),
         ),
       );
-    }
+      expect(didTap, isFalse);
+      await tester.tapAt(const Offset(10.0, 10.0), buttons: ButtonVariant.button);
+      expect(didTap, isTrue);
+    }, variant: buttonVariant);
 
-    didReceivePointerDown = false;
-    didTap = false;
-    await pumpWidgetTree(null);
-    await tester.tapAt(const Offset(10.0, 10.0));
-    expect(didReceivePointerDown, isTrue);
-    expect(didTap, isTrue);
-
-    didReceivePointerDown = false;
-    didTap = false;
-    await pumpWidgetTree(HitTestBehavior.deferToChild);
-    await tester.tapAt(const Offset(10.0, 10.0));
-    expect(didReceivePointerDown, isTrue);
-    expect(didTap, isFalse);
-
-    didReceivePointerDown = false;
-    didTap = false;
-    await pumpWidgetTree(HitTestBehavior.opaque);
-    await tester.tapAt(const Offset(10.0, 10.0));
-    expect(didReceivePointerDown, isFalse);
-    expect(didTap, isTrue);
-
-    didReceivePointerDown = false;
-    didTap = false;
-    await pumpWidgetTree(HitTestBehavior.translucent);
-    await tester.tapAt(const Offset(10.0, 10.0));
-    expect(didReceivePointerDown, isTrue);
-    expect(didTap, isTrue);
-
-  });
-
-  testWidgets('Empty', (WidgetTester tester) async {
-    bool didTap = false;
-    await tester.pumpWidget(
-      Center(
-        child: GestureDetector(
-          onTap: () {
-            didTap = true;
-          },
-        ),
-      ),
-    );
-    expect(didTap, isFalse);
-    await tester.tapAt(const Offset(10.0, 10.0));
-    expect(didTap, isTrue);
-  });
-
-  testWidgets('Only container', (WidgetTester tester) async {
-    bool didTap = false;
-    await tester.pumpWidget(
-      Center(
-        child: GestureDetector(
-          onTap: () {
-            didTap = true;
-          },
-          child: Container(),
-        ),
-      ),
-    );
-    expect(didTap, isFalse);
-    await tester.tapAt(const Offset(10.0, 10.0));
-    expect(didTap, isFalse);
-  });
-
-  testWidgets('cache render object', (WidgetTester tester) async {
-    final GestureTapCallback inputCallback = () { };
-
-    await tester.pumpWidget(
-      Center(
-        child: GestureDetector(
-          onTap: inputCallback,
-          child: Container(),
-        ),
-      ),
-    );
-
-    final RenderSemanticsGestureHandler renderObj1 = tester.renderObject(find.byType(GestureDetector));
-
-    await tester.pumpWidget(
-      Center(
-        child: GestureDetector(
-          onTap: inputCallback,
-          child: Container(),
-        ),
-      ),
-    );
-
-    final RenderSemanticsGestureHandler renderObj2 = tester.renderObject(find.byType(GestureDetector));
-
-    expect(renderObj1, same(renderObj2));
-  });
-
-  testWidgets('Tap down occurs after kPressTimeout', (WidgetTester tester) async {
-    int tapDown = 0;
-    int tap = 0;
-    int tapCancel = 0;
-    int longPress = 0;
-
-    await tester.pumpWidget(
-      Container(
-        alignment: Alignment.topLeft,
-        child: Container(
-          alignment: Alignment.center,
-          height: 100.0,
-          color: const Color(0xFF00FF00),
+    testWidgets('Only container', (WidgetTester tester) async {
+      bool didTap = false;
+      await tester.pumpWidget(
+        Center(
           child: GestureDetector(
-            onTapDown: (TapDownDetails details) {
-              tapDown += 1;
-            },
-            onTap: () {
-              tap += 1;
-            },
-            onTapCancel: () {
-              tapCancel += 1;
-            },
-            onLongPress: () {
-              longPress += 1;
-            },
+            onTap: ButtonVariant.button == kPrimaryButton ? () {
+              didTap = true;
+            } : null,
+            onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
+              didTap = true;
+            } : null,
+            child: Container(),
           ),
         ),
-      ),
-    );
+      );
+      expect(didTap, isFalse);
+      await tester.tapAt(const Offset(10.0, 10.0));
+      expect(didTap, isFalse);
+    }, variant: buttonVariant);
 
-    // Pointer is dragged from the center of the 800x100 gesture detector
-    // to a point (400,300) below it. This should never call onTap.
-    Future<void> dragOut(Duration timeout) async {
-      final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
-      // If the timeout is less than kPressTimeout the recognizer will not
-      // trigger any callbacks. If the timeout is greater than kLongPressTimeout
-      // then onTapDown, onLongPress, and onCancel will be called.
-      await tester.pump(timeout);
-      await gesture.moveTo(const Offset(400.0, 300.0));
-      await gesture.up();
-    }
+    testWidgets('cache render object', (WidgetTester tester) async {
+      final GestureTapCallback inputCallback = () { };
 
-    await dragOut(kPressTimeout * 0.5); // generates nothing
-    expect(tapDown, 0);
-    expect(tapCancel, 0);
-    expect(tap, 0);
-    expect(longPress, 0);
-
-    await dragOut(kPressTimeout); // generates tapDown, tapCancel
-    expect(tapDown, 1);
-    expect(tapCancel, 1);
-    expect(tap, 0);
-    expect(longPress, 0);
-
-    await dragOut(kLongPressTimeout); // generates tapDown, longPress, tapCancel
-    expect(tapDown, 2);
-    expect(tapCancel, 2);
-    expect(tap, 0);
-    expect(longPress, 1);
-  });
-
-  testWidgets('Long Press Up Callback called after long press', (WidgetTester tester) async {
-    int longPressUp = 0;
-
-    await tester.pumpWidget(
-      Container(
-        alignment: Alignment.topLeft,
-        child: Container(
-          alignment: Alignment.center,
-          height: 100.0,
-          color: const Color(0xFF00FF00),
+      await tester.pumpWidget(
+        Center(
           child: GestureDetector(
-            onLongPressUp: () {
-              longPressUp += 1;
-            },
+            onTap: ButtonVariant.button == kPrimaryButton ? inputCallback : null,
+            onSecondaryTap: ButtonVariant.button == kSecondaryButton ? inputCallback : null,
+            child: Container(),
           ),
         ),
-      ),
-    );
+      );
 
-    Future<void> longPress(Duration timeout) async {
-      final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
-      await tester.pump(timeout);
-      await gesture.up();
-    }
+      final RenderSemanticsGestureHandler renderObj1 = tester.renderObject(find.byType(GestureDetector));
 
-    await longPress(kLongPressTimeout + const Duration(seconds: 1)); // To make sure the time for long press has occurred
-    expect(longPressUp, 1);
+      await tester.pumpWidget(
+        Center(
+          child: GestureDetector(
+            onTap: ButtonVariant.button == kPrimaryButton ? inputCallback : null,
+            onSecondaryTap: ButtonVariant.button == kSecondaryButton ? inputCallback : null,
+            child: Container(),
+          ),
+        ),
+      );
+
+      final RenderSemanticsGestureHandler renderObj2 = tester.renderObject(find.byType(GestureDetector));
+
+      expect(renderObj1, same(renderObj2));
+    }, variant: buttonVariant);
+
+    testWidgets('Tap down occurs after kPressTimeout', (WidgetTester tester) async {
+      int tapDown = 0;
+      int tap = 0;
+      int tapCancel = 0;
+      int longPress = 0;
+
+      await tester.pumpWidget(
+        Container(
+          alignment: Alignment.topLeft,
+          child: Container(
+            alignment: Alignment.center,
+            height: 100.0,
+            color: const Color(0xFF00FF00),
+            child: GestureDetector(
+              onTapDown: ButtonVariant.button == kPrimaryButton ? (TapDownDetails details) {
+                tapDown += 1;
+              } : null,
+              onSecondaryTapDown: ButtonVariant.button == kSecondaryButton ? (TapDownDetails details) {
+                tapDown += 1;
+              } : null,
+              onTap: ButtonVariant.button == kPrimaryButton ? () {
+                tap += 1;
+              } : null,
+              onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
+                tap += 1;
+              } : null,
+              onTapCancel: ButtonVariant.button == kPrimaryButton ? () {
+                tapCancel += 1;
+              } : null,
+              onSecondaryTapCancel: ButtonVariant.button == kSecondaryButton ? () {
+                tapCancel += 1;
+              } : null,
+              onLongPress: ButtonVariant.button == kPrimaryButton ? () {
+                longPress += 1;
+              } : null,
+              onSecondaryLongPress: ButtonVariant.button == kSecondaryButton ? () {
+                longPress += 1;
+              } : null,
+            ),
+          ),
+        ),
+      );
+
+      // Pointer is dragged from the center of the 800x100 gesture detector
+      // to a point (400,300) below it. This should never call onTap.
+      Future<void> dragOut(Duration timeout) async {
+        final TestGesture gesture =
+        await tester.startGesture(const Offset(400.0, 50.0), buttons: ButtonVariant.button);
+        // If the timeout is less than kPressTimeout the recognizer will not
+        // trigger any callbacks. If the timeout is greater than kLongPressTimeout
+        // then onTapDown, onLongPress, and onCancel will be called.
+        await tester.pump(timeout);
+        await gesture.moveTo(const Offset(400.0, 300.0));
+        await gesture.up();
+      }
+
+      await dragOut(kPressTimeout * 0.5); // generates nothing
+      expect(tapDown, 0);
+      expect(tapCancel, 0);
+      expect(tap, 0);
+      expect(longPress, 0);
+
+      await dragOut(kPressTimeout); // generates tapDown, tapCancel
+      expect(tapDown, 1);
+      expect(tapCancel, 1);
+      expect(tap, 0);
+      expect(longPress, 0);
+
+      await dragOut(kLongPressTimeout); // generates tapDown, longPress, tapCancel
+      expect(tapDown, 2);
+      expect(tapCancel, 2);
+      expect(tap, 0);
+      expect(longPress, 1);
+    }, variant: buttonVariant);
+
+    testWidgets('Long Press Up Callback called after long press', (WidgetTester tester) async {
+      int longPressUp = 0;
+
+      await tester.pumpWidget(
+        Container(
+          alignment: Alignment.topLeft,
+          child: Container(
+            alignment: Alignment.center,
+            height: 100.0,
+            color: const Color(0xFF00FF00),
+            child: GestureDetector(
+              onLongPressUp: ButtonVariant.button == kPrimaryButton ? () {
+                longPressUp += 1;
+              } : null,
+              onSecondaryLongPressUp: ButtonVariant.button == kSecondaryButton ? () {
+                longPressUp += 1;
+              } : null,
+            ),
+          ),
+        ),
+      );
+
+      Future<void> longPress(Duration timeout) async {
+        final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0), buttons: ButtonVariant.button);
+        await tester.pump(timeout);
+        await gesture.up();
+      }
+
+      await longPress(kLongPressTimeout + const Duration(seconds: 1)); // To make sure the time for long press has occurred
+      expect(longPressUp, 1);
+    }, variant: buttonVariant);
   });
 
   testWidgets('Force Press Callback called after force press', (WidgetTester tester) async {
@@ -705,5 +741,38 @@ void main() {
 class _EmptySemanticsGestureDelegate extends SemanticsGestureDelegate {
   @override
   void assignSemantics(RenderSemanticsGestureHandler renderObject) {
+  }
+}
+
+/// A [TestVariant] that runs tests multiple times with different buttons.
+class ButtonVariant extends TestVariant<int> {
+  const ButtonVariant({
+    @required this.values,
+    @required this.descriptions,
+  }) : assert(values.length != 0); // ignore: prefer_is_empty
+
+  @override
+  final List<int> values;
+
+  final Map<int, String> descriptions;
+
+  static int button;
+
+  @override
+  String describeValue(int value) {
+    assert(descriptions.containsKey(value), 'Unknown button');
+    return descriptions[value];
+  }
+
+  @override
+  Future<int> setUp(int value) async {
+    final int oldValue = button;
+    button = value;
+    return oldValue;
+  }
+
+  @override
+  Future<void> tearDown(int value, int memento) async {
+    button = memento;
   }
 }

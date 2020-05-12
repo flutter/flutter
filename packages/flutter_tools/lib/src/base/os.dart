@@ -5,13 +5,13 @@
 import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../globals.dart' as globals;
 import 'file_system.dart';
 import 'io.dart';
 import 'logger.dart';
+import 'platform.dart';
 import 'process.dart';
 
 abstract class OperatingSystemUtils {
@@ -51,6 +51,9 @@ abstract class OperatingSystemUtils {
         logger: logger,
         processManager: processManager,
       );
+
+  @visibleForTesting
+  static final GZipCodec gzipLevel1 = GZipCodec(level: 1);
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -98,6 +101,11 @@ abstract class OperatingSystemUtils {
   /// Returns true if the gzip is not corrupt (does not check tar).
   bool verifyGzip(File gzippedFile);
 
+  /// Compresses a stream using gzip level 1 (faster but larger).
+  Stream<List<int>> gzipLevel1Stream(Stream<List<int>> stream) {
+    return stream.cast<List<int>>().transform<List<int>>(gzipLevel1.encoder);
+  }
+
   /// Returns a pretty name string for the current operating system.
   ///
   /// If available, the detailed version of the OS is included.
@@ -136,7 +144,7 @@ abstract class OperatingSystemUtils {
         return findFreePort(ipv6: true);
       }
       _logger.printTrace('findFreePort failed: $e');
-    } catch (e) {
+    } on Exception catch (e) {
       // Failures are signaled by a return value of 0 from this function.
       _logger.printTrace('findFreePort failed: $e');
     } finally {
@@ -223,7 +231,7 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   bool verifyZip(File zipFile) =>
-    _processUtils.exitsHappySync(<String>['zip', '-T', zipFile.path]);
+    _processUtils.exitsHappySync(<String>['unzip', '-t', '-qq', zipFile.path]);
 
   // tar -xzf tarball -C dest
   @override
@@ -353,6 +361,8 @@ class _WindowsUtils extends OperatingSystemUtils {
     } on FileSystemException catch (_) {
       return false;
     } on ArchiveException catch (_) {
+      return false;
+    } on RangeError catch (_) {
       return false;
     }
     return true;

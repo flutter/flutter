@@ -25,4 +25,130 @@ void main() {
       ),
     );
   });
+
+  test('Compute intrinsic height test', () {
+    final List<RenderBox> children = <RenderBox>[
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(
+          minWidth: 80,
+          minHeight: 80,
+        ),
+      ),
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(
+          minWidth: 80,
+          minHeight: 80,
+        ),
+      ),
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(
+          minWidth: 80,
+          minHeight: 80,
+        ),
+      ),
+    ];
+
+    final RenderWrap renderWrap = RenderWrap();
+
+    children.forEach(renderWrap.add);
+
+    renderWrap.spacing = 5;
+    renderWrap.runSpacing = 5;
+    renderWrap.direction = Axis.horizontal;
+
+    expect(renderWrap.computeMaxIntrinsicHeight(245), 165);
+    expect(renderWrap.computeMaxIntrinsicHeight(250), 80);
+    expect(renderWrap.computeMaxIntrinsicHeight(80), 250);
+    expect(renderWrap.computeMaxIntrinsicHeight(79), 250);
+    expect(renderWrap.computeMinIntrinsicHeight(245), 165);
+    expect(renderWrap.computeMinIntrinsicHeight(250), 80);
+    expect(renderWrap.computeMinIntrinsicHeight(80), 250);
+    expect(renderWrap.computeMinIntrinsicHeight(79), 250);
+  });
+
+  test('Compute intrinsic width test', () {
+    final List<RenderBox> children = <RenderBox>[
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(
+          minWidth: 80,
+          minHeight: 80,
+        ),
+      ),
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(
+          minWidth: 80,
+          minHeight: 80,
+        ),
+      ),
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(
+          minWidth: 80,
+          minHeight: 80,
+        ),
+      ),
+    ];
+
+    final RenderWrap renderWrap = RenderWrap();
+
+    children.forEach(renderWrap.add);
+
+    renderWrap.spacing = 5;
+    renderWrap.runSpacing = 5;
+    renderWrap.direction = Axis.vertical;
+
+    expect(renderWrap.computeMaxIntrinsicWidth(245), 165);
+    expect(renderWrap.computeMaxIntrinsicWidth(250), 80);
+    expect(renderWrap.computeMaxIntrinsicWidth(80), 250);
+    expect(renderWrap.computeMaxIntrinsicWidth(79), 250);
+    expect(renderWrap.computeMinIntrinsicWidth(245), 165);
+    expect(renderWrap.computeMinIntrinsicWidth(250), 80);
+    expect(renderWrap.computeMinIntrinsicWidth(80), 250);
+    expect(renderWrap.computeMinIntrinsicWidth(79), 250);
+  });
+
+  test('Compute intrinsic height for only one run', () {
+    final RenderBox child = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints(
+        minWidth: 80,
+        minHeight: 80,
+      ),
+    );
+
+    final RenderWrap renderWrap = RenderWrap();
+    renderWrap.add(child);
+
+    renderWrap.spacing = 5;
+    renderWrap.runSpacing = 5;
+    renderWrap.direction = Axis.horizontal;
+
+    expect(renderWrap.computeMaxIntrinsicHeight(100), 80);
+    expect(renderWrap.computeMaxIntrinsicHeight(79), 80);
+    expect(renderWrap.computeMaxIntrinsicHeight(80), 80);
+    expect(renderWrap.computeMinIntrinsicHeight(100), 80);
+    expect(renderWrap.computeMinIntrinsicHeight(79), 80);
+    expect(renderWrap.computeMinIntrinsicHeight(80), 80);
+  });
+
+  test('Compute intrinsic width for only one run', () {
+    final RenderBox child = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints(
+        minWidth: 80,
+        minHeight: 80,
+      ),
+    );
+
+    final RenderWrap renderWrap = RenderWrap();
+    renderWrap.add(child);
+
+    renderWrap.spacing = 5;
+    renderWrap.runSpacing = 5;
+    renderWrap.direction = Axis.vertical;
+
+    expect(renderWrap.computeMaxIntrinsicWidth(100), 80);
+    expect(renderWrap.computeMaxIntrinsicWidth(79), 80);
+    expect(renderWrap.computeMaxIntrinsicWidth(80), 80);
+    expect(renderWrap.computeMinIntrinsicWidth(100), 80);
+    expect(renderWrap.computeMinIntrinsicWidth(79), 80);
+    expect(renderWrap.computeMinIntrinsicWidth(80), 80);
+  });
 }

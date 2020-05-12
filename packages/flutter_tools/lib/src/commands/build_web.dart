@@ -4,22 +4,27 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../base/common.dart';
 import '../build_info.dart';
 import '../features.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart'
-    show DevelopmentArtifact, FlutterCommandResult;
+    show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../web/compile.dart';
 import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
-  BuildWebCommand() {
-    addTreeShakeIconsFlag();
+  BuildWebCommand({
+    @required bool verboseHelp,
+  }) {
+    addTreeShakeIconsFlag(enabledByDefault: false);
     usesTargetOption();
     usesPubOption();
     addBuildModeFlags(excludeDebug: true);
-    usesDartDefines();
+    usesDartDefineOption();
+    addEnableExperimentation(hide: !verboseHelp);
     argParser.addFlag('web-initialize-platform',
         defaultsTo: true,
         negatable: true,
@@ -65,8 +70,8 @@ class BuildWebCommand extends BuildSubCommand {
       target,
       buildInfo,
       boolArg('web-initialize-platform'),
-      dartDefines,
-      boolArg('csp')
+      boolArg('csp'),
+      stringsArg(FlutterOptions.kEnableExperiment),
     );
     return FlutterCommandResult.success();
   }

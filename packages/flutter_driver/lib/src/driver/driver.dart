@@ -127,6 +127,10 @@ abstract class FlutterDriver {
   /// `isolateNumber` is set, as this is already enough information to connect
   /// to an isolate.
   ///
+  /// `headers` optionally specifies HTTP headers to be included in the
+  /// [WebSocket] connection. This is only used for [VMServiceFlutterDriver]
+  /// connections.
+  ///
   /// `browser` specifies which FlutterDriver implementation to use. If not
   /// speicifed or set to false, [VMServiceFlutterDriver] implementation
   /// will be used. Otherwise, [WebFlutterDriver] implementation will be used.
@@ -141,6 +145,7 @@ abstract class FlutterDriver {
     int isolateNumber,
     Pattern fuchsiaModuleTarget,
     Duration timeout,
+    Map<String, dynamic> headers,
   }) async {
     if (Platform.environment['FLUTTER_WEB_TEST'] != null) {
       return WebFlutterDriver.connectWeb(hostUrl: dartVmServiceUrl, timeout: timeout);
@@ -151,6 +156,7 @@ abstract class FlutterDriver {
               logCommunicationToFile: logCommunicationToFile,
               isolateNumber: isolateNumber,
               fuchsiaModuleTarget: fuchsiaModuleTarget,
+              headers: headers,
     );
   }
 
@@ -167,7 +173,7 @@ abstract class FlutterDriver {
   ///
   ///  * [VMServiceFlutterDriver], which uses vmservice to implement.
   ///  * [WebFlutterDriver], which uses webdriver to implement.
-  Future<Map<String, dynamic>> sendCommand(Command command) => throw UnimplementedError();
+  Future<Map<String, dynamic>> sendCommand(Command command) async => throw UnimplementedError();
 
   /// Checks the status of the Flutter Driver extension.
   Future<Health> checkHealth({ Duration timeout }) async {
@@ -515,15 +521,16 @@ abstract class FlutterDriver {
   ///
   ///  HACK: There will be a 2-second artificial delay before screenshotting,
   ///        the delay here is to deal with a race between the driver script and
-  ///        the GPU thread. The issue is that driver API synchronizes with the
-  ///        framework based on transient callbacks, which are out of sync with
-  ///        the GPU thread. Here's the timeline of events in ASCII art:
+  ///        the raster thread (formerly known as the GPU thread). The issue is
+  ///        that driver API synchronizes with the framework based on transient
+  ///        callbacks, which are out of sync with the raster thread.
+  ///        Here's the timeline of events in ASCII art:
   ///
   ///        -------------------------------------------------------------------
   ///        Without this delay:
   ///        -------------------------------------------------------------------
   ///        UI    : <-- build -->
-  ///        GPU   :               <-- rasterize -->
+  ///        Raster:               <-- rasterize -->
   ///        Gap   :              | random |
   ///        Driver:                        <-- screenshot -->
   ///
@@ -532,7 +539,7 @@ abstract class FlutterDriver {
   ///        `screenshot()`. The gap is random because it is determined by the
   ///        unpredictable network communication between the driver process and
   ///        the application. If this gap is too short, which it typically will
-  ///        be, the screenshot is taken before the GPU thread is done
+  ///        be, the screenshot is taken before the raster thread is done
   ///        rasterizing the frame, so the screenshot of the previous frame is
   ///        taken, which is wrong.
   ///
@@ -540,11 +547,11 @@ abstract class FlutterDriver {
   ///        With this delay, if we're lucky:
   ///        -------------------------------------------------------------------
   ///        UI    : <-- build -->
-  ///        GPU   :               <-- rasterize -->
+  ///        Raster:               <-- rasterize -->
   ///        Gap   :              |    2 seconds or more   |
   ///        Driver:                                        <-- screenshot -->
   ///
-  ///        The two-second gap should be long enough for the GPU thread to
+  ///        The two-second gap should be long enough for the raster thread to
   ///        finish rasterizing the frame, but not longer than necessary to keep
   ///        driver tests as fast a possible.
   ///
@@ -552,14 +559,14 @@ abstract class FlutterDriver {
   ///        With this delay, if we're not lucky:
   ///        -------------------------------------------------------------------
   ///        UI    : <-- build -->
-  ///        GPU   :               <-- rasterize randomly slow today -->
+  ///        Raster:               <-- rasterize randomly slow today -->
   ///        Gap   :              |    2 seconds or more   |
   ///        Driver:                                        <-- screenshot -->
   ///
   ///        In practice, sometimes the device gets really busy for a while and
   ///        even two seconds isn't enough, which means that this is still racy
   ///        and a source of flakes.
-  Future<List<int>> screenshot() {
+  Future<List<int>> screenshot() async {
     throw UnimplementedError();
   }
 
@@ -584,7 +591,7 @@ abstract class FlutterDriver {
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
   ///
   /// Throws [UnimplementedError] on [WebFlutterDriver] instances.
-  Future<List<Map<String, dynamic>>> getVmFlags() {
+  Future<List<Map<String, dynamic>>> getVmFlags() async {
     throw UnimplementedError();
   }
   /// Starts recording performance traces.
@@ -597,7 +604,7 @@ abstract class FlutterDriver {
   Future<void> startTracing({
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
     Duration timeout = kUnusuallyLongTimeout,
-  }) {
+  }) async {
     throw UnimplementedError();
   }
 
@@ -610,7 +617,7 @@ abstract class FlutterDriver {
   /// For [WebFlutterDriver], this is only supported for Chrome.
   Future<Timeline> stopTracingAndDownloadTimeline({
     Duration timeout = kUnusuallyLongTimeout,
-  }) {
+  }) async {
     throw UnimplementedError();
   }
   /// Runs [action] and outputs a performance trace for it.
@@ -636,7 +643,7 @@ abstract class FlutterDriver {
     Future<dynamic> action(), {
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
     bool retainPriorEvents = false,
-  }) {
+  }) async {
     throw UnimplementedError();
   }
 
@@ -649,7 +656,7 @@ abstract class FlutterDriver {
   /// For [WebFlutterDriver], this is only supported for Chrome.
   Future<void> clearTimeline({
     Duration timeout = kUnusuallyLongTimeout,
-  }) {
+  }) async {
     throw UnimplementedError();
   }
   /// [action] will be executed with the frame sync mechanism disabled.
@@ -665,7 +672,7 @@ abstract class FlutterDriver {
   /// action will time out). For these cases, the sync mechanism can be disabled
   /// by wrapping the actions to be performed by this [runUnsynchronized] method.
   ///
-  /// With frame sync disabled, its the responsibility of the test author to
+  /// With frame sync disabled, it's the responsibility of the test author to
   /// ensure that no action is performed while the app is undergoing a
   /// transition to avoid flakiness.
   Future<T> runUnsynchronized<T>(Future<T> action(), { Duration timeout }) async {
@@ -682,14 +689,14 @@ abstract class FlutterDriver {
   /// Force a garbage collection run in the VM.
   ///
   /// Throws [UnimplementedError] on [WebFlutterDriver] instances.
-  Future<void> forceGC() {
+  Future<void> forceGC() async {
     throw UnimplementedError();
   }
 
   /// Closes the underlying connection to the VM service.
   ///
   /// Returns a [Future] that fires once the connection has been closed.
-  Future<void> close() {
+  Future<void> close() async {
     throw UnimplementedError();
   }
 }
@@ -748,6 +755,7 @@ class CommonFinders {
 }
 
 /// An immutable 2D floating-point offset used by Flutter Driver.
+@immutable
 class DriverOffset {
   /// Creates an offset.
   const DriverOffset(this.dx, this.dy);

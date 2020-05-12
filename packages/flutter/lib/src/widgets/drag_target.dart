@@ -21,6 +21,11 @@ typedef DragTargetWillAccept<T> = bool Function(T data);
 /// Used by [DragTarget.onAccept].
 typedef DragTargetAccept<T> = void Function(T data);
 
+/// Signature for determining information about the acceptance by a [DragTarget].
+///
+/// Used by [DragTarget.onAcceptWithDetails].
+typedef DragTargetAcceptWithDetails<T> = void Function(DragTargetDetails<T> details);
+
 /// Signature for building children of a [DragTarget].
 ///
 /// The `candidateData` argument contains the list of drag data that is hovering
@@ -459,6 +464,21 @@ class DraggableDetails {
   final Offset offset;
 }
 
+/// Represents the details when a pointer event occurred on the [DragTarget].
+class DragTargetDetails<T> {
+  /// Creates details for a [DragTarget] callback.
+  ///
+  /// The [offset] must not be null.
+  DragTargetDetails({@required this.data, @required this.offset}) : assert(offset != null);
+
+  /// The data that was dropped onto this [DragTarget].
+  final T data;
+
+  /// The global position when the specific pointer event occurred on
+  /// the draggable.
+  final Offset offset;
+}
+
 /// A widget that receives data when a [Draggable] widget is dropped.
 ///
 /// When a draggable is dragged on top of a drag target, the drag target is
@@ -480,6 +500,7 @@ class DragTarget<T> extends StatefulWidget {
     @required this.builder,
     this.onWillAccept,
     this.onAccept,
+    this.onAcceptWithDetails,
     this.onLeave,
   }) : super(key: key);
 
@@ -493,12 +514,20 @@ class DragTarget<T> extends StatefulWidget {
   /// piece of data being dragged over this drag target.
   ///
   /// Called when a piece of data enters the target. This will be followed by
-  /// either [onAccept], if the data is dropped, or [onLeave], if the drag
-  /// leaves the target.
+  /// either [onAccept] and [onAcceptWithDetails], if the data is dropped, or
+  /// [onLeave], if the drag leaves the target.
   final DragTargetWillAccept<T> onWillAccept;
 
   /// Called when an acceptable piece of data was dropped over this drag target.
+  ///
+  /// Equivalent to [onAcceptWithDetails], but only includes the data.
   final DragTargetAccept<T> onAccept;
+
+  /// Called when an acceptable piece of data was dropped over this drag target.
+  ///
+  /// Equivalent to [onAccept], but with information, including the data, in a
+  /// [DragTargetDetails].
+  final DragTargetAcceptWithDetails<T> onAcceptWithDetails;
 
   /// Called when a given piece of data being dragged over this target leaves
   /// the target.
@@ -553,6 +582,8 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
     });
     if (widget.onAccept != null)
       widget.onAccept(avatar.data as T);
+    if (widget.onAcceptWithDetails != null)
+      widget.onAcceptWithDetails(DragTargetDetails<T>(data: avatar.data as T, offset: avatar._lastOffset));
   }
 
   @override

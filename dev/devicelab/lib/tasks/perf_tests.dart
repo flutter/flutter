@@ -30,9 +30,36 @@ TaskFunction createTilesScrollPerfTest() {
   ).run;
 }
 
+TaskFunction createUiKitViewScrollPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    'test_driver/uikit_view_scroll_perf.dart',
+    'platform_views_scroll_perf',
+    testDriver: 'test_driver/scroll_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createAndroidTextureScrollPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    'test_driver/android_texture_scroll_perf.dart',
+    'platform_views_scroll_perf',
+    testDriver: 'test_driver/scroll_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createAndroidViewScrollPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    'test_driver/android_view_scroll_perf.dart',
+    'platform_views_scroll_perf',
+    testDriver: 'test_driver/scroll_perf_test.dart',
+  ).run;
+}
+
 TaskFunction createHomeScrollPerfTest() {
   return PerfTest(
-    '${flutterDirectory.path}/examples/flutter_gallery',
+    '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
     'test_driver/scroll_perf.dart',
     'home_scroll_perf',
   ).run;
@@ -100,7 +127,7 @@ TaskFunction createPictureCachePerfTest() {
 
 TaskFunction createFlutterGalleryStartupTest() {
   return StartupTest(
-    '${flutterDirectory.path}/examples/flutter_gallery',
+    '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
   ).run;
 }
 
@@ -118,7 +145,7 @@ TaskFunction createHelloWorldStartupTest() {
 }
 
 TaskFunction createFlutterGalleryCompileTest() {
-  return CompileTest('${flutterDirectory.path}/examples/flutter_gallery').run;
+  return CompileTest('${flutterDirectory.path}/dev/integration_tests/flutter_gallery').run;
 }
 
 TaskFunction createHelloWorldCompileTest() {
@@ -173,6 +200,21 @@ TaskFunction createTextfieldPerfTest() {
   ).run;
 }
 
+TaskFunction createColorFilterAndFadePerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/color_filter_and_fade_perf.dart',
+    'color_filter_and_fade_perf',
+  ).run;
+}
+
+TaskFunction createFadingChildAnimationPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/fading_child_animation_perf.dart',
+    'fading_child_animation_perf',
+  ).run;
+}
 
 /// Measure application startup performance.
 class StartupTest {
@@ -212,15 +254,22 @@ class StartupTest {
 /// performance.
 class PerfTest {
   const PerfTest(
-      this.testDirectory,
-      this.testTarget,
-      this.timelineFileName,
-      {this.needsMeasureCpuGPu = false});
+    this.testDirectory,
+    this.testTarget,
+    this.timelineFileName, {
+    this.needsMeasureCpuGPu = false,
+    this.testDriver,
+  });
 
+  /// The directory where the app under test is defined.
   final String testDirectory;
+  /// The main entry-point file of the application, as run on the device.
   final String testTarget;
+  // The prefix name of the filename such as `<timelineFileName>.timeline_summary.json`.
   final String timelineFileName;
-
+  /// The test file to run on the host.
+  final String testDriver;
+  /// Whether to collect CPU and GPU metrics.
   final bool needsMeasureCpuGPu;
 
   Future<TaskResult> run() {
@@ -236,6 +285,8 @@ class PerfTest {
         '--trace-startup', // Enables "endless" timeline event buffering.
         '-t',
         testTarget,
+        if (testDriver != null)
+          '--driver', testDriver,
         '-d',
         deviceId,
       ]);
@@ -259,14 +310,15 @@ class PerfTest {
       return TaskResult.success(data, benchmarkScoreKeys: <String>[
         'average_frame_build_time_millis',
         'worst_frame_build_time_millis',
-        'missed_frame_build_budget_count',
         '90th_percentile_frame_build_time_millis',
         '99th_percentile_frame_build_time_millis',
         'average_frame_rasterizer_time_millis',
         'worst_frame_rasterizer_time_millis',
-        'missed_frame_rasterizer_budget_count',
         '90th_percentile_frame_rasterizer_time_millis',
         '99th_percentile_frame_rasterizer_time_millis',
+        'average_vsync_transitions_missed',
+        '90th_percentile_vsync_transitions_missed',
+        '99th_percentile_vsync_transitions_missed',
         if (needsMeasureCpuGPu) 'cpu_percentage',
         if (needsMeasureCpuGPu) 'gpu_percentage',
       ]);
@@ -281,65 +333,75 @@ class WebCompileTest {
 
   Future<TaskResult> run() async {
     final Map<String, Object> metrics = <String, Object>{};
-    await inDirectory<TaskResult>('${flutterDirectory.path}/examples/hello_world', () async {
-      await flutter('packages', options: <String>['get']);
-      await evalFlutter('build', options: <String>[
-        'web',
-        '-v',
-        '--release',
-        '--no-pub',
-      ], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
-      final String output = '${flutterDirectory.path}/examples/hello_world/build/web/main.dart.js';
-      await _measureSize('hello_world', output, metrics);
-      return null;
-    });
-    await inDirectory<TaskResult>('${flutterDirectory.path}/examples/flutter_gallery', () async {
-      await flutter('packages', options: <String>['get']);
-      await evalFlutter('build', options: <String>[
-        'web',
-        '-v',
-        '--release',
-        '--no-pub',
-      ], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
-      final String output = '${flutterDirectory.path}/examples/flutter_gallery/build/web/main.dart.js';
-      await _measureSize('flutter_gallery', output, metrics);
-      return null;
-    });
+
+    metrics.addAll(await runSingleBuildTest(
+      directory: '${flutterDirectory.path}/examples/hello_world',
+      metric: 'hello_world',
+    ));
+
+    metrics.addAll(await runSingleBuildTest(
+      directory: '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
+      metric: 'flutter_gallery',
+    ));
+
     const String sampleAppName = 'sample_flutter_app';
     final Directory sampleDir = dir('${Directory.systemTemp.path}/$sampleAppName');
 
     rmTree(sampleDir);
 
     await inDirectory<void>(Directory.systemTemp, () async {
-      await flutter('create', options: <String>['--template=app', sampleAppName], environment: <String, String>{
-          'FLUTTER_WEB': 'true',
-        });
-      await inDirectory(sampleDir, () async {
-        await flutter('packages', options: <String>['get']);
-        await evalFlutter('build', options: <String>[
-          'web',
-          '-v',
-          '--release',
-          '--no-pub',
-        ], environment: <String, String>{
-          'FLUTTER_WEB': 'true',
-        });
-        await _measureSize('basic_material_app', path.join(sampleDir.path, 'build/web/main.dart.js'), metrics);
-      });
+      await flutter('create', options: <String>['--template=app', sampleAppName]);
     });
+
+    metrics.addAll(await runSingleBuildTest(
+      directory: sampleDir.path,
+      metric: 'basic_material_app',
+    ));
+
     return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
   }
 
-  static Future<void> _measureSize(String metric, String output, Map<String, Object> metrics) async {
-    final ProcessResult result = await Process.run('du', <String>['-k', output]);
-    await Process.run('gzip',<String>['-k', '9', output]);
-    final ProcessResult resultGzip = await Process.run('du', <String>['-k', output + '.gz']);
-    metrics['${metric}_dart2js_size'] = _parseDu(result.stdout as String);
-    metrics['${metric}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout as String);
+  /// Run a single web compile test and return its metrics.
+  ///
+  /// Run a single web compile test for the app under [directory], and store
+  /// its metrics with prefix [metric].
+  static Future<Map<String, int>> runSingleBuildTest({String directory, String metric, bool measureBuildTime = false}) {
+    return inDirectory<Map<String, int>>(directory, () async {
+      final Map<String, int> metrics = <String, int>{};
+
+      await flutter('packages', options: <String>['get']);
+      final Stopwatch watch = measureBuildTime ? Stopwatch() : null;
+      watch?.start();
+      await evalFlutter('build', options: <String>[
+        'web',
+        '-v',
+        '--release',
+        '--no-pub',
+      ]);
+      watch?.stop();
+      final String outputFileName = path.join(directory, 'build/web/main.dart.js');
+      metrics.addAll(await getSize(outputFileName, metric: metric));
+
+      if (measureBuildTime) {
+        metrics['${metric}_dart2js_millis'] = watch.elapsedMilliseconds;
+      }
+
+      return metrics;
+    });
+  }
+
+  /// Obtains the size and gzipped size of a file given by [fileName].
+  static Future<Map<String, int>> getSize(String fileName, {String metric}) async {
+    final Map<String, int> sizeMetrics = <String, int>{};
+
+    final ProcessResult result = await Process.run('du', <String>['-k', fileName]);
+    sizeMetrics['${metric}_dart2js_size'] = _parseDu(result.stdout as String);
+
+    await Process.run('gzip',<String>['-k', '9', fileName]);
+    final ProcessResult resultGzip = await Process.run('du', <String>['-k', fileName + '.gz']);
+    sizeMetrics['${metric}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout as String);
+
+    return sizeMetrics;
   }
 
   static int _parseDu(String source) {
@@ -362,50 +424,12 @@ class CompileTest {
       await flutter('packages', options: <String>['get']);
 
       final Map<String, dynamic> metrics = <String, dynamic>{
-        ...await _compileAot(),
         ...await _compileApp(reportPackageContentSizes: reportPackageContentSizes),
         ...await _compileDebug(),
       };
 
       return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
     });
-  }
-
-  static Future<Map<String, dynamic>> _compileAot() async {
-    await flutter('clean');
-    final Stopwatch watch = Stopwatch()..start();
-    final List<String> options = <String>[
-      'aot',
-      '-v',
-      '--extra-gen-snapshot-options=--print_snapshot_sizes',
-      '--release',
-      '--no-pub',
-      '--target-platform',
-    ];
-    switch (deviceOperatingSystem) {
-      case DeviceOperatingSystem.ios:
-        options.add('ios');
-        break;
-      case DeviceOperatingSystem.android:
-        options.add('android-arm');
-        break;
-      case DeviceOperatingSystem.fuchsia:
-        throw Exception('Unsupported option for Fuchsia devices');
-    }
-    final String compileLog = await evalFlutter('build', options: options);
-    watch.stop();
-
-    final RegExp metricExpression = RegExp(r'([a-zA-Z]+)\(CodeSize\)\: (\d+)');
-    final Map<String, dynamic> metrics = <String, dynamic>{};
-    for (final Match m in metricExpression.allMatches(compileLog)) {
-      metrics[_sdkNameToMetricName(m.group(1))] = int.parse(m.group(2));
-    }
-    if (metrics.length != _kSdkNameToMetricNameMapping.length) {
-      throw 'Expected metrics: ${_kSdkNameToMetricNameMapping.keys}, but got: ${metrics.keys}.';
-    }
-    metrics['aot_snapshot_compile_millis'] = watch.elapsedMilliseconds;
-
-    return metrics;
   }
 
   static Future<Map<String, dynamic>> _compileApp({ bool reportPackageContentSizes = false }) async {
@@ -423,7 +447,15 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        final String appPath =  '$cwd/build/ios/Release-iphoneos/Runner.app/';
+        final Directory appBuildDirectory = dir(path.join(cwd, 'build/ios/Release-iphoneos'));
+        final Directory appBundle = appBuildDirectory
+            .listSync()
+            .whereType<Directory>()
+            .singleWhere((Directory directory) => path.extension(directory.path) == '.app', orElse: () => null);
+        if (appBundle == null) {
+          throw 'Failed to find app bundle in ${appBuildDirectory.path}';
+        }
+        final String appPath =  appBundle.path;
         // IPAs are created manually, https://flutter.dev/ios-release/
         await exec('tar', <String>['-zcf', 'build/app.ipa', appPath]);
         releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
@@ -438,13 +470,8 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        String apkPath = '$cwd/build/app/outputs/apk/app.apk';
-        File apk = file(apkPath);
-        if (!apk.existsSync()) {
-          // Pre Android SDK 26 path
-          apkPath = '$cwd/build/app/outputs/apk/app-release.apk';
-          apk = file(apkPath);
-        }
+        final String apkPath = '$cwd/build/app/outputs/flutter-apk/app-release.apk';
+        final File apk = file(apkPath);
         releaseSizeInBytes = apk.lengthSync();
         if (reportPackageContentSizes)
           metrics.addAll(await getSizesFromApk(apkPath));
@@ -485,22 +512,6 @@ class CompileTest {
     };
   }
 
-  static const Map<String, String> _kSdkNameToMetricNameMapping = <String, String> {
-    'VMIsolate': 'aot_snapshot_size_vmisolate',
-    'Isolate': 'aot_snapshot_size_isolate',
-    'ReadOnlyData': 'aot_snapshot_size_rodata',
-    'Instructions': 'aot_snapshot_size_instructions',
-    'Total': 'aot_snapshot_size_total',
-  };
-
-  static String _sdkNameToMetricName(String sdkName) {
-
-    if (!_kSdkNameToMetricNameMapping.containsKey(sdkName))
-      throw 'Unrecognized SDK snapshot metric name: $sdkName';
-
-    return _kSdkNameToMetricNameMapping[sdkName];
-  }
-
   static Future<Map<String, dynamic>> getSizesFromIosApp(String appPath) async {
     // Thin the binary to only contain one architecture.
     final String xcodeBackend = path.join(flutterDirectory.path, 'packages', 'flutter_tools', 'bin', 'xcode_backend.sh');
@@ -518,7 +529,6 @@ class CompileTest {
       'flutter_framework_uncompressed_bytes': await flutterFramework.length(),
     };
   }
-
 
   static Future<Map<String, dynamic>> getSizesFromApk(String apkPath) async {
     final  String output = await eval('unzip', <String>['-v', apkPath]);

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -85,7 +84,7 @@ class FocusAttachment {
     assert(_focusDebug('Detaching node:', <String>[_node.toString(), 'With enclosing scope ${_node.enclosingScope}']));
     if (isAttached) {
       if (_node.hasPrimaryFocus || (_node._manager != null && _node._manager._markedForFocus == _node)) {
-        _node.unfocus(focusPrevious: true);
+        _node.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
       }
       // This node is no longer in the tree, so shouldn't send notifications anymore.
       _node._manager?._markDetached(_node);
@@ -93,7 +92,6 @@ class FocusAttachment {
       _node._attachment = null;
       assert(!_node.hasPrimaryFocus);
       assert(_node._manager?._markedForFocus != _node);
-      assert(_node._manager?._markedForUnfocus != _node);
     }
     assert(!isAttached);
   }
@@ -130,6 +128,43 @@ class FocusAttachment {
       parent._reparent(_node);
     }
   }
+}
+
+/// Describe what should happen after [FocusNode.unfocus] is called.
+///
+/// See also:
+///
+///  * [FocusNode.unfocus], which takes this as its `disposition` parameter.
+enum UnfocusDisposition {
+  /// Focus the nearest focusable enclosing scope of this node, but do not
+  /// descend to locate the leaf [FocusScopeNode.focusedChild] the way
+  /// [previouslyFocusedChild] does.
+  ///
+  /// Focusing the scope in this way clears the [FocusScopeNode.focusedChild]
+  /// history for the enclosing scope when it receives focus. Because of this,
+  /// calling a traversal method like [FocusNode.nextFocus] after unfocusing
+  /// will cause the [FocusTraversalPolicy] to pick the node it thinks should be
+  /// first in the scope.
+  ///
+  /// This is the default disposition for [FocusNode.unfocus].
+  scope,
+
+  /// Focus the previously focused child of the nearest focusable enclosing
+  /// scope of this node.
+  ///
+  /// If there is no previously focused child, then this is equivalent to
+  /// using the [scope] disposition.
+  ///
+  /// Unfocusing with this disposition will cause [FocusNode.unfocus] to walk up
+  /// the tree to the nearest focusable enclosing scope, then start to walk down
+  /// the tree, looking for a focused child at its
+  /// [FocusScopeNode.focusedChild].
+  ///
+  /// If the [FocusScopeNode.focusedChild] is a scope, then look for its
+  /// [FocusScopeNode.focusedChild], and so on, finding the leaf
+  /// [FocusScopeNode.focusedChild] that is not a scope, or, failing that, a
+  /// leaf scope that has no focused child.
+  previouslyFocusedChild,
 }
 
 /// An object that can be used by a stateful widget to obtain the keyboard focus
@@ -372,16 +407,20 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// The [debugLabel] is ignored on release builds.
   ///
-  /// The [skipTraversal] and [canRequestFocus] arguments must not be null.
+  /// The [skipTraversal], [descendantsAreFocusable], and [canRequestFocus]
+  /// arguments must not be null.
   FocusNode({
     String debugLabel,
     FocusOnKeyCallback onKey,
     bool skipTraversal = false,
     bool canRequestFocus = true,
+    bool descendantsAreFocusable = true,
   })  : assert(skipTraversal != null),
         assert(canRequestFocus != null),
+        assert(descendantsAreFocusable != null),
         _skipTraversal = skipTraversal,
         _canRequestFocus = canRequestFocus,
+        _descendantsAreFocusable = descendantsAreFocusable,
         _onKey = onKey {
     // Set it via the setter so that it does nothing on release builds.
     this.debugLabel = debugLabel;
@@ -434,19 +473,69 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///  * [FocusTraversalPolicy], a class that can be extended to describe a
   ///    traversal policy.
   bool get canRequestFocus {
+    if (!_canRequestFocus) {
+      return false;
+    }
     final FocusScopeNode scope = enclosingScope;
-    return _canRequestFocus && (scope == null || scope.canRequestFocus);
+    if (scope != null && !scope.canRequestFocus) {
+      return false;
+    }
+    for (final FocusNode ancestor in ancestors) {
+      if (!ancestor.descendantsAreFocusable) {
+        return false;
+      }
+    }
+    return true;
   }
+
   bool _canRequestFocus;
   @mustCallSuper
   set canRequestFocus(bool value) {
     if (value != _canRequestFocus) {
-      if (!value) {
-        unfocus(focusPrevious: true);
-      }
+      // Have to set this first before unfocusing, since it checks this to cull
+      // unfocusable, previously-focused children.
       _canRequestFocus = value;
+      if (hasFocus && !value) {
+        unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
+      }
       _manager?._markPropertiesChanged(this);
     }
+  }
+
+  /// If false, will disable focus for all of this node's descendants.
+  ///
+  /// Defaults to true. Does not affect focusability of this node: for that,
+  /// use [canRequestFocus].
+  ///
+  /// If any descendants are focused when this is set to false, they will be
+  /// unfocused. When `descendantsAreFocusable` is set to true again, they will
+  /// not be refocused, although they will be able to accept focus again.
+  ///
+  /// Does not affect the value of [canRequestFocus] on the descendants.
+  ///
+  /// See also:
+  ///
+  ///  * [ExcludeFocus], a widget that uses this property to conditionally
+  ///    exclude focus for a subtree.
+  ///  * [Focus], a widget that exposes this setting as a parameter.
+  ///  * [FocusTraversalGroup], a widget used to group together and configure
+  ///    the focus traversal policy for a widget subtree that also has an
+  ///    `descendantsAreFocusable` parameter that prevents its children from
+  ///    being focused.
+  bool get descendantsAreFocusable => _descendantsAreFocusable;
+  bool _descendantsAreFocusable;
+  @mustCallSuper
+  set descendantsAreFocusable(bool value) {
+    if (value == _descendantsAreFocusable) {
+      return;
+    }
+    if (!value && hasFocus) {
+      for (final FocusNode child in children) {
+        child.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
+      }
+    }
+    _descendantsAreFocusable = value;
+    _manager?._markPropertiesChanged(this);
   }
 
   /// The context that was supplied to [attach].
@@ -562,15 +651,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   ///  * [Focus.isAt], which is a static method that will return the focus
   ///    state of the nearest ancestor [Focus] widget's focus node.
-  bool get hasFocus {
-    if (_manager?.primaryFocus == null || _manager?._markedForUnfocus == this) {
-      return false;
-    }
-    if (hasPrimaryFocus) {
-      return true;
-    }
-    return _manager.primaryFocus.ancestors.contains(this);
-  }
+  bool get hasFocus => hasPrimaryFocus || (_manager?.primaryFocus?.ancestors?.contains(this) ?? false);
 
   /// Returns true if this node currently has the application-wide input focus.
   ///
@@ -612,77 +693,191 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// Returns the size of the attached widget's [RenderObject], in logical
   /// units.
-  Size get size {
-    assert(
-        context != null,
-        "Tried to get the size of a focus node that didn't have its context set yet.\n"
-        'The context needs to be set before trying to evaluate traversal policies. This '
-        'is typically done with the attach method.');
-    return context.findRenderObject().semanticBounds.size;
-  }
+  ///
+  /// Size is the size of the transformed widget in global coordinates.
+  Size get size => rect.size;
 
   /// Returns the global offset to the upper left corner of the attached
   /// widget's [RenderObject], in logical units.
+  ///
+  /// Offset is the offset of the transformed widget in global coordinates.
   Offset get offset {
     assert(
         context != null,
         "Tried to get the offset of a focus node that didn't have its context set yet.\n"
-        'The context needs to be set before trying to evaluate traversal policies. This '
-        'is typically done with the attach method.');
+        'The context needs to be set before trying to evaluate traversal policies. '
+        'Setting the context is typically done with the attach method.');
     final RenderObject object = context.findRenderObject();
     return MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
   }
 
   /// Returns the global rectangle of the attached widget's [RenderObject], in
   /// logical units.
+  ///
+  /// Rect is the rectangle of the transformed widget in global coordinates.
   Rect get rect {
     assert(
         context != null,
         "Tried to get the bounds of a focus node that didn't have its context set yet.\n"
-        'The context needs to be set before trying to evaluate traversal policies. This '
-        'is typically done with the attach method.');
+        'The context needs to be set before trying to evaluate traversal policies. '
+        'Setting the context is typically done with the attach method.');
     final RenderObject object = context.findRenderObject();
-    final Offset globalOffset = MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
-    return globalOffset & object.semanticBounds.size;
+    final Offset topLeft = MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
+    final Offset bottomRight = MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.bottomRight);
+    return Rect.fromLTRB(topLeft.dx, topLeft.dy, bottomRight.dx, bottomRight.dy);
   }
 
-  /// Removes focus from a node that has the primary focus, and cancels any
-  /// outstanding requests to focus it.
+  /// Removes the focus on this node by moving the primary focus to another node.
   ///
-  /// Calling [requestFocus] sends a request to the [FocusManager] to make that
-  /// node the primary focus, which schedules a microtask to resolve the latest
-  /// request into an update of the focus state on the tree. Calling [unfocus]
-  /// cancels a request that has been requested, but not yet acted upon.
+  /// This method removes focus from a node that has the primary focus, cancels
+  /// any outstanding requests to focus it, while setting the primary focus to
+  /// another node according to the `disposition`.
   ///
-  /// This method is safe to call regardless of whether this node has ever
-  /// requested focus.
+  /// It is safe to call regardless of whether this node has ever requested
+  /// focus or not. If this node doesn't have focus or primary focus, nothing
+  /// happens.
   ///
-  /// For nodes that return true from [hasFocus], but false from
-  /// [hasPrimaryFocus], this will unfocus the descendant node that has the
-  /// primary focus instead ([FocusManager.primaryFocus]).
+  /// The `disposition` argument determines which node will receive primary
+  /// focus after this one loses it.
   ///
-  /// If [focusPrevious] is true, then rather than losing all focus, the focus
-  /// will be moved to the node that the [enclosingScope] thinks should have it,
-  /// based on its history of nodes that were set as first focus on it using
-  /// [FocusScopeNode.setFirstFocus].
-  void unfocus({ bool focusPrevious = false }) {
-    assert(focusPrevious != null);
+  /// If `disposition` is set to [UnfocusDisposition.scope] (the default), then
+  /// the previously focused node history of the enclosing scope will be
+  /// cleared, and the primary focus will be moved to the nearest enclosing
+  /// scope ancestor that is enabled for focus, ignoring the
+  /// [FocusScopeNode.focusedChild] for that scope.
+  ///
+  /// If `disposition` is set to [UnfocusDisposition.previouslyFocusedChild],
+  /// then this node will be removed from the previously focused list in the
+  /// [enclosingScope], and the focus will be moved to the previously focused
+  /// node of the [enclosingScope], which (if it is a scope itself), will find
+  /// its focused child, etc., until a leaf focus node is found. If there is no
+  /// previously focused child, then the scope itself will receive focus, as if
+  /// [UnfocusDisposition.scope] were specified.
+  ///
+  /// If you want this node to lose focus and the focus to move to the next or
+  /// previous node in the enclosing [FocusTraversalGroup], call [nextFocus] or
+  /// [previousFocus] instead of calling `unfocus`.
+  ///
+  /// {@tool dartpad --template=stateful_widget_material}
+  /// This example shows the difference between the different [UnfocusDisposition]
+  /// values for [unfocus].
+  ///
+  /// Try setting focus on the four text fields by selecting them, and then
+  /// select "UNFOCUS" to see what happens when the current
+  /// [FocusManager.primaryFocus] is unfocused.
+  ///
+  /// Try pressing the TAB key after unfocusing to see what the next widget
+  /// chosen is.
+  ///
+  /// ```dart imports
+  /// import 'package:flutter/foundation.dart';
+  /// ```
+  ///
+  /// ```dart
+  /// UnfocusDisposition disposition = UnfocusDisposition.scope;
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Material(
+  ///     child: Container(
+  ///       color: Colors.white,
+  ///       child: Column(
+  ///         mainAxisAlignment: MainAxisAlignment.center,
+  ///         children: <Widget>[
+  ///           Wrap(
+  ///             children: List<Widget>.generate(4, (int index) {
+  ///               return SizedBox(
+  ///                 width: 200,
+  ///                 child: Padding(
+  ///                   padding: const EdgeInsets.all(8.0),
+  ///                   child: TextField(
+  ///                     decoration: InputDecoration(border: OutlineInputBorder()),
+  ///                   ),
+  ///                 ),
+  ///               );
+  ///             }),
+  ///           ),
+  ///           Row(
+  ///             mainAxisAlignment: MainAxisAlignment.spaceAround,
+  ///             children: <Widget>[
+  ///               ...List<Widget>.generate(UnfocusDisposition.values.length,
+  ///                   (int index) {
+  ///                 return Row(
+  ///                   mainAxisSize: MainAxisSize.min,
+  ///                   children: <Widget>[
+  ///                     Radio<UnfocusDisposition>(
+  ///                       groupValue: disposition,
+  ///                       onChanged: (UnfocusDisposition value) {
+  ///                         setState(() {
+  ///                           disposition = value;
+  ///                         });
+  ///                       },
+  ///                       value: UnfocusDisposition.values[index],
+  ///                     ),
+  ///                     Text(describeEnum(UnfocusDisposition.values[index])),
+  ///                   ],
+  ///                 );
+  ///               }),
+  ///               OutlineButton(
+  ///                 child: const Text('UNFOCUS'),
+  ///                 onPressed: () {
+  ///                   setState(() {
+  ///                     primaryFocus.unfocus(disposition: disposition);
+  ///                   });
+  ///                 },
+  ///               ),
+  ///             ],
+  ///           ),
+  ///         ],
+  ///       ),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  void unfocus({
+    UnfocusDisposition disposition = UnfocusDisposition.scope,
+  }) {
+    assert(disposition != null);
     if (!hasFocus && (_manager == null || _manager._markedForFocus != this)) {
       return;
     }
-    if (!hasPrimaryFocus) {
-      // If we are in the focus chain, but not the primary focus, then unfocus
-      // the primary instead.
-      _manager?.primaryFocus?.unfocus(focusPrevious: focusPrevious);
+    FocusScopeNode scope = enclosingScope;
+    if (scope == null) {
+      // If the scope is null, then this is either the root node, or a node that
+      // is not yet in the tree, neither of which do anything when unfocused.
+      return;
     }
-    _manager?._markUnfocused(this);
-    final FocusScopeNode scope = enclosingScope;
-    if (scope != null) {
-      scope._focusedChildren.remove(this);
-      if (focusPrevious) {
-        scope._doRequestFocus();
-      }
+    switch (disposition) {
+      case UnfocusDisposition.scope:
+        // If it can't request focus, then don't modify its focused children.
+        if (scope.canRequestFocus) {
+          // Clearing the focused children here prevents re-focusing the node
+          // that we just unfocused if we immediately hit "next" after
+          // unfocusing, and also prevents choosing to refocus the next-to-last
+          // focused child if unfocus is called more than once.
+          scope._focusedChildren.clear();
+        }
+
+        while (!scope.canRequestFocus) {
+          scope = scope.enclosingScope ?? _manager?.rootScope;
+        }
+        scope?._doRequestFocus(findFirstFocus: false);
+        break;
+      case UnfocusDisposition.previouslyFocusedChild:
+        // Select the most recent focused child from the nearest focusable scope
+        // and focus that. If there isn't one, focus the scope itself.
+        if (scope.canRequestFocus) {
+          scope?._focusedChildren?.remove(this);
+        }
+        while (!scope.canRequestFocus) {
+          scope.enclosingScope?._focusedChildren?.remove(scope);
+          scope = scope.enclosingScope ?? _manager?.rootScope;
+        }
+        scope?._doRequestFocus(findFirstFocus: true);
+        break;
     }
+    assert(_focusDebug('Unfocused node:', <String>['primary focus was $this', 'next focus will be ${_manager?._markedForFocus}']));
   }
 
   /// Removes the keyboard token from this focus node if it has one.
@@ -785,7 +980,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       FocusTraversalGroup.of(child.context, nullOk: true)?.changedScope(node: child, oldScope: oldScope);
     }
     if (child._requestFocusWhenReparented) {
-      child._doRequestFocus();
+      child._doRequestFocus(findFirstFocus: true);
       child._requestFocusWhenReparented = false;
     }
   }
@@ -852,14 +1047,15 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
         _reparent(node);
       }
       assert(node.ancestors.contains(this), 'Focus was requested for a node that is not a descendant of the scope from which it was requested.');
-      node._doRequestFocus();
+      node._doRequestFocus(findFirstFocus: true);
       return;
     }
-    _doRequestFocus();
+    _doRequestFocus(findFirstFocus: true);
   }
 
   // Note that this is overridden in FocusScopeNode.
-  void _doRequestFocus() {
+  void _doRequestFocus({@required bool findFirstFocus}) {
+    assert(findFirstFocus != null);
     if (!canRequestFocus) {
       assert(_focusDebug('Node NOT requesting focus because canRequestFocus is false: $this'));
       return;
@@ -939,6 +1135,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<BuildContext>('context', context, defaultValue: null));
+    properties.add(FlagProperty('descendantsAreFocusable', value: descendantsAreFocusable, ifFalse: 'DESCENDANTS UNFOCUSABLE', defaultValue: true));
     properties.add(FlagProperty('canRequestFocus', value: canRequestFocus, ifFalse: 'NOT FOCUSABLE', defaultValue: true));
     properties.add(FlagProperty('hasFocus', value: hasFocus && !hasPrimaryFocus, ifTrue: 'IN FOCUS PATH', defaultValue: false));
     properties.add(FlagProperty('hasPrimaryFocus', value: hasPrimaryFocus, ifTrue: 'PRIMARY FOCUS', defaultValue: false));
@@ -1004,6 +1201,7 @@ class FocusScopeNode extends FocusNode {
           debugLabel: debugLabel,
           onKey: onKey,
           canRequestFocus: canRequestFocus,
+          descendantsAreFocusable: true,
           skipTraversal: skipTraversal,
         );
 
@@ -1043,7 +1241,7 @@ class FocusScopeNode extends FocusNode {
     }
     assert(scope.ancestors.contains(this), '$FocusScopeNode $scope must be a child of $this to set it as first focus.');
     if (hasFocus) {
-      scope._doRequestFocus();
+      scope._doRequestFocus(findFirstFocus: true);
     } else {
       scope._setAsFocusedChildForScope();
     }
@@ -1066,12 +1264,29 @@ class FocusScopeNode extends FocusNode {
         _reparent(node);
       }
       assert(node.ancestors.contains(this), 'Autofocus was requested for a node that is not a descendant of the scope from which it was requested.');
-      node._doRequestFocus();
+      node._doRequestFocus(findFirstFocus: true);
     }
   }
 
   @override
-  void _doRequestFocus() {
+  void _doRequestFocus({@required bool findFirstFocus}) {
+    assert(findFirstFocus != null);
+
+    // It is possible that a previously focused child is no longer focusable.
+    while (focusedChild != null && !focusedChild.canRequestFocus)
+      _focusedChildren.removeLast();
+
+    // If findFirstFocus is false, then the request is to make this scope the
+    // focus instead of looking for the ultimate first focus for this scope and
+    // its descendants.
+    if (!findFirstFocus) {
+      if (canRequestFocus) {
+        _setAsFocusedChildForScope();
+        _markNextFocus(this);
+      }
+      return;
+    }
+
     // Start with the primary focus as the focused child of this scope, if there
     // is one. Otherwise start with this node itself.
     FocusNode primaryFocus = focusedChild ?? this;
@@ -1093,7 +1308,7 @@ class FocusScopeNode extends FocusNode {
       // We found a FocusScopeNode at the leaf, so ask it to focus itself
       // instead of this scope. That will cause this scope to return true from
       // hasFocus, but false from hasPrimaryFocus.
-      primaryFocus._doRequestFocus();
+      primaryFocus._doRequestFocus(findFirstFocus: findFirstFocus);
     }
   }
 
@@ -1191,7 +1406,7 @@ enum FocusHighlightStrategy {
 ///    subtrees into groups and restrict focus to them.
 ///  * The [primaryFocus] global accessor, for convenient access from anywhere
 ///    to the current focus manager state.
-class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagnosticable {
+class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// Creates an object that manages the focus tree.
   ///
   /// This constructor is rarely called directly. To access the [FocusManager],
@@ -1206,8 +1421,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
   /// Provides convenient access to the current [FocusManager] singleton from
   /// the [WidgetsBinding] instance.
   static FocusManager get instance => WidgetsBinding.instance.focusManager;
-
-  bool _lastInteractionWasTouch = true;
 
   /// Sets the strategy by which [highlightMode] is determined.
   ///
@@ -1240,6 +1453,30 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
     _updateHighlightMode();
   }
 
+  static FocusHighlightMode get _defaultModeForPlatform {
+    // Assume that if we're on one of the mobile platforms, and there's no mouse
+    // connected, that the initial interaction will be touch-based, and that
+    // it's traditional mouse and keyboard on all other platforms.
+    //
+    // This only affects the initial value: the ongoing value is updated to a
+    // known correct value as soon as any pointer/keyboard events are received.
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        if (WidgetsBinding.instance.mouseTracker.mouseIsConnected) {
+          return FocusHighlightMode.traditional;
+        }
+        return FocusHighlightMode.touch;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return FocusHighlightMode.traditional;
+    }
+    assert(false, 'Unhandled target platform $defaultTargetPlatform');
+    return null;
+  }
+
   /// Indicates the current interaction mode for focus highlights.
   ///
   /// The value returned depends upon the [highlightStrategy] used, and possibly
@@ -1251,22 +1488,28 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
   ///
   /// If [highlightMode] returns [FocusHighlightMode.traditional], then widgets should
   /// draw their focus highlight whenever they are focused.
-  FocusHighlightMode get highlightMode => _highlightMode;
-  FocusHighlightMode _highlightMode = FocusHighlightMode.touch;
+  // Don't want to set _highlightMode here, since it's possible for the target
+  // platform to change (especially in tests).
+  FocusHighlightMode get highlightMode => _highlightMode ?? _defaultModeForPlatform;
+  FocusHighlightMode _highlightMode;
+
+  // If set, indicates if the last interaction detected was touch or not.
+  // If null, no interactions have occurred yet.
+  bool _lastInteractionWasTouch;
 
   // Update function to be called whenever the state relating to highlightMode
   // changes.
   void _updateHighlightMode() {
-    // Assume that if we're on one of these mobile platforms, or if there's no
-    // mouse connected, that the initial interaction will be touch-based, and
-    // that it's traditional mouse and keyboard on all others.
-    //
-    // This only affects the initial value: the ongoing value is updated as soon
-    // as any input events are received.
-    _lastInteractionWasTouch ??= Platform.isAndroid || Platform.isIOS || !WidgetsBinding.instance.mouseTracker.mouseIsConnected;
     FocusHighlightMode newMode;
     switch (highlightStrategy) {
       case FocusHighlightStrategy.automatic:
+        if (_lastInteractionWasTouch == null) {
+          // If we don't have any information about the last interaction yet,
+          // then just rely on the default value for the platform, which will be
+          // determined based on the target platform if _highlightMode is not
+          // set.
+          return;
+        }
         if (_lastInteractionWasTouch) {
           newMode = FocusHighlightMode.touch;
         } else {
@@ -1280,8 +1523,12 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
         newMode = FocusHighlightMode.traditional;
         break;
     }
-    if (newMode != _highlightMode) {
-      _highlightMode = newMode;
+    // We can't just compare newMode with _highlightMode here, since
+    // _highlightMode could be null, so we want to compare with the return value
+    // for the getter, since that's what clients will be looking at.
+    final FocusHighlightMode oldMode = highlightMode;
+    _highlightMode = newMode;
+    if (highlightMode != oldMode) {
       _notifyHighlightModeListeners();
     }
   }
@@ -1305,21 +1552,26 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
     for (final ValueChanged<FocusHighlightMode> listener in localListeners) {
       try {
         if (_listeners.contains(listener)) {
-          listener(_highlightMode);
+          listener(highlightMode);
         }
       } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'widgets library',
-          context: ErrorDescription('while dispatching notifications for $runtimeType'),
-          informationCollector: () sync* {
+        InformationCollector collector;
+        assert(() {
+          collector = () sync* {
             yield DiagnosticsProperty<FocusManager>(
               'The $runtimeType sending notification was',
               this,
               style: DiagnosticsTreeStyle.errorProperty,
             );
-          },
+          };
+          return true;
+        }());
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('while dispatching notifications for $runtimeType'),
+          informationCollector: collector,
         ));
       }
     }
@@ -1332,20 +1584,21 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
   final FocusScopeNode rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
 
   void _handlePointerEvent(PointerEvent event) {
-    bool currentInteractionIsTouch;
+    FocusHighlightMode expectedMode;
     switch (event.kind) {
       case PointerDeviceKind.touch:
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
-        currentInteractionIsTouch = true;
+        _lastInteractionWasTouch = true;
+        expectedMode = FocusHighlightMode.touch;
         break;
       case PointerDeviceKind.mouse:
       case PointerDeviceKind.unknown:
-        currentInteractionIsTouch = false;
+        _lastInteractionWasTouch = false;
+        expectedMode = FocusHighlightMode.traditional;
         break;
     }
-    if (_lastInteractionWasTouch != currentInteractionIsTouch) {
-      _lastInteractionWasTouch = currentInteractionIsTouch;
+    if (expectedMode != highlightMode) {
       _updateHighlightMode();
     }
   }
@@ -1353,10 +1606,8 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
   void _handleRawKeyEvent(RawKeyEvent event) {
     // Update highlightMode first, since things responding to the keys might
     // look at the highlight mode, and it should be accurate.
-    if (_lastInteractionWasTouch) {
-      _lastInteractionWasTouch = false;
-      _updateHighlightMode();
-    }
+    _lastInteractionWasTouch = false;
+    _updateHighlightMode();
 
     assert(_focusDebug('Received key event ${event.logicalKey}'));
     // Walk the current focus from the leaf to the root, calling each one's
@@ -1390,17 +1641,10 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
   // given it yet.
   FocusNode _markedForFocus;
 
-  // The node that has been marked as needing to be unfocused during the next
-  // focus update.
-  FocusNode _markedForUnfocus;
-
   void _markDetached(FocusNode node) {
     // The node has been removed from the tree, so it no longer needs to be
     // notified of changes.
     assert(_focusDebug('Node was detached: $node'));
-    if (_markedForUnfocus == node) {
-      _markedForUnfocus = null;
-    }
     if (_primaryFocus == node) {
       _primaryFocus = null;
     }
@@ -1418,34 +1662,10 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
       // The caller asked for the current focus to be the next focus, so just
       // pretend that didn't happen.
       _markedForFocus = null;
-      // If this node is going to be the next focus, then it's not going to be
-      // unfocused unless we call _markUnfocused again, so unset _unfocusedNode.
-      if (_markedForUnfocus == node) {
-        _markedForUnfocus = null;
-      }
     } else {
       _markedForFocus = node;
       _markNeedsUpdate();
     }
-  }
-
-  // Called to indicate that the given node should be marked to be unfocused at
-  // the next focus update, and that any pending request to focus it should be
-  // canceled.
-  void _markUnfocused(FocusNode node) {
-    assert(node != null);
-    assert(_focusDebug('Unfocusing node $node'));
-    if (_primaryFocus == node || _markedForFocus == node) {
-      if (_markedForFocus == node) {
-        _markedForFocus = null;
-      }
-      if (_primaryFocus == node) {
-        assert(_markedForUnfocus == null);
-        _markedForUnfocus = node;
-      }
-      _markNeedsUpdate();
-    }
-    assert(_focusDebug('Unfocused node $node:', <String>['primary focus is $_primaryFocus', 'next focus will be $_markedForFocus']));
   }
 
   // True indicates that there is an update pending.
@@ -1464,9 +1684,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
 
   void _applyFocusChange() {
     _haveScheduledUpdate = false;
-    if (_markedForUnfocus == _primaryFocus) {
-      _primaryFocus = null;
-    }
     final FocusNode previousFocus = _primaryFocus;
     if (_primaryFocus == null && _markedForFocus == null) {
       // If we don't have any current focus, and nobody has asked to focus yet,
@@ -1479,11 +1696,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
     if (_markedForFocus != null && _markedForFocus != _primaryFocus) {
       final Set<FocusNode> previousPath = previousFocus?.ancestors?.toSet() ?? <FocusNode>{};
       final Set<FocusNode> nextPath = _markedForFocus.ancestors.toSet();
-      if (_markedForUnfocus != null) {
-        final Set<FocusNode> unfocusedNodes = <FocusNode>{_markedForUnfocus, ..._markedForUnfocus.ancestors};
-        unfocusedNodes.removeAll(nextPath); // No need to dirty the ancestors that are in the newly focused set.
-        _dirtyNodes.addAll(unfocusedNodes);
-      }
       // Notify nodes that are newly focused.
       _dirtyNodes.addAll(nextPath.difference(previousPath));
       // Notify nodes that are no longer focused
@@ -1506,7 +1718,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
       node._notify();
     }
     _dirtyNodes.clear();
-    _markedForUnfocus = null;
     if (previousFocus != _primaryFocus) {
       notifyListeners();
     }

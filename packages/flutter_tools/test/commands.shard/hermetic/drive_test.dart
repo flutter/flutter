@@ -5,22 +5,22 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
-import 'package:platform/platform.dart';
-
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/drive.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/build_info.dart';
-import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:mockito/mockito.dart';
 import 'package:webdriver/sync_io.dart' as sync_io;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/mocks.dart';
 
 void main() {
@@ -42,10 +42,10 @@ void main() {
       fs.currentDirectory = tempDir;
       fs.directory('test').createSync();
       fs.directory('test_driver').createSync();
-      fs.file('pubspec.yaml')..createSync();
+      fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
       setExitFunctionForTests();
-      appStarter = (DriveCommand command) {
+      appStarter = (DriveCommand command, Uri webUri) {
         throw 'Unexpected call to appStarter';
       };
       testRunner = (List<String> testArgs, Map<String, String> environment) {
@@ -91,7 +91,7 @@ void main() {
 
     testUsingContext('returns 1 when app fails to run', () async {
       testDeviceManager.addDevice(MockDevice());
-      appStarter = expectAsync1((DriveCommand command) async => null);
+      appStarter = expectAsync2((DriveCommand command, Uri webUri) async => null);
 
       final String testApp = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
@@ -170,7 +170,7 @@ void main() {
       final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-      appStarter = expectAsync1((DriveCommand command) async {
+      appStarter = expectAsync2((DriveCommand command, Uri webUri) async {
         return LaunchResult.succeeded();
       });
       testRunner = expectAsync2((List<String> testArgs, Map<String, String> environment) async {
@@ -207,7 +207,7 @@ void main() {
       final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-      appStarter = expectAsync1((DriveCommand command) async {
+      appStarter = expectAsync2((DriveCommand command, Uri webUri) async {
         return LaunchResult.succeeded();
       });
       testRunner = (List<String> testArgs, Map<String, String> environment) async {
@@ -351,7 +351,7 @@ void main() {
         final Device mockDevice = MockDevice();
         testDeviceManager.addDevice(mockDevice);
 
-        final MockDeviceLogReader mockDeviceLogReader = MockDeviceLogReader();
+        final FakeDeviceLogReader mockDeviceLogReader = FakeDeviceLogReader();
         when(mockDevice.getLogReader()).thenReturn(mockDeviceLogReader);
         final MockLaunchResult mockLaunchResult = MockLaunchResult();
         when(mockLaunchResult.started).thenReturn(true);
@@ -481,7 +481,7 @@ void main() {
         final Device mockDevice = MockDevice();
         testDeviceManager.addDevice(mockDevice);
 
-        final MockDeviceLogReader mockDeviceLogReader = MockDeviceLogReader();
+        final FakeDeviceLogReader mockDeviceLogReader = FakeDeviceLogReader();
         when(mockDevice.getLogReader()).thenReturn(mockDeviceLogReader);
         final MockLaunchResult mockLaunchResult = MockLaunchResult();
         when(mockLaunchResult.started).thenReturn(true);
@@ -611,11 +611,13 @@ void main() {
     });
 
     test('Chrome with headless off', () {
+      const String chromeBinary = 'random-binary';
       final Map<String, dynamic> expected = <String, dynamic>{
         'acceptInsecureCerts': true,
         'browserName': 'chrome',
         'goog:loggingPrefs': <String, String>{ sync_io.LogType.performance: 'ALL'},
         'chromeOptions': <String, dynamic>{
+          'binary': chromeBinary,
           'w3c': false,
           'args': <String>[
             '--bwsi',
@@ -637,7 +639,7 @@ void main() {
         }
       };
 
-      expect(getDesiredCapabilities(Browser.chrome, false), expected);
+      expect(getDesiredCapabilities(Browser.chrome, false, chromeBinary), expected);
 
     });
 
@@ -712,6 +714,19 @@ void main() {
       };
 
       expect(getDesiredCapabilities(Browser.iosSafari, false), expected);
+    });
+
+    test('android chrome', () {
+      final Map<String, dynamic> expected = <String, dynamic>{
+        'browserName': 'chrome',
+        'platformName': 'android',
+        'goog:chromeOptions': <String, dynamic>{
+          'androidPackage': 'com.android.chrome',
+          'args': <String>['--disable-fullscreen']
+        },
+      };
+
+      expect(getDesiredCapabilities(Browser.androidChrome, false), expected);
     });
   });
 }

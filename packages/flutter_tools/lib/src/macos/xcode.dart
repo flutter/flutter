@@ -5,17 +5,22 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../convert.dart';
+import '../globals.dart' as globals;
 import '../ios/devices.dart';
+import '../ios/ios_deploy.dart';
+import '../ios/mac.dart';
 import '../ios/xcodeproj.dart';
 import '../reporting/reporting.dart';
 
@@ -168,10 +173,9 @@ class Xcode {
     assert(sdk != null);
     final RunResult runResult = await _processUtils.run(
       <String>['xcrun', '--sdk', getNameForSdk(sdk), '--show-sdk-path'],
-      throwOnError: true,
     );
     if (runResult.exitCode != 0) {
-      throwToolExit('Could not find iPhone SDK location: ${runResult.stderr}');
+      throwToolExit('Could not find SDK location: ${runResult.stderr}');
     }
     return runResult.stdout.trim();
   }
@@ -193,15 +197,33 @@ class Xcode {
 /// A utility class for interacting with Xcode xcdevice command line tools.
 class XCDevice {
   XCDevice({
+    @required Artifacts artifacts,
+    @required Cache cache,
     @required ProcessManager processManager,
     @required Logger logger,
     @required Xcode xcode,
+    @required Platform platform,
   }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _logger = logger,
-       _xcode = xcode;
+      _logger = logger,
+      _iMobileDevice = IMobileDevice(
+        artifacts: artifacts,
+        cache: cache,
+        logger: logger,
+        processManager: processManager,
+      ),
+      _iosDeploy = IOSDeploy(
+        artifacts: artifacts,
+        cache: cache,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
+      _xcode = xcode;
 
   final ProcessUtils _processUtils;
   final Logger _logger;
+  final IMobileDevice _iMobileDevice;
+  final IOSDeploy _iosDeploy;
   final Xcode _xcode;
 
   bool get isInstalled => _xcode.isInstalledAndMeetsVersionCheck && xcdevicePath != null;
@@ -227,7 +249,10 @@ class XCDevice {
     return _xcdevicePath;
   }
 
-  Future<List<dynamic>> _getAllDevices({bool useCache = false}) async {
+  Future<List<dynamic>> _getAllDevices({
+    bool useCache = false,
+    @required Duration timeout
+  }) async {
     if (!isInstalled) {
       _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
       return null;
@@ -243,7 +268,7 @@ class XCDevice {
           'xcdevice',
           'list',
           '--timeout',
-          '1',
+          timeout.inSeconds.toString(),
         ],
         throwOnError: true,
       );
@@ -264,9 +289,9 @@ class XCDevice {
 
   List<dynamic> _cachedListResults;
 
-  /// List of devices available over USB.
-  Future<List<IOSDevice>> getAvailableTetheredIOSDevices() async {
-    final List<dynamic> allAvailableDevices = await _getAllDevices();
+  /// [timeout] defaults to 2 seconds.
+  Future<List<IOSDevice>> getAvailableTetheredIOSDevices({ Duration timeout }) async {
+    final List<dynamic> allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 2));
 
     if (allAvailableDevices == null) {
       return const <IOSDevice>[];
@@ -325,7 +350,7 @@ class XCDevice {
       if (errorProperties != null) {
         final String errorMessage = _parseErrorMessage(errorProperties);
         if (errorMessage.contains('not paired')) {
-          UsageEvent('device', 'ios-trust-failure').send();
+          UsageEvent('device', 'ios-trust-failure', flutterUsage: globals.flutterUsage).send();
         }
         _logger.printTrace(errorMessage);
 
@@ -349,6 +374,12 @@ class XCDevice {
         name: device['name'] as String,
         cpuArchitecture: _cpuArchitecture(deviceProperties),
         sdkVersion: _sdkVersion(deviceProperties),
+        artifacts: globals.artifacts,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        iosDeploy: _iosDeploy,
+        iMobileDevice: _iMobileDevice,
+        platform: globals.platform,
       ));
     }
     return devices;
@@ -401,11 +432,20 @@ class XCDevice {
       final String architecture = deviceProperties['architecture'] as String;
       try {
         cpuArchitecture = getIOSArchForName(architecture);
-      } catch (error) {
-        // Fallback to default iOS architecture. Future-proof against a theoretical version
-        // of Xcode that changes this string to something slightly different like "ARM64".
-        cpuArchitecture ??= defaultIOSArchs.first;
-        _logger.printError('Unknown architecture $architecture, defaulting to ${getNameForDarwinArch(cpuArchitecture)}');
+      } on Exception {
+        // Fallback to default iOS architecture. Future-proof against a
+        // theoretical version of Xcode that changes this string to something
+        // slightly different like "ARM64", or armv7 variations like
+        // armv7s and armv7f.
+        if (architecture.startsWith('armv7')) {
+          cpuArchitecture = DarwinArch.armv7;
+        } else {
+          cpuArchitecture = defaultIOSArchs.first;
+        }
+        _logger.printError(
+          'Unknown architecture $architecture, defaulting to '
+          '${getNameForDarwinArch(cpuArchitecture)}',
+        );
       }
     }
     return cpuArchitecture;
@@ -492,7 +532,10 @@ class XCDevice {
 
   /// List of all devices reporting errors.
   Future<List<String>> getDiagnostics() async {
-    final List<dynamic> allAvailableDevices = await _getAllDevices(useCache: true);
+    final List<dynamic> allAvailableDevices = await _getAllDevices(
+      useCache: true,
+      timeout: const Duration(seconds: 2)
+    );
 
     if (allAvailableDevices == null) {
       return const <String>[];

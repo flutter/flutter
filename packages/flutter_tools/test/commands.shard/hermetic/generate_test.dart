@@ -48,7 +48,7 @@ void main() {
     final GenerateCommand command = GenerateCommand();
     applyMocksToCommand(command);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
-      ..createSync(recursive: true);
+      .createSync(recursive: true);
 
     globals.fs.currentDirectory
       .childDirectory('.dart_tool')

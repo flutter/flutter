@@ -84,6 +84,13 @@ void main() {
       'debugCheckHasScaffold control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+            },
+          ),
+        ),
         home: Builder(
           builder: (BuildContext context) {
             showBottomSheet<void>(context: context,
@@ -167,6 +174,7 @@ void main() {
       '     Focus\n'
       '     _FocusTraversalGroupMarker\n'
       '     FocusTraversalGroup\n'
+      '     _ActionsMarker\n'
       '     Actions\n'
       '     _ShortcutsMarker\n'
       '     Semantics\n'

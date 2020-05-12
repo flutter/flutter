@@ -2,30 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
+import 'dart:async';
 
+import 'package:meta/meta.dart';
+
+import '../persistent_tool_state.dart';
 import 'io.dart';
 import 'net.dart';
+import 'platform.dart';
 
 class BotDetector {
   BotDetector({
     @required HttpClientFactory httpClientFactory,
     @required Platform platform,
+    @required PersistentToolState persistentToolState,
   }) :
     _platform = platform,
     _azureDetector = AzureDetector(
       httpClientFactory: httpClientFactory,
-    );
+    ),
+    _persistentToolState = persistentToolState;
 
   final Platform _platform;
   final AzureDetector _azureDetector;
-
-  bool _isRunningOnBot;
+  final PersistentToolState _persistentToolState;
 
   Future<bool> get isRunningOnBot async {
-    if (_isRunningOnBot != null) {
-      return _isRunningOnBot;
+    if (_persistentToolState.isRunningOnBot != null) {
+      return _persistentToolState.isRunningOnBot;
     }
     if (
       // Explicitly stated to not be a bot.
@@ -36,10 +40,10 @@ class BotDetector {
       // When set, GA logs to a local file (normally for tests) so we don't need to filter.
       || _platform.environment.containsKey('FLUTTER_ANALYTICS_LOG_FILE')
     ) {
-      return _isRunningOnBot = false;
+      return _persistentToolState.isRunningOnBot = false;
     }
 
-    return _isRunningOnBot = _platform.environment['BOT'] == 'true'
+    return _persistentToolState.isRunningOnBot = _platform.environment['BOT'] == 'true'
 
       // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
       || _platform.environment['TRAVIS'] == 'true'
@@ -93,12 +97,14 @@ class AzureDetector {
     if (_isRunningOnAzure != null) {
       return _isRunningOnAzure;
     }
+    const Duration connectionTimeout = Duration(milliseconds: 250);
+    const Duration requestTimeout = Duration(seconds: 1);
     final HttpClient client = _httpClientFactory()
-      ..connectionTimeout = const Duration(seconds: 1);
+      ..connectionTimeout = connectionTimeout;
     try {
       final HttpClientRequest request = await client.getUrl(
         Uri.parse(_serviceUrl),
-      );
+      ).timeout(requestTimeout);
       request.headers.add('Metadata', true);
       await request.close();
     } on SocketException {
@@ -109,6 +115,10 @@ class AzureDetector {
       // If the connection gets set up, but encounters an error condition, it
       // still means we're on Azure.
       return _isRunningOnAzure = true;
+    } on TimeoutException {
+      // The HttpClient connected to a host, but it did not respond in a timely
+      // fashion. Assume we are not on a bot.
+      return _isRunningOnAzure = false;
     }
     // We got a response. We're running on Azure.
     return _isRunningOnAzure = true;

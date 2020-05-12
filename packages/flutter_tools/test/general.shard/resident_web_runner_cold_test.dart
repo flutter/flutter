@@ -7,19 +7,20 @@ import 'dart:async';
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_runner/devfs_web.dart';
+import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
-import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
-import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
@@ -52,10 +53,11 @@ void main() {
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
           ipv6: true,
           stayResident: true,
-          dartDefines: const <String>[],
           urlTunneller: null,
         ) as ResidentWebRunner;
-      },
+      }, overrides: <Type, Generator>{
+        Pub: () => MockPub(),
+      }
     );
   });
 
@@ -129,14 +131,18 @@ void main() {
     final MockChromeConnection mockChromeConnection = MockChromeConnection();
     final MockChromeTab mockChromeTab = MockChromeTab();
     final MockWipConnection mockWipConnection = MockWipConnection();
+    final MockChromiumLauncher chromiumLauncher = MockChromiumLauncher();
     when(mockChromeConnection.getTab(any)).thenAnswer((Invocation invocation) async {
       return mockChromeTab;
     });
     when(mockChromeTab.connect()).thenAnswer((Invocation invocation) async {
       return mockWipConnection;
     });
+    when(chromiumLauncher.connectedInstance).thenAnswer((Invocation invocation) async {
+      return chrome;
+    });
     when(chrome.chromeConnection).thenReturn(mockChromeConnection);
-    launchChromeInstance(chrome);
+    when(chromeDevice.chromeLauncher).thenReturn(chromiumLauncher);
     when(mockFlutterDevice.device).thenReturn(chromeDevice);
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
@@ -161,9 +167,11 @@ class MockDebugConnection extends Mock implements DebugConnection {}
 class MockVmService extends Mock implements VmService {}
 class MockStatus extends Mock implements Status {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
-class MockChromeDevice extends Mock implements ChromeDevice {}
-class MockChrome extends Mock implements Chrome {}
+class MockChromeDevice extends Mock implements ChromiumDevice {}
+class MockChrome extends Mock implements Chromium {}
 class MockChromeConnection extends Mock implements ChromeConnection {}
 class MockChromeTab extends Mock implements ChromeTab {}
 class MockWipConnection extends Mock implements WipConnection {}
 class MockBuildSystem extends Mock implements BuildSystem {}
+class MockPub extends Mock implements Pub {}
+class MockChromiumLauncher extends Mock implements ChromiumLauncher {}

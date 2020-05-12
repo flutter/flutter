@@ -44,9 +44,9 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// installation or a data wipe. The warm up does not block the main thread
   /// so there should be no "Application Not Responding" warning.
   ///
-  /// Currently the warm-up happens synchronously on the GPU thread which means
-  /// the rendering of the first frame on the GPU thread will be postponed until
-  /// the warm-up is finished.
+  /// Currently the warm-up happens synchronously on the raster thread which
+  /// means the rendering of the first frame on the raster thread will be
+  /// postponed until the warm-up is finished.
   ///
   /// See also:
   ///
@@ -95,6 +95,13 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   @override
   void evict(String asset) {
     super.evict(asset);
+    imageCache.clear();
+    imageCache.clearLiveImages();
+  }
+
+  @override
+  void handleMemoryPressure() {
+    super.handleMemoryPressure();
     imageCache.clear();
   }
 

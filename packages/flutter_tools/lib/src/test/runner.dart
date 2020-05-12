@@ -31,6 +31,8 @@ abstract class FlutterTestRunner {
     Directory workDir,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
+    String tags,
+    String excludeTags,
     bool enableObservatory = false,
     bool startPaused = false,
     bool disableServiceAuthCodes = false,
@@ -48,7 +50,8 @@ abstract class FlutterTestRunner {
     String icudtlPath,
     Directory coverageDirectory,
     bool web = false,
-    String randomSeed = '0',
+    String randomSeed,
+    @required List<String> dartExperiments,
   });
 }
 
@@ -62,6 +65,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     Directory workDir,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
+    String tags,
+    String excludeTags,
     bool enableObservatory = false,
     bool startPaused = false,
     bool disableServiceAuthCodes = false,
@@ -79,7 +84,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String icudtlPath,
     Directory coverageDirectory,
     bool web = false,
-    String randomSeed = '0',
+    String randomSeed,
+    @required List<String> dartExperiments,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
@@ -102,7 +108,12 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         ...<String>['--name', name],
       for (final String plainName in plainNames)
         ...<String>['--plain-name', plainName],
-      '--test-randomize-ordering-seed=$randomSeed',
+      if (randomSeed != null)
+        '--test-randomize-ordering-seed=$randomSeed',
+      if (tags != null)
+        ...<String>['--tags', tags],
+      if (excludeTags != null)
+        ...<String>['--exclude-tags', excludeTags],
     ];
     if (web) {
       final String tempBuildDir = globals.fs.systemTempDirectory
@@ -166,12 +177,13 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       projectRootDirectory: globals.fs.currentDirectory.uri,
       flutterProject: flutterProject,
       icudtlPath: icudtlPath,
+      dartExperiments: dartExperiments,
     );
 
     // Make the global packages path absolute.
     // (Makes sure it still works after we change the current directory.)
-    PackageMap.globalPackagesPath =
-        globals.fs.path.normalize(globals.fs.path.absolute(PackageMap.globalPackagesPath));
+    globalPackagesPath =
+        globals.fs.path.normalize(globals.fs.path.absolute(globalPackagesPath));
 
     // Call package:test's main method in the appropriate directory.
     final Directory saved = globals.fs.currentDirectory;
@@ -189,7 +201,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
 
       return exitCode;
     } finally {
-      globals.fs.currentDirectory = saved;
+      globals.fs.currentDirectory = saved.path;
       await platform.close();
     }
   }

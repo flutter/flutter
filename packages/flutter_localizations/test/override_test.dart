@@ -15,9 +15,12 @@ class FooMaterialLocalizations extends MaterialLocalizationEn {
   ) : super(
     localeName: localeName.toString(),
     fullYearFormat: intl.DateFormat.y(),
+    compactDateFormat: intl.DateFormat.yMd(),
+    shortDateFormat: intl.DateFormat.yMMMd(),
     mediumDateFormat: intl.DateFormat('E, MMM\u00a0d'),
     longDateFormat: intl.DateFormat.yMMMMEEEEd(),
     yearMonthFormat: intl.DateFormat.yMMMM(),
+    shortMonthDayFormat: intl.DateFormat.MMMd(),
     decimalFormat: intl.NumberFormat.decimalPattern(),
     twoDigitZeroPaddedFormat: intl.NumberFormat('00'),
   );

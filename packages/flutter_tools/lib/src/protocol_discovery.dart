@@ -64,10 +64,17 @@ class ProtocolDiscovery {
   _BufferedStreamController<Uri> _uriStreamController;
 
   /// The discovered service URL.
+  ///
+  /// Returns null if the log reader shuts down before any uri is found.
+  ///
   /// Use [uris] instead.
   // TODO(egarciad): replace `uri` for `uris`.
-  Future<Uri> get uri {
-    return uris.first;
+  Future<Uri> get uri async {
+    try {
+      return await uris.first;
+    } on StateError {
+      return null;
+    }
   }
 
   /// The discovered service URLs.
@@ -110,7 +117,7 @@ class ProtocolDiscovery {
     Uri uri;
     try {
       uri = _getObservatoryUri(line);
-    } on FormatException catch(error, stackTrace) {
+    } on FormatException catch (error, stackTrace) {
       _uriStreamController.addError(error, stackTrace);
     }
     if (uri == null) {

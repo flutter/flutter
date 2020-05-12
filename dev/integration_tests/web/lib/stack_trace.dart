@@ -32,8 +32,8 @@ const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
   StackFrame(
     number: -1,
     packageScheme: 'package',
-    package: 'web_integration',
-    packagePath: 'stack_trace.dart',
+    package: 'packages',
+    packagePath: 'web_integration/stack_trace.dart',
     line: 121,
     column: 3,
     className: '<unknown>',
@@ -43,8 +43,8 @@ const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
   StackFrame(
     number: -1,
     packageScheme: 'package',
-    package: 'web_integration',
-    packagePath: 'stack_trace.dart',
+    package: 'packages',
+    packagePath: 'web_integration/stack_trace.dart',
     line: 116,
     column: 3,
     className: '<unknown>',
@@ -54,8 +54,8 @@ const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
   StackFrame(
     number: -1,
     packageScheme: 'package',
-    package: 'web_integration',
-    packagePath: 'stack_trace.dart',
+    package: 'packages',
+    packagePath: 'web_integration/stack_trace.dart',
     line: 111,
     column: 3,
     className: '<unknown>',

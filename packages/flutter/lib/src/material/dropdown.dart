@@ -145,14 +145,20 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
   }
 
   void _handleOnTap() {
+    final DropdownMenuItem<T> dropdownMenuItem = widget.route.items[widget.itemIndex].item;
+
+    if (dropdownMenuItem.onTap != null) {
+      dropdownMenuItem.onTap();
+    }
+
     Navigator.pop(
       context,
-      _DropdownRouteResult<T>(widget.route.items[widget.itemIndex].item.value),
+      _DropdownRouteResult<T>(dropdownMenuItem.value),
     );
   }
 
   static final Map<LogicalKeySet, Intent> _webShortcuts =<LogicalKeySet, Intent>{
-    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
+    LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
   };
 
   @override
@@ -197,12 +203,14 @@ class _DropdownMenu<T> extends StatefulWidget {
     this.route,
     this.buttonRect,
     this.constraints,
+    this.dropdownColor,
   }) : super(key: key);
 
   final _DropdownRoute<T> route;
   final EdgeInsets padding;
   final Rect buttonRect;
   final BoxConstraints constraints;
+  final Color dropdownColor;
 
   @override
   _DropdownMenuState<T> createState() => _DropdownMenuState<T>();
@@ -259,7 +267,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
       opacity: _fadeOpacity,
       child: CustomPaint(
         painter: _DropdownMenuPainter(
-          color: Theme.of(context).canvasColor,
+          color: widget.dropdownColor ?? Theme.of(context).canvasColor,
           elevation: route.elevation,
           selectedIndex: route.selectedIndex,
           resize: _resize,
@@ -360,6 +368,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
 // We box the return value so that the return value can be null. Otherwise,
 // canceling the route (which returns null) would get confused with actually
 // returning a real null value.
+@immutable
 class _DropdownRouteResult<T> {
   const _DropdownRouteResult(this.result);
 
@@ -394,6 +403,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     @required this.style,
     this.barrierLabel,
     this.itemHeight,
+    this.dropdownColor,
   }) : assert(style != null),
        itemHeights = List<double>.filled(items.length, itemHeight ?? kMinInteractiveDimension);
 
@@ -405,6 +415,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final ThemeData theme;
   final TextStyle style;
   final double itemHeight;
+  final Color dropdownColor;
 
   final List<double> itemHeights;
   ScrollController scrollController;
@@ -435,6 +446,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
           elevation: elevation,
           theme: theme,
           style: style,
+          dropdownColor: dropdownColor,
         );
       }
     );
@@ -520,6 +532,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     this.elevation = 8,
     this.theme,
     this.style,
+    this.dropdownColor,
   }) : super(key: key);
 
   final _DropdownRoute<T> route;
@@ -531,6 +544,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
   final int elevation;
   final ThemeData theme;
   final TextStyle style;
+  final Color dropdownColor;
 
   @override
   Widget build(BuildContext context) {
@@ -553,6 +567,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
       padding: padding.resolve(textDirection),
       buttonRect: buttonRect,
       constraints: constraints,
+      dropdownColor: dropdownColor,
     );
 
     if (theme != null)
@@ -656,10 +671,14 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
   /// The [child] argument is required.
   const DropdownMenuItem({
     Key key,
+    this.onTap,
     this.value,
     @required Widget child,
   }) : assert(child != null),
        super(key: key, child: child);
+
+  /// Called when the dropdown menu item is tapped.
+  final VoidCallback onTap;
 
   /// The value to return if the user selects this menu item.
   ///
@@ -779,6 +798,12 @@ class DropdownButton<T> extends StatefulWidget {
   /// The [elevation] and [iconSize] arguments must not be null (they both have
   /// defaults, so do not need to be specified). The boolean [isDense] and
   /// [isExpanded] arguments must not be null.
+  ///
+  /// The [autofocus] argument must not be null.
+  ///
+  /// The [dropdownColor] argument specifies the background color of the
+  /// dropdown when it is open. If it is null, the current theme's
+  /// [ThemeData.canvasColor] will be used instead.
   DropdownButton({
     Key key,
     @required this.items,
@@ -787,6 +812,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.hint,
     this.disabledHint,
     @required this.onChanged,
+    this.onTap,
     this.elevation = 8,
     this.style,
     this.underline,
@@ -800,6 +826,9 @@ class DropdownButton<T> extends StatefulWidget {
     this.focusColor,
     this.focusNode,
     this.autofocus = false,
+    this.dropdownColor,
+    // When adding new arguments, consider adding similar arguments to
+    // DropdownButtonFormField.
   }) : assert(items == null || items.isEmpty || value == null ||
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
@@ -857,6 +886,14 @@ class DropdownButton<T> extends StatefulWidget {
   /// be displayed.
   /// {@endtemplate}
   final ValueChanged<T> onChanged;
+
+  /// Called when the dropdown button is tapped.
+  ///
+  /// This is distinct from [onChanged], which is called when the user
+  /// selects an item from the dropdown.
+  ///
+  /// The callback will not be invoked if the dropdown button is disabled.
+  final VoidCallback onTap;
 
   /// A builder to customize the dropdown buttons corresponding to the
   /// [DropdownMenuItem]s in [items].
@@ -1030,6 +1067,12 @@ class DropdownButton<T> extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// The background color of the dropdown.
+  ///
+  /// If it is not provided, the theme's [ThemeData.canvasColor] will be used
+  /// instead.
+  final Color dropdownColor;
+
   @override
   _DropdownButtonState<T> createState() => _DropdownButtonState<T>();
 }
@@ -1041,7 +1084,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   FocusNode _internalNode;
   FocusNode get focusNode => widget.focusNode ?? _internalNode;
   bool _hasPrimaryFocus = false;
-  Map<LocalKey, ActionFactory> _actionMap;
+  Map<Type, Action<Intent>> _actionMap;
   FocusHighlightMode _focusHighlightMode;
 
   // Only used if needed to create _internalNode.
@@ -1056,8 +1099,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (widget.focusNode == null) {
       _internalNode ??= _createFocusNode();
     }
-    _actionMap = <LocalKey, ActionFactory>{
-      ActivateAction.key: _createAction,
+    _actionMap = <Type, Action<Intent>>{
+      ActivateIntent: CallbackAction<ActivateIntent>(
+        onInvoke: (ActivateIntent intent) => _handleTap(),
+      ),
     };
     focusNode.addListener(_handleFocusChanged);
     final FocusManager focusManager = WidgetsBinding.instance.focusManager;
@@ -1170,6 +1215,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       style: _textStyle,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       itemHeight: widget.itemHeight,
+      dropdownColor: widget.dropdownColor,
     );
 
     Navigator.push(context, _dropdownRoute).then<void>((_DropdownRouteResult<T> newValue) {
@@ -1179,15 +1225,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       if (widget.onChanged != null)
         widget.onChanged(newValue.result);
     });
-  }
 
-  Action _createAction() {
-    return CallbackAction(
-      ActivateAction.key,
-      onInvoke: (FocusNode node, Intent intent) {
-        _handleTap();
-      },
-    );
+    if (widget.onTap != null) {
+      widget.onTap();
+    }
   }
 
   // When isDense is true, reduce the height of this button from _kMenuItemHeight to
@@ -1389,24 +1430,26 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 }
 
-/// A convenience widget that wraps a [DropdownButton] in a [FormField].
+/// A convenience widget that makes a [DropdownButton] into a [FormField].
 class DropdownButtonFormField<T> extends FormField<T> {
-  /// Creates a [DropdownButton] widget wrapped in an [InputDecorator] and
-  /// [FormField].
+  /// Creates a [DropdownButton] widget that is a [FormField], wrapped in an
+  /// [InputDecorator].
   ///
-  /// The [DropdownButton] [items] parameters must not be null.
+  /// For a description of the `onSaved`, `validator`, or `autovalidate`
+  /// parameters, see [FormField]. For the rest (other than [decoration]), see
+  /// [DropdownButton].
+  ///
+  /// The `items`, `elevation`, `iconSize`, `isDense`, `isExpanded`,
+  /// `autofocus`, and `decoration`  parameters must not be null.
   DropdownButtonFormField({
     Key key,
-    T value,
     @required List<DropdownMenuItem<T>> items,
     DropdownButtonBuilder selectedItemBuilder,
+    T value,
     Widget hint,
-    @required this.onChanged,
-    this.decoration = const InputDecoration(),
-    FormFieldSetter<T> onSaved,
-    FormFieldValidator<T> validator,
-    bool autovalidate = false,
     Widget disabledHint,
+    @required this.onChanged,
+    VoidCallback onTap,
     int elevation = 8,
     TextStyle style,
     Widget icon,
@@ -1416,6 +1459,14 @@ class DropdownButtonFormField<T> extends FormField<T> {
     bool isDense = true,
     bool isExpanded = false,
     double itemHeight,
+    Color focusColor,
+    FocusNode focusNode,
+    bool autofocus = false,
+    Color dropdownColor,
+    InputDecoration decoration,
+    FormFieldSetter<T> onSaved,
+    FormFieldValidator<T> validator,
+    bool autovalidate = false,
   }) : assert(items == null || items.isEmpty || value == null ||
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
@@ -1425,12 +1476,13 @@ class DropdownButtonFormField<T> extends FormField<T> {
                 'Either zero or 2 or more [DropdownMenuItem]s were detected '
                 'with the same value',
               ),
-       assert(decoration != null),
        assert(elevation != null),
        assert(iconSize != null),
        assert(isDense != null),
        assert(isExpanded != null),
-       assert(itemHeight == null || itemHeight > 0),
+       assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
+       assert(autofocus != null),
+       decoration = decoration ?? InputDecoration(focusColor: focusColor),
        super(
          key: key,
          onSaved: onSaved,
@@ -1439,31 +1491,46 @@ class DropdownButtonFormField<T> extends FormField<T> {
          autovalidate: autovalidate,
          builder: (FormFieldState<T> field) {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
-           final InputDecoration effectiveDecoration = decoration.applyDefaults(
+           final InputDecoration decorationArg =  decoration ?? InputDecoration(focusColor: focusColor);
+           final InputDecoration effectiveDecoration = decorationArg.applyDefaults(
              Theme.of(field.context).inputDecorationTheme,
            );
-           return InputDecorator(
-             decoration: effectiveDecoration.copyWith(errorText: field.errorText),
-             isEmpty: state.value == null,
-             child: DropdownButtonHideUnderline(
-               child: DropdownButton<T>(
-                 value: state.value,
-                 items: items,
-                 selectedItemBuilder: selectedItemBuilder,
-                 hint: hint,
-                 onChanged: onChanged == null ? null : state.didChange,
-                 disabledHint: disabledHint,
-                 elevation: elevation,
-                 style: style,
-                 icon: icon,
-                 iconDisabledColor: iconDisabledColor,
-                 iconEnabledColor: iconEnabledColor,
-                 iconSize: iconSize,
-                 isDense: isDense,
-                 isExpanded: isExpanded,
-                 itemHeight: itemHeight,
-               ),
-             ),
+           // An unfocusable Focus widget so that this widget can detect if its
+           // descendants have focus or not.
+           return Focus(
+             canRequestFocus: false,
+             skipTraversal: true,
+             child: Builder(builder: (BuildContext context) {
+               return InputDecorator(
+                 decoration: effectiveDecoration.copyWith(errorText: field.errorText),
+                 isEmpty: state.value == null,
+                 isFocused: Focus.of(context).hasFocus,
+                 child: DropdownButtonHideUnderline(
+                   child: DropdownButton<T>(
+                     items: items,
+                     selectedItemBuilder: selectedItemBuilder,
+                     value: state.value,
+                     hint: hint,
+                     disabledHint: disabledHint,
+                     onChanged: onChanged == null ? null : state.didChange,
+                     onTap: onTap,
+                     elevation: elevation,
+                     style: style,
+                     icon: icon,
+                     iconDisabledColor: iconDisabledColor,
+                     iconEnabledColor: iconEnabledColor,
+                     iconSize: iconSize,
+                     isDense: isDense,
+                     isExpanded: isExpanded,
+                     itemHeight: itemHeight,
+                     focusColor: focusColor,
+                     focusNode: focusNode,
+                     autofocus: autofocus,
+                     dropdownColor: dropdownColor,
+                   ),
+                 ),
+               );
+             }),
            );
          },
        );
@@ -1473,11 +1540,11 @@ class DropdownButtonFormField<T> extends FormField<T> {
 
   /// The decoration to show around the dropdown button form field.
   ///
-  /// By default, draws a horizontal line under the dropdown button field but can be
-  /// configured to show an icon, label, hint text, and error text.
+  /// By default, draws a horizontal line under the dropdown button field but
+  /// can be configured to show an icon, label, hint text, and error text.
   ///
-  /// Specify null to remove the decoration entirely (including the
-  /// extra padding introduced by the decoration to save space for the labels).
+  /// If not specified, an [InputDecorator] with the `focusColor` set to the
+  /// supplied `focusColor` (if any) will be used.
   final InputDecoration decoration;
 
   @override

@@ -22,7 +22,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('invert_colors_test.0.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('InvertColors and ColorFilter',  (WidgetTester tester) async {
     await tester.pumpWidget(const RepaintBoundary(
@@ -40,7 +40,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('invert_colors_test.1.png'),
     );
-  }, skip: isBrowser);
+  });
 }
 
 // Draws a rectangle sized by the parent widget with [color], [colorFilter],

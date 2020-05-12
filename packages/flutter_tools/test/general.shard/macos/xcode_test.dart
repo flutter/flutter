@@ -3,30 +3,28 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
-class MockPlatform extends Mock implements Platform {}
 
 void main() {
   ProcessManager processManager;
   Logger logger;
 
   setUp(() {
-    logger = MockLogger();
+    logger = BufferLogger.test();
     processManager = MockProcessManager();
   });
 
@@ -182,18 +180,51 @@ void main() {
       expect(getNameForSdk(SdkType.iPhoneSimulator), 'iphonesimulator');
       expect(getNameForSdk(SdkType.macOS), 'macosx');
     });
+
+    group('SDK location', () {
+      const String sdkroot = 'Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.2.sdk';
+
+      testWithoutContext('--show-sdk-path iphoneos', () async {
+        when(processManager.run(<String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path'])).thenAnswer((_) =>
+        Future<ProcessResult>.value(ProcessResult(1, 0, sdkroot, '')));
+
+        expect(await xcode.sdkLocation(SdkType.iPhone), sdkroot);
+      });
+
+      testWithoutContext('--show-sdk-path macosx', () async {
+        when(processManager.run(<String>['xcrun', '--sdk', 'macosx', '--show-sdk-path'])).thenAnswer((_) =>
+        Future<ProcessResult>.value(ProcessResult(1, 0, sdkroot, '')));
+
+        expect(await xcode.sdkLocation(SdkType.macOS), sdkroot);
+      });
+
+      testWithoutContext('--show-sdk-path fails', () async {
+        when(processManager.run(<String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path'])).thenAnswer((_) =>
+        Future<ProcessResult>.value(ProcessResult(1, 1, '', 'xcrun: error:')));
+
+        expect(() async => await xcode.sdkLocation(SdkType.iPhone),
+          throwsToolExit(message: 'Could not find SDK location'));
+      });
+    });
   });
 
   group('xcdevice', () {
     XCDevice xcdevice;
     MockXcode mockXcode;
+    MockArtifacts mockArtifacts;
+    MockCache mockCache;
 
     setUp(() {
       mockXcode = MockXcode();
+      mockArtifacts = MockArtifacts();
+      mockCache = MockCache();
       xcdevice = XCDevice(
         processManager: processManager,
         logger: logger,
         xcode: mockXcode,
+        platform: null,
+        artifacts: mockArtifacts,
+        cache: mockCache,
       );
     });
 
@@ -222,8 +253,7 @@ void main() {
     });
 
     group('available devices', () {
-      final FakePlatform macPlatform = FakePlatform.fromPlatform(const LocalPlatform());
-      macPlatform.operatingSystem = 'macos';
+      final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
 
       testWithoutContext('Xcode not installed', () async {
         when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
@@ -238,8 +268,8 @@ void main() {
         when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
             .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
-            .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '1']));
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
+            .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '2']));
 
         expect(await xcdevice.getAvailableTetheredIOSDevices(), isEmpty);
       });
@@ -343,7 +373,7 @@ void main() {
 ]
 ''';
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
             .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
         final List<IOSDevice> devices = await xcdevice.getAvailableTetheredIOSDevices();
         expect(devices, hasLength(3));
@@ -361,6 +391,18 @@ void main() {
         expect(devices[2].cpuArchitecture, DarwinArch.arm64); // Defaults to arm64 for unknown architecture.
       }, overrides: <Type, Generator>{
         Platform: () => macPlatform,
+      });
+
+      testWithoutContext('uses timeout', () async {
+        when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+
+        when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
+          .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
+
+        when(processManager.run(any))
+          .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, '[]', '')));
+        await xcdevice.getAvailableTetheredIOSDevices(timeout: const Duration(seconds: 20));
+        verify(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '20'])).called(1);
       });
 
       testUsingContext('ignores "Preparing debugger support for iPhone" error', () async {
@@ -393,7 +435,7 @@ void main() {
 ]
 ''';
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
             .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
         final List<IOSDevice> devices = await xcdevice.getAvailableTetheredIOSDevices();
         expect(devices, hasLength(1));
@@ -401,11 +443,54 @@ void main() {
       }, overrides: <Type, Generator>{
         Platform: () => macPlatform,
       });
+
+      testUsingContext('handles unknown architectures', () async {
+        when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+
+        when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
+          .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
+
+        const String devicesOutput = '''
+[
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "13.3 (17C54)",
+    "interface" : "usb",
+    "available" : true,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone8,1",
+    "identifier" : "d83d5bc53967baa0ee18626ba87b6254b2ab5418",
+    "architecture" : "armv7x",
+    "modelName" : "iPad 3 BOGUS",
+    "name" : "iPad"
+  },
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "13.3 (17C54)",
+    "interface" : "usb",
+    "available" : true,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone8,1",
+    "identifier" : "d83d5bc53967baa0ee18626ba87b6254b2ab5418",
+    "architecture" : "BOGUS",
+    "modelName" : "Future iPad",
+    "name" : "iPad"
+  }
+]
+''';
+
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
+          .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
+        final List<IOSDevice> devices = await xcdevice.getAvailableTetheredIOSDevices();
+        expect(devices[0].cpuArchitecture, DarwinArch.armv7);
+        expect(devices[1].cpuArchitecture, DarwinArch.arm64);
+      }, overrides: <Type, Generator>{
+        Platform: () => macPlatform,
+      });
     });
 
     group('diagnostics', () {
-      final FakePlatform macPlatform = FakePlatform.fromPlatform(const LocalPlatform());
-      macPlatform.operatingSystem = 'macos';
+      final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
 
       testWithoutContext('Xcode not installed', () async {
         when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
@@ -420,8 +505,8 @@ void main() {
         when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
             .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
-            .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '1']));
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
+            .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '2']));
 
         expect(await xcdevice.getDiagnostics(), isEmpty);
       });
@@ -453,7 +538,7 @@ void main() {
 ]
 ''';
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
             .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
         await xcdevice.getAvailableTetheredIOSDevices();
         final List<String> errors = await xcdevice.getDiagnostics();
@@ -555,7 +640,7 @@ void main() {
 ]
 ''';
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
             .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
         final List<String> errors = await xcdevice.getDiagnostics();
         expect(errors, hasLength(4));
@@ -570,5 +655,9 @@ void main() {
   });
 }
 
-class MockLogger extends Mock implements Logger {}
 class MockXcode extends Mock implements Xcode {}
+class MockProcessManager extends Mock implements ProcessManager {}
+class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
+class MockPlatform extends Mock implements Platform {}
+class MockArtifacts extends Mock implements Artifacts {}
+class MockCache extends Mock implements Cache {}

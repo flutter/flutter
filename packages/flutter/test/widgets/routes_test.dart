@@ -6,9 +6,9 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:mockito/mockito.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 final List<String> results = <String>[];
 
@@ -1242,6 +1242,80 @@ void main() {
       // It should refocus page one after pops.
       expect(focusNodeOnPageOne.hasFocus, isTrue);
     });
+
+    testWidgets('focus traversal is correct when popping mutiple pages simultaneously - with focused children', (WidgetTester tester) async {
+      // Regression test: https://github.com/flutter/flutter/issues/48903
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(MaterialApp(
+        navigatorKey: navigatorKey,
+        home: const Text('dummy1'),
+      ));
+      final Element textOnPageOne = tester.element(find.text('dummy1'));
+      final FocusScopeNode focusNodeOnPageOne = FocusScope.of(textOnPageOne);
+      expect(focusNodeOnPageOne.hasFocus, isTrue);
+
+      // Pushes one page.
+      navigatorKey.currentState.push<void>(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) => const Material(child: TextField()),
+          )
+      );
+      await tester.pumpAndSettle();
+
+      final Element textOnPageTwo = tester.element(find.byType(TextField));
+      final FocusScopeNode focusNodeOnPageTwo = FocusScope.of(textOnPageTwo);
+      // The focus should be on second page.
+      expect(focusNodeOnPageOne.hasFocus, isFalse);
+      expect(focusNodeOnPageTwo.hasFocus, isTrue);
+
+      // Move the focus to another node.
+      focusNodeOnPageTwo.nextFocus();
+      await tester.pumpAndSettle();
+      expect(focusNodeOnPageTwo.hasFocus, isTrue);
+      expect(focusNodeOnPageTwo.hasPrimaryFocus, isFalse);
+
+      // Pushes another page.
+      navigatorKey.currentState.push<void>(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) => const Text('dummy3'),
+          )
+      );
+      await tester.pumpAndSettle();
+      final Element textOnPageThree = tester.element(find.text('dummy3'));
+      final FocusScopeNode focusNodeOnPageThree = FocusScope.of(textOnPageThree);
+      // The focus should be on third page.
+      expect(focusNodeOnPageOne.hasFocus, isFalse);
+      expect(focusNodeOnPageTwo.hasFocus, isFalse);
+      expect(focusNodeOnPageThree.hasFocus, isTrue);
+
+      // Pops two pages simultaneously.
+      navigatorKey.currentState.popUntil((Route<void> route) => route.isFirst);
+      await tester.pumpAndSettle();
+      // It should refocus page one after pops.
+      expect(focusNodeOnPageOne.hasFocus, isTrue);
+    });
+
+    testWidgets('child with local history can be disposed', (WidgetTester tester) async {
+      // Regression test: https://github.com/flutter/flutter/issues/52478
+      await tester.pumpWidget(MaterialApp(
+        home: WidgetWithLocalHistory(),
+      ));
+
+      final WidgetWithLocalHistoryState state = tester.state(find.byType(WidgetWithLocalHistory));
+      state.addLocalHistory();
+      // Waits for modal route to update its internal state;
+      await tester.pump();
+
+      // Pumps a new widget to dispose WidgetWithLocalHistory. This should cause
+      // it to remove the local history entry from modal route during
+      // finalizeTree.
+      await tester.pumpWidget(const MaterialApp(
+        home: Text('dummy'),
+      ));
+      // Waits for modal route to update its internal state;
+      await tester.pump();
+      expect(tester.takeException(), null);
+    });
   });
 }
 
@@ -1336,5 +1410,31 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
       scopesRoute: true,
       explicitChildNodes: true,
     );
+  }
+}
+
+class WidgetWithLocalHistory extends StatefulWidget {
+  @override
+  WidgetWithLocalHistoryState createState() => WidgetWithLocalHistoryState();
+}
+
+class WidgetWithLocalHistoryState extends State<WidgetWithLocalHistory> {
+  LocalHistoryEntry _localHistory;
+
+  void addLocalHistory() {
+    final ModalRoute<dynamic> route = ModalRoute.of(context);
+    _localHistory = LocalHistoryEntry();
+    route.addLocalHistoryEntry(_localHistory);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _localHistory.remove();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text('dummy');
   }
 }

@@ -80,21 +80,24 @@
                                     "type": "object",
                                     "additionalProperties": false,
                                     "properties": {
-                                        "pluginClass": {"type": "string"}
+                                        "pluginClass": {"type": "string"},
+                                        "dartPluginClass": {"type": "string"}
                                     }
                                 },
                                 "macos": {
                                     "type": "object",
                                     "additionalProperties": false,
                                     "properties": {
-                                        "pluginClass": {"type": "string"}
+                                        "pluginClass": {"type": "string"},
+                                        "dartPluginClass": {"type": "string"}
                                     }
                                 },
                                 "windows": {
                                     "type": "object",
                                     "additionalProperties": false,
                                     "properties": {
-                                        "pluginClass": {"type": "string"}
+                                        "pluginClass": {"type": "string"},
+                                        "dartPluginClass": {"type": "string"}
                                     }
                                 }
                             }

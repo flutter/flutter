@@ -105,7 +105,7 @@ void main() {
     expect(log, <String>['badListener', 'listener1', 'listener2']);
     expect(tester.takeException(), isNullThrownError);
     log.clear();
-  }, skip: isBrowser);
+  });
 
   test('ChangeNotifier with mutating listener', () {
     final TestNotifier test = TestNotifier();

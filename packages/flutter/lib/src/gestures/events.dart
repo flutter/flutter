@@ -30,7 +30,7 @@ const int kPrimaryButton = 0x01;
 /// It is equivalent to:
 ///
 ///  * [kPrimaryStylusButton]: The stylus contacts the screen.
-///  * [kSecondaryMouseButton]: The primary mouse button.
+///  * [kSecondaryMouseButton]: The secondary mouse button.
 ///
 /// See also:
 ///
@@ -196,7 +196,7 @@ bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == 
 ///
 ///  * [Window.devicePixelRatio], which defines the device's current resolution.
 @immutable
-abstract class PointerEvent extends Diagnosticable {
+abstract class PointerEvent with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const PointerEvent({
@@ -366,7 +366,7 @@ abstract class PointerEvent extends Diagnosticable {
   /// for this pointer, in logical pixels.
   final double radiusMin;
 
-  /// The minimum value that could be reported for [radiusMajor] and [radiusMinor]
+  /// The maximum value that could be reported for [radiusMajor] and [radiusMinor]
   /// for this pointer, in logical pixels.
   final double radiusMax;
 

@@ -11,6 +11,7 @@ import 'lsq_solver.dart';
 export 'dart:ui' show Offset;
 
 /// A velocity in two dimensions.
+@immutable
 class Velocity {
   /// Creates a velocity.
   ///

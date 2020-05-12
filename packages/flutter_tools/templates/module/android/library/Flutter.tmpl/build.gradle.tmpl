@@ -45,11 +45,5 @@ flutter {
 }
 
 dependencies {
-    {{#androidX}}
     implementation 'androidx.appcompat:appcompat:1.0.2'
-    {{/androidX}}
-    {{^androidX}}
-    implementation 'com.android.support:support-v13:27.1.1'
-    implementation 'com.android.support:support-annotations:27.1.1'
-    {{/androidX}}
 }

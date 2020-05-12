@@ -31,7 +31,7 @@ class _TextSpanEditingController extends TextEditingController {
 
   @override
   TextSpan buildTextSpan({TextStyle style ,bool withComposing}) {
-    // TODO(chunhtai): Implement composing.
+    // This does not care about composing.
     return TextSpan(
       style: style,
       children: <TextSpan>[_textSpan],
@@ -40,7 +40,8 @@ class _TextSpanEditingController extends TextEditingController {
 
   @override
   set text(String newText) {
-    // TODO(chunhtai): Implement value editing.
+    // This should never be reached.
+    throw UnimplementedError();
   }
 }
 
@@ -78,6 +79,8 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           renderEditable.selectWordsInRange(
             from: details.globalPosition - details.offsetFromOrigin,
             to: details.globalPosition,
@@ -99,6 +102,8 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           renderEditable.selectPosition(cause: SelectionChangedCause.tap);
           break;
       }
@@ -120,6 +125,8 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           renderEditable.selectWord(cause: SelectionChangedCause.longPress);
           Feedback.forLongPress(_state.context);
           break;
@@ -494,6 +501,8 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         return;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
       // Do nothing.
     }
   }
@@ -567,6 +576,8 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         forcePressEnabled = false;
         textSelectionControls = materialTextSelectionControls;
         paintCursorAboveText = false;
@@ -591,7 +602,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         showCursor: widget.showCursor,
         controller: _controller,
         focusNode: focusNode,
-        strutStyle: widget.strutStyle ?? StrutStyle.disabled,
+        strutStyle: widget.strutStyle ?? const StrutStyle(),
         textAlign: widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
         textDirection: widget.textDirection,
         textScaleFactor: widget.textScaleFactor,

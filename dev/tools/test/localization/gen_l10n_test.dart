@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart';
@@ -14,9 +15,9 @@ import '../../localization/localizations_utils.dart';
 
 import '../common.dart';
 
-final String defaultArbPathString = path.join('lib', 'l10n');
-const String defaultTemplateArbFileName = 'app_en_US.arb';
-const String defaultOutputFileString = 'output-localization-file';
+final String defaultL10nPathString = path.join('lib', 'l10n');
+const String defaultTemplateArbFileName = 'app_en.arb';
+const String defaultOutputFileString = 'output-localization-file.dart';
 const String defaultClassNameString = 'AppLocalizations';
 const String singleMessageArbFileString = '''
 {
@@ -25,7 +26,17 @@ const String singleMessageArbFileString = '''
     "description": "Title for the application"
   }
 }''';
-
+const String twoMessageArbFileString = '''
+{
+  "title": "Title",
+  "@title": {
+    "description": "Title for the application"
+  },
+  "subtitle": "Subtitle",
+  "@subtitle": {
+    "description": "Subtitle for the application"
+  }
+}''';
 const String esArbFileName = 'app_es.arb';
 const String singleEsMessageArbFileString = '''
 {
@@ -52,41 +63,58 @@ void main() {
     fs = MemoryFileSystem(
       style: Platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix
     );
+    precacheLanguageAndRegionTags();
   });
 
   group('Setters', () {
-    test('setL10nDirectory fails if the directory does not exist', () {
+    test('setInputDirectory fails if the directory does not exist', () {
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
       try {
-        generator.setL10nDirectory('lib');
+        generator.setInputDirectory('lib');
       } on FileSystemException catch (e) {
         expect(e.message, contains('Make sure that the correct path was provided'));
         return;
       }
 
       fail(
-        'Attempting to set LocalizationsGenerator.setL10nDirectory should fail if the '
+        'LocalizationsGenerator.setInputDirectory should fail if the '
         'directory does not exist.'
       );
     });
 
-    test('setL10nDirectory fails if input string is null', () {
+    test('setInputDirectory fails if input string is null', () {
       _standardFlutterDirectoryL10nSetup(fs);
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
       try {
-        generator.setL10nDirectory(null);
+        generator.setInputDirectory(null);
       } on L10nException catch (e) {
         expect(e.message, contains('cannot be null'));
         return;
       }
 
       fail(
-        'Attempting to set LocalizationsGenerator.setL10nDirectory should fail if the '
-        'the input string is null.'
+        'LocalizationsGenerator.setInputDirectory should fail if the '
+        'input string is null.'
       );
     });
 
-    test('setTemplateArbFile fails if l10nDirectory is null', () {
+    test('setOutputDirectory fails if output string is null', () {
+      _standardFlutterDirectoryL10nSetup(fs);
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.setOutputDirectory(null);
+      } on L10nException catch (e) {
+        expect(e.message, contains('cannot be null'));
+        return;
+      }
+
+      fail(
+        'LocalizationsGenerator.setOutputDirectory should fail if the '
+        'input string is null.'
+      );
+    });
+
+    test('setTemplateArbFile fails if inputDirectory is null', () {
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
       try {
         generator.setTemplateArbFile(defaultTemplateArbFileName);
@@ -96,8 +124,8 @@ void main() {
       }
 
       fail(
-        'Attempting to set LocalizationsGenerator.setTemplateArbFile should fail if the '
-        'the l10nDirectory is null.'
+        'LocalizationsGenerator.setTemplateArbFile should fail if the '
+        'inputDirectory is not specified.'
       );
     });
 
@@ -112,8 +140,8 @@ void main() {
       }
 
       fail(
-        'Attempting to set LocalizationsGenerator.setTemplateArbFile should fail if the '
-        'the l10nDirectory is null.'
+        'LocalizationsGenerator.setTemplateArbFile should fail if the '
+        'templateArbFileName passed in is null.'
       );
     });
 
@@ -128,24 +156,24 @@ void main() {
       }
 
       fail(
-        'Attempting to set LocalizationsGenerator.setTemplateArbFile should fail if the '
-        'the input string is null.'
+        'LocalizationsGenerator.setTemplateArbFile should fail if the '
+        'input string is null.'
       );
     });
 
-    test('setOutputFile fails if input string is null', () {
+    test('setBaseOutputFile fails if input string is null', () {
       _standardFlutterDirectoryL10nSetup(fs);
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
       try {
-        generator.setOutputFile(null);
+        generator.setBaseOutputFile(null);
       } on L10nException catch (e) {
         expect(e.message, contains('cannot be null'));
         return;
       }
 
       fail(
-        'Attempting to set LocalizationsGenerator.setOutputFile should fail if the '
-        'the input string is null.'
+        'LocalizationsGenerator.setBaseOutputFile should fail if the '
+        'input string is null.'
       );
     });
 
@@ -160,8 +188,8 @@ void main() {
       }
 
       fail(
-        'Attempting to set LocalizationsGenerator.className should fail if the '
-        'the input string is null.'
+        'LocalizationsGenerator.className should fail if the '
+        'input string is null.'
       );
     });
 
@@ -171,9 +199,10 @@ void main() {
         _standardFlutterDirectoryL10nSetup(fs);
         generator = LocalizationsGenerator(fs);
         try {
-          generator.setL10nDirectory(defaultArbPathString);
+          generator.setInputDirectory(defaultL10nPathString);
+          generator.setOutputDirectory(defaultL10nPathString);
           generator.setTemplateArbFile(defaultTemplateArbFileName);
-          generator.setOutputFile(defaultOutputFileString);
+          generator.setBaseOutputFile(defaultOutputFileString);
         } on L10nException catch (e) {
           throw TestFailure('Unexpected failure during test setup: ${e.message}');
         }
@@ -187,8 +216,8 @@ void main() {
           return;
         }
         fail(
-          'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid Dart class name.'
+          'LocalizationsGenerator.className should fail if the '
+          'input string is not a valid Dart class name.'
         );
       });
 
@@ -200,8 +229,8 @@ void main() {
           return;
         }
         fail(
-          'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid public Dart class name.'
+          'LocalizationsGenerator.className should fail if the '
+          'input string is not a valid public Dart class name.'
         );
       });
 
@@ -213,8 +242,8 @@ void main() {
           return;
         }
         fail(
-          'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid public Dart class name.'
+          'LocalizationsGenerator.className should fail if the '
+          'input string is not a valid public Dart class name.'
         );
       });
 
@@ -226,14 +255,306 @@ void main() {
           return;
         }
         fail(
-          'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid public Dart class name.'
+          'LocalizationsGenerator.className should fail if the '
+          'input string is not a valid public Dart class name.'
         );
       });
     });
   });
 
-  group('parseArbFiles', () {
+  test('correctly adds a headerString when it is set', () {
+    _standardFlutterDirectoryL10nSetup(fs);
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator.initialize(
+        inputPathString: defaultL10nPathString,
+        outputPathString: defaultL10nPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        headerString: '/// Sample header',
+      );
+    } on L10nException catch (e) {
+      fail('Setting a header through a String should not fail: \n${e.message}');
+    }
+
+    expect(generator.header, '/// Sample header');
+  });
+
+  test('correctly adds a headerFile when it is set', () {
+    fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true)
+      ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
+      ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString)
+      ..childFile('header.txt').writeAsStringSync('/// Sample header in a text file');
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator.initialize(
+        inputPathString: defaultL10nPathString,
+        outputPathString: defaultL10nPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        headerFile: 'header.txt',
+      );
+    } on L10nException catch (e) {
+      fail('Setting a header through a file should not fail: \n${e.message}');
+    }
+
+    expect(generator.header, '/// Sample header in a text file');
+  });
+
+  test('correctly creates an unimplemented messages file', () {
+    fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true)
+      ..childFile(defaultTemplateArbFileName).writeAsStringSync(twoMessageArbFileString)
+      ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator
+        ..initialize(
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+        ..loadResources()
+        ..writeOutputFiles()
+        ..outputUnimplementedMessages(path.join('lib', 'l10n', 'unimplemented_message_translations.json'));
+    } on L10nException catch (e) {
+      fail('Generating output should not fail: \n${e.message}');
+    }
+
+    final File unimplementedOutputFile = fs.file(
+      path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
+    );
+    final String unimplementedOutputString = unimplementedOutputFile.readAsStringSync();
+    try {
+      // Since ARB file is essentially JSON, decoding it should not fail.
+      json.decode(unimplementedOutputString);
+    } on Exception {
+      fail('Parsing arb file should not fail');
+    }
+    expect(unimplementedOutputString, contains('es'));
+    expect(unimplementedOutputString, contains('subtitle'));
+  });
+
+  test('uses inputPathString as outputPathString when the outputPathString is null', () {
+    _standardFlutterDirectoryL10nSetup(fs);
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator
+        ..initialize(
+          inputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+        ..loadResources()
+        ..writeOutputFiles();
+    } on L10nException catch (e) {
+      fail('Generating output should not fail: \n${e.message}');
+    }
+
+    final Directory outputDirectory = fs.directory('lib').childDirectory('l10n');
+    expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_en.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
+  });
+
+  test('correctly generates output files in non-default output directory if it already exists', () {
+  final Directory l10nDirectory = fs.currentDirectory
+    .childDirectory('lib')
+    .childDirectory('l10n')
+    ..createSync(recursive: true);
+  // Create the directory 'lib/l10n/output'.
+  l10nDirectory.childDirectory('output');
+
+  l10nDirectory
+    .childFile(defaultTemplateArbFileName)
+    .writeAsStringSync(singleMessageArbFileString);
+  l10nDirectory
+    .childFile(esArbFileName)
+    .writeAsStringSync(singleEsMessageArbFileString);
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator
+        ..initialize(
+          inputPathString: defaultL10nPathString,
+          outputPathString: path.join('lib', 'l10n', 'output'),
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+        ..loadResources()
+        ..writeOutputFiles();
+    } on L10nException catch (e) {
+      fail('Generating output should not fail: \n${e.message}');
+    }
+
+    final Directory outputDirectory = fs.directory('lib').childDirectory('l10n').childDirectory('output');
+    expect(outputDirectory.existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_en.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
+  });
+
+  test('correctly creates output directory if it does not exist and writes files in it', () {
+    _standardFlutterDirectoryL10nSetup(fs);
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator
+        ..initialize(
+          inputPathString: defaultL10nPathString,
+          outputPathString: path.join('lib', 'l10n', 'output'),
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+        ..loadResources()
+        ..writeOutputFiles();
+    } on L10nException catch (e) {
+      fail('Generating output should not fail: \n${e.message}');
+    }
+
+    final Directory outputDirectory = fs.directory('lib').childDirectory('l10n').childDirectory('output');
+    expect(outputDirectory.existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_en.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
+  });
+
+  test('creates list of inputs and outputs when file path is specified', () {
+    _standardFlutterDirectoryL10nSetup(fs);
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator
+        ..initialize(
+          inputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          inputsAndOutputsListPath: defaultL10nPathString,
+        )
+        ..loadResources()
+        ..writeOutputFiles();
+    } on L10nException catch (e) {
+      fail('Generating output should not fail: \n${e.message}');
+    }
+
+    final File inputsAndOutputsList = fs
+      .directory('lib')
+      .childDirectory('l10n')
+      .childFile('gen_l10n_inputs_and_outputs.json');
+    expect(inputsAndOutputsList.existsSync(), isTrue);
+
+    final Map<String, dynamic> jsonResult = json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
+    expect(jsonResult.containsKey('inputs'), isTrue);
+    final List<dynamic> inputList = jsonResult['inputs'] as List<dynamic>;
+    expect(inputList, contains(fs.path.absolute('lib', 'l10n', 'app_en.arb')));
+    expect(inputList, contains(fs.path.absolute('lib', 'l10n', 'app_es.arb')));
+
+    expect(jsonResult.containsKey('outputs'), isTrue);
+    final List<dynamic> outputList = jsonResult['outputs'] as List<dynamic>;
+    expect(outputList, contains(fs.path.absolute('lib', 'l10n', 'output-localization-file.dart')));
+    expect(outputList, contains(fs.path.absolute('lib', 'l10n', 'output-localization-file_en.dart')));
+    expect(outputList, contains(fs.path.absolute('lib', 'l10n', 'output-localization-file_es.dart')));
+  });
+
+  test('setting both a headerString and a headerFile should fail', () {
+    fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true)
+      ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
+      ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString)
+      ..childFile('header.txt').writeAsStringSync('/// Sample header in a text file');
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator.initialize(
+        inputPathString: defaultL10nPathString,
+        outputPathString: defaultL10nPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        headerString: '/// Sample header for localizations file.',
+        headerFile: 'header.txt',
+      );
+    } on L10nException catch (e) {
+      expect(e.message, contains('Cannot accept both header and header file arguments'));
+      return;
+    }
+
+    fail('Setting both headerFile and headerString should fail');
+  });
+
+  test('setting a headerFile that does not exist should fail', () {
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile(defaultTemplateArbFileName)
+      .writeAsStringSync(singleMessageArbFileString);
+    l10nDirectory.childFile(esArbFileName)
+      .writeAsStringSync(singleEsMessageArbFileString);
+    l10nDirectory.childFile('header.txt')
+      .writeAsStringSync('/// Sample header in a text file');
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator.initialize(
+        inputPathString: defaultL10nPathString,
+        outputPathString: defaultL10nPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        headerFile: 'header.tx', // Intentionally spelled incorrectly
+      );
+    } on L10nException catch (e) {
+      expect(e.message, contains('Failed to read header file'));
+      return;
+    }
+
+    fail('Setting headerFile that does not exist should fail');
+  });
+
+  test('setting useDefferedLoading to null should fail', () {
+    _standardFlutterDirectoryL10nSetup(fs);
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator.initialize(
+        inputPathString: defaultL10nPathString,
+        outputPathString: defaultL10nPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        headerString: '/// Sample header',
+        useDeferredLoading: null,
+      );
+    } on L10nException catch (e) {
+      expect(e.message, contains('useDeferredLoading argument cannot be null.'));
+      return;
+    }
+
+    fail('Setting useDefferedLoading to null should fail');
+  });
+
+  group('loadResources', () {
     test('correctly initializes supportedLocales and supportedLanguageCodes properties', () {
       _standardFlutterDirectoryL10nSetup(fs);
 
@@ -241,17 +562,18 @@ void main() {
       try {
         generator = LocalizationsGenerator(fs);
         generator.initialize(
-          l10nDirectoryPath: defaultArbPathString,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.parseArbFiles();
+        generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
-      expect(generator.supportedLocales.contains(LocaleInfo.fromString('en_US')), true);
+      expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('es')), true);
     });
 
@@ -263,24 +585,25 @@ void main() {
         .writeAsStringSync(singleZhMessageArbFileString);
       l10nDirectory.childFile('app_es.arb')
         .writeAsStringSync(singleEsMessageArbFileString);
-      l10nDirectory.childFile('app_en_US.arb')
+      l10nDirectory.childFile('app_en.arb')
         .writeAsStringSync(singleMessageArbFileString);
 
       LocalizationsGenerator generator;
       try {
         generator = LocalizationsGenerator(fs);
         generator.initialize(
-          l10nDirectoryPath: defaultArbPathString,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.parseArbFiles();
+        generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
-      expect(generator.supportedLocales.first, LocaleInfo.fromString('en_US'));
+      expect(generator.supportedLocales.first, LocaleInfo.fromString('en'));
       expect(generator.supportedLocales.elementAt(1), LocaleInfo.fromString('es'));
       expect(generator.supportedLocales.elementAt(2), LocaleInfo.fromString('zh'));
     });
@@ -288,7 +611,7 @@ void main() {
     test('adds preferred locales to the top of supportedLocales and supportedLanguageCodes', () {
       final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
         ..createSync(recursive: true);
-      l10nDirectory.childFile('app_en_US.arb')
+      l10nDirectory.childFile('app_en.arb')
         .writeAsStringSync(singleMessageArbFileString);
       l10nDirectory.childFile('app_es.arb')
         .writeAsStringSync(singleEsMessageArbFileString);
@@ -300,20 +623,21 @@ void main() {
       try {
         generator = LocalizationsGenerator(fs);
         generator.initialize(
-          l10nDirectoryPath: defaultArbPathString,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
           preferredSupportedLocaleString: preferredSupportedLocaleString,
         );
-        generator.parseArbFiles();
+        generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
       expect(generator.supportedLocales.first, LocaleInfo.fromString('zh'));
       expect(generator.supportedLocales.elementAt(1), LocaleInfo.fromString('es'));
-      expect(generator.supportedLocales.elementAt(2), LocaleInfo.fromString('en_US'));
+      expect(generator.supportedLocales.elementAt(2), LocaleInfo.fromString('en'));
     });
 
     test(
@@ -322,25 +646,26 @@ void main() {
       () {
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
           ..createSync(recursive: true);
-        l10nDirectory.childFile('app_en_US.arb')
+        l10nDirectory.childFile('app_en.arb')
           .writeAsStringSync(singleMessageArbFileString);
         l10nDirectory.childFile('app_es.arb')
           .writeAsStringSync(singleEsMessageArbFileString);
         l10nDirectory.childFile('app_zh.arb')
           .writeAsStringSync(singleZhMessageArbFileString);
 
-        const String preferredSupportedLocaleString = '[44, "en_US"]';
+        const String preferredSupportedLocaleString = '[44, "en"]';
         LocalizationsGenerator generator;
         try {
           generator = LocalizationsGenerator(fs);
           generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
             preferredSupportedLocaleString: preferredSupportedLocaleString,
           );
-          generator.parseArbFiles();
+          generator.loadResources();
         } on L10nException catch (e) {
           expect(
             e.message,
@@ -363,7 +688,7 @@ void main() {
       () {
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
           ..createSync(recursive: true);
-        l10nDirectory.childFile('app_en_US.arb')
+        l10nDirectory.childFile('app_en.arb')
           .writeAsStringSync(singleMessageArbFileString);
         l10nDirectory.childFile('app_es.arb')
           .writeAsStringSync(singleEsMessageArbFileString);
@@ -375,13 +700,14 @@ void main() {
         try {
           generator = LocalizationsGenerator(fs);
           generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
             preferredSupportedLocaleString: preferredSupportedLocaleString,
           );
-          generator.parseArbFiles();
+          generator.loadResources();
         } on L10nException catch (e) {
           expect(
             e.message,
@@ -405,32 +731,27 @@ void main() {
         .writeAsStringSync(singleZhMessageArbFileString);
       l10nDirectory.childFile('app_es.arb')
         .writeAsStringSync(singleEsMessageArbFileString);
-      l10nDirectory.childFile('app_en_US.arb')
+      l10nDirectory.childFile('app_en.arb')
         .writeAsStringSync(singleMessageArbFileString);
 
       LocalizationsGenerator generator;
       try {
         generator = LocalizationsGenerator(fs);
         generator.initialize(
-          l10nDirectoryPath: defaultArbPathString,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.parseArbFiles();
+        generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
-      if (Platform.isWindows) {
-        expect(generator.arbPathStrings.first, r'lib\l10n\app_en_US.arb');
-        expect(generator.arbPathStrings.elementAt(1), r'lib\l10n\app_es.arb');
-        expect(generator.arbPathStrings.elementAt(2), r'lib\l10n\app_zh.arb');
-      } else {
-        expect(generator.arbPathStrings.first, 'lib/l10n/app_en_US.arb');
-        expect(generator.arbPathStrings.elementAt(1), 'lib/l10n/app_es.arb');
-        expect(generator.arbPathStrings.elementAt(2), 'lib/l10n/app_zh.arb');
-      }
+      expect(generator.arbPathStrings.first, path.join('lib', 'l10n', 'app_en.arb'));
+      expect(generator.arbPathStrings.elementAt(1), path.join('lib', 'l10n', 'app_es.arb'));
+      expect(generator.arbPathStrings.elementAt(2), path.join('lib', 'l10n', 'app_zh.arb'));
     });
 
     test('correctly parses @@locale property in arb file', () {
@@ -463,14 +784,15 @@ void main() {
       try {
         generator = LocalizationsGenerator(fs);
         generator.initialize(
-          l10nDirectoryPath: defaultArbPathString,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: 'first_file.arb',
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.parseArbFiles();
+        generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
@@ -507,14 +829,15 @@ void main() {
       try {
         generator = LocalizationsGenerator(fs);
         generator.initialize(
-          l10nDirectoryPath: defaultArbPathString,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: 'app_es.arb',
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.parseArbFiles();
+        generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
       // @@locale property should hold higher priority
@@ -533,12 +856,13 @@ void main() {
       try {
         final LocalizationsGenerator generator = LocalizationsGenerator(fs);
         generator.initialize(
-          l10nDirectoryPath: defaultArbPathString,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: 'app.arb',
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.parseArbFiles();
+        generator.loadResources();
       } on L10nException catch (e) {
         expect(e.message, contains('locale could not be determined'));
         return;
@@ -567,14 +891,15 @@ void main() {
       try {
         final LocalizationsGenerator generator = LocalizationsGenerator(fs);
         generator.initialize(
-          l10nDirectoryPath: defaultArbPathString,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: 'app_en.arb',
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.parseArbFiles();
+        generator.loadResources();
       } on L10nException catch (e) {
-        expect(e.message, contains('Multiple arb files with the same locale detected'));
+        expect(e.message, contains("Multiple arb files with the same 'en' locale detected"));
         return;
       }
 
@@ -583,13 +908,138 @@ void main() {
         'should fail'
       );
     });
+
+    test('throws when the base locale does not exist', () {
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile('app_en_US.arb')
+        .writeAsStringSync(singleMessageArbFileString);
+
+      try {
+        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+        generator.initialize(
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: 'app_en_US.arb',
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.loadResources();
+      } on L10nException catch (e) {
+        expect(e.message, contains('Arb file for a fallback, en, does not exist'));
+        return;
+      }
+
+      fail(
+        'Since en_US.arb is specified, but en.arb is not, '
+        'the tool should throw an error.'
+      );
+    });
   });
 
-  group('generateClassMethods', () {
+  group('writeOutputFiles', () {
+    test('should generate a file per language', () {
+      const String singleEnCaMessageArbFileString = '''
+{
+  "title": "Canadian Title"
+}''';
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
+        ..childFile('app_en_CA.arb').writeAsStringSync(singleEnCaMessageArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.loadResources();
+        generator.writeOutputFiles();
+      } on Exception catch (e) {
+        fail('Generating output files should not fail: $e');
+      }
+
+      expect(fs.isFileSync(path.join('lib', 'l10n', 'output-localization-file_en.dart')), true);
+      expect(fs.isFileSync(path.join('lib', 'l10n', 'output-localization-file_en_US.dart')), false);
+
+      final String englishLocalizationsFile = fs.file(
+        path.join('lib', 'l10n', 'output-localization-file_en.dart')
+      ).readAsStringSync();
+      expect(englishLocalizationsFile, contains('class AppLocalizationsEnCa extends AppLocalizationsEn'));
+      expect(englishLocalizationsFile, contains('class AppLocalizationsEn extends AppLocalizations'));
+    });
+
+    test('language imports are sorted when preferredSupportedLocaleString is given', () {
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
+        ..childFile('app_zh.arb').writeAsStringSync(singleZhMessageArbFileString)
+        ..childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
+
+      const String preferredSupportedLocaleString = '["zh"]';
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          preferredSupportedLocaleString: preferredSupportedLocaleString,
+        );
+        generator.loadResources();
+        generator.writeOutputFiles();
+      } on Exception catch (e) {
+        fail('Generating output files should not fail: $e');
+      }
+
+      final String localizationsFile = fs.file(
+        path.join('lib', 'l10n', defaultOutputFileString),
+      ).readAsStringSync();
+      expect(localizationsFile, contains(
+'''
+import 'output-localization-file_en.dart';
+import 'output-localization-file_es.dart';
+import 'output-localization-file_zh.dart';
+'''));
+    });
+
+    test('imports are deferred when useDeferredImports are set', () {
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          useDeferredLoading: true,
+        );
+        generator.loadResources();
+        generator.writeOutputFiles();
+      } on Exception catch (e) {
+        fail('Generating output files should not fail: $e');
+      }
+
+      final String localizationsFile = fs.file(
+        path.join('lib', 'l10n', defaultOutputFileString),
+      ).readAsStringSync();
+      expect(localizationsFile, contains(
+'''
+import 'output-localization-file_en.dart' deferred as output-localization-file_en;
+'''));
+    });
+
     group('DateTime tests', () {
       test('throws an exception when improperly formatted date is passed in', () {
         const String singleDateMessageArbFileString = '''
 {
+  "@@locale": "en",
   "springBegins": "Spring begins on {springStartDate}",
   "@springBegins": {
       "description": "The first day of spring",
@@ -609,13 +1059,14 @@ void main() {
         final LocalizationsGenerator generator = LocalizationsGenerator(fs);
         try {
           generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
           expect(e.message, contains('asdf'));
           expect(e.message, contains('springStartDate'));
@@ -647,212 +1098,20 @@ void main() {
         final LocalizationsGenerator generator = LocalizationsGenerator(fs);
         try {
           generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
           expect(e.message, contains('the "format" attribute needs to be set'));
           return;
         }
 
         fail('Improper date formatting should throw an exception');
-      });
-
-      test('correctly generates simple message with date along with other placeholders', () {
-        const String singleDateMessageArbFileString = '''
-{
-  "springGreetings": "Since it's {springStartDate}, it's finally spring! {helloWorld}!",
-  "@springGreetings": {
-      "description": "A realization that it's finally the spring season, followed by a greeting.",
-      "placeholders": {
-          "springStartDate": {
-              "type": "DateTime",
-              "format": "yMMMMEEEEd"
-          },
-          "helloWorld": {}
-      }
-  }
-}''';
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(singleDateMessageArbFileString);
-
-        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-        try {
-          generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-          );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
-        } on Exception catch (e) {
-          fail('Parsing template arb file should succeed: \n$e');
-        }
-
-        expect(generator.classMethods, isNotEmpty);
-        expect(
-          generator.classMethods.first,
-          r'''
-  String springGreetings(DateTime springStartDate, Object helloWorld) {
-    final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
-    final String springStartDateString = springStartDateDateFormat.format(springStartDate);
-
-    String springGreetings(Object springStartDate, Object helloWorld) {
-      return Intl.message(
-        "Since it's ${springStartDate}, it's finally spring! ${helloWorld}!",
-        locale: _localeName,
-        name: 'springGreetings',
-        desc: "A realization that it's finally the spring season, followed by a greeting.",
-        args: <Object>[springStartDate, helloWorld]
-      );
-    }
-    return springGreetings(springStartDateString, helloWorld);
-  }
-''');
-      });
-    });
-
-    group('Number tests', () {
-      test('correctly adds optional named parameters to numbers', () {
-        const Set<String> numberFormatsWithNamedParameters = <String>{
-          'compact',
-          'compactCurrency',
-          'compactSimpleCurrency',
-          'compactLong',
-          'currency',
-          'decimalPercentPattern',
-          'simpleCurrency',
-        };
-
-        for (final String numberFormat in numberFormatsWithNamedParameters) {
-          final String singleNumberMessage = '''
-{
-  "courseCompletion": "You have completed {progress} of the course.",
-  "@courseCompletion": {
-    "description": "The amount of progress the student has made in their class.",
-    "placeholders": {
-      "progress": {
-        "type": "double",
-        "format": "$numberFormat",
-        "optionalParameters": {
-          "decimalDigits": 2
-        }
-      }
-    }
-  }
-}''';
-          final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-            ..createSync(recursive: true);
-          l10nDirectory.childFile(defaultTemplateArbFileName)
-            .writeAsStringSync(singleNumberMessage);
-
-          final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-          try {
-            generator.initialize(
-              l10nDirectoryPath: defaultArbPathString,
-              templateArbFileName: defaultTemplateArbFileName,
-              outputFileString: defaultOutputFileString,
-              classNameString: defaultClassNameString,
-            );
-            generator.parseArbFiles();
-            generator.generateClassMethods();
-          } on Exception catch (e) {
-            fail('Parsing template arb file should succeed: \n$e');
-          }
-
-          expect(generator.classMethods, isNotEmpty);
-          expect(
-            generator.classMethods.first,
-            '''
-  String courseCompletion(double progress) {
-    final NumberFormat progressNumberFormat = NumberFormat.$numberFormat(
-      locale: _localeName,
-      decimalDigits: 2,
-    );
-    final String progressString = progressNumberFormat.format(progress);
-
-    String courseCompletion(Object progress) {
-      return Intl.message(
-        'You have completed \${progress} of the course.',
-        locale: _localeName,
-        name: 'courseCompletion',
-        desc: 'The amount of progress the student has made in their class.',
-        args: <Object>[progress]
-      );
-    }
-    return courseCompletion(progressString);
-  }
-''');}
-      });
-
-      test('correctly adds optional positional parameters to numbers', () {
-        const Set<String> numberFormatsWithPositionalParameters = <String>{
-          'decimalPattern',
-          'percentPattern',
-          'scientificPattern',
-        };
-
-        for (final String numberFormat in numberFormatsWithPositionalParameters) {
-          final String singleNumberMessage = '''
-{
-  "courseCompletion": "You have completed {progress} of the course.",
-  "@courseCompletion": {
-    "description": "The amount of progress the student has made in their class.",
-    "placeholders": {
-      "progress": {
-        "type": "double",
-        "format": "$numberFormat"
-      }
-    }
-  }
-}''';
-          final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-            ..createSync(recursive: true);
-          l10nDirectory.childFile(defaultTemplateArbFileName)
-            .writeAsStringSync(singleNumberMessage);
-
-          final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-          try {
-            generator.initialize(
-              l10nDirectoryPath: defaultArbPathString,
-              templateArbFileName: defaultTemplateArbFileName,
-              outputFileString: defaultOutputFileString,
-              classNameString: defaultClassNameString,
-            );
-            generator.parseArbFiles();
-            generator.generateClassMethods();
-          } on Exception catch (e) {
-            fail('Parsing template arb file should succeed: \n$e');
-          }
-
-          expect(generator.classMethods, isNotEmpty);
-          expect(
-            generator.classMethods.first,
-            '''
-  String courseCompletion(double progress) {
-    final NumberFormat progressNumberFormat = NumberFormat.$numberFormat(_localeName);
-    final String progressString = progressNumberFormat.format(progress);
-
-    String courseCompletion(Object progress) {
-      return Intl.message(
-        'You have completed \${progress} of the course.',
-        locale: _localeName,
-        name: 'courseCompletion',
-        desc: 'The amount of progress the student has made in their class.',
-        args: <Object>[progress]
-      );
-    }
-    return courseCompletion(progressString);
-  }
-''');
-        }
       });
 
       test('throws an exception when improperly formatted number is passed in', () {
@@ -877,13 +1136,14 @@ void main() {
         final LocalizationsGenerator generator = LocalizationsGenerator(fs);
         try {
           generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
           expect(e.message, contains('asdf'));
           expect(e.message, contains('progress'));
@@ -913,13 +1173,14 @@ void main() {
         final LocalizationsGenerator generator = LocalizationsGenerator(fs);
         try {
           generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
           expect(e.message, contains('Check to see if the plural message is in the proper ICU syntax format'));
           return;
@@ -945,13 +1206,14 @@ void main() {
         final LocalizationsGenerator generator = LocalizationsGenerator(fs);
         try {
           generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
           expect(e.message, contains('Check to see if the plural message is in the proper ICU syntax format'));
           return;
@@ -973,13 +1235,14 @@ void main() {
         final LocalizationsGenerator generator = LocalizationsGenerator(fs);
         try {
           generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
           expect(e.message, contains('Resource attribute "@helloWorlds" was not found'));
           return;
@@ -1004,13 +1267,14 @@ void main() {
         final LocalizationsGenerator generator = LocalizationsGenerator(fs);
         try {
           generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
           expect(e.message, contains('is not properly formatted'));
           expect(e.message, contains('Ensure that it is a map with string valued keys'));
@@ -1020,39 +1284,46 @@ void main() {
       });
     });
 
-    test('should throw when failing to parse the arb file', () {
-      const String arbFileWithTrailingComma = '''
+    test(
+      'should throw with descriptive error message when failing to parse the '
+      'arb file',
+      () {
+        const String arbFileWithTrailingComma = '''
 {
   "title": "Stocks",
   "@title": {
     "description": "Title for the Stocks application"
   },
 }''';
-      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-        ..createSync(recursive: true);
-      l10nDirectory.childFile(defaultTemplateArbFileName)
-        .writeAsStringSync(arbFileWithTrailingComma);
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(arbFileWithTrailingComma);
 
-      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-      try {
-        generator.initialize(
-          l10nDirectoryPath: defaultArbPathString,
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
+        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+        try {
+          generator.initialize(
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+          );
+          generator.loadResources();
+          generator.writeOutputFiles();
+        } on L10nException catch (e) {
+          expect(e.message, contains('app_en.arb'));
+          expect(e.message, contains('FormatException'));
+          expect(e.message, contains('Unexpected character'));
+          return;
+        }
+
+        fail(
+          'should fail with an L10nException due to a trailing comma in the '
+          'arb file.'
         );
-        generator.parseArbFiles();
-        generator.generateClassMethods();
-      } on FormatException catch (e) {
-        expect(e.message, contains('Unexpected character'));
-        return;
-      }
-
-      fail(
-        'should fail with a FormatException due to a trailing comma in the '
-        'arb file.'
-      );
-    });
+      },
+    );
 
     test('should throw when resource is missing resource attribute', () {
       const String arbFileWithMissingResourceAttribute = '''
@@ -1067,13 +1338,14 @@ void main() {
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
       try {
         generator.initialize(
-          l10nDirectoryPath: defaultArbPathString,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.parseArbFiles();
-        generator.generateClassMethods();
+        generator.loadResources();
+        generator.writeOutputFiles();
       } on L10nException catch (e) {
         expect(e.message, contains('Resource attribute "@title" was not found'));
         return;
@@ -1089,11 +1361,11 @@ void main() {
       test('cannot contain non-alphanumeric symbols', () {
         const String nonAlphaNumericArbFile = '''
 {
-    "title!!": "Stocks",
-    "@title!!": {
-      "description": "Title for the Stocks application"
-    }
-  }''';
+  "title!!": "Stocks",
+  "@title!!": {
+    "description": "Title for the Stocks application"
+  }
+}''';
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
           ..createSync(recursive: true);
         l10nDirectory.childFile(defaultTemplateArbFileName)
@@ -1102,15 +1374,16 @@ void main() {
         final LocalizationsGenerator generator = LocalizationsGenerator(fs);
         try {
           generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
-          expect(e.message, contains('Invalid key format'));
+          expect(e.message, contains('Invalid ARB resource name'));
           return;
         }
 
@@ -1120,11 +1393,11 @@ void main() {
       test('must start with lowercase character', () {
         const String nonAlphaNumericArbFile = '''
 {
-    "Title": "Stocks",
-    "@Title": {
-      "description": "Title for the Stocks application"
-    }
-  }''';
+  "Title": "Stocks",
+  "@Title": {
+    "description": "Title for the Stocks application"
+  }
+}''';
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
           ..createSync(recursive: true);
         l10nDirectory.childFile(defaultTemplateArbFileName)
@@ -1133,15 +1406,16 @@ void main() {
         final LocalizationsGenerator generator = LocalizationsGenerator(fs);
         try {
           generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
-          expect(e.message, contains('Invalid key format'));
+          expect(e.message, contains('Invalid ARB resource name'));
           return;
         }
 
@@ -1151,11 +1425,11 @@ void main() {
       test('cannot start with a number', () {
         const String nonAlphaNumericArbFile = '''
 {
-    "123title": "Stocks",
-    "@123title": {
-      "description": "Title for the Stocks application"
-    }
-  }''';
+  "123title": "Stocks",
+  "@123title": {
+    "description": "Title for the Stocks application"
+  }
+}''';
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
           ..createSync(recursive: true);
         l10nDirectory.childFile(defaultTemplateArbFileName)
@@ -1164,53 +1438,21 @@ void main() {
         final LocalizationsGenerator generator = LocalizationsGenerator(fs);
         try {
           generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.writeOutputFiles();
         } on L10nException catch (e) {
-          expect(e.message, contains('Invalid key format'));
+          expect(e.message, contains('Invalid ARB resource name'));
           return;
         }
 
         fail('should fail since key starts with a number.');
       });
-    });
-  });
-
-  group('generateString', () {
-    test('handles simple string', () {
-      expect(generateString('abc'), "'abc'");
-    });
-    test('handles string with quote', () {
-      expect(generateString("ab'c"), '''"ab'c"''');
-    });
-    test('handles string with double quote', () {
-      expect(generateString('ab"c'), """'ab"c'""");
-    });
-    test('handles string with both single and double quote', () {
-      expect(generateString('''a'b"c'''), """'''a'b"c'''""");
-    });
-    test('handles string with a triple single quote and a double quote', () {
-      expect(generateString("""a"b'''c"""), '''"""a"b\'''c"""''');
-    });
-    test('handles string with a triple double quote and a single quote', () {
-      expect(generateString('''a'b"""c'''), """'''a'b\"""c'''""");
-    });
-    test('handles string with both triple single and triple double quote', () {
-      expect(generateString('''a\'''\'''\''b"""c'''), """'a' "'''"  "'''" '''''b\"""c'''""");
-    });
-    test('handles dollar', () {
-      expect(generateString(r'ab$c'), r"r'ab$c'");
-    });
-    test('handles back slash', () {
-      expect(generateString(r'ab\c'), r"r'ab\c'");
-    });
-    test("doesn't support multiline strings", () {
-      expect(() => generateString('ab\nc'), throwsA(isA<AssertionError>()));
     });
   });
 }

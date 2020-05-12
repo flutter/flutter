@@ -61,6 +61,7 @@ void main() {
   test('no unauthorized imports of dart:io', () {
     final List<String> whitelistedPaths = <String>[
       globals.fs.path.join(flutterTools, 'lib', 'src', 'base', 'io.dart'),
+      globals.fs.path.join(flutterTools, 'lib', 'src', 'base', 'platform.dart'),
       globals.fs.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_file_system.dart'),
     ];
     bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);

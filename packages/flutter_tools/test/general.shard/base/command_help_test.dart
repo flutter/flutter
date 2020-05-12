@@ -4,29 +4,27 @@
 
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart' show AnsiTerminal, OutputPreferences;
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/mocks.dart' show MockStdio;
-
-class MockLogger extends Mock implements Logger {}
 
 CommandHelp _createCommandHelp({
   @required bool ansi,
   @required int wrapColumn,
 }) {
-  final MockPlatform mockPlatform = MockPlatform();
-  when(mockPlatform.stdoutSupportsAnsi).thenReturn(ansi);
+  final Platform platform = FakePlatform(
+    stdoutSupportsAnsi: ansi,
+  );
   return CommandHelp(
-    logger: MockLogger(),
+    logger: BufferLogger.test(),
     terminal: AnsiTerminal(
       stdio:  MockStdio(),
-      platform: mockPlatform,
+      platform: platform,
     ),
-    platform: mockPlatform,
+    platform: platform,
     outputPreferences: OutputPreferences.test(
       showColor: ansi,
       wrapColumn: wrapColumn,
@@ -61,12 +59,14 @@ void _testMessageLength({
   expect(commandHelp.d.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.h.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.i.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.k.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.o.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.p.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.q.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.r.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.s.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.t.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.v.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.w.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.z.toString().length, lessThanOrEqualTo(expectedWidth));
 }
@@ -96,6 +96,7 @@ void main() {
         expect(commandHelp.r.toString(), startsWith('\x1B[1mr\x1B[22m'));
         expect(commandHelp.s.toString(), startsWith('\x1B[1ms\x1B[22m'));
         expect(commandHelp.t.toString(), startsWith('\x1B[1mt\x1B[22m'));
+        expect(commandHelp.v.toString(), startsWith('\x1B[1mv\x1B[22m'));
         expect(commandHelp.w.toString(), startsWith('\x1B[1mw\x1B[22m'));
         expect(commandHelp.z.toString(), startsWith('\x1B[1mz\x1B[22m'));
       });
@@ -171,6 +172,7 @@ void main() {
         expect(commandHelp.r.toString(), equals('\x1B[1mr\x1B[22m Hot reload. $fire$fire$fire'));
         expect(commandHelp.s.toString(), equals('\x1B[1ms\x1B[22m Save a screenshot to flutter.png.'));
         expect(commandHelp.t.toString(), equals('\x1B[1mt\x1B[22m Dump rendering tree to the console.                          \x1B[1;30m(debugDumpRenderTree)\x1B[39m'));
+        expect(commandHelp.v.toString(), equals('\x1B[1mv\x1B[22m Launch DevTools.'));
         expect(commandHelp.w.toString(), equals('\x1B[1mw\x1B[22m Dump widget hierarchy to the console.                               \x1B[1;30m(debugDumpApp)\x1B[39m'));
         expect(commandHelp.z.toString(), equals('\x1B[1mz\x1B[22m Toggle elevation checker.'));
       });
@@ -196,16 +198,10 @@ void main() {
         expect(commandHelp.r.toString(), equals('r Hot reload. $fire$fire$fire'));
         expect(commandHelp.s.toString(), equals('s Save a screenshot to flutter.png.'));
         expect(commandHelp.t.toString(), equals('t Dump rendering tree to the console.                          (debugDumpRenderTree)'));
+        expect(commandHelp.v.toString(), equals('v Launch DevTools.'));
         expect(commandHelp.w.toString(), equals('w Dump widget hierarchy to the console.                               (debugDumpApp)'));
         expect(commandHelp.z.toString(), equals('z Toggle elevation checker.'));
       });
     });
   });
-}
-
-class MockPlatform extends Mock implements Platform {
-  @override
-  Map<String, String> environment = <String, String>{
-    'FLUTTER_ROOT': '/',
-  };
 }

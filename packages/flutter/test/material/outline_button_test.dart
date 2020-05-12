@@ -133,6 +133,30 @@ void main() {
     expect(inkFeatures, paints..rect(color: focusColor));
   });
 
+  testWidgets('Does OutlineButton work with autofocus', (WidgetTester tester) async {
+    const Color focusColor = Color(0xff001122);
+
+    final FocusNode focusNode = FocusNode(debugLabel: 'OutlineButton Node');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: OutlineButton(
+          autofocus: true,
+          focusColor: focusColor,
+          focusNode: focusNode,
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: focusColor));
+  });
+
   testWidgets('OutlineButton implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     OutlineButton(
@@ -200,8 +224,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
     semanticsEnabled: true,
-    skip: isBrowser,
   );
 
   testWidgets('OutlineButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
@@ -265,7 +289,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
-    skip: isBrowser,
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
     semanticsEnabled: true,
   );
 
@@ -747,7 +771,7 @@ void main() {
       clipPath: clipPath,
       clipRect: clipRect,
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('OutlineButton has no clip by default', (WidgetTester tester) async {
     final GlobalKey buttonKey = GlobalKey();
@@ -882,7 +906,7 @@ void main() {
     expect(tester.getSize(find.byType(FlatButton)).height, equals(48.0));
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));
     expect(tester.getSize(find.byType(Text)).height, equals(42.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('OutlineButton pressed fillColor default', (WidgetTester tester) async {
     Widget buildFrame(ThemeData theme) {

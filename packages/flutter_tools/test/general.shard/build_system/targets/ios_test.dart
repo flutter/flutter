@@ -39,10 +39,22 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      environment = Environment.test(globals.fs.currentDirectory, defines: <String, String>{
-        kTargetPlatform: 'ios',
-      });
+      environment = Environment.test(
+        globals.fs.currentDirectory,
+        defines: <String, String>{
+          kTargetPlatform: 'ios',
+        },
+        processManager: processManager,
+        artifacts: MockArtifacts(),
+        logger: globals.logger,
+        fileSystem: globals.fs,
+      );
     });
+  });
+
+  test('iOS AOT targets has analyicsName', () {
+    expect(const AotAssemblyRelease().analyticsName, 'ios_aot');
+    expect(const AotAssemblyProfile().analyticsName, 'ios_aot');
   });
 
   test('DebugUniveralFramework creates expected binary with arm64 only arch', () => testbed.run(() async {
@@ -88,7 +100,7 @@ void main() {
         environment.buildDir.childFile('iphone_framework').path,
         environment.buildDir.childFile('simulator_framework').path,
         '-output',
-        environment.buildDir.childFile('App').path,
+        environment.buildDir.childDirectory('App.framework').childFile('App').path,
       ]),
     ]);
 
@@ -111,11 +123,14 @@ void main() {
     globals.fs.file('.packages').writeAsStringSync('\n');
     // Plist file
     globals.fs.file(globals.fs.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
-      ..createSync(recursive: true);
+      .createSync(recursive: true);
     // App kernel
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
     // Stub framework
-    environment.buildDir.childFile('App').createSync();
+    environment.buildDir
+      .childDirectory('App.framework')
+      .childFile('App')
+      .createSync(recursive: true);
 
     await const DebugIosApplicationBundle().build(environment);
 
@@ -140,7 +155,7 @@ void main() {
     globals.fs.file('.packages').writeAsStringSync('\n');
     // Plist file
     globals.fs.file(globals.fs.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
-      ..createSync(recursive: true);
+      .createSync(recursive: true);
 
     // Real framework
     environment.buildDir

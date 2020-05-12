@@ -103,7 +103,7 @@ class FakeImageStreamCompleter extends ImageStreamCompleter {
 }
 
 class TestAssetImage extends AssetImage {
-  TestAssetImage(String name) : super(name);
+  const TestAssetImage(String name) : super(name);
 
   @override
   ImageStreamCompleter load(AssetBundleImageKey key, DecoderCallback decode) {

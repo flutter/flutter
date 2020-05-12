@@ -8,7 +8,6 @@ import '../base/process.dart';
 import '../device.dart';
 import '../emulator.dart';
 import '../globals.dart' as globals;
-import 'ios_workflow.dart';
 import 'simulators.dart';
 
 class IOSEmulators extends EmulatorDiscovery {
@@ -16,14 +15,14 @@ class IOSEmulators extends EmulatorDiscovery {
   bool get supportsPlatform => globals.platform.isMacOS;
 
   @override
-  bool get canListAnything => iosWorkflow.canListEmulators;
+  bool get canListAnything => globals.iosWorkflow.canListEmulators;
 
   @override
   Future<List<Emulator>> get emulators async => getEmulators();
 }
 
 class IOSEmulator extends Emulator {
-  IOSEmulator(String id) : super(id, true);
+  const IOSEmulator(String id) : super(id, true);
 
   @override
   String get name => 'iOS Simulator';
@@ -73,5 +72,5 @@ List<IOSEmulator> getEmulators() {
     return <IOSEmulator>[];
   }
 
-  return <IOSEmulator>[IOSEmulator(iosSimulatorId)];
+  return <IOSEmulator>[const IOSEmulator(iosSimulatorId)];
 }

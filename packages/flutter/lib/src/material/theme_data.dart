@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'app_bar_theme.dart';
 import 'banner_theme.dart';
 import 'bottom_app_bar_theme.dart';
+import 'bottom_navigation_bar_theme.dart';
 import 'bottom_sheet_theme.dart';
 import 'button_bar_theme.dart';
 import 'button_theme.dart';
@@ -25,6 +26,7 @@ import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
+import 'navigation_rail_theme.dart';
 import 'page_transitions_theme.dart';
 import 'popup_menu_theme.dart';
 import 'slider_theme.dart';
@@ -163,7 +165,7 @@ enum MaterialTapTargetSize {
 /// ```
 /// {@end-tool}
 @immutable
-class ThemeData extends Diagnosticable {
+class ThemeData with Diagnosticable {
   /// Create a [ThemeData] given a set of preferred values.
   ///
   /// Default values will be derived for arguments that are omitted.
@@ -256,6 +258,7 @@ class ThemeData extends Diagnosticable {
     ColorScheme colorScheme,
     DialogTheme dialogTheme,
     FloatingActionButtonThemeData floatingActionButtonTheme,
+    NavigationRailThemeData navigationRailTheme,
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
     SnackBarThemeData snackBarTheme,
@@ -264,6 +267,8 @@ class ThemeData extends Diagnosticable {
     MaterialBannerThemeData bannerTheme,
     DividerThemeData dividerTheme,
     ButtonBarThemeData buttonBarTheme,
+    BottomNavigationBarThemeData bottomNavigationBarTheme,
+    bool fixTextFieldOutlineLabel,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -302,7 +307,7 @@ class ThemeData extends Diagnosticable {
     // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
     secondaryHeaderColor ??= isDark ? Colors.grey[700] : primarySwatch[50];
     textSelectionColor ??= isDark ? accentColor : primarySwatch[200];
-    // TODO(sandrasandeep): change to color provided by Material Design team
+    // TODO(hansmuller): We need a TextFieldTheme to handle this instead, https://github.com/flutter/flutter/issues/56082
     cursorColor = cursorColor ?? const Color.fromRGBO(66, 133, 244, 1.0);
     textSelectionHandleColor ??= isDark ? Colors.tealAccent[400] : primarySwatch[300];
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
@@ -364,6 +369,7 @@ class ThemeData extends Diagnosticable {
     );
     dialogTheme ??= const DialogTheme();
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
+    navigationRailTheme ??= const NavigationRailThemeData();
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     snackBarTheme ??= const SnackBarThemeData();
     bottomSheetTheme ??= const BottomSheetThemeData();
@@ -371,6 +377,9 @@ class ThemeData extends Diagnosticable {
     bannerTheme ??= const MaterialBannerThemeData();
     dividerTheme ??= const DividerThemeData();
     buttonBarTheme ??= const ButtonBarThemeData();
+    bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
+
+    fixTextFieldOutlineLabel ??= false;
 
     return ThemeData.raw(
       brightness: brightness,
@@ -428,6 +437,7 @@ class ThemeData extends Diagnosticable {
       colorScheme: colorScheme,
       dialogTheme: dialogTheme,
       floatingActionButtonTheme: floatingActionButtonTheme,
+      navigationRailTheme: navigationRailTheme,
       typography: typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
       snackBarTheme: snackBarTheme,
@@ -436,6 +446,8 @@ class ThemeData extends Diagnosticable {
       bannerTheme: bannerTheme,
       dividerTheme: dividerTheme,
       buttonBarTheme: buttonBarTheme,
+      bottomNavigationBarTheme: bottomNavigationBarTheme,
+      fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
     );
   }
 
@@ -505,6 +517,7 @@ class ThemeData extends Diagnosticable {
     @required this.colorScheme,
     @required this.dialogTheme,
     @required this.floatingActionButtonTheme,
+    @required this.navigationRailTheme,
     @required this.typography,
     @required this.cupertinoOverrideTheme,
     @required this.snackBarTheme,
@@ -513,6 +526,8 @@ class ThemeData extends Diagnosticable {
     @required this.bannerTheme,
     @required this.dividerTheme,
     @required this.buttonBarTheme,
+    @required this.bottomNavigationBarTheme,
+    @required this.fixTextFieldOutlineLabel,
   }) : assert(brightness != null),
        assert(visualDensity != null),
        assert(primaryColor != null),
@@ -566,13 +581,16 @@ class ThemeData extends Diagnosticable {
        assert(colorScheme != null),
        assert(dialogTheme != null),
        assert(floatingActionButtonTheme != null),
+       assert(navigationRailTheme != null),
        assert(typography != null),
        assert(snackBarTheme != null),
        assert(bottomSheetTheme != null),
        assert(popupMenuTheme != null),
        assert(bannerTheme != null),
        assert(dividerTheme != null),
-       assert(buttonBarTheme != null);
+       assert(buttonBarTheme != null),
+       assert(bottomNavigationBarTheme != null),
+       assert(fixTextFieldOutlineLabel != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -982,6 +1000,10 @@ class ThemeData extends Diagnosticable {
   /// [FloatingActionButton].
   final FloatingActionButtonThemeData floatingActionButtonTheme;
 
+  /// A theme for customizing the background color, elevation, text style, and
+  /// icon themes of a [NavigationRail].
+  final NavigationRailThemeData navigationRailTheme;
+
   /// The color and geometry [TextTheme] values used to configure [textTheme],
   /// [primaryTextTheme], and [accentTextTheme].
   final Typography typography;
@@ -1014,6 +1036,22 @@ class ThemeData extends Diagnosticable {
 
   /// A theme for customizing the appearance and layout of [ButtonBar] widgets.
   final ButtonBarThemeData buttonBarTheme;
+
+  /// A theme for customizing the appearance and layout of [BottomNavigationBar]
+  /// widgets.
+  final BottomNavigationBarThemeData bottomNavigationBarTheme;
+
+  /// A temporary flag to allow apps to opt-in to a
+  /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
+  /// coordinate of the floating label in a [TextField] [OutlineInputBorder].
+  ///
+  /// Setting this flag to true causes the floating label to be more precisely
+  /// vertically centered relative to the border's outline.
+  ///
+  /// The flag is currently false by default. It will be default true and
+  /// deprecated before the next beta release (1.18), and removed before the next
+  /// stable release (1.19).
+  final bool fixTextFieldOutlineLabel;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
@@ -1072,6 +1110,7 @@ class ThemeData extends Diagnosticable {
     ColorScheme colorScheme,
     DialogTheme dialogTheme,
     FloatingActionButtonThemeData floatingActionButtonTheme,
+    NavigationRailThemeData navigationRailTheme,
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
     SnackBarThemeData snackBarTheme,
@@ -1080,6 +1119,8 @@ class ThemeData extends Diagnosticable {
     MaterialBannerThemeData bannerTheme,
     DividerThemeData dividerTheme,
     ButtonBarThemeData buttonBarTheme,
+    BottomNavigationBarThemeData bottomNavigationBarTheme,
+    bool fixTextFieldOutlineLabel,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1138,6 +1179,7 @@ class ThemeData extends Diagnosticable {
       colorScheme: colorScheme ?? this.colorScheme,
       dialogTheme: dialogTheme ?? this.dialogTheme,
       floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
+      navigationRailTheme: navigationRailTheme ?? this.navigationRailTheme,
       typography: typography ?? this.typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
       snackBarTheme: snackBarTheme ?? this.snackBarTheme,
@@ -1146,6 +1188,8 @@ class ThemeData extends Diagnosticable {
       bannerTheme: bannerTheme ?? this.bannerTheme,
       dividerTheme: dividerTheme ?? this.dividerTheme,
       buttonBarTheme: buttonBarTheme ?? this.buttonBarTheme,
+      bottomNavigationBarTheme: bottomNavigationBarTheme ?? this.bottomNavigationBarTheme,
+      fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
     );
   }
 
@@ -1282,6 +1326,7 @@ class ThemeData extends Diagnosticable {
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
       dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
       floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(a.floatingActionButtonTheme, b.floatingActionButtonTheme, t),
+      navigationRailTheme: NavigationRailThemeData.lerp(a.navigationRailTheme, b.navigationRailTheme, t),
       typography: Typography.lerp(a.typography, b.typography, t),
       cupertinoOverrideTheme: t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
       snackBarTheme: SnackBarThemeData.lerp(a.snackBarTheme, b.snackBarTheme, t),
@@ -1290,6 +1335,8 @@ class ThemeData extends Diagnosticable {
       bannerTheme: MaterialBannerThemeData.lerp(a.bannerTheme, b.bannerTheme, t),
       dividerTheme: DividerThemeData.lerp(a.dividerTheme, b.dividerTheme, t),
       buttonBarTheme: ButtonBarThemeData.lerp(a.buttonBarTheme, b.buttonBarTheme, t),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData.lerp(a.bottomNavigationBarTheme, b.bottomNavigationBarTheme, t),
+      fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
     );
   }
 
@@ -1354,6 +1401,7 @@ class ThemeData extends Diagnosticable {
         && other.colorScheme == colorScheme
         && other.dialogTheme == dialogTheme
         && other.floatingActionButtonTheme == floatingActionButtonTheme
+        && other.navigationRailTheme == navigationRailTheme
         && other.typography == typography
         && other.cupertinoOverrideTheme == cupertinoOverrideTheme
         && other.snackBarTheme == snackBarTheme
@@ -1361,7 +1409,9 @@ class ThemeData extends Diagnosticable {
         && other.popupMenuTheme == popupMenuTheme
         && other.bannerTheme == bannerTheme
         && other.dividerTheme == dividerTheme
-        && other.buttonBarTheme == buttonBarTheme;
+        && other.buttonBarTheme == buttonBarTheme
+        && other.bottomNavigationBarTheme == bottomNavigationBarTheme
+        && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel;
   }
 
   @override
@@ -1425,6 +1475,7 @@ class ThemeData extends Diagnosticable {
       colorScheme,
       dialogTheme,
       floatingActionButtonTheme,
+      navigationRailTheme,
       typography,
       cupertinoOverrideTheme,
       snackBarTheme,
@@ -1433,6 +1484,8 @@ class ThemeData extends Diagnosticable {
       bannerTheme,
       dividerTheme,
       buttonBarTheme,
+      bottomNavigationBarTheme,
+      fixTextFieldOutlineLabel,
     ];
     return hashList(values);
   }
@@ -1492,6 +1545,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonThemeData', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<NavigationRailThemeData>('navigationRailThemeData', navigationRailTheme, defaultValue: defaultData.navigationRailTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<CupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme, level: DiagnosticLevel.debug));
@@ -1500,6 +1554,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialBannerThemeData>('bannerTheme', bannerTheme, defaultValue: defaultData.bannerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DividerThemeData>('dividerTheme', dividerTheme, defaultValue: defaultData.dividerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ButtonBarThemeData>('buttonBarTheme', buttonBarTheme, defaultValue: defaultData.buttonBarTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<BottomNavigationBarThemeData>('bottomNavigationBarTheme', bottomNavigationBarTheme, defaultValue: defaultData.bottomNavigationBarTheme, level: DiagnosticLevel.debug));
   }
 }
 
@@ -1620,8 +1675,9 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   }
 }
 
+@immutable
 class _IdentityThemeDataCacheKey {
-  _IdentityThemeDataCacheKey(this.baseTheme, this.localTextGeometry);
+  const _IdentityThemeDataCacheKey(this.baseTheme, this.localTextGeometry);
 
   final ThemeData baseTheme;
   final TextTheme localTextGeometry;
@@ -1697,7 +1753,8 @@ class _FifoCache<K, V> {
 ///  * [ThemeData.visualDensity], where this property is used to specify the base
 ///    horizontal density of Material components.
 ///  * [Material design guidance on density](https://material.io/design/layout/applying-density.html).
-class VisualDensity extends Diagnosticable {
+@immutable
+class VisualDensity with Diagnosticable {
   /// A const constructor for [VisualDensity].
   ///
   /// All of the arguments must be non-null, and [horizontal] and [vertical]
@@ -1745,6 +1802,24 @@ class VisualDensity extends Diagnosticable {
   ///
   /// It corresponds to a density value of -2 in both axes.
   static const VisualDensity compact = VisualDensity(horizontal: -2.0, vertical: -2.0);
+
+  /// Returns a visual density that is adaptive based on the [defaultTargetPlatform].
+  ///
+  /// For desktop platforms, this returns [compact], and for other platforms,
+  /// it returns a default-constructed [VisualDensity].
+  static VisualDensity get adaptivePlatformDensity {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return compact;
+    }
+    return const VisualDensity();
+  }
 
   /// Copy the current [VisualDensity] with the given values replacing the
   /// current values.

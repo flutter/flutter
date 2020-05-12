@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -14,8 +15,10 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/build_runner/mustache_template.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -26,7 +29,6 @@ import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/github_template.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -35,6 +37,7 @@ import 'package:mockito/mockito.dart';
 
 import 'common.dart';
 import 'fake_process_manager.dart';
+import 'mocks.dart';
 import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
@@ -105,7 +108,7 @@ void testUsingContext(
           AnsiTerminal: () => AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
           Config: () => buildConfig(globals.fs),
           DeviceManager: () => FakeDeviceManager(),
-          Doctor: () => FakeDoctor(),
+          Doctor: () => FakeDoctor(globals.logger),
           FlutterVersion: () => MockFlutterVersion(),
           HttpClient: () => MockHttpClient(),
           IOSSimulatorUtils: () {
@@ -116,7 +119,7 @@ void testUsingContext(
           OutputPreferences: () => OutputPreferences.test(),
           Logger: () => BufferLogger(
             terminal: globals.terminal,
-            outputPreferences: outputPreferences,
+            outputPreferences: globals.outputPreferences,
           ),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           PersistentToolState: () => buildPersistentToolState(globals.fs),
@@ -128,7 +131,8 @@ void testUsingContext(
           PlistParser: () => FakePlistParser(),
           Signals: () => FakeSignals(),
           Pub: () => ThrowingPub(), // prevent accidentally using pub.
-          GitHubTemplateCreator: () => MockGitHubTemplateCreator(),
+          CrashReporter: () => MockCrashReporter(),
+          TemplateRenderer: () => const MustacheTemplateRenderer(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
@@ -148,11 +152,12 @@ void testUsingContext(
                   return await testMethod();
                 },
               );
-            } catch (error) {
+            // This catch rethrows, so doesn't need to catch only Exception.
+            } catch (error) { // ignore: avoid_catches_without_on_clauses
               _printBufferedErrors(context);
               rethrow;
             }
-          }, onError: (dynamic error, StackTrace stackTrace) {
+          }, onError: (Object error, StackTrace stackTrace) { // ignore: deprecated_member_use
             io.stdout.writeln(error);
             io.stdout.writeln(stackTrace);
             _printBufferedErrors(context);
@@ -160,6 +165,15 @@ void testUsingContext(
           });
         },
       );
+    }, overrides: <Type, Generator>{
+      // This has to go here so that runInContext will pick it up when it tries
+      // to do bot detection before running the closure.  This is important
+      // because the test may be giving us a fake HttpClientFactory, which may
+      // throw in unexpected/abnormal ways.
+      // If a test needs a BotDetector that does not always return true, it
+      // can provide the AlwaysFalseBotDetector in the overrides, or its own
+      // BotDetector implementation in the overrides.
+      BotDetector: overrides[BotDetector] ?? () => const AlwaysTrueBotDetector(),
     });
   }, testOn: testOn, skip: skip);
 }
@@ -204,6 +218,9 @@ class FakeDeviceManager implements DeviceManager {
   Future<List<Device>> getAllConnectedDevices() async => devices;
 
   @override
+  Future<List<Device>> refreshAllConnectedDevices({ Duration timeout }) async => devices;
+
+  @override
   Future<List<Device>> getDevicesById(String deviceId) async {
     return devices.where((Device device) => device.id == deviceId).toList();
   }
@@ -243,6 +260,8 @@ class FakeAndroidLicenseValidator extends AndroidLicenseValidator {
 }
 
 class FakeDoctor extends Doctor {
+  FakeDoctor(Logger logger) : super(logger: logger);
+
   // True for testing.
   @override
   bool get canListAnything => true;
@@ -302,6 +321,9 @@ class FakeOperatingSystemUtils implements OperatingSystemUtils {
 
   @override
   bool verifyGzip(File gzippedFile) => true;
+
+  @override
+  Stream<List<int>> gzipLevel1Stream(Stream<List<int>> stream) => stream;
 
   @override
   String get name => 'fake OS name and version';
@@ -375,15 +397,16 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
 
   @override
   Future<Map<String, String>> getBuildSettings(
-    String projectPath,
-    String target, {
+    String projectPath, {
+    String scheme,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{};
   }
 
   @override
-  void cleanWorkspace(String workspacePath, String scheme) {
+  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) {
+    return null;
   }
 
   @override
@@ -409,7 +432,7 @@ class MockClock extends Mock implements SystemClock {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 
-class MockGitHubTemplateCreator extends Mock implements GitHubTemplateCreator {}
+class MockCrashReporter extends Mock implements CrashReporter {}
 
 class FakePlistParser implements PlistParser {
   @override

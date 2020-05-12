@@ -192,6 +192,21 @@ void main() {
       final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
       expect(port, isNull);
     });
+
+    testUsingContext('Throws SocketException when client throws OSError on start', () async {
+      final MDnsClient client = MockMDnsClient();
+      when(client.start()).thenAnswer((_) {
+        throw const OSError('Operation not suppoted on socket', 102);
+      });
+
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+        mdnsClient: client,
+      );
+      expect(
+        () async => await portDiscovery.query(),
+        throwsA(isA<SocketException>()),
+      );
+    });
   });
 }
 

@@ -100,7 +100,12 @@ class UpgradeCommandRunner {
     @required FlutterVersion flutterVersion,
     @required bool testFlow,
   }) async {
-    await verifyUpstreamConfigured();
+    final String upstreamRevision = await fetchRemoteRevision();
+    if (flutterVersion.frameworkRevision == upstreamRevision) {
+      globals.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
+      globals.printStatus('$flutterVersion');
+      return;
+    }
     if (!force && gitTagVersion == const GitTagVersion.unknown()) {
       // If the commit is a recognized branch and not master,
       // explain that we are avoiding potential damage.
@@ -131,14 +136,9 @@ class UpgradeCommandRunner {
       );
     }
     recordState(flutterVersion);
-    await resetChanges(gitTagVersion);
     await upgradeChannel(flutterVersion);
-    final bool alreadyUpToDate = await attemptFastForward(flutterVersion);
-    if (alreadyUpToDate) {
-      // If the upgrade was a no op, then do not continue with the second half.
-      globals.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
-      globals.printStatus('$flutterVersion');
-    } else if (!testFlow) {
+    await attemptReset(upstreamRevision);
+    if (!testFlow) {
       await flutterUpgradeContinue();
     }
   }
@@ -200,51 +200,33 @@ class UpgradeCommandRunner {
     return false;
   }
 
-  /// Check if there is an upstream repository configured.
+  /// Returns the remote HEAD revision.
   ///
   /// Exits tool if there is no upstream.
-  Future<void> verifyUpstreamConfigured() async {
+  Future<String> fetchRemoteRevision() async {
+    String revision;
     try {
+      // Fetch upstream branch's commits and tags
       await processUtils.run(
-        <String>[ 'git', 'rev-parse', '@{u}'],
+        <String>['git', 'fetch', '--tags'],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
-    } catch (e) {
+      // '@{u}' means upstream HEAD
+      final RunResult result = await processUtils.run(
+          <String>[ 'git', 'rev-parse', '--verify', '@{u}'],
+          throwOnError: true,
+          workingDirectory: workingDirectory,
+      );
+      revision = result.stdout.trim();
+    } on Exception {
       throwToolExit(
         'Unable to upgrade Flutter: no origin repository configured. '
         "Run 'git remote add origin "
         "https://github.com/flutter/flutter' in $workingDirectory",
       );
     }
-  }
-
-  /// Attempts to reset to the last non-hotfix tag.
-  ///
-  /// If the git history is on a hotfix, doing a fast forward will not pick up
-  /// major or minor version upgrades. By resetting to the point before the
-  /// hotfix, doing a git fast forward should succeed.
-  Future<void> resetChanges(GitTagVersion gitTagVersion) async {
-    String tag;
-    if (gitTagVersion == const GitTagVersion.unknown()) {
-      tag = 'v0.0.0';
-    } else {
-      tag = 'v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}';
-    }
-    try {
-      await processUtils.run(
-        <String>['git', 'reset', '--hard', tag],
-        throwOnError: true,
-        workingDirectory: workingDirectory,
-      );
-    } on ProcessException catch (error) {
-      throwToolExit(
-        'Unable to upgrade Flutter: The tool could not update to the version $tag. '
-        'This may be due to git not being installed or an internal error. '
-        'Please ensure that git is installed on your computer and retry again.'
-        '\nError: $error.'
-      );
-    }
+    return revision;
   }
 
   /// Attempts to upgrade the channel.
@@ -256,33 +238,21 @@ class UpgradeCommandRunner {
     await ChannelCommand.upgradeChannel();
   }
 
-  /// Attempts to rebase the upstream onto the local branch.
+  /// Attempts a hard reset to the given revision.
   ///
-  /// If there haven't been any hot fixes or local changes, this is equivalent
-  /// to a fast-forward.
-  ///
-  /// If the fast forward lands us on the same channel and revision, then
-  /// returns true, otherwise returns false.
-  Future<bool> attemptFastForward(FlutterVersion oldFlutterVersion) async {
-    final int code = await processUtils.stream(
-      <String>['git', 'pull', '--ff'],
-      workingDirectory: workingDirectory,
-      mapFunction: (String line) => matchesGitLine(line) ? null : line,
-    );
-    if (code != 0) {
-      throwToolExit(null, exitCode: code);
-    }
-
-    // Check if the upgrade did anything.
-    bool alreadyUpToDate = false;
+  /// This is a reset instead of fast forward because if we are on a release
+  /// branch with cherry picks, there may not be a direct fast-forward route
+  /// to the next release.
+  Future<void> attemptReset(String newRevision) async {
     try {
-      final FlutterVersion newFlutterVersion = FlutterVersion(const SystemClock(), workingDirectory);
-      alreadyUpToDate = newFlutterVersion.channel == oldFlutterVersion.channel &&
-        newFlutterVersion.frameworkRevision == oldFlutterVersion.frameworkRevision;
-    } catch (e) {
-      globals.printTrace('Failed to determine FlutterVersion after upgrade fast-forward: $e');
+      await processUtils.run(
+        <String>['git', 'reset', '--hard', newRevision],
+        throwOnError: true,
+        workingDirectory: workingDirectory,
+      );
+    } on ProcessException catch (e) {
+      throwToolExit(e.message, exitCode: e.errorCode);
     }
-    return alreadyUpToDate;
   }
 
   /// Update the engine repository and precache all artifacts.
@@ -328,19 +298,5 @@ class UpgradeCommandRunner {
       workingDirectory: workingDirectory,
       allowReentrantFlutter: true,
     );
-  }
-
-  //  dev/benchmarks/complex_layout/lib/main.dart        |  24 +-
-  static final RegExp _gitDiffRegex = RegExp(r' (\S+)\s+\|\s+\d+ [+-]+');
-
-  //  rename {packages/flutter/doc => dev/docs}/styles.html (92%)
-  //  delete mode 100644 doc/index.html
-  //  create mode 100644 examples/flutter_gallery/lib/gallery/demo.dart
-  static final RegExp _gitChangedRegex = RegExp(r' (rename|delete mode|create mode) .+');
-
-  static bool matchesGitLine(String line) {
-    return _gitDiffRegex.hasMatch(line)
-      || _gitChangedRegex.hasMatch(line)
-      || line == 'Fast-forward';
   }
 }

@@ -19,7 +19,7 @@ class Stock {
   Stock(this.symbol, this.name, this.lastSale, this.marketCap, this.percentChange);
 
   Stock.fromFields(List<String> fields) {
-    // FIXME: This class should only have static data, not lastSale, etc.
+    // TODO(jackson): This class should only have static data, not lastSale, etc.
     // "Symbol","Name","LastSale","MarketCap","IPOyear","Sector","industry","Summary Quote",
     lastSale = 0.0;
     try {

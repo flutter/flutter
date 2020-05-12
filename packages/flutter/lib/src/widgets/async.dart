@@ -645,7 +645,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// }
 /// ```
 /// {@end-tool}
-// TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed
+// TODO(ianh): remove unreachable code above once https://github.com/dart-lang/sdk/issues/35520 is fixed
 class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of
   /// interaction with a [Future].

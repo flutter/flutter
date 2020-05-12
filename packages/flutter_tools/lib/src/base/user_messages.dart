@@ -3,20 +3,27 @@
 // found in the LICENSE file.
 
 import 'context.dart';
+import 'platform.dart';
 
 UserMessages get userMessages => context.get<UserMessages>();
 
 /// Class containing message strings that can be produced by Flutter tools.
 class UserMessages {
+  // Messages used in multiple components.
+  String get flutterToolBugInstructions =>
+      'Please report a bug at https://github.com/flutter/flutter/issues.';
+
   // Messages used in FlutterValidator
   String flutterStatusInfo(String channel, String version, String os, String locale) =>
-      'Channel ${channel ?? 'unknown'}, v${version ?? 'Unknown'}, on $os, locale $locale';
+      'Channel ${channel ?? 'unknown'}, ${version ?? 'Unknown'}, on $os, locale $locale';
   String flutterVersion(String version, String flutterRoot) =>
       'Flutter version $version at $flutterRoot';
   String flutterRevision(String revision, String age, String date) =>
       'Framework revision $revision ($age), $date';
   String engineRevision(String revision) => 'Engine revision $revision';
   String dartRevision(String revision) => 'Dart version $revision';
+  String pubMirrorURL(String url) => 'Pub download mirror $url';
+  String flutterMirrorURL(String url) => 'Flutter download mirror $url';
   String get flutterBinariesDoNotRun =>
       'Downloaded executables cannot execute on host.\n'
       'See https://github.com/flutter/flutter/issues/6207 for more information';
@@ -62,21 +69,19 @@ class UserMessages {
   String androidBadSdkDir(String envKey, String homeDir) =>
       '$envKey = $homeDir\n'
       'but Android SDK not found at this location.';
-  String androidMissingSdkInstructions(String envKey) =>
+  String androidMissingSdkInstructions(String envKey, Platform platform) =>
       'Unable to locate Android SDK.\n'
       'Install Android Studio from: https://developer.android.com/studio/index.html\n'
       'On first launch it will assist you in installing the Android SDK components.\n'
-      '(or visit https://flutter.dev/setup/#android-setup for detailed instructions).\n'
+      '(or visit ${_androidSdkInstallUrl(platform)} for detailed instructions).\n'
       'If the Android SDK has been installed to a custom location, set $envKey to that location.\n'
       'You may also want to add it to your PATH environment variable.\n';
   String androidSdkLocation(String directory) => 'Android SDK at $directory';
   String androidSdkPlatformToolsVersion(String platform, String tools) =>
       'Platform $platform, build-tools $tools';
-  String get androidSdkInstallHelp =>
+  String androidSdkInstallHelp(Platform platform) =>
       'Try re-installing or updating your Android SDK,\n'
-      'visit https://flutter.dev/setup/#android-setup for detailed instructions.';
-  String get androidMissingNdk => 'Android NDK location not configured (optional; useful for native profiling support)';
-  String androidNdkLocation(String directory) => 'Android NDK at $directory';
+      'visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
   // Also occurs in AndroidLicenseValidator
   String androidStatusInfo(String version) => 'Android SDK version $version';
 
@@ -89,29 +94,29 @@ class UserMessages {
   String get androidLicensesAll => 'All Android licenses accepted.';
   String get androidLicensesSome => 'Some Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
   String get androidLicensesNone => 'Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
-  String get androidLicensesUnknown =>
+  String androidLicensesUnknown(Platform platform) =>
       'Android license status unknown.\n'
       'Try re-installing or updating your Android SDK Manager.\n'
       'See https://developer.android.com/studio/#downloads or visit '
-      'https://flutter.dev/setup/#android-setup for detailed instructions.';
+      'visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
   String androidSdkManagerOutdated(String managerPath) =>
       'A newer version of the Android SDK is required. To update, run:\n'
       '$managerPath --update\n';
   String androidLicensesTimeout(String managerPath) => 'Intentionally killing $managerPath';
   String get androidSdkShort => 'Unable to locate Android SDK.';
-  String androidMissingSdkManager(String sdkManagerPath) =>
+  String androidMissingSdkManager(String sdkManagerPath, Platform platform) =>
       'Android sdkmanager tool not found ($sdkManagerPath).\n'
       'Try re-installing or updating your Android SDK,\n'
-      'visit https://flutter.dev/setup/#android-setup for detailed instructions.';
-  String androidCannotRunSdkManager(String sdkManagerPath, String error) =>
+      'visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
+  String androidCannotRunSdkManager(String sdkManagerPath, String error, Platform platform) =>
       'Android sdkmanager tool was found, but failed to run ($sdkManagerPath): "$error".\n'
       'Try re-installing or updating your Android SDK,\n'
-      'visit https://flutter.dev/setup/#android-setup for detailed instructions.';
-  String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion) =>
+      'visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
+  String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion, Platform platform) =>
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
       'To update using sdkmanager, run:\n'
       '  "$managerPath" "platforms;android-$sdkMinVersion" "build-tools;$buildToolsMinVersion"\n'
-      'or visit https://flutter.dev/setup/#android-setup for detailed instructions.';
+      'or visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
 
   // Messages used in AndroidStudioValidator
   String androidStudioVersion(String version) => 'version $version';
@@ -127,9 +132,9 @@ class UserMessages {
   String androidStudioMissing(String location) =>
       'android-studio-dir = $location\n'
       'but Android Studio not found at this location.';
-  String get androidStudioInstallation =>
+  String androidStudioInstallation(Platform platform) =>
       'Android Studio not found; download from https://developer.android.com/studio/index.html\n'
-      '(or visit https://flutter.dev/setup/#android-setup for detailed instructions).';
+      '(or visit ${_androidSdkInstallUrl(platform)} for detailed instructions).';
 
   // Messages used in XcodeValidator
   String xcodeLocation(String location) => 'Xcode at $location';
@@ -292,4 +297,18 @@ class UserMessages {
       'In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.\n'
       'Read more about iOS versioning at\n'
       'https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html\n';
+
+  String _androidSdkInstallUrl(Platform platform) {
+    const String baseUrl = 'https://flutter.dev/docs/get-started/install';
+    const String fragment = '#android-setup';
+    if (platform.isMacOS) {
+      return '$baseUrl/macos$fragment';
+    } else if (platform.isLinux) {
+      return '$baseUrl/linux$fragment';
+    } else if (platform.isWindows) {
+      return '$baseUrl/windows$fragment';
+    } else {
+      return baseUrl;
+    }
+  }
 }

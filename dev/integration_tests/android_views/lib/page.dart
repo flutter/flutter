@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 /// The base class of all the testing pages
 //
 /// A testing page has to override this in order to be put as one of the items in the main page.
-abstract class Page extends StatelessWidget {
-  const Page(this.title, this.tileKey);
+abstract class PageWidget extends StatelessWidget {
+  const PageWidget(this.title, this.tileKey);
 
   /// The title of the testing page
   ///

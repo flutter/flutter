@@ -162,6 +162,69 @@ flags to `bin/run.dart`:
 
 An example of a local engine architecture is `android_debug_unopt_x86`.
 
+## Running an A/B test for engine changes
+
+You can run an A/B test that compares the performance of the default engine
+against a local engine build. The test runs the same benchmark a specified
+number of times against both engines, then outputs a tab-separated spreadsheet
+with the results and stores them in a JSON file for future reference. The
+results can be copied to a Google Spreadsheet for further inspection and the
+JSON file can be reprocessed with the summarize.dart command for more detailed
+output.
+
+Example:
+
+```sh
+../../bin/cache/dart-sdk/bin/dart bin/run.dart --ab=10 \
+  --local-engine=host_debug_unopt \
+  -t bin/tasks/web_benchmarks_canvaskit.dart
+```
+
+The `--ab=10` tells the runner to run an A/B test 10 times.
+
+`--local-engine=host_debug_unopt` tells the A/B test to use the `host_debug_unopt`
+engine build. `--local-engine` is required for A/B test.
+
+`--ab-result-file=filename` can be used to provide an alternate location to output
+the JSON results file (defaults to `ABresults#.json`). A single `#` character can be
+used to indicate where to insert a serial number if a file with that name already
+exists, otherwise the file will be overwritten.
+
+A/B can run exactly one task. Multiple tasks are not supported.
+
+Example output:
+
+```
+Score	Average A (noise)	Average B (noise)	Speed-up
+bench_card_infinite_scroll.canvaskit.drawFrameDuration.average	2900.20 (8.44%)	2426.70 (8.94%)	1.20x
+bench_card_infinite_scroll.canvaskit.totalUiFrame.average	4964.00 (6.29%)	4098.00 (8.03%)	1.21x
+draw_rect.canvaskit.windowRenderDuration.average	1959.45 (16.56%)	2286.65 (0.61%)	0.86x
+draw_rect.canvaskit.sceneBuildDuration.average	1969.45 (16.37%)	2294.90 (0.58%)	0.86x
+draw_rect.canvaskit.drawFrameDuration.average	5335.20 (17.59%)	6437.60 (0.59%)	0.83x
+draw_rect.canvaskit.totalUiFrame.average	6832.00 (13.16%)	7932.00 (0.34%)	0.86x
+```
+
+The output contains averages and noises for each score. More importantly, it
+contains the speed-up value, i.e. how much _faster_ is the local engine than
+the default engine. Values less than 1.0 indicate a slow-down. For example,
+0.5x means the local engine is twice as slow as the default engine, and 2.0x
+means it's twice as fast. Higher is better.
+
+Summarize tool example:
+
+```sh
+../../bin/cache/dart-sdk/bin/dart bin/summarize.dart  --[no-]tsv-table --[no-]raw-summary \
+    ABresults.json ABresults1.json ABresults2.json ...
+```
+
+`--[no-]tsv-table` tells the tool to print the summary in a table with tabs for easy spreadsheet
+entry. (defaults to on)
+
+`--[no-]raw-summary` tells the tool to print all per-run data collected by the A/B test formatted
+with tabs for easy spreadsheet entry. (defaults to on)
+
+Multiple trailing filenames can be specified and each such results file will be processed in turn.
+
 # Reproducing broken builds locally
 
 To reproduce the breakage locally `git checkout` the corresponding Flutter

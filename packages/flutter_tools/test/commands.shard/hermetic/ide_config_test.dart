@@ -58,7 +58,7 @@ void main() {
     void _populateDir(Map<String, String> manifest) {
       for (final String key in manifest.keys) {
         if (manifest[key] == 'dir') {
-          tempDir.childDirectory(key)..createSync(recursive: true);
+          tempDir.childDirectory(key).createSync(recursive: true);
         }
       }
       for (final String key in manifest.keys) {

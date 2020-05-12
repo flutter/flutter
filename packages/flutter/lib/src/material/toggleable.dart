@@ -70,8 +70,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     _position = CurvedAnimation(
       parent: _positionController,
       curve: Curves.linear,
-    )..addListener(markNeedsPaint)
-     ..addStatusListener(_handlePositionStateChanged);
+    )..addListener(markNeedsPaint);
     _reactionController = AnimationController(
       duration: kRadialReactionDuration,
       vsync: vsync,
@@ -335,9 +334,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// Called when the control changes value.
   ///
   /// If the control is tapped, [onChanged] is called immediately with the new
-  /// value. If the control changes value due to an animation (see
-  /// [positionController]), the callback is called when the animation
-  /// completes.
+  /// value.
   ///
   /// The control is considered interactive (see [isInteractive]) if this
   /// callback is non-null. If the callback is null, then the control is
@@ -395,19 +392,6 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     _positionController.stop();
     _reactionController.stop();
     super.detach();
-  }
-
-  // Handle the case where the _positionController's value changes because
-  // the user dragged the toggleable: we may reach 0.0 or 1.0 without
-  // seeing a tap. The Switch does this.
-  void _handlePositionStateChanged(AnimationStatus status) {
-    if (isInteractive && !tristate) {
-      if (status == AnimationStatus.completed && _value == false) {
-        onChanged(true);
-      } else if (status == AnimationStatus.dismissed && _value != false) {
-        onChanged(false);
-      }
-    }
   }
 
   void _handleTapDown(TapDownDetails details) {

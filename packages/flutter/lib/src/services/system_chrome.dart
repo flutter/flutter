@@ -83,6 +83,7 @@ enum SystemUiOverlay {
 /// Specifies a preference for the style of the system overlays.
 ///
 /// Used by [SystemChrome.setSystemUIOverlayStyle].
+@immutable
 class SystemUiOverlayStyle {
   /// Creates a new [SystemUiOverlayStyle].
   const SystemUiOverlayStyle({

@@ -11,13 +11,13 @@ import '../base/logger.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/dart.dart';
+import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/web.dart';
-import '../convert.dart';
+import '../cache.dart';
 import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 
 /// The [WebCompilationProxy] instance.
 WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
@@ -27,20 +27,20 @@ Future<void> buildWeb(
   String target,
   BuildInfo buildInfo,
   bool initializePlatform,
-  List<String> dartDefines,
   bool csp,
+  List<String> experiments,
 ) async {
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
   }
-  final bool hasWebPlugins = findPlugins(flutterProject)
+  final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   await injectPlugins(flutterProject, checkProjects: true);
   final Status status = globals.logger.startProgress('Compiling $target for the Web...', timeout: null);
   final Stopwatch sw = Stopwatch()..start();
   try {
-    final BuildResult result = await buildSystem.build(const WebServiceWorker(), Environment.test(
-      globals.fs.currentDirectory,
+    final BuildResult result = await globals.buildSystem.build(const WebServiceWorker(), Environment(
+      projectDir: globals.fs.currentDirectory,
       outputDir: globals.fs.directory(getWebBuildDirectory()),
       buildDir: flutterProject.directory
         .childDirectory('.dart_tool')
@@ -50,11 +50,21 @@ Future<void> buildWeb(
         kTargetFile: target,
         kInitializePlatform: initializePlatform.toString(),
         kHasWebPlugins: hasWebPlugins.toString(),
-        kDartDefines: jsonEncode(dartDefines),
+        kDartDefines: buildInfo.dartDefines.join(','),
         kCspMode: csp.toString(),
-        // TODO(dnfield): Enable font subset. We need to get a kernel file to do
-        // that. https://github.com/flutter/flutter/issues/49730
+        kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
+        if (experiments.isNotEmpty)
+          kEnableExperiment: experiments?.join(','),
       },
+      artifacts: globals.artifacts,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      cacheDir: globals.cache.getRoot(),
+      engineVersion: globals.artifacts.isLocalEngine
+        ? null
+        : globals.flutterVersion.engineRevision,
+      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
     ));
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
@@ -66,12 +76,12 @@ Future<void> buildWeb(
       }
       throwToolExit('Failed to compile application for the Web.');
     }
-  } catch (err) {
+  } on Exception catch (err) {
     throwToolExit(err.toString());
   } finally {
     status.stop();
   }
-  flutterUsage.sendTiming('build', 'dart2js', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'dart2js', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
 /// An indirection on web compilation.

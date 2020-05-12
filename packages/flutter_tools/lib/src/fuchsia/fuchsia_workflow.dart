@@ -5,7 +5,6 @@
 import '../base/context.dart';
 import '../doctor.dart';
 import '../globals.dart' as globals;
-import 'fuchsia_sdk.dart';
 
 /// The [FuchsiaWorkflow] instance.
 FuchsiaWorkflow get fuchsiaWorkflow => context.get<FuchsiaWorkflow>();
@@ -21,12 +20,12 @@ class FuchsiaWorkflow implements Workflow {
 
   @override
   bool get canListDevices {
-    return fuchsiaArtifacts.devFinder != null;
+    return globals.fuchsiaArtifacts.devFinder != null;
   }
 
   @override
   bool get canLaunchDevices {
-    return fuchsiaArtifacts.devFinder != null && fuchsiaArtifacts.sshConfig != null;
+    return globals.fuchsiaArtifacts.devFinder != null && globals.fuchsiaArtifacts.sshConfig != null;
   }
 
   @override

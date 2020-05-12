@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:usage/uuid/uuid.dart';
 
 import 'artifacts.dart';
@@ -15,7 +16,6 @@ import 'base/terminal.dart';
 import 'build_info.dart';
 import 'codegen.dart';
 import 'convert.dart';
-import 'dart/package_map.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
 
@@ -193,55 +193,8 @@ class StdoutHandler {
   }
 }
 
-/// Converts filesystem paths to package URIs.
-class PackageUriMapper {
-  PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
-    final Map<String, Uri> packageMap = PackageMap(globals.fs.path.absolute(packagesPath)).map;
-    final bool isWindowsPath = globals.platform.isWindows && !scriptPath.startsWith('org-dartlang-app');
-    final String scriptUri = Uri.file(scriptPath, windows: isWindowsPath).toString();
-    for (final String packageName in packageMap.keys) {
-      final String prefix = packageMap[packageName].toString();
-      // Only perform a multi-root mapping if there are multiple roots.
-      if (fileSystemScheme != null
-        && fileSystemRoots != null
-        && fileSystemRoots.length > 1
-        && prefix.contains(fileSystemScheme)) {
-        _packageName = packageName;
-        _uriPrefixes = fileSystemRoots
-          .map((String name) => Uri.file(name, windows:globals.platform.isWindows).toString())
-          .toList();
-        return;
-      }
-      if (scriptUri.startsWith(prefix)) {
-        _packageName = packageName;
-        _uriPrefixes = <String>[prefix];
-        return;
-      }
-    }
-  }
-
-  String _packageName;
-  List<String> _uriPrefixes;
-
-  Uri map(String scriptPath) {
-    if (_packageName == null) {
-      return null;
-    }
-    final String scriptUri = Uri.file(scriptPath, windows: globals.platform.isWindows).toString();
-    for (final String uriPrefix in _uriPrefixes) {
-      if (scriptUri.startsWith(uriPrefix)) {
-        return Uri.parse('package:$_packageName/${scriptUri.substring(uriPrefix.length)}');
-      }
-    }
-    return null;
-  }
-
-  static Uri findUri(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
-    return PackageUriMapper(scriptPath, packagesPath, fileSystemScheme, fileSystemRoots).map(scriptPath);
-  }
-}
-
-List<String> _buildModeOptions(BuildMode mode) {
+/// List the preconfigured build options for a given build mode.
+List<String> buildModeOptions(BuildMode mode) {
   switch (mode) {
     case BuildMode.debug:
       return <String>[
@@ -275,17 +228,18 @@ class KernelCompiler {
     String outputFilePath,
     String depFilePath,
     TargetModel targetModel = TargetModel.flutter,
-    @required BuildMode buildMode,
     bool linkPlatformKernelIn = false,
     bool aot = false,
-    @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
-    String packagesPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
     String initializeFromDill,
     String platformDill,
+    @required String packagesPath,
+    @required BuildMode buildMode,
+    @required bool trackWidgetCreation,
     @required List<String> dartDefines,
+    @required PackageConfig packageConfig,
   }) async {
     final String frontendServer = globals.artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
@@ -300,7 +254,7 @@ class KernelCompiler {
     }
     Uri mainUri;
     if (packagesPath != null) {
-      mainUri = PackageUriMapper.findUri(mainPath, packagesPath, fileSystemScheme, fileSystemRoots);
+      mainUri = packageConfig.toPackageUri(globals.fs.file(mainPath).uri);
     }
     // TODO(jonahwilliams): The output file must already exist, but this seems
     // unnecessary.
@@ -316,7 +270,7 @@ class KernelCompiler {
       '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
-      ..._buildModeOptions(buildMode),
+      ...buildModeOptions(buildMode),
       if (trackWidgetCreation) '--track-widget-creation',
       if (!linkPlatformKernelIn) '--no-link-platform',
       if (aot) ...<String>[
@@ -357,14 +311,9 @@ class KernelCompiler {
     ];
 
     globals.printTrace(command.join(' '));
-    final Process server = await globals.processManager
-      .start(command)
-      .catchError((dynamic error, StackTrace stack) {
-        globals.printError('Failed to start frontend server $error, $stack');
-      });
+    final Process server = await globals.processManager.start(command);
 
     final StdoutHandler _stdoutHandler = StdoutHandler();
-
     server.stderr
       .transform<String>(utf8.decoder)
       .listen(globals.printError);
@@ -396,16 +345,16 @@ abstract class _CompilationRequest {
 class _RecompileRequest extends _CompilationRequest {
   _RecompileRequest(
     Completer<CompilerOutput> completer,
-    this.mainPath,
+    this.mainUri,
     this.invalidatedFiles,
     this.outputPath,
-    this.packagesFilePath,
+    this.packageConfig,
   ) : super(completer);
 
-  String mainPath;
+  Uri mainUri;
   List<Uri> invalidatedFiles;
   String outputPath;
-  String packagesFilePath;
+  PackageConfig packageConfig;
 
   @override
   Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
@@ -435,6 +384,31 @@ class _CompileExpressionRequest extends _CompilationRequest {
       compiler._compileExpression(this);
 }
 
+class _CompileExpressionToJsRequest extends _CompilationRequest {
+  _CompileExpressionToJsRequest(
+    Completer<CompilerOutput> completer,
+    this.libraryUri,
+    this.line,
+    this.column,
+    this.jsModules,
+    this.jsFrameValues,
+    this.moduleName,
+    this.expression,
+  ) : super(completer);
+
+  final String libraryUri;
+  final int line;
+  final int column;
+  final Map<String, String> jsModules;
+  final Map<String, String> jsFrameValues;
+  final String moduleName;
+  final String expression;
+
+  @override
+  Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
+      compiler._compileExpressionToJs(this);
+}
+
 class _RejectRequest extends _CompilationRequest {
   _RejectRequest(Completer<CompilerOutput> completer) : super(completer);
 
@@ -462,13 +436,13 @@ abstract class ResidentCompiler {
     List<String> experimentalFlags,
     String platformDill,
     List<String> dartDefines,
+    String librariesSpec,
   }) = DefaultResidentCompiler;
 
   // TODO(jonahwilliams): find a better way to configure additional file system
   // roots from the runner.
   // See: https://github.com/flutter/flutter/issues/50494
   void addFileSystemRoot(String root);
-
 
   /// If invoked for the first time, it compiles Dart script identified by
   /// [mainPath], [invalidatedFiles] list is ignored.
@@ -478,10 +452,10 @@ abstract class ResidentCompiler {
   /// Binary file name is returned if compilation was successful, otherwise
   /// null is returned.
   Future<CompilerOutput> recompile(
-    String mainPath,
+    Uri mainUri,
     List<Uri> invalidatedFiles, {
     @required String outputPath,
-    String packagesFilePath,
+    @required PackageConfig packageConfig,
   });
 
   Future<CompilerOutput> compileExpression(
@@ -491,6 +465,36 @@ abstract class ResidentCompiler {
     String libraryUri,
     String klass,
     bool isStatic,
+  );
+
+  /// Compiles [expression] in [libraryUri] at [line]:[column] to JavaScript
+  /// in [moduleName].
+  ///
+  /// Values listed in [jsFrameValues] are substituted for their names in the
+  /// [expression].
+  ///
+  /// Ensures that all [jsModules] are loaded and accessible inside the
+  /// expression.
+  ///
+  /// Example values of parameters:
+  /// [moduleName] is of the form '/packages/hello_world_main.dart'
+  /// [jsFrameValues] is a map from js variable name to its primitive value
+  /// or another variable name, for example
+  /// { 'x': '1', 'y': 'y', 'o': 'null' }
+  /// [jsModules] is a map from variable name to the module name, where
+  /// variable name is the name originally used in JavaScript to contain the
+  /// module object, for example:
+  /// { 'dart':'dart_sdk', 'main': '/packages/hello_world_main.dart' }
+  /// Returns a [CompilerOutput] including the name of the file containing the
+  /// compilation result and a number of errors
+  Future<CompilerOutput> compileExpressionToJs(
+    String libraryUri,
+    int line,
+    int column,
+    Map<String, String> jsModules,
+    Map<String, String> jsFrameValues,
+    String moduleName,
+    String expression,
   );
 
   /// Should be invoked when results of compilation are accepted by the client.
@@ -527,6 +531,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.experimentalFlags,
     this.platformDill,
     List<String> dartDefines,
+    this.librariesSpec,
   }) : assert(sdkRoot != null),
        _stdoutHandler = StdoutHandler(consumer: compilerMessageConsumer),
        dartDefines = dartDefines ?? const <String>[],
@@ -543,6 +548,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final bool unsafePackageSerialization;
   final List<String> experimentalFlags;
   final List<String> dartDefines;
+  final String librariesSpec;
 
   @override
   void addFileSystemRoot(String root) {
@@ -567,56 +573,46 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
   @override
   Future<CompilerOutput> recompile(
-    String mainPath,
+    Uri mainUri,
     List<Uri> invalidatedFiles, {
     @required String outputPath,
-    String packagesFilePath,
+    @required PackageConfig packageConfig,
   }) async {
-    assert (outputPath != null);
+    assert(outputPath != null);
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
     final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
     _controller.add(
-        _RecompileRequest(completer, mainPath, invalidatedFiles, outputPath, packagesFilePath)
+      _RecompileRequest(completer, mainUri, invalidatedFiles, outputPath, packageConfig)
     );
     return completer.future;
   }
 
   Future<CompilerOutput> _recompile(_RecompileRequest request) async {
     _stdoutHandler.reset();
-
-    // First time recompile is called we actually have to compile the app from
-    // scratch ignoring list of invalidated files.
-    PackageUriMapper packageUriMapper;
-    if (request.packagesFilePath != null || packagesPath != null) {
-      packageUriMapper = PackageUriMapper(
-        request.mainPath,
-        request.packagesFilePath ?? packagesPath,
-        fileSystemScheme,
-        fileSystemRoots,
-      );
-    }
-
     _compileRequestNeedsConfirmation = true;
 
     if (_server == null) {
       return _compile(
-        _mapFilename(request.mainPath, packageUriMapper),
+        request.packageConfig.toPackageUri(request.mainUri)?.toString() ?? request.mainUri.toString(),
         request.outputPath,
-        _mapFilename(request.packagesFilePath ?? packagesPath, /* packageUriMapper= */ null),
       );
     }
-
     final String inputKey = Uuid().generateV4();
-    final String mainUri = request.mainPath != null
-        ? _mapFilename(request.mainPath, packageUriMapper) + ' '
-        : '';
-    _server.stdin.writeln('recompile $mainUri$inputKey');
-    globals.printTrace('<- recompile $mainUri$inputKey');
+    final String mainUri = request.packageConfig.toPackageUri(request.mainUri)?.toString()
+      ?? request.mainUri.toString();
+    _server.stdin.writeln('recompile $mainUri $inputKey');
+    globals.printTrace('<- recompile $mainUri $inputKey');
     for (final Uri fileUri in request.invalidatedFiles) {
-      final String message = _mapFileUri(fileUri.toString(), packageUriMapper);
+      String message;
+      if (fileUri.scheme == 'package') {
+        message = fileUri.toString();
+      } else {
+        message = request.packageConfig.toPackageUri(fileUri)?.toString()
+          ?? fileUri.toString();
+      }
       _server.stdin.writeln(message);
       globals.printTrace(message);
     }
@@ -646,7 +642,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
   Future<CompilerOutput> _compile(
     String scriptUri,
     String outputPath,
-    String packagesFilePath,
   ) async {
     final String frontendServer = globals.artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
@@ -658,6 +653,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
       sdkRoot,
       '--incremental',
       '--target=$targetModel',
+      // TODO(jonahwilliams): remove once this becomes the default behavior
+      // in the frontend_server.
+      // https://github.com/flutter/flutter/issues/52693
+      '--debugger-module-names',
       '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
@@ -665,14 +664,15 @@ class DefaultResidentCompiler implements ResidentCompiler {
         '--output-dill',
         outputPath,
       ],
-      if (packagesFilePath != null) ...<String>[
-        '--packages',
-        packagesFilePath,
-      ] else if (packagesPath != null) ...<String>[
+      if (librariesSpec != null) ...<String>[
+        '--libraries-spec',
+        librariesSpec,
+      ],
+      if (packagesPath != null) ...<String>[
         '--packages',
         packagesPath,
       ],
-      ..._buildModeOptions(buildMode),
+      ...buildModeOptions(buildMode),
       if (trackWidgetCreation) '--track-widget-creation',
       if (fileSystemRoots != null)
         for (final String root in fileSystemRoots) ...<String>[
@@ -773,6 +773,52 @@ class DefaultResidentCompiler implements ResidentCompiler {
   }
 
   @override
+  Future<CompilerOutput> compileExpressionToJs(
+    String libraryUri,
+    int line,
+    int column,
+    Map<String, String> jsModules,
+    Map<String, String> jsFrameValues,
+    String moduleName,
+    String expression,
+  ) {
+    if (!_controller.hasListener) {
+      _controller.stream.listen(_handleCompilationRequest);
+    }
+
+    final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
+    _controller.add(
+        _CompileExpressionToJsRequest(
+            completer, libraryUri, line, column, jsModules, jsFrameValues, moduleName, expression)
+    );
+    return completer.future;
+  }
+
+  Future<CompilerOutput> _compileExpressionToJs(_CompileExpressionToJsRequest request) async {
+    _stdoutHandler.reset(suppressCompilerMessages: false, expectSources: false);
+
+    // 'compile-expression-to-js' should be invoked after compiler has been started,
+    // program was compiled.
+    if (_server == null) {
+      return null;
+    }
+
+    final String inputKey = Uuid().generateV4();
+    _server.stdin.writeln('compile-expression-to-js $inputKey');
+    _server.stdin.writeln(request.libraryUri ?? '');
+    _server.stdin.writeln(request.line);
+    _server.stdin.writeln(request.column);
+    request.jsModules?.forEach((String k, String v) { _server.stdin.writeln('$k:$v'); });
+    _server.stdin.writeln(inputKey);
+    request.jsFrameValues?.forEach((String k, String v) { _server.stdin.writeln('$k:$v'); });
+    _server.stdin.writeln(inputKey);
+    _server.stdin.writeln(request.moduleName ?? '');
+    _server.stdin.writeln(request.expression ?? '');
+
+    return _stdoutHandler.compilerOutput.future;
+  }
+
+  @override
   void accept() {
     if (_compileRequestNeedsConfirmation) {
       _server.stdin.writeln('accept');
@@ -807,43 +853,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
   void reset() {
     _server?.stdin?.writeln('reset');
     globals.printTrace('<- reset');
-  }
-
-  String _mapFilename(String filename, PackageUriMapper packageUriMapper) {
-    return _doMapFilename(filename, packageUriMapper) ?? filename;
-  }
-
-  String _mapFileUri(String fileUri, PackageUriMapper packageUriMapper) {
-    String filename;
-    try {
-      filename = Uri.parse(fileUri).toFilePath();
-    } on UnsupportedError catch (_) {
-      return fileUri;
-    }
-    return _doMapFilename(filename, packageUriMapper) ?? fileUri;
-  }
-
-  String _doMapFilename(String filename, PackageUriMapper packageUriMapper) {
-    if (packageUriMapper != null) {
-      final Uri packageUri = packageUriMapper.map(filename);
-      if (packageUri != null) {
-        return packageUri.toString();
-      }
-    }
-
-    if (fileSystemRoots != null) {
-      for (final String root in fileSystemRoots) {
-        if (filename.startsWith(root)) {
-          return Uri(
-              scheme: fileSystemScheme, path: filename.substring(root.length))
-              .toString();
-        }
-      }
-    }
-    if (globals.platform.isWindows && fileSystemRoots != null && fileSystemRoots.length > 1) {
-      return Uri.file(filename, windows: globals.platform.isWindows).toString();
-    }
-    return null;
   }
 
   @override

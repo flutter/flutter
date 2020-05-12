@@ -12,20 +12,20 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/fuchsia/application_package.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 
-final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final Generator _kNoColorTerminalPlatform = () => FakePlatform(stdoutSupportsAnsi: false);
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
@@ -91,6 +91,7 @@ void main() {
 
       final ApplicationPackage applicationPackage = await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
+        buildInfo: null,
         applicationBinary: apkFile,
       );
       expect(applicationPackage.name, 'app.apk');
@@ -117,6 +118,7 @@ void main() {
 
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
+        buildInfo: null,
         applicationBinary: globals.fs.file('app.apk'),
       );
       verify(
@@ -134,6 +136,7 @@ void main() {
 
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
+        buildInfo: null,
       );
       verifyNever(
         mockProcessManager.run(
@@ -206,7 +209,7 @@ void main() {
   });
 
   group('PrebuiltIOSApp', () {
-    final MockOperatingSystemUtils os = MockOperatingSystemUtils();
+    MockOperatingSystemUtils os;
     final Map<Type, Generator> overrides = <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -214,6 +217,10 @@ void main() {
       Platform: _kNoColorTerminalPlatform,
       OperatingSystemUtils: () => os,
     };
+
+    setUp(() {
+      os = MockOperatingSystemUtils();
+    });
 
     testUsingContext('Error on non-existing file', () {
       final PrebuiltIOSApp iosApp =
@@ -324,7 +331,7 @@ void main() {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
       final BuildableIOSApp iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios) as BuildableIOSApp;
+        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp;
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -334,7 +341,7 @@ void main() {
       globals.fs.file('.packages').createSync();
       globals.fs.file('ios/FooBar.xcodeproj').createSync(recursive: true);
       final BuildableIOSApp iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios) as BuildableIOSApp;
+        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp;
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -344,7 +351,7 @@ void main() {
       globals.fs.file('.packages').createSync();
       globals.fs.file('ios/Runner.xcodeproj').createSync(recursive: true);
       final BuildableIOSApp iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios) as BuildableIOSApp;
+        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp;
 
       expect(iosApp, null);
     }, overrides: overrides);

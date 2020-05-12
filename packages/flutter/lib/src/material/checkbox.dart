@@ -169,17 +169,17 @@ class Checkbox extends StatefulWidget {
 
 class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
   bool get enabled => widget.onChanged != null;
-  Map<LocalKey, ActionFactory> _actionMap;
+  Map<Type, Action<Intent>> _actionMap;
 
   @override
   void initState() {
     super.initState();
-    _actionMap = <LocalKey, ActionFactory>{
-      ActivateAction.key: _createAction,
+    _actionMap = <Type, Action<Intent>>{
+      ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _actionHandler),
     };
   }
 
-  void _actionHandler(FocusNode node, Intent intent){
+  void _actionHandler(ActivateIntent intent) {
     if (widget.onChanged != null) {
       switch (widget.value) {
         case false:
@@ -193,15 +193,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
           break;
       }
     }
-    final RenderObject renderObject = node.context.findRenderObject();
+    final RenderObject renderObject = context.findRenderObject();
     renderObject.sendSemanticsEvent(const TapSemanticEvent());
-  }
-
-  Action _createAction() {
-    return CallbackAction(
-      ActivateAction.key,
-      onInvoke: _actionHandler,
-    );
   }
 
   bool _focused = false;

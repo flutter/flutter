@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_driver/driver_extension.dart';
-import 'message.dart' as generated; // ignore: uri_does_not_exist
+import 'message.dart' as generated;
 
 Future<void> main() async {
   enableFlutterDriverExtension();
