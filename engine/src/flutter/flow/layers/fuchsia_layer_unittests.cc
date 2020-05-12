@@ -384,7 +384,9 @@ class AutoDestroyChildLayerId {
 // node; PhysicalShapeLayers created afterward do.
 //
 // Nested PhysicalShapeLayers are collapsed.
-TEST_F(FuchsiaLayerTest, PhysicalShapeLayersAndChildSceneLayers) {
+//
+// This test has been temporarily disabled: fxb/52028
+TEST_F(FuchsiaLayerTest, DISABLED_PhysicalShapeLayersAndChildSceneLayers) {
   auto test_context = InitTest();
 
   // Root.
@@ -617,7 +619,8 @@ TEST_F(FuchsiaLayerTest, PhysicalShapeLayersAndChildSceneLayers) {
 // We are interested in verifying that the opacity values of children are
 // correct, and the transform values as well.
 //
-TEST_F(FuchsiaLayerTest, OpacityAndTransformLayer) {
+// This test has been temporarily disabled: fxb/52028
+TEST_F(FuchsiaLayerTest, DISABLED_OpacityAndTransformLayer) {
   auto test_context = InitTest();
 
   // Root.
