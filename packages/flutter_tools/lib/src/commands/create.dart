@@ -76,7 +76,7 @@ class CreateCommand extends FlutterCommand {
     argParser.addOption(
       'list-samples',
       help: 'Specifies a JSON output file for a listing of Flutter code samples '
-        'that can created with --sample.',
+        'that can be created with --sample.',
       valueHelp: 'path',
     );
     argParser.addFlag(
