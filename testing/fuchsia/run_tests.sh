@@ -104,23 +104,24 @@ echo "$(date) START:flow_tests --------------------------------------"
     --timeout-seconds 300 \
     --packages-directory packages
 
-echo "$(date) START:runtime_tests -----------------------------------"
-./fuchsia_ctl -d $device_name test \
-    -f runtime_tests-0.far  \
-    -t runtime_tests \
-    --identity-file $pkey \
-    --timeout-seconds 300 \
-    --packages-directory packages
+# TODO (kaushikiska): Re-enable runtime and shell tests,
+# see: https://github.com/flutter/flutter/issues/57061
+# echo "$(date) START:runtime_tests -----------------------------------"
+# ./fuchsia_ctl -d $device_name test \
+#     -f runtime_tests-0.far  \
+#     -t runtime_tests \
+#     --identity-file $pkey \
+#     --timeout-seconds 300 \
+#     --packages-directory packages
 
 # TODO(https://github.com/flutter/flutter/issues/53399): Re-enable
 # OnServiceProtocolGetSkSLsWorks and CanLoadSkSLsFromAsset once they pass on
 # Fuchsia.
-echo "$(date) START:shell_tests -------------------------------------"
-./fuchsia_ctl -d $device_name test \
-    -f shell_tests-0.far  \
-    -t shell_tests \
-    -a "--gtest_filter=-ShellTest.CacheSkSLWorks:ShellTest.SetResourceCacheSize*:ShellTest.OnServiceProtocolGetSkSLsWorks:ShellTest.CanLoadSkSLsFromAsset" \
-    --identity-file $pkey \
-    --timeout-seconds 300 \
-    --packages-directory packages
-
+# echo "$(date) START:shell_tests -------------------------------------"
+# ./fuchsia_ctl -d $device_name test \
+#     -f shell_tests-0.far  \
+#     -t shell_tests \
+#     -a "--gtest_filter=-ShellTest.CacheSkSLWorks:ShellTest.SetResourceCacheSize*:ShellTest.OnServiceProtocolGetSkSLsWorks:ShellTest.CanLoadSkSLsFromAsset" \
+#     --identity-file $pkey \
+#     --timeout-seconds 300 \
+#     --packages-directory packages
