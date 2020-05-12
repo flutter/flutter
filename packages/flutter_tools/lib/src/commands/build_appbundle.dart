@@ -5,10 +5,10 @@
 import 'dart:async';
 
 import '../android/android_builder.dart';
-import '../android/android_sdk.dart';
 import '../android/gradle_utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -76,7 +76,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (androidSdk == null) {
+    if (globals.androidSdk == null) {
       exitWithNoSdkMessage();
     }
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(getBuildInfo(),

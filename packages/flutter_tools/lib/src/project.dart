@@ -102,11 +102,14 @@ class FlutterProject {
   /// Gradle group ID.
   Future<Set<String>> get organizationNames async {
     final List<String> candidates = <String>[
-      await ios.productBundleIdentifier,
+      // Don't require iOS build info, this method is only
+      // used during create as best-effort, use the
+      // default target bundle identifier.
+      await ios.productBundleIdentifier(null),
       android.applicationId,
       android.group,
       example.android.applicationId,
-      await example.ios.productBundleIdentifier,
+      await example.ios.productBundleIdentifier(null),
     ];
     return Set<String>.of(candidates
         .map<String>(_organizationNameFromPackageName)
@@ -411,11 +414,11 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
 
   /// The product bundle identifier of the host app, or null if not set or if
   /// iOS tooling needed to read it is not installed.
-  Future<String> get productBundleIdentifier async =>
-    _productBundleIdentifier ??= await _parseProductBundleIdentifier();
+  Future<String> productBundleIdentifier(BuildInfo buildInfo) async =>
+    _productBundleIdentifier ??= await _parseProductBundleIdentifier(buildInfo);
   String _productBundleIdentifier;
 
-  Future<String> _parseProductBundleIdentifier() async {
+  Future<String> _parseProductBundleIdentifier(BuildInfo buildInfo) async {
     String fromPlist;
     final File defaultInfoPlist = defaultHostInfoPlist;
     // Users can change the location of the Info.plist.
@@ -434,7 +437,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
         return fromPlist;
       }
     }
-    final Map<String, String> allBuildSettings = await buildSettings;
+    final Map<String, String> allBuildSettings = await buildSettingsForBuildInfo(buildInfo);
     if (allBuildSettings != null) {
       if (fromPlist != null) {
         // Perform variable substitution using build settings.
@@ -458,18 +461,18 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
 
   /// The bundle name of the host app, `My App.app`.
-  Future<String> get hostAppBundleName async =>
-    _hostAppBundleName ??= await _parseHostAppBundleName();
+  Future<String> hostAppBundleName(BuildInfo buildInfo) async =>
+    _hostAppBundleName ??= await _parseHostAppBundleName(buildInfo);
   String _hostAppBundleName;
 
-  Future<String> _parseHostAppBundleName() async {
+  Future<String> _parseHostAppBundleName(BuildInfo buildInfo) async {
     // The product name and bundle name are derived from the display name, which the user
     // is instructed to change in Xcode as part of deploying to the App Store.
     // https://flutter.dev/docs/deployment/ios#review-xcode-project-settings
     // The only source of truth for the name is Xcode's interpretation of the build settings.
     String productName;
     if (globals.xcodeProjectInterpreter.isInstalled) {
-      final Map<String, String> xcodeBuildSettings = await buildSettings;
+      final Map<String, String> xcodeBuildSettings = await buildSettingsForBuildInfo(buildInfo);
       if (xcodeBuildSettings != null) {
         productName = xcodeBuildSettings['FULL_PRODUCT_NAME'];
       }
@@ -483,17 +486,20 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   /// The build settings for the host app of this project, as a detached map.
   ///
   /// Returns null, if iOS tooling is unavailable.
-  Future<Map<String, String>> get buildSettings async =>
-    _buildSettings ??= await _xcodeProjectBuildSettings();
-  Map<String, String> _buildSettings;
+  Future<Map<String, String>> buildSettingsForBuildInfo(BuildInfo buildInfo) async {
+    _buildSettingsByScheme ??= <String, Map<String, String>>{};
+    final String scheme = xcode.XcodeProjectInfo.expectedSchemeFor(buildInfo);
+    return _buildSettingsByScheme[scheme] ??= await _xcodeProjectBuildSettings(scheme);
+  }
+  Map<String, Map<String, String>> _buildSettingsByScheme;
 
-  Future<Map<String, String>> _xcodeProjectBuildSettings() async {
+  Future<Map<String, String>> _xcodeProjectBuildSettings(String scheme) async {
     if (!globals.xcodeProjectInterpreter.isInstalled) {
       return null;
     }
     final Map<String, String> buildSettings = await globals.xcodeProjectInterpreter.getBuildSettings(
       xcodeProject.path,
-      _hostAppProjectName,
+      scheme: scheme,
     );
     if (buildSettings != null && buildSettings.isNotEmpty) {
       // No timeouts, flakes, or errors.
@@ -511,8 +517,8 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
 
   /// Check if one the [targets] of the project is a watchOS companion app target.
-  Future<bool> containsWatchCompanion(List<String> targets) async {
-    final String bundleIdentifier = await productBundleIdentifier;
+  Future<bool> containsWatchCompanion(List<String> targets, BuildInfo buildInfo) async {
+    final String bundleIdentifier = await productBundleIdentifier(buildInfo);
     // A bundle identifier is required for a companion app.
     if (bundleIdentifier == null) {
       return false;

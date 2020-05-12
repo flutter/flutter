@@ -129,7 +129,6 @@ void main() {
         final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
           requests: <VmServiceExpectation>[
             FakeVmServiceRequest(
-              id: '1',
               method: '_createDevFS',
               args: <String, Object>{
                 'fsName': 'test',
@@ -202,7 +201,6 @@ void main() {
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           FakeVmServiceRequest(
-            id: '1',
             method: '_createDevFS',
             args: <String, Object>{
               'fsName': 'test',

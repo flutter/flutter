@@ -40,6 +40,18 @@ class ValueClipper<T> extends CustomClipper<T> {
   }
 }
 
+class NotifyClipper<T> extends CustomClipper<T> {
+  NotifyClipper({this.clip}) : super(reclip: clip);
+
+  final ValueNotifier<T> clip;
+
+  @override
+  T getClip(Size size) => clip.value;
+
+  @override
+  bool shouldReclip(NotifyClipper<T> oldClipper) => clip != oldClipper.clip;
+}
+
 class _UpdateCountedClipRect extends ClipRect {
   const _UpdateCountedClipRect({Clip clipBehavior = Clip.antiAlias})
     : super(clipBehavior: clipBehavior);
@@ -836,5 +848,38 @@ void main() {
       '--5',
       'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
     ]);
+  });
+
+  testWidgets('CustomClipper reclips when notified', (WidgetTester tester) async {
+    final ValueNotifier<Rect> clip = ValueNotifier<Rect>(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+
+    await tester.pumpWidget(
+      ClipRect(
+        child: const Placeholder(),
+        clipper: NotifyClipper<Rect>(clip: clip),
+      ),
+    );
+
+    expect(tester.renderObject(find.byType(ClipRect)).paint, paints
+      ..save()
+      ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0))
+      ..save()
+      ..path() // Placeholder
+      ..restore()
+      ..restore(),
+    );
+
+    expect(tester.renderObject(find.byType(ClipRect)).debugNeedsPaint, isFalse);
+    clip.value = const Rect.fromLTWH(50.0, 50.0, 150.0, 100.0);
+    expect(tester.renderObject(find.byType(ClipRect)).debugNeedsPaint, isTrue);
+
+    expect(tester.renderObject(find.byType(ClipRect)).paint, paints
+      ..save()
+      ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 150.0, 100.0))
+      ..save()
+      ..path() // Placeholder
+      ..restore()
+      ..restore(),
+    );
   });
 }

@@ -2243,7 +2243,6 @@ void main() {
             ),
           ),
         );
-
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
         expect(tester.getTopLeft(find.text('text')).dy, 15.0);
         expect(tester.getBottomLeft(find.text('text')).dy, 31.0);
@@ -2630,6 +2629,79 @@ void main() {
     expect(getBorderWeight(tester), 1.0);
   });
 
+  testWidgets('contentPadding smaller than kMinInteractiveDimension', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/42449
+    const double verticalPadding = 1.0;
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default),
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          hintText: 'hint',
+          contentPadding: EdgeInsets.symmetric(vertical: verticalPadding),
+          isDense: true,
+        ),
+      ),
+    );
+
+    // The overall height is 18dps. This is shorter than
+    // kMinInteractiveDimension, but because isDense is true, the minimum is
+    // ignored.
+    //   16 - input text (ahem font size 16dps)
+    //    2 - total vertical padding
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 18.0));
+    expect(tester.getSize(find.text('text')).height, 16.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 1.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
+    expect(getBorderWeight(tester), 1.0);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default),
+        // isFocused: false (default)
+        decoration: const InputDecoration.collapsed(
+          hintText: 'hint',
+          // InputDecoration.collapsed does not support contentPadding
+        ),
+      ),
+    );
+
+    // The overall height is 16dps. This is shorter than
+    // kMinInteractiveDimension, but because isCollapsed is true, the minimum is
+    // ignored. There is no padding at all, because isCollapsed doesn't support
+    // contentPadding.
+    //   16 - input text (ahem font size 16dps)
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 16.0));
+    expect(tester.getSize(find.text('text')).height, 16.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 0.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
+    expect(getBorderWeight(tester), 1.0);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default),
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          hintText: 'hint',
+          contentPadding: EdgeInsets.symmetric(vertical: verticalPadding),
+        ),
+      ),
+    );
+
+    // The requested overall height is 18dps, however the minimum height is
+    // kMinInteractiveDimension because neither isDense or isCollapsed are true.
+    //   16 - input text (ahem font size 16dps)
+    //    2 - total vertical padding
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
+    expect(tester.getSize(find.text('text')).height, 16.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
+    expect(getBorderWeight(tester), 0.0);
+  });
+
   testWidgets('InputDecorator.collapsed', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
@@ -2641,12 +2713,13 @@ void main() {
       ),
     );
 
-    // Overall height for this InputDecorator is 16dps:
+    // Overall height for this InputDecorator is 16dps. There is no minimum
+    // height when InputDecoration.collapsed is used.
     //   16 - input text (ahem font size 16dps)
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 16 bumped up to minimum.
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 16.0));
     expect(tester.getSize(find.text('text')).height, 16.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 0.0);
     expect(getOpacity(tester, 'hint'), 0.0);
     expect(getBorderWeight(tester), 0.0);
 
@@ -2662,11 +2735,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 16.0));
     expect(tester.getSize(find.text('text')).height, 16.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 0.0);
     expect(tester.getSize(find.text('hint')).height, 16.0);
-    expect(tester.getTopLeft(find.text('hint')).dy, 16.0);
+    expect(tester.getTopLeft(find.text('hint')).dy, 0.0);
     expect(getBorderWeight(tester), 0.0);
   });
 
