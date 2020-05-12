@@ -142,12 +142,14 @@ FlutterPlatform installHook({
 ///
 /// The [updateGoldens] argument will set the [autoUpdateGoldens] global
 /// variable in the [flutter_test] package before invoking the test.
+// NOTE: this API is used by the fuchsia source tree, do not add new
+// required or position parameters.
 String generateTestBootstrap({
   @required Uri testUrl,
   @required InternetAddress host,
   File testConfigFile,
   bool updateGoldens = false,
-  @required bool nullSafety,
+  bool nullSafety = false,
 }) {
   assert(testUrl != null);
   assert(host != null);
