@@ -13,10 +13,16 @@ static const char _kTextAffinityUpstream[] = "TextAffinity.upstream";
 
 static UIKeyboardType ToUIKeyboardType(NSDictionary* type) {
   NSString* inputType = type[@"name"];
-  if ([inputType isEqualToString:@"TextInputType.text"])
+  if ([inputType isEqualToString:@"TextInputType.address"])
     return UIKeyboardTypeDefault;
+  if ([inputType isEqualToString:@"TextInputType.datetime"])
+    return UIKeyboardTypeNumbersAndPunctuation;
+  if ([inputType isEqualToString:@"TextInputType.emailAddress"])
+    return UIKeyboardTypeEmailAddress;
   if ([inputType isEqualToString:@"TextInputType.multiline"])
     return UIKeyboardTypeDefault;
+  if ([inputType isEqualToString:@"TextInputType.name"])
+    return UIKeyboardTypeNamePhonePad;
   if ([inputType isEqualToString:@"TextInputType.number"]) {
     if ([type[@"signed"] boolValue])
       return UIKeyboardTypeNumbersAndPunctuation;
@@ -26,8 +32,8 @@ static UIKeyboardType ToUIKeyboardType(NSDictionary* type) {
   }
   if ([inputType isEqualToString:@"TextInputType.phone"])
     return UIKeyboardTypePhonePad;
-  if ([inputType isEqualToString:@"TextInputType.emailAddress"])
-    return UIKeyboardTypeEmailAddress;
+  if ([inputType isEqualToString:@"TextInputType.text"])
+    return UIKeyboardTypeDefault;
   if ([inputType isEqualToString:@"TextInputType.url"])
     return UIKeyboardTypeURL;
   return UIKeyboardTypeDefault;
@@ -193,6 +199,10 @@ static UITextContentType ToUITextContentType(NSArray<NSString*>* hints) {
   if (@available(iOS 12.0, *)) {
     if ([hint isEqualToString:@"oneTimeCode"]) {
       return UITextContentTypeOneTimeCode;
+    }
+
+    if ([hint isEqualToString:@"newPassword"]) {
+      return UITextContentTypeNewPassword;
     }
   }
 

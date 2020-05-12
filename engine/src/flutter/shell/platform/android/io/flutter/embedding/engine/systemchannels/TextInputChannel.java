@@ -544,6 +544,8 @@ public class TextInputChannel {
   public enum TextInputType {
     TEXT("TextInputType.text"),
     DATETIME("TextInputType.datetime"),
+    NAME("TextInputType.name"),
+    POSTAL_ADDRESS("TextInputType.address"),
     NUMBER("TextInputType.number"),
     PHONE("TextInputType.phone"),
     MULTILINE("TextInputType.multiline"),
