@@ -1056,7 +1056,7 @@ class ThemeData with Diagnosticable {
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
-    //Brightness brightness,
+    Brightness brightness, // ignored
     VisualDensity visualDensity,
     Color primaryColor,
     Brightness primaryColorBrightness,
