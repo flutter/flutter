@@ -40,7 +40,7 @@ class RawMaterialButton extends StatefulWidget {
     @required this.onPressed,
     this.onLongPress,
     this.onHighlightChanged,
-    this.mouseCursor,
+    this.mouseCursor = SystemMouseCursors.click,
     this.textStyle,
     this.fillColor,
     this.focusColor,
@@ -103,7 +103,8 @@ class RawMaterialButton extends StatefulWidget {
   /// [State.setState] is not allowed).
   final ValueChanged<bool> onHighlightChanged;
 
-  /// {@macro flutter.material.inkwell.mousecursor}
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
   ///
   /// If the property is null, [SystemMouseCursor.click] is used.
   final MouseCursor mouseCursor;

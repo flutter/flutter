@@ -431,6 +431,51 @@ void main() {
     await gesture.removePointer();
   });
 
+  testWidgets('RaisedButton changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RaisedButton(
+          mouseCursor: SystemMouseCursors.forbidden,
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(RaisedButton)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RaisedButton(
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RaisedButton.icon(
+          onPressed: () { },
+          icon: const Icon(Icons.add),
+          label: const Text('Hello'),
+        ),
+      ),
+    );
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
+
   testWidgets('Does RaisedButton work with focus', (WidgetTester tester) async {
     const Color focusColor = Color(0xff001122);
 

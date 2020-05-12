@@ -1108,6 +1108,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     return IgnorePointer(
       ignoring: !_isEnabled,
       child: MouseRegion(
+        cursor: SystemMouseCursors.text,
         onEnter: (PointerEnterEvent event) => _handleHover(true),
         onExit: (PointerExitEvent event) => _handleHover(false),
         child: AnimatedBuilder(

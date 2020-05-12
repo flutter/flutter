@@ -189,6 +189,64 @@ void main() {
     expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
   });
 
+  testWidgets('InkWell.mouseCursor changes cursor on hover', (WidgetTester tester) async {
+    final GlobalKey innerKey = GlobalKey();
+    // Test argument works
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: InkWell(
+              mouseCursor: SystemMouseCursors.forbidden,
+              child: Container(
+                width: 100,
+                height: 100,
+                child: InkWell(
+                  key: innerKey,
+                  mouseCursor: SystemMouseCursors.click,
+                  onTap: () {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byKey(innerKey)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default is null
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: InkWell(
+              mouseCursor: SystemMouseCursors.forbidden,
+              child: Container(
+                width: 100,
+                height: 100,
+                child: InkWell(
+                  key: innerKey,
+                  onTap: () {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+  });
+
   group('feedback', () {
     FeedbackTester feedback;
 
