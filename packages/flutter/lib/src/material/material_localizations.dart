@@ -29,11 +29,13 @@ import 'typography.dart';
 //    flutter_localizations package, you must first add it to the English
 //    translations (lib/src/l10n/material_en.arb), including a description.
 //
-//    Then you need to add  new `TBD` entries for the string to all of the other
+//    Then you need to add new entries for the string to all of the other
 //    language locale files by running:
 //    ```
 //    dart dev/tools/localization/bin/gen_missing_localizations.dart
 //    ```
+//    Which will copy the english strings into the other locales as placeholders
+//    until they can be translated.
 //
 //    Finally you need to re-generate lib/src/l10n/localizations.dart by running:
 //    ```
@@ -45,10 +47,6 @@ import 'typography.dart';
 //
 // 5. If you are a Google employee, you should then also follow the instructions
 //    at go/flutter-l10n. If you're not, don't worry about it.
-//
-// 6. If you're adding a String for the sake of Flutter, not for an app-specific
-//    version of this interface, you are making a breaking API change. See
-//    https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes.
 
 /// Defines the localized resource values used by the Material widgets.
 ///
