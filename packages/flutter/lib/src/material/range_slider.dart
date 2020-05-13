@@ -41,54 +41,22 @@ typedef PaintRangeValueIndicator = void Function(PaintingContext context, Offset
 /// This sample shows creation of a [RangeSlider] widget with 5 divisions.
 ///
 /// ```dart
-/// RangeValues _rangeSliderDiscreteValues = const RangeValues(40, 80);
+/// RangeValues _values = const RangeValues(40, 80);
 ///
 /// @override
 /// Widget build(BuildContext context) {
 ///   return RangeSlider(
-///     values: _rangeSliderDiscreteValues,
+///     values: _values,
 ///     min: 0,
 ///     max: 100,
 ///     divisions: 5,
 ///     labels: RangeLabels(
-///       _rangeSliderDiscreteValues.start.round().toString(),
-///       _rangeSliderDiscreteValues.end.round().toString(),
+///       _values.start.round().toString(),
+///       _values.end.round().toString(),
 ///     ),
 ///     onChanged: (values) {
 ///       setState(() {
-///         _rangeSliderDiscreteValues = values;
-///       });
-///     },
-///   );
-/// }
-/// ```
-/// {@end-tool}
-///
-///
-/// This is what it looks like when run:
-///
-/// ![A range slider widget, consisting of 5 divisions and showing the default
-/// value indicator.]()
-///
-/// {@tool dartpad --template=stateless_widget_scaffold}
-///
-/// This sample shows creation of a [RangeSlider] widget with 5 divisions.
-///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   RangeValues _rangeSliderDiscreteValues = const RangeValues(40, 80);
-///   return RangeSlider(
-///     values: _rangeSliderDiscreteValues,
-///     min: 0,
-///     max: 100,
-///     divisions: 5,
-///     labels: RangeLabels(
-///       _rangeSliderDiscreteValues.start.round().toString(),
-///       _rangeSliderDiscreteValues.end.round().toString(),
-///     ),
-///     onChanged: (values) {
-///       setState(() {
-///         _rangeSliderDiscreteValues = values;
+///         _values = values;
 ///       });
 ///     },
 ///   );
