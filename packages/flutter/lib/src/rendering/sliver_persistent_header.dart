@@ -76,7 +76,7 @@ class PersistentHeaderShowOnScreenConfiguration {
     this.minShowOnScreenExtent,
     this.maxShowOnScreenExtent,
   }) : assert(ignoreLeading != null),
-       assert(minShowOnScreenExtent == null || minShowOnScreenExtent < maxShowOnScreenExtent);
+       assert(minShowOnScreenExtent == null || maxShowOnScreenExtent == null || minShowOnScreenExtent < maxShowOnScreenExtent);
 
   /// Whether to ignore the part of the `rect` specified in [RenderObject.showOnScreen]
   /// that exceeds the leading edge of the sliver's child [RenderBox].

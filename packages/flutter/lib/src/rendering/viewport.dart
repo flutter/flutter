@@ -783,6 +783,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     final double offsetDifference = offset.pixels - targetOffset;
 
     final Matrix4 transform = target.getTransformTo(this);
+    applyPaintTransform(child, transform);
     Rect targetRect = MatrixUtils.transformRect(transform, rect);
 
     switch (axisDirection) {

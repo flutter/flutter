@@ -15,9 +15,17 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
-  _TestSliverPersistentHeaderDelegate(this.minExtent, this.maxExtent, this.key);
+  _TestSliverPersistentHeaderDelegate({
+    this.key,
+    this.minExtent,
+    this.maxExtent,
+    this.child,
+    this.vsync = const TestVSync(),
+    this.showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration(),
+  });
 
   final Key key;
+  final Widget child;
 
   @override
   final double maxExtent;
@@ -26,9 +34,13 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
   final double minExtent;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return SizedBox.expand(key: key);
-  }
+  final TickerProvider vsync;
+
+  @override
+  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => child ?? SizedBox.expand(key: key);
 
   @override
   bool shouldRebuild(_TestSliverPersistentHeaderDelegate oldDelegate) => true;
@@ -1026,7 +1038,11 @@ void main() {
                   ? SliverPersistentHeader(
                     pinned: true,
                     floating: false,
-                    delegate: _TestSliverPersistentHeaderDelegate(100, 300, headerKey),
+                    delegate: _TestSliverPersistentHeaderDelegate(
+                      minExtent: 100,
+                      maxExtent: 300,
+                      key: headerKey,
+                    ),
                   )
                   : SliverToBoxAdapter(
                     child: Container(
@@ -1070,145 +1086,350 @@ void main() {
       expect(controller.offset, lessThan(11 * 300.0 + 200.0 + 100.0));
   });
 
-  testWidgets(
-    'Viewport.showOnScreen for floating headers',
-    (WidgetTester tester) async {
-      List<Widget> children;
-      ScrollController controller;
+  void testFloatingHeaderShowOnScreen({ bool animated = true, Axis axis = Axis.vertical }) {
+    final TickerProvider vsync = animated ? const TestVSync() : null;
+    const Key headerKey = Key('header');
+    List<Widget> children;
+    ScrollController controller;
 
-      const Key headerKey = Key('header');
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-            child: Container(
-              height: 600.0,
-              width: 600.0,
-              child: CustomScrollView(
-                controller: controller = ScrollController(initialScrollOffset: 300.0),
-                slivers: children = List<Widget>.generate(20, (int i) {
+    Widget buildList({ SliverPersistentHeader floatingHeader, bool reversed = false }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 600.0,
+            width: 600.0,
+            child: CustomScrollView(
+              scrollDirection: axis,
+              center: reversed ? const Key('19') : null,
+              controller: controller = ScrollController(initialScrollOffset: 300.0),
+              slivers: children = List<Widget>.generate(20, (int i) {
                   return i == 10
-                  ? SliverPersistentHeader(
-                    pinned: true,
-                    floating: true,
-                    delegate: _TestSliverPersistentHeaderDelegate(100, 300, headerKey),
-                  )
+                  ? floatingHeader
                   : SliverToBoxAdapter(
+                    key: (i == 19) ? const Key('19') : null,
                     child: Container(
                       height: 300.0,
+                      width: 300,
                       child: Text('Tile $i'),
                     ),
                   );
-                }),
-              ),
+              }),
             ),
           ),
         ),
       );
+    }
 
-      final Finder pinnedHeaderContent = find.descendant(
-        of: find.byWidget(children[10], skipOffstage: false),
-        matching: find.byKey(headerKey, skipOffstage: false),
-        skipOffstage: false,
-      );
+    double mainAxisExtent(WidgetTester tester, Finder finder) {
+      final RenderObject renderObject = tester.renderObject(finder);
+      if (renderObject is RenderSliver) {
+        return renderObject.geometry.paintExtent;
+      }
 
-      controller.jumpTo(300.0 * 15);
-      await tester.pumpAndSettle();
-      expect(tester.getSize(pinnedHeaderContent).height, lessThan(300));
+      final RenderBox renderBox = renderObject as RenderBox;
+      switch (axis) {
+        case Axis.horizontal:
+          return renderBox.size.width;
+        case Axis.vertical:
+          return renderBox.size.height;
+      }
+      assert(false);
+      return null;
+    }
 
-      // The persistent header is pinned to the leading edge thus still visible,
-      // the viewport should not scroll.
-      // Also, cross axis extents don't matter
-      tester.renderObject(pinnedHeaderContent).showOnScreen(
-        descendant: tester.renderObject(pinnedHeaderContent),
-        rect: Offset.zero & const Size(60000, 300),
-      );
-      await tester.pumpAndSettle();
-      // The header expands but doesn't move.
-      expect(controller.offset, 300.0 * 15);
-      expect(tester.getSize(pinnedHeaderContent).height, 300);
-
-      // The rect specifies that the persistent header needs to be 1 pixel away
-      // from the leading edge of the viewport. Ignore the 1 pixel, the viewport
-      // should not scroll.
-      //
-      // See: https://github.com/flutter/flutter/issues/25507.
-      tester.renderObject(pinnedHeaderContent).showOnScreen(
-        descendant: tester.renderObject(pinnedHeaderContent),
-        rect: const Offset(0, -1) & const Size(600, 300),
-      );
-      await tester.pumpAndSettle();
-      expect(controller.offset, 300.0 * 15);
-      expect(tester.getSize(pinnedHeaderContent).height, 300);
-  });
-
-  testWidgets(
-    'Viewport showOnScreen should not scroll if the rect is already visible, '
-    'even if it does not scroll linearly (reversed order version)',
-    (WidgetTester tester) async {
-      List<Widget> children;
-      ScrollController controller;
-
-      const Key headerKey = Key('header');
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-            child: Container(
-              height: 600.0,
-              child: CustomScrollView(
-                center: const Key('19'),
-                controller: controller = ScrollController(initialScrollOffset: 300.0),
-                slivers: children = List<Widget>.generate(20, (int i) {
-                  return i == 10
-                    ? SliverPersistentHeader(
-                      pinned: true,
-                      floating: false,
-                      delegate: _TestSliverPersistentHeaderDelegate(100, 300, headerKey),
-                    )
-                    : SliverToBoxAdapter(
-                      key: (i == 19) ? const Key('19') : null,
-                      child: Container(
-                        height: 300.0,
-                        child: Text('Tile $i'),
-                      ),
-                    );
-                }),
+    group('animated: $animated, scrollDirection: $axis', () {
+      testWidgets(
+        'RenderViewportBase.showOnScreen',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildList(
+              floatingHeader: SliverPersistentHeader(
+                pinned: true,
+                floating: true,
+                delegate: _TestSliverPersistentHeaderDelegate(minExtent: 100, maxExtent: 300, key: headerKey, vsync: vsync),
               ),
-            ),
-          ),
-        ),
-      );
+            )
+          );
 
-      controller.jumpTo(-300.0 * 15);
-      await tester.pumpAndSettle();
+          final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
 
-      final Finder pinnedHeaderContent = find.descendant(
-        of: find.byWidget(children[10], skipOffstage: false),
-        matching: find.byKey(headerKey, skipOffstage: false),
-        skipOffstage: false,
-      );
+          controller.jumpTo(300.0 * 15);
+          await tester.pumpAndSettle();
+          expect(mainAxisExtent(tester, pinnedHeaderContent), lessThan(300));
 
-      // The persistent header is pinned to the leading edge thus still visible,
-      // the viewport should not scroll.
-      tester.renderObject(pinnedHeaderContent).showOnScreen();
-      await tester.pumpAndSettle();
-      expect(controller.offset, -300.0 * 15);
+          // The persistent header is pinned to the leading edge thus still visible,
+          // the viewport should not scroll.
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            descendant: tester.renderObject(pinnedHeaderContent),
+            rect: Offset.zero & const Size(300, 300),
+          );
+          await tester.pumpAndSettle();
+          // The header expands but doesn't move.
+          expect(controller.offset, 300.0 * 15);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 300);
 
-      // children[9] will be partially obstructed by the persistent header,
-      // the viewport should scroll to reveal it.
-      controller.jumpTo(
-        -8 * 300.0  // Preceding headers 11 - 18
-        - 200.0     // Viewport height
-        - 200.0     // Shrinks the pinned header to minExtent
-        - 100.0     // Obstructs the leading 100 pixels of the 11th header
-      );
-      await tester.pumpAndSettle();
+          // The rect specifies that the persistent header needs to be 1 pixel away
+          // from the leading edge of the viewport. Ignore the 1 pixel, the viewport
+          // should not scroll.
+          //
+          // See: https://github.com/flutter/flutter/issues/25507.
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            descendant: tester.renderObject(pinnedHeaderContent),
+            rect: const Offset(-1, -1) & const Size(300, 300),
+          );
+          await tester.pumpAndSettle();
+          expect(controller.offset, 300.0 * 15);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 300);
+      });
 
-      tester.renderObject(find.byWidget(children[11], skipOffstage: false)).showOnScreen();
-      await tester.pumpAndSettle();
-      expect(controller.offset, lessThan(-8 * 300.0 - 200.0 - 100.0));
+      testWidgets(
+        'RenderViewportBase.showOnScreen but no child',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildList(
+              floatingHeader: SliverPersistentHeader(
+                key: headerKey,
+                pinned: true,
+                floating: true,
+                delegate: _TestSliverPersistentHeaderDelegate(minExtent: 100, maxExtent: 300, child: null, vsync: vsync),
+              ),
+            )
+          );
 
+          final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
+
+          controller.jumpTo(300.0 * 15);
+          await tester.pumpAndSettle();
+          expect(mainAxisExtent(tester, pinnedHeaderContent), lessThan(300));
+
+          // The persistent header is pinned to the leading edge thus still visible,
+          // the viewport should not scroll.
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            rect: Offset.zero & const Size(300, 300),
+          );
+          await tester.pumpAndSettle();
+          // The header expands but doesn't move.
+          expect(controller.offset, 300.0 * 15);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 300);
+
+          // The rect specifies that the persistent header needs to be 1 pixel away
+          // from the leading edge of the viewport. Ignore the 1 pixel, the viewport
+          // should not scroll.
+          //
+          // See: https://github.com/flutter/flutter/issues/25507.
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            rect: const Offset(-1, -1) & const Size(300, 300),
+          );
+          await tester.pumpAndSettle();
+          expect(controller.offset, 300.0 * 15);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 300);
+      });
+
+      testWidgets(
+        'RenderViewportBase.showOnScreen with maxShowOnScreenExtent ',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildList(
+              floatingHeader: SliverPersistentHeader(
+                pinned: true,
+                floating: true,
+                delegate: _TestSliverPersistentHeaderDelegate(
+                  minExtent: 100,
+                  maxExtent: 300,
+                  key: headerKey,
+                  vsync: vsync,
+                  showOnScreenConfiguration: const PersistentHeaderShowOnScreenConfiguration(maxShowOnScreenExtent: 200),
+                ),
+              ),
+            )
+          );
+
+          final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
+
+          controller.jumpTo(300.0 * 15);
+          await tester.pumpAndSettle();
+          // childExtent was initially 100.
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 100);
+
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            descendant: tester.renderObject(pinnedHeaderContent),
+            rect: Offset.zero & const Size(300, 300),
+          );
+          await tester.pumpAndSettle();
+          // The header doesn't move. It would have expanded to 300 but
+          // maxShowOnScreenExtent is 200, preventing it from doing so.
+          expect(controller.offset, 300.0 * 15);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 200);
+
+          // ignoreLeading still works.
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            descendant: tester.renderObject(pinnedHeaderContent),
+            rect: const Offset(-1, -1) & const Size(300, 300),
+          );
+          await tester.pumpAndSettle();
+          expect(controller.offset, 300.0 * 15);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 200);
+
+          // Move the viewport so that its childExtent reaches 250.
+          controller.jumpTo(300.0 * 10 + 50.0);
+          await tester.pumpAndSettle();
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 250);
+
+          // Doesn't move, doesn't expand or shrink, leading still ignored.
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            descendant: tester.renderObject(pinnedHeaderContent),
+            rect: const Offset(-1, -1) & const Size(300, 300),
+          );
+          await tester.pumpAndSettle();
+          expect(controller.offset, 300.0 * 10 + 50.0);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 250);
+      });
+
+      testWidgets(
+        'RenderViewportBase.showOnScreen with minShowOnScreenExtent ',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildList(
+              floatingHeader: SliverPersistentHeader(
+                pinned: true,
+                floating: true,
+                delegate: _TestSliverPersistentHeaderDelegate(
+                  minExtent: 100,
+                  maxExtent: 300,
+                  key: headerKey,
+                  vsync: vsync,
+                  showOnScreenConfiguration: const PersistentHeaderShowOnScreenConfiguration(minShowOnScreenExtent: 200),
+                ),
+              ),
+            )
+          );
+
+          final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
+
+          controller.jumpTo(300.0 * 15);
+          await tester.pumpAndSettle();
+          // childExtent was initially 100.
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 100);
+
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            descendant: tester.renderObject(pinnedHeaderContent),
+            rect: Offset.zero & const Size(110, 110),
+          );
+          await tester.pumpAndSettle();
+          // The header doesn't move. It would have expanded to 110 but
+          // minShowOnScreenExtent is 200, preventing it from doing so.
+          expect(controller.offset, 300.0 * 15);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 200);
+
+          // ignoreLeading still works.
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            descendant: tester.renderObject(pinnedHeaderContent),
+            rect: const Offset(-1, -1) & const Size(110, 110),
+          );
+          await tester.pumpAndSettle();
+          expect(controller.offset, 300.0 * 15);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 200);
+
+          // Move the viewport so that its childExtent reaches 250.
+          controller.jumpTo(300.0 * 10 + 50.0);
+          await tester.pumpAndSettle();
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 250);
+
+          // Doesn't move, doesn't expand or shrink, leading still ignored.
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            descendant: tester.renderObject(pinnedHeaderContent),
+            rect: const Offset(-1, -1) & const Size(110, 110),
+          );
+          await tester.pumpAndSettle();
+          expect(controller.offset, 300.0 * 10 + 50.0);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 250);
+      });
+
+      testWidgets(
+        'RenderViewportBase.showOnScreen with ignoreLeading == false',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildList(
+              floatingHeader: SliverPersistentHeader(
+                pinned: true,
+                floating: true,
+                delegate: _TestSliverPersistentHeaderDelegate(
+                  minExtent: 100,
+                  maxExtent: 300,
+                  key: headerKey,
+                  vsync: vsync,
+                  showOnScreenConfiguration: const PersistentHeaderShowOnScreenConfiguration(ignoreLeading: false),
+                ),
+              ),
+            )
+          );
+
+          final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
+
+          controller.jumpTo(300.0 * 15);
+          await tester.pumpAndSettle();
+          expect(mainAxisExtent(tester, pinnedHeaderContent), lessThan(300));
+
+          tester.renderObject(pinnedHeaderContent).showOnScreen(
+            descendant: tester.renderObject(pinnedHeaderContent),
+            rect: const Offset(-1, -1) & const Size(300, 300),
+          );
+
+          await tester.pumpAndSettle();
+          // 1px away from the viewport's leading edge.
+          expect(controller.offset, 300.0 * 10 - 1.0);
+          expect(mainAxisExtent(tester, pinnedHeaderContent), 300);
+      });
+
+      testWidgets(
+        'RenderViewportBase.showOnScreen should not scroll if the rect is already visible, '
+        'even if it does not scroll linearly (reversed order version)',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildList(
+              floatingHeader: SliverPersistentHeader(
+                pinned: true,
+                floating: true,
+                delegate: _TestSliverPersistentHeaderDelegate(minExtent: 100, maxExtent: 300, key: headerKey, vsync: vsync),
+              ),
+              reversed: true,
+            )
+          );
+
+          controller.jumpTo(-300.0 * 15);
+          await tester.pumpAndSettle();
+
+          final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
+
+          // The persistent header is pinned to the leading edge thus still visible,
+          // the viewport should not scroll.
+          tester.renderObject(pinnedHeaderContent).showOnScreen();
+          await tester.pumpAndSettle();
+          expect(controller.offset, -300.0 * 15);
+
+          // children[9] will be partially obstructed by the persistent header,
+          // the viewport should scroll to reveal it.
+          controller.jumpTo(
+            -8 * 300.0  // Preceding headers 11 - 18
+            - 200.0     // Viewport height
+            - 200.0     // Shrinks the pinned header to minExtent
+            - 100.0     // Obstructs the leading 100 pixels of the 11th header
+          );
+          await tester.pumpAndSettle();
+
+          tester.renderObject(find.byWidget(children[11], skipOffstage: false)).showOnScreen();
+          await tester.pumpAndSettle();
+          expect(controller.offset, lessThan(-8 * 300.0 - 200.0 - 100.0));
+      });
+    });
+  }
+
+  group('Floating header showOnScreen', () {
+    testFloatingHeaderShowOnScreen();
+    testFloatingHeaderShowOnScreen(axis: Axis.horizontal);
+    testFloatingHeaderShowOnScreen(animated: false);
+    testFloatingHeaderShowOnScreen(animated: false, axis: Axis.horizontal);
   });
 
   group('unbounded constraints control test', () {
