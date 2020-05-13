@@ -64,9 +64,13 @@ void main() {
         // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
         await Future<void>.delayed(const Duration(milliseconds: 500));
 
-        // The text selection menu and related semantics vary depending on if the
-        // clipboard contents are pasteable. Copy some text into the clipboard to
-        // make sure these tests always run with pasteable content in the clipboard.
+        // The text selection menu and related semantics vary depending on if
+        // the clipboard contents are pasteable. Copy some text into the
+        // clipboard to make sure these tests always run with pasteable content
+        // in the clipboard.
+        // Ideally this should test the case where there is nothing on the
+        // clipboard as well, but there is no reliable way to clear the
+        // clipboard on Android devices.
         final SerializableFinder normalTextField = find.descendant(
           of: find.byValueKey(normalTextFieldKeyValue),
           matching: find.byType('Semantics'),
