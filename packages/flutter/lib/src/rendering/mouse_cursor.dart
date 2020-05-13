@@ -44,18 +44,16 @@ mixin MouseTrackerCursorMixin on BaseMouseTracker {
 
   final Map<int, MouseCursorSession> _lastSession = <int, MouseCursorSession>{};
 
-  // Find the mouse cursor, which fallbacks to SystemMouseCursors.basic.
+  // Find the first non-deferred mouse cursor, which fallbacks to
+  // [SystemMouseCursors.basic].
   //
   // The `annotations` is the current annotations that the device is hovering in
   // visual order from front the back.
   // The return value is never null.
   MouseCursor _findFirstCursor(LinkedHashSet<MouseTrackerAnnotation> annotations) {
-    for (final MouseTrackerAnnotation annotation in annotations) {
-      if (annotation.cursor != null) {
-        return annotation.cursor;
-      }
-    }
-    return SystemMouseCursors.basic;
+    return DeferredMouseCursor.firstNonDeferred(
+      annotations.map((MouseTrackerAnnotation annotation) => annotation.cursor),
+    ) ?? SystemMouseCursors.basic;
   }
 
   // Handles device update and changes mouse cursors.
@@ -233,6 +231,41 @@ abstract class MouseCursor with Diagnosticable {
     if (minLevel.index >= DiagnosticLevel.info.index && debugDescription != null)
       return '$runtimeType($debugDescription)';
     return super.toString(minLevel: minLevel);
+  }
+}
+
+/// A special class that indicates that the region with this cursor defers the
+/// choice of cursor to the next region behind it.
+///
+/// When an event occurs, [MouseTracker] will update the each pointer's cursor by
+/// finding the list of regions that contain the pointer's location, from front
+/// to back in hit-test order. The pointer's cursor will be the first cursor in
+/// the list that is not a [DeferredMouseCursor].
+class DeferredMouseCursor extends MouseCursor {
+  const DeferredMouseCursor._();
+
+  /// An instance of [DeferredMouseCursor].
+  ///
+  /// It is the global single instance of [DeferredMouseCursor].
+  static const DeferredMouseCursor instance = DeferredMouseCursor._();
+
+  @override
+  MouseCursorSession createSession(int device) {
+    assert(false, 'DeferredMouseCursor can not create a session');
+    throw UnimplementedError();
+  }
+
+  @override
+  String get debugDescription => '';
+
+  /// Finds the first from a list of cursors that is not [DeferredMouseCursor].
+  static MouseCursor firstNonDeferred(Iterable<MouseCursor> cursors) {
+    for (final MouseCursor cursor in cursors) {
+      assert(cursor != null);
+      if (cursor != DeferredMouseCursor.instance)
+        return cursor;
+    }
+    return null;
   }
 }
 

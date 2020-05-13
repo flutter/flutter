@@ -1673,6 +1673,7 @@ void main() {
       onEnter: (PointerEnterEvent event) {},
       onExit: (PointerExitEvent event) {},
       onHover: (PointerHoverEvent event) {},
+      cursor: SystemMouseCursors.click,
       child: RenderErrorBox(),
     ).debugFillProperties(builder);
 
@@ -1683,6 +1684,7 @@ void main() {
       'constraints: MISSING',
       'size: MISSING',
       'listeners: enter, hover, exit',
+      'cursor: SystemMouseCursor(click)',
     ]);
   });
 

@@ -48,12 +48,14 @@ typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 ///  * [BaseMouseTracker], which uses [MouseTrackerAnnotation].
 class MouseTrackerAnnotation with Diagnosticable {
   /// Creates an immutable [MouseTrackerAnnotation].
+  ///
+  /// All arguments are optional. The [cursor] must not be null.
   const MouseTrackerAnnotation({
     this.onEnter,
     this.onHover,
     this.onExit,
-    this.cursor,
-  });
+    this.cursor = DeferredMouseCursor.instance,
+  }) : assert(cursor != null);
 
   /// Triggered when a mouse pointer, with or without buttons pressed, has
   /// entered the region.
@@ -98,11 +100,10 @@ class MouseTrackerAnnotation with Diagnosticable {
   /// region.
   ///
   /// When a mouse enters the annotated region, its cursor will be changed to the
-  /// [cursor]. If the [cursor] is null, then the annotated region does not
-  /// control cursors, but defers the choice to the next annotation behind this
-  /// one on the screen in hit-test order, or [SystemMouseCursors.basic] if no
-  /// others can be found. When the mouse leaves the region, the cursor will be
-  /// set by the region found at the new location.
+  /// [cursor]. When the mouse leaves the region, the cursor will be set by the
+  /// region found at the new location.
+  /// 
+  /// Defaults to [DeferredMouseCursor].
   ///
   /// See also:
   ///
@@ -121,7 +122,7 @@ class MouseTrackerAnnotation with Diagnosticable {
       },
       ifEmpty: '<none>',
     ));
-    properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: DeferredMouseCursor.instance));
   }
 }
 
