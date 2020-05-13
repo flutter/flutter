@@ -153,27 +153,33 @@ class VMServiceFlutterDriver extends FlutterDriver {
     /// Looks at the list of loaded extensions for the current [isolateRef], as
     /// well as the stream of added extensions.
     Future<void> waitForServiceExtension() async {
-      _log('Waiting for service extension');
-
-      final Future<bool> extensionAlreadyAdded = isolateRef
+      final Future<void> extensionAlreadyAdded = isolateRef
         .loadRunnable()
-        .then((VMIsolate isolate) {
+        .then((VMIsolate isolate) async {
           if (isolate.extensionRpcs.contains(_flutterExtensionMethodName)) {
-            return true;
+            return;
           }
           // Never complete. Rely on the stream listener to find the service
           // extension instead.
-          return Completer<bool>().future;
+          return Completer<void>().future;
         });
-      final Future<bool> extensionAddedEvent = isolate.onExtensionAdded
-        .contains(_flutterExtensionMethodName);
 
-      final bool isDriverExtensionFound = await Future.any(<Future<bool>>[
+      final Completer<void> extensionAdded = Completer<void>();
+      StreamSubscription<String> isolateAddedSubscription;
+      isolateAddedSubscription = isolate.onExtensionAdded.listen(
+        (String extensionName) {
+          if (extensionName == _flutterExtensionMethodName) {
+            extensionAdded.complete();
+            isolateAddedSubscription.cancel();
+          }
+        },
+        onError: extensionAdded.completeError,
+        cancelOnError: true);
+
+      await Future.any(<Future<void>>[
         extensionAlreadyAdded,
-        extensionAddedEvent,
+        extensionAdded.future,
       ]);
-      assert(isDriverExtensionFound);
-      _log('Found service extension');
     }
 
     /// Tells the Dart VM Service to notify us about "Isolate" events.
