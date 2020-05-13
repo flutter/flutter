@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -46,6 +48,10 @@ void main() {
         environment: const <String, String>{},
       ),
       botDetector: const BotDetectorAlwaysNo(),
+      persistentToolState: PersistentToolState.test(
+        directory: null,
+        logger: BufferLogger.test(),
+      ),
     );
 
     FakeAsync().run((FakeAsync time) {
@@ -113,6 +119,10 @@ void main() {
       logger: logger,
       usage: MockUsage(),
       botDetector: const BotDetectorAlwaysNo(),
+      persistentToolState: PersistentToolState.test(
+        directory: null,
+        logger: BufferLogger.test(),
+      ),
       processManager: MockProcessManager(66, stderr: 'err1\nerr2\nerr3\n', stdout: 'out1\nout2\nout3\n'),
     );
     try {
@@ -145,6 +155,10 @@ void main() {
       logger: BufferLogger.test(),
       processManager: processMock,
       botDetector: const BotDetectorAlwaysNo(),
+      persistentToolState: PersistentToolState.test(
+        directory: null,
+        logger: BufferLogger.test(),
+      ),
     );
 
     FakeAsync().run((FakeAsync time) {
@@ -175,6 +189,10 @@ void main() {
         environment: const <String, String>{
           'PUB_CACHE': 'custom/pub-cache/path',
         },
+      ),
+      persistentToolState: PersistentToolState.test(
+        directory: null,
+        logger: BufferLogger.test(),
       ),
     );
 
@@ -210,6 +228,10 @@ void main() {
           'PUB_CACHE': 'custom/pub-cache/path',
         }
       ),
+      persistentToolState: PersistentToolState.test(
+        directory: null,
+        logger: BufferLogger.test(),
+      ),
     );
 
     await pub.get(context: PubContext.flutterTests, checkLastModified: false);
@@ -226,6 +248,10 @@ void main() {
       logger: BufferLogger.test(),
       processManager: MockProcessManager(1),
       botDetector: const BotDetectorAlwaysNo(),
+      persistentToolState: PersistentToolState.test(
+        directory: null,
+        logger: BufferLogger.test(),
+      ),
       platform: FakePlatform(
         environment: const <String, String>{
           'PUB_CACHE': 'custom/pub-cache/path',
@@ -258,6 +284,10 @@ void main() {
       ),
       usage: usage,
       botDetector: const BotDetectorAlwaysNo(),
+      persistentToolState: PersistentToolState.test(
+        directory: null,
+        logger: BufferLogger.test(),
+      ),
     );
 
     try {
@@ -267,6 +297,178 @@ void main() {
     }
 
     verify(usage.sendEvent('pub-result', 'flutter-tests', label: 'version-solving-failed')).called(1);
+  });
+
+  testWithoutContext('will hydrate the system pub cache on Linux/macOS', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final PersistentToolState persistentToolState = PersistentToolState.test(
+      directory: fileSystem.currentDirectory,
+      logger: BufferLogger.test(),
+    );
+    fileSystem.file('.pub-cache/foo').createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
+
+    expect(persistentToolState.pubCacheHydrated, false);
+
+    final Pub pub = Pub(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{
+          'HOME': 'home/'
+        },
+      ),
+      usage: MockUsage(),
+      botDetector: const BotDetectorAlwaysNo(),
+      persistentToolState: persistentToolState,
+    );
+
+    await pub.get(context: PubContext.flutterTests, checkLastModified: false);
+
+    expect(fileSystem.file('home/.pub-cache/foo'), exists);
+    expect(persistentToolState.pubCacheHydrated, true);
+  });
+
+  testWithoutContext('will not re-hydrate the system pub cache on Linux/macOS', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final PersistentToolState persistentToolState = PersistentToolState.test(
+      directory: fileSystem.currentDirectory,
+      logger: BufferLogger.test(),
+    );
+    fileSystem.file('.pub-cache/foo').createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
+
+    // Set to true to simulate a second run.
+    persistentToolState.pubCacheHydrated = true;
+
+    final Pub pub = Pub(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{
+          'HOME': 'home/'
+        },
+      ),
+      usage: MockUsage(),
+      botDetector: const BotDetectorAlwaysNo(),
+      persistentToolState: persistentToolState,
+    );
+
+    await pub.get(context: PubContext.flutterTests, checkLastModified: false);
+
+    expect(fileSystem.file('home/.pub-cache/foo'), isNot(exists));
+    expect(persistentToolState.pubCacheHydrated, true);
+  });
+
+  testWithoutContext('Does not hydrate the system pub cache on Linux/macOS if '
+    'a pub-cache already exists', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final PersistentToolState persistentToolState = PersistentToolState.test(
+      directory: fileSystem.currentDirectory,
+      logger: BufferLogger.test(),
+    );
+    fileSystem.file('.pub-cache/foo').createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
+    fileSystem.directory('home/.pub-cache/otherstuff').createSync(recursive: true);
+
+    expect(persistentToolState.pubCacheHydrated, false);
+
+    final Pub pub = Pub(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{
+          'HOME': 'home/'
+        },
+      ),
+      usage: MockUsage(),
+      botDetector: const BotDetectorAlwaysNo(),
+      persistentToolState: persistentToolState,
+    );
+
+    await pub.get(context: PubContext.flutterTests, checkLastModified: false);
+
+    expect(fileSystem.file('home/.pub-cache/foo'), isNot(exists));
+    expect(persistentToolState.pubCacheHydrated, true);
+  });
+
+  testWithoutContext('will hydrate the system pub cache on Windows', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    final PersistentToolState persistentToolState = PersistentToolState.test(
+      directory: fileSystem.currentDirectory,
+      logger: BufferLogger.test(),
+    );
+    fileSystem.file('.pub-cache\\foo').createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('.dart_tool\\package_config.json').createSync(recursive: true);
+
+    expect(persistentToolState.pubCacheHydrated, false);
+
+    final Pub pub = Pub(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      platform: FakePlatform(
+        operatingSystem: 'windows',
+        environment: <String, String>{
+          'LOCALAPPDATA': 'localappdata',
+          'APPDATA': 'appdata',
+        },
+      ),
+      usage: MockUsage(),
+      botDetector: const BotDetectorAlwaysNo(),
+      persistentToolState: persistentToolState,
+    );
+
+    await pub.get(context: PubContext.flutterTests, checkLastModified: false);
+
+    expect(fileSystem.file('C:\\localappdata\\Pub\\Cache\\foo'), exists);
+    expect(persistentToolState.pubCacheHydrated, true);
+  });
+
+  testWithoutContext('Does not hydrate the system pub cache on Windows if '
+    'a pub cache already exists', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    final PersistentToolState persistentToolState = PersistentToolState.test(
+      directory: fileSystem.currentDirectory,
+      logger: BufferLogger.test(),
+    );
+    fileSystem.file('.pub-cache\\foo').createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('.dart_tool\\package_config.json').createSync(recursive: true);
+    fileSystem.directory('localappdata\\Pub\\Cache\\other').createSync(recursive: true);
+
+    expect(persistentToolState.pubCacheHydrated, false);
+
+    final Pub pub = Pub(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      platform: FakePlatform(
+        operatingSystem: 'windows',
+        environment: <String, String>{
+          'LOCALAPPDATA': 'localappdata',
+          'APPDATA': 'appdata',
+        },
+      ),
+      usage: MockUsage(),
+      botDetector: const BotDetectorAlwaysNo(),
+      persistentToolState: persistentToolState,
+    );
+
+    await pub.get(context: PubContext.flutterTests, checkLastModified: false);
+
+    expect(fileSystem.file('C:\\localappdata\\Pub\\Cache\\foo'), isNot(exists));
+    expect(persistentToolState.pubCacheHydrated, true);
   });
 
   testWithoutContext('Pub error handling', () async {
@@ -323,7 +525,11 @@ void main() {
         operatingSystem: 'linux', // so that the command executed is consistent
         environment: <String, String>{},
       ),
-      botDetector: const BotDetectorAlwaysNo()
+      botDetector: const BotDetectorAlwaysNo(),
+      persistentToolState: PersistentToolState.test(
+        directory: null,
+        logger: BufferLogger.test(),
+      ),
     );
 
     // the good scenario: .packages is old, pub updates the file.

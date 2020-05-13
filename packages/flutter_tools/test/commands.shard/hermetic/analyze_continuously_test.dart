@@ -73,6 +73,7 @@ void main() {
         platform: const LocalPlatform(),
         botDetector: globals.botDetector,
         usage: globals.flutterUsage,
+        persistentToolState: globals.persistentToolState,
       );
       await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
 
@@ -106,6 +107,7 @@ void main() {
       platform: const LocalPlatform(),
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
+      persistentToolState: globals.persistentToolState,
     );
     await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
 

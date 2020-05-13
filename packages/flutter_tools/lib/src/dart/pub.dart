@@ -16,6 +16,7 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
+import '../persistent_tool_state.dart';
 import '../reporting/reporting.dart';
 
 /// The [Pub] instance.
@@ -80,6 +81,7 @@ abstract class Pub {
     @required Platform platform,
     @required BotDetector botDetector,
     @required Usage usage,
+    @required PersistentToolState persistentToolState,
   }) = _DefaultPub;
 
   /// Runs `pub get`.
@@ -139,11 +141,13 @@ class _DefaultPub implements Pub {
     @required Platform platform,
     @required BotDetector botDetector,
     @required Usage usage,
+    @required PersistentToolState persistentToolState,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _botDetector = botDetector,
        _usage = usage,
+       _persistentToolState = persistentToolState,
        _processUtils = ProcessUtils(
          logger: logger,
          processManager: processManager,
@@ -155,6 +159,7 @@ class _DefaultPub implements Pub {
   final Platform _platform;
   final BotDetector _botDetector;
   final Usage _usage;
+  final PersistentToolState _persistentToolState;
 
   @override
   Future<void> get({
@@ -168,6 +173,7 @@ class _DefaultPub implements Pub {
     String flutterRootOverride,
   }) async {
     directory ??= _fileSystem.currentDirectory.path;
+    _hydratePubCache();
 
     final File pubSpecYaml = _fileSystem.file(
       _fileSystem.path.join(directory, 'pubspec.yaml'));
@@ -270,6 +276,7 @@ class _DefaultPub implements Pub {
     String flutterRootOverride,
   }) async {
     showTraceForErrors ??= await _botDetector.isRunningOnBot;
+    _hydratePubCache();
 
     String lastPubMessage = 'no message';
     bool versionSolvingFailed = false;
@@ -343,6 +350,7 @@ class _DefaultPub implements Pub {
     @required io.Stdio stdio,
   }) async {
     Cache.releaseLockEarly();
+    _hydratePubCache();
     final io.Process process = await _processUtils.start(
       _pubCommand(arguments),
       workingDirectory: directory,
@@ -424,19 +432,52 @@ class _DefaultPub implements Pub {
     return values.join(':');
   }
 
-  String _getRootPubCacheIfAvailable() {
-    if (_platform.environment.containsKey(_kPubCacheEnvironmentKey)) {
-      return _platform.environment[_kPubCacheEnvironmentKey];
+  /// When a bundled pub cache is detected, use it to populate a system pub
+  /// cache if it does not already exist.
+  ///
+  /// This method is a no-op if it has already run.
+  ///
+  /// The logic for location pub-cache is based on:
+  ///
+  /// https://github.com/dart-lang/pub/blob/3606265962da4248d34d352aa3d170aae4496a90/lib/src/system_cache.dart#L34-L53
+  void _hydratePubCache() {
+    if (_persistentToolState.pubCacheHydrated) {
+      return;
+    }
+    final Directory bundledCache = _fileSystem.directory(
+      _fileSystem.path.join(Cache.flutterRoot, '.pub-cache'));
+    if (!bundledCache.existsSync()) {
+      _persistentToolState.pubCacheHydrated = true;
+      return;
+    }
+    // First check if there is already a pub cache. If so, it is not safe to hydrate
+    // and we need to bail out.
+    String preferredCacheLocation;
+    if (_platform.isWindows) {
+      final String appData = _platform.environment['APPDATA'];
+      final String appDataCacheDir = _fileSystem.path.join(appData, 'Pub', 'Cache');
+      if (_fileSystem.isDirectorySync(appDataCacheDir)) {
+        preferredCacheLocation = appDataCacheDir;
+      }
+      final String localAppData = _platform.environment['LOCALAPPDATA'];
+      preferredCacheLocation = _fileSystem.path.join(localAppData, 'Pub', 'Cache');
+    } else {
+      preferredCacheLocation = _fileSystem.path.join(_platform.environment['HOME'], '.pub-cache');
+    }
+    if (_fileSystem.isDirectorySync(preferredCacheLocation)) {
+      _persistentToolState.pubCacheHydrated = true;
+      return;
     }
 
-    final String cachePath = _fileSystem.path.join(Cache.flutterRoot, '.pub-cache');
-    if (_fileSystem.directory(cachePath).existsSync()) {
-      _logger.printTrace('Using $cachePath for the pub cache.');
-      return cachePath;
-    }
-
-    // Use pub's default location by returning null.
-    return null;
+    // If there is no cache, create the directory at the preferred location and copy the
+    // directories.
+    final Directory pubCacheDirectory = _fileSystem.directory(preferredCacheLocation);
+    pubCacheDirectory.createSync(recursive: true);
+    FileSystemUtils(
+      platform: _platform,
+      fileSystem: _fileSystem,
+    ).copyDirectorySync(bundledCache, pubCacheDirectory);
+    _persistentToolState.pubCacheHydrated = true;
   }
 
   /// The full environment used when running pub.
@@ -448,7 +489,7 @@ class _DefaultPub implements Pub {
       'FLUTTER_ROOT': flutterRootOverride ?? Cache.flutterRoot,
       _kPubEnvironmentKey: await _getPubEnvironmentValue(context),
     };
-    final String pubCache = _getRootPubCacheIfAvailable();
+    final String pubCache = _platform.environment[_kPubCacheEnvironmentKey];
     if (pubCache != null) {
       environment[_kPubCacheEnvironmentKey] = pubCache;
     }

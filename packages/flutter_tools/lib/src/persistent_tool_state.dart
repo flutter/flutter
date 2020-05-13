@@ -49,6 +49,9 @@ abstract class PersistentToolState {
 
   /// Whether this client was already determined to be or not be a bot.
   bool isRunningOnBot;
+
+  /// Whether we have attempted to hydrate a downloaded pub cache.
+  bool pubCacheHydrated;
 }
 
 class _DefaultPersistentToolState implements PersistentToolState {
@@ -73,6 +76,7 @@ class _DefaultPersistentToolState implements PersistentToolState {
       logger: logger,
     );
 
+  static const String _kHydratedKey = 'pub-cache-hydrated';
   static const String _kFileName = '.flutter_tool_state';
   static const String _kRedisplayWelcomeMessage = 'redisplay-welcome-message';
   static const Map<Channel, String> _lastActiveVersionKeys = <Channel,String>{
@@ -118,4 +122,10 @@ class _DefaultPersistentToolState implements PersistentToolState {
 
   @override
   set isRunningOnBot(bool value) => _config.setValue(_kBotKey, value);
+
+  @override
+  bool get pubCacheHydrated => _config.getValue(_kHydratedKey) as bool ?? false;
+
+  @override
+  set pubCacheHydrated(bool value) => _config.setValue(_kHydratedKey, value);
 }
