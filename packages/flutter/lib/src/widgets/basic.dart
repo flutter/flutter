@@ -5880,8 +5880,8 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 class MouseRegion extends StatefulWidget {
   /// Creates a widget that forwards mouse events to callbacks.
   ///
-  /// By default, all callbacks are empty, [cursor] is deferred, and [opaque] is
-  /// true.
+  /// By default, all callbacks are empty, [cursor] is [MouseCursor.defer], and
+  /// [opaque] is true.
   const MouseRegion({
     Key key,
     this.onEnter,
@@ -5890,7 +5890,7 @@ class MouseRegion extends StatefulWidget {
     MouseCursor cursor,
     this.opaque = true,
     this.child,
-  }) : cursor = cursor ?? DeferredMouseCursor.instance,
+  }) : cursor = cursor ?? MouseCursor.defer,
        assert(opaque != null),
        super(key: key);
 
@@ -6100,14 +6100,14 @@ class MouseRegion extends StatefulWidget {
   ///    this callback is internally implemented, but without the restriction.
   final PointerExitEventListener onExit;
 
-  /// The mouse cursor for mouse pointers that are hovering over the annotated
-  /// region.
+  /// The mouse cursor for mouse pointers that are hovering over the region.
   ///
   /// When a mouse enters the region, its cursor will be changed to the [cursor].
   /// When the mouse leaves the region, the cursor will be decided by the region
   /// found at the new location.
   ///
-  /// The [cursor] defaults to [DeferredMouseCursor].
+  /// The [cursor] defaults to [MouseCursor.defer], deferring the choice of
+  /// cursor to the next region behing it in hit-test order.
   final MouseCursor cursor;
 
   /// Whether this widget should prevent other [MouseRegion]s visually behind it

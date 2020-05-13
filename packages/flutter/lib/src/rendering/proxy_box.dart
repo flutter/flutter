@@ -2688,7 +2688,7 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
     PointerEnterEventListener onEnter,
     PointerHoverEventListener onHover,
     PointerExitEventListener onExit,
-    MouseCursor cursor = DeferredMouseCursor.instance,
+    MouseCursor cursor = MouseCursor.defer,
     bool opaque = true,
     RenderBox child,
   }) : assert(opaque != null),
@@ -2783,7 +2783,7 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
         _onEnter != null ||
         _onHover != null ||
         _onExit != null ||
-        _cursor != DeferredMouseCursor.instance ||
+        _cursor != MouseCursor.defer ||
         opaque
       ) && RendererBinding.instance.mouseTracker.mouseIsConnected;
     _setAnnotationIsActive(newAnnotationIsActive);
@@ -2855,7 +2855,7 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
       },
       ifEmpty: '<none>',
     ));
-    properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: DeferredMouseCursor.instance));
+    properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: MouseCursor.defer));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
   }
 }

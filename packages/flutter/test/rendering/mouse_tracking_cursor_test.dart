@@ -249,7 +249,7 @@ void main() {
     );
 
     annotations = <MouseTrackerAnnotation>[
-      const MouseTrackerAnnotation(cursor: DeferredMouseCursor.instance),
+      const MouseTrackerAnnotation(cursor: MouseCursor.defer),
       const MouseTrackerAnnotation(cursor: SystemMouseCursors.click),
       const MouseTrackerAnnotation(cursor: SystemMouseCursors.grabbing),
     ];
@@ -277,8 +277,8 @@ void main() {
     );
 
     annotations = <MouseTrackerAnnotation>[
-      const MouseTrackerAnnotation(cursor: DeferredMouseCursor.instance),
-      const MouseTrackerAnnotation(cursor: DeferredMouseCursor.instance),
+      const MouseTrackerAnnotation(cursor: MouseCursor.defer),
+      const MouseTrackerAnnotation(cursor: MouseCursor.defer),
       const MouseTrackerAnnotation(cursor: SystemMouseCursors.grabbing),
     ];
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[

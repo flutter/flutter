@@ -54,7 +54,7 @@ class MouseTrackerAnnotation with Diagnosticable {
     this.onEnter,
     this.onHover,
     this.onExit,
-    this.cursor = DeferredMouseCursor.instance,
+    this.cursor = MouseCursor.defer,
   }) : assert(cursor != null);
 
   /// Triggered when a mouse pointer, with or without buttons pressed, has
@@ -96,14 +96,14 @@ class MouseTrackerAnnotation with Diagnosticable {
   ///    certain cases and does not always match its earier [MouseRegion.onEnter].
   final PointerExitEventListener onExit;
 
-  /// The mouse cursor for mouse pointers that are hovering over the annotated
-  /// region.
+  /// The mouse cursor for mouse pointers that are hovering over the region.
   ///
-  /// When a mouse enters the annotated region, its cursor will be changed to the
-  /// [cursor]. When the mouse leaves the region, the cursor will be set by the
-  /// region found at the new location.
-  /// 
-  /// Defaults to [DeferredMouseCursor].
+  /// When a mouse enters the region, its cursor will be changed to the [cursor].
+  /// When the mouse leaves the region, the cursor will be set by the region
+  /// found at the new location.
+  ///
+  /// Defaults to [MouseCursor.defer], deferring the choice of cursor to the next
+  /// region behing it in hit-test order.
   ///
   /// See also:
   ///
@@ -122,7 +122,7 @@ class MouseTrackerAnnotation with Diagnosticable {
       },
       ifEmpty: '<none>',
     ));
-    properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: DeferredMouseCursor.instance));
+    properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: MouseCursor.defer));
   }
 }
 
