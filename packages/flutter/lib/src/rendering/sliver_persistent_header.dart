@@ -17,15 +17,12 @@ import 'sliver.dart';
 import 'viewport.dart';
 import 'viewport_offset.dart';
 
-// Trims the part of `rect` that protrudes `child`'s leading edge.
-//
-// If the `rect` a descendant specified in its showOnScreen call exceeds
-// the leading edge of this sliver (which is usually the same as that of
-// `child`), the viewport will move towards the leading edge (reduce its
-// scroll offset) to unpin the persistent header. This is almost always
-// undesirable.
-//
-// See: https://github.com/flutter/flutter/issues/25507.
+// Eventually we'll get rid of the deprecated members, but for now, we have to use them
+// in order to implement them.
+// ignore_for_file: deprecated_member_use_from_same_package
+
+// Trims the specified edges of the given `Rect` [original], so that they do not
+// exceed the given values.
 Rect _trim(Rect original, {
   double top = -double.infinity,
   double right = double.infinity,
@@ -76,10 +73,13 @@ class PersistentHeaderShowOnScreenConfiguration {
     this.minShowOnScreenExtent,
     this.maxShowOnScreenExtent,
   }) : assert(ignoreLeading != null),
-       assert(minShowOnScreenExtent == null || maxShowOnScreenExtent == null || minShowOnScreenExtent < maxShowOnScreenExtent);
+       assert(minShowOnScreenExtent == null || maxShowOnScreenExtent == null || minShowOnScreenExtent <= maxShowOnScreenExtent);
 
+  /// {@template flutter.rendering.persistentHeader.ignoreLeading}
   /// Whether to ignore the part of the `rect` specified in [RenderObject.showOnScreen]
-  /// that exceeds the leading edge of the sliver's child [RenderBox].
+  /// that exceeds the leading edge of the sliver's child [RenderBox], to prevent
+  /// `showOnScreen` from significantly reduce the viewport's scroll offset in
+  /// an attempt to reveal to original `rect`.
   ///
   /// When this parameter is set to false, the framework will try to reveal the
   /// entire `rect` specified in [RenderObject.showOnScreen], even if it exceeds
@@ -87,50 +87,56 @@ class PersistentHeaderShowOnScreenConfiguration {
   /// attempt to reveal the part of the preceeding sliver(s) that intersects with
   /// `rect`. This could potentially lead to unintended overscrolling if there's
   /// no preceeding slivers. Additionally, if the sliver is initially pinned
-  /// (or floating) at the leading edge, this would also reveal the slivers that
-  /// are immediately after the pinned header.
+  /// (or floating) at the leading edge, this could also reduce the scroll
+  /// offset of the viewport significantly, revealing the slivers that are
+  /// immediately after the pinned header.
   ///
   /// Setting the parameter to true will cause the framework to trim the incoming
-  /// `rect` if it exceeds the leading edge of the `child` [RenderBox]. The new
-  /// `rect` will have the same leading edge as the `child` [RenderBox], or that
-  /// of the persistent header when `child` is null.
+  /// `rect` in `showOnScreen` if it exceeds the leading edge of the `child`
+  /// [RenderBox]. The new `rect` will have the same leading edge as the `child`
+  /// [RenderBox], or that of the persistent header when `child` is null.
+  /// {@endtemplate}
   ///
   /// Defaults to true and must not be null.
   final bool ignoreLeading;
 
-  /// The [TickerProvider] for the [AnimationController] used to expand the
-  /// floating header in response to [RenderObject.showOnScreen] calls.
+  /// {@template flutter.rendering.persistentHeader.minShowOnScreenExtent}
+  /// The smallest the floating header can expand to in the main axis direction,
+  /// when `showOnScreen` is called, in addition to the persistent header's
+  /// `minExtent`.
   ///
-  /// Defaults to null. If not provided, the header will expand immediately to
-  /// the target size, with no animation. Has no effect unless the persistent
-  /// header is a floating header.
-  // final TickerProvider vsync;
-
-  /// The smallest the floating header object can become in the main axis
-  /// direction, when `showOnScreen` is called, in addition to the persistent
-  /// header's `minExtent`.
+  /// This parameter has no effect if set to null or a value smaller than or
+  /// equal to the persistent header's `minExtent`. Setting this to a value
+  /// larger than `maxExtent` is equivalent to setting this to `maxExtent`.
   ///
   /// This parameter can be set to the persistent header's `maxExtent` so the
   /// persistent header always expands to its `maxExtent` when `showOnScreen` is
-  /// called.
+  /// called, if its main axis extent is not already greater than or equal to
+  /// `maxExtent`.
   ///
-  /// Defaults null. Must be less than [maxShowOnScreenExtent] if both of them
-  /// are not null. This parameter has no effect if set to null or a value smaller than
-  /// the persistent header's `minExtent`. Has no effect unless the persistent
-  /// header is a floating header.
+  /// Defaults null. Must be less than or equal to [maxShowOnScreenExtent] if it
+  /// is also not null. Has no effect unless the persistent header is a floating
+  /// header.
+  /// {@endtemplate}
   final double minShowOnScreenExtent;
 
-  /// The biggest the floating header object can become in the main axis
-  /// direction, when `showOnScreen` is called, in addition to the persistent
-  /// header's `maxExtent`.
+  /// {@template flutter.rendering.persistentHeader.maxShowOnScreenExtent}
+  /// The biggest the floating header can expand to in the main axis direction,
+  /// when `showOnScreen` is called, in addition to the persistent header's
+  /// `maxExtent`.
+  ///
+  /// This parameter has no effect if set to null or a value bigger than or equal
+  /// to the persistent header's `maxExtent`. Setting this to a value smaller
+  /// than `minExtent` is equivalent to setting this to `minExtent`.
   ///
   /// This parameter can be set to the persistent header's `minExtent` so the
-  /// persistent header will try not to expand when `showOnScreen` is called.
+  /// persistent header will try not to expand when `showOnScreen` is called, if
+  /// its main axis extent is not already greater than or equal to `minExtent`.
   ///
-  /// Defaults null. Must be greater than [minShowOnScreenExtent] if both of them
-  /// are not null. This parameter has no effect if set to null or a value
-  /// bigger than the persistent header's `maxExtent`. Has no effect unless the
-  /// persistent header is a floating header.
+  /// Defaults null. Must be greater than or equal to [minShowOnScreenExtent] if
+  /// it is also not null. Has no effect unless the persistent header is a
+  /// floating header.
+  /// {@endtemplate}
   final double maxShowOnScreenExtent;
 }
 
@@ -550,15 +556,22 @@ class FloatingHeaderSnapConfiguration {
   /// Creates an object that specifies how a floating header is to be "snapped"
   /// (animated) into or out of view.
   FloatingHeaderSnapConfiguration({
-    @deprecated this.vsync,
+    @Deprecated(
+      'Specify SliverPersistentHeaderDelegate.vsync instead. '
+      'This feature was deprecated after v1.19.0.'
+    )
+    this.vsync,
     this.curve = Curves.ease,
     this.duration = const Duration(milliseconds: 300),
   }) : assert(curve != null),
        assert(duration != null);
 
-  /// The [TickerProvider] for the [AnimationController] that causes a
-  /// floating header to snap in or out of view.
-  @deprecated
+  /// The [TickerProvider] for the [AnimationController] that causes a floating
+  /// header to snap in or out of view.
+  @Deprecated(
+    'Specify SliverPersistentHeaderDelegate.vsync instead. '
+    'This feature was deprecated after v1.19.0.'
+  )
   final TickerProvider vsync;
 
   /// The snap animation curve.
@@ -802,17 +815,16 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         math.max(showOnScreenConfiguration.maxShowOnScreenExtent ?? effectiveMaxExtent, childExtent),
       )
       .clamp(childExtent, effectiveMaxExtent) as double;
-     
+
     // Expands the header if needed, with animation if possible.
     if (minTargetExtent > childExtent) {
       final double targetScrollOffset = maxExtent - minTargetExtent;
-      if (vsync != null) {
-        _updateAnimation(duration, targetScrollOffset, curve);
-        _controller.forward(from: 0.0);
-      } else {
-        _effectiveScrollOffset = targetScrollOffset;
-        markNeedsLayout();
-      }
+      assert(
+        vsync != null,
+        'vsync must not be null if the floating header changes size animatedly.',
+      );
+      _updateAnimation(duration, targetScrollOffset, curve);
+      _controller.forward(from: 0.0);
     }
 
     super.showOnScreen(

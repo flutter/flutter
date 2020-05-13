@@ -1426,9 +1426,9 @@ void main() {
   }
 
   group('Floating header showOnScreen', () {
-    testFloatingHeaderShowOnScreen();
-    testFloatingHeaderShowOnScreen(axis: Axis.horizontal);
-    testFloatingHeaderShowOnScreen(animated: false);
+    testFloatingHeaderShowOnScreen(animated: true, axis: Axis.vertical);
+    testFloatingHeaderShowOnScreen(animated: true, axis: Axis.horizontal);
+    testFloatingHeaderShowOnScreen(animated: false, axis: Axis.vertical);
     testFloatingHeaderShowOnScreen(animated: false, axis: Axis.horizontal);
   });
 

@@ -1805,4 +1805,55 @@ void main() {
     expect(tester.getRect(appBarTitle), const Rect.fromLTRB(200, -12, 800.0 - 200.0, 68));
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
   });
+
+  testWidgets('SliverAppBar configures the delegate properly', (WidgetTester tester) async {
+    Future<void> buildAndVerifyDelegate({ bool pinned, bool floating, bool ignoreLeading, double minExpandExtent, double maxExpandExtent }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                title: const Text('Jumbo'),
+                pinned: pinned,
+                floating: floating,
+                preventShowOnScreenUnpinning: ignoreLeading,
+                minShowOnScreenExtent: minExpandExtent,
+                maxShowOnScreenExtent: maxExpandExtent,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final SliverPersistentHeaderDelegate delegate = tester
+        .widget<SliverPersistentHeader>(find.byType(SliverPersistentHeader))
+        .delegate;
+
+      // Ensure we have a non-null vsync when it's needed.
+      if (!floating || (delegate.snapConfiguration == null && delegate.showOnScreenConfiguration == null))
+        expect(delegate.vsync, isNotNull);
+      if (pinned || floating)
+        expect(delegate?.showOnScreenConfiguration?.ignoreLeading ?? false, ignoreLeading);
+
+      if (floating) {
+        expect(delegate.showOnScreenConfiguration?.minShowOnScreenExtent, minExpandExtent);
+        expect(delegate.showOnScreenConfiguration?.maxShowOnScreenExtent, maxExpandExtent);
+      }
+    }
+
+    await buildAndVerifyDelegate(pinned: true, floating: false, ignoreLeading: true, minExpandExtent: null, maxExpandExtent: null);
+    await buildAndVerifyDelegate(pinned: true, floating: false, ignoreLeading: true, minExpandExtent: 200, maxExpandExtent: 200);
+    await buildAndVerifyDelegate(pinned: true, floating: false, ignoreLeading: false, minExpandExtent: null, maxExpandExtent: null);
+    await buildAndVerifyDelegate(pinned: true, floating: false, ignoreLeading: false, minExpandExtent: 200, maxExpandExtent: 200);
+
+    await buildAndVerifyDelegate(pinned: false, floating: true, ignoreLeading: true, minExpandExtent: null, maxExpandExtent: null);
+    await buildAndVerifyDelegate(pinned: false, floating: true, ignoreLeading: true, minExpandExtent: 200, maxExpandExtent: 200);
+    await buildAndVerifyDelegate(pinned: false, floating: true, ignoreLeading: false, minExpandExtent: null, maxExpandExtent: null);
+    await buildAndVerifyDelegate(pinned: false, floating: true, ignoreLeading: false, minExpandExtent: 200, maxExpandExtent: 200);
+
+    await buildAndVerifyDelegate(pinned: true, floating: true, ignoreLeading: true, minExpandExtent: null, maxExpandExtent: null);
+    await buildAndVerifyDelegate(pinned: true, floating: true, ignoreLeading: true, minExpandExtent: 200, maxExpandExtent: 200);
+    await buildAndVerifyDelegate(pinned: true, floating: true, ignoreLeading: false, minExpandExtent: null, maxExpandExtent: null);
+    await buildAndVerifyDelegate(pinned: true, floating: true, ignoreLeading: false, minExpandExtent: 200, maxExpandExtent: 200);
+  });
 }

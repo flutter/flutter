@@ -986,46 +986,54 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       );
     }
 
-    RenderObject child = descendant;
-    RenderSliver childSliver;
+    // Defer to RenderViewportBase.showInViewport if descendant is null.
+    bool canSkipScrolling = descendant != null;
+    Rect localRect;
+    if (canSkipScrolling) {
+      RenderObject child = descendant;
+      RenderSliver childSliver;
 
-    do {
-      if (child is RenderSliver) {
-        childSliver = child;
+      do {
+        if (child is RenderSliver) {
+          childSliver = child;
+        }
+
+        final RenderObject parent = child.parent as RenderObject;
+        child = parent;
+        assert(child != null, '$descendant must be a descendant of $this.');
+      } while (child != this);
+
+      assert(childSliver.parent == this);
+      localRect = MatrixUtils.transformRect(
+        (descendant ?? this).getTransformTo(this),
+        rect ?? descendant?.paintBounds ?? paintBounds,
+      );
+
+      final double extentOfPinnedSlivers = maxScrollObstructionExtentBefore(childSliver);
+      assert(extentOfPinnedSlivers >= 0);
+
+      switch (applyGrowthDirectionToAxisDirection(axisDirection, childSliver.constraints.growthDirection)) {
+        case AxisDirection.up:
+          canSkipScrolling = canSkipScrolling
+                          && localRect.top >= 0
+                          && localRect.bottom <= size.height - extentOfPinnedSlivers;
+          break;
+        case AxisDirection.right:
+          canSkipScrolling = canSkipScrolling
+                          && localRect.left >= extentOfPinnedSlivers
+                          && localRect.right <= size.width;
+          break;
+        case AxisDirection.down:
+          canSkipScrolling = canSkipScrolling
+                          && localRect.top >= extentOfPinnedSlivers
+                          && localRect.bottom <= size.height;
+          break;
+        case AxisDirection.left:
+          canSkipScrolling = canSkipScrolling
+                          && localRect.left >= 0
+                          && localRect.right <= size.width - extentOfPinnedSlivers;
+          break;
       }
-
-      final RenderObject parent = child.parent as RenderObject;
-      child = parent;
-      assert(child != null, '$descendant must be a descendant of $this.');
-    } while (child != this);
-
-    assert(childSliver.parent == this);
-    Rect localRect = MatrixUtils.transformRect(
-      (descendant ?? this).getTransformTo(this),
-      rect ?? descendant?.paintBounds ?? paintBounds,
-    );
-
-    final double extentOfPinnedSlivers = maxScrollObstructionExtentBefore(childSliver);
-    assert(extentOfPinnedSlivers >= 0);
-
-    bool canSkipScrolling = true;
-    switch (applyGrowthDirectionToAxisDirection(axisDirection, childSliver.constraints.growthDirection)) {
-      case AxisDirection.up:
-        canSkipScrolling = canSkipScrolling && localRect.top >= 0;
-        canSkipScrolling = canSkipScrolling && localRect.bottom <= size.height - extentOfPinnedSlivers;
-        break;
-      case AxisDirection.right:
-        canSkipScrolling = canSkipScrolling && localRect.left >= extentOfPinnedSlivers;
-        canSkipScrolling = canSkipScrolling && localRect.right <= size.width;
-        break;
-      case AxisDirection.down:
-        canSkipScrolling = canSkipScrolling && localRect.top >= extentOfPinnedSlivers;
-        canSkipScrolling = canSkipScrolling && localRect.bottom <= size.height;
-        break;
-      case AxisDirection.left:
-        canSkipScrolling = canSkipScrolling && localRect.left >= 0;
-        canSkipScrolling = canSkipScrolling && localRect.right <= size.width - extentOfPinnedSlivers;
-        break;
     }
 
     if (!canSkipScrolling) {

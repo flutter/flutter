@@ -750,6 +750,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.showOnScreenConfiguration,
     @required this.shape,
   }) : assert(primary || topPadding == 0.0),
+       assert(!floating || (snapConfiguration == null && showOnScreenConfiguration == null) || vsync != null),
        _bottomHeight = bottom?.preferredSize?.height ?? 0.0;
 
   final Widget leading;
@@ -991,6 +992,9 @@ class SliverAppBar extends StatefulWidget {
     this.stretchTriggerOffset = 100.0,
     this.onStretchTrigger,
     this.shape,
+    this.preventShowOnScreenUnpinning = true,
+    this.minShowOnScreenExtent,
+    this.maxShowOnScreenExtent,
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
        assert(primary != null),
@@ -1001,6 +1005,7 @@ class SliverAppBar extends StatefulWidget {
        assert(stretch != null),
        assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
        assert(stretchTriggerOffset > 0.0),
+       assert(preventShowOnScreenUnpinning != null),
        super(key: key);
 
   /// A widget to display before the [title].
@@ -1262,6 +1267,17 @@ class SliverAppBar extends StatefulWidget {
   /// offset specified by [stretchTriggerOffset].
   final AsyncCallback onStretchTrigger;
 
+  /// {@macro flutter.rendering.persistentHeader.ignoreLeading}
+  ///
+  /// Defaults to true and must not be null.
+  final bool preventShowOnScreenUnpinning;
+
+  /// {@macro flutter.rendering.persistentHeader.minShowOnScreenExtent}
+  final double minShowOnScreenExtent;
+
+  /// {@macro flutter.rendering.persistentHeader.maxShowOnScreenExtent}
+  final double maxShowOnScreenExtent;
+
   @override
   _SliverAppBarState createState() => _SliverAppBarState();
 }
@@ -1296,11 +1312,13 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   }
 
   void _updateShowOnScreenConfiguration() {
-    if (widget.floating || widget.pinned) {
-      _showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration(ignoreLeading: true);
-    } else {
-      _showOnScreenConfiguration = null;
-    }
+    _showOnScreenConfiguration = widget.floating || widget.pinned
+      ? PersistentHeaderShowOnScreenConfiguration(
+        ignoreLeading: widget.preventShowOnScreenUnpinning,
+        minShowOnScreenExtent: widget.minShowOnScreenExtent,
+        maxShowOnScreenExtent: widget.maxShowOnScreenExtent,
+      )
+      : null;
   }
 
   @override
@@ -1318,8 +1336,13 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
       _updateSnapConfiguration();
     if (widget.stretch != oldWidget.stretch)
       _updateStretchConfiguration();
-
-    _updateShowOnScreenConfiguration();
+    if (widget.floating || widget.pinned) {
+      if (widget.preventShowOnScreenUnpinning != oldWidget.preventShowOnScreenUnpinning ||
+        widget.minShowOnScreenExtent != oldWidget.minShowOnScreenExtent ||
+        widget.maxShowOnScreenExtent != oldWidget.maxShowOnScreenExtent) {
+        _updateShowOnScreenConfiguration();
+      }
+    }
   }
 
   @override
