@@ -2682,8 +2682,8 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
   /// Creates a render object that forwards pointer events to callbacks.
   ///
   /// All parameters are optional. By default this method creates an opaque
-  /// mouse region with no callbacks and deferred cursor. The [cursor] must not
-  /// be null.
+  /// mouse region with no callbacks and cursor being [MouseCursor.defer]. The
+  /// [cursor] must not be null.
   RenderMouseRegion({
     PointerEnterEventListener onEnter,
     PointerHoverEventListener onHover,

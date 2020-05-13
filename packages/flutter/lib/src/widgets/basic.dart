@@ -5881,16 +5881,16 @@ class MouseRegion extends StatefulWidget {
   /// Creates a widget that forwards mouse events to callbacks.
   ///
   /// By default, all callbacks are empty, [cursor] is [MouseCursor.defer], and
-  /// [opaque] is true.
+  /// [opaque] is true. The [cursor] must not be null.
   const MouseRegion({
     Key key,
     this.onEnter,
     this.onExit,
     this.onHover,
-    MouseCursor cursor,
+    this.cursor = MouseCursor.defer,
     this.opaque = true,
     this.child,
-  }) : cursor = cursor ?? MouseCursor.defer,
+  }) : assert(cursor != null),
        assert(opaque != null),
        super(key: key);
 
