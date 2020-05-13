@@ -31,7 +31,7 @@ void main() {
     testUsingContext('no error when no connected devices', () async {
       final DevicesCommand command = DevicesCommand();
       await createTestCommandRunner(command).run(<String>['devices']);
-      expect(testLogger.statusText, contains('No devices detected'));
+      expect(testLogger.statusText, containsIgnoringWhitespace('No devices detected'));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => null,
       DeviceManager: () => DeviceManager(),

@@ -4,17 +4,49 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/testbed.dart';
 
 void main() {
+  testUsingContext('Grabs context logger if no constructor logger is provided', () async {
+    final WebDevices webDevices = WebDevices(
+      featureFlags: TestFeatureFlags(isWebEnabled: true),
+      fileSystem: MemoryFileSystem.test(),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{}
+      ),
+      processManager:  FakeProcessManager.any(),
+    );
+
+    final List<Device> devices = await webDevices.pollingGetDevices();
+    final WebServerDevice serverDevice = devices.firstWhere((Device device) => device is WebServerDevice)
+      as WebServerDevice;
+
+    await serverDevice.startApp(
+      null,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        startPaused: true,
+      ),
+      platformArgs: <String, String>{
+        'uri': 'foo',
+      }
+    );
+
+    // Verify that the injected testLogger is used.
+    expect(testLogger.statusText, contains(
+      'Waiting for connection from Dart debug extension at foo'
+    ));
+  });
   testWithoutContext('No web devices listed if feature is disabled', () async {
     final WebDevices webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: false),
@@ -44,7 +76,7 @@ void main() {
     expect(chromeDevice.supportsHotReload, true);
     expect(chromeDevice.supportsHotRestart, true);
     expect(chromeDevice.supportsStartPaused, true);
-    expect(chromeDevice.supportsFlutterExit, true);
+    expect(chromeDevice.supportsFlutterExit, false);
     expect(chromeDevice.supportsScreenshot, false);
     expect(await chromeDevice.isLocalEmulator, false);
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
@@ -64,7 +96,7 @@ void main() {
     expect(chromeDevice.supportsHotReload, true);
     expect(chromeDevice.supportsHotRestart, true);
     expect(chromeDevice.supportsStartPaused, true);
-    expect(chromeDevice.supportsFlutterExit, true);
+    expect(chromeDevice.supportsFlutterExit, false);
     expect(chromeDevice.supportsScreenshot, false);
     expect(await chromeDevice.isLocalEmulator, false);
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
@@ -82,7 +114,7 @@ void main() {
     expect(device.supportsHotReload, true);
     expect(device.supportsHotRestart, true);
     expect(device.supportsStartPaused, true);
-    expect(device.supportsFlutterExit, true);
+    expect(device.supportsFlutterExit, false);
     expect(device.supportsScreenshot, false);
     expect(await device.isLocalEmulator, false);
     expect(device.getLogReader(), isA<NoOpDeviceLogReader>());

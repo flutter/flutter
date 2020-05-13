@@ -5,11 +5,11 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';

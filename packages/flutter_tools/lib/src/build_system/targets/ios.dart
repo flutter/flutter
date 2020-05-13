@@ -187,7 +187,7 @@ class DebugUniveralFramework extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/App')
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
   ];
 
   @override
@@ -200,7 +200,10 @@ class DebugUniveralFramework extends Target {
       ?? <DarwinArch>{DarwinArch.arm64};
     final File iphoneFile = environment.buildDir.childFile('iphone_framework');
     final File simulatorFile = environment.buildDir.childFile('simulator_framework');
-    final File lipoOutputFile = environment.buildDir.childFile('App');
+    final File lipoOutputFile = environment.buildDir
+      .childDirectory('App.framework')
+      .childFile('App');
+    lipoOutputFile.parent.createSync(recursive: true);
     final RunResult iphoneResult = await createStubAppFramework(
       iphoneFile,
       SdkType.iPhone,
@@ -250,7 +253,7 @@ abstract class IosAssetBundle extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/App'),
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     ...IconTreeShaker.inputs,
   ];
@@ -280,7 +283,9 @@ abstract class IosAssetBundle extends Target {
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
     if (buildMode == BuildMode.debug) {
       // Copy the App.framework to the output directory.
-      environment.buildDir.childFile('App')
+      environment.buildDir
+        .childDirectory('App.framework')
+        .childFile('App')
         .copySync(frameworkDirectory.childFile('App').path);
 
       final String vmSnapshotData = globals.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);

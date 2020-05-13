@@ -6,9 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
-import 'package:package_config/package_config.dart';
-import 'package:platform/platform.dart';
-
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
 import 'package:flutter_tools/src/application_package.dart';
@@ -16,16 +13,18 @@ import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
+import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
 import 'common.dart';
@@ -45,7 +44,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
       versionCode: 1,
       launchActivity: 'io.flutter.android.mock.MockActivity',
     ),
-    iOS: BuildableIOSApp(MockIosProject(), MockIosProject.bundleId),
+    iOS: BuildableIOSApp(MockIosProject(), MockIosProject.bundleId, MockIosProject.appBundleName),
   );
 }
 
@@ -55,9 +54,10 @@ class MockApplicationPackageFactory extends Mock implements ApplicationPackageFa
   @override
   Future<ApplicationPackage> getPackageForPlatform(
     TargetPlatform platform, {
+    BuildInfo buildInfo,
     File applicationBinary,
   }) async {
-    return _store.getPackageForPlatform(platform);
+    return _store.getPackageForPlatform(platform, buildInfo);
   }
 }
 
@@ -529,12 +529,13 @@ class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
 
 class MockIosProject extends Mock implements IosProject {
   static const String bundleId = 'com.example.test';
+  static const String appBundleName = 'My Super Awesome App.app';
 
   @override
-  Future<String> get productBundleIdentifier async => bundleId;
+  Future<String> productBundleIdentifier(BuildInfo buildInfo) async => bundleId;
 
   @override
-  String get hostAppBundleName => 'Runner.app';
+  Future<String> hostAppBundleName(BuildInfo buildInfo) async => appBundleName;
 }
 
 class MockAndroidDevice extends Mock implements AndroidDevice {

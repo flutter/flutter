@@ -80,7 +80,7 @@ Future<void> runCommand(String executable, List<String> arguments, {
   );
 
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
-  final String relativeWorkingDir = path.relative(workingDirectory);
+  final String relativeWorkingDir = path.relative(workingDirectory ?? Directory.current.path);
   if (skip) {
     printProgress('SKIPPING', relativeWorkingDir, commandDescription);
     return;

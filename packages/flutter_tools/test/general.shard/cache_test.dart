@@ -5,20 +5,18 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
-
-import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
-import 'package:process/process.dart';
-
 import 'package:flutter_tools/src/android/gradle_utils.dart';
-import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show InternetAddress, SocketException;
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:meta/meta.dart';
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -372,12 +370,15 @@ void main() {
     });
 
     test('development artifact', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts();
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(mockCache);
       expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
     });
 
     testUsingContext('update', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts();
+      final Directory cacheRoot = globals.fs.directory('/bin/cache')
+        ..createSync(recursive: true);
+      when(mockCache.getRoot()).thenReturn(cacheRoot);
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(mockCache);
       expect(mavenArtifacts.isUpToDate(), isFalse);
 
       final Directory gradleWrapperDir = globals.fs.systemTempDirectory.createTempSync('flutter_cache_test_gradle_wrapper.');
@@ -574,26 +575,41 @@ void main() {
     Platform: () => FakePlatform(operatingSystem: 'linux'),
   });
 
-  testUsingContext('Windows desktop artifacts ignore filtering when requested', () {
+  testWithoutContext('Windows desktop artifacts ignore filtering when requested', () {
     final MockCache mockCache = MockCache();
-    final WindowsEngineArtifacts artifacts = WindowsEngineArtifacts(mockCache);
+    final WindowsEngineArtifacts artifacts = WindowsEngineArtifacts(
+      mockCache,
+      platform: FakePlatform(operatingSystem: 'linux'),
+    );
     when(mockCache.includeAllPlatforms).thenReturn(false);
     when(mockCache.platformOverrideArtifacts).thenReturn(<String>{'windows'});
 
     expect(artifacts.getBinaryDirs(), isNotEmpty);
-  }, overrides: <Type, Generator> {
-    Platform: () => FakePlatform(operatingSystem: 'linux'),
   });
 
-  testUsingContext('Linux desktop artifacts ignore filtering when requested', () {
+  testWithoutContext('Windows desktop artifacts include profile and release artifacts', () {
     final MockCache mockCache = MockCache();
-    final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(mockCache);
+    final WindowsEngineArtifacts artifacts = WindowsEngineArtifacts(
+      mockCache,
+      platform: FakePlatform(operatingSystem: 'windows'),
+    );
+
+    expect(artifacts.getBinaryDirs(), containsAll(<Matcher>[
+      contains(contains('profile')),
+      contains(contains('release')),
+    ]));
+  });
+
+  testWithoutContext('Linux desktop artifacts ignore filtering when requested', () {
+    final MockCache mockCache = MockCache();
+    final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
+      mockCache,
+      platform: FakePlatform(operatingSystem: 'macos'),
+    );
     when(mockCache.includeAllPlatforms).thenReturn(false);
     when(mockCache.platformOverrideArtifacts).thenReturn(<String>{'linux'});
 
     expect(artifacts.getBinaryDirs(), isNotEmpty);
-  }, overrides: <Type, Generator> {
-    Platform: () => FakePlatform(operatingSystem: 'macos'),
   });
 }
 

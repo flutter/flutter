@@ -2,23 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:platform/platform.dart';
-
 import 'context.dart';
+import 'platform.dart';
 
 UserMessages get userMessages => context.get<UserMessages>();
 
 /// Class containing message strings that can be produced by Flutter tools.
 class UserMessages {
+  // Messages used in multiple components.
+  String get flutterToolBugInstructions =>
+      'Please report a bug at https://github.com/flutter/flutter/issues.';
+
   // Messages used in FlutterValidator
   String flutterStatusInfo(String channel, String version, String os, String locale) =>
-      'Channel ${channel ?? 'unknown'}, v${version ?? 'Unknown'}, on $os, locale $locale';
+      'Channel ${channel ?? 'unknown'}, ${version ?? 'Unknown'}, on $os, locale $locale';
   String flutterVersion(String version, String flutterRoot) =>
       'Flutter version $version at $flutterRoot';
   String flutterRevision(String revision, String age, String date) =>
       'Framework revision $revision ($age), $date';
   String engineRevision(String revision) => 'Engine revision $revision';
   String dartRevision(String revision) => 'Dart version $revision';
+  String pubMirrorURL(String url) => 'Pub download mirror $url';
+  String flutterMirrorURL(String url) => 'Flutter download mirror $url';
   String get flutterBinariesDoNotRun =>
       'Downloaded executables cannot execute on host.\n'
       'See https://github.com/flutter/flutter/issues/6207 for more information';

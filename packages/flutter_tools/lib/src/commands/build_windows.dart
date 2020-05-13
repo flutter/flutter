@@ -30,6 +30,7 @@ class BuildWindowsCommand extends BuildSubCommand {
     usesExtraFrontendOptions();
     addEnableExperimentation(hide: !verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
+    addBuildPerformanceFile(hide: !verboseHelp);
   }
 
   @override

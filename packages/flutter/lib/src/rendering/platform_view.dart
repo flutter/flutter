@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'layer.dart';
+import 'mouse_cursor.dart';
 import 'mouse_tracking.dart';
 import 'object.dart';
 
@@ -757,9 +758,10 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   void paint(PaintingContext context, Offset offset) {
     assert(_controller.viewId != null);
     context.addLayer(PlatformViewLayer(
-            rect: offset & size,
-            viewId: _controller.viewId,
-            hoverAnnotation: _hoverAnnotation));
+      rect: offset & size,
+      viewId: _controller.viewId,
+      hoverAnnotation: _hoverAnnotation,
+    ));
   }
 
   @override
@@ -787,7 +789,16 @@ mixin _PlatformViewGestureMixin on RenderBox {
   /// and apply it to all subsequent move events, but there is no down event
   /// for a hover. To support native hover gesture handling by platform views,
   /// we attach/detach this layer annotation as necessary.
-  MouseTrackerAnnotation _hoverAnnotation;
+  MouseTrackerAnnotation get _hoverAnnotation {
+    return _cachedHoverAnnotation ??= MouseTrackerAnnotation(
+      onHover: (PointerHoverEvent event) {
+        if (_handlePointerEvent != null)
+          _handlePointerEvent(event);
+      },
+      cursor: SystemMouseCursors.uncontrolled,
+    );
+  }
+  MouseTrackerAnnotation _cachedHoverAnnotation;
 
   _HandlePointerEvent _handlePointerEvent;
 
@@ -831,19 +842,8 @@ mixin _PlatformViewGestureMixin on RenderBox {
   }
 
   @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    assert(_hoverAnnotation == null);
-    _hoverAnnotation = MouseTrackerAnnotation(onHover: (PointerHoverEvent event) {
-      if (_handlePointerEvent != null)
-        _handlePointerEvent(event);
-    });
-  }
-
-  @override
   void detach() {
     _gestureRecognizer.reset();
-    _hoverAnnotation = null;
     super.detach();
   }
 }

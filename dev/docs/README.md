@@ -1,11 +1,11 @@
-Welcome to the Flutter API reference documentation.
+**Welcome to the Flutter API reference documentation!**
 
-Flutter is Google’s mobile UI framework for crafting high-quality native
-interfaces on iOS and Android in record time. Flutter works with existing code,
-is used by developers and organizations around the world, and is free and open
-source.
+Flutter is Google's SDK for crafting beautiful, fast user experiences for 
+mobile, web and desktop from a single codebase. Flutter works with existing
+code, is used by developers and organizations around the world, and is free
+and open source.
 
-The API reference herein covers all libraries that are exported by the Flutter
+This API reference covers all libraries that are exported by the Flutter
 SDK.
 
 ### More Documentation
@@ -33,7 +33,7 @@ import 'package:flutter/services.dart';
 
 #### Dart Libraries
 
-Libraries in the "Dart" section exist in the `'dart:'` namespace and are imported
+Libraries in the "Dart" section exist in the `dart:` namespace and are imported
 using `'dart:<library>'`, like so:
 
 ```dart
@@ -43,7 +43,7 @@ import 'dart:ui';
 
 Except for `'dart:core'`, you must import a Dart library before you can use it.
 
-#### Other Libraries
+#### Supporting Libraries
 
 Libraries in other sections are supporting libraries that ship with Flutter.
 They are organized by package and are imported using
@@ -54,8 +54,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:file/local.dart';
 ```
 
-### Finding Other Libraries
+### Packages on pub.dev
 
-Flutter has a rich community of packages that have been contributed by the
-open-source community. You can browse those packages at
-[pub.dev/flutter](https://pub.dev/flutter)
+Flutter has a rich ecosystem of packages that have been contributed by the
+Flutter team and the broader open source community to a central repository. 
+Among the thousands of packages you'll find support for Firebase, Google 
+Fonts, hardware services like Bluetooth and camera, new widgets and
+animations, and integration with other popular web services. You can browse
+those packages at [pub.dev](https://pub.dev).

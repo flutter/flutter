@@ -119,22 +119,9 @@ void _writeGeneratedFlutterProperties(
     'FLUTTER_ROOT': Cache.flutterRoot,
     'FLUTTER_EPHEMERAL_DIR': windowsProject.ephemeralDirectory.path,
     'PROJECT_DIR': windowsProject.project.directory.path,
-    if (buildInfo.trackWidgetCreation != null)
-      'TRACK_WIDGET_CREATION': buildInfo.trackWidgetCreation.toString(),
-    if (buildInfo.treeShakeIcons != null)
-      'TREE_SHAKE_ICONS': buildInfo.treeShakeIcons.toString(),
-    if (buildInfo.extraGenSnapshotOptions?.isNotEmpty ?? false)
-      'EXTRA_GEN_SNAPSHOT_OPTIONS': buildInfo.extraGenSnapshotOptions.join(','),
-    if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false)
-      'EXTRA_FRONT_END_OPTIONS': buildInfo.extraFrontEndOptions.join(','),
-    if (buildInfo.dartDefines?.isNotEmpty ?? false)
-      'DART_DEFINES': buildInfo.dartDefines.join(','),
-    if (buildInfo.dartObfuscation != null)
-      'DART_OBFUSCATION': buildInfo.dartObfuscation.toString(),
-    if (buildInfo.splitDebugInfoPath != null)
-      'SPLIT_DEBUG_INFO': buildInfo.splitDebugInfoPath,
     if (target != null)
       'FLUTTER_TARGET': target,
+    ...buildInfo.toEnvironmentConfig(),
   };
   if (globals.artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;

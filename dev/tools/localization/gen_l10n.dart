@@ -394,15 +394,23 @@ class LocalizationsGenerator {
   AppResourceBundleCollection _allBundles;
   LocaleInfo _templateArbLocale;
 
-  /// The reference to the project's l10n directory.
+  /// The directory that contains the project's arb files, as well as the
+  /// header file, if specified.
   ///
   /// It is assumed that all input files (e.g. [templateArbFile], arb files
-  /// for translated messages) and output files (e.g. The localizations
+  /// for translated messages, header file templates) will reside here.
+  ///
+  /// This directory is specified with the [initialize] method.
+  Directory inputDirectory;
+
+  /// The directory to generate the project's localizations files in.
+  ///
+  /// It is assumed that all output files (e.g. The localizations
   /// [outputFile], `messages_<locale>.dart` and `messages_all.dart`)
   /// will reside here.
   ///
   /// This directory is specified with the [initialize] method.
-  Directory l10nDirectory;
+  Directory outputDirectory;
 
   /// The input arb file which defines all of the messages that will be
   /// exported by the generated class that's written to [outputFile].
@@ -410,11 +418,13 @@ class LocalizationsGenerator {
   /// This file is specified with the [initialize] method.
   File templateArbFile;
 
-  /// The file to write the generated localizations and localizations delegate
-  /// classes to.
+  /// The file to write the generated abstract localizations and
+  /// localizations delegate classes to. Separate localizations
+  /// files will also be generated for each language using this
+  /// filename as a prefix and the locale as the suffix.
   ///
   /// This file is specified with the [initialize] method.
-  File outputFile;
+  File baseOutputFile;
 
   /// The class name to be used for the localizations class in [outputFile].
   ///
@@ -440,17 +450,17 @@ class LocalizationsGenerator {
   List<LocaleInfo> get preferredSupportedLocales => _preferredSupportedLocales;
   List<LocaleInfo> _preferredSupportedLocales;
 
-  /// The list of all arb path strings in [l10nDirectory].
+  /// The list of all arb path strings in [inputDirectory].
   List<String> get arbPathStrings {
     return _allBundles.bundles.map((AppResourceBundle bundle) => bundle.file.path).toList();
   }
 
   /// The supported language codes as found in the arb files located in
-  /// [l10nDirectory].
+  /// [inputDirectory].
   final Set<String> supportedLanguageCodes = <String>{};
 
   /// The supported locales as found in the arb files located in
-  /// [l10nDirectory].
+  /// [inputDirectory].
   final Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
 
   /// The header to be prepended to the generated Dart localization file.
@@ -475,7 +485,22 @@ class LocalizationsGenerator {
   bool get useDeferredLoading => _useDeferredLoading;
   bool _useDeferredLoading;
 
-  /// Initializes [l10nDirectory], [templateArbFile], [outputFile] and [className].
+  /// Contains a map of each output language file to its corresponding content in
+  /// string format.
+  final Map<File, String> _languageFileMap = <File, String>{};
+
+  /// Contains the generated application's localizations and localizations delegate
+  /// classes.
+  String _generatedLocalizationsFile;
+
+  /// The file that contains the list of inputs and outputs for generating
+  /// localizations.
+  File _inputsAndOutputsListFile;
+  List<String> _inputFileList;
+  List<String> _outputFileList;
+
+  /// Initializes [inputDirectory], [outputDirectory], [templateArbFile],
+  /// [outputFile] and [className].
   ///
   /// Throws an [L10nException] when a provided configuration is not allowed
   /// by [LocalizationsGenerator].
@@ -483,7 +508,8 @@ class LocalizationsGenerator {
   /// Throws a [FileSystemException] when a file operation necessary for setting
   /// up the [LocalizationsGenerator] cannot be completed.
   void initialize({
-    String l10nDirectoryPath,
+    String inputPathString,
+    String outputPathString,
     String templateArbFileName,
     String outputFileString,
     String classNameString,
@@ -491,14 +517,17 @@ class LocalizationsGenerator {
     String headerString,
     String headerFile,
     bool useDeferredLoading = false,
+    String inputsAndOutputsListPath,
   }) {
-    setL10nDirectory(l10nDirectoryPath);
+    setInputDirectory(inputPathString);
+    setOutputDirectory(outputPathString ?? inputPathString);
     setTemplateArbFile(templateArbFileName);
-    setOutputFile(outputFileString);
+    setBaseOutputFile(outputFileString);
     setPreferredSupportedLocales(preferredSupportedLocaleString);
     _setHeader(headerString, headerFile);
     _setUseDeferredLoading(useDeferredLoading);
     className = classNameString;
+    _setInputsAndOutputsListFile(inputsAndOutputsListPath);
   }
 
   static bool _isNotReadable(FileStat fileStat) {
@@ -515,24 +544,32 @@ class LocalizationsGenerator {
     return !(statString[1] == 'w' || statString[4] == 'w' || statString[7] == 'w');
   }
 
-  /// Sets the reference [Directory] for [l10nDirectory].
+  /// Sets the reference [Directory] for [inputDirectory].
   @visibleForTesting
-  void setL10nDirectory(String arbPathString) {
-    if (arbPathString == null)
-      throw L10nException('arbPathString argument cannot be null');
-    l10nDirectory = _fs.directory(arbPathString);
-    if (!l10nDirectory.existsSync())
+  void setInputDirectory(String inputPathString) {
+    if (inputPathString == null)
+      throw L10nException('inputPathString argument cannot be null');
+    inputDirectory = _fs.directory(inputPathString);
+    if (!inputDirectory.existsSync())
       throw FileSystemException(
-        "The 'arb-dir' directory, $l10nDirectory, does not exist.\n"
+        "The 'input-dir' directory, '$inputDirectory', does not exist.\n"
         'Make sure that the correct path was provided.'
       );
 
-    final FileStat fileStat = l10nDirectory.statSync();
+    final FileStat fileStat = inputDirectory.statSync();
     if (_isNotReadable(fileStat) || _isNotWritable(fileStat))
       throw FileSystemException(
-        "The 'arb-dir' directory, $l10nDirectory, doesn't allow reading and writing.\n"
+        "The 'input-dir' directory, '$inputDirectory', doesn't allow reading and writing.\n"
         'Please ensure that the user has read and write permissions.'
       );
+  }
+
+  /// Sets the reference [Directory] for [outputDirectory].
+  @visibleForTesting
+  void setOutputDirectory(String outputPathString) {
+    if (outputPathString == null)
+      throw L10nException('outputPathString argument cannot be null');
+    outputDirectory = _fs.directory(outputPathString);
   }
 
   /// Sets the reference [File] for [templateArbFile].
@@ -540,10 +577,10 @@ class LocalizationsGenerator {
   void setTemplateArbFile(String templateArbFileName) {
     if (templateArbFileName == null)
       throw L10nException('templateArbFileName argument cannot be null');
-    if (l10nDirectory == null)
-      throw L10nException('l10nDirectory cannot be null when setting template arb file');
+    if (inputDirectory == null)
+      throw L10nException('inputDirectory cannot be null when setting template arb file');
 
-    templateArbFile = _fs.file(path.join(l10nDirectory.path, templateArbFileName));
+    templateArbFile = _fs.file(path.join(inputDirectory.path, templateArbFileName));
     final String templateArbFileStatModeString = templateArbFile.statSync().modeString();
     if (templateArbFileStatModeString[0] == '-' && templateArbFileStatModeString[3] == '-')
       throw FileSystemException(
@@ -554,10 +591,10 @@ class LocalizationsGenerator {
 
   /// Sets the reference [File] for the localizations delegate [outputFile].
   @visibleForTesting
-  void setOutputFile(String outputFileString) {
+  void setBaseOutputFile(String outputFileString) {
     if (outputFileString == null)
       throw L10nException('outputFileString argument cannot be null');
-    outputFile = _fs.file(path.join(l10nDirectory.path, outputFileString));
+    baseOutputFile = _fs.file(path.join(outputDirectory.path, outputFileString));
   }
 
   static bool _isValidClassName(String className) {
@@ -620,7 +657,7 @@ class LocalizationsGenerator {
       header = headerString;
     } else if (headerFile != null) {
       try {
-        header = _fs.file(path.join(l10nDirectory.path, headerFile)).readAsStringSync();
+        header = _fs.file(path.join(inputDirectory.path, headerFile)).readAsStringSync();
       } on FileSystemException catch (error) {
         throw L10nException (
           'Failed to read header file: "$headerFile". \n'
@@ -635,6 +672,17 @@ class LocalizationsGenerator {
       throw L10nException('useDeferredLoading argument cannot be null.');
     }
     _useDeferredLoading = useDeferredLoading;
+  }
+
+  void _setInputsAndOutputsListFile(String inputsAndOutputsListPath) {
+    if (inputsAndOutputsListPath == null)
+      return;
+
+    _inputsAndOutputsListFile = _fs.file(
+      path.join(inputsAndOutputsListPath, 'gen_l10n_inputs_and_outputs.json'),
+    );
+    _inputFileList = <String>[];
+    _outputFileList = <String>[];
   }
 
   static bool _isValidGetterAndMethodName(String name) {
@@ -654,7 +702,7 @@ class LocalizationsGenerator {
   }
 
   // Load _allMessages from templateArbFile and _allBundles from all of the ARB
-  // files in l10nDirectory. Also initialized: supportedLocales.
+  // files in inputDirectory. Also initialized: supportedLocales.
   void loadResources() {
     final AppResourceBundle templateBundle = AppResourceBundle(templateArbFile);
     _templateArbLocale = templateBundle.locale;
@@ -669,7 +717,12 @@ class LocalizationsGenerator {
         );
       }
 
-    _allBundles = AppResourceBundleCollection(l10nDirectory);
+    _allBundles = AppResourceBundleCollection(inputDirectory);
+    if (_inputsAndOutputsListFile != null) {
+      _inputFileList.addAll(_allBundles.bundles.map((AppResourceBundle bundle) {
+        return bundle.file.absolute.path;
+      }));
+    }
 
     final List<LocaleInfo> allLocales = List<LocaleInfo>.from(_allBundles.locales);
     for (final LocaleInfo preferredLocale in preferredSupportedLocales) {
@@ -754,8 +807,9 @@ class LocalizationsGenerator {
   }
 
   // Generate the AppLocalizations class, its LocalizationsDelegate subclass,
-  // and all AppLocalizations subclasses for every locale.
-  String generateCode() {
+  // and all AppLocalizations subclasses for every locale. This method by
+  // itself does not generate the output files.
+  void _generateCode() {
     bool isBaseClassLocale(LocaleInfo locale, String language) {
       return locale.languageCode == language
           && locale.countryCode == null
@@ -772,8 +826,8 @@ class LocalizationsGenerator {
         .map((AppResourceBundle bundle) => bundle.locale).toList();
     }
 
-    final String directory = path.basename(l10nDirectory.path);
-    final String outputFileName = path.basename(outputFile.path);
+    final String directory = path.basename(outputDirectory.path);
+    final String outputFileName = path.basename(baseOutputFile.path);
 
     final Iterable<String> supportedLocalesCode = supportedLocales.map((LocaleInfo locale) {
       final String languageCode = locale.languageCode;
@@ -799,8 +853,8 @@ class LocalizationsGenerator {
     final String fileName = outputFileName.split('.')[0];
     for (final LocaleInfo locale in allLocales) {
       if (isBaseClassLocale(locale, locale.languageCode)) {
-        final File localeMessageFile = _fs.file(
-          path.join(l10nDirectory.path, '${fileName}_$locale.dart'),
+        final File languageMessageFile = _fs.file(
+          path.join(outputDirectory.path, '${fileName}_$locale.dart'),
         );
 
         // Generate the template for the base class file. Further string
@@ -827,9 +881,9 @@ class LocalizationsGenerator {
           );
         });
 
-        localeMessageFile.writeAsStringSync(
-          languageBaseClassFile.replaceAll('@(subclasses)', subclasses.join()),
-        );
+        _languageFileMap.putIfAbsent(languageMessageFile, () {
+          return languageBaseClassFile.replaceAll('@(subclasses)', subclasses.join());
+        });
       }
     }
 
@@ -854,7 +908,7 @@ class LocalizationsGenerator {
       fileName: fileName,
     );
 
-    return fileTemplate
+    _generatedLocalizationsFile = fileTemplate
       .replaceAll('@(header)', header)
       .replaceAll('@(class)', className)
       .replaceAll('@(methods)', _allMessages.map(generateBaseClassMethod).join('\n'))
@@ -865,8 +919,48 @@ class LocalizationsGenerator {
       .replaceAll('@(delegateClass)', delegateClass);
   }
 
-  void writeOutputFile() {
-    outputFile.writeAsStringSync(generateCode());
+  void writeOutputFiles() {
+    // First, generate the string contents of all necessary files.
+    _generateCode();
+
+    // Since all validity checks have passed up to this point,
+    // write the contents into the directory.
+    if (!outputDirectory.existsSync()) {
+      outputDirectory.createSync(recursive: true);
+    }
+
+    // Ensure that the created directory has read/write permissions.
+    final FileStat fileStat = outputDirectory.statSync();
+    if (_isNotReadable(fileStat) || _isNotWritable(fileStat))
+      throw FileSystemException(
+        "The 'output-dir' directory, $outputDirectory, doesn't allow reading and writing.\n"
+        'Please ensure that the user has read and write permissions.'
+      );
+
+    // Generate the required files for localizations.
+    _languageFileMap.forEach((File file, String contents) {
+      file.writeAsStringSync(contents);
+      if (_inputsAndOutputsListFile != null) {
+        _outputFileList.add(file.absolute.path);
+      }
+    });
+
+    baseOutputFile.writeAsStringSync(_generatedLocalizationsFile);
+    if (_inputsAndOutputsListFile != null) {
+      _outputFileList.add(baseOutputFile.absolute.path);
+
+      // Generate a JSON file containing the inputs and outputs of the gen_l10n script.
+      if (!_inputsAndOutputsListFile.existsSync()) {
+        _inputsAndOutputsListFile.createSync(recursive: true);
+      }
+
+      _inputsAndOutputsListFile.writeAsStringSync(
+        json.encode(<String, Object> {
+          'inputs': _inputFileList,
+          'outputs': _outputFileList,
+        }),
+      );
+    }
   }
 
   void outputUnimplementedMessages(String untranslatedMessagesFile) {

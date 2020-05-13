@@ -12,15 +12,15 @@ import 'package:dwds/src/readers/asset_reader.dart';
 import 'package:dwds/src/services/expression_compiler.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/build_runner/devfs_web.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:logging/logging.dart';
 import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
-import 'package:platform/platform.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
@@ -155,6 +155,15 @@ void main() {
       .handleRequest(Request('GET', Uri.parse('http://foobar/bar.js')));
 
     expect(response.statusCode, HttpStatus.notFound);
+  }));
+
+  test('serves default index.html', () => testbed.run(() async {
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/')));
+
+    expect(response.statusCode, HttpStatus.ok);
+    expect((await response.read().toList()).first,
+      containsAllInOrder(utf8.encode('<html>')));
   }));
 
   test('handles web server paths without .lib extension', () => testbed.run(() async {
@@ -313,6 +322,18 @@ void main() {
       containsPair(HttpHeaders.contentTypeHeader, 'application/octet-stream'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
+  }));
+
+  test('serves valid etag header for asset files with non-ascii chracters', () => testbed.run(() async {
+    globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'fooπ'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(<int>[1, 2, 3]);
+
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/assets/fooπ')));
+    final String etag = response.headers[HttpHeaders.etagHeader];
+
+    expect(etag.runes, everyElement(predicate((int char) => char < 255)));
   }));
 
   test('handles serving missing asset file', () => testbed.run(() async {
