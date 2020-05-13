@@ -111,8 +111,15 @@ abstract class Recorder {
   /// prefix.
   final String name;
 
+  /// Returns the recorded profile.
+  ///
+  /// This value is only available while the benchmark is running.
   Profile get profile;
 
+  /// Whether the benchmark should continue running.
+  ///
+  /// Returns `false` if the benchmark collected enough data and it's time to
+  /// stop.
   bool shouldContinue() => profile.shouldContinue();
 
   /// Called once before all runs of this benchmark recorder.
