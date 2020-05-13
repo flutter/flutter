@@ -232,8 +232,6 @@ class _DefaultPub implements Pub {
     }
     // We don't check if dotPackages was actually modified, because as far as we can tell sometimes
     // pub will decide it does not need to actually modify it.
-    // Since we rely on the file having a more recent timestamp, though, we do manually force the
-    // file to be more recently modified.
     final DateTime now = DateTime.now();
     if (now.isBefore(originalPubspecYamlModificationTime)) {
       _logger.printError(
