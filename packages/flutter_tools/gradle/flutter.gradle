@@ -591,7 +591,7 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('filesystem-scheme')) {
             fileSystemSchemeValue = project.property('filesystem-scheme')
         }
-        Boolean trackWidgetCreationValue = false
+        Boolean trackWidgetCreationValue = null
         if (project.hasProperty('track-widget-creation')) {
             trackWidgetCreationValue = project.property('track-widget-creation').toBoolean()
         }
@@ -841,7 +841,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     String[] fileSystemRoots
     @Optional @Input
     String fileSystemScheme
-    @Input
+    @Optional @Input
     Boolean trackWidgetCreation
     @Optional @Input
     List<String> targetPlatformValues
