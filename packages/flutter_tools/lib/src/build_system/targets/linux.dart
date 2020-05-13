@@ -154,8 +154,6 @@ class LinuxAotElfProfile extends AotElfBase {
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.pattern('{PROJECT_DIR}/.packages'),
-    Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot,
       platform: TargetPlatform.linux_x64,
@@ -185,8 +183,6 @@ class LinuxAotElfRelease extends AotElfBase {
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.pattern('{PROJECT_DIR}/.packages'),
-    Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot,
       platform: TargetPlatform.linux_x64,
@@ -220,7 +216,7 @@ class ProfileBundleLinuxAssets extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/app.dill'),
+    Source.pattern('{BUILD_DIR}/app.so'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     ...IconTreeShaker.inputs,
@@ -277,7 +273,7 @@ class ReleaseBundleLinuxAssets extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/app.dill'),
+    Source.pattern('{BUILD_DIR}/app.so'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     ...IconTreeShaker.inputs,
