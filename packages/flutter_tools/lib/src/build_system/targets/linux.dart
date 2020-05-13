@@ -122,18 +122,129 @@ class DebugBundleLinuxAssets extends Target {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'debug_bundle_linux_assets');
     }
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final Directory outputDirectory = environment.outputDir
       .childDirectory('flutter_assets');
     if (!outputDirectory.existsSync()) {
       outputDirectory.createSync();
     }
 
-    // Only copy the kernel blob in debug mode.
-    if (buildMode == BuildMode.debug) {
-      environment.buildDir.childFile('app.dill')
-        .copySync(outputDirectory.childFile('kernel_blob.bin').path);
+    environment.buildDir.childFile('app.dill')
+      .copySync(outputDirectory.childFile('kernel_blob.bin').path);
+
+    final Depfile depfile = await copyAssets(environment, outputDirectory);
+    final DepfileService depfileService = DepfileService(
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
+  }
+}
+
+/// Creates a profile bundle for the Linux desktop target.
+class ProfileBundleLinuxAssets extends Target {
+  const ProfileBundleLinuxAssets();
+
+  @override
+  String get name => 'profile_bundle_linux_assets';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    AotElfProfile(),
+    UnpackLinux(),
+  ];
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/app.dill'),
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    ...IconTreeShaker.inputs,
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/flutter_assets/libapp.so'),
+  ];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'flutter_assets.d',
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    if (environment.defines[kBuildMode] == null) {
+      throw MissingDefineException(kBuildMode, 'profile_bundle_linux_assets');
     }
+    final Directory outputDirectory = environment.outputDir
+      .childDirectory('flutter_assets');
+    if (!outputDirectory.existsSync()) {
+      outputDirectory.createSync();
+    }
+
+    environment.buildDir.childFile('app.so')
+      .copySync(outputDirectory.childFile('libapp.so').path);
+
+    final Depfile depfile = await copyAssets(environment, outputDirectory);
+    final DepfileService depfileService = DepfileService(
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
+  }
+}
+
+/// Creates a release bundle for the Linux desktop target.
+class ReleaseBundleLinuxAssets extends Target {
+  const ReleaseBundleLinuxAssets();
+
+  @override
+  String get name => 'release_bundle_linux_assets';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    AotElfRelease(),
+    UnpackLinux(),
+  ];
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/app.dill'),
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    ...IconTreeShaker.inputs,
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/flutter_assets/libapp.so'),
+  ];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'flutter_assets.d',
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    if (environment.defines[kBuildMode] == null) {
+      throw MissingDefineException(kBuildMode, 'release_bundle_linux_assets');
+    }
+    final Directory outputDirectory = environment.outputDir
+      .childDirectory('flutter_assets');
+    if (!outputDirectory.existsSync()) {
+      outputDirectory.createSync();
+    }
+
+    environment.buildDir.childFile('app.so')
+      .copySync(outputDirectory.childFile('libapp.so').path);
+
     final Depfile depfile = await copyAssets(environment, outputDirectory);
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,

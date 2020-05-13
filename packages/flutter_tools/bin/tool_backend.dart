@@ -44,15 +44,16 @@ or
 
   final String flutterExecutable = path.join(
     flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+  String target;
   if (targetPlatform == 'windows-x64') {
-    final String target = 'debug_bundle_windows_assets'
+    target = 'debug_bundle_windows_assets';
   } else {
     if (buildMode == 'debug')
-      final String target = 'debug_bundle_linux_assets'
+      target = 'debug_bundle_linux_assets';
     else if (buildMode == 'release')
-      final String target = 'release_bundle_linux_assets'
+      target = 'release_bundle_linux_assets';
     else if (buildMode == 'profile')
-      final String target = 'profile_bundle_linux_assets'
+      target = 'profile_bundle_linux_assets';
   }
 
   // TODO(jonahwilliams): currently all builds are debug builds. Remove the
