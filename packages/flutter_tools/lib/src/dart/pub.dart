@@ -223,7 +223,7 @@ class _DefaultPub implements Pub {
     }
 
     if (!packageConfigFile.existsSync()) {
-      throwToolExit('$directory: pub did not create .packages file.');
+      throwToolExit('$directory: pub did not create .dart_tools/package_config.json file.');
     }
     if (pubSpecYaml.lastModifiedSync() != originalPubspecYamlModificationTime) {
       throwToolExit(
@@ -243,18 +243,6 @@ class _DefaultPub implements Pub {
         'The timestamp was: $originalPubspecYamlModificationTime\n'
         'The time now is: $now'
       );
-    } else {
-      packageConfigFile.setLastModifiedSync(now);
-      final DateTime newDotPackagesTimestamp = packageConfigFile.lastModifiedSync();
-      if (newDotPackagesTimestamp.isBefore(originalPubspecYamlModificationTime)) {
-        _logger.printError(
-          'Warning: Failed to set timestamp of "${_fileSystem.path.absolute(packageConfigFile.path)}". '
-          'Tried to set timestamp to $now, but new timestamp is $newDotPackagesTimestamp.'
-        );
-        if (newDotPackagesTimestamp.isAfter(now)) {
-          _logger.printError('Maybe the file was concurrently modified?');
-        }
-      }
     }
   }
 
