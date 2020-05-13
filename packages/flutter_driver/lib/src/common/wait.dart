@@ -31,6 +31,9 @@ class WaitForCondition extends Command {
 
   @override
   String get kind => 'waitForCondition';
+
+  @override
+  bool get requiresRootWidgetAttached => condition.requiresRootWidgetAttached;
 }
 
 /// A Flutter Driver command that waits until there are no more transient callbacks in the queue.
@@ -148,6 +151,20 @@ abstract class SerializableWaitCondition {
       'conditionName': conditionName
     };
   }
+
+  /// Whether this command requires the widget tree to be initialized before
+  /// the command may be run.
+  ///
+  /// This defaults to true to force the application under test to call [runApp]
+  /// before attempting to remotely drive the application. Subclasses may
+  /// override this to return false if they allow invocation before the
+  /// application has started.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBinding.isRootWidgetAttached], which indicates whether the
+  ///    widget tree has been initialized.
+  bool get requiresRootWidgetAttached => true;
 }
 
 /// A condition that waits until no transient callbacks are scheduled.
@@ -208,6 +225,9 @@ class FirstFrameRasterized extends SerializableWaitCondition {
 
   @override
   String get conditionName => 'FirstFrameRasterizedCondition';
+
+  @override
+  bool get requiresRootWidgetAttached => false;
 }
 
 /// A condition that waits until there are no pending platform messages.

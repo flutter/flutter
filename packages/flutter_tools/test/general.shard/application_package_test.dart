@@ -91,6 +91,7 @@ void main() {
 
       final ApplicationPackage applicationPackage = await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
+        buildInfo: null,
         applicationBinary: apkFile,
       );
       expect(applicationPackage.name, 'app.apk');
@@ -117,6 +118,7 @@ void main() {
 
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
+        buildInfo: null,
         applicationBinary: globals.fs.file('app.apk'),
       );
       verify(
@@ -134,6 +136,7 @@ void main() {
 
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
+        buildInfo: null,
       );
       verifyNever(
         mockProcessManager.run(
@@ -328,7 +331,7 @@ void main() {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
       final BuildableIOSApp iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios) as BuildableIOSApp;
+        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp;
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -338,7 +341,7 @@ void main() {
       globals.fs.file('.packages').createSync();
       globals.fs.file('ios/FooBar.xcodeproj').createSync(recursive: true);
       final BuildableIOSApp iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios) as BuildableIOSApp;
+        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp;
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -348,7 +351,7 @@ void main() {
       globals.fs.file('.packages').createSync();
       globals.fs.file('ios/Runner.xcodeproj').createSync(recursive: true);
       final BuildableIOSApp iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios) as BuildableIOSApp;
+        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp;
 
       expect(iosApp, null);
     }, overrides: overrides);

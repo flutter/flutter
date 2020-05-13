@@ -88,7 +88,7 @@ Future<T> runInContext<T>(
         platform: globals.platform,
       ),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
-      BuildSystem: () => BuildSystem(
+      BuildSystem: () => FlutterBuildSystem(
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
