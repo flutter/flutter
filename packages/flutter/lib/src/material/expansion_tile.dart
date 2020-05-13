@@ -45,9 +45,11 @@ class ExpansionTile extends StatefulWidget {
     this.expandedCrossAxisAlignment,
     this.expandedAlignment,
   }) : assert(initiallyExpanded != null),
-       assert(expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
+       assert(
+       expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
        'CrossAxisAlignment.baseline is not supported since the expanded children '
-           'are aligned in a column, not a row. Try to use another constant.'),
+           'are aligned in a column, not a row. Try to use another constant.',
+       ),
        super(key: key);
 
   /// A widget to display before the title.

@@ -289,14 +289,15 @@ void main() {
   testWidgets('ExpansionTile expandedCrossAxisAlignment test', (WidgetTester tester) async {
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
-    // Set the column's alignment to Alignment.centerRight to test CrossAxisAlignment
-    // of children widgets. This helps distinguish the effect of expandedAlignment
-    // and expandedCrossAxisAlignment later in the test.
+
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
           child: ExpansionTile(
             title: const Text('title'),
+            // Set the column's alignment to Alignment.centerRight to test CrossAxisAlignment
+            // of children widgets. This helps distinguish the effect of expandedAlignment
+            // and expandedCrossAxisAlignment later in the test.
             expandedAlignment: Alignment.centerRight,
             expandedCrossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -350,6 +351,7 @@ void main() {
 
   testWidgets('expandedCrossAxisAlignment and expandedAlignment default values', (WidgetTester tester) async {
     const Key child1Key = Key('child1');
+
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
