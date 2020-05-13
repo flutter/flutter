@@ -16,6 +16,11 @@
 
 set -Ee
 
+
+echo "These tests have been temporarily disabled."
+echo "See: https://github.com/flutter/flutter/issues/57061"
+exit 0
+
 # The nodes are named blah-blah--four-word-fuchsia-id
 device_name=${SWARMING_BOT_ID#*--}
 
