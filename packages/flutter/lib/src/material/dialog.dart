@@ -712,6 +712,7 @@ class SimpleDialog extends StatelessWidget {
     Key key,
     this.title,
     this.titlePadding = const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
+    this.titleTextStyle,
     this.children,
     this.contentPadding = const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
     this.backgroundColor,
@@ -738,6 +739,12 @@ class SimpleDialog extends StatelessWidget {
   /// See [contentPadding] for the conventions regarding padding between the
   /// [title] and the [children].
   final EdgeInsetsGeometry titlePadding;
+
+  /// Style for the text in the [title] of this [SimpleDialog].
+  ///
+  /// If null, [DialogTheme.titleTextStyle] is used, if that's null, defaults to
+  /// [ThemeData.textTheme.headline6].
+  final TextStyle titleTextStyle;
 
   /// The (optional) content of the dialog is displayed in a
   /// [SingleChildScrollView] underneath the title.
@@ -814,7 +821,7 @@ class SimpleDialog extends StatelessWidget {
               Padding(
                 padding: titlePadding,
                 child: DefaultTextStyle(
-                  style: theme.textTheme.headline6,
+                  style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6,
                   child: Semantics(namesRoute: true, child: title),
                 ),
               ),

@@ -986,6 +986,7 @@ class AdbLogReader extends DeviceLogReader {
     RegExp(r'^[VDIWEF]\/flutter[^:]*:\s+', caseSensitive: false),
     RegExp(r'^[IE]\/DartVM[^:]*:\s+'),
     RegExp(r'^[WEF]\/AndroidRuntime:\s+'),
+    RegExp(r'^[WEF]\/AndroidRuntime\([0-9]+\):\s+'),
     RegExp(r'^[WEF]\/ActivityManager:\s+.*(\bflutter\b|\bdomokit\b|\bsky\b)'),
     RegExp(r'^[WEF]\/System\.err:\s+'),
     RegExp(r'^[F]\/[\S^:]+:\s+'),
@@ -1019,6 +1020,7 @@ class AdbLogReader extends DeviceLogReader {
     }
     final Match timeMatch = AndroidDevice._timeRegExp.firstMatch(line);
     if (timeMatch == null || line.length == timeMatch.end) {
+      _acceptedLastLine = false;
       return;
     }
     // Chop off the time.

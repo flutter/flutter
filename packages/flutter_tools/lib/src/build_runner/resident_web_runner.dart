@@ -525,8 +525,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
       }
     } on Exception catch (err) {
       return OperationResult(1, err.toString(), fatal: true);
-    } on WipError catch (err) {
-      return OperationResult(1, err.toString(), fatal: true);
     } finally {
       status.stop();
     }

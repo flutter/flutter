@@ -20,7 +20,7 @@ dependencies:
   flutter:
     sdk: flutter
   # This plugin is using Android Embedding 1
-  battery: 1.0.0
+  battery: 1.0.1
   # TODO(egarciad): Add a plugin that uses Android Embedding 2
 
   # The following adds the Cupertino Icons font to your application.
@@ -93,4 +93,4 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
 
-# PUBSPEC CHECKSUM: 79ad
+# PUBSPEC CHECKSUM: c2ae
