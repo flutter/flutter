@@ -4000,7 +4000,7 @@ void main() {
 
   testWidgets('textAlignVertical can be updated', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/56933
-    final String hintText = 'hint';
+    const String hintText = 'hint';
     TextAlignVertical alignment = TextAlignVertical.top;
     StateSetter setState;
     await tester.pumpWidget(
@@ -4010,7 +4010,7 @@ void main() {
             setState = setter;
             return InputDecorator(
               textAlignVertical: alignment,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: hintText,
               ),
             );
