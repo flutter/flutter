@@ -267,7 +267,6 @@ class CocoaPods {
     } else {
       final bool isSwift = (await _xcodeProjectInterpreter.getBuildSettings(
         runnerProject.path,
-        'Runner',
       )).containsKey('SWIFT_VERSION');
       podfileTemplateName = isSwift ? 'Podfile-ios-swift' : 'Podfile-ios-objc';
     }

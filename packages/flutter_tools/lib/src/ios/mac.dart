@@ -111,12 +111,6 @@ Future<XcodeBuildResult> buildXcodeProject({
   await removeFinderExtendedAttributes(app.project.hostAppRoot, processUtils, globals.logger);
 
   final XcodeProjectInfo projectInfo = await globals.xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
-  if (!projectInfo.targets.contains('Runner')) {
-    globals.printError('The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
-    globals.printError('Open Xcode to fix the problem:');
-    globals.printError('  open ios/Runner.xcworkspace');
-    return XcodeBuildResult(success: false);
-  }
   final String scheme = projectInfo.schemeFor(buildInfo);
   if (scheme == null) {
     globals.printError('');
@@ -180,7 +174,8 @@ Future<XcodeBuildResult> buildXcodeProject({
     autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(
       iosApp: app,
       processManager: globals.processManager,
-      logger: globals.logger
+      logger: globals.logger,
+      buildInfo: buildInfo,
     );
   }
 
@@ -229,7 +224,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   // Check if the project contains a watchOS companion app.
-  final bool hasWatchCompanion = await app.project.containsWatchCompanion(projectInfo.targets);
+  final bool hasWatchCompanion = await app.project.containsWatchCompanion(
+    projectInfo.targets,
+    buildInfo,
+  );
   if (hasWatchCompanion) {
     // The -sdk argument has to be omitted if a watchOS companion app exists.
     // Otherwise the build will fail as WatchKit dependencies cannot be build using the iOS SDK.

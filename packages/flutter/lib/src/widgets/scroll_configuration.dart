@@ -50,20 +50,24 @@ class ScrollBehavior {
     return null;
   }
 
+  static const ScrollPhysics _bouncingPhysics = BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
+  static const ScrollPhysics _clampingPhysics = ClampingScrollPhysics(parent: RangeMaintainingScrollPhysics());
+
   /// The scroll physics to use for the platform given by [getPlatform].
   ///
-  /// Defaults to [BouncingScrollPhysics] on iOS and [ClampingScrollPhysics] on
+  /// Defaults to [RangeMaintainingScrollPhysics] mixed with
+  /// [BouncingScrollPhysics] on iOS and [ClampingScrollPhysics] on
   /// Android.
   ScrollPhysics getScrollPhysics(BuildContext context) {
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        return const BouncingScrollPhysics();
+        return _bouncingPhysics;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        return const ClampingScrollPhysics();
+        return _clampingPhysics;
     }
     return null;
   }

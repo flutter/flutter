@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'localizations.dart';
@@ -3782,7 +3783,7 @@ class PositionedDirectional extends StatelessWidget {
 ///  * [Column], for a version of this widget that is always vertical.
 ///  * [Expanded], to indicate children that should take all the remaining room.
 ///  * [Flexible], to indicate children that should share the remaining room.
-///  * [Spacer], a widget that takes up space proportional to it's flex value.
+///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///    that may be sized smaller (leaving some remaining room unused).
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Flex extends MultiChildRenderObjectWidget {
@@ -4122,7 +4123,7 @@ class Flex extends MultiChildRenderObjectWidget {
 ///  * [Expanded], to indicate children that should take all the remaining room.
 ///  * [Flexible], to indicate children that should share the remaining room but
 ///    that may by sized smaller (leaving some remaining room unused).
-///  * [Spacer], a widget that takes up space proportional to it's flex value.
+///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Row extends Flex {
   /// Creates a horizontal array of children.
@@ -4324,7 +4325,7 @@ class Row extends Flex {
 ///    that may size smaller (leaving some remaining room unused).
 ///  * [SingleChildScrollView], whose documentation discusses some ways to
 ///    use a [Column] inside a scrolling container.
-///  * [Spacer], a widget that takes up space proportional to it's flex value.
+///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Column extends Flex {
   /// Creates a vertical array of children.
@@ -4457,7 +4458,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 ///
 /// {@tool dartpad --template=stateless_widget_material}
 /// This example shows how to use an [Expanded] widget in a [Column] so that
-/// it's middle child, a [Container] here, expands to fill the space.
+/// its middle child, a [Container] here, expands to fill the space.
 ///
 /// ![This results in two thin blue boxes with a larger amber box in between.](https://flutter.github.io/assets-for-api-docs/assets/widgets/expanded_column.png)
 ///
@@ -4539,7 +4540,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 /// See also:
 ///
 ///  * [Flexible], which does not force the child to fill the available space.
-///  * [Spacer], a widget that takes up space proportional to it's flex value.
+///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Expanded extends Flexible {
   /// Creates a widget that expands a child of a [Row], [Column], or [Flex]
@@ -5878,17 +5879,21 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 ///    have buttons pressed.
 class MouseRegion extends StatefulWidget {
   /// Creates a widget that forwards mouse events to callbacks.
+  ///
+  /// By default, all callbacks are empty, `cursor` is unset, and `opaque` is
+  /// `true`.
   const MouseRegion({
     Key key,
     this.onEnter,
     this.onExit,
     this.onHover,
+    this.cursor,
     this.opaque = true,
     this.child,
   }) : assert(opaque != null),
        super(key: key);
 
-  /// Called when a mouse pointer has entered this widget.
+  /// Triggered when a mouse pointer has entered this widget.
   ///
   /// This callback is triggered when the pointer, with or without buttons
   /// pressed, has started to be contained by the region of this widget. More
@@ -5916,16 +5921,16 @@ class MouseRegion extends StatefulWidget {
   ///    internally implemented.
   final PointerEnterEventListener onEnter;
 
-  /// Called when a mouse pointer moves within this widget without buttons
-  /// pressed.
+  /// Triggered when a mouse pointer has moved onto or within the widget without
+  /// buttons pressed.
   ///
-  /// This callback is not triggered when the [MouseRegion] has moved
-  /// while being hovered by the mouse pointer.
+  /// This callback is not triggered by the movement of an annotation.
   ///
-  /// {@macro flutter.mouseRegion.triggerTime}
+  /// The time that this callback is triggered is during the callback of a
+  /// pointer event, which is always between frames.
   final PointerHoverEventListener onHover;
 
-  /// Called when a mouse pointer has exited this widget when the widget is
+  /// Triggered when a mouse pointer has exited this widget when the widget is
   /// still mounted.
   ///
   /// This callback is triggered when the pointer, with or without buttons
@@ -6094,9 +6099,22 @@ class MouseRegion extends StatefulWidget {
   ///    this callback is internally implemented, but without the restriction.
   final PointerExitEventListener onExit;
 
+  /// The mouse cursor for mouse pointers that are hovering over the annotated
+  /// region.
+  ///
+  /// When a mouse enters the region, its cursor will be changed to the [cursor].
+  /// The [cursor] defaults to null, meaning the region does not control cursors,
+  /// but defers the choice to the next region behind this one on the screen in
+  /// hit-test order, or [SystemMouseCursors.basic] if no others can be found.
+  /// When the mouse leaves the region, the cursor will be decided by the region
+  /// found at the new location.
+  final MouseCursor cursor;
+
   /// Whether this widget should prevent other [MouseRegion]s visually behind it
-  /// from detecting the pointer, thus affecting how their [onHover], [onEnter],
-  /// and [onExit] behave.
+  /// from detecting the pointer.
+  ///
+  /// This changes the list of regions that a pointer hovers, thus affecting how
+  /// their [onHover], [onEnter], [onExit], and [cursor] behave.
   ///
   /// If [opaque] is true, this widget will absorb the mouse pointer and
   /// prevent this widget's siblings (or any other widgets that are not
@@ -6129,6 +6147,7 @@ class MouseRegion extends StatefulWidget {
     if (onHover != null)
       listeners.add('hover');
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
+    properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
   }
 }
@@ -6161,6 +6180,7 @@ class _RawMouseRegion extends SingleChildRenderObjectWidget {
       onEnter: widget.onEnter,
       onHover: widget.onHover,
       onExit: owner.getHandleExit(),
+      cursor: widget.cursor,
       opaque: widget.opaque,
     );
   }
@@ -6172,6 +6192,7 @@ class _RawMouseRegion extends SingleChildRenderObjectWidget {
       ..onEnter = widget.onEnter
       ..onHover = widget.onHover
       ..onExit = owner.getHandleExit()
+      ..cursor = widget.cursor
       ..opaque = widget.opaque;
   }
 }

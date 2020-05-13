@@ -208,7 +208,7 @@ void main() {
     });
 
     testWithoutContext('creates objective-c Podfile when not present', () async {
-      when(mockXcodeProjectInterpreter.getBuildSettings(any, any))
+      when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: null, timeout: anyNamed('timeout')))
         .thenAnswer((_) async => <String, String>{});
       await cocoaPodsUnderTest.setupPodfile(projectUnderTest.ios);
 
@@ -216,7 +216,7 @@ void main() {
     });
 
     testUsingContext('creates swift Podfile if swift', () async {
-      when(mockXcodeProjectInterpreter.getBuildSettings(any, any))
+      when(mockXcodeProjectInterpreter.getBuildSettings(any, scheme: null, timeout: anyNamed('timeout')))
         .thenAnswer((_) async => <String, String>{
           'SWIFT_VERSION': '5.0',
         });

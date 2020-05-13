@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 
@@ -534,6 +536,28 @@ void main() {
     expect(move2, isEmpty);
     expect(enter2, isEmpty);
     expect(exit2, isEmpty);
+  });
+
+  testWidgets('applies mouse cursor', (WidgetTester tester) async {
+    await tester.pumpWidget(_Scaffold(
+      topLeft: MouseRegion(
+        cursor: SystemMouseCursors.text,
+        child: Container(width: 10, height: 10),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(100, 100));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    await gesture.moveTo(const Offset(5, 5));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    await gesture.moveTo(const Offset(100, 100));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('MouseRegion uses updated callbacks', (WidgetTester tester) async {
@@ -1358,7 +1382,7 @@ void main() {
     expect(logs, <String>['hover2']);
     logs.clear();
 
-    // Compare: It repaints if the MouseRegion is unactivated.
+    // Compare: It repaints if the MouseRegion is deactivated.
     await tester.pumpWidget(_Scaffold(
       topLeft: Container(
         height: 10,
@@ -1418,6 +1442,215 @@ void main() {
     ));
 
     expect(logs, <String>['paint', 'hover-enter']);
+  });
+
+  testWidgets('Changing MouseRegion.cursor is effective and repaints', (WidgetTester tester) async {
+    final List<String> logPaints = <String>[];
+    final List<String> logEnters = <String>[];
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(100, 100));
+    addTearDown(gesture.removePointer);
+
+    final VoidCallback onPaintChild = () { logPaints.add('paint'); };
+
+    await tester.pumpWidget(_Scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          onEnter: (_) { logEnters.add('enter'); },
+          opaque: true,
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+        ),
+      ),
+    ));
+    await gesture.moveTo(const Offset(5, 5));
+
+    expect(logPaints, <String>['paint']);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    expect(logEnters, <String>['enter']);
+    logPaints.clear();
+    logEnters.clear();
+
+    await tester.pumpWidget(_Scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.text,
+          onEnter: (_) { logEnters.add('enter'); },
+          opaque: true,
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+        ),
+      ),
+    ));
+
+    expect(logPaints, <String>['paint']);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(logEnters, isEmpty);
+    logPaints.clear();
+    logEnters.clear();
+  });
+
+  testWidgets('Changing whether MouseRegion.cursor is null is effective and repaints', (WidgetTester tester) async {
+    final List<String> logEnters = <String>[];
+    final List<String> logPaints = <String>[];
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(100, 100));
+    addTearDown(gesture.removePointer);
+
+    final VoidCallback onPaintChild = () { logPaints.add('paint'); };
+
+    await tester.pumpWidget(_Scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.text,
+            onEnter: (_) { logEnters.add('enter'); },
+            child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+          ),
+        ),
+      ),
+    ));
+    await gesture.moveTo(const Offset(5, 5));
+
+    expect(logPaints, <String>['paint']);
+    expect(logEnters, <String>['enter']);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    logPaints.clear();
+    logEnters.clear();
+
+    await tester.pumpWidget(_Scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: MouseRegion(
+            cursor: null,
+            onEnter: (_) { logEnters.add('enter'); },
+            child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+          ),
+        ),
+      ),
+    ));
+
+    expect(logPaints, <String>['paint']);
+    expect(logEnters, isEmpty);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    logPaints.clear();
+    logEnters.clear();
+
+    await tester.pumpWidget(_Scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.text,
+            opaque: true,
+            child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+          ),
+        ),
+      ),
+    ));
+
+    expect(logPaints, <String>['paint']);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(logEnters, isEmpty);
+    logPaints.clear();
+    logEnters.clear();
+  });
+
+  testWidgets('Does not trigger side effects during a reparent', (WidgetTester tester) async {
+    final List<String> logEnters = <String>[];
+    final List<String> logExits = <String>[];
+    final List<String> logCursors = <String>[];
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(100, 100));
+    addTearDown(gesture.removePointer);
+    SystemChannels.mouseCursor.setMockMethodCallHandler((_) async {
+      logCursors.add('cursor');
+    });
+
+    final GlobalKey key = GlobalKey();
+
+    // Pump a row of 2 SizedBox's, each taking 50px of width.
+    await tester.pumpWidget(_Scaffold(
+      topLeft: SizedBox(
+        width: 100,
+        height: 50,
+        child: Row(
+          children: <Widget>[
+            SizedBox(
+              width: 50,
+              height: 50,
+              child: MouseRegion(
+                key: key,
+                onEnter: (_) { logEnters.add('enter'); },
+                onExit: (_) { logEnters.add('enter'); },
+                cursor: SystemMouseCursors.click,
+              ),
+            ),
+            const SizedBox(
+              width: 50,
+              height: 50,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    // Move to the mouse region inside the first box.
+    await gesture.moveTo(const Offset(40, 5));
+
+    expect(logEnters, <String>['enter']);
+    expect(logExits, isEmpty);
+    expect(logCursors, isNotEmpty);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    logEnters.clear();
+    logExits.clear();
+    logCursors.clear();
+
+    // Move MouseRegion to the second box while resizing them so that the
+    // mouse is still on the MouseRegion
+    await tester.pumpWidget(_Scaffold(
+      topLeft: SizedBox(
+        width: 100,
+        height: 50,
+        child: Row(
+          children: <Widget>[
+            const SizedBox(
+              width: 30,
+              height: 50,
+            ),
+            SizedBox(
+              width: 70,
+              height: 50,
+              child: MouseRegion(
+                key: key,
+                onEnter: (_) { logEnters.add('enter'); },
+                onExit: (_) { logEnters.add('enter'); },
+                cursor: SystemMouseCursors.click,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    expect(logEnters, isEmpty);
+    expect(logExits, isEmpty);
+    expect(logCursors, isEmpty);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
   testWidgets("RenderMouseRegion's debugFillProperties when default", (WidgetTester tester) async {

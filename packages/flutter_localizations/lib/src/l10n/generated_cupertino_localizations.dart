@@ -2271,7 +2271,7 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Select All';
 
   @override
-  String get tabSemanticsLabelRaw => 'tab, \$tabIndex of \$tabCount';
+  String get tabSemanticsLabelRaw => 'Tab \$tabIndex of \$tabCount';
 
   @override
   String get timerPickerHourLabelFew => null;
