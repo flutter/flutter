@@ -6,7 +6,7 @@
 part of ui;
 
 /// Linearly interpolate between two numbers.
-double lerpDouble(num a, num b, double t) {
+double/*!*/ lerpDouble(num/*?*/ a, num/*?*/ b, double/*!*/ t) {
   if (a == null && b == null) {
     return null;
   }

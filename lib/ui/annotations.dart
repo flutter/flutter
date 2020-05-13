@@ -39,7 +39,7 @@ part of dart.ui;
 ///   }
 /// }
 /// ```
-const _KeepToString keepToString = _KeepToString();
+const _KeepToString/*!*/ keepToString = _KeepToString();
 
 class _KeepToString {
   const _KeepToString();
