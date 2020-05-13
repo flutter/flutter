@@ -101,6 +101,7 @@ void main() {
             actions: <AndroidSemanticsAction>[
               AndroidSemanticsAction.clearAccessibilityFocus,
               AndroidSemanticsAction.click,
+              AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
             ],
           ),
@@ -122,6 +123,7 @@ void main() {
             actions: <AndroidSemanticsAction>[
               AndroidSemanticsAction.clearAccessibilityFocus,
               AndroidSemanticsAction.click,
+              AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
             ],
           ),
@@ -193,6 +195,7 @@ void main() {
             actions: <AndroidSemanticsAction>[
               AndroidSemanticsAction.clearAccessibilityFocus,
               AndroidSemanticsAction.click,
+              AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
             ],
           ),
@@ -214,6 +217,7 @@ void main() {
             actions: <AndroidSemanticsAction>[
               AndroidSemanticsAction.clearAccessibilityFocus,
               AndroidSemanticsAction.click,
+              AndroidSemanticsAction.copy,
               AndroidSemanticsAction.setSelection,
             ],
           ),
