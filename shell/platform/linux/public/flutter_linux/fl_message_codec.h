@@ -60,18 +60,18 @@ struct _FlMessageCodecClass {
   /**
    * FlMessageCodec::encode_message:
    * @codec: A #FlMessageCodec
-   * @value: value to encode or %NULL to encode the null value
+   * @message: message to encode or %NULL to encode the null value
    * @error: (allow-none): #GError location to store the error occurring, or
    * %NULL
    *
    * Virtual method to encode a message. A subclass must implement this method.
-   * If the subclass cannot handle the type of @value then it must generate a
+   * If the subclass cannot handle the type of @message then it must generate a
    * FL_MESSAGE_CODEC_ERROR_UNSUPPORTED_TYPE error.
    *
    * Returns: a binary message or %NULL on error.
    */
   GBytes* (*encode_message)(FlMessageCodec* codec,
-                            FlValue* value,
+                            FlValue* message,
                             GError** error);
 
   /**
@@ -97,15 +97,15 @@ struct _FlMessageCodecClass {
  * fl_message_codec_encode_message:
  * @codec: a #FlMessageCodec
  * @buffer: buffer to write to
- * @value: value to encode or %NULL to encode the null value.
+ * @message: message to encode or %NULL to encode the null value.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
  *
- * Encode a value into a binary representation.
+ * Encode a message into a binary representation.
  *
  * Returns: a binary message or %NULL on error.
  */
 GBytes* fl_message_codec_encode_message(FlMessageCodec* codec,
-                                        FlValue* value,
+                                        FlValue* message,
                                         GError** error);
 
 /**
@@ -114,7 +114,7 @@ GBytes* fl_message_codec_encode_message(FlMessageCodec* codec,
  * @message: binary message to decode
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
  *
- * Decode a value from a binary encoding.
+ * Decode a message from a binary encoding.
  *
  * Returns: a #FlValue or %NULL on error.
  */
