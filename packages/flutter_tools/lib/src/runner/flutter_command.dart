@@ -832,6 +832,7 @@ abstract class FlutterCommand extends Command<void> {
       return null;
     } else if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices) {
       if (deviceManager.hasSpecifiedDeviceId) {
+        //TODO: Make changes here to solve issue: https://github.com/flutter/flutter/issues/10557
        globals.printStatus(userMessages.flutterFoundSpecifiedDevices(devices.length, deviceManager.specifiedDeviceId));
       } else {
         globals.printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
