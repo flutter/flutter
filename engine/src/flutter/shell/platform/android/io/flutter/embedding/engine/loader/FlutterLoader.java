@@ -22,6 +22,9 @@ import io.flutter.util.PathUtils;
 import io.flutter.view.VsyncWaiter;
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /** Finds Flutter resources in an application APK and also loads Flutter's native library. */
 public class FlutterLoader {
@@ -76,9 +79,22 @@ public class FlutterLoader {
   }
 
   private boolean initialized = false;
-  @Nullable private ResourceExtractor resourceExtractor;
   @Nullable private Settings settings;
   private long initStartTimestampMillis;
+
+  private static class InitResult {
+    final String appStoragePath;
+    final String engineCachesPath;
+    final String dataDirPath;
+
+    private InitResult(String appStoragePath, String engineCachesPath, String dataDirPath) {
+      this.appStoragePath = appStoragePath;
+      this.engineCachesPath = engineCachesPath;
+      this.dataDirPath = dataDirPath;
+    }
+  }
+
+  @Nullable Future<InitResult> initResultFuture;
 
   /**
    * Starts initialization of the native system.
@@ -110,19 +126,35 @@ public class FlutterLoader {
     }
 
     // Ensure that the context is actually the application context.
-    applicationContext = applicationContext.getApplicationContext();
+    final Context appContext = applicationContext.getApplicationContext();
 
     this.settings = settings;
 
     initStartTimestampMillis = SystemClock.uptimeMillis();
-    initConfig(applicationContext);
-    initResources(applicationContext);
-
-    System.loadLibrary("flutter");
-
-    VsyncWaiter.getInstance(
-            (WindowManager) applicationContext.getSystemService(Context.WINDOW_SERVICE))
+    initConfig(appContext);
+    VsyncWaiter.getInstance((WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE))
         .init();
+
+    // Use a background thread for initialization tasks that require disk access.
+    Callable<InitResult> initTask =
+        new Callable<InitResult>() {
+          @Override
+          public InitResult call() {
+            ResourceExtractor resourceExtractor = initResources(appContext);
+
+            System.loadLibrary("flutter");
+
+            if (resourceExtractor != null) {
+              resourceExtractor.waitForCompletion();
+            }
+
+            return new InitResult(
+                PathUtils.getFilesDir(appContext),
+                PathUtils.getCacheDirectory(appContext),
+                PathUtils.getDataDirectory(appContext));
+          }
+        };
+    initResultFuture = Executors.newSingleThreadExecutor().submit(initTask);
   }
 
   /**
@@ -147,9 +179,7 @@ public class FlutterLoader {
           "ensureInitializationComplete must be called after startInitialization");
     }
     try {
-      if (resourceExtractor != null) {
-        resourceExtractor.waitForCompletion();
-      }
+      InitResult result = initResultFuture.get();
 
       List<String> shellArgs = new ArrayList<>();
       shellArgs.add("--icu-symbol-prefix=_binary_icudtl_dat");
@@ -167,8 +197,7 @@ public class FlutterLoader {
 
       String kernelPath = null;
       if (BuildConfig.DEBUG || BuildConfig.JIT_RELEASE) {
-        String snapshotAssetPath =
-            PathUtils.getDataDirectory(applicationContext) + File.separator + flutterAssetsDir;
+        String snapshotAssetPath = result.dataDirPath + File.separator + flutterAssetsDir;
         kernelPath = snapshotAssetPath + File.separator + DEFAULT_KERNEL_BLOB;
         shellArgs.add("--" + SNAPSHOT_ASSET_PATH_KEY + "=" + snapshotAssetPath);
         shellArgs.add("--" + VM_SNAPSHOT_DATA_KEY + "=" + vmSnapshotData);
@@ -188,20 +217,18 @@ public class FlutterLoader {
                 + aotSharedLibraryName);
       }
 
-      shellArgs.add("--cache-dir-path=" + PathUtils.getCacheDirectory(applicationContext));
+      shellArgs.add("--cache-dir-path=" + result.engineCachesPath);
       if (settings.getLogTag() != null) {
         shellArgs.add("--log-tag=" + settings.getLogTag());
       }
 
-      String appStoragePath = PathUtils.getFilesDir(applicationContext);
-      String engineCachesPath = PathUtils.getCacheDirectory(applicationContext);
       long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
       FlutterJNI.nativeInit(
           applicationContext,
           shellArgs.toArray(new String[0]),
           kernelPath,
-          appStoragePath,
-          engineCachesPath,
+          result.appStoragePath,
+          result.engineCachesPath,
           initTimeMillis);
 
       initialized = true;
@@ -232,12 +259,17 @@ public class FlutterLoader {
       callbackHandler.post(callback);
       return;
     }
-    new Thread(
+    Executors.newSingleThreadExecutor()
+        .execute(
             new Runnable() {
               @Override
               public void run() {
-                if (resourceExtractor != null) {
-                  resourceExtractor.waitForCompletion();
+                InitResult result;
+                try {
+                  result = initResultFuture.get();
+                } catch (Exception e) {
+                  Log.e(TAG, "Flutter initialization failed.", e);
+                  throw new RuntimeException(e);
                 }
                 new Handler(Looper.getMainLooper())
                     .post(
@@ -250,8 +282,7 @@ public class FlutterLoader {
                           }
                         });
               }
-            })
-        .start();
+            });
   }
 
   @NonNull
@@ -289,7 +320,8 @@ public class FlutterLoader {
   }
 
   /** Extract assets out of the APK that need to be cached as uncompressed files on disk. */
-  private void initResources(@NonNull Context applicationContext) {
+  private ResourceExtractor initResources(@NonNull Context applicationContext) {
+    ResourceExtractor resourceExtractor = null;
     if (BuildConfig.DEBUG || BuildConfig.JIT_RELEASE) {
       final String dataDirPath = PathUtils.getDataDirectory(applicationContext);
       final String packageName = applicationContext.getPackageName();
@@ -307,6 +339,7 @@ public class FlutterLoader {
 
       resourceExtractor.start();
     }
+    return resourceExtractor;
   }
 
   @NonNull

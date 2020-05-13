@@ -3,7 +3,7 @@
     package="dev.flutter.scenarios">
 
     <application
-        android:name="io.flutter.app.FlutterApplication"
+        android:name=".ScenarioApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
