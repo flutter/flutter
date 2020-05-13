@@ -42,14 +42,14 @@ class _Jenkins {
 /// ```dart
 /// int hashCode => hashValues(foo, bar, hashList(quux), baz);
 /// ```
-int hashValues(
-  Object arg01,            Object arg02,          [ Object arg03 = _hashEnd,
-  Object arg04 = _hashEnd, Object arg05 = _hashEnd, Object arg06 = _hashEnd,
-  Object arg07 = _hashEnd, Object arg08 = _hashEnd, Object arg09 = _hashEnd,
-  Object arg10 = _hashEnd, Object arg11 = _hashEnd, Object arg12 = _hashEnd,
-  Object arg13 = _hashEnd, Object arg14 = _hashEnd, Object arg15 = _hashEnd,
-  Object arg16 = _hashEnd, Object arg17 = _hashEnd, Object arg18 = _hashEnd,
-  Object arg19 = _hashEnd, Object arg20 = _hashEnd ]) {
+int/*!*/ hashValues(
+  Object/*?*/ arg01,            Object/*?*/ arg02,          [ Object/*?*/ arg03 = _hashEnd,
+  Object/*?*/ arg04 = _hashEnd, Object/*?*/ arg05 = _hashEnd, Object/*?*/ arg06 = _hashEnd,
+  Object/*?*/ arg07 = _hashEnd, Object/*?*/ arg08 = _hashEnd, Object/*?*/ arg09 = _hashEnd,
+  Object/*?*/ arg10 = _hashEnd, Object/*?*/ arg11 = _hashEnd, Object/*?*/ arg12 = _hashEnd,
+  Object/*?*/ arg13 = _hashEnd, Object/*?*/ arg14 = _hashEnd, Object/*?*/ arg15 = _hashEnd,
+  Object/*?*/ arg16 = _hashEnd, Object/*?*/ arg17 = _hashEnd, Object/*?*/ arg18 = _hashEnd,
+  Object/*?*/ arg19 = _hashEnd, Object/*?*/ arg20 = _hashEnd ]) {
   int result = 0;
   result = _Jenkins.combine(result, arg01);
   result = _Jenkins.combine(result, arg02);
@@ -114,7 +114,7 @@ int hashValues(
 /// Combine the [Object.hashCode] values of an arbitrary number of objects from
 /// an [Iterable] into one value. This function will return the same value if
 /// given null as if given an empty list.
-int hashList(Iterable<Object> arguments) {
+int/*!*/ hashList(Iterable<Object/*?*/>/*!*/ arguments) {
   int result = 0;
   if (arguments != null) {
     for (Object argument in arguments)
