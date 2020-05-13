@@ -82,7 +82,7 @@ String float64ListToCssTransform(Float32List matrix) {
     return float64ListToCssTransform3d(matrix);
   } else {
     assert(transformKind == TransformKind.identity);
-    return null;
+    return 'none';
   }
 }
 
