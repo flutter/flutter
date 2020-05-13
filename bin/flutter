@@ -127,7 +127,7 @@ function upgrade_flutter () {
 
     retry_upgrade
 
-    "$DART" $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" --no-enable-mirrors "$SCRIPT_PATH"
+    "$DART" --disable-dart-dev $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" --no-enable-mirrors "$SCRIPT_PATH"
     echo "$revision" > "$STAMP_PATH"
   fi
   # The exit here is duplicitous since the function is run in a subshell,
@@ -189,4 +189,4 @@ fi
 
 # FLUTTER_TOOL_ARGS isn't quoted below, because it is meant to be considered as
 # separate space-separated args.
-"$DART" --packages="$FLUTTER_TOOLS_DIR/.packages" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
+"$DART" --disable-dart-dev --packages="$FLUTTER_TOOLS_DIR/.packages" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
