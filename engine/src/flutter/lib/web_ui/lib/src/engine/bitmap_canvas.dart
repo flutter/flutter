@@ -714,6 +714,10 @@ class BitmapCanvas extends EngineCanvas {
       rootElement.append(paragraphElement);
     }
     _children.add(paragraphElement);
+    // If there is a prior sibling such as img prevent left/top shift.
+    paragraphElement.style
+      ..left = "0px"
+      ..top = "0px";
     _closeCurrentCanvas();
   }
 

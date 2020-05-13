@@ -105,7 +105,42 @@ void main() async {
           maxDiffRatePercent: 8.0);
     });
   }
+
+  // Regression test for https://github.com/flutter/flutter/issues/56971
+  test('Draws image and paragraph at same vertical position', () async {
+    final RecordingCanvas rc = RecordingCanvas(
+        const Rect.fromLTRB(0, 0, 400, 400));
+    rc.save();
+    rc.drawRect(Rect.fromLTWH(0, 50, 200, 50), Paint()
+      ..color = white);
+    rc.drawImage(createTestImage(), Offset(0, 50),
+        Paint()
+          ..colorFilter = EngineColorFilter.mode(red, BlendMode.srcIn));
+
+    final Paragraph paragraph = createTestParagraph();
+    const double textLeft = 80.0;
+    const double textTop = 50.0;
+    const double widthConstraint = 300.0;
+    paragraph.layout(const ParagraphConstraints(width: widthConstraint));
+    rc.drawParagraph(paragraph, const Offset(textLeft, textTop));
+
+    rc.restore();
+    await _checkScreenshot(rc, 'canvas_image_blend_and_text',
+        maxDiffRatePercent: 8.0);
+  });
 }
+
+Paragraph createTestParagraph() {
+  final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+    fontFamily: 'Ahem',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.normal,
+    fontSize: 14.0,
+  ));
+  builder.addText('FOO');
+  return builder.build();
+}
+
 
 // 50x50 pixel flutter logo image.
 const String _flutterLogoBase64 =
