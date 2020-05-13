@@ -736,7 +736,7 @@ class TextField extends StatefulWidget {
     'Set canAssertMaterialLocalizations to `true`. This parameter will be '
     'removed and was introduced to migrate TextField to assert '
     'debugCheckHasMaterialLocalizations by default.'
-    'This feature was deprecated after TBD.'
+    'This feature was deprecated after v1.18.0.'
   )
   final bool canAssertMaterialLocalizations;
 
