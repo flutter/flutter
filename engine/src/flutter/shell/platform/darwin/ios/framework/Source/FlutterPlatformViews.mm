@@ -251,22 +251,21 @@ void FlutterPlatformViewsController::CancelFrame() {
   composition_order_ = active_composition_order_;
 }
 
-bool FlutterPlatformViewsController::HasPendingViewOperations() {
-  if (!views_to_dispose_.empty()) {
-    return true;
-  }
-  if (!views_to_recomposite_.empty()) {
-    return true;
-  }
-  return active_composition_order_ != composition_order_;
+// TODO(cyanglaz): https://github.com/flutter/flutter/issues/56474
+// Make this method check if there are pending view operations instead.
+// Also rename it to `HasPendingViewOperations`.
+bool FlutterPlatformViewsController::HasPlatformViewThisOrNextFrame() {
+  return composition_order_.size() > 0 || active_composition_order_.size() > 0;
 }
 
 const int FlutterPlatformViewsController::kDefaultMergedLeaseDuration;
 
 PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
-  const bool uiviews_mutated = HasPendingViewOperations();
-  if (uiviews_mutated) {
+  // TODO(cyanglaz): https://github.com/flutter/flutter/issues/56474
+  // Rename `has_platform_view` to `view_mutated` when the above issue is resolved.
+  const bool has_platform_view = HasPlatformViewThisOrNextFrame();
+  if (has_platform_view) {
     if (raster_thread_merger->IsMerged()) {
       raster_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
     } else {
@@ -485,7 +484,7 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
   // Any UIKit related code has to run on main thread.
   // When on a non-main thread, we only allow the rest of the method to run if there is no
   // Pending UIView operations.
-  FML_DCHECK([[NSThread currentThread] isMainThread] || !HasPendingViewOperations());
+  FML_DCHECK([[NSThread currentThread] isMainThread] || !HasPlatformViewThisOrNextFrame());
 
   DisposeViews();
 
