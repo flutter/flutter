@@ -258,7 +258,6 @@ void main() {
   });
 
   testWidgets('ExpansionTile expandedAlignment test', (WidgetTester tester) async {
-    const Key childKey = Key('key');
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
@@ -267,7 +266,7 @@ void main() {
             expandedAlignment: Alignment.centerLeft,
             children: <Widget>[
               Container(height: 100, width: 100),
-              Container(height: 100, width: 80, key: childKey)
+              Container(height: 100, width: 80),
             ],
           ),
         ),
@@ -278,25 +277,21 @@ void main() {
     await tester.pumpAndSettle();
 
     final Rect columnRect = tester.getRect(find.byType(Column).last);
-    final Rect secondChild = tester.getRect(find.byKey(childKey));
 
+    // The expandedAlignment is used to define the alignment of the Column widget in
+    // expanded tile, not the alignment of the children inside the Column.
     expect(columnRect.left, 0.0);
-    // The width of the Column is the maximum width of the children. The maximum
-    // width being 100.0, the offset of the right edge of Column from X-axis should
-    // be 100.0.
+    // The width of the Column is the width of the largest child. The largest width
+    // being 100.0, the offset of the right edge of Column from X-axis should be 100.0.
     expect(columnRect.right, 100.0);
-
-    // The alignment doesn't define the position of the children inside the Column.
-    // Considering the default value for expandedCrossAxisAlignment is CrossAxisAlignment.center,
-    // the offset of the left edge of second Container from X-axis should be greater
-    // than 0.
-    expect(secondChild.left, greaterThan(0.0));
-    expect(secondChild.right, lessThan(100.0));
   });
 
   testWidgets('ExpansionTile expandedCrossAxisAlignment test', (WidgetTester tester) async {
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
+    // Set the column's alignment to Alignment.centerRight to test CrossAxisAlignment
+    // of children widgets. This helps distinguish the effect of expandedAlignment
+    // and expandedCrossAxisAlignment later in the test.
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
@@ -306,7 +301,7 @@ void main() {
             expandedCrossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Container(height: 100, width: 100, key: child0Key),
-              Container(height: 100, width: 80, key: child1Key)
+              Container(height: 100, width: 80, key: child1Key),
             ],
           ),
         ),
@@ -320,10 +315,12 @@ void main() {
     final Rect child0Rect = tester.getRect(find.byKey(child0Key));
     final Rect child1Rect = tester.getRect(find.byKey(child1Key));
 
+    // Since expandedAlignment is set to Alignment.centerRight, the column of children
+    // should be aligned to the center right of the expanded tile. This provides confirmation
+    // that the expandedCrossAxisAlignment.start is 700.0, where columnRect.left is.
     expect(columnRect.right, 800.0);
-    // The width of the Column is the maximum width of the children. The maximum
-    // width being 100.0, the offset of the left edge of Column from X-axis should
-    // be 700.0.
+    // The width of the Column is the width of the largest child. The largest width
+    // being 100.0, the offset of the left edge of Column from X-axis should be 700.0.
     expect(columnRect.left, 700.0);
 
     // Considering the value of expandedCrossAxisAlignment is CrossAxisAlignment.start,
@@ -344,10 +341,11 @@ void main() {
         ),
       );
     } on AssertionError catch (error) {
-      expect(error.toString(), contains('CrossAxisAlignment.baseline is not supported, try to use another constant.'));
+      expect(error.toString(), contains('CrossAxisAlignment.baseline is not supported since the expanded'
+          ' children are aligned in a column, not a row. Try to use another constant.'));
       return;
     }
-    fail('AssertionError was not thrown when epxandedCrossAxisAlignment was CrossAxisalignment.baseline');
+    fail('AssertionError was not thrown when expandedCrossAxisAlignment is CrossAxisAlignment.baseline.');
   });
 
   testWidgets('expandedCrossAxisAlignment and expandedAlignment default values', (WidgetTester tester) async {
@@ -359,7 +357,7 @@ void main() {
             title: const Text('title'),
             children: <Widget>[
               Container(height: 100, width: 100),
-              Container(height: 100, width: 80, key: child1Key)
+              Container(height: 100, width: 80, key: child1Key),
             ],
           ),
         ),
