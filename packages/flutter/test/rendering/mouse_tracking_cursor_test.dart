@@ -240,7 +240,7 @@ void main() {
     ]);
   });
 
-  test('The first annotation with non-deferred cursor is used', () {
+  test('The first annotation with non-deferring cursor is used', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     List<MouseTrackerAnnotation> annotations;
     _setUpMouseTracker(
@@ -268,7 +268,7 @@ void main() {
     ]));
   });
 
-  test('Annotations with deferred cursors are ignored', () {
+  test('Annotations with deferring cursors are ignored', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     List<MouseTrackerAnnotation> annotations;
     _setUpMouseTracker(
