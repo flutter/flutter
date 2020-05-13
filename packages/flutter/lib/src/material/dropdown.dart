@@ -675,7 +675,6 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
     @required this.value,
     @required Widget child,
   }) : assert(child != null),
-       assert(value != null),
        super(key: key, child: child);
 
   /// Called when the dropdown menu item is tapped.
