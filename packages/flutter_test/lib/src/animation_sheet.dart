@@ -23,8 +23,8 @@ import 'package:flutter_test/flutter_test.dart';
 ///  * Create an instance of this class.
 ///  * Pump frames that render the target widget wrapped in [record]. Every frame
 ///    that has `recording` being true will be recorded.
-///  * Optionally, adjust the size of the test viewport to the [sheetSize] (see
-///    the documentation of [sheetSize] for more information).
+///  * Adjust the size of the test viewport to the [sheetSize] (see the
+///    documentation of [sheetSize] for more information).
 ///  * Pump a frame that renders [display], which shows all recorded frames in an
 ///    animation sheet, and can be matched against the golden test.
 ///
@@ -35,7 +35,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// ```dart
 /// testWidgets('Inkwell animation sheet', (WidgetTester tester) async {
 ///   // Create instance
-///   final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(size: const Size(48, 24));
+///   final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(48, 24));
 ///
 ///   final Widget target = Material(
 ///     child: Directionality(
@@ -68,7 +68,7 @@ import 'package:flutter_test/flutter_test.dart';
 ///     recording: true,
 ///   ), const Duration(seconds: 1));
 ///
-///   // Optional: adjust view port size
+///   // Adjust view port size
 ///   tester.binding.setSurfaceSize(animationSheet.sheetSize());
 ///
 ///   // Display
@@ -83,31 +83,31 @@ import 'package:flutter_test/flutter_test.dart';
 /// }, skip: isBrowser); // Animation sheet does not support browser https://github.com/flutter/flutter/issues/56001
 /// ```
 /// {@end-tool}
-/// 
+///
 /// See also:
 ///
 ///  * [GoldenFileComparator], which introduces Golden File Testing.
 class AnimationSheetBuilder {
   /// Starts a session of building an animation sheet.
   ///
-  /// The [size] is a tight constraint for the child to be recorded, and must not
+  /// The [frameSize] is a tight constraint for the child to be recorded, and must not
   /// be null.
-  AnimationSheetBuilder({@required this.size}) : assert(size != null);
+  AnimationSheetBuilder({@required this.frameSize}) : assert(frameSize != null);
 
   /// The size of the child to be recorded.
   ///
   /// This size is applied as a tight layout constraint for the child, and is
   /// fixed throughout the building session.
-  final Size size;
+  final Size frameSize;
 
   final List<Future<ui.Image>> _recordedFrames = <Future<ui.Image>>[];
   Future<List<ui.Image>> get _frames async {
     final List<ui.Image> frames = await Future.wait<ui.Image>(_recordedFrames, eagerError: true);
     assert(() {
       for (final ui.Image frame in frames) {
-        assert(frame.width == size.width && frame.height == size.height,
+        assert(frame.width == frameSize.width && frame.height == frameSize.height,
           'Unexpected size mismatch: frame has (${frame.width}, ${frame.height}) '
-          'while `size` is $size.'
+          'while `frameSize` is $frameSize.'
         );
       }
       return true;
@@ -118,7 +118,7 @@ class AnimationSheetBuilder {
   /// Returns a widget that renders a widget in a box that can be recorded.
   ///
   /// The returned widget wraps `child` in a box with a fixed size specified by
-  /// [size]. The `key` is also applied to the returned widget.
+  /// [frameSize]. The `key` is also applied to the returned widget.
   ///
   /// The `recording` defaults to true, which means the painted result of each
   /// frame will be stored and later available for [display]. If `recording` is
@@ -140,7 +140,7 @@ class AnimationSheetBuilder {
     return _AnimationSheetRecorder(
       key: key,
       child: child,
-      size: size,
+      size: frameSize,
       handleRecorded: recording ? _recordedFrames.add : null,
     );
   }
@@ -148,13 +148,14 @@ class AnimationSheetBuilder {
   /// Constructs a widget that renders the recorded frames in an animation sheet.
   ///
   /// The resulting widget takes as much space as its parent allows, which is
-  /// usually the screen size, and is then filled with the recorded frames, each
-  /// having a size specified by [size], chronologically from top-left to
+  /// usually the screen size. It is then filled with all recorded frames, each
+  /// having a size specified by [frameSize], chronologically from top-left to
   /// bottom-right in a row-major order.
   ///
-  /// If too many frames have been recorded, overflow errors might be thrown,
-  /// therefore it is recommended to adjust the screen size to [sheetSize] before
-  /// calling this method.
+  /// This widget does not check whether its size fits all recorded frames.
+  /// Having too many frames can cause overflow errors, while having too few can
+  /// waste the size of golden files. Therefore you should usually adjust the
+  /// viewport size to [sheetSize] before calling this method.
   ///
   /// The `key` is applied to the root widget.
   ///
@@ -164,24 +165,24 @@ class AnimationSheetBuilder {
     final List<ui.Image> frames = await _frames;
     return _CellSheet(
       key: key,
-      cellSize: size,
+      cellSize: frameSize,
       children: frames.map((ui.Image image) => RawImage(
         image: image,
-        width: size.width,
-        height: size.height,
+        width: frameSize.width,
+        height: frameSize.height,
       )).toList(),
     );
   }
 
   /// Returns the smallest size that can contain all recorded frames.
   ///
-  /// This is usually used to adjust the viewport during unit tests, i.e. the
-  /// size of virtual screen. Having too many frames recorded than the default
-  /// viewport size can contain will lead to overflow errors, while having too
-  /// few frames means the golden file might be larger than necessary.
+  /// This is used to adjust the viewport during unit tests, i.e. the size of
+  /// virtual screen. Having too many frames recorded than the default viewport
+  /// size can contain will lead to overflow errors, while having too few frames
+  /// means the golden file might be larger than necessary.
   ///
   /// The [sheetSize] returns the smallest possible size by placing the
-  /// recorded frames, each of which has a size specified by [size], in a
+  /// recorded frames, each of which has a size specified by [frameSize], in a
   /// row-major grid with a maximum width specified by `maxWidth`, and returns
   /// the size of that grid.
   ///
@@ -193,10 +194,10 @@ class AnimationSheetBuilder {
   /// This method can only be called if at least one frame has been recorded.
   Size sheetSize({double maxWidth = _kDefaultTestViewportWidth}) {
     assert(_recordedFrames.isNotEmpty);
-    final int cellsPerRow = (maxWidth / size.width).floor();
+    final int cellsPerRow = (maxWidth / frameSize.width).floor();
     final int rowNum = (_recordedFrames.length / cellsPerRow).ceil();
-    final double width = math.min(cellsPerRow, _recordedFrames.length) * size.width;
-    return Size(width, size.height * rowNum);
+    final double width = math.min(cellsPerRow, _recordedFrames.length) * frameSize.width;
+    return Size(width, frameSize.height * rowNum);
   }
 
   // The width of _kDefaultTestViewportSize in [TestViewConfiguration].

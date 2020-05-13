@@ -16,7 +16,7 @@ void main() {
    */
 
   testWidgets('correctly records frames', (WidgetTester tester) async {
-    final AnimationSheetBuilder builder = AnimationSheetBuilder(size: _DecuplePixels.size);
+    final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
     await tester.pumpFrames(
       builder.record(
@@ -52,7 +52,7 @@ void main() {
   }, skip: isBrowser);
 
   testWidgets('correctly wraps a row', (WidgetTester tester) async {
-    final AnimationSheetBuilder builder = AnimationSheetBuilder(size: _DecuplePixels.size);
+    final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
     const Duration duration = Duration(seconds: 2);
     await tester.pumpFrames(
