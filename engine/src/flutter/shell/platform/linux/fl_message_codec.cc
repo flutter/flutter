@@ -18,19 +18,19 @@ static void fl_message_codec_class_init(FlMessageCodecClass* klass) {}
 static void fl_message_codec_init(FlMessageCodec* self) {}
 
 G_MODULE_EXPORT GBytes* fl_message_codec_encode_message(FlMessageCodec* self,
-                                                        FlValue* value,
+                                                        FlValue* message,
                                                         GError** error) {
   g_return_val_if_fail(FL_IS_MESSAGE_CODEC(self), nullptr);
 
   // If the user provided NULL, then make a temporary FlValue object for this to
   // make it simpler for the subclasses
   g_autoptr(FlValue) null_value = nullptr;
-  if (value == nullptr) {
+  if (message == nullptr) {
     null_value = fl_value_new_null();
-    value = null_value;
+    message = null_value;
   }
 
-  return FL_MESSAGE_CODEC_GET_CLASS(self)->encode_message(self, value, error);
+  return FL_MESSAGE_CODEC_GET_CLASS(self)->encode_message(self, message, error);
 }
 
 G_MODULE_EXPORT FlValue* fl_message_codec_decode_message(FlMessageCodec* self,
