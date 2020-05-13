@@ -9,7 +9,6 @@ import 'package:flutter/widgets.dart';
 
 import 'scaffold.dart';
 
-// TODO(hmuller): should be device dependent.
 /// The margin that a [FloatingActionButton] should leave between it and the
 /// edge of the screen.
 ///

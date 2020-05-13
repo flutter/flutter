@@ -385,14 +385,14 @@ void main() {
 
     expect(semantics, includesNodeWith(
       label: 'Tab 1',
-      hint: 'tab, 1 of 2',
+      hint: 'Tab 1 of 2',
       flags: <SemanticsFlag>[SemanticsFlag.isSelected],
       textDirection: TextDirection.ltr,
     ));
 
     expect(semantics, includesNodeWith(
       label: 'Tab 2',
-      hint: 'tab, 2 of 2',
+      hint: 'Tab 2 of 2',
       textDirection: TextDirection.ltr,
     ));
 

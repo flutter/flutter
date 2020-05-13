@@ -6,23 +6,22 @@ import 'dart:async';
 import 'dart:io' show ProcessResult, Process;
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -554,7 +553,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           xcode: mockXcode,
         );
         final DeviceLogReader logReader = device.getLogReader(
-          app: await BuildableIOSApp.fromProject(mockIosProject),
+          app: await BuildableIOSApp.fromProject(mockIosProject, null),
         );
 
         final List<String> lines = await logReader.logLines.toList();
@@ -588,7 +587,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           xcode: mockXcode,
         );
         final DeviceLogReader logReader = device.getLogReader(
-          app: await BuildableIOSApp.fromProject(mockIosProject),
+          app: await BuildableIOSApp.fromProject(mockIosProject, null),
         );
 
         final List<String> lines = await logReader.logLines.toList();
@@ -635,7 +634,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           xcode: mockXcode,
         );
         final DeviceLogReader logReader = device.getLogReader(
-          app: await BuildableIOSApp.fromProject(mockIosProject),
+          app: await BuildableIOSApp.fromProject(mockIosProject, null),
         );
 
         final List<String> lines = await logReader.logLines.toList();
@@ -700,7 +699,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           xcode: mockXcode,
         );
         final DeviceLogReader logReader = device.getLogReader(
-          app: await BuildableIOSApp.fromProject(mockIosProject),
+          app: await BuildableIOSApp.fromProject(mockIosProject, null),
         );
 
         final List<String> lines = await logReader.logLines.toList();

@@ -13,8 +13,6 @@ import 'theme.dart';
 const double _kMinCircularProgressIndicatorSize = 36.0;
 const int _kIndeterminateLinearDuration = 1800;
 
-// TODO(hansmuller): implement the support for buffer indicator
-
 /// A base class for material design progress indicators.
 ///
 /// This widget cannot be instantiated directly. For a linear progress

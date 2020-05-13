@@ -628,6 +628,74 @@ void main() {
     expect(aOffset.dx, lessThan(aOffsetOriginal.dx));
   });
 
+  testWidgets('pushReplacement correctly reports didReplace to the observer', (WidgetTester tester) async {
+    // Regression test for  https://github.com/flutter/flutter/issues/56892.
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/' : (BuildContext context) => const OnTapPage(
+        id: '/',
+      ),
+      '/A': (BuildContext context) => const OnTapPage(
+        id: 'A',
+      ),
+      '/A/B': (BuildContext context) => OnTapPage(
+        id: 'B',
+        onTap: (){
+          Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
+          Navigator.of(context).pushReplacementNamed('/C');
+        },
+      ),
+      '/C': (BuildContext context) => const OnTapPage(id: 'C',
+      ),
+    };
+    final List<NavigatorObservation> observations = <NavigatorObservation>[];
+    final TestObserver observer = TestObserver()
+      ..onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        observations.add(
+          NavigatorObservation(
+            current: route.settings.name,
+            previous: previousRoute.settings.name,
+            operation: 'didPop'
+          )
+        );
+      }
+      ..onReplaced = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        observations.add(
+          NavigatorObservation(
+            current: route.settings.name,
+            previous: previousRoute.settings.name,
+            operation: 'didReplace'
+          )
+        );
+      };
+    await tester.pumpWidget(
+      MaterialApp(
+        routes: routes,
+        navigatorObservers: <NavigatorObserver>[observer],
+        initialRoute: '/A/B',
+      )
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('B'), isOnstage);
+
+    await tester.tap(find.text('B'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(observations.length, 3);
+    expect(observations[0].current, '/A/B');
+    expect(observations[0].previous, '/A');
+    expect(observations[0].operation, 'didPop');
+    expect(observations[1].current, '/A');
+    expect(observations[1].previous, '/');
+    expect(observations[1].operation, 'didPop');
+
+    expect(observations[2].current, '/C');
+    expect(observations[2].previous, '/');
+    expect(observations[2].operation, 'didReplace');
+
+    await tester.pumpAndSettle();
+    expect(find.text('C'), isOnstage);
+  });
+
   testWidgets('pushAndRemoveUntil triggers secondaryAnimation', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(
@@ -680,6 +748,42 @@ void main() {
     expect(find.text('/'), findsNothing);
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), isOnstage);
+  });
+
+  testWidgets('pushAndRemoveUntil does not remove routes below the first route that pass the predicate', (WidgetTester tester) async {
+    // Regression https://github.com/flutter/flutter/issues/56688
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const Text('home'),
+      '/A': (BuildContext context) => const Text('page A'),
+      '/A/B': (BuildContext context) => OnTapPage(
+        id: 'B',
+        onTap: () {
+          Navigator.of(context).pushNamedAndRemoveUntil('/D', ModalRoute.withName('/A'));
+        },
+      ),
+      '/D': (BuildContext context) => const Text('page D'),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        routes: routes,
+        initialRoute: '/A/B',
+      )
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('B'));
+    await tester.pumpAndSettle();
+    expect(find.text('page D'), isOnstage);
+
+    navigator.currentState.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('page A'), isOnstage);
+
+    navigator.currentState.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('home'), isOnstage);
   });
 
   testWidgets('replaceNamed returned value', (WidgetTester tester) async {
@@ -2367,6 +2471,66 @@ void main() {
       expect(find.text('forth'), findsOneWidget);
     });
 
+    testWidgets('can repush a page that was previously popped before it has finished popping', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      List<Page<dynamic>> myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      ];
+      bool onPopPage(Route<dynamic> route, dynamic result) {
+        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        return route.didPop(result);
+      }
+      await tester.pumpWidget(buildNavigator(myPages, onPopPage, navigator));
+
+      // Pops the second page route.
+      myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+      ];
+      await tester.pumpWidget(buildNavigator(myPages, onPopPage, navigator));
+
+      // Re-push the second page again before it finishes popping.
+      myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      ];
+      await tester.pumpWidget(buildNavigator(myPages, onPopPage, navigator));
+
+      // It should not crash the app.
+      expect(tester.takeException(), isNull);
+      await tester.pumpAndSettle();
+      expect(find.text('second'), findsOneWidget);
+    });
+
+    testWidgets('can update pages before a route has finished popping', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      List<Page<dynamic>> myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      ];
+      bool onPopPage(Route<dynamic> route, dynamic result) {
+        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        return route.didPop(result);
+      }
+      await tester.pumpWidget(buildNavigator(myPages, onPopPage, navigator));
+
+      // Pops the second page route.
+      myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+      ];
+      await tester.pumpWidget(buildNavigator(myPages, onPopPage, navigator));
+
+      // Updates the pages again before second page finishes popping.
+      myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
+      ];
+      await tester.pumpWidget(buildNavigator(myPages, onPopPage, navigator));
+
+      // It should not crash the app.
+      expect(tester.takeException(), isNull);
+      await tester.pumpAndSettle();
+      expect(find.text('initial'), findsOneWidget);
+    });
   });
 }
 
@@ -2415,23 +2579,24 @@ class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
         return;
 
       final RouteTransitionRecord exitingPageRoute = locationToExitingPageRoute[location];
-      final bool hasPagelessRoute = pageRouteToPagelessRoutes.containsKey(exitingPageRoute);
-
-      exitingPageRoute.markForRemove();
-      results.add(exitingPageRoute);
-
-      if (hasPagelessRoute) {
-        final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
-        for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
-          pagelessRoute.markForRemove();
+      if (exitingPageRoute.isWaitingForExitingDecision) {
+        final bool hasPagelessRoute = pageRouteToPagelessRoutes.containsKey(exitingPageRoute);
+        exitingPageRoute.markForRemove();
+        if (hasPagelessRoute) {
+          final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
+          for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
+            pagelessRoute.markForRemove();
+          }
         }
       }
+      results.add(exitingPageRoute);
+
       handleExitingRoute(exitingPageRoute);
     }
     handleExitingRoute(null);
 
     for (final RouteTransitionRecord pageRoute in newPageRouteHistory) {
-      if (pageRoute.isEntering) {
+      if (pageRoute.isWaitingForEnteringDecision) {
         pageRoute.markForAdd();
       }
       results.add(pageRoute);
@@ -2485,4 +2650,11 @@ class StatefulTestState extends State<StatefulTestWidget> {
     rebuildCount += 1;
     return Container();
   }
+}
+
+class NavigatorObservation {
+  const NavigatorObservation({this.previous, this.current, this.operation});
+  final String previous;
+  final String current;
+  final String operation;
 }

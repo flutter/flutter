@@ -5,14 +5,14 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -464,7 +464,11 @@ void main() {
   });
 
   testWithoutContext('trackSharedBuildDirectory handles a missing .last_build_id', () {
-    BuildSystem.trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
+    FlutterBuildSystem(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(),
+    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
 
     expect(environment.outputDir.childFile('.last_build_id'), exists);
     expect(environment.outputDir.childFile('.last_build_id').readAsStringSync(),
@@ -475,7 +479,11 @@ void main() {
     environment.outputDir.childFile('.last_build_id')
       ..writeAsStringSync('6666cd76f96956469e7be39d750cc7d9')
       ..setLastModifiedSync(DateTime(1991, 8, 23));
-    BuildSystem.trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
+    FlutterBuildSystem(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(),
+    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
 
     expect(environment.outputDir.childFile('.last_build_id').lastModifiedSync(),
       DateTime(1991, 8, 23));
@@ -491,7 +499,11 @@ void main() {
     environment.outputDir
       .childFile('stale')
       .createSync();
-    BuildSystem.trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
+    FlutterBuildSystem(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(),
+    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
 
     expect(environment.outputDir.childFile('.last_build_id').readAsStringSync(),
       '6666cd76f96956469e7be39d750cc7d9');
@@ -510,7 +522,11 @@ void main() {
       ..createSync();
     otherBuildDir.childFile('outputs.json')
       .writeAsStringSync(json.encode(<String>[staleFile.absolute.path]));
-    BuildSystem.trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
+    FlutterBuildSystem(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(),
+    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
 
     expect(environment.outputDir.childFile('.last_build_id').readAsStringSync(),
       '6666cd76f96956469e7be39d750cc7d9');
@@ -568,7 +584,7 @@ void main() {
 }
 
 BuildSystem setUpBuildSystem(FileSystem fileSystem) {
-  return BuildSystem(
+  return FlutterBuildSystem(
     fileSystem: fileSystem,
     logger: BufferLogger.test(),
     platform: FakePlatform(operatingSystem: 'linux'),

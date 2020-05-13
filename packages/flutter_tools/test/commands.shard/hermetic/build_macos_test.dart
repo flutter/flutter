@@ -4,8 +4,8 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';

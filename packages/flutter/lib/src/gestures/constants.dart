@@ -26,7 +26,7 @@ const Duration kLongPressTimeout = Duration(milliseconds: 500);
 
 /// The maximum time from the start of the first tap to the start of the second
 /// tap in a double-tap gesture.
-// TODO(ianh): In Android, this is actually the time from the first's up event
+// In Android, this is actually the time from the first's up event
 // to the second's down event, according to the ViewConfiguration docs.
 const Duration kDoubleTapTimeout = Duration(milliseconds: 300);
 

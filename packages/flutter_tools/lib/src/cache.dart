@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import 'android/gradle_utils.dart';
 import 'base/common.dart';
@@ -14,6 +13,7 @@ import 'base/io.dart' show SocketException;
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
+import 'base/platform.dart';
 import 'base/process.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
@@ -111,7 +111,7 @@ class Cache {
       _artifacts.add(MaterialFonts(this));
 
       _artifacts.add(GradleWrapper(this));
-      _artifacts.add(AndroidMavenArtifacts());
+      _artifacts.add(AndroidMavenArtifacts(this));
       _artifacts.add(AndroidGenSnapshotArtifacts(this));
       _artifacts.add(AndroidInternalBuildArtifacts(this));
 
@@ -990,12 +990,15 @@ class AndroidInternalBuildArtifacts extends EngineCachedArtifact {
 
 /// A cached artifact containing the Maven dependencies used to build Android projects.
 class AndroidMavenArtifacts extends ArtifactSet {
-  AndroidMavenArtifacts() : super(DevelopmentArtifact.androidMaven);
+  AndroidMavenArtifacts(this.cache) : super(DevelopmentArtifact.androidMaven);
+
+  final Cache cache;
 
   @override
   Future<void> update() async {
-    final Directory tempDir =
-        globals.fs.systemTempDirectory.createTempSync('flutter_gradle_wrapper.');
+    final Directory tempDir = cache.getRoot().createTempSync(
+      'flutter_gradle_wrapper.',
+    );
     gradleUtils.injectGradleWrapperIfNeeded(tempDir);
 
     final Status status = globals.logger.startProgress('Downloading Android Maven dependencies...',
