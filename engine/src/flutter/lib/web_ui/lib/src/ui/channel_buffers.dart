@@ -130,7 +130,7 @@ class ChannelBuffers {
   }
 
   /// Returns true on overflow.
-  bool push(String channel, ByteData data, PlatformMessageResponseCallback callback) {
+  bool push(String/*!*/ channel, ByteData/*!*/ data, PlatformMessageResponseCallback/*!*/ callback) {
     _RingBuffer<_StoredMessage> queue = _messages[channel];
     if (queue == null) {
       queue = _makeRingBuffer(kDefaultBufferSize);
@@ -182,7 +182,7 @@ class ChannelBuffers {
   ///
   /// This should be called once a channel is prepared to handle messages
   /// (i.e. when a message handler is setup in the framework).
-  Future<void> drain(String channel, DrainChannelCallback callback) async {
+  Future<void> drain(String/*!*/ channel, DrainChannelCallback/*!*/ callback) async {
     while (!_isEmpty(channel)) {
       final _StoredMessage message = _pop(channel);
       await callback(message.data, message.callback);
@@ -204,7 +204,7 @@ class ChannelBuffers {
   ///   Arity: 2
   ///   Format: `resize\r<channel name>\r<new size>`
   ///   Description: Allows you to set the size of a channel's buffer.
-  void handleMessage(ByteData data) {
+  void handleMessage(ByteData/*!*/ data) {
     final List<String> command = _getString(data).split('\r');
     if (command.length == /*arity=*/2 + 1 && command[0] == 'resize') {
       _resize(command[1], int.parse(command[2]));
@@ -220,4 +220,4 @@ class ChannelBuffers {
 ///
 /// See also:
 /// * [BinaryMessenger] - The place where ChannelBuffers are typically read.
-final ChannelBuffers channelBuffers = ChannelBuffers();
+final ChannelBuffers/*!*/ channelBuffers = ChannelBuffers();
