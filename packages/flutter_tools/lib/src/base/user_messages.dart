@@ -224,6 +224,7 @@ class UserMessages {
   String get flutterNoSupportedDevices => 'No supported devices connected.';
   String flutterFoundSpecifiedDevices(int count, String deviceId) =>
       'Found $count devices with name or id matching $deviceId:';
+  String get flutterMultipleDevicesFound => 'Multiple devices found:';
   String get flutterSpecifyDeviceWithAllOption =>
       'More than one device connected; please specify a device with '
       "the '-d <deviceId>' flag, or use '-d all' to act on all devices.";
