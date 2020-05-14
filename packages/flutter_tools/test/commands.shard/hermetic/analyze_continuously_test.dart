@@ -31,7 +31,7 @@ void main() {
 
   setUp(() {
     platform = const LocalPlatform();
-    fileSystem = const LocalFileSystem();
+    fileSystem = LocalFileSystem.instance;
     platform = const LocalPlatform();
     processManager = const LocalProcessManager();
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());
