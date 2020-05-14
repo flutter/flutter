@@ -16,11 +16,11 @@ class CallbackHandle {
   CallbackHandle.fromRawHandle(this._handle)
       : assert(_handle != null, "'_handle' must not be null.");
 
-  final int _handle;
+  final int/*!*/ _handle;
 
   /// Get the raw callback handle to pass over a [MethodChannel] or [SendPort]
   /// (to pass to another [Isolate]).
-  int toRawHandle() => _handle;
+  int/*!*/ toRawHandle() => _handle;
 
   @override
   bool operator ==(dynamic other) {
@@ -43,12 +43,12 @@ class CallbackHandle {
 class PluginUtilities {
   // This class is only a namespace, and should not be instantiated or
   // extended directly.
-  factory PluginUtilities._() => null;
+  factory PluginUtilities._() => throw UnsupportedError('Namespace');
 
-  static Map<Function, CallbackHandle> _forwardCache =
-      <Function, CallbackHandle>{};
-  static Map<CallbackHandle, Function> _backwardCache =
-      <CallbackHandle, Function>{};
+  static Map<Function/*!*/, CallbackHandle/*?*/>/*!*/ _forwardCache =
+      <Function/*!*/, CallbackHandle/*?*/>{};
+  static Map<CallbackHandle/*!*/, Function/*?*/>/*!*/ _backwardCache =
+      <CallbackHandle/*!*/, Function/*?*/>{};
 
   /// Get a handle to a named top-level or static callback function which can
   /// be easily passed between isolates.
@@ -59,10 +59,10 @@ class PluginUtilities {
   /// [PluginUtilities.getCallbackFromHandle] to retrieve a tear-off of the
   /// original callback. If `callback` is not a top-level or static function,
   /// null is returned.
-  static CallbackHandle getCallbackHandle(Function callback) {
+  static CallbackHandle/*?*/ getCallbackHandle(Function/*!*/ callback) {
     assert(callback != null, "'callback' must not be null.");
     return _forwardCache.putIfAbsent(callback, () {
-      final int handle = _getCallbackHandle(callback);
+      final int/*?*/ handle = _getCallbackHandle(callback);
       return handle != null ? CallbackHandle.fromRawHandle(handle) : null;
     });
   }
@@ -75,7 +75,7 @@ class PluginUtilities {
   /// If `handle` is not a valid handle returned by
   /// [PluginUtilities.getCallbackHandle], null is returned. Otherwise, a
   /// tear-off of the callback associated with `handle` is returned.
-  static Function getCallbackFromHandle(CallbackHandle handle) {
+  static Function/*?*/ getCallbackFromHandle(CallbackHandle/*!*/ handle) {
     assert(handle != null, "'handle' must not be null.");
     return _backwardCache.putIfAbsent(
         handle, () => _getCallbackFromHandle(handle.toRawHandle()));
