@@ -262,6 +262,19 @@ class DeviceManager {
     }
   }
 
+  Future<String> _readUserInput(int deviceLength) async {
+   if (globals.stdio.stdinHasTerminal)  {
+      globals.terminal.usesTerminalUi = true;
+      final String result = await globals.terminal.promptForCharInput(
+        <String>['1','2'], //TODO:Change this placeholder to actual value
+        logger: globals.logger,
+        prompt: userMessages.flutterChoseOne
+      );
+      return result;
+    }
+    return null;
+  }
+
   /// Returns whether the device is supported for the project.
   ///
   /// This exists to allow the check to be overridden for google3 clients.
