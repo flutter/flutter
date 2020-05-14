@@ -5,10 +5,35 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import '../widgets/text.dart' show findRenderEditable, globalize, textOffsetToPosition;
 
+class MockClipboard {
+  Object _clipboardData = <String, dynamic>{
+    'text': null,
+  };
+
+  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
+    switch (methodCall.method) {
+      case 'Clipboard.getData':
+        return _clipboardData;
+      case 'Clipboard.setData':
+        _clipboardData = methodCall.arguments;
+        break;
+    }
+  }
+}
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  final MockClipboard mockClipboard = MockClipboard();
+  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+
+  setUp(() async {
+    await Clipboard.setData(const ClipboardData(text: 'clipboard data'));
+  });
+
   group('canSelectAll', () {
     Widget createEditableText({
       Key key,
@@ -104,7 +129,7 @@ void main() {
       expect(endpoints.length, 1);
       final Offset handlePos = endpoints[0].point + const Offset(0.0, 1.0);
       await tester.tapAt(handlePos, pointer: 7);
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.text('CUT'), findsNothing);
       expect(find.text('COPY'), findsNothing);
       expect(find.text('PASTE'), findsOneWidget);
@@ -235,7 +260,7 @@ void main() {
       // Long press to show the menu.
       final Offset textOffset = textOffsetToPosition(tester, 1);
       await tester.longPressAt(textOffset);
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // The last two buttons are missing, and a more button is shown.
       expect(find.text('CUT'), findsOneWidget);
@@ -301,7 +326,7 @@ void main() {
       // Long press to show the menu.
       final Offset textOffset = textOffsetToPosition(tester, 1);
       await tester.longPressAt(textOffset);
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // The last button is missing, and a more button is shown.
       expect(find.text('CUT'), findsOneWidget);
@@ -413,7 +438,7 @@ void main() {
 
       // Long press to show the menu.
       await tester.longPressAt(textOffsetToPosition(tester, 1));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // The last button is missing, and a more button is shown.
       expect(find.text('CUT'), findsOneWidget);
@@ -488,7 +513,7 @@ void main() {
       expect(endpoints.length, 1);
       final Offset handlePos = endpoints[0].point + const Offset(0.0, 1.0);
       await tester.tapAt(handlePos, pointer: 7);
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.text('CUT'), findsNothing);
       expect(find.text('COPY'), findsNothing);
       expect(find.text('PASTE'), findsOneWidget);
@@ -556,4 +581,58 @@ void main() {
       );
     });
   });
+
+  testWidgets('Paste only appears when clipboard has contents', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              TextField(
+                controller: controller,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Make sure the clipboard is empty to start.
+    await Clipboard.setData(const ClipboardData(text: ''));
+
+    // Double tap to selet the first word.
+    const int index = 4;
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pumpAndSettle();
+
+    // No Paste yet, because nothing has been copied.
+    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('COPY'), findsOneWidget);
+    expect(find.text('CUT'), findsOneWidget);
+    expect(find.text('SELECT ALL'), findsOneWidget);
+
+    // Tap copy to add something to the clipboard and close the menu.
+    await tester.tapAt(tester.getCenter(find.text('COPY')));
+    await tester.pumpAndSettle();
+    expect(find.text('COPY'), findsNothing);
+    expect(find.text('CUT'), findsNothing);
+    expect(find.text('SELECT ALL'), findsNothing);
+
+    // Double tap to show the menu again.
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pumpAndSettle();
+
+    // Paste now shows.
+    expect(find.text('COPY'), findsOneWidget);
+    expect(find.text('CUT'), findsOneWidget);
+    expect(find.text('PASTE'), findsOneWidget);
+    expect(find.text('SELECT ALL'), findsOneWidget);
+  }, skip: isBrowser);
 }
