@@ -42,7 +42,7 @@ void main() {
     expect(localizations.searchFieldLabel, isNotNull);
     expect(localizations.dateSeparator, isNotNull);
     expect(localizations.dateHelpText, isNotNull);
-    expect(localizations.selectYearLabel, isNotNull);
+    expect(localizations.selectYearSemanticsLabel, isNotNull);
     expect(localizations.unspecifiedDate, isNotNull);
     expect(localizations.unspecifiedDateRange, isNotNull);
     expect(localizations.dateInputLabel, isNotNull);

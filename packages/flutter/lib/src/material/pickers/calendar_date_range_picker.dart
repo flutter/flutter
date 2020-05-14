@@ -541,11 +541,12 @@ class _MonthItem extends StatelessWidget {
     // day of month before the rest of the date, as they are looking
     // for the day of month. To do that we prepend day of month to the
     // formatted full date.
-    String semanticLabel = '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}';
+    final String fullDate = localizations.formatFullDate(dayToBuild);
+    String semanticLabel = fullDate;
     if (isSelectedDayStart) {
-      semanticLabel = '${localizations.dateRangeStartLabel} $semanticLabel';
+      semanticLabel = localizations.dateRangeStartDateSemanticLabel(fullDate);
     } else if (isSelectedDayEnd) {
-      semanticLabel = '${localizations.dateRangeEndLabel} $semanticLabel';
+      semanticLabel = localizations.dateRangeEndDateSemanticLabel(fullDate);
     }
 
     Widget dayWidget = Container(

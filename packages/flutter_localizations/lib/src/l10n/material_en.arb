@@ -183,8 +183,8 @@
     "description": "The help text used on an empty text input date field to indicate the date format being asked for."
   },
 
-  "selectYearLabel": "Select year",
-  "@selectYearLabel": {
+  "selectYearSemanticsLabel": "Select year",
+  "@selectYearSemanticsLabel": {
     "description": "The accessibility label used to announce when the user has entered the year selection mode in the date picker."
   },
 
@@ -213,6 +213,18 @@
     "description": "The label used to describe the ending date input text field used in in the date range picker."
   },
 
+  "dateRangeStartDateSemanticLabel": "Start date $fullDate",
+  "@dateRangeStartDateSemanticLabel": {
+    "description": "Accessibility announcement that is used when the user navigates to the selected start date in the date range picker.",
+    "parameters": "$fullDate"
+  },
+
+  "dateRangeEndDateSemanticLabel": "End date $fullDate",
+  "@dateRangeEndDateSemanticLabel": {
+    "description": "Accessibility announcement that is used when the user navigates to the selected end date in the date range picker.",
+    "parameters": "$fullDate"
+  },
+
   "invalidDateFormatLabel": "Invalid format.",
   "@invalidDateFormatLabel": {
     "description": "Error message displayed to the user when they have entered a text string in an input field of the date picker that is not in a valid date format."
@@ -238,7 +250,7 @@
     "description": "Label used in the header of the date picker dialog"
   },
 
-  "dateRangePickerHelpText": "SELECT DATE RANGE",
+  "dateRangePickerHelpText": "SELECT RANGE",
   "@dateRangePickerHelpText": {
     "description": "Label used in the header of the date range picker dialog."
   },

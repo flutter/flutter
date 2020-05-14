@@ -330,7 +330,7 @@ abstract class MaterialLocalizations {
   /// The semantic label used to announce when the user has entered the year
   /// selection mode of the [CalendarDatePicker] which is used in the data picker
   /// dialog created with [showDatePicker].
-  String get selectYearLabel;
+  String get selectYearSemanticsLabel;
 
   /// The label used to indicate a date that has not been entered or selected
   /// yet in the date picker.
@@ -350,6 +350,14 @@ abstract class MaterialLocalizations {
   /// The label used for the ending date input field in the date range picker
   /// created with [showDateRangePicker].
   String get dateRangeEndLabel;
+
+  /// The semantics label used for the selected start date in the date range
+  /// picker's day grid.
+  String dateRangeStartDateSemanticLabel(String formattedDate);
+
+  /// The semantics label used for the selected end date in the date range
+  /// picker's day grid.
+  String dateRangeEndDateSemanticLabel(String formattedDate);
 
   /// Error message displayed to the user when they have entered a text string
   /// in an [InputDatePickerFormField] that is not in a valid date format.
@@ -671,7 +679,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get dateHelpText => 'mm/dd/yyyy';
 
   @override
-  String get selectYearLabel => 'Select year';
+  String get selectYearSemanticsLabel => 'Select year';
 
   @override
   String get unspecifiedDate => 'Date';
@@ -689,6 +697,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get dateRangeEndLabel => 'End Date';
 
   @override
+  String dateRangeStartDateSemanticLabel(String fullDate) => 'Start date $fullDate';
+
+  @override
+  String dateRangeEndDateSemanticLabel(String fullDate) => 'End date $fullDate';
+
+  @override
   String get invalidDateFormatLabel => 'Invalid format.';
 
   @override
@@ -704,7 +718,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get datePickerHelpText => 'SELECT DATE';
 
   @override
-  String get dateRangePickerHelpText => 'SELECT DATE RANGE';
+  String get dateRangePickerHelpText => 'SELECT RANGE';
 
   @override
   String get calendarModeButtonLabel => 'Switch to calendar';
