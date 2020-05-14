@@ -23,7 +23,7 @@ part of dart.ui;
 class IsolateNameServer {
   // This class is only a namespace, and should not be instantiated or
   // extended directly.
-  factory IsolateNameServer._() => null;
+  factory IsolateNameServer._() => throw UnsupportedError('Namespace');
 
   /// Looks up the [SendPort] associated with a given name.
   ///
@@ -31,7 +31,7 @@ class IsolateNameServer {
   /// place, consider [registerPortWithName].
   ///
   /// The `name` argument must not be null.
-  static SendPort lookupPortByName(String name) {
+  static SendPort/*?*/ lookupPortByName(String/*!*/ name) {
     assert(name != null, "'name' cannot be null.");
     return _lookupPortByName(name);
   }
@@ -49,7 +49,7 @@ class IsolateNameServer {
   /// name, as there is an inherent race condition in doing so.
   ///
   /// The `port` and `name` arguments must not be null.
-  static bool registerPortWithName(SendPort port, String name) {
+  static bool/*!*/ registerPortWithName(SendPort port, String name) {
     assert(port != null, "'port' cannot be null.");
     assert(name != null, "'name' cannot be null.");
     return _registerPortWithName(port, name);
@@ -66,15 +66,15 @@ class IsolateNameServer {
   /// after it has been removed).
   ///
   /// The `name` argument must not be null.
-  static bool removePortNameMapping(String name) {
+  static bool/*!*/ removePortNameMapping(String name) {
     assert(name != null, "'name' cannot be null.");
     return _removePortNameMapping(name);
   }
 
-  static SendPort _lookupPortByName(String name)
+  static SendPort/*?*/ _lookupPortByName(String name)
       native 'IsolateNameServerNatives_LookupPortByName';
-  static bool _registerPortWithName(SendPort port, String name)
+  static bool/*!*/ _registerPortWithName(SendPort port, String name)
       native 'IsolateNameServerNatives_RegisterPortWithName';
-  static bool _removePortNameMapping(String name)
+  static bool/*!*/ _removePortNameMapping(String name)
       native 'IsolateNameServerNatives_RemovePortNameMapping';
 }
