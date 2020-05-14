@@ -116,7 +116,7 @@ class LinuxDoctorValidator extends DoctorValidator {
   }
 
   /// Returns the installed version of [binary], or null if it's not installed.
-  /// 
+  ///
   /// Requires tha [binary] take a '--version' flag, and print a version of the
   /// form x.y.z somewhere on the first line of output.
   Future<_VersionInfo> _getBinaryVersion(String binary) async {
