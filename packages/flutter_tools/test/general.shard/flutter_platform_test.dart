@@ -53,6 +53,7 @@ void main() {
 
       setUp(() {
         mockPlatform = MockPlatform();
+        when(mockPlatform.isWindows).thenReturn(false);
         mockProcessManager = MockProcessManager();
         flutterPlatform = TestFlutterPlatform();
       });
