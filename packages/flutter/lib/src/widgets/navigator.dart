@@ -1440,7 +1440,7 @@ class Navigator extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [dart:ui.Window.defaultRouteName], which reflects the route that the
+  ///  * [dart:ui.Window.initialRouteName], which reflects the route that the
   ///    application was started with.
   static const String defaultRouteName = '/';
 

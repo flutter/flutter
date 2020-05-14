@@ -286,17 +286,17 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  String get defaultRouteName => _defaultRouteNameTestValue ?? _platformDispatcher.defaultRouteName;
-  String _defaultRouteNameTestValue;
+  String get initialRouteName => _initialRouteNameTestValue ?? _platformDispatcher.initialRouteName;
+  String _initialRouteNameTestValue;
   /// Hides the real default route name and reports the given
-  /// [defaultRouteNameTestValue] instead.
-  set defaultRouteNameTestValue(String defaultRouteNameTestValue) {
-    _defaultRouteNameTestValue = defaultRouteNameTestValue;
+  /// [initialRouteNameTestValue] instead.
+  set initialRouteNameTestValue(String initialRouteNameTestValue) {
+    _initialRouteNameTestValue = initialRouteNameTestValue;
   }
   /// Deletes any existing test default route name and returns to using the real
   /// default route name.
   void clearDefaultRouteNameTestValue() {
-    _defaultRouteNameTestValue = null;
+    _initialRouteNameTestValue = null;
   }
 
   @override

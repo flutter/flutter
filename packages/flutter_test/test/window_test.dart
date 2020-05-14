@@ -144,13 +144,13 @@ void main() {
   testWidgets('TestWindow can fake default route name', (WidgetTester tester) async {
     verifyThatTestWindowCanFakeProperty<String>(
       tester: tester,
-      realValue: ui.window.defaultRouteName,
+      realValue: ui.window.initialRouteName,
       fakeValue: 'fake_route',
       propertyRetriever: () {
-        return WidgetsBinding.instance.window.defaultRouteName;
+        return WidgetsBinding.instance.window.initialRouteName;
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, String fakeValue) {
-        binding.window.defaultRouteNameTestValue = fakeValue;
+        binding.window.initialRouteNameTestValue = fakeValue;
       },
     );
   });
