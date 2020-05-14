@@ -1093,18 +1093,22 @@ class ImageShader implements Shader {
 
 // TODO(flutter_web): probably dont implement this one.
 class IsolateNameServer {
+  // This class is only a namespace, and should not be instantiated or
+  // extended directly.
+  factory IsolateNameServer._() => throw UnsupportedError('Namespace');
+
   static dynamic lookupPortByName(String name) {
     assert(name != null, "'name' cannot be null.");
     throw UnimplementedError();
   }
 
-  static bool registerPortWithName(dynamic port, String name) {
+  static bool/*!*/ registerPortWithName(dynamic port, String name) {
     assert(port != null, "'port' cannot be null.");
     assert(name != null, "'name' cannot be null.");
     throw UnimplementedError();
   }
 
-  static bool removePortNameMapping(String name) {
+  static bool/*!*/ removePortNameMapping(String name) {
     assert(name != null, "'name' cannot be null.");
     throw UnimplementedError();
   }
