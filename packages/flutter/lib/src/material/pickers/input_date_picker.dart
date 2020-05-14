@@ -187,11 +187,9 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   String _validateDate(String text) {
     final DateTime date = _parseDate(text);
     if (date == null) {
-      // TODO(darrenaustin): localize 'Invalid format.'
-      return widget.errorFormatText ?? 'Invalid format.';
+      return widget.errorFormatText ?? MaterialLocalizations.of(context).invalidDateFormatLabel;
     } else if (!_isValidAcceptableDate(date)) {
-      // TODO(darrenaustin): localize 'Out of range.'
-      return widget.errorInvalidText ?? 'Out of range.';
+      return widget.errorInvalidText ?? MaterialLocalizations.of(context).dateOutOfRangeLabel;
     }
     return null;
   }
@@ -220,6 +218,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
 
   @override
   Widget build(BuildContext context) {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return OrientationBuilder(builder: (BuildContext context, Orientation orientation) {
       assert(orientation != null);
 
@@ -227,14 +226,12 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
         decoration: InputDecoration(
           border: const UnderlineInputBorder(),
           filled: true,
-          // TODO(darrenaustin): localize 'mm/dd/yyyy' and 'Enter Date'
-          hintText: widget.fieldHintText ?? 'mm/dd/yyyy',
-          labelText: widget.fieldLabelText ?? 'Enter Date',
+          hintText: widget.fieldHintText ?? localizations.dateHelpText,
+          labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
         ),
         validator: _validateDate,
         inputFormatters: <TextInputFormatter>[
-          // TODO(darrenaustin): localize date separator '/'
-          DateTextInputFormatter('/'),
+          DateTextInputFormatter(localizations.dateSeparator),
         ],
         keyboardType: TextInputType.datetime,
         onSaved: _handleSaved,
