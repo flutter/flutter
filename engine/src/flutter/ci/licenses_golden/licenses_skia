@@ -1,4 +1,4 @@
-Signature: 8f1ba4ee96bc2c3ad91dde09d1118c4a
+Signature: b3448981e6234dd816ea49ded4372a41
 
 UNUSED LICENSES:
 
@@ -5292,6 +5292,8 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrDrawAtlasPathOp.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrDrawAtlasPathOp.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrMiddleOutPolygonTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrMidpointContourParser.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrVectorXform.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrWangsFormula.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google Inc.
 
