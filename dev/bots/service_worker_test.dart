@@ -135,7 +135,6 @@ Future<void> runRecordingServer({
       windowWidth: 500,
     ), onError: completer.completeError);
     await completer.future;
-    await completer.future;
   } finally {
     chrome?.stop();
     await server?.close();
