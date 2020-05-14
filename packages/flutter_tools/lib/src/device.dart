@@ -250,6 +250,14 @@ class DeviceManager {
             .where((Device device) => device.ephemeral == true)
             .toList();
       }
+      // If it was not able to prioritize a device. For xample, if the user
+      // has two active Android devices running, then we request the user to
+      // choose one.
+      if (devices.length > 1) {
+        final Device chosenDevice = await _chooseOneOfAvailableDevices(devices);
+        deviceManager.specifiedDeviceId = chosenDevice.id;
+        devices = <Device>[chosenDevice];
+      }
     }
     return devices;
   }
