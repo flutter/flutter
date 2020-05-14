@@ -703,17 +703,25 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
     return context.findAncestorRenderObjectOfType<RenderSliverFloatingPersistentHeader>();
   }
 
-  void _isScrollingListener() {
+  Future<void> _isScrollingListener() async {
     if (_position == null)
       return;
-
     // When a scroll stops, then maybe snap the appbar into view.
     // Similarly, when a scroll starts, then maybe stop the snap animation.
     final RenderSliverFloatingPersistentHeader header = _headerRenderer();
-    if (_position.isScrollingNotifier.value)
+    if (_position.isScrollingNotifier.value) {
       header?.maybeStopSnapAnimation(_position.userScrollDirection);
-    else
-      header?.maybeStartSnapAnimation(_position.userScrollDirection);
+    } else {
+      final double potentialCorrection = await header?.maybeStartSnapAnimation(_position.userScrollDirection);
+      // If the _FloatingAppBar is expected to snap from another scrollable,
+      // e.g. when used in conjunction with a NestedScrollView, the position
+      // needs to be corrected after the animation completes, or the app bar
+      // will stop floating.
+      if (potentialCorrection >= 0.0) {
+        _position.correctPixels(potentialCorrection);
+      }
+    }
+
   }
 
   @override
@@ -977,6 +985,7 @@ class SliverAppBar extends StatefulWidget {
     this.floating = false,
     this.pinned = false,
     this.snap = false,
+    this.nestedSnap = false,
     this.stretch = false,
     this.stretchTriggerOffset = 100.0,
     this.onStretchTrigger,
@@ -988,6 +997,7 @@ class SliverAppBar extends StatefulWidget {
        assert(floating != null),
        assert(pinned != null),
        assert(snap != null),
+       assert(nestedSnap != null),
        assert(stretch != null),
        assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
        assert(stretchTriggerOffset > 0.0),
@@ -1237,6 +1247,16 @@ class SliverAppBar extends StatefulWidget {
   ///    behavior of the app bar in combination with [pinned] and [floating].
   final bool snap;
 
+  /// Specifies whether the snap animation is influenced by another
+  /// [ScrollPosition], such as the inner body of a [NestedScrollView].
+  ///
+  /// When true, the [ScrollPosition] of the current context, e.g. the inner
+  /// scrollable, will be corrected to properly coordinate with the outer
+  /// scrollable.
+  ///
+  /// Defaults to false, cannot be null.
+  final bool nestedSnap;
+
   /// Whether the app bar should stretch to fill the over-scroll area.
   ///
   /// The app bar can still expand and contract as the user scrolls, but it will
@@ -1268,6 +1288,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
         vsync: this,
         curve: Curves.easeOut,
         duration: const Duration(milliseconds: 200),
+        nestedSnap: widget.nestedSnap,
       );
     } else {
       _snapConfiguration = null;
