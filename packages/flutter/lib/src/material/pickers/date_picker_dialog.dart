@@ -369,8 +369,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
     final String dateText = _selectedDate != null
       ? localizations.formatMediumDate(_selectedDate)
-      // TODO(darrenaustin): localize 'Date'
-      : 'Date';
+      : localizations.unspecifiedDate;
     final Color dateColor = colorScheme.brightness == Brightness.light
       ? colorScheme.onPrimary
       : colorScheme.onSurface;
@@ -409,8 +408,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           initialCalendarMode: widget.initialCalendarMode,
         );
         entryModeIcon = Icons.edit;
-        // TODO(darrenaustin): localize 'Switch to input'
-        entryModeTooltip = 'Switch to input';
+        entryModeTooltip = localizations.inputDateModeButtonLabel;
         break;
 
       case DatePickerEntryMode.input:
@@ -442,14 +440,12 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           ),
         );
         entryModeIcon = Icons.calendar_today;
-        // TODO(darrenaustin): localize 'Switch to calendar'
-        entryModeTooltip = 'Switch to calendar';
+        entryModeTooltip = localizations.calendarModeButtonLabel;
         break;
     }
 
     final Widget header = DatePickerHeader(
-      // TODO(darrenaustin): localize 'SELECT DATE'
-      helpText: widget.helpText ?? 'SELECT DATE',
+      helpText: widget.helpText ?? localizations.datePickerHelpText,
       titleText: dateText,
       titleStyle: dateStyle,
       orientation: orientation,
