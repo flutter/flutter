@@ -1062,11 +1062,12 @@ enum Brightness {
 // Unimplemented classes.
 // TODO(flutter_web): see https://github.com/flutter/flutter/issues/33614.
 class CallbackHandle {
-  CallbackHandle.fromRawHandle(this._handle);
+  CallbackHandle.fromRawHandle(this._handle)
+    : assert(_handle != null, "'_handle' must not be null.");
 
-  final int _handle;
+  final int/*!*/ _handle;
 
-  int toRawHandle() => _handle;
+  int/*!*/ toRawHandle() => _handle;
 
   @override
   bool operator ==(Object other) => identical(this, other);
@@ -1077,11 +1078,15 @@ class CallbackHandle {
 
 // TODO(flutter_web): see https://github.com/flutter/flutter/issues/33615.
 class PluginUtilities {
-  static CallbackHandle getCallbackHandle(Function callback) {
+  // This class is only a namespace, and should not be instantiated or
+  // extended directly.
+  factory PluginUtilities._() => throw UnsupportedError('Namespace');
+
+  static CallbackHandle/*?*/ getCallbackHandle(Function callback) {
     throw UnimplementedError();
   }
 
-  static Function getCallbackFromHandle(CallbackHandle handle) {
+  static Function/*?*/ getCallbackFromHandle(CallbackHandle handle) {
     throw UnimplementedError();
   }
 }
