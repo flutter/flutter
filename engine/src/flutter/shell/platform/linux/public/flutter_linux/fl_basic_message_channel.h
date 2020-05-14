@@ -87,11 +87,12 @@ void fl_basic_message_channel_set_message_handler(
     gpointer user_data);
 
 /**
- * fl_basic_message_channel_send_response:
+ * fl_basic_message_channel_respond:
  * @channel: a #FlBasicMessageChannel
  * @response_handle: (transfer full): handle that was provided in a
  * #FlBasicMessageChannelMessageHandler
- * @response: (allow-none): response to send or %NULL for an empty response
+ * @message: (allow-none): message response to send or %NULL for an empty
+ * response
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
  * to ignore
  *
@@ -99,10 +100,10 @@ void fl_basic_message_channel_set_message_handler(
  *
  * Returns: %TRUE on success.
  */
-gboolean fl_basic_message_channel_send_response(
+gboolean fl_basic_message_channel_respond(
     FlBasicMessageChannel* channel,
     FlBasicMessageChannelResponseHandle* response_handle,
-    FlValue* response,
+    FlValue* message,
     GError** error);
 
 /**
