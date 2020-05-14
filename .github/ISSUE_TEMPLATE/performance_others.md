@@ -28,10 +28,8 @@ assignees: ''
      reproduces the problem. You could use https://gist.github.com/ for this.
 
 3.  Switch flutter to master channel and run this app on a physical device
-     using profile mode with Skia tracing enabled, as follows:
-       flutter channel master
-       flutter run --profile --trace-skia
-     Then press ‘P’ to enable the performance overlay.
+     using profile or release mode. Verify that the performance issue can be
+     reproduced there.
 
      The bleeding edge master channel is encouraged here because Flutter is
      constantly fixing bugs and improving its performance. Your problem in an
