@@ -89,6 +89,8 @@ enum AppLifecycleState {
 /// [Window.padding]. View insets and padding are preferably read via
 /// [MediaQuery.of].
 ///
+/// For the engine implementation of this class see the [engine.WindowPadding].
+///
 /// For a generic class that represents distances around a rectangle, see the
 /// [EdgeInsets] class.
 ///
@@ -99,8 +101,12 @@ enum AppLifecycleState {
 ///  * [MediaQuery.of], for the preferred mechanism for accessing these values.
 ///  * [Scaffold], which automatically applies the padding in material design
 ///    applications.
-class WindowPadding {
-  const WindowPadding._({this.left, this.top, this.right, this.bottom});
+abstract class WindowPadding {
+  const factory WindowPadding._(
+      {double left,
+      double top,
+      double right,
+      double bottom}) = engine.WindowPadding;
 
   /// The distance from the left edge to the first unpadded pixel, in physical
   /// pixels.
