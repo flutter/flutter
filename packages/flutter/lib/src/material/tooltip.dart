@@ -263,7 +263,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   /// Shows the tooltip if it is not already visible.
   ///
-  /// Returns `false` when the tooltip was already visible.
+  /// Returns `false` when the tooltip was already visible or if the context has
+  /// become null.
   bool ensureTooltipVisible() {
     _showTimer?.cancel();
     _showTimer = null;
@@ -273,6 +274,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       _hideTimer = null;
       _controller.forward();
       return false; // Already visible.
+    }
+    if (context == null) {
+      return false;
     }
     _createNewEntry();
     _controller.forward();
