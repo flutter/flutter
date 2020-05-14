@@ -62,10 +62,10 @@ class EngineWindow extends ui.Window {
     if (!override) {
       double windowInnerWidth;
       double windowInnerHeight;
-      if (html.window.visualViewport != null) {
-        windowInnerWidth = html.window.visualViewport.width * devicePixelRatio;
-        windowInnerHeight =
-            html.window.visualViewport.height * devicePixelRatio;
+      final html.VisualViewport viewport = html.window.visualViewport;
+      if (viewport != null) {
+        windowInnerWidth = viewport.width * devicePixelRatio;
+        windowInnerHeight = viewport.height * devicePixelRatio;
       } else {
         windowInnerWidth = html.window.innerWidth * devicePixelRatio;
         windowInnerHeight = html.window.innerHeight * devicePixelRatio;
@@ -76,6 +76,60 @@ class EngineWindow extends ui.Window {
       );
     }
   }
+
+  void computeOnScreenKeyboardInsets() {
+    double windowInnerHeight;
+    final html.VisualViewport viewport = html.window.visualViewport;
+    if (viewport != null) {
+      windowInnerHeight = viewport.height * devicePixelRatio;
+    } else {
+      windowInnerHeight = html.window.innerHeight * devicePixelRatio;
+    }
+    final double bottomPadding = _physicalSize.height - windowInnerHeight;
+    _viewInsets =
+        WindowPadding(bottom: bottomPadding, left: 0, right: 0, top: 0);
+  }
+
+  /// Uses the previous physical size and current innerHeight/innerWidth
+  /// values to decide if a device is rotating.
+  ///
+  /// During a rotation the height and width values will (almost) swap place.
+  /// Values can slightly differ due to space occupied by the browser header.
+  /// For example the following values are collected for Pixel 3 rotation:
+  ///
+  /// height: 658 width: 393
+  /// new height: 313 new width: 738
+  ///
+  /// The following values are from a changed caused by virtual keyboard.
+  ///
+  /// height: 658 width: 393
+  /// height: 368 width: 393
+  bool isRotation() {
+    double height = 0;
+    double width = 0;
+    if (html.window.visualViewport != null) {
+      height = html.window.visualViewport.height * devicePixelRatio;
+      width = html.window.visualViewport.width * devicePixelRatio;
+    } else {
+      height = html.window.innerHeight * devicePixelRatio;
+      width = html.window.innerWidth * devicePixelRatio;
+    }
+    // First confirm both heught and width is effected.
+    if (_physicalSize.height != height && _physicalSize.width != width) {
+      // If prior to rotation height is bigger than width it should be the
+      // opposite after the rotation and vice versa.
+      if ((_physicalSize.height > _physicalSize.width && height < width) ||
+          (_physicalSize.width > _physicalSize.height && width < height)) {
+        // Rotation detected
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  WindowPadding get viewInsets => _viewInsets;
+  WindowPadding _viewInsets = ui.WindowPadding.zero;
 
   /// Lazily populated and cleared at the end of the frame.
   ui.Size _physicalSize;
@@ -155,7 +209,9 @@ class EngineWindow extends ui.Window {
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnMetricsChanged() {
-    _invoke(_onMetricsChanged, _onMetricsChangedZone);
+    if (window._onMetricsChanged != null) {
+      _invoke(_onMetricsChanged, _onMetricsChangedZone);
+    }
   }
 
   @override
@@ -617,3 +673,18 @@ void _invoke3<A1, A2, A3>(void callback(A1 a1, A2 a2, A3 a3), Zone zone, A1 arg1
 /// API surface, providing Web-specific functionality that the standard
 /// `dart:ui` version does not.
 final EngineWindow window = EngineWindow();
+
+/// The Web implementation of [ui.WindowPadding].
+class WindowPadding implements ui.WindowPadding {
+  const WindowPadding({
+    this.left,
+    this.top,
+    this.right,
+    this.bottom,
+  });
+
+  final double left;
+  final double top;
+  final double right;
+  final double bottom;
+}
