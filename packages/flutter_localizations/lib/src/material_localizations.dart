@@ -246,6 +246,26 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     return null;
   }
 
+  /// The raw version of [dateRangeStartDateSemanticLabel], with `$formattedDate` verbatim
+  /// in the string.
+  @protected
+  String get dateRangeStartDateSemanticLabelRaw;
+
+  @override
+  String dateRangeStartDateSemanticLabel(String fullDate) {
+    return dateRangeStartDateSemanticLabelRaw.replaceFirst(r'$fullDate', fullDate);
+  }
+
+  /// The raw version of [dateRangeEndDateSemanticLabel], with `$fullDate` verbatim
+  /// in the string.
+  @protected
+  String get dateRangeEndDateSemanticLabelRaw;
+
+  @override
+  String dateRangeEndDateSemanticLabel(String fullDate) {
+    return dateRangeEndDateSemanticLabelRaw.replaceFirst(r'$fullDate', fullDate);
+  }
+
   /// The raw version of [aboutListTileTitle], with `$applicationName` verbatim
   /// in the string.
   @protected
