@@ -49,6 +49,7 @@ _public_headers = [
   "public/flutter_linux/fl_binary_messenger.h",
   "public/flutter_linux/fl_dart_project.h",
   "public/flutter_linux/fl_engine.h",
+  "public/flutter_linux/fl_json_message_codec.h",
   "public/flutter_linux/fl_message_codec.h",
   "public/flutter_linux/fl_standard_message_codec.h",
   "public/flutter_linux/fl_string_codec.h",
@@ -70,6 +71,7 @@ source_set("flutter_linux") {
     "fl_binary_messenger.cc",
     "fl_dart_project.cc",
     "fl_engine.cc",
+    "fl_json_message_codec.cc",
     "fl_message_codec.cc",
     "fl_renderer.cc",
     "fl_renderer_x11.cc",
@@ -90,6 +92,7 @@ source_set("flutter_linux") {
 
   deps = [
     "//flutter/shell/platform/embedder:embedder_with_symbol_prefix",
+    "//third_party/rapidjson",
   ]
 }
 
@@ -103,6 +106,7 @@ executable("flutter_linux_unittests") {
   sources = [
     "fl_binary_codec_test.cc",
     "fl_dart_project_test.cc",
+    "fl_json_message_codec_test.cc",
     "fl_message_codec_test.cc",
     "fl_standard_message_codec_test.cc",
     "fl_string_codec_test.cc",

@@ -1194,6 +1194,8 @@ FILE: ../../../flutter/shell/platform/linux/fl_dart_project.cc
 FILE: ../../../flutter/shell/platform/linux/fl_dart_project_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_engine.cc
 FILE: ../../../flutter/shell/platform/linux/fl_engine_private.h
+FILE: ../../../flutter/shell/platform/linux/fl_json_message_codec.cc
+FILE: ../../../flutter/shell/platform/linux/fl_json_message_codec_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_message_codec.cc
 FILE: ../../../flutter/shell/platform/linux/fl_message_codec_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_renderer.cc
@@ -1213,6 +1215,7 @@ FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_binary_codec
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_engine.h
+FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_message_codec.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_standard_message_codec.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_string_codec.h
