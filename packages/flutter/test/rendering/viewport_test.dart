@@ -1428,8 +1428,6 @@ void main() {
   group('Floating header showOnScreen', () {
     testFloatingHeaderShowOnScreen(animated: true, axis: Axis.vertical);
     testFloatingHeaderShowOnScreen(animated: true, axis: Axis.horizontal);
-    testFloatingHeaderShowOnScreen(animated: false, axis: Axis.vertical);
-    testFloatingHeaderShowOnScreen(animated: false, axis: Axis.horizontal);
   });
 
   group('unbounded constraints control test', () {

@@ -62,8 +62,10 @@ class OverScrollHeaderStretchConfiguration {
   final AsyncCallback onStretchTrigger;
 }
 
+/// {@template flutter.rendering.persistentHeader.showOnScreenConfiguration}
 /// Specifies how a pinned header or a floating header should react to
 /// [RenderObject.showOnScreen] calls.
+/// {@endtemplate}
 @immutable
 class PersistentHeaderShowOnScreenConfiguration {
   /// Creates an object that specifies how a pinned or floating persistent header
@@ -114,9 +116,9 @@ class PersistentHeaderShowOnScreenConfiguration {
   /// called, if its main axis extent is not already greater than or equal to
   /// `maxExtent`.
   ///
-  /// Defaults null. Must be less than or equal to [maxShowOnScreenExtent] if it
-  /// is also not null. Has no effect unless the persistent header is a floating
-  /// header.
+  /// Defaults to null. Must be less than or equal to [maxShowOnScreenExtent] if
+  /// it is also not null. Has no effect unless the persistent header is a
+  /// floating header.
   /// {@endtemplate}
   final double minShowOnScreenExtent;
 
@@ -133,8 +135,8 @@ class PersistentHeaderShowOnScreenConfiguration {
   /// persistent header will try not to expand when `showOnScreen` is called, if
   /// its main axis extent is not already greater than or equal to `minExtent`.
   ///
-  /// Defaults null. Must be greater than or equal to [minShowOnScreenExtent] if
-  /// it is also not null. Has no effect unless the persistent header is a
+  /// Defaults to null. Must be greater than or equal to [minShowOnScreenExtent]
+  /// if it is also not null. Has no effect unless the persistent header is a
   /// floating header.
   /// {@endtemplate}
   final double maxShowOnScreenExtent;
@@ -651,7 +653,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   ///    and snapped into view via the corresponding parameters.
   FloatingHeaderSnapConfiguration snapConfiguration;
 
-  /// Specifies the persistent header's behavior when `showOnScreen` is called.
+  /// {@macro flutter.rendering.persistentHeader.showOnScreenConfiguration}
   ///
   /// If set to null, the persistent header will delegate the `showOnScreen` call
   /// to it's parent [RenderObject].
@@ -773,11 +775,11 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
 
     assert(child != null || descendant == null);
     // We prefer the child's coordinate space (instead of the sliver's) because
-    // its easier for us to convert the target rect into target extents: when
+    // it's easier for us to convert the target rect into target extents: when
     // the sliver is sitting above the leading edge (not possible with pinned
     // headers), the leading edge of the sliver and the leading edge of the child
-    // will not be aligned.
-    // The only exception is when child is null (and thus descendant == null).
+    // will not be aligned. The only exception is when child is null (and thus
+    // descendant == null).
     final Rect childBounds = descendant != null
       ? MatrixUtils.transformRect(descendant.getTransformTo(child), rect ?? descendant.paintBounds)
       : rect;
