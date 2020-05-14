@@ -134,12 +134,6 @@ abstract class Target {
   /// A list of zero or more depfiles, located directly under {BUILD_DIR}.
   List<String> get depfiles => const <String>[];
 
-  /// Whether this target can be executed with the given [environment].
-  ///
-  /// Returning `true` will cause [build] to be skipped. This is equivalent
-  /// to a build that produces no outputs.
-  bool canSkip(Environment environment) => false;
-
   /// The action which performs this build step.
   Future<void> build(Environment environment);
 
@@ -492,8 +486,30 @@ class BuildResult {
 }
 
 /// The build system is responsible for invoking and ordering [Target]s.
-class BuildSystem {
-  const BuildSystem({
+abstract class BuildSystem {
+  /// Const constructor to allow subclasses to be const.
+  const BuildSystem();
+
+  /// Build [target] and all of its dependencies.
+  Future<BuildResult> build(
+    Target target,
+    Environment environment, {
+    BuildSystemConfig buildSystemConfig = const BuildSystemConfig(),
+  });
+
+  /// Perform an incremental build of [target] and all of its dependencies.
+  ///
+  /// If [previousBuild] is not provided, a new incremental build is
+  /// initialized.
+  Future<BuildResult> buildIncremental(
+    Target target,
+    Environment environment,
+    BuildResult previousBuild,
+  );
+}
+
+class FlutterBuildSystem extends BuildSystem {
+  const FlutterBuildSystem({
     @required FileSystem fileSystem,
     @required Platform platform,
     @required Logger logger,
@@ -505,7 +521,7 @@ class BuildSystem {
   final Platform _platform;
   final Logger _logger;
 
-  /// Build `target` and all of its dependencies.
+  @override
   Future<BuildResult> build(
     Target target,
     Environment environment, {
@@ -578,10 +594,7 @@ class BuildSystem {
 
   static final Expando<FileStore> _incrementalFileStore = Expando<FileStore>();
 
-  /// Perform an incremental build of `target` and all of its dependencies.
-  ///
-  /// If [previousBuild] is not provided, a new incremental build is
-  /// initialized.
+  @override
   Future<BuildResult> buildIncremental(
     Target target,
     Environment environment,
@@ -637,7 +650,7 @@ class BuildSystem {
   /// cleanup is only necessary when multiple different build configurations
   /// output to the same directory.
   @visibleForTesting
-  static void trackSharedBuildDirectory(
+  void trackSharedBuildDirectory(
     Environment environment,
     FileSystem fileSystem,
     Map<String, File> currentOutputs,
@@ -760,26 +773,18 @@ class _BuildInstance {
         updateGraph();
         return succeeded;
       }
-      // Clear old inputs. These will be replaced with new inputs/outputs
-      // after the target is run. In the case of a runtime skip, each list
-      // must be empty to ensure the previous outputs are purged.
-      node.inputs.clear();
-      node.outputs.clear();
+      logger.printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
+      await node.target.build(environment);
+      logger.printTrace('${node.target.name}: Complete');
 
-      // Check if we can skip via runtime dependencies.
-      final bool runtimeSkip = node.target.canSkip(environment);
-      if (runtimeSkip) {
-        logger.printTrace('Skipping target: ${node.target.name}');
-        skipped = true;
-      } else {
-        logger.printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
-        await node.target.build(environment);
-        logger.printTrace('${node.target.name}: Complete');
-        node.inputs.addAll(node.target.resolveInputs(environment).sources);
-        node.outputs.addAll(node.target.resolveOutputs(environment).sources);
-      }
+      node.inputs
+        ..clear()
+        ..addAll(node.target.resolveInputs(environment).sources);
+      node.outputs
+        ..clear()
+        ..addAll(node.target.resolveOutputs(environment).sources);
 
-      // If we were missing the depfile, resolve input files after executing the
+      // If we were missing the depfile, resolve  input files after executing the
       // target so that all file hashes are up to date on the next run.
       if (node.missingDepfile) {
         await fileCache.diffFileList(node.inputs);

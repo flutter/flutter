@@ -7,16 +7,13 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:meta/meta.dart';
 
 import '../test_utils.dart';
 import 'project.dart';
 
 class GenL10nProject extends Project {
   @override
-  Future<void> setUpIn(Directory dir, {
-    bool useDeferredLoading = false,
-  }) {
+  Future<void> setUpIn(Directory dir) {
     this.dir = dir;
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), appEn);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_CA.arb'), appEnCa);
@@ -27,7 +24,6 @@ class GenL10nProject extends Project {
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant.arb'), appZhHant);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hans.arb'), appZhHans);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant_TW.arb'), appZhHantTw);
-    writeFile(globals.fs.path.join(dir.path, 'l10n.yaml'), l10nYaml(useDeferredLoading: useDeferredLoading));
     return super.setUpIn(dir);
   }
 
@@ -565,15 +561,4 @@ void main() {
   "helloWorld": "台灣繁體你好世界"
 }
 ''';
-
-  String l10nYaml({
-    @required bool useDeferredLoading,
-  }) {
-    if (useDeferredLoading) {
-      return r'''
-use-deferred-loading: false
-      ''';
-    }
-    return '';
-  }
 }

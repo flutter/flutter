@@ -54,9 +54,10 @@ class MockApplicationPackageFactory extends Mock implements ApplicationPackageFa
   @override
   Future<ApplicationPackage> getPackageForPlatform(
     TargetPlatform platform, {
+    BuildInfo buildInfo,
     File applicationBinary,
   }) async {
-    return _store.getPackageForPlatform(platform);
+    return _store.getPackageForPlatform(platform, buildInfo);
   }
 }
 
@@ -531,10 +532,10 @@ class MockIosProject extends Mock implements IosProject {
   static const String appBundleName = 'My Super Awesome App.app';
 
   @override
-  Future<String> get productBundleIdentifier async => bundleId;
+  Future<String> productBundleIdentifier(BuildInfo buildInfo) async => bundleId;
 
   @override
-  Future<String> get hostAppBundleName async => appBundleName;
+  Future<String> hostAppBundleName(BuildInfo buildInfo) async => appBundleName;
 }
 
 class MockAndroidDevice extends Mock implements AndroidDevice {
