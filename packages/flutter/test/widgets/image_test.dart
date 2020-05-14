@@ -1610,6 +1610,25 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('errorBuilder is not called if disposed', (WidgetTester tester) async {
+    final TestImageProvider imageProvider = TestImageProvider();
+
+    await tester.pumpWidget(Image(
+      image: imageProvider,
+      errorBuilder: (BuildContext context, Object error, StackTrace stackTrace) {
+        assert(false);
+        return null;
+      },
+    ));
+
+    await tester.pumpWidget(const SizedBox()); // Remove Image from tree
+
+    imageProvider.fail('failed', null);
+
+    await tester.idle(); // Resolve the failed future
+    await tester.pump(null, EnginePhase.layout);
+  });
+
   testWidgets('no errorBuilder - failure reported to FlutterError', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Image(
