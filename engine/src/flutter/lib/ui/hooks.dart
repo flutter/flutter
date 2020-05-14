@@ -7,16 +7,6 @@
 // @dart = 2.6
 part of dart.ui;
 
-// ignore: unused_element
-String _decodeUTF8(ByteData message) {
-  return message != null ? utf8.decoder.convert(message.buffer.asUint8List()) : null;
-}
-
-// ignore: unused_element
-dynamic _decodeJSON(String message) {
-  return message != null ? json.decode(message) : null;
-}
-
 @pragma('vm:entry-point')
 // ignore: unused_element
 void _updateWindowMetrics(
