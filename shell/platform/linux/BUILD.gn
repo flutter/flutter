@@ -44,6 +44,7 @@ if (build_glfw_shell) {
 }
 
 _public_headers = [
+  "public/flutter_linux/fl_basic_message_channel.h",
   "public/flutter_linux/fl_binary_codec.h",
   "public/flutter_linux/fl_binary_messenger.h",
   "public/flutter_linux/fl_dart_project.h",
@@ -64,6 +65,7 @@ source_set("flutter_linux") {
   public = _public_headers
 
   sources = [
+    "fl_basic_message_channel.cc",
     "fl_binary_codec.cc",
     "fl_binary_messenger.cc",
     "fl_dart_project.cc",
