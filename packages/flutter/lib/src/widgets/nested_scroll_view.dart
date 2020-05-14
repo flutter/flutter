@@ -194,11 +194,11 @@ class NestedScrollView extends StatefulWidget {
     @required this.body,
     this.dragStartBehavior = DragStartBehavior.start,
     this.floatOuterSlivers = false,
-    this.stretchOuterSlivers = false,
   }) : assert(scrollDirection != null),
        assert(reverse != null),
        assert(headerSliverBuilder != null),
        assert(body != null),
+       assert(floatOuterSlivers != null),
        super(key: key);
 
   /// An object that can be used to control the position to which the outer
@@ -268,13 +268,6 @@ class NestedScrollView extends StatefulWidget {
   /// This is useful for an outer scrollable containing a [SliverAppBar] that
   /// is expected to float. This cannot be null.
   final bool floatOuterSlivers;
-
-  /// Whether or not the [NestedScrollView]'s coordinator should prioritize the
-  /// outer scrollable over the inner when overscrolling.
-  ///
-  /// This is useful for an outer scrollable containing a [SliverAppBar] that
-  /// is expected to stretch. This cannot be null.
-  final bool stretchOuterSlivers;
 
   /// Returns the [SliverOverlapAbsorberHandle] of the nearest ancestor
   /// [NestedScrollView].
@@ -393,7 +386,6 @@ class NestedScrollViewState extends State<NestedScrollView> {
       this, widget.controller,
       _handleHasScrolledBodyChanged,
       widget.floatOuterSlivers,
-      widget.stretchOuterSlivers,
     );
   }
 
@@ -570,7 +562,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     this._parent,
     this._onHasScrolledBodyChanged,
     this._floatOuterSlivers,
-    this._stretchOuterSlivers,
   ) {
     final double initialScrollOffset = _parent?.initialScrollOffset ?? 0.0;
     _outerController = _NestedScrollController(
@@ -589,7 +580,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   ScrollController _parent;
   final VoidCallback _onHasScrolledBodyChanged;
   final bool _floatOuterSlivers;
-  final bool _stretchOuterSlivers;
 
   _NestedScrollController _outerController;
   _NestedScrollController _innerController;
@@ -979,7 +969,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         if (outerDelta != 0.0)
           outerDelta -= _outerPosition.applyClampedDragUpdate(outerDelta);
         // Now deal with any overscroll
-        // TODO(Piinks): Defer overscroll to stretched app bars
         for (int i = 0; i < innerPositions.length; ++i) {
           final double remainingDelta = overscrolls[i] - outerDelta;
           if (remainingDelta > 0.0)
