@@ -19,18 +19,7 @@ REM Include shared scripts in shared.bat
 SET shared_bin=%FLUTTER_ROOT%/bin/internal/shared.bat
 CALL "%shared_bin%"
 
-SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
-SET cache_dir=%FLUTTER_ROOT%\bin\cache
-SET snapshot_path=%cache_dir%\flutter_tools.snapshot
-SET stamp_path=%cache_dir%\flutter_tools.stamp
-SET script_path=%flutter_tools_dir%\bin\flutter_tools.dart
-SET dart_sdk_path=%cache_dir%\dart-sdk
-SET engine_stamp=%cache_dir%\engine-dart-sdk.stamp
-SET engine_version_path=%FLUTTER_ROOT%\bin\internal\engine.version
-SET pub_cache_path=%FLUTTER_ROOT%\.pub-cache
-
 SET dart=%dart_sdk_path%\bin\dart.exe
-SET pub=%dart_sdk_path%\bin\pub.bat
 
 REM Chaining the call to 'dart' and 'exit' with an ampersand ensures that
 REM Windows reads both commands into memory once before executing them. This

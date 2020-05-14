@@ -370,6 +370,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
     firstBuildTime = DateTime.now();
     final ApplicationPackage package = await ApplicationPackageFactory.instance.getPackageForPlatform(
       TargetPlatform.web_javascript,
+      buildInfo: debuggingOptions.buildInfo,
       applicationBinary: null,
     );
     if (package == null) {
@@ -486,7 +487,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
     );
 
     if (debuggingOptions.buildInfo.isDebug) {
-      await runSourceGenerators();
       // Full restart is always false for web, since the extra recompile is wasteful.
       final UpdateFSReport report = await _updateDevFS(fullRestart: false);
       if (report.success) {
@@ -524,8 +524,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
         });
       }
     } on Exception catch (err) {
-      return OperationResult(1, err.toString(), fatal: true);
-    } on WipError catch (err) {
       return OperationResult(1, err.toString(), fatal: true);
     } finally {
       status.stop();

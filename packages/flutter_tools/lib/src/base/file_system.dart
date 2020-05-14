@@ -3,13 +3,19 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
+import 'package:file/local.dart' as local_fs;
 import 'package:meta/meta.dart';
 
 import 'common.dart' show throwToolExit;
+import 'io.dart';
 import 'platform.dart';
+import 'process.dart';
+import 'signals.dart';
 
+// package:file/local.dart must not be exported. This exposes LocalFileSystem,
+// which we override to ensure that temporary directories are cleaned up when
+// the tool is killed by a signal.
 export 'package:file/file.dart';
-export 'package:file/local.dart';
 
 /// Exception indicating that a file that was expected to exist was not found.
 class FileNotFoundException implements IOException {
@@ -136,11 +142,94 @@ class FileSystemUtils {
   /// Return the absolute path of the user's home directory
   String get homeDirPath {
     String path = _platform.isWindows
-        ? _platform.environment['USERPROFILE']
-        : _platform.environment['HOME'];
+      ? _platform.environment['USERPROFILE']
+      : _platform.environment['HOME'];
     if (path != null) {
       path = _fileSystem.path.absolute(path);
     }
     return path;
+  }
+}
+
+/// This class extends [local_fs.LocalFileSystem] in order to clean up
+/// directories and files that the tool creates under the system temporary
+/// directory when the tool exits either normally or when killed by a signal.
+class LocalFileSystem extends local_fs.LocalFileSystem {
+  LocalFileSystem._(Signals signals, List<ProcessSignal> fatalSignals) :
+    _signals = signals, _fatalSignals = fatalSignals;
+
+  @visibleForTesting
+  LocalFileSystem.test({
+    @required Signals signals,
+    List<ProcessSignal> fatalSignals = Signals.defaultExitSignals,
+  }) : this._(signals, fatalSignals);
+
+  // Unless we're in a test of this class's signal hanlding features, we must
+  // have only one instance created with the singleton LocalSignals instance
+  // and the catchable signals it considers to be fatal.
+  static LocalFileSystem _instance;
+  static LocalFileSystem get instance => _instance ??= LocalFileSystem._(
+    LocalSignals.instance,
+    Signals.defaultExitSignals,
+  );
+
+  Directory _systemTemp;
+  final Map<ProcessSignal, Object> _signalTokens = <ProcessSignal, Object>{};
+
+  @visibleForTesting
+  static Future<void> dispose() => LocalFileSystem.instance?._dispose();
+
+  Future<void> _dispose() async {
+    _tryToDeleteTemp();
+    for (final MapEntry<ProcessSignal, Object> signalToken in _signalTokens.entries) {
+      await _signals.removeHandler(signalToken.key, signalToken.value);
+    }
+    _signalTokens.clear();
+  }
+
+  final Signals _signals;
+  final List<ProcessSignal> _fatalSignals;
+
+  void _tryToDeleteTemp() {
+    try {
+      if (_systemTemp?.existsSync() ?? false) {
+        _systemTemp.deleteSync(recursive: true);
+      }
+    } on FileSystemException {
+      // ignore.
+    }
+    _systemTemp = null;
+  }
+
+  // This getter returns a fresh entry under /tmp, like
+  // /tmp/flutter_tools.abcxyz, then the rest of the tool creates /tmp entries
+  // under that, like /tmp/flutter_tools.abcxyz/flutter_build_stuff.123456.
+  // Right before exiting because of a signal or otherwise, we delete
+  // /tmp/flutter_tools.abcxyz, not the whole of /tmp.
+  @override
+  Directory get systemTempDirectory {
+    if (_systemTemp == null) {
+      _systemTemp = super.systemTempDirectory.createTempSync(
+        'flutter_tools.',
+      )..createSync(recursive: true);
+      // Make sure that the temporary directory is cleaned up if the tool is
+      // killed by a signal.
+      for (final ProcessSignal signal in _fatalSignals) {
+        final Object token = _signals.addHandler(
+          signal,
+          (ProcessSignal _) {
+            _tryToDeleteTemp();
+          },
+        );
+        _signalTokens[signal] = token;
+      }
+      // Make sure that the temporary directory is cleaned up when the tool
+      // exits normally.
+      shutdownHooks?.addShutdownHook(
+        _tryToDeleteTemp,
+        ShutdownStage.CLEANUP,
+      );
+    }
+    return _systemTemp;
   }
 }

@@ -54,9 +54,10 @@ class MockApplicationPackageFactory extends Mock implements ApplicationPackageFa
   @override
   Future<ApplicationPackage> getPackageForPlatform(
     TargetPlatform platform, {
+    BuildInfo buildInfo,
     File applicationBinary,
   }) async {
-    return _store.getPackageForPlatform(platform);
+    return _store.getPackageForPlatform(platform, buildInfo);
   }
 }
 
@@ -481,8 +482,8 @@ class MockStdio extends Stdio {
   List<String> get writtenToStderr => _stderr.writes.map<String>(_stderr.encoding.decode).toList();
 }
 
-class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
-  MockPollingDeviceDiscovery() : super('mock');
+class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
+  FakePollingDeviceDiscovery() : super('mock');
 
   final List<Device> _devices = <Device>[];
   final StreamController<Device> _onAddedController = StreamController<Device>.broadcast();
@@ -531,10 +532,10 @@ class MockIosProject extends Mock implements IosProject {
   static const String appBundleName = 'My Super Awesome App.app';
 
   @override
-  Future<String> get productBundleIdentifier async => bundleId;
+  Future<String> productBundleIdentifier(BuildInfo buildInfo) async => bundleId;
 
   @override
-  Future<String> get hostAppBundleName async => appBundleName;
+  Future<String> hostAppBundleName(BuildInfo buildInfo) async => appBundleName;
 }
 
 class MockAndroidDevice extends Mock implements AndroidDevice {
