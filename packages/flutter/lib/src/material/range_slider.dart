@@ -33,30 +33,30 @@ typedef PaintRangeValueIndicator = void Function(PaintingContext context, Offset
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
 ///
-/// This is what it looks like when run:
-///
 /// ![A range slider widget, consisting of 5 divisions and showing the default
 /// value indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/range_slider.png)
 ///
-/// This sample shows creation of a [RangeSlider] widget with 5 divisions.
+/// This range values are in intervals of 20 because the Range Slider has 5
+/// divisions, from 0 to 100. This means are values are split between 0, 20, 40,
+/// 60, 80, and 100. The range values are initialized with 40 and 80 in this demo.
 ///
 /// ```dart
-/// RangeValues _values = const RangeValues(40, 80);
+/// RangeValues _currentRangeValues = const RangeValues(40, 80);
 ///
 /// @override
 /// Widget build(BuildContext context) {
 ///   return RangeSlider(
-///     values: _values,
+///     values: _currentRangeValues,
 ///     min: 0,
 ///     max: 100,
 ///     divisions: 5,
 ///     labels: RangeLabels(
-///       _values.start.round().toString(),
-///       _values.end.round().toString(),
+///       _currentRangeValues.start.round().toString(),
+///       _currentRangeValues.end.round().toString(),
 ///     ),
-///     onChanged: (values) {
+///     onChanged: (RangeValues values) {
 ///       setState(() {
-///         _values = values;
+///         _currentRangeValues = values;
 ///       });
 ///     },
 ///   );

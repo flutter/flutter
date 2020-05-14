@@ -46,27 +46,26 @@ enum _SliderType { material, adaptive }
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
 ///
-/// This is what it looks like when run:
-///
 /// ![A slider widget, consisting of 5 divisions and showing the default value
 /// indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/slider.png)
 ///
-/// This sample shows creation of a [Slider] widget with 5 divisions.
+/// The Sliders value is part of the Stateful widget subclass to change the value
+/// setState was called.
 ///
 /// ```dart
-/// double _sliderDiscreteValue = 20;
+/// double _currentSliderValue = 20;
 ///
 /// @override
 /// Widget build(BuildContext context) {
 ///   return Slider(
-///     value: _sliderDiscreteValue,
+///     value: _currentSliderValue,
 ///     min: 0,
 ///     max: 100,
 ///     divisions: 5,
 ///     label: _sliderDiscreteValue.round().toString(),
-///     onChanged: (value) {
+///     onChanged: (double value) {
 ///       setState(() {
-///         _sliderDiscreteValue = value;
+///         _currentSliderValue = value;
 ///       });
 ///     },
 ///   );

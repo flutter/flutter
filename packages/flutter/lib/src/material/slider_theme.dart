@@ -1556,8 +1556,6 @@ abstract class BaseSliderTrackShape {
 ///
 /// {@macro flutter.material.slider.trackSegment}
 ///
-/// This is what it looks like when run:
-///
 /// ![A slider widget, consisting of 5 divisions and showing the rectangular slider track shape.]
 /// (https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_slider_track_shape.png)
 ///
@@ -1665,8 +1663,6 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 ///   [SliderThemeData.disabledInactiveTrackColor].
 ///
 /// {@macro flutter.material.slider.trackSegment}
-///
-/// This is what it looks like when run:
 ///
 /// ![A slider widget, consisting of 5 divisions and showing the rounded rect slider track shape.]
 /// (https://flutter.github.io/assets-for-api-docs/assets/material/rounded_rect_slider_track_shape.png)
@@ -1782,8 +1778,6 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 ///   [SliderThemeData.disabledInactiveTrackColor].
 ///
 /// {@macro flutter.material.rangeSlider.trackSegment}
-///
-/// This is what it looks like when run:
 ///
 /// ![A range slider widget, consisting of 5 divisions and showing the rectangular range slider track shape.]
 /// (https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_range_slider_track_shape.png)
@@ -1914,8 +1908,6 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
 ///   [SliderThemeData.disabledInactiveTrackColor].
 ///
 /// {@macro flutter.material.rangeSlider.trackSegment}
-///
-/// This is what it looks like when run:
 ///
 /// ![A range slider widget, consisting of 5 divisions and showing the rounded rect range slider track shape.]
 /// (https://flutter.github.io/assets-for-api-docs/assets/material/rounded_rect_range_slider_track_shape.png)
@@ -2082,8 +2074,6 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
 ///   [SliderThemeData.disabledActiveTrackColor],
 ///   [SliderThemeData.disabledInactiveTrackColor].
 ///
-/// This is what it looks like when run:
-///
 /// ![A slider widget, consisting of 5 divisions and showing the round slider slider tick mark shape.]
 /// (https://flutter.github.io/assets-for-api-docs/assets/material/rounded_slider_tick_mark_shape.png)
 ///
@@ -2181,8 +2171,6 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
 ///   [SliderThemeData.inactiveTrackColor],
 ///   [SliderThemeData.disabledActiveTrackColor],
 ///   [SliderThemeData.disabledInactiveTrackColor].
-///
-/// This is what it looks like when run:
 ///
 /// ![A slider widget, consisting of 5 divisions and showing the round range slider tick mark shape.]
 /// (https://flutter.github.io/assets-for-api-docs/assets/material/round_range_slider_tick_mark_shape.png )
@@ -2331,8 +2319,6 @@ class _EmptySliderComponentShape extends SliderComponentShape {
 ///
 /// There is a shadow for the resting, pressed, hovered, and focused state.
 ///
-/// This is what it looks like when run:
-///
 /// ![A slider widget, consisting of 5 divisions and showing the round slider thumb shape.]
 /// (https://flutter.github.io/assets-for-api-docs/assets/material/round_slider_thumb_shape.png)
 ///
@@ -2441,8 +2427,6 @@ class RoundSliderThumbShape extends SliderComponentShape {
 /// The default shape of a [RangeSlider]'s thumbs.
 ///
 /// There is a shadow for the resting and pressed state.
-///
-/// This is what it looks like when run:
 ///
 /// ![A slider widget, consisting of 5 divisions and showing the round range slider thumb shape.]
 /// (https://flutter.github.io/assets-for-api-docs/assets/material/round_range_slider_thumb_shape.png)
@@ -2638,8 +2622,6 @@ class RoundSliderOverlayShape extends SliderComponentShape {
 
 /// The default shape of a [Slider]'s value indicator.
 ///
-/// This is what it looks like when run:
-///
 /// ![A slider widget, consisting of 5 divisions and showing the rectangular slider value indicator shape.]
 /// (https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_slider_value_indicator_shape.png)
 ///
@@ -2696,8 +2678,6 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
 }
 
 /// The default shape of a [RangeSlider]'s value indicators.
-///
-/// This is what it looks like when run:
 ///
 /// ![A slider widget, consisting of 5 divisions and showing the rectangular range slider value indicator shape.]
 /// (https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_range_slider_value_indicator_shape.png)
@@ -2906,8 +2886,6 @@ class _RectangularSliderValueIndicatorPathPainter {
 /// A variant shape of a [Slider]'s value indicator . The value indicator is in
 /// the shape of an upside-down pear.
 ///
-/// This is what it looks like when run:
-///
 /// ![A slider widget, consisting of 5 divisions and showing the paddle slider value indicator shape.]
 /// (https://flutter.github.io/assets-for-api-docs/assets/material/paddle_slider_value_indicator_shape.png)
 ///
@@ -2972,8 +2950,6 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
 
 /// A variant shape of a [RangeSlider]'s value indicators. The value indicator
 /// is in the shape of an upside-down pear.
-///
-/// This is what it looks like when run:
 ///
 /// ![A slider widget, consisting of 5 divisions and showing the paddle range slider value indicator shape.]
 /// (https://flutter.github.io/assets-for-api-docs/assets/material/paddle_range_slider_value_indicator_shape.png)
