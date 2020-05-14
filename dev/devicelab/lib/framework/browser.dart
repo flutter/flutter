@@ -105,7 +105,6 @@ class Chrome {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
-      '--enable-features=NetworkService',
     ];
     final io.Process chromeProcess = await io.Process.start(
       _findSystemChromeExecutable(),
@@ -239,7 +238,7 @@ String _findSystemChromeExecutable() {
     }, orElse: () => '.');
     return path.join(windowsPrefix, kWindowsExecutable);
   } else {
-       throw Exception('Web benchmarks cannot run on ${io.Platform.operatingSystem}.');
+    throw Exception('Web benchmarks cannot run on ${io.Platform.operatingSystem}.');
   }
 }
 
