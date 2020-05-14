@@ -44,18 +44,16 @@ mixin MouseTrackerCursorMixin on BaseMouseTracker {
 
   final Map<int, MouseCursorSession> _lastSession = <int, MouseCursorSession>{};
 
-  // Find the mouse cursor, which fallbacks to SystemMouseCursors.basic.
+  // Find the first non-deferred mouse cursor, which fallbacks to
+  // [SystemMouseCursors.basic].
   //
   // The `annotations` is the current annotations that the device is hovering in
   // visual order from front the back.
   // The return value is never null.
   MouseCursor _findFirstCursor(LinkedHashSet<MouseTrackerAnnotation> annotations) {
-    for (final MouseTrackerAnnotation annotation in annotations) {
-      if (annotation.cursor != null) {
-        return annotation.cursor;
-      }
-    }
-    return SystemMouseCursors.basic;
+    return _DeferringMouseCursor.firstNonDeferred(
+      annotations.map((MouseTrackerAnnotation annotation) => annotation.cursor),
+    ) ?? SystemMouseCursors.basic;
   }
 
   // Handles device update and changes mouse cursors.
@@ -219,20 +217,67 @@ abstract class MouseCursor with Diagnosticable {
 
   /// A very short description of the mouse cursor.
   ///
-  /// The [debugDescription] shoule be a few words that can differentiate
-  /// instances of a class to make debug information more readable. For example,
-  /// a [SystemMouseCursor] class with description "drag" will be printed as
-  /// "SystemMouseCursor(drag)".
+  /// The [debugDescription] shoule be a few words that can describe this cursor
+  /// to make debug information more readable. It is returned as the [toString]
+  /// when the diagnostic level is at or above [DiagnosticLevel.info].
   ///
-  /// The [debugDescription] must not be null, but can be an empty string.
+  /// The [debugDescription] must not be null or empty string.
   String get debugDescription;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     final String debugDescription = this.debugDescription;
     if (minLevel.index >= DiagnosticLevel.info.index && debugDescription != null)
-      return '$runtimeType($debugDescription)';
+      return debugDescription;
     return super.toString(minLevel: minLevel);
+  }
+
+  /// A special class that indicates that the region with this cursor defers the
+  /// choice of cursor to the next region behind it.
+  ///
+  /// When an event occurs, [MouseTracker] will update each pointer's cursor by
+  /// finding the list of regions that contain the pointer's location, from front
+  /// to back in hit-test order. The pointer's cursor will be the first cursor in
+  /// the list that is not a [MouseCursor.defer].
+  static const MouseCursor defer = _DeferringMouseCursor._();
+
+  /// A special value that doesn't change cursor by itself, but make a region
+  /// that blocks other regions behind it from changing the cursor.
+  ///
+  /// When a pointer enters a region with a cursor of [uncontrolled], the pointer
+  /// retains its previous cursor and keeps so until it moves out of the region.
+  /// Technically, this region absorb the mouse cursor hit test without changing
+  /// the pointer's cursor.
+  ///
+  /// This is useful in a region that displays a platform view, which let the
+  /// operating system handle pointer events and change cursors accordingly. To
+  /// achieve this, the region's cursor must not be any Flutter cursor, since
+  /// that might overwrite the system request upon pointer entering; the cursor
+  /// must not be null either, since that allows the widgets behind the region to
+  /// change cursors.
+  static const MouseCursor uncontrolled = _NoopMouseCursor._();
+}
+
+class _DeferringMouseCursor extends MouseCursor {
+  const _DeferringMouseCursor._();
+
+  @override
+  MouseCursorSession createSession(int device) {
+    assert(false, '_DeferringMouseCursor can not create a session');
+    throw UnimplementedError();
+  }
+
+  @override
+  String get debugDescription => 'defer';
+
+  /// Returns the first cursor that is not a [MouseCursor.defer].
+  static MouseCursor firstNonDeferred(Iterable<MouseCursor> cursors) {
+    for (final MouseCursor cursor in cursors) {
+      assert(cursor != null);
+      if (cursor != MouseCursor.defer)
+        return cursor;
+    }
+    return null;
   }
 }
 
@@ -252,9 +297,9 @@ class _NoopMouseCursorSession extends MouseCursorSession {
 /// Although setting a region's cursor to [NoopMouseCursor] doesn't change the
 /// cursor, it blocks regions behind it from changing the cursor, in contrast to
 /// setting the cursor to null. More information about the usage of this class
-/// can be found at [SystemMouseCursors.uncontrolled].
+/// can be found at [MouseCursors.uncontrolled].
 ///
-/// To use this class, use [SystemMouseCursors.uncontrolled]. Directly
+/// To use this class, use [MouseCursors.uncontrolled]. Directly
 /// instantiating this class is not allowed.
 class _NoopMouseCursor extends MouseCursor {
   // Application code shouldn't directly instantiate this class, since its only
@@ -265,9 +310,8 @@ class _NoopMouseCursor extends MouseCursor {
   @protected
   _NoopMouseCursorSession createSession(int device) => _NoopMouseCursorSession(this, device);
 
-  // The [debugDescription] is '' so that its toString() returns 'NoopMouseCursor()'.
   @override
-  String get debugDescription => '';
+  String get debugDescription => 'uncontrolled';
 }
 
 class _SystemMouseCursorSession extends MouseCursorSession {
@@ -322,7 +366,7 @@ class SystemMouseCursor extends MouseCursor {
   final String kind;
 
   @override
-  String get debugDescription => kind;
+  String get debugDescription => '$runtimeType($kind)';
 
   @override
   @protected
@@ -363,22 +407,6 @@ class SystemMouseCursors {
   // This class only contains static members, and should not be instantiated or
   // extended.
   factory SystemMouseCursors._() => null;
-
-  /// A special value that doesn't change cursor by itself, but make a region
-  /// that blocks other regions behind it from changing the cursor.
-  ///
-  /// When a pointer enters a region with a cursor of [uncontrolled], the pointer
-  /// retains its previous cursor and keeps so until it moves out of the region.
-  /// Technically, this region absorb the mouse cursor hit test without changing
-  /// the pointer's cursor.
-  ///
-  /// This is useful in a region that displays a platform view, which let the
-  /// operating system handle pointer events and change cursors accordingly. To
-  /// achieve this, the region's cursor must not be any Flutter cursor, since
-  /// that might overwrite the system request upon pointer entering; the cursor
-  /// must not be null either, since that allows the widgets behind the region to
-  /// change cursors.
-  static const MouseCursor uncontrolled = _NoopMouseCursor._();
 
   /// Hide the cursor.
   ///

@@ -795,7 +795,7 @@ mixin _PlatformViewGestureMixin on RenderBox {
         if (_handlePointerEvent != null)
           _handlePointerEvent(event);
       },
-      cursor: SystemMouseCursors.uncontrolled,
+      cursor: MouseCursor.uncontrolled,
     );
   }
   MouseTrackerAnnotation _cachedHoverAnnotation;

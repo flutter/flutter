@@ -365,12 +365,9 @@ class InkResponse extends StatelessWidget {
   /// {@template flutter.material.inkwell.mousecursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// region.
-  ///
-  /// If the [mouseCursor] is null, then the hovering pointer's cursor will be
-  /// decided by the widget behind it on the screen in hit-test order.
   /// {@endtemplate}
   ///
-  /// Defaults to null.
+  /// If the property is null, [SystemMouseCursor.click] is used.
   final MouseCursor mouseCursor;
 
   /// Whether this ink response should be clipped its bounds.
@@ -555,7 +552,7 @@ class InkResponse extends StatelessWidget {
       onLongPress: onLongPress,
       onHighlightChanged: onHighlightChanged,
       onHover: onHover,
-      mouseCursor: mouseCursor,
+      mouseCursor: mouseCursor ?? SystemMouseCursors.click,
       containedInkWell: containedInkWell,
       highlightShape: highlightShape,
       radius: radius,
