@@ -62,7 +62,7 @@ enum _SliderType { material, adaptive }
 ///     min: 0,
 ///     max: 100,
 ///     divisions: 5,
-///     label: _sliderDiscreteValue.round().toString(),
+///     label: _currentSliderValue.round().toString(),
 ///     onChanged: (double value) {
 ///       setState(() {
 ///         _currentSliderValue = value;
