@@ -21,7 +21,7 @@ import 'dart.dart';
 const String kIconTreeShakerFlag = 'TreeShakeIcons';
 
 /// Whether icon font subsetting is enabled by default.
-const bool kIconTreeShakerEnabledDefault = false;
+const bool kIconTreeShakerEnabledDefault = true;
 
 List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
   try {
@@ -127,7 +127,7 @@ class IconTreeShaker {
     );
 
     if (fonts.length != iconData.length) {
-      throwToolExit(
+      environment.logger.printStatus(
         'Expected to find fonts for ${iconData.keys}, but found '
         '${fonts.keys}. This usually means you are refering to '
         'font families in an IconData class but not including them '

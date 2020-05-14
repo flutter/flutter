@@ -8,14 +8,10 @@ import 'package:flutter/widgets.dart';
 import '../input_border.dart';
 import '../input_decorator.dart';
 import '../material_localizations.dart';
-import '../text_field.dart';
 import '../text_form_field.dart';
 
 import 'date_picker_common.dart';
 import 'date_utils.dart' as utils;
-
-const double _inputPortraitHeight = 98.0;
-const double _inputLandscapeHeight = 108.0;
 
 /// A [TextFormField] configured to accept and validate a date entered by the user.
 ///
@@ -227,54 +223,60 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     return OrientationBuilder(builder: (BuildContext context, Orientation orientation) {
       assert(orientation != null);
 
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        height: orientation == Orientation.portrait ? _inputPortraitHeight : _inputLandscapeHeight,
-        child: Column(
-          children: <Widget>[
-            const Spacer(),
-            TextFormField(
-              decoration: InputDecoration(
-                border: const UnderlineInputBorder(),
-                filled: true,
-                // TODO(darrenaustin): localize 'mm/dd/yyyy' and 'Enter Date'
-                hintText: widget.fieldHintText ?? 'mm/dd/yyyy',
-                labelText: widget.fieldLabelText ?? 'Enter Date',
-              ),
-              validator: _validateDate,
-              inputFormatters: <TextInputFormatter>[
-                // TODO(darrenaustin): localize date separator '/'
-                _DateTextInputFormatter('/'),
-              ],
-              keyboardType: TextInputType.datetime,
-              onSaved: _handleSaved,
-              onFieldSubmitted: _handleSubmitted,
-              autofocus: widget.autofocus,
-              controller: _controller,
-            ),
-            const Spacer(),
-          ],
+      return TextFormField(
+        decoration: InputDecoration(
+          border: const UnderlineInputBorder(),
+          filled: true,
+          // TODO(darrenaustin): localize 'mm/dd/yyyy' and 'Enter Date'
+          hintText: widget.fieldHintText ?? 'mm/dd/yyyy',
+          labelText: widget.fieldLabelText ?? 'Enter Date',
         ),
+        validator: _validateDate,
+        inputFormatters: <TextInputFormatter>[
+          // TODO(darrenaustin): localize date separator '/'
+          DateTextInputFormatter('/'),
+        ],
+        keyboardType: TextInputType.datetime,
+        onSaved: _handleSaved,
+        onFieldSubmitted: _handleSubmitted,
+        autofocus: widget.autofocus,
+        controller: _controller,
       );
     });
   }
 }
 
-class _DateTextInputFormatter extends TextInputFormatter {
+/// A `TextInputFormatter` set up to format dates.
+///
+/// Note: this is not publicly exported (see pickers.dart), as it is
+/// just meant for internal use by `InputDatePickerFormField` and
+/// `InputDateRangePicker`.
+class DateTextInputFormatter extends TextInputFormatter {
 
-  _DateTextInputFormatter(this.separator);
+  /// Creates a date formatter with the given separator.
+  DateTextInputFormatter(
+    this.separator
+  ) : _filterFormatter = WhitelistingTextInputFormatter(RegExp('[\\d$_commonSeparators\\$separator]+'));
 
+  /// List of common separators that are used in dates. This is used to make
+  /// sure that if given platform's [TextInputType.datetime] keyboard doesn't
+  /// provide the given locale's separator character, they can still enter the
+  /// separator using one of these characters (slash, period, comma, dash, or
+  /// space).
+  static const String _commonSeparators = r'\/\.,-\s';
+
+  /// The date separator for the current locale.
   final String separator;
 
-  final WhitelistingTextInputFormatter _filterFormatter =
-    // Only allow digits and separators (slash, dot, comma, hyphen, space).
-    WhitelistingTextInputFormatter(RegExp(r'[\d\/\.,-\s]+'));
+  // Formatter that will filter out all characters except digits and date
+  // separators.
+  final WhitelistingTextInputFormatter _filterFormatter;
 
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
     final TextEditingValue filteredValue = _filterFormatter.formatEditUpdate(oldValue, newValue);
     return filteredValue.copyWith(
-      // Replace any separator character with the given separator
+      // Replace any non-digits with the given separator
       text: filteredValue.text.replaceAll(RegExp(r'[\D]'), separator),
     );
   }
