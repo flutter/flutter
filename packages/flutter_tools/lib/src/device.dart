@@ -15,6 +15,7 @@ import 'artifacts.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
+import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'features.dart';
@@ -251,6 +252,14 @@ class DeviceManager {
       }
     }
     return devices;
+  }
+
+  void _displayDeviceOptions(List<Device> devices) {
+    int count = 0;
+    for (final Device device in devices) {
+      globals.printStatus(userMessages.flutterChooseDevice(count, device.id, device.name));
+      count++;
+    }
   }
 
   /// Returns whether the device is supported for the project.
