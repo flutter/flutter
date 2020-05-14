@@ -340,7 +340,8 @@ Future<void> _runToolTests() async {
 /// target app.
 Future<void> _runBuildTests() async {
   final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
-    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
+    // TODO(jonahwilliams): re-enable once https://github.com/flutter/flutter/issues/57234 is done.
+    // ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')));
 
   final String branch = Platform.environment['CIRRUS_BRANCH'];
@@ -602,9 +603,10 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'),
-      options: <String>['--enable-experiment=non-nullable'],
-    );
+    // TODO(jonahwilliams): re-enable once https://github.com/flutter/flutter/issues/57234 is done.
+    // await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'),
+    //   options: <String>['--enable-experiment=non-nullable'],
+    // );
     await _runFlutterTest(
       path.join(flutterRoot, 'dev', 'tracing_tests'),
       options: <String>['--enable-vmservice'],
@@ -761,7 +763,8 @@ Future<void> _runWebIntegrationTests() async {
   await _runWebDebugTest('lib/stack_trace.dart');
   await _runWebDebugTest('lib/web_directory_loading.dart');
   await _runWebDebugTest('test/test.dart');
-  await _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true);
+  // TODO(jonahwilliams): re-enable once https://github.com/flutter/flutter/issues/57234 is done.
+  // await _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true);
   await _runWebDebugTest('lib/web_define_loading.dart',
     additionalArguments: <String>[
       '--dart-define=test.valueA=Example',
