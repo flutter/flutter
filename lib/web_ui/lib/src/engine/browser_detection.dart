@@ -155,3 +155,9 @@ const Set<OperatingSystem> _desktopOperatingSystems = {
 ///
 /// See [_desktopOperatingSystems].
 bool get isDesktop => _desktopOperatingSystems.contains(operatingSystem);
+
+/// A flag to check if the current browser is running on a mobile device.
+///
+/// See [_desktopOperatingSystems].
+/// See [isDesktop].
+bool get isMobile => !isDesktop;
