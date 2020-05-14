@@ -193,12 +193,12 @@ class NestedScrollView extends StatefulWidget {
     @required this.headerSliverBuilder,
     @required this.body,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.floatOuterSlivers = false,
+    this.floatHeaderSlivers = false,
   }) : assert(scrollDirection != null),
        assert(reverse != null),
        assert(headerSliverBuilder != null),
        assert(body != null),
-       assert(floatOuterSlivers != null),
+       assert(floatHeaderSlivers != null),
        super(key: key);
 
   /// An object that can be used to control the position to which the outer
@@ -267,7 +267,7 @@ class NestedScrollView extends StatefulWidget {
   ///
   /// This is useful for an outer scrollable containing a [SliverAppBar] that
   /// is expected to float. This cannot be null.
-  final bool floatOuterSlivers;
+  final bool floatHeaderSlivers;
 
   /// Returns the [SliverOverlapAbsorberHandle] of the nearest ancestor
   /// [NestedScrollView].
@@ -385,7 +385,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
     _coordinator = _NestedScrollCoordinator(
       this, widget.controller,
       _handleHasScrolledBodyChanged,
-      widget.floatOuterSlivers,
+      widget.floatHeaderSlivers,
     );
   }
 
@@ -561,7 +561,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     this._state,
     this._parent,
     this._onHasScrolledBodyChanged,
-    this._floatOuterSlivers,
+    this._floatHeaderSlivers,
   ) {
     final double initialScrollOffset = _parent?.initialScrollOffset ?? 0.0;
     _outerController = _NestedScrollController(
@@ -579,7 +579,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   final NestedScrollViewState _state;
   ScrollController _parent;
   final VoidCallback _onHasScrolledBodyChanged;
-  final bool _floatOuterSlivers;
+  final bool _floatHeaderSlivers;
 
   _NestedScrollController _outerController;
   _NestedScrollController _innerController;
@@ -951,7 +951,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       // Dragging "down" - delta is positive
       double innerDelta = delta;
       // Float outer slivers
-      if (_floatOuterSlivers)
+      if (_floatHeaderSlivers)
         innerDelta = _outerPosition.applyClampedDragUpdate(delta);
 
       if (innerDelta != 0.0) {
