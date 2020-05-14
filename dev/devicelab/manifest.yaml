@@ -479,6 +479,7 @@ tasks:
       32-bit iOS (iPhone 4S).
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
+    flaky: true # TODO(jmagman): https://github.com/flutter/flutter/issues/57225
 
   flavors_test_ios:
     description: >
@@ -559,6 +560,7 @@ tasks:
       iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
+    flaky: true # TODO(jmagman): https://github.com/flutter/flutter/issues/57225
 
   hello_world_ios__compile:
     description: >
