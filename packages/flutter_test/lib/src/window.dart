@@ -382,11 +382,6 @@ class TestWindow implements Window {
   }
 
   @override
-  void setIsolateDebugName(String name) {
-    _window.setIsolateDebugName(name);
-  }
-
-  @override
   void sendPlatformMessage(
     String name,
     ByteData data,

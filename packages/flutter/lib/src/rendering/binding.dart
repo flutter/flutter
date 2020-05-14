@@ -182,32 +182,24 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 
   @protected
-  void handleWindowOpened(Object id) => handleMetricsChanged();
+  void handleWindowOpened(ui.Window window) { }
 
   /// Called when the configuration of a specific window changes.
-  ///
-  /// The `id` parameter contains the ID of the window that changed.
-  /// The updated configuration can be obtained using
-  /// `RendererBinding.instance.platformDispatcher.windows[id]`.
   @protected
-  void handleWindowConfigurationChanged(Object id) => handleMetricsChanged();
+  void handleWindowConfigurationChanged(ui.Window window) { }
 
   @protected
-  void handleWindowClosed(Object id) => handleMetricsChanged();
+  void handleWindowClosed(ui.Window window) { }
 
   @protected
-  void handleScreenAdded(Object id) => handleMetricsChanged();
+  void handleScreenAdded(ui.Screen screen) { }
 
   /// Called when the configuration of a specific screen changes.
-  ///
-  /// The `id` parameter contains the ID of the screen that changed.
-  /// The updated configuration can be obtained using
-  /// `RendererBinding.instance.platformDispatcher.screens[id]`.
   @protected
-  void handleScreenConfigurationChanged(Object id) => handleMetricsChanged();
+  void handleScreenConfigurationChanged(ui.Screen screen) { }
 
   @protected
-  void handleScreenRemoved(Object id) => handleMetricsChanged();
+  void handleScreenRemoved(ui.Screen screen) { }
 
   /// Called when the system metrics change.
   ///

@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:collection' show HashMap;
-import 'dart:ui' as ui show PlatformDispatcher;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -1286,7 +1285,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         // If platformDispatcher.initialRouteName isn't '/', we should assume it was set
         // intentionally via `setInitialRoute`, and should override whatever
         // is in [platformDispatcher.initialRoute].
-        initialRoute: WidgetsBinding.instance.platformDispatcher.initialRouteName != Navigator.initialRouteName
+        initialRoute: WidgetsBinding.instance.platformDispatcher.initialRouteName != Navigator.defaultRouteName
             ? WidgetsBinding.instance.platformDispatcher.initialRouteName
             : widget.initialRoute ?? WidgetsBinding.instance.platformDispatcher.initialRouteName,
         onGenerateRoute: _onGenerateRoute,

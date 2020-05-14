@@ -60,11 +60,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   /// The current list of screens.
   @override
-  Map<Object, ScreenConfiguration> get screens => _platformDispatcher.screens;
+  Iterable<Screen> get screens => _platformDispatcher.screens;
 
   /// The current list of windows,
   @override
-  Map<Object, WindowConfiguration> get windows => _platformDispatcher.windows;
+  Iterable<Window> get windows => _platformDispatcher.windows;
 
   /// Receives all events related to platform configuration changes.
   @override
@@ -75,7 +75,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   /// Called when a screen is added to the device.
+  @override
   ScreenAddedCallback get onScreenAdded => _platformDispatcher.onScreenAdded;
+  @override
   set onScreenAdded(ScreenAddedCallback callback) {
     _platformDispatcher.onScreenAdded = callback;
   }

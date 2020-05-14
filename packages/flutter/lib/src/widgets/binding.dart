@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback, ScreenConfiguration;
+import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback, Screen, Window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -107,7 +107,7 @@ abstract class WidgetsBindingObserver {
   /// Called when the application's dimensions change. For example,
   /// when a phone is rotated.
   ///
-  /// This method exposes notifications from [Window.onMetricsChanged].
+  /// This method exposes notifications from [PlatformDispatcher.onMetricsChanged].
   ///
   /// {@tool snippet}
   ///
@@ -252,32 +252,32 @@ abstract class WidgetsBindingObserver {
   ///
   /// The configuration of the screen can be obtained with
   /// `WidgetsBinding.instance.platformDispatcher.screens[id]`.
-  void didAddScreen(Object id) { }
+  void didAddScreen(Screen id) { }
 
   /// Called whenever a physical screen is removed from the system.
-  void didRemoveScreen(Object id) { }
+  void didRemoveScreen(Screen id) { }
 
   /// Called when the configuration of a physical screen has changed.
   ///
   /// The configuration of the screen can be obtained with
   /// `WidgetsBinding.instance.platformDispatcher.screens[id]`.
-  void didChangeScreenConfiguration(Object id) { }
+  void didChangeScreenConfiguration(Screen id) { }
 
   /// Called whenever a window is added to the system, and at startup
   /// when the initial window is opened.
   ///
   /// The configuration of the window can be obtained with
   /// `WidgetsBinding.instance.platformDispatcher.windows[id]`.
-  void didOpenWindow(Object id) { }
+  void didOpenWindow(Window id) { }
 
   /// Called whenever a window is closed.
-  void didCloseWindow(Object id) { }
+  void didCloseWindow(Window id) { }
 
   /// Called when the configuration of a window has changed.
   ///
   /// The configuration of the window can be obtained with
   /// `WidgetsBinding.instance.platformDispatcher.windows[id]`.
-  void didChangeWindowConfiguration(Object id) { }
+  void didChangeWindowConfiguration(Window id) { }
 }
 
 /// The glue between the widgets layer and the Flutter engine.
@@ -564,50 +564,50 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   bool removeObserver(WidgetsBindingObserver observer) => _observers.remove(observer);
 
   @override
-  void handleScreenAdded(Object id) {
-    super.handleScreenAdded(id);
+  void handleScreenAdded(Screen screen) {
+    super.handleScreenAdded(screen);
     for (final WidgetsBindingObserver observer in _observers) {
-      observer.didAddScreen(id);
+      observer.didAddScreen(screen);
     }
   }
 
   @override
-  void handleScreenConfigurationChanged(Object id) {
-    super.handleScreenConfigurationChanged(id);
+  void handleScreenConfigurationChanged(Screen screen) {
+    super.handleScreenConfigurationChanged(screen);
     for (final WidgetsBindingObserver observer in _observers) {
-      observer.didChangeScreenConfiguration(id);
+      observer.didChangeScreenConfiguration(screen);
     }
   }
 
   @override
-  void handleScreenRemoved(Object id) {
-    super.handleScreenRemoved(id);
+  void handleScreenRemoved(Screen screen) {
+    super.handleScreenRemoved(screen);
     for (final WidgetsBindingObserver observer in _observers) {
-      observer.didRemoveScreen(id);
+      observer.didRemoveScreen(screen);
     }
   }
 
   @override
-  void handleWindowOpened(Object id) {
-    super.handleWindowOpened(id);
+  void handleWindowOpened(Window window) {
+    super.handleWindowOpened(window);
     for (final WidgetsBindingObserver observer in _observers) {
-      observer.didOpenWindow(id);
+      observer.didOpenWindow(window);
     }
   }
 
   @override
-  void handleWindowConfigurationChanged(Object id) {
-    super.handleWindowConfigurationChanged(id);
+  void handleWindowConfigurationChanged(Window window) {
+    super.handleWindowConfigurationChanged(window);
     for (final WidgetsBindingObserver observer in _observers) {
-      observer.didChangeScreenConfiguration(id);
+      observer.didChangeWindowConfiguration(window);
     }
   }
 
   @override
-  void handleWindowClosed(Object id) {
-    super.handleWindowClosed(id);
+  void handleWindowClosed(Window window) {
+    super.handleWindowClosed(window);
     for (final WidgetsBindingObserver observer in _observers) {
-      observer.didCloseWindow(id);
+      observer.didCloseWindow(window);
     }
   }
 
