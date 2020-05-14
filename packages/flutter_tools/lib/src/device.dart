@@ -254,6 +254,12 @@ class DeviceManager {
     return devices;
   }
 
+  Future<Device> _chooseOneOfAvailableDevices(List<Device> devices) async {
+    _displayDeviceOptions(devices);
+    final String userInput =  await _readUserInput(devices.length);
+    return devices[int.parse(userInput.toString())];
+  }
+
   void _displayDeviceOptions(List<Device> devices) {
     int count = 0;
     for (final Device device in devices) {
