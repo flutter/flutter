@@ -9,6 +9,7 @@ import '../input_border.dart';
 import '../input_decorator.dart';
 import '../material_localizations.dart';
 import '../text_form_field.dart';
+import '../theme.dart';
 
 import 'date_picker_common.dart';
 import 'date_utils.dart' as utils;
@@ -219,27 +220,24 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   @override
   Widget build(BuildContext context) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    return OrientationBuilder(builder: (BuildContext context, Orientation orientation) {
-      assert(orientation != null);
-
-      return TextFormField(
-        decoration: InputDecoration(
-          border: const UnderlineInputBorder(),
-          filled: true,
-          hintText: widget.fieldHintText ?? localizations.dateHelpText,
-          labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
-        ),
-        validator: _validateDate,
-        inputFormatters: <TextInputFormatter>[
-          DateTextInputFormatter(localizations.dateSeparator),
-        ],
-        keyboardType: TextInputType.datetime,
-        onSaved: _handleSaved,
-        onFieldSubmitted: _handleSubmitted,
-        autofocus: widget.autofocus,
-        controller: _controller,
-      );
-    });
+    final InputDecorationTheme inputTheme = Theme.of(context).inputDecorationTheme;
+    return TextFormField(
+      decoration: InputDecoration(
+        border: inputTheme.border ?? const UnderlineInputBorder(),
+        filled: inputTheme.filled ?? true,
+        hintText: widget.fieldHintText ?? localizations.dateHelpText,
+        labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
+      ),
+      validator: _validateDate,
+      inputFormatters: <TextInputFormatter>[
+        DateTextInputFormatter(localizations.dateSeparator),
+      ],
+      keyboardType: TextInputType.datetime,
+      onSaved: _handleSaved,
+      onFieldSubmitted: _handleSubmitted,
+      autofocus: widget.autofocus,
+      controller: _controller,
+    );
   }
 }
 
