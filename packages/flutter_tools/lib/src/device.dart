@@ -266,13 +266,21 @@ class DeviceManager {
    if (globals.stdio.stdinHasTerminal)  {
       globals.terminal.usesTerminalUi = true;
       final String result = await globals.terminal.promptForCharInput(
-        <String>['1','2'], //TODO:Change this placeholder to actual value
+       _createPossibleInputsList(deviceLength),
         logger: globals.logger,
         prompt: userMessages.flutterChoseOne
       );
       return result;
     }
     return null;
+  }
+
+  List<String> _createPossibleInputsList(int length) {
+    final List<String> possibleInputs = <String>[];
+    for (int i = 0; i < length; i++){
+      possibleInputs.add(i.toString());
+    }
+    return possibleInputs;
   }
 
   /// Returns whether the device is supported for the project.
