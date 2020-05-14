@@ -3641,9 +3641,21 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   void popUntil(RoutePredicate predicate) {
-    while (!predicate(_history.lastWhere(_RouteEntry.isPresentPredicate).route)) {
-      pop();
+    int index = _history.length - 1;
+    while(index >= 0) {
+      if (_history[index].isPresent) {
+        if (predicate(_history[index].route))
+          return;
+        pop();
+      } else {
+        index -= 1;
+      }
     }
+    // We have popped all routes and still can't find a match.
+    assert(
+      false,
+      'All routes have been popped because none of them matches the predicate.'
+    );
   }
 
   /// Immediately remove `route` from the navigator, and [Route.dispose] it.
