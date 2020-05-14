@@ -30,6 +30,7 @@ export 'src/widgets/binding.dart';
 export 'src/widgets/bottom_navigation_bar_item.dart';
 export 'src/widgets/color_filter.dart';
 export 'src/widgets/container.dart';
+export 'src/widgets/crossfade_image.dart';
 export 'src/widgets/debug.dart';
 export 'src/widgets/dismissible.dart';
 export 'src/widgets/disposable_build_context.dart';
