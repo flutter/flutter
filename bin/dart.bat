@@ -6,7 +6,7 @@ REM found in the LICENSE file.
 REM ---------------------------------- NOTE ----------------------------------
 REM
 REM Please keep the logic in this file consistent with the logic in the
-REM `flutter` script in the same directory to ensure that Flutter continues to
+REM `dart` script in the same directory to ensure that Flutter & Dart continues to
 REM work across all platforms!
 REM
 REM --------------------------------------------------------------------------
@@ -19,6 +19,8 @@ REM Include shared scripts in shared.bat
 SET shared_bin=%FLUTTER_ROOT%/bin/internal/shared.bat
 CALL "%shared_bin%"
 
+SET cache_dir=%FLUTTER_ROOT%\bin\cache
+SET dart_sdk_path=%cache_dir%\dart-sdk
 SET dart=%dart_sdk_path%\bin\dart.exe
 
 REM Chaining the call to 'dart' and 'exit' with an ampersand ensures that
