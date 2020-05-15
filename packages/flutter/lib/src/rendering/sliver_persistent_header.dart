@@ -516,9 +516,8 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       stretchOffset += constraints.overlap.abs();
     }
     final double maxExtent = this.maxExtent;
-    final double scrollOffset = constraints.scrollOffset + _nestedSnapOffset;
     final double paintExtent = maxExtent - _effectiveScrollOffset;
-    final double layoutExtent = maxExtent - scrollOffset;
+    final double layoutExtent = maxExtent - (constraints.scrollOffset + _nestedSnapOffset);
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: math.min(constraints.overlap, 0.0),
