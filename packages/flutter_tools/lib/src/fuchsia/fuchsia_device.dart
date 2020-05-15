@@ -808,6 +808,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     process?.kill();
     final List<String> command = <String>[
       'ssh',
+      '-6',
       '-F',
       globals.fuchsiaArtifacts.sshConfig.absolute.path,
       '-O',
