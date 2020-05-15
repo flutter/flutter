@@ -1080,8 +1080,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     if (_isListeningToStream &&
         (widget.loadingBuilder == null) != (oldWidget.loadingBuilder == null)) {
       _imageStream.removeListener(_getListener());
-      _resetListener();
-      _imageStream.addListener(_getListener());
+      _imageStream.addListener(_getListener(recreateListener: true));
     }
     if (widget.image != oldWidget.image)
       _resolveImage();
@@ -1121,8 +1120,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   ImageStreamListener _imageStreamListener;
-  ImageStreamListener _getListener() {
-    if(_imageStreamListener == null) {
+  ImageStreamListener _getListener({bool recreateListener = false}) {
+    if(_imageStreamListener == null || recreateListener) {
       _lastException = null;
       _lastStack = null;
       _imageStreamListener = ImageStreamListener(
@@ -1139,10 +1138,6 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       );
     }
     return _imageStreamListener;
-  }
-
-  void _resetListener(){
-    _imageStreamListener = null;
   }
 
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
