@@ -152,7 +152,7 @@ void VulkanSurfaceProducer::OnSurfacesPresented(
   // Do a single flush for all canvases derived from the context.
   {
     TRACE_EVENT0("flutter", "GrContext::flushAndSignalSemaphores");
-    context_->flush();
+    context_->flushAndSubmit();
   }
 
   if (!TransitionSurfacesToExternal(surfaces))

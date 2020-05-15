@@ -211,7 +211,7 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context,
   //
   // @warning: Embedder may trample on our OpenGL context here.
   if (context) {
-    context->flush();
+    context->flushAndSubmit();
   }
 
   // Submit the scribbled layer to the embedder for presentation.
