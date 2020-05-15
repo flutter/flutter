@@ -8,6 +8,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <string>
 
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/trace_event.h"
@@ -60,6 +61,8 @@ class SamplingProfiler {
   /**
    * @brief Construct a new Sampling Profiler object
    *
+   * @param thread_label observatory prefix to be set for the profiling task
+   * runner.
    * @param profiler_task_runner the task runner to service sampling requests.
    * @param sampler the value function to collect the profiling metrics.
    * @param num_samples_per_sec number of times you wish to run the sampler per
@@ -67,7 +70,8 @@ class SamplingProfiler {
    *
    * @see fml::TaskRunner
    */
-  SamplingProfiler(fml::RefPtr<fml::TaskRunner> profiler_task_runner,
+  SamplingProfiler(const char* thread_label,
+                   fml::RefPtr<fml::TaskRunner> profiler_task_runner,
                    Sampler sampler,
                    int num_samples_per_sec);
 
@@ -78,11 +82,20 @@ class SamplingProfiler {
   void Start() const;
 
  private:
+  const std::string thread_label_;
   const fml::RefPtr<fml::TaskRunner> profiler_task_runner_;
   const Sampler sampler_;
   const uint32_t num_samples_per_sec_;
 
   void SampleRepeatedly(fml::TimeDelta task_delay) const;
+
+  /**
+   * @brief This doesn't update the underlying OS thread name for the thread
+   * backing `profiler_task_runner_`. Instead, this is just additional metadata
+   * for the Observatory to show the thread name of the isolate.
+   *
+   */
+  void UpdateObservatoryThreadName() const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SamplingProfiler);
 };

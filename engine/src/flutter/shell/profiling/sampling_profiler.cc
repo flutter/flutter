@@ -7,10 +7,12 @@
 namespace flutter {
 
 SamplingProfiler::SamplingProfiler(
+    const char* thread_label,
     fml::RefPtr<fml::TaskRunner> profiler_task_runner,
     Sampler sampler,
     int num_samples_per_sec)
-    : profiler_task_runner_(profiler_task_runner),
+    : thread_label_(thread_label),
+      profiler_task_runner_(profiler_task_runner),
       sampler_(std::move(sampler)),
       num_samples_per_sec_(num_samples_per_sec) {}
 
@@ -23,6 +25,7 @@ void SamplingProfiler::Start() const {
       << num_samples_per_sec_;
   double delay_between_samples = 1.0 / num_samples_per_sec_;
   auto task_delay = fml::TimeDelta::FromSecondsF(delay_between_samples);
+  UpdateObservatoryThreadName();
   SampleRepeatedly(task_delay);
 }
 
@@ -44,6 +47,15 @@ void SamplingProfiler::SampleRepeatedly(fml::TimeDelta task_delay) const {
         profiler->SampleRepeatedly(task_delay);
       },
       task_delay);
+}
+
+void SamplingProfiler::UpdateObservatoryThreadName() const {
+  FML_CHECK(profiler_task_runner_);
+
+  profiler_task_runner_->PostTask(
+      [label = thread_label_ + std::string{".profiler"}]() {
+        Dart_SetThreadName(label.c_str());
+      });
 }
 
 }  // namespace flutter
