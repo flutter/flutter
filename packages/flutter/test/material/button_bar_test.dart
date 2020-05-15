@@ -633,7 +633,7 @@ void main() {
   testWidgets('_RenderButtonBarRow.constraints works before layout', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: ButtonBar()),
-      null,
+      Duration.zero,
       EnginePhase.build,
     );
 
