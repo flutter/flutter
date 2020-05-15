@@ -1840,6 +1840,56 @@ void main() {
     expect(tickCount, 4);
   });
 
+  testWidgets('Route annouce correctly for first route and last route', (WidgetTester tester) async {
+    Route<void> previousOfFirst = NotAnnounced();
+    Route<void> nextOfFirst = NotAnnounced();
+    Route<void> popNextOfFirst = NotAnnounced();
+    Route<void> firstRoute;
+
+    Route<void> previousOfSecond = NotAnnounced();
+    Route<void> nextOfSecond = NotAnnounced();
+    Route<void> popNextOfSecond = NotAnnounced();
+    Route<void> secondRoute;
+
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        initialRoute: '/second',
+        onGenerateRoute: (RouteSettings settings) {
+          if (settings.name == '/') {
+            firstRoute = RouteAnnouncementSpy(
+              onDidChangeNext: (Route<void> next) => nextOfFirst = next,
+              onDidChangePrevious: (Route<void> previous) => previousOfFirst = previous,
+              onDidPopNext: (Route<void> next) => popNextOfFirst = next,
+              settings: settings,
+            );
+            return firstRoute;
+          }
+          secondRoute = RouteAnnouncementSpy(
+            onDidChangeNext: (Route<void> next) => nextOfSecond = next,
+            onDidChangePrevious: (Route<void> previous) => previousOfSecond = previous,
+            onDidPopNext: (Route<void> next) => popNextOfSecond = next,
+            settings: settings,
+          );
+          return secondRoute;
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(previousOfFirst, isNull);
+    expect(nextOfFirst, secondRoute);
+    expect(popNextOfFirst is NotAnnounced, isTrue);
+
+    expect(previousOfSecond, firstRoute);
+    expect(nextOfSecond, isNull);
+    expect(popNextOfSecond is NotAnnounced, isTrue);
+
+    navigator.currentState.pop();
+    expect(popNextOfFirst, secondRoute);
+  });
+
   group('Page api', (){
     Widget buildNavigator(
       List<Page<dynamic>> pages,
@@ -2559,6 +2609,50 @@ void main() {
       expect(find.text('initial'), findsOneWidget);
     });
   });
+}
+
+typedef AnnouncementCallBack = void Function(Route<dynamic>);
+
+class NotAnnounced extends Route<void> {/* A place holder for not announced route*/}
+
+class RouteAnnouncementSpy extends Route<void> {
+  RouteAnnouncementSpy({
+    this.onDidChangePrevious,
+    this.onDidChangeNext,
+    this.onDidPopNext,
+    RouteSettings settings,
+  }) : super(settings: settings);
+  final AnnouncementCallBack onDidChangePrevious;
+  final AnnouncementCallBack onDidChangeNext;
+  final AnnouncementCallBack onDidPopNext;
+
+  @override
+  List<OverlayEntry> get overlayEntries => <OverlayEntry>[
+    OverlayEntry(
+      builder: (BuildContext context) => const Placeholder(),
+    )
+  ];
+
+  @override
+  void didChangeNext(Route<dynamic> nextRoute) {
+    super.didChangeNext(nextRoute);
+    if (onDidChangeNext != null)
+      onDidChangeNext(nextRoute);
+  }
+
+  @override
+  void didChangePrevious(Route<dynamic> previousRoute) {
+    super.didChangePrevious(previousRoute);
+    if (onDidChangePrevious != null)
+      onDidChangePrevious(previousRoute);
+  }
+
+  @override
+  void didPopNext(Route<dynamic> nextRoute) {
+    super.didPopNext(nextRoute);
+    if (onDidPopNext != null)
+      onDidPopNext(nextRoute);
+  }
 }
 
 class _TickingWidget extends StatefulWidget {
