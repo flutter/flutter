@@ -557,6 +557,7 @@ abstract class PersistedPicture extends PersistedLeafSurface {
       // that won't be useful for anything anyway.
       _recycleCanvas(oldCanvas);
       domRenderer.clearDom(rootElement);
+      _canvas = null;
       return;
     }
 
