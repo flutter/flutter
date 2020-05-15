@@ -90,7 +90,7 @@ void main() {
     FakeDevice ephemeralOne;
     FakeDevice ephemeralTwo;
     FakeDevice nonEphemeralOne;
-    FakeDevice nonephemeralTwo;
+    FakeDevice nonEphemeralTwo;
     FakeDevice unsupported;
     FakeDevice webDevice;
     FakeDevice fuchsiaDevice;
@@ -99,7 +99,7 @@ void main() {
       ephemeralOne = FakeDevice('ephemeralOne', 'ephemeralOne', true);
       ephemeralTwo = FakeDevice('ephemeralTwo', 'ephemeralTwo', true);
       nonEphemeralOne = FakeDevice('nonEphemeralOne', 'nonEphemeralOne', false);
-      nonephemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
+      nonEphemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
       unsupported = FakeDevice('unsupported', 'unsupported', true, false);
       webDevice = FakeDevice('webby', 'webby')
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
@@ -111,7 +111,7 @@ void main() {
       final List<Device> devices = <Device>[
         ephemeralOne,
         nonEphemeralOne,
-        nonephemeralTwo,
+        nonEphemeralTwo,
         unsupported,
       ];
 
@@ -124,7 +124,7 @@ void main() {
     testUsingContext('does not remove all non-ephemeral', () async {
       final List<Device> devices = <Device>[
         nonEphemeralOne,
-        nonephemeralTwo,
+        nonEphemeralTwo,
       ];
 
       final DeviceManager deviceManager = TestDeviceManager(devices);
@@ -132,7 +132,7 @@ void main() {
 
       expect(filtered, <Device>[
         nonEphemeralOne,
-        nonephemeralTwo,
+        nonEphemeralTwo,
       ]);
     });
 
@@ -206,7 +206,7 @@ void main() {
     testUsingContext('Removes unsupported devices from --all', () async {
       final List<Device> devices = <Device>[
         nonEphemeralOne,
-        nonephemeralTwo,
+        nonEphemeralTwo,
         unsupported,
       ];
       final DeviceManager deviceManager = TestDeviceManager(devices);
@@ -216,7 +216,7 @@ void main() {
 
       expect(filtered, <Device>[
         nonEphemeralOne,
-        nonephemeralTwo,
+        nonEphemeralTwo,
       ]);
     });
 
