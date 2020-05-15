@@ -1247,16 +1247,29 @@ class SliverAppBar extends StatefulWidget {
   ///
   ///  * [SliverAppBar] for more animated examples of how this property changes the
   ///    behavior of the app bar in combination with [pinned] and [floating].
+  ///  * [nestedSnap] for snapping the app bar from the outer or header
+  ///    scrollable of a [NestedScrollView] while also floating.
+  ///  * [NestedScrollView] for more details and examples of how to use
+  ///    [SliverAppBar]s with nested scrolling.
   final bool snap;
 
-  /// Specifies whether the snap animation is influenced by another
+  /// Specifies whether the [snap] animation is influenced by another
   /// [ScrollPosition], such as the inner body of a [NestedScrollView].
   ///
-  /// When true, the [ScrollPosition] of the current context, e.g. the inner
-  /// scrollable, will be corrected to properly coordinate with the outer
+  /// When true, the [ScrollPosition] of the current context, e.g. the outer
+  /// scrollable, will be corrected to properly coordinate with the inner
   /// scrollable.
   ///
+  /// In order for the [SliverAppBar] to float and snap together, this flag and
+  /// [NestedScrollView.floatHeaderSlivers] must both be true. If only the snap
+  /// animation is desired, leave both flags false.
+  ///
   /// Defaults to false, cannot be null.
+  ///
+  /// See also:
+  ///
+  ///  * [NestedScrollView] for more details and examples of how to use
+  ///    [SliverAppBar]s with nested scrolling.
   final bool nestedSnap;
 
   /// Whether the app bar should stretch to fill the over-scroll area.

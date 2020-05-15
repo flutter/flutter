@@ -62,7 +62,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// (those inside the [TabBarView], hooking them together so that they appear,
 /// to the user, as one coherent scroll view.
 ///
-/// {@tool snippet}
+/// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// This example shows a [NestedScrollView] whose header is the combination of a
 /// [TabBar] in a [SliverAppBar] and whose body is a [TabBarView]. It uses a
@@ -72,113 +72,261 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// [PageStorageKey]s are used to remember the scroll position of each tab's
 /// list.
 ///
-/// In the example below, `_tabs` is a list of strings, one for each tab, giving
-/// the tab labels. In a real application, it would be replaced by the actual
-/// data model being represented.
-///
 /// ```dart
-/// DefaultTabController(
-///   length: _tabs.length, // This is the number of tabs.
-///   child: NestedScrollView(
-///     headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-///       // These are the slivers that show up in the "outer" scroll view.
-///       return <Widget>[
-///         SliverOverlapAbsorber(
-///           // This widget takes the overlapping behavior of the SliverAppBar,
-///           // and redirects it to the SliverOverlapInjector below. If it is
-///           // missing, then it is possible for the nested "inner" scroll view
-///           // below to end up under the SliverAppBar even when the inner
-///           // scroll view thinks it has not been scrolled.
-///           // This is not necessary if the "headerSliverBuilder" only builds
-///           // widgets that do not overlap the next sliver.
-///           handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-///           sliver: SliverAppBar(
-///             title: const Text('Books'), // This is the title in the app bar.
-///             pinned: true,
-///             expandedHeight: 150.0,
-///             // The "forceElevated" property causes the SliverAppBar to show
-///             // a shadow. The "innerBoxIsScrolled" parameter is true when the
-///             // inner scroll view is scrolled beyond its "zero" point, i.e.
-///             // when it appears to be scrolled below the SliverAppBar.
-///             // Without this, there are cases where the shadow would appear
-///             // or not appear inappropriately, because the SliverAppBar is
-///             // not actually aware of the precise position of the inner
-///             // scroll views.
-///             forceElevated: innerBoxIsScrolled,
-///             bottom: TabBar(
-///               // These are the widgets to put in each tab in the tab bar.
-///               tabs: _tabs.map((String name) => Tab(text: name)).toList(),
+/// Widget build(BuildContext context) {
+///   final List<String> _tabs = ['Tab 1', 'Tab 2'];
+///   return DefaultTabController(
+///     length: _tabs.length, // This is the number of tabs.
+///     child: NestedScrollView(
+///       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+///         // These are the slivers that show up in the "outer" scroll view.
+///         return <Widget>[
+///           SliverOverlapAbsorber(
+///             // This widget takes the overlapping behavior of the SliverAppBar,
+///             // and redirects it to the SliverOverlapInjector below. If it is
+///             // missing, then it is possible for the nested "inner" scroll view
+///             // below to end up under the SliverAppBar even when the inner
+///             // scroll view thinks it has not been scrolled.
+///             // This is not necessary if the "headerSliverBuilder" only builds
+///             // widgets that do not overlap the next sliver.
+///             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+///             sliver: SliverAppBar(
+///               title: const Text('Books'), // This is the title in the app bar.
+///               pinned: true,
+///               expandedHeight: 150.0,
+///               // The "forceElevated" property causes the SliverAppBar to show
+///               // a shadow. The "innerBoxIsScrolled" parameter is true when the
+///               // inner scroll view is scrolled beyond its "zero" point, i.e.
+///               // when it appears to be scrolled below the SliverAppBar.
+///               // Without this, there are cases where the shadow would appear
+///               // or not appear inappropriately, because the SliverAppBar is
+///               // not actually aware of the precise position of the inner
+///               // scroll views.
+///               forceElevated: innerBoxIsScrolled,
+///               bottom: TabBar(
+///                 // These are the widgets to put in each tab in the tab bar.
+///                 tabs: _tabs.map((String name) => Tab(text: name)).toList(),
+///               ),
 ///             ),
 ///           ),
-///         ),
-///       ];
-///     },
-///     body: TabBarView(
-///       // These are the contents of the tab views, below the tabs.
-///       children: _tabs.map((String name) {
-///         return SafeArea(
-///           top: false,
-///           bottom: false,
-///           child: Builder(
-///             // This Builder is needed to provide a BuildContext that is
-///             // "inside" the NestedScrollView, so that
-///             // sliverOverlapAbsorberHandleFor() can find the
-///             // NestedScrollView.
-///             builder: (BuildContext context) {
-///               return CustomScrollView(
-///                 // The "controller" and "primary" members should be left
-///                 // unset, so that the NestedScrollView can control this
-///                 // inner scroll view.
-///                 // If the "controller" property is set, then this scroll
-///                 // view will not be associated with the NestedScrollView.
-///                 // The PageStorageKey should be unique to this ScrollView;
-///                 // it allows the list to remember its scroll position when
-///                 // the tab view is not on the screen.
-///                 key: PageStorageKey<String>(name),
-///                 slivers: <Widget>[
-///                   SliverOverlapInjector(
-///                     // This is the flip side of the SliverOverlapAbsorber
-///                     // above.
-///                     handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-///                   ),
-///                   SliverPadding(
-///                     padding: const EdgeInsets.all(8.0),
-///                     // In this example, the inner scroll view has
-///                     // fixed-height list items, hence the use of
-///                     // SliverFixedExtentList. However, one could use any
-///                     // sliver widget here, e.g. SliverList or SliverGrid.
-///                     sliver: SliverFixedExtentList(
-///                       // The items in this example are fixed to 48 pixels
-///                       // high. This matches the Material Design spec for
-///                       // ListTile widgets.
-///                       itemExtent: 48.0,
-///                       delegate: SliverChildBuilderDelegate(
-///                         (BuildContext context, int index) {
-///                           // This builder is called for each child.
-///                           // In this example, we just number each list item.
-///                           return ListTile(
-///                             title: Text('Item $index'),
-///                           );
-///                         },
-///                         // The childCount of the SliverChildBuilderDelegate
-///                         // specifies how many children this inner list
-///                         // has. In this example, each tab has a list of
-///                         // exactly 30 items, but this is arbitrary.
-///                         childCount: 30,
+///         ];
+///       },
+///       body: TabBarView(
+///         // These are the contents of the tab views, below the tabs.
+///         children: _tabs.map((String name) {
+///           return SafeArea(
+///             top: false,
+///             bottom: false,
+///             child: Builder(
+///               // This Builder is needed to provide a BuildContext that is
+///               // "inside" the NestedScrollView, so that
+///               // sliverOverlapAbsorberHandleFor() can find the
+///               // NestedScrollView.
+///               builder: (BuildContext context) {
+///                 return CustomScrollView(
+///                   // The "controller" and "primary" members should be left
+///                   // unset, so that the NestedScrollView can control this
+///                   // inner scroll view.
+///                   // If the "controller" property is set, then this scroll
+///                   // view will not be associated with the NestedScrollView.
+///                   // The PageStorageKey should be unique to this ScrollView;
+///                   // it allows the list to remember its scroll position when
+///                   // the tab view is not on the screen.
+///                   key: PageStorageKey<String>(name),
+///                   slivers: <Widget>[
+///                     SliverOverlapInjector(
+///                       // This is the flip side of the SliverOverlapAbsorber
+///                       // above.
+///                       handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+///                     ),
+///                     SliverPadding(
+///                       padding: const EdgeInsets.all(8.0),
+///                       // In this example, the inner scroll view has
+///                       // fixed-height list items, hence the use of
+///                       // SliverFixedExtentList. However, one could use any
+///                       // sliver widget here, e.g. SliverList or SliverGrid.
+///                       sliver: SliverFixedExtentList(
+///                         // The items in this example are fixed to 48 pixels
+///                         // high. This matches the Material Design spec for
+///                         // ListTile widgets.
+///                         itemExtent: 48.0,
+///                         delegate: SliverChildBuilderDelegate(
+///                           (BuildContext context, int index) {
+///                             // This builder is called for each child.
+///                             // In this example, we just number each list item.
+///                             return ListTile(
+///                               title: Text('Item $index'),
+///                             );
+///                           },
+///                           // The childCount of the SliverChildBuilderDelegate
+///                           // specifies how many children this inner list
+///                           // has. In this example, each tab has a list of
+///                           // exactly 30 items, but this is arbitrary.
+///                           childCount: 30,
+///                         ),
 ///                       ),
 ///                     ),
-///                   ),
-///                 ],
-///               );
-///             },
-///           ),
-///         );
-///       }).toList(),
+///                   ],
+///                 );
+///               },
+///             ),
+///           );
+///         }).toList(),
+///       ),
 ///     ),
-///   ),
-/// )
+///   );
+/// }
 /// ```
 /// {@end-tool}
+///
+/// ## More on using [SliverAppBar]s with [NestedScrollView]s
+///
+/// ### Pinned [SliverAppBar]s
+/// //TODO(Piinks): Talk about why pinning works
+///
+/// ### Floating [SliverAppBar]s
+///
+/// //TODO(Piinks): talk about FLOATING
+///
+/// {@tool sample --template=stateless_widget_scaffold}
+///
+/// This simple example shows a [NestedScrollView] whose header contains a
+/// floating [SliverAppBar]. By using the [floatHeaderSlivers] property, the
+/// floating behavior is coordinated between the outer and inner scrollables,
+/// so it behaves as it would in a single scrollable.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: NestedScrollView(
+///       // Setting floatHeaderSlivers to true is required in order to float
+///       // the outer slivers over the inner scrollable.
+///       floatHeaderSlivers: floating,
+///       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+///         return <Widget>[
+///           SliverAppBar(
+///             title: const Text(_title),
+///             floating: true,
+///             expandedHeight: 200.0,
+///             forceElevated: innerBoxIsScrolled,
+///           ),
+///         ];
+///       },
+///       body: ListView.builder(
+///         padding: const EdgeInsets.all(8),
+///         itemCount: 30,
+///         itemBuilder: (BuildContext context, int index) {
+///           return Container(
+///             height: 50,
+///             child: Center(child: Text('Item $index')),
+///           );
+///         }
+///       )
+///     )
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// ### Snapping [SliverAppBar]s
+///
+/// //TODO(Piinks): Talk about SNAPPING
+///
+/// {@tool sample --template=stateless_widget_scaffold}
+///
+/// This simple example shows a [NestedScrollView] whose header contains a
+/// snapping, floating [SliverAppBar]. _Without_ setting any additional flags,
+/// e.g [NestedScrollView.floatHeaderSlivers] and [SliverAppBar.nestedSnap], the
+/// SliverAppBar will animate in and out without floating. This may be desirable
+/// over floating and snapping at the same time.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: NestedScrollView(
+///       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+///         return <Widget>[
+///           SliverAppBar(
+///             title: const Text(_title),
+///             floating: true,
+///             snap: true,
+///             expandedHeight: 200.0,
+///             forceElevated: innerBoxIsScrolled,
+///           ),
+///         ];
+///       },
+///       body: ListView.builder(
+///         padding: const EdgeInsets.all(8),
+///         itemCount: 30,
+///         itemBuilder: (BuildContext context, int index) {
+///           return Container(
+///             height: 50,
+///             child: Center(child: Text('Item $index')),
+///           );
+///         }
+///       )
+///     )
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// ### Snapping and Floating [SliverAppBar]s
+///
+/// //TODO(Piinks): Talk about FLOATING & SNAPPING
+///
+/// {@tool sample --template=stateless_widget_scaffold}
+///
+/// This simple example shows a [NestedScrollView] whose header contains a
+/// snapping, floating [SliverAppBar]. By setting the
+/// [NestedScrollView.floatHeaderSlivers] and [SliverAppBar.nestedSnap] flags to
+/// true, theSliverAppBar will animate in and out while floating at the same
+/// time.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: NestedScrollView(
+///       // Setting floatHeaderSlivers to true is required in order to float
+///       // the outer slivers over the inner scrollable.
+///       floatHeaderSlivers: true,
+///       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+///         return <Widget>[
+///           SliverAppBar(
+///             title: const Text(_title),
+///             floating: true,
+///             snap: true,
+///             // This flag informs the SliverAppBar that it will need to
+///             // correct the outer positioning after animating in order to
+///             // continue floating from the inner scrollable's movement.
+///             nestedSnap: true,
+///             expandedHeight: 200.0,
+///             forceElevated: innerBoxIsScrolled,
+///           ),
+///         ];
+///       },
+///       body: ListView.builder(
+///         padding: const EdgeInsets.all(8),
+///         itemCount: 30,
+///         itemBuilder: (BuildContext context, int index) {
+///           return Container(
+///             height: 50,
+///             child: Center(child: Text('Item $index')),
+///           );
+///         }
+///       )
+///     )
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// ### Stretching [SliverAppBar]s
+///
+/// Currently, [NestedScrollView] does not support stretching the outer
+/// scrollable, e.g. when using [SliverAppBar.stretch].
+///
+/// //TODO(Piinks): SEE ALSO
 class NestedScrollView extends StatefulWidget {
   /// Creates a nested scroll view.
   ///
