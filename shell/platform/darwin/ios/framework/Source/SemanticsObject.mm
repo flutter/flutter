@@ -103,50 +103,6 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 }
 @end
 
-/**
- * Represents a semantics object that has children and hence has to be presented to the OS as a
- * UIAccessibilityContainer.
- *
- * The SemanticsObject class cannot implement the UIAccessibilityContainer protocol because an
- * object that returns YES for isAccessibilityElement cannot also implement
- * UIAccessibilityContainer.
- *
- * With the help of SemanticsObjectContainer, the hierarchy of semantic objects received from
- * the framework, such as:
- *
- * SemanticsObject1
- *     SemanticsObject2
- *         SemanticsObject3
- *         SemanticsObject4
- *
- * is translated into the following hierarchy, which is understood by iOS:
- *
- * SemanticsObjectContainer1
- *     SemanticsObject1
- *     SemanticsObjectContainer2
- *         SemanticsObject2
- *         SemanticsObject3
- *         SemanticsObject4
- *
- * From Flutter's view of the world (the first tree seen above), we construct iOS's view of the
- * world (second tree) as follows: We replace each SemanticsObjects that has children with a
- * SemanticsObjectContainer, which has the original SemanticsObject and its children as children.
- *
- * SemanticsObjects have semantic information attached to them which is interpreted by
- * VoiceOver (they return YES for isAccessibilityElement). The SemanticsObjectContainers are just
- * there for structure and they don't provide any semantic information to VoiceOver (they return
- * NO for isAccessibilityElement).
- */
-@interface SemanticsObjectContainer : UIAccessibilityElement
-- (instancetype)init __attribute__((unavailable("Use initWithSemanticsObject instead")));
-- (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject
-                                 bridge:(fml::WeakPtr<flutter::AccessibilityBridgeIos>)bridge
-    NS_DESIGNATED_INITIALIZER;
-
-@property(nonatomic, weak) SemanticsObject* semanticsObject;
-
-@end
-
 @interface SemanticsObject ()
 /** Should only be called in conjunction with setting child/parent relationship. */
 - (void)privateSetParent:(SemanticsObject*)parent;

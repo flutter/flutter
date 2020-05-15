@@ -152,6 +152,28 @@ source_set("flutter_framework_source") {
 ios_test_flutter_path = rebase_path("$root_out_dir/libios_test_flutter.dylib")
 platform_frameworks_path = "$ios_sdk_path/../../Library/Frameworks/"
 
+# For tests that rely on manual reference counting.
+source_set("ios_test_flutter_mrc") {
+  visibility = [ ":*" ]
+  cflags = [
+    "-fvisibility=default",
+    "-F$platform_frameworks_path",
+    "-mios-simulator-version-min=$ios_testing_deployment_target",
+  ]
+  sources = [
+    "framework/Source/accessibility_bridge_test.mm",
+  ]
+  deps = [
+    ":flutter_framework_source",
+    "//flutter/shell/platform/darwin/common:framework_shared",
+    "//flutter/third_party/tonic",
+    "//flutter/third_party/txt",
+    "//third_party/ocmock:ocmock",
+    "//third_party/rapidjson",
+    "//third_party/skia",
+  ]
+}
+
 # NOTE: This currently only supports simulator targets because of the install_name.
 # TODO(54504): Switch the install_name and make the test runner copy the dynamic
 #              library into the testing bundle.
@@ -182,8 +204,12 @@ shared_library("ios_test_flutter") {
   ]
   deps = [
     ":flutter_framework_source",
+    ":ios_test_flutter_mrc",
     "//flutter/shell/platform/darwin/common:framework_shared",
+    "//flutter/third_party/tonic",
+    "//flutter/third_party/txt",
     "//third_party/ocmock:ocmock",
+    "//third_party/rapidjson",
     "//third_party/skia",
   ]
   public_configs = [ "//flutter:config" ]
