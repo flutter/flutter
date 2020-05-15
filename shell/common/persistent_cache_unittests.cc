@@ -16,6 +16,7 @@
 #include "flutter/shell/common/persistent_cache.h"
 #include "flutter/shell/common/shell_test.h"
 #include "flutter/shell/common/switches.h"
+#include "flutter/shell/version/version.h"
 #include "flutter/testing/testing.h"
 #include "include/core/SkPicture.h"
 
@@ -202,6 +203,36 @@ TEST_F(ShellTest, CanLoadSkSLsFromAsset) {
 
   // Cleanup.
   fml::UnlinkFile(asset_dir.fd(), PersistentCache::kAssetFileName);
+}
+
+TEST_F(ShellTest, CanRemoveOldPersistentCache) {
+  fml::ScopedTemporaryDirectory base_dir;
+  ASSERT_TRUE(base_dir.fd().is_valid());
+
+  fml::CreateDirectory(base_dir.fd(),
+                       {"flutter_engine", GetFlutterEngineVersion(), "skia"},
+                       fml::FilePermission::kReadWrite);
+
+  constexpr char kOldEngineVersion[] = "old";
+  auto old_created = fml::CreateDirectory(
+      base_dir.fd(), {"flutter_engine", kOldEngineVersion, "skia"},
+      fml::FilePermission::kReadWrite);
+  ASSERT_TRUE(old_created.is_valid());
+
+  PersistentCache::SetCacheDirectoryPath(base_dir.path());
+  PersistentCache::ResetCacheForProcess();
+
+  auto engine_dir = fml::OpenDirectoryReadOnly(base_dir.fd(), "flutter_engine");
+  auto current_dir =
+      fml::OpenDirectoryReadOnly(engine_dir, GetFlutterEngineVersion());
+  auto old_dir = fml::OpenDirectoryReadOnly(engine_dir, kOldEngineVersion);
+
+  ASSERT_TRUE(engine_dir.is_valid());
+  ASSERT_TRUE(current_dir.is_valid());
+  ASSERT_FALSE(old_dir.is_valid());
+
+  // Cleanup
+  fml::RemoveFilesInDirectory(base_dir.fd());
 }
 
 }  // namespace testing
