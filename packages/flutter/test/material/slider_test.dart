@@ -1036,15 +1036,22 @@ void main() {
     TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
+//    RenderObject box = tester.firstRenderObject(find.byType(Overlay).evaluate().first.renderObject);
+    RenderObject box = find.byType(Overlay).evaluate().first.renderObject;
+//    box.
+//    print(box.debugDescribeChildren());
+//    print(box.debugFillProperties(this));
+//    debugDumpApp();
+
     expect(
       tester.firstRenderObject(find.byType(Overlay)),
       paints
         ..path(
           includes: const <Offset>[
             Offset(0.0, 0.0),
-            Offset(0.0, -38.0),
-            Offset(-30.0, -16.0),
-            Offset(30.0, -16.0),
+            Offset(0.0, -8.0),
+            Offset(-276.0, -16.0),
+            Offset(-216.0, -16.0),
           ],
           color: const Color(0xf55f5f5f),
         ),
@@ -1064,9 +1071,9 @@ void main() {
         ..path(
           includes: const <Offset>[
             Offset(0.0, 0.0),
-            Offset(0.0, -52.0),
-            Offset(-44.0, -16.0),
-            Offset(44.0, -16.0),
+            Offset(0.0, -8.0),
+            Offset(-304.0, -16.0),
+            Offset(-216.0, -16.0),
           ],
           color: const Color(0xf55f5f5f),
         ),
@@ -1090,9 +1097,9 @@ void main() {
         ..path(
           includes: const <Offset>[
             Offset(0.0, 0.0),
-            Offset(0.0, -38.0),
-            Offset(-30.0, -16.0),
-            Offset(30.0, -16.0),
+            Offset(0.0, -8.0),
+            Offset(-276.0, -16.0),
+            Offset(-216.0, -16.0),
           ],
           color: const Color(0xf55f5f5f),
         ),
@@ -1116,9 +1123,9 @@ void main() {
         ..path(
           includes: const <Offset>[
             Offset(0.0, 0.0),
-            Offset(0.0, -52.0),
-            Offset(-44.0, -16.0),
-            Offset(44.0, -16.0),
+            Offset(0.0, -8.0),
+            Offset(-276.0, -16.0),
+            Offset(-216.0, -16.0),
           ],
           color: const Color(0xf55f5f5f),
         ),
