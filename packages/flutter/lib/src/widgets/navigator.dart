@@ -524,6 +524,7 @@ abstract class Page<T> extends RouteSettings {
   /// Creates the [Route] that corresponds to this page.
   ///
   /// The created [Route] must have its [Route.settings] property set to this [Page].
+  @factory
   Route<T> createRoute(BuildContext context);
 
   @override
