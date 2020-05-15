@@ -882,7 +882,7 @@ config("optimize") {
     cflags = [ "/O1" ] + common_optimize_on_cflags + [ "/Oi" ]
   } else if (is_ios) {
     cflags = [ "-Os" ] + common_optimize_on_cflags  # Favor size over speed.
-  } else if (is_android) {
+  } else if (is_android || is_fuchsia || is_linux) {
     cflags = [ "-Oz" ] + common_optimize_on_cflags  # Favor size over speed.
     if (enable_lto) {
       lto_flags += [ "-flto" ]
