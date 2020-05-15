@@ -8,7 +8,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 
 import 'button.dart';
 import 'colors.dart';
@@ -62,151 +61,6 @@ const TextStyle _kToolbarButtonDisabledFontStyle = TextStyle(
 
 // Eyeballed value.
 const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0);
-
-// Generates the child that's passed into CupertinoTextSelectionToolbar.
-class _CupertinoTextSelectionToolbarWrapper extends StatefulWidget {
-  const _CupertinoTextSelectionToolbarWrapper({
-    Key key,
-    this.arrowTipX,
-    this.barTopY,
-    this.clipboardStatus,
-    this.handleCut,
-    this.handleCopy,
-    this.handlePaste,
-    this.handleSelectAll,
-    this.isArrowPointingDown,
-  }) : super(key: key);
-
-  final double arrowTipX;
-  final double barTopY;
-  final ClipboardStatusNotifier clipboardStatus;
-  final VoidCallback handleCut;
-  final VoidCallback handleCopy;
-  final VoidCallback handlePaste;
-  final VoidCallback handleSelectAll;
-  final bool isArrowPointingDown;
-
-  @override
-  _CupertinoTextSelectionToolbarWrapperState createState() => _CupertinoTextSelectionToolbarWrapperState();
-}
-
-class _CupertinoTextSelectionToolbarWrapperState extends State<_CupertinoTextSelectionToolbarWrapper> {
-  ClipboardStatusNotifier _clipboardStatus;
-
-  void _onChangedClipboardStatus() {
-    setState(() {
-      // Inform the widget that the value of clipboardStatus has changed.
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _clipboardStatus = widget.clipboardStatus ?? ClipboardStatusNotifier();
-    _clipboardStatus.addListener(_onChangedClipboardStatus);
-    _clipboardStatus.update();
-  }
-
-  @override
-  void didUpdateWidget(_CupertinoTextSelectionToolbarWrapper oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.clipboardStatus == null && widget.clipboardStatus != null) {
-      _clipboardStatus.removeListener(_onChangedClipboardStatus);
-      _clipboardStatus.dispose();
-      _clipboardStatus = widget.clipboardStatus;
-    } else if (oldWidget.clipboardStatus != null) {
-      if (widget.clipboardStatus == null) {
-        _clipboardStatus = ClipboardStatusNotifier();
-        _clipboardStatus.addListener(_onChangedClipboardStatus);
-        oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
-      } else if (widget.clipboardStatus != oldWidget.clipboardStatus) {
-        _clipboardStatus = widget.clipboardStatus;
-        _clipboardStatus.addListener(_onChangedClipboardStatus);
-        oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
-      }
-    }
-    if (widget.handlePaste != null) {
-      _clipboardStatus.update();
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    // When used in an Overlay, this can be disposed after its creator has
-    // already disposed _clipboardStatus.
-    if (!_clipboardStatus.disposed) {
-      _clipboardStatus.removeListener(_onChangedClipboardStatus);
-      if (widget.clipboardStatus == null) {
-        _clipboardStatus.dispose();
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Don't render the menu until the state of the clipboard is known.
-    if (widget.handlePaste != null
-        && _clipboardStatus.value == ClipboardStatus.unknown) {
-      return const SizedBox(width: 0.0, height: 0.0);
-    }
-
-    final List<Widget> items = <Widget>[];
-    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
-    final EdgeInsets arrowPadding = widget.isArrowPointingDown
-      ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
-      : EdgeInsets.only(top: _kToolbarArrowSize.height);
-    final Widget onePhysicalPixelVerticalDivider =
-        SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
-
-    void addToolbarButton(
-      String text,
-      VoidCallback onPressed,
-    ) {
-      if (items.isNotEmpty) {
-        items.add(onePhysicalPixelVerticalDivider);
-      }
-
-      items.add(CupertinoButton(
-        child: Text(
-          text,
-          overflow: TextOverflow.ellipsis,
-          style: _kToolbarButtonFontStyle,
-        ),
-        borderRadius: null,
-        color: _kToolbarBackgroundColor,
-        minSize: _kToolbarHeight,
-        onPressed: onPressed,
-        padding: _kToolbarButtonPadding.add(arrowPadding),
-        pressedOpacity: 0.7,
-      ));
-    }
-
-    if (widget.handleCut != null) {
-      addToolbarButton(localizations.cutButtonLabel, widget.handleCut);
-    }
-    if (widget.handleCopy != null) {
-      addToolbarButton(localizations.copyButtonLabel, widget.handleCopy);
-    }
-    if (widget.handlePaste != null
-        && _clipboardStatus.value == ClipboardStatus.pasteable) {
-      addToolbarButton(localizations.pasteButtonLabel, widget.handlePaste);
-    }
-    if (widget.handleSelectAll != null) {
-      addToolbarButton(localizations.selectAllButtonLabel, widget.handleSelectAll);
-    }
-
-    return CupertinoTextSelectionToolbar._(
-      barTopY: widget.barTopY,
-      arrowTipX: widget.arrowTipX,
-      isArrowPointingDown: widget.isArrowPointingDown,
-      child: items.isEmpty ? null : _CupertinoTextSelectionToolbarContent(
-        isArrowPointingDown: widget.isArrowPointingDown,
-        children: items,
-      ),
-    );
-  }
-}
 
 /// An iOS-style toolbar that appears in response to text selection.
 ///
@@ -458,7 +312,6 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier clipboardStatus,
   ) {
     assert(debugCheckHasMediaQuery(context));
     final MediaQueryData mediaQuery = MediaQuery.of(context);
@@ -485,15 +338,49 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       ? endpoints.first.point.dy - textLineHeight - _kToolbarContentDistance - _kToolbarHeight
       : endpoints.last.point.dy + _kToolbarContentDistance;
 
-    return _CupertinoTextSelectionToolbarWrapper(
-      arrowTipX: arrowTipX,
+    final List<Widget> items = <Widget>[];
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+    final EdgeInsets arrowPadding = isArrowPointingDown
+      ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
+      : EdgeInsets.only(top: _kToolbarArrowSize.height);
+
+    void addToolbarButtonIfNeeded(
+      String text,
+      bool Function(TextSelectionDelegate) predicate,
+      void Function(TextSelectionDelegate) onPressed,
+    ) {
+      if (!predicate(delegate)) {
+        return;
+      }
+
+      items.add(CupertinoButton(
+        child: Text(
+          text,
+          overflow: TextOverflow.ellipsis,
+          style: _kToolbarButtonFontStyle,
+        ),
+        color: _kToolbarBackgroundColor,
+        minSize: _kToolbarHeight,
+        padding: _kToolbarButtonPadding.add(arrowPadding),
+        borderRadius: null,
+        pressedOpacity: 0.7,
+        onPressed: () => onPressed(delegate),
+      ));
+    }
+
+    addToolbarButtonIfNeeded(localizations.cutButtonLabel, canCut, handleCut);
+    addToolbarButtonIfNeeded(localizations.copyButtonLabel, canCopy, handleCopy);
+    addToolbarButtonIfNeeded(localizations.pasteButtonLabel, canPaste, handlePaste);
+    addToolbarButtonIfNeeded(localizations.selectAllButtonLabel, canSelectAll, handleSelectAll);
+
+    return CupertinoTextSelectionToolbar._(
       barTopY: localBarTopY + globalEditableRegion.top,
-      clipboardStatus: clipboardStatus,
-      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
-      handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
-      handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
-      handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
+      arrowTipX: arrowTipX,
       isArrowPointingDown: isArrowPointingDown,
+      child: items.isEmpty ? null : _CupertinoTextSelectionToolbarContent(
+        isArrowPointingDown: isArrowPointingDown,
+        children: items,
+      ),
     );
   }
 
