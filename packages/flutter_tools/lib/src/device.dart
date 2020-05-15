@@ -250,7 +250,7 @@ class DeviceManager {
             .where((Device device) => device.ephemeral == true)
             .toList();
       }
-      // If it was not able to prioritize a device. For xample, if the user
+      // If it was not able to prioritize a device. For example, if the user
       // has two active Android devices running, then we request the user to
       // choose one.
       if (devices.length > 1 && _allEphemeral(devices)){
@@ -265,7 +265,7 @@ class DeviceManager {
   }
 
   bool _allEphemeral(List<Device> devices) {
-      return !devices.any((Device device) => device.ephemeral == false);
+      return devices.every((Device device) => device.ephemeral == true);
   }
 
   Future<Device> _chooseOneOfAvailableDevices(List<Device> devices) async {
