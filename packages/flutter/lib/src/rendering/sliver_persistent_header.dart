@@ -533,15 +533,16 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   /// If the header isn't already fully exposed, then animate it into view, if
   /// it is exposed, animate it out of view.
   ///
-  /// Returns the value of [_effectiveScrollOffset] when no longer animating if
-  /// the [FloatingHeaderSnapConfiguration.nestedSnap] is true for correcting
-  /// the outer position. Otherwise it will return -1.0.
-  Future<double> maybeStartSnapAnimation(ScrollDirection direction) async {
+  /// Returns a bool after animating to indicate if the [ScrollPosition] needs
+  /// to be corrected. This is relevant if
+  /// [FloatingHeaderSnapConfiguration.nestedSnap] is true, indicating we are
+  /// snapping an outer scrollable over a nested inner scrollable.
+  Future<bool> maybeStartSnapAnimation(ScrollDirection direction) async {
     if (snapConfiguration == null)
-      return -1.0;
+      return false;
     if ((direction == ScrollDirection.forward && _effectiveScrollOffset <= 0.0)
       || (direction == ScrollDirection.reverse && _effectiveScrollOffset >= maxExtent))
-      return snapConfiguration.nestedSnap ? _effectiveScrollOffset : -1.0;
+      return snapConfiguration.nestedSnap;
 
     final TickerProvider vsync = snapConfiguration.vsync;
     final Duration duration = snapConfiguration.duration;
@@ -568,20 +569,21 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     );
 
     await _controller.forward(from: 0.0);
-    return snapConfiguration.nestedSnap ? tweenEnd : -1.0;
+    return snapConfiguration.nestedSnap;
   }
 
   /// If a header snap animation is underway then stop it.
   ///
-  /// Returns a double to represent any potential position correction due to the
-  /// snap being triggered by a nested position. If [snapConfiguration.nestedSnap]
-  /// is false, it will return -1.0.
-  double maybeStopSnapAnimation(ScrollDirection direction) {
+  /// Returns a bool to indicate if the [ScrollPosition] needs to be corrected
+  /// due to the snap being triggered by a nested position.
+  /// [FloatingHeaderSnapConfiguration.nestedSnap] indicates if this situation
+  /// is present.
+  bool maybeStopSnapAnimation(ScrollDirection direction) {
     if (snapConfiguration == null)
-      return -1.0;
+      return false;
     _controller?.stop();
     _nestedSnapOffset = _effectiveScrollOffset;
-    return snapConfiguration.nestedSnap ? _effectiveScrollOffset : -1.0;
+    return snapConfiguration.nestedSnap;
   }
 
   @override
