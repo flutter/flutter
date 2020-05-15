@@ -37,12 +37,14 @@ else
 fi
 
 reboot() {
-  echo "Dumping system logs..."
+  # TODO come up with better log collection strategy.
+  # https://github.com/flutter/flutter/issues/57273
+  # echo "Dumping system logs..."
 
-  ./fuchsia_ctl -d $device_name ssh \
-      -c "log_listener --dump_logs yes" \
-      --timeout-seconds $ssh_timeout_seconds \
-      --identity-file $pkey
+  # ./fuchsia_ctl -d $device_name ssh \
+  #     -c "log_listener --dump_logs yes" \
+  #     --timeout-seconds $ssh_timeout_seconds \
+  #     --identity-file $pkey
 
   echo "$(date) START:REBOOT ------------------------------------------"
   # note: this will set an exit code of 255, which we can ignore.
@@ -102,15 +104,17 @@ echo "$(date) START:fml_tests ---------------------------------------"
     --identity-file $pkey \
     --timeout-seconds $test_timeout_seconds \
     --packages-directory packages
+echo "$(date) DONE:fml_tests ---------------------------------------"
 
 
-#echo "$(date) START:flow_tests --------------------------------------"
-#./fuchsia_ctl -d $device_name test \
-#    -f flow_tests-0.far  \
-#    -t flow_tests \
-#    --identity-file $pkey \
-#    --timeout-seconds $test_timeout_seconds \
-#    --packages-directory packages
+echo "$(date) START:flow_tests --------------------------------------"
+./fuchsia_ctl -d $device_name test \
+   -f flow_tests-0.far  \
+   -t flow_tests \
+   --identity-file $pkey \
+   --timeout-seconds $test_timeout_seconds \
+   --packages-directory packages
+echo "$(date) DONE:flow_tests ---------------------------------------"
 
 
 # TODO(kaushikiska): Runtime and shell tests are failing with
