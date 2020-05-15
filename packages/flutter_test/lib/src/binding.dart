@@ -1128,7 +1128,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           debugPrintStack(stackTrace: timer.creationStackTrace);
           debugPrint('');
         }
-
         timersPending = true;
     }
 
