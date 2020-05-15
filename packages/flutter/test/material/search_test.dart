@@ -9,37 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-class MockClipboard {
-  Object _clipboardData = <String, dynamic>{
-    'text': null,
-  };
-
-  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
-    switch (methodCall.method) {
-      case 'Clipboard.getData':
-        return _clipboardData;
-      case 'Clipboard.setData':
-        _clipboardData = methodCall.arguments;
-        break;
-    }
-  }
-}
-
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-  final MockClipboard mockClipboard = MockClipboard();
-
-  setUp(() async {
-    // Fill the clipboard so that the PASTE option is available in the text
-    // selection menu.
-    SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
-    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
-  });
-
-  tearDown(() {
-    SystemChannels.platform.setMockMethodCallHandler(null);
-  });
-
   testWidgets('Can open and close search', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     final List<String> selectedResults = <String>[];

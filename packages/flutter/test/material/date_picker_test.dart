@@ -3,31 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import 'feedback_tester.dart';
 
-class MockClipboard {
-  Object _clipboardData = <String, dynamic>{
-    'text': null,
-  };
-
-  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
-    switch (methodCall.method) {
-      case 'Clipboard.getData':
-        return _clipboardData;
-      case 'Clipboard.setData':
-        _clipboardData = methodCall.arguments;
-        break;
-    }
-  }
-}
-
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-  final MockClipboard mockClipboard = MockClipboard();
 
   DateTime firstDate;
   DateTime lastDate;
@@ -54,7 +35,7 @@ void main() {
     return tester.widget<TextField>(find.byType(TextField));
   }
 
-  setUp(() async {
+  setUp(() {
     firstDate = DateTime(2001, DateTime.january, 1);
     lastDate = DateTime(2031, DateTime.december, 31);
     initialDate = DateTime(2016, DateTime.january, 15);
@@ -70,15 +51,6 @@ void main() {
     fieldHintText = null;
     fieldLabelText = null;
     helpText = null;
-
-    // Fill the clipboard so that the PASTE option is available in the text
-    // selection menu.
-    SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
-    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
-  });
-
-  tearDown(() {
-    SystemChannels.platform.setMockMethodCallHandler(null);
   });
 
   Future<void> prepareDatePicker(WidgetTester tester, Future<void> callback(Future<DateTime> date)) async {
@@ -679,6 +651,63 @@ void main() {
         expect(find.text(errorInvalidText), findsOneWidget);
       });
     });
+
+    testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {
+      BuildContext buttonContext;
+      const InputBorder border = InputBorder.none;
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData.light().copyWith(
+          inputDecorationTheme: const InputDecorationTheme(
+            filled: false,
+            border: border,
+          ),
+        ),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  buttonContext = context;
+                },
+                child: const Text('Go'),
+              );
+            },
+          ),
+        ),
+      ));
+
+      await tester.tap(find.text('Go'));
+      expect(buttonContext, isNotNull);
+
+      showDatePicker(
+        context: buttonContext,
+        initialDate: initialDate,
+        firstDate: firstDate,
+        lastDate: lastDate,
+        currentDate: today,
+        initialEntryMode: DatePickerEntryMode.input,
+      );
+
+      await tester.pumpAndSettle();
+
+      // Get the border and container color from the painter of the _BorderContainer
+      // (this was cribbed from input_decorator_test.dart).
+      final CustomPaint customPaint = tester.widget(find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
+        matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
+      ));
+      final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+      final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
+      final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
+      final InputBorder actualBorder = inputBorderTween.evaluate(animation) as InputBorder;
+      final Color containerColor = inputBorderPainter.blendedColor as Color;
+
+      // Border should match
+      expect(actualBorder, equals(border));
+
+      // It shouldn't be filled, so the color should be transparent
+      expect(containerColor, equals(Colors.transparent));
+    });
   });
 
   group('Haptic feedback', () {
@@ -1046,6 +1075,7 @@ void main() {
 
       semantics.dispose();
     });
+
   });
 
   group('Screen configurations', () {

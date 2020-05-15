@@ -105,7 +105,7 @@ class RawMaterialButton extends StatefulWidget {
 
   /// {@macro flutter.material.inkwell.mousecursor}
   ///
-  /// Defaults to null.
+  /// If the property is null, [SystemMouseCursor.click] is used.
   final MouseCursor mouseCursor;
 
   /// Defines the default text style, with [Material.textStyle], for the

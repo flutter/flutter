@@ -21,7 +21,7 @@ void main() {
     FlutterRunTestDriver flutter;
     VmService vmService;
 
-    setUpAll(() async {
+    setUp(() async {
       tempDir = createResolvedTempDirectorySync('vmservice_integration_test.');
 
       final BasicProject _project = BasicProject();
@@ -33,7 +33,7 @@ void main() {
       vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
     });
 
-    tearDownAll(() async {
+    tearDown(() async {
       await flutter?.stop();
       tryToDelete(tempDir);
     });
