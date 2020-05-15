@@ -271,7 +271,7 @@ class DeviceManager {
   Future<Device> _chooseOneOfAvailableDevices(List<Device> devices) async {
     _displayDeviceOptions(devices);
     final String userInput =  await _readUserInput(devices.length);
-    return devices[int.parse(userInput.toString())];
+    return devices[int.parse(userInput)];
   }
 
   void _displayDeviceOptions(List<Device> devices) {
@@ -282,11 +282,11 @@ class DeviceManager {
     }
   }
 
-  Future<String> _readUserInput(int deviceLength) async {
+  Future<String> _readUserInput(int deviceCount) async {
    if (globals.stdio.stdinHasTerminal)  {
       globals.terminal.usesTerminalUi = true;
       final String result = await globals.terminal.promptForCharInput(
-       _createPossibleInputsList(deviceLength),
+       _createPossibleInputsList(deviceCount),
         logger: globals.logger,
         prompt: userMessages.flutterChooseOne
       );
