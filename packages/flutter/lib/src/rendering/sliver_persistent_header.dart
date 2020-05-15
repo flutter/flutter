@@ -537,8 +537,9 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   /// the [FloatingHeaderSnapConfiguration.nestedSnap] is true for correcting
   /// the outer position. Otherwise it will return -1.0.
   Future<double> maybeStartSnapAnimation(ScrollDirection direction) async {
-    if (snapConfiguration == null
-      || (direction == ScrollDirection.forward && _effectiveScrollOffset <= 0.0)
+    if (snapConfiguration == null)
+      return -1.0;
+    if ((direction == ScrollDirection.forward && _effectiveScrollOffset <= 0.0)
       || (direction == ScrollDirection.reverse && _effectiveScrollOffset >= maxExtent))
       return snapConfiguration.nestedSnap ? _effectiveScrollOffset : -1.0;
 
@@ -576,6 +577,8 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   /// snap being triggered by a nested position. If [snapConfiguration.nestedSnap]
   /// is false, it will return -1.0.
   double maybeStopSnapAnimation(ScrollDirection direction) {
+    if (snapConfiguration == null)
+      return -1.0;
     _controller?.stop();
     _nestedSnapOffset = _effectiveScrollOffset;
     return snapConfiguration.nestedSnap ? _effectiveScrollOffset : -1.0;
