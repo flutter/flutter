@@ -107,10 +107,11 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue, // unused.
+    TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
     return _selectionAwareTextManipulation(
+      oldValue,
       newValue,
       (String substring) {
         return substring.replaceAll(blacklistedPattern, replacementString);
@@ -239,10 +240,11 @@ class WhitelistingTextInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue, // unused.
+    TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
     return _selectionAwareTextManipulation(
+      oldValue,
       newValue,
       (String substring) {
         return whitelistedPattern
@@ -259,6 +261,7 @@ class WhitelistingTextInputFormatter extends TextInputFormatter {
 }
 
 TextEditingValue _selectionAwareTextManipulation(
+  TextEditingValue oldValue,
   TextEditingValue value,
   String substringManipulation(String substring),
 ) {
@@ -266,13 +269,14 @@ TextEditingValue _selectionAwareTextManipulation(
   final int selectionEndIndex = value.selection.end;
   String manipulatedText;
   TextSelection manipulatedSelection;
-  final String oldValidText = value.text.substring(0, value.text.length -1);
+  final String oldValidText = oldValue.text;
   if (selectionStartIndex < 0 || selectionEndIndex < 0) {
     manipulatedText = substringManipulation(value.text);
   } else if (value.selection.isCollapsed) { // non-selected text manipulation
     manipulatedText = substringManipulation(value.text);
+    // We only return the old valid value if the current value is not empty
     // manipulation fails, return the old valid text
-    if (manipulatedText.isEmpty) {
+    if (value.text.isNotEmpty && manipulatedText.isEmpty) {
       manipulatedText = oldValidText;
     }
     // move the carret to the end of the text
