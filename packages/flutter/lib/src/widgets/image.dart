@@ -1129,11 +1129,11 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
         onChunk: widget.loadingBuilder == null ? null : _handleImageChunk,
         onError: widget.errorBuilder != null
             ? (dynamic error, StackTrace stackTrace) {
-          setState(() {
-            _lastException = error;
-            _lastStack = stackTrace;
-          });
-        }
+                setState(() {
+                  _lastException = error;
+                  _lastStack = stackTrace;
+                });
+              }
             : null,
       );
     }
