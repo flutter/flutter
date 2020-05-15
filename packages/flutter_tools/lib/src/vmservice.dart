@@ -89,12 +89,20 @@ Future<io.WebSocket> _defaultOpenChannel(String url, {
   io.WebSocket socket;
 
   Future<void> handleError(dynamic e) async {
-    globals.printTrace('Exception attempting to connect to Observatory: $e');
-    globals.printTrace('This was attempt #$attempts. Will retry in $delay.');
-
+    void Function(String) printVisibleTrace = globals.printTrace;
     if (attempts == 10) {
-      globals.printStatus('This is taking longer than expected...');
+      globals.printStatus('Connecting to the Observatory is taking longer than expected...');
+    } else if (attempts == 20) {
+      globals.printStatus('Still attempting to connect to the Observatory...');
+      globals.printStatus(
+        'Consider running with --host-vmservice-port to use a specific port '
+        'that is known to be available.');
+    } else if (attempts % 50 == 0) {
+      printVisibleTrace = globals.printStatus;
     }
+
+    printVisibleTrace('Exception attempting to connect to the Observatory: $e');
+    printVisibleTrace('This was attempt #$attempts. Will retry in $delay.');
 
     // Delay next attempt.
     await Future<void>.delayed(delay);
