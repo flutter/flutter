@@ -709,19 +709,19 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
     // When a scroll stops, then maybe snap the appbar into view.
     // Similarly, when a scroll starts, then maybe stop the snap animation.
     final RenderSliverFloatingPersistentHeader header = _headerRenderer();
-    if (_position.isScrollingNotifier.value) {
-      header?.maybeStopSnapAnimation(_position.userScrollDirection);
-    } else {
-      final double needsCorrection = await header?.maybeStartSnapAnimation(_position.userScrollDirection);
-      // If the _FloatingAppBar is expected to snap from another scrollable,
-      // e.g. when used in conjunction with a NestedScrollView, the position
-      // needs to be corrected after the animation completes, or the app bar
-      // will stop floating.
-      
-      if (needsCorrection) {
+    final SliverGeometry geometry = header?.geometry;
+    double correction = -1.0;
+    if (_position.isScrollingNotifier.value)
+      correction = header?.maybeStopSnapAnimation(_position.userScrollDirection);
+    else
+      correction = await header?.maybeStartSnapAnimation(_position.userScrollDirection);
 
-//        _position.correctPixels();
-      }
+    // If the _FloatingAppBar is expected to snap from another scrollable,
+    // e.g. when used in conjunction with a NestedScrollView, the position
+    // needs to be corrected after the animation completes, or the outer
+    // positioning will be out of sync, breaking the float.
+    if (correction >= 0.0 && geometry != null) {
+      _position.correctPixels(geometry.scrollExtent - geometry.paintExtent);
     }
 
   }
