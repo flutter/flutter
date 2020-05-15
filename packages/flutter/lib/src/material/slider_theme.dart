@@ -2793,6 +2793,7 @@ class _RectangularSliderValueIndicatorPathPainter {
     assert(!sizeWithOverflow.isEmpty);
     const double edgePadding = 8.0;
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale, textScaleFactor);
+    center = parentBox.localToGlobal(center);
 
     // The rectangle must be shifted towards the center so that it minimizes the
     // chance of it rendering outside the bounds of the render box. If the shift
