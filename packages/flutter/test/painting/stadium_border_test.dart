@@ -9,6 +9,18 @@ import '../rendering/mock_canvas.dart';
 import 'common_matchers.dart';
 
 void main() {
+  test('StadiumBorder defaults', () {
+    const StadiumBorder border = StadiumBorder();
+    expect(border.side, BorderSide.none);
+  });
+
+  test('StadiumBorder copyWith, ==, hashCode', () {
+    expect(const StadiumBorder(), const StadiumBorder().copyWith());
+    expect(const StadiumBorder().hashCode, const StadiumBorder().copyWith().hashCode);
+    const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
+    expect(const StadiumBorder().copyWith(side: side), const StadiumBorder(side: side));
+  });
+
   test('StadiumBorder', () {
     const StadiumBorder c10 = StadiumBorder(side: BorderSide(width: 10.0));
     const StadiumBorder c15 = StadiumBorder(side: BorderSide(width: 15.0));
@@ -84,7 +96,7 @@ void main() {
     expect(direct50, indirect50);
     expect(direct50.hashCode, indirect50.hashCode);
     expect(direct50.toString(), indirect50.toString());
-  }, skip: isBrowser);
+  });
 
   test('StadiumBorder and RoundedRectBorder', () {
     const StadiumBorder stadium = StadiumBorder(side: BorderSide.none);

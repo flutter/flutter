@@ -90,6 +90,7 @@ export 'dart:io'
         ProcessStartMode,
         // RandomAccessFile  NO! Use `file_system.dart`
         ServerSocket,
+        SignalException,
         // stderr,           NO! Use `io.dart`
         // stdin,            NO! Use `io.dart`
         Stdin,

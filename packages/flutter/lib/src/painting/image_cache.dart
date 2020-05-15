@@ -286,10 +286,9 @@ class ImageCache {
     }
   }
 
-  void _trackLiveImage(Object key, _LiveImage image, { bool debugPutOk = true }) {
+  void _trackLiveImage(Object key, _LiveImage image) {
     // Avoid adding unnecessary callbacks to the completer.
     _liveImages.putIfAbsent(key, () {
-      assert(debugPutOk);
       // Even if no callers to ImageProvider.resolve have listened to the stream,
       // the cache is listening to the stream and will remove itself once the
       // image completes to move it from pending to keepAlive.
@@ -400,10 +399,6 @@ class ImageCache {
           imageSize,
           () => _liveImages.remove(key),
         ),
-        // This should result in a put if `loader()` above executed
-        // synchronously, in which case syncCall is true and we arrived here
-        // before we got a chance to track the image otherwise.
-        debugPutOk: syncCall,
       );
 
       final _PendingImage pendingImage = untrackedPendingImage ?? _pendingImages.remove(key);

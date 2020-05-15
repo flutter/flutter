@@ -21,6 +21,7 @@ import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'bundle.dart';
 import 'codegen.dart';
 import 'compile.dart';
 import 'convert.dart';
@@ -98,7 +99,9 @@ class FlutterDevice {
         compilerMessageConsumer:
           (String message, {bool emphasis, TerminalColor color, }) =>
             globals.printTrace(message),
-        initializeFromDill: globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
+        initializeFromDill: getDefaultCachedKernelPath(
+          trackWidgetCreation: buildInfo.trackWidgetCreation,
+        ),
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
         platformDill: globals.fs.file(globals.artifacts
@@ -123,7 +126,9 @@ class FlutterDevice {
         targetModel: targetModel,
         experimentalFlags: experimentalFlags,
         dartDefines: buildInfo.dartDefines,
-        initializeFromDill: globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
+        initializeFromDill: getDefaultCachedKernelPath(
+          trackWidgetCreation: buildInfo.trackWidgetCreation,
+        ),
         packagesPath: globalPackagesPath,
       );
     }
@@ -464,6 +469,7 @@ class FlutterDevice {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await ApplicationPackageFactory.instance.getPackageForPlatform(
       targetPlatform,
+      buildInfo: hotRunner.debuggingOptions.buildInfo,
       applicationBinary: hotRunner.applicationBinary,
     );
 
@@ -519,6 +525,7 @@ class FlutterDevice {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await ApplicationPackageFactory.instance.getPackageForPlatform(
       targetPlatform,
+      buildInfo: coldRunner.debuggingOptions.buildInfo,
       applicationBinary: coldRunner.applicationBinary,
     );
 
@@ -723,6 +730,7 @@ abstract class ResidentRunner {
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
   bool get supportsCanvasKit => false;
   bool get supportsWriteSkSL => supportsServiceProtocol;
+  bool get trackWidgetCreation => debuggingOptions.buildInfo.trackWidgetCreation;
 
   // Returns the Uri of the first connected device for mobile,
   // and only connected device for web.
@@ -830,7 +838,7 @@ abstract class ResidentRunner {
     final File outputFile = globals.fsUtils.getUniqueFile(
       globals.fs.currentDirectory,
       'flutter',
-      'sksl',
+      'sksl.json',
     );
     final Device device = flutterDevices.first.device;
 
@@ -1156,10 +1164,11 @@ abstract class ResidentRunner {
   Future<void> preExit() async {
     // If _dillOutputPath is null, we created a temporary directory for the dill.
     if (_dillOutputPath == null && artifactDirectory.existsSync()) {
-      final File outputDill = artifactDirectory.childFile('app.dill');
+      final File outputDill = globals.fs.file(dillOutputPath);
       if (outputDill.existsSync()) {
-        artifactDirectory.childFile('app.dill')
-          .copySync(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+        outputDill.copySync(getDefaultCachedKernelPath(
+          trackWidgetCreation: trackWidgetCreation,
+        ));
       }
       artifactDirectory.deleteSync(recursive: true);
     }
@@ -1286,7 +1295,7 @@ class TerminalHandler {
   final Map<io.ProcessSignal, Object> _signalTokens = <io.ProcessSignal, Object>{};
 
   void _addSignalHandler(io.ProcessSignal signal, SignalHandler handler) {
-    _signalTokens[signal] = signals.addHandler(signal, handler);
+    _signalTokens[signal] = globals.signals.addHandler(signal, handler);
   }
 
   void registerSignalHandlers() {
@@ -1305,7 +1314,7 @@ class TerminalHandler {
   void stop() {
     assert(residentRunner.stayResident);
     for (final MapEntry<io.ProcessSignal, Object> entry in _signalTokens.entries) {
-      signals.removeHandler(entry.key, entry.value);
+      globals.signals.removeHandler(entry.key, entry.value);
     }
     _signalTokens.clear();
     subscription.cancel();

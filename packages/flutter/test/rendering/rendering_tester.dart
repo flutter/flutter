@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -19,7 +21,15 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   /// while drawing the frame. If [onErrors] is null and [FlutterError] caught at least
   /// one error, this function fails the test. A test may override [onErrors] and
   /// inspect errors using [takeFlutterErrorDetails].
-  TestRenderingFlutterBinding({ this.onErrors });
+  ///
+  /// Errors caught between frames will cause the test to fail unless
+  /// [FlutterError.onError] has been overridden.
+  TestRenderingFlutterBinding({ this.onErrors }) {
+    FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.dumpErrorToConsole(details);
+      Zone.current.parent.handleUncaughtError(details.exception, details.stack);
+    };
+  }
 
   final List<FlutterErrorDetails> _errors = <FlutterErrorDetails>[];
 
