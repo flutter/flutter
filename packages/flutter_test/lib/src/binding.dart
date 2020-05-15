@@ -1117,8 +1117,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     super._verifyInvariants();
 
     bool timersPending = false;
-    if (   _currentFakeAsync.periodicTimerCount != 0
-        || _currentFakeAsync.nonPeriodicTimerCount != 0) {
+    if (_currentFakeAsync.periodicTimerCount != 0 ||
+        _currentFakeAsync.nonPeriodicTimerCount != 0) {
 
         debugPrint('Pending timers:');
         for (final FakeTimer timer in _currentFakeAsync.pendingTimers) {
