@@ -1036,13 +1036,6 @@ void main() {
     TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-//    RenderObject box = tester.firstRenderObject(find.byType(Overlay).evaluate().first.renderObject);
-    RenderObject box = find.byType(Overlay).evaluate().first.renderObject;
-//    box.
-//    print(box.debugDescribeChildren());
-//    print(box.debugFillProperties(this));
-//    debugDumpApp();
-
     expect(
       tester.firstRenderObject(find.byType(Overlay)),
       paints
