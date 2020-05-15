@@ -1,7 +1,9 @@
 chrome:
   # It seems Chrome can't always release from the same build for all operating
   # systems, so we specify per-OS build number.
-  Linux: 753189
+  # Note: 741412 binary is for Chrome Version 82. Driver for Chrome version 83
+  # is not working with chrome.binary option.
+  Linux: 741412
   Mac: 735194
   Win: 735105
 firefox:

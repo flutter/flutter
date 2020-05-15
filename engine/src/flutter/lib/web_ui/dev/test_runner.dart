@@ -131,8 +131,8 @@ class TestCommand extends Command<bool> with ArgUtils {
         // TODO(nurhan): https://github.com/flutter/flutter/issues/53322
         // TODO(nurhan): Expand browser matrix for felt integration tests.
         if (runAllTests && isChrome) {
-          bool integrationTestResult = await runIntegrationTests();
           bool unitTestResult = await runUnitTests();
+          bool integrationTestResult = await runIntegrationTests();
           if (integrationTestResult != unitTestResult) {
             print('Tests run. Integration tests passed: $integrationTestResult '
                 'unit tests passed: $unitTestResult');
@@ -146,11 +146,6 @@ class TestCommand extends Command<bool> with ArgUtils {
   }
 
   Future<bool> runIntegrationTests() async {
-    // TODO(nurhan): https://github.com/flutter/flutter/issues/52983
-    if (io.Platform.environment['LUCI_CONTEXT'] != null) {
-      return true;
-    }
-
     return IntegrationTestsManager(browser, useSystemFlutter).runTests();
   }
 
