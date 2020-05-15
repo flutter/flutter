@@ -4,12 +4,14 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -85,17 +87,19 @@ void main() {
   });
 
   group('Filter devices', () {
-    FakeDevice ephemeral;
-    FakeDevice nonEphemeralOne;
-    FakeDevice nonEphemeralTwo;
+    FakeDevice ephemeralOne;
+    FakeDevice ephemeralTwo;
+    FakeDevice nonEphemeralOneOne;
+    FakeDevice nonEphemeralOneTwo;
     FakeDevice unsupported;
     FakeDevice webDevice;
     FakeDevice fuchsiaDevice;
 
     setUp(() {
-      ephemeral = FakeDevice('ephemeral', 'ephemeral', true);
-      nonEphemeralOne = FakeDevice('nonEphemeralOne', 'nonEphemeralOne', false);
-      nonEphemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
+      ephemeralOne = FakeDevice('ephemeralOne', 'ephemeralOne', true);
+      ephemeralTwo = FakeDevice('ephemeralTwo', 'ephemeralTwo', true);
+      nonEphemeralOneOne = FakeDevice('nonEphemeralOneOne', 'nonEphemeralOneOne', false);
+      nonEphemeralOneTwo = FakeDevice('nonEphemeralOneTwo', 'nonEphemeralOneTwo', false);
       unsupported = FakeDevice('unsupported', 'unsupported', true, false);
       webDevice = FakeDevice('webby', 'webby')
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
@@ -103,33 +107,55 @@ void main() {
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia_x64);
     });
 
-    testUsingContext('chooses ephemeral device', () async {
+    testUsingContext('chooses ephemeralOne device', () async {
       final List<Device> devices = <Device>[
-        ephemeral,
-        nonEphemeralOne,
-        nonEphemeralTwo,
+        ephemeralOne,
+        nonEphemeralOneOne,
+        nonEphemeralOneTwo,
         unsupported,
       ];
 
       final DeviceManager deviceManager = TestDeviceManager(devices);
       final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
 
-      expect(filtered.single, ephemeral);
+      expect(filtered.single, ephemeralOne);
     });
 
-    testUsingContext('does not remove all non-ephemeral', () async {
+    testUsingContext('does not remove all non-ephemeralOne', () async {
       final List<Device> devices = <Device>[
-        nonEphemeralOne,
-        nonEphemeralTwo,
+        nonEphemeralOneOne,
+        nonEphemeralOneTwo,
       ];
 
       final DeviceManager deviceManager = TestDeviceManager(devices);
       final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
 
       expect(filtered, <Device>[
-        nonEphemeralOne,
-        nonEphemeralTwo,
+        nonEphemeralOneOne,
+        nonEphemeralOneTwo,
       ]);
+    });
+
+
+    testUsingContext('chose first ephemeralOne device', () async {
+      final List<Device> devices = <Device>[
+        ephemeralOne,
+        ephemeralTwo,
+      ];
+
+      when(globals.terminal.promptForCharInput(<String>['0', '1'],
+        logger: globals.logger,
+        prompt: globals.userMessages.flutterChoseOne)
+      ).thenAnswer((Invocation invocation) async => '0');
+
+      final DeviceManager deviceManager = TestDeviceManager(devices);
+      final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
+
+      expect(filtered, <Device>[
+        ephemeralOne
+      ]);
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => MockTerminal(),
     });
 
     testUsingContext('Removes a single unsupported device', () async {
@@ -158,8 +184,8 @@ void main() {
 
     testUsingContext('Removes unsupported devices from --all', () async {
       final List<Device> devices = <Device>[
-        nonEphemeralOne,
-        nonEphemeralTwo,
+        nonEphemeralOneOne,
+        nonEphemeralOneTwo,
         unsupported,
       ];
       final DeviceManager deviceManager = TestDeviceManager(devices);
@@ -168,8 +194,8 @@ void main() {
       final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
 
       expect(filtered, <Device>[
-        nonEphemeralOne,
-        nonEphemeralTwo,
+        nonEphemeralOneOne,
+        nonEphemeralOneTwo,
       ]);
     });
 
@@ -242,3 +268,4 @@ class TestDeviceManager extends DeviceManager {
 }
 
 class MockProcess extends Mock implements Process {}
+class MockTerminal extends Mock implements AnsiTerminal {}
