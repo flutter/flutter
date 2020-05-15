@@ -981,7 +981,7 @@ class Window {
   }
 
   _SetNeedsReportTimingsFunc _setNeedsReportTimings;
-  void _nativeSetNeedsReportTimings(bool value) native 'Window_setNeedsReportTimings';
+  void _nativeSetNeedsReportTimings(bool/*!*/ value) native 'Window_setNeedsReportTimings';
 
   /// A callback that is invoked when pointer data is available.
   ///
@@ -1030,8 +1030,8 @@ class Window {
   ///  * [Navigator], a widget that handles routing.
   ///  * [SystemChannels.navigation], which handles subsequent navigation
   ///    requests from the embedder.
-  String get defaultRouteName => _defaultRouteName();
-  String _defaultRouteName() native 'Window_defaultRouteName';
+  String/*!*/ get defaultRouteName => _defaultRouteName();
+  String/*!*/ _defaultRouteName() native 'Window_defaultRouteName';
 
   /// Requests that, at the next appropriate opportunity, the [onBeginFrame]
   /// and [onDrawFrame] callbacks be invoked.
@@ -1066,7 +1066,7 @@ class Window {
   ///    scheduling of frames.
   ///  * [RendererBinding], the Flutter framework class which manages layout and
   ///    painting.
-  void render(Scene scene) native 'Window_render';
+  void render(Scene/*!*/ scene) native 'Window_render';
 
   /// Whether the user has requested that [updateSemantics] be called when
   /// the semantic contents of window changes.
@@ -1127,7 +1127,7 @@ class Window {
   ///
   /// In either case, this function disposes the given update, which means the
   /// semantics update cannot be used further.
-  void updateSemantics(SemanticsUpdate update) native 'Window_updateSemantics';
+  void updateSemantics(SemanticsUpdate/*!*/ update) native 'Window_updateSemantics';
 
   /// Set the debug name associated with this window's root isolate.
   ///
@@ -1137,7 +1137,7 @@ class Window {
   /// This can be combined with flutter tools `--isolate-filter` flag to debug
   /// specific root isolates. For example: `flutter attach --isolate-filter=[name]`.
   /// Note that this does not rename any child isolates of the root.
-  void setIsolateDebugName(String name) native 'Window_setIsolateDebugName';
+  void setIsolateDebugName(String/*!*/ name) native 'Window_setIsolateDebugName';
 
   /// Sends a message to a platform-specific plugin.
   ///
@@ -1148,17 +1148,17 @@ class Window {
   ///
   /// The framework invokes [callback] in the same zone in which this method
   /// was called.
-  void sendPlatformMessage(String name,
-                           ByteData data,
-                           PlatformMessageResponseCallback callback) {
+  void sendPlatformMessage(String/*!*/ name,
+                           ByteData/*?*/ data,
+                           PlatformMessageResponseCallback/*?*/ callback) {
     final String error =
         _sendPlatformMessage(name, _zonedPlatformMessageResponseCallback(callback), data);
     if (error != null)
       throw Exception(error);
   }
-  String _sendPlatformMessage(String name,
-                              PlatformMessageResponseCallback callback,
-                              ByteData data) native 'Window_sendPlatformMessage';
+  String _sendPlatformMessage(String/*!*/ name,
+                              PlatformMessageResponseCallback/*?*/ callback,
+                              ByteData/*?*/ data) native 'Window_sendPlatformMessage';
 
   /// Called whenever this window receives a message from a platform-specific
   /// plugin.
@@ -1182,12 +1182,12 @@ class Window {
   }
 
   /// Called by [_dispatchPlatformMessage].
-  void _respondToPlatformMessage(int responseId, ByteData data)
+  void _respondToPlatformMessage(int/*!*/ responseId, ByteData/*?*/ data)
       native 'Window_respondToPlatformMessage';
 
   /// Wraps the given [callback] in another callback that ensures that the
   /// original callback is called in the zone it was registered in.
-  static PlatformMessageResponseCallback _zonedPlatformMessageResponseCallback(PlatformMessageResponseCallback callback) {
+  static PlatformMessageResponseCallback/*?*/ _zonedPlatformMessageResponseCallback(PlatformMessageResponseCallback/*?*/ callback) {
     if (callback == null)
       return null;
 
@@ -1209,7 +1209,7 @@ class Window {
   ///
   /// For asynchronous communication between the embedder and isolate, a
   /// platform channel may be used.
-  ByteData getPersistentIsolateData() native 'Window_getPersistentIsolateData';
+  ByteData/*?*/ getPersistentIsolateData() native 'Window_getPersistentIsolateData';
 }
 
 /// Additional accessibility features that may be enabled by the platform.

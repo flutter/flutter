@@ -154,7 +154,7 @@ class EngineWindow extends ui.Window {
   String _defaultRouteName;
 
   @override
-  String get defaultRouteName => _defaultRouteName ??= _browserHistory.currentPath;
+  String/*!*/ get defaultRouteName => _defaultRouteName ??= _browserHistory.currentPath;
 
   /// Change the strategy to use for handling browser history location.
   /// Setting this member will automatically update [_browserHistory].
@@ -367,16 +367,16 @@ class EngineWindow extends ui.Window {
 
   @override
   void sendPlatformMessage(
-    String name,
-    ByteData data,
-    ui.PlatformMessageResponseCallback callback,
+    String/*!*/ name,
+    ByteData/*?*/ data,
+    ui.PlatformMessageResponseCallback/*?*/ callback,
   ) {
     _sendPlatformMessage(name, data, _zonedPlatformMessageResponseCallback(callback));
   }
 
   /// Wraps the given [callback] in another callback that ensures that the
   /// original callback is called in the zone it was registered in.
-  static ui.PlatformMessageResponseCallback _zonedPlatformMessageResponseCallback(ui.PlatformMessageResponseCallback callback) {
+  static ui.PlatformMessageResponseCallback/*?*/ _zonedPlatformMessageResponseCallback(ui.PlatformMessageResponseCallback/*?*/ callback) {
     if (callback == null)
       return null;
 
@@ -389,9 +389,9 @@ class EngineWindow extends ui.Window {
   }
 
   void _sendPlatformMessage(
-    String name,
-    ByteData data,
-    ui.PlatformMessageResponseCallback callback,
+    String/*!*/ name,
+    ByteData/*?*/ data,
+    ui.PlatformMessageResponseCallback/*?*/ callback,
   ) {
     // In widget tests we want to bypass processing of platform messages.
     if (assertionsEnabled && ui.debugEmulateFlutterTesterEnvironment) {
@@ -604,7 +604,7 @@ class EngineWindow extends ui.Window {
   }
 
   @override
-  void render(ui.Scene scene) {
+  void render(ui.Scene/*!*/ scene) {
     if (experimentalUseSkia) {
       final LayerScene layerScene = scene;
       rasterizer.draw(layerScene.layerTree);
