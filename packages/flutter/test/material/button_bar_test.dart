@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+final Finder _buttonBarRow = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ButtonBarRow');
+
 void main() {
   testWidgets('ButtonBar default control smoketest', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -626,5 +628,18 @@ void main() {
         expect(containerOneRect.bottom, containerTwoRect.top - 10.0);
       },
     );
+  });
+
+  testWidgets('_RenderButtonBarRow.constraints works before layout', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: ButtonBar()),
+      null,
+      EnginePhase.build,
+    );
+
+    final RenderBox buttonBar = tester.renderObject(_buttonBarRow) as RenderBox;
+
+    expect(buttonBar.debugNeedsLayout, isTrue);
+    expect(buttonBar.constraints, isNull);
   });
 }
