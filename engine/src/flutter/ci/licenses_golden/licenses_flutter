@@ -903,6 +903,7 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/SemanticsObjec
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge_ios.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge_test.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h
