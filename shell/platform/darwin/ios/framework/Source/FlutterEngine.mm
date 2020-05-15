@@ -677,9 +677,12 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 - (void)setMessageHandlerOnChannel:(NSString*)channel
               binaryMessageHandler:(FlutterBinaryMessageHandler)handler {
   NSParameterAssert(channel);
-  NSAssert(_shell && _shell->IsSetup(),
-           @"Setting a message handler before the FlutterEngine has been run.");
-  self.iosPlatformView->GetPlatformMessageRouter().SetMessageHandler(channel.UTF8String, handler);
+  if (_shell && _shell->IsSetup()) {
+    self.iosPlatformView->GetPlatformMessageRouter().SetMessageHandler(channel.UTF8String, handler);
+  } else {
+    NSAssert(!handler, @"Setting a message handler before the FlutterEngine has been run.");
+    // Setting a handler to nil for a not setup channel is a noop.
+  }
 }
 
 #pragma mark - FlutterTextureRegistry
