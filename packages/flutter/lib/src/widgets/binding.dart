@@ -257,12 +257,6 @@ abstract class WidgetsBindingObserver {
   /// Called whenever a physical screen is removed from the system.
   void didRemoveScreen(Screen id) { }
 
-  /// Called when the configuration of a physical screen has changed.
-  ///
-  /// The configuration of the screen can be obtained with
-  /// `WidgetsBinding.instance.platformDispatcher.screens[id]`.
-  void didChangeScreenConfiguration(Screen id) { }
-
   /// Called whenever a window is added to the system, and at startup
   /// when the initial window is opened.
   ///
@@ -272,12 +266,6 @@ abstract class WidgetsBindingObserver {
 
   /// Called whenever a window is closed.
   void didCloseWindow(Window id) { }
-
-  /// Called when the configuration of a window has changed.
-  ///
-  /// The configuration of the window can be obtained with
-  /// `WidgetsBinding.instance.platformDispatcher.windows[id]`.
-  void didChangeWindowConfiguration(Window id) { }
 }
 
 /// The glue between the widgets layer and the Flutter engine.
@@ -572,14 +560,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   @override
-  void handleScreenConfigurationChanged(Screen screen) {
-    super.handleScreenConfigurationChanged(screen);
-    for (final WidgetsBindingObserver observer in _observers) {
-      observer.didChangeScreenConfiguration(screen);
-    }
-  }
-
-  @override
   void handleScreenRemoved(Screen screen) {
     super.handleScreenRemoved(screen);
     for (final WidgetsBindingObserver observer in _observers) {
@@ -592,14 +572,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     super.handleWindowOpened(window);
     for (final WidgetsBindingObserver observer in _observers) {
       observer.didOpenWindow(window);
-    }
-  }
-
-  @override
-  void handleWindowConfigurationChanged(Window window) {
-    super.handleWindowConfigurationChanged(window);
-    for (final WidgetsBindingObserver observer in _observers) {
-      observer.didChangeWindowConfiguration(window);
     }
   }
 
