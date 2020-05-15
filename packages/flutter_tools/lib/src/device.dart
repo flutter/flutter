@@ -254,6 +254,8 @@ class DeviceManager {
       // has two active Android devices running, then we request the user to
       // choose one.
       if (devices.length > 1 && _allEphemeral(devices)){
+        globals.printStatus(globals.userMessages.flutterMultipleDevicesFound);
+        await Device.printDevices(devices);
         final Device chosenDevice = await _chooseOneOfAvailableDevices(devices);
         deviceManager.specifiedDeviceId = chosenDevice.id;
         devices = <Device>[chosenDevice];
@@ -275,7 +277,7 @@ class DeviceManager {
   void _displayDeviceOptions(List<Device> devices) {
     int count = 0;
     for (final Device device in devices) {
-      globals.printStatus(userMessages.flutterChooseDevice(count, device.id, device.name));
+      globals.printStatus(userMessages.flutterChooseDevice(count, device.id));
       count++;
     }
   }
