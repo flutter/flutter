@@ -413,10 +413,18 @@ const Set<String> _genericFontFamilies = <String>{
 
 /// A default fallback font family in case an unloaded font has been requested.
 ///
-/// For iOS, default to Helvetica, where it should be available, otherwise
-/// default to Arial.
-final String _fallbackFontFamily =
-    operatingSystem == OperatingSystem.iOs ? 'Helvetica' : 'Arial';
+/// -apple-system targets San Francisco in Safari (on Mac OS X and iOS),
+/// and it targets Neue Helvetica and Lucida Grande on older versions of
+/// Mac OS X. It properly selects between San Francisco Text and
+/// San Francisco Display depending on the text’s size.
+///
+/// For iOS, default to -apple-system, where it should be available, otherwise
+/// default to Arial. BlinkMacSystemFont is used for Chrome on iOS.
+final String _fallbackFontFamily = _isMacOrIOS ?
+    '-apple-system, BlinkMacSystemFont' : 'Arial';
+
+bool get _isMacOrIOS => operatingSystem == OperatingSystem.iOs ||
+    operatingSystem == OperatingSystem.macOs;
 
 /// Create a font-family string appropriate for CSS.
 ///
@@ -425,6 +433,16 @@ final String _fallbackFontFamily =
 String canonicalizeFontFamily(String fontFamily) {
   if (_genericFontFamilies.contains(fontFamily)) {
     return fontFamily;
+  }
+  if (_isMacOrIOS) {
+    // Unlike Safari, Chrome on iOS does not correctly fallback to cupertino
+    // on sans-serif.
+    // Map to San Francisco Text/Display fonts, use -apple-system,
+    // BlinkMacSystemFont.
+    if (fontFamily == '.SF Pro Text' || fontFamily == '.SF Pro Display' ||
+        fontFamily == '.SF UI Text' || fontFamily == '.SF UI Display') {
+      return _fallbackFontFamily;
+    }
   }
   return '"$fontFamily", $_fallbackFontFamily, sans-serif';
 }
