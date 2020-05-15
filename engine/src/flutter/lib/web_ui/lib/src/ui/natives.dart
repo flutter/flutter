@@ -16,10 +16,10 @@ void _printDebug(dynamic arg) {
 }
 
 class _Logger {
-  static void _printString(String s) {
+  static void _printString(String/*?*/ s) {
     print(s);
   }
-  static void _printDebugString(String s) {
+  static void _printDebugString(String/*?*/ s) {
     html.window.console.error(s);
   }
 }
@@ -40,6 +40,6 @@ class _Logger {
 /// ```
 ///
 /// This function is only effective in debug and dynamic modes, and will throw in AOT mode.
-List<int> saveCompilationTrace() {
+List<int/*!*/>/*!*/ saveCompilationTrace() {
   throw UnimplementedError();
 }
