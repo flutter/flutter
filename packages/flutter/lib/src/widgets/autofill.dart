@@ -37,74 +37,81 @@ export 'package:flutter/services.dart' show AutofillHints;
 ///
 ///  final TextEditingController phoneNumber = TextEditingController();
 ///
-///  @override
+///    @override
 ///  Widget build(BuildContext context) {
-///    return ListView(
-///      children: <Widget>[
-///        const Text('Shipping address'),
-///        // The address fields are grouped together as some platforms are capable
-///        // of autofilling all these fields in one go.
-///        AutofillGroup(
-///          child: Column(
-///            children: <Widget>[
-///              TextField(
-///                controller: shippingAddress1,
-///                autofillHints: <String>[AutofillHints.streetAddressLine1],
+///    return Material(
+///      child: ListView(
+///        children: <Widget>[
+///          const Text('Shipping address'),
+///          // The address fields are grouped together as some platforms are capable
+///          // of autofilling all these fields in one go.
+///          Center(
+///            child: AutofillGroup(
+///              child: Column(
+///                children: <Widget>[
+///                  TextField(
+///                    controller: shippingAddress1,
+///                    autofillHints: <String>[AutofillHints.streetAddressLine1],
+///                  ),
+///                  TextField(
+///                    controller: shippingAddress2,
+///                    autofillHints: <String>[AutofillHints.streetAddressLine2],
+///                  ),
+///                ],
 ///              ),
-///              TextField(
-///                controller: shippingAddress2,
-///                autofillHints: <String>[AutofillHints.streetAddressLine2],
-///              ),
-///            ],
+///            ),
 ///          ),
-///        ),
-///        const Text('Billing address'),
-///        Checkbox(
-///          value: isSameAddress,
-///          onChanged: (bool newValue) {
-///            setState(() { isSameAddress = newValue; });
-///          },
-///        ),
-///        // Again the address fields are grouped together for the same reason.
-///        if (!isSameAddress) AutofillGroup(
-///          child: Column(
-///            children: <Widget>[
-///              TextField(
-///                controller: billingAddress1,
-///                autofillHints: <String>[AutofillHints.streetAddressLine1],
-///              ),
-///              TextField(
-///                controller: billingAddress2,
-///                autofillHints: <String>[AutofillHints.streetAddressLine2],
-///              ),
-///            ],
+///          const Text('Billing address'),
+///          Checkbox(
+///            value: isSameAddress,
+///            onChanged: (bool newValue) {
+///              setState(() {
+///                isSameAddress = newValue;
+///              });
+///            },
 ///          ),
-///        ),
-///        const Text('Credit Card Information'),
-///        // The credit card number and the security code are grouped together as
-///        // some platforms are capable of autofilling both fields.
-///        AutofillGroup(
-///          child: Column(
-///            children: <Widget>[
-///              TextField(
-///                controller: creditCardNumber,
-///                autofillHints: <String>[AutofillHints.creditCardNumber],
+///          // Again the address fields are grouped together for the same reason.
+///          if (!isSameAddress)
+///            AutofillGroup(
+///              child: Column(
+///                children: <Widget>[
+///                  TextField(
+///                    controller: billingAddress1,
+///                    autofillHints: <String>[AutofillHints.streetAddressLine1],
+///                  ),
+///                  TextField(
+///                    controller: billingAddress2,
+///                    autofillHints: <String>[AutofillHints.streetAddressLine2],
+///                  ),
+///                ],
 ///              ),
-///              TextField(
-///                controller: creditCardSecurityCode,
-///                autofillHints: <String>[AutofillHints.creditCardSecurityCode],
-///              ),
-///            ],
+///            ),
+///          const Text('Credit Card Information'),
+///          // The credit card number and the security code are grouped together as
+///          // some platforms are capable of autofilling both fields.
+///          AutofillGroup(
+///            child: Column(
+///              children: <Widget>[
+///                TextField(
+///                  controller: creditCardNumber,
+///                  autofillHints: <String>[AutofillHints.creditCardNumber],
+///                ),
+///                TextField(
+///                  controller: creditCardSecurityCode,
+///                  autofillHints: <String>[AutofillHints.creditCardSecurityCode],
+///                ),
+///              ],
+///            ),
 ///          ),
-///        ),
-///        const Text('Contact Phone Number'),
-///        // The phone number field can still be autofilled despite lacking an
-///        // `AutofillScope`.
-///        TextField(
-///          controller: phoneNumber,
-///          autofillHints: <String>[AutofillHints.telephoneNumber],
-///        ),
-///      ],
+///          const Text('Contact Phone Number'),
+///          // The phone number field can still be autofilled despite lacking an
+///          // `AutofillScope`.
+///          TextField(
+///            controller: phoneNumber,
+///            autofillHints: <String>[AutofillHints.telephoneNumber],
+///          ),
+///        ],
+///      ),
 ///    );
 ///  }
 /// ```
