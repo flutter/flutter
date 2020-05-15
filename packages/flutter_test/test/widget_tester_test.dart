@@ -751,6 +751,23 @@ void main() {
       expect(desktop.values.union(mobile.values), equals(all.values));
     });
   });
+
+  group('no timers pending after widget tree disposal', () {
+    testWidgets('timer pending check', (WidgetTester tester) async {
+      final Timer timer = Timer(const Duration(seconds: 1), () {});
+      expect(timer.isActive, true);
+      timer.cancel();
+      expect(timer.isActive, false);
+
+    });
+
+    testWidgets('periodic timer pending check', (WidgetTester tester) async {
+      final Timer timer = Timer.periodic(Duration(seconds: 1), (Timer t) => print(t));
+      expect(timer.isActive, true);
+      timer.cancel();
+      expect(timer.isActive, false);
+    });
+  });
 }
 
 class FakeMatcher extends AsyncMatcher {
