@@ -1,4 +1,4 @@
-Signature: 32b07bdd5249ce1ab4416f3b8b386b1c
+Signature: a2e5ec195c30841e619221fbf920655b
 
 UNUSED LICENSES:
 
@@ -490,6 +490,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.namedplace/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.position/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.sensor/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.logger/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/meta.json
@@ -1436,6 +1439,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.namedplace/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.namedplace/namedplace.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.position/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.sensor/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.logger/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/meta.json
@@ -2246,6 +2252,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.namedplace/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.position/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.sensor/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.logger/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/meta.json
@@ -3281,6 +3290,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/diagnostics.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/launch.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/power.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/tiles.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/gpu_metrics.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/update.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.gesture/gesture_listener.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.a2dp/audio_mode.fidl
@@ -3294,11 +3304,15 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castwindow/window.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/error.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/types.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/crash_register.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_register.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/last_reboot_info.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/keys.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/event.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/metrics_recorder.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.position/position.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.sensor/sensor.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/properties.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.target/target_discovery.fidl
