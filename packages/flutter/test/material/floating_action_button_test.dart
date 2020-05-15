@@ -748,9 +748,14 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {},
-            mouseCursor: SystemMouseCursors.forbidden,
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: FloatingActionButton.extended(
+              onPressed: () { },
+              mouseCursor: SystemMouseCursors.text,
+              label: const Text('label'),
+              icon: const Icon(Icons.android),
+            ),
           ),
         ),
       ),
@@ -762,37 +767,59 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: FloatingActionButton(
+              onPressed: () { },
+              mouseCursor: SystemMouseCursors.text,
+              child: const Icon(Icons.add),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {},
-          ),
-        ),
-      ),
-    );
-
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () {},
-            label: const SizedBox(
-              width: 100.0,
-              child: Text('label'),
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: FloatingActionButton(
+              onPressed: () { },
+              child: const Icon(Icons.add),
             ),
-            icon: const Icon(Icons.android),
           ),
         ),
       ),
     );
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: FloatingActionButton(
+              onPressed: null,
+              child: Icon(Icons.add),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async {

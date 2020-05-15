@@ -190,54 +190,54 @@ void main() {
   });
 
   testWidgets('InkWell.mouseCursor changes cursor on hover', (WidgetTester tester) async {
-    final GlobalKey innerKey = GlobalKey();
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(1, 1));
+    addTearDown(gesture.removePointer);
+
     // Test argument works
     await tester.pumpWidget(
       Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Center(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
             child: InkWell(
-              mouseCursor: SystemMouseCursors.forbidden,
-              child: Container(
-                width: 100,
-                height: 100,
-                child: InkWell(
-                  key: innerKey,
-                  mouseCursor: SystemMouseCursors.click,
-                  onTap: () {},
-                ),
-              ),
+              mouseCursor: SystemMouseCursors.click,
+              onTap: () {},
             ),
           ),
         ),
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-    await gesture.addPointer(location: tester.getCenter(find.byKey(innerKey)));
-    addTearDown(gesture.removePointer);
-
-    await tester.pump();
-
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
-    // Test default is null
+    // Test default of InkWell()
     await tester.pumpWidget(
       Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Center(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
             child: InkWell(
-              mouseCursor: SystemMouseCursors.forbidden,
-              child: Container(
-                width: 100,
-                height: 100,
-                child: InkWell(
-                  key: innerKey,
-                  onTap: () {},
-                ),
-              ),
+              onTap: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+
+    // Test default of InkResponse()
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: InkResponse(
+              onTap: () {},
             ),
           ),
         ),

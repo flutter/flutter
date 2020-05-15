@@ -142,7 +142,7 @@ class FloatingActionButton extends StatelessWidget {
     this.highlightElevation,
     this.disabledElevation,
     @required this.onPressed,
-    this.mouseCursor = SystemMouseCursors.click,
+    this.mouseCursor,
     this.mini = false,
     this.shape,
     this.clipBehavior = Clip.none,
@@ -290,10 +290,7 @@ class FloatingActionButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
-  /// The cursor for a mouse pointer when it enters or is hovering over the
-  /// widget.
-  ///
-  /// If the property is null, [SystemMouseCursor.click] is used.
+  /// {@macro flutter.material.button.mouseCursor}
   final MouseCursor mouseCursor;
 
   /// The z-coordinate at which to place this button relative to its parent.

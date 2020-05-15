@@ -435,46 +435,71 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: RaisedButton(
-          mouseCursor: SystemMouseCursors.forbidden,
-          onPressed: () { },
-          child: const Text('button'),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: RaisedButton.icon(
+            icon: const Icon(Icons.add),
+            label: const Text('Hello'),
+            onPressed: () {},
+            mouseCursor: SystemMouseCursors.text,
+          ),
         ),
       ),
     );
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-    await gesture.addPointer(location: tester.getCenter(find.byType(RaisedButton)));
+    await gesture.addPointer(location: const Offset(1, 1));
     addTearDown(gesture.removePointer);
 
     await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: RaisedButton(
+            onPressed: () {},
+            mouseCursor: SystemMouseCursors.text,
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: RaisedButton(
-          onPressed: () { },
-          child: const Text('button'),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: RaisedButton(
+            onPressed: () {},
+          ),
         ),
       ),
     );
+
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
+    // Test default cursor when disabled
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
-        child: RaisedButton.icon(
-          onPressed: () { },
-          icon: const Icon(Icons.add),
-          label: const Text('Hello'),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: RaisedButton(
+            onPressed: null,
+          ),
         ),
       ),
     );
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
+
 
   testWidgets('Does RaisedButton work with focus', (WidgetTester tester) async {
     const Color focusColor = Color(0xff001122);

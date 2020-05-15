@@ -295,7 +295,7 @@ class InkResponse extends StatelessWidget {
     this.onLongPress,
     this.onHighlightChanged,
     this.onHover,
-    this.mouseCursor,
+    this.mouseCursor = MouseCursor.defer,
     this.containedInkWell = false,
     this.highlightShape = BoxShape.circle,
     this.radius,
@@ -365,7 +365,8 @@ class InkResponse extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If the property is null, [SystemMouseCursor.click] is used.
+  /// The [cursor] defaults to [MouseCursor.defer], deferring the choice of
+  /// cursor to the next region behing it in hit-test order.
   final MouseCursor mouseCursor;
 
   /// Whether this ink response should be clipped its bounds.
@@ -550,7 +551,7 @@ class InkResponse extends StatelessWidget {
       onLongPress: onLongPress,
       onHighlightChanged: onHighlightChanged,
       onHover: onHover,
-      mouseCursor: mouseCursor ?? SystemMouseCursors.click,
+      mouseCursor: mouseCursor,
       containedInkWell: containedInkWell,
       highlightShape: highlightShape,
       radius: radius,
@@ -598,7 +599,7 @@ class _InnerInkResponse extends StatefulWidget {
     this.onLongPress,
     this.onHighlightChanged,
     this.onHover,
-    this.mouseCursor,
+    this.mouseCursor = MouseCursor.defer,
     this.containedInkWell = false,
     this.highlightShape = BoxShape.circle,
     this.radius,
@@ -623,7 +624,8 @@ class _InnerInkResponse extends StatefulWidget {
        assert(enableFeedback != null),
        assert(excludeFromSemantics != null),
        assert(autofocus != null),
-       assert(canRequestFocus != null);
+       assert(canRequestFocus != null),
+       assert(mouseCursor != null);
 
   final Widget child;
   final GestureTapCallback onTap;
@@ -668,6 +670,7 @@ class _InnerInkResponse extends StatefulWidget {
       if (onTapCancel != null) 'tap cancel',
     ];
     properties.add(IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
+    properties.add(DiagnosticsProperty<MouseCursor>('mouseCursor', mouseCursor, defaultValue: MouseCursor.defer));
     properties.add(DiagnosticsProperty<bool>('containedInkWell', containedInkWell, level: DiagnosticLevel.fine));
     properties.add(DiagnosticsProperty<BoxShape>(
       'highlightShape',
@@ -1132,7 +1135,7 @@ class InkWell extends InkResponse {
     GestureTapCancelCallback onTapCancel,
     ValueChanged<bool> onHighlightChanged,
     ValueChanged<bool> onHover,
-    MouseCursor mouseCursor,
+    MouseCursor mouseCursor = MouseCursor.defer,
     Color focusColor,
     Color hoverColor,
     Color highlightColor,

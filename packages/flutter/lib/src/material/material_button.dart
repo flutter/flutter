@@ -53,7 +53,7 @@ class MaterialButton extends StatelessWidget {
     @required this.onPressed,
     this.onLongPress,
     this.onHighlightChanged,
-    this.mouseCursor = SystemMouseCursors.click,
+    this.mouseCursor,
     this.textTheme,
     this.textColor,
     this.disabledTextColor,
@@ -116,9 +116,7 @@ class MaterialButton extends StatelessWidget {
   /// [State.setState] is not allowed).
   final ValueChanged<bool> onHighlightChanged;
 
-  /// {@macro flutter.material.inkwell.mousecursor}
-  ///
-  /// Defaults to [SystemMouseCursors.click].
+  /// {@macro flutter.material.button.mouseCursor}
   final MouseCursor mouseCursor;
 
   /// Defines the button's base colors, and the defaults for the button's minimum

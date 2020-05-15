@@ -377,34 +377,53 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: MaterialButton(
-          onPressed: () {},
-          mouseCursor: SystemMouseCursors.forbidden,
-          child: const Text('button'),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: MaterialButton(
+            onPressed: () {},
+            mouseCursor: SystemMouseCursors.text,
+          ),
         ),
       ),
     );
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-    await gesture.addPointer(location: tester.getCenter(find.byType(MaterialButton)));
+    await gesture.addPointer(location: Offset.zero);
     addTearDown(gesture.removePointer);
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: MaterialButton(
-          onPressed: () {},
-          child: const Text('button'),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: MaterialButton(
+            onPressed: () {},
+          ),
         ),
       ),
     );
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: MaterialButton(
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   // This test is very similar to the '...explicit splashColor and highlightColor' test

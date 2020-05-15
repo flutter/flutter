@@ -109,51 +109,73 @@ void main() {
     gesture.removePointer();
   });
 
-  testWidgets('MaterialButton changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('OutlineButton changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: OutlineButton(
-          mouseCursor: SystemMouseCursors.forbidden,
-          onPressed: () { },
-          child: const Text('button'),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: OutlineButton.icon(
+            icon: const Icon(Icons.add),
+            label: const Text('Hello'),
+            onPressed: () {},
+            mouseCursor: SystemMouseCursors.text,
+          ),
         ),
       ),
     );
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-    await gesture.addPointer(location: tester.getCenter(find.byType(OutlineButton)));
+    await gesture.addPointer(location: const Offset(1, 1));
     addTearDown(gesture.removePointer);
 
     await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: OutlineButton(
+            onPressed: () {},
+            mouseCursor: SystemMouseCursors.text,
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: OutlineButton(
-          onPressed: () { },
-          child: const Text('button'),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: OutlineButton(
+            onPressed: () {},
+          ),
         ),
       ),
     );
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
+    // Test default cursor when disabled
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
-        child: OutlineButton.icon(
-          onPressed: () { },
-          icon: const Icon(Icons.android),
-          label: const Text('label'),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: OutlineButton(
+            onPressed: null,
+          ),
         ),
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('Does OutlineButton work with focus', (WidgetTester tester) async {

@@ -437,51 +437,76 @@ void main() {
     await gesture.removePointer();
   });
 
-  testWidgets('MaterialButton changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('FlatButton changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: FlatButton(
-          mouseCursor: SystemMouseCursors.forbidden,
-          onPressed: () { },
-          child: const Text('button'),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: FlatButton.icon(
+            icon: const Icon(Icons.add),
+            label: const Text('Hello'),
+            onPressed: () {},
+            mouseCursor: SystemMouseCursors.text,
+          ),
         ),
       ),
     );
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-    await gesture.addPointer(location: tester.getCenter(find.byType(FlatButton)));
+    await gesture.addPointer(location: const Offset(1, 1));
     addTearDown(gesture.removePointer);
 
     await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: FlatButton(
+            onPressed: () {},
+            mouseCursor: SystemMouseCursors.text,
+            child: const Text('Hello'),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: FlatButton(
-          onPressed: () { },
-          child: const Text('button'),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: FlatButton(
+            onPressed: () {},
+            child: const Text('Hello'),
+          ),
         ),
       ),
     );
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
+    // Test default cursor when disabled
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
-        child: FlatButton.icon(
-          onPressed: () { },
-          icon: const Icon(Icons.android),
-          label: const Text('label'),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: FlatButton(
+            onPressed: null,
+            child: Text('Hello'),
+          ),
         ),
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('Does FlatButton work with focus', (WidgetTester tester) async {
