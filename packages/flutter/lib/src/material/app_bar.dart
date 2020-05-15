@@ -712,13 +712,15 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
     if (_position.isScrollingNotifier.value) {
       header?.maybeStopSnapAnimation(_position.userScrollDirection);
     } else {
-      final double potentialCorrection = await header?.maybeStartSnapAnimation(_position.userScrollDirection);
+      final double needsCorrection = await header?.maybeStartSnapAnimation(_position.userScrollDirection);
       // If the _FloatingAppBar is expected to snap from another scrollable,
       // e.g. when used in conjunction with a NestedScrollView, the position
       // needs to be corrected after the animation completes, or the app bar
       // will stop floating.
-      if (potentialCorrection >= 0.0) {
-        _position.correctPixels(potentialCorrection);
+      
+      if (needsCorrection) {
+
+//        _position.correctPixels();
       }
     }
 

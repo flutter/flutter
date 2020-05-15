@@ -386,7 +386,7 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
       paintExtent: math.min(childExtent, effectiveRemainingPaintExtent),
       layoutExtent: layoutExtent,
       maxPaintExtent: maxExtent + stretchOffset,
-      maxScrollObstructionExtent: math.min(childExtent, effectiveRemainingPaintExtent),
+      maxScrollObstructionExtent: minExtent,
       cacheExtent: layoutExtent > 0.0 ? -constraints.cacheOrigin + layoutExtent : layoutExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
@@ -534,13 +534,13 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   /// Returns the value of [_effectiveScrollOffset] after animating if the
   /// [FloatingHeaderSnapConfiguration.nestedSnap] is true. Otherwise it will
   /// return -1.0.
-  Future<double> maybeStartSnapAnimation(ScrollDirection direction) async {
+  Future<bool> maybeStartSnapAnimation(ScrollDirection direction) async {
     if (snapConfiguration == null)
-      return -1.0;
+      return false;
     if (direction == ScrollDirection.forward && _effectiveScrollOffset <= 0.0)
-      return -1.0;
+      return false;
     if (direction == ScrollDirection.reverse && _effectiveScrollOffset >= maxExtent)
-      return -1.0;
+      return false;
 
     final TickerProvider vsync = snapConfiguration.vsync;
     final Duration duration = snapConfiguration.duration;
@@ -562,7 +562,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     );
 
     await _controller.forward(from: 0.0);
-    return snapConfiguration.nestedSnap ? _effectiveScrollOffset : -1.0;
+    return snapConfiguration.nestedSnap;
   }
 
   /// If a header snap animation is underway then stop it.
@@ -660,7 +660,7 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
       paintExtent: clampedPaintExtent,
       layoutExtent: layoutExtent.clamp(0.0, clampedPaintExtent) as double,
       maxPaintExtent: maxExtent + stretchOffset,
-      maxScrollObstructionExtent: clampedPaintExtent,
+      maxScrollObstructionExtent: minExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
     return 0.0;
