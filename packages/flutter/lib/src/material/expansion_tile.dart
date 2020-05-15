@@ -44,6 +44,7 @@ class ExpansionTile extends StatefulWidget {
     this.tilePadding,
     this.expandedCrossAxisAlignment,
     this.expandedAlignment,
+    this.childrenPadding,
   }) : assert(initiallyExpanded != null),
        assert(
        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
@@ -128,6 +129,11 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// When the value is null, the value of `expandedCrossAxisAlignment` is [CrossAxisAlignment.center].
   final CrossAxisAlignment expandedCrossAxisAlignment;
+
+  /// Specifies padding for [children].
+  ///
+  /// When the value is null, the value of `childrenPadding` is [EdgeInsets.zero].
+  final EdgeInsetsGeometry childrenPadding;
 
   @override
   _ExpansionTileState createState() => _ExpansionTileState();
@@ -256,11 +262,13 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     return AnimatedBuilder(
       animation: _controller.view,
       builder: _buildChildren,
-      child: closed ? null : Column(
-        crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
-        children: widget.children,
+      child: closed ? null : Padding(
+        padding: widget.childrenPadding ?? EdgeInsets.zero,
+        child: Column(
+          crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
+          children: widget.children,
+        ),
       ),
     );
-
   }
 }
