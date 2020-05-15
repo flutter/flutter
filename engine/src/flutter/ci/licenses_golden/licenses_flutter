@@ -413,7 +413,6 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/canvas_kit_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/color_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/embedded_views.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/engine_delegate.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/fonts.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/image.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/image_filter.dart
@@ -430,7 +429,6 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/picture_recorder.dar
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/platform_message.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/raster_cache.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/rasterizer.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/runtime_delegate.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/surface.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/text.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/compositor/util.dart
