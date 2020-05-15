@@ -274,26 +274,6 @@ class SimdMatrixUtils {
     return temp.signMask == 15;
   }
 
-  /// Returns a rect that bounds the result of applying the given matrix as a
-  /// perspective transform to the given rect.
-  static Rect transformRect(SimdMatrix4 transform, Rect rect) {
-    // Convert the rect into an efficient SIMD representation using a 4x4
-    // matrix.
-    final SimdMatrix4 points = SimdMatrix4(
-      rect.left,  rect.top,    0, 1,
-      rect.left,  rect.bottom, 0, 1,
-      rect.right, rect.top,    0, 1,
-      rect.right, rect.bottom, 0, 1,
-    );
-    final SimdMatrix4 result = transform * points;
-    return Rect.fromLTRB(
-      result._column0.x,
-      result._column0.y,
-      result._column2.x,
-      result._column3.y,
-    );
-  }
-
   /// Applies the given matrix as a perspective transform to the given point.
   ///
   /// This function assumes the given point has a z-coordinate of 0.0. The
@@ -425,13 +405,4 @@ class SimdMatrixUtils {
     );
   }
 
-  /// Returns a rect that bounds the result of applying the inverse of the given
-  /// matrix as a perspective transform to the given rect.
-  ///
-  /// This function assumes the given rect is in the plane with z equals 0.0.
-  /// The transformed rect is then projected back into the plane with z equals
-  /// 0.0 before computing its bounding rect.
-  static Rect inverseTransformRect(SimdMatrix4 transform, Rect rect) {
-    return transformRect(transform.invert(), rect);
-  }
 }

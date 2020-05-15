@@ -78,23 +78,6 @@ void main() {
       );
     }
   });
-
-  test('Rect transform', () {
-    final Random random = Random();
-    rectEqualWithinTolerance(
-      MatrixUtils.transformRect(Matrix4.identity(), Rect.zero),
-      SimdMatrixUtils.transformRect(SimdMatrix4.identity, Rect.zero),
-    );
-
-    for (int i = 0; i < 1000; i++) {
-      final Matrix4 transform = randomMatrix(random);
-      final Rect rect = randomRect(random);
-      rectEqualWithinTolerance(
-        MatrixUtils.transformRect(transform, rect),
-        SimdMatrixUtils.transformRect(SimdMatrix4.fromVectorMath(transform), rect),
-      );
-    }
-  });
 }
 
 Matrix4 randomMatrix(Random random) {
