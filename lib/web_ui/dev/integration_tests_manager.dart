@@ -9,6 +9,7 @@ import 'package:web_driver_installer/chrome_driver_installer.dart';
 import 'chrome_installer.dart';
 import 'environment.dart';
 import 'exceptions.dart';
+import 'common.dart';
 import 'utils.dart';
 
 class IntegrationTestsManager {
@@ -20,7 +21,8 @@ class IntegrationTestsManager {
   /// It usually changes with each the browser version changes.
   /// A better solution would be installing the browser and the driver at the
   /// same time.
-  // TODO(nurhan): https://github.com/flutter/flutter/issues/53179.
+  // TODO(nurhan): https://github.com/flutter/flutter/issues/53179. Partly
+  // solved. Remaining local integration tests using the locked Chrome version.
   final io.Directory _browserDriverDir;
 
   /// This is the parent directory for all drivers.
@@ -33,7 +35,10 @@ class IntegrationTestsManager {
 
   IntegrationTestsManager(this._browser, this._useSystemFlutter)
       : this._browserDriverDir = io.Directory(pathlib.join(
-            environment.webUiDartToolDir.path, 'drivers', _browser)),
+            environment.webUiDartToolDir.path,
+            'drivers',
+            _browser,
+            '${_browser}driver-${io.Platform.operatingSystem.toString()}')),
         this._drivers = io.Directory(
             pathlib.join(environment.webUiDartToolDir.path, 'drivers'));
 
@@ -42,7 +47,13 @@ class IntegrationTestsManager {
       print('WARNING: integration tests are only supported on chrome for now');
       return false;
     } else {
-      await prepareDriver();
+      if (!isLuci) {
+        // LUCI installs driver from CIPD, so we skip installing it on LUCI.
+        await _prepareDriver();
+      } else {
+        await _verifyDriverForLUCI();
+      }
+      await _startDriver(_browserDriverDir.path);
       // TODO(nurhan): https://github.com/flutter/flutter/issues/52987
       return await _runTests();
     }
@@ -65,7 +76,7 @@ class IntegrationTestsManager {
   Future<void> _cloneFlutterRepo() async {
     // Delete directory if exists.
     if (environment.engineDartToolDir.existsSync()) {
-      environment.engineDartToolDir.deleteSync();
+      environment.engineDartToolDir.deleteSync(recursive: true);
     }
     environment.engineDartToolDir.createSync();
 
@@ -88,13 +99,23 @@ class IntegrationTestsManager {
         useSystemFlutter: _useSystemFlutter);
   }
 
-  void _runDriver() async {
-    startProcess('./chromedriver/chromedriver', ['--port=4444'],
-        workingDirectory: io.Directory.current.path);
+  /// Driver should already exist on LUCI as a CIPD package.
+  ///
+  /// Throw an error if directory does not exists.
+  void _verifyDriverForLUCI() {
+    if (!_browserDriverDir.existsSync()) {
+      throw StateError('Failed to locate Chrome driver on LUCI on path:'
+          '${_browserDriverDir.path}');
+    }
+  }
+
+  void _startDriver(String workingDirectory) async {
+    await startProcess('./chromedriver/chromedriver', ['--port=4444'],
+        workingDirectory: workingDirectory);
     print('INFO: Driver started');
   }
 
-  void prepareDriver() async {
+  void _prepareDriver() async {
     if (_browserDriverDir.existsSync()) {
       _browserDriverDir.deleteSync(recursive: true);
     }
@@ -110,7 +131,6 @@ class IntegrationTestsManager {
     ChromeDriverInstaller chromeDriverInstaller =
         ChromeDriverInstaller.withVersion(chromeDriverVersion);
     await chromeDriverInstaller.install(alwaysInstall: true);
-    await _runDriver();
     io.Directory.current = temp;
   }
 
@@ -153,6 +173,8 @@ class IntegrationTestsManager {
         .toList();
 
     final List<String> e2eTestsToRun = List<String>();
+    final List<String> blackList =
+        blackListsMap[getBlackListMapKey(_browser)] ?? <String>[];
 
     // The following loops over the contents of the directory and saves an
     // expected driver file name for each e2e test assuming any dart file
@@ -162,7 +184,13 @@ class IntegrationTestsManager {
     for (io.File f in entities) {
       final String basename = pathlib.basename(f.path);
       if (!basename.contains('_test.dart') && basename.endsWith('.dart')) {
-        e2eTestsToRun.add(basename);
+        // Do not add the basename if it is in the blacklist.
+        if (!blackList.contains(basename)) {
+          e2eTestsToRun.add(basename);
+        } else {
+          print('INFO: Test $basename is skipped since it is blacklisted for '
+              '${getBlackListMapKey(_browser)}');
+        }
       }
     }
 
@@ -200,15 +228,21 @@ class IntegrationTestsManager {
         'web-server',
         '--profile',
         '--browser-name=$_browser',
+        if (isLuci) '--chrome-binary=${preinstalledChromeExecutable()}',
+        if (isLuci) '--headless',
         '--local-engine=host_debug_unopt',
       ],
       workingDirectory: directory.path,
     );
 
     if (exitCode != 0) {
-      final String statementToRun = 'flutter drive '
+      String statementToRun = 'flutter drive '
           '--target=test_driver/${testName} -d web-server --profile '
           '--browser-name=$_browser --local-engine=host_debug_unopt';
+      if (isLuci) {
+        statementToRun = '$statementToRun --chrome-binary='
+            '${preinstalledChromeExecutable()}';
+      }
       io.stderr
           .writeln('ERROR: Failed to run test. Exited with exit code $exitCode'
               '. Statement to run $testName locally use the following '
@@ -321,3 +355,32 @@ class IntegrationTestsManager {
     }
   }
 }
+
+/// Prepares a key for the [blackList] map.
+///
+/// Uses the browser name and the operating system name.
+String getBlackListMapKey(String browser) =>
+    '${browser}-${io.Platform.operatingSystem}';
+
+/// Tests that should be skipped run for a specific platform-browser
+/// combination.
+///
+/// These tests might be failing or might have been implemented for a specific
+/// configuration.
+///
+/// For example a mobile browser only tests will be added to blacklist for
+/// `chrome-linux`, `safari-macos` and `chrome-macos`.
+///
+/// Note that integration tests are only running on chrome for now.
+const Map<String, List<String>> blackListsMap = <String, List<String>>{
+  'chrome-linux': [
+    'target_platform_ios_e2e.dart',
+    'target_platform_macos_e2e.dart',
+    'target_platform_android_e2e.dart',
+  ],
+  'chrome-macos': [
+    'target_platform_ios_e2e.dart',
+    'target_platform_macos_e2e.dart',
+    'target_platform_android_e2e.dart',
+  ],
+};
