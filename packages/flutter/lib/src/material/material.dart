@@ -175,6 +175,7 @@ class Material extends StatefulWidget {
     this.borderRadius,
     this.shape,
     this.borderOnForeground = true,
+    this.inkOnForeground = false,
     this.clipBehavior = Clip.none,
     this.animationDuration = kThemeChangeDuration,
     this.child,
@@ -256,6 +257,8 @@ class Material extends StatefulWidget {
   /// The default value is true.
   /// If false, the border will be painted behind the [child].
   final bool borderOnForeground;
+
+  final bool inkOnForeground;
 
   /// {@template flutter.widgets.Clip}
   /// The content will be clipped (or not) according to this option.
@@ -365,6 +368,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       child: _InkFeatures(
         key: _inkFeatureRenderer,
         color: backgroundColor,
+        inkOnForeground: widget.inkOnForeground,
         child: contents,
         vsync: this,
       ),
@@ -474,9 +478,12 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
 class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController {
   _RenderInkFeatures({
     RenderBox child,
+    bool inkOnForeground = false,
     @required this.vsync,
     this.color,
   }) : assert(vsync != null),
+       assert(inkOnForeground != null),
+       _inkOnForeground = inkOnForeground,
        super(child);
 
   // This class should exist in a 1:1 relationship with a MaterialState object,
@@ -490,6 +497,15 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   // MaterialState build method.
   @override
   Color color;
+
+  bool get inkOnForeground => _inkOnForeground;
+  bool _inkOnForeground;
+  set inkOnForeground(bool value) {
+    if (_inkOnForeground != value) {
+      _inkOnForeground = value;
+      markNeedsPaint();
+    }
+  }
 
   List<InkFeature> _inkFeatures;
 
@@ -519,6 +535,10 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    final bool localInkOnForeground = inkOnForeground;
+    if (localInkOnForeground) {
+      super.paint(context, offset);
+    }
     if (_inkFeatures != null && _inkFeatures.isNotEmpty) {
       final Canvas canvas = context.canvas;
       canvas.save();
@@ -528,7 +548,9 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
         inkFeature._paint(canvas);
       canvas.restore();
     }
-    super.paint(context, offset);
+    if (!localInkOnForeground) {
+      super.paint(context, offset);
+    }
   }
 }
 
@@ -536,6 +558,7 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
   const _InkFeatures({
     Key key,
     this.color,
+    this.inkOnForeground,
     @required this.vsync,
     Widget child,
   }) : super(key: key, child: child);
@@ -547,17 +570,22 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
 
   final TickerProvider vsync;
 
+  final bool inkOnForeground;
+
   @override
   _RenderInkFeatures createRenderObject(BuildContext context) {
     return _RenderInkFeatures(
       color: color,
       vsync: vsync,
+      inkOnForeground: inkOnForeground,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderInkFeatures renderObject) {
-    renderObject.color = color;
+    renderObject
+      ..color = color
+      ..inkOnForeground = inkOnForeground;
     assert(vsync == renderObject.vsync);
   }
 }
