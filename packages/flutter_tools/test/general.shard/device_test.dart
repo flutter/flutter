@@ -89,8 +89,8 @@ void main() {
   group('Filter devices', () {
     FakeDevice ephemeralOne;
     FakeDevice ephemeralTwo;
-    FakeDevice nonEphemeralOneOne;
-    FakeDevice nonEphemeralOneTwo;
+    FakeDevice nonEphemeralOne;
+    FakeDevice nonephemeralTwo;
     FakeDevice unsupported;
     FakeDevice webDevice;
     FakeDevice fuchsiaDevice;
@@ -98,8 +98,8 @@ void main() {
     setUp(() {
       ephemeralOne = FakeDevice('ephemeralOne', 'ephemeralOne', true);
       ephemeralTwo = FakeDevice('ephemeralTwo', 'ephemeralTwo', true);
-      nonEphemeralOneOne = FakeDevice('nonEphemeralOneOne', 'nonEphemeralOneOne', false);
-      nonEphemeralOneTwo = FakeDevice('nonEphemeralOneTwo', 'nonEphemeralOneTwo', false);
+      nonEphemeralOne = FakeDevice('nonEphemeralOne', 'nonEphemeralOne', false);
+      nonephemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
       unsupported = FakeDevice('unsupported', 'unsupported', true, false);
       webDevice = FakeDevice('webby', 'webby')
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
@@ -107,11 +107,11 @@ void main() {
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia_x64);
     });
 
-    testUsingContext('chooses ephemeralOne device', () async {
+    testUsingContext('chooses ephemeral device', () async {
       final List<Device> devices = <Device>[
         ephemeralOne,
-        nonEphemeralOneOne,
-        nonEphemeralOneTwo,
+        nonEphemeralOne,
+        nonephemeralTwo,
         unsupported,
       ];
 
@@ -121,23 +121,23 @@ void main() {
       expect(filtered.single, ephemeralOne);
     });
 
-    testUsingContext('does not remove all non-ephemeralOne', () async {
+    testUsingContext('does not remove all non-ephemeral', () async {
       final List<Device> devices = <Device>[
-        nonEphemeralOneOne,
-        nonEphemeralOneTwo,
+        nonEphemeralOne,
+        nonephemeralTwo,
       ];
 
       final DeviceManager deviceManager = TestDeviceManager(devices);
       final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
 
       expect(filtered, <Device>[
-        nonEphemeralOneOne,
-        nonEphemeralOneTwo,
+        nonEphemeralOne,
+        nonephemeralTwo,
       ]);
     });
 
 
-    testUsingContext('chose first ephemeral device', () async {
+    testUsingContext('choose first ephemeral device', () async {
       final List<Device> devices = <Device>[
         ephemeralOne,
         ephemeralTwo,
@@ -145,7 +145,7 @@ void main() {
 
       when(globals.terminal.promptForCharInput(<String>['0', '1'],
         logger: globals.logger,
-        prompt: globals.userMessages.flutterChoseOne)
+        prompt: globals.userMessages.flutterChooseOne)
       ).thenAnswer((Invocation invocation) async => '0');
 
       final DeviceManager deviceManager = TestDeviceManager(devices);
@@ -158,7 +158,7 @@ void main() {
       AnsiTerminal: () => MockTerminal(),
     });
 
-    testUsingContext('chose second ephemeral device', () async {
+    testUsingContext('choose second ephemeral device', () async {
       final List<Device> devices = <Device>[
         ephemeralOne,
         ephemeralTwo,
@@ -166,7 +166,7 @@ void main() {
 
       when(globals.terminal.promptForCharInput(<String>['0', '1'],
         logger: globals.logger,
-        prompt: globals.userMessages.flutterChoseOne)
+        prompt: globals.userMessages.flutterChooseOne)
       ).thenAnswer((Invocation invocation) async => '1');
 
       final DeviceManager deviceManager = TestDeviceManager(devices);
@@ -205,8 +205,8 @@ void main() {
 
     testUsingContext('Removes unsupported devices from --all', () async {
       final List<Device> devices = <Device>[
-        nonEphemeralOneOne,
-        nonEphemeralOneTwo,
+        nonEphemeralOne,
+        nonephemeralTwo,
         unsupported,
       ];
       final DeviceManager deviceManager = TestDeviceManager(devices);
@@ -215,8 +215,8 @@ void main() {
       final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
 
       expect(filtered, <Device>[
-        nonEphemeralOneOne,
-        nonEphemeralOneTwo,
+        nonEphemeralOne,
+        nonephemeralTwo,
       ]);
     });
 

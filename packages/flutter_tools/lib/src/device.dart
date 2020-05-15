@@ -286,7 +286,7 @@ class DeviceManager {
       final String result = await globals.terminal.promptForCharInput(
        _createPossibleInputsList(deviceLength),
         logger: globals.logger,
-        prompt: userMessages.flutterChoseOne
+        prompt: userMessages.flutterChooseOne
       );
       return result;
     }
