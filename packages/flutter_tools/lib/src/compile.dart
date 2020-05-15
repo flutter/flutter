@@ -433,7 +433,7 @@ abstract class ResidentCompiler {
     String initializeFromDill,
     TargetModel targetModel,
     bool unsafePackageSerialization,
-    List<String> experimentalFlags,
+    List<String> extraFrontEndOptions,
     String platformDill,
     List<String> dartDefines,
     String librariesSpec,
@@ -528,7 +528,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.initializeFromDill,
     this.targetModel = TargetModel.flutter,
     this.unsafePackageSerialization,
-    this.experimentalFlags,
+    this.extraFrontEndOptions,
     this.platformDill,
     List<String> dartDefines,
     this.librariesSpec,
@@ -546,7 +546,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final String fileSystemScheme;
   final String initializeFromDill;
   final bool unsafePackageSerialization;
-  final List<String> experimentalFlags;
+  final List<String> extraFrontEndOptions;
   final List<String> dartDefines;
   final String librariesSpec;
 
@@ -692,8 +692,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         platformDill,
       ],
       if (unsafePackageSerialization == true) '--unsafe-package-serialization',
-      if ((experimentalFlags != null) && experimentalFlags.isNotEmpty)
-        '--enable-experiment=${experimentalFlags.join(',')}',
+      ...?extraFrontEndOptions
     ];
     globals.printTrace(command.join(' '));
     _server = await globals.processManager.start(command);
