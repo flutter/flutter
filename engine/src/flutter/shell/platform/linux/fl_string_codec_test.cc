@@ -54,7 +54,7 @@ TEST(FlStringCodecTest, EncodeEmpty) {
   EXPECT_STREQ(hex_string, "");
 }
 
-TEST(FlStringCodecTest, EncodeNULL) {
+TEST(FlStringCodecTest, EncodeNullptr) {
   encode_message_error(nullptr, FL_MESSAGE_CODEC_ERROR,
                        FL_MESSAGE_CODEC_ERROR_UNSUPPORTED_TYPE);
 }
