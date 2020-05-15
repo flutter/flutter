@@ -441,4 +441,5 @@ void main() {
 
     final TextField widget = tester.widget(find.byType(TextField));
     expect(widget.autofillHints, equals(const <String>[AutofillHints.countryName]));
+  });
 }
