@@ -10,6 +10,3 @@ const String normalTextFieldKeyValue = 'textFieldNormal';
 
 /// The string supplied to the [ValueKey] for the password text field.
 const String passwordTextFieldKeyValue = 'passwordField';
-
-/// The string supplied to the [ValueKey] for the page navigation back button.
-const String backButtonKeyValue = 'back';
