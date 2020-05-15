@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -386,6 +387,39 @@ void main() {
       await buildTest(true);
       expect(hovering, isFalse);
       expect(focusing, isFalse);
+    });
+    testWidgets('FocusableActionDetector changes mouse cursor when hovered', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: FocusableActionDetector(
+            mouseCursor: SystemMouseCursors.text,
+            onShowHoverHighlight: (_) {},
+            onShowFocusHighlight: (_) {},
+            child: Container(),
+          ),
+        ),
+      );
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+      await gesture.addPointer(location: const Offset(1, 1));
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+      // Test default
+      await tester.pumpWidget(
+        MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: FocusableActionDetector(
+            onShowHoverHighlight: (_) {},
+            onShowFocusHighlight: (_) {},
+            child: Container(),
+          ),
+        ),
+      );
+
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
     });
   });
 

@@ -5,6 +5,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -76,6 +77,7 @@ class Switch extends StatefulWidget {
     this.onInactiveThumbImageError,
     this.materialTapTargetSize,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.mouseCursor,
     this.focusColor,
     this.hoverColor,
     this.focusNode,
@@ -109,6 +111,7 @@ class Switch extends StatefulWidget {
     this.onInactiveThumbImageError,
     this.materialTapTargetSize,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.mouseCursor,
     this.focusColor,
     this.hoverColor,
     this.focusNode,
@@ -205,6 +208,13 @@ class Switch extends StatefulWidget {
 
   /// {@macro flutter.cupertino.switch.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
+
+  /// {@macro flutter.material.button.mouseCursor}
+  ///
+  /// The [MaterialStateMouseCursor] used here only supports
+  /// [MaterialState.hovered], [MaterialState.focused], and
+  /// [MaterialState.enabled].
+  final MouseCursor mouseCursor;
 
   /// The color for the button's [Material] when it has the input focus.
   final Color focusColor;
@@ -303,6 +313,14 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       inactiveThumbColor = widget.inactiveThumbColor ?? (isDark ? Colors.grey.shade800 : Colors.grey.shade400);
       inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white10 : Colors.black12);
     }
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+      widget.mouseCursor ?? const ClickableMouseCursor(),
+      <MaterialState>{
+        if (!enabled) MaterialState.disabled,
+        if (!_hovering) MaterialState.hovered,
+        if (!_focused) MaterialState.focused,
+      },
+    );
 
     return FocusableActionDetector(
       actions: _actionMap,
@@ -311,6 +329,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       enabled: enabled,
       onShowFocusHighlight: _handleFocusHighlightChanged,
       onShowHoverHighlight: _handleHoverChanged,
+      mouseCursor: effectiveMouseCursor,
       child: Builder(
         builder: (BuildContext context) {
           return _SwitchRenderObjectWidget(

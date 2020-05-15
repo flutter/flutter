@@ -283,8 +283,8 @@ class InkResponse extends StatelessWidget {
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
   ///
-  /// The [containedInkWell], [highlightShape], [enableFeedback], and
-  /// [excludeFromSemantics] arguments must not be null.
+  /// The [mouseCursor], [containedInkWell], [highlightShape], [enableFeedback],
+  /// and [excludeFromSemantics] arguments must not be null.
   const InkResponse({
     Key key,
     this.child,
@@ -312,7 +312,8 @@ class InkResponse extends StatelessWidget {
     this.canRequestFocus = true,
     this.onFocusChange,
     this.autofocus = false,
-  }) : assert(containedInkWell != null),
+  }) : assert(mouseCursor != null),
+       assert(containedInkWell != null),
        assert(highlightShape != null),
        assert(enableFeedback != null),
        assert(excludeFromSemantics != null),
@@ -542,7 +543,7 @@ class InkResponse extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _ParentInkResponseState parentState = _ParentInkResponseProvider.of(context);
-    return _InnerInkResponse(
+    return _InkResponseStateWidget(
       child: child,
       onTap: onTap,
       onTapDown: onTapDown,
@@ -589,8 +590,8 @@ class InkResponse extends StatelessWidget {
   }
 }
 
-class _InnerInkResponse extends StatefulWidget {
-  const _InnerInkResponse({
+class _InkResponseStateWidget extends StatefulWidget {
+  const _InkResponseStateWidget({
     this.child,
     this.onTap,
     this.onTapDown,
@@ -689,8 +690,8 @@ enum _HighlightType {
   focus,
 }
 
-class _InkResponseState extends State<_InnerInkResponse>
-    with AutomaticKeepAliveClientMixin<_InnerInkResponse>
+class _InkResponseState extends State<_InkResponseStateWidget>
+    with AutomaticKeepAliveClientMixin<_InkResponseStateWidget>
     implements _ParentInkResponseState {
   Set<InteractiveInkFeature> _splashes;
   InteractiveInkFeature _currentSplash;
@@ -732,7 +733,7 @@ class _InkResponseState extends State<_InnerInkResponse>
   }
 
   @override
-  void didUpdateWidget(_InnerInkResponse oldWidget) {
+  void didUpdateWidget(_InkResponseStateWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
       _handleHoverChange(_hovering);
@@ -976,7 +977,7 @@ class _InkResponseState extends State<_InnerInkResponse>
     super.deactivate();
   }
 
-  bool _isWidgetEnabled(_InnerInkResponse widget) {
+  bool _isWidgetEnabled(_InkResponseStateWidget widget) {
     return widget.onTap != null || widget.onDoubleTap != null || widget.onLongPress != null;
   }
 
@@ -1123,8 +1124,8 @@ class InkWell extends InkResponse {
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
   ///
-  /// The [enableFeedback] and [excludeFromSemantics] arguments must not be
-  /// null.
+  /// The [mouseCursor], [enableFeedback], and [excludeFromSemantics] arguments
+  /// must not be null.
   const InkWell({
     Key key,
     Widget child,
