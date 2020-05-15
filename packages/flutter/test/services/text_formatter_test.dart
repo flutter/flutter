@@ -88,19 +88,19 @@ void main() {
   group('WhitelistingTextInputFormatter', () {
     test('should return the old value if new value contains non-white-listed character', () {
       const TextEditingValue oldValue = TextEditingValue(text: '12345');
-      const TextEditingValue newValue = TextEditingValue(text: '@');
+      const TextEditingValue newValue = TextEditingValue(text: '12345@');
 
       final WhitelistingTextInputFormatter formatter = WhitelistingTextInputFormatter.digitsOnly;
 
       final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
 
-      // assert that we are passing digits only as the oldValue
+      // assert that we are passing digits only at the first time
       expect(oldValue.text, equals('12345'));
       
-      // The new value is always a non-digit character
-      expect(newValue.text, equals('@'));
+      // The new value is always the oldValue plus a non-digit character (user press @)
+      expect(newValue.text, equals('12345@'));
 
-      // we expect that the formatted value returns the oldValue since the newValue does not
+      // we expect that the formatted value returns the oldValue only since the newValue does not
       // satisfy the formatter condition (wich is, in this case digitsOnly)
       expect(formatted.text, equals('12345'));
     });
