@@ -8,15 +8,14 @@
 #include <memory>
 #include <string>
 
-#include "rapidjson/document.h"
-
 namespace flutter {
 // Handles underlying text input state, using a simple ASCII model.
 //
 // Ignores special states like "insert mode" for now.
 class TextInputModel {
  public:
-  TextInputModel(int client_id, const rapidjson::Value& config);
+  TextInputModel(const std::string& input_type,
+                 const std::string& input_action);
   virtual ~TextInputModel();
 
   // Attempts to set the text state.
@@ -78,11 +77,18 @@ class TextInputModel {
   // Returns true if the cursor could be moved.
   void MoveCursorToEnd();
 
-  // Returns the state in the form of a platform message.
-  std::unique_ptr<rapidjson::Document> GetState() const;
+  // Get the current text
+  std::string GetText() const;
 
-  // Id of the text input client.
-  int client_id() const { return client_id_; }
+  // The position of the cursor
+  int selection_base() const {
+    return static_cast<int>(selection_base_ - text_.begin());
+  }
+
+  // The end of the selection
+  int selection_extent() const {
+    return static_cast<int>(selection_extent_ - text_.begin());
+  }
 
   // Keyboard type of the client. See available options:
   // https://docs.flutter.io/flutter/services/TextInputType-class.html
@@ -96,7 +102,6 @@ class TextInputModel {
   void DeleteSelected();
 
   std::u16string text_;
-  int client_id_;
   std::string input_type_;
   std::string input_action_;
   std::u16string::iterator selection_base_;
