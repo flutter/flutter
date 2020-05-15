@@ -126,12 +126,12 @@ void testUsingContext(
           SimControl: () => MockSimControl(),
           Usage: () => FakeUsage(),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
-          FileSystem: () => const LocalFileSystemBlockingSetCurrentDirectory(),
+          FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
           TimeoutConfiguration: () => const TimeoutConfiguration(),
           PlistParser: () => FakePlistParser(),
           Signals: () => FakeSignals(),
           Pub: () => ThrowingPub(), // prevent accidentally using pub.
-          GitHubTemplateCreator: () => MockGitHubTemplateCreator(),
+          CrashReporter: () => MockCrashReporter(),
           TemplateRenderer: () => const MustacheTemplateRenderer(),
         },
         body: () {
@@ -397,8 +397,8 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
 
   @override
   Future<Map<String, String>> getBuildSettings(
-    String projectPath,
-    String target, {
+    String projectPath, {
+    String scheme,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{};
@@ -432,7 +432,7 @@ class MockClock extends Mock implements SystemClock {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 
-class MockGitHubTemplateCreator extends Mock implements GitHubTemplateCreator {}
+class MockCrashReporter extends Mock implements CrashReporter {}
 
 class FakePlistParser implements PlistParser {
   @override
@@ -443,7 +443,9 @@ class FakePlistParser implements PlistParser {
 }
 
 class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
-  const LocalFileSystemBlockingSetCurrentDirectory();
+  LocalFileSystemBlockingSetCurrentDirectory() : super.test(
+    signals: LocalSignals.instance,
+  );
 
   @override
   set currentDirectory(dynamic value) {

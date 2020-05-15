@@ -23,5 +23,6 @@
   "cutButtonLabel": "Iseci",
   "copyButtonLabel": "Kopiraj",
   "pasteButtonLabel": "Nalepi",
-  "selectAllButtonLabel": "Izaberi sve"
+  "selectAllButtonLabel": "Izaberi sve",
+  "modalBarrierDismissLabel": "Odbaci"
 }

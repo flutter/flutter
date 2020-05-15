@@ -63,32 +63,47 @@ class FileHash {
   }
 }
 
-/// A globally accessible cache of file hashes.
+/// The strategy used by [FileStore] to determine if a file has been
+/// invalidated.
+enum FileStoreStrategy {
+  /// The [FileStore] will compute an md5 hash of the file contents.
+  hash,
+
+  /// The [FileStore] will check for differences in the file's last modified
+  /// timestamp.
+  timestamp,
+}
+
+/// A globally accessible cache of files.
 ///
 /// In cases where multiple targets read the same source files as inputs, we
 /// avoid recomputing or storing multiple copies of hashes by delegating
-/// through this class. All file hashes are held in memory during a build
-/// operation, and persisted to cache in the root build directory.
+/// through this class.
+///
+/// This class uses either timestamps or file hashes depending on the
+/// provided [FileStoreStrategy]. All information  is held in memory during
+/// a build operation, and may be persisted to cache in the root build
+/// directory.
 ///
 /// The format of the file store is subject to change and not part of its API.
-class FileHashStore {
-  FileHashStore({
-    @required Environment environment,
-    @required FileSystem fileSystem,
+class FileStore {
+  FileStore({
+    @required File cacheFile,
     @required Logger logger,
-  }) : _cachePath = environment.buildDir.childFile(_kFileCache).path,
-       _logger = logger,
-       _fileSystem = fileSystem;
+    FileStoreStrategy strategy = FileStoreStrategy.hash,
+  }) : _logger = logger,
+       _strategy = strategy,
+       _cacheFile = cacheFile;
 
-  final FileSystem _fileSystem;
-  final String _cachePath;
+  final File _cacheFile;
   final Logger _logger;
+  final FileStoreStrategy _strategy;
 
-  final HashMap<String, String> previousHashes = HashMap<String, String>();
-  final HashMap<String, String> currentHashes = HashMap<String, String>();
+  final HashMap<String, String> previousAssetKeys = HashMap<String, String>();
+  final HashMap<String, String> currentAssetKeys = HashMap<String, String>();
 
   // The name of the file which stores the file hashes.
-  static const String _kFileCache = '.filecache';
+  static const String kFileCache = '.filecache';
 
   // The current version of the file cache storage format.
   static const int _kVersion = 2;
@@ -96,16 +111,15 @@ class FileHashStore {
   /// Read file hashes from disk.
   void initialize() {
     _logger.printTrace('Initializing file store');
-    final File cacheFile = _fileSystem.file(_cachePath);
-    if (!cacheFile.existsSync()) {
+    if (!_cacheFile.existsSync()) {
       return;
     }
     Uint8List data;
     try {
-      data = cacheFile.readAsBytesSync();
+      data = _cacheFile.readAsBytesSync();
     } on FileSystemException catch (err) {
       _logger.printError(
-        'Failed to read file store at ${cacheFile.path} due to $err.\n'
+        'Failed to read file store at ${_cacheFile.path} due to $err.\n'
         'Build artifacts will not be cached. Try clearing the cache directories '
         'with "flutter clean"',
       );
@@ -117,29 +131,28 @@ class FileHashStore {
       fileStorage = FileStorage.fromBuffer(data);
     } on Exception catch (err) {
       _logger.printTrace('Filestorage format changed: $err');
-      cacheFile.deleteSync();
+      _cacheFile.deleteSync();
       return;
     }
     if (fileStorage.version != _kVersion) {
       _logger.printTrace('file cache format updating, clearing old hashes.');
-      cacheFile.deleteSync();
+      _cacheFile.deleteSync();
       return;
     }
     for (final FileHash fileHash in fileStorage.files) {
-      previousHashes[fileHash.path] = fileHash.hash;
+      previousAssetKeys[fileHash.path] = fileHash.hash;
     }
     _logger.printTrace('Done initializing file store');
   }
 
-  /// Persist file hashes to disk.
+  /// Persist file marks to disk for a non-incremental build.
   void persist() {
     _logger.printTrace('Persisting file store');
-    final File cacheFile = _fileSystem.file(_cachePath);
-    if (!cacheFile.existsSync()) {
-      cacheFile.createSync(recursive: true);
+    if (!_cacheFile.existsSync()) {
+      _cacheFile.createSync(recursive: true);
     }
     final List<FileHash> fileHashes = <FileHash>[];
-    for (final MapEntry<String, String> entry in currentHashes.entries) {
+    for (final MapEntry<String, String> entry in currentAssetKeys.entries) {
       fileHashes.add(FileHash(entry.key, entry.value));
     }
     final FileStorage fileStorage = FileStorage(
@@ -148,10 +161,10 @@ class FileHashStore {
     );
     final List<int> buffer = fileStorage.toBuffer();
     try {
-      cacheFile.writeAsBytesSync(buffer);
+      _cacheFile.writeAsBytesSync(buffer);
     } on FileSystemException catch (err) {
       _logger.printError(
-        'Failed to persist file store at ${cacheFile.path} due to $err.\n'
+        'Failed to persist file store at ${_cacheFile.path} due to $err.\n'
         'Build artifacts will not be cached. Try clearing the cache directories '
         'with "flutter clean"',
       );
@@ -159,26 +172,60 @@ class FileHashStore {
     _logger.printTrace('Done persisting file store');
   }
 
-  /// Computes a hash of the provided files and returns a list of entities
+  /// Reset `previousMarks` for an incremental build.
+  void persistIncremental() {
+    previousAssetKeys.clear();
+    previousAssetKeys.addAll(currentAssetKeys);
+    currentAssetKeys.clear();
+  }
+
+  /// Computes a diff of the provided files and returns a list of files
   /// that were dirty.
-  Future<List<File>> hashFiles(List<File> files) async {
+  Future<List<File>> diffFileList(List<File> files) async {
     final List<File> dirty = <File>[];
-    final Pool openFiles = Pool(kMaxOpenFiles);
-    await Future.wait(<Future<void>>[
-       for (final File file in files) _hashFile(file, dirty, openFiles)
-    ]);
+    switch (_strategy) {
+      case FileStoreStrategy.hash:
+        final Pool openFiles = Pool(kMaxOpenFiles);
+        await Future.wait(<Future<void>>[
+          for (final File file in files) _hashFile(file, dirty, openFiles)
+        ]);
+        break;
+      case FileStoreStrategy.timestamp:
+        for (final File file in files) {
+          _checkModification(file, dirty);
+        }
+        break;
+    }
     return dirty;
+  }
+
+  void _checkModification(File file, List<File> dirty) {
+    final String absolutePath = file.path;
+    final String previousTime = previousAssetKeys[absolutePath];
+
+    // If the file is missing it is assumed to be dirty.
+    if (!file.existsSync()) {
+      currentAssetKeys.remove(absolutePath);
+      previousAssetKeys.remove(absolutePath);
+      dirty.add(file);
+      return;
+    }
+    final String modifiedTime = file.lastModifiedSync().toString();
+    if (modifiedTime != previousTime) {
+      dirty.add(file);
+    }
+    currentAssetKeys[absolutePath] = modifiedTime;
   }
 
   Future<void> _hashFile(File file, List<File> dirty, Pool pool) async {
     final PoolResource resource = await pool.request();
     try {
       final String absolutePath = file.path;
-      final String previousHash = previousHashes[absolutePath];
+      final String previousHash = previousAssetKeys[absolutePath];
       // If the file is missing it is assumed to be dirty.
       if (!file.existsSync()) {
-        currentHashes.remove(absolutePath);
-        previousHashes.remove(absolutePath);
+        currentAssetKeys.remove(absolutePath);
+        previousAssetKeys.remove(absolutePath);
         dirty.add(file);
         return;
       }
@@ -187,7 +234,7 @@ class FileHashStore {
       if (currentHash != previousHash) {
         dirty.add(file);
       }
-      currentHashes[absolutePath] = currentHash;
+      currentAssetKeys[absolutePath] = currentHash;
     } finally {
       resource.release();
     }

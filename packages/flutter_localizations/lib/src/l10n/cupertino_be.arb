@@ -28,5 +28,7 @@
   "cutButtonLabel": "Выразаць",
   "copyButtonLabel": "Капіраваць",
   "pasteButtonLabel": "Уставіць",
-  "selectAllButtonLabel": "Выбраць усе"
+  "selectAllButtonLabel": "Выбраць усе",
+  "tabSemanticsLabel": "TBD",
+  "modalBarrierDismissLabel": "Адхіліць"
 }

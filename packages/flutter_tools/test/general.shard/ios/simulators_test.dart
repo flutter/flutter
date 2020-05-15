@@ -6,23 +6,22 @@ import 'dart:async';
 import 'dart:io' show ProcessResult, Process;
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -452,10 +451,10 @@ void main() {
         simControl: mockSimControl,
         xcode: mockXcode,
       );
-      await launchDeviceUnifiedLogging(device, 'Runner');
+      await launchDeviceUnifiedLogging(device, 'My Super Awesome App');
 
       const String expectedPredicate = 'eventType = logEvent AND '
-        'processImagePath ENDSWITH "Runner" AND '
+        'processImagePath ENDSWITH "My Super Awesome App" AND '
         '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID) AND '
         'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
         'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
@@ -517,13 +516,13 @@ void main() {
   });
 
   group('log reader', () {
-    MockProcessManager mockProcessManager;
+    FakeProcessManager fakeProcessManager;
     MockIosProject mockIosProject;
     MockSimControl mockSimControl;
     MockXcode mockXcode;
 
     setUp(() {
-      mockProcessManager = MockProcessManager();
+      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
       mockIosProject = MockIosProject();
       mockSimControl = MockSimControl();
       mockXcode = MockXcode();
@@ -535,25 +534,51 @@ void main() {
         osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = syslog.path;
       });
 
+      testUsingContext('simulator can parse Xcode 8/iOS 10-style logs', () async {
+        fakeProcessManager
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', 'system.log'],
+            stdout: '''
+Dec 20 17:04:32 md32-11-vm1 My Super Awesome App[88374]: flutter: Observatory listening on http://127.0.0.1:64213/1Uoeu523990=/
+Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
+          ))
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', '/private/var/log/system.log']
+          ));
+
+        final IOSSimulator device = IOSSimulator(
+          '123456',
+          simulatorCategory: 'iOS 10.0',
+          simControl: mockSimControl,
+          xcode: mockXcode,
+        );
+        final DeviceLogReader logReader = device.getLogReader(
+          app: await BuildableIOSApp.fromProject(mockIosProject, null),
+        );
+
+        final List<String> lines = await logReader.logLines.toList();
+        expect(lines, <String>[
+          'flutter: Observatory listening on http://127.0.0.1:64213/1Uoeu523990=/',
+        ]);
+        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      }, overrides: <Type, Generator>{
+        ProcessManager: () => fakeProcessManager,
+        FileSystem: () => fileSystem,
+        Platform: () => osx,
+      });
+
       testUsingContext('simulator can output `)`', () async {
-        when(mockProcessManager.start(any, environment: null, workingDirectory: null))
-          .thenAnswer((Invocation invocation) {
-          final Process mockProcess = MockProcess();
-          when(mockProcess.stdout)
-            .thenAnswer((Invocation invocation) {
-            return Stream<List<int>>.fromIterable(<List<int>>['''
-2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
-2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) ))))))))))
-2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) #0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)'''
-              .codeUnits]);
-          });
-          when(mockProcess.stderr)
-            .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
-          // Delay return of exitCode until after stdout stream data, since it terminates the logger.
-          when(mockProcess.exitCode)
-            .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
-          return Future<Process>.value(mockProcess);
-        });
+        fakeProcessManager
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', 'system.log'],
+            stdout: '''
+2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
+2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) ))))))))))
+2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) #0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)'''
+          ))
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', '/private/var/log/system.log']
+          ));
 
         final IOSSimulator device = IOSSimulator(
           '123456',
@@ -562,7 +587,7 @@ void main() {
           xcode: mockXcode,
         );
         final DeviceLogReader logReader = device.getLogReader(
-          app: await BuildableIOSApp.fromProject(mockIosProject),
+          app: await BuildableIOSApp.fromProject(mockIosProject, null),
         );
 
         final List<String> lines = await logReader.logLines.toList();
@@ -571,43 +596,36 @@ void main() {
           '))))))))))',
           '#0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)',
         ]);
+        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
         Platform: () => osx,
       });
 
-      testUsingContext('log reader handles multiline messages', () async {
-        when(mockProcessManager.start(any, environment: null, workingDirectory: null))
-          .thenAnswer((Invocation invocation) {
-          final Process mockProcess = MockProcess();
-          when(mockProcess.stdout)
-            .thenAnswer((Invocation invocation) {
-            // Messages from 2017 should pass through, 2020 message should not
-            return Stream<List<int>>.fromIterable(<List<int>>['''
-2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Single line message
-2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Multi line message
+      testUsingContext('multiline messages', () async {
+        fakeProcessManager
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', 'system.log'],
+            stdout: '''
+2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Single line message
+2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Multi line message
   continues...
   continues...
-2020-03-11 15:58:28.207175-0700  localhost Runner[72166]: (libnetwork.dylib) [com.apple.network:] [28 www.googleapis.com:443 stream, pid: 72166, tls] cancelled
+2020-03-11 15:58:28.207175-0700  localhost My Super Awesome App[72166]: (libnetwork.dylib) [com.apple.network:] [28 www.googleapis.com:443 stream, pid: 72166, tls] cancelled
 	[28.1 64A98447-EABF-4983-A387-7DB9D0C1785F 10.0.1.200.57912<->172.217.6.74:443]
 	Connected Path: satisfied (Path is satisfied), interface: en18
 	Duration: 0.271s, DNS @0.000s took 0.001s, TCP @0.002s took 0.019s, TLS took 0.046s
 	bytes in/out: 4468/1933, packets in/out: 11/10, rtt: 0.016s, retransmitted packets: 0, out-of-order packets: 0
-2017-09-13 15:36:57.228948-0700  localhost Runner[37195]: (Flutter) Multi line message again
+2017-09-13 15:36:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Multi line message again
   and it goes...
   and goes...
-2017-09-13 15:36:57.228948-0700  localhost Runner[37195]: (Flutter) Single line message, not the part of the above
+2017-09-13 15:36:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Single line message, not the part of the above
 '''
-              .codeUnits]);
-          });
-          when(mockProcess.stderr)
-            .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
-          // Delay return of exitCode until after stdout stream data, since it terminates the logger.
-          when(mockProcess.exitCode)
-            .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
-          return Future<Process>.value(mockProcess);
-        });
+          ))
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', '/private/var/log/system.log']
+          ));
 
         final IOSSimulator device = IOSSimulator(
           '123456',
@@ -616,7 +634,7 @@ void main() {
           xcode: mockXcode,
         );
         final DeviceLogReader logReader = device.getLogReader(
-          app: await BuildableIOSApp.fromProject(mockIosProject),
+          app: await BuildableIOSApp.fromProject(mockIosProject, null),
         );
 
         final List<String> lines = await logReader.logLines.toList();
@@ -630,8 +648,9 @@ void main() {
           '  and goes...',
           'Single line message, not the part of the above'
         ]);
+        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
         Platform: () => osx,
       });
@@ -639,12 +658,25 @@ void main() {
 
     group('unified logging', () {
       testUsingContext('log reader handles escaped multiline messages', () async {
-        when(mockProcessManager.start(any, environment: null, workingDirectory: null))
-          .thenAnswer((Invocation invocation) {
-          final Process mockProcess = MockProcess();
-          when(mockProcess.stdout)
-            .thenAnswer((Invocation invocation) {
-            return Stream<List<int>>.fromIterable(<List<int>>['''
+        const String logPredicate = 'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
+          'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
+          'OR processImageUUID == senderImageUUID) AND NOT(eventMessage CONTAINS ": could not find icon '
+          'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
+          'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
+        fakeProcessManager.addCommand(const FakeCommand(
+            command:  <String>[
+              '/usr/bin/xcrun',
+              'simctl',
+              'spawn',
+              '123456',
+              'log',
+              'stream',
+              '--style',
+              'json',
+              '--predicate',
+              logPredicate,
+            ],
+            stdout: '''
 },{
   "traceID" : 37579774151491588,
   "eventMessage" : "Single line message",
@@ -658,15 +690,7 @@ void main() {
   "eventType" : "logEvent"
 },{
 '''
-              .codeUnits]);
-          });
-          when(mockProcess.stderr)
-            .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
-          // Delay return of exitCode until after stdout stream data, since it terminates the logger.
-          when(mockProcess.exitCode)
-            .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
-          return Future<Process>.value(mockProcess);
-        });
+          ));
 
         final IOSSimulator device = IOSSimulator(
           '123456',
@@ -675,7 +699,7 @@ void main() {
           xcode: mockXcode,
         );
         final DeviceLogReader logReader = device.getLogReader(
-          app: await BuildableIOSApp.fromProject(mockIosProject),
+          app: await BuildableIOSApp.fromProject(mockIosProject, null),
         );
 
         final List<String> lines = await logReader.logLines.toList();
@@ -683,8 +707,9 @@ void main() {
           'Single line message', 'Multi line message\n  continues...\n  continues...',
           'Single line message, not the part of the above'
         ]);
+        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
       });
     });

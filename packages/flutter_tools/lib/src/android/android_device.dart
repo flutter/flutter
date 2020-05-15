@@ -214,10 +214,10 @@ class AndroidDevice extends Device {
 
   AdbLogReader _logReader;
   AdbLogReader _pastLogReader;
-  _AndroidDevicePortForwarder _portForwarder;
+  AndroidDevicePortForwarder _portForwarder;
 
   List<String> adbCommandForDevice(List<String> args) {
-    return <String>[getAdbPath(androidSdk), '-s', id, ...args];
+    return <String>[getAdbPath(globals.androidSdk), '-s', id, ...args];
   }
 
   String runAdbCheckedSync(
@@ -274,19 +274,19 @@ class AndroidDevice extends Device {
   }
 
   Future<bool> _checkForSupportedAdbVersion() async {
-    if (androidSdk == null) {
+    if (globals.androidSdk == null) {
       return false;
     }
 
     try {
       final RunResult adbVersion = await processUtils.run(
-        <String>[getAdbPath(androidSdk), 'version'],
+        <String>[getAdbPath(globals.androidSdk), 'version'],
         throwOnError: true,
       );
       if (_isValidAdbVersion(adbVersion.stdout)) {
         return true;
       }
-      globals.printError('The ADB at "${getAdbPath(androidSdk)}" is too old; please install version 1.0.39 or later.');
+      globals.printError('The ADB at "${getAdbPath(globals.androidSdk)}" is too old; please install version 1.0.39 or later.');
     } on Exception catch (error, trace) {
       globals.printError('Error running ADB: $error', stackTrace: trace);
     }
@@ -301,7 +301,7 @@ class AndroidDevice extends Device {
       //   adb server is out of date.  killing..
       //   * daemon started successfully *
       await processUtils.run(
-        <String>[getAdbPath(androidSdk), 'start-server'],
+        <String>[getAdbPath(globals.androidSdk), 'start-server'],
         throwOnError: true,
       );
 
@@ -507,7 +507,7 @@ class AndroidDevice extends Device {
         return LaunchResult.failed();
     }
 
-    if (!prebuiltApplication || androidSdk.licensesAvailable && androidSdk.latestVersion == null) {
+    if (!prebuiltApplication || globals.androidSdk.licensesAvailable && globals.androidSdk.latestVersion == null) {
       globals.printTrace('Building APK');
       final FlutterProject project = FlutterProject.current();
       await androidBuilder.buildApk(
@@ -647,6 +647,9 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> stopApp(AndroidApk app) {
+    if (app == null) {
+      return Future<bool>.value(false);
+    }
     final List<String> command = adbCommandForDevice(<String>['shell', 'am', 'force-stop', app.id]);
     return processUtils.stream(command).then<bool>(
         (int exitCode) => exitCode == 0 || allowHeapCorruptionOnWindows(exitCode));
@@ -694,7 +697,12 @@ class AndroidDevice extends Device {
   }
 
   @override
-  DevicePortForwarder get portForwarder => _portForwarder ??= _AndroidDevicePortForwarder(this);
+  DevicePortForwarder get portForwarder => _portForwarder ??= AndroidDevicePortForwarder(
+    processManager: globals.processManager,
+    logger: globals.logger,
+    deviceId: id,
+    adbPath: globals.androidSdk.adbPath,
+  );
 
   static final RegExp _timeRegExp = RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
 
@@ -983,6 +991,7 @@ class AdbLogReader extends DeviceLogReader {
     RegExp(r'^[VDIWEF]\/flutter[^:]*:\s+', caseSensitive: false),
     RegExp(r'^[IE]\/DartVM[^:]*:\s+'),
     RegExp(r'^[WEF]\/AndroidRuntime:\s+'),
+    RegExp(r'^[WEF]\/AndroidRuntime\([0-9]+\):\s+'),
     RegExp(r'^[WEF]\/ActivityManager:\s+.*(\bflutter\b|\bdomokit\b|\bsky\b)'),
     RegExp(r'^[WEF]\/System\.err:\s+'),
     RegExp(r'^[F]\/[\S^:]+:\s+'),
@@ -1016,6 +1025,7 @@ class AdbLogReader extends DeviceLogReader {
     }
     final Match timeMatch = AndroidDevice._timeRegExp.firstMatch(line);
     if (timeMatch == null || line.length == timeMatch.end) {
+      _acceptedLastLine = false;
       return;
     }
     // Chop off the time.
@@ -1083,10 +1093,22 @@ class AdbLogReader extends DeviceLogReader {
   }
 }
 
-class _AndroidDevicePortForwarder extends DevicePortForwarder {
-  _AndroidDevicePortForwarder(this.device);
+/// A [DevicePortForwarder] implemented for Android devices that uses adb.
+class AndroidDevicePortForwarder extends DevicePortForwarder {
+  AndroidDevicePortForwarder({
+    @required ProcessManager processManager,
+    @required Logger logger,
+    @required String deviceId,
+    @required String adbPath,
+  }) : _deviceId = deviceId,
+       _adbPath = adbPath,
+       _logger = logger,
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
-  final AndroidDevice device;
+  final String _deviceId;
+  final String _adbPath;
+  final Logger _logger;
+  final ProcessUtils _processUtils;
 
   static int _extractPort(String portString) {
     return int.tryParse(portString.trim());
@@ -1098,18 +1120,24 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
 
     String stdout;
     try {
-      stdout = processUtils.runSync(
-        device.adbCommandForDevice(<String>['forward', '--list']),
+      stdout = _processUtils.runSync(
+        <String>[
+          _adbPath,
+          '-s',
+          _deviceId,
+          'forward',
+          '--list',
+        ],
         throwOnError: true,
       ).stdout.trim();
     } on ProcessException catch (error) {
-      globals.printError('Failed to list forwarded ports: $error.');
+      _logger.printError('Failed to list forwarded ports: $error.');
       return ports;
     }
 
     final List<String> lines = LineSplitter.split(stdout).toList();
     for (final String line in lines) {
-      if (!line.startsWith(device.id)) {
+      if (!line.startsWith(_deviceId)) {
         continue;
       }
       final List<String> splitLine = line.split('tcp:');
@@ -1137,13 +1165,15 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
   @override
   Future<int> forward(int devicePort, { int hostPort }) async {
     hostPort ??= 0;
-    final List<String> forwardCommand = <String>[
-      'forward',
-      'tcp:$hostPort',
-      'tcp:$devicePort',
-    ];
-    final RunResult process = await processUtils.run(
-      device.adbCommandForDevice(forwardCommand),
+    final RunResult process = await _processUtils.run(
+      <String>[
+        _adbPath,
+        '-s',
+        _deviceId,
+        'forward',
+        'tcp:$hostPort',
+        'tcp:$devicePort',
+      ],
       throwOnError: true,
     );
 
@@ -1190,15 +1220,25 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
 
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async {
-    final List<String> unforwardCommand = <String>[
-      'forward',
-      '--remove',
-      'tcp:${forwardedPort.hostPort}',
-    ];
-    await processUtils.run(
-      device.adbCommandForDevice(unforwardCommand),
-      throwOnError: true,
+    final String tcpLine = 'tcp:${forwardedPort.hostPort}';
+    final RunResult runResult = await _processUtils.run(
+      <String>[
+        _adbPath,
+        '-s',
+        _deviceId,
+        'forward',
+        '--remove',
+        tcpLine,
+      ],
+      throwOnError: false,
     );
+    // The port may have already been unforwarded, for example if there
+    // are multiple attach process already connected.
+    if (runResult.exitCode == 0 || runResult
+      .stderr.contains("listener '$tcpLine' not found")) {
+      return;
+    }
+    runResult.throwException('Process exited abnormally:\n$runResult');
   }
 
   @override

@@ -71,9 +71,9 @@ const Set<String> _validDateFormats = <String>{
 // The set of number formats that can be automatically localized.
 //
 // The localizations generation tool makes use of the intl library's
-// NumberFormat class to properly format numbers based on the locale, the
-// desired format, as well as the passed in number. For example, using
-// DateFormat.compactLong("en_US").format(1200000) results
+// NumberFormat class to properly format numbers based on the locale and
+// the desired format. For example, using
+// NumberFormat.compactLong("en_US").format(1200000) results
 // in the string "1.2 million".
 //
 // Since the tool generates code that uses NumberFormat's constructor, it is
@@ -363,8 +363,16 @@ class AppResourceBundle {
   factory AppResourceBundle(File file) {
     assert(file != null);
     // Assuming that the caller has verified that the file exists and is readable.
+    Map<String, dynamic> resources;
+    try {
+      resources = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+    } on FormatException catch (e) {
+      throw L10nException(
+        'The arb file ${file.path} has the following formatting issue: \n'
+        '${e.toString()}',
+      );
+    }
 
-    final Map<String, dynamic> resources = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
     String localeString = resources['@@locale'] as String;
     if (localeString == null) {
       final RegExp filenameRE = RegExp(r'^[^_]*_(\w+)\.arb$');

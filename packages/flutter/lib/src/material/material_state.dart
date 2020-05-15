@@ -209,14 +209,27 @@ abstract class MaterialStateProperty<T> {
 
   /// Convenience method for creating a [MaterialStateProperty] from a
   /// [MaterialPropertyResolver] function alone.
-  static MaterialStateProperty<T> resolveWith<T>(MaterialPropertyResolver<T> callback) => _MaterialStateProperty<T>(callback);
+  static MaterialStateProperty<T> resolveWith<T>(MaterialPropertyResolver<T> callback) => _MaterialStatePropertyWith<T>(callback);
+
+  /// Convenience method for creating a [MaterialStateProperty] that resolves
+  /// to a single value for all states.
+  static MaterialStateProperty<T> all<T>(T value) => _MaterialStatePropertyAll<T>(value);
 }
 
-class _MaterialStateProperty<T> implements MaterialStateProperty<T> {
-  _MaterialStateProperty(this._resolve);
+class _MaterialStatePropertyWith<T> implements MaterialStateProperty<T> {
+  _MaterialStatePropertyWith(this._resolve);
 
   final MaterialPropertyResolver<T> _resolve;
 
   @override
   T resolve(Set<MaterialState> states) => _resolve(states);
+}
+
+class _MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
+  _MaterialStatePropertyAll(this.value);
+
+  final T value;
+
+  @override
+  T resolve(Set<MaterialState> states) => value;
 }

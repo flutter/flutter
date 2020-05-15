@@ -54,10 +54,6 @@ BuildApp() {
     derived_dir="${project_path}/.ios/Flutter"
   fi
 
-  RunCommand mkdir -p -- "$derived_dir"
-  AssertExists "$derived_dir"
-  RunCommand rm -rf -- "${derived_dir}/App.framework"
-
   # Default value of assets_path is flutter_assets
   local assets_path="flutter_assets"
   # The value of assets_path can set by add FLTAssetsPath to
@@ -156,19 +152,9 @@ BuildApp() {
     verbose_flag="--verbose"
   fi
 
-  local track_widget_creation_flag=""
-  if [[ -n "$TRACK_WIDGET_CREATION" ]]; then
-    track_widget_creation_flag="true"
-  fi
-
-  icon_tree_shaker_flag="false"
-  if [[ -n "$TREE_SHAKE_ICONS" ]]; then
-    icon_tree_shaker_flag="true"
-  fi
-
-  dart_obfuscation_flag="false"
-  if [[ -n "$DART_OBFUSCATION" ]]; then
-    dart_obfuscation_flag="true"
+  local performance_measurement_option=""
+  if [[ -n "$PERFORMANCE_MEASUREMENT_FILE" ]]; then
+    performance_measurement_option="--performance-measurement-file=${PERFORMANCE_MEASUREMENT_FILE}"
   fi
 
   RunCommand "${FLUTTER_ROOT}/bin/flutter"                                \
@@ -177,14 +163,15 @@ BuildApp() {
     ${local_engine_flag}                                                  \
     assemble                                                              \
     --output="${derived_dir}/"                                            \
+    ${performance_measurement_option}                                     \
     -dTargetPlatform=ios                                                  \
     -dTargetFile="${target_path}"                                         \
     -dBuildMode=${build_mode}                                             \
     -dIosArchs="${ARCHS}"                                                 \
     -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                \
-    -dTreeShakeIcons="${icon_tree_shaker_flag}"                           \
-    -dTrackWidgetCreation="${track_widget_creation_flag}"                 \
-    -dDartObfuscation="${dart_obfuscation_flag}"                          \
+    -dTreeShakeIcons="${TREE_SHAKE_ICONS}"                                \
+    -dTrackWidgetCreation="${TRACK_WIDGET_CREATION}"                      \
+    -dDartObfuscation="${DART_OBFUSCATION}"                               \
     -dEnableBitcode="${bitcode_flag}"                                     \
     --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"             \
     --DartDefines="${DART_DEFINES}"                                       \
@@ -260,7 +247,6 @@ ThinFramework() {
   local framework_dir="$1"
   shift
 
-  local plist_path="${framework_dir}/Info.plist"
   local executable="$(GetFrameworkExecutablePath "${framework_dir}")"
   LipoExecutable "${executable}" "$@"
 }
@@ -302,8 +288,8 @@ EmbedFlutterFrameworks() {
 
   # Copy Xcode behavior and don't copy over headers or modules.
   RunCommand rsync -av --delete --filter "- .DS_Store/" --filter "- Headers/" --filter "- Modules/" "${flutter_ios_engine_folder}/Flutter.framework" "${xcode_frameworks_dir}/"
-  if [[ "$ACTION" != "install" ]]; then
-    # Strip bitcode from the destination unless archiving.
+  if [[ "$ACTION" != "install" || "$ENABLE_BITCODE" == "NO" ]]; then
+    # Strip bitcode from the destination unless archiving, or if bitcode is disabled entirely.
     RunCommand "${DT_TOOLCHAIN_DIR}"/usr/bin/bitcode_strip "${flutter_ios_engine_folder}/Flutter.framework/Flutter" -r -o "${xcode_frameworks_dir}/Flutter.framework/Flutter"
   fi
 

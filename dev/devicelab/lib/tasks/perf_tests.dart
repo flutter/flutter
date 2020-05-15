@@ -30,11 +30,30 @@ TaskFunction createTilesScrollPerfTest() {
   ).run;
 }
 
-TaskFunction createPlatformViewsScrollPerfTest() {
+TaskFunction createUiKitViewScrollPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
-    'test_driver/scroll_perf.dart',
+    'test_driver/uikit_view_scroll_perf.dart',
     'platform_views_scroll_perf',
+    testDriver: 'test_driver/scroll_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createAndroidTextureScrollPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    'test_driver/android_texture_scroll_perf.dart',
+    'platform_views_scroll_perf',
+    testDriver: 'test_driver/scroll_perf_test.dart',
+  ).run;
+}
+
+TaskFunction createAndroidViewScrollPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    'test_driver/android_view_scroll_perf.dart',
+    'platform_views_scroll_perf',
+    testDriver: 'test_driver/scroll_perf_test.dart',
   ).run;
 }
 
@@ -235,15 +254,22 @@ class StartupTest {
 /// performance.
 class PerfTest {
   const PerfTest(
-      this.testDirectory,
-      this.testTarget,
-      this.timelineFileName,
-      {this.needsMeasureCpuGPu = false});
+    this.testDirectory,
+    this.testTarget,
+    this.timelineFileName, {
+    this.needsMeasureCpuGPu = false,
+    this.testDriver,
+  });
 
+  /// The directory where the app under test is defined.
   final String testDirectory;
+  /// The main entry-point file of the application, as run on the device.
   final String testTarget;
+  // The prefix name of the filename such as `<timelineFileName>.timeline_summary.json`.
   final String timelineFileName;
-
+  /// The test file to run on the host.
+  final String testDriver;
+  /// Whether to collect CPU and GPU metrics.
   final bool needsMeasureCpuGPu;
 
   Future<TaskResult> run() {
@@ -259,6 +285,8 @@ class PerfTest {
         '--trace-startup', // Enables "endless" timeline event buffering.
         '-t',
         testTarget,
+        if (testDriver != null)
+          '--driver', testDriver,
         '-d',
         deviceId,
       ]);
@@ -322,9 +350,7 @@ class WebCompileTest {
     rmTree(sampleDir);
 
     await inDirectory<void>(Directory.systemTemp, () async {
-      await flutter('create', options: <String>['--template=app', sampleAppName], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
+      await flutter('create', options: <String>['--template=app', sampleAppName]);
     });
 
     metrics.addAll(await runSingleBuildTest(
@@ -351,9 +377,7 @@ class WebCompileTest {
         '-v',
         '--release',
         '--no-pub',
-      ], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
+      ]);
       watch?.stop();
       final String outputFileName = path.join(directory, 'build/web/main.dart.js');
       metrics.addAll(await getSize(outputFileName, metric: metric));
@@ -423,7 +447,15 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        final String appPath =  '$cwd/build/ios/Release-iphoneos/Runner.app/';
+        final Directory appBuildDirectory = dir(path.join(cwd, 'build/ios/Release-iphoneos'));
+        final Directory appBundle = appBuildDirectory
+            .listSync()
+            .whereType<Directory>()
+            .singleWhere((Directory directory) => path.extension(directory.path) == '.app', orElse: () => null);
+        if (appBundle == null) {
+          throw 'Failed to find app bundle in ${appBuildDirectory.path}';
+        }
+        final String appPath =  appBundle.path;
         // IPAs are created manually, https://flutter.dev/ios-release/
         await exec('tar', <String>['-zcf', 'build/app.ipa', appPath]);
         releaseSizeInBytes = await file('$cwd/build/app.ipa').length();

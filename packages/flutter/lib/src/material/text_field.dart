@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(Piinks): Remove ignoring deprecated member use analysis
+// when TextField.canAssertMaterialLocalizations parameter is removed.
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/cupertino.dart';
@@ -348,6 +352,7 @@ class TextField extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autofillHints,
+    bool canAssertMaterialLocalizations,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -376,6 +381,11 @@ class TextField extends StatefulWidget {
        ),
        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
+       // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
+       assert(!identical(textInputAction, TextInputAction.newline) ||
+         maxLines == 1 ||
+         !identical(keyboardType, TextInputType.text),
+         'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.'),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        toolbarOptions = toolbarOptions ?? (obscureText ?
          const ToolbarOptions(
@@ -388,6 +398,7 @@ class TextField extends StatefulWidget {
            selectAll: true,
            paste: true,
          )),
+       canAssertMaterialLocalizations = canAssertMaterialLocalizations ?? false,
        super(key: key);
 
   /// Controls the text being edited.
@@ -719,6 +730,16 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autofillHints}
   final Iterable<String> autofillHints;
 
+  /// Indicates whether [debugCheckHasMaterialLocalizations] can be called
+  /// during build.
+  @Deprecated(
+    'Set canAssertMaterialLocalizations to `true`. This parameter will be '
+    'removed and was introduced to migrate TextField to assert '
+    'debugCheckHasMaterialLocalizations by default. '
+    'This feature was deprecated after v1.18.0.'
+  )
+  final bool canAssertMaterialLocalizations;
+
   @override
   _TextFieldState createState() => _TextFieldState();
 
@@ -797,7 +818,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     final InputDecoration effectiveDecoration = (widget.decoration ?? const InputDecoration())
       .applyDefaults(themeData.inputDecorationTheme)
       .copyWith(
-        enabled: widget.enabled,
+        enabled: _isEnabled,
         hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines,
       );
 
@@ -959,8 +980,8 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    // TODO(jonahwilliams): uncomment out this check once we have migrated tests.
-    // assert(debugCheckHasMaterialLocalizations(context));
+    if (widget.canAssertMaterialLocalizations)
+      assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
     assert(
       !(widget.style != null && widget.style.inherit == false &&

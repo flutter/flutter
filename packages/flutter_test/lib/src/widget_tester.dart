@@ -89,6 +89,9 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// each value of the [TestVariant.values]. If [variant] is not set, the test
 /// will be run once using the base test environment.
 ///
+/// If the [tags] are passed, they declare user-defined tags that are implemented by
+/// the `test` package.
+///
 /// See also:
 ///
 ///  * [AutomatedTestWidgetsFlutterBinding.addTime] to learn more about
@@ -112,6 +115,7 @@ void testWidgets(
   Duration initialTimeout,
   bool semanticsEnabled = true,
   TestVariant<Object> variant = const DefaultTestVariant(),
+  dynamic tags,
 }) {
   assert(variant != null);
   assert(variant.values.isNotEmpty, 'There must be at least on value to test in the testing variant');
@@ -150,6 +154,7 @@ void testWidgets(
       },
       skip: skip,
       timeout: timeout ?? binding.defaultTestTimeout,
+      tags: tags,
     );
   }
 }
@@ -559,6 +564,29 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         count += 1;
       } while (binding.hasScheduledFrame);
     }).then<int>((_) => count);
+  }
+
+  /// Repeatedly pump frames that render the `target` widget with a fixed time
+  /// `interval` as many as `maxDuration` allows.
+  ///
+  /// The `maxDuration` argument is required. The `interval` argument defaults to
+  /// 16.683 milliseconds (59.94 FPS).
+  Future<void> pumpFrames(
+    Widget target,
+    Duration maxDuration, [
+    Duration interval = const Duration(milliseconds: 16, microseconds: 683),
+  ]) {
+    assert(maxDuration != null);
+    // The interval following the last frame doesn't have to be within the fullDuration.
+    Duration elapsed = Duration.zero;
+    return TestAsyncUtils.guard<void>(() async {
+      binding.attachRootWidget(target);
+      binding.scheduleFrame();
+      while (elapsed < maxDuration) {
+        await binding.pump(interval);
+        elapsed += interval;
+      }
+    });
   }
 
   /// Runs a [callback] that performs real asynchronous work.

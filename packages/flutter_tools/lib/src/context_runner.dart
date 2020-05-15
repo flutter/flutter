@@ -17,7 +17,6 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/process.dart';
-import 'base/signals.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
@@ -88,7 +87,7 @@ Future<T> runInContext<T>(
         platform: globals.platform,
       ),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
-      BuildSystem: () => BuildSystem(
+      BuildSystem: () => FlutterBuildSystem(
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
@@ -115,6 +114,12 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+      ),
+      CrashReporter: () => CrashReporter(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        flutterProjectFactory: globals.projectFactory,
+        client: globals.httpClientFactory?.call() ?? HttpClient(),
       ),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => DeviceManager(),
@@ -176,7 +181,6 @@ Future<T> runInContext<T>(
         usage: globals.flutterUsage,
       ),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
-      Signals: () => Signals(),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
       TimeoutConfiguration: () => const TimeoutConfiguration(),

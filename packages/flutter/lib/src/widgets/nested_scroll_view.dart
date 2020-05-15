@@ -909,21 +909,31 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     if (_innerPositions.isEmpty) {
       _outerPosition.applyFullDragUpdate(delta);
     } else if (delta < 0.0) {
-      // dragging "up"
-      // TODO(ianh): prioritize first getting rid of overscroll, and then the
-      // outer view, so that the app bar will scroll out of the way asap.
-      // Right now we ignore overscroll. This works fine on Android but looks
-      // weird on iOS if you fling down then up. The problem is it's not at all
-      // clear what this should do when you have multiple inner positions at
-      // different levels of overscroll.
-      final double innerDelta = _outerPosition.applyClampedDragUpdate(delta);
-      if (innerDelta != 0.0) {
-        for (final _NestedScrollPosition position in _innerPositions)
-          position.applyFullDragUpdate(innerDelta);
+      // Dragging "up"
+      // Prioritize getting rid of any inner overscroll, and then the outer
+      // view, so that the app bar will scroll out of the way asap.
+      double outerDelta = delta;
+      for (final _NestedScrollPosition position in _innerPositions) {
+        if (position.pixels < 0.0) { // This inner position is in overscroll.
+          final double potentialOuterDelta = position.applyClampedDragUpdate(delta);
+          // In case there are multiple positions in varying states of
+          // overscroll, the first to 'reach' the outer view above takes
+          // precedence.
+          outerDelta = math.max(outerDelta, potentialOuterDelta);
+        }
+      }
+      if (outerDelta != 0.0) {
+        final double innerDelta = _outerPosition.applyClampedDragUpdate(
+          outerDelta
+        );
+        if (innerDelta != 0.0) {
+          for (final _NestedScrollPosition position in _innerPositions)
+            position.applyFullDragUpdate(innerDelta);
+        }
       }
     } else {
-      // dragging "down" - delta is positive
-      // prioritize the inner views, so that the inner content will move before
+      // Dragging "down" - delta is positive
+      // Prioritize the inner views, so that the inner content will move before
       // the app bar grows
       double outerDelta = 0.0; // it will go positive if it changes
       final List<double> overscrolls = <double>[];
@@ -1492,17 +1502,9 @@ class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
   const SliverOverlapAbsorber({
     Key key,
     @required this.handle,
-    @Deprecated(
-      'Use sliver instead. '
-      'This feature was deprecated after v1.10.16.'
-    )
-    Widget child,
     Widget sliver,
   }) : assert(handle != null),
-      // ignore: deprecated_member_use_from_same_package
-      assert(child == null || sliver == null),
-      // ignore: deprecated_member_use_from_same_package
-      super(key: key, child: sliver ?? child);
+      super(key: key, child: sliver);
 
   /// The object in which the absorbed overlap is recorded.
   ///
@@ -1545,17 +1547,10 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
   /// The [sliver] must be a [RenderSliver].
   RenderSliverOverlapAbsorber({
     @required SliverOverlapAbsorberHandle handle,
-    @Deprecated(
-      'Use sliver instead. '
-      'This feature was deprecated after v1.10.16.'
-    )
-    RenderSliver child,
     RenderSliver sliver,
   }) : assert(handle != null),
-       // ignore: deprecated_member_use_from_same_package
-       assert(child == null || sliver == null),
        _handle = handle {
-    this.child = sliver ?? child;
+    child = sliver;
   }
 
   /// The object in which the absorbed overlap is recorded.
@@ -1666,17 +1661,9 @@ class SliverOverlapInjector extends SingleChildRenderObjectWidget {
   const SliverOverlapInjector({
     Key key,
     @required this.handle,
-    @Deprecated(
-      'Use sliver instead. '
-      'This feature was deprecated after v1.10.16.'
-    )
-    Widget child,
     Widget sliver,
   }) : assert(handle != null),
-       // ignore: deprecated_member_use_from_same_package
-       assert(child == null || sliver == null),
-       // ignore: deprecated_member_use_from_same_package
-       super(key: key, child: sliver ?? child);
+       super(key: key, child: sliver);
 
   /// The handle to the [SliverOverlapAbsorber] that is feeding this injector.
   ///

@@ -45,6 +45,7 @@ export 'src/rendering/image.dart';
 export 'src/rendering/layer.dart';
 export 'src/rendering/list_body.dart';
 export 'src/rendering/list_wheel_viewport.dart';
+export 'src/rendering/mouse_cursor.dart';
 export 'src/rendering/mouse_tracking.dart';
 export 'src/rendering/object.dart';
 export 'src/rendering/paragraph.dart';

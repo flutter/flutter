@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
+import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -126,7 +127,12 @@ Future<void> main(List<String> args) async {
 class _FuchsiaDeviceManager extends DeviceManager {
   @override
   List<DeviceDiscovery> get deviceDiscoverers => List<DeviceDiscovery>.unmodifiable(<DeviceDiscovery>[
-    FuchsiaDevices(),
+    FuchsiaDevices(
+      logger: globals.logger,
+      platform: globals.platform,
+      fuchsiaWorkflow: fuchsiaWorkflow,
+      fuchsiaSdk: fuchsiaSdk,
+    ),
   ]);
 
   @override

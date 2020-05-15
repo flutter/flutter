@@ -29,10 +29,10 @@ void main() {
     expect(_railMaterial(tester).elevation, 0);
     expect(_selectedIconTheme(tester).size, 24.0);
     expect(_selectedIconTheme(tester).color, ThemeData().colorScheme.primary);
-    expect(_selectedIconTheme(tester).opacity, 0.64);
+    expect(_selectedIconTheme(tester).opacity, 1.0);
     expect(_unselectedIconTheme(tester).size, 24.0);
     expect(_unselectedIconTheme(tester).color, ThemeData().colorScheme.onSurface);
-    expect(_unselectedIconTheme(tester).opacity, 1.0);
+    expect(_unselectedIconTheme(tester).opacity, 0.64);
     expect(_selectedLabelStyle(tester).fontSize, 14.0);
     expect(_unselectedLabelStyle(tester).fontSize, 14.0);
     expect(_destinationsAlign(tester).alignment, Alignment.topCenter);

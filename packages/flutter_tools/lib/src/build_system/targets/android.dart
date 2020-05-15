@@ -6,6 +6,7 @@ import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
+import '../../devfs.dart';
 import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
@@ -62,7 +63,27 @@ abstract class AndroidAssetBundle extends Target {
           .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
     }
     if (_copyAssets) {
-      final Depfile assetDepfile = await copyAssets(environment, outputDirectory);
+      final String shaderBundlePath = environment.inputs[kBundleSkSLPath];
+      final DevFSContent skslBundle = processSkSLBundle(
+        shaderBundlePath,
+        engineVersion: environment.engineVersion,
+        fileSystem: environment.fileSystem,
+        logger: environment.logger,
+        targetPlatform: TargetPlatform.android,
+      );
+      final Depfile assetDepfile = await copyAssets(
+        environment,
+        outputDirectory,
+        additionalContent: <String, DevFSContent>{
+          if (skslBundle != null)
+            kSkSLShaderBundlePath: skslBundle,
+        }
+      );
+      if (shaderBundlePath != null) {
+        final File skSLBundleFile = environment.fileSystem
+          .file(shaderBundlePath).absolute;
+        assetDepfile.inputs.add(skSLBundleFile);
+      }
       final DepfileService depfileService = DepfileService(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -98,9 +119,9 @@ class DebugAndroidApplication extends AndroidAssetBundle {
   @override
   List<Source> get outputs => <Source>[
     ...super.outputs,
-    const Source.pattern('{OUTPUT_DIR}/vm_snapshot_data'),
-    const Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
-    const Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
+    const Source.pattern('{OUTPUT_DIR}/flutter_assets/vm_snapshot_data'),
+    const Source.pattern('{OUTPUT_DIR}/flutter_assets/isolate_snapshot_data'),
+    const Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
   ];
 }
 

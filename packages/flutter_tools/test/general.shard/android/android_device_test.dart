@@ -12,13 +12,13 @@ import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -383,87 +383,6 @@ flutter:
       expect(await device.emulatorId, isNull);
     }, overrides: <Type, Generator>{
       AndroidConsoleSocketFactory: () => disconnectingSocket,
-      ProcessManager: () => mockProcessManager,
-    });
-  });
-
-  group('portForwarder', () {
-    final ProcessManager mockProcessManager = MockProcessManager();
-    final AndroidDevice device = AndroidDevice('1234');
-    final DevicePortForwarder forwarder = device.portForwarder;
-
-    testUsingContext('returns the generated host port from stdout', () async {
-      when(mockProcessManager.run(argThat(contains('forward'))))
-          .thenAnswer((_) async => ProcessResult(0, 0, '456', ''));
-
-      expect(await forwarder.forward(123), equals(456));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('returns the supplied host port when stdout is empty', () async {
-      when(mockProcessManager.run(argThat(contains('forward'))))
-          .thenAnswer((_) async => ProcessResult(0, 0, '', ''));
-
-      expect(await forwarder.forward(123, hostPort: 456), equals(456));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('returns the supplied host port when stdout is the host port', () async {
-      when(mockProcessManager.run(argThat(contains('forward'))))
-          .thenAnswer((_) async => ProcessResult(0, 0, '456', ''));
-
-      expect(await forwarder.forward(123, hostPort: 456), equals(456));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('throws an error when stdout is not blank nor the host port', () async {
-      when(mockProcessManager.run(argThat(contains('forward'))))
-          .thenAnswer((_) async => ProcessResult(0, 0, '123456', ''));
-
-      expect(forwarder.forward(123, hostPort: 456), throwsA(isA<ProcessException>()));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('forwardedPorts returns empty list when forward failed', () {
-      when(mockProcessManager.runSync(argThat(contains('forward'))))
-          .thenReturn(ProcessResult(0, 1, '', ''));
-
-      expect(forwarder.forwardedPorts, equals(const <ForwardedPort>[]));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('disposing device disposes the portForwarder', () async {
-      bool unforwardCalled = false;
-      when(mockProcessManager.run(argThat(containsAll(<String>[
-        'forward',
-        'tcp:0',
-        'tcp:123',
-      ])))).thenAnswer((_) async {
-        return ProcessResult(0, 0, '456', '');
-      });
-      when(mockProcessManager.runSync(argThat(containsAll(<String>[
-        'forward',
-        '--list',
-      ])))).thenReturn(ProcessResult(0, 0, '1234 tcp:456 tcp:123', ''));
-      when(mockProcessManager.run(argThat(containsAll(<String>[
-        'forward',
-        '--remove',
-        'tcp:456',
-      ])))).thenAnswer((_) async {
-        unforwardCalled = true;
-        return ProcessResult(0, 0, '', '');
-      });
-      expect(await forwarder.forward(123), equals(456));
-
-      await device.dispose();
-
-      expect(unforwardCalled, isTrue);
-    }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
   });

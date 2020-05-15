@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
-import 'package:flutter_tools/src/vmservice.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -177,4 +176,4 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 }
 
 class MockArtifacts extends Mock implements Artifacts {}
-class MockVmService extends Mock implements VMService, VmService {}
+class MockVmService extends Mock implements VmService {}

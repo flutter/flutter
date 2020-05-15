@@ -4,17 +4,16 @@
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -161,7 +160,7 @@ void main() {
       Platform: () => fakePlatform,
     });
 
-    testUsingContext('fetchRemoteRevision', () async {
+    testUsingContext('fetchRemoteRevision returns revision if git succeeds', () async {
       const String revision = 'abc123';
       when(processManager.run(
         <String>['git', 'fetch', '--tags'],
@@ -181,6 +180,80 @@ void main() {
           ..stdout = revision;
       });
       expect(await realCommandRunner.fetchRemoteRevision(), revision);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
+    });
+
+    testUsingContext('fetchRemoteRevision throws toolExit if HEAD is detached', () async {
+      when(processManager.run(
+        <String>['git', 'fetch', '--tags'],
+        environment:anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory')),
+      ).thenAnswer((Invocation invocation) async {
+        return FakeProcessResult()..exitCode = 0;
+      });
+      when(processManager.run(
+        <String>['git', 'rev-parse', '--verify', '@{u}'],
+        environment:anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory')),
+      ).thenThrow(const ProcessException(
+        'git',
+        <String>['rev-parse', '--verify', '@{u}'],
+        'fatal: HEAD does not point to a branch',
+      ));
+      expect(
+        () async => await realCommandRunner.fetchRemoteRevision(),
+        throwsToolExit(message: 'You are not currently on a release branch.'),
+      );
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
+    });
+
+    testUsingContext('fetchRemoteRevision throws toolExit if no upstream configured', () async {
+      when(processManager.run(
+        <String>['git', 'fetch', '--tags'],
+        environment:anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory')),
+      ).thenAnswer((Invocation invocation) async {
+        return FakeProcessResult()..exitCode = 0;
+      });
+      when(processManager.run(
+        <String>['git', 'rev-parse', '--verify', '@{u}'],
+        environment:anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory')),
+      ).thenThrow(const ProcessException(
+        'git',
+        <String>['rev-parse', '--verify', '@{u}'],
+        'fatal: no upstream configured for branch',
+      ));
+      expect(
+        () async => await realCommandRunner.fetchRemoteRevision(),
+        throwsToolExit(
+          message: 'Unable to upgrade Flutter: no origin repository configured\.',
+        ),
+      );
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
+    });
+
+    testUsingContext('git exception during attemptReset throwsToolExit', () async {
+      const String revision = 'abc123';
+      const String errorMessage = 'fatal: Could not parse object ´$revision´';
+      when(processManager.run(
+        <String>['git', 'reset', '--hard', revision]
+      )).thenThrow(const ProcessException(
+        'git',
+        <String>['reset', '--hard', revision],
+        errorMessage,
+      ));
+
+      expect(
+        () async => await realCommandRunner.attemptReset(revision),
+        throwsToolExit(message: errorMessage),
+      );
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
@@ -315,7 +388,7 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   Future<void> upgradeChannel(FlutterVersion flutterVersion) async {}
 
   @override
-  Future<bool> attemptReset(FlutterVersion flutterVersion, String newRevision) async => alreadyUpToDate;
+  Future<void> attemptReset(String newRevision) async {}
 
   @override
   Future<void> precacheArtifacts() async {}

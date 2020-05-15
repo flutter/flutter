@@ -83,8 +83,8 @@ class ColdRunner extends ResidentRunner {
     if (flutterDevices.first.observatoryUris != null) {
       // For now, only support one debugger connection.
       connectionInfoCompleter?.complete(DebugConnectionInfo(
-        httpUri: flutterDevices.first.flutterDeprecatedVmService.httpAddress,
-        wsUri: flutterDevices.first.flutterDeprecatedVmService.wsAddress,
+        httpUri: flutterDevices.first.vmService.httpAddress,
+        wsUri: flutterDevices.first.vmService.wsAddress,
       ));
     }
 
@@ -95,7 +95,6 @@ class ColdRunner extends ResidentRunner {
         continue;
       }
       await device.initLogReader();
-      await device.refreshViews();
       globals.printTrace('Connected to ${device.device.name}');
     }
 
@@ -105,7 +104,7 @@ class ColdRunner extends ResidentRunner {
       if (device.vmService != null) {
         globals.printStatus('Tracing startup on ${device.device.name}.');
         await downloadStartupTrace(
-          device.flutterDeprecatedVmService,
+          device.vmService,
           awaitFirstFrame: awaitFirstFrameWhenTracing,
         );
       }
@@ -145,9 +144,9 @@ class ColdRunner extends ResidentRunner {
     for (final FlutterDevice device in flutterDevices) {
       await device.initLogReader();
     }
-    await refreshViews();
     for (final FlutterDevice device in flutterDevices) {
-      for (final FlutterView view in device.views) {
+      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      for (final FlutterView view in views) {
         globals.printTrace('Connected to $view.');
       }
     }
@@ -197,7 +196,7 @@ class ColdRunner extends ResidentRunner {
         // Caution: This log line is parsed by device lab tests.
         globals.printStatus(
           'An Observatory debugger and profiler on $dname is available at: '
-          '${device.flutterDeprecatedVmService.httpAddress}',
+          '${device.vmService.httpAddress}',
         );
       }
     }

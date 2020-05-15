@@ -238,6 +238,7 @@ void main() {
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
+          '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -267,6 +268,7 @@ void main() {
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
           '-Psplit-debug-info=${tempDir.path}',
+          '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -299,6 +301,7 @@ void main() {
           '-Ptrack-widget-creation=true',
           '-Pextra-front-end-options=foo,bar',
           '-Pshrink=true',
+          '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -329,6 +332,7 @@ void main() {
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
+          '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -353,6 +357,7 @@ void main() {
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
+          '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -375,12 +380,18 @@ void main() {
         );
       }, throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'));
 
-      expect(testLogger.statusText,
-          contains('The shrinker may have failed to optimize the Java bytecode.'));
-      expect(testLogger.statusText,
-          contains('To disable the shrinker, pass the `--no-shrink` flag to this command.'));
-      expect(testLogger.statusText,
-          contains('To learn more, see: https://developer.android.com/studio/build/shrink-code'));
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace('The shrinker may have failed to optimize the Java bytecode.'),
+      );
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace('To disable the shrinker, pass the `--no-shrink` flag to this command.'),
+      );
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace('To learn more, see: https://developer.android.com/studio/build/shrink-code'),
+      );
 
       verify(mockUsage.sendEvent(
         'build',
@@ -414,6 +425,7 @@ void main() {
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
+          '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -433,11 +445,16 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText, containsIgnoringWhitespace("Your app isn't using AndroidX"));
-      expect(testLogger.statusText, containsIgnoringWhitespace(
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace("Your app isn't using AndroidX"),
+      );
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace(
         'To avoid potential build failures, you can quickly migrate your app by '
         'following the steps on https://goo.gl/CP92wY'
-        )
+        ),
       );
       verify(mockUsage.sendEvent(
         'build',
@@ -465,6 +482,7 @@ void main() {
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
+          '-Ptree-shake-icons=true',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
