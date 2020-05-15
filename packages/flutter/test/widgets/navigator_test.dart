@@ -1841,6 +1841,7 @@ void main() {
   });
 
   testWidgets('Route annouce correctly for first route and last route', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/57133.
     Route<void> previousOfFirst = NotAnnounced();
     Route<void> nextOfFirst = NotAnnounced();
     Route<void> popNextOfFirst = NotAnnounced();
