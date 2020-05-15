@@ -47,6 +47,14 @@ FLUTTER_ASSERT_ARC
             }]);
 }
 
+- (void)testNilSetMessageHandlerBeforeRun {
+  id project = OCMClassMock([FlutterDartProject class]);
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  XCTAssertNotNil(engine);
+  XCTAssertNoThrow([engine.binaryMessenger setMessageHandlerOnChannel:@"foo"
+                                                 binaryMessageHandler:nil]);
+}
+
 - (void)testNotifyPluginOfDealloc {
   id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
   OCMStub([plugin detachFromEngineForRegistrar:[OCMArg any]]);
