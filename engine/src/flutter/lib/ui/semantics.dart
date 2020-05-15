@@ -793,24 +793,28 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
   /// For overridden standard actions, `overrideId` corresponds with a
   /// [SemanticsAction.index] value. For custom actions this argument should not be
   /// provided.
-  void updateCustomAction({int id, String label, String hint, int overrideId = -1}) {
+  void updateCustomAction({/*required*/ int/*!*/ id, String/*?*/ label, String/*?*/ hint, int/*!*/ overrideId = -1}) {
     assert(id != null);
     assert(overrideId != null);
     _updateCustomAction(id, label, hint, overrideId);
   }
-  void _updateCustomAction(int id, String label, String hint, int overrideId) native 'SemanticsUpdateBuilder_updateCustomAction';
+  void _updateCustomAction(
+      int/*!*/ id,
+      String/*?*/ label,
+      String/*?*/ hint,
+      int/*!*/ overrideId) native 'SemanticsUpdateBuilder_updateCustomAction';
 
   /// Creates a [SemanticsUpdate] object that encapsulates the updates recorded
   /// by this object.
   ///
   /// The returned object can be passed to [Window.updateSemantics] to actually
   /// update the semantics retained by the system.
-  SemanticsUpdate build() {
+  SemanticsUpdate/*!*/ build() {
     final SemanticsUpdate semanticsUpdate = SemanticsUpdate._();
     _build(semanticsUpdate);
     return semanticsUpdate;
   }
-  void _build(SemanticsUpdate outSemanticsUpdate) native 'SemanticsUpdateBuilder_build';
+  void _build(SemanticsUpdate/*!*/ outSemanticsUpdate) native 'SemanticsUpdateBuilder_build';
 }
 
 /// An opaque object representing a batch of semantics updates.

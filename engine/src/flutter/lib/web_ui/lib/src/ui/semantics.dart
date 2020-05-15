@@ -725,7 +725,7 @@ class SemanticsUpdateBuilder {
   }
 
   void updateCustomAction(
-      {int id, String label, String hint, int overrideId = -1}) {
+      {/*required*/ int/*!*/ id, String/*?*/ label, String/*?*/ hint, int/*!*/ overrideId = -1}) {
     // TODO(yjbanov): implement.
   }
 
@@ -734,7 +734,7 @@ class SemanticsUpdateBuilder {
   ///
   /// The returned object can be passed to [Window.updateSemantics] to actually
   /// update the semantics retained by the system.
-  SemanticsUpdate build() {
+  SemanticsUpdate/*!*/ build() {
     return SemanticsUpdate._(
       nodeUpdates: _nodeUpdates,
     );
