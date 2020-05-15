@@ -821,6 +821,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     if (result.exitCode != 0) {
       throwToolExit(
         'Unforward command failed:\n'
+        'command: ${command}\n'
         'stdout: ${result.stdout}\n'
         'stderr: ${result.stderr}'
       );
