@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
-public class PlatformTextureUiTests {
+public class PlatformViewUiTests {
   Intent intent;
 
   @Rule
@@ -27,8 +27,8 @@ public class PlatformTextureUiTests {
   @Before
   public void setUp() {
     intent = new Intent(Intent.ACTION_MAIN);
-    // Render a texture.
-    intent.putExtra("use_android_view", false);
+    // Render a native android view.
+    intent.putExtra("use_android_view", true);
   }
 
   @Test

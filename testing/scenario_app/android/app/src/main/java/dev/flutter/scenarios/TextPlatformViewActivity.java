@@ -20,11 +20,14 @@ import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.plugin.common.BasicMessageChannel;
 import io.flutter.plugin.common.BinaryCodec;
-import io.flutter.plugin.common.StringCodec;
+import io.flutter.plugin.common.JSONMethodCodec;
+import io.flutter.plugin.common.MethodChannel;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TextPlatformViewActivity extends TestableFlutterActivity {
@@ -80,10 +83,13 @@ public class TextPlatformViewActivity extends TestableFlutterActivity {
     if (!launchIntent.hasExtra("scenario")) {
       return;
     }
-    BasicMessageChannel<String> channel =
-        new BasicMessageChannel<>(
-            getFlutterEngine().getDartExecutor(), "set_scenario", StringCodec.INSTANCE);
-    channel.send(launchIntent.getStringExtra("scenario"));
+    MethodChannel channel =
+        new MethodChannel(getFlutterEngine().getDartExecutor(), "driver", JSONMethodCodec.INSTANCE);
+    Map<String, Object> test = new HashMap<>(2);
+    test.put("name", launchIntent.getStringExtra("scenario"));
+    test.put("use_android_view", launchIntent.getBooleanExtra("use_android_view", false));
+    channel.invokeMethod("set_scenario", test);
+
     notifyFlutterRenderedAfterVsync();
   }
 

@@ -89,9 +89,11 @@
   [engine.binaryMessenger
       setMessageHandlerOnChannel:@"waiting_for_status"
             binaryMessageHandler:^(NSData* _Nullable message, FlutterBinaryReply _Nonnull reply) {
-              [engine.binaryMessenger
-                  sendOnChannel:@"set_scenario"
-                        message:[scenarioIdentifier dataUsingEncoding:NSUTF8StringEncoding]];
+              FlutterMethodChannel* channel = [FlutterMethodChannel
+                  methodChannelWithName:@"driver"
+                        binaryMessenger:engine.binaryMessenger
+                                  codec:[FlutterJSONMethodCodec sharedInstance]];
+              [channel invokeMethod:@"set_scenario" arguments:@{@"name" : scenarioIdentifier}];
             }];
   [engine.binaryMessenger
       setMessageHandlerOnChannel:@"touches_scenario"
