@@ -239,6 +239,14 @@ void main() {
     });
   });
 
+  PersistedPicture findPictureSurfaceChild(PersistedContainerSurface parent) {
+    PersistedPicture pictureSurface;
+    parent.visitChildren((PersistedSurface child) {
+      pictureSurface = child;
+    });
+    return pictureSurface;
+  }
+
   test('skips painting picture when picture fully clipped out', () async {
     final Picture picture = _drawPicture();
 
@@ -256,13 +264,64 @@ void main() {
     {
       final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
       builder.pushOffset(0, 0);
-      builder.pushClipRect(const Rect.fromLTRB(1000, 1000, 2000, 2000));
+      final PersistedContainerSurface clip = builder.pushClipRect(const Rect.fromLTRB(1000, 1000, 2000, 2000)) as PersistedContainerSurface;
       builder.addPicture(Offset.zero, picture);
       builder.pop();
       builder.pop();
       html.HtmlElement content = builder.build().webOnlyRootElement;
       expect(content.querySelectorAll('flt-picture').single.children, isEmpty);
+      expect(findPictureSurfaceChild(clip).debugCanvas, isNull);
     }
+  });
+
+  test('releases old canvas when picture is fully clipped out after addRetained', () async {
+    final Picture picture = _drawPicture();
+
+    // Frame 1: picture visible
+    final SurfaceSceneBuilder builder1 = SurfaceSceneBuilder();
+    final PersistedOffset offset1 = builder1.pushOffset(0, 0) as PersistedOffset;
+    builder1.addPicture(Offset.zero, picture);
+    builder1.pop();
+    html.HtmlElement content1 = builder1.build().webOnlyRootElement;
+    expect(content1.querySelectorAll('flt-picture').single.children, isNotEmpty);
+    expect(findPictureSurfaceChild(offset1).debugCanvas, isNotNull);
+
+    // Frame 2: picture is clipped out after an update
+    final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
+    final PersistedOffset offset2 = builder2.pushOffset(-10000, -10000, oldLayer: offset1);
+    builder2.addPicture(Offset.zero, picture);
+    builder2.pop();
+    html.HtmlElement content = builder2.build().webOnlyRootElement;
+    expect(content.querySelectorAll('flt-picture').single.children, isEmpty);
+    expect(findPictureSurfaceChild(offset2).debugCanvas, isNull);
+  });
+
+  test('releases old canvas when picture is fully clipped out after addRetained', () async {
+    final Picture picture = _drawPicture();
+
+    // Frame 1: picture visible
+    final SurfaceSceneBuilder builder1 = SurfaceSceneBuilder();
+    final PersistedOffset offset1 = builder1.pushOffset(0, 0) as PersistedOffset;
+    final PersistedOffset subOffset1 = builder1.pushOffset(0, 0) as PersistedOffset;
+    builder1.addPicture(Offset.zero, picture);
+    builder1.pop();
+    builder1.pop();
+    html.HtmlElement content1 = builder1.build().webOnlyRootElement;
+    expect(content1.querySelectorAll('flt-picture').single.children, isNotEmpty);
+    expect(findPictureSurfaceChild(subOffset1).debugCanvas, isNotNull);
+
+    // Frame 2: picture is clipped out after addRetained
+    final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
+    builder2.pushOffset(-10000, -10000, oldLayer: offset1);
+
+    // Even though the child offset is added as retained, the parent
+    // is updated with a value that causes the picture to move out of
+    // the clipped area. We should see the canvas being released.
+    builder2.addRetained(subOffset1);
+    builder2.pop();
+    html.HtmlElement content = builder2.build().webOnlyRootElement;
+    expect(content.querySelectorAll('flt-picture').single.children, isEmpty);
+    expect(findPictureSurfaceChild(subOffset1).debugCanvas, isNull);
   });
 }
 
