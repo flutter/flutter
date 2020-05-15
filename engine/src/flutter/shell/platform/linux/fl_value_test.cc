@@ -138,7 +138,7 @@ TEST(FlValueTest, StringSized) {
   EXPECT_STREQ(fl_value_get_string(value), "he");
 }
 
-TEST(FlValueTest, StringSizedNULL) {
+TEST(FlValueTest, StringSizedNullptr) {
   g_autoptr(FlValue) value = fl_value_new_string_sized(nullptr, 0);
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_STRING);
   EXPECT_STREQ(fl_value_get_string(value), "");
@@ -173,7 +173,7 @@ TEST(FlValueTest, Uint8List) {
   EXPECT_EQ(fl_value_get_uint8_list(value)[3], 0xFF);
 }
 
-TEST(FlValueTest, Uint8ListNULL) {
+TEST(FlValueTest, Uint8ListNullptr) {
   g_autoptr(FlValue) value = fl_value_new_uint8_list(nullptr, 0);
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_UINT8_LIST);
   ASSERT_EQ(fl_value_get_length(value), static_cast<size_t>(0));
@@ -227,7 +227,7 @@ TEST(FlValueTest, Int32List) {
   EXPECT_EQ(fl_value_get_int32_list(value)[3], G_MININT32);
 }
 
-TEST(FlValueTest, Int32ListNULL) {
+TEST(FlValueTest, Int32ListNullptr) {
   g_autoptr(FlValue) value = fl_value_new_int32_list(nullptr, 0);
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_INT32_LIST);
   ASSERT_EQ(fl_value_get_length(value), static_cast<size_t>(0));
@@ -281,7 +281,7 @@ TEST(FlValueTest, Int64List) {
   EXPECT_EQ(fl_value_get_int64_list(value)[3], G_MININT64);
 }
 
-TEST(FlValueTest, Int64ListNULL) {
+TEST(FlValueTest, Int64ListNullptr) {
   g_autoptr(FlValue) value = fl_value_new_int64_list(nullptr, 0);
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_INT64_LIST);
   ASSERT_EQ(fl_value_get_length(value), static_cast<size_t>(0));
@@ -334,7 +334,7 @@ TEST(FlValueTest, FloatList) {
   EXPECT_EQ(fl_value_get_float_list(value)[2], M_PI);
 }
 
-TEST(FlValueTest, FloatListNULL) {
+TEST(FlValueTest, FloatListNullptr) {
   g_autoptr(FlValue) value = fl_value_new_float_list(nullptr, 0);
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT_LIST);
   ASSERT_EQ(fl_value_get_length(value), static_cast<size_t>(0));

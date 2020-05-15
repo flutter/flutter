@@ -55,7 +55,7 @@ TEST(FlBinaryCodecTest, EncodeEmpty) {
   EXPECT_STREQ(hex_string, "");
 }
 
-TEST(FlBinaryCodecTest, EncodeNULL) {
+TEST(FlBinaryCodecTest, EncodeNullptr) {
   encode_message_error(nullptr, FL_MESSAGE_CODEC_ERROR,
                        FL_MESSAGE_CODEC_ERROR_UNSUPPORTED_TYPE);
 }
