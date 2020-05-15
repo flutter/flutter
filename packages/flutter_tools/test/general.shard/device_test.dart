@@ -137,7 +137,7 @@ void main() {
     });
 
 
-    testUsingContext('chose first ephemeralOne device', () async {
+    testUsingContext('chose first ephemeral device', () async {
       final List<Device> devices = <Device>[
         ephemeralOne,
         ephemeralTwo,
@@ -153,6 +153,27 @@ void main() {
 
       expect(filtered, <Device>[
         ephemeralOne
+      ]);
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => MockTerminal(),
+    });
+
+    testUsingContext('chose second ephemeral device', () async {
+      final List<Device> devices = <Device>[
+        ephemeralOne,
+        ephemeralTwo,
+      ];
+
+      when(globals.terminal.promptForCharInput(<String>['0', '1'],
+        logger: globals.logger,
+        prompt: globals.userMessages.flutterChoseOne)
+      ).thenAnswer((Invocation invocation) async => '1');
+
+      final DeviceManager deviceManager = TestDeviceManager(devices);
+      final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
+
+      expect(filtered, <Device>[
+        ephemeralTwo
       ]);
     }, overrides: <Type, Generator>{
       AnsiTerminal: () => MockTerminal(),
