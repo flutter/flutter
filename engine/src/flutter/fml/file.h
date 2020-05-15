@@ -124,6 +124,19 @@ bool VisitFiles(const fml::UniqueFD& directory, const FileVisitor& visitor);
 bool VisitFilesRecursively(const fml::UniqueFD& directory,
                            const FileVisitor& visitor);
 
+/// Helper method to recursively remove files and subdirectories inside the
+/// directory. The directory itself will not be removed.
+///
+/// Return true if and only if all files have been successfully removed.
+bool RemoveFilesInDirectory(const fml::UniqueFD& directory);
+
+/// Helper method to recursively remove files and subdirectories inside the
+/// directory. The directory itself will also be removed.
+///
+/// Return true if and only if all files have been successfully removed.
+bool RemoveDirectoryRecursively(const fml::UniqueFD& parent,
+                                const char* directory_name);
+
 class ScopedTemporaryDirectory {
  public:
   ScopedTemporaryDirectory();

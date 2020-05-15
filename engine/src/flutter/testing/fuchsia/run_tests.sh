@@ -130,13 +130,13 @@ echo "$(date) DONE:flow_tests ---------------------------------------"
 
 
 # TODO(https://github.com/flutter/flutter/issues/53399): Re-enable
-# OnServiceProtocolGetSkSLsWorks and CanLoadSkSLsFromAsset once they pass on
-# Fuchsia.
+# OnServiceProtocolGetSkSLsWorks, CanLoadSkSLsFromAsset, and
+# CanRemoveOldPersistentCache once they pass on Fuchsia.
 # echo "$(date) START:shell_tests -------------------------------------"
 # ./fuchsia_ctl -d $device_name test \
 #     -f shell_tests-0.far  \
 #     -t shell_tests \
-#     -a "--gtest_filter=-ShellTest.CacheSkSLWorks:ShellTest.SetResourceCacheSize*:ShellTest.OnServiceProtocolGetSkSLsWorks:ShellTest.CanLoadSkSLsFromAsset" \
+#     -a "--gtest_filter=-ShellTest.CacheSkSLWorks:ShellTest.SetResourceCacheSize*:ShellTest.OnServiceProtocolGetSkSLsWorks:ShellTest.CanLoadSkSLsFromAsset:ShellTest.CanRemoveOldPersistentCache" \
 #     --identity-file $pkey \
 #     --timeout-seconds $test_timeout_seconds \
 #     --packages-directory packages

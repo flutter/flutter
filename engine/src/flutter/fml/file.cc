@@ -92,4 +92,29 @@ fml::UniqueFD OpenDirectoryReadOnly(const fml::UniqueFD& base_directory,
   return OpenDirectory(base_directory, path, false, FilePermission::kRead);
 }
 
+bool RemoveFilesInDirectory(const fml::UniqueFD& directory) {
+  fml::FileVisitor recursive_cleanup = [&recursive_cleanup](
+                                           const fml::UniqueFD& directory,
+                                           const std::string& filename) {
+    bool removed;
+    if (fml::IsDirectory(directory, filename.c_str())) {
+      fml::UniqueFD sub_dir =
+          OpenDirectoryReadOnly(directory, filename.c_str());
+      removed = VisitFiles(sub_dir, recursive_cleanup) &&
+                fml::UnlinkDirectory(directory, filename.c_str());
+    } else {
+      removed = fml::UnlinkFile(directory, filename.c_str());
+    }
+    return removed;
+  };
+  return VisitFiles(directory, recursive_cleanup);
+}
+
+bool RemoveDirectoryRecursively(const fml::UniqueFD& parent,
+                                const char* directory_name) {
+  auto dir = fml::OpenDirectory(parent, directory_name, false,
+                                fml::FilePermission::kReadWrite);
+  return RemoveFilesInDirectory(dir) && UnlinkDirectory(parent, directory_name);
+}
+
 }  // namespace fml

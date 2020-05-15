@@ -79,6 +79,28 @@ void PersistentCache::SetCacheDirectoryPath(std::string path) {
 }
 
 namespace {
+
+constexpr char kEngineComponent[] = "flutter_engine";
+
+static void FreeOldCacheDirectory(const fml::UniqueFD& cache_base_dir) {
+  fml::UniqueFD engine_dir =
+      fml::OpenDirectoryReadOnly(cache_base_dir, kEngineComponent);
+  if (!engine_dir.is_valid()) {
+    return;
+  }
+  fml::VisitFiles(engine_dir, [](const fml::UniqueFD& directory,
+                                 const std::string& filename) {
+    if (filename != GetFlutterEngineVersion()) {
+      auto dir = fml::OpenDirectory(directory, filename.c_str(), false,
+                                    fml::FilePermission::kReadWrite);
+      if (dir.is_valid()) {
+        fml::RemoveDirectoryRecursively(directory, filename.c_str());
+      }
+    }
+    return true;
+  });
+}
+
 static std::shared_ptr<fml::UniqueFD> MakeCacheDirectory(
     const std::string& global_cache_base_path,
     bool read_only,
@@ -92,8 +114,9 @@ static std::shared_ptr<fml::UniqueFD> MakeCacheDirectory(
   }
 
   if (cache_base_dir.is_valid()) {
+    FreeOldCacheDirectory(cache_base_dir);
     std::vector<std::string> components = {
-        "flutter_engine", GetFlutterEngineVersion(), "skia", GetSkiaVersion()};
+        kEngineComponent, GetFlutterEngineVersion(), "skia", GetSkiaVersion()};
     if (cache_sksl) {
       components.push_back(PersistentCache::kSkSLSubdirName);
     }
