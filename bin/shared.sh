@@ -172,15 +172,11 @@ function shared::execute() {
   BIN_NAME="$(basename "$PROG_NAME")"
   case "$BIN_NAME" in
     flutter*)
-      echo "Entrypoint is flutter, because PROG_NAME was $PROG_NAME and BIN_NAME was $BIN_NAME"
-      echo "basename \$PROG_NAME: $(basename $PROG_NAME)"
-      # FLUTTER_TOOL_ARGS and ARGS aren't quoted below, because it is meant to
+      # FLUTTER_TOOL_ARGS aren't quoted below, because it is meant to
       # be considered as separate space-separated args.
       "$DART" --disable-dart-dev --packages="$FLUTTER_TOOLS_DIR/.packages" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
       ;;
     dart*)
-      echo "Entrypoint is dart, because PROG_NAME was $PROG_NAME and BIN_NAME was $BIN_NAME"
-      echo "basename \$PROG_NAME: $(basename $PROG_NAME)"
       "$DART" "$@"
       ;;
     *)
