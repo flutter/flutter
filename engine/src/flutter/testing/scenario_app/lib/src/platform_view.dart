@@ -10,6 +10,7 @@ import 'dart:ui';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'scenario.dart';
+import 'scenarios.dart';
 
 List<int> _to32(int value) {
   final Uint8List temp = Uint8List(4);
@@ -639,8 +640,13 @@ mixin _BasePlatformViewScenarioMixin on Scenario {
     overlayOffset ??= const Offset(50, 50);
     if (Platform.isIOS) {
       sceneBuilder.addPlatformView(viewId, offset: overlayOffset, width: width, height: height);
-    } else if (Platform.isAndroid && _textureId != null) {
-      sceneBuilder.addTexture(_textureId, offset: overlayOffset, width: width, height: height);
+    } else if (Platform.isAndroid) {
+      if (scenarioParams['use_android_view'] as bool) {
+        // Hybrid composition.
+        sceneBuilder.addPlatformView(viewId, offset: overlayOffset, width: width, height: height);
+      } else if (_textureId != null) {
+        sceneBuilder.addTexture(_textureId, offset: overlayOffset, width: width, height: height);
+      }
     } else {
       throw UnsupportedError('Platform ${Platform.operatingSystem} is not supported');
     }
