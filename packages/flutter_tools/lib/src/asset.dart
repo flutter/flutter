@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -54,7 +55,6 @@ abstract class AssetBundle {
     String packagesPath,
     bool includeDefaultFonts = true,
     bool reportLicensedPackages = false,
-    bool warnOnWildcard = false,
   });
 }
 
@@ -126,7 +126,6 @@ class ManifestAssetBundle implements AssetBundle {
     String packagesPath,
     bool includeDefaultFonts = true,
     bool reportLicensedPackages = false,
-    bool warnOnWildcard = false,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
     packagesPath ??= globals.fs.path.absolute(globalPackagesPath);
@@ -270,14 +269,13 @@ class ManifestAssetBundle implements AssetBundle {
     final DevFSStringContent licenses = DevFSStringContent(licenseResult.combinedLicenses);
     additionalDependencies = licenseResult.dependencies;
 
-    if (warnOnWildcard && _wildcardDirectories.isNotEmpty) {
-      globals.printError(
-        'WARNING: wildcard asset directories are incompatible with incremental builds.\n'
-        'It is strongly recommended that the following directories are updated to '
-        'list the individual assets that should be included:\n\n'
-        '${_wildcardDirectories.keys.map((Uri uri) => '   - $uri').join(',\n')}\n'
-        'For more information, see https://github.com/flutter/flutter/issues/56466\n'
-      );
+    if (wildcardDirectories.isNotEmpty) {
+      // Force the depfile to contain missing files so that Gradle does not skip
+      // the task. Wildcard directories are not compatible with full incremental
+      // builds. For more context see https://github.com/flutter/flutter/issues/56466 .
+      final double suffix = math.Random().nextDouble();
+      additionalDependencies.add(
+        globals.fs.file('DOES_NOT_EXIST_RERUN_FOR_WILDCARD$suffix').absolute);
     }
 
     _setIfChanged(_assetManifestJson, assetManifest);

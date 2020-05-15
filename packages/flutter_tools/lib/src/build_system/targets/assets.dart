@@ -37,7 +37,6 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   final int resultCode = await assetBundle.build(
     manifestPath: pubspecFile.path,
     packagesPath: environment.projectDir.childFile('.packages').path,
-    warnOnWildcard: true,
   );
   if (resultCode != 0) {
     throw Exception('Failed to bundle asset files.');
