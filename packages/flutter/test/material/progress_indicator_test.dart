@@ -549,7 +549,7 @@ void main() {
     final Widget display = await animationSheet.display();
     await tester.pumpWidget(display);
 
-    expect(
+    await expectLater(
       find.byWidget(display),
       matchesGoldenFile('material.circular_progress_indicator.indeterminate.png'),
     );
