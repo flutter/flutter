@@ -42,8 +42,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsAction = _handleSemanticsAction
-      ..onWindowOpened = handleWindowOpened
-      ..onWindowClosed = handleWindowClosed
+      ..onWindowCreated = handleWindowCreated
+      ..onWindowDisposed = handleWindowDisposed
       ..onScreenAdded = handleScreenAdded
       ..onScreenRemoved = handleScreenRemoved
       ..onMetricsChanged = handleMetricsChanged;
@@ -180,10 +180,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 
   @protected
-  void handleWindowOpened(ui.Window window) { }
+  void handleWindowCreated(ui.Window window) { }
 
   @protected
-  void handleWindowClosed(ui.Window window) { }
+  void handleWindowDisposed(ui.Window window) { }
 
   @protected
   void handleScreenAdded(ui.Screen screen) { }

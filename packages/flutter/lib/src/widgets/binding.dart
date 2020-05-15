@@ -568,16 +568,16 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   @override
-  void handleWindowOpened(Window window) {
-    super.handleWindowOpened(window);
+  void handleWindowCreated(Window window) {
+    super.handleWindowCreated(window);
     for (final WidgetsBindingObserver observer in _observers) {
       observer.didOpenWindow(window);
     }
   }
 
   @override
-  void handleWindowClosed(Window window) {
-    super.handleWindowClosed(window);
+  void handleWindowDisposed(Window window) {
+    super.handleWindowDisposed(window);
     for (final WidgetsBindingObserver observer in _observers) {
       observer.didCloseWindow(window);
     }

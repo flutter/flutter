@@ -82,15 +82,6 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     _platformDispatcher.onScreenAdded = callback;
   }
 
-  /// Called when a screen's configuration changes.
-  @override
-  ScreenConfigurationChangedCallback get onScreenConfigurationChanged =>
-      _platformDispatcher.onScreenConfigurationChanged;
-  @override
-  set onScreenConfigurationChanged(ScreenConfigurationChangedCallback callback) {
-    _platformDispatcher.onScreenConfigurationChanged = callback;
-  }
-
   /// Called when a screen is removed from the device.
   @override
   ScreenRemovedCallback get onScreenRemoved => _platformDispatcher.onScreenRemoved;
@@ -103,31 +94,20 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ///
   /// Sends the opaque ID of the newly opened window.
   @override
-  WindowOpenedCallback get onWindowOpened => _platformDispatcher.onWindowOpened;
+  WindowCreatedCallback get onWindowCreated => _platformDispatcher.onWindowCreated;
   @override
-  set onWindowOpened(WindowOpenedCallback callback) {
-    _platformDispatcher.onWindowOpened = callback;
-  }
-
-  /// Receives window configuration changes.
-  ///
-  /// Sends the id of the window update, and the updated configuration.
-  @override
-  WindowConfigurationChangedCallback get onWindowConfigurationChanged =>
-      _platformDispatcher.onWindowConfigurationChanged;
-  @override
-  set onWindowConfigurationChanged(WindowConfigurationChangedCallback callback) {
-    _platformDispatcher.onWindowConfigurationChanged = callback;
+  set onWindowCreated(WindowCreatedCallback callback) {
+    _platformDispatcher.onWindowCreated = callback;
   }
 
   /// Is called when a window closure is requested by the platform.
   ///
   /// Sends the opaque ID of the window to be closed.
   @override
-  WindowClosedCallback get onWindowClosed => _platformDispatcher.onWindowClosed;
+  WindowDisposedCallback get onWindowDisposed => _platformDispatcher.onWindowDisposed;
   @override
-  set onWindowClosed(WindowClosedCallback callback) {
-    _platformDispatcher.onWindowClosed = callback;
+  set onWindowDisposed(WindowDisposedCallback callback) {
+    _platformDispatcher.onWindowDisposed = callback;
   }
 
   /// A callback invoked when any window begins a frame.
