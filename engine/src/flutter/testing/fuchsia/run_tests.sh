@@ -104,13 +104,13 @@ echo "$(date) START:fml_tests ---------------------------------------"
     --packages-directory packages
 
 
-echo "$(date) START:flow_tests --------------------------------------"
-./fuchsia_ctl -d $device_name test \
-    -f flow_tests-0.far  \
-    -t flow_tests \
-    --identity-file $pkey \
-    --timeout-seconds $test_timeout_seconds \
-    --packages-directory packages
+#echo "$(date) START:flow_tests --------------------------------------"
+#./fuchsia_ctl -d $device_name test \
+#    -f flow_tests-0.far  \
+#    -t flow_tests \
+#    --identity-file $pkey \
+#    --timeout-seconds $test_timeout_seconds \
+#    --packages-directory packages
 
 
 # TODO(kaushikiska): Runtime and shell tests are failing with
