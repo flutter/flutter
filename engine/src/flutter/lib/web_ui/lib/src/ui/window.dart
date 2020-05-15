@@ -846,7 +846,7 @@ abstract class Window {
   ///  * [Navigator], a widget that handles routing.
   ///  * [SystemChannels.navigation], which handles subsequent navigation
   ///    requests from the embedder.
-  String get defaultRouteName;
+  String/*!*/ get defaultRouteName;
 
   /// Whether the user has requested that [updateSemantics] be called when
   /// the semantic contents of window changes.
@@ -907,7 +907,7 @@ abstract class Window {
   ///
   /// In either case, this function disposes the given update, which means the
   /// semantics update cannot be used further.
-  void updateSemantics(SemanticsUpdate update) {
+  void updateSemantics(SemanticsUpdate/*!*/ update) {
     engine.EngineSemanticsOwner.instance.updateSemantics(update);
   }
 
@@ -921,9 +921,9 @@ abstract class Window {
   /// The framework invokes [callback] in the same zone in which this method
   /// was called.
   void sendPlatformMessage(
-    String name,
-    ByteData data,
-    PlatformMessageResponseCallback callback,
+    String/*!*/ name,
+    ByteData/*?*/ data,
+    PlatformMessageResponseCallback/*?*/ callback,
   );
 
   /// Additional accessibility features that may be enabled by the platform.
@@ -954,15 +954,15 @@ abstract class Window {
   ///    scheduling of frames.
   ///  * [RendererBinding], the Flutter framework class which manages layout and
   ///    painting.
-  void render(Scene scene);
+  void render(Scene/*!*/ scene);
 
   String get initialLifecycleState => _initialLifecycleState;
 
   String _initialLifecycleState;
 
-  void setIsolateDebugName(String name) {}
+  void setIsolateDebugName(String/*!*/ name) {}
 
-  ByteData getPersistentIsolateData() => null;
+  ByteData/*?*/ getPersistentIsolateData() => null;
 }
 
 VoidCallback webOnlyScheduleFrameCallback;

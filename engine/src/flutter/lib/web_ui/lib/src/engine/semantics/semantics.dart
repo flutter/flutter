@@ -1422,7 +1422,7 @@ class EngineSemanticsOwner {
   }
 
   /// Updates the semantics tree from data in the [uiUpdate].
-  void updateSemantics(ui.SemanticsUpdate uiUpdate) {
+  void updateSemantics(ui.SemanticsUpdate/*!*/ uiUpdate) {
     if (!_semanticsEnabled) {
       return;
     }
