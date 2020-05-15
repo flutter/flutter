@@ -169,7 +169,7 @@ function shared::execute() {
 
   (upgrade_flutter) 3< "$PROG_NAME"
 
-  BIN_NAME="$(basename $PROG_NAME)"
+  BIN_NAME="$(basename "$PROG_NAME")"
   case "$BIN_NAME" in
     flutter*)
       echo "Entrypoint is flutter, because PROG_NAME was $PROG_NAME and BIN_NAME was $BIN_NAME"
