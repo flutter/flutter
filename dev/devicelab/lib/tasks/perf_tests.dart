@@ -784,6 +784,7 @@ class DevToolsMemoryTest {
       'global',
       'activate',
       'devtools',
+      '0.2.5',
     ]);
     _devToolsProcess = await startProcess(
       'pub',

@@ -290,6 +290,7 @@ tasks:
       Measures memory usage of the scroll performance test using DevTools.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   hello_world_android__compile:
     description: >
