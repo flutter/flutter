@@ -325,10 +325,10 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _settingsChannel.reset();
 }
 
-- (void)startProfiler {
+- (void)startProfiler:(NSString*)threadLabel {
   _profiler_metrics = std::make_unique<flutter::ProfilerMetricsIOS>();
   _profiler = std::make_unique<flutter::SamplingProfiler>(
-      _threadHost.profiler_thread->GetTaskRunner(),
+      threadLabel.UTF8String, _threadHost.profiler_thread->GetTaskRunner(),
       [self]() { return self->_profiler_metrics->GenerateSample(); }, kNumProfilerSamplesPerSec);
   _profiler->Start();
 }
@@ -478,10 +478,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
         return std::make_unique<flutter::Rasterizer>(shell, shell.GetTaskRunners());
       };
 
-  if (profilerEnabled) {
-    [self startProfiler];
-  }
-
   if (flutter::IsIosEmbeddedViewsPreviewEnabled()) {
     // Embedded views requires the gpu and the platform views to be the same.
     // The plan is to eventually dynamically merge the threads when there's a
@@ -532,6 +528,9 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     _publisher.reset([[FlutterObservatoryPublisher alloc] init]);
     [self maybeSetupPlatformViewChannels];
     _shell->GetIsGpuDisabledSyncSwitch()->SetSwitch(_isGpuDisabled ? true : false);
+    if (profilerEnabled) {
+      [self startProfiler:threadLabel];
+    }
   }
 
   return _shell != nullptr;

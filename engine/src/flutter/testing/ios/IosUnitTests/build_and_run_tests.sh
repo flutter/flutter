@@ -21,4 +21,4 @@ fi
 
 autoninja -C out/$FLUTTER_ENGINE ios_test_flutter
 popd
-./run_tests.sh $FLUTTER_ENGINE
+$TESTING_DIR/run_tests.sh $FLUTTER_ENGINE
