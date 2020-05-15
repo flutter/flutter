@@ -712,8 +712,8 @@ abstract class FlutterCommand extends Command<void> {
         systemClock.now(),
       );
     };
-    signals.addHandler(io.ProcessSignal.SIGTERM, handler);
-    signals.addHandler(io.ProcessSignal.SIGINT, handler);
+    globals.signals.addHandler(io.ProcessSignal.SIGTERM, handler);
+    globals.signals.addHandler(io.ProcessSignal.SIGINT, handler);
   }
 
   /// Logs data about this command.

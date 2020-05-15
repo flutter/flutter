@@ -17,7 +17,6 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/process.dart';
-import 'base/signals.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
@@ -182,7 +181,6 @@ Future<T> runInContext<T>(
         usage: globals.flutterUsage,
       ),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
-      Signals: () => Signals(),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
       TimeoutConfiguration: () => const TimeoutConfiguration(),
