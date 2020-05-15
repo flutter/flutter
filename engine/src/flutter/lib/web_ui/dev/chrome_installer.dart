@@ -22,19 +22,20 @@ class ChromeArgParser extends BrowserArgParser {
   static ChromeArgParser get instance => _singletonInstance;
 
   String _version;
+  int _pinnedChromeBuildNumber;
 
   ChromeArgParser._();
 
   @override
   void populateOptions(ArgParser argParser) {
     final YamlMap browserLock = BrowserLock.instance.configuration;
-    final int pinnedChromeVersion =
+    _pinnedChromeBuildNumber =
         PlatformBinding.instance.getChromeBuild(browserLock);
 
     argParser
       ..addOption(
         'chrome-version',
-        defaultsTo: '$pinnedChromeVersion',
+        defaultsTo: '$pinnedChromeBuildNumber',
         help: 'The Chrome version to use while running tests. If the requested '
             'version has not been installed, it will be downloaded and installed '
             'automatically. A specific Chrome build version number, such as 695653, '
@@ -51,6 +52,8 @@ class ChromeArgParser extends BrowserArgParser {
 
   @override
   String get version => _version;
+
+  String get pinnedChromeBuildNumber => _pinnedChromeBuildNumber.toString();
 }
 
 /// Returns the installation of Chrome, installing it if necessary.
@@ -177,11 +180,22 @@ class ChromeInstaller {
   }
 
   Future<void> install() async {
-    if (versionDir.existsSync()) {
+    if (versionDir.existsSync() && !isLuci) {
       versionDir.deleteSync(recursive: true);
+      versionDir.createSync(recursive: true);
+    } else if (versionDir.existsSync() && isLuci) {
+      print('INFO: Chrome version directory in LUCI: '
+          '${versionDir.path}');
+    } else if(!versionDir.existsSync() && isLuci) {
+      // Chrome should have been deployed as a CIPD package on LUCI.
+      // Throw if it does not exists.
+      throw StateError('Failed to locate Chrome on LUCI on path:'
+          '${versionDir.path}');
+    } else {
+      // If the directory does not exists and felt is not running on LUCI.
+      versionDir.createSync(recursive: true);
     }
 
-    versionDir.createSync(recursive: true);
     final String url = PlatformBinding.instance.getChromeDownloadUrl(version);
     final StreamedResponse download = await client.send(Request(
       'GET',
@@ -241,9 +255,32 @@ Future<String> queryChromeDriverVersion() async {
   return chromeDriverVersion;
 }
 
+/// Make sure LUCI bot has the pinned Chrome version and return the executable.
+///
+/// We are using CIPD packages in LUCI. The pinned chrome version from the
+/// `browser_lock.yaml` file will already be installed in the LUCI bot.
+/// Verify if Chrome is installed and use it for the integration tests.
+String preinstalledChromeExecutable() {
+  // Note that build number and major version is different for Chrome.
+  // For example for a build number `753189`, major version is 83.
+  final String buildNumber = ChromeArgParser.instance.pinnedChromeBuildNumber;
+  final ChromeInstaller chromeInstaller = ChromeInstaller(version: buildNumber);
+  if (chromeInstaller.isInstalled) {
+    print('INFO: Found chrome executable for LUCI: '
+        '${chromeInstaller.getInstallation().executable}');
+    return chromeInstaller.getInstallation().executable;
+  } else {
+    throw StateError(
+        'Failed to locate pinned Chrome build: $buildNumber on LUCI.');
+  }
+}
+
 Future<int> _querySystemChromeMajorVersion() async {
   String chromeExecutable = '';
-  if (io.Platform.isLinux) {
+  // LUCI uses the Chrome from CIPD packages.
+  if (isLuci) {
+    chromeExecutable = preinstalledChromeExecutable();
+  } else if (io.Platform.isLinux) {
     chromeExecutable = 'google-chrome';
   } else if (io.Platform.isMacOS) {
     chromeExecutable = await _findChromeExecutableOnMac();
