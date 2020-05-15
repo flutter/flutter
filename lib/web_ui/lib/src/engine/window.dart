@@ -442,6 +442,13 @@ class EngineWindow extends ui.Window {
             domRenderer.setThemeColor(ui.Color(arguments['primaryColor']));
             _replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
             return;
+          case 'SystemChrome.setPreferredOrientations':
+            final List<dynamic> arguments = decoded.arguments;
+            domRenderer.setPreferredOrientation(arguments).then((bool success) {
+              _replyToPlatformMessage(callback,
+                codec.encodeSuccessEnvelope(success));
+            });
+            return;
           case 'SystemSound.play':
             // There are no default system sounds on web.
             _replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
