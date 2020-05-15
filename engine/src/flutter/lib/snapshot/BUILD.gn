@@ -250,7 +250,7 @@ compile_platform("strong_platform") {
   allow_causal_async_stacks = !is_runtime_mode_release
   args = [
     "--enable-experiment=non-nullable",
-    "--nnbd-agnostic",
+    "--nnbd-weak",
     "--target=flutter",
     "-Ddart.vm.product=$is_runtime_mode_release",
     "-Ddart.developer.causal_async_stacks=$allow_causal_async_stacks",
