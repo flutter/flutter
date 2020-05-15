@@ -340,27 +340,14 @@ class Container extends StatelessWidget {
     this.color,
     this.decoration,
     this.foregroundDecoration,
-    double width: double.infinity,
-    double height: double.infinity,
+    double width = double.infinity,
+    double height = double.infinity,
     BoxConstraints constraints,
     this.margin,
     this.transform,
     this.child,
     this.clipBehavior = Clip.none,
-  })  : assert(margin == null || margin.isNonNegative),
-        assert(padding == null || padding.isNonNegative),
-        assert(decoration == null || decoration.debugAssertIsValid()),
-        assert(constraints == null || constraints.debugAssertIsValid()),
-        assert(clipBehavior != null),
-        assert(
-            color == null || decoration == null,
-            'Cannot provide both a color and a decoration\n'
-            'To provide both, use "decoration: BoxDecoration(color: color)".'),
-        constraints = (width != null || height != null)
-            ? constraints?.tighten(width: width, height: height) ??
-                BoxConstraints.tightFor(width: width, height: height)
-            : constraints,
-        super(key: key);
+  });
 
   /// The [child] contained by the container.
   ///
