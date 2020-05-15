@@ -447,6 +447,7 @@
 					"$(PROJECT_DIR)/Tests",
 					../../../../out/$FLUTTER_ENGINE,
 					../../../../out/$FLUTTER_ENGINE/obj/flutter/shell/platform/darwin/ios/,
+					../../../../out/$FLUTTER_ENGINE/obj/third_party/ocmock/,
 				);
 				OTHER_LDFLAGS = (
 					"-locmock",
@@ -488,6 +489,7 @@
 					"$(PROJECT_DIR)/Tests",
 					../../../../out/$FLUTTER_ENGINE,
 					../../../../out/$FLUTTER_ENGINE/obj/flutter/shell/platform/darwin/ios/,
+					../../../../out/$FLUTTER_ENGINE/obj/third_party/ocmock/,
 				);
 				OTHER_LDFLAGS = (
 					"-locmock",
