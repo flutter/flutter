@@ -193,6 +193,7 @@ void main() {
     await tester.pump();
     expect(_validateCalled, 1);
     await tester.tap(find.byType(dropdownButtonType));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('three').last);
     await tester.pump();
     expect(_validateCalled, 2);
