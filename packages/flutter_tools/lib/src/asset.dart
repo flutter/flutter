@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -273,7 +272,7 @@ class ManifestAssetBundle implements AssetBundle {
       // Force the depfile to contain missing files so that Gradle does not skip
       // the task. Wildcard directories are not compatible with full incremental
       // builds. For more context see https://github.com/flutter/flutter/issues/56466 .
-      final double suffix = math.Random().nextDouble();
+      final int suffix = Object().hashCode;
       additionalDependencies.add(
         globals.fs.file('DOES_NOT_EXIST_RERUN_FOR_WILDCARD$suffix').absolute);
     }
