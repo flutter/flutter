@@ -73,6 +73,7 @@ class MatrixUtils {
 
   /// Returns true if the given matrices are exactly equal, and false
   /// otherwise. Null values are assumed to be the identity matrix.
+  @pragma('vm:never-inline')
   static bool matrixEquals(Matrix4 a, Matrix4 b) {
     if (identical(a, b))
       return true;
@@ -125,6 +126,7 @@ class MatrixUtils {
   ///
   /// This function assumes the given point has a z-coordinate of 0.0. The
   /// z-coordinate of the result is ignored.
+  @pragma('vm:never-inline')
   static Offset transformPoint(Matrix4 transform, Offset point) {
     final Float64List storage = transform.storage;
     final double x = point.dx;

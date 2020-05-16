@@ -80,6 +80,7 @@ class SimdMatrix4 {
   ///
   /// Taken from an archived dart.dev website post about SIMD from
   /// 2012.
+  @pragma('vm:never-inline')
   SimdMatrix4 operator *(SimdMatrix4 other) {
     final Float32x4 a0 = _column0;
     final Float32x4 a1 = _column1;
@@ -111,6 +112,7 @@ class SimdMatrix4 {
 
   /// An implementation of matrix inversion based on
   /// https://www.geometrictools.com/Documentation/LaplaceExpansionTheorem.pdf
+  @pragma('vm:never-inline')
   SimdMatrix4 invert() {
     // Given the 4x4 matrix below:
     //
@@ -263,6 +265,7 @@ class SimdMatrixUtils {
 
   /// Returns true if the given matrices are exactly equal, and false
   /// otherwise. Null values are assumed to be the identity matrix.
+  @pragma('vm:never-inline')
   static bool matrixEquals(SimdMatrix4 a, SimdMatrix4 b) {
     final Int32x4 col0Equals = a._column0.equal(b._column0);
     final Int32x4 col1Equals = a._column1.equal(b._column1);
@@ -278,6 +281,7 @@ class SimdMatrixUtils {
   ///
   /// This function assumes the given point has a z-coordinate of 0.0. The
   /// z-coordinate of the result is ignored.
+  @pragma('vm:never-inline')
   static Offset transformPoint(SimdMatrix4 transform, Offset point) {
     // Given the transform matrix M and an offset P, the offset can
     // be expanded to a 1-dimensional vector: [x, y, 0, 0]. The transformation
@@ -345,6 +349,7 @@ class SimdMatrixUtils {
   /// outer side of the cylinder at or past +/- π / 2 or 90 degrees and it's
   /// almost always possible to end up seeing the inner side of the cylinder
   /// or the back side of the transformed plane before π / 2 when perspective > 0.
+  @pragma('vm:never-inline')
   static SimdMatrix4 createCylindricalProjectionTransform({
     @required double radius,
     @required double angle,
