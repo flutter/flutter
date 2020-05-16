@@ -4,6 +4,7 @@
 
 // @dart = 2.6
 import 'dart:async';
+import 'dart:html' as html;
 import 'dart:typed_data';
 
 import 'package:test/test.dart';
@@ -221,5 +222,32 @@ void main() {
     });
 
     await completer.future;
+  });
+
+  test('Window implements locale, locales, and locale change notifications', () async {
+    // This will count how many times we notified about locale changes.
+    int localeChangedCount = 0;
+    window.onLocaleChanged = () {
+      localeChangedCount += 1;
+    };
+
+    // Cause DomRenderer to initialize itself.
+    domRenderer;
+
+    // We populate the initial list of locales automatically (only test that we
+    // got some locales; some contributors may be in different locales, so we
+    // can't test the exact contents).
+    expect(window.locale, isA<ui.Locale>());
+    expect(window.locales, isNotEmpty);
+
+    // Trigger a change notification (reset locales because the notification
+    // doesn't actually change the list of languages; the test only observes
+    // that the list is populated again).
+    window.debugResetLocales();
+    expect(window.locales, null);
+    expect(localeChangedCount, 0);
+    html.window.dispatchEvent(html.Event('languagechange'));
+    expect(window.locales, isNotEmpty);
+    expect(localeChangedCount, 1);
   });
 }
