@@ -27,8 +27,15 @@ class DomRenderer {
   static const int vibrateHeavyImpact = 30;
   static const int vibrateSelectionClick = 10;
 
+  /// Fires when browser language preferences change.
+  static const html.EventStreamProvider<html.Event> languageChangeEvent =
+      const html.EventStreamProvider<html.Event>('languagechange');
+
   /// Listens to window resize events.
   StreamSubscription<html.Event> _resizeSubscription;
+
+  /// Listens to window locale events.
+  StreamSubscription<html.Event> _localeSubscription;
 
   /// Contains Flutter-specific CSS rules, such as default margins and
   /// paddings.
@@ -85,6 +92,7 @@ class DomRenderer {
 
     registerHotRestartListener(() {
       _resizeSubscription?.cancel();
+      _localeSubscription?.cancel();
       _staleHotRestartState.addAll(<html.Element>[
         _glassPaneElement,
         _styleElement,
@@ -462,6 +470,9 @@ flt-glass-pane * {
     } else {
       _resizeSubscription = html.window.onResize.listen(_metricsDidChange);
     }
+    _localeSubscription = languageChangeEvent.forTarget(html.window)
+      .listen(_languageDidChange);
+    window._updateLocales();
   }
 
   /// Called immediately after browser window metrics change.
@@ -482,6 +493,14 @@ flt-glass-pane * {
       // When physical size changes this value has to be recalculated.
       window.computeOnScreenKeyboardInsets();
       window.invokeOnMetricsChanged();
+    }
+  }
+
+  /// Called immediately after browser window language change.
+  void _languageDidChange(html.Event event) {
+    window._updateLocales();
+    if (ui.window.onLocaleChanged != null) {
+      ui.window.onLocaleChanged();
     }
   }
 
