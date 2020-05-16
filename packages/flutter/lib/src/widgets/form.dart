@@ -435,8 +435,8 @@ class FormFieldState<T> extends State<FormField<T>> {
   @override
   Widget build(BuildContext context) {
     // Only autovalidate if the widget is also enabled and
-    // if its content has changed or has focus
-    if (widget.autovalidate && widget.enabled && (_hasInteractedByUser || Focus.isAt(context)))
+    // if its content has changed
+    if (widget.autovalidate && widget.enabled && _hasInteractedByUser)
       _validate();
     Form.of(context)?._register(this);
     return widget.builder(this);
