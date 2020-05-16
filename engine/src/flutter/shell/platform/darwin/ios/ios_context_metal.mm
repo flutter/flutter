@@ -102,18 +102,6 @@ bool IOSContextMetal::MakeCurrent() {
 }
 
 // |IOSContext|
-bool IOSContextMetal::ResourceMakeCurrent() {
-  // This only makes sense for context that need to be bound to a specific thread.
-  return true;
-}
-
-// |IOSContext|
-bool IOSContextMetal::ClearCurrent() {
-  // This only makes sense for context that need to be bound to a specific thread.
-  return true;
-}
-
-// |IOSContext|
 std::unique_ptr<Texture> IOSContextMetal::CreateExternalTexture(
     int64_t texture_id,
     fml::scoped_nsobject<NSObject<FlutterTexture>> texture) {
