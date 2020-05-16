@@ -1068,15 +1068,15 @@ class LinuxProject extends FlutterProjectPlatform {
   @override
   bool existsSync() => _editableDirectory.existsSync();
 
-  /// The Linux project makefile.
-  File get makeFile => _editableDirectory.childFile('Makefile');
+  /// The Linux project CMake specification.
+  File get cmakeFile => _editableDirectory.childFile('CMakeLists.txt');
 
   /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
   /// the build.
-  File get generatedMakeConfigFile => ephemeralDirectory.childFile('generated_config.mk');
+  File get generatedCmakeConfigFile => ephemeralDirectory.childFile('generated_config.cmake');
 
-  /// Makefile with rules and variables for plugin builds.
-  File get generatedPluginMakeFile => managedDirectory.childFile('generated_plugins.mk');
+  /// Includable CMake with rules and variables for plugin builds.
+  File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
 
   /// The directory to write plugin symlinks.
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');

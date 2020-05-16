@@ -794,38 +794,17 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
 }
 ''';
 
-const String _linuxPluginMakefileTemplate = '''
-# Plugins to include in the build.
-GENERATED_PLUGINS=\\
+const String _linuxPluginCmakefileTemplate = r'''
+list(APPEND FLUTTER_PLUGIN_LIST
 {{#plugins}}
-\t{{name}} \\
+  {{name}}
 {{/plugins}}
+)
 
-GENERATED_PLUGINS_DIR={{pluginsDir}}
-# A plugin library name plugin name with _plugin appended.
-GENERATED_PLUGIN_LIB_NAMES=\$(foreach plugin,\$(GENERATED_PLUGINS),\$(plugin)_plugin)
-
-# Variables for use in the enclosing Makefile. Changes to these names are
-# breaking changes.
-PLUGIN_TARGETS=\$(GENERATED_PLUGINS)
-PLUGIN_LIBRARIES=\$(foreach plugin,\$(GENERATED_PLUGIN_LIB_NAMES),\\
-\t\$(OUT_DIR)/lib\$(plugin).so)
-PLUGIN_LDFLAGS=\$(patsubst %,-l%,\$(GENERATED_PLUGIN_LIB_NAMES))
-PLUGIN_CPPFLAGS=\$(foreach plugin,\$(GENERATED_PLUGINS),\\
-\t-I\$(GENERATED_PLUGINS_DIR)/\$(plugin)/linux)
-
-# Targets
-
-# Implicit rules don't match phony targets, so list plugin builds explicitly.
-{{#plugins}}
-\$(OUT_DIR)/lib{{name}}_plugin.so: | {{name}}
-{{/plugins}}
-
-.PHONY: \$(GENERATED_PLUGINS)
-\$(GENERATED_PLUGINS):
-	make -C \$(GENERATED_PLUGINS_DIR)/\$@/linux \\
-		OUT_DIR=\$(OUT_DIR) \\
-		FLUTTER_EPHEMERAL_DIR="\$(abspath {{ephemeralDir}})"
+foreach(plugin ${FLUTTER_PLUGIN_LIST})
+  add_subdirectory({{pluginsDir}}/${plugin}/linux plugins/${plugin})
+  target_link_libraries(${BINARY_NAME} PRIVATE ${plugin}_plugin)
+endforeach(plugin)
 ''';
 
 Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
@@ -871,31 +850,26 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
 Future<void> _writeLinuxPluginFiles(FlutterProject project, List<Plugin> plugins) async {
   final List<Plugin>nativePlugins = _filterNativePlugins(plugins, LinuxPlugin.kConfigKey);
   final List<Map<String, dynamic>> linuxPlugins = _extractPlatformMaps(nativePlugins, LinuxPlugin.kConfigKey);
-  // The generated makefile is checked in, so can't use absolute paths. It is
-  // included by the main makefile, so relative paths must be relative to that
-  // file's directory.
-  final String makefileDirPath = project.linux.makeFile.parent.absolute.path;
+  // The generated file is checked in, so can't use absolute paths. It is
+  // included by the main CMakeLists.txt, so relative paths must be relative to
+  // that file's directory.
+  final String makefileDirPath = project.linux.cmakeFile.parent.absolute.path;
   final Map<String, dynamic> context = <String, dynamic>{
     'plugins': linuxPlugins,
-    'ephemeralDir': globals.fs.path.relative(
-      project.linux.ephemeralDirectory.absolute.path,
-      from: makefileDirPath,
-    ),
     'pluginsDir': globals.fs.path.relative(
       project.linux.pluginSymlinkDirectory.absolute.path,
       from: makefileDirPath,
     ),
   };
   await _writeCppPluginRegistrant(project.linux.managedDirectory, context);
-  await _writeLinuxPluginMakefile(project.linux.managedDirectory, context);
+  await _writeLinuxPluginCmakefile(project.linux.generatedPluginCmakeFile, context);
 }
 
-Future<void> _writeLinuxPluginMakefile(Directory destination, Map<String, dynamic> templateContext) async {
-  final String registryDirectory = destination.path;
+Future<void> _writeLinuxPluginCmakefile(File destinationFile, Map<String, dynamic> templateContext) async {
   _renderTemplateToFile(
-    _linuxPluginMakefileTemplate,
+    _linuxPluginCmakefileTemplate,
     templateContext,
-    globals.fs.path.join(registryDirectory, 'generated_plugins.mk'),
+    destinationFile.path,
   );
 }
 
