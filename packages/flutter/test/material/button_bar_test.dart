@@ -637,7 +637,7 @@ void main() {
 
     final Finder buttonBar = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ButtonBarRow');
     final RenderBox renderButtonBar = tester.renderObject(buttonBar) as RenderBox;
-    
+
     expect(renderButtonBar.debugNeedsLayout, isTrue);
     expect(renderButtonBar.constraints, isNull);
   });
