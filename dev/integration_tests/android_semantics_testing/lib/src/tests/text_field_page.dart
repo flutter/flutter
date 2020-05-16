@@ -17,14 +17,13 @@ class TextFieldPage extends StatefulWidget {
 class _TextFieldPageState extends State<TextFieldPage> {
   final TextEditingController _normalController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final Key backButtonKey = const ValueKey<String>(backButtonKeyValue);
   final Key normalTextFieldKey = const ValueKey<String>(normalTextFieldKeyValue);
   final Key passwordTextFieldKey = const ValueKey<String>(passwordTextFieldKeyValue);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(leading: BackButton(key: backButtonKey)),
+      appBar: AppBar(leading: const BackButton(key: ValueKey<String>('back'))),
       body: Material(
         child: Column(children: <Widget>[
           TextField(
