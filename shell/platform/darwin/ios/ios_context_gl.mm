@@ -33,7 +33,6 @@ std::unique_ptr<IOSRenderTargetGL> IOSContextGL::CreateRenderTarget(
 
 // |IOSContext|
 sk_sp<GrContext> IOSContextGL::CreateResourceContext() {
-  // TODO(chinmaygarde): Now that this is here, can ResourceMakeCurrent be removed?
   if (![EAGLContext setCurrentContext:resource_context_.get()]) {
     FML_DLOG(INFO) << "Could not make resource context current on IO thread. Async texture uploads "
                       "will be disabled. On Simulators, this is expected.";
@@ -47,16 +46,6 @@ sk_sp<GrContext> IOSContextGL::CreateResourceContext() {
 // |IOSContext|
 bool IOSContextGL::MakeCurrent() {
   return [EAGLContext setCurrentContext:context_.get()];
-}
-
-// |IOSContext|
-bool IOSContextGL::ResourceMakeCurrent() {
-  return [EAGLContext setCurrentContext:resource_context_.get()];
-}
-
-// |IOSContext|
-bool IOSContextGL::ClearCurrent() {
-  return [EAGLContext setCurrentContext:nil];
 }
 
 // |IOSContext|

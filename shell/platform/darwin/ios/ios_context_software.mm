@@ -22,16 +22,6 @@ bool IOSContextSoftware::MakeCurrent() {
 }
 
 // |IOSContext|
-bool IOSContextSoftware::ResourceMakeCurrent() {
-  return false;
-}
-
-// |IOSContext|
-bool IOSContextSoftware::ClearCurrent() {
-  return false;
-}
-
-// |IOSContext|
 std::unique_ptr<Texture> IOSContextSoftware::CreateExternalTexture(
     int64_t texture_id,
     fml::scoped_nsobject<NSObject<FlutterTexture>> texture) {
