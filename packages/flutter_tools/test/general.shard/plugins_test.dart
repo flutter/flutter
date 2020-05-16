@@ -91,8 +91,8 @@ void main() {
       when(linuxProject.managedDirectory).thenReturn(linuxManagedDirectory);
       when(linuxProject.ephemeralDirectory).thenReturn(linuxEphemeralDirectory);
       when(linuxProject.pluginSymlinkDirectory).thenReturn(linuxEphemeralDirectory.childDirectory('.plugin_symlinks'));
-      when(linuxProject.makeFile).thenReturn(linuxManagedDirectory.parent.childFile('Makefile'));
-      when(linuxProject.generatedPluginMakeFile).thenReturn(linuxManagedDirectory.childFile('generated_plugins.mk'));
+      when(linuxProject.cmakeFile).thenReturn(linuxManagedDirectory.parent.childFile('CMakeLists.txt'));
+      when(linuxProject.generatedPluginCmakeFile).thenReturn(linuxManagedDirectory.childFile('generated_plugins.mk'));
       when(linuxProject.existsSync()).thenReturn(false);
 
       when(mockClock.now()).thenAnswer(
@@ -961,7 +961,7 @@ flutter:
         FeatureFlags: () => featureFlags,
       });
 
-      testUsingContext('Injecting creates generated Linux plugin makefile', () async {
+      testUsingContext('Injecting creates generated Linux plugin Cmake file', () async {
         when(linuxProject.existsSync()).thenReturn(true);
         when(featureFlags.isLinuxEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
@@ -969,16 +969,12 @@ flutter:
 
         await injectPlugins(flutterProject, checkProjects: true);
 
-        final File pluginMakefile = linuxProject.generatedPluginMakeFile;
+        final File pluginMakefile = linuxProject.generatedPluginCmakeFile;
 
         expect(pluginMakefile.existsSync(), isTrue);
         final String contents = pluginMakefile.readAsStringSync();
-        expect(contents, contains('libapackage_plugin.so'));
-        // Verify all the variables the app-level Makefile rely on.
-        expect(contents, contains('PLUGIN_TARGETS='));
-        expect(contents, contains('PLUGIN_LIBRARIES='));
-        expect(contents, contains('PLUGIN_LDFLAGS='));
-        expect(contents, contains('PLUGIN_CPPFLAGS='));
+        expect(contents, contains('apackage'));
+        expect(contents, contains('target_link_libraries(\${BINARY_NAME} PRIVATE \${plugin}_plugin)'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
