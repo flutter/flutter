@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fake_async/fake_async.dart';
 
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
@@ -752,20 +753,31 @@ void main() {
     });
   });
 
-  group('no timers pending after widget tree disposal', () {
-    testWidgets('timer pending check', (WidgetTester tester) async {
+  group('timers pending after widget tree disposal', () {
+    testWidgets('no timers pending check', (WidgetTester tester) async {
       final Timer timer = Timer(const Duration(seconds: 1), () {});
       expect(timer.isActive, true);
       timer.cancel();
       expect(timer.isActive, false);
-
     });
 
-    testWidgets('periodic timer pending check', (WidgetTester tester) async {
-      final Timer timer = Timer.periodic(Duration(seconds: 1), (Timer t) => print(t));
-      expect(timer.isActive, true);
-      timer.cancel();
-      expect(timer.isActive, false);
+    testWidgets('timers pending check', (WidgetTester tester) async {
+      expect(
+          () {
+            final FakeAsync timers = FakeAsync();
+            debugPrint('Pending timers:');
+            for (final FakeTimer timer in timers.pendingTimers) {
+              debugPrint(
+                  'Timer (duration: ${timer.duration}, '
+                      'periodic: ${timer.isPeriodic}), created:');
+              debugPrintStack(stackTrace: timer.creationStackTrace);
+              debugPrint('');
+            }
+            throw AssertionError('A Timer is still pending even after the widget tree was disposed.');
+          },
+        throwsA(predicate<AssertionError>((AssertionError e) => e.message ==
+            'A Timer is still pending even after the widget tree was disposed.'))
+      );
     });
   });
 }

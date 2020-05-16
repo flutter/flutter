@@ -1119,7 +1119,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     bool timersPending = false;
     if (_currentFakeAsync.periodicTimerCount != 0 ||
         _currentFakeAsync.nonPeriodicTimerCount != 0) {
-
         debugPrint('Pending timers:');
         for (final FakeTimer timer in _currentFakeAsync.pendingTimers) {
           debugPrint(
@@ -1130,7 +1129,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         }
         timersPending = true;
     }
-
     assert(!timersPending, 'A Timer is still pending even after the widget tree was disposed.');
     assert(_currentFakeAsync.microtaskCount == 0); // Shouldn't be possible.
   }
