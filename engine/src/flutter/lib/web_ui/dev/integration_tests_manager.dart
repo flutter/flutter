@@ -376,11 +376,9 @@ const Map<String, List<String>> blackListsMap = <String, List<String>>{
   'chrome-linux': [
     'target_platform_ios_e2e.dart',
     'target_platform_macos_e2e.dart',
-    'target_platform_android_e2e.dart',
   ],
   'chrome-macos': [
     'target_platform_ios_e2e.dart',
-    'target_platform_macos_e2e.dart',
     'target_platform_android_e2e.dart',
   ],
 };
