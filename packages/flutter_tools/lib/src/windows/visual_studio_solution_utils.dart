@@ -66,6 +66,10 @@ class VisualStudioSolutionUtils {
   /// dependencies to include [plugins], removing any previous plugins from the
   /// solution.
   Future<void> updatePlugins(List<Plugin> plugins) async {
+    // If the solution file is missing write no plugins.
+    if (!_project.solutionFile.existsSync()) {
+      return;
+    }
     final String solutionContent = await _project.solutionFile.readAsString();
 
     // Map of GUID to name for the current plugin list.
