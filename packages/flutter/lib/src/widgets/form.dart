@@ -163,7 +163,8 @@ class FormState extends State<Form> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.autovalidate)
+    // validate only if one of the text form fields changes
+    if (widget.autovalidate && _generation > 0)
       _validate();
     return WillPopScope(
       onWillPop: widget.onWillPop,
