@@ -5,8 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-final Finder _buttonBarRow = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ButtonBarRow');
-
 void main() {
   testWidgets('ButtonBar default control smoketest', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -637,9 +635,10 @@ void main() {
       EnginePhase.build,
     );
 
-    final RenderBox buttonBar = tester.renderObject(_buttonBarRow) as RenderBox;
-
-    expect(buttonBar.debugNeedsLayout, isTrue);
-    expect(buttonBar.constraints, isNull);
+    final Finder buttonBar = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ButtonBarRow');
+    final RenderBox renderButtonBar = tester.renderObject(buttonBar) as RenderBox;
+    
+    expect(renderButtonBar.debugNeedsLayout, isTrue);
+    expect(renderButtonBar.constraints, isNull);
   });
 }
