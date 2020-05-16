@@ -265,6 +265,63 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
     Platform: () => FakePlatform(operatingSystem: 'linux'),
   });
+
+  testUsingContext('reports package that causes asset bundle error when it is '
+    'a dependency', () async {
+    globals.fs.file('.packages').writeAsStringSync(r'''
+example:lib/
+foo:foo/lib/
+''');
+    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+      .createSync(recursive: true);
+    globals.fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+dependencies:
+  foo: any
+''');
+    globals.fs.file('foo/pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'''
+name: foo
+
+flutter:
+  assets:
+    - bar.txt
+''');
+    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+
+    expect(await bundle.build(manifestPath: 'pubspec.yaml'), 1);
+    expect(testLogger.errorText, contains('This asset was included from package foo'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
+  });
+
+  testUsingContext('does not report package that causes asset bundle error '
+    'when it is from own pubspec', () async {
+    globals.fs.file('.packages').writeAsStringSync(r'''
+example:lib/
+''');
+    globals.fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - bar.txt
+''');
+    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+
+    expect(await bundle.build(manifestPath: 'pubspec.yaml'), 1);
+    expect(testLogger.errorText, isNot(contains('This asset was included from')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
+  });
 }
 
 class MockDirectory extends Mock implements Directory {}
