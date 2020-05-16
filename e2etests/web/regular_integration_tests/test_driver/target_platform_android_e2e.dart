@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:regular_integration_tests/text_editing_main.dart' as app;
+import 'package:regular_integration_tests/target_platform_main.dart' as app;
 import 'package:flutter/material.dart';
 
 import 'package:e2e/e2e.dart';
