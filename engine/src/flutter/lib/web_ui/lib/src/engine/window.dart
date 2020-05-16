@@ -181,7 +181,8 @@ class EngineWindow extends ui.Window {
   }
 
   @override
-  ui.VoidCallback get onPlatformBrightnessChanged => _onPlatformBrightnessChanged;
+  ui.VoidCallback get onPlatformBrightnessChanged =>
+      _onPlatformBrightnessChanged;
   ui.VoidCallback _onPlatformBrightnessChanged;
   Zone _onPlatformBrightnessChangedZone;
   @override
@@ -224,6 +225,64 @@ class EngineWindow extends ui.Window {
     _onLocaleChangedZone = Zone.current;
   }
 
+  /// The locale used when we fail to get the list from the browser.
+  static const _defaultLocale = const ui.Locale('en', 'US');
+
+  /// We use the first locale in the [locales] list instead of the browser's
+  /// built-in `navigator.language` because browsers do not agree on the
+  /// implementation.
+  ///
+  /// See also:
+  ///
+  /// * https://developer.mozilla.org/en-US/docs/Web/API/NavigatorLanguage/languages,
+  ///   which explains browser quirks in the implementation notes.
+  @override
+  ui.Locale get locale => _locales.first;
+
+  @override
+  List<ui.Locale> get locales => _locales;
+  List<ui.Locale> _locales = parseBrowserLanguages();
+
+  /// Sets locales to `null`.
+  ///
+  /// `null` is not a valid value for locales. This is only used for testing
+  /// locale update logic.
+  void debugResetLocales() {
+    _locales = null;
+  }
+
+  // Called by DomRenderer when browser languages change.
+  void _updateLocales() {
+    _locales = parseBrowserLanguages();
+  }
+
+  static List<ui.Locale> parseBrowserLanguages() {
+    // TODO(yjbanov): find a solution for IE
+    final bool languagesFeatureMissing = !js_util.hasProperty(html.window.navigator, 'languages');
+    if (languagesFeatureMissing || html.window.navigator.languages.isEmpty) {
+      // To make it easier for the app code, let's not leave the locales list
+      // empty. This way there's fewer corner cases for apps to handle.
+      return const [_defaultLocale];
+    }
+
+    final List<ui.Locale> locales = <ui.Locale>[];
+    for (final String language in html.window.navigator.languages) {
+      final List<String> parts = language.split('-');
+      if (parts.length > 1) {
+        locales.add(ui.Locale(parts.first, parts.last));
+      } else {
+        locales.add(ui.Locale(language));
+      }
+    }
+
+    assert(locales.isNotEmpty);
+    return locales;
+  }
+
+  /// On the web "platform" is the browser, so it's the same as [locale].
+  @override
+  ui.Locale get platformResolvedLocale => locale;
+
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnLocaleChanged() {
@@ -259,7 +318,8 @@ class EngineWindow extends ui.Window {
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnReportTimings(List<ui.FrameTiming> timings) {
-    _invoke1<List<ui.FrameTiming>>(_onReportTimings, _onReportTimingsZone, timings);
+    _invoke1<List<ui.FrameTiming>>(
+        _onReportTimings, _onReportTimingsZone, timings);
   }
 
   @override
@@ -291,7 +351,8 @@ class EngineWindow extends ui.Window {
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnPointerDataPacket(ui.PointerDataPacket packet) {
-    _invoke1<ui.PointerDataPacket>(_onPointerDataPacket, _onPointerDataPacketZone, packet);
+    _invoke1<ui.PointerDataPacket>(
+        _onPointerDataPacket, _onPointerDataPacketZone, packet);
   }
 
   @override
@@ -322,13 +383,15 @@ class EngineWindow extends ui.Window {
 
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
-  void invokeOnSemanticsAction(int id, ui.SemanticsAction action, ByteData args) {
-    _invoke3<int, ui.SemanticsAction, ByteData>(_onSemanticsAction,
-        _onSemanticsActionZone, id, action, args);
+  void invokeOnSemanticsAction(
+      int id, ui.SemanticsAction action, ByteData args) {
+    _invoke3<int, ui.SemanticsAction, ByteData>(
+        _onSemanticsAction, _onSemanticsActionZone, id, action, args);
   }
 
   @override
-  ui.VoidCallback get onAccessibilityFeaturesChanged => _onAccessibilityFeaturesChanged;
+  ui.VoidCallback get onAccessibilityFeaturesChanged =>
+      _onAccessibilityFeaturesChanged;
   ui.VoidCallback _onAccessibilityFeaturesChanged;
   Zone _onAccessibilityFeaturesChangedZone;
   @override
@@ -340,7 +403,8 @@ class EngineWindow extends ui.Window {
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnAccessibilityFeaturesChanged() {
-    _invoke(_onAccessibilityFeaturesChanged, _onAccessibilityFeaturesChangedZone);
+    _invoke(
+        _onAccessibilityFeaturesChanged, _onAccessibilityFeaturesChangedZone);
   }
 
   @override
@@ -355,7 +419,8 @@ class EngineWindow extends ui.Window {
 
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
-  void invokeOnPlatformMessage(String name, ByteData data, ui.PlatformMessageResponseCallback callback) {
+  void invokeOnPlatformMessage(
+      String name, ByteData data, ui.PlatformMessageResponseCallback callback) {
     _invoke3<String, ByteData, ui.PlatformMessageResponseCallback>(
       _onPlatformMessage,
       _onPlatformMessageZone,
@@ -371,14 +436,16 @@ class EngineWindow extends ui.Window {
     ByteData/*?*/ data,
     ui.PlatformMessageResponseCallback/*?*/ callback,
   ) {
-    _sendPlatformMessage(name, data, _zonedPlatformMessageResponseCallback(callback));
+    _sendPlatformMessage(
+        name, data, _zonedPlatformMessageResponseCallback(callback));
   }
 
   /// Wraps the given [callback] in another callback that ensures that the
   /// original callback is called in the zone it was registered in.
   static ui.PlatformMessageResponseCallback/*?*/ _zonedPlatformMessageResponseCallback(ui.PlatformMessageResponseCallback/*?*/ callback) {
-    if (callback == null)
+    if (callback == null) {
       return null;
+    }
 
     // Store the zone in which the callback is being registered.
     final Zone registrationZone = Zone.current;
@@ -434,13 +501,15 @@ class EngineWindow extends ui.Window {
           case 'HapticFeedback.vibrate':
             final String type = decoded.arguments;
             domRenderer.vibrate(_getHapticFeedbackDuration(type));
-            _replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
+            _replyToPlatformMessage(
+                callback, codec.encodeSuccessEnvelope(true));
             return;
           case 'SystemChrome.setApplicationSwitcherDescription':
             final Map<String, dynamic> arguments = decoded.arguments;
             domRenderer.setTitle(arguments['label']);
             domRenderer.setThemeColor(ui.Color(arguments['primaryColor']));
-            _replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
+            _replyToPlatformMessage(
+                callback, codec.encodeSuccessEnvelope(true));
             return;
           case 'SystemChrome.setPreferredOrientations':
             final List<dynamic> arguments = decoded.arguments;
@@ -451,7 +520,8 @@ class EngineWindow extends ui.Window {
             return;
           case 'SystemSound.play':
             // There are no default system sounds on web.
-            _replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
+            _replyToPlatformMessage(
+                callback, codec.encodeSuccessEnvelope(true));
             return;
           case 'Clipboard.setData':
             ClipboardMessageHandler().setDataMethodCall(decoded, callback);
@@ -468,9 +538,10 @@ class EngineWindow extends ui.Window {
 
       case 'flutter/web_test_e2e':
         const MethodCodec codec = JSONMethodCodec();
-        _replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(
-          _handleWebTestEnd2EndMessage(codec, data)
-        ));
+        _replyToPlatformMessage(
+            callback,
+            codec.encodeSuccessEnvelope(
+                _handleWebTestEnd2EndMessage(codec, data)));
         return;
 
       case 'flutter/platform_views':
@@ -497,11 +568,13 @@ class EngineWindow extends ui.Window {
           case 'routePushed':
           case 'routeReplaced':
             _browserHistory.setRouteName(message['routeName']);
-            _replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
+            _replyToPlatformMessage(
+                callback, codec.encodeSuccessEnvelope(true));
             break;
           case 'routePopped':
             _browserHistory.setRouteName(message['previousRouteName']);
-            _replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
+            _replyToPlatformMessage(
+                callback, codec.encodeSuccessEnvelope(true));
             break;
         }
         // As soon as Flutter starts taking control of the app navigation, we
@@ -621,7 +694,7 @@ class EngineWindow extends ui.Window {
 bool _handleWebTestEnd2EndMessage(MethodCodec codec, ByteData data) {
   final MethodCall decoded = codec.decodeMethodCall(data);
   double ratio = double.parse(decoded.arguments);
-  switch(decoded.method) {
+  switch (decoded.method) {
     case 'setDevicePixelRatio':
       window.debugOverrideDevicePixelRatio(ratio);
       window.onMetricsChanged();
@@ -632,8 +705,9 @@ bool _handleWebTestEnd2EndMessage(MethodCodec codec, ByteData data) {
 
 /// Invokes [callback] inside the given [zone].
 void _invoke(void callback(), Zone zone) {
-  if (callback == null)
+  if (callback == null) {
     return;
+  }
 
   assert(zone != null);
 
@@ -646,8 +720,9 @@ void _invoke(void callback(), Zone zone) {
 
 /// Invokes [callback] inside the given [zone] passing it [arg].
 void _invoke1<A>(void callback(A a), Zone zone, A arg) {
-  if (callback == null)
+  if (callback == null) {
     return;
+  }
 
   assert(zone != null);
 
@@ -659,9 +734,11 @@ void _invoke1<A>(void callback(A a), Zone zone, A arg) {
 }
 
 /// Invokes [callback] inside the given [zone] passing it [arg1], [arg2], and [arg3].
-void _invoke3<A1, A2, A3>(void callback(A1 a1, A2 a2, A3 a3), Zone zone, A1 arg1, A2 arg2, A3 arg3) {
-  if (callback == null)
+void _invoke3<A1, A2, A3>(
+    void callback(A1 a1, A2 a2, A3 a3), Zone zone, A1 arg1, A2 arg2, A3 arg3) {
+  if (callback == null) {
     return;
+  }
 
   assert(zone != null);
 
