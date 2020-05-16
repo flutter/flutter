@@ -649,4 +649,40 @@ void main() {
     await tester.pump();
     expect(formFieldState.errorText, equals(errorText(initialValue)));
   });
+  
+  testWidgets('Form only validate TextFormFields after one of the form fields changes', (WidgetTester tester) async {
+    String errorText(String value) => 'error/$value';
+
+    Widget builder() {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Material(
+              child: Form(
+                autovalidate: true,
+                child: TextFormField(
+                  validator: errorText,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    
+    // The issue only happens on the second build so we need to rebuild the three
+    await tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
+
+    // we expect no validation error text being shown
+    expect(find.text(errorText('')), findsNothing);
+
+    // set a empty string to trigger the Fields validators
+    await tester.enterText(find.byType(TextFormField), 'foo');
+    await tester.pump();
+
+    // now we expect the error to be shown
+    expect(find.text(errorText('foo')), findsOneWidget);
+  });
 }
