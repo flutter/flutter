@@ -186,15 +186,16 @@ void main() {
       ),
     );
 
-    expect(_validateCalled, 1);
     expect(value, equals('one'));
-    await tester.tap(find.text('one'));
+    await tester.tap(find.byType(dropdownButtonType));
     await tester.pumpAndSettle();
+    await tester.tap(find.text('one').last);
+    await tester.pump();
+    expect(_validateCalled, 1);
+    await tester.tap(find.byType(dropdownButtonType));
     await tester.tap(find.text('three').last);
     await tester.pump();
     expect(_validateCalled, 2);
-    await tester.pumpAndSettle();
-    expect(value, equals('three'));
   });
 
   testWidgets('DropdownButtonFormField arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {

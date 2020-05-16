@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../widgets.dart';
 import 'framework.dart';
 import 'navigator.dart';
 import 'will_pop_scope.dart';
@@ -337,6 +338,7 @@ class FormField<T> extends StatefulWidget {
 class FormFieldState<T> extends State<FormField<T>> {
   T _value;
   String _errorText;
+  bool _valueChanged = false;
 
   /// The current value of the form field.
   T get value => _value;
@@ -369,6 +371,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   void reset() {
     setState(() {
       _value = widget.initialValue;
+      _valueChanged = false;
       _errorText = null;
     });
   }
@@ -400,6 +403,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   void didChange(T value) {
     setState(() {
       _value = value;
+      _valueChanged = true;
     });
     Form.of(context)?._fieldDidChange();
   }
@@ -430,8 +434,9 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   @override
   Widget build(BuildContext context) {
-    // Only autovalidate if the widget is also enabled
-    if (widget.autovalidate && widget.enabled)
+    // Only autovalidate if the widget is also enabled and
+    // if its content has changed or has focus
+    if (widget.autovalidate && widget.enabled && (_valueChanged || Focus.isAt(context)))
       _validate();
     Form.of(context)?._register(this);
     return widget.builder(this);
