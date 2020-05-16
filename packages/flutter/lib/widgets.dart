@@ -16,6 +16,7 @@ export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 export 'src/widgets/actions.dart';
 export 'src/widgets/animated_cross_fade.dart';
+export 'src/widgets/animated_fade_out_fade_in.dart';
 export 'src/widgets/animated_list.dart';
 export 'src/widgets/animated_size.dart';
 export 'src/widgets/animated_switcher.dart';
