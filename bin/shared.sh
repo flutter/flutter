@@ -7,7 +7,7 @@
 # ---------------------------------- NOTE ---------------------------------- #
 #
 # Please keep the logic in this file consistent with the logic in the
-# `flutter.bat` script in the same directory to ensure that Flutter continues
+# `shared.bat` script in the same directory to ensure that Flutter & Dart continues
 # to work across all platforms!
 #
 # -------------------------------------------------------------------------- #
