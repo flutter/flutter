@@ -514,4 +514,27 @@ void main() {
 
     expect(lightTheme.toString().length, lessThan(200));
   });
+
+  testWidgets('ThemeData brightness parameter overrides ColorScheme brightness', (WidgetTester tester) async {
+    const ColorScheme lightColors = ColorScheme.light();
+    expect(() => ThemeData(colorScheme: lightColors, brightness: Brightness.dark), throwsAssertionError);
+  });
+
+  testWidgets('ThemeData.copyWith brightness parameter overrides ColorScheme brightness', (WidgetTester tester) async {
+    const ColorScheme lightColors = ColorScheme.light();
+    final ThemeData theme = ThemeData.from(colorScheme: lightColors).copyWith(brightness: Brightness.dark);
+
+    // The brightness parameter only overrides ColorScheme.brightness.
+    expect(theme.brightness, equals(Brightness.dark));
+    expect(theme.colorScheme.brightness, equals(Brightness.dark));
+    expect(theme.primaryColor, equals(lightColors.primary));
+    expect(theme.accentColor, equals(lightColors.secondary));
+    expect(theme.cardColor, equals(lightColors.surface));
+    expect(theme.backgroundColor, equals(lightColors.background));
+    expect(theme.canvasColor, equals(lightColors.background));
+    expect(theme.scaffoldBackgroundColor, equals(lightColors.background));
+    expect(theme.dialogBackgroundColor, equals(lightColors.background));
+    expect(theme.errorColor, equals(lightColors.error));
+    expect(theme.applyElevationOverlayColor, isFalse);
+  });
 }

@@ -269,6 +269,7 @@ class ThemeData with Diagnosticable {
     BottomNavigationBarThemeData bottomNavigationBarTheme,
     bool fixTextFieldOutlineLabel,
   }) {
+    assert(colorScheme?.brightness == null || brightness == null || colorScheme.brightness == brightness);
     final Brightness _brightness = brightness ?? colorScheme?.brightness ?? Brightness.light;
     final bool isDark = _brightness == Brightness.dark;
     visualDensity ??= const VisualDensity();
