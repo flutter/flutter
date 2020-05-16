@@ -269,15 +269,14 @@ TextEditingValue _selectionAwareTextManipulation(
   final int selectionEndIndex = value.selection.end;
   String manipulatedText;
   TextSelection manipulatedSelection;
-  final String oldValidText = oldValue.text;
   if (selectionStartIndex < 0 || selectionEndIndex < 0) {
     manipulatedText = substringManipulation(value.text);
-  } else if (value.selection.isCollapsed) { // non-selected text manipulation
+  } else if (value.selection.isCollapsed) { // non-selection text manipulation
     manipulatedText = substringManipulation(value.text);
-    // We only return the old valid value if the current value is not empty
-    // manipulation fails, return the old valid text
+    // We only return the old valid value if the current value is not empty and
+    // if manipulation fails.
     if (value.text.isNotEmpty && manipulatedText.isEmpty) {
-      manipulatedText = oldValidText;
+      manipulatedText = oldValue.text;
     }
     // move the carret to the end of the text
     manipulatedSelection = TextSelection.collapsed(offset: manipulatedText.length);
