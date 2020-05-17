@@ -66,9 +66,11 @@ class VisualStudioSolutionUtils {
   /// dependencies to include [plugins], removing any previous plugins from the
   /// solution.
   Future<void> updatePlugins(List<Plugin> plugins) async {
-    // If the solution file is missing write no plugins.
     if (!_project.solutionFile.existsSync()) {
-      return;
+      throwToolExit(
+        'Attempted to update Windows plugins on a project that does not '
+        'support Windows.',
+      );
     }
     final String solutionContent = await _project.solutionFile.readAsString();
 

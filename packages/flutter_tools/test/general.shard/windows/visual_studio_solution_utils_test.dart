@@ -436,7 +436,7 @@ EndGlobal''');
         throwsToolExit());
     });
 
-    test('A Windows project with a missing Runner.sln file does not crash', () async {
+    test('A Windows project with a missing Runner.sln file throws a ToolExit', () async {
       final MockWindowsProject windowsProject = MockWindowsProject();
       final File file = fileSystem.file('does_not_exist');
 
@@ -444,8 +444,8 @@ EndGlobal''');
 
       when(windowsProject.solutionFile).thenReturn(file);
 
-      await VisualStudioSolutionUtils(project: project, fileSystem: fileSystem)
-        .updatePlugins(<Plugin>[]);
+      expect(() async => await VisualStudioSolutionUtils(project: project, fileSystem: fileSystem)
+        .updatePlugins(<Plugin>[]), throwsToolExit());
     });
   });
 }
