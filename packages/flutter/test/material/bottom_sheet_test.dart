@@ -306,6 +306,38 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
+  testWidgets('Modal BottomSheet builder should only be called once', (WidgetTester tester) async {
+    BuildContext savedContext;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
+        builder: (BuildContext context) {
+          savedContext = context;
+          return Container();
+        },
+      ),
+    ));
+
+    int numBuilderCalls = 0;
+    showModalBottomSheet<void>(
+      context: savedContext,
+      isDismissible: false,
+      enableDrag: true,
+      builder: (BuildContext context) {
+        numBuilderCalls++;
+        return const Text('BottomSheet');
+      },
+    );
+
+    await tester.pumpAndSettle();
+    expect(numBuilderCalls, 1);
+
+    // Swipe the bottom sheet to dismiss it.
+    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
+    await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
+    expect(numBuilderCalls, 1);
+  });
+
   testWidgets('Verify that a downwards fling dismisses a persistent BottomSheet', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool showBottomSheetThenCalled = false;
