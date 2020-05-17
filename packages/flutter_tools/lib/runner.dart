@@ -25,7 +25,7 @@ import 'src/runner/flutter_command_runner.dart';
 /// Runs the Flutter tool with support for the specified list of [commands].
 Future<int> run(
   List<String> args,
-  List<FlutterCommand> commands, {
+  List<FlutterCommand> Function() commands, {
     bool muteCommandLogging = false,
     bool verbose = false,
     bool verboseHelp = false,
@@ -40,11 +40,10 @@ Future<int> run(
     args.removeWhere((String option) => option == '-v' || option == '--verbose');
   }
 
-  final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: verboseHelp);
-  commands.forEach(runner.addCommand);
-
   return runInContext<int>(() async {
     reportCrashes ??= !await globals.isRunningOnBot;
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: verboseHelp);
+    commands().forEach(runner.addCommand);
 
     // Initialize the system locale.
     final String systemLocale = await intl_standalone.findSystemLocale();

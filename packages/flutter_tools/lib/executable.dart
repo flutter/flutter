@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/logger.dart';
+
 import 'runner.dart' as runner;
 import 'src/base/context.dart';
 import 'src/base/template.dart';
@@ -64,8 +66,9 @@ Future<void> main(List<String> args) async {
       (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
   final bool muteCommandLogging = help || doctor;
   final bool verboseHelp = help && verbose;
+  final bool daemon = args.contains('daemon');
 
-  await runner.run(args, <FlutterCommand>[
+  await runner.run(args, () => <FlutterCommand>[
     AnalyzeCommand(
       verboseHelp: verboseHelp,
       fileSystem: globals.fs,
@@ -121,5 +124,14 @@ Future<void> main(List<String> args) async {
        WebRunnerFactory: () => DwdsWebRunnerFactory(),
        // The mustache dependency is different in google3
        TemplateRenderer: () => const MustacheTemplateRenderer(),
+       if (daemon)
+        Logger: () => NotifyingLogger()
+       else if (verbose)
+        Logger: () => VerboseLogger(StdoutLogger(
+          timeoutConfiguration: timeoutConfiguration,
+          stdio: globals.stdio,
+          terminal: globals.terminal,
+          outputPreferences: globals.outputPreferences,
+        ))
      });
 }

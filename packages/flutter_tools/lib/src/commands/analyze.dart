@@ -11,7 +11,6 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import 'analyze_continuously.dart';
 import 'analyze_once.dart';
@@ -113,9 +112,7 @@ class AnalyzeCommand extends FlutterCommand {
         runner.getRepoRoots(),
         runner.getRepoPackages(),
         fileSystem: _fileSystem,
-        // TODO(jonahwilliams): determine a better way to inject the logger,
-        // since it is constructed on-demand.
-        logger: _logger ?? globals.logger,
+        logger: _logger,
         platform: _platform,
         processManager: _processManager,
         terminal: _terminal,
@@ -128,9 +125,7 @@ class AnalyzeCommand extends FlutterCommand {
         runner.getRepoPackages(),
         workingDirectory: workingDirectory,
         fileSystem: _fileSystem,
-        // TODO(jonahwilliams): determine a better way to inject the logger,
-        // since it is constructed on-demand.
-        logger: _logger ?? globals.logger,
+        logger: _logger,
         platform: _platform,
         processManager: _processManager,
         terminal: _terminal,

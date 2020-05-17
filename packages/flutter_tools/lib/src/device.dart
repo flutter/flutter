@@ -102,6 +102,7 @@ class DeviceManager {
       fileSystem: globals.fs,
       platform: globals.platform,
       processManager: globals.processManager,
+      logger: globals.logger,
     ),
   ]);
 

@@ -15,7 +15,6 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -235,12 +234,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
     final Map<Type, dynamic> contextOverrides = <Type, dynamic>{};
-
-    // Check for verbose.
-    if (topLevelResults['verbose'] as bool) {
-      // Override the logger.
-      contextOverrides[Logger] = VerboseLogger(globals.logger);
-    }
 
     // Don't set wrapColumns unless the user said to: if it's set, then all
     // wrapping will occur at this width explicitly, and won't adapt if the

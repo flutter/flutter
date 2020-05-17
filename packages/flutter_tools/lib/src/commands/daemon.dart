@@ -51,27 +51,16 @@ class DaemonCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     globals.printStatus('Starting device daemon...');
     isRunningFromDaemon = true;
-
-    final NotifyingLogger notifyingLogger = NotifyingLogger();
-
     Cache.releaseLockEarly();
 
-    await context.run<void>(
-      body: () async {
-        final Daemon daemon = Daemon(
-          stdinCommandStream, stdoutCommandResponse,
-          notifyingLogger: notifyingLogger,
-        );
-
-        final int code = await daemon.onExit;
-        if (code != 0) {
-          throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
-        }
-      },
-      overrides: <Type, Generator>{
-        Logger: () => notifyingLogger,
-      },
+    final Daemon daemon = Daemon(
+      stdinCommandStream, stdoutCommandResponse,
+      notifyingLogger: globals.logger as NotifyingLogger,
     );
+    final int code = await daemon.onExit;
+    if (code != 0) {
+      throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
+    }
     return FlutterCommandResult.success();
   }
 }
