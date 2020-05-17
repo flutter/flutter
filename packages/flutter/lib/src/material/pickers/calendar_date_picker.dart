@@ -366,8 +366,7 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
         children: <Widget>[
           Flexible(
             child: Semantics(
-              // TODO(darrenaustin): localize 'Select year'
-              label: 'Select year',
+              label: MaterialLocalizations.of(context).selectYearSemanticsLabel,
               excludeSemantics: true,
               button: true,
               child: Container(

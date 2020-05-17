@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
+import '../base/platform.dart';
 import '../doctor.dart';
 import 'chrome.dart';
 

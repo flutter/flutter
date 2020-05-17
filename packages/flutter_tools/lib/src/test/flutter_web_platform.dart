@@ -335,7 +335,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     Object message,
   ) async {
     if (_closed) {
-      return null;
+      throw StateError('Load called on a closed FlutterWebPlatform');
     }
     final PoolResource lockResource = await _suiteLock.request();
 
@@ -348,7 +348,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     }
 
     if (_closed) {
-      return null;
+      throw StateError('Load called on a closed FlutterWebPlatform');
     }
 
     final Uri suiteUrl = url.resolveUri(globals.fs.path.toUri(globals.fs.path.withoutExtension(
@@ -360,7 +360,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       lockResource.release();
     });
     if (_closed) {
-      return null;
+      throw StateError('Load called on a closed FlutterWebPlatform');
     }
     return suite;
   }

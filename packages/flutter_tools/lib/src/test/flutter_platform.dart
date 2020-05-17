@@ -142,12 +142,14 @@ FlutterPlatform installHook({
 ///
 /// The [updateGoldens] argument will set the [autoUpdateGoldens] global
 /// variable in the [flutter_test] package before invoking the test.
+// NOTE: this API is used by the fuchsia source tree, do not add new
+// required or position parameters.
 String generateTestBootstrap({
   @required Uri testUrl,
   @required InternetAddress host,
   File testConfigFile,
   bool updateGoldens = false,
-  @required bool nullSafety,
+  bool nullSafety = false,
 }) {
   assert(testUrl != null);
   assert(host != null);
@@ -200,9 +202,10 @@ void catchIsolateErrors() {
   errorPort.listen((dynamic message) {
     // Masquerade as an IsolateSpawnException because that's what this would
     // be if the error had been detected statically.
-    final IsolateSpawnException error = IsolateSpawnException(message[0]);
-    final Trace stackTrace =
-        message[1] == null ? Trace(const <Frame>[]) : Trace.parse(message[1]);
+    final IsolateSpawnException error = IsolateSpawnException(
+        message[0] as String);
+    final Trace stackTrace = message[1] == null ?
+        Trace(const <Frame>[]) : Trace.parse(message[1] as String);
     Zone.current.handleUncaughtError(error, stackTrace);
   });
 }
@@ -210,7 +213,7 @@ void catchIsolateErrors() {
 
 void main() {
   print('$_kStartTimeoutTimerMessage');
-  String serverPort = Platform.environment['SERVER_PORT'];
+  String serverPort = Platform.environment['SERVER_PORT'] ?? '';
   String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
   StreamChannel<dynamic> channel = serializeSuite(() {
     catchIsolateErrors();
@@ -230,8 +233,7 @@ void main() {
   });
   WebSocket.connect(server).then((WebSocket socket) {
     socket.map((dynamic x) {
-      assert(x is String);
-      return json.decode(x);
+      return json.decode(x as String);
     }).pipe(channel.sink);
     socket.addStream(channel.stream.map(json.encode));
   });

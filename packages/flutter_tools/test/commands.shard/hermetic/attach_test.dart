@@ -3,14 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:file/memory.dart';
-import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
-import 'package:process/process.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
-
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -19,13 +14,17 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:meta/meta.dart';
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -393,7 +392,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-    }, skip: const LocalPlatform().isWindows); // mDNS does not work on Windows.
+    }, skip: Platform.isWindows); // mDNS does not work on Windows.
 
     group('forwarding to given port', () {
       const int devicePort = 499;
@@ -685,7 +684,6 @@ VMServiceConnector getFakeVmServiceFactory({
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
-          id: '1',
           method: kListViewsMethod,
           args: null,
           jsonResponse: <String, Object>{
@@ -698,14 +696,12 @@ VMServiceConnector getFakeVmServiceFactory({
           },
         ),
         FakeVmServiceRequest(
-          id: '2',
           method: 'getVM',
           args: null,
           jsonResponse: vm_service.VM.parse(<String, Object>{})
             .toJson(),
         ),
         FakeVmServiceRequest(
-          id: '3',
           method: '_createDevFS',
           args: <String, Object>{
             'fsName': globals.fs.currentDirectory.absolute.path,
@@ -715,7 +711,6 @@ VMServiceConnector getFakeVmServiceFactory({
           },
         ),
         FakeVmServiceRequest(
-          id: '4',
           method: kListViewsMethod,
           args: null,
           jsonResponse: <String, Object>{

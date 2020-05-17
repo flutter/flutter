@@ -346,6 +346,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  android_enable_twc:
+    description: >
+      Verifies that track-widget-creation can be enabled and disabled.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   android_defines_test:
     description: >
       Builds an APK with a --dart-define and verifies it can be used as a constant
@@ -379,15 +385,12 @@ tasks:
   #   required_agent_capabilities: ["linux/android"]
   #   flaky: true
 
-  # TODO(jonahwilliams): marked as flaky to due unreproducible errors
-  # 55875 and 55811
   flutter_attach_test_android:
     description: >
       Tests the `flutter attach` command.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
     timeout_in_minutes: 20
-    flaky: true
 
   named_isolates_test:
     description: >
@@ -476,6 +479,7 @@ tasks:
       32-bit iOS (iPhone 4S).
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
+    flaky: true # TODO(jmagman): https://github.com/flutter/flutter/issues/57225
 
   flavors_test_ios:
     description: >
@@ -556,6 +560,7 @@ tasks:
       iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
+    flaky: true # TODO(jmagman): https://github.com/flutter/flutter/issues/57225
 
   hello_world_ios__compile:
     description: >
@@ -588,6 +593,12 @@ tasks:
   ios_platform_view_tests:
     description: >
       Runs end-to-end tests with platform views in the scene.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
+  ios_enable_twc:
+    description: >
+      Verifies that track-widget-creation can be enabled and disabled.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
@@ -653,6 +664,14 @@ tasks:
       Checks the functionality and performance of hot reload on a macOS target platform
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
+
+#  TODO(jonahwilliams): investigate build failures on devicelab infra to re-enable.
+#  mac_enable_twc:
+#    description: >
+#      Verifies that track-widget-creation can be enabled and disabled.
+#    stage: devicelab_ios
+#    required_agent_capabilities: ["mac/ios"]
+#    flaky: true
 
   ios_app_with_watch_companion:
     description: >
@@ -758,12 +777,11 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-# TODO(https://github.com/flutter/flutter/issues/56135)
-#  new_gallery__transition_perf:
-#    description: >
-#      Measures the performance of screen transitions in the new Flutter Gallery on Android.
-#    stage: devicelab
-#    required_agent_capabilities: ["mac/android"]
+  new_gallery__transition_perf:
+    description: >
+      Measures the performance of screen transitions in the new Flutter Gallery on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
 
   fast_scroll_large_images__memory:
     description: >
@@ -796,6 +814,12 @@ tasks:
       Runs Web benchmarks on Chrome on a Linux machine using the CanvasKit rendering backend.
     stage: devicelab
     required_agent_capabilities: ["linux-vm"]
+
+  web_enable_twc:
+     description: >
+       Verifies that track-widget-creation can be enabled and disabled.
+     stage: devicelab
+     required_agent_capabilities: ["linux-vm"]
 
   # run_without_leak_linux:
   #   description: >

@@ -8,7 +8,6 @@ import 'dart:collection';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart' as xml;
 
-import 'android/android_sdk.dart';
 import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/context.dart';
@@ -32,6 +31,7 @@ class ApplicationPackageFactory {
 
   Future<ApplicationPackage> getPackageForPlatform(
     TargetPlatform platform, {
+    BuildInfo buildInfo,
     File applicationBinary,
   }) async {
     switch (platform) {
@@ -40,7 +40,7 @@ class ApplicationPackageFactory {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-        if (androidSdk?.licensesAvailable == true  && androidSdk?.latestVersion == null) {
+        if (globals.androidSdk?.licensesAvailable == true  && globals.androidSdk?.latestVersion == null) {
           await checkGradleDependencies();
         }
         return applicationBinary == null
@@ -48,7 +48,7 @@ class ApplicationPackageFactory {
             : AndroidApk.fromApk(applicationBinary);
       case TargetPlatform.ios:
         return applicationBinary == null
-            ? await IOSApp.fromIosProject(FlutterProject.current().ios)
+            ? await IOSApp.fromIosProject(FlutterProject.current().ios, buildInfo)
             : IOSApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.tester:
         return FlutterTesterApp.fromCurrentDirectory();
@@ -109,7 +109,7 @@ class AndroidApk extends ApplicationPackage {
 
   /// Creates a new AndroidApk from an existing APK.
   factory AndroidApk.fromApk(File apk) {
-    final String aaptPath = androidSdk?.latestVersion?.aaptPath;
+    final String aaptPath = globals.androidSdk?.latestVersion?.aaptPath;
     if (aaptPath == null) {
       globals.printError(userMessages.aaptNotFound);
       return null;
@@ -328,7 +328,7 @@ abstract class IOSApp extends ApplicationPackage {
     );
   }
 
-  static Future<IOSApp> fromIosProject(IosProject project) {
+  static Future<IOSApp> fromIosProject(IosProject project, BuildInfo buildInfo) {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
       return null;
     }
@@ -345,7 +345,7 @@ abstract class IOSApp extends ApplicationPackage {
       globals.printError('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.');
       return null;
     }
-    return BuildableIOSApp.fromProject(project);
+    return BuildableIOSApp.fromProject(project, buildInfo);
   }
 
   @override
@@ -357,18 +357,22 @@ abstract class IOSApp extends ApplicationPackage {
 }
 
 class BuildableIOSApp extends IOSApp {
-  BuildableIOSApp(this.project, String projectBundleId)
-    : super(projectBundleId: projectBundleId);
+  BuildableIOSApp(this.project, String projectBundleId, String hostAppBundleName)
+    : _hostAppBundleName = hostAppBundleName,
+      super(projectBundleId: projectBundleId);
 
-  static Future<BuildableIOSApp> fromProject(IosProject project) async {
-    final String projectBundleId = await project.productBundleIdentifier;
-    return BuildableIOSApp(project, projectBundleId);
+  static Future<BuildableIOSApp> fromProject(IosProject project, BuildInfo buildInfo) async {
+    final String projectBundleId = await project.productBundleIdentifier(buildInfo);
+    final String hostAppBundleName = await project.hostAppBundleName(buildInfo);
+    return BuildableIOSApp(project, projectBundleId, hostAppBundleName);
   }
 
   final IosProject project;
 
+  final String _hostAppBundleName;
+
   @override
-  String get name => project.hostAppBundleName;
+  String get name => _hostAppBundleName;
 
   @override
   String get simulatorBundlePath => _buildAppPath('iphonesimulator');
@@ -377,7 +381,7 @@ class BuildableIOSApp extends IOSApp {
   String get deviceBundlePath => _buildAppPath('iphoneos');
 
   String _buildAppPath(String type) {
-    return globals.fs.path.join(getIosBuildDirectory(), type, name);
+    return globals.fs.path.join(getIosBuildDirectory(), type, _hostAppBundleName);
   }
 }
 
@@ -413,7 +417,10 @@ class ApplicationPackageStore {
   MacOSApp macOS;
   WindowsApp windows;
 
-  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform) async {
+  Future<ApplicationPackage> getPackageForPlatform(
+    TargetPlatform platform,
+    BuildInfo buildInfo,
+  ) async {
     switch (platform) {
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
@@ -423,7 +430,7 @@ class ApplicationPackageStore {
         android ??= await AndroidApk.fromAndroidProject(FlutterProject.current().android);
         return android;
       case TargetPlatform.ios:
-        iOS ??= await IOSApp.fromIosProject(FlutterProject.current().ios);
+        iOS ??= await IOSApp.fromIosProject(FlutterProject.current().ios, buildInfo);
         return iOS;
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:

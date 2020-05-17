@@ -6,9 +6,9 @@ import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -222,6 +222,105 @@ assets:
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('does not track wildcard directories from dependencies', () async {
+    globals.fs.file('.packages').writeAsStringSync(r'''
+example:lib/
+foo:foo/lib/
+''');
+    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+      .createSync(recursive: true);
+    globals.fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+dependencies:
+  foo: any
+''');
+    globals.fs.file('foo/pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'''
+name: foo
+
+flutter:
+  assets:
+    - bar/
+''');
+    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+    globals.fs.file('foo/bar/fizz.txt').createSync(recursive: true);
+
+    await bundle.build(manifestPath: 'pubspec.yaml');
+
+    expect(bundle.entries, hasLength(4));
+    expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
+
+    // Does not track dependency's wildcard directories.
+    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+      .deleteSync();
+
+    expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
+  });
+
+  testUsingContext('reports package that causes asset bundle error when it is '
+    'a dependency', () async {
+    globals.fs.file('.packages').writeAsStringSync(r'''
+example:lib/
+foo:foo/lib/
+''');
+    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+      .createSync(recursive: true);
+    globals.fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+dependencies:
+  foo: any
+''');
+    globals.fs.file('foo/pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'''
+name: foo
+
+flutter:
+  assets:
+    - bar.txt
+''');
+    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+
+    expect(await bundle.build(manifestPath: 'pubspec.yaml'), 1);
+    expect(testLogger.errorText, contains('This asset was included from package foo'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
+  });
+
+  testUsingContext('does not report package that causes asset bundle error '
+    'when it is from own pubspec', () async {
+    globals.fs.file('.packages').writeAsStringSync(r'''
+example:lib/
+''');
+    globals.fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - bar.txt
+''');
+    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+
+    expect(await bundle.build(manifestPath: 'pubspec.yaml'), 1);
+    expect(testLogger.errorText, isNot(contains('This asset was included from')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
   });
 }
 
