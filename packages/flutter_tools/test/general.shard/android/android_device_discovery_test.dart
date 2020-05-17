@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_device_discovery.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:mockito/mockito.dart';
 
@@ -69,7 +71,15 @@ void main() {
 List of devices attached
 05a02bac               device usb:336592896X product:razor model:Nexus_7 device:flo
 
-''', devices: devices);
+''',
+    devices: devices,
+    androidSdk: MockAndroidSdk(),
+    logger: BufferLogger.test(),
+    processManager: FakeProcessManager.any(),
+    timeoutConfiguration: const TimeoutConfiguration(),
+    platform: FakePlatform(),
+    fileSystem: MemoryFileSystem.test(),
+  );
 
     expect(devices, hasLength(1));
     expect(devices.first.name, 'Nexus 7');
@@ -84,7 +94,15 @@ localhost:36790        device
 0149947A0D01500C       device usb:340787200X
 emulator-5612          host features:shell_2
 
-''', devices: devices);
+''',
+    devices: devices,
+    androidSdk: MockAndroidSdk(),
+    logger: BufferLogger.test(),
+    processManager: FakeProcessManager.any(),
+    timeoutConfiguration: const TimeoutConfiguration(),
+    platform: FakePlatform(),
+    fileSystem: MemoryFileSystem.test(),
+  );
 
     expect(devices, hasLength(3));
     expect(devices.first.name, 'localhost:36790');
@@ -95,7 +113,15 @@ emulator-5612          host features:shell_2
     AndroidDevices.parseADBDeviceOutput('''
 List of devices attached
 ZX1G22JJWR             device usb:3-3 product:shamu model:Nexus_6 device:shamu features:cmd,shell_v2
-''', devices: devices);
+''',
+    devices: devices,
+    androidSdk: MockAndroidSdk(),
+    logger: BufferLogger.test(),
+    processManager: FakeProcessManager.any(),
+    timeoutConfiguration: const TimeoutConfiguration(),
+    platform: FakePlatform(),
+    fileSystem: MemoryFileSystem.test(),
+  );
 
     expect(devices, hasLength(1));
     expect(devices.first.name, 'Nexus 6');
