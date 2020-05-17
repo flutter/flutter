@@ -4,10 +4,9 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/logger.dart';
-
 import 'runner.dart' as runner;
 import 'src/base/context.dart';
+import 'src/base/logger.dart';
 import 'src/base/template.dart';
 // The build_runner code generation is provided here to make it easier to
 // avoid introducing the dependency into google3. Not all build* packages
