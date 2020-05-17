@@ -77,7 +77,7 @@ class UnpackWindows extends Target {
       artifacts: _kWindowsArtifacts,
       engineSourcePath: engineSourcePath,
       outputDirectory: outputDirectory,
-      clientSourcePath: clientSourcePath,
+      clientSourcePaths: [clientSourcePath],
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
