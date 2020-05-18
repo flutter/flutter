@@ -179,7 +179,8 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
     std::unique_ptr<fml::Mapping> kernel_list =
         asset_manager->GetAsMapping(settings.application_kernel_list_asset);
     if (!kernel_list) {
-      FML_LOG(ERROR) << "Failed to load: " << settings.application_kernel_asset;
+      FML_LOG(ERROR) << "Failed to load: "
+                     << settings.application_kernel_list_asset;
       return nullptr;
     }
     auto kernel_pieces_paths = ParseKernelListPaths(std::move(kernel_list));
