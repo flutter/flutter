@@ -135,7 +135,7 @@ class _CanvasPool extends _SaveStackTracking {
     ++_activeElementCount;
 
     _context = _canvas.context2D;
-    _contextHandle = ContextStateHandle(_context);
+    _contextHandle = ContextStateHandle(this, _context);
     _initializeViewport(requiresClearRect);
     _replayClipStack();
   }
@@ -624,7 +624,7 @@ class _CanvasPool extends _SaveStackTracking {
         // alpha for the paint the path is painted in addition to the shadow,
         // which is undesirable.
         context.translate(shadow.offset.dx, shadow.offset.dy);
-        context.filter = _maskFilterToCss(
+        context.filter = _maskFilterToCanvasFilter(
             ui.MaskFilter.blur(ui.BlurStyle.normal, shadow.blurWidth));
         context.strokeStyle = '';
         context.fillStyle = solidColor;
@@ -690,8 +690,10 @@ class _CanvasPool extends _SaveStackTracking {
 // to initialize current values.
 //
 class ContextStateHandle {
-  html.CanvasRenderingContext2D context;
-  ContextStateHandle(this.context);
+  final html.CanvasRenderingContext2D context;
+  final _CanvasPool _canvasPool;
+
+  ContextStateHandle(this._canvasPool, this.context);
   ui.BlendMode _currentBlendMode = ui.BlendMode.srcOver;
   ui.StrokeCap _currentStrokeCap = ui.StrokeCap.butt;
   ui.StrokeJoin _currentStrokeJoin = ui.StrokeJoin.miter;
@@ -700,7 +702,6 @@ class ContextStateHandle {
   Object _currentFillStyle;
   Object _currentStrokeStyle;
   double _currentLineWidth = 1.0;
-  String _currentFilter = 'none';
 
   set blendMode(ui.BlendMode blendMode) {
     if (blendMode != _currentBlendMode) {
@@ -747,10 +748,124 @@ class ContextStateHandle {
     }
   }
 
-  set filter(String filter) {
-    if (_currentFilter != filter) {
-      _currentFilter = filter;
-      context.filter = filter;
+  ui.MaskFilter _currentFilter;
+  SurfacePaintData _lastUsedPaint;
+
+  /// The painting state.
+  ///
+  /// Used to validate that the [setUpPaint] and [tearDownPaint] are called in
+  /// a correct sequence.
+  bool _debugIsPaintSetUp = false;
+
+  /// Whether to use WebKit's method of rendering [MaskFilter].
+  ///
+  /// This is used in screenshot tests to test Safari codepaths.
+  static bool debugEmulateWebKitMaskFilter = false;
+
+  bool get _renderMaskFilterForWebkit => browserEngine == BrowserEngine.webkit || debugEmulateWebKitMaskFilter;
+
+  /// Sets paint properties on the current canvas.
+  ///
+  /// [tearDownPaint] must be called after calling this method.
+  void setUpPaint(SurfacePaintData paint) {
+    if (assertionsEnabled) {
+      assert(!_debugIsPaintSetUp);
+      _debugIsPaintSetUp = true;
+    }
+
+    _lastUsedPaint = paint;
+    lineWidth = paint.strokeWidth ?? 1.0;
+    blendMode = paint.blendMode;
+    strokeCap = paint.strokeCap;
+    strokeJoin = paint.strokeJoin;
+
+    if (paint.shader != null) {
+      final EngineGradient engineShader = paint.shader;
+      final Object paintStyle =
+          engineShader.createPaintStyle(_canvasPool.context);
+      fillStyle = paintStyle;
+      strokeStyle = paintStyle;
+    } else if (paint.color != null) {
+      final String colorString = colorToCssString(paint.color);
+      fillStyle = colorString;
+      strokeStyle = colorString;
+    } else {
+      fillStyle = '';
+      strokeStyle = '';
+    }
+
+    final ui.MaskFilter maskFilter = paint?.maskFilter;
+    if (!_renderMaskFilterForWebkit) {
+      if (_currentFilter != maskFilter) {
+        _currentFilter = maskFilter;
+        context.filter = _maskFilterToCanvasFilter(maskFilter);
+      }
+    } else {
+      // WebKit does not support the `filter` property. Instead we apply a
+      // shadow to the shape of the same color as the paint and the same blur
+      // as the mask filter.
+      //
+      // Note that on WebKit the cached value of _currentFilter is not useful.
+      // Instead we destructure it into the shadow properties and cache those.
+      if (maskFilter != null) {
+        context.save();
+        context.shadowBlur = convertSigmaToRadius(maskFilter.webOnlySigma);
+        if (paint?.color != null) {
+          // Shadow color must be fully opaque.
+          context.shadowColor = colorToCssString(paint.color.withAlpha(255));
+        } else {
+          context.shadowColor = colorToCssString(const ui.Color(0xFF000000));
+        }
+
+        // On the web a shadow must always be painted together with the shape
+        // that casts it. In order to paint just the shadow, we offset the shape
+        // by a large enough value that it moved outside the canvas bounds, then
+        // offset the shadow in the opposite direction such that it lands exactly
+        // where the shape is.
+        const double kOutsideTheBoundsOffset = 50000;
+
+        context.translate(-kOutsideTheBoundsOffset, 0);
+
+        // Shadow offset is not affected by the current canvas context transform.
+        // We have to apply the transform ourselves. To do that we transform the
+        // tip of the vector from the shape to the shadow, then we transform the
+        // origin (0, 0). The desired shadow offset is the difference between the
+        // two. In vector notation, this is:
+        //
+        // transformedShadowDelta = M*shadowDelta - M*origin.
+        final Float32List tempVector = Float32List(2);
+        tempVector[0] = kOutsideTheBoundsOffset * window.devicePixelRatio;
+        _canvasPool.currentTransform.transform2(tempVector);
+        double shadowOffsetX = tempVector[0];
+        double shadowOffsetY = tempVector[1];
+
+        tempVector[0] = tempVector[1] = 0;
+        _canvasPool.currentTransform.transform2(tempVector);
+        context.shadowOffsetX = shadowOffsetX - tempVector[0];
+        context.shadowOffsetY = shadowOffsetY - tempVector[1];
+      }
+    }
+  }
+
+  /// Removes paint properties on the current canvas used by the last draw
+  /// command.
+  ///
+  /// Not all properties are cleared. Properties that are set by all paint
+  /// commands prior to painting do not need to be cleared.
+  ///
+  /// Must be called after calling [setUpPaint].
+  void tearDownPaint() {
+    if (assertionsEnabled) {
+      assert(_debugIsPaintSetUp);
+      _debugIsPaintSetUp = false;
+    }
+
+    final ui.MaskFilter maskFilter = _lastUsedPaint?.maskFilter;
+    if (maskFilter != null && _renderMaskFilterForWebkit) {
+      // On Safari (WebKit) we use a translated shadow to emulate
+      // MaskFilter.blur. We use restore to undo the translation and
+      // shadow attributes.
+      context.restore();
     }
   }
 
@@ -782,8 +897,10 @@ class ContextStateHandle {
     _currentFillStyle = context.fillStyle;
     context.strokeStyle = '';
     _currentStrokeStyle = context.strokeStyle;
-    context.filter = 'none';
-    _currentFilter = 'none';
+    context.shadowBlur = 0;
+    context.shadowColor = 'none';
+    context.shadowOffsetX = 0;
+    context.shadowOffsetY = 0;
     context.globalCompositeOperation = 'source-over';
     _currentBlendMode = ui.BlendMode.srcOver;
     context.lineWidth = 1.0;

@@ -198,29 +198,12 @@ class BitmapCanvas extends EngineCanvas {
   }
 
   /// Sets the global paint styles to correspond to [paint].
-  void _applyPaint(SurfacePaintData paint) {
-    ContextStateHandle contextHandle = _canvasPool.contextHandle;
-    contextHandle
-      ..lineWidth = paint.strokeWidth ?? 1.0
-      ..blendMode = paint.blendMode
-      ..strokeCap = paint.strokeCap
-      ..strokeJoin = paint.strokeJoin
-      ..filter = _maskFilterToCss(paint.maskFilter);
+  void _setUpPaint(SurfacePaintData paint) {
+    _canvasPool.contextHandle.setUpPaint(paint);
+  }
 
-    if (paint.shader != null) {
-      final EngineGradient engineShader = paint.shader;
-      final Object paintStyle =
-          engineShader.createPaintStyle(_canvasPool.context);
-      contextHandle.fillStyle = paintStyle;
-      contextHandle.strokeStyle = paintStyle;
-    } else if (paint.color != null) {
-      final String colorString = colorToCssString(paint.color);
-      contextHandle.fillStyle = colorString;
-      contextHandle.strokeStyle = colorString;
-    } else {
-      contextHandle.fillStyle = '';
-      contextHandle.strokeStyle = '';
-    }
+  void _tearDownPaint() {
+    _canvasPool.contextHandle.tearDownPaint();
   }
 
   @override
@@ -299,50 +282,58 @@ class BitmapCanvas extends EngineCanvas {
 
   @override
   void drawLine(ui.Offset p1, ui.Offset p2, SurfacePaintData paint) {
-    _applyPaint(paint);
+    _setUpPaint(paint);
     _canvasPool.strokeLine(p1, p2);
+    _tearDownPaint();
   }
 
   @override
   void drawPaint(SurfacePaintData paint) {
-    _applyPaint(paint);
+    _setUpPaint(paint);
     _canvasPool.fill();
+    _tearDownPaint();
   }
 
   @override
   void drawRect(ui.Rect rect, SurfacePaintData paint) {
-    _applyPaint(paint);
+    _setUpPaint(paint);
     _canvasPool.drawRect(rect, paint.style);
+    _tearDownPaint();
   }
 
   @override
   void drawRRect(ui.RRect rrect, SurfacePaintData paint) {
-    _applyPaint(paint);
+    _setUpPaint(paint);
     _canvasPool.drawRRect(rrect, paint.style);
+    _tearDownPaint();
   }
 
   @override
   void drawDRRect(ui.RRect outer, ui.RRect inner, SurfacePaintData paint) {
-    _applyPaint(paint);
+    _setUpPaint(paint);
     _canvasPool.drawDRRect(outer, inner, paint.style);
+    _tearDownPaint();
   }
 
   @override
   void drawOval(ui.Rect rect, SurfacePaintData paint) {
-    _applyPaint(paint);
+    _setUpPaint(paint);
     _canvasPool.drawOval(rect, paint.style);
+    _tearDownPaint();
   }
 
   @override
   void drawCircle(ui.Offset c, double radius, SurfacePaintData paint) {
-    _applyPaint(paint);
+    _setUpPaint(paint);
     _canvasPool.drawCircle(c, radius, paint.style);
+    _tearDownPaint();
   }
 
   @override
   void drawPath(ui.Path path, SurfacePaintData paint) {
-    _applyPaint(paint);
+    _setUpPaint(paint);
     _canvasPool.drawPath(path, paint.style);
+    _tearDownPaint();
   }
 
   @override
@@ -442,8 +433,6 @@ class BitmapCanvas extends EngineCanvas {
         !requiresClipping &&
         paint.colorFilter == null) {
       _drawImage(image, dst.topLeft, paint);
-      _childOverdraw = true;
-      _canvasPool.closeCurrentCanvas();
     } else {
       if (requiresClipping) {
         save();
@@ -683,14 +672,15 @@ class BitmapCanvas extends EngineCanvas {
         ctx.font = style.cssFontString;
         _cachedLastStyle = style;
       }
-      _applyPaint(paragraph._paint.paintData);
-
+      _setUpPaint(paragraph._paint.paintData);
       double y = offset.dy + paragraph.alphabeticBaseline;
       final int len = lines.length;
       for (int i = 0; i < len; i++) {
         _drawTextLine(style, lines[i], offset.dx, y);
         y += paragraph._lineHeight;
       }
+      _tearDownPaint();
+
       return;
     }
 
@@ -769,23 +759,28 @@ class BitmapCanvas extends EngineCanvas {
         _canvasPool.currentTransform, vertices, blendMode, paint);
   }
 
+  /// Stores paint data used by [drawPoints]. We cannot use the original paint
+  /// data object because painting style is determined by [ui.PointMode] and
+  /// not by [SurfacePointData.style].
+  static SurfacePaintData _drawPointsPaint = SurfacePaintData()
+    ..strokeCap = ui.StrokeCap.round
+    ..strokeJoin = ui.StrokeJoin.round
+    ..blendMode = ui.BlendMode.srcOver;
+
   @override
-  void drawPoints(ui.PointMode pointMode, Float32List points,
-      double strokeWidth, ui.Color color) {
-    ContextStateHandle contextHandle = _canvasPool.contextHandle;
-    contextHandle
-      ..lineWidth = strokeWidth
-      ..blendMode = ui.BlendMode.srcOver
-      ..strokeCap = ui.StrokeCap.round
-      ..strokeJoin = ui.StrokeJoin.round
-      ..filter = '';
-    final String cssColor = colorToCssString(color);
+  void drawPoints(ui.PointMode pointMode, Float32List points, SurfacePaintData paint) {
     if (pointMode == ui.PointMode.points) {
-      contextHandle.fillStyle = cssColor;
+      _drawPointsPaint.style = ui.PaintingStyle.stroke;
     } else {
-      contextHandle.strokeStyle = cssColor;
+      _drawPointsPaint.style = ui.PaintingStyle.fill;
     }
-    _canvasPool.drawPoints(pointMode, points, strokeWidth / 2.0);
+    _drawPointsPaint.color = paint.color;
+    _drawPointsPaint.strokeWidth = paint.strokeWidth;
+    _drawPointsPaint.maskFilter = paint.maskFilter;
+
+    _setUpPaint(_drawPointsPaint);
+    _canvasPool.drawPoints(pointMode, points, paint.strokeWidth / 2.0);
+    _tearDownPaint();
   }
 
   @override
@@ -969,11 +964,19 @@ List<html.Element> _clipContent(List<_SaveClipEntry> clipStack,
   return <html.Element>[root]..addAll(clipDefs);
 }
 
-String _maskFilterToCss(ui.MaskFilter maskFilter) {
-  if (maskFilter == null) {
+/// Converts a [maskFilter] to the value to be used on a `<canvas>`.
+///
+/// Only supported in non-WebKit browsers.
+String _maskFilterToCanvasFilter(ui.MaskFilter maskFilter) {
+  assert(
+    browserEngine != BrowserEngine.webkit,
+    'WebKit (Safari) does not support `filter` canvas property.',
+  );
+  if (maskFilter != null) {
+    return 'blur(${maskFilter.webOnlySigma}px)';
+  } else {
     return 'none';
   }
-  return 'blur(${maskFilter.webOnlySigma}px)';
 }
 
 int _filterIdCounter = 0;

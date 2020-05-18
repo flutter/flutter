@@ -534,7 +534,7 @@ class RecordingCanvas {
     }
     _hasArbitraryPaint = true;
     _didDraw = true;
-    final PaintDrawPoints command = PaintDrawPoints(pointMode, points, paint.strokeWidth, paint.color);
+    final PaintDrawPoints command = PaintDrawPoints(pointMode, points, paint.paintData);
     _growPaintBoundsByPoints(points, paint.strokeWidth, paint, command);
     _commands.add(command);
   }
@@ -990,19 +990,18 @@ class PaintDrawVertices extends DrawCommand {
 class PaintDrawPoints extends DrawCommand {
   final Float32List points;
   final ui.PointMode pointMode;
-  final double strokeWidth;
-  final ui.Color color;
-  PaintDrawPoints(this.pointMode, this.points, this.strokeWidth, this.color);
+  final SurfacePaintData paint;
+  PaintDrawPoints(this.pointMode, this.points, this.paint);
 
   @override
   void apply(EngineCanvas canvas) {
-    canvas.drawPoints(pointMode, points, strokeWidth, color);
+    canvas.drawPoints(pointMode, points, paint);
   }
 
   @override
   String toString() {
     if (assertionsEnabled) {
-      return 'drawPoints($pointMode, $points, $strokeWidth, $color)';
+      return 'drawPoints($pointMode, $points, $paint)';
     } else {
       return super.toString();
     }
