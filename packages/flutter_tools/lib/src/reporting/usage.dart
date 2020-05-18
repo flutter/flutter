@@ -306,7 +306,7 @@ class _DefaultUsage implements Usage {
 
     final Map<String, String> paramsWithLocalTime = <String, String>{
       ...?parameters,
-      cdKey(CustomDimensions.localTime): formatDateTime(systemClock.now()),
+      cdKey(CustomDimensions.localTime): formatDateTime(globals.systemClock.now()),
     };
     _analytics.sendScreenView(command, parameters: paramsWithLocalTime);
   }
@@ -325,7 +325,7 @@ class _DefaultUsage implements Usage {
 
     final Map<String, String> paramsWithLocalTime = <String, String>{
       ...?parameters,
-      cdKey(CustomDimensions.localTime): formatDateTime(systemClock.now()),
+      cdKey(CustomDimensions.localTime): formatDateTime(globals.systemClock.now()),
     };
 
     _analytics.sendEvent(

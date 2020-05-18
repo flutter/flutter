@@ -20,6 +20,7 @@ import 'base/platform.dart';
 import 'base/signals.dart';
 import 'base/template.dart';
 import 'base/terminal.dart';
+import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
@@ -106,6 +107,9 @@ final BotDetector _defaultBotDetector = BotDetector(
 BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector;
 
 Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
+
+/// The current system clock instance.
+SystemClock get systemClock => context.get<SystemClock>();
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.
