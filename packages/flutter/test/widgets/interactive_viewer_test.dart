@@ -17,6 +17,7 @@ void main() {
           home: Scaffold(
             body: Center(
               child: InteractiveViewer(
+                disableRotation: true,
                 transformationController: transformationController,
                 child: Container(width: 200.0, height: 200.0),
               ),
