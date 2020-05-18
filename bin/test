@@ -16,15 +16,21 @@ set -e
 unset CDPATH
 
 function follow_links() {
+  echo "1: $PWD" >&2
   cd -P "${1%/*}"
+  echo "2: $PWD" >&2
   local file="$PWD/${1##*/}"
+  echo "3: $file" >&2
   while [[ -h "$file" ]]; do
+    echo "4: $file" >&2
     # On Mac OS, readlink -f doesn't work.
     cd -P "${file%/*}"
     file="$(readlink "$file")"
     cd -P "${file%/*}"
     file="$PWD/${file##*/}"
   done
+  echo "5: $PWD" >&2
+  echo "6: $PWD/${file##*/}" >&2
   echo "$PWD/${file##*/}"
 }
 
@@ -39,6 +45,5 @@ PROG_NAME="$(path_uri "$(follow_links "$BASH_SOURCE")")"
 BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
 
 echo "PWD = $PWD"
-echo "follow_links \"\$BASH_SOURCE\" = $(follow_links "$BASH_SOURCE")"
 echo "PROG_NAME = $PROG_NAME"
 echo "BIN_DIR = $BIN_DIR"
