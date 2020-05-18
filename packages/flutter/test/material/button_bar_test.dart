@@ -627,4 +627,18 @@ void main() {
       },
     );
   });
+
+  testWidgets('_RenderButtonBarRow.constraints works before layout', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: ButtonBar()),
+      Duration.zero,
+      EnginePhase.build,
+    );
+
+    final Finder buttonBar = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ButtonBarRow');
+    final RenderBox renderButtonBar = tester.renderObject(buttonBar) as RenderBox;
+
+    expect(renderButtonBar.debugNeedsLayout, isTrue);
+    expect(renderButtonBar.constraints, isNull);
+  });
 }
