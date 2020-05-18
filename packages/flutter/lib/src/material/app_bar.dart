@@ -1002,6 +1002,7 @@ class SliverAppBar extends StatefulWidget {
        assert(nestedSnap != null),
        assert(stretch != null),
        assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
+       assert(snap || !nestedSnap, 'The "snap" argument must be true for nestedSnap to be used.'),
        assert(stretchTriggerOffset > 0.0),
        super(key: key);
 
@@ -1264,7 +1265,7 @@ class SliverAppBar extends StatefulWidget {
   /// [NestedScrollView.floatHeaderSlivers] must both be true. If only the snap
   /// animation is desired, leave both flags false.
   ///
-  /// Defaults to false, cannot be null.
+  /// Defaults to false, cannot be null. Cannot be true if [snap] is not true.
   ///
   /// See also:
   ///
