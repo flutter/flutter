@@ -3,6 +3,7 @@ package io.flutter.plugin.editing;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalMatchers.aryEq;
+import static org.mockito.AdditionalMatchers.geq;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
@@ -479,8 +480,11 @@ public class TextInputPluginTest {
 
     verify(children[0]).setAutofillId(any(), eq("1".hashCode()));
     verify(children[0]).setAutofillHints(aryEq(new String[] {"HINT1"}));
+    verify(children[0]).setDimens(anyInt(), anyInt(), anyInt(), anyInt(), geq(0), geq(0));
+
     verify(children[1]).setAutofillId(any(), eq("2".hashCode()));
     verify(children[1]).setAutofillHints(aryEq(new String[] {"HINT2", "EXTRA"}));
+    verify(children[1]).setDimens(anyInt(), anyInt(), anyInt(), anyInt(), geq(0), geq(0));
   }
 
   @Test
@@ -523,6 +527,8 @@ public class TextInputPluginTest {
 
     verify(children[0]).setAutofillId(any(), eq("1".hashCode()));
     verify(children[0]).setAutofillHints(aryEq(new String[] {"HINT1"}));
+    // Verifies that the child has a non-zero size.
+    verify(children[0]).setDimens(anyInt(), anyInt(), anyInt(), anyInt(), geq(0), geq(0));
   }
 
   @Implements(InputMethodManager.class)
