@@ -13,6 +13,10 @@ FLUTTER_ASSERT_ARC
 @interface FlutterTextInputPluginTest : XCTestCase
 @end
 
+@interface FlutterTextInputView ()
+- (void)setTextInputState:(NSDictionary*)state;
+@end
+
 @implementation FlutterTextInputPluginTest
 - (void)testSecureInput {
   // Setup test.
@@ -63,6 +67,95 @@ FLUTTER_ASSERT_ARC
   [[[[textInputPlugin textInputView] superview] subviews]
       makeObjectsPerformSelector:@selector(removeFromSuperview)];
 }
+
+- (void)testTextChangesTriggerUpdateEditingClient {
+  // Setup test.
+  id engine = OCMClassMock([FlutterEngine class]);
+
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  inputView.textInputDelegate = engine;
+
+  [inputView.text setString:@"BEFORE"];
+  inputView.markedTextRange = nil;
+  inputView.selectedTextRange = nil;
+
+  // Text changes trigger update.
+  [inputView setTextInputState:@{@"text" : @"AFTER"}];
+  OCMVerify([engine updateEditingClient:0 withState:[OCMArg isNotNil]]);
+
+  // Don't send anything if there's nothing new.
+  [inputView setTextInputState:@{@"text" : @"AFTER"}];
+  OCMReject([engine updateEditingClient:0 withState:[OCMArg any]]);
+
+  // Clean up.
+  [engine stopMocking];
+}
+
+- (void)testSelectionChangeTriggersUpdateEditingClient {
+  // Setup test.
+  id engine = OCMClassMock([FlutterEngine class]);
+
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  inputView.textInputDelegate = engine;
+
+  [inputView.text setString:@"SELECTION"];
+  inputView.markedTextRange = nil;
+  inputView.selectedTextRange = nil;
+
+  [inputView
+      setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @0, @"selectionExtent" : @3}];
+  OCMVerify([engine updateEditingClient:0 withState:[OCMArg isNotNil]]);
+
+  [inputView
+      setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @1, @"selectionExtent" : @3}];
+  OCMVerify([engine updateEditingClient:0 withState:[OCMArg isNotNil]]);
+
+  [inputView
+      setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @1, @"selectionExtent" : @2}];
+  OCMVerify([engine updateEditingClient:0 withState:[OCMArg isNotNil]]);
+
+  // Don't send anything if there's nothing new.
+  [inputView
+      setTextInputState:@{@"text" : @"SELECTION", @"selectionBase" : @1, @"selectionExtent" : @2}];
+  OCMReject([engine updateEditingClient:0 withState:[OCMArg any]]);
+
+  // Clean up.
+  [engine stopMocking];
+}
+
+- (void)testComposingChangeTriggersUpdateEditingClient {
+  // Setup test.
+  id engine = OCMClassMock([FlutterEngine class]);
+
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] init];
+  inputView.textInputDelegate = engine;
+
+  // Reset to test marked text.
+  [inputView.text setString:@"COMPOSING"];
+  inputView.markedTextRange = nil;
+  inputView.selectedTextRange = nil;
+
+  [inputView
+      setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @0, @"composingExtent" : @3}];
+  OCMVerify([engine updateEditingClient:0 withState:[OCMArg isNotNil]]);
+
+  [inputView
+      setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @1, @"composingExtent" : @3}];
+  OCMVerify([engine updateEditingClient:0 withState:[OCMArg isNotNil]]);
+
+  [inputView
+      setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @1, @"composingExtent" : @2}];
+  OCMVerify([engine updateEditingClient:0 withState:[OCMArg isNotNil]]);
+
+  // Don't send anything if there's nothing new.
+  [inputView
+      setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @1, @"composingExtent" : @2}];
+  OCMReject([engine updateEditingClient:0 withState:[OCMArg any]]);
+
+  // Clean up.
+  [engine stopMocking];
+}
+
 - (void)testAutofillInputViews {
   // Setup test.
   id engine = OCMClassMock([FlutterEngine class]);
