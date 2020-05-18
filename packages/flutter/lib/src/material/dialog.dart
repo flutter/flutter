@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(shihaohong/Piinks): remove ignoring deprecated member use analysis
+// TODO(shihaohong-Piinks): remove ignoring deprecated member use analysis
 //   * when AlertDialog.scrollable parameter is removed. See
 //     https://flutter.dev/go/scrollable-alert-dialog for more details.
 //   * when Dialog.useMaterialBorderRadius parameter is removed.
