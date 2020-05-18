@@ -159,6 +159,7 @@ abstract class InteractiveInkFeatureFactory {
   ///
   /// Subclasses should override this method to return a new instance of an
   /// [InteractiveInkFeature].
+  @factory
   InteractiveInkFeature create({
     @required MaterialInkController controller,
     @required RenderBox referenceBox,
