@@ -272,6 +272,10 @@ class ManifestAssetBundle implements AssetBundle {
       // Force the depfile to contain missing files so that Gradle does not skip
       // the task. Wildcard directories are not compatible with full incremental
       // builds. For more context see https://github.com/flutter/flutter/issues/56466 .
+      globals.printTrace(
+        'manifest contained wildcard assets. Inserting missing file into '
+        'build graph to force rerun. for more information see #56466.'
+      );
       final int suffix = Object().hashCode;
       additionalDependencies.add(
         globals.fs.file('DOES_NOT_EXIST_RERUN_FOR_WILDCARD$suffix').absolute);
