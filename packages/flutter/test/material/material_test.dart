@@ -273,7 +273,7 @@ void main() {
       }
     });
 
-    testWidgets('overlay will not apply to to materials using a light theme', (WidgetTester tester) async {
+    testWidgets('overlay will not apply to materials using a light theme', (WidgetTester tester) async {
       await tester.pumpWidget(
           Theme(
             data: ThemeData(
