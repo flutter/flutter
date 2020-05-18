@@ -323,6 +323,26 @@ void main() {
     expect(content.querySelectorAll('flt-picture').single.children, isEmpty);
     expect(findPictureSurfaceChild(subOffset1).debugCanvas, isNull);
   });
+
+  test('auto-pops pushed layers', () async {
+    final Picture picture = _drawPicture();
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+    builder.pushOffset(0, 0);
+    builder.pushOffset(0, 0);
+    builder.pushOffset(0, 0);
+    builder.pushOffset(0, 0);
+    builder.pushOffset(0, 0);
+    builder.addPicture(Offset.zero, picture);
+
+    // Intentionally pop fewer layers than we pushed
+    builder.pop();
+    builder.pop();
+    builder.pop();
+
+    // Expect as many layers as we pushed (not popped).
+    html.HtmlElement content = builder.build().webOnlyRootElement;
+    expect(content.querySelectorAll('flt-offset'), hasLength(5));
+  });
 }
 
 typedef TestLayerBuilder = EngineLayer Function(
