@@ -278,7 +278,7 @@ TextEditingValue _selectionAwareTextManipulation(
     if (value.text.isNotEmpty && manipulatedText.isEmpty) {
       manipulatedText = oldValue.text;
     }
-    // move the carret to the end of the text
+    // Move the caret to the end of the text.
     manipulatedSelection = TextSelection.collapsed(offset: manipulatedText.length);
   } else {
     final String beforeSelection = substringManipulation(
