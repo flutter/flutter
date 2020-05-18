@@ -1518,8 +1518,8 @@ class _TimePickerDialog extends StatefulWidget {
   /// prior default of 2.0 pixels.
   @Deprecated(
     'Set useMaterialBorderRadius to `true`. This parameter will be removed and '
-    'was introduced to migrate Dialog to the correct border radius by default.'
-    'This feature was deprecated after TBD.'
+    'was introduced to migrate Dialog to the correct border radius by default. '
+    'This feature was deprecated after v1.18.0.'
   )
   final bool useMaterialBorderRadius;
 
@@ -1830,8 +1830,8 @@ Future<TimeOfDay> showTimePicker({
   RouteSettings routeSettings,
   @Deprecated(
     'Set useMaterialBorderRadius to `true`. This parameter will be removed and '
-    'was introduced to migrate Dialog to the correct border radius by default.'
-    'This feature was deprecated after TBD.'
+    'was introduced to migrate Dialog to the correct border radius by default. '
+    'This feature was deprecated after v1.18.0.'
   )
   bool useMaterialBorderRadius,
 }) async {
