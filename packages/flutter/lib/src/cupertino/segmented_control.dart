@@ -382,6 +382,7 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
       );
 
       child = GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTapDown: (TapDownDetails event) {
           _onTapDown(currentKey);
         },
