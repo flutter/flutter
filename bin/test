@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# ---------------------------------- NOTE ---------------------------------- #
+#
+# Please keep the logic in this file consistent with the logic in the
+# `dart.bat` script in the same directory to ensure that Flutter & Dart continue
+# to work across all platforms!
+#
+# -------------------------------------------------------------------------- #
+
+set -e
+
+unset CDPATH
+
+function follow_links() {
+  cd -P "${1%/*}"
+  local file="$PWD/${1##*/}"
+  while [[ -h "$file" ]]; do
+    # On Mac OS, readlink -f doesn't work.
+    cd -P "${file%/*}"
+    file="$(readlink "$file")"
+    cd -P "${file%/*}"
+    file="$PWD/${file##*/}"
+  done
+  echo "$PWD/${file##*/}"
+}
+
+# Convert a filesystem path to a format usable by Dart's URI parser.
+function path_uri() {
+  # Reduce multiple leading slashes to a single slash.
+  #echo "$1" | sed -E -e "s,^/+,/,"
+  echo "$1"
+}
+
+PROG_NAME="$(path_uri "$(follow_links "$BASH_SOURCE")")"
+BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
+
+echo "PWD = $PWD"
+echo "follow_links \"\$BASH_SOURCE\" = $(follow_links "$BASH_SOURCE")"
+echo "PROG_NAME = $PROG_NAME"
+echo "BIN_DIR = $BIN_DIR"
