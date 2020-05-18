@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.10)
+
 set(EPHEMERAL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ephemeral")
 
 # Configuration provided via flutter tool.
@@ -6,6 +8,16 @@ include(${EPHEMERAL_DIR}/generated_config.cmake)
 # TODO: Move the rest of this into files in ephemeral. See
 # https://github.com/flutter/flutter/issues/57146.
 set(WRAPPER_ROOT "${EPHEMERAL_DIR}/cpp_client_wrapper_glfw")
+
+# Serves the same purpose as list(TRANSFORM ... PREPEND ...),
+# which isn't available in 3.10.
+function(list_prepend LIST_NAME PREFIX)
+    set(NEW_LIST "")
+    foreach(element ${${LIST_NAME}})
+        list(APPEND NEW_LIST "${PREFIX}${element}")
+    endforeach(element)
+    set(${LIST_NAME} "${NEW_LIST}" PARENT_SCOPE)
+endfunction()
 
 # === Flutter Library ===
 set(FLUTTER_LIBRARY "${EPHEMERAL_DIR}/libflutter_linux_glfw.so")
@@ -21,7 +33,7 @@ list(APPEND FLUTTER_LIBRARY_HEADERS
   "flutter_messenger.h"
   "flutter_plugin_registrar.h"
 )
-list(TRANSFORM FLUTER_LIBRARY_HEADERS PREPEND "${EPHEMERAL_DIR}/")
+list_prepend(FLUTER_LIBRARY_HEADERS "${EPHEMERAL_DIR}/")
 add_library(flutter INTERFACE)
 target_include_directories(flutter INTERFACE
   "${EPHEMERAL_DIR}"
@@ -34,16 +46,15 @@ list(APPEND CPP_WRAPPER_SOURCES_CORE
   "engine_method_result.cc"
 	"standard_codec.cc"
 )
-list(TRANSFORM CPP_WRAPPER_SOURCES_CORE PREPEND "${WRAPPER_ROOT}/")
+list_prepend(CPP_WRAPPER_SOURCES_CORE "${WRAPPER_ROOT}/")
 list(APPEND CPP_WRAPPER_SOURCES_PLUGIN
   "plugin_registrar.cc"
 )
-list(TRANSFORM CPP_WRAPPER_SOURCES_PLUGIN PREPEND "${WRAPPER_ROOT}/")
+list_prepend(CPP_WRAPPER_SOURCES_PLUGIN "${WRAPPER_ROOT}/")
 list(APPEND CPP_WRAPPER_SOURCES_APP
-  "flutter_engine.cc"
   "flutter_window_controller.cc"
 )
-list(TRANSFORM CPP_WRAPPER_SOURCES_APP PREPEND "${WRAPPER_ROOT}/")
+list_prepend(CPP_WRAPPER_SOURCES_APP "${WRAPPER_ROOT}/")
 
 # Wrapper sources needed for a plugin.
 add_library(flutter_wrapper_plugin STATIC
