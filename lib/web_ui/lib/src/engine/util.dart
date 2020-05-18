@@ -511,3 +511,12 @@ class _FastMatrix64 {
     transformedY = matrix[13] + (matrix[1] * x) + (matrix[5] * y);
   }
 }
+
+/// Roughly the inverse of [ui.Shadow.convertRadiusToSigma].
+///
+/// This does not inverse [ui.Shadow.convertRadiusToSigma] exactly, because on
+/// the Web the difference between sigma and blur radius is different from
+/// Flutter mobile.
+double convertSigmaToRadius(double sigma) {
+  return sigma * 2.0;
+}

@@ -27,29 +27,30 @@ void main() async {
   });
 
   test('draws points in all 3 modes', () async {
-    final double strokeWidth = 2.0;
-    final Color color = Color(0xFF0000FF);
+    final SurfacePaintData paint = SurfacePaintData();
+    paint.strokeWidth = 2.0;
+    paint.color = Color(0xFF0000FF);
     final Float32List points = offsetListToFloat32List(<Offset>[
       Offset(10, 10),
       Offset(50, 10),
       Offset(70, 70),
       Offset(170, 70)
     ]);
-    canvas.drawPoints(PointMode.points, points, strokeWidth, color);
+    canvas.drawPoints(PointMode.points, points, paint);
     final Float32List points2 = offsetListToFloat32List(<Offset>[
       Offset(10, 110),
       Offset(50, 110),
       Offset(70, 170),
       Offset(170, 170)
     ]);
-    canvas.drawPoints(PointMode.lines, points2, strokeWidth, color);
+    canvas.drawPoints(PointMode.lines, points2, paint);
     final Float32List points3 = offsetListToFloat32List(<Offset>[
       Offset(10, 210),
       Offset(50, 210),
       Offset(70, 270),
       Offset(170, 270)
     ]);
-    canvas.drawPoints(PointMode.polygon, points3, strokeWidth, color);
+    canvas.drawPoints(PointMode.polygon, points3, paint);
 
     html.document.body.append(canvas.rootElement);
     await matchGoldenFile('canvas_draw_points.png', region: region);
