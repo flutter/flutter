@@ -27,8 +27,16 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String infoText = 'no-enter';
+
+  // Controller with no inital value;
+  final TextEditingController _emptyController = TextEditingController();
+
   final TextEditingController _controller =
       TextEditingController(text: 'Text1');
+
+  final TextEditingController _controller2 =
+      TextEditingController(text: 'Text2');
 
   @override
   Widget build(BuildContext context) {
@@ -41,16 +49,45 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'Text Editing Test',
+              'Text Editing Test 1',
+            ),
+            TextFormField(
+              key: const Key('empty-input'),
+              enabled: true,
+              controller: _emptyController,
+              decoration: const InputDecoration(
+                labelText: 'Empty Input Field:',
+              ),
+            ),
+            const Text(
+              'Text Editing Test 2',
             ),
             TextFormField(
               key: const Key('input'),
               enabled: true,
               controller: _controller,
-              //initialValue: 'Text1',
               decoration: const InputDecoration(
                 labelText: 'Text Input Field:',
               ),
+            ),
+            const Text(
+              'Text Editing Test 3',
+            ),
+            TextFormField(
+              key: const Key('input2'),
+              enabled: true,
+              controller: _controller2,
+              decoration: const InputDecoration(
+                labelText: 'Text Input Field 2:',
+              ),
+              onFieldSubmitted: (String str) {
+                print('event received');
+                setState(() => infoText = 'enter pressed');
+              },
+            ),
+            Text(
+              infoText,
+              key: const Key('text'),
             ),
           ],
         ),
