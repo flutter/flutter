@@ -1084,7 +1084,7 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
   if (featureFlags.isWindowsEnabled && project.windows.existsSync()) {
     await _writeWindowsPluginFiles(project, plugins);
 
-    final List<Plugin>nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
+    final List<Plugin> nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
     await VisualStudioSolutionUtils(project: project.windows, fileSystem: globals.fs).updatePlugins(nativePlugins);
   }
   for (final XcodeBasedProject subproject in <XcodeBasedProject>[project.ios, project.macos]) {
