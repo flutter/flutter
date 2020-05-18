@@ -334,7 +334,7 @@ class _RenderButtonBarRow extends RenderFlex {
   BoxConstraints get constraints {
     if (_hasCheckedLayoutWidth)
       return super.constraints;
-    return super.constraints.copyWith(maxWidth: double.infinity);
+    return super.constraints?.copyWith(maxWidth: double.infinity);
   }
 
   @override
