@@ -41,10 +41,12 @@ class ExpansionTile extends StatefulWidget {
     this.children = const <Widget>[],
     this.trailing,
     this.initiallyExpanded = false,
+    this.maintainState = false,
     this.tilePadding,
     this.expandedCrossAxisAlignment,
     this.expandedAlignment,
   }) : assert(initiallyExpanded != null),
+       assert(maintainState != null),
        assert(
        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
        'CrossAxisAlignment.baseline is not supported since the expanded children '
@@ -87,6 +89,13 @@ class ExpansionTile extends StatefulWidget {
 
   /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
   final bool initiallyExpanded;
+
+  /// Specifies whether the state of the children is maintained when the tile expands and collapses.
+  ///
+  /// When true, the children are kept in the tree while the tile is collapsed.
+  /// When false (default), the children are removed from the tree when the tile is
+  /// collapsed and recreated upon expansion.
+  final bool maintainState;
 
   /// Specifies padding for the [ListTile].
   ///
@@ -253,13 +262,23 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     final bool closed = !_isExpanded && _controller.isDismissed;
+    final bool shouldRemoveChildren = closed && !widget.maintainState;
+
+    final Widget result = Offstage(
+      child: TickerMode(
+        child: Column(
+          crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
+          children: widget.children,
+        ),
+        enabled: !closed,
+      ),
+      offstage: closed
+    );
+
     return AnimatedBuilder(
       animation: _controller.view,
       builder: _buildChildren,
-      child: closed ? null : Column(
-        crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
-        children: widget.children,
-      ),
+      child: shouldRemoveChildren ? null : result,
     );
 
   }
