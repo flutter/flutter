@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fake_async/fake_async.dart';
 
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
@@ -753,31 +752,21 @@ void main() {
     });
   });
 
-  group('timers pending after widget tree disposal', () {
-    testWidgets('no timers pending check', (WidgetTester tester) async {
-      final Timer timer = Timer(const Duration(seconds: 1), () {});
-      expect(timer.isActive, true);
-      timer.cancel();
-      expect(timer.isActive, false);
-    });
+  group('Pending timer', () {
+    test('Throws assertion message without code', () async {
+      FlutterErrorDetails flutterErrorDetails;
+      reportTestException = (FlutterErrorDetails details, String testDescription) {
+        flutterErrorDetails = details;
+      };
 
-    testWidgets('timers pending check', (WidgetTester tester) async {
-      expect(
-          () {
-            final FakeAsync timers = FakeAsync();
-            debugPrint('Pending timers:');
-            for (final FakeTimer timer in timers.pendingTimers) {
-              debugPrint(
-                  'Timer (duration: ${timer.duration}, '
-                      'periodic: ${timer.isPeriodic}), created:');
-              debugPrintStack(stackTrace: timer.creationStackTrace);
-              debugPrint('');
-            }
-            throw AssertionError('A Timer is still pending even after the widget tree was disposed.');
-          },
-        throwsA(predicate<AssertionError>((AssertionError e) => e.message ==
-            'A Timer is still pending even after the widget tree was disposed.'))
-      );
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+      await binding.runTest(() async {
+        final Timer timer = Timer(const Duration(seconds: 1), () {});
+        expect(timer.isActive, true);
+      }, () {});
+
+      expect(flutterErrorDetails?.exception, isA<AssertionError>());
+      expect(flutterErrorDetails?.exception?.message, 'A Timer is still pending even after the widget tree was disposed.');
     });
   });
 }
