@@ -73,24 +73,21 @@ class IOSDevices extends PollingDeviceDiscovery {
   }
 }
 
-class IOSDevice extends Device {
+class IOSDevice extends Device<IOSApp> {
   IOSDevice(String id, {
-    @required FileSystem fileSystem,
+    @required IOSInstallationService installationService,
     @required this.name,
     @required this.cpuArchitecture,
     @required String sdkVersion,
     @required Platform platform,
     @required Artifacts artifacts,
-    @required IOSDeploy iosDeploy,
     @required IMobileDevice iMobileDevice,
     @required Logger logger,
   })
     : _sdkVersion = sdkVersion,
-      _iosDeploy = iosDeploy,
       _iMobileDevice = iMobileDevice,
-      _fileSystem = fileSystem,
       _logger = logger,
-      _platform = platform,
+      _installationService = installationService,
         super(
           id,
           category: Category.mobile,
@@ -109,11 +106,9 @@ class IOSDevice extends Device {
 
   String _iproxyPath;
 
+  final IOSInstallationService _installationService;
   final String _sdkVersion;
-  final IOSDeploy _iosDeploy;
-  final FileSystem _fileSystem;
   final Logger _logger;
-  final Platform _platform;
   final IMobileDevice _iMobileDevice;
 
   /// May be 0 if version cannot be parsed.
@@ -147,73 +142,19 @@ class IOSDevice extends Device {
   bool get supportsStartPaused => false;
 
   @override
-  Future<bool> isAppInstalled(IOSApp app) async {
-    bool result;
-    try {
-      result = await _iosDeploy.isAppInstalled(
-        bundleId: app.id,
-        deviceId: id,
-      );
-    } on ProcessException catch (e) {
-      _logger.printError(e.message);
-      return false;
-    }
-    return result;
-  }
+  Future<bool> isAppInstalled(IOSApp app) => _installationService.isAppInstalled(this, app);
 
   @override
-  Future<bool> isLatestBuildInstalled(IOSApp app) async => false;
+  Future<bool> isLatestBuildInstalled(IOSApp app) => _installationService.isLatestBuildInstalled(this, app);
 
   @override
-  Future<bool> installApp(IOSApp app) async {
-    final Directory bundle = _fileSystem.directory(app.deviceBundlePath);
-    if (!bundle.existsSync()) {
-      _logger.printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
-      return false;
-    }
-
-    int installationResult;
-    try {
-      installationResult = await _iosDeploy.installApp(
-        deviceId: id,
-        bundlePath: bundle.path,
-        launchArguments: <String>[],
-      );
-    } on ProcessException catch (e) {
-      _logger.printError(e.message);
-      return false;
-    }
-    if (installationResult != 0) {
-      _logger.printError('Could not install ${bundle.path} on $id.');
-      _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
-      _logger.printError('  open ios/Runner.xcworkspace');
-      _logger.printError('');
-      return false;
-    }
-    return true;
-  }
+  Future<bool> installApp(IOSApp app) => _installationService.installApp(this, app);
 
   @override
-  Future<bool> uninstallApp(IOSApp app) async {
-    int uninstallationResult;
-    try {
-      uninstallationResult = await _iosDeploy.uninstallApp(
-        deviceId: id,
-        bundleId: app.id,
-      );
-    } on ProcessException catch (e) {
-      _logger.printError(e.message);
-      return false;
-    }
-    if (uninstallationResult != 0) {
-      _logger.printError('Could not uninstall ${app.id} on $id.');
-      return false;
-    }
-    return true;
-  }
+  Future<bool> stopApp(IOSApp app) => _installationService.stopApp(this, app);
 
   @override
-  bool isSupported() => true;
+  Future<bool> uninstallApp(IOSApp app) => _installationService.uninstallApp(this, app);
 
   @override
   Future<LaunchResult> startApp(
@@ -225,146 +166,20 @@ class IOSDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
   }) async {
-    String packageId;
-
-    if (!prebuiltApplication) {
-      // TODO(chinmaygarde): Use mainPath, route.
-      _logger.printTrace('Building ${package.name} for $id');
-
-      // Step 1: Build the precompiled/DBC application if necessary.
-      final XcodeBuildResult buildResult = await buildXcodeProject(
-          app: package as BuildableIOSApp,
-          buildInfo: debuggingOptions.buildInfo,
-          targetOverride: mainPath,
-          buildForDevice: true,
-          activeArch: cpuArchitecture,
-          deviceID: id,
-      );
-      if (!buildResult.success) {
-        _logger.printError('Could not build the precompiled application for the device.');
-        await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, _logger);
-        _logger.printError('');
-        return LaunchResult.failed();
-      }
-      packageId = buildResult.xcodeBuildExecution?.buildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
-    } else {
-      if (!await installApp(package)) {
-        return LaunchResult.failed();
-      }
-    }
-
-    packageId ??= package.id;
-
-    // Step 2: Check that the application exists at the specified path.
-    final Directory bundle = _fileSystem.directory(package.deviceBundlePath);
-    if (!bundle.existsSync()) {
-      _logger.printError('Could not find the built application bundle at ${bundle.path}.');
-      return LaunchResult.failed();
-    }
-
-    // Step 2.5: Generate a potential open port using the provided argument,
-    // or randomly with the package name as a seed. Intentionally choose
-    // ports within the ephemeral port range.
-    final int assumedObservatoryPort = debuggingOptions?.deviceVmServicePort
-      ?? math.Random(packageId.hashCode).nextInt(16383) + 49152;
-
-    // Step 3: Attempt to install the application on the device.
-    final List<String> launchArguments = <String>[
-      '--enable-dart-profiling',
-      // These arguments are required to support the fallback connection strategy
-      // described in fallback_discovery.dart.
-      '--enable-service-port-fallback',
-      '--disable-service-auth-codes',
-      '--observatory-port=$assumedObservatoryPort',
-      if (debuggingOptions.startPaused) '--start-paused',
-      if (debuggingOptions.dartFlags.isNotEmpty) '--dart-flags="${debuggingOptions.dartFlags}"',
-      if (debuggingOptions.useTestFonts) '--use-test-fonts',
-      // "--enable-checked-mode" and "--verify-entry-points" should always be
-      // passed when we launch debug build via "ios-deploy". However, we don't
-      // pass them if a certain environment variable is set to enable the
-      // "system_debug_ios" integration test in the CI, which simulates a
-      // home-screen launch.
-      if (debuggingOptions.debuggingEnabled &&
-          _platform.environment['FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE'] != 'true') ...<String>[
-        '--enable-checked-mode',
-        '--verify-entry-points',
-      ],
-      if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
-      if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
-      if (debuggingOptions.traceSkia) '--trace-skia',
-      if (debuggingOptions.traceWhitelist != null) '--trace-whitelist="${debuggingOptions.traceWhitelist}"',
-      if (debuggingOptions.endlessTraceBuffer) '--endless-trace-buffer',
-      if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
-      if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
-      if (debuggingOptions.cacheSkSL) '--cache-sksl',
-      if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
-    ];
-
-    final Status installStatus = _logger.startProgress(
-        'Installing and launching...',
-        timeout: timeoutConfiguration.slowOperation);
-    try {
-      ProtocolDiscovery observatoryDiscovery;
-      if (debuggingOptions.debuggingEnabled) {
-        _logger.printTrace('Debugging is enabled, connecting to observatory');
-        observatoryDiscovery = ProtocolDiscovery.observatory(
-          getLogReader(app: package),
-          portForwarder: portForwarder,
-          hostPort: debuggingOptions.hostVmServicePort,
-          devicePort: debuggingOptions.deviceVmServicePort,
-          ipv6: ipv6,
-        );
-      }
-      final int installationResult = await _iosDeploy.runApp(
-        deviceId: id,
-        bundlePath: bundle.path,
-        launchArguments: launchArguments,
-      );
-      if (installationResult != 0) {
-        _logger.printError('Could not run ${bundle.path} on $id.');
-        _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
-        _logger.printError('  open ios/Runner.xcworkspace');
-        _logger.printError('');
-        return LaunchResult.failed();
-      }
-
-      if (!debuggingOptions.debuggingEnabled) {
-        return LaunchResult.succeeded();
-      }
-
-      _logger.printTrace('Application launched on the device. Waiting for observatory port.');
-      final FallbackDiscovery fallbackDiscovery = FallbackDiscovery(
-        logger: _logger,
-        mDnsObservatoryDiscovery: MDnsObservatoryDiscovery.instance,
-        portForwarder: portForwarder,
-        protocolDiscovery: observatoryDiscovery,
-        flutterUsage: globals.flutterUsage,
-      );
-      final Uri localUri = await fallbackDiscovery.discover(
-        assumedDevicePort: assumedObservatoryPort,
-        deivce: this,
-        usesIpv6: ipv6,
-        hostVmservicePort: debuggingOptions.hostVmServicePort,
-        packageId: packageId,
-        packageName: FlutterProject.current().manifest.appName,
-      );
-      if (localUri == null) {
-        return LaunchResult.failed();
-      }
-      return LaunchResult.succeeded(observatoryUri: localUri);
-    } on ProcessException catch (e) {
-      _logger.printError(e.message);
-      return LaunchResult.failed();
-    } finally {
-      installStatus.stop();
-    }
+    return _installationService.startApp(
+      this,
+      package,
+      mainPath: mainPath,
+      route: route,
+      debuggingOptions: debuggingOptions,
+      platformArgs: platformArgs,
+      prebuiltApplication: prebuiltApplication,
+      ipv6: ipv6,
+    );
   }
 
   @override
-  Future<bool> stopApp(IOSApp app) async {
-    // Currently we don't have a way to stop an app running on iOS.
-    return false;
-  }
+  bool isSupported() => true;
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
@@ -488,6 +303,245 @@ String decodeSyslog(String line) {
   } on Exception {
     // Unable to decode line: return as-is.
     return line;
+  }
+}
+
+/// iOS specific implementation of the [InstallationService].
+///
+/// Neither [isLatestBuildInstalled] nor [stopApp] are fully implemented, so
+/// these methods always return a reasonable default value.
+class IOSInstallationService extends InstallationService<IOSDevice, IOSApp> {
+  IOSInstallationService({
+    @required Logger logger,
+    @required IOSDeploy iosDeploy,
+    @required FileSystem fileSystem,
+    @required Platform platform,
+  }) : _logger = logger,
+       _iosDeploy = iosDeploy,
+       _fileSystem = fileSystem,
+       _platform = platform;
+
+  final IOSDeploy _iosDeploy;
+  final Logger _logger;
+  final FileSystem _fileSystem;
+  final Platform _platform;
+
+  @override
+  Future<bool> isAppInstalled(IOSDevice device, IOSApp application) async {
+    bool result;
+    try {
+      result = await _iosDeploy.isAppInstalled(
+        bundleId: application.id,
+        deviceId: device.id,
+      );
+    } on ProcessException catch (e) {
+      _logger.printError(e.message);
+      return false;
+    }
+    return result;
+  }
+
+  @override
+  Future<bool> isLatestBuildInstalled(IOSDevice device, IOSApp application) async => false;
+
+  @override
+  Future<bool> installApp(IOSDevice device, IOSApp application) async {
+    final Directory bundle = _fileSystem.directory(application.deviceBundlePath);
+    if (!bundle.existsSync()) {
+      _logger.printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
+      return false;
+    }
+
+    int installationResult;
+    try {
+      installationResult = await _iosDeploy.installApp(
+        deviceId: device.id,
+        bundlePath: bundle.path,
+        launchArguments: <String>[],
+      );
+    } on ProcessException catch (e) {
+      _logger.printError(e.message);
+      return false;
+    }
+    if (installationResult != 0) {
+      _logger.printError('Could not install ${bundle.path} on ${device.id}.');
+      _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
+      _logger.printError('  open ios/Runner.xcworkspace');
+      _logger.printError('');
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  Future<bool> uninstallApp(IOSDevice device, IOSApp application) async {
+    int uninstallationResult;
+    try {
+      uninstallationResult = await _iosDeploy.uninstallApp(
+        deviceId: device.id,
+        bundleId: application.id,
+      );
+    } on ProcessException catch (e) {
+      _logger.printError(e.message);
+      return false;
+    }
+    if (uninstallationResult != 0) {
+      _logger.printError('Could not uninstall ${application.id} on ${device.id}.');
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  Future<bool> stopApp(IOSDevice device, IOSApp application) async {
+    // Currently we don't have a way to stop an app running on iOS.
+    return false;
+  }
+
+  @override
+  Future<LaunchResult> startApp(
+    IOSDevice device,
+    IOSApp application, {
+    String mainPath,
+    String route,
+    DebuggingOptions debuggingOptions,
+    Map<String, dynamic> platformArgs,
+    bool prebuiltApplication = false,
+    bool ipv6 = false,
+  }) async {
+    String packageId;
+
+    if (!prebuiltApplication) {
+      // TODO(chinmaygarde): Use mainPath, route.
+      _logger.printTrace('Building ${application.name} for ${device.id}');
+
+      // Step 1: Build the precompiled/DBC application if necessary.
+      final XcodeBuildResult buildResult = await buildXcodeProject(
+          app: application as BuildableIOSApp,
+          buildInfo: debuggingOptions.buildInfo,
+          targetOverride: mainPath,
+          buildForDevice: true,
+          activeArch: device.cpuArchitecture,
+          deviceID: device.id,
+      );
+      if (!buildResult.success) {
+        _logger.printError('Could not build the precompiled application for the device.');
+        await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, _logger);
+        _logger.printError('');
+        return LaunchResult.failed();
+      }
+      packageId = buildResult.xcodeBuildExecution?.buildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
+    } else {
+      if (!await installApp(device, application)) {
+        return LaunchResult.failed();
+      }
+    }
+
+    packageId ??= application.id;
+
+    // Step 2: Check that the application exists at the specified path.
+    final Directory bundle = _fileSystem.directory(application.deviceBundlePath);
+    if (!bundle.existsSync()) {
+      _logger.printError('Could not find the built application bundle at ${bundle.path}.');
+      return LaunchResult.failed();
+    }
+
+    // Step 2.5: Generate a potential open port using the provided argument,
+    // or randomly with the package name as a seed. Intentionally choose
+    // ports within the ephemeral port range.
+    final int assumedObservatoryPort = debuggingOptions?.deviceVmServicePort
+      ?? math.Random(packageId.hashCode).nextInt(16383) + 49152;
+
+    // Step 3: Attempt to install the application on the device.
+    final List<String> launchArguments = <String>[
+      '--enable-dart-profiling',
+      // These arguments are required to support the fallback connection strategy
+      // described in fallback_discovery.dart.
+      '--enable-service-port-fallback',
+      '--disable-service-auth-codes',
+      '--observatory-port=$assumedObservatoryPort',
+      if (debuggingOptions.startPaused) '--start-paused',
+      if (debuggingOptions.dartFlags.isNotEmpty) '--dart-flags="${debuggingOptions.dartFlags}"',
+      if (debuggingOptions.useTestFonts) '--use-test-fonts',
+      // "--enable-checked-mode" and "--verify-entry-points" should always be
+      // passed when we launch debug build via "ios-deploy". However, we don't
+      // pass them if a certain environment variable is set to enable the
+      // "system_debug_ios" integration test in the CI, which simulates a
+      // home-screen launch.
+      if (debuggingOptions.debuggingEnabled &&
+          _platform.environment['FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE'] != 'true') ...<String>[
+        '--enable-checked-mode',
+        '--verify-entry-points',
+      ],
+      if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
+      if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
+      if (debuggingOptions.traceSkia) '--trace-skia',
+      if (debuggingOptions.traceWhitelist != null) '--trace-whitelist="${debuggingOptions.traceWhitelist}"',
+      if (debuggingOptions.endlessTraceBuffer) '--endless-trace-buffer',
+      if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
+      if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
+      if (debuggingOptions.cacheSkSL) '--cache-sksl',
+      if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
+    ];
+
+    final Status installStatus = _logger.startProgress(
+        'Installing and launching...',
+        timeout: timeoutConfiguration.slowOperation);
+    try {
+      ProtocolDiscovery observatoryDiscovery;
+      if (debuggingOptions.debuggingEnabled) {
+        _logger.printTrace('Debugging is enabled, connecting to observatory');
+        observatoryDiscovery = ProtocolDiscovery.observatory(
+          device.getLogReader(app: application),
+          portForwarder: device.portForwarder,
+          hostPort: debuggingOptions.hostVmServicePort,
+          devicePort: debuggingOptions.deviceVmServicePort,
+          ipv6: ipv6,
+        );
+      }
+      final int installationResult = await _iosDeploy.runApp(
+        deviceId: device.id,
+        bundlePath: bundle.path,
+        launchArguments: launchArguments,
+      );
+      if (installationResult != 0) {
+        _logger.printError('Could not run ${bundle.path} on ${device.id}.');
+        _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
+        _logger.printError('  open ios/Runner.xcworkspace');
+        _logger.printError('');
+        return LaunchResult.failed();
+      }
+
+      if (!debuggingOptions.debuggingEnabled) {
+        return LaunchResult.succeeded();
+      }
+
+      _logger.printTrace('Application launched on the device. Waiting for observatory port.');
+      final FallbackDiscovery fallbackDiscovery = FallbackDiscovery(
+        logger: _logger,
+        mDnsObservatoryDiscovery: MDnsObservatoryDiscovery.instance,
+        portForwarder: device.portForwarder,
+        protocolDiscovery: observatoryDiscovery,
+        flutterUsage: globals.flutterUsage,
+      );
+      final Uri localUri = await fallbackDiscovery.discover(
+        assumedDevicePort: assumedObservatoryPort,
+        deivce: device,
+        usesIpv6: ipv6,
+        hostVmservicePort: debuggingOptions.hostVmServicePort,
+        packageId: packageId,
+        packageName: FlutterProject.current().manifest.appName,
+      );
+      if (localUri == null) {
+        return LaunchResult.failed();
+      }
+      return LaunchResult.succeeded(observatoryUri: localUri);
+    } on ProcessException catch (e) {
+      _logger.printError(e.message);
+      return LaunchResult.failed();
+    } finally {
+      installStatus.stop();
+    }
   }
 }
 

@@ -375,11 +375,15 @@ class XCDevice {
         cpuArchitecture: _cpuArchitecture(deviceProperties),
         sdkVersion: _sdkVersion(deviceProperties),
         artifacts: globals.artifacts,
-        fileSystem: globals.fs,
         logger: globals.logger,
-        iosDeploy: _iosDeploy,
         iMobileDevice: _iMobileDevice,
         platform: globals.platform,
+        installationService: IOSInstallationService(
+          logger: globals.logger,
+          iosDeploy: _iosDeploy,
+          fileSystem: globals.fs,
+          platform: globals.platform,
+        )
       ));
     }
     return devices;

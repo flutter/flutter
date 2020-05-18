@@ -352,7 +352,8 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   String toString() => '$name device discovery';
 }
 
-abstract class Device {
+@optionalTypeArgs
+abstract class Device<A extends ApplicationPackage> {
   Device(this.id, {@required this.category, @required this.platformType, @required this.ephemeral});
 
   final String id;
@@ -578,6 +579,46 @@ abstract class Device {
   ///
   /// For example log readers or port forwarders.
   Future<void> dispose();
+}
+
+
+/// Service responsible for install applications to remote devices and emulators.
+abstract class InstallationService<D extends Device<A>, A extends ApplicationPackage> {
+
+  /// Stop the given [application] on [device] and return whether it was
+  /// successfully terminated.
+  Future<bool> stopApp(D device, A application);
+
+  /// Start the given [application] on the current device.
+  ///
+  /// [platformArgs] allows callers to pass platform-specific arguments to the
+  /// start call. The build mode is not used by all platforms.
+  Future<LaunchResult> startApp(
+    D device,
+    A application, {
+    String mainPath,
+    String route,
+    DebuggingOptions debuggingOptions,
+    Map<String, dynamic> platformArgs,
+    bool prebuiltApplication = false,
+    bool ipv6 = false,
+  });
+
+  /// Check if a version of the given [application] is already installed on
+  /// [device].
+  Future<bool> isAppInstalled(D device, A application);
+
+  /// Check if the latest build of the [application] is already installed on
+  /// [device].
+  Future<bool> isLatestBuildInstalled(D device, A application);
+
+  /// Install [application] on [device] and return whether this process was
+  /// successful.
+  Future<bool> installApp(D device, A application);
+
+  /// Uninstall [application] from [device] and return whether this process was
+  /// successful.
+  Future<bool> uninstallApp(D device, A application);
 }
 
 /// Information about an application's memory usage.
