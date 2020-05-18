@@ -24,6 +24,7 @@ import 'text_theme.dart';
 import 'theme.dart';
 
 const double _kLeadingWidth = kToolbarHeight; // So the leading button is square.
+const double _kMaxTitleTextScaleFactor = 1.34;
 
 // Bottom justify the kToolbarHeight child which may overflow the top.
 class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
@@ -548,6 +549,20 @@ class _AppBarState extends State<AppBar> {
         overflow: TextOverflow.ellipsis,
         child: title,
       );
+
+      // Cap the text scale factor up to [_kMaxTitleTextScaleFactor], to keep
+      // the visual hierarchy with larger text scale factors. To opt out, wrap
+      // the [title] in a [MediaQuery] widget with
+      // [MediaQueryData.textScaleFactor] set.
+      final MediaQueryData mediaQueryData = MediaQuery.of(context);
+      if (mediaQueryData.textScaleFactor > _kMaxTitleTextScaleFactor) {
+        title = MediaQuery(
+          data: mediaQueryData.copyWith(
+            textScaleFactor: _kMaxTitleTextScaleFactor,
+          ),
+          child: title,
+        );
+      }
     }
 
     Widget actions;
