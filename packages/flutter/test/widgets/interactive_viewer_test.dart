@@ -31,11 +31,11 @@ void main() {
       // Attempting to drag to pan doesn't work because the child fits inside
       // the viewport and has a tight boundary.
       final Offset childOffset = tester.getTopLeft(find.byType(Container));
-      final Offset insideChild = Offset(
+      final Offset childInterior = Offset(
         childOffset.dx + 20.0,
         childOffset.dy + 20.0,
       );
-      TestGesture gesture = await tester.startGesture(insideChild);
+      TestGesture gesture = await tester.startGesture(childInterior);
       addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.moveTo(childOffset);
@@ -45,10 +45,10 @@ void main() {
       expect(transformationController.value, equals(Matrix4.identity()));
 
       // Pinch to zoom works.
-      final Offset scaleStart1 = insideChild;
-      final Offset scaleStart2 = Offset(insideChild.dx + 10.0, insideChild.dy);
-      final Offset scaleEnd1 = Offset(insideChild.dx - 10.0, insideChild.dy);
-      final Offset scaleEnd2 = Offset(insideChild.dx + 20.0, insideChild.dy);
+      final Offset scaleStart1 = childInterior;
+      final Offset scaleStart2 = Offset(childInterior.dx + 10.0, childInterior.dy);
+      final Offset scaleEnd1 = Offset(childInterior.dx - 10.0, childInterior.dy);
+      final Offset scaleEnd2 = Offset(childInterior.dx + 20.0, childInterior.dy);
       gesture = await tester.createGesture();
       final TestGesture gesture2 = await tester.createGesture();
       await gesture.down(scaleStart1);
@@ -61,6 +61,67 @@ void main() {
       await gesture2.up();
       await tester.pumpAndSettle();
       expect(transformationController.value, isNot(equals(Matrix4.identity())));
+    });
+
+    testWidgets('boundary slightly bigger than child', (WidgetTester tester) async {
+      final ValueNotifier<Matrix4> transformationController =
+          ValueNotifier<Matrix4>(Matrix4.identity());
+      const double boundaryMargin = 10.0;
+      const double minScale = 0.8;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                boundaryMargin: const EdgeInsets.all(boundaryMargin),
+                minScale: minScale,
+                disableRotation: true,
+                transformationController: transformationController,
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value, equals(Matrix4.identity()));
+
+      // Dragging to pan works only until it hits the boundary.
+      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      final Offset childInterior = Offset(
+        childOffset.dx + 20.0,
+        childOffset.dy + 20.0,
+      );
+      TestGesture gesture = await tester.startGesture(childInterior);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(childOffset);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      final Vector3 translation = transformationController.value.getTranslation();
+      expect(translation.x, -boundaryMargin);
+      expect(translation.y, -boundaryMargin);
+
+      // Pinch to zoom also only works until expanding to the boundary.
+      final Offset scaleStart1 = childInterior;
+      final Offset scaleStart2 = Offset(childInterior.dx + 20.0, childInterior.dy);
+      final Offset scaleEnd1 = Offset(scaleStart1.dx + 5.0, scaleStart1.dy);
+      final Offset scaleEnd2 = Offset(scaleStart2.dx - 5.0, scaleStart2.dy);
+      gesture = await tester.createGesture();
+      final TestGesture gesture2 = await tester.createGesture();
+      await gesture.down(scaleStart1);
+      await gesture2.down(scaleStart2);
+      await tester.pump();
+      await gesture.moveTo(scaleEnd1);
+      await gesture2.moveTo(scaleEnd2);
+      await tester.pump();
+      await gesture.up();
+      await gesture2.up();
+      await tester.pumpAndSettle();
+      // The new scale is the scale that makes the original size (200.0) as big
+      // as the boundary (220.0).
+      expect(transformationController.value.getMaxScaleOnAxis(), 200.0 / 220.0);
     });
 
     testWidgets('child bigger than viewport', (WidgetTester tester) async {
@@ -85,24 +146,24 @@ void main() {
 
       // Attempting to move against the boundary doesn't work.
       final Offset childOffset = tester.getTopLeft(find.byType(Container));
-      final Offset insideChild = Offset(
+      final Offset childInterior = Offset(
         childOffset.dx + 20.0,
         childOffset.dy + 20.0,
       );
       TestGesture gesture = await tester.startGesture(childOffset);
       addTearDown(gesture.removePointer);
       await tester.pump();
-      await gesture.moveTo(insideChild);
+      await gesture.moveTo(childInterior);
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
       expect(transformationController.value, equals(Matrix4.identity()));
 
       // Attempting to pinch to zoom doens't work.
-      final Offset scaleStart1 = insideChild;
-      final Offset scaleStart2 = Offset(insideChild.dx + 10.0, insideChild.dy);
-      final Offset scaleEnd1 = Offset(insideChild.dx - 10.0, insideChild.dy);
-      final Offset scaleEnd2 = Offset(insideChild.dx + 20.0, insideChild.dy);
+      final Offset scaleStart1 = childInterior;
+      final Offset scaleStart2 = Offset(childInterior.dx + 10.0, childInterior.dy);
+      final Offset scaleEnd1 = Offset(childInterior.dx - 10.0, childInterior.dy);
+      final Offset scaleEnd2 = Offset(childInterior.dx + 20.0, childInterior.dy);
       gesture = await tester.startGesture(scaleStart1);
       TestGesture gesture2 = await tester.startGesture(scaleStart2);
       addTearDown(gesture2.removePointer);
@@ -116,10 +177,10 @@ void main() {
       expect(transformationController.value, equals(Matrix4.identity()));
 
       // Attempting to pinch to rotate doesn't work because it's disabled.
-      final Offset rotateStart1 = insideChild;
-      final Offset rotateStart2 = Offset(insideChild.dx + 10.0, insideChild.dy);
-      final Offset rotateEnd1 = Offset(insideChild.dx + 5.0, insideChild.dy + 5.0);
-      final Offset rotateEnd2 = Offset(insideChild.dx - 5.0, insideChild.dy - 5.0);
+      final Offset rotateStart1 = childInterior;
+      final Offset rotateStart2 = Offset(childInterior.dx + 10.0, childInterior.dy);
+      final Offset rotateEnd1 = Offset(childInterior.dx + 5.0, childInterior.dy + 5.0);
+      final Offset rotateEnd2 = Offset(childInterior.dx - 5.0, childInterior.dy - 5.0);
       gesture = await tester.startGesture(rotateStart1);
       gesture2 = await tester.startGesture(rotateStart2);
       await tester.pump();
@@ -132,13 +193,73 @@ void main() {
       expect(transformationController.value, equals(Matrix4.identity()));
 
       // Drag to pan away from the boundary.
-      gesture = await tester.startGesture(insideChild);
+      gesture = await tester.startGesture(childInterior);
       await tester.pump();
       await gesture.moveTo(childOffset);
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
       expect(transformationController.value, isNot(equals(Matrix4.identity())));
+    });
+
+    testWidgets('no boundary', (WidgetTester tester) async {
+      final ValueNotifier<Matrix4> transformationController =
+          ValueNotifier<Matrix4>(Matrix4.identity());
+      const double minScale = 0.8;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                disableRotation: true,
+                boundaryMargin: const EdgeInsets.all(double.infinity),
+                minScale: minScale,
+                transformationController: transformationController,
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value, equals(Matrix4.identity()));
+
+      // Drag to pan works because even though the viewport fits perfectly
+      // around the child, there is no boundary.
+      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      final Offset childInterior = Offset(
+        childOffset.dx + 20.0,
+        childOffset.dy + 20.0,
+      );
+      TestGesture gesture = await tester.startGesture(childInterior);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(childOffset);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      final Vector3 translation = transformationController.value.getTranslation();
+      expect(translation.x, childOffset.dx - childInterior.dx);
+      expect(translation.y, childOffset.dy - childInterior.dy);
+
+      // It's also possible to zoom out and view beyond the child because there
+      // is no boundary.
+      final Offset scaleStart1 = childInterior;
+      final Offset scaleStart2 = Offset(childInterior.dx + 20.0, childInterior.dy);
+      final Offset scaleEnd1 = Offset(childInterior.dx + 5.0, childInterior.dy);
+      final Offset scaleEnd2 = Offset(childInterior.dx - 5.0, childInterior.dy);
+      gesture = await tester.createGesture();
+      final TestGesture gesture2 = await tester.createGesture();
+      await gesture.down(scaleStart1);
+      await gesture2.down(scaleStart2);
+      await tester.pump();
+      await gesture.moveTo(scaleEnd1);
+      await gesture2.moveTo(scaleEnd2);
+      await tester.pump();
+      await gesture.up();
+      await gesture2.up();
+      await tester.pumpAndSettle();
+      expect(transformationController.value.getMaxScaleOnAxis(), minScale);
     });
   });
 

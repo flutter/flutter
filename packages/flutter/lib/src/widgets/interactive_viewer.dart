@@ -418,7 +418,7 @@ class InteractiveViewer extends StatelessWidget {
           onScaleStart: onScaleStart,
           onScaleUpdate: onScaleUpdate,
           onScaleEnd: onScaleEnd,
-          size: Size(constraints.maxWidth, constraints.maxHeight),
+          constraints: constraints,
           transformationController: transformationController ?? ValueNotifier<Matrix4>(Matrix4.identity()),
         );
       },
@@ -463,7 +463,7 @@ class _InteractiveViewerSized extends StatefulWidget {
     this.onScaleStart,
     this.onScaleUpdate,
     this.onScaleEnd,
-    @required this.size,
+    @required this.constraints,
     @required this.transformationController,
   }) : assert(child != null),
        assert(minScale != null),
@@ -474,8 +474,7 @@ class _InteractiveViewerSized extends StatefulWidget {
        assert(transformationController != null);
 
   final Widget child;
-  // The size available to the widget.
-  final Size size;
+  final BoxConstraints constraints;
   final GestureTapDownCallback onTapDown;
   final GestureTapUpCallback onTapUp;
   final GestureTapCallback onTap;
@@ -540,7 +539,7 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
 
     final Size childSize = _getChildSize(
       _childKey.currentContext.findRenderObject() as RenderBox,
-      widget.size,
+      widget.constraints,
     );
     _boundaryRectCached = Rect.fromLTRB(
       -widget.boundaryMargin.left,
@@ -548,12 +547,30 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
       childSize.width + widget.boundaryMargin.right,
       childSize.height + widget.boundaryMargin.bottom,
     );
+    // Boundaries that are partially infinite are not allowed because Matrix4's
+    // rotation and translation methods don't handle infinites well.
     assert(_boundaryRectCached.isFinite ||
         (_boundaryRectCached.left.isInfinite
         && _boundaryRectCached.top.isInfinite
         && _boundaryRectCached.right.isInfinite
         && _boundaryRectCached.bottom.isInfinite));
     return _boundaryRectCached;
+  }
+
+  // The Rect representing the child's parent.
+  Rect get _viewport {
+    assert(_childKey.currentContext != null);
+    final Size childSize = _getChildSize(
+      _childKey.currentContext.findRenderObject() as RenderBox,
+      widget.constraints,
+    );
+    final Size viewportSize = widget.constraints.constrain(childSize);
+    return Rect.fromLTRB(
+      0.0,
+      0.0,
+      viewportSize.width,
+      viewportSize.height,
+    );
   }
 
   // Return a new matrix representing the given matrix after applying the given
@@ -570,13 +587,7 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
 
     // Transform the viewport to determine where its four corners will be after
     // the child has been transformed.
-    final Rect untransformedViewport = Rect.fromLTRB(
-      0.0,
-      0.0,
-      widget.size.width,
-      widget.size.height,
-    );
-    final Quad nextViewport = _transformViewport(nextMatrix, untransformedViewport);
+    final Quad nextViewport = _transformViewport(nextMatrix, _viewport);
 
     // If the boundaries are infinite, then no need to check if the translation
     // fits within them.
@@ -618,7 +629,7 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     ));
 
     // Double check that the corrected translation fits.
-    final Quad correctedViewport = _transformViewport(correctedMatrix, untransformedViewport);
+    final Quad correctedViewport = _transformViewport(correctedMatrix, _viewport);
     final Offset offendingCorrectedDistance = _exceedsBy(boundariesAabbQuad, correctedViewport);
     if (offendingCorrectedDistance == Offset.zero) {
       return correctedMatrix;
@@ -666,8 +677,8 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     // Ensure that the scale cannot make the child so big that it can't fit
     // inside the boundaries (in either direction).
     final double minScale = math.max(
-      widget.size.width / _boundaryRect.width,
-      widget.size.height / _boundaryRect.height,
+      _viewport.width / _boundaryRect.width,
+      _viewport.height / _boundaryRect.height,
     );
     if (clampedTotalScale < minScale) {
       final double minCurrentScale = minScale / currentScale;
@@ -906,7 +917,7 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     super.didUpdateWidget(oldWidget);
     if (widget.child != oldWidget.child
       || widget.boundaryMargin != oldWidget.boundaryMargin
-      || widget.size != oldWidget.size) {
+      || widget.constraints != oldWidget.constraints) {
       _boundaryRectCached = null;
     }
   }
@@ -1255,13 +1266,13 @@ Offset _getOffset(BuildContext context) {
 // viewport but is being fit to the viewport), renderBox.size will also give
 // the size of the viewport, and the boundary should remain at the viewport.
 // The intrinsic size is not used.
-Size _getChildSize(RenderBox renderBox, Size viewportSize) {
+Size _getChildSize(RenderBox renderBox, BoxConstraints constraints) {
   double width = renderBox.size.width;
   double height = renderBox.size.height;
-  final double minIntrinsicWidth = renderBox.getMinIntrinsicWidth(viewportSize.height);
-  final double maxIntrinsicWidth = renderBox.getMaxIntrinsicWidth(viewportSize.height);
-  final double minIntrinsicHeight = renderBox.getMinIntrinsicHeight(viewportSize.width);
-  final double maxIntrinsicHeight = renderBox.getMaxIntrinsicHeight(viewportSize.width);
+  final double minIntrinsicWidth = renderBox.getMinIntrinsicWidth(constraints.maxHeight);
+  final double maxIntrinsicWidth = renderBox.getMaxIntrinsicWidth(constraints.maxHeight);
+  final double minIntrinsicHeight = renderBox.getMinIntrinsicHeight(constraints.maxWidth);
+  final double maxIntrinsicHeight = renderBox.getMaxIntrinsicHeight(constraints.maxWidth);
 
   if (minIntrinsicWidth == maxIntrinsicWidth) {
     width = minIntrinsicWidth;
