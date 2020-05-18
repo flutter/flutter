@@ -2791,6 +2791,12 @@ class _RectangularSliderValueIndicatorPathPainter {
     double scale,
   }) {
     assert(!sizeWithOverflow.isEmpty);
+    /// If parentBox is null this means that the Slider was removed without
+    /// disposing value indicator.
+    if (!parentBox.attached) {
+      return 0.0;
+    }
+
     const double edgePadding = 8.0;
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale, textScaleFactor);
     /// Value indicator draws on the Overlay and by using the global Offset

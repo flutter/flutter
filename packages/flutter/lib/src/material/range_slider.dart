@@ -466,12 +466,18 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
 
   @override
   void dispose() {
+    if (overlayEntry != null) {
+      overlayEntry.remove();
+      overlayEntry = null;
+    }
     interactionTimer?.cancel();
     overlayController.dispose();
     valueIndicatorController.dispose();
     enableController.dispose();
     startPositionController.dispose();
     endPositionController.dispose();
+//    print((overlayEntry == null) ? 'overlay entry is null' : 'overlay entry is not null');
+
     super.dispose();
   }
 
