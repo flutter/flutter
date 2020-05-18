@@ -231,14 +231,14 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// ### Snapping [SliverAppBar]s
 ///
 /// //TODO(Piinks): Talk about SNAPPING
+/// - will always need overlap slivers in order to work
 ///
 /// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// This simple example shows a [NestedScrollView] whose header contains a
 /// snapping, floating [SliverAppBar]. _Without_ setting any additional flags,
 /// e.g [NestedScrollView.floatHeaderSlivers] and [SliverAppBar.nestedSnap], the
-/// SliverAppBar will animate in and out without floating. This may be desirable
-/// over floating and snapping at the same time.
+/// SliverAppBar will animate in and out without floating.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -274,6 +274,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// ### Snapping and Floating [SliverAppBar]s
 ///
 /// //TODO(Piinks): Talk about FLOATING & SNAPPING
+/// - will always need overlap slivers to work
 ///
 /// {@tool sample --template=stateless_widget_scaffold}
 ///
