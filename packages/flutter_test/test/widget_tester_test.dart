@@ -753,6 +753,15 @@ void main() {
   });
 
   group('Pending timer', () {
+    TestExceptionReporter currentExceptionReporter;
+    setUp(() {
+      currentExceptionReporter = reportTestException;
+    });
+
+    tearDown(() {
+      reportTestException = currentExceptionReporter;
+    });
+
     test('Throws assertion message without code', () async {
       FlutterErrorDetails flutterErrorDetails;
       reportTestException = (FlutterErrorDetails details, String testDescription) {
