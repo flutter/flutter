@@ -320,6 +320,68 @@ void main() {
     expect(painter, paints..rotate(angle: math.pi / 2.0)..circle(color: const Color(0x0A0000FF))..saveRestore());
     expect(painter, isNot(paints..circle()..circle()));
   });
+
+  group('Modify glow position', () {
+    testWidgets('Leading', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: NotificationListener<OverscrollIndicatorNotification>(
+            onNotification: (OverscrollIndicatorNotification notification) {
+              if (notification.leading) {
+                notification.paintOffset = 50.0;
+              }
+              return false;
+            },
+            child: const CustomScrollView(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+              ],
+            ),
+          ),
+        ),
+      );
+      final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+      await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0));
+      expect(painter, paints..save()..translate(y: 50.0)..scale()..circle());
+      // Reverse scroll direction.
+      await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, -30.0));
+      await tester.pump();
+      // The painter should follow the scroll direction.
+      expect(painter, paints..save()..translate(y: 50.0 - 30.0)..scale()..circle());
+    });
+
+    testWidgets('Trailing', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: NotificationListener<OverscrollIndicatorNotification>(
+            onNotification: (OverscrollIndicatorNotification notification) {
+              if (!notification.leading) {
+                notification.paintOffset = 50.0;
+              }
+              return false;
+            },
+            child: const CustomScrollView(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+              ],
+            ),
+          ),
+        ),
+      );
+      final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+      await tester.dragFrom(const Offset(200.0, 200.0), const Offset(200.0, -10000.0));
+      await tester.pump();
+      await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, -5.0));
+      expect(painter, paints..scale(y: -1.0)..save()..translate(y: 50.0)..scale()..circle());
+      // Reverse scroll direction.
+      await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, 30.0));
+      await tester.pump();
+      // The painter should follow the scroll direction.
+      expect(painter, paints..scale(y: -1.0)..save()..translate(y: 50.0 - 30.0)..scale()..circle());
+    });
+  });
 }
 
 class TestScrollBehavior1 extends ScrollBehavior {

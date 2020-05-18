@@ -136,7 +136,7 @@ int getDaysInMonth(int year, int month) {
 /// (i.e. 'Jan 21, 2020').
 String formatRangeStartDate(MaterialLocalizations localizations, DateTime startDate, DateTime endDate) {
   return startDate == null
-    ? 'Start Date'
+    ? localizations.dateRangeStartLabel
     : (endDate == null || startDate.year == endDate.year)
       ? localizations.formatShortMonthDay(startDate)
       : localizations.formatShortDate(startDate);
@@ -150,7 +150,7 @@ String formatRangeStartDate(MaterialLocalizations localizations, DateTime startD
 /// include the year (i.e. 'Jan 21, 2020').
 String formatRangeEndDate(MaterialLocalizations localizations, DateTime startDate, DateTime endDate, DateTime currentDate) {
   return endDate == null
-    ? 'End Date'
+    ? localizations.dateRangeEndLabel
     : (startDate != null && startDate.year == endDate.year && startDate.year == currentDate.year)
       ? localizations.formatShortMonthDay(endDate)
       : localizations.formatShortDate(endDate);

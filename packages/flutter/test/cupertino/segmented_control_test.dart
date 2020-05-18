@@ -926,6 +926,44 @@ void main() {
     expect(sharedValue, 0);
   });
 
+  testWidgets(
+    'Segment still hittable with a child that has no hitbox',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/57326.
+      final Map<int, Widget> children = <int, Widget>{};
+      children[0] = const Text('Child 1');
+      children[1] = const SizedBox();
+      int sharedValue = 0;
+
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return boilerplate(
+              child: CupertinoSegmentedControl<int>(
+                key: const ValueKey<String>('Segmented Control'),
+                children: children,
+                onValueChanged: (int newValue) {
+                  setState(() {
+                    sharedValue = newValue;
+                  });
+                },
+                groupValue: sharedValue,
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(sharedValue, 0);
+
+      final Offset centerOfTwo = tester.getCenter(find.byWidget(children[1]));
+      // Tap within the bounds of children[1], but not at the center.
+      // children[1] is a SizedBox thus not hittable by itself.
+      await tester.tapAt(centerOfTwo + const Offset(10, 0));
+
+      expect(sharedValue, 1);
+  });
+
   testWidgets('Animation is correct when the selected segment changes', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 

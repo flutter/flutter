@@ -213,7 +213,7 @@ void catchIsolateErrors() {
 
 void main() {
   print('$_kStartTimeoutTimerMessage');
-  String serverPort = Platform.environment['SERVER_PORT'];
+  String serverPort = Platform.environment['SERVER_PORT'] ?? '';
   String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
   StreamChannel<dynamic> channel = serializeSuite(() {
     catchIsolateErrors();

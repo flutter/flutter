@@ -9,6 +9,7 @@ import '../input_border.dart';
 import '../input_decorator.dart';
 import '../material_localizations.dart';
 import '../text_form_field.dart';
+import '../theme.dart';
 
 import 'date_picker_common.dart';
 import 'date_utils.dart' as utils;
@@ -187,11 +188,9 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   String _validateDate(String text) {
     final DateTime date = _parseDate(text);
     if (date == null) {
-      // TODO(darrenaustin): localize 'Invalid format.'
-      return widget.errorFormatText ?? 'Invalid format.';
+      return widget.errorFormatText ?? MaterialLocalizations.of(context).invalidDateFormatLabel;
     } else if (!_isValidAcceptableDate(date)) {
-      // TODO(darrenaustin): localize 'Out of range.'
-      return widget.errorInvalidText ?? 'Out of range.';
+      return widget.errorInvalidText ?? MaterialLocalizations.of(context).dateOutOfRangeLabel;
     }
     return null;
   }
@@ -220,29 +219,25 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
 
   @override
   Widget build(BuildContext context) {
-    return OrientationBuilder(builder: (BuildContext context, Orientation orientation) {
-      assert(orientation != null);
-
-      return TextFormField(
-        decoration: InputDecoration(
-          border: const UnderlineInputBorder(),
-          filled: true,
-          // TODO(darrenaustin): localize 'mm/dd/yyyy' and 'Enter Date'
-          hintText: widget.fieldHintText ?? 'mm/dd/yyyy',
-          labelText: widget.fieldLabelText ?? 'Enter Date',
-        ),
-        validator: _validateDate,
-        inputFormatters: <TextInputFormatter>[
-          // TODO(darrenaustin): localize date separator '/'
-          DateTextInputFormatter('/'),
-        ],
-        keyboardType: TextInputType.datetime,
-        onSaved: _handleSaved,
-        onFieldSubmitted: _handleSubmitted,
-        autofocus: widget.autofocus,
-        controller: _controller,
-      );
-    });
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final InputDecorationTheme inputTheme = Theme.of(context).inputDecorationTheme;
+    return TextFormField(
+      decoration: InputDecoration(
+        border: inputTheme.border ?? const UnderlineInputBorder(),
+        filled: inputTheme.filled ?? true,
+        hintText: widget.fieldHintText ?? localizations.dateHelpText,
+        labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
+      ),
+      validator: _validateDate,
+      inputFormatters: <TextInputFormatter>[
+        DateTextInputFormatter(localizations.dateSeparator),
+      ],
+      keyboardType: TextInputType.datetime,
+      onSaved: _handleSaved,
+      onFieldSubmitted: _handleSubmitted,
+      autofocus: widget.autofocus,
+      controller: _controller,
+    );
   }
 }
 

@@ -986,6 +986,56 @@ void main() {
     expect(controller.offset, 300.0);
   });
 
+  testWidgets('RenderViewportBase.showOnScreen reports the correct targetRect', (WidgetTester tester) async {
+    final ScrollController innerController = ScrollController();
+    final ScrollController outerController = ScrollController();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 300.0,
+            child: CustomScrollView(
+              cacheExtent: 0,
+              controller: outerController,
+              slivers: <Widget>[
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 300,
+                    child: CustomScrollView(
+                      controller: innerController,
+                      slivers: List<Widget>.generate(5, (int i) {
+                        return SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: 300.0,
+                            child: Text('Tile $i'),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+                const SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 300.0,
+                    child: Text('hidden'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    tester.renderObject(find.widgetWithText(SizedBox, 'Tile 1', skipOffstage: false)).showOnScreen();
+    await tester.pumpAndSettle();
+    // The inner viewport scrolls to reveal the 2nd tile.
+    expect(innerController.offset, 300.0);
+    expect(outerController.offset, 0);
+  });
+
   group('unbounded constraints control test', () {
     Widget buildNestedWidget([Axis a1 = Axis.vertical, Axis a2 = Axis.horizontal]) {
       return Directionality(

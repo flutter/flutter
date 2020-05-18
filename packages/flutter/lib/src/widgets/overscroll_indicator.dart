@@ -33,14 +33,53 @@ import 'ticker_provider.dart';
 ///
 /// In a [MaterialApp], the edge glow color is the [ThemeData.accentColor].
 ///
+/// ## Customizing the Glow Position for Advanced Scroll Views
+///
 /// When building a [CustomScrollView] with a [GlowingOverscrollIndicator], the
 /// indicator will apply to the entire scrollable area, regardless of what
 /// slivers the CustomScrollView contains.
 ///
 /// For example, if your CustomScrollView contains a SliverAppBar in the first
 /// position, the GlowingOverscrollIndicator will overlay the SliverAppBar. To
-/// manipulate the position of the GlowingOverscrollIndicator in this case, use
-/// a [NestedScrollView].
+/// manipulate the position of the GlowingOverscrollIndicator in this case,
+/// you can either make use of a [NotificationListener] and provide a
+/// [OverscrollIndicatorNotification.paintOffset] to the
+/// notification, or use a [NestedScrollView].
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This example demonstrates how to use a [NotificationListener] to manipulate
+/// the placement of a [GlowingOverscrollIndicator] when building a
+/// [CustomScrollView]. Drag the scrollable to see the bounds of the overscroll
+/// indicator.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   double leadingPaintOffset = MediaQuery.of(context).padding.top + AppBar().preferredSize.height;
+///   return NotificationListener<OverscrollIndicatorNotification>(
+///     onNotification: (notification) {
+///       if (notification.leading) {
+///         notification.paintOffset = leadingPaintOffset;
+///       }
+///       return false;
+///     },
+///     child: CustomScrollView(
+///       slivers: [
+///         SliverAppBar(title: Text('Custom PaintOffset')),
+///         SliverToBoxAdapter(
+///           child: Container(
+///             color: Colors.amberAccent,
+///             height: 100,
+///             child: Center(child: Text('Glow all day!')),
+///           ),
+///         ),
+///         SliverFillRemaining(child: FlutterLogo()),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
@@ -73,6 +112,13 @@ import 'ticker_provider.dart';
 /// }
 /// ```
 /// {@end-tool}
+///
+/// See also:
+///
+///  * [OverscrollIndicatorNotification], which can be used to manipulate the
+///    glow position or prevent the glow from being painted at all
+///  * [NotificationListener], to listen for the
+///    [OverscrollIndicatorNotification]
 class GlowingOverscrollIndicator extends StatefulWidget {
   /// Creates a visual indication that a scroll view has overscrolled.
   ///
@@ -199,6 +245,16 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
   bool _handleScrollNotification(ScrollNotification notification) {
     if (!widget.notificationPredicate(notification))
       return false;
+
+    // Update the paint offset with the current scroll position. This makes
+    // sure that the glow effect correctly scrolls in line with the current
+    // scroll, e.g. when scrolling in the opposite direction again to hide
+    // the glow. Otherwise, the glow would always stay in a fixed position,
+    // even if the top of the content already scrolled away.
+    _leadingController._paintOffsetScrollPixels = -notification.metrics.pixels;
+    _trailingController._paintOffsetScrollPixels =
+        -(notification.metrics.maxScrollExtent - notification.metrics.pixels);
+
     if (notification is OverscrollNotification) {
       _GlowController controller;
       if (notification.overscroll < 0.0) {
@@ -213,6 +269,9 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
         final OverscrollIndicatorNotification confirmationNotification = OverscrollIndicatorNotification(leading: isLeading);
         confirmationNotification.dispatch(context);
         _accepted[isLeading] = confirmationNotification._accepted;
+        if (_accepted[isLeading]) {
+          controller._paintOffset = confirmationNotification.paintOffset;
+        }
       }
       assert(controller != null);
       assert(notification.metrics.axis == widget.axis);
@@ -309,6 +368,8 @@ class _GlowController extends ChangeNotifier {
   _GlowState _state = _GlowState.idle;
   AnimationController _glowController;
   Timer _pullRecedeTimer;
+  double _paintOffset = 0.0;
+  double _paintOffsetScrollPixels = 0.0;
 
   // animation values
   final Tween<double> _glowOpacityTween = Tween<double>(begin: 0.0, end: 0.0);
@@ -490,6 +551,7 @@ class _GlowController extends ChangeNotifier {
     final Offset center = Offset((size.width / 2.0) * (0.5 + _displacement), height - radius);
     final Paint paint = Paint()..color = color.withOpacity(_glowOpacity.value);
     canvas.save();
+    canvas.translate(0.0, _paintOffset + _paintOffsetScrollPixels);
     canvas.scale(1.0, scaleY);
     canvas.clipRect(rect);
     canvas.drawCircle(center, radius, paint);
@@ -587,6 +649,18 @@ class OverscrollIndicatorNotification extends Notification with ViewportNotifica
   /// Whether the indication will be shown on the leading edge of the scroll
   /// view.
   final bool leading;
+
+  /// Controls at which offset the glow should be drawn.
+  ///
+  /// A positive offset will move the glow away from its edge,
+  /// i.e. for a vertical, [leading] indicator, a [paintOffset] of 100.0 will
+  /// draw the indicator 100.0 pixels from the top of the edge.
+  /// For a vertical indicator with [leading] set to `false`, a [paintOffset]
+  /// of 100.0 will draw the indicator 100.0 pixels from the bottom instead.
+  ///
+  /// A negative [paintOffset] is generally not useful, since the glow will be
+  /// clipped.
+  double paintOffset = 0.0;
 
   bool _accepted = true;
 

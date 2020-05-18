@@ -49,6 +49,8 @@ enum Artifact {
   iproxy,
   /// The root of the Linux desktop sources.
   linuxDesktopPath,
+  // The root of the cpp headers for Linux desktop.
+  linuxHeaders,
   // The root of the cpp client code for Linux desktop.
   linuxCppClientWrapper,
   /// The root of the Windows desktop sources.
@@ -118,6 +120,8 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'iproxy';
     case Artifact.linuxDesktopPath:
       return '';
+    case Artifact.linuxHeaders:
+      return 'flutter_linux';
     case Artifact.windowsDesktopPath:
       return '';
     case Artifact.windowsCppClientWrapper:
@@ -356,6 +360,7 @@ class CachedArtifacts extends Artifacts {
       case Artifact.linuxDesktopPath:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterMacOSPodspec:
+      case Artifact.linuxHeaders:
         // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
         // https://github.com/flutter/flutter/issues/38935
@@ -530,6 +535,7 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.iproxy:
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
       case Artifact.linuxDesktopPath:
+      case Artifact.linuxHeaders:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.linuxCppClientWrapper:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);

@@ -24,11 +24,10 @@ const String kIconTreeShakerFlag = 'TreeShakeIcons';
 const bool kIconTreeShakerEnabledDefault = true;
 
 List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
-  try {
-    return (object as List<dynamic>).cast<Map<String, dynamic>>();
-  } on TypeError catch (_) {
-    throw IconTreeShakerException._(errorMessage);
+  if (object is List<dynamic>) {
+    return object.cast<Map<String, dynamic>>();
   }
+  throw IconTreeShakerException._(errorMessage);
 }
 
 /// A class that wraps the functionality of the const finder package and the

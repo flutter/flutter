@@ -208,6 +208,7 @@ class ManifestAssetBundle implements AssetBundle {
           <Uri>[],
           packageBasePath,
           packageName: package.name,
+          attributedPackage: package,
         );
 
         if (packageAssets == null) {
@@ -230,6 +231,9 @@ class ManifestAssetBundle implements AssetBundle {
       if (!asset.assetFileExists && assetVariants[asset].isEmpty) {
         globals.printStatus('Error detected in pubspec.yaml:', emphasis: true);
         globals.printError('No file or variants found for $asset.\n');
+        if (asset.package != null) {
+          globals.printError('This asset was included from package ${asset.package.name}.');
+        }
         return 1;
       }
       // The file name for an asset's "main" entry is whatever appears in
@@ -291,9 +295,11 @@ class ManifestAssetBundle implements AssetBundle {
 
 @immutable
 class _Asset {
-  const _Asset({ this.baseDir, this.relativeUri, this.entryUri });
+  const _Asset({ this.baseDir, this.relativeUri, this.entryUri, @required this.package });
 
   final String baseDir;
+
+  final Package package;
 
   /// A platform-independent URL where this asset can be found on disk on the
   /// host system relative to [baseDir].
@@ -367,6 +373,7 @@ List<_Asset> _getMaterialAssets(String fontSet) {
         baseDir: globals.fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'artifacts', 'material_fonts'),
         relativeUri: Uri(path: entryUri.pathSegments.last),
         entryUri: entryUri,
+        package: null,
       ));
     }
   }
@@ -638,6 +645,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
   String assetBase, {
   List<String> excludeDirs = const <String>[],
   String packageName,
+  Package attributedPackage,
 }) {
   final Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
 
@@ -645,13 +653,29 @@ Map<_Asset, List<_Asset>> _parseAssets(
   for (final Uri assetUri in flutterManifest.assets) {
     if (assetUri.toString().endsWith('/')) {
       wildcardDirectories.add(assetUri);
-      _parseAssetsFromFolder(packageConfig, flutterManifest, assetBase,
-          cache, result, assetUri,
-          excludeDirs: excludeDirs, packageName: packageName);
+      _parseAssetsFromFolder(
+        packageConfig,
+        flutterManifest,
+        assetBase,
+        cache,
+        result,
+        assetUri,
+        excludeDirs: excludeDirs,
+        packageName: packageName,
+        attributedPackage: attributedPackage,
+      );
     } else {
-      _parseAssetFromFile(packageConfig, flutterManifest, assetBase,
-          cache, result, assetUri,
-          excludeDirs: excludeDirs, packageName: packageName);
+      _parseAssetFromFile(
+        packageConfig,
+        flutterManifest,
+        assetBase,
+        cache,
+        result,
+        assetUri,
+        excludeDirs: excludeDirs,
+        packageName: packageName,
+        attributedPackage: attributedPackage,
+      );
     }
   }
 
@@ -663,6 +687,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
         assetBase,
         fontAsset.assetUri,
         packageName,
+        attributedPackage,
       );
       if (!baseAsset.assetFileExists) {
         globals.printError('Error: unable to locate asset entry in pubspec.yaml: "${fontAsset.assetUri}".');
@@ -685,6 +710,7 @@ void _parseAssetsFromFolder(
   Uri assetUri, {
   List<String> excludeDirs = const <String>[],
   String packageName,
+  Package attributedPackage,
 }) {
   final String directoryPath = globals.fs.path.join(
       assetBase, assetUri.toFilePath(windows: globals.platform.isWindows));
@@ -699,11 +725,18 @@ void _parseAssetsFromFolder(
   for (final FileSystemEntity entity in lister) {
     if (entity is File) {
       final String relativePath = globals.fs.path.relative(entity.path, from: assetBase);
-
       final Uri uri = Uri.file(relativePath, windows: globals.platform.isWindows);
 
-      _parseAssetFromFile(packageConfig, flutterManifest, assetBase, cache, result,
-          uri, packageName: packageName);
+      _parseAssetFromFile(
+        packageConfig,
+        flutterManifest,
+        assetBase,
+        cache,
+        result,
+        uri,
+        packageName: packageName,
+        attributedPackage: attributedPackage,
+      );
     }
   }
 }
@@ -717,12 +750,14 @@ void _parseAssetFromFile(
   Uri assetUri, {
   List<String> excludeDirs = const <String>[],
   String packageName,
+  Package attributedPackage,
 }) {
   final _Asset asset = _resolveAsset(
     packageConfig,
     assetBase,
     assetUri,
     packageName,
+    attributedPackage,
   );
   final List<_Asset> variants = <_Asset>[];
   for (final String path in cache.variantsFor(asset.assetFile.path)) {
@@ -737,6 +772,7 @@ void _parseAssetFromFile(
         baseDir: asset.baseDir,
         entryUri: entryUri,
         relativeUri: relativeUri,
+        package: attributedPackage,
       ),
     );
   }
@@ -749,12 +785,17 @@ _Asset _resolveAsset(
   String assetsBaseDir,
   Uri assetUri,
   String packageName,
+  Package attributedPackage,
 ) {
   final String assetPath = globals.fs.path.fromUri(assetUri);
   if (assetUri.pathSegments.first == 'packages' && !globals.fs.isFileSync(globals.fs.path.join(assetsBaseDir, assetPath))) {
     // The asset is referenced in the pubspec.yaml as
     // 'packages/PACKAGE_NAME/PATH/TO/ASSET .
-    final _Asset packageAsset = _resolvePackageAsset(assetUri, packageConfig);
+    final _Asset packageAsset = _resolvePackageAsset(
+      assetUri,
+      packageConfig,
+      attributedPackage,
+    );
     if (packageAsset != null) {
       return packageAsset;
     }
@@ -766,23 +807,29 @@ _Asset _resolveAsset(
         ? assetUri // Asset from the current application.
         : Uri(pathSegments: <String>['packages', packageName, ...assetUri.pathSegments]), // Asset from, and declared in $packageName.
     relativeUri: assetUri,
+    package: attributedPackage,
   );
 }
 
-_Asset _resolvePackageAsset(Uri assetUri, PackageConfig packageConfig) {
+_Asset _resolvePackageAsset(Uri assetUri, PackageConfig packageConfig, Package attributedPackage) {
   assert(assetUri.pathSegments.first == 'packages');
   if (assetUri.pathSegments.length > 1) {
     final String packageName = assetUri.pathSegments[1];
-    final Uri packageUri = packageConfig[packageName]?.packageUriRoot;
+    final Package package = packageConfig[packageName];
+    final Uri packageUri = package?.packageUriRoot;
     if (packageUri != null && packageUri.scheme == 'file') {
       return _Asset(
         baseDir: globals.fs.path.fromUri(packageUri),
         entryUri: assetUri,
         relativeUri: Uri(pathSegments: assetUri.pathSegments.sublist(2)),
+        package: attributedPackage,
       );
     }
   }
   globals.printStatus('Error detected in pubspec.yaml:', emphasis: true);
   globals.printError('Could not resolve package for asset $assetUri.\n');
+  if (attributedPackage != null) {
+    globals.printError('This asset was included from package ${attributedPackage.name}');
+  }
   return null;
 }
