@@ -17,22 +17,6 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   ///
   /// This getter should only be called after all surfaces are built.
   PersistedScene get _persistedScene {
-    assert(() {
-      if (_surfaceStack.length != 1) {
-        final String surfacePrintout = _surfaceStack
-            .map<Type>(
-                (PersistedContainerSurface surface) => surface.runtimeType)
-            .toList()
-            .join(', ');
-        throw Exception('Incorrect sequence of push/pop operations while '
-            'building scene surfaces. After building the scene the persisted '
-            'surface stack must contain a single element which corresponds '
-            'to the scene itself (_PersistedScene). All other surfaces '
-            'should have been popped off the stack. Found the following '
-            'surfaces in the stack:\n$surfacePrintout');
-      }
-      return true;
-    }());
     return _surfaceStack.first;
   }
 
@@ -547,6 +531,10 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   @override
   SurfaceScene build() {
     timeAction<void>(kProfilePrerollFrame, () {
+      while (_surfaceStack.length > 1) {
+        // Auto-pop layers that were pushed without a corresponding pop.
+        pop();
+      }
       _persistedScene.preroll();
     });
     return timeAction<SurfaceScene>(kProfileApplyFrame, () {
