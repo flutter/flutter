@@ -185,7 +185,7 @@ flutter:
     expect(device.isSupportedForProject(flutterProject), true);
   });
 
-  testUsingContext('isSupportedForProject is true with editable host app', () async {
+  testWithoutContext('isSupportedForProject is true with editable host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
@@ -200,7 +200,7 @@ flutter:
     expect(device.isSupportedForProject(flutterProject), true);
   });
 
-  testUsingContext('isSupportedForProject is false with no host app and no module', () async {
+  testWithoutContext('isSupportedForProject is false with no host app and no module', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('.packages').createSync();
@@ -214,7 +214,7 @@ flutter:
     expect(device.isSupportedForProject(flutterProject), false);
   });
 
-  testUsingContext('AndroidDevice returns correct ID for responsive emulator', () async {
+  testWithoutContext('AndroidDevice returns correct ID for responsive emulator', () async {
     final AndroidDevice device = setUpAndroidDevice(
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
