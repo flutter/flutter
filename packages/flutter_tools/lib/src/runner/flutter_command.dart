@@ -15,7 +15,6 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
 import '../base/signals.dart';
-import '../base/time.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -558,10 +557,12 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// Compute the [BuildInfo] for the current flutter command.
+  /// Commands that build multiple build modes can pass in a [forcedBuildMode]
+  /// to be used instead of parsing flags.
   ///
   /// Throws a [ToolExit] if the current set of options is not compatible with
-  /// eachother.
-  BuildInfo getBuildInfo() {
+  /// each other.
+  BuildInfo getBuildInfo({ BuildMode forcedBuildMode }) {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
 
@@ -603,7 +604,7 @@ abstract class FlutterCommand extends Command<void> {
         'combination with "--${FlutterOptions.kSplitDebugInfoOption}"',
       );
     }
-    final BuildMode buildMode = getBuildMode();
+    final BuildMode buildMode = forcedBuildMode ?? getBuildMode();
     final bool treeShakeIcons = argParser.options.containsKey('tree-shake-icons')
       && buildMode.isPrecompiled
       && boolArg('tree-shake-icons');
@@ -678,7 +679,7 @@ abstract class FlutterCommand extends Command<void> {
   /// so that this method can record and report the overall time to analytics.
   @override
   Future<void> run() {
-    final DateTime startTime = systemClock.now();
+    final DateTime startTime = globals.systemClock.now();
 
     return context.run<void>(
       name: 'command',
@@ -692,7 +693,7 @@ abstract class FlutterCommand extends Command<void> {
         try {
           commandResult = await verifyThenRunCommand(commandPath);
         } finally {
-          final DateTime endTime = systemClock.now();
+          final DateTime endTime = globals.systemClock.now();
           globals.printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
           _sendPostUsage(commandPath, commandResult, startTime, endTime);
         }
@@ -707,11 +708,11 @@ abstract class FlutterCommand extends Command<void> {
         commandPath,
         const FlutterCommandResult(ExitStatus.killed),
         startTime,
-        systemClock.now(),
+        globals.systemClock.now(),
       );
     };
-    signals.addHandler(io.ProcessSignal.SIGTERM, handler);
-    signals.addHandler(io.ProcessSignal.SIGINT, handler);
+    globals.signals.addHandler(io.ProcessSignal.SIGTERM, handler);
+    globals.signals.addHandler(io.ProcessSignal.SIGINT, handler);
   }
 
   /// Logs data about this command.

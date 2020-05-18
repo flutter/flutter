@@ -21,14 +21,13 @@ import 'dart.dart';
 const String kIconTreeShakerFlag = 'TreeShakeIcons';
 
 /// Whether icon font subsetting is enabled by default.
-const bool kIconTreeShakerEnabledDefault = false;
+const bool kIconTreeShakerEnabledDefault = true;
 
 List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
-  try {
-    return (object as List<dynamic>).cast<Map<String, dynamic>>();
-  } on TypeError catch (_) {
-    throw IconTreeShakerException._(errorMessage);
+  if (object is List<dynamic>) {
+    return object.cast<Map<String, dynamic>>();
   }
+  throw IconTreeShakerException._(errorMessage);
 }
 
 /// A class that wraps the functionality of the const finder package and the
@@ -127,7 +126,7 @@ class IconTreeShaker {
     );
 
     if (fonts.length != iconData.length) {
-      throwToolExit(
+      environment.logger.printStatus(
         'Expected to find fonts for ${iconData.keys}, but found '
         '${fonts.keys}. This usually means you are refering to '
         'font families in an IconData class but not including them '

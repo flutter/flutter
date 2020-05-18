@@ -125,7 +125,7 @@ Future<void> _runABTest() async {
 
   print('$taskName A/B test. Will run $runsPerTest times.');
 
-  final ABTest abTest = ABTest();
+  final ABTest abTest = ABTest(localEngine, taskName);
   for (int i = 1; i <= runsPerTest; i++) {
     section('Run #$i');
 
@@ -168,6 +168,10 @@ Future<void> _runABTest() async {
       print(abTest.printSummary());
     }
   }
+  abTest.finalize();
+
+  final File jsonFile = _uniqueFile(args['ab-result-file'] as String ?? 'ABresults#.json');
+  jsonFile.writeAsString(const JsonEncoder.withIndent('  ').convert(abTest.jsonMap));
 
   if (!silent) {
     section('Raw results');
@@ -176,6 +180,23 @@ Future<void> _runABTest() async {
 
   section('Final A/B results');
   print(abTest.printSummary());
+
+  print('');
+  print('Results saved to ${jsonFile.path}');
+}
+
+File _uniqueFile(String filenameTemplate) {
+  final List<String> parts = filenameTemplate.split('#');
+  if (parts.length != 2) {
+    return File(filenameTemplate);
+  }
+  File file = File(parts[0] + parts[1]);
+  int i = 1;
+  while (file.existsSync()) {
+    file = File(parts[0]+i.toString()+parts[1]);
+    i++;
+  }
+  return file;
 }
 
 void addTasks({
@@ -244,6 +265,12 @@ final ArgParser _argParser = ArgParser()
         throw ArgParserException('Option --ab must be a number, but was "$value".');
       }
     },
+  )
+  ..addOption(
+    'ab-result-file',
+    help: 'The filename in which to place the json encoded results of an A/B test.\n'
+          'The filename may contain a single # character to be replaced by a sequence\n'
+          'number if the name already exists.',
   )
   ..addFlag(
     'all',

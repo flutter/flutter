@@ -225,6 +225,7 @@ void main() {
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
+          '-Ptree-shake-icons=true',
           'bundleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -257,6 +258,7 @@ void main() {
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
+          '-Ptree-shake-icons=true',
           'bundleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -272,7 +274,6 @@ void main() {
     testUsingContext('guides the user when the shrinker fails', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
-
       when(mockProcessManager.start(
         <String>[
           gradlew,
@@ -281,6 +282,7 @@ void main() {
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
+          '-Ptree-shake-icons=true',
           'bundleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
