@@ -264,6 +264,9 @@ static NSString* uniqueIdFromDictionary(NSDictionary* dictionary) {
   return [[FlutterTextRange allocWithZone:zone] initWithNSRange:self.range];
 }
 
+- (BOOL)isEqualTo:(FlutterTextRange*)other {
+  return NSEqualRanges(self.range, other.range);
+}
 @end
 
 @interface FlutterTextInputView ()
@@ -329,14 +332,19 @@ static NSString* uniqueIdFromDictionary(NSDictionary* dictionary) {
     [self.inputDelegate textWillChange:self];
     [self.text setString:newText];
   }
-
+  BOOL needsEditingStateUpdate = textChanged;
   NSInteger composingBase = [state[@"composingBase"] intValue];
   NSInteger composingExtent = [state[@"composingExtent"] intValue];
   NSRange composingRange = [self clampSelection:NSMakeRange(MIN(composingBase, composingExtent),
                                                             ABS(composingBase - composingExtent))
                                         forText:self.text];
-  self.markedTextRange =
+  FlutterTextRange* newMarkedRange =
       composingRange.length > 0 ? [FlutterTextRange rangeWithNSRange:composingRange] : nil;
+  needsEditingStateUpdate =
+      needsEditingStateUpdate || newMarkedRange == nil
+          ? self.markedTextRange == nil
+          : [newMarkedRange isEqualTo:(FlutterTextRange*)self.markedTextRange];
+  self.markedTextRange = newMarkedRange;
 
   NSInteger selectionBase = [state[@"selectionBase"] intValue];
   NSInteger selectionExtent = [state[@"selectionExtent"] intValue];
@@ -346,6 +354,7 @@ static NSString* uniqueIdFromDictionary(NSDictionary* dictionary) {
   NSRange oldSelectedRange = [(FlutterTextRange*)self.selectedTextRange range];
   if (selectedRange.location != oldSelectedRange.location ||
       selectedRange.length != oldSelectedRange.length) {
+    needsEditingStateUpdate = YES;
     [self.inputDelegate selectionWillChange:self];
     [self setSelectedTextRange:[FlutterTextRange rangeWithNSRange:selectedRange]
             updateEditingState:NO];
@@ -357,7 +366,8 @@ static NSString* uniqueIdFromDictionary(NSDictionary* dictionary) {
 
   if (textChanged) {
     [self.inputDelegate textDidChange:self];
-
+  }
+  if (needsEditingStateUpdate) {
     // For consistency with Android behavior, send an update to the framework.
     [self updateEditingState];
   }
