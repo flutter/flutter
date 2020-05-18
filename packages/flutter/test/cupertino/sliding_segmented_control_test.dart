@@ -776,7 +776,8 @@ void main() {
     expect(groupValue, 0);
 
     final Offset centerOfTwo = tester.getCenter(find.byWidget(children[1]));
-    // Tap just inside segment bounds
+    // Tap within the bounds of children[1], but not at the center.
+    // children[1] is a SizedBox thus not hittable by itself.
     await tester.tapAt(centerOfTwo + const Offset(10, 0));
 
     expect(groupValue, 1);

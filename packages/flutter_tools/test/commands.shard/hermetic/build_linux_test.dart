@@ -82,28 +82,38 @@ void main() {
     projectTemplateVersionFile.writeAsStringSync(templateVersion.toString());
   }
 
-  // Returns the command list matching the build_linux call to cmake.
-  List<String> cmakeCommand(String buildMode) {
-    return <String>[
-      'cmake',
-      '-S',
-      '/linux',
-      '-B',
-      'build/linux/$buildMode',
-      '-G',
-      'Ninja',
-      '-DCMAKE_BUILD_TYPE=${toTitleCase(buildMode)}',
-    ];
+  // Returns the command matching the build_linux call to cmake.
+  FakeCommand cmakeCommand(String buildMode, {void Function() onRun}) {
+    return FakeCommand(
+      command: <String>[
+        'cmake',
+        '-G',
+        'Ninja',
+        '-DCMAKE_BUILD_TYPE=${toTitleCase(buildMode)}',
+        '/linux',
+      ],
+      workingDirectory: 'build/linux/$buildMode',
+      onRun: onRun,
+    );
   }
 
-  // Returns the command list matching the build_linux call to ninja.
-  List<String> ninjaCommand(String buildMode) {
-    return <String>[
-      'ninja',
-      '-C',
-      'build/linux/$buildMode',
-      'install',
-    ];
+  // Returns the command matching the build_linux call to ninja.
+  FakeCommand ninjaCommand(String buildMode, {
+    Map<String, String> environment,
+    void Function() onRun,
+    String stdout = '',
+  }) {
+    return FakeCommand(
+      command: <String>[
+        'ninja',
+        '-C',
+        'build/linux/$buildMode',
+        'install',
+      ],
+      environment: environment,
+      onRun: onRun,
+      stdout: stdout,
+    );
   }
 
   testUsingContext('Linux build fails when there is no linux project', () async {
@@ -165,8 +175,8 @@ void main() {
   testUsingContext('Linux build invokes CMake and ninja, and writes temporary files', () async {
     final BuildCommand command = BuildCommand();
     processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(command: cmakeCommand('release')),
-      FakeCommand(command: ninjaCommand('release')),
+      cmakeCommand('release'),
+      ninjaCommand('release'),
     ]);
 
     setUpMockProjectFilesForBuild();
@@ -186,7 +196,7 @@ void main() {
     final BuildCommand command = BuildCommand();
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(command: cmakeCommand('release'), onRun: () {
+      cmakeCommand('release', onRun: () {
         throw ArgumentError();
       }),
     ]);
@@ -205,8 +215,8 @@ void main() {
     final BuildCommand command = BuildCommand();
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(command: cmakeCommand('release')),
-      FakeCommand(command: ninjaCommand('release'), onRun: () {
+      cmakeCommand('release'),
+      ninjaCommand('release', onRun: () {
         throw ArgumentError();
       }),
     ]);
@@ -225,10 +235,10 @@ void main() {
     final BuildCommand command = BuildCommand();
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(command: cmakeCommand('debug')),
-      FakeCommand(
-        command: ninjaCommand('debug'),
-        stdout: 'STDOUT STUFF',),
+      cmakeCommand('debug'),
+      ninjaCommand('debug',
+        stdout: 'STDOUT STUFF',
+      ),
     ]);
 
     await createTestCommandRunner(command).run(
@@ -247,9 +257,8 @@ void main() {
     final BuildCommand command = BuildCommand();
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(command: cmakeCommand('debug')),
-      FakeCommand(
-        command: ninjaCommand('debug'),
+      cmakeCommand('debug'),
+      ninjaCommand('debug',
         environment: const <String, String>{
           'VERBOSE_SCRIPT_LOGGING': 'true'
         },
@@ -273,8 +282,8 @@ void main() {
     final BuildCommand command = BuildCommand();
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(command: cmakeCommand('debug')),
-      FakeCommand(command: ninjaCommand('debug')),
+      cmakeCommand('debug'),
+      ninjaCommand('debug'),
     ]);
 
 
@@ -292,8 +301,8 @@ void main() {
     final BuildCommand command = BuildCommand();
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(command: cmakeCommand('profile')),
-      FakeCommand(command: ninjaCommand('profile')),
+      cmakeCommand('profile'),
+      ninjaCommand('profile'),
     ]);
 
     await createTestCommandRunner(command).run(
@@ -310,8 +319,8 @@ void main() {
     final BuildCommand command = BuildCommand();
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(command: cmakeCommand('release')),
-      FakeCommand(command: ninjaCommand('release')),
+      cmakeCommand('release'),
+      ninjaCommand('release'),
     ]);
     fileSystem.file('lib/other.dart')
       .createSync(recursive: true);
@@ -396,8 +405,8 @@ set(BINARY_NAME "fizz_bar")
     final BuildCommand command = BuildCommand();
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(command: cmakeCommand('release')),
-      FakeCommand(command: ninjaCommand('release')),
+      cmakeCommand('release'),
+      ninjaCommand('release'),
     ]);
 
     await createTestCommandRunner(command).run(
