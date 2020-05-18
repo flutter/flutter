@@ -21,7 +21,7 @@ export 'package:flutter/services.dart' show AutofillHints;
 /// viewport. To workaround this problem, ensure clients in the same [AutofillGroup]
 /// are built together:
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// An example form with autofillable fields grouped into different `AutofillGroup`s.
 ///
