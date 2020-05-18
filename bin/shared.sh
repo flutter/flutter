@@ -154,7 +154,8 @@ function shared::execute() {
     echo "Error: Unable to find git in your PATH."
     exit 1
   fi
-  # Test if the flutter directory is a git clone (otherwise git rev-parse HEAD would fail)
+  # Test if the flutter directory is a git clone (otherwise git rev-parse HEAD
+  # would fail)
   if [[ ! -e "$FLUTTER_ROOT/.git" ]]; then
     echo "Error: The Flutter directory is not a clone of the GitHub project."
     echo "       The flutter tool requires Git in order to operate properly;"
@@ -163,7 +164,8 @@ function shared::execute() {
     exit 1
   fi
 
-  # To debug the tool, you can uncomment the following lines to enable checked mode and set an observatory port:
+  # To debug the tool, you can uncomment the following lines to enable checked
+  # mode and set an observatory port:
   # FLUTTER_TOOL_ARGS="--enable-asserts $FLUTTER_TOOL_ARGS"
   # FLUTTER_TOOL_ARGS="$FLUTTER_TOOL_ARGS --observe=65432"
 
