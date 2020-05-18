@@ -7,11 +7,13 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
+import 'cmake.dart';
 
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(
@@ -19,7 +21,7 @@ Future<void> buildLinux(
   BuildInfo buildInfo, {
     String target = 'lib/main.dart',
   }) async {
-  if (!linuxProject.makeFile.existsSync()) {
+  if (!linuxProject.cmakeFile.existsSync()) {
     throwToolExit('No Linux desktop project configured. See '
       'https://github.com/flutter/flutter/wiki/Desktop-shells#create '
       'to learn about adding Linux support to a project.');
@@ -39,29 +41,18 @@ Future<void> buildLinux(
       'Upgrade Flutter and try again.');
   }
 
-  final StringBuffer buffer = StringBuffer('''
-# Generated code do not commit.
-export FLUTTER_ROOT=${Cache.flutterRoot}
-export FLUTTER_TARGET=$target
-export PROJECT_DIR=${linuxProject.project.directory.path}
-''');
+  // Build the environment that needs to be set for the re-entrant flutter build
+  // step.
   final Map<String, String> environmentConfig = buildInfo.toEnvironmentConfig();
-  for (final String key in environmentConfig.keys) {
-    final String value = environmentConfig[key];
-    buffer.writeln('export $key=$value');
-  }
-
+  environmentConfig['FLUTTER_TARGET'] = target;
   if (globals.artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
-    buffer.writeln('export FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
-    buffer.writeln('export LOCAL_ENGINE=${globals.fs.path.basename(engineOutPath)}');
+    environmentConfig['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
+    environmentConfig['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
+  writeGeneratedCmakeConfig(Cache.flutterRoot, linuxProject, environmentConfig);
 
-  /// Cache flutter configuration files in the linux directory.
-  linuxProject.generatedMakeConfigFile
-    ..createSync(recursive: true)
-    ..writeAsStringSync(buffer.toString());
   createPluginSymlinks(linuxProject.project);
 
   if (!buildInfo.isDebug) {
@@ -73,36 +64,77 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
     globals.printStatus('');
   }
 
-  // Invoke make.
-  final String buildFlag = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
-  final Stopwatch sw = Stopwatch()..start();
   final Status status = globals.logger.startProgress(
     'Building Linux application...',
     timeout: null,
   );
+  try {
+    final String buildModeName = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
+    final Directory buildDirectory = globals.fs.directory(getLinuxBuildDirectory()).childDirectory(buildModeName);
+    await _runCmake(buildModeName, linuxProject.cmakeFile.parent, buildDirectory);
+    await _runBuild(buildDirectory);
+  } finally {
+    status.cancel();
+  }
+}
+
+Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buildDir) async {
+  final Stopwatch sw = Stopwatch()..start();
+
+  final String buildFlag = toTitleCase(buildModeName);
   int result;
   try {
     result = await processUtils.stream(
       <String>[
-        'make',
+        'cmake',
+        '-S',
+        sourceDir.path,
+        '-B',
+        buildDir.path,
+        '-G',
+        'Ninja',
+        '-DCMAKE_BUILD_TYPE=$buildFlag',
+      ],
+      environment: <String, String>{
+        'CC': 'clang',
+        'CXX': 'clang++'
+      },
+      trace: true,
+    );
+  } on ArgumentError {
+    throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
+  }
+  if (result != 0) {
+    throwToolExit('Unable to generate build files');
+  }
+  globals.flutterUsage.sendTiming('build', 'cmake-linux', Duration(milliseconds: sw.elapsedMilliseconds));
+}
+
+Future<void> _runBuild(Directory buildDir) async {
+  final Stopwatch sw = Stopwatch()..start();
+
+  int result;
+  try {
+    result = await processUtils.stream(
+      <String>[
+        'ninja',
         '-C',
-        linuxProject.makeFile.parent.path,
-        'BUILD=$buildFlag',
+        buildDir.path,
+        'install',
       ],
       environment: <String, String>{
         if (globals.logger.isVerbose)
           'VERBOSE_SCRIPT_LOGGING': 'true'
-      }, trace: true,
+      },
+      trace: true,
     );
   } on ArgumentError {
-    throwToolExit("make not found. Run 'flutter doctor' for more information.");
-  } finally {
-    status.cancel();
+    throwToolExit("ninja not found. Run 'flutter doctor' for more information.");
   }
   if (result != 0) {
     throwToolExit('Build process failed');
   }
-  globals.flutterUsage.sendTiming('build', 'make-linux', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'linux-ninja', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
 // Checks the template version of [project] against the current template

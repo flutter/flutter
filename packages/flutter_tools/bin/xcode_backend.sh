@@ -288,8 +288,8 @@ EmbedFlutterFrameworks() {
 
   # Copy Xcode behavior and don't copy over headers or modules.
   RunCommand rsync -av --delete --filter "- .DS_Store/" --filter "- Headers/" --filter "- Modules/" "${flutter_ios_engine_folder}/Flutter.framework" "${xcode_frameworks_dir}/"
-  if [[ "$ACTION" != "install" ]]; then
-    # Strip bitcode from the destination unless archiving.
+  if [[ "$ACTION" != "install" || "$ENABLE_BITCODE" == "NO" ]]; then
+    # Strip bitcode from the destination unless archiving, or if bitcode is disabled entirely.
     RunCommand "${DT_TOOLCHAIN_DIR}"/usr/bin/bitcode_strip "${flutter_ios_engine_folder}/Flutter.framework/Flutter" -r -o "${xcode_frameworks_dir}/Flutter.framework/Flutter"
   fi
 

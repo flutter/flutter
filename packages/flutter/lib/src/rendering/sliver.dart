@@ -634,7 +634,7 @@ class SliverGeometry with Diagnosticable {
   ///
   /// This value is typically 0 when outside of the viewport and grows or
   /// shrinks from 0 or to 0 as the sliver is being scrolled into and out of the
-  /// viewport unless then sliver wants to achieve a special effect and push
+  /// viewport unless the sliver wants to achieve a special effect and push
   /// down the layout start position of subsequent slivers before the sliver is
   /// even scrolled into the viewport.
   final double layoutExtent;

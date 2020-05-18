@@ -43,6 +43,19 @@ IF NOT EXIST "%flutter_root%\.git" (
   EXIT /B 1
 )
 
+REM Detect which PowerShell executable is available on the Host
+REM PowerShell version <= 5: PowerShell.exe
+REM PowerShell version >= 6: pwsh.exe
+WHERE /Q pwsh.exe && (
+    SET powershell_executable=pwsh.exe
+) || WHERE /Q PowerShell.exe && (
+    SET powershell_executable=PowerShell.exe
+) || (
+    ECHO Error: PowerShell executable not found.
+    ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH.
+    EXIT /B 1
+)
+
 REM Ensure that bin/cache exists.
 IF NOT EXIST "%cache_dir%" MKDIR "%cache_dir%"
 
@@ -101,7 +114,7 @@ GOTO :after_subroutine
     SET update_dart_bin=%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1
     REM Escape apostrophes from the executable path
     SET "update_dart_bin=!update_dart_bin:'=''!"
-    PowerShell.exe -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'"
+    %powershell_executable% -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'"
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to update Dart SDK. Retrying...
       timeout /t 5 /nobreak
@@ -152,9 +165,9 @@ GOTO :after_subroutine
     POPD
 
     IF "%FLUTTER_TOOL_ARGS%" == "" (
-      "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" --no-enable-mirrors "%script_path%"
+      "%dart%" --disable-dart-dev --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" --no-enable-mirrors "%script_path%"
     ) else (
-      "%dart%" "%FLUTTER_TOOL_ARGS%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
+      "%dart%" --disable-dart-dev "%FLUTTER_TOOL_ARGS%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
     )
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to create dart snapshot for flutter tool.
@@ -176,7 +189,7 @@ REM
 REM Do not use the CALL command in the next line to execute Dart. CALL causes
 REM Windows to re-read the line from disk after the CALL command has finished
 REM regardless of the ampersand chain.
-"%dart%" --packages="%flutter_tools_dir%\.packages" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %* & exit /B !ERRORLEVEL!
+"%dart%" --disable-dart-dev --packages="%flutter_tools_dir%\.packages" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %* & exit /B !ERRORLEVEL!
 
 :final_exit
 EXIT /B %exit_code%

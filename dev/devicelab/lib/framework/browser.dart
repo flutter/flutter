@@ -7,6 +7,7 @@ import 'dart:convert' show json, utf8, LineSplitter, JsonEncoder;
 import 'dart:io' as io;
 import 'dart:math' as math;
 
+import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
@@ -76,8 +77,12 @@ class Chrome {
   /// process encounters an error. In particular, [onError] is called when the
   /// Chrome process exits prematurely, i.e. before [stop] is called.
   static Future<Chrome> launch(ChromeOptions options, { String workingDirectory, @required ChromeErrorCallback onError }) async {
-    final io.ProcessResult versionResult = io.Process.runSync(_findSystemChromeExecutable(), const <String>['--version']);
-    print('Launching ${versionResult.stdout}');
+    if (!io.Platform.isWindows) {
+      final io.ProcessResult versionResult = io.Process.runSync(_findSystemChromeExecutable(), const <String>['--version']);
+      print('Launching ${versionResult.stdout}');
+    } else {
+      print('Launching Chrome...');
+    }
 
     final bool withDebugging = options.debugPort != null;
     final List<String> args = <String>[
@@ -217,8 +222,23 @@ String _findSystemChromeExecutable() {
     return (which.stdout as String).trim();
   } else if (io.Platform.isMacOS) {
     return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+  } else if (io.Platform.isWindows) {
+    const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
+    final List<String> kWindowsPrefixes = <String>[
+      io.Platform.environment['LOCALAPPDATA'],
+      io.Platform.environment['PROGRAMFILES'],
+      io.Platform.environment['PROGRAMFILES(X86)'],
+    ];
+    final String windowsPrefix = kWindowsPrefixes.firstWhere((String prefix) {
+      if (prefix == null) {
+        return false;
+      }
+      final String expectedPath = path.join(prefix, kWindowsExecutable);
+      return io.File(expectedPath).existsSync();
+    }, orElse: () => '.');
+    return path.join(windowsPrefix, kWindowsExecutable);
   } else {
-    throw Exception('Web benchmarks cannot run on ${io.Platform.operatingSystem} yet.');
+    throw Exception('Web benchmarks cannot run on ${io.Platform.operatingSystem}.');
   }
 }
 

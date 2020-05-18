@@ -77,7 +77,8 @@ void updateMissingResources(String localizationPath, String groupPrefix) {
   final Directory localizationDir = Directory(localizationPath);
   final RegExp filenamePattern = RegExp('${groupPrefix}_(\\w+)\\.arb');
 
-  final Set<String> requiredKeys = resourceKeys(loadBundle(File(path.join(localizationPath, '${groupPrefix}_en.arb'))));
+  final Map<String, dynamic> englishBundle = loadBundle(File(path.join(localizationPath, '${groupPrefix}_en.arb')));
+  final Set<String> requiredKeys = resourceKeys(englishBundle);
 
   for (final FileSystemEntity entity in localizationDir.listSync().toList()..sort(sortFilesByPath)) {
     final String entityPath = entity.path;
@@ -94,7 +95,8 @@ void updateMissingResources(String localizationPath, String groupPrefix) {
           (String key) => !isPluralVariation(key, localeBundle) && !intentionallyOmitted(key, localeBundle)
         ).toSet();
         if (missingResources.isNotEmpty) {
-          localeBundle.addEntries(missingResources.map((String k) => MapEntry<String, String>(k, 'TBD')));
+          localeBundle.addEntries(missingResources.map((String k) =>
+            MapEntry<String, String>(k, englishBundle[k].toString())));
           writeBundle(arbFile, localeBundle);
           print('Updated $entityPath with missing entries for $missingResources');
         }

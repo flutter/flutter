@@ -134,6 +134,27 @@ void main() {
     }
   });
 
+  test('no unauthorized imports of package:file/local.dart', () {
+    final List<String> whitelistedPath = <String>[
+      globals.fs.path.join(flutterTools, 'lib', 'src', 'base', 'file_system.dart'),
+    ];
+    for (final String dirName in <String>['lib', 'bin', 'test']) {
+      final Iterable<File> files =  globals.fs.directory(globals.fs.path.join(flutterTools, dirName))
+        .listSync(recursive: true)
+        .where(_isDartFile)
+        .where((FileSystemEntity entity) => !whitelistedPath.contains(entity.path))
+        .map(_asFile);
+      for (final File file in files) {
+        for (final String line in file.readAsLinesSync()) {
+          if (line.startsWith(RegExp(r'import.*package:file/local.dart'))) {
+            final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
+            fail("$relativePath imports 'package:file/local.dart'; use 'lib/src/base/file_system.dart' instead");
+          }
+        }
+      }
+    }
+  });
+
   test('no unauthorized imports of dart:convert', () {
     final List<String> whitelistedPaths = <String>[
       globals.fs.path.join(flutterTools, 'lib', 'src', 'convert.dart'),

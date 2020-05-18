@@ -587,4 +587,111 @@ void main() {
     await tester.pump();
     expect(hitCounts, const <int> [0, 0, 0]);
   });
+
+  testWidgets('LayoutBuilder does not call builder when layout happens but layout constraints do not change', (WidgetTester tester) async {
+    int builderInvocationCount = 0;
+
+    Future<void> pumpTestWidget(Size size) async {
+      await tester.pumpWidget(
+        // Center is used to give the SizedBox the power to determine constraints for LayoutBuilder
+        Center(
+          child: SizedBox.fromSize(
+            size: size,
+            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+              builderInvocationCount += 1;
+              return _LayoutSpy();
+            }),
+          ),
+        ),
+      );
+    }
+
+    await pumpTestWidget(const Size(10, 10));
+
+    final _RenderLayoutSpy spy = tester.renderObject(find.byType(_LayoutSpy));
+
+    // The child is laid out once the first time.
+    expect(spy.performLayoutCount, 1);
+    expect(spy.performResizeCount, 1);
+
+    // The initial `pumpWidget` will trigger `performRebuild`, asking for
+    // builder invocation.
+    expect(builderInvocationCount, 1);
+
+    // Invalidate the layout without chaning the constraints.
+    tester.renderObject(find.byType(LayoutBuilder)).markNeedsLayout();
+
+    // The second pump will not go through the `performRebuild` or `update`, and
+    // only judge the need for builder invocation based on constraints, which
+    // didn't change, so we don't expect any counters to go up.
+    await tester.pump();
+    expect(builderInvocationCount, 1);
+    expect(spy.performLayoutCount, 1);
+    expect(spy.performResizeCount, 1);
+
+    // Cause the `update` to be called (but not `performRebuild`), triggering
+    // builder invocation.
+    await pumpTestWidget(const Size(10, 10));
+    expect(builderInvocationCount, 2);
+
+    // The spy does not invalidate its layout on widget update, so no
+    // layout-related methods should be called.
+    expect(spy.performLayoutCount, 1);
+    expect(spy.performResizeCount, 1);
+
+    // Have the child request layout and verify that the child gets laid out
+    // despite layout constraints remaining constant.
+    spy.markNeedsLayout();
+    await tester.pump();
+
+    // Builder is not invoked. This was a layout-only pump with the same parent
+    // constraints.
+    expect(builderInvocationCount, 2);
+
+    // Expect performLayout to be called.
+    expect(spy.performLayoutCount, 2);
+
+    // performResize should not be called because the spy sets sizedByParent,
+    // and the constraints did not change.
+    expect(spy.performResizeCount, 1);
+
+    // Change the parent size, triggering constraint change.
+    await pumpTestWidget(const Size(20, 20));
+
+    // We should see everything invoked once.
+    expect(builderInvocationCount, 3);
+    expect(spy.performLayoutCount, 3);
+    expect(spy.performResizeCount, 2);
+  });
+}
+
+class _LayoutSpy extends LeafRenderObjectWidget {
+  @override
+  LeafRenderObjectElement createElement() => _LayoutSpyElement(this);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderLayoutSpy();
+}
+
+class _LayoutSpyElement extends LeafRenderObjectElement {
+  _LayoutSpyElement(LeafRenderObjectWidget widget) : super(widget);
+}
+
+class _RenderLayoutSpy extends RenderBox {
+  int performLayoutCount = 0;
+  int performResizeCount = 0;
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  void performResize() {
+    performResizeCount += 1;
+    size = constraints.biggest;
+  }
+
+  @override
+  void performLayout() {
+    performLayoutCount += 1;
+  }
 }
