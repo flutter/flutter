@@ -17,6 +17,7 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'icon_tree_shaker.dart';
+import 'localizations.dart';
 
 /// The define to pass a [BuildMode].
 const String kBuildMode = 'BuildMode';
@@ -183,7 +184,9 @@ class KernelSnapshot extends Target {
   ];
 
   @override
-  List<Target> get dependencies => <Target>[];
+  List<Target> get dependencies => const <Target>[
+    GenerateLocalizationsTarget(),
+  ];
 
   @override
   Future<void> build(Environment environment) async {
