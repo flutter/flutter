@@ -190,8 +190,7 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
   }
 
   @override
-  void drawPoints(ui.PointMode pointMode, Float32List points,
-      double strokeWidth, ui.Color color) {
+  void drawPoints(ui.PointMode pointMode, Float32List points, SurfacePaintData paint) {
     throw UnimplementedError();
   }
 
