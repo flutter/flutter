@@ -260,9 +260,13 @@ class AlertDialog extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.shape,
     this.scrollable = false,
+    this.adjustForTextScale = true, // TODO(clocksmith): For demo only, remove!
   }) : assert(contentPadding != null),
        assert(clipBehavior != null),
        super(key: key);
+
+  /// TODO(clocksmith): For demo only, remove!
+  final bool adjustForTextScale;
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -470,12 +474,22 @@ class AlertDialog extends StatelessWidget {
       }
     }
 
+    final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final TextDirection textDirection = Directionality.of(context);
+    final double paddingScaleFactor = adjustForTextScale ? 1.0 / textScaleFactor.clamp(1.0, 3.0) : 1.0;
+
     Widget titleWidget;
     Widget contentWidget;
     Widget actionsWidget;
-    if (title != null)
-     titleWidget = Padding(
-        padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
+    if (title != null) {
+      final EdgeInsets defaultTitlePadding = titlePadding?.resolve(textDirection) ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0);
+      titleWidget = Padding(
+        padding: EdgeInsets.only(
+          left: defaultTitlePadding.left * paddingScaleFactor,
+          right: defaultTitlePadding.right * paddingScaleFactor,
+          top: defaultTitlePadding.top * paddingScaleFactor,
+          bottom: actions == null && content == null ? defaultTitlePadding.bottom * paddingScaleFactor : defaultTitlePadding.bottom,
+        ),
         child: DefaultTextStyle(
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6,
           child: Semantics(
@@ -485,19 +499,34 @@ class AlertDialog extends StatelessWidget {
           ),
         ),
       );
+    }
 
-    if (content != null)
+    if (content != null) {
+      final EdgeInsets defaultContentPadding = contentPadding.resolve(textDirection);
       contentWidget = Padding(
-        padding: contentPadding,
+        padding: EdgeInsets.only(
+          left: defaultContentPadding.left * paddingScaleFactor,
+          right: defaultContentPadding.right * paddingScaleFactor,
+          top: title == null ? defaultContentPadding.top * paddingScaleFactor : defaultContentPadding.top,
+          bottom: actions == null ? defaultContentPadding.bottom * paddingScaleFactor : defaultContentPadding.bottom,
+        ),
         child: DefaultTextStyle(
-          style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subtitle1,
+          style: contentTextStyle ?? dialogTheme.contentTextStyle ??
+              theme.textTheme.subtitle1,
           child: content,
         ),
       );
+    }
 
-    if (actions != null)
+    if (actions != null) {
+      final EdgeInsets defaultActionsPadding = actionsPadding.resolve(textDirection);
       actionsWidget = Padding(
-        padding: actionsPadding,
+        padding: EdgeInsets.only(
+          left: defaultActionsPadding.left * paddingScaleFactor,
+          right: defaultActionsPadding.right * paddingScaleFactor,
+          top: title == null && content == null ? defaultActionsPadding.top * paddingScaleFactor : defaultActionsPadding.top,
+          bottom: defaultActionsPadding.bottom * paddingScaleFactor,
+        ),
         child: ButtonBar(
           buttonPadding: buttonPadding,
           overflowDirection: actionsOverflowDirection,
@@ -505,6 +534,7 @@ class AlertDialog extends StatelessWidget {
           children: actions,
         ),
       );
+    }
 
     List<Widget> columnChildren;
     if (scrollable) {
