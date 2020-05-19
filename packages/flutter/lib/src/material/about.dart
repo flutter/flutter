@@ -10,18 +10,22 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/src/material/master_detail_flow.dart';
 import 'package:flutter/widgets.dart' hide Flow;
 
 import 'app_bar.dart';
 import 'debug.dart';
 import 'dialog.dart';
 import 'flat_button.dart';
+import 'ink_decoration.dart';
 import 'list_tile.dart';
+import 'material.dart';
 import 'material_localizations.dart';
 import 'page.dart';
 import 'progress_indicator.dart';
 import 'scaffold.dart';
 import 'scrollbar.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 
 /// A [ListTile] that shows an about box.
@@ -474,6 +478,253 @@ class LicensePage extends StatefulWidget {
 }
 
 class _LicensePageState extends State<LicensePage> {
+  final ValueNotifier<int> selectedId = ValueNotifier<int>(null);
+
+  final Future<_LicenseData> licenses =
+      LicenseRegistry.licenses.fold<_LicenseData>(
+    _LicenseData(),
+    (_LicenseData previous, LicenseEntry license) {
+      return previous..addLicense(license);
+    },
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return MasterDetailFlow(
+      title: Text(MaterialLocalizations.of(context).licensesPageTitle),
+      masterViewBuilder: _buildPackagesView,
+      detailPageBuilder: _buildPackageLicensePage,
+    );
+  }
+
+  Widget _buildPackagesView(final BuildContext _, final bool isLateral) {
+    return AnimatedSwitcher(
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+      duration: kThemeAnimationDuration,
+      child: FutureBuilder<_LicenseData>(
+        future: licenses,
+        builder: (BuildContext context, AsyncSnapshot<_LicenseData> snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.done:
+              _initDefaultDetailPage(snapshot.data, context);
+              return ValueListenableBuilder<int>(
+                valueListenable: selectedId,
+                builder: (BuildContext context, int selectedId, Widget _) {
+                  return Center(
+                    child: Material(
+                      color: Theme.of(context).cardColor,
+                      elevation: 4,
+                      child: Container(
+                        constraints:
+                            BoxConstraints.loose(const Size.fromWidth(600)),
+                        child: _buildPackagesList(
+                          context,
+                          selectedId,
+                          snapshot.data,
+                          isLateral,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            default:
+              return const Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
+    );
+  }
+
+  void _initDefaultDetailPage(_LicenseData data, BuildContext context) {
+    final String packageName = data.packages[selectedId.value ?? 0];
+    final List<int> bindings = data.packageLicenseBindings[packageName];
+    MasterDetailFlow.of(context).setInitialDetailPage(
+      _DetailArguments(
+        packageName,
+        bindings.map((int i) => data.licenses[i]).toList(growable: false),
+      ),
+    );
+  }
+
+  Widget _buildPackagesList(
+    final BuildContext context,
+    final int selectedId,
+    final _LicenseData data,
+    final bool drawSelection,
+  ) {
+    return ListView.builder(
+      itemCount: data.packages.length,
+      itemBuilder: (BuildContext context, int index) {
+        if (index != 0) {
+          return _buildPackageTile(context, index - 1,
+              drawSelection && index - 1 == (selectedId ?? 0), data);
+        }
+        return _AboutProgram(
+          name: widget.applicationName,
+          icon: widget.applicationIcon,
+          version: widget.applicationVersion,
+          legalese: widget.applicationLegalese,
+        );
+      },
+    );
+  }
+
+  Widget _buildPackageTile(
+    BuildContext context,
+    int index,
+    bool isSelected,
+    _LicenseData data,
+  ) {
+    final String packageName = data.packages[index];
+    final List<int> bindings = data.packageLicenseBindings[packageName];
+    return Ink(
+      color: isSelected
+          ? Theme.of(context).highlightColor
+          : Theme.of(context).cardColor,
+      child: ListTile(
+        title: Text(packageName),
+        subtitle: Text('${bindings.length} licenses'),
+        selected: isSelected,
+        onTap: () {
+          selectedId.value = index;
+          MasterDetailFlow.of(context).openDetailPage(_DetailArguments(
+            packageName,
+            bindings.map((int i) => data.licenses[i]).toList(growable: false),
+          ));
+        },
+      ),
+    );
+  }
+
+  Widget _buildPackageLicensePage(
+    final BuildContext context,
+    final Object arguments,
+    final ScrollController scrollController,
+  ) {
+    assert(arguments is _DetailArguments);
+    final _DetailArguments args = arguments as _DetailArguments;
+    return _PackageLicensePage(
+      packageName: args.packageName,
+      licenseEntries: args.licenseEntries,
+      scrollController: scrollController,
+    );
+  }
+}
+
+class _AboutProgram extends StatelessWidget {
+  const _AboutProgram(
+      {Key key, this.name, this.version, this.icon, this.legalese})
+      : super(key: key);
+
+  final String name;
+  final String version;
+  final Widget icon;
+  final String legalese;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: _getGutterSize(context),
+        vertical: 24.0,
+      ),
+      child: Column(
+        children: <Widget>[
+          Text(
+            name,
+            style: Theme.of(context).textTheme.headline5,
+            textAlign: TextAlign.center,
+          ),
+          if (icon != null)
+            IconTheme(
+              data: Theme.of(context).iconTheme,
+              child: icon,
+            ),
+          Text(
+            version,
+            style: Theme.of(context).textTheme.bodyText2,
+            textAlign: TextAlign.center,
+          ),
+          Container(height: 18.0),
+          Text(
+            legalese ?? '',
+            style: Theme.of(context).textTheme.caption,
+            textAlign: TextAlign.center,
+          ),
+          Container(height: 18.0),
+          Text(
+            'Powered by Flutter',
+            style: Theme.of(context).textTheme.bodyText2,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LicenseData {
+  final List<LicenseEntry> licenses = <LicenseEntry>[];
+  final Map<String, List<int>> packageLicenseBindings = <String, List<int>>{};
+  final List<String> packages = <String>[];
+
+  void addLicense(LicenseEntry entry) {
+    for (final String package in entry.packages) {
+      _addPackage(package);
+      packageLicenseBindings[package].add(licenses.length);
+    }
+    licenses.add(entry);
+  }
+
+  void _addPackage(String package) {
+    if (!packageLicenseBindings.containsKey(package)) {
+      packageLicenseBindings[package] = <int>[];
+      packages.add(package);
+      packages.sort(
+          (String a, String b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    }
+  }
+}
+
+@immutable
+class _DetailArguments {
+  const _DetailArguments(this.packageName, this.licenseEntries);
+
+  final String packageName;
+  final List<LicenseEntry> licenseEntries;
+
+  @override
+  bool operator ==(final dynamic other) {
+    if (other is _DetailArguments) {
+      return other.packageName == packageName;
+    }
+    return other == this;
+  }
+
+  @override
+  int get hashCode => packageName.hashCode; // Good enough.
+}
+
+class _PackageLicensePage extends StatefulWidget {
+  const _PackageLicensePage({
+    Key key,
+    this.packageName,
+    this.licenseEntries,
+    this.scrollController,
+  }) : super(key: key);
+
+  final String packageName;
+  final List<LicenseEntry> licenseEntries;
+  final ScrollController scrollController;
+
+  @override
+  _PackageLicensePageState createState() => _PackageLicensePageState();
+}
+
+class _PackageLicensePageState extends State<_PackageLicensePage> {
   @override
   void initState() {
     super.initState();
@@ -491,7 +742,7 @@ class _LicensePageState extends State<LicensePage> {
       debugFlowId = flow.id;
       return true;
     }());
-    await for (final LicenseEntry license in LicenseRegistry.licenses) {
+    for (final LicenseEntry license in widget.licenseEntries) {
       if (!mounted) {
         return;
       }
@@ -513,16 +764,6 @@ class _LicensePageState extends State<LicensePage> {
           padding: EdgeInsets.symmetric(vertical: 18.0),
           child: Text(
             '🍀‬', // That's U+1F340. Could also use U+2766 (❦) if U+1F340 doesn't work everywhere.
-            textAlign: TextAlign.center,
-          ),
-        ));
-        _licenses.add(Container(
-          decoration: const BoxDecoration(
-            border: Border(bottom: BorderSide(width: 0.0))
-          ),
-          child: Text(
-            license.packages.join(', '),
-            style: const TextStyle(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
         ));
@@ -558,49 +799,116 @@ class _LicensePageState extends State<LicensePage> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    final String name = widget.applicationName ?? _defaultApplicationName(context);
-    final String version = widget.applicationVersion ?? _defaultApplicationVersion(context);
-    final Widget icon = widget.applicationIcon ?? _defaultApplicationIcon(context);
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(localizations.licensesPageTitle),
-      ),
-      // All of the licenses page text is English. We don't want localized text
-      // or text direction.
-      body: Localizations.override(
-        locale: const Locale('en', 'US'),
-        context: context,
-        child: DefaultTextStyle(
-          style: Theme.of(context).textTheme.caption,
-          child: SafeArea(
-            bottom: false,
-            child: Scrollbar(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-                children: <Widget>[
-                  Text(name, style: Theme.of(context).textTheme.headline5, textAlign: TextAlign.center),
-                  if (icon != null) IconTheme(data: Theme.of(context).iconTheme, child: icon),
-                  Text(version, style: Theme.of(context).textTheme.bodyText2, textAlign: TextAlign.center),
-                  Container(height: 18.0),
-                  Text(widget.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
-                  Container(height: 18.0),
-                  Text('Powered by Flutter', style: Theme.of(context).textTheme.bodyText2, textAlign: TextAlign.center),
-                  Container(height: 24.0),
-                  ..._licenses,
-                  if (!_loaded)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24.0),
-                      child: Center(
-                        child: CircularProgressIndicator(),
+    final String package = widget.packageName;
+    final MaterialLocalizations localisations =
+        MaterialLocalizations.of(context);
+    final double gutterSize = _getGutterSize(context);
+
+    if (widget.scrollController == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: _buildTitle(package, localisations, context),
+        ),
+        body: Center(
+          child: Material(
+            color: Theme.of(context).cardColor,
+            elevation: 4,
+            child: Container(
+              constraints: BoxConstraints.loose(const Size.fromWidth(600)),
+              child: Localizations.override(
+                locale: const Locale('en', 'US'),
+                context: context,
+                child: DefaultTextStyle(
+                  style: Theme.of(context).textTheme.caption,
+                  child: Scrollbar(
+                    child: ListView(
+                      padding: EdgeInsets.only(
+                        left: gutterSize,
+                        right: gutterSize,
+                        bottom: gutterSize,
                       ),
+                      children: <Widget>[
+                        ..._licenses,
+                        if (!_loaded)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24.0),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                      ],
                     ),
-                ],
+                  ),
+                ),
               ),
             ),
           ),
         ),
-      ),
+      );
+    } else {
+      return Localizations.override(
+        context: context,
+        locale: const Locale('en', 'US'),
+        child: DefaultTextStyle(
+          style: Theme.of(context).textTheme.caption,
+          child: CustomScrollView(
+            controller: widget.scrollController,
+            slivers: <Widget>[
+              SliverAppBar(
+                pinned: true,
+                backgroundColor: Theme.of(context).cardColor,
+                title: _buildTitle(
+                  package,
+                  localisations,
+                  context,
+                  theme: Theme.of(context).textTheme,
+                ),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.only(
+                  left: gutterSize,
+                  right: gutterSize,
+                  bottom: gutterSize,
+                ),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate(
+                    <Widget>[
+                      ..._licenses,
+                      if (!_loaded)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24.0),
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  }
+
+  Column _buildTitle(
+    String package,
+    MaterialLocalizations localisations,
+    BuildContext context, {
+    TextTheme theme,
+  }) {
+    theme ??= Theme.of(context).primaryTextTheme;
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(package, style: theme.headline6),
+        Text(
+          localisations.licensesPageTitle,
+          style: theme.subtitle2,
+        ),
+      ],
     );
   }
 }
@@ -625,3 +933,6 @@ Widget _defaultApplicationIcon(BuildContext context) {
   // TODO(ianh): Get this from the embedder somehow.
   return null;
 }
+
+double _getGutterSize(BuildContext context) =>
+    MediaQuery.of(context).size.width >= 720 ? 24 : 12;
