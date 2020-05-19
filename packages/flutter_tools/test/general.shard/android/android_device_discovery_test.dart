@@ -134,7 +134,10 @@ ZX1G22JJWR             device usb:3-3 product:shamu model:Nexus_6 device:shamu f
 It appears you do not have 'Android SDK Platform-tools' installed.
 Use the 'android' tool to install them:
   android update sdk --no-ui --filter 'platform-tools'
-''', devices: devices, diagnostics: diagnostics);
+''', devices: devices,
+     diagnostics: diagnostics,
+     timeoutConfiguration: const TimeoutConfiguration(),
+    );
 
     expect(devices, isEmpty);
     expect(diagnostics, hasLength(1));

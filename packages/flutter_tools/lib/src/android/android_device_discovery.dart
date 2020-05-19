@@ -65,7 +65,11 @@ class AndroidDevices extends PollingDeviceDiscovery {
         'ANDROID_HOME environment variable: ${exception.executable}');
     }
     final List<AndroidDevice> devices = <AndroidDevice>[];
-    parseADBDeviceOutput(text, devices: devices);
+    parseADBDeviceOutput(
+      text,
+      devices: devices,
+      timeoutConfiguration: timeoutConfiguration,
+    );
     return devices;
   }
 
@@ -82,7 +86,11 @@ class AndroidDevices extends PollingDeviceDiscovery {
     } else {
       final String text = result.stdout;
       final List<String> diagnostics = <String>[];
-      parseADBDeviceOutput(text, diagnostics: diagnostics);
+      parseADBDeviceOutput(
+        text,
+        diagnostics: diagnostics,
+        timeoutConfiguration: timeoutConfiguration,
+      );
       return diagnostics;
     }
   }
@@ -103,7 +111,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
     Logger logger,
     Platform platform,
     ProcessManager processManager,
-    TimeoutConfiguration timeoutConfiguration,
+    @required TimeoutConfiguration timeoutConfiguration,
   }) {
     // Check for error messages from adb
     if (!text.contains('List of devices')) {
