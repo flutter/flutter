@@ -973,7 +973,9 @@ String _maskFilterToCanvasFilter(ui.MaskFilter maskFilter) {
     'WebKit (Safari) does not support `filter` canvas property.',
   );
   if (maskFilter != null) {
-    return 'blur(${maskFilter.webOnlySigma}px)';
+    // Multiply by device-pixel ratio because the canvas' pixel width and height
+    // are larger than its CSS width and height by device-pixel ratio.
+    return 'blur(${maskFilter.webOnlySigma * window.devicePixelRatio}px)';
   } else {
     return 'none';
   }
