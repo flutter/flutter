@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'debug.dart';
+import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'toggleable.dart';
@@ -60,6 +61,7 @@ class Checkbox extends StatefulWidget {
     @required this.value,
     this.tristate = false,
     @required this.onChanged,
+    this.mouseCursor,
     this.activeColor,
     this.checkColor,
     this.focusColor,
@@ -106,6 +108,13 @@ class Checkbox extends StatefulWidget {
   /// )
   /// ```
   final ValueChanged<bool> onChanged;
+
+  /// {@macro flutter.material.button.mouseCursor}
+  ///
+  /// If [MaterialStateMouseCursor] is used, it supports [MaterialState.hovered],
+  /// [MaterialState.focused], [MaterialState.disabled], and
+  /// [MaterialState.selected].
+  final MouseCursor mouseCursor;
 
   /// The color to use when this checkbox is checked.
   ///
@@ -226,6 +235,16 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
     }
     size += (widget.visualDensity ?? themeData.visualDensity).baseSizeAdjustment;
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+      widget.mouseCursor ?? const ClickableMouseCursor(),
+      <MaterialState>{
+        if (!enabled) MaterialState.disabled,
+        if (_hovering) MaterialState.hovered,
+        if (_focused) MaterialState.focused,
+        if (widget.value) MaterialState.selected,
+      },
+    );
+
     return FocusableActionDetector(
       actions: _actionMap,
       focusNode: widget.focusNode,
@@ -233,6 +252,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
       enabled: enabled,
       onShowFocusHighlight: _handleFocusHighlightChanged,
       onShowHoverHighlight: _handleHoverChanged,
+      mouseCursor: effectiveMouseCursor,
       child: Builder(
         builder: (BuildContext context) {
           return _CheckboxRenderObjectWidget(

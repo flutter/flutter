@@ -914,6 +914,7 @@ void main() {
   });
 
   testWidgets('Switch changes mouse cursor when hovered', (WidgetTester tester) async {
+    // Test Switch.adaptive() constructor
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -939,10 +940,10 @@ void main() {
     addTearDown(gesture.removePointer);
 
     await tester.pump();
-    debugDumpRenderTree();
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
+    // Test Switch() constructor
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

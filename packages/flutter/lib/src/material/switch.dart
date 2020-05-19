@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'material_state.dart';
 import 'shadows.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -211,9 +212,9 @@ class Switch extends StatefulWidget {
 
   /// {@macro flutter.material.button.mouseCursor}
   ///
-  /// The [MaterialStateMouseCursor] used here only supports
-  /// [MaterialState.hovered], [MaterialState.focused], and
-  /// [MaterialState.enabled].
+  /// If [MaterialStateMouseCursor] is used, it supports [MaterialState.hovered],
+  /// [MaterialState.focused], [MaterialState.disabled], and
+  /// [MaterialState.selected].
   final MouseCursor mouseCursor;
 
   /// The color for the button's [Material] when it has the input focus.
@@ -317,8 +318,9 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       widget.mouseCursor ?? const ClickableMouseCursor(),
       <MaterialState>{
         if (!enabled) MaterialState.disabled,
-        if (!_hovering) MaterialState.hovered,
-        if (!_focused) MaterialState.focused,
+        if (_hovering) MaterialState.hovered,
+        if (_focused) MaterialState.focused,
+        if (widget.value) MaterialState.selected,
       },
     );
 
