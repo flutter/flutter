@@ -165,7 +165,9 @@ public final class MethodChannel {
     /**
      * Handles a successful result.
      *
-     * @param result The result, possibly null.
+     * @param result The result, possibly null. The result must be an Object type supported by the
+     *     codec. For instance, if you are using StandardCodec (default), please see {@link
+     *     StandardMessageCodec} documentation on what types are supported.
      */
     @UiThread
     void success(@Nullable Object result);
@@ -175,7 +177,9 @@ public final class MethodChannel {
      *
      * @param errorCode An error code String.
      * @param errorMessage A human-readable error message String, possibly null.
-     * @param errorDetails Error details, possibly null
+     * @param errorDetails Error details, possibly null. The details must be an Object type
+     *     supported by the codec. For instance, if you are using StandardCodec (default), please
+     *     see {@link StandardMessageCodec} documentation on what types are supported.
      */
     @UiThread
     void error(String errorCode, @Nullable String errorMessage, @Nullable Object errorDetails);
