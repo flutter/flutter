@@ -111,6 +111,7 @@ executable("common_cpp_unittests") {
   sources = [
     "json_message_codec_unittests.cc",
     "json_method_codec_unittests.cc",
+    "text_input_model_unittests.cc",
   ]
 
   deps = [
