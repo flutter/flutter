@@ -113,14 +113,24 @@ bool TextInputModel::Delete() {
   return false;
 }
 
-void TextInputModel::MoveCursorToBeginning() {
+bool TextInputModel::MoveCursorToBeginning() {
+  if (selection_base_ == text_.begin() && selection_extent_ == text_.begin())
+    return false;
+
   selection_base_ = text_.begin();
   selection_extent_ = text_.begin();
+
+  return true;
 }
 
-void TextInputModel::MoveCursorToEnd() {
+bool TextInputModel::MoveCursorToEnd() {
+  if (selection_base_ == text_.end() && selection_extent_ == text_.end())
+    return false;
+
   selection_base_ = text_.end();
   selection_extent_ = text_.end();
+
+  return true;
 }
 
 bool TextInputModel::MoveCursorForward() {
