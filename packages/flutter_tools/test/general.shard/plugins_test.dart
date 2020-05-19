@@ -91,8 +91,8 @@ void main() {
       when(linuxProject.managedDirectory).thenReturn(linuxManagedDirectory);
       when(linuxProject.ephemeralDirectory).thenReturn(linuxEphemeralDirectory);
       when(linuxProject.pluginSymlinkDirectory).thenReturn(linuxEphemeralDirectory.childDirectory('.plugin_symlinks'));
-      when(linuxProject.makeFile).thenReturn(linuxManagedDirectory.parent.childFile('Makefile'));
-      when(linuxProject.generatedPluginMakeFile).thenReturn(linuxManagedDirectory.childFile('generated_plugins.mk'));
+      when(linuxProject.cmakeFile).thenReturn(linuxManagedDirectory.parent.childFile('CMakeLists.txt'));
+      when(linuxProject.generatedPluginCmakeFile).thenReturn(linuxManagedDirectory.childFile('generated_plugins.mk'));
       when(linuxProject.existsSync()).thenReturn(false);
 
       when(mockClock.now()).thenAnswer(
@@ -914,6 +914,35 @@ flutter:
         FeatureFlags: () => featureFlags,
       });
 
+      testUsingContext('pluginClass: none doesn\'t trigger registrant entry on macOS', () async {
+        when(macosProject.existsSync()).thenReturn(true);
+        when(featureFlags.isMacOSEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(true);
+        // Create a plugin without a pluginClass.
+        dummyPackageDirectory.parent.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      macos:
+        pluginClass: none
+        dartPluginClass: SomePlugin
+    ''');
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File registrantFile = macosProject.managedDirectory.childFile('GeneratedPluginRegistrant.swift');
+
+        expect(registrantFile, exists);
+        expect(registrantFile, isNot(contains('SomePlugin')));
+        expect(registrantFile, isNot(contains('none')));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
       testUsingContext('Injecting creates generated Linux registrant', () async {
         when(linuxProject.existsSync()).thenReturn(true);
         when(featureFlags.isLinuxEnabled).thenReturn(true);
@@ -961,7 +990,36 @@ flutter:
         FeatureFlags: () => featureFlags,
       });
 
-      testUsingContext('Injecting creates generated Linux plugin makefile', () async {
+      testUsingContext('pluginClass: none doesn\'t trigger registrant entry on Linux', () async {
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(featureFlags.isLinuxEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        // Create a plugin without a pluginClass.
+        dummyPackageDirectory.parent.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      linux:
+        pluginClass: none
+        dartPluginClass: SomePlugin
+    ''');
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File registrantImpl = linuxProject.managedDirectory.childFile('generated_plugin_registrant.cc');
+
+        expect(registrantImpl, exists);
+        expect(registrantImpl, isNot(contains('SomePlugin')));
+        expect(registrantImpl, isNot(contains('none')));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Injecting creates generated Linux plugin Cmake file', () async {
         when(linuxProject.existsSync()).thenReturn(true);
         when(featureFlags.isLinuxEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
@@ -969,16 +1027,12 @@ flutter:
 
         await injectPlugins(flutterProject, checkProjects: true);
 
-        final File pluginMakefile = linuxProject.generatedPluginMakeFile;
+        final File pluginMakefile = linuxProject.generatedPluginCmakeFile;
 
         expect(pluginMakefile.existsSync(), isTrue);
         final String contents = pluginMakefile.readAsStringSync();
-        expect(contents, contains('libapackage_plugin.so'));
-        // Verify all the variables the app-level Makefile rely on.
-        expect(contents, contains('PLUGIN_TARGETS='));
-        expect(contents, contains('PLUGIN_LIBRARIES='));
-        expect(contents, contains('PLUGIN_LDFLAGS='));
-        expect(contents, contains('PLUGIN_CPPFLAGS='));
+        expect(contents, contains('apackage'));
+        expect(contents, contains('target_link_libraries(\${BINARY_NAME} PRIVATE \${plugin}_plugin)'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1032,6 +1086,38 @@ flutter:
 
         expect(registrantImpl, exists);
         expect(registrantImpl, isNot(contains('SomePlugin')));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('pluginClass: none doesn\'t trigger registrant entry on Windows', () async {
+        when(windowsProject.existsSync()).thenReturn(true);
+        when(featureFlags.isWindowsEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        // Create a plugin without a pluginClass.
+        dummyPackageDirectory.parent.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      windows:
+        pluginClass: none
+        dartPluginClass: SomePlugin
+    ''');
+
+        createDummyWindowsSolutionFile();
+        createDummyPluginWindowsProjectFile();
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File registrantImpl = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
+
+        expect(registrantImpl, exists);
+        expect(registrantImpl, isNot(contains('SomePlugin')));
+        expect(registrantImpl, isNot(contains('none')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
