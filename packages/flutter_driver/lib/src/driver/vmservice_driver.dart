@@ -357,6 +357,11 @@ class VMServiceFlutterDriver extends FlutterDriver {
   Future<List<int>> screenshot() async {
     await Future<void>.delayed(const Duration(seconds: 2));
 
+    // We've seen 2 seconds delay to be not long enough for the first frame and
+    // it caused some golden tests to fail (b/129875208). When the first frame
+    // is already rasterized, this await would cost no extra time.
+    await waitUntilFirstFrameRasterized();
+
     final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot') as Map<String, dynamic>;
     return base64.decode(result['screenshot'] as String);
   }
