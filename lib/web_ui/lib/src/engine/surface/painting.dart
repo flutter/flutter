@@ -246,4 +246,45 @@ class SurfacePaintData {
       ..strokeJoin = strokeJoin
       ..strokeCap = strokeCap;
   }
+
+  @override
+  String toString() {
+    if (!assertionsEnabled) {
+      return super.toString();
+    } else {
+      final StringBuffer buffer = StringBuffer('SurfacePaintData(');
+      if (blendMode != null) {
+        buffer.write('blendMode = $blendMode; ');
+      }
+      if (style != null) {
+        buffer.write('style = $style; ');
+      }
+      if (strokeWidth != null) {
+        buffer.write('strokeWidth = $strokeWidth; ');
+      }
+      if (strokeCap != null) {
+        buffer.write('strokeCap = $strokeCap; ');
+      }
+      if (strokeJoin != null) {
+        buffer.write('strokeJoin = $strokeJoin; ');
+      }
+      if (color != null) {
+        buffer.write('color = ${colorToCssString(color)}; ');
+      }
+      if (shader != null) {
+        buffer.write('shader = $shader; ');
+      }
+      if (maskFilter != null) {
+        buffer.write('maskFilter = $maskFilter; ');
+      }
+      if (filterQuality != null) {
+        buffer.write('filterQuality = $filterQuality; ');
+      }
+      if (colorFilter != null) {
+        buffer.write('colorFilter = $colorFilter; ');
+      }
+      buffer.write('isAntiAlias = $isAntiAlias)');
+      return buffer.toString();
+    }
+  }
 }
