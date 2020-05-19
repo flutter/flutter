@@ -74,12 +74,12 @@ import 'ticker_provider.dart';
 /// ```
 /// {@end-tool}
 @immutable
-class InteractiveViewer extends StatelessWidget {
+class InteractiveViewer extends StatefulWidget {
   /// Create an InteractiveViewer.
   ///
   /// The [child] parameter must not be null. The [minScale] paramter must be
   /// greater than zero.
-  const InteractiveViewer({
+  InteractiveViewer({
     Key key,
     @required this.child,
     this.boundaryMargin = EdgeInsets.zero,
@@ -115,7 +115,7 @@ class InteractiveViewer extends StatelessWidget {
     this.onVerticalDragEnd,
     this.onVerticalDragStart,
     this.onVerticalDragUpdate,
-    this.transformationController,
+    ValueNotifier<Matrix4> transformationController,
   }) : assert(child != null),
        assert(minScale != null),
        assert(minScale > 0),
@@ -124,6 +124,7 @@ class InteractiveViewer extends StatelessWidget {
        assert(disableRotation != null),
        // TODO(justinmc): Remove this assertion when rotation is enabled.
        assert(disableRotation == true, 'Set disableRotation to true. This requirement will be removed later when the feature is complete.'),
+       transformationController = transformationController ?? ValueNotifier<Matrix4>(Matrix4.identity()),
        super(key: key);
 
   /// A margin for the visible boundaries of the child.
@@ -381,137 +382,10 @@ class InteractiveViewer extends StatelessWidget {
   ///  * [TextEditingController] for an example of another similar pattern.
   final ValueNotifier<Matrix4> transformationController;
 
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        return _InteractiveViewerSized(
-          child: child,
-          maxScale: maxScale,
-          minScale: minScale,
-          boundaryMargin: boundaryMargin,
-          disableTranslation: disableTranslation,
-          disableScale: disableScale,
-          disableRotation: disableRotation,
-          onTapDown: onTapDown,
-          onTapUp: onTapUp,
-          onTap: onTap,
-          onTapCancel: onTapCancel,
-          onDoubleTap: onDoubleTap,
-          onLongPress: onLongPress,
-          onLongPressUp: onLongPressUp,
-          onVerticalDragDown: onVerticalDragDown,
-          onVerticalDragStart: onVerticalDragStart,
-          onVerticalDragUpdate: onVerticalDragUpdate,
-          onVerticalDragEnd: onVerticalDragEnd,
-          onVerticalDragCancel: onVerticalDragCancel,
-          onHorizontalDragDown: onHorizontalDragDown,
-          onHorizontalDragStart: onHorizontalDragStart,
-          onHorizontalDragUpdate: onHorizontalDragUpdate,
-          onHorizontalDragEnd: onHorizontalDragEnd,
-          onHorizontalDragCancel: onHorizontalDragCancel,
-          onPanDown: onPanDown,
-          onPanStart: onPanStart,
-          onPanUpdate: onPanUpdate,
-          onPanEnd: onPanEnd,
-          onPanCancel: onPanCancel,
-          onScaleStart: onScaleStart,
-          onScaleUpdate: onScaleUpdate,
-          onScaleEnd: onScaleEnd,
-          constraints: constraints,
-          transformationController: transformationController ?? ValueNotifier<Matrix4>(Matrix4.identity()),
-        );
-      },
-    );
-  }
-}
-
-// This is separate from InteractiveViewer so that InteractiveViewer can get
-// the size of the constraints in a LayoutBuilder.
-@immutable
-class _InteractiveViewerSized extends StatefulWidget {
-  const _InteractiveViewerSized({
-    this.boundaryMargin,
-    @required this.child,
-    @required this.disableRotation,
-    @required this.disableScale,
-    @required this.disableTranslation,
-    this.maxScale,
-    @required this.minScale,
-    this.onTapDown,
-    this.onTapUp,
-    this.onTap,
-    this.onTapCancel,
-    this.onDoubleTap,
-    this.onLongPress,
-    this.onLongPressUp,
-    this.onVerticalDragDown,
-    this.onVerticalDragStart,
-    this.onVerticalDragUpdate,
-    this.onVerticalDragEnd,
-    this.onVerticalDragCancel,
-    this.onHorizontalDragDown,
-    this.onHorizontalDragStart,
-    this.onHorizontalDragUpdate,
-    this.onHorizontalDragEnd,
-    this.onHorizontalDragCancel,
-    this.onPanDown,
-    this.onPanStart,
-    this.onPanUpdate,
-    this.onPanEnd,
-    this.onPanCancel,
-    this.onScaleStart,
-    this.onScaleUpdate,
-    this.onScaleEnd,
-    @required this.constraints,
-    @required this.transformationController,
-  }) : assert(child != null),
-       assert(minScale != null),
-       assert(minScale > 0),
-       assert(disableTranslation != null),
-       assert(disableScale != null),
-       assert(disableRotation != null),
-       assert(transformationController != null);
-
-  final Widget child;
-  final BoxConstraints constraints;
-  final GestureTapDownCallback onTapDown;
-  final GestureTapUpCallback onTapUp;
-  final GestureTapCallback onTap;
-  final GestureTapCancelCallback onTapCancel;
-  final GestureTapCallback onDoubleTap;
-  final GestureLongPressCallback onLongPress;
-  final GestureLongPressUpCallback onLongPressUp;
-  final GestureDragDownCallback onVerticalDragDown;
-  final GestureDragStartCallback onVerticalDragStart;
-  final GestureDragUpdateCallback onVerticalDragUpdate;
-  final GestureDragEndCallback onVerticalDragEnd;
-  final GestureDragCancelCallback onVerticalDragCancel;
-  final GestureDragDownCallback onHorizontalDragDown;
-  final GestureDragStartCallback onHorizontalDragStart;
-  final GestureDragUpdateCallback onHorizontalDragUpdate;
-  final GestureDragEndCallback onHorizontalDragEnd;
-  final GestureDragCancelCallback onHorizontalDragCancel;
-  final GestureDragDownCallback onPanDown;
-  final GestureDragStartCallback onPanStart;
-  final GestureDragUpdateCallback onPanUpdate;
-  final GestureDragEndCallback onPanEnd;
-  final GestureDragCancelCallback onPanCancel;
-  final GestureScaleStartCallback onScaleStart;
-  final GestureScaleUpdateCallback onScaleUpdate;
-  final GestureScaleEndCallback onScaleEnd;
-  final double maxScale;
-  final double minScale;
-  final EdgeInsets boundaryMargin;
-  final bool disableTranslation;
-  final bool disableScale;
-  final bool disableRotation;
-  final ValueNotifier<Matrix4> transformationController;
-
   @override _InteractiveViewerState createState() => _InteractiveViewerState();
 }
 
-class _InteractiveViewerState extends State<_InteractiveViewerSized> with TickerProviderStateMixin {
+class _InteractiveViewerState extends State<InteractiveViewer> with TickerProviderStateMixin {
   final GlobalKey _childKey = GlobalKey();
   Animation<Offset> _animation;
   AnimationController _controller;
@@ -519,6 +393,7 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
   double _scaleStart; // Scale value at start of scaling gesture.
   double _rotationStart = 0.0; // Rotation at start of rotation gesture.
   double _currentRotation = 0.0; // Rotation of widget.transformationController.value.
+  BoxConstraints _constraints;
   _GestureType _gestureType;
 
   // This value was eyeballed as to give a feel similar to Google Photos.
@@ -539,7 +414,7 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
 
     final Size childSize = _getChildSize(
       _childKey.currentContext.findRenderObject() as RenderBox,
-      widget.constraints,
+      _constraints,
     );
     _boundaryRectCached = Rect.fromLTRB(
       -widget.boundaryMargin.left,
@@ -562,9 +437,9 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     assert(_childKey.currentContext != null);
     final Size childSize = _getChildSize(
       _childKey.currentContext.findRenderObject() as RenderBox,
-      widget.constraints,
+      _constraints,
     );
-    final Size viewportSize = widget.constraints.constrain(childSize);
+    final Size viewportSize = _constraints.constrain(childSize);
     return Rect.fromLTRB(
       0.0,
       0.0,
@@ -913,11 +788,10 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
   }
 
   @override
-  void didUpdateWidget(_InteractiveViewerSized oldWidget) {
+  void didUpdateWidget(InteractiveViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.child != oldWidget.child
-      || widget.boundaryMargin != oldWidget.boundaryMargin
-      || widget.constraints != oldWidget.constraints) {
+      || widget.boundaryMargin != oldWidget.boundaryMargin) {
       _boundaryRectCached = null;
     }
   }
@@ -932,121 +806,126 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
   Widget build(BuildContext context) {
     // A GestureDetector allows the detection of panning and zooming gestures on
     // the child.
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque, // Necessary when translating off screen
-      onTapDown: widget.onTapDown == null ? null : (TapDownDetails details) {
-        widget.onTapDown(TapDownDetails(
-          globalPosition: _fromViewport(
-            details.globalPosition - _getOffset(context),
-            widget.transformationController.value,
-          ),
-        ));
-      },
-      onTapUp: widget.onTapUp == null ? null : (TapUpDetails details) {
-        widget.onTapUp(TapUpDetails(
-          globalPosition: _fromViewport(
-            details.globalPosition - _getOffset(context),
-            widget.transformationController.value,
-          ),
-        ));
-      },
-      onTap: widget.onTap,
-      onTapCancel: widget.onTapCancel,
-      onDoubleTap: widget.onDoubleTap,
-      onLongPress: widget.onLongPress,
-      onLongPressUp: widget.onLongPressUp,
-      onVerticalDragDown: widget.onVerticalDragDown == null ? null : (DragDownDetails details) {
-        widget.onVerticalDragDown(DragDownDetails(
-          globalPosition: _fromViewport(
-            details.globalPosition - _getOffset(context),
-            widget.transformationController.value,
-          ),
-        ));
-      },
-      onVerticalDragStart: widget.onVerticalDragStart == null ? null : (DragStartDetails details) {
-        widget.onVerticalDragStart(DragStartDetails(
-          globalPosition: _fromViewport(
-            details.globalPosition - _getOffset(context),
-            widget.transformationController.value,
-          ),
-        ));
-      },
-      onVerticalDragUpdate: widget.onVerticalDragUpdate == null ? null : (DragUpdateDetails details) {
-        widget.onVerticalDragUpdate(DragUpdateDetails(
-          globalPosition: _fromViewport(
-            details.globalPosition - _getOffset(context),
-            widget.transformationController.value,
-          ),
-        ));
-      },
-      onVerticalDragEnd: widget.onVerticalDragEnd,
-      onVerticalDragCancel: widget.onVerticalDragCancel,
-      onHorizontalDragDown: widget.onHorizontalDragDown == null ? null : (DragDownDetails details) {
-        widget.onHorizontalDragDown(DragDownDetails(
-          globalPosition: _fromViewport(
-            details.globalPosition - _getOffset(context),
-            widget.transformationController.value,
-          ),
-        ));
-      },
-      onHorizontalDragStart: widget.onHorizontalDragStart == null ? null : (DragStartDetails details) {
-        widget.onHorizontalDragStart(DragStartDetails(
-          globalPosition: _fromViewport(
-            details.globalPosition - _getOffset(context),
-            widget.transformationController.value,
-          ),
-        ));
-      },
-      onHorizontalDragUpdate: widget.onHorizontalDragUpdate == null ? null : (DragUpdateDetails details) {
-        widget.onHorizontalDragUpdate(DragUpdateDetails(
-          globalPosition: _fromViewport(
-            details.globalPosition - _getOffset(context),
-            widget.transformationController.value,
-          ),
-        ));
-      },
-      onHorizontalDragEnd: widget.onHorizontalDragEnd,
-      onHorizontalDragCancel: widget.onHorizontalDragCancel,
-      onPanDown: widget.onPanDown == null ? null : (DragDownDetails details) {
-        widget.onPanDown(DragDownDetails(
-          globalPosition: _fromViewport(
-            details.globalPosition - _getOffset(context),
-            widget.transformationController.value,
-          ),
-        ));
-      },
-      onPanStart: widget.onPanStart == null ? null : (DragStartDetails details) {
-        widget.onPanStart(DragStartDetails(
-          globalPosition: _fromViewport(
-            details.globalPosition - _getOffset(context),
-            widget.transformationController.value,
-          ),
-        ));
-      },
-      onPanUpdate: widget.onPanUpdate == null ? null : (DragUpdateDetails details) {
-        widget.onPanUpdate(DragUpdateDetails(
-          globalPosition: _fromViewport(
-            details.globalPosition - _getOffset(context),
-            widget.transformationController.value,
-          ),
-        ));
-      },
-      onPanEnd: widget.onPanEnd,
-      onPanCancel: widget.onPanCancel,
-      onScaleEnd: _onScaleEnd,
-      onScaleStart: _onScaleStart,
-      onScaleUpdate: _onScaleUpdate,
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        _constraints = constraints;
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque, // Necessary when translating off screen
+          onTapDown: widget.onTapDown == null ? null : (TapDownDetails details) {
+            widget.onTapDown(TapDownDetails(
+              globalPosition: _fromViewport(
+                details.globalPosition - _getOffset(context),
+                widget.transformationController.value,
+              ),
+            ));
+          },
+          onTapUp: widget.onTapUp == null ? null : (TapUpDetails details) {
+            widget.onTapUp(TapUpDetails(
+              globalPosition: _fromViewport(
+                details.globalPosition - _getOffset(context),
+                widget.transformationController.value,
+              ),
+            ));
+          },
+          onTap: widget.onTap,
+          onTapCancel: widget.onTapCancel,
+          onDoubleTap: widget.onDoubleTap,
+          onLongPress: widget.onLongPress,
+          onLongPressUp: widget.onLongPressUp,
+          onVerticalDragDown: widget.onVerticalDragDown == null ? null : (DragDownDetails details) {
+            widget.onVerticalDragDown(DragDownDetails(
+              globalPosition: _fromViewport(
+                details.globalPosition - _getOffset(context),
+                widget.transformationController.value,
+              ),
+            ));
+          },
+          onVerticalDragStart: widget.onVerticalDragStart == null ? null : (DragStartDetails details) {
+            widget.onVerticalDragStart(DragStartDetails(
+              globalPosition: _fromViewport(
+                details.globalPosition - _getOffset(context),
+                widget.transformationController.value,
+              ),
+            ));
+          },
+          onVerticalDragUpdate: widget.onVerticalDragUpdate == null ? null : (DragUpdateDetails details) {
+            widget.onVerticalDragUpdate(DragUpdateDetails(
+              globalPosition: _fromViewport(
+                details.globalPosition - _getOffset(context),
+                widget.transformationController.value,
+              ),
+            ));
+          },
+          onVerticalDragEnd: widget.onVerticalDragEnd,
+          onVerticalDragCancel: widget.onVerticalDragCancel,
+          onHorizontalDragDown: widget.onHorizontalDragDown == null ? null : (DragDownDetails details) {
+            widget.onHorizontalDragDown(DragDownDetails(
+              globalPosition: _fromViewport(
+                details.globalPosition - _getOffset(context),
+                widget.transformationController.value,
+              ),
+            ));
+          },
+          onHorizontalDragStart: widget.onHorizontalDragStart == null ? null : (DragStartDetails details) {
+            widget.onHorizontalDragStart(DragStartDetails(
+              globalPosition: _fromViewport(
+                details.globalPosition - _getOffset(context),
+                widget.transformationController.value,
+              ),
+            ));
+          },
+          onHorizontalDragUpdate: widget.onHorizontalDragUpdate == null ? null : (DragUpdateDetails details) {
+            widget.onHorizontalDragUpdate(DragUpdateDetails(
+              globalPosition: _fromViewport(
+                details.globalPosition - _getOffset(context),
+                widget.transformationController.value,
+              ),
+            ));
+          },
+          onHorizontalDragEnd: widget.onHorizontalDragEnd,
+          onHorizontalDragCancel: widget.onHorizontalDragCancel,
+          onPanDown: widget.onPanDown == null ? null : (DragDownDetails details) {
+            widget.onPanDown(DragDownDetails(
+              globalPosition: _fromViewport(
+                details.globalPosition - _getOffset(context),
+                widget.transformationController.value,
+              ),
+            ));
+          },
+          onPanStart: widget.onPanStart == null ? null : (DragStartDetails details) {
+            widget.onPanStart(DragStartDetails(
+              globalPosition: _fromViewport(
+                details.globalPosition - _getOffset(context),
+                widget.transformationController.value,
+              ),
+            ));
+          },
+          onPanUpdate: widget.onPanUpdate == null ? null : (DragUpdateDetails details) {
+            widget.onPanUpdate(DragUpdateDetails(
+              globalPosition: _fromViewport(
+                details.globalPosition - _getOffset(context),
+                widget.transformationController.value,
+              ),
+            ));
+          },
+          onPanEnd: widget.onPanEnd,
+          onPanCancel: widget.onPanCancel,
+          onScaleEnd: _onScaleEnd,
+          onScaleStart: _onScaleStart,
+          onScaleUpdate: _onScaleUpdate,
 
-      // Wrapping a Widget in an InteractiveViewer does not change how the
-      // widget is initially rendered. It should look identical whether or not
-      // the InteractiveViewer is there, until the transformation is changed.
-      child: Transform(
-        transform: widget.transformationController.value,
-        child: KeyedSubtree(
-          key: _childKey,
-          child: widget.child,
-        ),
-      ),
+          // Wrapping a Widget in an InteractiveViewer does not change how the
+          // widget is initially rendered. It should look identical whether or not
+          // the InteractiveViewer is there, until the transformation is changed.
+          child: Transform(
+            transform: widget.transformationController.value,
+            child: KeyedSubtree(
+              key: _childKey,
+              child: widget.child,
+            ),
+          ),
+        );
+      },
     );
   }
 }
