@@ -186,7 +186,7 @@ class Rasterizer final : public SnapshotDelegate {
   ///
   fml::TaskRunnerAffineWeakPtr<Rasterizer> GetWeakPtr() const;
 
-  fml::WeakPtr<SnapshotDelegate> GetSnapshotDelegate() const;
+  fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> GetSnapshotDelegate() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Sometimes, it may be necessary to render the same frame again
@@ -430,7 +430,7 @@ class Rasterizer final : public SnapshotDelegate {
   fml::closure next_frame_callback_;
   bool user_override_resource_cache_bytes_;
   std::optional<size_t> max_cache_bytes_;
-  fml::WeakPtrFactory<Rasterizer> weak_factory_;
+  fml::TaskRunnerAffineWeakPtrFactory<Rasterizer> weak_factory_;
   fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger_;
 
   // |SnapshotDelegate|

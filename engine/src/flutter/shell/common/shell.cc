@@ -338,7 +338,7 @@ Shell::Shell(DartVMRef vm, TaskRunners task_runners, Settings settings)
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetRasterTaskRunner(), fml::MakeCopyable([this]() mutable {
         this->weak_factory_gpu_ =
-            std::make_unique<fml::WeakPtrFactory<Shell>>(this);
+            std::make_unique<fml::TaskRunnerAffineWeakPtrFactory<Shell>>(this);
       }));
 
   // Install service protocol handlers.
@@ -1156,7 +1156,7 @@ void Shell::OnFrameRasterized(const FrameTiming& timing) {
     // never be reported until the next animation starts.
     frame_timings_report_scheduled_ = true;
     task_runners_.GetRasterTaskRunner()->PostDelayedTask(
-        [self = weak_factory_gpu_->GetTaskRunnerAffineWeakPtr()]() {
+        [self = weak_factory_gpu_->GetWeakPtr()]() {
           if (!self.get()) {
             return;
           }

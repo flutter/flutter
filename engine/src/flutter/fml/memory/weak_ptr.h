@@ -30,17 +30,18 @@ struct DebugTaskRunnerChecker {
 template <typename T>
 class WeakPtrFactory;
 
-// Class for "weak pointers" that can be invalidated. Valid weak pointers can
-// only originate from a |WeakPtrFactory| (see below), though weak pointers are
-// copyable and movable.
+// Class for "weak pointers" that can be invalidated. Valid weak pointers
+// can only originate from a |WeakPtrFactory| (see below), though weak
+// pointers are copyable and movable.
 //
-// Weak pointers are not in general thread-safe. They may only be *used* on a
-// single thread, namely the same thread as the "originating" |WeakPtrFactory|
-// (which can invalidate the weak pointers that it generates).
+// Weak pointers are not in general thread-safe. They may only be *used* on
+// a single thread, namely the same thread as the "originating"
+// |WeakPtrFactory| (which can invalidate the weak pointers that it
+// generates).
 //
 // However, weak pointers may be passed to other threads, reset on other
-// threads, or destroyed on other threads. They may also be reassigned on other
-// threads (in which case they should then only be used on the thread
+// threads, or destroyed on other threads. They may also be reassigned on
+// other threads (in which case they should then only be used on the thread
 // corresponding to the new "originating" |WeakPtrFactory|).
 template <typename T>
 class WeakPtr {
@@ -117,9 +118,6 @@ class WeakPtr {
   explicit WeakPtr(T* ptr, fml::RefPtr<fml::internal::WeakPtrFlag>&& flag)
       : ptr_(ptr), flag_(std::move(flag)) {}
 
-  T* ptr_;
-  fml::RefPtr<fml::internal::WeakPtrFlag> flag_;
-
   virtual void CheckThreadSafety() const {
     FML_DCHECK_CREATION_THREAD_IS_CURRENT(checker_.checker);
   }
@@ -134,11 +132,16 @@ class WeakPtr {
                    fml::RefPtr<fml::internal::WeakPtrFlag>&& flag,
                    DebugThreadChecker checker)
       : ptr_(ptr), flag_(std::move(flag)), checker_(checker) {}
-
+  T* ptr_;
+  fml::RefPtr<fml::internal::WeakPtrFlag> flag_;
   DebugThreadChecker checker_;
 
   // Copy/move construction/assignment supported.
 };
+
+// Forward declaration, so |TaskRunnerAffineWeakPtr<T>| can friend it.
+template <typename T>
+class TaskRunnerAffineWeakPtrFactory;
 
 // A weak pointer that can be used in different threads as long as
 // the threads are belong to the same |TaskRunner|.
@@ -153,14 +156,13 @@ class TaskRunnerAffineWeakPtr : public WeakPtr<T> {
 
   template <typename U>
   TaskRunnerAffineWeakPtr(const TaskRunnerAffineWeakPtr<U>& r)
-      : WeakPtr<T>(static_cast<T*>(r.ptr_), r.flag_), checker_(r.checker_) {}
+      : WeakPtr<T>(r), checker_(r.checker_) {}
 
   TaskRunnerAffineWeakPtr(TaskRunnerAffineWeakPtr<T>&& r) = default;
 
   template <typename U>
   TaskRunnerAffineWeakPtr(TaskRunnerAffineWeakPtr<U>&& r)
-      : WeakPtr<T>(static_cast<T*>(r.ptr_), std::move(r.flag_)),
-        checker_(r.checker_) {}
+      : WeakPtr<T>(r), checker_(r.checker_) {}
 
   ~TaskRunnerAffineWeakPtr() = default;
 
@@ -176,7 +178,9 @@ class TaskRunnerAffineWeakPtr : public WeakPtr<T> {
   }
 
  private:
-  friend class WeakPtrFactory<T>;
+  template <typename U>
+  friend class TaskRunnerAffineWeakPtr;
+  friend class TaskRunnerAffineWeakPtrFactory<T>;
 
   explicit TaskRunnerAffineWeakPtr(
       T* ptr,
@@ -248,14 +252,7 @@ class WeakPtrFactory {
     return WeakPtr<T>(ptr_, flag_.Clone(), checker_);
   }
 
-  // Gets a new weak pointer, which will be valid until either
-  // |InvalidateWeakPtrs()| is called or this object is destroyed.
-  TaskRunnerAffineWeakPtr<T> GetTaskRunnerAffineWeakPtr() const {
-    return TaskRunnerAffineWeakPtr<T>(ptr_, flag_.Clone(),
-                                      task_runner_checker_);
-  }
-
- protected:
+ private:
   // Note: See weak_ptr_internal.h for an explanation of why we store the
   // pointer here, instead of in the "flag".
   T* const ptr_;
@@ -265,11 +262,45 @@ class WeakPtrFactory {
     FML_DCHECK_CREATION_THREAD_IS_CURRENT(checker_.checker);
   }
 
- private:
   DebugThreadChecker checker_;
-  DebugTaskRunnerChecker task_runner_checker_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(WeakPtrFactory);
+};
+
+// A type of |WeakPtrFactory| that produces |TaskRunnerAffineWeakPtr| instead of
+// |WeakPtr|.
+template <typename T>
+class TaskRunnerAffineWeakPtrFactory {
+ public:
+  explicit TaskRunnerAffineWeakPtrFactory(T* ptr)
+      : ptr_(ptr), flag_(fml::MakeRefCounted<fml::internal::WeakPtrFlag>()) {
+    FML_DCHECK(ptr_);
+  }
+
+  ~TaskRunnerAffineWeakPtrFactory() {
+    CheckThreadSafety();
+    flag_->Invalidate();
+  }
+
+  // Gets a new weak pointer, which will be valid until either
+  // |InvalidateWeakPtrs()| is called or this object is destroyed.
+  TaskRunnerAffineWeakPtr<T> GetWeakPtr() const {
+    return TaskRunnerAffineWeakPtr<T>(ptr_, flag_.Clone(), checker_);
+  }
+
+ private:
+  // Note: See weak_ptr_internal.h for an explanation of why we store the
+  // pointer here, instead of in the "flag".
+  T* const ptr_;
+  fml::RefPtr<fml::internal::WeakPtrFlag> flag_;
+
+  void CheckThreadSafety() const {
+    FML_DCHECK_TASK_RUNNER_IS_CURRENT(checker_.checker);
+  }
+
+  DebugTaskRunnerChecker checker_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(TaskRunnerAffineWeakPtrFactory);
 };
 
 }  // namespace fml
