@@ -70,7 +70,6 @@ import 'ticker_provider.dart';
 ///       ),
 ///     );
 ///   }
-/// }
 /// ```
 /// {@end-tool}
 @immutable
@@ -323,11 +322,31 @@ class InteractiveViewer extends StatefulWidget {
   ///   }
   /// }
   ///
+  /// IconButton get resetButton {
+  ///   return IconButton(
+  ///     onPressed: () {
+  ///       setState(() {
+  ///         _animateResetInitialize();
+  ///       });
+  ///     },
+  ///     tooltip: 'Reset',
+  ///     color: Theme.of(context).colorScheme.surface,
+  ///     icon: const Icon(Icons.replay),
+  ///   );
+  /// }
+  ///
+  /// @override
   /// void initState() {
   ///   super.initState();
   ///   _controllerReset = AnimationController(
   ///     vsync: this,
   ///   );
+  /// }
+  ///
+  /// @override
+  /// void dispose() {
+  ///   _controllerReset.dispose();
+  ///   super.dispose();
   /// }
   ///
   /// @override
@@ -353,25 +372,6 @@ class InteractiveViewer extends StatefulWidget {
   ///     ),
   ///     persistentFooterButtons: [resetButton],
   ///   );
-  /// }
-  ///
-  /// IconButton get resetButton {
-  ///   return IconButton(
-  ///     onPressed: () {
-  ///       setState(() {
-  ///         _animateResetInitialize();
-  ///       });
-  ///     },
-  ///     tooltip: 'Reset',
-  ///     color: Theme.of(context).colorScheme.surface,
-  ///     icon: const Icon(Icons.replay),
-  ///   );
-  /// }
-  ///
-  /// @override
-  /// void dispose() {
-  ///   _controllerReset.dispose();
-  ///   super.dispose();
   /// }
   /// ```
   /// {@end-tool}
