@@ -6,7 +6,7 @@
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 #include "gtest/gtest.h"
 
-// Encode a message using a FlStringCodec. Return a hex string with the encoded
+// Encodes a message using a FlStringCodec. Return a hex string with the encoded
 // binary output.
 static gchar* encode_message(FlValue* value) {
   g_autoptr(FlStringCodec) codec = fl_string_codec_new();
@@ -19,7 +19,7 @@ static gchar* encode_message(FlValue* value) {
   return bytes_to_hex_string(message);
 }
 
-// Encode a message using a FlStringCodec. Expect the given error.
+// Encodes a message using a FlStringCodec. Expect the given error.
 static void encode_message_error(FlValue* value, GQuark domain, int code) {
   g_autoptr(FlStringCodec) codec = fl_string_codec_new();
   g_autoptr(GError) error = nullptr;
@@ -29,7 +29,7 @@ static void encode_message_error(FlValue* value, GQuark domain, int code) {
   EXPECT_TRUE(g_error_matches(error, domain, code));
 }
 
-// Decode a message using a FlStringCodec. The binary data is given in the form
+// Decodes a message using a FlStringCodec. The binary data is given in the form
 // of a hex string.
 static FlValue* decode_message(const char* hex_string) {
   g_autoptr(FlStringCodec) codec = fl_string_codec_new();

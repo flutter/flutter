@@ -15,7 +15,8 @@ G_BEGIN_DECLS
  * fl_binary_messenger_new:
  * @engine: The #FlEngine to communicate with.
  *
- * Create a new #FlBinaryMessenger.
+ * Creates a new #FlBinaryMessenger. The binary messenger will take control of
+ * the engines platform message handler.
  *
  * Returns: a new #FlBinaryMessenger.
  */

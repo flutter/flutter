@@ -17,7 +17,8 @@ G_BEGIN_DECLS
  * FlJsonMessageCodecError:
  * @FL_JSON_MESSAGE_CODEC_ERROR_INVALID_UTF8: Message is not valid UTF-8.
  * @FL_JSON_MESSAGE_CODEC_ERROR_INVALID_JSON: Message is not valid JSON.
- * @FL_JSON_MESSAGE_CODEC_ERROR_INVALID_OBJECT_KEY_TYPE: Invalid object key type
+ * @FL_JSON_MESSAGE_CODEC_ERROR_INVALID_OBJECT_KEY_TYPE: Invalid object key
+ * type.
  *
  * Errors for #FlJsonMessageCodec objects to set on failures.
  */
@@ -40,12 +41,12 @@ G_DECLARE_FINAL_TYPE(FlJsonMessageCodec,
 /**
  * FlJsonMessageCodec:
  *
- * #FlJsonMessageCodec is an #FlMessageCodec that implements the Flutter
- * standard message encoding. This encodes and decodes #FlValue of type
+ * #FlJsonMessageCodec is an #FlMessageCodec that implements the encodes
+ * #FlValue to/from JSON. This codec encodes and decodes #FlValue of type
  * #FL_VALUE_TYPE_NULL, #FL_VALUE_TYPE_BOOL, #FL_VALUE_TYPE_INT,
  * #FL_VALUE_TYPE_FLOAT, #FL_VALUE_TYPE_STRING, #FL_VALUE_TYPE_UINT8_LIST,
  * #FL_VALUE_TYPE_INT32_LIST, #FL_VALUE_TYPE_INT64_LIST,
- * #FL_VALUE_TYPE_FLOAT_LIST, #FL_VALUE_TYPE_LIST, and #FL_VALUE_TYPE_MAP
+ * #FL_VALUE_TYPE_FLOAT_LIST, #FL_VALUE_TYPE_LIST, and #FL_VALUE_TYPE_MAP.
  *
  * #FlJsonMessageCodec matches the JSONMessageCodec class in the Flutter
  * services library.
@@ -54,19 +55,20 @@ G_DECLARE_FINAL_TYPE(FlJsonMessageCodec,
 /**
  * fl_json_message_codec_new:
  *
- * Creates a #FlJsonMessageCodec.
+ * Creates an #FlJsonMessageCodec.
  *
- * Returns: a new #FlJsonMessageCodec
+ * Returns: a new #FlJsonMessageCodec.
  */
 FlJsonMessageCodec* fl_json_message_codec_new();
 
 /**
  * fl_json_message_codec_encode:
- * @codec: a #FlJsonMessageCodec
- * @value: value to encode
- * @error: (allow-none): #GError location to store the error occurring, or %NULL
+ * @codec: an #FlJsonMessageCodec.
+ * @value: value to encode.
+ * @error: (allow-none): #GError location to store the error occurring, or
+ * %NULL.
  *
- * Encode a value to a JSON string.
+ * Encodes a value to a JSON string.
  *
  * Returns: a JSON representation of this value or %NULL on error.
  */
@@ -76,13 +78,14 @@ gchar* fl_json_message_codec_encode(FlJsonMessageCodec* codec,
 
 /**
  * fl_json_message_codec_decode:
- * @codec: a #FlJsonMessageCodec
- * @text: UTF-8 text in JSON format
- * @error: (allow-none): #GError location to store the error occurring, or %NULL
+ * @codec: an #FlJsonMessageCodec.
+ * @text: UTF-8 text in JSON format.
+ * @error: (allow-none): #GError location to store the error occurring, or
+ * %NULL.
  *
- * Decode a value from a JSON string.
+ * Decodes a value from a JSON string.
  *
- * Returns: a #FlValue or %NULL on error
+ * Returns: an #FlValue or %NULL on error.
  */
 FlValue* fl_json_message_codec_decode(FlJsonMessageCodec* codec,
                                       const gchar* text,

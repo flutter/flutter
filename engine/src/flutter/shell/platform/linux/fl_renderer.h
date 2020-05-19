@@ -35,8 +35,11 @@ G_DECLARE_DERIVABLE_TYPE(FlRenderer, fl_renderer, FL, RENDERER, GObject)
 struct _FlRendererClass {
   GObjectClass parent_class;
 
-  // Virtual methods
+  // Virtual method called when Flutter has set up EGL and is ready for the
+  // renderer to start.
   gboolean (*start)(FlRenderer* renderer, GError** error);
+
+  // Virtual method called when flutter needs a surface to render to.
   EGLSurface (*create_surface)(FlRenderer* renderer,
                                EGLDisplay display,
                                EGLConfig config);
@@ -44,9 +47,11 @@ struct _FlRendererClass {
 
 /**
  * fl_renderer_start:
- * @renderer: a #FlRenderer
+ * @renderer: an #FlRenderer.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
  * to ignore.
+ *
+ * Start the renderer. EGL must be set up before this call.
  *
  * Returns: %TRUE if successfully started.
  */
@@ -54,58 +59,58 @@ gboolean fl_renderer_start(FlRenderer* self, GError** error);
 
 /**
  * fl_renderer_get_proc_address:
- * @renderer: a #FlRenderer
- * @name: a function name
+ * @renderer: an #FlRenderer.
+ * @name: a function name.
  *
  * Gets the rendering API function that matches the given name.
  *
- * Returns: a function pointer
+ * Returns: a function pointer.
  */
 void* fl_renderer_get_proc_address(FlRenderer* renderer, const char* name);
 
 /**
  * fl_renderer_make_current:
- * @renderer: a #FlRenderer
+ * @renderer: an #FlRenderer.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
  * to ignore.
  *
  * Makes the rendering context current.
  *
- * Returns %TRUE if successful
+ * Returns %TRUE if successful.
  */
 gboolean fl_renderer_make_current(FlRenderer* renderer, GError** error);
 
 /**
  * fl_renderer_clear_current:
- * @renderer: a #FlRenderer
+ * @renderer: an #FlRenderer.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
  * to ignore.
  *
  * Clears the current rendering context.
  *
- * Returns %TRUE if successful
+ * Returns %TRUE if successful.
  */
 gboolean fl_renderer_clear_current(FlRenderer* renderer, GError** error);
 
 /**
  * fl_renderer_get_fbo:
- * @renderer: a #FlRenderer
+ * @renderer: an #FlRenderer.
  *
  * Gets the frame buffer object to render to.
  *
- * Returns: a frame buffer object index
+ * Returns: a frame buffer object index.
  */
 guint32 fl_renderer_get_fbo(FlRenderer* renderer);
 
 /**
  * fl_renderer_present:
- * @renderer: a #FlRenderer
+ * @renderer: an #FlRenderer.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
  * to ignore.
  *
  * Presents the current frame.
  *
- * Returns %TRUE if successful
+ * Returns %TRUE if successful.
  */
 gboolean fl_renderer_present(FlRenderer* renderer, GError** error);
 
