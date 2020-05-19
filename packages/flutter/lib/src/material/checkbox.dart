@@ -113,7 +113,8 @@ class Checkbox extends StatefulWidget {
   ///
   /// If [MaterialStateMouseCursor] is used, it supports [MaterialState.hovered],
   /// [MaterialState.focused], [MaterialState.disabled], and
-  /// [MaterialState.selected].
+  /// [MaterialState.selected]. When [value] is null (when [tristate] is true),
+  /// [MaterialState.selected] is included as a state.
   final MouseCursor mouseCursor;
 
   /// The color to use when this checkbox is checked.
@@ -241,7 +242,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
         if (!enabled) MaterialState.disabled,
         if (_hovering) MaterialState.hovered,
         if (_focused) MaterialState.focused,
-        if (widget.value) MaterialState.selected,
+        if (widget.tristate || widget.value) MaterialState.selected,
       },
     );
 
@@ -329,8 +330,10 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderCheckbox renderObject) {
     renderObject
-      ..value = value
+      // The `tristate` must be changed before `value` due to the assertion at
+      // the beginning of `set value`.
       ..tristate = tristate
+      ..value = value
       ..activeColor = activeColor
       ..checkColor = checkColor
       ..inactiveColor = inactiveColor

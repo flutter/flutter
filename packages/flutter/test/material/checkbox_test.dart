@@ -676,5 +676,44 @@ void main() {
     );
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Test cursor when tristate
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Checkbox(
+                  value: null,
+                  tristate: true,
+                  onChanged: null,
+                  mouseCursor: _SelectedGrabMouseCursor(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
   });
+}
+
+class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
+  const _SelectedGrabMouseCursor();
+
+  @override
+  MouseCursor resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.selected)) {
+      return SystemMouseCursors.grab;
+    }
+    return SystemMouseCursors.basic;
+  }
+
+  @override
+  String get debugDescription => '_SelectedGrabMouseCursor()';
 }
