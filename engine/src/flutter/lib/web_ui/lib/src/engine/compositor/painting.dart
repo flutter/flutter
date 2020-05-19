@@ -119,10 +119,10 @@ class SkPaint extends SkiaObject implements ui.Paint {
   bool _invertColors = false;
 
   @override
-  ui.Shader get shader => _shader;
+  ui.Shader get shader => _shader as ui.Shader;
   @override
   set shader(ui.Shader value) {
-    _shader = value;
+    _shader = value as EngineShader;
     _syncShader(skiaObject);
   }
   void _syncShader(js.JsObject object) {
@@ -132,7 +132,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
     }
     object.callMethod('setShader', <js.JsObject>[skShader]);
   }
-  EngineGradient _shader;
+  EngineShader _shader;
 
   @override
   ui.MaskFilter get maskFilter => _maskFilter;

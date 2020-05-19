@@ -18,7 +18,12 @@ bool _matrix4IsValid(Float32List matrix4) {
   return true;
 }
 
-abstract class EngineGradient implements ui.Gradient {
+abstract class EngineShader {
+  /// Create a shader for use in the Skia backend.
+  js.JsObject createSkiaShader();
+}
+
+abstract class EngineGradient implements ui.Gradient, EngineShader {
   /// Hidden constructor to prevent subclassing.
   EngineGradient._();
 
@@ -28,9 +33,6 @@ abstract class EngineGradient implements ui.Gradient {
   List<dynamic> webOnlySerializeToCssPaint() {
     throw UnsupportedError('CSS paint not implemented for this shader type');
   }
-
-  /// Create a shader for use in the Skia backend.
-  js.JsObject createSkiaShader();
 }
 
 class GradientSweep extends EngineGradient {
@@ -300,4 +302,30 @@ class EngineImageFilter implements ui.ImageFilter {
   String toString() {
     return 'ImageFilter.blur($sigmaX, $sigmaY)';
   }
+}
+
+js.JsObject _skTileMode(ui.TileMode tileMode) {
+  switch(tileMode) {
+    case ui.TileMode.clamp:
+      return canvasKit['TileMode']['Clamp'];
+    case ui.TileMode.repeated:
+      return canvasKit['TileMode']['Repeat'];
+    case ui.TileMode.mirror:
+    default:
+      return canvasKit['TileMode']['Mirror'];
+  }
+}
+
+/// Backend implementation of [ui.ImageShader].
+class EngineImageShader implements ui.ImageShader, EngineShader {
+  EngineImageShader(ui.Image image, this.tileModeX, this.tileModeY,
+      this.matrix4) : _skImage = image as SkImage;
+
+  final ui.TileMode tileModeX;
+  final ui.TileMode tileModeY;
+  final Float64List matrix4;
+  final SkImage _skImage;
+
+  js.JsObject createSkiaShader() => _skImage.skImage.callMethod('makeShader',
+      <dynamic>[_skTileMode(tileModeX), _skTileMode(tileModeY)]);
 }
