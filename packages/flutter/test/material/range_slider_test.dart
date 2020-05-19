@@ -1338,6 +1338,111 @@ void main() {
 
   });
 
+  testWidgets('Range Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
+    final ThemeData theme = _buildTheme();
+    final SliderThemeData sliderTheme = theme.sliderTheme;
+    RangeValues values = const RangeValues(0.5, 0.75);
+
+    Widget buildApp({
+      Color activeColor,
+      Color inactiveColor,
+      int divisions,
+      bool enabled = true,
+    }) {
+      final ValueChanged<RangeValues> onChanged = (RangeValues newValues) {
+        values = newValues;
+      };
+      return MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Navigator(onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(builder: (BuildContext context) {
+                return Column(
+                  children: <Widget>[
+                    Theme(
+                      data: theme,
+                      child: RangeSlider(
+                        values: values,
+                        labels: RangeLabels(values.start.toStringAsFixed(2),
+                            values.end.toStringAsFixed(2)),
+                        divisions: 3,
+                        onChanged: onChanged,
+                      ),
+                    ),
+                    RaisedButton(
+                      child: const Text('Next'),
+                      onPressed: () {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute<void>(
+                            builder: (BuildContext context) {
+                              return RaisedButton(
+                                child: const Text('Inner page'),
+                                onPressed: () => Navigator.of(context).pop(),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                );
+              });
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(divisions: 3));
+
+    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
+
+    final Offset topRight = tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
+    final TestGesture gesture = await tester.startGesture(topRight);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+    expect(values.end, equals(1));
+    expect(
+      valueIndicatorBox,
+      paints
+        ..path()
+        ..path(color: sliderTheme.valueIndicatorColor)
+        ..path(color: sliderTheme.valueIndicatorColor),
+    );
+
+    expect(sliderBox, isNotNull);
+
+    await tester.tap(find.text('Next'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(
+      tester.getTopLeft(find.text('Next')),
+      paints..path(),
+    );
+
+    sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
+
+    expect(sliderBox,
+        paints
+          ..path(),
+    );
+
+    expect(values.end, equals(1));
+    expect(
+      valueIndicatorBox,
+      paints
+        ..path()
+    );
+
+    // Don't stop holding the value indicator.
+    await gesture.up();
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+  });
+
   testWidgets('Range Slider top thumb gets stroked when overlapping', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
