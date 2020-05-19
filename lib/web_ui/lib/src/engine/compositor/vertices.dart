@@ -105,8 +105,6 @@ class SkVertices implements ui.Vertices {
       _encodePoints(positions),
       _encodePoints(textureCoordinates),
       colors,
-      null,
-      null,
       indices,
     ]);
 
