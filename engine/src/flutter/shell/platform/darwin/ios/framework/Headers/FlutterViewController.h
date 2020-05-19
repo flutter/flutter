@@ -37,7 +37,7 @@ extern NSNotificationName const FlutterSemanticsUpdateNotification;
  *
  * A FlutterViewController can be initialized either with an already-running `FlutterEngine` via the
  * `initWithEngine:` initializer, or it can be initialized with a `FlutterDartProject` that will be
- * used to implicitly spin up a new `FlutterEngine`. Creating a `FlutterEngine before showing a
+ * used to implicitly spin up a new `FlutterEngine`. Creating a `FlutterEngine` before showing a
  * FlutterViewController can be used to pre-initialize the Dart VM and to prepare the isolate in
  * order to reduce the latency to the first rendered frame. See
  * https://flutter.dev/docs/development/add-to-app/performance for more details on loading
