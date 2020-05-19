@@ -15,9 +15,16 @@ static constexpr int kMicrosecondsPerMillisecond = 1000;
 struct _FlView {
   GtkWidget parent_instance;
 
+  // Project being run
   FlDartProject* project;
+
+  // Rendering output
   FlRendererX11* renderer;
+
+  // Engine running @project
   FlEngine* engine;
+
+  // Pointer button state recorded for sending status updates
   int64_t button_state;
 };
 
@@ -119,6 +126,7 @@ static void fl_view_dispose(GObject* object) {
   G_OBJECT_CLASS(fl_view_parent_class)->dispose(object);
 }
 
+// Implements GtkWidget::realize
 static void fl_view_realize(GtkWidget* widget) {
   FlView* self = FL_VIEW(widget);
 
@@ -155,6 +163,7 @@ static void fl_view_realize(GtkWidget* widget) {
     g_warning("Failed to start Flutter engine: %s", error->message);
 }
 
+// Implements GtkWidget::size-allocate
 static void fl_view_size_allocate(GtkWidget* widget,
                                   GtkAllocation* allocation) {
   FlView* self = FL_VIEW(widget);
@@ -171,6 +180,7 @@ static void fl_view_size_allocate(GtkWidget* widget,
                                       allocation->height, 1);
 }
 
+// Implements GtkWidget::button_press_event
 static gboolean fl_view_button_press_event(GtkWidget* widget,
                                            GdkEventButton* event) {
   FlView* self = FL_VIEW(widget);
@@ -183,6 +193,7 @@ static gboolean fl_view_button_press_event(GtkWidget* widget,
   return fl_view_send_pointer_button_event(self, event);
 }
 
+// Implements GtkWidget::button_release_event
 static gboolean fl_view_button_release_event(GtkWidget* widget,
                                              GdkEventButton* event) {
   FlView* self = FL_VIEW(widget);
@@ -190,6 +201,7 @@ static gboolean fl_view_button_release_event(GtkWidget* widget,
   return fl_view_send_pointer_button_event(self, event);
 }
 
+// Implements GtkWidget::motion_notify_event
 static gboolean fl_view_motion_notify_event(GtkWidget* widget,
                                             GdkEventMotion* event) {
   FlView* self = FL_VIEW(widget);

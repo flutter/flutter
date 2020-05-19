@@ -27,11 +27,11 @@ GQuark fl_engine_error_quark(void) G_GNUC_CONST;
 
 /**
  * FlEnginePlatformMessageHandler:
- * @engine: a #FlEngine
+ * @engine: an #FlEngine.
  * @channel: channel message received on.
- * @message: message content received from Dart
- * @response_handle: a handle to respond to the message with
- * @user_data: (closure): data provided when registering this handler
+ * @message: message content received from Dart.
+ * @response_handle: a handle to respond to the message with.
+ * @user_data: (closure): data provided when registering this handler.
  *
  * Function called when platform messages are received.
  *
@@ -46,25 +46,25 @@ typedef gboolean (*FlEnginePlatformMessageHandler)(
 
 /**
  * fl_engine_new:
- * @project: a #FlDartProject
- * @renderer: a #FlRenderer
+ * @project: an #FlDartProject.
+ * @renderer: an #FlRenderer.
  *
- * Creates a new Flutter engine.
+ * Creates new Flutter engine.
  *
- * Returns: a #FlEngine
+ * Returns: a new #FlEngine.
  */
 FlEngine* fl_engine_new(FlDartProject* project, FlRenderer* renderer);
 
 /**
  * fl_engine_set_platform_message_handler:
- * @engine: a #FlEngine
- * @handler: function to call when a platform message is received
- * @user_data: (closure): user data to pass to @handler
+ * @engine: an #FlEngine.
+ * @handler: function to call when a platform message is received.
+ * @user_data: (closure): user data to pass to @handler.
  *
- * Register a handler to handle platform messages. Call
- * fl_engine_send_platform_message_response() when this message should be
- * responded to. Ownership of #FlutterPlatformMessageResponseHandle is
- * transferred to the caller, and the call must be responded to to avoid
+ * Registers the function called when a platform message is reveived. Call
+ * fl_engine_send_platform_message_response() with the response to this message.
+ * Ownership of #FlutterPlatformMessageResponseHandle is
+ * transferred to the caller, and the message must be responded to to avoid
  * memory leaks.
  */
 void fl_engine_set_platform_message_handler(
@@ -74,19 +74,19 @@ void fl_engine_set_platform_message_handler(
 
 /**
  * fl_engine_start:
- * @engine: a #FlEngine
+ * @engine: an #FlEngine.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
  * to ignore.
  *
  * Starts the Flutter engine.
  *
- * Returns: %TRUE on success
+ * Returns: %TRUE on success.
  */
 gboolean fl_engine_start(FlEngine* engine, GError** error);
 
 /**
  * fl_engine_send_window_metrics_event:
- * @engine: a #FlEngine
+ * @engine: an #FlEngine.
  * @width: width of the window in pixels.
  * @height: height of the window in pixels.
  * @pixel_ratio: scale factor for window.
@@ -100,7 +100,7 @@ void fl_engine_send_window_metrics_event(FlEngine* engine,
 
 /**
  * fl_engine_send_mouse_pointer_event:
- * @engine: a #FlEngine
+ * @engine: an #FlEngine.
  * @phase: mouse phase.
  * @timestamp: time when event occurred in microseconds.
  * @x: x location of mouse cursor.
@@ -118,13 +118,13 @@ void fl_engine_send_mouse_pointer_event(FlEngine* engine,
 
 /**
  * fl_engine_send_platform_message_response:
- * @engine: a #FlEngine
- * @handle: handle that was provided in #FlEnginePlatformMessageHandler
+ * @engine: an #FlEngine.
+ * @handle: handle that was provided in #FlEnginePlatformMessageHandler.
  * @response: (allow-none): response to send or %NULL for an empty response.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
  * to ignore.
  *
- * Respond to a platform message.
+ * Responds to a platform message.
  *
  * Returns: %TRUE on success.
  */
@@ -136,15 +136,15 @@ gboolean fl_engine_send_platform_message_response(
 
 /**
  * fl_engine_send_platform_message:
- * @engine: a #FlEngine
- * @channel: channel to send to
+ * @engine: an #FlEngine.
+ * @channel: channel to send to.
  * @message: (allow-none): message buffer to send or %NULL for an empty message
- * @cancellable: (allow-none): a #GCancellable or %NULL
+ * @cancellable: (allow-none): a #GCancellable or %NULL.
  * @callback: (scope async): a #GAsyncReadyCallback to call when the request is
- * satisfied
- * @user_data: (closure): user data to pass to @callback
+ * satisfied.
+ * @user_data: (closure): user data to pass to @callback.
  *
- * Asynchronously send a platform message.
+ * Asynchronously sends a platform message.
  */
 void fl_engine_send_platform_message(FlEngine* engine,
                                      const gchar* channel,
@@ -155,12 +155,12 @@ void fl_engine_send_platform_message(FlEngine* engine,
 
 /**
  * fl_engine_send_platform_message_finish:
- * @engine: a #FlEngine
- * @result: a #GAsyncResult
+ * @engine: an #FlEngine.
+ * @result: a #GAsyncResult.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
  * to ignore.
  *
- * Complete request started with fl_engine_send_platform_message().
+ * Completes request started with fl_engine_send_platform_message().
  *
  * Returns: message response on success or %NULL on error.
  */

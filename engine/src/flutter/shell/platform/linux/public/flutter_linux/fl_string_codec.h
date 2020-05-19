@@ -23,8 +23,9 @@ G_DECLARE_FINAL_TYPE(FlStringCodec,
  * FlStringCodec:
  *
  * #FlStringCodec is an #FlMessageCodec that implements the Flutter string
- * message encoding. This encodes and decodes #FlValue of type
- * #FL_VALUE_TYPE_STRING.
+ * message encoding. This only encodes and decodes #FlValue of type
+ * #FL_VALUE_TYPE_STRING, other types #FlValues will generate an error during
+ * encoding.
  *
  * #FlStringCodec matches the StringCodec class in the Flutter services library.
  */
@@ -32,7 +33,7 @@ G_DECLARE_FINAL_TYPE(FlStringCodec,
 /**
  * fl_string_codec_new:
  *
- * Creates a #FlStringCodec.
+ * Creates an #FlStringCodec.
  *
  * Returns: a new #FlStringCodec.
  */

@@ -23,11 +23,11 @@ G_DECLARE_FINAL_TYPE(FlStandardMessageCodec,
  * FlStandardMessageCodec:
  *
  * #FlStandardMessageCodec is an #FlMessageCodec that implements the Flutter
- * standard message encoding. This encodes and decodes #FlValue of type
+ * standard message encoding. This codec encodes and decodes #FlValue of type
  * #FL_VALUE_TYPE_NULL, #FL_VALUE_TYPE_BOOL, #FL_VALUE_TYPE_INT,
  * #FL_VALUE_TYPE_FLOAT, #FL_VALUE_TYPE_STRING, #FL_VALUE_TYPE_UINT8_LIST,
  * #FL_VALUE_TYPE_INT32_LIST, #FL_VALUE_TYPE_INT64_LIST,
- * #FL_VALUE_TYPE_FLOAT_LIST, #FL_VALUE_TYPE_LIST, and #FL_VALUE_TYPE_MAP
+ * #FL_VALUE_TYPE_FLOAT_LIST, #FL_VALUE_TYPE_LIST, and #FL_VALUE_TYPE_MAP.
  *
  * #FlStandardMessageCodec matches the StandardCodec class in the Flutter
  * services library.
@@ -36,9 +36,9 @@ G_DECLARE_FINAL_TYPE(FlStandardMessageCodec,
 /*
  * fl_standard_message_codec_new:
  *
- * Creates a #FlStandardMessageCodec.
+ * Creates an #FlStandardMessageCodec.
  *
- * Returns: a new #FlStandardMessageCodec
+ * Returns: a new #FlStandardMessageCodec.
  */
 FlStandardMessageCodec* fl_standard_message_codec_new();
 

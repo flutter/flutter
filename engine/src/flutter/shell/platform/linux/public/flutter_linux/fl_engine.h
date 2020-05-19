@@ -26,11 +26,11 @@ G_DECLARE_FINAL_TYPE(FlEngine, fl_engine, FL, ENGINE, GObject)
 
 /**
  * fl_engine_get_binary_messenger:
- * @engine: a #FlEngine
+ * @engine: an #FlEngine.
  *
- * Get the messenger to communicate with this engine.
+ * Gets the messenger to communicate with this engine.
  *
- * Returns: a #FlBinaryMessenger
+ * Returns: an #FlBinaryMessenger.
  */
 FlBinaryMessenger* fl_engine_get_binary_messenger(FlEngine* engine);
 
