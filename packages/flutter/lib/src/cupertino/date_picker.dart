@@ -211,15 +211,17 @@ class CupertinoDatePicker extends StatefulWidget {
   /// the intervals set in [minimumDate], [maximumDate], [minimumYear], and
   /// [maximumYear].
   ///
-  /// [minimumDate] is the minimum selectable [DateTime] of the picker. In
-  /// [CupertinoDatePickerMode.time] mode, [minimumDate] should typically be on
-  /// the same date as [initialDateTime]. When set to null, the picker does not
-  /// limit the minimum [DateTime] the user can pick.
+  /// [minimumDate] is the minimum selectable [DateTime] of the picker. When set
+  /// to null, the picker does not limit the minimum [DateTime] the user can pick.
+  /// In [CupertinoDatePickerMode.time] mode, [minimumDate] should typically be
+  /// on the same date as [initialDateTime], as the picker will not limit the
+  /// minimum time the user can pick if it's set to a date earlier than that.
   ///
-  /// [maximumDate] is the maximum selectable [DateTime] of the picker. In
-  /// [CupertinoDatePickerMode.time] mode, [maximumDate] should typically be on
-  /// the same date as [initialDateTime]. When set to null, the picker does not
-  /// limit the maximum [DateTime] the user can pick.
+  /// [maximumDate] is the maximum selectable [DateTime] of the picker. When set
+  /// to null, the picker does not limit the maximum [DateTime] the user can pick.
+  /// In [CupertinoDatePickerMode.time] mode, [maximumDate] should typically be
+  /// on the same date as [initialDateTime], as the picker will not limit the
+  /// maxium time the user can pick if it's set to a date later than that.
   ///
   /// [minimumYear] is the minimum year that the picker can be scrolled to in
   /// [CupertinoDatePickerMode.date] mode. Defaults to 1 and must not be null.
