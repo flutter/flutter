@@ -7,8 +7,6 @@ import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:mockito/mockito.dart';
@@ -57,16 +55,11 @@ void main() {
     TargetPlatform.android_arm64,
     TargetPlatform.android_x64,
   ]) {
-    testWithoutContext('AndroidDevice.startApp allows release builds on $targetPlatform', () async {
+    testUsingContext('AndroidDevice.startApp allows release builds on $targetPlatform', () async {
+      const String deviceId = '1234';
       final String arch = getNameForAndroidArch(
         getAndroidArchForName(getNameForTargetPlatform(targetPlatform)));
-      final AndroidDevice device = AndroidDevice('1234', modelID: 'TestModel',
-        fileSystem: fileSystem,
-        processManager: processManager,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(operatingSystem: 'linux'),
-        androidSdk: androidSdk,
-      );
+      final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
       final File apkFile = fileSystem.file('app.apk')..createSync();
       final AndroidApk apk = AndroidApk(
         id: 'FlutterApp',
@@ -124,17 +117,16 @@ void main() {
 
       expect(launchResult.started, true);
       expect(processManager.hasRemainingExpectations, false);
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => androidSdk,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
   }
 
-  testWithoutContext('AndroidDevice.startApp does not allow release builds on x86', () async {
-    final AndroidDevice device = AndroidDevice('1234', modelID: 'TestModel',
-      fileSystem: fileSystem,
-      processManager: processManager,
-      logger: BufferLogger.test(),
-      platform: FakePlatform(operatingSystem: 'linux'),
-      androidSdk: androidSdk,
-    );
+  testUsingContext('AndroidDevice.startApp does not allow release builds on x86', () async {
+    const String deviceId = '1234';
+    final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
     final File apkFile = fileSystem.file('app.apk')..createSync();
     final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
@@ -163,16 +155,15 @@ void main() {
 
     expect(launchResult.started, false);
     expect(processManager.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    AndroidSdk: () => androidSdk,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
   });
 
-  testWithoutContext('AndroidDevice.startApp forwards all supported debugging options', () async {
-    final AndroidDevice device = AndroidDevice('1234', modelID: 'TestModel',
-      fileSystem: fileSystem,
-      processManager: processManager,
-      logger: BufferLogger.test(),
-      platform: FakePlatform(operatingSystem: 'linux'),
-      androidSdk: androidSdk,
-    );
+  testUsingContext('AndroidDevice.startApp forwards all supported debugging options', () async {
+    const String deviceId = '1234';
+    final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
     final File apkFile = fileSystem.file('app.apk')..createSync();
     final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
@@ -273,6 +264,10 @@ void main() {
     // This fails to start due to observatory discovery issues.
     expect(launchResult.started, false);
     expect(processManager.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    AndroidSdk: () => androidSdk,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
   });
 }
 
