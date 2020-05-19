@@ -70,12 +70,12 @@ class TextInputModel {
   // Attempts to move the cursor to the beginning.
   //
   // Returns true if the cursor could be moved.
-  void MoveCursorToBeginning();
+  bool MoveCursorToBeginning();
 
   // Attempts to move the cursor to the back.
   //
   // Returns true if the cursor could be moved.
-  void MoveCursorToEnd();
+  bool MoveCursorToEnd();
 
   // Get the current text
   std::string GetText() const;
