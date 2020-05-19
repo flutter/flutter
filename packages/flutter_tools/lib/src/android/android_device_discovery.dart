@@ -6,10 +6,8 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
@@ -98,12 +96,6 @@ class AndroidDevices extends PollingDeviceDiscovery {
     String text, {
     List<AndroidDevice> devices,
     List<String> diagnostics,
-    AndroidSdk androidSdk,
-    FileSystem fileSystem,
-    Logger logger,
-    Platform platform,
-    ProcessManager processManager,
-    TimeoutConfiguration timeoutConfiguration,
   }) {
     // Check for error messages from adb
     if (!text.contains('List of devices')) {
@@ -162,12 +154,6 @@ class AndroidDevices extends PollingDeviceDiscovery {
             productID: info['product'],
             modelID: info['model'] ?? deviceID,
             deviceCodeName: info['device'],
-            androidSdk: androidSdk ?? globals.androidSdk,
-            fileSystem: fileSystem ?? globals.fs,
-            logger: logger ?? globals.logger,
-            platform: platform ?? globals.platform,
-            processManager: processManager ?? globals.processManager,
-            timeoutConfiguration: timeoutConfiguration,
           ));
         }
       } else {
