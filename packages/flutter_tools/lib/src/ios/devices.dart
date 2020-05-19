@@ -352,11 +352,9 @@ class IOSDevice extends Device {
       return LaunchResult.failed();
     }
 
-    // Step 2.5: Generate a potential open port using the provided argument,
-    // or randomly with the package name as a seed. Intentionally choose
-    // ports within the ephemeral port range.
-    final int assumedObservatoryPort = debuggingOptions?.deviceVmServicePort
-      ?? math.Random(packageId.hashCode).nextInt(16383) + 49152;
+    // Step 2.5: Generate a potential open port randomly with the package name
+    // as a seed. Intentionally choose ports within the ephemeral port range.
+    final int assumedObservatoryPort = math.Random(packageId.hashCode).nextInt(16383) + 49152;
 
     // Step 3: Attempt to install the application on the device.
     final List<String> launchArguments = <String>[
@@ -400,7 +398,8 @@ class IOSDevice extends Device {
         observatoryDiscovery = ProtocolDiscovery.observatory(
           getLogReader(app: package),
           portForwarder: portForwarder,
-          hostPort: debuggingOptions.hostVmServicePort,
+          // DDS will be listening on the hostVmServicePort.
+          hostPort: 0,
           devicePort: debuggingOptions.deviceVmServicePort,
           ipv6: ipv6,
         );
@@ -434,9 +433,8 @@ class IOSDevice extends Device {
       );
       final Uri localUri = await fallbackDiscovery.discover(
         assumedDevicePort: assumedObservatoryPort,
-        deivce: this,
+        device: this,
         usesIpv6: ipv6,
-        hostVmservicePort: debuggingOptions.hostVmServicePort,
         packageId: packageId,
         packageName: FlutterProject.current().manifest.appName,
       );

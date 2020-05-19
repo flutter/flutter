@@ -140,8 +140,8 @@ class MDnsObservatoryDiscovery {
 
   Future<Uri> getObservatoryUri(String applicationId, Device device, {
     bool usesIpv6 = false,
-    int hostVmservicePort,
     int deviceVmservicePort,
+    int hostVmservicePort,
   }) async {
     final MDnsObservatoryDiscoveryResult result = await query(
       applicationId: applicationId,
@@ -239,7 +239,7 @@ Future<Uri> buildObservatoryUri(
   if (!path.endsWith('/')) {
     path += '/';
   }
-  final int actualHostPort = hostVmservicePort ?? await device
-    .portForwarder.forward(devicePort);
+  final int actualHostPort = hostVmservicePort ?? await device.
+    portForwarder.forward(devicePort);
   return Uri(scheme: 'http', host: host, port: actualHostPort, path: path);
 }

@@ -620,7 +620,8 @@ class AndroidDevice extends Device {
       observatoryDiscovery = ProtocolDiscovery.observatory(
         await getLogReader(),
         portForwarder: portForwarder,
-        hostPort: debuggingOptions.hostVmServicePort,
+        // DDS will be listening on the hostVmServicePort.
+        hostPort: 0,
         devicePort: debuggingOptions.deviceVmServicePort,
         ipv6: ipv6,
       );

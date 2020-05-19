@@ -69,10 +69,10 @@ class FallbackDiscovery {
   Future<Uri> discover({
     @required int assumedDevicePort,
     @required String packageId,
-    @required Device deivce,
+    @required Device device,
     @required bool usesIpv6,
-    @required int hostVmservicePort,
     @required String packageName,
+    @visibleForTesting int hostVmservicePort,
   }) async {
     final Uri result = await _attemptServiceConnection(
       assumedDevicePort: assumedDevicePort,
@@ -86,7 +86,7 @@ class FallbackDiscovery {
     try {
       final Uri result = await _mDnsObservatoryDiscovery.getObservatoryUri(
         packageId,
-        deivce,
+        device,
         usesIpv6: usesIpv6,
         hostVmservicePort: hostVmservicePort,
       );
@@ -137,7 +137,7 @@ class FallbackDiscovery {
   // Returns `null` if no connection can be made.
   Future<Uri> _attemptServiceConnection({
     @required int assumedDevicePort,
-    @required int  hostVmservicePort,
+    @required int hostVmservicePort,
     @required String packageName,
   }) async {
     int hostPort;

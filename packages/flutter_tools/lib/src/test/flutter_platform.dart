@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -477,7 +478,6 @@ class FlutterPlatform extends PlatformPlugin {
         enableObservatory: enableObservatory,
         startPaused: startPaused,
         disableServiceAuthCodes: disableServiceAuthCodes,
-        observatoryPort: explicitObservatoryPort,
         serverPort: server.port,
       );
       subprocessActive = true;
@@ -511,7 +511,7 @@ class FlutterPlatform extends PlatformPlugin {
       Uri processObservatoryUri;
       _pipeStandardStreamsToConsole(
         process,
-        reportObservatoryUri: (Uri detectedUri) {
+        reportObservatoryUri: (Uri detectedUri) async {
           assert(processObservatoryUri == null);
           assert(explicitObservatoryPort == null ||
               explicitObservatoryPort == detectedUri.port);
@@ -523,18 +523,29 @@ class FlutterPlatform extends PlatformPlugin {
           } else {
             globals.printTrace('test $ourTestCount: using observatory uri $detectedUri from pid ${process.pid}');
           }
-          processObservatoryUri = detectedUri;
-          {
-            globals.printTrace('Connecting to service protocol: $processObservatoryUri');
-            final Future<vm_service.VmService> localVmService = connectToVmService(processObservatoryUri,
-              compileExpression: _compileExpressionService);
-            localVmService.then((vm_service.VmService vmservice) {
-              globals.printTrace('Successfully connected to service protocol: $processObservatoryUri');
-            });
-          }
-          gotProcessObservatoryUri.complete();
-          watcher?.handleStartedProcess(
-              ProcessEvent(ourTestCount, process, processObservatoryUri));
+          unawaited(DartDevelopmentService.startDartDevelopmentService(
+              detectedUri,
+              serviceUri: Uri.parse('http://${InternetAddress.loopbackIPv4.host}:${explicitObservatoryPort ?? 0}'),
+              enableAuthCodes: !disableServiceAuthCodes
+            ).then((DartDevelopmentService dds) {
+                processObservatoryUri = detectedUri;
+                {
+                  globals.printTrace('Connecting to service protocol: $processObservatoryUri');
+                  final Future<vm_service.VmService> localVmService =
+                    connectToVmService(
+                      processObservatoryUri,
+                      compileExpression: _compileExpressionService
+                    );
+                  localVmService.then((vm_service.VmService vmservice) {
+                    globals.printTrace('Successfully connected to service protocol: $processObservatoryUri');
+                  });
+                }
+                gotProcessObservatoryUri.complete();
+                watcher?.handleStartedProcess(
+                    ProcessEvent(ourTestCount, process, processObservatoryUri));
+              }
+            )
+          );
         },
         startTimeoutTimer: () {
           Future<InitialResult>.delayed(_kTestStartupTimeout)
