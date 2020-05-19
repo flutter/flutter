@@ -272,6 +272,19 @@ class ManifestAssetBundle implements AssetBundle {
     final DevFSStringContent licenses = DevFSStringContent(licenseResult.combinedLicenses);
     additionalDependencies = licenseResult.dependencies;
 
+    if (wildcardDirectories.isNotEmpty) {
+      // Force the depfile to contain missing files so that Gradle does not skip
+      // the task. Wildcard directories are not compatible with full incremental
+      // builds. For more context see https://github.com/flutter/flutter/issues/56466 .
+      globals.printTrace(
+        'Manifest contained wildcard assets. Inserting missing file into '
+        'build graph to force rerun. for more information see #56466.'
+      );
+      final int suffix = Object().hashCode;
+      additionalDependencies.add(
+        globals.fs.file('DOES_NOT_EXIST_RERUN_FOR_WILDCARD$suffix').absolute);
+    }
+
     _setIfChanged(_assetManifestJson, assetManifest);
     _setIfChanged(kFontManifestJson, fontManifest);
     _setIfChanged(_license, licenses);
