@@ -5,6 +5,9 @@
 package io.flutter.plugin.common;
 
 import io.flutter.plugin.common.StandardMessageCodec.ExposedByteArrayOutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -66,7 +69,11 @@ public final class StandardMethodCodec implements MethodCodec {
     stream.write(1);
     messageCodec.writeValue(stream, errorCode);
     messageCodec.writeValue(stream, errorMessage);
-    messageCodec.writeValue(stream, errorDetails);
+    if (errorDetails instanceof Throwable) {
+      messageCodec.writeValue(stream, getStackTrace((Throwable) errorDetails));
+    } else {
+      messageCodec.writeValue(stream, errorDetails);
+    }
     final ByteBuffer buffer = ByteBuffer.allocateDirect(stream.size());
     buffer.put(stream.buffer(), 0, stream.size());
     return buffer;
@@ -98,5 +105,11 @@ public final class StandardMethodCodec implements MethodCodec {
         }
     }
     throw new IllegalArgumentException("Envelope corrupted");
+  }
+
+  private static String getStackTrace(Throwable t) {
+    Writer result = new StringWriter();
+    t.printStackTrace(new PrintWriter(result));
+    return result.toString();
   }
 }
