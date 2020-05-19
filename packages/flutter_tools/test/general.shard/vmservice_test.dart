@@ -163,7 +163,7 @@ void main() {
     FlutterVersion: () => MockFlutterVersion(),
   });
 
-  testUsingContext('VMService prints messages for Observatory connection failures', () {
+  testUsingContext('VMService prints messages for connection failures', () {
     FakeAsync().run((FakeAsync time) {
       final Uri uri = Uri.parse('ws://127.0.0.1:12345/QqL7EFEDNG0=/ws');
       unawaited(connectToVmService(uri));
@@ -176,15 +176,15 @@ void main() {
       final String statusText = testLogger.statusText;
       expect(
         statusText,
-        containsIgnoringWhitespace('Connecting to the Observatory is taking longer than expected...'),
+        containsIgnoringWhitespace('Connecting to the VM Service is taking longer than expected...'),
       );
       expect(
         statusText,
-        containsIgnoringWhitespace('Consider running with --host-vmservice-port'),
+        containsIgnoringWhitespace('try re-running with --host-vmservice-port'),
       );
       expect(
         statusText,
-        containsIgnoringWhitespace('Exception attempting to connect to the Observatory:'),
+        containsIgnoringWhitespace('Exception attempting to connect to the VM Service:'),
       );
       expect(
         statusText,

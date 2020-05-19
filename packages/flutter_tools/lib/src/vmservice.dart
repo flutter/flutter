@@ -91,17 +91,22 @@ Future<io.WebSocket> _defaultOpenChannel(String url, {
   Future<void> handleError(dynamic e) async {
     void Function(String) printVisibleTrace = globals.printTrace;
     if (attempts == 10) {
-      globals.printStatus('Connecting to the Observatory is taking longer than expected...');
+      globals.printStatus('Connecting to the VM Service is taking longer than expected...');
     } else if (attempts == 20) {
-      globals.printStatus('Still attempting to connect to the Observatory...');
+      globals.printStatus('Still attempting to connect to the VM Service...');
       globals.printStatus(
-        'Consider running with --host-vmservice-port to use a specific port '
-        'that is known to be available.');
+        'If you do NOT see the Flutter application running, it might have '
+        'crashed. The device logs (e.g. from adb or XCode) might have more '
+        'details.');
+      globals.printStatus(
+        'If you do see the Flutter application running on the device, try '
+        're-running with --host-vmservice-port to use a specific port known to '
+        'be available.');
     } else if (attempts % 50 == 0) {
       printVisibleTrace = globals.printStatus;
     }
 
-    printVisibleTrace('Exception attempting to connect to the Observatory: $e');
+    printVisibleTrace('Exception attempting to connect to the VM Service: $e');
     printVisibleTrace('This was attempt #$attempts. Will retry in $delay.');
 
     // Delay next attempt.
