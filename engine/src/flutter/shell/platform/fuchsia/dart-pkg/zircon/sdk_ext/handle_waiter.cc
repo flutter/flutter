@@ -4,7 +4,7 @@
 
 #include "handle_waiter.h"
 
-#include <lib/async-loop/default.h>
+#include <lib/async/default.h>
 
 #include "handle.h"
 #include "third_party/tonic/converter/dart_converter.h"
