@@ -828,13 +828,16 @@ abstract class FlutterCommand extends Command<void> {
       } else {
         globals.printStatus(userMessages.flutterNoSupportedDevices);
       }
-      final List<Device> unSupportedDevices = await deviceManager.getDevices();
-      if (unSupportedDevices.isNotEmpty) {
-        globals.printStatus(userMessages.flutterFoundButUnSupportedDevices);
+      final List<Device> unsupportedDevices = await deviceManager.getDevices();
+      if (unsupportedDevices.isNotEmpty) {
+        globals.printStatus(userMessages.flutterFoundButUnsupportedDevices);
         globals.printStatus('');
-        await Device.printDevices(unSupportedDevices);
+        await Device.printDevices(unsupportedDevices);
         globals.printStatus('');
-        globals.printStatus(userMessages.flutterMissPlatformProject(FlutterProject.current().directory.path));
+        globals.printStatus(userMessages.flutterMissPlatformProject(
+          FlutterProject.current().directory.path,
+          Device.devicesPlatformTypes(unsupportedDevices),
+        ));
       }
       return null;
     } else if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices) {

@@ -241,7 +241,7 @@ void main() {
         ProcessManager: () => mockProcessManager,
       });
 
-      testUsingContext('exist with unsupported device message when missing platform project',  () async {
+      testUsingContext('shows unsupported devices when no supported devices are found',  () async {
         final RunCommand command = RunCommand();
         applyMocksToCommand(command);
 
@@ -280,11 +280,16 @@ void main() {
         );
         expect(
           testLogger.statusText,
-          containsIgnoringWhitespace(userMessages.flutterFoundButUnSupportedDevices),
+          containsIgnoringWhitespace(userMessages.flutterFoundButUnsupportedDevices),
         );
         expect(
           testLogger.statusText,
-          containsIgnoringWhitespace(userMessages.flutterMissPlatformProject(fs.path.current)),
+          containsIgnoringWhitespace(
+            userMessages.flutterMissPlatformProject(
+              fs.path.current,
+              Device.devicesPlatformTypes([mockDevice]),
+            ),
+          ),
         );
       }, overrides: <Type, Generator>{
         DeviceManager: () => mockDeviceManager,
