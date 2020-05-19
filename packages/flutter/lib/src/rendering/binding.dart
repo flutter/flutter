@@ -42,8 +42,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsAction = _handleSemanticsAction
-      ..onWindowCreated = handleWindowCreated
-      ..onWindowDisposed = handleWindowDisposed
+      ..onViewCreated = handleViewCreated
+      ..onViewDisposed = handleViewDisposed
       ..onScreenAdded = handleScreenAdded
       ..onScreenRemoved = handleScreenRemoved
       ..onMetricsChanged = handleMetricsChanged;
@@ -180,10 +180,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 
   @protected
-  void handleWindowCreated(ui.Window window) { }
+  void handleViewCreated(ui.FlutterView view) { }
 
   @protected
-  void handleWindowDisposed(ui.Window window) { }
+  void handleViewDisposed(ui.FlutterView view) { }
 
   @protected
   void handleScreenAdded(ui.Screen screen) { }
@@ -254,8 +254,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// this to force the display into 800x600 when a test is run on the device
   /// using `flutter run`.
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = ui.PlatformDispatcher.instance.windows.isEmpty ? 1.0 : window.devicePixelRatio;
-    final Size physicalSize = ui.PlatformDispatcher.instance.windows.isEmpty ? Size.zero : window.physicalSize;
+    final double devicePixelRatio = ui.PlatformDispatcher.instance.views.isEmpty ? 1.0 : window.devicePixelRatio;
+    final Size physicalSize = ui.PlatformDispatcher.instance.views.isEmpty ? Size.zero : window.physicalSize;
     return ViewConfiguration(
       size: physicalSize / devicePixelRatio,
       devicePixelRatio: devicePixelRatio,

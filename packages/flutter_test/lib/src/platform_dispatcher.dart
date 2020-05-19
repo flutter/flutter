@@ -64,7 +64,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   /// The current list of windows,
   @override
-  Iterable<Window> get windows => _platformDispatcher.windows;
+  Iterable<FlutterView> get views => _platformDispatcher.views;
 
   /// Receives all events related to platform configuration changes.
   @override
@@ -94,20 +94,20 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ///
   /// Sends the opaque ID of the newly opened window.
   @override
-  WindowCreatedCallback get onWindowCreated => _platformDispatcher.onWindowCreated;
+  ViewCreatedCallback get onViewCreated => _platformDispatcher.onViewCreated;
   @override
-  set onWindowCreated(WindowCreatedCallback callback) {
-    _platformDispatcher.onWindowCreated = callback;
+  set onViewCreated(ViewCreatedCallback callback) {
+    _platformDispatcher.onViewCreated = callback;
   }
 
   /// Is called when a window closure is requested by the platform.
   ///
   /// Sends the opaque ID of the window to be closed.
   @override
-  WindowDisposedCallback get onWindowDisposed => _platformDispatcher.onWindowDisposed;
+  ViewDisposedCallback get onViewDisposed => _platformDispatcher.onViewDisposed;
   @override
-  set onWindowDisposed(WindowDisposedCallback callback) {
-    _platformDispatcher.onWindowDisposed = callback;
+  set onViewDisposed(ViewDisposedCallback callback) {
+    _platformDispatcher.onViewDisposed = callback;
   }
 
   /// A callback invoked when any window begins a frame.
@@ -287,8 +287,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  void render(Scene scene) {
-    _platformDispatcher.render(scene);
+  void render(Scene scene, [FlutterView view]) {
+    _platformDispatcher.render(scene, view);
   }
 
   @override

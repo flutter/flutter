@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback, Screen, Window;
+import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback, Screen, FlutterView;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -262,10 +262,10 @@ abstract class WidgetsBindingObserver {
   ///
   /// The configuration of the window can be obtained with
   /// `WidgetsBinding.instance.platformDispatcher.windows[id]`.
-  void didOpenWindow(Window id) { }
+  void didCreateView(FlutterView view) { }
 
   /// Called whenever a window is closed.
-  void didCloseWindow(Window id) { }
+  void didDisposeView(FlutterView view) { }
 }
 
 /// The glue between the widgets layer and the Flutter engine.
@@ -568,18 +568,18 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   @override
-  void handleWindowCreated(Window window) {
-    super.handleWindowCreated(window);
+  void handleViewCreated(FlutterView view) {
+    super.handleViewCreated(window);
     for (final WidgetsBindingObserver observer in _observers) {
-      observer.didOpenWindow(window);
+      observer.didCreateView(window);
     }
   }
 
   @override
-  void handleWindowDisposed(Window window) {
-    super.handleWindowDisposed(window);
+  void handleViewDisposed(FlutterView view) {
+    super.handleViewDisposed(window);
     for (final WidgetsBindingObserver observer in _observers) {
-      observer.didCloseWindow(window);
+      observer.didDisposeView(window);
     }
   }
 
