@@ -1,4 +1,4 @@
-Signature: c95c19ed24aaa4e2933c96c463164cc9
+Signature: d5ff069f5a497a1f744cc4dff3cb6e88
 
 UNUSED LICENSES:
 
@@ -657,6 +657,7 @@ FILE: ../../../third_party/skia/src/gpu/GrTextureRenderTargetProxy.h
 FILE: ../../../third_party/skia/src/gpu/GrUserStencilSettings.h
 FILE: ../../../third_party/skia/src/gpu/GrWindowRectangles.h
 FILE: ../../../third_party/skia/src/gpu/GrWindowRectsState.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DPipelineStateDataManager.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrShadowGeoProc.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrShadowGeoProc.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrStyledShape.cpp
@@ -1102,7 +1103,6 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-EMCC-wasm-Debug-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-EMCC-wasm-Release-CanvasKit_CPU.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-EMCC-wasm-Release-PathKit.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-GCC-loongson3a-Release-Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-GCC-x86-Debug-Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-GCC-x86_64-Debug-Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-GCC-x86_64-Release-NoGPU_Docker.json
@@ -1279,7 +1279,6 @@ FILE: ../../../third_party/skia/infra/config/recipes.cfg
 FILE: ../../../third_party/skia/infra/cross-compile/docker/cross-linux-arm64/Dockerfile
 FILE: ../../../third_party/skia/infra/cts/whitelist_devices.json
 FILE: ../../../third_party/skia/infra/docker/debian9/Dockerfile
-FILE: ../../../third_party/skia/infra/gcc/Debian10-mips64el/Dockerfile
 FILE: ../../../third_party/skia/infra/gcc/Debian10-x86/Dockerfile
 FILE: ../../../third_party/skia/infra/gcc/Debian10/Dockerfile
 FILE: ../../../third_party/skia/infra/lottiecap/docker/gold-lottie-web-puppeteer/Dockerfile
@@ -1922,6 +1921,7 @@ FILE: ../../../third_party/skia/src/gpu/GrPrimitiveProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProcessorAnalysis.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProcessorAnalysis.h
 FILE: ../../../third_party/skia/src/gpu/GrProgramDesc.h
+FILE: ../../../third_party/skia/src/gpu/GrRectanizerPow2.h
 FILE: ../../../third_party/skia/src/gpu/GrRectanizerSkyline.h
 FILE: ../../../third_party/skia/src/gpu/GrResourceCache.cpp
 FILE: ../../../third_party/skia/src/gpu/GrResourceCache.h
@@ -3934,6 +3934,8 @@ FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.h
 FILE: ../../../third_party/skia/src/gpu/GrManagedResource.cpp
 FILE: ../../../third_party/skia/src/gpu/GrStencilMaskHelper.cpp
 FILE: ../../../third_party/skia/src/gpu/GrStencilMaskHelper.h
+FILE: ../../../third_party/skia/src/gpu/GrUniformDataManager.cpp
+FILE: ../../../third_party/skia/src/gpu/GrUniformDataManager.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DAttachmentViewManager.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DAttachmentViewManager.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DBuffer.cpp
@@ -3952,6 +3954,7 @@ FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DPipelineState.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DPipelineState.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DPipelineStateBuilder.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DPipelineStateBuilder.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DPipelineStateDataManager.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DRenderTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResourceProvider.cpp
@@ -6216,6 +6219,8 @@ FILE: ../../../third_party/skia/src/gpu/GrColor.h
 FILE: ../../../third_party/skia/src/gpu/GrFixedClip.cpp
 FILE: ../../../third_party/skia/src/gpu/GrGlyph.h
 FILE: ../../../third_party/skia/src/gpu/GrGpu.cpp
+FILE: ../../../third_party/skia/src/gpu/GrRectanizer.h
+FILE: ../../../third_party/skia/src/gpu/GrRectanizerPow2.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTAllocator.h
 FILE: ../../../third_party/skia/src/gpu/GrVertexWriter.h
 FILE: ../../../third_party/skia/src/gpu/SkGpuDevice.h
