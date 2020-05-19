@@ -127,7 +127,7 @@ void main() {
     });
   }
 
-  testUsingContext('AndroidDevice.startApp does not allow release builds on x86', () async {
+  testWithoutContext('AndroidDevice.startApp does not allow release builds on x86', () async {
     final AndroidDevice device = AndroidDevice('1234', modelID: 'TestModel',
       fileSystem: fileSystem,
       processManager: processManager,
