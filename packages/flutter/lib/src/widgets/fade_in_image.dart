@@ -120,7 +120,7 @@ class FadeInImage extends StatelessWidget {
   /// null.
   ///
   /// If [excludeFromSemantics] is true, then [imageSemanticLabel] will be ignored.
-  FadeInImage({
+  const FadeInImage({
     Key key,
     @required this.placeholder,
     this.placeholderErrorBuilder,
@@ -138,13 +138,13 @@ class FadeInImage extends StatelessWidget {
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
-    FadeInImageAnimationBuilder animationBuilder,
+    this.animationBuilder,
   }) : assert(placeholder != null),
        assert(image != null),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       animationBuilder = animationBuilder ?? _defaultAnimationBuilder(fadeOutDuration, fadeOutCurve, fadeInDuration, fadeInCurve),
+       assert(animationBuilder != null || (fadeOutDuration != null && fadeOutCurve != null && fadeInDuration != null && fadeInCurve != null)),
        super(key: key);
 
   /// Creates a widget that uses a placeholder image stored in memory while
@@ -202,7 +202,7 @@ class FadeInImage extends StatelessWidget {
     int placeholderCacheHeight,
     int imageCacheWidth,
     int imageCacheHeight,
-    FadeInImageAnimationBuilder animationBuilder,
+    this.animationBuilder,
   }) : assert(placeholder != null),
        assert(image != null),
        assert(placeholderScale != null),
@@ -210,9 +210,9 @@ class FadeInImage extends StatelessWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert(animationBuilder != null || (fadeOutDuration != null && fadeOutCurve != null && fadeInDuration != null && fadeInCurve != null)),
        placeholder = ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, MemoryImage(placeholder, scale: placeholderScale)),
        image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight, NetworkImage(image, scale: imageScale)),
-       animationBuilder = animationBuilder ?? _defaultAnimationBuilder(fadeOutDuration, fadeOutCurve, fadeInDuration, fadeInCurve),
        super(key: key);
 
   /// Creates a widget that uses a placeholder image stored in an asset bundle
@@ -274,7 +274,7 @@ class FadeInImage extends StatelessWidget {
     int placeholderCacheHeight,
     int imageCacheWidth,
     int imageCacheHeight,
-    FadeInImageAnimationBuilder animationBuilder,
+    this.animationBuilder,
   }) : assert(placeholder != null),
        assert(image != null),
        placeholder = placeholderScale != null
@@ -284,8 +284,8 @@ class FadeInImage extends StatelessWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert(animationBuilder != null || (fadeOutDuration != null && fadeOutCurve != null && fadeInDuration != null && fadeInCurve != null)),
        image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight, NetworkImage(image, scale: imageScale)),
-       animationBuilder = animationBuilder ?? _defaultAnimationBuilder(fadeOutDuration, fadeOutCurve, fadeInDuration, fadeInCurve),
        super(key: key);
 
   /// Image displayed while the target [image] is loading.
@@ -413,16 +413,7 @@ class FadeInImage extends StatelessWidget {
 
   /// The default animation used to maintain backwards compatibility used during
   /// construction. The parameters passed through the contructor for 
-  static FadeInImageAnimationBuilder _defaultAnimationBuilder(
-    Duration fadeOutDuration, 
-    Curve fadeOutCurve, 
-    Duration fadeInDuration, 
-    Curve fadeInCurve,
-  ){
-    assert(fadeOutDuration != null);
-    assert(fadeOutCurve != null);
-    assert(fadeInDuration != null);
-    assert(fadeInCurve != null);
+  FadeInImageAnimationBuilder _defaultAnimationBuilder() {
     return (Widget target, Widget placeholder, bool isTargetLoaded) => AnimatedFadeOutFadeIn(
       target: target,
       placeholder: placeholder,
@@ -463,7 +454,8 @@ class FadeInImage extends StatelessWidget {
       frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
         if (wasSynchronouslyLoaded)
           return child;
-        return animationBuilder(child, _image(image: placeholder, errorBuilder: placeholderErrorBuilder), frame != null);
+        final FadeInImageAnimationBuilder builder = animationBuilder ?? _defaultAnimationBuilder();
+        return builder(child, _image(image: placeholder, errorBuilder: placeholderErrorBuilder), frame != null);
       },
     );
 
