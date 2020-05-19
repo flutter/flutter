@@ -184,9 +184,10 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// `width`, `height`, and [constraints] arguments to the constructor override
 /// this.
 ///
-/// A container by itself is hittable during a hit test if and only if it has
-/// [color], [decoration], or [foregroundDecoration]. By using decorations,
-/// the hittability will be decided by [Decoration.hitTest].
+/// By default, containers return false for all hit tests. If the [color]
+/// property is specified, the hit testing is handled by [ColoredBox], which
+/// always returns true. If the [decoration] or [foregroundDecoration] properties
+/// are specified, hit testing is handled by [Decoration.hitTest].
 ///
 /// ## Layout behavior
 ///
