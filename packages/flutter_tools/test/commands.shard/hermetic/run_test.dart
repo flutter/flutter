@@ -287,7 +287,7 @@ void main() {
           containsIgnoringWhitespace(
             userMessages.flutterMissPlatformProject(
               fs.path.current,
-              Device.devicesPlatformTypes([mockDevice]),
+              Device.devicesPlatformTypes(<Device>[mockDevice]),
             ),
           ),
         );
