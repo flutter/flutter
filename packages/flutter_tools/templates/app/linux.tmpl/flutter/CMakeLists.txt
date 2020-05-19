@@ -52,6 +52,7 @@ list(APPEND CPP_WRAPPER_SOURCES_PLUGIN
 )
 list_prepend(CPP_WRAPPER_SOURCES_PLUGIN "${WRAPPER_ROOT}/")
 list(APPEND CPP_WRAPPER_SOURCES_APP
+  "flutter_engine.cc"
   "flutter_window_controller.cc"
 )
 list_prepend(CPP_WRAPPER_SOURCES_APP "${WRAPPER_ROOT}/")
