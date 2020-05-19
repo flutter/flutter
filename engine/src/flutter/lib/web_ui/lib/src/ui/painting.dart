@@ -1812,3 +1812,24 @@ class Shadow {
   @override
   String toString() => 'TextShadow($color, $offset, $blurRadius)';
 }
+
+
+/// A shader (as used by [Paint.shader]) that tiles an image.
+class ImageShader extends Shader {
+  /// Creates an image-tiling shader. The first argument specifies the image to
+  /// tile. The second and third arguments specify the [TileMode] for the x
+  /// direction and y direction respectively. The fourth argument gives the
+  /// matrix to apply to the effect. All the arguments are required and must not
+  /// be null.
+  factory ImageShader(
+    Image image,
+    TileMode tmx,
+    TileMode tmy,
+    Float64List matrix4) {
+    if (engine.experimentalUseSkia) {
+      return engine.EngineImageShader(image, tmx, tmy, matrix4);
+    }
+    throw UnsupportedError(
+        'ImageShader not implemented for web platform.');
+  }
+}
