@@ -52,7 +52,7 @@ import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowBuild;
 import org.robolectric.shadows.ShadowInputMethodManager;
 
-@Config(manifest = Config.NONE, shadows = TextInputPluginTest.TestImm.class, sdk = 27)
+@Config(manifest = Config.NONE, shadows = TextInputPluginTest.TestImm.class)
 @RunWith(RobolectricTestRunner.class)
 public class TextInputPluginTest {
   // Verifies the method and arguments for a captured method call.
