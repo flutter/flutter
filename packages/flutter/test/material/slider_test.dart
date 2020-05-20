@@ -1972,7 +1972,7 @@ void main() {
                       key: sliderKey,
                       min: 0.0,
                       max: 100.0,
-                      divisions: 10,
+                      divisions: divisions,
                       label: '${value.round()}',
                       value: value,
                       onChanged: (double newValue) {
@@ -2015,8 +2015,8 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
-        ..rrect(color: const Color(0xff2196f3)) // active track
-        ..rrect(color: const Color(0x3d2196f3)), // inactive
+        ..rrect(color: const Color(0xff2196f3)) // Active track.
+        ..rrect(color: const Color(0x3d2196f3)), // Inactive track.
     );
 
     await tester.tap(find.text('Next'));
@@ -2027,9 +2027,9 @@ void main() {
       valueIndicatorBox,
       isNot(
           paints
-            ..rrect(color: const Color(0xff2196f3)) // active track
-            ..rrect(color: const Color(0x3d2196f3))
-      ), //inactive
+            ..rrect(color: const Color(0xff2196f3)) // Active track.
+            ..rrect(color: const Color(0x3d2196f3)) // Inactive track.
+      ),
     );
 
     // Don't stop holding the value indicator.

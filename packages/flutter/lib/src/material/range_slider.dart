@@ -476,7 +476,6 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       overlayEntry.remove();
       overlayEntry = null;
     }
-//    print((overlayEntry == null) ? 'overlay entry is null' : 'overlay entry is not null');
 
     super.dispose();
   }

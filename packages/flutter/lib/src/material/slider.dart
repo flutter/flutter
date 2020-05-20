@@ -507,15 +507,15 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    if (overlayEntry != null) {
-      overlayEntry.remove();
-      overlayEntry = null;
-    }
     interactionTimer?.cancel();
     overlayController.dispose();
     valueIndicatorController.dispose();
     enableController.dispose();
     positionController.dispose();
+    if (overlayEntry != null) {
+      overlayEntry.remove();
+      overlayEntry = null;
+    }
     super.dispose();
   }
 

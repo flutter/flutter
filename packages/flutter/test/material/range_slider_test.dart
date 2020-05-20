@@ -1366,7 +1366,7 @@ void main() {
                         values: values,
                         labels: RangeLabels(values.start.toStringAsFixed(2),
                             values.end.toStringAsFixed(2)),
-                        divisions: 3,
+                        divisions: divisions,
                         onChanged: onChanged,
                       ),
                     ),
