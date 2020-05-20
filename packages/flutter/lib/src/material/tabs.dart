@@ -612,6 +612,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.unselectedLabelStyle,
     this.dragStartBehavior = DragStartBehavior.start,
     this.onTap,
+    this.physics,
   }) : assert(tabs != null),
        assert(isScrollable != null),
        assert(dragStartBehavior != null),
@@ -744,6 +745,14 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// callbacks should not make changes to the TabController since that would
   /// interfere with the default tap handler.
   final ValueChanged<int> onTap;
+
+  /// How the [TabBar]'s scroll view should respond to user input.
+  ///
+  /// For example, determines how the scroll view continues to animate after the
+  /// user stops dragging the scroll view.
+  ///
+  /// Defaults to matching platform conventions.
+  final ScrollPhysics physics;
 
   /// A size whose height depends on if the tabs have both icons and text.
   ///
@@ -1107,6 +1116,7 @@ class _TabBarState extends State<TabBar> {
         dragStartBehavior: widget.dragStartBehavior,
         scrollDirection: Axis.horizontal,
         controller: _scrollController,
+        physics: widget.physics,
         child: tabBar,
       );
     }
