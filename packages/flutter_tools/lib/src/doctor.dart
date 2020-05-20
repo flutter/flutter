@@ -818,6 +818,12 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
             // ignored
           }
           if (installPath != null && globals.fs.isDirectorySync(installPath)) {
+            // Needed if the app has been installed via JetBrains Toolbox
+            final String pluginsPath =
+                globals.fs.isDirectorySync(installPath + '.plugins')
+                    ? installPath + '.plugins'
+                    : globals.fs.path.join(dir.path, 'config', 'plugins');
+
             final String pluginsPath = globals.fs.path.join(dir.path, 'config', 'plugins');
             addValidator(title, version, installPath, pluginsPath);
           }
