@@ -617,6 +617,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     );
     _childPosition = updateGeometry();
     _lastActualScrollOffset = constraints.scrollOffset;
+    print('perform layout $geometry');
   }
 
   @override

@@ -721,6 +721,9 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
     // needs to be corrected after the animation completes, or the outer
     // positioning will be out of sync, breaking the float.
     if (needsCorrection && geometry != null) {
+      print('After animation geometry: $geometry');
+      print('position maxExtent: ${_position.maxScrollExtent}');
+      print('correcting to ${geometry.scrollExtent - geometry.paintExtent}');
       _position.correctPixels(geometry.scrollExtent - geometry.paintExtent);
     }
 
