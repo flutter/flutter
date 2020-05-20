@@ -520,6 +520,11 @@ class _CanvasPool extends _SaveStackTracking {
             break;
           case PathCommandTypes.ellipse:
             final Ellipse ellipse = command;
+            if (c == 0) {
+              // Ellipses that start a new path need to set start point,
+              // otherwise it incorrectly uses last point.
+              ctx.moveTo(subpath.startX, subpath.startY);
+            }
             DomRenderer.ellipse(ctx,
                 ellipse.x,
                 ellipse.y,
