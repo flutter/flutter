@@ -17,10 +17,6 @@ import 'ticker_provider.dart';
 /// The user can transform the child by dragging to pan or pinching to zoom and
 /// rotate.
 ///
-/// All event callbacks for GestureDetector are supported, and the coordinates
-/// that the callbacks are called with are untransformed and in relation to the
-/// original position of the child.
-///
 /// [child] must not be null.
 ///
 /// [disableRotation] must be true because the rotation feature is not yet
@@ -89,31 +85,9 @@ class InteractiveViewer extends StatefulWidget {
     // use cases.
     this.maxScale = 2.5,
     this.minScale = 0.8,
-    this.onDoubleTap,
-    this.onHorizontalDragCancel,
-    this.onHorizontalDragDown,
-    this.onHorizontalDragEnd,
-    this.onHorizontalDragStart,
-    this.onHorizontalDragUpdate,
-    this.onLongPress,
-    this.onLongPressUp,
-    this.onPanCancel,
-    this.onPanDown,
-    this.onPanEnd,
-    this.onPanStart,
-    this.onPanUpdate,
-    this.onScaleEnd,
-    this.onScaleStart,
-    this.onScaleUpdate,
-    this.onTap,
-    this.onTapCancel,
-    this.onTapDown,
-    this.onTapUp,
-    this.onVerticalDragCancel,
-    this.onVerticalDragDown,
-    this.onVerticalDragEnd,
-    this.onVerticalDragStart,
-    this.onVerticalDragUpdate,
+    this.onInteractionEnd,
+    this.onInteractionStart,
+    this.onInteractionUpdate,
     ValueNotifier<Matrix4> transformationController,
   }) : assert(child != null),
        assert(minScale != null),
@@ -195,80 +169,63 @@ class InteractiveViewer extends StatefulWidget {
   /// Defaults to 0.8.
   final double minScale;
 
-  /// A pre-transformation proxy for [GestureDetector.onDoubleTap].
-  final GestureTapCallback onDoubleTap;
+  /// Called when the user ends a pan, scale, or rotate gesture on the widget.
+  ///
+  /// Will be called even if the interaction is disabled with
+  /// [disableTranslation], [disableScale], or [disableRotation].
+  ///
+  /// Wrapping the InteractiveViewer in a [GestureDetector] can also be used to
+  /// receive many gestures on the child, but [GestureDetector.onScaleStart],
+  /// [GestureDetector.onScaleUpdate], and [GestureDetector.onScaleEnd] will not
+  /// be called, so [onInteractionStart], [onInteractionUpdate], and [onInteractionEnd] should be used instead.
+  ///
+  /// The coordinates returned in the details are viewport coordinates relative
+  /// to the parent. See [fromViewport] for how to convert the coordinates to
+  /// scene coordinates relative to the child.
+  ///
+  /// See also:
+  ///  * [onInteractionStart]
+  ///  * [onInteractionEnd]
+  final GestureScaleEndCallback onInteractionEnd;
 
-  /// A pre-transformation proxy for [GestureDetector.onHorizontalDragCancel].
-  final GestureDragCancelCallback onHorizontalDragCancel;
+  /// Called when the user begins a pan, scale, or rotate gesture on the widget.
+  ///
+  /// Will be called even if the interaction is disabled with
+  /// [disableTranslation], [disableScale], or [disableRotation].
+  ///
+  /// Wrapping the InteractiveViewer in a [GestureDetector] can also be used to
+  /// receive many gestures on the child, but [GestureDetector.onScaleStart],
+  /// [GestureDetector.onScaleUpdate], and [GestureDetector.onScaleEnd] will not
+  /// be called, so [onInteractionStart], [onInteractionUpdate], and [onInteractionEnd] should be used instead.
+  ///
+  /// The coordinates returned in the details are viewport coordinates relative
+  /// to the parent. See [fromViewport] for how to convert the coordinates to
+  /// scene coordinates relative to the child.
+  ///
+  /// See also:
+  ///  * [onInteractionUpdate]
+  ///  * [onInteractionEnd]
+  final GestureScaleStartCallback onInteractionStart;
 
-  /// A pre-transformation proxy for [GestureDetector.onHorizontalDragDown].
-  final GestureDragDownCallback onHorizontalDragDown;
-
-  /// A pre-transformation proxy for [GestureDetector.onHorizontalDragEnd].
-  final GestureDragEndCallback onHorizontalDragEnd;
-
-  /// A pre-transformation proxy for [GestureDetector.onHorizontalDragStart].
-  final GestureDragStartCallback onHorizontalDragStart;
-
-  /// A pre-transformation proxy for [GestureDetector.onHorizontalDragUpdate].
-  final GestureDragUpdateCallback onHorizontalDragUpdate;
-
-  /// A pre-transformation proxy for [GestureDetector.onLongPress].
-  final GestureLongPressCallback onLongPress;
-
-  /// A pre-transformation proxy for [GestureDetector.onLongPressUp].
-  final GestureLongPressUpCallback onLongPressUp;
-
-  /// A pre-transformation proxy for [GestureDetector.onPanCancel].
-  final GestureDragCancelCallback onPanCancel;
-
-  /// A pre-transformation proxy for [GestureDetector.onPanDown].
-  final GestureDragDownCallback onPanDown;
-
-  /// A pre-transformation proxy for [GestureDetector.onPanEnd].
-  final GestureDragEndCallback onPanEnd;
-
-  /// A pre-transformation proxy for [GestureDetector.onPanStart].
-  final GestureDragStartCallback onPanStart;
-
-  /// A pre-transformation proxy for [GestureDetector.onPanUpdate].
-  final GestureDragUpdateCallback onPanUpdate;
-
-  /// A pre-transformation proxy for [GestureDetector.onScaleEnd].
-  final GestureScaleEndCallback onScaleEnd;
-
-  /// A pre-transformation proxy for [GestureDetector.onScaleStart].
-  final GestureScaleStartCallback onScaleStart;
-
-  /// A pre-transformation proxy for [GestureDetector.onScaleUpdate].
-  final GestureScaleUpdateCallback onScaleUpdate;
-
-  /// A pre-transformation proxy for [GestureDetector.onTap].
-  final GestureTapCallback onTap;
-
-  /// A pre-transformation proxy for [GestureDetector.onTapCancel].
-  final GestureTapCancelCallback onTapCancel;
-
-  /// A pre-transformation proxy for [GestureDetector.onTapDown].
-  final GestureTapDownCallback onTapDown;
-
-  /// A pre-transformation proxy for [GestureDetector.onTapUp].
-  final GestureTapUpCallback onTapUp;
-
-  /// A pre-transformation proxy for [GestureDetector.onVerticalDragCancel].
-  final GestureDragCancelCallback onVerticalDragCancel;
-
-  /// A pre-transformation proxy for [GestureDetector.onVerticalDragDown].
-  final GestureDragDownCallback onVerticalDragDown;
-
-  /// A pre-transformation proxy for [GestureDetector.onVerticalDragEnd].
-  final GestureDragEndCallback onVerticalDragEnd;
-
-  /// A pre-transformation proxy for [GestureDetector.onVerticalDragStart].
-  final GestureDragStartCallback onVerticalDragStart;
-
-  /// A pre-transformation proxy for [GestureDetector.onVerticalDragStart].
-  final GestureDragUpdateCallback onVerticalDragUpdate;
+  /// Called when the user updates a pan, scale, or rotate gesture on the
+  /// widget.
+  ///
+  /// Will be called even if the interaction is disabled with
+  /// [disableTranslation], [disableScale], or [disableRotation].
+  ///
+  /// Wrapping the InteractiveViewer in a [GestureDetector] can also be used to
+  /// receive many gestures on the child, but [GestureDetector.onScaleStart],
+  /// [GestureDetector.onScaleUpdate], and [GestureDetector.onScaleEnd] will not
+  /// be called, so [onInteractionStart], [onInteractionUpdate], and [onInteractionEnd] should be used instead.
+  ///
+  /// The coordinates returned in the details are viewport coordinates relative
+  /// to the parent. See [fromViewport] for how to convert the coordinates to
+  /// scene coordinates relative to the child.
+  ///
+  /// See also:
+  ///  * [onInteractionStart]
+  ///  * [onInteractionEnd]
+  final GestureScaleUpdateCallback onInteractionUpdate;
 
   /// A controller for the transformation performed on the child.
   ///
@@ -314,7 +271,7 @@ class InteractiveViewer extends StatefulWidget {
   ///   _controllerReset.reset();
   /// }
   ///
-  /// void _onScaleStart(ScaleStartDetails details) {
+  /// void _onInteractionStart(ScaleStartDetails details) {
   ///   // If the user tries to cause a transformation while the reset animation is
   ///   // running, cancel the reset animation.
   ///   if (_controllerReset.status == AnimationStatus.forward) {
@@ -364,7 +321,7 @@ class InteractiveViewer extends StatefulWidget {
   ///         transformationController: _transformationController,
   ///         minScale: 0.1,
   ///         maxScale: 1.0,
-  ///         onScaleStart: _onScaleStart,
+  ///         onInteractionStart: _onInteractionStart,
   ///         child: Container(
   ///           color: Colors.pink,
   ///         ),
@@ -381,6 +338,49 @@ class InteractiveViewer extends StatefulWidget {
   ///  * [ValueNotifier].
   ///  * [TextEditingController] for an example of another similar pattern.
   final ValueNotifier<Matrix4> transformationController;
+
+  /// Return the scene point at the given viewport point.
+  ///
+  /// A viewport point is relative to the parent while a scene point is relative
+  /// to the child, regardless of transformation. Calling fromViewport with a
+  /// viewport point essentially returns the scene coordinate that lies
+  /// underneath the viewport point given the transform.
+  ///
+  /// The viewport transforms as the inverse of the child (i.e. moving the child
+  /// left is equivalent to moving the viewport right).
+  ///
+  /// This method is often useful when determining where an event on the parent
+  /// occurs on the child. This example shows how to determine where a tap on
+  /// the parent occurred on the child.
+  ///
+  /// ```dart
+  /// @override
+  /// void build(BuildContext context) {
+  ///   return GestureDetector(
+  ///     onTapUp: (TapUpDetails details) {
+  ///       _childWasTappedAt = InteractiveViewer.fromViewport(
+  ///         details.localPosition,
+  ///         _transformationController.value,
+  ///       );
+  ///     },
+  ///     child: InteractiveViewer(
+  ///       transformationController: _transformationController,
+  ///       child: child,
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  static Offset fromViewport(Offset viewportPoint, Matrix4 transform) {
+    // On viewportPoint, perform the inverse transformation of the scene to get
+    // where the point would be in the scene before the transformation.
+    final Matrix4 inverseMatrix = Matrix4.inverted(transform);
+    final Vector3 untransformed = inverseMatrix.transform3(Vector3(
+      viewportPoint.dx,
+      viewportPoint.dy,
+      0,
+    ));
+    return Offset(untransformed.x, untransformed.y);
+  }
 
   @override _InteractiveViewerState createState() => _InteractiveViewerState();
 }
@@ -569,7 +569,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     if (widget.disableRotation || rotation == 0) {
       return matrix;
     }
-    final Offset focalPointScene = _fromViewport(focalPoint, matrix);
+    final Offset focalPointScene = InteractiveViewer.fromViewport(focalPoint, matrix);
     return matrix
       ..translate(focalPointScene.dx, focalPointScene.dy)
       ..rotateZ(-rotation)
@@ -579,8 +579,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Handle the start of a gesture of _GestureType. All of translation, scale,
   // and rotation are handled with GestureDetector's scale gesture.
   void _onScaleStart(ScaleStartDetails details) {
-    if (widget.onScaleStart != null) {
-      widget.onScaleStart(details);
+    if (widget.onInteractionStart != null) {
+      widget.onInteractionStart(details);
     }
 
     if (_controller.isAnimating) {
@@ -593,7 +593,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _gestureType = null;
     setState(() {
       _scaleStart = widget.transformationController.value.getMaxScaleOnAxis();
-      _referenceFocalPoint = _fromViewport(
+      _referenceFocalPoint = InteractiveViewer.fromViewport(
         details.localFocalPoint,
         widget.transformationController.value,
       );
@@ -604,9 +604,9 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Handle an update to an ongoing gesture of _GestureType.
   void _onScaleUpdate(ScaleUpdateDetails details) {
     final double scale = widget.transformationController.value.getMaxScaleOnAxis();
-    if (widget.onScaleUpdate != null) {
-      widget.onScaleUpdate(ScaleUpdateDetails(
-        focalPoint: _fromViewport(
+    if (widget.onInteractionUpdate != null) {
+      widget.onInteractionUpdate(ScaleUpdateDetails(
+        focalPoint: InteractiveViewer.fromViewport(
           details.localFocalPoint,
           widget.transformationController.value,
         ),
@@ -614,7 +614,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         rotation: details.rotation,
       ));
     }
-    final Offset focalPointScene = _fromViewport(
+    final Offset focalPointScene = InteractiveViewer.fromViewport(
       details.localFocalPoint,
       widget.transformationController.value,
     );
@@ -643,7 +643,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           // the same places in the scene. That means that the focal point of
           // the scale should be on the same place in the scene before and after
           // the scale.
-          final Offset focalPointSceneScaled = _fromViewport(
+          final Offset focalPointSceneScaled = InteractiveViewer.fromViewport(
             details.localFocalPoint,
             widget.transformationController.value,
           );
@@ -657,7 +657,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           // the translate came in contact with a boundary. In that case, update
           // _referenceFocalPoint so subsequent updates happen in relation to
           // the new effective focal point.
-          final Offset focalPointSceneCheck = _fromViewport(
+          final Offset focalPointSceneCheck = InteractiveViewer.fromViewport(
             details.localFocalPoint,
             widget.transformationController.value,
           );
@@ -694,7 +694,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
             widget.transformationController.value,
             translationChange,
           );
-          _referenceFocalPoint = _fromViewport(
+          _referenceFocalPoint = InteractiveViewer.fromViewport(
             details.localFocalPoint,
             widget.transformationController.value,
           );
@@ -705,8 +705,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Handle the end of a gesture of _GestureType.
   void _onScaleEnd(ScaleEndDetails details) {
-    if (widget.onScaleEnd != null) {
-      widget.onScaleEnd(details);
+    if (widget.onInteractionEnd != null) {
+      widget.onInteractionEnd(details);
     }
     setState(() {
       _scaleStart = null;
@@ -761,11 +761,11 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // Translate such that the resulting translation is _animation.value.
     final Vector3 translationVector = widget.transformationController.value.getTranslation();
     final Offset translation = Offset(translationVector.x, translationVector.y);
-    final Offset translationScene = _fromViewport(
+    final Offset translationScene = InteractiveViewer.fromViewport(
       translation,
       widget.transformationController.value,
     );
-    final Offset animationScene = _fromViewport(
+    final Offset animationScene = InteractiveViewer.fromViewport(
       _animation.value,
       widget.transformationController.value,
     );
@@ -811,112 +811,10 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         _constraints = constraints;
         return GestureDetector(
           behavior: HitTestBehavior.opaque, // Necessary when translating off screen
-          onTapDown: widget.onTapDown == null ? null : (TapDownDetails details) {
-            widget.onTapDown(TapDownDetails(
-              globalPosition: _fromViewport(
-                details.globalPosition - _getOffset(context),
-                widget.transformationController.value,
-              ),
-            ));
-          },
-          onTapUp: widget.onTapUp == null ? null : (TapUpDetails details) {
-            widget.onTapUp(TapUpDetails(
-              globalPosition: _fromViewport(
-                details.globalPosition - _getOffset(context),
-                widget.transformationController.value,
-              ),
-            ));
-          },
-          onTap: widget.onTap,
-          onTapCancel: widget.onTapCancel,
-          onDoubleTap: widget.onDoubleTap,
-          onLongPress: widget.onLongPress,
-          onLongPressUp: widget.onLongPressUp,
-          onVerticalDragDown: widget.onVerticalDragDown == null ? null : (DragDownDetails details) {
-            widget.onVerticalDragDown(DragDownDetails(
-              globalPosition: _fromViewport(
-                details.globalPosition - _getOffset(context),
-                widget.transformationController.value,
-              ),
-            ));
-          },
-          onVerticalDragStart: widget.onVerticalDragStart == null ? null : (DragStartDetails details) {
-            widget.onVerticalDragStart(DragStartDetails(
-              globalPosition: _fromViewport(
-                details.globalPosition - _getOffset(context),
-                widget.transformationController.value,
-              ),
-            ));
-          },
-          onVerticalDragUpdate: widget.onVerticalDragUpdate == null ? null : (DragUpdateDetails details) {
-            widget.onVerticalDragUpdate(DragUpdateDetails(
-              globalPosition: _fromViewport(
-                details.globalPosition - _getOffset(context),
-                widget.transformationController.value,
-              ),
-            ));
-          },
-          onVerticalDragEnd: widget.onVerticalDragEnd,
-          onVerticalDragCancel: widget.onVerticalDragCancel,
-          onHorizontalDragDown: widget.onHorizontalDragDown == null ? null : (DragDownDetails details) {
-            widget.onHorizontalDragDown(DragDownDetails(
-              globalPosition: _fromViewport(
-                details.globalPosition - _getOffset(context),
-                widget.transformationController.value,
-              ),
-            ));
-          },
-          onHorizontalDragStart: widget.onHorizontalDragStart == null ? null : (DragStartDetails details) {
-            widget.onHorizontalDragStart(DragStartDetails(
-              globalPosition: _fromViewport(
-                details.globalPosition - _getOffset(context),
-                widget.transformationController.value,
-              ),
-            ));
-          },
-          onHorizontalDragUpdate: widget.onHorizontalDragUpdate == null ? null : (DragUpdateDetails details) {
-            widget.onHorizontalDragUpdate(DragUpdateDetails(
-              globalPosition: _fromViewport(
-                details.globalPosition - _getOffset(context),
-                widget.transformationController.value,
-              ),
-            ));
-          },
-          onHorizontalDragEnd: widget.onHorizontalDragEnd,
-          onHorizontalDragCancel: widget.onHorizontalDragCancel,
-          onPanDown: widget.onPanDown == null ? null : (DragDownDetails details) {
-            widget.onPanDown(DragDownDetails(
-              globalPosition: _fromViewport(
-                details.globalPosition - _getOffset(context),
-                widget.transformationController.value,
-              ),
-            ));
-          },
-          onPanStart: widget.onPanStart == null ? null : (DragStartDetails details) {
-            widget.onPanStart(DragStartDetails(
-              globalPosition: _fromViewport(
-                details.globalPosition - _getOffset(context),
-                widget.transformationController.value,
-              ),
-            ));
-          },
-          onPanUpdate: widget.onPanUpdate == null ? null : (DragUpdateDetails details) {
-            widget.onPanUpdate(DragUpdateDetails(
-              globalPosition: _fromViewport(
-                details.globalPosition - _getOffset(context),
-                widget.transformationController.value,
-              ),
-            ));
-          },
-          onPanEnd: widget.onPanEnd,
-          onPanCancel: widget.onPanCancel,
           onScaleEnd: _onScaleEnd,
           onScaleStart: _onScaleStart,
           onScaleUpdate: _onScaleUpdate,
 
-          // Wrapping a Widget in an InteractiveViewer does not change how the
-          // widget is initially rendered. It should look identical whether or not
-          // the InteractiveViewer is there, until the transformation is changed.
           child: Transform(
             transform: widget.transformationController.value,
             child: KeyedSubtree(
@@ -1081,21 +979,6 @@ _GestureType _getGestureType(double scale, double rotation) {
 Offset _getMatrixTranslation(Matrix4 matrix) {
   final Vector3 nextTranslation = matrix.getTranslation();
   return Offset(nextTranslation.x, nextTranslation.y);
-}
-
-// Return the scene point at the given viewport point. The viewport transforms
-// as the inverse of the child (i.e. moving the child left is equivalent to
-// moving the viewport right).
-Offset _fromViewport(Offset viewportPoint, Matrix4 transform) {
-  // On viewportPoint, perform the inverse transformation of the scene to get
-  // where the point would be in the scene before the transformation.
-  final Matrix4 inverseMatrix = Matrix4.inverted(transform);
-  final Vector3 untransformed = inverseMatrix.transform3(Vector3(
-    viewportPoint.dx,
-    viewportPoint.dy,
-    0,
-  ));
-  return Offset(untransformed.x, untransformed.y);
 }
 
 // Transform the four corners of the viewport by the inverse of the given
