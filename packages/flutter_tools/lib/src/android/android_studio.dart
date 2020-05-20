@@ -98,7 +98,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
       
     // The plugins path is different when installed via Jetbrains Toolbox
-    String pluginsPath = null;
+    String pluginsPath;
     if(globals.fs.isDirectorySync(installPath + '.plugins')){
       pluginsPath = installPath + '.plugins';
     }
