@@ -365,8 +365,10 @@ void main() {
     final GlobalKey childKey = GlobalKey();
     await tester.pumpWidget(
       Material(
-        child: NavigationModality(
-          navigationMode: NavigationMode.directional,
+        child: MediaQuery(
+          data: const MediaQueryData(
+            navigationMode: NavigationMode.directional,
+          ),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: InkWell(
@@ -385,8 +387,10 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     await tester.pumpWidget(
       Material(
-        child: NavigationModality(
-          navigationMode: NavigationMode.directional,
+        child: MediaQuery(
+          data: const MediaQueryData(
+            navigationMode: NavigationMode.directional,
+          ),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: InkWell(

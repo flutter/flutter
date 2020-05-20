@@ -499,8 +499,10 @@ void main() {
           @required Key key,
         }) async {
       await tester.pumpWidget(
-        NavigationModality(
-          navigationMode: directional ? NavigationMode.directional : NavigationMode.traditional,
+        MediaQuery(
+          data: MediaQueryData(
+            navigationMode: directional ? NavigationMode.directional : NavigationMode.traditional,
+          ),
           child: Center(
             child: Actions(
               dispatcher: const TestDispatcher1(),

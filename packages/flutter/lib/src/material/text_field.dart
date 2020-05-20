@@ -894,7 +894,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _effectiveFocusNode.canRequestFocus = _isEnabled || NavigationModality.isDirectional(context);
+    _effectiveFocusNode.canRequestFocus = _isEnabled || MediaQuery.of(context).navigationMode == NavigationMode.directional;
   }
 
   @override
@@ -904,7 +904,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
       _controller = TextEditingController.fromValue(oldWidget.controller.value);
     else if (widget.controller != null && oldWidget.controller == null)
       _controller = null;
-    _effectiveFocusNode.canRequestFocus = _isEnabled || NavigationModality.isDirectional(context);
+    _effectiveFocusNode.canRequestFocus = _isEnabled || MediaQuery.of(context).navigationMode == NavigationMode.directional;
     if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly && _isEnabled) {
       if(_effectiveController.selection.isCollapsed) {
         _showSelectionHandles = !widget.readOnly;

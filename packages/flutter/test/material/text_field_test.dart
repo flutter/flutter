@@ -5111,14 +5111,18 @@ void main() {
 
     await tester.pumpWidget(
       boilerplate(
-        child: NavigationModality(
-          navigationMode: NavigationMode.directional,
-          child: TextField(
-            focusNode: focusNode,
-            autofocus: true,
-            enabled: true,
-          ),
-        ),
+        child: Builder(builder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              navigationMode: NavigationMode.directional,
+            ),
+            child: TextField(
+              focusNode: focusNode,
+              autofocus: true,
+              enabled: true,
+            ),
+          );
+        }),
       ),
     );
     focusNode.requestFocus();
@@ -5128,14 +5132,18 @@ void main() {
 
     await tester.pumpWidget(
       boilerplate(
-        child: NavigationModality(
-          navigationMode: NavigationMode.directional,
-          child: TextField(
-            focusNode: focusNode,
-            autofocus: true,
-            enabled: false,
-          ),
-        ),
+        child: Builder(builder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              navigationMode: NavigationMode.directional,
+            ),
+            child:  TextField(
+              focusNode: focusNode,
+              autofocus: true,
+              enabled: false,
+            ),
+          );
+        }),
       ),
     );
     await tester.pump();

@@ -10,6 +10,7 @@ import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'shortcuts.dart';
 
 // BuildContext/Element doesn't have a parent accessor, but it can be
@@ -1014,7 +1015,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
 
     bool shouldShowFocusHighlight(FocusableActionDetector target) {
       return _focused
-          && (target.enabled || NavigationModality.isDirectional(context))
+          && (target.enabled || MediaQuery.of(context).navigationMode == NavigationMode.directional)
           && _canShowHighlight;
     }
 
@@ -1053,7 +1054,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       child: Focus(
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
-        canRequestFocus: widget.enabled || NavigationModality.isDirectional(context),
+        canRequestFocus: widget.enabled || MediaQuery.of(context).navigationMode == NavigationMode.directional,
         onFocusChange: _handleFocusChange,
         child: widget.child,
       ),

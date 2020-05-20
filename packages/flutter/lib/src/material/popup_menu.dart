@@ -1117,7 +1117,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
           onTap: widget.enabled ? showButtonMenu : null,
-          canRequestFocus: widget.enabled || NavigationModality.isDirectional(context),
+          canRequestFocus: widget.enabled || MediaQuery.of(context).navigationMode == NavigationMode.directional,
           child: widget.child,
         ),
       );

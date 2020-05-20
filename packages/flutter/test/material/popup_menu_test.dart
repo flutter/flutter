@@ -134,30 +134,34 @@ void main() {
 
     Widget buildApp({bool directional = false}) {
       return MaterialApp(
-        home: NavigationModality(
-          navigationMode: directional ? NavigationMode.directional : NavigationMode.traditional,
-          child: Material(
-            child: Column(
-              children: <Widget>[
-                PopupMenuButton<int>(
-                  child: Text('Tap Me', key: popupButtonKey),
-                  enabled: false,
-                  itemBuilder: (BuildContext context) {
-                    itemBuilderCalled = true;
-                    return <PopupMenuEntry<int>>[
-                      const PopupMenuItem<int>(
-                        value: 1,
-                        child: Text('Tap me please!'),
-                      ),
-                    ];
-                  },
-                  onSelected: (int selected) => onSelectedCalled = true,
-                  onCanceled: () => onCanceledCalled = true,
-                ),
-              ],
+        home: Builder(builder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              navigationMode: NavigationMode.directional,
             ),
-          ),
-        ),
+            child: Material(
+              child: Column(
+                children: <Widget>[
+                  PopupMenuButton<int>(
+                    child: Text('Tap Me', key: popupButtonKey),
+                    enabled: false,
+                    itemBuilder: (BuildContext context) {
+                      itemBuilderCalled = true;
+                      return <PopupMenuEntry<int>>[
+                        const PopupMenuItem<int>(
+                          value: 1,
+                          child: Text('Tap me please!'),
+                        ),
+                      ];
+                    },
+                    onSelected: (int selected) => onSelectedCalled = true,
+                    onCanceled: () => onCanceledCalled = true,
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
       );
     }
 
@@ -246,29 +250,33 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: NavigationModality(
-          navigationMode: NavigationMode.directional,
-          child: Material(
-            child: Column(
-              children: <Widget>[
-                PopupMenuButton<int>(
-                  key: popupButtonKey,
-                  child: Container(key: childKey),
-                  enabled: false,
-                  itemBuilder: (BuildContext context) {
-                    return <PopupMenuEntry<int>>[
-                      const PopupMenuItem<int>(
-                        value: 1,
-                        child: Text('Tap me please!'),
-                      ),
-                    ];
-                  },
-                  onSelected: (int selected) {},
-                ),
-              ],
+        home: Builder(builder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              navigationMode: NavigationMode.directional,
             ),
-          ),
-        ),
+            child: Material(
+              child: Column(
+                children: <Widget>[
+                  PopupMenuButton<int>(
+                    key: popupButtonKey,
+                    child: Container(key: childKey),
+                    enabled: false,
+                    itemBuilder: (BuildContext context) {
+                      return <PopupMenuEntry<int>>[
+                        const PopupMenuItem<int>(
+                          value: 1,
+                          child: Text('Tap me please!'),
+                        ),
+                      ];
+                    },
+                    onSelected: (int selected) {},
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
       ),
     );
     Focus.of(childKey.currentContext, nullOk: true).requestFocus();

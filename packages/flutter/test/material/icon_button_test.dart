@@ -463,8 +463,10 @@ void main() {
     final FocusNode focusNode = FocusNode(debugLabel: 'IconButton');
     await tester.pumpWidget(
       wrap(
-        child: NavigationModality(
-          navigationMode: NavigationMode.directional,
+        child: MediaQuery(
+          data: const MediaQueryData(
+            navigationMode: NavigationMode.directional,
+          ),
           child: IconButton(
             focusNode: focusNode,
             autofocus: true,
@@ -480,8 +482,10 @@ void main() {
 
     await tester.pumpWidget(
       wrap(
-        child: NavigationModality(
-          navigationMode: NavigationMode.directional,
+        child: MediaQuery(
+          data: const MediaQueryData(
+            navigationMode: NavigationMode.directional,
+          ),
           child: IconButton(
             focusNode: focusNode,
             autofocus: true,
