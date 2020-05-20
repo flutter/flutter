@@ -476,7 +476,7 @@ class AlertDialog extends StatelessWidget {
 
     final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
     final TextDirection textDirection = Directionality.of(context);
-    final double paddingScaleFactor = adjustForTextScale ? 1.0 / textScaleFactor.clamp(1.0, 3.0) : 1.0;
+    final double paddingScaleFactor = adjustForTextScale ? 1.0 / textScaleFactor.clamp(1.0, 2.0) * 1.5 : 1.0;
 
     Widget titleWidget;
     Widget contentWidget;
