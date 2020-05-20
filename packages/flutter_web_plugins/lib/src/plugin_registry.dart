@@ -135,6 +135,12 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
     throw FlutterError(
         'Setting mock handlers is not supported on the platform side.');
   }
+
+  @override
+  bool checkMockMessageHandler(String channel, MessageHandler handler) {
+    throw FlutterError(
+        'Setting mock handlers is not supported on the platform side.');
+  }
 }
 
 /// The default [BinaryMessenger] for Flutter Web plugins.
