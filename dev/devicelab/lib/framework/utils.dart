@@ -437,6 +437,9 @@ Future<String> evalFlutter(String command, {
 String get dartBin =>
     path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
 
+String get pubBin =>
+    path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'pub');
+
 Future<int> dart(List<String> args) => exec(dartBin, args);
 
 /// Returns a future that completes with a path suitable for JAVA_HOME
