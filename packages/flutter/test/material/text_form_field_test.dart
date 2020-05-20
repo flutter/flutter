@@ -425,4 +425,30 @@ void main() {
     expect(find.text('initialValue'), findsNothing);
     expect(find.text('changedValue'), findsOneWidget);
   });
+  
+  testWidgets('autovalidateOnUserInteraction is passed to super', (WidgetTester tester) async {
+    int _validateCalled = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              autovalidate: true,
+              autovalidateOnUserInteraction: true,
+              validator: (String value) {
+                _validateCalled++;
+                return null;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(_validateCalled, 0);
+    await tester.enterText(find.byType(TextField), 'a');
+    await tester.pump();
+    expect(_validateCalled, 1);
+  });
 }
