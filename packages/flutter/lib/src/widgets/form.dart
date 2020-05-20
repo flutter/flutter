@@ -79,6 +79,7 @@ class Form extends StatefulWidget {
     this.autovalidate = false,
     this.onWillPop,
     this.onChanged,
+    this.autovalidateOnUserInteraction = false,
   }) : assert(child != null),
        super(key: key);
 
@@ -125,6 +126,11 @@ class Form extends StatefulWidget {
   /// will rebuild.
   final VoidCallback onChanged;
 
+  /// If true this form will only auto-validate after its content changes.
+  /// 
+  /// This property has no effect if [autovalidate] is false.
+  final bool autovalidateOnUserInteraction;
+
   @override
   FormState createState() => FormState();
 }
@@ -164,8 +170,13 @@ class FormState extends State<Form> {
   @override
   Widget build(BuildContext context) {
     // validate only if one of the text form fields changes
-    if (widget.autovalidate && _generation > 0)
-      _validate();
+    if (widget.autovalidate) {
+      if (!widget.autovalidateOnUserInteraction) {
+        _validate();
+      } else if (_generation > 0) {
+        _validate();
+      }
+    }
     return WillPopScope(
       onWillPop: widget.onWillPop,
       child: _FormScope(
