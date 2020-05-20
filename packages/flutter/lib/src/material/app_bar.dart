@@ -759,7 +759,7 @@ class _FloatingAppBarState extends State<_FloatingAppBar> with TickerProviderSta
             begin: _position.pixels,
             end: _position.userScrollDirection == ScrollDirection.forward
               ? 0.0
-              : header?.maxExtent,
+              : _position.maxScrollExtent,
           ).chain(CurveTween(
             curve: Curves.ease,
           )),
