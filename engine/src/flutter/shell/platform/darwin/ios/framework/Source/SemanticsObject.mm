@@ -508,10 +508,12 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 
 @end
 
-@implementation FlutterPlatformViewSemanticsContainer {
-  SemanticsObject* _semanticsObject;
-  UIView* _platformView;
-}
+@interface FlutterPlatformViewSemanticsContainer ()
+@property(nonatomic, assign) SemanticsObject* semanticsObject;
+@property(nonatomic, strong) UIView* platformView;
+@end
+
+@implementation FlutterPlatformViewSemanticsContainer
 
 // Method declared as unavailable in the interface
 - (instancetype)init {
@@ -531,11 +533,20 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
     flutter::FlutterPlatformViewsController* controller =
         object.bridge->GetPlatformViewsController();
     if (controller) {
-      _platformView = [controller->GetPlatformViewByID(object.node.platformViewId) view];
+      _platformView = [[controller->GetPlatformViewByID(object.node.platformViewId) view] retain];
     }
-    self.accessibilityElements = @[ _semanticsObject, _platformView ];
   }
   return self;
+}
+
+- (void)dealloc {
+  [_platformView release];
+  _platformView = nil;
+  [super dealloc];
+}
+
+- (NSArray*)accessibilityElements {
+  return @[ _semanticsObject, _platformView ];
 }
 
 - (CGRect)accessibilityFrame {

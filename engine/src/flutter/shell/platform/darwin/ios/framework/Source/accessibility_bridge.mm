@@ -89,11 +89,11 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
     if (object.node.IsPlatformViewNode()) {
       FlutterPlatformViewsController* controller = GetPlatformViewsController();
       if (controller) {
-        object.platformViewSemanticsContainer =
-            [[FlutterPlatformViewSemanticsContainer alloc] initWithSemanticsObject:object];
+        object.platformViewSemanticsContainer = [[[FlutterPlatformViewSemanticsContainer alloc]
+            initWithSemanticsObject:object] autorelease];
       }
     } else if (object.platformViewSemanticsContainer) {
-      [object.platformViewSemanticsContainer release];
+      object.platformViewSemanticsContainer = nil;
     }
   }
 
