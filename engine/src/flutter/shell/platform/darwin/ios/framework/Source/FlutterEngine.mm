@@ -759,27 +759,46 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 #pragma mark - Locale updates
 
 - (void)onLocaleUpdated:(NSNotification*)notification {
-  NSArray<NSString*>* preferredLocales = [NSLocale preferredLanguages];
-  NSMutableArray<NSString*>* data = [[NSMutableArray new] autorelease];
+  // [NSLocale currentLocale] provides an iOS resolved locale if the
+  // supported locales are exposed to the iOS embedder. Here, we get
+  // currentLocale and pass it to dart:ui
+  NSMutableArray<NSString*>* localeData = [[NSMutableArray new] autorelease];
+  NSLocale* platformResolvedLocale = [NSLocale currentLocale];
+  NSString* languageCode = [platformResolvedLocale objectForKey:NSLocaleLanguageCode];
+  NSString* countryCode = [platformResolvedLocale objectForKey:NSLocaleCountryCode];
+  NSString* scriptCode = [platformResolvedLocale objectForKey:NSLocaleScriptCode];
+  NSString* variantCode = [platformResolvedLocale objectForKey:NSLocaleVariantCode];
+  if (languageCode) {
+    [localeData addObject:languageCode];
+    [localeData addObject:(countryCode ? countryCode : @"")];
+    [localeData addObject:(scriptCode ? scriptCode : @"")];
+    [localeData addObject:(variantCode ? variantCode : @"")];
+  }
+  if (localeData.count != 0) {
+    [self.localizationChannel invokeMethod:@"setPlatformResolvedLocale" arguments:localeData];
+  }
 
+  // Get and pass the user's preferred locale list to dart:ui
+  localeData = [[NSMutableArray new] autorelease];
+  NSArray<NSString*>* preferredLocales = [NSLocale preferredLanguages];
   for (NSString* localeID in preferredLocales) {
-    NSLocale* currentLocale = [[[NSLocale alloc] initWithLocaleIdentifier:localeID] autorelease];
-    NSString* languageCode = [currentLocale objectForKey:NSLocaleLanguageCode];
-    NSString* countryCode = [currentLocale objectForKey:NSLocaleCountryCode];
-    NSString* scriptCode = [currentLocale objectForKey:NSLocaleScriptCode];
-    NSString* variantCode = [currentLocale objectForKey:NSLocaleVariantCode];
+    NSLocale* locale = [[[NSLocale alloc] initWithLocaleIdentifier:localeID] autorelease];
+    NSString* languageCode = [locale objectForKey:NSLocaleLanguageCode];
+    NSString* countryCode = [locale objectForKey:NSLocaleCountryCode];
+    NSString* scriptCode = [locale objectForKey:NSLocaleScriptCode];
+    NSString* variantCode = [locale objectForKey:NSLocaleVariantCode];
     if (!languageCode) {
       continue;
     }
-    [data addObject:languageCode];
-    [data addObject:(countryCode ? countryCode : @"")];
-    [data addObject:(scriptCode ? scriptCode : @"")];
-    [data addObject:(variantCode ? variantCode : @"")];
+    [localeData addObject:languageCode];
+    [localeData addObject:(countryCode ? countryCode : @"")];
+    [localeData addObject:(scriptCode ? scriptCode : @"")];
+    [localeData addObject:(variantCode ? variantCode : @"")];
   }
-  if (data.count == 0) {
+  if (localeData.count == 0) {
     return;
   }
-  [self.localizationChannel invokeMethod:@"setLocale" arguments:data];
+  [self.localizationChannel invokeMethod:@"setLocale" arguments:localeData];
 }
 
 @end

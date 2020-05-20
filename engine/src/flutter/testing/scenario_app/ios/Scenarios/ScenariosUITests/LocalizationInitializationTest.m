@@ -25,11 +25,17 @@ FLUTTER_ASSERT_ARC
 - (void)testNoLocalePrepend {
   NSTimeInterval timeout = 10.0;
 
+  // The locales received by dart:ui are exposed onBeginFrame via semantics label.
+  // There should only be one locale, since the default iOS app only has en_US as
+  // the locale. The list should consist of just the en locale.
   XCUIElement* textInputSemanticsObject =
       [self.application.textFields matchingIdentifier:@"[en]"].element;
+  XCTAssertTrue([textInputSemanticsObject waitForExistenceWithTimeout:timeout]);
 
-  // The locales recieved by dart:ui are exposed onBeginFrame via semantics label.
-  // There should only be one locale, as we have removed the locale prepend on iOS.
+  [textInputSemanticsObject tap];
+
+  // [NSLocale currentLocale] always includes a country code.
+  textInputSemanticsObject = [self.application.textFields matchingIdentifier:@"en_US"].element;
   XCTAssertTrue([textInputSemanticsObject waitForExistenceWithTimeout:timeout]);
 }
 
