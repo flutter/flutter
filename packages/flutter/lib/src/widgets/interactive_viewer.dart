@@ -17,7 +17,7 @@ import 'ticker_provider.dart';
 /// The user can transform the child by dragging to pan or pinching to zoom and
 /// rotate.
 ///
-/// [child] must not be null.
+/// The [child] must not be null.
 ///
 /// [disableRotation] must be true because the rotation feature is not yet
 /// available. This requirement will be removed in the future when rotation is
@@ -28,30 +28,8 @@ import 'ticker_provider.dart';
 /// panning over a large widget representing a table.
 ///
 /// ```dart
-///   static Widget _getTable(int rowCount, int columnCount) {
-///     return Table(
-///       columnWidths: <int, TableColumnWidth>{
-///         for (int column = 0; column < columnCount; column++)
-///           column: const FixedColumnWidth(300.0),
-///       },
-///       children: <TableRow>[
-///         for (int row = 0; row < rowCount; row++)
-///           TableRow(
-///             children: <Widget>[
-///               for (int column = 0; column < columnCount; column++)
-///                 DragTarget(
-///                   builder: (BuildContext context, List candidateData, List rejectedData) {
-///                     return Container(
-///                       height: 100,
-///                       color: row % 2 + column % 2 == 1 ? Colors.red : Colors.green,
-///                     );
-///                   },
-///                 ),
-///             ],
-///           ),
-///       ],
-///     );
-///   }
+///   const _rowCount = 20;
+///   const _columnCount = 3;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -62,7 +40,24 @@ import 'ticker_provider.dart';
 ///       body: InteractiveViewer(
 ///         disableRotation: true,
 ///         disableScale: true,
-///         child: _getTable(20, 3),
+///         child: Table(
+///           columnWidths: <int, TableColumnWidth>{
+///             for (int column = 0; column < _columnCount; column += 1)
+///               column: const FixedColumnWidth(300.0),
+///           },
+///           children: <TableRow>[
+///             for (int row = 0; row < _rowCount; row += 1)
+///               TableRow(
+///                 children: <Widget>[
+///                   for (int column = 0; column < _columnCount; column += 1)
+///                     Container(
+///                       height: 100,
+///                       color: row % 2 + column % 2 == 1 ? Colors.red : Colors.green,
+///                     ),
+///                 ],
+///               ),
+///           ],
+///         );
 ///       ),
 ///     );
 ///   }
@@ -117,9 +112,6 @@ class InteractiveViewer extends StatefulWidget {
   final EdgeInsets boundaryMargin;
 
   /// The Widget to perform the transformations on.
-  ///
-  /// [child] should usually have an intrinsic size. This is used to calculate
-  /// the boundary (see [boundaryMargin]).
   ///
   /// Cannot be null.
   final Widget child;
@@ -1013,15 +1005,15 @@ Quad _transformViewport(Matrix4 matrix, Rect viewport) {
 
 // Get the size of the child given its RenderBox and the viewport's Size.
 //
-// In some cases (i.e. a Table that's wider and/or taller than the viewport),
-// renderBox.size will give the size of the viewport, even though the child is
+// In some cases (i.e. a Table that's wider and/or taller than the device),
+// renderBox.size will give the size of the device, even though the child is
 // drawn beyond the viewport. The intrinsic size can then be used to set the
 // boundary to the full size of the child.
 //
 // In other cases (i.e. an Image whose original size is larger than the
 // viewport but is being fit to the viewport), renderBox.size will also give
-// the size of the viewport, and the boundary should remain at the viewport.
-// The intrinsic size is not used.
+// the size of the viewport, and the boundary should remain at the viewport. In
+// that case, the intrinsic size is not used.
 Size _getChildSize(RenderBox renderBox, BoxConstraints constraints) {
   double width = renderBox.size.width;
   double height = renderBox.size.height;
