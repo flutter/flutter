@@ -606,7 +606,10 @@ class _LicensePageState extends State<LicensePage> {
           : Theme.of(context).cardColor,
       child: ListTile(
         title: Text(packageName),
-        subtitle: Text('${bindings.length} licenses'),
+        subtitle: Text(
+          MaterialLocalizations.of(context)
+              .licensesPackageDetailText(bindings.length),
+        ),
         selected: isSelected,
         onTap: () {
           selectedId.value = index;
@@ -845,7 +848,12 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
     if (widget.scrollController == null) {
       return Scaffold(
         appBar: AppBar(
-          title: _buildTitle(package, localisations, context),
+          title: _buildTitle(
+            context,
+            package,
+            localisations
+                .licensesPackageDetailText(widget.licenseEntries.length),
+          ),
         ),
         body: Center(
           child: Material(
@@ -897,9 +905,10 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
                 pinned: true,
                 backgroundColor: Theme.of(context).cardColor,
                 title: _buildTitle(
-                  package,
-                  localisations,
                   context,
+                  package,
+                  localisations
+                      .licensesPackageDetailText(widget.licenseEntries.length),
                   theme: Theme.of(context).textTheme,
                 ),
               ),
@@ -932,9 +941,9 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
   }
 
   Column _buildTitle(
+    BuildContext context,
     String package,
-    MaterialLocalizations localisations,
-    BuildContext context, {
+    String subtitle, {
     TextTheme theme,
   }) {
     theme ??= Theme.of(context).primaryTextTheme;
@@ -944,7 +953,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
       children: <Widget>[
         Text(package, style: theme.headline6),
         Text(
-          localisations.licensesPageTitle,
+          subtitle,
           style: theme.subtitle2,
         ),
       ],
