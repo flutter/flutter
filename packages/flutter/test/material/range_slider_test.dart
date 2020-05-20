@@ -1397,50 +1397,37 @@ void main() {
     await tester.pumpWidget(buildApp(divisions: 3));
 
     final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
-    RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
-
     final Offset topRight = tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
     final TestGesture gesture = await tester.startGesture(topRight);
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
-    expect(values.end, equals(1));
+
+    expect(find.byType(RangeSlider), isNotNull);
     expect(
       valueIndicatorBox,
       paints
-        ..path()
-        ..path(color: sliderTheme.valueIndicatorColor)
-        ..path(color: sliderTheme.valueIndicatorColor),
+        ..rrect(color: sliderTheme.inactiveTrackColor)
+        ..rect(color: sliderTheme.activeTrackColor)
+        ..rrect(color: sliderTheme.inactiveTrackColor),
     );
-
-    expect(sliderBox, isNotNull);
 
     await tester.tap(find.text('Next'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(
-      tester.getTopLeft(find.text('Next')),
-      paints..path(),
-    );
+    await tester.pumpAndSettle();
 
-    sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
-
-    expect(sliderBox,
-        paints
-          ..path(),
-    );
-
-    expect(values.end, equals(1));
+    expect(find.byType(RangeSlider), findsNothing);
     expect(
       valueIndicatorBox,
-      paints
-        ..path()
+      isNot(
+         paints
+           ..rrect(color: sliderTheme.inactiveTrackColor)
+           ..rect(color: sliderTheme.activeTrackColor)
+           ..rrect(color: sliderTheme.inactiveTrackColor)
+      ),
     );
 
     // Don't stop holding the value indicator.
     await gesture.up();
-    // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
-
   });
 
   testWidgets('Range Slider top thumb gets stroked when overlapping', (WidgetTester tester) async {

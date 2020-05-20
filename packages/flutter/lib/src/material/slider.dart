@@ -1242,6 +1242,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _endInteraction() {
+    if (!_state.mounted) {
+      return;
+    }
+
     if (_active && _state.mounted) {
       if (onChangeEnd != null) {
         onChangeEnd(_discretize(_currentDragValue));

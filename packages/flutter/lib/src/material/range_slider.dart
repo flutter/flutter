@@ -466,16 +466,16 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
 
   @override
   void dispose() {
-    if (overlayEntry != null) {
-      overlayEntry.remove();
-      overlayEntry = null;
-    }
     interactionTimer?.cancel();
     overlayController.dispose();
     valueIndicatorController.dispose();
     enableController.dispose();
     startPositionController.dispose();
     endPositionController.dispose();
+    if (overlayEntry != null) {
+      overlayEntry.remove();
+      overlayEntry = null;
+    }
 //    print((overlayEntry == null) ? 'overlay entry is null' : 'overlay entry is not null');
 
     super.dispose();
@@ -1196,7 +1196,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   void _endInteraction() {
-    _state.overlayController.reverse();
+    if (!_state.mounted) {
+      return;
+    }
+
     if (showValueIndicator && _state.interactionTimer == null) {
       _state.valueIndicatorController.reverse();
     }
@@ -1208,6 +1211,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       }
       _active = false;
     }
+    _state.overlayController.reverse();
   }
 
   void _handleDragStart(DragStartDetails details) {
