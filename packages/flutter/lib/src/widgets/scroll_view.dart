@@ -432,9 +432,15 @@ abstract class ScrollView extends StatelessWidget {
 ///
 /// {@tool dartpad --template=stateful_widget_material}
 ///
-/// This sample code shows a scroll view that contains two [SliverList]s,
-/// allowing the scroll view to grow in both directions along its scroll axis,
-/// by setting the [CustomScrollView.center] to the key of the second list.
+/// [ListView] is often used to display items in a scrolling widget. If items
+/// are added to the top of a [ListView], the scroll position moves, as it is
+/// meant to only grow in the direction of the scroll axis.
+///
+/// To have a scrolling widget that grows in both directions along its scroll
+/// axis, use a [CustomScrollView]. This sample code shows a scroll view that
+/// contains two [SliverList]s, and by setting the [CustomScrollView.center]
+/// to the key of the second list, it can grow in both directions along its
+/// scroll axis without moving the scroll position.
 ///
 /// ```dart
 /// List<int> top = [];
