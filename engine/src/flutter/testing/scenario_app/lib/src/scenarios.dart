@@ -6,6 +6,7 @@
 import 'dart:ui';
 
 import 'animated_color_square.dart';
+import 'locale_initialization.dart';
 import 'platform_view.dart';
 import 'poppable_screen.dart';
 import 'scenario.dart';
@@ -14,6 +15,7 @@ import 'touches_scenario.dart';
 
 Map<String, Scenario> _scenarios = <String, Scenario>{
   'animated_color_square': AnimatedColorSquareScenario(window),
+  'locale_initialization': LocaleInitialization(window),
   'platform_view': PlatformViewScenario(window, 'Hello from Scenarios (Platform View)', id: 0),
   'platform_view_no_overlay_intersection': PlatformViewNoOverlayIntersectionScenario(window, 'Hello from Scenarios (Platform View)', id: 0),
   'platform_view_partial_intersection': PlatformViewPartialIntersectionScenario(window, 'Hello from Scenarios (Platform View)', id: 0),
