@@ -430,6 +430,68 @@ abstract class ScrollView extends StatelessWidget {
 /// ```
 /// {@end-tool}
 ///
+/// {@tool dartpad --template=stateful_widget_material}
+///
+/// This sample code shows a scroll view that contains two [SliverList],
+/// allowing the scroll view to grow in both directions, by setting the
+/// [CustomScrollView.center] to the key of the second list.
+///
+/// ```dart
+/// List<int> top = [];
+/// List<int> bottom = [0];
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: const Text('Press on the plus to add items above and below'),
+///       leading: IconButton(
+///         icon: const Icon(Icons.add),
+///         onPressed: () {
+///           setState(() {
+///             top.add(-top.length - 1);
+///             bottom.add(bottom.length);
+///           });
+///         },
+///       ),
+///     ),
+///     body: CustomScrollView(
+///       center: const ValueKey('second-sliver-list'),
+///       slivers: <Widget>[
+///         SliverList(
+///           delegate: SliverChildBuilderDelegate(
+///             (BuildContext context, int index) {
+///               return Container(
+///                 alignment: Alignment.center,
+///                 color: Colors.blue[200 + top[index].hashCode % 4 * 100],
+///                 height: 100 + top[index].hashCode % 4 * 20.0,
+///                 child: Text('Item: ${top[index]}'),
+///               );
+///             },
+///             childCount: top.length,
+///           ),
+///         ),
+///         SliverList(
+///           key: const ValueKey('second-sliver-list'),
+///           delegate: SliverChildBuilderDelegate(
+///             (BuildContext context, int index) {
+///               return Container(
+///                 alignment: Alignment.center,
+///                 color: Colors.blue[200 + bottom[index].hashCode % 4 * 100],
+///                 height: 100 + bottom[index].hashCode % 4 * 20.0,
+///                 child: Text('Item: ${bottom[index]}'),
+///               );
+///             },
+///             childCount: bottom.length,
+///           ),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// ## Accessibility
 ///
 /// A [CustomScrollView] can allow Talkback/VoiceOver to make announcements
