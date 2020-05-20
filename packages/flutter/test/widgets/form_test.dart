@@ -685,4 +685,71 @@ void main() {
     // now we expect the error to be shown
     expect(find.text(errorText('foo')), findsOneWidget);
   });
+  
+  testWidgets('Form auto-validate form fields only after one of them changes if autovalidate and autovalidateOnUserInteraction are both true', (WidgetTester tester) async {
+    String errorText(String value) => 'error/$value';
+
+    Widget builder() {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Material(
+              child: Form(
+                autovalidate: true,
+                autovalidateOnUserInteraction: true,
+                child: TextFormField(
+                  validator: errorText,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // The issue only happens on the second build so we need to rebuild the three
+    await tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
+
+    // we expect no validation error text being shown
+    expect(find.text(errorText('')), findsNothing);
+
+    // set a empty string to trigger the Fields validators
+    await tester.enterText(find.byType(TextFormField), 'foo');
+    await tester.pump();
+
+    // now we expect the error to be shown
+    expect(find.text(errorText('foo')), findsOneWidget);
+  });
+
+  testWidgets('Form auto-validate form fields even before none of them changes if autovalidate is true and autovalidateOnUserInteraction is false', (WidgetTester tester) async {
+    String errorText(String value) => 'error/$value';
+
+    Widget builder() {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Material(
+              child: Form(
+                autovalidate: true,
+                autovalidateOnUserInteraction: false,
+                child: TextFormField(
+                  validator: errorText,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // The issue only happens on the second build so we need to rebuild the three
+    await tester.pumpWidget(builder());
+    await tester.pumpWidget(builder());
+
+    // we expect validation error text being shown
+    expect(find.text(errorText('')), findsOneWidget);
+  });
 }
