@@ -8,6 +8,7 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -476,7 +477,7 @@ class AlertDialog extends StatelessWidget {
 
     final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
     final TextDirection textDirection = Directionality.of(context);
-    final double paddingScaleFactor = adjustForTextScale ? 1.0 / textScaleFactor.clamp(1.0, 2.0) * 1.5 : 1.0;
+    final double paddingScaleFactor = adjustForTextScale ? lerpDouble(1.0, 1.0 / 3.0, textScaleFactor.clamp(1.0, 2.0).toDouble() - 1.0) : 1.0;
 
     Widget titleWidget;
     Widget contentWidget;
