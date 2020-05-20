@@ -371,7 +371,7 @@ class _MasterDetailFlowState extends State<MasterDetailFlow>
       appBar: AppBar(
         title: widget.title,
         leading: widget.leading ??
-            (widget.automaticallyImplyLeading
+            (widget.automaticallyImplyLeading && Navigator.of(flowContext).canPop()
                 ? IconButton(
                     icon: const Icon(Icons.arrow_back),
                     onPressed: () => Navigator.of(flowContext).pop(),
