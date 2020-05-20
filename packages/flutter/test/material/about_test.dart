@@ -92,6 +92,8 @@ void main() {
       find.text('I am the very model of a modern major general.'),
       findsOneWidget,
     );
+    await tester.tap(find.text('Pirate package '));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(find.text('Pirate license'), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
