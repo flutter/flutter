@@ -570,31 +570,29 @@ class _LicensePageState extends State<LicensePage> {
     final _LicenseData data,
     final bool drawSelection,
   ) {
-    return ListView.builder(
-      itemCount: data.packages.length,
-      itemBuilder: (BuildContext context, int index) {
-        if (index != 0) {
-          return _buildPackageTile(context, index - 1,
-              drawSelection && index - 1 == (selectedId ?? 0), data);
-        }
-        return _AboutProgram(
+    return ListView(
+      children: <Widget>[
+        _AboutProgram(
           name: widget.applicationName ?? _defaultApplicationName(context),
           icon: widget.applicationIcon ?? _defaultApplicationIcon(context),
           version:
               widget.applicationVersion ?? _defaultApplicationVersion(context),
           legalese: widget.applicationLegalese,
-        );
-      },
+        ),
+        ...data.packages
+            .asMap()
+            .entries
+            .map<Widget>((MapEntry<int, String> entry) {
+          return _buildPackageTile(context, entry.value, entry.key,
+              drawSelection && entry.key == (selectedId ?? 0), data);
+        }),
+      ],
     );
   }
 
-  Widget _buildPackageTile(
-    BuildContext context,
-    int index,
-    bool isSelected,
-    _LicenseData data,
+  Widget _buildPackageTile(final BuildContext context, final String packageName,
+      final int index, final bool isSelected, final _LicenseData data,
   ) {
-    final String packageName = data.packages[index];
     final List<int> bindings = data.packageLicenseBindings[packageName];
     return Ink(
       color: isSelected
@@ -693,6 +691,9 @@ class _LicenseData {
   final List<LicenseEntry> licenses = <LicenseEntry>[];
   final Map<String, List<int>> packageLicenseBindings = <String, List<int>>{};
   final List<String> packages = <String>[];
+  // Special treatment for the first package since it should be the package
+  // for delivered application.
+  String firstPackage;
 
   void addLicense(LicenseEntry entry) {
     for (final String package in entry.packages) {
@@ -705,9 +706,18 @@ class _LicenseData {
   void _addPackage(String package) {
     if (!packageLicenseBindings.containsKey(package)) {
       packageLicenseBindings[package] = <int>[];
-      packages.add(package);
-      packages.sort(
-          (String a, String b) => a.toLowerCase().compareTo(b.toLowerCase()));
+      firstPackage ??= package;
+        packages.add(package);
+        packages.sort((String a, String b) {
+          // Make sure first package remains at front
+          if (a == firstPackage) {
+            return -1;
+          }
+          if (b == firstPackage) {
+            return -1;
+          }
+          return a.toLowerCase().compareTo(b.toLowerCase());
+        });
     }
   }
 }
