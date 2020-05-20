@@ -69,7 +69,7 @@ class MasterDetailFlow extends StatefulWidget {
     @required this.detailPageBuilder,
     @required this.masterViewBuilder,
     this.actionBuilder,
-    this.autoImplyLeading = true,
+    this.automaticallyImplyLeading = true,
     this.breakpoint,
     this.centerTitle,
     this.detailPageFABGutterWidth,
@@ -84,6 +84,7 @@ class MasterDetailFlow extends StatefulWidget {
     this.masterViewWidth,
     this.title,
   })  : assert(masterViewBuilder != null),
+        assert(automaticallyImplyLeading != null),
         assert(detailPageBuilder != null),
         assert(displayMode != null),
         super(key: key);
@@ -136,8 +137,8 @@ class MasterDetailFlow extends StatefulWidget {
 
   /// Override the framework from determining whether to show a leading widget or not.
   ///
-  /// See [AppBar.autoImplyLeading].
-  final bool autoImplyLeading;
+  /// See [AppBar.automaticallyImplyLeading].
+  final bool automaticallyImplyLeading;
 
   /// Override the framework from determining whether to display the title in the centre of the
   /// app bar or not.
@@ -292,18 +293,18 @@ class _MasterDetailFlowState extends State<MasterDetailFlow>
             return <Route<dynamic>>[
               MaterialPageRoute<dynamic>(
                 builder: widget.masterPageBuilder != null
-                    ? (BuildContext context) =>
-                        widget.masterPageBuilder(context, false)
-                    : _buildMasterPage,
+                    ? (BuildContext c) =>
+                        widget.masterPageBuilder(c, false)
+                    : (BuildContext c) => _buildMasterPage(c, context),
               ),
             ];
           default:
             return <Route<dynamic>>[
               MaterialPageRoute<dynamic>(
                 builder: widget.masterPageBuilder != null
-                    ? (BuildContext context) =>
-                        widget.masterPageBuilder(context, false)
-                    : _buildMasterPage,
+                    ? (BuildContext c) =>
+                        widget.masterPageBuilder(c, false)
+                    : (BuildContext c) => _buildMasterPage(c, context),
               ),
               MaterialPageRoute<dynamic>(
                 builder: (BuildContext context) => WillPopScope(
@@ -332,7 +333,7 @@ class _MasterDetailFlowState extends State<MasterDetailFlow>
               builder: widget.masterPageBuilder != null
                   ? (BuildContext context) =>
                       widget.masterPageBuilder(context, false)
-                  : _buildMasterPage,
+                  : (BuildContext c) => _buildMasterPage(c, context),
             );
           case _navDetail:
             // Matching state to navigation event.
@@ -361,12 +362,21 @@ class _MasterDetailFlowState extends State<MasterDetailFlow>
     );
   }
 
-  Widget _buildMasterPage(BuildContext context) {
+  /// Build a master page using the master view builder.
+  ///
+  /// Uses the context (flowContext) from the MasterDetailFlow widget to pop
+  /// the nav route if there is no back button supplied.
+  Widget _buildMasterPage(BuildContext context, BuildContext flowContext) {
     return Scaffold(
       appBar: AppBar(
         title: widget.title,
-        leading: widget.leading,
-        automaticallyImplyLeading: widget.autoImplyLeading,
+        leading: widget.leading ??
+            (widget.automaticallyImplyLeading
+                ? IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => Navigator.of(flowContext).pop(),
+                  )
+                : null),
         actions: widget.actionBuilder == null
             ? const <Widget>[]
             : widget.actionBuilder(context, ActionLevel.composite),
@@ -384,7 +394,7 @@ class _MasterDetailFlowState extends State<MasterDetailFlow>
     return _MasterDetailScaffold(
       actionBuilder: widget.actionBuilder ??
           (BuildContext context, ActionLevel actionLevel) => const <Widget>[],
-      autoImplyLeading: widget.autoImplyLeading,
+      automaticallyImplyLeading: widget.automaticallyImplyLeading,
       centerTitle: widget.centerTitle,
       detailPageBuilder: (BuildContext context, Object arguments,
               ScrollController scrollController) =>
@@ -423,7 +433,7 @@ class _MasterDetailScaffold extends StatefulWidget {
     this.initialArguments,
     this.leading,
     this.title,
-    this.autoImplyLeading,
+    this.automaticallyImplyLeading,
     this.centerTitle,
     this.detailPageFABlessGutterWidth,
     this.detailPageFABGutterWidth,
@@ -446,7 +456,7 @@ class _MasterDetailScaffold extends StatefulWidget {
   final Object initialArguments;
   final Widget leading;
   final Widget title;
-  final bool autoImplyLeading;
+  final bool automaticallyImplyLeading;
   final bool centerTitle;
   final double detailPageFABlessGutterWidth;
   final double detailPageFABGutterWidth;
@@ -501,7 +511,7 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
             title: widget.title,
             actions: widget.actionBuilder(context, ActionLevel.top),
             leading: widget.leading,
-            automaticallyImplyLeading: widget.autoImplyLeading,
+            automaticallyImplyLeading: widget.automaticallyImplyLeading,
             centerTitle: widget.centerTitle,
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -574,7 +584,7 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
                 title: widget.title,
                 actions: widget.actionBuilder(context, ActionLevel.top),
                 leading: widget.leading,
-                automaticallyImplyLeading: widget.autoImplyLeading,
+                automaticallyImplyLeading: widget.automaticallyImplyLeading,
                 centerTitle: widget.centerTitle,
               ),
               body: widget.masterViewBuilder(context, true))
