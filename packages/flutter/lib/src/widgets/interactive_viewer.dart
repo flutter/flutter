@@ -448,7 +448,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Return a new matrix representing the given matrix after applying the given
   // translation.
-  Matrix4 matrixTranslate(Matrix4 matrix, Offset translation) {
+  Matrix4 _matrixTranslate(Matrix4 matrix, Offset translation) {
     if (widget.disableTranslation || translation == Offset.zero) {
       return matrix;
     }
@@ -531,7 +531,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Return a new matrix representing the given matrix after applying the given
   // scale.
-  Matrix4 matrixScale(Matrix4 matrix, double scale) {
+  Matrix4 _matrixScale(Matrix4 matrix, double scale) {
     if (widget.disableScale || scale == 1) {
       return matrix;
     }
@@ -564,7 +564,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Return a new matrix representing the given matrix after applying the given
   // rotation.
-  Matrix4 matrixRotate(Matrix4 matrix, double rotation, Offset focalPoint) {
+  Matrix4 _matrixRotate(Matrix4 matrix, double rotation, Offset focalPoint) {
     if (widget.disableRotation || rotation == 0) {
       return matrix;
     }
@@ -633,7 +633,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         final double desiredScale = _scaleStart * details.scale;
         final double scaleChange = desiredScale / scale;
         setState(() {
-          widget.transformationController.value = matrixScale(
+          widget.transformationController.value = _matrixScale(
             widget.transformationController.value,
             scaleChange,
           );
@@ -646,7 +646,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
             details.localFocalPoint,
             widget.transformationController.value,
           );
-          widget.transformationController.value = matrixTranslate(
+          widget.transformationController.value = _matrixTranslate(
             widget.transformationController.value,
             focalPointSceneScaled - _referenceFocalPoint,
           );
@@ -672,7 +672,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         }
         final double desiredRotation = _rotationStart + details.rotation;
         setState(() {
-          widget.transformationController.value = matrixRotate(
+          widget.transformationController.value = _matrixRotate(
             widget.transformationController.value,
             _currentRotation - desiredRotation,
             details.localFocalPoint,
@@ -689,7 +689,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         // focal point before and after the movement.
         final Offset translationChange = focalPointScene - _referenceFocalPoint;
         setState(() {
-          widget.transformationController.value = matrixTranslate(
+          widget.transformationController.value = _matrixTranslate(
             widget.transformationController.value,
             translationChange,
           );
@@ -749,6 +749,41 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _controller.forward();
   }
 
+  // Handle mousewheel scroll events.
+  void _receivedPointerSignal(PointerSignalEvent event) {
+    if (event is PointerScrollEvent) {
+      final Size childSize = _getChildSize(
+        _childKey.currentContext.findRenderObject() as RenderBox,
+        _constraints,
+      );
+      final double scaleChange = 1.0 + event.scrollDelta.dy / childSize.height;
+      if (scaleChange == 0.0) {
+        return;
+      }
+      final Offset focalPointScene = InteractiveViewer.fromViewport(
+        event.localPosition,
+        widget.transformationController.value,
+      );
+      setState(() {
+        widget.transformationController.value = _matrixScale(
+          widget.transformationController.value,
+          scaleChange,
+        );
+
+        // After scaling, translate such that the event's position is at the
+        // same scene point before and after the scale.
+        final Offset focalPointSceneScaled = InteractiveViewer.fromViewport(
+          event.localPosition,
+          widget.transformationController.value,
+        );
+        widget.transformationController.value = _matrixTranslate(
+          widget.transformationController.value,
+          focalPointSceneScaled - focalPointScene,
+        );
+      });
+    }
+  }
+
   // Handle inertia drag animation.
   void _onAnimate() {
     if (!_controller.isAnimating) {
@@ -770,7 +805,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     );
     final Offset translationChangeScene = animationScene - translationScene;
     setState(() {
-      widget.transformationController.value = matrixTranslate(
+      widget.transformationController.value = _matrixTranslate(
         widget.transformationController.value,
         translationChangeScene,
       );
@@ -808,17 +843,20 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         _constraints = constraints;
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque, // Necessary when translating off screen
-          onScaleEnd: _onScaleEnd,
-          onScaleStart: _onScaleStart,
-          onScaleUpdate: _onScaleUpdate,
+        return Listener(
+          onPointerSignal: _receivedPointerSignal,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque, // Necessary when translating off screen
+            onScaleEnd: _onScaleEnd,
+            onScaleStart: _onScaleStart,
+            onScaleUpdate: _onScaleUpdate,
 
-          child: Transform(
-            transform: widget.transformationController.value,
-            child: KeyedSubtree(
-              key: _childKey,
-              child: widget.child,
+            child: Transform(
+              transform: widget.transformationController.value,
+              child: KeyedSubtree(
+                key: _childKey,
+                child: widget.child,
+              ),
             ),
           ),
         );
