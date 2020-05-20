@@ -933,12 +933,13 @@ class ThemeData with Diagnosticable {
   /// elevation of a surface should be portrayed with an "overlay" in addition
   /// to the shadow. As the elevation of the component increases, the
   /// overlay increases in opacity. [applyElevationOverlayColor] turns the
-  /// application of this overlay on or off.
+  /// application of this overlay on or off for dark themes.
   ///
-  /// If [true] a semi-transparent version of [colorScheme.onSurface] will be
-  /// applied on top of the color of [Material] widgets when their [Material.color]
-  /// is [colorScheme.surface]. The level of transparency is based on
-  /// [Material.elevation] as per the Material Dark theme specification.
+  /// If [true] and [brightness] is [Brightness.dark], a
+  /// semi-transparent version of [colorScheme.onSurface] will be
+  /// applied on top of the color of [Material] widgets. The level of
+  /// transparency is based on [Material.elevation] as per the
+  /// Material Dark theme specification.
   ///
   /// If [false] the surface color will be used unmodified.
   ///
@@ -951,9 +952,9 @@ class ThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [Material.elevation], which effects how transparent the white overlay is.
-  ///  * [Material.color], the white color overlay will only be applied of the
-  ///    material's color is [colorScheme.surface].
+  ///  * [Material.elevation], which effects the level of transparency of the
+  ///    overlay color.
+  ///  * [Material.color], the elevation overlay will be applied to this color.
   ///  * <https://material.io/design/color/dark-theme.html>, which specifies how
   ///    the overlay should be applied.
   final bool applyElevationOverlayColor;
