@@ -30,30 +30,6 @@ bool debugShowClipLayers = false;
 /// reasonable.
 const double _kScreenPixelRatioWarningThreshold = 6.0;
 
-/// A monotonically increasing frame number being rendered.
-///
-/// Used for debugging only.
-int _debugFrameNumber = 1;
-
-List<FrameReference<dynamic>> _frameReferences = <FrameReference<dynamic>>[];
-
-/// A temporary reference to a value of type [V].
-///
-/// The value automatically gets set to null after the current frame is
-/// rendered.
-///
-/// It is useful to think of this as a weak reference that's scoped to a
-/// single frame.
-class FrameReference<V> {
-  /// Creates a frame reference to a value.
-  FrameReference([this.value]) {
-    _frameReferences.add(this);
-  }
-
-  /// The current value of this reference.
-  V value;
-}
-
 /// Performs any outstanding painting work enqueued by [PersistedPicture]s.
 void commitScene(PersistedScene scene) {
   if (_paintQueue.isNotEmpty) {

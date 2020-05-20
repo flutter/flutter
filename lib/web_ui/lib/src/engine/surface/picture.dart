@@ -218,8 +218,6 @@ class PersistedStandardPicture extends PersistedPicture {
     return bitmapCanvas.bitmapPixelCount;
   }
 
-  FrameReference<bool> _didApplyPaint = FrameReference<bool>(false);
-
   @override
   void applyPaint(EngineCanvas oldCanvas) {
     if (picture.recordingCanvas.hasArbitraryPaint) {
@@ -227,7 +225,6 @@ class PersistedStandardPicture extends PersistedPicture {
     } else {
       _applyDomPaint(oldCanvas);
     }
-    _didApplyPaint.value = true;
   }
 
   void _applyDomPaint(EngineCanvas oldCanvas) {
@@ -335,6 +332,7 @@ class PersistedStandardPicture extends PersistedPicture {
         DebugCanvasReuseOverlay.instance.reusedCount++;
       }
       bestRecycledCanvas.bounds = bounds;
+      bestRecycledCanvas.elementCache = _elementCache;
       return bestRecycledCanvas;
     }
 
@@ -342,6 +340,7 @@ class PersistedStandardPicture extends PersistedPicture {
       DebugCanvasReuseOverlay.instance.createdCount++;
     }
     final BitmapCanvas canvas = BitmapCanvas(bounds);
+    canvas.elementCache = _elementCache;
     if (_debugExplainSurfaceStats) {
       _surfaceStatsFor(this)
         ..allocateBitmapCanvasCount += 1
@@ -370,6 +369,10 @@ abstract class PersistedPicture extends PersistedLeafSurface {
   final EnginePicture picture;
   final ui.Rect localPaintBounds;
   final int hints;
+
+  /// Cache for reusing elements such as images across picture updates.
+  CrossFrameCache<html.HtmlElement> _elementCache =
+      CrossFrameCache<html.HtmlElement>();
 
   @override
   html.Element createElement() {
@@ -591,6 +594,8 @@ abstract class PersistedPicture extends PersistedLeafSurface {
   @override
   void update(PersistedPicture oldSurface) {
     super.update(oldSurface);
+    // Transfer element cache over.
+    _elementCache = oldSurface._elementCache;
 
     if (dx != oldSurface.dx || dy != oldSurface.dy) {
       _applyTranslate();
