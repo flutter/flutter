@@ -286,6 +286,7 @@ class FormField<T> extends StatefulWidget {
     this.initialValue,
     this.autovalidate = false,
     this.enabled = true,
+    this.autovalidateOnUserInteraction = false,
   }) : assert(builder != null),
        super(key: key);
 
@@ -328,6 +329,11 @@ class FormField<T> extends StatefulWidget {
   /// Likewise, if this field is false, the widget will not be validated
   /// regardless of [autovalidate].
   final bool enabled;
+
+  /// If true this form will only auto-validate after its content changes.
+  /// 
+  /// This property has no effect if [autovalidate] is false.
+  final bool autovalidateOnUserInteraction;
 
   @override
   FormFieldState<T> createState() => FormFieldState<T>();
@@ -435,9 +441,14 @@ class FormFieldState<T> extends State<FormField<T>> {
   @override
   Widget build(BuildContext context) {
     // Only autovalidate if the widget is also enabled and
-    // if its content has changed
-    if (widget.autovalidate && widget.enabled && _hasInteractedByUser)
-      _validate();
+    // if its content has changed or autovalidateOnUserInteraction is false
+    if (widget.autovalidate && widget.enabled) {
+      if (!widget.autovalidateOnUserInteraction) {
+        _validate();
+      } else if (_hasInteractedByUser){
+        _validate();
+      }
+    }
     Form.of(context)?._register(this);
     return widget.builder(this);
   }
