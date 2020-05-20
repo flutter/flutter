@@ -26,6 +26,7 @@ class BitmapCanvas extends EngineCanvas {
   }
 
   ui.Rect _bounds;
+  CrossFrameCache<html.HtmlElement> _elementCache;
 
   /// The amount of padding to add around the edges of this canvas to
   /// ensure that anti-aliased arcs are not clipped.
@@ -114,6 +115,11 @@ class BitmapCanvas extends EngineCanvas {
     _updateRootElementTransform();
     _canvasPool.allocateCanvas(rootElement);
     _setupInitialTransform();
+  }
+
+  /// Setup cache for reusing DOM elements across frames.
+  set elementCache(CrossFrameCache<html.HtmlElement> cache) {
+    _elementCache = cache;
   }
 
   void _updateRootElementTransform() {
@@ -354,6 +360,26 @@ class BitmapCanvas extends EngineCanvas {
     _cachedLastStyle = null;
   }
 
+  html.ImageElement _reuseOrCreateImage(HtmlImage htmlImage) {
+    final String cacheKey = htmlImage.imgElement.src;
+    if (_elementCache != null) {
+      html.ImageElement imageElement = _elementCache.reuse(cacheKey);
+      if (imageElement != null) {
+        return imageElement;
+      }
+    }
+    // Can't reuse, create new instance.
+    html.ImageElement newImageElement = htmlImage.cloneImageElement();
+    if (_elementCache != null) {
+      _elementCache.cache(cacheKey, newImageElement, _onEvictElement);
+    }
+    return newImageElement;
+  }
+
+  static void _onEvictElement(html.HtmlElement element) {
+    element.remove();
+  }
+
   html.HtmlElement _drawImage(
       ui.Image image, ui.Offset p, SurfacePaintData paint) {
     final HtmlImage htmlImage = image;
@@ -363,7 +389,7 @@ class BitmapCanvas extends EngineCanvas {
     html.HtmlElement imgElement;
     if (colorFilterBlendMode == null) {
       // No Blending, create an image by cloning original loaded image.
-      imgElement = htmlImage.cloneImageElement();
+      imgElement = _reuseOrCreateImage(htmlImage);
     } else {
       switch (colorFilterBlendMode) {
         case ui.BlendMode.colorBurn:
@@ -596,7 +622,7 @@ class BitmapCanvas extends EngineCanvas {
     html.Element.html(svgFilter, treeSanitizer: _NullTreeSanitizer());
     rootElement.append(filterElement);
     _children.add(filterElement);
-    final html.HtmlElement imgElement = image.cloneImageElement();
+    final html.HtmlElement imgElement = _reuseOrCreateImage(image);
     imgElement.style.filter = 'url(#_fcf${_filterIdCounter})';
     if (colorFilterBlendMode == ui.BlendMode.saturation) {
       imgElement.style.backgroundColor = colorToCssString(filterColor);
@@ -787,6 +813,7 @@ class BitmapCanvas extends EngineCanvas {
   void endOfPaint() {
     assert(_saveCount == 0);
     _canvasPool.endOfPaint();
+    _elementCache?.commitFrame();
   }
 }
 
