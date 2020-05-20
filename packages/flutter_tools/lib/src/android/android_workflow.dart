@@ -44,17 +44,23 @@ final RegExp licenseNotAccepted = RegExp(r'licenses? not accepted', caseSensitiv
 final RegExp licenseAccepted = RegExp(r'All SDK package licenses accepted.');
 
 class AndroidWorkflow implements Workflow {
+  AndroidWorkflow({
+    @required AndroidSdk androidSdk,
+  }) : _androidSdk = androidSdk;
+
+  final AndroidSdk _androidSdk;
+
   @override
   bool get appliesToHostPlatform => true;
 
   @override
-  bool get canListDevices => getAdbPath(globals.androidSdk) != null;
+  bool get canListDevices => getAdbPath(_androidSdk) != null;
 
   @override
-  bool get canLaunchDevices => globals.androidSdk != null && globals.androidSdk.validateSdkWellFormed().isEmpty;
+  bool get canLaunchDevices => _androidSdk != null && _androidSdk.validateSdkWellFormed().isEmpty;
 
   @override
-  bool get canListEmulators => getEmulatorPath(globals.androidSdk) != null;
+  bool get canListEmulators => getEmulatorPath(_androidSdk) != null;
 }
 
 class AndroidValidator extends DoctorValidator {
