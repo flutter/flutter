@@ -58,10 +58,10 @@ void main() {
       expect(TestPlugin.createdViewIds.length, equals(1));
       TestPlugin.createdViewIds.clear();
 
-      // TODO(hterkelsen): Uncomment this once the engine support lands.
-      //expect(html.document.getElementById('platform_view_test'), isNotNull);
-      //expect(html.document.getElementById('platform_view_test').text,
-      //    equals('Testing 123'));
+      print(html.document.body.innerHtml);
+      expect(html.document.getElementById('platform_view_test'), isNotNull);
+      expect(html.document.getElementById('platform_view_test').text,
+          equals('Testing 123'));
     });
   });
 }

@@ -24,9 +24,18 @@ class PluginRegistry {
   /// platform messages are forwarded to the registry, where they can be
   /// correctly dispatched to one of the registered plugins.
   void registerMessageHandler() {
+    // TODO(hterkelsen): Convert this to JS interop.
     // The function below is only defined in the Web dart:ui.
     // ignore: undefined_function
     ui.webOnlySetPluginHandler(_binaryMessenger.handlePlatformMessage);
+
+    // Initialize the JS bindings here.
+    //
+    // TODO(hterkelsen): We are initializing the JS bindings here because the
+    //   generated entrypoint calls `pluginRegistry.registerMessageHandler`. In
+    //   the future we should change the entrypoint so it's more clear when the
+    //   JS bindings are initialized.
+    initializeJsBindings();
   }
 }
 
@@ -124,7 +133,8 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
       _handlers.remove(channel);
     else
       _handlers[channel] = handler;
-    ui.channelBuffers.drain(channel, (ByteData data, ui.PlatformMessageResponseCallback callback) async {
+    ui.channelBuffers.drain(channel,
+        (ByteData data, ui.PlatformMessageResponseCallback callback) async {
       await handlePlatformMessage(channel, data, callback);
     });
   }
