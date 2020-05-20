@@ -7,6 +7,8 @@ import 'framework.dart';
 
 export 'package:flutter/services.dart' show AutofillHints;
 
+typedef OnAutofillGroupDisposeCallback = bool Function({ BuildContext from });
+
 /// An [AutofillScope] widget that groups [AutofillClient]s together.
 ///
 /// [AutofillClient]s within the same [AutofillScope] must be built together, and
@@ -224,4 +226,62 @@ class _AutofillScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_AutofillScope old) => _scope != old._scope;
+}
+
+/// A widget that controls that lifecycle of the current autofill context.
+///
+/// When this widget is going to be removed from the tree, or sent offstage, it
+/// executes the actions defined by
+class AutofillContext extends ProxyWidget {
+
+  @override
+  _AutofillContextLifecycleElement createElement() => _AutofillContextLifecycleElement(this);
+}
+
+
+class _AutofillContextLifecycleElement extends ProxyElement {
+  _AutofillContextLifecycleElement(AutofillContext autofillContext) : super(autofillContext);
+
+  @override
+  void notifyClients(covariant ProxyWidget oldWidget) { }
+
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+  }
+}
+
+
+// Provides the
+class AutofillContextLifecycleAction extends InheritedWidget {
+  const AutofillContextLifecycleAction({
+    Key key,
+    Widget child,
+    this.lifecycleDelegate,
+  }): super(key: key, child: child);
+
+  final AutofillContextLifecycleDelegate lifecycleDelegate;
+
+  static AutofillContextLifecycleDelegate _globalLifecycleDelegate = const AutofillContextLifecycleDelegate();
+  static AutofillContextLifecycleDelegate get globalLifecycleDelegate => _globalLifecycleDelegate;
+  static set globalLifecycleDelegate(AutofillContextLifecycleDelegate newDelegate) {
+    assert(newDelegate != null);
+    if (_globalLifecycleDelegate != newDelegate)
+      _globalLifecycleDelegate = newDelegate;
+  }
+
+  // Changing delegates shouldn't make anything other than the widget itself
+  // rebuild.
+  @override
+  bool updateShouldNotify(covariant AutofillContextLifecycleAction oldWidget) => false;
+}
+
+abstract class AutofillContextLifecycleDelegate {
+  @protected
+  void onBecomingOffstage(BuildContext context);
+
+  @protected
+  void onDispose(BuildContext context);
 }

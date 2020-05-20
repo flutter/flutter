@@ -799,13 +799,36 @@ mixin AutofillScopeMixin implements AutofillScope {
       !autofillClients.any((AutofillClient client) => client.textInputConfiguration.autofillConfiguration == null),
       'Every client in AutofillScope.autofillClients must enable autofill',
     );
-    return TextInput.attach(
-      trigger,
-      _AutofillScopeTextInputConfiguration(
-        allConfigurations: autofillClients
-          .map((AutofillClient client) => client.textInputConfiguration),
-        currentClientConfiguration: configuration,
-      ),
+
+    TextInputConfiguration inputConfiguration;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        bool isPassword(AutofillClient client) {
+          final Iterable<String> hints = client.textInputConfiguration.autofillConfiguration?.autofillHints;
+          return client.textInputConfiguration.obscureText
+            || (hints?.contains(AutofillHints.password) ?? false)
+            || (hints?.contains(AutofillHints.newPassword) ?? false);
+        }
+
+        // In native iOS, the only kind of fields that have multi-field autofill
+        // are password fields. We can exclude other fields in the scope if the
+        // scope does not contain a password field, as they will not be used.
+        if (!autofillClients.any(isPassword)) {
+          inputConfiguration = configuration;
+        }
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        break;
+    }
+
+    inputConfiguration ??= _AutofillScopeTextInputConfiguration(
+      allConfigurations: autofillClients.map((AutofillClient client) => client.textInputConfiguration),
+      currentClientConfiguration: configuration,
     );
+    return TextInput.attach(trigger, inputConfiguration);
   }
 }

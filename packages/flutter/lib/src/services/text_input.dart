@@ -829,12 +829,13 @@ class TextInputConnection {
     TextInput._instance._show();
   }
 
-  /// Requests the platform autofill UI to appear.
+  /// Requests the system autofill UI to appear.
   ///
-  /// The call has no effect unless the currently attached client supports
-  /// autofill, and the platform has a standalone autofill UI (for example, this
-  /// call has no effect on iOS since its autofill UI is part of the software
-  /// keyboard).
+  /// Currently only works on Android.
+  ///
+  /// See also:
+  ///
+  ///  * [EditableText], a [TextInputClient] that calls this method when focused.
   void requestAutofill() {
     assert(attached);
     TextInput._instance._requestAutofill();
@@ -1179,6 +1180,7 @@ class TextInput {
     _channel.invokeMethod<void>('TextInput.requestAutofill');
   }
 
+
   void _setEditableSizeAndTransform(Map<String, dynamic> args) {
     _channel.invokeMethod<void>(
       'TextInput.setEditableSizeAndTransform',
@@ -1190,6 +1192,34 @@ class TextInput {
     _channel.invokeMethod<void>(
       'TextInput.setStyle',
       args,
+    );
+  }
+
+  /// Finish the current autofill context, save the user input for future use if
+  /// [shouldSave] is true.
+  ///
+  /// Autofill contexts help the platform identify the range of input fields it
+  /// needs to save user input from. Finishing the current autofill context
+  /// signals the platform's autofill service that the user has finalized their
+  /// input in the context, therefore any connected [TextInputClient]s must be
+  /// disconnected beforehand. The platform will usually show a "Save for autofill"
+  /// dialog when [shouldSave] is true and the user input in the current context
+  /// is eligible for saving.
+  ///
+  /// A new autofill context is automatically created when autofill is requested
+  /// for the first time in the app, or when the previous autofill context is
+  /// finished. An autofillable input field is added to the current context when
+  /// autofill is requested on it or its [AutofillGroup] (which is done by
+  /// default when the input field gains focus).
+  ///
+  /// By default,
+  void finishAutofillContext({ bool shouldSave = true }) {
+    assert(shouldSave != null);
+    assert(TextInput._instance._currentConnection = null);
+    TextInput._instance._channel.invokeMethod<void>(
+      shouldSave
+        ? 'TextInput.AutofillContext.commit'
+        : 'TextInput.AutofillContext.cancel',
     );
   }
 }
