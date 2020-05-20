@@ -855,6 +855,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
             controller: widget.scrollController,
             slivers: <Widget>[
               SliverAppBar(
+                automaticallyImplyLeading: false,
                 pinned: true,
                 backgroundColor: Theme.of(context).cardColor,
                 title: _buildTitle(
