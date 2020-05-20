@@ -432,16 +432,14 @@ abstract class ScrollView extends StatelessWidget {
 ///
 /// {@tool dartpad --template=stateful_widget_material}
 ///
-/// [ListView] is often used to display items in a scrolling widget. If items
-/// are added to the top of a [ListView], the scroll position moves, as it is
-/// meant to only grow in the one direction along the scroll axis (for example
-/// a vertical list will grow from the top to the bottom).
-///
-/// To have a scrolling widget that grows in both directions along its scroll
-/// axis, use a [CustomScrollView]. This sample code shows a scroll view that
-/// contains two [SliverList]s, and by setting the [CustomScrollView.center]
-/// to the key of the second list, it can grow in both directions along its
-/// scroll axis without moving the scroll position.
+/// By default, if items are inserted at the "top" of a scrolling container like
+/// [ListView] or [CustomScrollView], the top item and all of the items below it
+/// are scrolled downwards. In some applications, it's preferable to have the
+/// top of the list just grow upwards, without changing the scroll position.
+/// This example demonstrates how to do that with a [CustomScrollView] with
+/// two [SliverList] children, and the [CustomScrollView.center] set to the key
+/// of the bottom SliverList. The top one SliverList will grow upwards, and the
+/// bottom SliverList will grow downwards.
 ///
 /// ```dart
 /// List<int> top = [];
@@ -449,7 +447,7 @@ abstract class ScrollView extends StatelessWidget {
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   const Key centerKey = ValueKey('second-sliver-list');
+///   const Key centerKey = ValueKey('bottom-sliver-list');
 ///   return Scaffold(
 ///     appBar: AppBar(
 ///       title: const Text('Press on the plus to add items above and below'),
