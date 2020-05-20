@@ -14,10 +14,31 @@
 
 G_BEGIN_DECLS
 
+/**
+ * FlBinaryMessengerError:
+ * @FL_BINARY_MESSENGER_ERROR_ALREADY_RESPONDED: unable to send response, this
+ * message has already been responded to.
+ *
+ * Errors for #FlBinaryMessenger objects to set on failures.
+ */
+#define FL_BINARY_MESSENGER_ERROR fl_binary_messenger_codec_error_quark()
+
+typedef enum {
+  FL_BINARY_MESSENGER_ERROR_ALREADY_RESPONDED,
+} FlBinaryMessengerError;
+
+GQuark fl_binary_messenger_codec_error_quark(void) G_GNUC_CONST;
+
 G_DECLARE_FINAL_TYPE(FlBinaryMessenger,
                      fl_binary_messenger,
                      FL,
                      BINARY_MESSENGER,
+                     GObject)
+
+G_DECLARE_FINAL_TYPE(FlBinaryMessengerResponseHandle,
+                     fl_binary_messenger_response_handle,
+                     FL,
+                     BINARY_MESSENGER_RESPONSE_HANDLE,
                      GObject)
 
 /**
@@ -30,20 +51,23 @@ G_DECLARE_FINAL_TYPE(FlBinaryMessenger,
 /**
  * FlBinaryMessengerResponseHandle:
  *
- * A handle used to respond to platform messages.
+ * #FlBinaryMessengerResponseHandle is an object used to send responses with.
  */
-typedef struct _FlBinaryMessengerResponseHandle FlBinaryMessengerResponseHandle;
 
 /**
  * FlBinaryMessengerMessageHandler:
  * @messenger: an #FlBinaryMessenger.
  * @channel: channel message received on.
  * @message: message content received from Dart.
- * @response_handle: (transfer full): a handle to respond to the message with.
+ * @response_handle: a handle to respond to the message with.
  * @user_data: (closure): data provided when registering this handler.
  *
- * Function called when platform messages are received. The receiver must
- * call fl_binary_messenger_send_response() to avoid leaking the handle.
+ * Function called when platform messages are received. Call
+ * fl_binary_messenger_send_response() to respond to this message. If the
+ * response is not occurring in this callback take a reference to
+ * @response_handle and release that once it has been responded to. Failing to
+ * respond before the last reference to @response_handle is dropped is a
+ * programming error.
  */
 typedef void (*FlBinaryMessengerMessageHandler)(
     FlBinaryMessenger* messenger,
@@ -74,7 +98,7 @@ void fl_binary_messenger_set_message_handler_on_channel(
 /**
  * fl_binary_messenger_send_response:
  * @binary_messenger: an #FlBinaryMessenger.
- * @response_handle: (transfer full): handle that was provided in a
+ * @response_handle: handle that was provided in a
  * #FlBinaryMessengerMessageHandler.
  * @response: (allow-none): response to send or %NULL for an empty response.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
