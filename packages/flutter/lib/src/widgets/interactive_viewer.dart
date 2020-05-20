@@ -12,10 +12,9 @@ import 'gesture_detector.dart';
 import 'layout_builder.dart';
 import 'ticker_provider.dart';
 
-/// A widget that enables pan, zoom, and rotate interactions with its child.
+/// A widget that enables pan and zoom interactions with its child.
 ///
-/// The user can transform the child by dragging to pan or pinching to zoom and
-/// rotate.
+/// The user can transform the child by dragging to pan or pinching to zoom.
 ///
 /// The [child] must not be null.
 ///
@@ -91,6 +90,7 @@ class InteractiveViewer extends StatefulWidget {
        assert(disableScale != null),
        assert(disableRotation != null),
        // TODO(justinmc): Remove this assertion when rotation is enabled.
+       // https://github.com/flutter/flutter/issues/57698
        assert(disableRotation == true, 'Set disableRotation to true. This requirement will be removed later when the feature is complete.'),
        transformationController = transformationController ?? ValueNotifier<Matrix4>(Matrix4.identity()),
        super(key: key);
@@ -134,9 +134,15 @@ class InteractiveViewer extends StatefulWidget {
   ///   * [disableRotation]
   final bool disableScale;
 
+  // TODO(justinmc): Update these docs when rotation is available.
+  // https://github.com/flutter/flutter/issues/57698
   /// If true, the user will be prevented from rotating.
   ///
   /// Defaults to false.
+  ///
+  /// Currently, must be set to true, because rotation is not fully implemented.
+  /// This requirement will be removed in the future when rotation becomes
+  /// available.
   ///
   /// See also:
   ///   * [disableTranslation]
@@ -161,7 +167,7 @@ class InteractiveViewer extends StatefulWidget {
   /// Defaults to 0.8.
   final double minScale;
 
-  /// Called when the user ends a pan, scale, or rotate gesture on the widget.
+  /// Called when the user ends a pan or scale gesture on the widget.
   ///
   /// Will be called even if the interaction is disabled with
   /// [disableTranslation], [disableScale], or [disableRotation].
@@ -180,7 +186,7 @@ class InteractiveViewer extends StatefulWidget {
   ///  * [onInteractionEnd]
   final GestureScaleEndCallback onInteractionEnd;
 
-  /// Called when the user begins a pan, scale, or rotate gesture on the widget.
+  /// Called when the user begins a pan or scale gesture on the widget.
   ///
   /// Will be called even if the interaction is disabled with
   /// [disableTranslation], [disableScale], or [disableRotation].
@@ -199,7 +205,7 @@ class InteractiveViewer extends StatefulWidget {
   ///  * [onInteractionEnd]
   final GestureScaleStartCallback onInteractionStart;
 
-  /// Called when the user updates a pan, scale, or rotate gesture on the
+  /// Called when the user updates a pan or scale gesture on the
   /// widget.
   ///
   /// Will be called even if the interaction is disabled with
@@ -489,6 +495,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // idea is that the boundaries are axis aligned (boundariesAabbQuad), but
     // calculating the translation to put the viewport inside that Quad is more
     // complicated than this when rotated.
+     // https://github.com/flutter/flutter/issues/57698
     final Matrix4 correctedMatrix = matrix.clone()..setTranslation(Vector3(
       correctedTotalTranslation.dx,
       correctedTotalTranslation.dy,
