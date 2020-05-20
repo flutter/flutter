@@ -210,11 +210,18 @@ class Switch extends StatefulWidget {
   /// {@macro flutter.cupertino.switch.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
-  /// {@macro flutter.material.button.mouseCursor}
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
   ///
-  /// If [MaterialStateMouseCursor] is used, it supports [MaterialState.hovered],
-  /// [MaterialState.focused], [MaterialState.disabled], and
-  /// [MaterialState.selected].
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If this property is null, [ClickableMouseCursor] will be used.
   final MouseCursor mouseCursor;
 
   /// The color for the button's [Material] when it has the input focus.

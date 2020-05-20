@@ -1,4 +1,3 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -105,10 +104,17 @@ class RawMaterialButton extends StatefulWidget {
 
   /// {@template flutter.material.button.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
-  /// widget.
+  /// button.
   ///
-  /// The [mouseCursor] accepts [MaterialStateMouseCursor]. If this property is
-  /// null, [ClickableMouseCursor] will be used.
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.pressed].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If this property is null, [ClickableMouseCursor] will be used.
   /// {@endtemplate flutter.material.button.mouseCursor}
   final MouseCursor mouseCursor;
 

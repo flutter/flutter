@@ -109,12 +109,21 @@ class Checkbox extends StatefulWidget {
   /// ```
   final ValueChanged<bool> onChanged;
 
-  /// {@macro flutter.material.button.mouseCursor}
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
   ///
-  /// If [MaterialStateMouseCursor] is used, it supports [MaterialState.hovered],
-  /// [MaterialState.focused], [MaterialState.disabled], and
-  /// [MaterialState.selected]. When [value] is null (when [tristate] is true),
-  /// [MaterialState.selected] is included as a state.
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
+  /// When [value] is null and [tristate] is true, [MaterialState.selected] is
+  /// included as a state.
+  ///
+  /// If this property is null, [ClickableMouseCursor] will be used.
   final MouseCursor mouseCursor;
 
   /// The color to use when this checkbox is checked.

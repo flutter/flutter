@@ -159,11 +159,18 @@ class Radio<T> extends StatefulWidget {
   /// ```
   final ValueChanged<T> onChanged;
 
-  /// {@macro flutter.material.button.mouseCursor}
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
   ///
-  /// If [MaterialStateMouseCursor] is used, it supports [MaterialState.hovered],
-  /// [MaterialState.focused], [MaterialState.disabled], and
-  /// [MaterialState.selected].
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If this property is null, [ClickableMouseCursor] will be used.
   final MouseCursor mouseCursor;
 
   /// Set to true if this radio button is allowed to be returned to an
