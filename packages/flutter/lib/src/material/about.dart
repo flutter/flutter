@@ -563,9 +563,10 @@ class _LicensePageState extends State<LicensePage> {
               drawSelection && index - 1 == (selectedId ?? 0), data);
         }
         return _AboutProgram(
-          name: widget.applicationName,
-          icon: widget.applicationIcon,
-          version: widget.applicationVersion,
+          name: widget.applicationName ?? _defaultApplicationName(context),
+          icon: widget.applicationIcon ?? _defaultApplicationIcon(context),
+          version:
+              widget.applicationVersion ?? _defaultApplicationVersion(context),
           legalese: widget.applicationLegalese,
         );
       },
@@ -616,8 +617,15 @@ class _LicensePageState extends State<LicensePage> {
 
 class _AboutProgram extends StatelessWidget {
   const _AboutProgram(
-      {Key key, this.name, this.version, this.icon, this.legalese})
-      : super(key: key);
+      {Key key,
+      @required this.name,
+      @required this.version,
+      @required this.icon,
+      this.legalese})
+      : assert(name != null),
+        assert(version != null),
+        assert(icon != null),
+        super(key: key);
 
   final String name;
   final String version;
