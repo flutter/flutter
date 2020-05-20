@@ -1011,12 +1011,6 @@ Quad _transformViewport(Matrix4 matrix, Rect viewport) {
   );
 }
 
-// Get the offset of the current widget from the global screen coordinates.
-Offset _getOffset(BuildContext context) {
-  final RenderBox renderObject = context.findRenderObject() as RenderBox;
-  return renderObject.localToGlobal(Offset.zero);
-}
-
 // Get the size of the child given its RenderBox and the viewport's Size.
 //
 // In some cases (i.e. a Table that's wider and/or taller than the viewport),
