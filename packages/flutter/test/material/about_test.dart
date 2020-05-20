@@ -138,9 +138,23 @@ void main() {
 
     await tester.pumpAndSettle();
 
+    // Check for packages.
     expect(find.text('AAA'), findsOneWidget);
-    expect(find.text('BBB'), findsOneWidget);
     expect(find.text('Another package'), findsOneWidget);
+
+    // Check license is displayed after entering into license page for 'AAA'.
+    await tester.tap(find.text('AAA'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    expect(find.text('BBB'), findsOneWidget);
+
+    /// Go back to list of packages.
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    /// Check license is displayed after entering into license page for
+    /// 'Another package'.
+    await tester.tap(find.text('Another package'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(find.text('Another license'), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
