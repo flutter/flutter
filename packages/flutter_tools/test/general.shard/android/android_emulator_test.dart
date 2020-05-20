@@ -52,6 +52,7 @@ void main() {
       expect(emulator.id, emulatorID);
       expect(emulator.hasConfig, true);
     });
+
     testWithoutContext('reads expected metadata', () {
       const String emulatorID = '1234';
       const String manufacturer = 'Me';
@@ -203,7 +204,8 @@ void main() {
         time.flushMicrotasks();
       });
       await completer.future;
-      expect(testLogger.errorText, isEmpty);
+
+      expect(logger.errorText, isEmpty);
     });
   });
 }
