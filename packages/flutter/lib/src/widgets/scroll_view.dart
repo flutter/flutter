@@ -432,7 +432,7 @@ abstract class ScrollView extends StatelessWidget {
 ///
 /// {@tool dartpad --template=stateful_widget_material}
 ///
-/// This sample code shows a scroll view that contains two [SliverList],
+/// This sample code shows a scroll view that contains two [SliverList]s,
 /// allowing the scroll view to grow in both directions, by setting the
 /// [CustomScrollView.center] to the key of the second list.
 ///
@@ -442,6 +442,7 @@ abstract class ScrollView extends StatelessWidget {
 ///
 /// @override
 /// Widget build(BuildContext context) {
+///   const Key centerKey = ValueKey('second-sliver-list');
 ///   return Scaffold(
 ///     appBar: AppBar(
 ///       title: const Text('Press on the plus to add items above and below'),
@@ -456,7 +457,7 @@ abstract class ScrollView extends StatelessWidget {
 ///       ),
 ///     ),
 ///     body: CustomScrollView(
-///       center: const ValueKey('second-sliver-list'),
+///       center: centerKey,
 ///       slivers: <Widget>[
 ///         SliverList(
 ///           delegate: SliverChildBuilderDelegate(
@@ -472,7 +473,7 @@ abstract class ScrollView extends StatelessWidget {
 ///           ),
 ///         ),
 ///         SliverList(
-///           key: const ValueKey('second-sliver-list'),
+///           key: centerKey,
 ///           delegate: SliverChildBuilderDelegate(
 ///             (BuildContext context, int index) {
 ///               return Container(
