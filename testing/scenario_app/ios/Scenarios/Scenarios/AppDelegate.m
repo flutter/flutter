@@ -26,6 +26,7 @@
 
   NSDictionary<NSString*, NSString*>* launchArgsMap = @{
     // The Platform view golden test args should match `PlatformViewGoldenTestManager`.
+    @"--locale-initialization" : @"locale_initialization",
     @"--platform-view" : @"platform_view",
     @"--platform-view-no-overlay-intersection" : @"platform_view_no_overlay_intersection",
     @"--platform-view-two-intersecting-overlays" : @"platform_view_two_intersecting_overlays",
