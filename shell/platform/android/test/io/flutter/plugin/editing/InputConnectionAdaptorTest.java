@@ -34,7 +34,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowClipboardManager;
 
-@Config(manifest = Config.NONE, sdk = 27, shadows = ShadowClipboardManager.class)
+@Config(manifest = Config.NONE, shadows = ShadowClipboardManager.class)
 @RunWith(RobolectricTestRunner.class)
 public class InputConnectionAdaptorTest {
   @Test
