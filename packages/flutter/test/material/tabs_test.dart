@@ -2532,13 +2532,11 @@ void main() {
     expectedIndicatorLeft = canvas.indicatorRect.left;
     pageController.addListener(pageControllerListener);
     await tester.pumpAndSettle();
-    pageController.removeListener(pageControllerListener);
 
     // Moving fromm index 2 to 1 (neighboring tabs)
     tabController.index = 1;
     box.paint(context, Offset.zero);
     expectedIndicatorLeft = canvas.indicatorRect.left;
-    pageController.addListener(pageControllerListener);
     await tester.pumpAndSettle();
     pageController.removeListener(pageControllerListener);
   });

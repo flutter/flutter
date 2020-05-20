@@ -1269,10 +1269,8 @@ class _TabBarViewState extends State<TabBarView> {
     if ((_currentIndex - previousIndex).abs() == 1) {
       _warpUnderwayCount += 1;
       await _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
-      if (!mounted)
-        return Future<void>.value();
       _warpUnderwayCount -= 1;
-      return;
+      return Future<void>.value();
     }
 
     assert((_currentIndex - previousIndex).abs() > 1);
