@@ -1550,6 +1550,138 @@ void main() {
       // Maintains pre-existing NestedScroll View snapping behavior. Prior to
       // adding float support, the snap animation provided a unique behavior
       // some developers may not want to lose.
+      final GlobalKey appBarKey = GlobalKey();
+      final GlobalKey<NestedScrollViewState> nestedKey = GlobalKey();
+      await tester.pumpWidget(buildFloatTest(
+        floating: true,
+        snap: true,
+        appBarKey: appBarKey,
+        nestedKey: nestedKey,
+      ));
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        56.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+
+      // Scroll down the list, the app bar should scroll away and no longer be
+      // visible.
+      final Offset point1 = tester.getCenter(find.text('Item 5'));
+      await tester.dragFrom(point1, const Offset(0.0, -300.0));
+      await tester.pump();
+      expect(find.text('Test Title'), findsNothing);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
+      // The outer scroll view should be at its full extent, here the size of
+      // the app bar.
+      expect(nestedKey.currentState.outerController.offset, 56.0);
+
+      // Animate In
+
+      // Drag the scrollable up and down. The app bar should not snap open, nor
+      // should it float in.
+      final TestGesture animateInGesture = await tester.startGesture(point1);
+      await animateInGesture.moveBy(const Offset(0.0, 100.0)); // Should not float in
+      await tester.pump();
+      expect(find.text('Test Title'), findsNothing);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
+      expect(nestedKey.currentState.outerController.offset, 56.0);
+
+      await animateInGesture.moveBy(const Offset(0.0, -50.0)); // No float out
+      await tester.pump();
+      expect(find.text('Test Title'), findsNothing);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
+      expect(nestedKey.currentState.outerController.offset, 56.0);
+
+      // Trigger the snap open animation: drag down and release
+      await animateInGesture.moveBy(const Offset(0.0, 10.0));
+      await animateInGesture.up();
+
+      // Now verify that the appbar is animating open
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      double lastExtent = verifyGeometry(
+        key: appBarKey,
+        paintExtent: 10.0, // >10.0 since 0.0 + 10.0
+        extentGreaterThan: true,
+        visible: true,
+      );
+      // The outer scroll offset should remain unchanged.
+      expect(nestedKey.currentState.outerController.offset, 56.0);
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(
+        key: appBarKey,
+        paintExtent: lastExtent,
+        extentGreaterThan: true,
+        visible: true,
+      );
+      expect(nestedKey.currentState.outerController.offset, 56.0);
+
+      // The animation finishes when the appbar is full height.
+      await tester.pumpAndSettle();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+      expect(nestedKey.currentState.outerController.offset, 56.0);
+
+      // Animate Out
+
+      // Trigger the snap close animation: drag up and release
+      final TestGesture animateOutGesture = await tester.startGesture(point1);
+      await animateOutGesture.moveBy(const Offset(0.0, -10.0));
+      await animateOutGesture.up();
+
+      // Now verify that the appbar is animating closed
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      lastExtent = verifyGeometry(
+        key: appBarKey,
+        paintExtent: 46.0, // <46.0 since 56.0 - 10.0
+        extentLessThan: true,
+        visible: true,
+      );
+      expect(nestedKey.currentState.outerController.offset, 56.0);
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(
+        key: appBarKey,
+        paintExtent: lastExtent,
+        extentLessThan: true,
+        visible: true,
+      );
+      expect(nestedKey.currentState.outerController.offset, 56.0);
+
+      // The animation finishes when the appbar is no longer in view.
+      await tester.pumpAndSettle();
+      expect(find.text('Test Title'), findsNothing);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
+      expect(nestedKey.currentState.outerController.offset, 56.0);
     });
 
     testWidgets('float snap expanded', (WidgetTester tester) async {
@@ -1722,17 +1854,253 @@ void main() {
       // Maintains pre-existing NestedScroll View snapping behavior. Prior to
       // adding float support, the snap animation provided a unique behavior
       // some developers may not want to lose.
+      final GlobalKey appBarKey = GlobalKey();
+      final GlobalKey<NestedScrollViewState> nestedKey = GlobalKey();
+      await tester.pumpWidget(buildFloatTest(
+        floating: true,
+        snap: true,
+        expanded: true,
+        appBarKey: appBarKey,
+        nestedKey: nestedKey,
+      ));
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        200.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 200.0, visible: true);
+
+      // Scroll down the list, the app bar should scroll away and no longer be
+      // visible.
+      final Offset point1 = tester.getCenter(find.text('Item 5'));
+      await tester.dragFrom(point1, const Offset(0.0, -400.0));
+      await tester.pump();
+      expect(find.text('Test Title'), findsNothing);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
+      // The outer scroll view should be at its full extent, here the size of
+      // the app bar.
+      expect(nestedKey.currentState.outerController.offset, 200.0);
+
+      // Animate In
+
+      // Drag the scrollable up and down. The app bar should not snap open, nor
+      // should it float in.
+      final TestGesture animateInGesture = await tester.startGesture(point1);
+      await animateInGesture.moveBy(const Offset(0.0, 100.0)); // Should not float in
+      await tester.pump();
+      expect(find.text('Test Title'), findsNothing);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
+      expect(nestedKey.currentState.outerController.offset, 200.0);
+
+      await animateInGesture.moveBy(const Offset(0.0, -50.0)); // No float out
+      await tester.pump();
+      expect(find.text('Test Title'), findsNothing);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
+      expect(nestedKey.currentState.outerController.offset, 200.0);
+
+      // Trigger the snap open animation: drag down and release
+      await animateInGesture.moveBy(const Offset(0.0, 10.0));
+      await animateInGesture.up();
+
+      // Now verify that the appbar is animating open
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      double lastExtent = verifyGeometry(
+        key: appBarKey,
+        paintExtent: 10.0, // >10.0 since 0.0 + 10.0
+        extentGreaterThan: true,
+        visible: true,
+      );
+      // The outer scroll offset should remain unchanged.
+      expect(nestedKey.currentState.outerController.offset, 200.0);
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(
+        key: appBarKey,
+        paintExtent: lastExtent,
+        extentGreaterThan: true,
+        visible: true,
+      );
+      expect(nestedKey.currentState.outerController.offset, 200.0);
+
+      // The animation finishes when the appbar is full height.
+      await tester.pumpAndSettle();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: appBarKey, paintExtent: 200.0, visible: true);
+      expect(nestedKey.currentState.outerController.offset, 200.0);
+
+      // Animate Out
+
+      // Trigger the snap close animation: drag up and release
+      final TestGesture animateOutGesture = await tester.startGesture(point1);
+      await animateOutGesture.moveBy(const Offset(0.0, -10.0));
+      await animateOutGesture.up();
+
+      // Now verify that the appbar is animating closed
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      lastExtent = verifyGeometry(
+        key: appBarKey,
+        paintExtent: 190.0, // <190.0 since 200.0 - 10.0
+        extentLessThan: true,
+        visible: true,
+      );
+      expect(nestedKey.currentState.outerController.offset, 200.0);
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(
+        key: appBarKey,
+        paintExtent: lastExtent,
+        extentLessThan: true,
+        visible: true,
+      );
+      expect(nestedKey.currentState.outerController.offset, 200.0);
+
+      // The animation finishes when the appbar is no longer in view.
+      await tester.pumpAndSettle();
+      expect(find.text('Test Title'), findsNothing);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
+      expect(nestedKey.currentState.outerController.offset, 200.0);
     });
 
     testWidgets('float pinned', (WidgetTester tester) async {
       // This configuration should have the same behavior of a pinned app bar.
       // No floating should happen, and the app bar should persist.
+      final GlobalKey appBarKey = GlobalKey();
+      await tester.pumpWidget(buildFloatTest(
+        floating: true,
+        pinned: true,
+        nestedFloat: true,
+        appBarKey: appBarKey,
+      ));
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        56.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+
+      // Scroll away the outer scroll view and some of the inner scroll view.
+      final Offset point1 = tester.getCenter(find.text('Item 5'));
+      await tester.dragFrom(point1, const Offset(0.0, -300.0));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        56.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+
+      await tester.dragFrom(point1, const Offset(0.0, 50.0));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        56.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+
+      await tester.dragFrom(point1, const Offset(0.0, 150.0));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        56.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
     });
 
     testWidgets('float pinned expanded', (WidgetTester tester) async {
       // Only the expanded portion (flexible space) of the app bar should float
       // in and out.
-      
+      final GlobalKey appBarKey = GlobalKey();
+      await tester.pumpWidget(buildFloatTest(
+        floating: true,
+        pinned: true,
+        expanded: true,
+        nestedFloat: true,
+        appBarKey: appBarKey,
+      ));
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        200.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 200.0, visible: true);
+
+      // Scroll away the outer scroll view and some of the inner scroll view.
+      // The expanded portion of the app bar should collapse.
+      final Offset point1 = tester.getCenter(find.text('Item 5'));
+      await tester.dragFrom(point1, const Offset(0.0, -300.0));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        56.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+
+      // Scroll back some, the app bar should expand.
+      await tester.dragFrom(point1, const Offset(0.0, 50.0));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsNothing);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        106.0, // 56.0 + 50.0
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 106.0, visible: true);
+
+      // Finish scrolling the rest of the way in.
+      await tester.dragFrom(point1, const Offset(0.0, 150.0));
+      await tester.pump();
+      expect(find.text('Test Title'), findsOneWidget);
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(
+        tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
+        200.0,
+      );
+      verifyGeometry(key: appBarKey, paintExtent: 200.0, visible: true);
     });
 
     testWidgets('float pinned snap', (WidgetTester tester) async {

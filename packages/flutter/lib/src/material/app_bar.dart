@@ -680,7 +680,7 @@ class _FloatingAppBar extends StatefulWidget {
 
 // A wrapper for the widget created by _SliverAppBarDelegate that starts and
 // stops the floating app bar's snap-into-view or snap-out-of-view animation.
-class _FloatingAppBarState extends State<_FloatingAppBar> with TickerProviderStateMixin {
+class _FloatingAppBarState extends State<_FloatingAppBar> {
   ScrollPosition _position;
   AnimationController _controller;
   Animation<double> _animation;
@@ -709,6 +709,7 @@ class _FloatingAppBarState extends State<_FloatingAppBar> with TickerProviderSta
   void _isScrollingListener() {
     if (_position == null)
       return;
+
     // When a scroll stops, then maybe snap the appbar into view.
     // Similarly, when a scroll starts, then maybe stop the snap animation.
 
