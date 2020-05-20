@@ -579,7 +579,7 @@ void main() {
     expect(formKey.currentState.validate(), isTrue);
   });
 
-  testWidgets('Do not autovalidate before value changes', (WidgetTester tester) async {
+  testWidgets('Do not auto-validate before value changes if both autovalidate and autovalidateOnUserInteraction are true', (WidgetTester tester) async {
     FormFieldState<String> formFieldState;
 
     String errorText(String value) => '$value/error';
@@ -594,12 +594,13 @@ void main() {
               child: Material(
                 child: FormField<String>(
                   initialValue: 'foo',
+                  autovalidate: true,
+                  autovalidateOnUserInteraction: true,
                   builder: (FormFieldState<String> state) {
                     formFieldState = state;
                     return Container();
                   },
                   validator: errorText,
-                  autovalidate: true,
                 ),
               ),
             ),
@@ -609,13 +610,14 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-
+    // form field has no error
     expect(formFieldState.hasError, isFalse);
+    // No error widget is visile
+    expect(find.text(errorText('foo')), findsNothing);
   });
 
-  testWidgets('only autovalidate after value changes', (WidgetTester tester) async {
+  testWidgets('auto-validate before value changes if autovalidate is true and autovalidateOnUserInteraction is false', (WidgetTester tester) async {
     FormFieldState<String> formFieldState;
-    const String initialValue = 'foo';
 
     String errorText(String value) => '$value/error';
 
@@ -629,12 +631,13 @@ void main() {
               child: Material(
                 child: FormField<String>(
                   initialValue: 'foo',
+                  autovalidate: true,
+                  autovalidateOnUserInteraction: false,
                   builder: (FormFieldState<String> state) {
                     formFieldState = state;
                     return Container();
                   },
                   validator: errorText,
-                  autovalidate: true,
                 ),
               ),
             ),
@@ -644,10 +647,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-
-    formFieldState.didChange(initialValue);
-    await tester.pump();
-    expect(formFieldState.errorText, equals(errorText(initialValue)));
+    expect(formFieldState.hasError, isTrue);
   });
 
   testWidgets('Form only validate TextFormFields after one of the form fields changes', (WidgetTester tester) async {
