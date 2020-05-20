@@ -466,7 +466,6 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   Animation<double> _animation;
   double _lastActualScrollOffset;
   double _effectiveScrollOffset;
-  double _nestedSnapOffset = 0.0;
 
   // Distance from our leading edge to the child's leading edge, in the axis
   // direction. Negative if we're scrolled off the top.
@@ -517,7 +516,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     }
     final double maxExtent = this.maxExtent;
     final double paintExtent = maxExtent - _effectiveScrollOffset;
-    final double layoutExtent = maxExtent - (constraints.scrollOffset + _nestedSnapOffset);
+    final double layoutExtent = maxExtent - constraints.scrollOffset;
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: math.min(constraints.overlap, 0.0),
@@ -532,16 +531,19 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   /// If the header isn't already fully exposed, then animate it into view, if
   /// it is exposed, animate it out of view.
   ///
-  /// Returns a bool after animating to indicate if the [ScrollPosition] needs
-  /// to be corrected. This is relevant if
+  /// Returns a bool to indicate if the [ScrollPosition] needs
+  /// to be animated from the _FloatingAppBarState. This is relevant if
   /// [FloatingHeaderSnapConfiguration.nestedSnap] is true, indicating we are
   /// snapping an outer scrollable over a nested inner scrollable.
-  Future<bool> maybeStartSnapAnimation(ScrollDirection direction) async {
+  bool maybeStartSnapAnimation(ScrollDirection direction) {
     if (snapConfiguration == null)
       return false;
     if ((direction == ScrollDirection.forward && _effectiveScrollOffset <= 0.0)
       || (direction == ScrollDirection.reverse && _effectiveScrollOffset >= maxExtent))
-      return snapConfiguration.nestedSnap;
+      return false;
+
+    if (snapConfiguration.nestedSnap)
+      return true;
 
     final TickerProvider vsync = snapConfiguration.vsync;
     final Duration duration = snapConfiguration.duration;
@@ -553,43 +555,28 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         markNeedsLayout();
       });
 
-    final double tweenEnd = direction == ScrollDirection.forward ? 0.0 : maxExtent;
-    _nestedSnapOffset = snapConfiguration.nestedSnap
-      ? tweenEnd
-      : 0.0;
-
     _animation = _controller.drive(
       Tween<double>(
         begin: _effectiveScrollOffset,
-        end: tweenEnd,
+        end: direction == ScrollDirection.forward ? 0.0 : maxExtent,
       ).chain(CurveTween(
         curve: snapConfiguration.curve,
       )),
     );
 
-    await _controller.forward(from: 0.0);
-    return snapConfiguration.nestedSnap;
+    _controller.forward(from: 0.0);
+    return false;
   }
 
   /// If a header snap animation is underway then stop it.
-  ///
-  /// Returns a bool to indicate if the [ScrollPosition] needs to be corrected
-  /// due to the snap being triggered by a nested position.
-  /// [FloatingHeaderSnapConfiguration.nestedSnap] indicates if this situation
-  /// is present.
-  bool maybeStopSnapAnimation(ScrollDirection direction) {
-    if (snapConfiguration == null)
-      return false;
+  void maybeStopSnapAnimation(ScrollDirection direction) {
     _controller?.stop();
-    _nestedSnapOffset = _effectiveScrollOffset;
-    return snapConfiguration.nestedSnap;
   }
 
   @override
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
     final double maxExtent = this.maxExtent;
-    final double scrollOffsetWithPotentialNest = constraints.scrollOffset + _nestedSnapOffset;
     if (_lastActualScrollOffset != null && // We've laid out at least once to get an initial position, and either
         ((constraints.scrollOffset < _lastActualScrollOffset) || // we are scrolling back, so should reveal, or
          (_effectiveScrollOffset < maxExtent))) { // some part of it is visible, so should shrink or reveal as appropriate.
@@ -603,7 +590,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         if (delta > 0.0) // If we are trying to expand when allowFloatingExpansion is false,
           delta = 0.0; // disallow the expansion. (But allow shrinking, i.e. delta < 0.0 is fine.)
       }
-      _effectiveScrollOffset = (_effectiveScrollOffset - delta).clamp(0.0, scrollOffsetWithPotentialNest) as double;
+      _effectiveScrollOffset = (_effectiveScrollOffset - delta).clamp(0.0, constraints.scrollOffset) as double;
     } else {
       _effectiveScrollOffset = constraints.scrollOffset;
     }
@@ -617,7 +604,6 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     );
     _childPosition = updateGeometry();
     _lastActualScrollOffset = constraints.scrollOffset;
-    print('perform layout $geometry');
   }
 
   @override
@@ -667,7 +653,7 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
       minAllowedExtent,
       constraints.remainingPaintExtent,
     ) as double;
-    final double layoutExtent = maxExtent - (constraints.scrollOffset + _nestedSnapOffset);
+    final double layoutExtent = maxExtent - constraints.scrollOffset;
     final double stretchOffset = stretchConfiguration != null ?
       constraints.overlap.abs() :
       0.0;
