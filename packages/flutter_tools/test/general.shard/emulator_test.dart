@@ -93,6 +93,29 @@ void main() {
       expect(await testEmulatorManager.getEmulatorsMatching('ios'),  <Emulator>[emulator3]);
     });
 
+    testUsingContext('create emulator with a missing avdmanager does not crash.', () async {
+      when(mockSdk.avdManagerPath).thenReturn(null);
+      when(mockSdk.getAvdManagerPath()).thenReturn(null);
+      final EmulatorManager emulatorManager = EmulatorManager(
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['emulator', '-list-avds'],
+            stdout: 'existing-avd-1',
+          ),
+        ]),
+        androidSdk: mockSdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdk: mockSdk,
+        ),
+      );
+      final CreateEmulatorResult result = await emulatorManager.createEmulator();
+
+      expect(result.success, false);
+      expect(result.error, contains('avdmanager is missing from the Android SDK'));
+    });
+
     // iOS discovery uses context.
     testUsingContext('create emulator with an empty name does not fail', () async {
       final EmulatorManager emulatorManager = EmulatorManager(
