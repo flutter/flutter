@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show json;
+import 'dart:convert' show LineSplitter, json, utf8;
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -690,6 +691,130 @@ class MemoryTest {
     _endMemory.add(endMemoryUsage['total_kb'] as int);
     _diffMemory.add((endMemoryUsage['total_kb'] as int) - (_startMemoryUsage['total_kb'] as int));
   }
+}
+
+class DevToolsMemoryTest {
+  DevToolsMemoryTest(this.project, this.driverTest);
+
+  final String project;
+  final String driverTest;
+
+  Future<TaskResult> run() {
+    return inDirectory<TaskResult>(project, () async {
+      _device = await devices.workingDevice;
+      await _device.unlock();
+      await flutter('packages', options: <String>['get']);
+
+      await _launchApp();
+      if (_observatoryUri == null) {
+        return  TaskResult.failure('Observatory URI not found.');
+      }
+
+      await _launchDevTools();
+
+      await flutter(
+        'drive',
+        options: <String>[
+          '--use-existing-app', _observatoryUri,
+          '-d', _device.deviceId,
+          '--profile',
+          driverTest,
+        ],
+      );
+
+      _devToolsProcess.kill();
+      await _devToolsProcess.exitCode;
+
+      _runProcess.kill();
+      await _runProcess.exitCode;
+
+      final Map<String, dynamic> data = json.decode(
+        file('$project/$_kJsonFileName').readAsStringSync(),
+      ) as Map<String, dynamic>;
+      final List<dynamic> samples = data['samples']['data'] as List<dynamic>;
+      int maxRss = 0;
+      int maxAdbTotal = 0;
+      for (final dynamic sample in samples) {
+        maxRss = math.max(maxRss, sample['rss'] as int);
+        if (sample['adb_memoryInfo'] != null) {
+          maxAdbTotal = math.max(maxAdbTotal, sample['adb_memoryInfo']['Total'] as int);
+        }
+      }
+      return TaskResult.success(
+          <String, dynamic>{'maxRss': maxRss, 'maxAdbTotal': maxAdbTotal},
+          benchmarkScoreKeys: <String>['maxRss', 'maxAdbTotal'],
+      );
+    });
+  }
+
+  Future<void> _launchApp() async {
+    print('launching $project$driverTest on device...');
+    final String flutterPath = path.join(flutterDirectory.path, 'bin', 'flutter');
+    _runProcess = await startProcess(
+      flutterPath,
+      <String>[
+        'run',
+        '--verbose',
+        '--profile',
+        '-d', _device.deviceId,
+        driverTest,
+      ],
+    );
+
+    // Listen for Observatory URI and forward stdout/stderr
+    final Completer<String> observatoryUri = Completer<String>();
+    _runProcess.stdout
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          print('run stdout: $line');
+          final RegExpMatch match = RegExp(r'An Observatory debugger and profiler on .+ is available at: ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)').firstMatch(line);
+          if (match != null) {
+            observatoryUri.complete(match[1]);
+            _observatoryUri = match[1];
+          }
+        }, onDone: () { observatoryUri.complete(null); });
+    _forwardStream(_runProcess.stderr, 'run stderr');
+
+    _observatoryUri = await observatoryUri.future;
+  }
+
+  Future<void> _launchDevTools() async {
+    await exec('pub', <String>[
+      'global',
+      'activate',
+      'devtools',
+      '0.2.5',
+    ]);
+    _devToolsProcess = await startProcess(
+      'pub',
+      <String>[
+        'global',
+        'run',
+        'devtools',
+        '--vm-uri', _observatoryUri,
+        '--profile-memory', _kJsonFileName,
+      ],
+    );
+    _forwardStream(_devToolsProcess.stdout, 'devtools stdout');
+    _forwardStream(_devToolsProcess.stderr, 'devtools stderr');
+  }
+
+  void _forwardStream(Stream<List<int>> stream, String label) {
+    stream
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          print('$label: $line');
+        });
+  }
+
+  Device _device;
+  String _observatoryUri;
+  Process _runProcess;
+  Process _devToolsProcess;
+
+  static const String _kJsonFileName = 'devtools_memory.json';
 }
 
 enum ReportedDurationTestFlavor {
