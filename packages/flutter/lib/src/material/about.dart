@@ -499,57 +499,63 @@ class _LicensePageState extends State<LicensePage> {
   }
 
   Widget _buildPackagesView(final BuildContext _, final bool isLateral) {
-    return AnimatedSwitcher(
-      transitionBuilder: (Widget child, Animation<double> animation) {
-        return FadeTransition(opacity: animation, child: child);
-      },
-      duration: kThemeAnimationDuration,
-      child: FutureBuilder<_LicenseData>(
+    return FutureBuilder<_LicenseData>(
         future: licenses,
         builder: (BuildContext context, AsyncSnapshot<_LicenseData> snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.done:
-              _initDefaultDetailPage(snapshot.data, context);
-              return ValueListenableBuilder<int>(
-                valueListenable: selectedId,
-                builder: (BuildContext context, int selectedId, Widget _) {
-                  return Center(
-                    child: Material(
-                      color: Theme.of(context).cardColor,
-                      elevation: 4,
-                      child: Container(
-                        constraints:
-                            BoxConstraints.loose(const Size.fromWidth(600)),
-                        child: _buildPackagesList(
-                          context,
-                          selectedId,
-                          snapshot.data,
-                          isLateral,
+          return AnimatedSwitcher(
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+            duration: kThemeAnimationDuration,
+            child: LayoutBuilder(
+              key: ValueKey<ConnectionState>(snapshot.connectionState),
+              builder: (BuildContext context, BoxConstraints constraints) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.done:
+                    _initDefaultDetailPage(snapshot.data, context);
+                    return ValueListenableBuilder<int>(
+                      valueListenable: selectedId,
+                      builder:
+                          (BuildContext context, int selectedId, Widget _) {
+                        return Center(
+                          child: Material(
+                            color: Theme.of(context).cardColor,
+                            elevation: 4,
+                            child: Container(
+                              constraints: BoxConstraints.loose(
+                                  const Size.fromWidth(600)),
+                              child: _buildPackagesList(
+                                context,
+                                selectedId,
+                                snapshot.data,
+                                isLateral,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  default:
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        _AboutProgram(
+                          name: widget.applicationName ??
+                              _defaultApplicationName(context),
+                          icon: widget.applicationIcon ??
+                              _defaultApplicationIcon(context),
+                          version: widget.applicationVersion ??
+                              _defaultApplicationVersion(context),
+                          legalese: widget.applicationLegalese,
                         ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            default:
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  _AboutProgram(
-                    name: widget.applicationName ??
-                        _defaultApplicationName(context),
-                    icon: widget.applicationIcon ??
-                        _defaultApplicationIcon(context),
-                    version: widget.applicationVersion ??
-                        _defaultApplicationVersion(context),
-                    legalese: widget.applicationLegalese,
-                  ),
-                  const Center(child: CircularProgressIndicator()),
-                ],
-              );
-          }
+                        const Center(child: CircularProgressIndicator()),
+                      ],
+                    );
+                }
+              },
+            ),
+          );
         },
-      ),
     );
   }
 
