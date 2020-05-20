@@ -6,7 +6,8 @@
     "features": [
       "config-data",
       "root-ssl-certificates",
-      "vulkan"
+      "vulkan",
+      "isolated-cache-storage"
     ],
     "services": [
       "fuchsia.accessibility.SettingsManager",
