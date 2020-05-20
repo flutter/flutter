@@ -174,6 +174,7 @@ class TextFormField extends FormField<String> {
     bool enableInteractiveSelection = true,
     InputCounterWidgetBuilder buildCounter,
     ScrollPhysics scrollPhysics,
+    bool autovalidateOnUserInteraction = false,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -206,6 +207,7 @@ class TextFormField extends FormField<String> {
     validator: validator,
     autovalidate: autovalidate,
     enabled: enabled ?? decoration?.enabled ?? true,
+    autovalidateOnUserInteraction: autovalidateOnUserInteraction,
     builder: (FormFieldState<String> field) {
       final _TextFormFieldState state = field as _TextFormFieldState;
       final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
