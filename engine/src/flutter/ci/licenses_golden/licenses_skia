@@ -1,4 +1,4 @@
-Signature: a7fe620648016153865bf421bb88da27
+Signature: 45c564b57644033a13dea12c571a88b1
 
 UNUSED LICENSES:
 
@@ -2269,6 +2269,10 @@ FILE: ../../../third_party/skia/bench/StrokeBench.cpp
 FILE: ../../../third_party/skia/bench/TextBlobBench.cpp
 FILE: ../../../third_party/skia/bench/TopoSortBench.cpp
 FILE: ../../../third_party/skia/bench/nanobench.h
+FILE: ../../../third_party/skia/client_utils/android/BRDAllocator.h
+FILE: ../../../third_party/skia/client_utils/android/BitmapRegionDecoder.cpp
+FILE: ../../../third_party/skia/client_utils/android/BitmapRegionDecoder.h
+FILE: ../../../third_party/skia/client_utils/android/BitmapRegionDecoderPriv.h
 FILE: ../../../third_party/skia/dm/DMSrcSink.cpp
 FILE: ../../../third_party/skia/dm/DMSrcSink.h
 FILE: ../../../third_party/skia/example/SkiaSDLExample.cpp
@@ -2367,10 +2371,7 @@ FILE: ../../../third_party/skia/samplecode/SampleClipDrawMatch.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFilterQuality.cpp
 FILE: ../../../third_party/skia/samplecode/SampleShip.cpp
 FILE: ../../../third_party/skia/samplecode/SampleXfer.cpp
-FILE: ../../../third_party/skia/src/android/SkBitmapRegionCodec.cpp
-FILE: ../../../third_party/skia/src/android/SkBitmapRegionCodec.h
 FILE: ../../../third_party/skia/src/android/SkBitmapRegionDecoder.cpp
-FILE: ../../../third_party/skia/src/android/SkBitmapRegionDecoderPriv.h
 FILE: ../../../third_party/skia/src/c/sk_c_from_to.h
 FILE: ../../../third_party/skia/src/c/sk_paint.cpp
 FILE: ../../../third_party/skia/src/c/sk_types_priv.h
