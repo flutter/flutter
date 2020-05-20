@@ -23,33 +23,51 @@ struct _FlBasicMessageChannel {
   gpointer message_handler_data;
 };
 
-// Wrap the binary messenger handle for type safety and to make the API
-// consistent
 struct _FlBasicMessageChannelResponseHandle {
+  GObject parent_instance;
+
   FlBinaryMessengerResponseHandle* response_handle;
 };
-
-static FlBasicMessageChannelResponseHandle* response_handle_new(
-    FlBinaryMessengerResponseHandle* response_handle) {
-  FlBasicMessageChannelResponseHandle* handle =
-      static_cast<FlBasicMessageChannelResponseHandle*>(
-          g_malloc0(sizeof(FlBasicMessageChannelResponseHandle)));
-  handle->response_handle = response_handle;
-
-  return handle;
-}
-
-static void response_handle_free(FlBasicMessageChannelResponseHandle* handle) {
-  g_free(handle);
-}
-
-G_DEFINE_AUTOPTR_CLEANUP_FUNC(FlBasicMessageChannelResponseHandle,
-                              response_handle_free);
 
 // Added here to stop the compiler from optimising this function away
 G_MODULE_EXPORT GType fl_basic_message_channel_get_type();
 
 G_DEFINE_TYPE(FlBasicMessageChannel, fl_basic_message_channel, G_TYPE_OBJECT)
+G_DEFINE_TYPE(FlBasicMessageChannelResponseHandle,
+              fl_basic_message_channel_response_handle,
+              G_TYPE_OBJECT)
+
+static void fl_basic_message_channel_response_handle_dispose(GObject* object) {
+  FlBasicMessageChannelResponseHandle* self =
+      FL_BASIC_MESSAGE_CHANNEL_RESPONSE_HANDLE(object);
+
+  g_clear_object(&self->response_handle);
+
+  G_OBJECT_CLASS(fl_basic_message_channel_response_handle_parent_class)
+      ->dispose(object);
+}
+
+static void fl_basic_message_channel_response_handle_class_init(
+    FlBasicMessageChannelResponseHandleClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose =
+      fl_basic_message_channel_response_handle_dispose;
+}
+
+static void fl_basic_message_channel_response_handle_init(
+    FlBasicMessageChannelResponseHandle* self) {}
+
+static FlBasicMessageChannelResponseHandle*
+fl_basic_message_channel_response_handle_new(
+    FlBinaryMessengerResponseHandle* response_handle) {
+  FlBasicMessageChannelResponseHandle* self =
+      FL_BASIC_MESSAGE_CHANNEL_RESPONSE_HANDLE(g_object_new(
+          fl_basic_message_channel_response_handle_get_type(), nullptr));
+
+  self->response_handle =
+      FL_BINARY_MESSENGER_RESPONSE_HANDLE(g_object_ref(response_handle));
+
+  return self;
+}
 
 // Called when a binary message is received on this channel
 static void message_cb(FlBinaryMessenger* messenger,
@@ -74,8 +92,9 @@ static void message_cb(FlBinaryMessenger* messenger,
                                       nullptr);
   }
 
-  self->message_handler(self, message_value,
-                        response_handle_new(response_handle),
+  g_autoptr(FlBasicMessageChannelResponseHandle) handle =
+      fl_basic_message_channel_response_handle_new(response_handle);
+  self->message_handler(self, message_value, handle,
                         self->message_handler_data);
 }
 
@@ -146,18 +165,18 @@ G_MODULE_EXPORT gboolean fl_basic_message_channel_respond(
     GError** error) {
   g_return_val_if_fail(FL_IS_BASIC_MESSAGE_CHANNEL(self), FALSE);
   g_return_val_if_fail(response_handle != nullptr, FALSE);
-
-  // Take reference to ensure it is freed
-  g_autoptr(FlBasicMessageChannelResponseHandle) owned_response_handle =
-      response_handle;
+  g_return_val_if_fail(response_handle->response_handle != nullptr, FALSE);
 
   g_autoptr(GBytes) data =
       fl_message_codec_encode_message(self->codec, message, error);
   if (data == nullptr)
     return FALSE;
 
-  return fl_binary_messenger_send_response(
-      self->messenger, owned_response_handle->response_handle, data, error);
+  gboolean result = fl_binary_messenger_send_response(
+      self->messenger, response_handle->response_handle, data, error);
+  g_clear_object(&response_handle->response_handle);
+
+  return result;
 }
 
 G_MODULE_EXPORT void fl_basic_message_channel_send(FlBasicMessageChannel* self,
