@@ -4,7 +4,9 @@
 
 import 'dart:async';
 
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -78,7 +80,7 @@ String getFlutterRoot() {
 }
 
 CommandRunner<void> createTestCommandRunner([ FlutterCommand command ]) {
-  final FlutterCommandRunner runner = FlutterCommandRunner();
+  final FlutterCommandRunner runner = TestFlutterCommandRunner();
   if (command != null) {
     runner.addCommand(command);
   }
@@ -361,4 +363,20 @@ class FakeVmServiceStreamResponse implements VmServiceExpectation {
 
   @override
   bool get isRequest => false;
+}
+
+class TestFlutterCommandRunner extends FlutterCommandRunner {
+  @override
+  Future<void> runCommand(ArgResults topLevelResults) async {
+    final Map<Type, dynamic> contextOverrides = <Type, dynamic>{
+      if (topLevelResults['verbose'] as bool)
+        Logger: () => VerboseLogger(globals.logger),
+    };
+    return context.run<void>(
+      overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
+        return MapEntry<Type, Generator>(type, () => value);
+      }),
+      body: () => super.runCommand(topLevelResults),
+    );
+  }
 }
