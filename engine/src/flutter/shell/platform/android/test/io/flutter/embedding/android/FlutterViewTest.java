@@ -42,7 +42,7 @@ import org.robolectric.shadows.ShadowDisplay;
 
 @Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
-@TargetApi(29)
+@TargetApi(28)
 public class FlutterViewTest {
   @Mock FlutterJNI mockFlutterJni;
   @Mock FlutterLoader mockFlutterLoader;
