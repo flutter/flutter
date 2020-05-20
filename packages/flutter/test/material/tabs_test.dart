@@ -2533,7 +2533,7 @@ void main() {
     pageController.addListener(pageControllerListener);
     await tester.pumpAndSettle();
 
-    // Moving fromm index 2 to 1 (neighboring tabs)
+    // Moving from index 2 to 1 (neighboring tabs)
     tabController.index = 1;
     box.paint(context, Offset.zero);
     expectedIndicatorLeft = canvas.indicatorRect.left;
