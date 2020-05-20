@@ -639,11 +639,10 @@ class _AboutProgram extends StatelessWidget {
       {Key key,
       @required this.name,
       @required this.version,
-      @required this.icon,
+      this.icon,
       this.legalese})
       : assert(name != null),
         assert(version != null),
-        assert(icon != null),
         super(key: key);
 
   final String name;
