@@ -443,6 +443,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/history.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/houdini_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html_image_codec.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/keyboard.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/mouse_cursor.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/onscreen_logging.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/path_to_svg.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/picture.dart
