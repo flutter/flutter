@@ -12,7 +12,7 @@ import '../runner/flutter_command.dart';
 import '../template.dart';
 
 class IdeConfigCommand extends FlutterCommand {
-  IdeConfigCommand({this.hidden = false}) {
+  IdeConfigCommand() {
     argParser.addFlag(
       'overwrite',
       negatable: true,
@@ -57,7 +57,7 @@ class IdeConfigCommand extends FlutterCommand {
       'Currently, IntelliJ is the default (and only) IDE that may be configured.';
 
   @override
-  final bool hidden;
+  final bool hidden = true;
 
   @override
   String get invocation => '${runner.executableName} $name';

@@ -33,7 +33,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
-  UpdatePackagesCommand({ this.hidden = false }) {
+  UpdatePackagesCommand() {
     argParser
       ..addFlag(
         'force-upgrade',
@@ -98,7 +98,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   final List<String> aliases = <String>['upgrade-packages'];
 
   @override
-  final bool hidden;
+  final bool hidden = true;
 
 
   // Lazy-initialize the net utilities with values from the context.
