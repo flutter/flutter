@@ -10,6 +10,9 @@
 
 #include <gmodule.h>
 
+G_DEFINE_QUARK(fl_binary_messenger_codec_error_quark,
+               fl_binary_messenger_codec_error)
+
 struct _FlBinaryMessenger {
   GObject parent_instance;
 
@@ -21,12 +24,61 @@ struct _FlBinaryMessenger {
 
 G_DEFINE_TYPE(FlBinaryMessenger, fl_binary_messenger, G_TYPE_OBJECT)
 
+struct _FlBinaryMessengerResponseHandle {
+  GObject parent_instance;
+
+  // Messenger sending response on
+  FlBinaryMessenger* messenger;
+
+  // Handle to send the response with. This is cleared to nullptr when it is
+  // used.
+  const FlutterPlatformMessageResponseHandle* response_handle;
+};
+
+G_DEFINE_TYPE(FlBinaryMessengerResponseHandle,
+              fl_binary_messenger_response_handle,
+              G_TYPE_OBJECT)
+
+static void fl_binary_messenger_response_handle_dispose(GObject* object) {
+  FlBinaryMessengerResponseHandle* self =
+      FL_BINARY_MESSENGER_RESPONSE_HANDLE(object);
+
+  if (self->response_handle != nullptr && self->messenger->engine != nullptr)
+    g_critical("FlBinaryMessengerResponseHandle was not responded to");
+
+  g_clear_object(&self->messenger);
+  self->response_handle = nullptr;
+
+  G_OBJECT_CLASS(fl_binary_messenger_response_handle_parent_class)
+      ->dispose(object);
+}
+
+static void fl_binary_messenger_response_handle_class_init(
+    FlBinaryMessengerResponseHandleClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = fl_binary_messenger_response_handle_dispose;
+}
+
+static void fl_binary_messenger_response_handle_init(
+    FlBinaryMessengerResponseHandle* self) {}
+
+static FlBinaryMessengerResponseHandle* fl_binary_messenger_response_handle_new(
+    FlBinaryMessenger* messenger,
+    const FlutterPlatformMessageResponseHandle* response_handle) {
+  FlBinaryMessengerResponseHandle* self = FL_BINARY_MESSENGER_RESPONSE_HANDLE(
+      g_object_new(fl_binary_messenger_response_handle_get_type(), nullptr));
+
+  self->messenger = FL_BINARY_MESSENGER(g_object_ref(messenger));
+  self->response_handle = response_handle;
+
+  return self;
+}
+
 typedef struct {
   FlBinaryMessengerMessageHandler message_handler;
   gpointer message_handler_data;
 } PlatformMessageHandler;
 
-PlatformMessageHandler* platform_message_handler_new(
+static PlatformMessageHandler* platform_message_handler_new(
     FlBinaryMessengerMessageHandler handler,
     gpointer user_data) {
   PlatformMessageHandler* self = static_cast<PlatformMessageHandler*>(
@@ -36,31 +88,10 @@ PlatformMessageHandler* platform_message_handler_new(
   return self;
 }
 
-void platform_message_handler_free(gpointer data) {
+static void platform_message_handler_free(gpointer data) {
   PlatformMessageHandler* self = static_cast<PlatformMessageHandler*>(data);
   g_free(self);
 }
-
-struct _FlBinaryMessengerResponseHandle {
-  const FlutterPlatformMessageResponseHandle* response_handle;
-};
-
-static FlBinaryMessengerResponseHandle* response_handle_new(
-    const FlutterPlatformMessageResponseHandle* response_handle) {
-  FlBinaryMessengerResponseHandle* self =
-      static_cast<FlBinaryMessengerResponseHandle*>(
-          g_malloc0(sizeof(FlBinaryMessengerResponseHandle)));
-  self->response_handle = response_handle;
-
-  return self;
-}
-
-static void response_handle_free(FlBinaryMessengerResponseHandle* self) {
-  g_free(self);
-}
-
-G_DEFINE_AUTOPTR_CLEANUP_FUNC(FlBinaryMessengerResponseHandle,
-                              response_handle_free);
 
 static void engine_weak_notify_cb(gpointer user_data, GObject* object) {
   FlBinaryMessenger* self = FL_BINARY_MESSENGER(user_data);
@@ -75,14 +106,13 @@ static gboolean fl_binary_messenger_platform_message_cb(
     void* user_data) {
   FlBinaryMessenger* self = FL_BINARY_MESSENGER(user_data);
 
-  FlBinaryMessengerResponseHandle* handle =
-      response_handle_new(response_handle);
-
   PlatformMessageHandler* handler = static_cast<PlatformMessageHandler*>(
       g_hash_table_lookup(self->platform_message_handlers, channel));
   if (handler == nullptr)
     return FALSE;
 
+  g_autoptr(FlBinaryMessengerResponseHandle) handle =
+      fl_binary_messenger_response_handle_new(self, response_handle);
   handler->message_handler(self, channel, message, handle,
                            handler->message_handler_data);
 
@@ -148,16 +178,23 @@ G_MODULE_EXPORT gboolean fl_binary_messenger_send_response(
     GError** error) {
   g_return_val_if_fail(FL_IS_BINARY_MESSENGER(self), FALSE);
   g_return_val_if_fail(response_handle != nullptr, FALSE);
-
-  // Take reference to ensure it is freed
-  g_autoptr(FlBinaryMessengerResponseHandle) owned_response_handle =
-      response_handle;
+  g_return_val_if_fail(response_handle->messenger == self, FALSE);
+  g_return_val_if_fail(response_handle->response_handle != nullptr, FALSE);
 
   if (self->engine == nullptr)
     return TRUE;
 
+  if (response_handle->response_handle == nullptr) {
+    g_set_error(
+        error, FL_BINARY_MESSENGER_ERROR,
+        FL_BINARY_MESSENGER_ERROR_ALREADY_RESPONDED,
+        "Attempted to respond to a message that is already responded to");
+    return FALSE;
+  }
+
   gboolean result = fl_engine_send_platform_message_response(
-      self->engine, owned_response_handle->response_handle, response, error);
+      self->engine, response_handle->response_handle, response, error);
+  response_handle->response_handle = nullptr;
 
   return result;
 }
