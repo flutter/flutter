@@ -16,6 +16,9 @@ import '../../src/context.dart';
 const String homeLinux = '/home/me';
 const String homeMac = '/Users/me';
 
+// Placeholder. Windows pathing not yet supported by file:Directory
+const String userProfileWin = '/Users/me';
+
 const Map<String, dynamic> macStudioInfoPlist = <String, dynamic>{
   'CFBundleGetInfoString': 'Android Studio 3.3, build AI-182.5107.16.33.5199772. Copyright JetBrains s.r.o., (c) 2000-2018',
   'CFBundleShortVersionString': '3.3',
@@ -44,6 +47,13 @@ Platform macPlatform() {
   );
 }
 
+Platform winPlatform() {
+  return FakePlatform(
+    operatingSystem: 'windows',
+    environment: <String, String>{'USERPROFILE': userProfileWin},
+  );
+}
+
 void main() {
   MemoryFileSystem fs;
   MockPlistUtils plistUtils;
@@ -53,17 +63,80 @@ void main() {
     plistUtils = MockPlistUtils();
   });
 
+  group('pluginsPath on Windows', () {
+    FileSystemUtils fsUtils;
+    Platform platform;
+
+    String studioHome;
+    String homeFile;
+
+    setUp(() {
+      platform = winPlatform();
+      // This path is consistent across windows installs
+      studioHome = '$userProfileWin/.AndroidStudioWithCheese5.0';
+      homeFile = '$studioHome/system/.home';
+
+      fsUtils = FileSystemUtils(
+        fileSystem: fs,
+        platform: platform,
+      );
+    });
+
+    testUsingContext('extracts plugins path when installed via Toolbox',() {
+
+      const String installPath = '$userProfileWin/AppData/Local/JetBrains/Toolbox/apps/AndroidStudio/ch-0/5.0';
+      const String pluginsPath = '$installPath.plugins';
+
+      fs.directory(pluginsPath).createSync(recursive: true);
+      fs.directory(installPath).createSync(recursive: true);
+      fs.file(homeFile).createSync(recursive: true);
+      fs.file(homeFile).writeAsStringSync(installPath);
+
+      final AndroidStudio studio =
+      AndroidStudio.fromHomeDot(fs.directory(studioHome));
+      expect(studio, isNotNull);
+      expect(studio.pluginsPath, equals('$installPath.plugins'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      FileSystemUtils: () => fsUtils,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => platform,
+    });
+
+    testUsingContext('extracts plugins paths from home path when installed separately.',() {
+      const String installPath = '/Program Files/Android/Android Studio/android-studio-with-cheese-5.0';
+
+      fs.directory(installPath).createSync(recursive: true);
+      fs.file(homeFile).createSync(recursive: true);
+      fs.file(homeFile).writeAsStringSync(installPath);
+
+      final AndroidStudio studio = AndroidStudio.fromHomeDot(fs.directory(studioHome));
+      expect(studio, isNotNull);
+      expect(
+          studio.pluginsPath,
+          equals(fs.path.join(
+            studioHome,
+            'config',
+            'plugins',
+          )));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      FileSystemUtils: () => fsUtils,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => platform,
+    });
+  });
+
   group('pluginsPath on Linux', () {
     testUsingContext('extracts custom paths from home dir', () {
       const String installPath = '/opt/android-studio-with-cheese-5.0';
       const String studioHome = '$homeLinux/.AndroidStudioWithCheese5.0';
       const String homeFile = '$studioHome/system/.home';
-      globals.fs.directory(installPath).createSync(recursive: true);
-      globals.fs.file(homeFile).createSync(recursive: true);
-      globals.fs.file(homeFile).writeAsStringSync(installPath);
-
+      fs.directory(installPath).createSync(recursive: true);
+      fs.file(homeFile).createSync(recursive: true);
+      fs.file(homeFile).writeAsStringSync(installPath);
       final AndroidStudio studio =
-      AndroidStudio.fromHomeDot(globals.fs.directory(studioHome));
+      AndroidStudio.fromHomeDot(fs.directory(studioHome));
       expect(studio, isNotNull);
       expect(studio.pluginsPath,
           equals('/home/me/.AndroidStudioWithCheese5.0/config/plugins'));
