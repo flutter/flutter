@@ -11,6 +11,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/src/material/master_detail_flow.dart';
+import 'package:flutter/src/rendering/flex.dart';
 import 'package:flutter/widgets.dart' hide Flow;
 
 import 'app_bar.dart';
@@ -531,7 +532,21 @@ class _LicensePageState extends State<LicensePage> {
                 },
               );
             default:
-              return const Center(child: CircularProgressIndicator());
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  _AboutProgram(
+                    name: widget.applicationName ??
+                        _defaultApplicationName(context),
+                    icon: widget.applicationIcon ??
+                        _defaultApplicationIcon(context),
+                    version: widget.applicationVersion ??
+                        _defaultApplicationVersion(context),
+                    legalese: widget.applicationLegalese,
+                  ),
+                  const Center(child: CircularProgressIndicator()),
+                ],
+              );
           }
         },
       ),
