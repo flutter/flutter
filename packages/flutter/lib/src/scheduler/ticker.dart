@@ -35,6 +35,7 @@ abstract class TickerProvider {
   /// Creates a ticker with the given callback.
   ///
   /// The kind of ticker provided depends on the kind of ticker provider.
+  @factory
   Ticker createTicker(TickerCallback onTick);
 }
 

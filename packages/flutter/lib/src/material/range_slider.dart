@@ -31,6 +31,39 @@ typedef PaintRangeValueIndicator = void Function(PaintingContext context, Offset
 ///
 /// Used to select a range from a range of values.
 ///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// ![A range slider widget, consisting of 5 divisions and showing the default
+/// value indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/range_slider.png)
+///
+/// This range values are in intervals of 20 because the Range Slider has 5
+/// divisions, from 0 to 100. This means are values are split between 0, 20, 40,
+/// 60, 80, and 100. The range values are initialized with 40 and 80 in this demo.
+///
+/// ```dart
+/// RangeValues _currentRangeValues = const RangeValues(40, 80);
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return RangeSlider(
+///     values: _currentRangeValues,
+///     min: 0,
+///     max: 100,
+///     divisions: 5,
+///     labels: RangeLabels(
+///       _currentRangeValues.start.round().toString(),
+///       _currentRangeValues.end.round().toString(),
+///     ),
+///     onChanged: (RangeValues values) {
+///       setState(() {
+///         _currentRangeValues = values;
+///       });
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// A range slider can be used to select from either a continuous or a discrete
 /// set of values. The default is to use a continuous range of values from [min]
 /// to [max]. To use discrete values, use a non-null value for [divisions], which

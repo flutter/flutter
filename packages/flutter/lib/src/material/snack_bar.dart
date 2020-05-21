@@ -107,7 +107,7 @@ class SnackBarAction extends StatefulWidget {
   final VoidCallback onPressed;
 
   @override
-  _SnackBarActionState createState() => _SnackBarActionState();
+  State<SnackBarAction> createState() => _SnackBarActionState();
 }
 
 class _SnackBarActionState extends State<SnackBarAction> {
