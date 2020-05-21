@@ -2294,7 +2294,7 @@ enum _RouteLifecycle {
 typedef _RouteEntryPredicate = bool Function(_RouteEntry entry);
 
 class _NotAnnounced extends Route<void> {
-  // A place holder for the lastAnnouncedPreviousRoute, the
+  // A placeholder for the lastAnnouncedPreviousRoute, the
   // lastAnnouncedPoppedNextRoute, and the lastAnnouncedNextRoute before any
   // change has been announced.
 }
