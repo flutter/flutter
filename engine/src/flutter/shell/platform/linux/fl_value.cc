@@ -92,6 +92,122 @@ static ssize_t fl_value_lookup_index(FlValue* self, FlValue* key) {
   return -1;
 }
 
+// Converts an integer to a string and adds it to the buffer
+static void int_to_string(int64_t value, GString* buffer) {
+  g_string_append_printf(buffer, "%" G_GINT64_FORMAT, value);
+}
+
+// Converts a floating point number to a string and adds it to the buffer
+static void float_to_string(double value, GString* buffer) {
+  g_string_append_printf(buffer, "%.16f", value);
+
+  // Strip trailing zeros
+  int zero_count = 0;
+  for (int i = buffer->len - 1; i >= 0; i--) {
+    // Leave one zero after a decimal point
+    if (buffer->str[i] == '.') {
+      zero_count = zero_count == 0 ? 0 : zero_count - 1;
+      break;
+    }
+    if (buffer->str[i] != '0')
+      break;
+    zero_count++;
+  }
+  g_string_truncate(buffer, buffer->len - zero_count);
+}
+
+static void value_to_string(FlValue* value, GString* buffer) {
+  switch (value->type) {
+    case FL_VALUE_TYPE_NULL:
+      g_string_append(buffer, "null");
+      return;
+    case FL_VALUE_TYPE_BOOL:
+      if (fl_value_get_bool(value))
+        g_string_append(buffer, "true");
+      else
+        g_string_append(buffer, "false");
+      return;
+    case FL_VALUE_TYPE_INT:
+      int_to_string(fl_value_get_int(value), buffer);
+      return;
+    case FL_VALUE_TYPE_FLOAT:
+      float_to_string(fl_value_get_float(value), buffer);
+      return;
+    case FL_VALUE_TYPE_STRING: {
+      g_string_append(buffer, fl_value_get_string(value));
+      return;
+    }
+    case FL_VALUE_TYPE_UINT8_LIST: {
+      g_string_append(buffer, "[");
+      const uint8_t* values = fl_value_get_uint8_list(value);
+      for (size_t i = 0; i < fl_value_get_length(value); i++) {
+        if (i != 0)
+          g_string_append(buffer, ", ");
+        int_to_string(values[i], buffer);
+      }
+      g_string_append(buffer, "]");
+      return;
+    }
+    case FL_VALUE_TYPE_INT32_LIST: {
+      g_string_append(buffer, "[");
+      const int32_t* values = fl_value_get_int32_list(value);
+      for (size_t i = 0; i < fl_value_get_length(value); i++) {
+        if (i != 0)
+          g_string_append(buffer, ", ");
+        int_to_string(values[i], buffer);
+      }
+      g_string_append(buffer, "]");
+      return;
+    }
+    case FL_VALUE_TYPE_INT64_LIST: {
+      g_string_append(buffer, "[");
+      const int64_t* values = fl_value_get_int64_list(value);
+      for (size_t i = 0; i < fl_value_get_length(value); i++) {
+        if (i != 0)
+          g_string_append(buffer, ", ");
+        int_to_string(values[i], buffer);
+      }
+      g_string_append(buffer, "]");
+      return;
+    }
+    case FL_VALUE_TYPE_FLOAT_LIST: {
+      g_string_append(buffer, "[");
+      const double* values = fl_value_get_float_list(value);
+      for (size_t i = 0; i < fl_value_get_length(value); i++) {
+        if (i != 0)
+          g_string_append(buffer, ", ");
+        float_to_string(values[i], buffer);
+      }
+      g_string_append(buffer, "]");
+      return;
+    }
+    case FL_VALUE_TYPE_LIST: {
+      g_string_append(buffer, "[");
+      for (size_t i = 0; i < fl_value_get_length(value); i++) {
+        if (i != 0)
+          g_string_append(buffer, ", ");
+        value_to_string(fl_value_get_list_value(value, i), buffer);
+      }
+      g_string_append(buffer, "]");
+      return;
+    }
+    case FL_VALUE_TYPE_MAP: {
+      g_string_append(buffer, "{");
+      for (size_t i = 0; i < fl_value_get_length(value); i++) {
+        if (i != 0)
+          g_string_append(buffer, ", ");
+        value_to_string(fl_value_get_map_key(value, i), buffer);
+        g_string_append(buffer, ": ");
+        value_to_string(fl_value_get_map_value(value, i), buffer);
+      }
+      g_string_append(buffer, "}");
+      return;
+    }
+    default:
+      g_string_append_printf(buffer, "<unknown type %d>", value->type);
+  }
+}
+
 G_MODULE_EXPORT FlValue* fl_value_new_null() {
   return fl_value_new(FL_VALUE_TYPE_NULL, sizeof(FlValue));
 }
@@ -569,4 +685,10 @@ FlValue* fl_value_lookup_string(FlValue* self, const gchar* key) {
   g_return_val_if_fail(self != nullptr, nullptr);
   g_autoptr(FlValue) string_key = fl_value_new_string(key);
   return fl_value_lookup(self, string_key);
+}
+
+gchar* fl_value_to_string(FlValue* value) {
+  GString* buffer = g_string_new("");
+  value_to_string(value, buffer);
+  return g_string_free(buffer, FALSE);
 }

@@ -22,7 +22,7 @@ G_BEGIN_DECLS
  * channel used by Flutter.
  *
  * In Dart the values are represented as follows:
- * - #FL_VALUE_TYPE_NULL: null
+ * - #FL_VALUE_TYPE_NULL: Null
  * - #FL_VALUE_TYPE_BOOL: bool
  * - #FL_VALUE_TYPE_INT: num
  * - #FL_VALUE_TYPE_FLOAT: num
@@ -31,8 +31,8 @@ G_BEGIN_DECLS
  * - #FL_VALUE_TYPE_INT32_LIST: Int32List
  * - #FL_VALUE_TYPE_INT64_LIST: Int64List
  * - #FL_VALUE_TYPE_FLOAT_LIST: Float64List
- * - #FL_VALUE_TYPE_LIST: List
- * - #FL_VALUE_TYPE_MAP: Map
+ * - #FL_VALUE_TYPE_LIST: List<dynamic>
+ * - #FL_VALUE_TYPE_MAP: Map<dynamic>
  *
  * See #FlMessageCodec to encode and decode these values.
  */
@@ -198,7 +198,7 @@ FlValue* fl_value_new_float_list(const double* value, size_t value_length);
  *
  * Creates an ordered list. Children can be added to the list using
  * fl_value_append(). The children are accessed using fl_value_get_length()
- * and fl_value_get_list_value(). The equivalent Dart type is a List.
+ * and fl_value_get_list_value(). The equivalent Dart type is a List<dynamic>.
  *
  * The following example shows a simple list of values:
  *
@@ -241,7 +241,7 @@ FlValue* fl_value_new_list_from_strv(const gchar* const* value);
  * fl_value_set_string_take(). The children are accessed using
  * fl_value_get_length(), fl_value_get_map_key(), fl_value_get_map_value(),
  * fl_value_lookup() and fl_value_lookup_string(). The equivalent Dart type is a
- * Map.
+ * Map<dynamic>.
  *
  * The following example shows how to create a map of values keyed by strings:
  *
@@ -567,6 +567,17 @@ FlValue* fl_value_lookup(FlValue* value, FlValue* key);
  * Returns: (allow-none): the value with this key or %NULL if not one present.
  */
 FlValue* fl_value_lookup_string(FlValue* value, const gchar* key);
+
+/**
+ * fl_value_to_string:
+ * @value: an #FlValue.
+ *
+ * Converts an #FlValue to a text representation, suitable for logging purposes.
+ * The text is formatted to be match the equivalent Dart toString() methods.
+ *
+ * Returns: UTF-8 text.
+ */
+gchar* fl_value_to_string(FlValue* value);
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(FlValue, fl_value_unref)
 
