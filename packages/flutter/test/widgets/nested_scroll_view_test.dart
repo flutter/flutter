@@ -1413,9 +1413,7 @@ void main() {
       // The outer scroll view should be at its full extent, here the size of
       // the app bar.
       expect(nestedKey.currentState.outerController.offset, 56.0);
-      
       // Animate In
-      
       // Drag the scrollable up and down. The app bar should not snap open, its
       // height should just track the drag offset.
       final TestGesture animateInGesture = await tester.startGesture(point1);
@@ -1477,9 +1475,7 @@ void main() {
       expect(find.text('Item 5'), findsOneWidget);
       verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
       expect(nestedKey.currentState.outerController.offset, 0.0);
-      
       // Animate Out
-
       // Drag the scrollable up and down. The app bar should not snap open, its
       // height should just track the drag offset.
       final TestGesture animateOutGesture = await tester.startGesture(point1);
