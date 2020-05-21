@@ -147,6 +147,43 @@ abstract class BundleWindowsAssets extends Target {
   }
 }
 
+/// A wrapper for AOT complitaion that copies app.so into the output directory.
+class WindowsAotBundle extends Target {
+  /// Create a [WindowsAotBundle] wrapper for [aotTarget].
+  const WindowsAotBundle(this.aotTarget);
+
+  /// The [AotElfBase] subclass that produces the app.so.
+  final AotElfBase aotTarget;
+
+  @override
+  String get name => 'windows_aot_bundle';
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/app.so'),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/windows/app.so'),
+  ];
+
+  @override
+  List<Target> get dependencies => <Target>[
+    aotTarget,
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    final File outputFile = environment.buildDir.childFile('app.so');
+    final Directory outputDirectory = environment.outputDir.childDirectory('windows');
+    if (!outputDirectory.existsSync()) {
+      outputDirectory.createSync(recursive: true);
+    }
+    outputFile.copySync(outputDirectory.childFile('app.so').path);
+  }
+}
+
 class ReleaseBundleWindowsAssets extends BundleWindowsAssets {
   const ReleaseBundleWindowsAssets();
 
@@ -156,7 +193,7 @@ class ReleaseBundleWindowsAssets extends BundleWindowsAssets {
   @override
   List<Target> get dependencies => <Target>[
     ...super.dependencies,
-    const AotElfRelease(TargetPlatform.windows_x64),
+    const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64)),
   ];
 }
 
@@ -169,7 +206,7 @@ class ProfileBundleWindowsAssets extends BundleWindowsAssets {
   @override
   List<Target> get dependencies => <Target>[
     ...super.dependencies,
-    const AotElfProfile(TargetPlatform.windows_x64),
+    const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64)),
   ];
 }
 
