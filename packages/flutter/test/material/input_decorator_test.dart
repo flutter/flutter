@@ -4027,5 +4027,13 @@ void main() {
     await tester.pump();
 
     expect(tester.getTopLeft(find.text(hintText)).dy, greaterThan(topPosition));
+
+    // Setting textAlignVertical back to null works and reverts to the default.
+    setState(() {
+      alignment = null;
+    });
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.text(hintText)).dy, topPosition);
   });
 }

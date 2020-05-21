@@ -781,20 +781,22 @@ class _RenderDecoration extends RenderBox {
     markNeedsLayout();
   }
 
+  TextAlignVertical get _defaultTextAlignVertical => _isOutlineAligned
+      ? TextAlignVertical.center
+      : TextAlignVertical.top;
   TextAlignVertical get textAlignVertical {
     if (_textAlignVertical == null) {
-      return _isOutlineAligned ? TextAlignVertical.center : TextAlignVertical.top;
+      return _defaultTextAlignVertical;
     }
     return _textAlignVertical;
   }
   TextAlignVertical _textAlignVertical;
   set textAlignVertical(TextAlignVertical value) {
-    assert(value != null);
     if (_textAlignVertical == value) {
       return;
     }
     // No need to relayout if the effective value is still the same.
-    if (textAlignVertical.y == value.y) {
+    if (textAlignVertical.y == (value?.y ?? _defaultTextAlignVertical.y)) {
       _textAlignVertical = value;
       return;
     }
@@ -1709,12 +1711,9 @@ class _Decorator extends RenderObjectWidget {
      ..decoration = decoration
      ..expands = expands
      ..isFocused = isFocused
+     ..textAlignVertical = textAlignVertical
      ..textBaseline = textBaseline
      ..textDirection = textDirection;
-
-    if (textAlignVertical != null) {
-      renderObject.textAlignVertical = textAlignVertical;
-    }
   }
 }
 
