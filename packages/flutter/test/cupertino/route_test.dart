@@ -1304,15 +1304,45 @@ void main() {
   });
 
   testWidgets('showCupertinoModalPopup transparent barrier color', (WidgetTester tester) async {
+    const Color _kTransparentColor = Color(0x00000000);
+
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
         child: Builder(builder: (BuildContext context) {
           return GestureDetector(
             onTap: () async {
               await showCupertinoModalPopup<void>(
-                  context: context,
-                  builder: (BuildContext context) => const SizedBox(),
-                  barrierColor: const Color(0x00000000));
+                context: context,
+                builder: (BuildContext context) => const SizedBox(),
+                barrierColor: _kTransparentColor,
+              );
+            },
+            child: const Text('tap'),
+          );
+        }),
+      ),
+    ));
+
+    await tester.tap(find.text('tap'));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color,
+      null,
+    );
+  });
+
+  testWidgets('showCupertinoModalPopup null barrier color', (WidgetTester tester) async {
+    await tester.pumpWidget(CupertinoApp(
+      home: CupertinoPageScaffold(
+        child: Builder(builder: (BuildContext context) {
+          return GestureDetector(
+            onTap: () async {
+              await showCupertinoModalPopup<void>(
+                context: context,
+                builder: (BuildContext context) => const SizedBox(),
+                barrierColor: null,
+              );
             },
             child: const Text('tap'),
           );
