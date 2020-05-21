@@ -13,6 +13,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart' hide Flow;
 
 import 'app_bar.dart';
+import 'back_button.dart';
 import 'button_bar.dart';
 import 'card.dart';
 import 'constants.dart';
@@ -21,8 +22,6 @@ import 'dialog.dart';
 import 'flat_button.dart';
 import 'floating_action_button.dart';
 import 'floating_action_button_location.dart';
-import 'icon_button.dart';
-import 'icons.dart';
 import 'ink_decoration.dart';
 import 'list_tile.dart';
 import 'material.dart';
@@ -498,6 +497,7 @@ class _LicensePageState extends State<LicensePage> {
   @override
   Widget build(BuildContext context) {
     return _MasterDetailFlow(
+      detailPageFABlessGutterWidth: _getGutterSize(context),
       title: Text(MaterialLocalizations.of(context).licensesPageTitle),
       masterViewBuilder: _buildPackagesView,
       detailPageBuilder: _buildPackageLicensePage,
@@ -1268,34 +1268,81 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
 
   Widget _buildNestedUI(BuildContext context) {
     _builtLayout = _LayoutMode.nested;
-    return Navigator(
-      key: _navigatorKey,
-      initialRoute: 'initial',
-      onGenerateInitialRoutes: (NavigatorState navigator, String initialRoute) {
-        switch (focus) {
-          case _Focus.master:
-            return <Route<dynamic>>[
-              MaterialPageRoute<dynamic>(
+    return WillPopScope(
+      // Push pop check into nested navigator.
+      onWillPop: () async => !(await _navigatorKey.currentState.maybePop()),
+      child: Navigator(
+        key: _navigatorKey,
+        initialRoute: 'initial',
+        onGenerateInitialRoutes: (NavigatorState navigator, String initialRoute) {
+          switch (focus) {
+            case _Focus.master:
+              return <Route<dynamic>>[
+                MaterialPageRoute<dynamic>(
+                  builder: widget.masterPageBuilder != null
+                      ? (BuildContext c) => BlockSemantics(
+                            child: widget.masterPageBuilder(c, false),
+                          )
+                      : (BuildContext c) =>
+                          BlockSemantics(child: _buildMasterPage(c, context)),
+                ),
+              ];
+            default:
+              return <Route<dynamic>>[
+                MaterialPageRoute<dynamic>(
+                  builder: widget.masterPageBuilder != null
+                      ? (BuildContext c) => BlockSemantics(
+                            child: widget.masterPageBuilder(c, false),
+                          )
+                      : (BuildContext c) =>
+                          BlockSemantics(child: _buildMasterPage(c, context)),
+                ),
+                MaterialPageRoute<dynamic>(
+                  builder: (BuildContext context) => WillPopScope(
+                    onWillPop: () async {
+                      // No need for setState() as rebuild happens on navigation pop.
+                      focus = _Focus.master;
+                      Navigator.of(context).pop();
+                      return false;
+                    },
+                    child: BlockSemantics(
+                      child: widget.detailPageBuilder(
+                        context,
+                        _cachedDetailArguments,
+                        null,
+                      ),
+                    ),
+                  ),
+                )
+              ];
+          }
+        },
+        onGenerateRoute: (RouteSettings settings) {
+          switch (settings.name) {
+            case _navMaster:
+              // Matching state to navigation event.
+              focus = _Focus.master;
+              return MaterialPageRoute<void>(
                 builder: widget.masterPageBuilder != null
-                    ? (BuildContext c) =>
-                    widget.masterPageBuilder(c, false)
-                    : (BuildContext c) => _buildMasterPage(c, context),
-              ),
-            ];
-          default:
-            return <Route<dynamic>>[
-              MaterialPageRoute<dynamic>(
-                builder: widget.masterPageBuilder != null
-                    ? (BuildContext c) =>
-                    widget.masterPageBuilder(c, false)
-                    : (BuildContext c) => _buildMasterPage(c, context),
-              ),
-              MaterialPageRoute<dynamic>(
+                    ? (BuildContext context) => BlockSemantics(
+                          child: widget.masterPageBuilder(context, false),
+                        )
+                    : (BuildContext c) =>
+                        BlockSemantics(child: _buildMasterPage(c, context)),
+              );
+            case _navDetail:
+              // Matching state to navigation event.
+              focus = _Focus.detail;
+              // Cache detail page settings.
+              _cachedDetailArguments = settings.arguments;
+              return MaterialPageRoute<void>(
                 builder: (BuildContext context) => WillPopScope(
-                  child: widget.detailPageBuilder(
-                    context,
-                    _cachedDetailArguments,
-                    null,
+                  child: BlockSemantics(
+                    child: widget.detailPageBuilder(
+                      context,
+                      _cachedDetailArguments,
+                      null,
+                    ),
                   ),
                   onWillPop: () async {
                     // No need for setState() as rebuild happens on navigation pop.
@@ -1304,45 +1351,12 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
                     return false;
                   },
                 ),
-              )
-            ];
-        }
-      },
-      onGenerateRoute: (RouteSettings settings) {
-        switch (settings.name) {
-          case _navMaster:
-          // Matching state to navigation event.
-            focus = _Focus.master;
-            return MaterialPageRoute<void>(
-              builder: widget.masterPageBuilder != null
-                  ? (BuildContext context) =>
-                  widget.masterPageBuilder(context, false)
-                  : (BuildContext c) => _buildMasterPage(c, context),
-            );
-          case _navDetail:
-          // Matching state to navigation event.
-            focus = _Focus.detail;
-            // Cache detail page settings.
-            _cachedDetailArguments = settings.arguments;
-            return MaterialPageRoute<void>(
-              builder: (BuildContext context) => WillPopScope(
-                child: widget.detailPageBuilder(
-                  context,
-                  _cachedDetailArguments,
-                  null,
-                ),
-                onWillPop: () async {
-                  // No need for setState() as rebuild happens on navigation pop.
-                  focus = _Focus.master;
-                  Navigator.of(context).pop();
-                  return false;
-                },
-              ),
-            );
-          default:
-            throw Exception('Unknown route ${settings.name}');
-        }
-      },
+              );
+            default:
+              throw Exception('Unknown route ${settings.name}');
+          }
+        },
+      ),
     );
   }
 
@@ -1355,11 +1369,9 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
       appBar: AppBar(
         title: widget.title,
         leading: widget.leading ??
-            (widget.automaticallyImplyLeading && Navigator.of(flowContext).canPop()
-                ? IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => Navigator.of(flowContext).pop(),
-            )
+            (widget.automaticallyImplyLeading &&
+                    Navigator.of(flowContext).canPop()
+                ? BackButton(onPressed: () => Navigator.of(flowContext).pop())
                 : null),
         actions: widget.actionBuilder == null
             ? const <Widget>[]
