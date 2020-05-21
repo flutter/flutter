@@ -891,10 +891,22 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     _effectiveFocusNode.canRequestFocus = _isEnabled;
   }
 
+  bool get _canRequestFocus {
+    final NavigationMode mode = MediaQuery.of(context, nullOk: true)?.navigationMode ?? NavigationMode.traditional;
+    switch (mode) {
+      case NavigationMode.traditional:
+        return _isEnabled;
+      case NavigationMode.directional:
+        return true;
+    }
+    assert(false, 'Navigation mode $mode not handled');
+    return null;
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _effectiveFocusNode.canRequestFocus = _isEnabled || MediaQuery.of(context).navigationMode == NavigationMode.directional;
+    _effectiveFocusNode.canRequestFocus = _canRequestFocus;
   }
 
   @override
@@ -904,7 +916,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
       _controller = TextEditingController.fromValue(oldWidget.controller.value);
     else if (widget.controller != null && oldWidget.controller == null)
       _controller = null;
-    _effectiveFocusNode.canRequestFocus = _isEnabled || MediaQuery.of(context).navigationMode == NavigationMode.directional;
+    _effectiveFocusNode.canRequestFocus = _canRequestFocus;
     if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly && _isEnabled) {
       if(_effectiveController.selection.isCollapsed) {
         _showSelectionHandles = !widget.readOnly;
@@ -1004,9 +1016,8 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
-    if (widget.maxLength != null && widget.maxLengthEnforced) {
+    if (widget.maxLength != null && widget.maxLengthEnforced)
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
-    }
 
     TextSelectionControls textSelectionControls;
     bool paintCursorAboveText;

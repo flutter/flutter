@@ -1013,10 +1013,20 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       return _hovering && target.enabled && _canShowHighlight;
     }
 
+    bool canRequestFocus(FocusableActionDetector target) {
+      final NavigationMode mode = MediaQuery.of(context, nullOk: true)?.navigationMode ?? NavigationMode.traditional;
+      switch (mode) {
+        case NavigationMode.traditional:
+          return target.enabled;
+        case NavigationMode.directional:
+          return true;
+      }
+      assert(false, 'Navigation mode $mode not handled');
+      return null;
+    }
+
     bool shouldShowFocusHighlight(FocusableActionDetector target) {
-      return _focused
-          && (target.enabled || MediaQuery.of(context).navigationMode == NavigationMode.directional)
-          && _canShowHighlight;
+      return _focused && _canShowHighlight && canRequestFocus(target);
     }
 
     assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
@@ -1046,6 +1056,18 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     }
   }
 
+  bool get _canRequestFocus {
+    final NavigationMode mode = MediaQuery.of(context, nullOk: true)?.navigationMode ?? NavigationMode.traditional;
+    switch (mode) {
+      case NavigationMode.traditional:
+        return widget.enabled;
+      case NavigationMode.directional:
+        return true;
+    }
+    assert(false, 'NavigationMode $mode not handled.');
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget child = MouseRegion(
@@ -1054,7 +1076,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       child: Focus(
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
-        canRequestFocus: widget.enabled || MediaQuery.of(context).navigationMode == NavigationMode.directional,
+        canRequestFocus: _canRequestFocus,
         onFocusChange: _handleFocusChange,
         child: widget.child,
       ),

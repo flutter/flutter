@@ -1883,7 +1883,7 @@ class InputDecorator extends StatefulWidget {
   /// Whether the label needs to get out of the way of the input, either by
   /// floating or disappearing.
   ///
-  /// Will not withdraw when empty, or focused, but disabled.
+  /// Will withdraw when not empty, or when focused while enabled.
   bool get _labelShouldWithdraw => !isEmpty || (isFocused && decoration.enabled);
 
   @override

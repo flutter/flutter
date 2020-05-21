@@ -6,6 +6,7 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -871,6 +872,18 @@ class _InkResponseState extends State<_InnerInkResponse>
     });
   }
 
+  bool get _shouldShowFocus {
+    final NavigationMode mode = MediaQuery.of(context, nullOk: true)?.navigationMode ?? NavigationMode.traditional;
+    switch (mode) {
+      case NavigationMode.traditional:
+        return enabled && _hasFocus;
+      case NavigationMode.directional:
+        return _hasFocus;
+    }
+    assert(false, 'Navigation mode $mode not handled');
+    return null;
+  }
+
   void _updateFocusHighlights() {
     bool showFocus;
     switch (FocusManager.instance.highlightMode) {
@@ -878,7 +891,7 @@ class _InkResponseState extends State<_InnerInkResponse>
         showFocus = false;
         break;
       case FocusHighlightMode.traditional:
-        showFocus = (enabled || MediaQuery.of(context).navigationMode == NavigationMode.directional) && _hasFocus;
+        showFocus = _shouldShowFocus;
         break;
     }
     updateHighlight(_HighlightType.focus, value: showFocus);
@@ -991,6 +1004,18 @@ class _InkResponseState extends State<_InnerInkResponse>
     }
   }
 
+  bool get _canRequestFocus {
+    final NavigationMode mode = MediaQuery.of(context, nullOk: true)?.navigationMode ?? NavigationMode.traditional;
+    switch (mode) {
+      case NavigationMode.traditional:
+        return enabled && widget.canRequestFocus;
+      case NavigationMode.directional:
+        return true;
+    }
+    assert(false, 'NavigationMode $mode not handled.');
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(widget.debugCheckContext(context));
@@ -999,14 +1024,13 @@ class _InkResponseState extends State<_InnerInkResponse>
       _highlights[type]?.color = getHighlightColorForType(type);
     }
     _currentSplash?.color = widget.splashColor ?? Theme.of(context).splashColor;
-    final bool canRequestFocus = (enabled && widget.canRequestFocus) || MediaQuery.of(context).navigationMode == NavigationMode.directional;
     return _ParentInkResponseProvider(
       state: this,
       child: Actions(
         actions: _actionMap,
         child: Focus(
           focusNode: widget.focusNode,
-          canRequestFocus: canRequestFocus,
+          canRequestFocus: _canRequestFocus,
           onFocusChange: _handleFocusUpdate,
           autofocus: widget.autofocus,
           child: MouseRegion(
