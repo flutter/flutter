@@ -345,7 +345,7 @@ class _BottomNavigationTile extends StatelessWidget {
     this.showSelectedLabels,
     this.showUnselectedLabels,
     this.indexLabel,
-    this.mouseCursor,
+    @required this.mouseCursor,
     }) : assert(type != null),
          assert(item != null),
          assert(animation != null),
