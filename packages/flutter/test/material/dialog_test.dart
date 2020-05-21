@@ -94,7 +94,6 @@ void main() {
       title: Text('Title'),
       content: Text('Y'),
       actions: <Widget>[ ],
-      useMaterialBorderRadius: true,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog, theme: ThemeData(brightness: Brightness.dark)));
 
@@ -190,7 +189,6 @@ void main() {
     const AlertDialog dialog = AlertDialog(
       actions: <Widget>[ ],
       shape: null,
-      useMaterialBorderRadius: true,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
