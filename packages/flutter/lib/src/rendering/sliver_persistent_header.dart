@@ -429,14 +429,21 @@ class FloatingHeaderSnapConfiguration {
   /// The snap animation's duration.
   final Duration duration;
 
-  /// Specifies whether the snap animation is influenced by another
+  /// Specifies whether the [snap] animation is influenced by another
   /// [ScrollPosition], such as the inner body of a [NestedScrollView].
   ///
-  /// When true, the [ScrollPosition] of the current context, e.g. the inner
-  /// scrollable, will be corrected to properly coordinate with the outer
+  /// When true, the actual [ScrollPosition] of the current context, e.g. the
+  /// outer scroll view, will be animated to properly coordinate with the inner
   /// scrollable.
   ///
   /// Defaults to false, cannot be null.
+  ///
+  /// See also:
+  ///
+  ///   * [SliverAppBar.nestedSnap], the flag which sets this property by
+  ///     default.
+  ///   * [NestedScrollView] for more details and examples of how to use
+  ///     [SliverAppBar]s with nested scrolling.
   final bool nestedSnap;
 }
 
@@ -532,13 +539,12 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   /// it is exposed, animate it out of view.
   ///
   /// Returns a bool to indicate if the [ScrollPosition] needs
-  /// to be animated from the _FloatingAppBarState. This is relevant if
+  /// to be animated from the _FloatingAppBarState instead. This is relevant if
   /// [FloatingHeaderSnapConfiguration.nestedSnap] is true, indicating we are
   /// snapping an outer scrollable over a nested inner scrollable.
   bool maybeStartSnapAnimation(ScrollDirection direction) {
-    if (snapConfiguration == null)
-      return false;
-    if ((direction == ScrollDirection.forward && _effectiveScrollOffset <= 0.0)
+    if ((snapConfiguration == null)
+      || (direction == ScrollDirection.forward && _effectiveScrollOffset <= 0.0)
       || (direction == ScrollDirection.reverse && _effectiveScrollOffset >= maxExtent))
       return false;
 

@@ -183,7 +183,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// ### Pinned [SliverAppBar]s
 ///
-/// When using [SliverAppBar.pinned], the app bar remains visible at the start
+/// When using [SliverAppBar.pinned], the app bar remains visible at the top
 /// of the scroll view. The app bar can still expand and contract as the user
 /// scrolls, but it will remain visible rather than being scrolled out of view.
 ///
@@ -191,6 +191,9 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// is not expected to move in or out of the visible portion of the viewport.
 /// As the inner or outer [Scrollable]s are moved, the app bar persists as
 /// expected.
+///
+/// If the app bar is floating, pinned and using an expanded height, follow the
+/// floating convention laid out below.
 ///
 ///
 /// ### Floating [SliverAppBar]s
@@ -207,6 +210,11 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// In order to float the outer, use [NestedScrollView.floatHeaderSlivers]. When
 /// set to true, the nested scrolling coordinator will prioritize floating in
 /// the header slivers before applying the remaining drag to the body.
+///
+/// Furthermore, the `floatHeaderSlivers` flag should also be used when using an
+/// app bar that is floating, pinned, and having an expanded height. In this
+/// configuration, the flexible space of the app bar should open and collapse,
+/// while the primary portion of the app bar remains pinned.
 ///
 /// {@tool sample --template=stateless_widget_material}
 ///
@@ -256,7 +264,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// Similarly if a scroll dismisses the app bar, the animation will slide the
 /// app bar completely out of view.
 ///
-/// It is possible with a NestedScrollView to perform just the snapping
+/// It is possible with a [NestedScrollView] to perform just the snapping
 /// animation without floating the app bar in and out. By not using the
 /// [NestedScrollView.floatHeaderSlivers], the app bar will snap in and out
 /// without floating.
@@ -264,7 +272,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// The [SliverAppBar.snap] animation should be used in conjunction with the
 /// [SliverOverlapAbsorber] and  [SliverOverlapInjector] widgets when
 /// implemented in a [NestedScrollView]. These widgets take any overlapping
-/// behavior of the [SliverAppBar[ in the header and redirect it to the
+/// behavior of the [SliverAppBar] in the header and redirect it to the
 /// [SliverOverlapInjector] in the body. If it is missing, then it is possible
 /// for the nested "inner" scroll view below to end up under the [SliverAppBar]
 /// even when the inner scroll view thinks it has not been scrolled.
@@ -329,21 +337,19 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// [NestedScrollView], use the [NestedScrollView.floatHeaderSlivers] and
 /// [SliverAppBar.nestedSnap] properties.
 ///
-/// When true, [NestedScrollView.floatHeaderSlivers] result in will the nested
+/// When true, [NestedScrollView.floatHeaderSlivers] will result in the nested
 /// scrolling coordinator prioritizing floating in the header slivers before
 /// applying the remaining drag to the body. When [SliverAppBar.nestedSnap] is
-/// also true, the scroll offset of the inner and outer scroll views will be
-/// corrected as they are happening across separate scroll views.
+/// also true, the scroll offset of the outer scroll view will be animated to
+/// snap in the app bar.
 ///
 /// The [SliverAppBar.snap] animation should be used in conjunction with the
 /// [SliverOverlapAbsorber] and  [SliverOverlapInjector] widgets when
 /// implemented in a [NestedScrollView]. These widgets take any overlapping
-/// behavior of the [SliverAppBar[ in the header and redirect it to the
+/// behavior of the [SliverAppBar] in the header and redirect it to the
 /// [SliverOverlapInjector] in the body. If it is missing, then it is possible
 /// for the nested "inner" scroll view below to end up under the [SliverAppBar]
 /// even when the inner scroll view thinks it has not been scrolled.
-///
-/// - will always need overlap slivers to work
 ///
 /// {@tool sample --template=stateless_widget_material}
 ///
@@ -1189,7 +1195,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     } else {
       // Dragging "down" - delta is positive
       double innerDelta = delta;
-      // Float outer slivers
+      // Apply delta to the outer header first if they are expected to float.
       if (_floatHeaderSlivers)
         innerDelta = _outerPosition.applyClampedDragUpdate(delta);
 
