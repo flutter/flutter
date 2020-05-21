@@ -1,4 +1,4 @@
-Signature: 4245f081cfc6f32ece2e4adc485bf414
+Signature: 0f522b24b13469fa2bcdf17cdcf5a35a
 
 UNUSED LICENSES:
 
@@ -1007,7 +1007,6 @@ FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/gpu.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/helper.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/karma.conf.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/package.json
-FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/ready.js
 FILE: ../../../third_party/skia/go.mod
 FILE: ../../../third_party/skia/go.sum
 FILE: ../../../third_party/skia/infra/bots/assets.isolate
