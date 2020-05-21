@@ -38,13 +38,9 @@ def RunCmd(cmd, **kwargs):
   print 'Running command "%s"' % command_string
 
   start_time = time.time()
-  process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, **kwargs)
-  (output, _) = process.communicate()
+  process = subprocess.Popen(cmd, stdout=sys.stdout, stderr=sys.stderr, **kwargs)
+  process.communicate()
   end_time = time.time()
-
-  # Print the result no matter what.
-  for line in output.splitlines():
-    print line
 
   if process.returncode != 0:
     PrintDivider('!')
