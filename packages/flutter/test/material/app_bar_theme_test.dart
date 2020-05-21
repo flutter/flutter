@@ -209,7 +209,6 @@ void main() {
     // The AppBar.centerTitle should be used instead of AppBarTheme.centerTitle.
     expect(navToolBar.centerMiddle, false);
   });
-
 }
 
 AppBarTheme _appBarTheme() {
