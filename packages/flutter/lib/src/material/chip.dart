@@ -1821,6 +1821,13 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
 
+    final EdgeInsetsGeometry _defaultLabelPadding = EdgeInsets.lerp(
+      const EdgeInsets.symmetric(horizontal: 9.0),
+      const EdgeInsets.symmetric(horizontal: 4.0),
+      MediaQuery.of(context).textScaleFactor < 2.0
+        ? MediaQuery.of(context).textScaleFactor - 1.0 : 1.0,
+    );
+
     final ThemeData theme = Theme.of(context);
     final ChipThemeData chipTheme = ChipTheme.of(context);
     final TextDirection textDirection = Directionality.of(context);
@@ -1835,6 +1842,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final TextStyle effectiveLabelStyle = widget.labelStyle ?? chipTheme.labelStyle;
     final Color resolvedLabelColor =  MaterialStateProperty.resolveAs<Color>(effectiveLabelStyle?.color, _states);
     final TextStyle resolvedLabelStyle = effectiveLabelStyle?.copyWith(color: resolvedLabelColor);
+    final EdgeInsetsGeometry labelPadding = widget.labelPadding ?? chipTheme.labelPadding ?? _defaultLabelPadding;
 
     Widget result = Material(
       elevation: isTapping ? pressElevation : elevation,
@@ -1894,7 +1902,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                 brightness: chipTheme.brightness,
                 padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
                 visualDensity: widget.visualDensity ?? theme.visualDensity,
-                labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
+                labelPadding: labelPadding.resolve(textDirection),
                 showAvatar: hasAvatar,
                 showCheckmark: showCheckmark,
                 checkmarkColor: checkmarkColor,

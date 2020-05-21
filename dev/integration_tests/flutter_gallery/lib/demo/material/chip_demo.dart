@@ -99,36 +99,39 @@ class _ChipsTile extends StatelessWidget {
   // Wraps a list of chips into a ListTile for display as a section in the demo.
   @override
   Widget build(BuildContext context) {
-    return Card(
-      semanticContainer: false,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Container(
-            padding: const EdgeInsets.only(top: 16.0, bottom: 4.0),
-            alignment: Alignment.center,
-            child: Text(label, textAlign: TextAlign.start),
-          ),
-          if (children.isNotEmpty)
-            Wrap(
-              children: children.map<Widget>((Widget chip) {
-                return Padding(
-                  padding: const EdgeInsets.all(2.0),
-                  child: chip,
-                );
-              }).toList(),
-            )
-          else
-            Semantics(
-              container: true,
-              child: Container(
-                alignment: Alignment.center,
-                constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
-                padding: const EdgeInsets.all(8.0),
-                child: Text('None', style: Theme.of(context).textTheme.caption.copyWith(fontStyle: FontStyle.italic)),
-              ),
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.5),
+      child: Card(
+        semanticContainer: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Container(
+              padding: const EdgeInsets.only(top: 16.0, bottom: 4.0),
+              alignment: Alignment.center,
+              child: Text(label, textAlign: TextAlign.start),
             ),
-        ],
+            if (children.isNotEmpty)
+              Wrap(
+                children: children.map<Widget>((Widget chip) {
+                  return Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: chip,
+                  );
+                }).toList(),
+              )
+            else
+              Semantics(
+                container: true,
+                child: Container(
+                  alignment: Alignment.center,
+                  constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('None', style: Theme.of(context).textTheme.caption.copyWith(fontStyle: FontStyle.italic)),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
