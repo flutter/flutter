@@ -272,14 +272,18 @@ TextEditingValue _selectionAwareTextManipulation(
   if (selectionStartIndex < 0 || selectionEndIndex < 0) {
     manipulatedText = substringManipulation(value.text);
   } else if (value.selection.isCollapsed) { // non-selection text manipulation
+    int cursorPosition = value.selection.baseOffset;
     manipulatedText = substringManipulation(value.text);
     // We only return the old valid value if the current value is not empty and
     // if manipulation fails.
     if (value.text.isNotEmpty && manipulatedText.isEmpty) {
       manipulatedText = oldValue.text;
+      // we decrease cursorPosition by one because
+      // user entered a invalid character
+      cursorPosition -= 1;
     }
-    // Move the caret to the end of the text.
-    manipulatedSelection = TextSelection.collapsed(offset: manipulatedText.length);
+    // Move the caret to its previous position.
+    manipulatedSelection = TextSelection.collapsed(offset: cursorPosition);
   } else {
     final String beforeSelection = substringManipulation(
       value.text.substring(0, selectionStartIndex)

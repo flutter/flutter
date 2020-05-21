@@ -101,5 +101,38 @@ void main() {
       // satisfy the formatter condition (wich is, in this case digitsOnly)
       expect(formatted.text, equals('12345'));
     });
+
+    test('should move the cursor to the right position', () {
+      TextEditingValue collapsedValue(String text, int offset) =>
+          TextEditingValue(
+            text: text,
+            selection: TextSelection.collapsed(offset: offset),
+          );
+
+      TextEditingValue oldValue = collapsedValue('123', 0);
+      TextEditingValue newValue = collapsedValue('123456', 6);
+
+      final WhitelistingTextInputFormatter formatter =
+          WhitelistingTextInputFormatter.digitsOnly;
+      TextEditingValue formatted = formatter.formatEditUpdate(oldValue,
+          newValue);
+
+      // assert that we are passing digits only at the first time
+      expect(oldValue.text, equals('123'));
+      // assert that we are passing digits only at the second time
+      expect(newValue.text, equals('123456'));
+      // assert that cursor is at the end of the text
+      expect(formatted.selection.baseOffset, equals(6));
+
+      // move cursor at the middle of the text and then add the number 9.
+      oldValue = newValue.copyWith(
+          selection: const TextSelection.collapsed(offset: 4));
+      newValue = oldValue.copyWith(text: '1239456');
+
+      formatted = formatter.formatEditUpdate(oldValue, newValue);
+
+      // cursor must be now at fourth position (right after the number 9)
+      expect(formatted.selection.baseOffset, equals(4));
+    });
   });
 }
