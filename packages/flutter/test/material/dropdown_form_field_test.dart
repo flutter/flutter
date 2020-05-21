@@ -761,4 +761,34 @@ void main() {
     expect(currentValue, equals('one'));
     expect(find.text(currentValue), findsOneWidget);
   });
+
+  testWidgets('autoValidateMode is passed to super', (WidgetTester tester) async {
+    int _validateCalled = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: DropdownButtonFormField<String>(
+              autoValidateMode: AutoValidateMode.always,
+              items: menuItems.map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: onChanged,
+              validator: (String value) {
+                _validateCalled++;
+                return null;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(_validateCalled, 1);
+  });
+
 }
