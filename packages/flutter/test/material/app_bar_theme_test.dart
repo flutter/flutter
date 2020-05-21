@@ -186,9 +186,7 @@ void main() {
   testWidgets('AppBar uses AppBarTheme.centerTitle when centerTitle is null', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Title')),
-      ),
+      home: Scaffold(appBar: AppBar(title: const Text('Title'))),
     ));
 
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
@@ -208,6 +206,18 @@ void main() {
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
     // The AppBar.centerTitle should be used instead of AppBarTheme.centerTitle.
     expect(navToolBar.centerMiddle, false);
+  });
+
+  testWidgets('AppBar.centerTitle adapts to TargetPlatform when AppBarTheme.centerTitle is null', (WidgetTester tester) async{
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(platform: TargetPlatform.iOS),
+      home: Scaffold(appBar: AppBar(title: const Text('Title'))),
+    ));
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    // When ThemeData.platform is TargetPlatform.iOS, and AppBarTheme is null,
+    // the value of NavigationToolBar.centerMiddle should be true.
+    expect(navToolBar.centerMiddle, true);
   });
 }
 
