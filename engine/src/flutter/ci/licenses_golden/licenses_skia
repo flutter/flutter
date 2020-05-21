@@ -1,4 +1,4 @@
-Signature: ff50540c2fa91162018d73f6c3ec4b4a
+Signature: 4245f081cfc6f32ece2e4adc485bf414
 
 UNUSED LICENSES:
 
@@ -996,7 +996,6 @@ FILE: ../../../third_party/skia/experimental/skottiekit/helper.js
 FILE: ../../../third_party/skia/experimental/skottiekit/interface.js
 FILE: ../../../third_party/skia/experimental/skottiekit/postamble.js
 FILE: ../../../third_party/skia/experimental/skottiekit/preamble.js
-FILE: ../../../third_party/skia/experimental/skottiekit/ready.js
 FILE: ../../../third_party/skia/experimental/skottiekit/release.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/cpu.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger/anim.mskp
@@ -1325,7 +1324,6 @@ FILE: ../../../third_party/skia/modules/canvaskit/perf/canvas.bench.js
 FILE: ../../../third_party/skia/modules/canvaskit/perf/matrix.bench.js
 FILE: ../../../third_party/skia/modules/canvaskit/postamble.js
 FILE: ../../../third_party/skia/modules/canvaskit/preamble.js
-FILE: ../../../third_party/skia/modules/canvaskit/ready.js
 FILE: ../../../third_party/skia/modules/canvaskit/release.js
 FILE: ../../../third_party/skia/modules/canvaskit/rt_shader.js
 FILE: ../../../third_party/skia/modules/canvaskit/skottie.js
@@ -1340,7 +1338,6 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/effects.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/path.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
-FILE: ../../../third_party/skia/modules/pathkit/ready.js
 FILE: ../../../third_party/skia/modules/skparagraph/include/DartTypes.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/FontCollection.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/Metrics.h
