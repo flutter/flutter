@@ -1,4 +1,4 @@
-Signature: b9c61c42dde6ffd10241803f8705a0c2
+Signature: f62c842b1ac3db1f8942eeeef286f757
 
 UNUSED LICENSES:
 
@@ -3279,6 +3279,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/modifiers.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/pointer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view_ref.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view_ref_focused.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view_ref_installed.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ultrasound/factory.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update/update.fidl
