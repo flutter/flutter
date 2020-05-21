@@ -30,14 +30,28 @@ struct CpuUsageInfo {
 };
 
 /**
+ * @brief Memory usage stats. `dirty_memory_usage` is the the memory usage (in
+ * MB) such that the app uses its physical memory for dirty memory. Dirty memory
+ * is the memory data that cannot be paged to disk. `owned_shared_memory_usage`
+ * is the memory usage (in MB) such that the app uses its physicaal memory for
+ * shared memory, including loaded frameworks and executables. On iOS, it's
+ * `physical memory - dirty memory`.
+ */
+struct MemoryUsageInfo {
+  double dirty_memory_usage;
+  double owned_shared_memory_usage;
+};
+
+/**
  * @brief Container for the metrics we collect during each run of `Sampler`.
- * This currently holds `CpuUsageInfo` but the intent is to expand it to other
- * metrics.
+ * This currently holds `CpuUsageInfo` and `MemoryUsageInfo` but the intent
+ * is to expand it to other metrics.
  *
  * @see flutter::Sampler
  */
 struct ProfileSample {
   std::optional<CpuUsageInfo> cpu_usage;
+  std::optional<MemoryUsageInfo> memory_usage;
 };
 
 /**
