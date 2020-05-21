@@ -379,7 +379,7 @@ void main() {
   testWidgets('Can set and update clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(Stack(textDirection: TextDirection.ltr));
     final RenderStack renderObject = tester.allRenderObjects.whereType<RenderStack>().first;
-    expect(renderObject.clipBehavior, equals(Clip.none));
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     await tester.pumpWidget(Stack(textDirection: TextDirection.ltr, clipBehavior: Clip.hardEdge));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
@@ -451,6 +451,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: Stack(
+            clipBehavior: Clip.none,
             children: const <Widget>[
               SizedBox(
                 width: 100.0,
