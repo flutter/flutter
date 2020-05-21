@@ -30,7 +30,7 @@ class TransformationController extends ValueNotifier<Matrix4> {
   /// Return the scene point at the given viewport point.
   ///
   /// A viewport point is relative to the parent while a scene point is relative
-  /// to the child, regardless of transformation. Calling fromViewport with a
+  /// to the child, regardless of transformation. Calling toScene with a
   /// viewport point essentially returns the scene coordinate that lies
   /// underneath the viewport point given the transform.
   ///
@@ -46,7 +46,7 @@ class TransformationController extends ValueNotifier<Matrix4> {
   /// void build(BuildContext context) {
   ///   return GestureDetector(
   ///     onTapUp: (TapUpDetails details) {
-  ///       _childWasTappedAt = _transformationController.fromViewport(
+  ///       _childWasTappedAt = _transformationController.toScene(
   ///         details.localPosition,
   ///       );
   ///     },
@@ -57,7 +57,7 @@ class TransformationController extends ValueNotifier<Matrix4> {
   ///   );
   /// }
   /// ```
-  Offset fromViewport(Offset viewportPoint) {
+  Offset toScene(Offset viewportPoint) {
     // On viewportPoint, perform the inverse transformation of the scene to get
     // where the point would be in the scene before the transformation.
     final Matrix4 inverseMatrix = Matrix4.inverted(value);
@@ -236,7 +236,7 @@ class InteractiveViewer extends StatefulWidget {
   /// be called, so [onInteractionStart], [onInteractionUpdate], and [onInteractionEnd] should be used instead.
   ///
   /// The coordinates returned in the details are viewport coordinates relative
-  /// to the parent. See [TransformationController.fromViewport] for how to
+  /// to the parent. See [TransformationController.toScene] for how to
   /// convert the coordinates to scene coordinates relative to the child.
   ///
   /// See also:
@@ -255,7 +255,7 @@ class InteractiveViewer extends StatefulWidget {
   /// be called, so [onInteractionStart], [onInteractionUpdate], and [onInteractionEnd] should be used instead.
   ///
   /// The coordinates returned in the details are viewport coordinates relative
-  /// to the parent. See [TransformationController.fromViewport] for how to
+  /// to the parent. See [TransformationController.toScene] for how to
   /// convert the coordinates to scene coordinates relative to the child.
   ///
   /// See also:
@@ -275,7 +275,7 @@ class InteractiveViewer extends StatefulWidget {
   /// be called, so [onInteractionStart], [onInteractionUpdate], and [onInteractionEnd] should be used instead.
   ///
   /// The coordinates returned in the details are viewport coordinates relative
-  /// to the parent. See [TransformationController.fromViewport] for how to
+  /// to the parent. See [TransformationController.toScene] for how to
   /// convert the coordinates to scene coordinates relative to the child.
   ///
   /// See also:
@@ -584,7 +584,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     if (widget.disableRotation || rotation == 0) {
       return matrix;
     }
-    final Offset focalPointScene = widget.transformationController.fromViewport(
+    final Offset focalPointScene = widget.transformationController.toScene(
       focalPoint,
     );
     return matrix
@@ -610,7 +610,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _gestureType = null;
     setState(() {
       _scaleStart = widget.transformationController.value.getMaxScaleOnAxis();
-      _referenceFocalPoint = widget.transformationController.fromViewport(
+      _referenceFocalPoint = widget.transformationController.toScene(
         details.localFocalPoint,
       );
       _rotationStart = _currentRotation;
@@ -622,14 +622,14 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     final double scale = widget.transformationController.value.getMaxScaleOnAxis();
     if (widget.onInteractionUpdate != null) {
       widget.onInteractionUpdate(ScaleUpdateDetails(
-        focalPoint: widget.transformationController.fromViewport(
+        focalPoint: widget.transformationController.toScene(
           details.localFocalPoint,
         ),
         scale: details.scale,
         rotation: details.rotation,
       ));
     }
-    final Offset focalPointScene = widget.transformationController.fromViewport(
+    final Offset focalPointScene = widget.transformationController.toScene(
       details.localFocalPoint,
     );
     _gestureType ??= _getGestureType(
@@ -657,7 +657,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           // the same places in the scene. That means that the focal point of
           // the scale should be on the same place in the scene before and after
           // the scale.
-          final Offset focalPointSceneScaled = widget.transformationController.fromViewport(
+          final Offset focalPointSceneScaled = widget.transformationController.toScene(
             details.localFocalPoint,
           );
           widget.transformationController.value = _matrixTranslate(
@@ -670,7 +670,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           // the translate came in contact with a boundary. In that case, update
           // _referenceFocalPoint so subsequent updates happen in relation to
           // the new effective focal point.
-          final Offset focalPointSceneCheck = widget.transformationController.fromViewport(
+          final Offset focalPointSceneCheck = widget.transformationController.toScene(
             details.localFocalPoint,
           );
           if (_round(_referenceFocalPoint) != _round(focalPointSceneCheck)) {
@@ -706,7 +706,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
             widget.transformationController.value,
             translationChange,
           );
-          _referenceFocalPoint = widget.transformationController.fromViewport(
+          _referenceFocalPoint = widget.transformationController.toScene(
             details.localFocalPoint,
           );
         });
@@ -772,7 +772,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       if (scaleChange == 0.0) {
         return;
       }
-      final Offset focalPointScene = widget.transformationController.fromViewport(
+      final Offset focalPointScene = widget.transformationController.toScene(
         event.localPosition,
       );
       setState(() {
@@ -783,7 +783,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
         // After scaling, translate such that the event's position is at the
         // same scene point before and after the scale.
-        final Offset focalPointSceneScaled = widget.transformationController.fromViewport(
+        final Offset focalPointSceneScaled = widget.transformationController.toScene(
           event.localPosition,
         );
         widget.transformationController.value = _matrixTranslate(
@@ -805,10 +805,10 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // Translate such that the resulting translation is _animation.value.
     final Vector3 translationVector = widget.transformationController.value.getTranslation();
     final Offset translation = Offset(translationVector.x, translationVector.y);
-    final Offset translationScene = widget.transformationController.fromViewport(
+    final Offset translationScene = widget.transformationController.toScene(
       translation,
     );
-    final Offset animationScene = widget.transformationController.fromViewport(
+    final Offset animationScene = widget.transformationController.toScene(
       _animation.value,
     );
     final Offset translationChangeScene = animationScene - translationScene;

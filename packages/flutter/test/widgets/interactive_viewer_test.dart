@@ -10,8 +10,7 @@ import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
 void main() {
   group('InteractiveViewer', () {
     testWidgets('child fits in viewport', (WidgetTester tester) async {
-      final ValueNotifier<Matrix4> transformationController =
-          ValueNotifier<Matrix4>(Matrix4.identity());
+      final TransformationController transformationController = TransformationController();
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -64,8 +63,7 @@ void main() {
     });
 
     testWidgets('boundary slightly bigger than child', (WidgetTester tester) async {
-      final ValueNotifier<Matrix4> transformationController =
-          ValueNotifier<Matrix4>(Matrix4.identity());
+      final TransformationController transformationController = TransformationController();
       const double boundaryMargin = 10.0;
       const double minScale = 0.8;
       await tester.pumpWidget(
@@ -125,8 +123,7 @@ void main() {
     });
 
     testWidgets('child bigger than viewport', (WidgetTester tester) async {
-      final ValueNotifier<Matrix4> transformationController =
-          ValueNotifier<Matrix4>(Matrix4.identity());
+      final TransformationController transformationController = TransformationController();
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -203,8 +200,7 @@ void main() {
     });
 
     testWidgets('no boundary', (WidgetTester tester) async {
-      final ValueNotifier<Matrix4> transformationController =
-          ValueNotifier<Matrix4>(Matrix4.identity());
+      final TransformationController transformationController = TransformationController();
       const double minScale = 0.8;
       await tester.pumpWidget(
         MaterialApp(
