@@ -174,8 +174,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// [elevation] is specified, it must be non-negative.
   ///
   /// If [backgroundColor], [elevation], [brightness], [iconTheme],
-  /// [actionsIconTheme], or [textTheme] are null, then their [AppBarTheme]
-  /// values will be used. If the corresponding [AppBarTheme] property is null,
+  /// [actionsIconTheme], [textTheme] or [centerTitle] are null, then their
+  /// [AppBarTheme] values will be used. If the corresponding [AppBarTheme] property is null,
   /// then the default specified in the property's documentation will be used.
   ///
   /// Typically used in the [Scaffold.appBar] property.
@@ -388,7 +388,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// Whether the title should be centered.
   ///
-  /// Defaults to being adapted to the current [TargetPlatform].
+  /// If this property is null, then [ThemeData.appBarTheme.centerTitle] is used,
+  /// if that is also null, then value is adapted to the current [TargetPlatform].
   final bool centerTitle;
 
   /// Whether the title should be wrapped with header [Semantics].
@@ -431,6 +432,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   bool _getEffectiveCenterTitle(ThemeData theme) {
     if (centerTitle != null)
       return centerTitle;
+    if (theme.appBarTheme.centerTitle != null)
+      return theme.appBarTheme.centerTitle;
     assert(theme.platform != null);
     switch (theme.platform) {
       case TargetPlatform.android:
