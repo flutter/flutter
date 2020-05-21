@@ -12,7 +12,7 @@ part of dart.ui;
 // `lib/ui/semantics/semantics_node.h` and in each of the embedders *must* be
 // updated.
 class SemanticsAction {
-  const SemanticsAction._(this.index);
+  const SemanticsAction._(this.index) : assert(index != null);
 
   static const int _kTapIndex = 1 << 0;
   static const int _kLongPressIndex = 1 << 1;
@@ -42,7 +42,7 @@ class SemanticsAction {
   /// The numerical value for this action.
   ///
   /// Each action has one bit set in this bit field.
-  final int index;
+  final int/*!*/ index;
 
   /// The equivalent of a user briefly tapping the screen with the finger
   /// without moving it.
@@ -263,7 +263,8 @@ class SemanticsAction {
       case _kMoveCursorBackwardByWordIndex:
         return 'SemanticsAction.moveCursorBackwardByWord';
     }
-    return null;
+    assert(false, 'Unhandled index: $index');
+    return '';
   }
 }
 
@@ -299,12 +300,12 @@ class SemanticsFlag {
   // READ THIS: if you add a flag here, you MUST update the numSemanticsFlags
   // value in testing/dart/semantics_test.dart, or tests will fail.
 
-  const SemanticsFlag._(this.index);
+  const SemanticsFlag._(this.index) : assert(index != null);
 
   /// The numerical value for this flag.
   ///
   /// Each flag has one bit set in this bit field.
-  final int index;
+  final int/*!*/ index;
 
   /// The semantics node has the quality of either being "checked" or "unchecked".
   ///
@@ -596,7 +597,8 @@ class SemanticsFlag {
       case _kIsLinkIndex:
         return 'SemanticsFlag.isLink';
     }
-    return null;
+    assert(false, 'Unhandled index: $index');
+    return '';
   }
 }
 
