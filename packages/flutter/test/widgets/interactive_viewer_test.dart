@@ -296,28 +296,114 @@ void main() {
       translation = transformationController.value.getTranslation();
       expect(translation.x, greaterThan(20.0));
       expect(translation.y, greaterThan(10.0));
-      expect(translation.x, lessThan(50.0));
-      expect(translation.y, lessThan(50.0));
+      expect(translation.x, lessThan(boundaryMargin));
+      expect(translation.y, lessThan(boundaryMargin));
 
       // It hits the boundary in the x direction first.
       await tester.pump(const Duration(milliseconds: 60));
       translation = transformationController.value.getTranslation();
-      expect(translation.x, closeTo(50.0, .000000001));
-      expect(translation.y, lessThan(50.0));
+      expect(translation.x, closeTo(boundaryMargin, .000000001));
+      expect(translation.y, lessThan(boundaryMargin));
       final double yWhenXHits = translation.y;
 
       // x is held to the boundary while y slides along.
       await tester.pump(const Duration(milliseconds: 50));
       translation = transformationController.value.getTranslation();
-      expect(translation.x, closeTo(50.0, .000000001));
+      expect(translation.x, closeTo(boundaryMargin, .000000001));
       expect(translation.y, greaterThan(yWhenXHits));
-      expect(translation.y, lessThan(50.0));
+      expect(translation.y, lessThan(boundaryMargin));
 
       // Eventually it ends up in the corner.
       await tester.pumpAndSettle();
       translation = transformationController.value.getTranslation();
-      expect(translation.x, closeTo(50.0, .000000001));
-      expect(translation.y, closeTo(50.0, .000000001));
+      expect(translation.x, closeTo(boundaryMargin, .000000001));
+      expect(translation.y, closeTo(boundaryMargin, .000000001));
+    });
+
+    testWidgets('Scaling automatically causes a centering translation', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      const double boundaryMargin = 50.0;
+      const double minScale = 0.1;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                boundaryMargin: const EdgeInsets.all(boundaryMargin),
+                minScale: minScale,
+                disableRotation: true,
+                transformationController: transformationController,
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      Vector3 translation = transformationController.value.getTranslation();
+      expect(translation.x, 0.0);
+      expect(translation.y, 0.0);
+
+      // Pan into the corner of the boundaries.
+      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      const Offset flingEnd = Offset(20.0, 15.0);
+      await tester.flingFrom(childOffset, flingEnd, 1000.0);
+      await tester.pumpAndSettle();
+      translation = transformationController.value.getTranslation();
+      expect(translation.x, closeTo(boundaryMargin, .000000001));
+      expect(translation.y, closeTo(boundaryMargin, .000000001));
+
+      // Zoom out so the entire child is visible. The child will also be
+      // translated in order to keep it inside the boundaries.
+      final Offset childCenter = tester.getCenter(find.byType(Container));
+      Offset scaleStart1 = Offset(childCenter.dx - 40.0, childCenter.dy);
+      Offset scaleStart2 = Offset(childCenter.dx + 40.0, childCenter.dy);
+      Offset scaleEnd1 = Offset(childCenter.dx - 10.0, childCenter.dy);
+      Offset scaleEnd2 = Offset(childCenter.dx + 10.0, childCenter.dy);
+      TestGesture gesture = await tester.createGesture();
+      TestGesture gesture2 = await tester.createGesture();
+      await gesture.down(scaleStart1);
+      await gesture2.down(scaleStart2);
+      await tester.pump();
+      await gesture.moveTo(scaleEnd1);
+      await gesture2.moveTo(scaleEnd2);
+      await tester.pump();
+      await gesture.up();
+      await gesture2.up();
+      await tester.pumpAndSettle();
+      expect(transformationController.value.getMaxScaleOnAxis(), lessThan(1.0));
+      translation = transformationController.value.getTranslation();
+      expect(translation.x, lessThan(boundaryMargin));
+      expect(translation.y, lessThan(boundaryMargin));
+      expect(translation.x, greaterThan(0.0));
+      expect(translation.y, greaterThan(0.0));
+      expect(translation.x, closeTo(translation.y, .000000001));
+
+      // Zoom in on a point that's not the center, and see that it remains at
+      // roughly the same location in the viewport after the zoom.
+      scaleStart1 = Offset(childCenter.dx - 50.0, childCenter.dy);
+      scaleStart2 = Offset(childCenter.dx - 30.0, childCenter.dy);
+      scaleEnd1 = Offset(childCenter.dx - 51.0, childCenter.dy);
+      scaleEnd2 = Offset(childCenter.dx - 29.0, childCenter.dy);
+      final Offset viewportFocalPoint = Offset(
+        childCenter.dx - 40.0 - childOffset.dx,
+        childCenter.dy - childOffset.dy,
+      );
+      final Offset sceneFocalPoint = transformationController.toScene(viewportFocalPoint);
+      gesture = await tester.createGesture();
+      gesture2 = await tester.createGesture();
+      await gesture.down(scaleStart1);
+      await gesture2.down(scaleStart2);
+      await tester.pump();
+      await gesture.moveTo(scaleEnd1);
+      await gesture2.moveTo(scaleEnd2);
+      await tester.pump();
+      await gesture.up();
+      await gesture2.up();
+      await tester.pumpAndSettle();
+      final Offset newSceneFocalPoint = transformationController.toScene(viewportFocalPoint);
+      expect(newSceneFocalPoint.dx, closeTo(sceneFocalPoint.dx, 1.0));
+      expect(newSceneFocalPoint.dy, closeTo(sceneFocalPoint.dy, 1.0));
     });
   });
 
