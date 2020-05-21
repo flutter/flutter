@@ -48,7 +48,8 @@ public interface MethodCodec {
    *
    * @param errorCode An error code String.
    * @param errorMessage An error message String, possibly null.
-   * @param errorDetails Error details, possibly null.
+   * @param errorDetails Error details, possibly null. Consider supporting {@link Throwable} in your
+   *     codec. This is the most common value passed to this field.
    * @return a {@link ByteBuffer} containing the encoding between position 0 and the current
    *     position.
    */
