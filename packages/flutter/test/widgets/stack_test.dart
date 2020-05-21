@@ -451,6 +451,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: Stack(
+            overflow: Overflow.visible,
             clipBehavior: Clip.none,
             children: const <Widget>[
               SizedBox(

@@ -1410,7 +1410,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
     Key key,
     this.fit = BoxFit.contain,
     this.alignment = Alignment.center,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
     Widget child,
   }) : assert(fit != null),
        assert(alignment != null),
@@ -1436,9 +1436,10 @@ class FittedBox extends SingleChildRenderObjectWidget {
   ///    relative to text direction.
   final AlignmentGeometry alignment;
 
+  // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   @override
@@ -2239,7 +2240,7 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
     this.textDirection,
     this.alignment = Alignment.center,
     this.constrainedAxis,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(alignment != null),
        assert(clipBehavior != null),
        super(key: key, child: child);
@@ -2267,9 +2268,10 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
   /// will be retained.
   final Axis constrainedAxis;
 
+  // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   @override
@@ -3837,7 +3839,7 @@ class Flex extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
     this.textBaseline,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
     List<Widget> children = const <Widget>[],
   }) : assert(direction != null),
        assert(mainAxisAlignment != null),
@@ -3930,9 +3932,10 @@ class Flex extends MultiChildRenderObjectWidget {
   /// If aligning items according to their baseline, which baseline to use.
   final TextBaseline textBaseline;
 
+  // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   bool get _needTextDirection {
@@ -4663,7 +4666,7 @@ class Wrap extends MultiChildRenderObjectWidget {
     this.crossAxisAlignment = WrapCrossAlignment.start,
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
     List<Widget> children = const <Widget>[],
   }) : assert(clipBehavior != null), super(key: key, children: children);
 
@@ -4799,9 +4802,10 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// [verticalDirection] must not be null.
   final VerticalDirection verticalDirection;
 
+  // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
   /// {@macro flutter.widgets.Clip}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   @override
