@@ -3997,4 +3997,43 @@ void main() {
     // because the label is not initially floating.
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
   });
+
+  testWidgets('textAlignVertical can be updated', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/56933
+    const String hintText = 'hint';
+    TextAlignVertical alignment = TextAlignVertical.top;
+    StateSetter setState;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return InputDecorator(
+              textAlignVertical: alignment,
+              decoration: const InputDecoration(
+                hintText: hintText,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final double topPosition = tester.getTopLeft(find.text(hintText)).dy;
+
+    setState(() {
+      alignment = TextAlignVertical.bottom;
+    });
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.text(hintText)).dy, greaterThan(topPosition));
+
+    // Setting textAlignVertical back to null works and reverts to the default.
+    setState(() {
+      alignment = null;
+    });
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.text(hintText)).dy, topPosition);
+  });
 }
