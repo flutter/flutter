@@ -2162,6 +2162,7 @@ void main() {
                       icon: Container(),
                       items: itemValues.map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
+                          value: value,
                           child: Text(value),
                         );
                       }).toList(),
@@ -2603,5 +2604,29 @@ void main() {
     // though it was already selected.
     expect(value, equals('two'));
     expect(menuItemTapCounters, <int>[0, 2, 1, 0]);
+  });
+
+  testWidgets('throws AssertionError if value param is not provide', (WidgetTester tester) async {
+    expect(() async {
+      await tester.pumpWidget(
+        TestApp(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: RepaintBoundary(
+              child: DropdownButton<String>(
+                onChanged: onChanged,
+                items: menuItems.map<DropdownMenuItem<String>>((String item) {
+                  // ignore: missing_required_param
+                  return DropdownMenuItem<String>(
+                    onTap: () {},
+                    child: Text(item),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ),
+      );
+    }, throwsAssertionError);
   });
 }

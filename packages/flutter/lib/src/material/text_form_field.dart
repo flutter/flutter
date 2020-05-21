@@ -174,6 +174,7 @@ class TextFormField extends FormField<String> {
     bool enableInteractiveSelection = true,
     InputCounterWidgetBuilder buildCounter,
     ScrollPhysics scrollPhysics,
+    Iterable<String> autofillHints,
     bool autovalidateOnUserInteraction = false,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
@@ -259,6 +260,7 @@ class TextFormField extends FormField<String> {
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: enableInteractiveSelection,
         buildCounter: buildCounter,
+        autofillHints: autofillHints,
       );
     },
   );

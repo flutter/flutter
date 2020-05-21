@@ -173,7 +173,8 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('One asset is bundled when the package has and lists one asset its pubspec', () async {
+    testUsingContext('One asset is bundled when the package has and lists one '
+      'asset its pubspec', () async {
       establishFlutterRoot();
       writeEmptySchemaFile(globals.fs);
 
@@ -201,7 +202,8 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext("One asset is bundled when the package has one asset, listed in the app's pubspec", () async {
+    testUsingContext('One asset is bundled when the package has one asset, '
+      "listed in the app's pubspec", () async {
       establishFlutterRoot();
       writeEmptySchemaFile(globals.fs);
 
@@ -229,7 +231,8 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('One asset and its variant are bundled when the package has an asset and a variant, and lists the asset in its pubspec', () async {
+    testUsingContext('One asset and its variant are bundled when the package '
+      'has an asset and a variant, and lists the asset in its pubspec', () async {
       establishFlutterRoot();
       writeEmptySchemaFile(globals.fs);
 
@@ -257,7 +260,8 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('One asset and its variant are bundled when the package has an asset and a variant, and the app lists the asset in its pubspec', () async {
+    testUsingContext('One asset and its variant are bundled when the package '
+      'has an asset and a variant, and the app lists the asset in its pubspec', () async {
       establishFlutterRoot();
       writeEmptySchemaFile(globals.fs);
 
@@ -288,7 +292,8 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Two assets are bundled when the package has and lists two assets in its pubspec', () async {
+    testUsingContext('Two assets are bundled when the package has and lists '
+      'two assets in its pubspec', () async {
       establishFlutterRoot();
       writeEmptySchemaFile(globals.fs);
 
@@ -436,7 +441,8 @@ $assetsSection
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('One asset is bundled when the app depends on a package, listing in its pubspec an asset from another package', () async {
+    testUsingContext('One asset is bundled when the app depends on a package, '
+      'listing in its pubspec an asset from another package', () async {
       establishFlutterRoot();
       writeEmptySchemaFile(globals.fs);
       writePubspecFile(
@@ -584,7 +590,9 @@ $assetsSection
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
-      assert(bundle.entries['AssetManifest.json'] == null,'Invalid pubspec.yaml should not generate AssetManifest.json'  );
+
+      expect(bundle.entries['AssetManifest.json'], isNull,
+        reason: 'Invalid pubspec.yaml should not generate AssetManifest.json'  );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),

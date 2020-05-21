@@ -183,7 +183,7 @@ void main() {
       expect(events[i].cumulativeBytesLoaded, math.min((i + 1) * chunkSize, kTransparentImage.length));
       expect(events[i].expectedTotalBytes, kTransparentImage.length);
     }
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56317
+  }, skip: isBrowser); // Browser loads images through <img> not Http.
 
   test('NetworkImage is evicted from cache on SocketException', () async {
     final _MockHttpClient mockHttpClient = _MockHttpClient();

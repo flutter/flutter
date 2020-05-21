@@ -58,7 +58,7 @@ task printEngineMavenUrl() {
           gradlewExecutable,
           <String>['printEngineMavenUrl', '-q'],
           environment: <String, String>{
-            'FLUTTER_STORAGE_BASE_URL': 'my.special.proxy',
+            'FLUTTER_STORAGE_BASE_URL': 'https://my.special.proxy',
           }
         );
 

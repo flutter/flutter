@@ -425,7 +425,24 @@ void main() {
     expect(find.text('initialValue'), findsNothing);
     expect(find.text('changedValue'), findsOneWidget);
   });
-  
+
+  testWidgets('autofillHints is passed to super', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              autofillHints: const <String>[AutofillHints.countryName],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TextField widget = tester.widget(find.byType(TextField));
+    expect(widget.autofillHints, equals(const <String>[AutofillHints.countryName]));
+  });
+
   testWidgets('autovalidateOnUserInteraction is passed to super', (WidgetTester tester) async {
     int _validateCalled = 0;
 

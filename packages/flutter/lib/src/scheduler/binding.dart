@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'debug.dart';
 import 'priority.dart';
 
-export 'dart:ui' show AppLifecycleState, VoidCallback;
+export 'dart:ui' show AppLifecycleState, VoidCallback, FrameTiming;
 
 /// Slows down animations by this factor to help in development.
 double get timeDilation => _timeDilation;
@@ -215,15 +215,54 @@ mixin SchedulerBinding on BindingBase {
 
   final List<TimingsCallback> _timingsCallbacks = <TimingsCallback>[];
 
-  /// Add a [TimingsCallback] that receives [FrameTiming] sent from the engine.
+  /// Add a [TimingsCallback] that receives [FrameTiming] sent from
+  /// the engine.
   ///
-  /// This can be used, for example, to monitor the performance in release mode,
-  /// or to get a signal when the first frame is rasterized.
+  /// This API enables applications to monitor their graphics
+  /// performance. Data from the engine is batched into lists of
+  /// [FrameTiming] objects which are reported approximately once a
+  /// second in release mode and approximately once every 100ms in
+  /// debug and profile builds. The list is sorted in ascending
+  /// chronological order (earliest frame first). The timing of the
+  /// first frame is sent immediately without batching.
   ///
-  /// This is preferred over using [Window.onReportTimings] directly because
-  /// [addTimingsCallback] allows multiple callbacks.
+  /// The data returned can be used to catch missed frames (by seeing
+  /// if [FrameTiming.buildDuration] or [FrameTiming.rasterDuration]
+  /// exceed the frame budget, e.g. 16ms at 60Hz), and to catch high
+  /// latency (by seeing if [FrameTiming.totalSpan] exceeds the frame
+  /// budget). It is possible for no frames to be missed but for the
+  /// latency to be more than one frame in the case where the Flutter
+  /// engine is pipelining the graphics updates, e.g. because the sum
+  /// of the [FrameTiming.buildDuration] and the
+  /// [FrameTiming.rasterDuration] together exceed the frame budget.
+  /// In those cases, animations will be smooth but touch input will
+  /// feel more sluggish.
+  ///
+  /// Using [addTimingsCallback] is preferred over using
+  /// [Window.onReportTimings] directly because the
+  /// [Window.onReportTimings] API only allows one callback, which
+  /// prevents multiple libraries from registering listeners
+  /// simultaneously, while this API allows multiple callbacks to be
+  /// registered independently.
+  ///
+  /// This API is implemented in terms of [Window.onReportTimings]. In
+  /// release builds, when no libraries have registered with this API,
+  /// the [Window.onReportTimings] callback is not set, which disables
+  /// the performance tracking and reduces the runtime overhead to
+  /// approximately zero. The performance overhead of the performance
+  /// tracking when one or more callbacks are registered (i.e. when it
+  /// is enabled) is very approximately 0.01% CPU usage per second
+  /// (measured on an iPhone 6s).
+  ///
+  /// In debug and profile builds, the [SchedulerBinding] itself
+  /// registers a timings callback to update the [Timeline].
   ///
   /// If the same callback is added twice, it will be executed twice.
+  ///
+  /// See also:
+  ///
+  ///  * [removeTimingsCallback], which can be used to remove a callback
+  ///    added using this method.
   void addTimingsCallback(TimingsCallback callback) {
     _timingsCallbacks.add(callback);
     if (_timingsCallbacks.length == 1) {

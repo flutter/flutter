@@ -201,6 +201,7 @@ abstract class Gradient {
   ///
   /// The shader's transform will be resolved from the [transform] of this
   /// gradient.
+  @factory
   Shader createShader(Rect rect, { TextDirection textDirection });
 
   /// Returns a new gradient with its properties scaled by the given factor.

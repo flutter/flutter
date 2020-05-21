@@ -14,19 +14,19 @@ import 'theme.dart';
 /// This is an internal implementation class and should not be exported by
 /// the material package.
 class ElevationOverlay {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   ElevationOverlay._();
 
-  /// Applies an elevation overlay color to a surface color to indicate
+  /// Applies an elevation overlay color to a given color to indicate
   /// the level of elevation in a dark theme.
   ///
-  /// If the surrounding [Theme.applyElevationOverlayColor] is true, and
-  /// [color] is [Theme.colorScheme.surface] then this will return
-  /// a version of the given color with a semi-transparent [Theme.colorScheme.onSurface]
-  /// overlaid on top of it. The opacity of the overlay is controlled by the
-  /// [elevation].
+  /// If the ambient [ThemeData.applyElevationOverlayColor] is true,
+  /// and [ThemeData.brightness] is [Brightness.dark] then this will return
+  /// a version of the given color with a semi-transparent
+  /// [ThemeData.colorScheme.onSurface] overlaid on top of it. The opacity
+  /// of the overlay is computed based on the [elevation].
   ///
   /// Otherwise it will just return the [color] unmodified.
   ///
@@ -39,7 +39,7 @@ class ElevationOverlay {
     final ThemeData theme = Theme.of(context);
     if (elevation > 0.0 &&
         theme.applyElevationOverlayColor &&
-        color == theme.colorScheme.surface) {
+        theme.brightness == Brightness.dark) {
 
       return Color.alphaBlend(overlayColor(context, elevation), color);
     }

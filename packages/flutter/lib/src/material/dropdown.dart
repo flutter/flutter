@@ -672,9 +672,10 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
   const DropdownMenuItem({
     Key key,
     this.onTap,
-    this.value,
+    @required this.value,
     @required Widget child,
   }) : assert(child != null),
+       assert(value != null),
        super(key: key, child: child);
 
   /// Called when the dropdown menu item is tapped.
@@ -1560,5 +1561,13 @@ class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
     super.didChange(value);
     assert(widget.onChanged != null);
     widget.onChanged(value);
+  }
+
+  @override
+  void didUpdateWidget(DropdownButtonFormField<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialValue != widget.initialValue) {
+      setValue(widget.initialValue);
+    }
   }
 }

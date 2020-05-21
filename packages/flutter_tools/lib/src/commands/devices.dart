@@ -60,32 +60,37 @@ class DevicesCommand extends FlutterCommand {
 
     if (boolArg('machine')) {
       await printDevicesAsJson(devices);
-    } else if (devices.isEmpty) {
-      final StringBuffer status = StringBuffer('No devices detected.');
-      status.writeln();
-      status.writeln();
-      status.writeln('Run "flutter emulators" to list and start any available device emulators.');
-      status.writeln();
-      status.write('If you expected your device to be detected, please run "flutter doctor" to diagnose potential issues. ');
-      if (timeout == null) {
-        status.write('You may also try increasing the time to wait for connected devices with the --timeout flag. ');
-      }
-      status.write('Visit https://flutter.dev/setup/ for troubleshooting tips.');
-
-      globals.printStatus(status.toString());
-      final List<String> diagnostics = await deviceManager.getDeviceDiagnostics();
-      if (diagnostics.isNotEmpty) {
-        globals.printStatus('');
-        for (final String diagnostic in diagnostics) {
-          globals.printStatus('• $diagnostic', hangingIndent: 2);
-        }
-      }
     } else {
-      globals.printStatus('${devices.length} connected ${pluralize('device', devices.length)}:\n');
-      await Device.printDevices(devices);
-    }
+      if (devices.isEmpty) {
+        final StringBuffer status = StringBuffer('No devices detected.');
+        status.writeln();
+        status.writeln();
+        status.writeln('Run "flutter emulators" to list and start any available device emulators.');
+        status.writeln();
+        status.write('If you expected your device to be detected, please run "flutter doctor" to diagnose potential issues. ');
+        if (timeout == null) {
+          status.write('You may also try increasing the time to wait for connected devices with the --timeout flag. ');
+        }
+        status.write('Visit https://flutter.dev/setup/ for troubleshooting tips.');
 
+        globals.printStatus(status.toString());
+      } else {
+        globals.printStatus('${devices.length} connected ${pluralize('device', devices.length)}:\n');
+        await Device.printDevices(devices);
+      }
+      await _printDiagnostics();
+    }
     return FlutterCommandResult.success();
+  }
+
+  Future<void> _printDiagnostics() async {
+    final List<String> diagnostics = await deviceManager.getDeviceDiagnostics();
+    if (diagnostics.isNotEmpty) {
+      globals.printStatus('');
+      for (final String diagnostic in diagnostics) {
+        globals.printStatus('• $diagnostic', hangingIndent: 2);
+      }
+    }
   }
 
   Future<void> printDevicesAsJson(List<Device> devices) async {

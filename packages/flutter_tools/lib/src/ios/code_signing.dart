@@ -13,6 +13,7 @@ import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../build_info.dart';
 import '../convert.dart' show utf8;
 import '../globals.dart' as globals;
 
@@ -101,8 +102,9 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   @required BuildableIOSApp iosApp,
   @required ProcessManager processManager,
   @required Logger logger,
+  @required BuildInfo buildInfo,
 }) async {
-  final Map<String, String> buildSettings = await iosApp.project.buildSettings;
+  final Map<String, String> buildSettings = await iosApp.project.buildSettingsForBuildInfo(buildInfo);
   if (buildSettings == null) {
     return null;
   }

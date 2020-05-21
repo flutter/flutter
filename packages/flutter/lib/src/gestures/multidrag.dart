@@ -220,6 +220,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
   /// Subclasses should override this method to create per-pointer state
   /// objects to track the pointer associated with the given event.
   @protected
+  @factory
   T createNewPointerState(PointerDownEvent event);
 
   void _handleEvent(PointerEvent event) {

@@ -1144,7 +1144,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
   final GlobalKey _editableKey = GlobalKey();
-  final ClipboardStatusNotifier _clipboardStatus = ClipboardStatusNotifier();
+  final ClipboardStatusNotifier _clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
 
   TextInputConnection _textInputConnection;
   TextSelectionOverlay _selectionOverlay;
@@ -1202,7 +1202,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void initState() {
     super.initState();
-    _clipboardStatus.addListener(_onChangedClipboardStatus);
+    _clipboardStatus?.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     _focusAttachment = widget.focusNode.attach(context);
     widget.focusNode.addListener(_handleFocusChanged);
@@ -1277,7 +1277,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
     if (widget.selectionEnabled && pasteEnabled && widget.selectionControls?.canPaste(this) == true) {
-      _clipboardStatus.update();
+      _clipboardStatus?.update();
     }
   }
 
@@ -1296,8 +1296,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _focusAttachment.detach();
     widget.focusNode.removeListener(_handleFocusChanged);
     WidgetsBinding.instance.removeObserver(this);
-    _clipboardStatus.removeListener(_onChangedClipboardStatus);
-    _clipboardStatus.dispose();
+    _clipboardStatus?.removeListener(_onChangedClipboardStatus);
+    _clipboardStatus?.dispose();
     super.dispose();
   }
 
@@ -2006,7 +2006,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   VoidCallback _semanticsOnPaste(TextSelectionControls controls) {
-    return widget.selectionEnabled && pasteEnabled && _hasFocus && controls?.canPaste(this) == true && _clipboardStatus.value == ClipboardStatus.pasteable
+    return widget.selectionEnabled && pasteEnabled && _hasFocus && controls?.canPaste(this) == true && (_clipboardStatus == null || _clipboardStatus.value == ClipboardStatus.pasteable)
       ? () => controls.handlePaste(this)
       : null;
   }

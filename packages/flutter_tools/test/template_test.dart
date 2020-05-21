@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
@@ -77,12 +78,21 @@ void main() {
         .childDirectory('flutter_tools')
         .childFile('.packages');
     packagesFile.createSync(recursive: true);
-    packagesFile.writeAsStringSync('flutter_template_images:file:///flutter_template_images');
+    packagesFile.writeAsStringSync('\n');
 
-    // Attempting to run pub in a test throws.
-    await expectLater(Template.fromName('app', fileSystem: fileSystem),
-      throwsUnsupportedError);
+    when(pub.get(
+      context: PubContext.pubGet,
+      directory: anyNamed('directory'),
+    )).thenAnswer((Invocation invocation) async {
+      // Create valid package entry.
+      packagesFile.writeAsStringSync('flutter_template_images:file:///flutter_template_images');
+    });
+
+    await Template.fromName('app', fileSystem: fileSystem);
+  }, overrides: <Type, Generator>{
+    Pub: () => MockPub(),
   }));
 }
 
+class MockPub extends Mock implements Pub {}
 class MockDirectory extends Mock implements Directory {}
