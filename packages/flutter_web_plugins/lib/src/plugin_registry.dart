@@ -118,8 +118,7 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  void setMessageHandler(
-      String channel, Future<ByteData> Function(ByteData message) handler) {
+  void setMessageHandler(String channel, MessageHandler handler) {
     if (handler == null)
       _handlers.remove(channel);
     else
@@ -130,8 +129,17 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
   }
 
   @override
+  bool checkMessageHandler(String channel, MessageHandler handler) => _handlers[channel] == handler;
+
+  @override
   void setMockMessageHandler(
       String channel, Future<ByteData> Function(ByteData message) handler) {
+    throw FlutterError(
+        'Setting mock handlers is not supported on the platform side.');
+  }
+
+  @override
+  bool checkMockMessageHandler(String channel, MessageHandler handler) {
     throw FlutterError(
         'Setting mock handlers is not supported on the platform side.');
   }

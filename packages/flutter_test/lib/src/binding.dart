@@ -135,8 +135,18 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
+  bool checkMessageHandler(String channel, MessageHandler handler) {
+    return delegate.checkMessageHandler(channel, handler);
+  }
+
+  @override
   void setMockMessageHandler(String channel, MessageHandler handler) {
     delegate.setMockMessageHandler(channel, handler);
+  }
+
+  @override
+  bool checkMockMessageHandler(String channel, MessageHandler handler) {
+    return delegate.checkMockMessageHandler(channel, handler);
   }
 }
 
