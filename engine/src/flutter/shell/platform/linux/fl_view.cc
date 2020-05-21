@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_key_event_plugin.h"
 #include "flutter/shell/platform/linux/fl_renderer_x11.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
@@ -26,13 +27,16 @@ struct _FlView {
 
   // Pointer button state recorded for sending status updates
   int64_t button_state;
+
+  // Flutter system channel handlers.
+  FlKeyEventPlugin* key_event_plugin;
 };
 
 enum { PROP_FLUTTER_PROJECT = 1, PROP_LAST };
 
 G_DEFINE_TYPE(FlView, fl_view, GTK_TYPE_WIDGET)
 
-// Convert a GDK button event into a Flutter event and send to the engine
+// Converts a GDK button event into a Flutter event and sends it to the engine.
 static gboolean fl_view_send_pointer_button_event(FlView* self,
                                                   GdkEventButton* event) {
   int64_t button;
@@ -81,6 +85,10 @@ static void fl_view_constructed(GObject* object) {
 
   self->renderer = fl_renderer_x11_new();
   self->engine = fl_engine_new(self->project, FL_RENDERER(self->renderer));
+
+  // Create system channel handlers
+  FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(self->engine);
+  self->key_event_plugin = fl_key_event_plugin_new(messenger);
 }
 
 static void fl_view_set_property(GObject* object,
@@ -122,6 +130,7 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->project);
   g_clear_object(&self->renderer);
   g_clear_object(&self->engine);
+  g_clear_object(&self->key_event_plugin);
 
   G_OBJECT_CLASS(fl_view_parent_class)->dispose(object);
 }
@@ -145,7 +154,8 @@ static void fl_view_realize(GtkWidget* widget) {
   window_attributes.visual = gtk_widget_get_visual(widget);
   window_attributes.event_mask =
       gtk_widget_get_events(widget) | GDK_EXPOSURE_MASK |
-      GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK;
+      GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK |
+      GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK;
 
   gint window_attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL;
 
@@ -217,6 +227,25 @@ static gboolean fl_view_motion_notify_event(GtkWidget* widget,
   return TRUE;
 }
 
+// Implements GtkWidget::key_press_event
+static gboolean fl_view_key_press_event(GtkWidget* widget, GdkEventKey* event) {
+  FlView* self = FL_VIEW(widget);
+
+  fl_key_event_plugin_send_key_event(self->key_event_plugin, event);
+
+  return TRUE;
+}
+
+// Implements GtkWidget::key_release_event
+static gboolean fl_view_key_release_event(GtkWidget* widget,
+                                          GdkEventKey* event) {
+  FlView* self = FL_VIEW(widget);
+
+  fl_key_event_plugin_send_key_event(self->key_event_plugin, event);
+
+  return TRUE;
+}
+
 static void fl_view_class_init(FlViewClass* klass) {
   G_OBJECT_CLASS(klass)->constructed = fl_view_constructed;
   G_OBJECT_CLASS(klass)->set_property = fl_view_set_property;
@@ -227,6 +256,8 @@ static void fl_view_class_init(FlViewClass* klass) {
   GTK_WIDGET_CLASS(klass)->button_press_event = fl_view_button_press_event;
   GTK_WIDGET_CLASS(klass)->button_release_event = fl_view_button_release_event;
   GTK_WIDGET_CLASS(klass)->motion_notify_event = fl_view_motion_notify_event;
+  GTK_WIDGET_CLASS(klass)->key_press_event = fl_view_key_press_event;
+  GTK_WIDGET_CLASS(klass)->key_release_event = fl_view_key_release_event;
 
   g_object_class_install_property(
       G_OBJECT_CLASS(klass), PROP_FLUTTER_PROJECT,
@@ -237,7 +268,9 @@ static void fl_view_class_init(FlViewClass* klass) {
                                    G_PARAM_STATIC_STRINGS)));
 }
 
-static void fl_view_init(FlView* self) {}
+static void fl_view_init(FlView* self) {
+  gtk_widget_set_can_focus(GTK_WIDGET(self), TRUE);
+}
 
 G_MODULE_EXPORT FlView* fl_view_new(FlDartProject* project) {
   return static_cast<FlView*>(

@@ -79,6 +79,7 @@ source_set("flutter_linux") {
     "fl_engine.cc",
     "fl_json_message_codec.cc",
     "fl_json_method_codec.cc",
+    "fl_key_event_plugin.cc",
     "fl_message_codec.cc",
     "fl_method_call.cc",
     "fl_method_channel.cc",
