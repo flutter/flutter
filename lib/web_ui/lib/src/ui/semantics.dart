@@ -8,7 +8,7 @@ part of ui;
 /// The possible actions that can be conveyed from the operating system
 /// accessibility APIs to a semantics node.
 class SemanticsAction {
-  const SemanticsAction._(this.index);
+  const SemanticsAction._(this.index) : assert(index != null);
 
   static const int _kTapIndex = 1 << 0;
   static const int _kLongPressIndex = 1 << 1;
@@ -35,7 +35,7 @@ class SemanticsAction {
   /// The numerical value for this action.
   ///
   /// Each action has one bit set in this bit field.
-  final int index;
+  final int/*!*/ index;
 
   /// The equivalent of a user briefly tapping the screen with the finger
   /// without moving it.
@@ -267,7 +267,8 @@ class SemanticsAction {
       case _kMoveCursorBackwardByWordIndex:
         return 'SemanticsAction.moveCursorBackwardByWord';
     }
-    return null;
+    assert(false, 'Unhandled index: $index');
+    return '';
   }
 }
 
@@ -297,12 +298,12 @@ class SemanticsFlag {
   static const int _kIsFocusableIndex = 1 << 21;
   static const int _kIsLinkIndex = 1 << 22;
 
-  const SemanticsFlag._(this.index);
+  const SemanticsFlag._(this.index) : assert(index != null);
 
   /// The numerical value for this flag.
   ///
   /// Each flag has one bit set in this bit field.
-  final int index;
+  final int/*!*/ index;
 
   /// The semantics node has the quality of either being "checked" or "unchecked".
   ///
@@ -601,7 +602,8 @@ class SemanticsFlag {
       case _kIsReadOnlyIndex:
         return 'SemanticsFlag.isReadOnly';
     }
-    return null;
+    assert(false, 'Unhandled index: $index');
+    return '';
   }
 }
 
