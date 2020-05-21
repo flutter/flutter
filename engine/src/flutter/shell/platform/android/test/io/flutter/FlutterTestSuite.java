@@ -17,6 +17,7 @@ import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistryTest;
 import io.flutter.embedding.engine.renderer.FlutterRendererTest;
 import io.flutter.external.FlutterLaunchTests;
 import io.flutter.plugin.common.StandardMessageCodecTest;
+import io.flutter.plugin.common.StandardMethodCodecTest;
 import io.flutter.plugin.editing.InputConnectionAdaptorTest;
 import io.flutter.plugin.editing.TextInputPluginTest;
 import io.flutter.plugin.platform.PlatformPluginTest;
@@ -52,6 +53,7 @@ import test.io.flutter.embedding.engine.dart.DartExecutorTest;
   PreconditionsTest.class,
   RenderingComponentTest.class,
   StandardMessageCodecTest.class,
+  StandardMethodCodecTest.class,
   ShimPluginRegistryTest.class,
   SingleViewPresentationTest.class,
   SmokeTest.class,
