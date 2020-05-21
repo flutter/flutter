@@ -229,11 +229,11 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///     body: NestedScrollView(
 ///       // Setting floatHeaderSlivers to true is required in order to float
 ///       // the outer slivers over the inner scrollable.
-///       floatHeaderSlivers: floating,
+///       floatHeaderSlivers: true,
 ///       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
 ///         return <Widget>[
 ///           SliverAppBar(
-///             title: const Text(_title),
+///             title: const Text('Floating Nested SliverAppBar'),
 ///             floating: true,
 ///             expandedHeight: 200.0,
 ///             forceElevated: innerBoxIsScrolled,
@@ -295,7 +295,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///           SliverOverlapAbsorber(
 ///             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
 ///             sliver: SliverAppBar(
-///               title: const Text(_title),
+///               title: const Text('Snapping Nested SliverAppBar'),
 ///               floating: true,
 ///               snap: true,
 ///               expandedHeight: 200.0,
@@ -371,7 +371,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///           SliverOverlapAbsorber(
 ///             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
 ///             sliver: SliverAppBar(
-///               title: const Text(_title),
+///               title: const Text('Snap & Float Nested SliverAppBar'),
 ///               floating: true,
 ///               snap: true,
 ///               // This flag informs the SliverAppBar that it will need to
