@@ -6,7 +6,8 @@
     "features": [
       "vulkan",
       "deprecated-ambient-replace-as-executable",
-      "isolated-cache-storage"
+      "isolated-cache-storage",
+      "isolated-temp"
     ],
     "services": [
       "fuchsia.accessibility.semantics.SemanticsManager",

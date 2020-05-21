@@ -100,7 +100,7 @@ echo "$(date) START:fml_tests ---------------------------------------"
 ./fuchsia_ctl -d $device_name test \
     -f fml_tests-0.far  \
     -t fml_tests \
-    -a "--gtest_filter=-FileTest*" \
+    -a "--gtest_filter=-FileTest.CanTruncateAndWrite:FileTest.CreateDirectoryStructure" \
     --identity-file $pkey \
     --timeout-seconds $test_timeout_seconds \
     --packages-directory packages
