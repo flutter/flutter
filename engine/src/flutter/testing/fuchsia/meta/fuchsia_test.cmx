@@ -13,6 +13,7 @@
       "fuchsia.process.Launcher",
       "fuchsia.deprecatedtimezone.Timezone",
       "fuchsia.netstack.Netstack",
+      "fuchsia.sysmem.Allocator",
       "fuchsia.vulkan.loader.Loader",
       "fuchsia.logger.LogSink",
       "fuchsia.tracing.provider.Registry"

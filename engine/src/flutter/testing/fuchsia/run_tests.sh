@@ -76,7 +76,6 @@ echo "$(date) END:EXTRACT_PACKAGES  -----------------------------------"
 
 
 # TODO(gw280): Enable tests using JIT runner
-
 echo "$(date) START:flutter_runner_tests ----------------------------"
 ./fuchsia_ctl -d $device_name test \
     -f flutter_aot_runner-0.far    \
@@ -93,14 +92,15 @@ echo "$(date) START:flutter_runner_tests ----------------------------"
     --identity-file $pkey \
     --timeout-seconds $test_timeout_seconds \
     --packages-directory packages
+echo "$(date) DONE:flutter_runner_tests ----------------------------"
 
-# TODO(https://github.com/flutter/flutter/issues/50032) Enable after the
-# Fuchsia message loop migration is complete.
+# TODO(https://github.com/flutter/flutter/issues/??): Re-enable
+# FileTest's once they pass on Fuchsia.
 echo "$(date) START:fml_tests ---------------------------------------"
 ./fuchsia_ctl -d $device_name test \
     -f fml_tests-0.far  \
     -t fml_tests \
-    -a "--gtest_filter=-MessageLoop*:Message*:FileTest*" \
+    -a "--gtest_filter=-FileTest*" \
     --identity-file $pkey \
     --timeout-seconds $test_timeout_seconds \
     --packages-directory packages
@@ -117,26 +117,24 @@ echo "$(date) START:flow_tests --------------------------------------"
 echo "$(date) DONE:flow_tests ---------------------------------------"
 
 
-# TODO(kaushikiska): Runtime and shell tests are failing with
-# async_dispatcher failures. Re-enable them once this gets fixed.
-
-# echo "$(date) START:runtime_tests -----------------------------------"
-# ./fuchsia_ctl -d $device_name test \
-#     -f runtime_tests-0.far  \
-#     -t runtime_tests \
-#     --identity-file $pkey \
-#     --timeout-seconds $test_timeout_seconds \
-#     --packages-directory packages
-
+echo "$(date) START:runtime_tests -----------------------------------"
+./fuchsia_ctl -d $device_name test \
+    -f runtime_tests-0.far  \
+    -t runtime_tests \
+    --identity-file $pkey \
+    --timeout-seconds $test_timeout_seconds \
+    --packages-directory packages
+echo "$(date) DONE:runtime_tests -----------------------------------"
 
 # TODO(https://github.com/flutter/flutter/issues/53399): Re-enable
 # OnServiceProtocolGetSkSLsWorks, CanLoadSkSLsFromAsset, and
 # CanRemoveOldPersistentCache once they pass on Fuchsia.
-# echo "$(date) START:shell_tests -------------------------------------"
-# ./fuchsia_ctl -d $device_name test \
-#     -f shell_tests-0.far  \
-#     -t shell_tests \
-#     -a "--gtest_filter=-ShellTest.CacheSkSLWorks:ShellTest.SetResourceCacheSize*:ShellTest.OnServiceProtocolGetSkSLsWorks:ShellTest.CanLoadSkSLsFromAsset:ShellTest.CanRemoveOldPersistentCache" \
-#     --identity-file $pkey \
-#     --timeout-seconds $test_timeout_seconds \
-#     --packages-directory packages
+echo "$(date) START:shell_tests -------------------------------------"
+./fuchsia_ctl -d $device_name test \
+    -f shell_tests-0.far  \
+    -t shell_tests \
+    -a "--gtest_filter=-ShellTest.CacheSkSLWorks:ShellTest.SetResourceCacheSize*:ShellTest.OnServiceProtocolGetSkSLsWorks:ShellTest.CanLoadSkSLsFromAsset:ShellTest.CanRemoveOldPersistentCache" \
+    --identity-file $pkey \
+    --timeout-seconds $test_timeout_seconds \
+    --packages-directory packages
+echo "$(date) DONE:shell_tests -----------------------------------"
