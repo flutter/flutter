@@ -257,6 +257,68 @@ void main() {
       await tester.pumpAndSettle();
       expect(transformationController.value.getMaxScaleOnAxis(), minScale);
     });
+
+    testWidgets('inertia fling and boundary sliding', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      const double boundaryMargin = 50.0;
+      const double minScale = 0.8;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                boundaryMargin: const EdgeInsets.all(boundaryMargin),
+                minScale: minScale,
+                disableRotation: true,
+                transformationController: transformationController,
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Fling the child.
+      final Offset childOffset = tester.getTopLeft(find.byType(Container));
+      const Offset flingEnd = Offset(20.0, 15.0);
+      await tester.flingFrom(childOffset, flingEnd, 1000.0);
+      await tester.pump();
+
+      // Immediately after the gesture, the child has moved to exactly follow
+      // the gesture.
+      Vector3 translation = transformationController.value.getTranslation();
+      expect(translation.x, flingEnd.dx);
+      expect(translation.y, flingEnd.dy);
+
+      // A short time after the gesture was released, it continues to move with
+      // inertia.
+      await tester.pump(const Duration(milliseconds: 10));
+      translation = transformationController.value.getTranslation();
+      expect(translation.x, greaterThan(20.0));
+      expect(translation.y, greaterThan(10.0));
+      expect(translation.x, lessThan(50.0));
+      expect(translation.y, lessThan(50.0));
+
+      // It hits the boundary in the x direction first.
+      await tester.pump(const Duration(milliseconds: 60));
+      translation = transformationController.value.getTranslation();
+      expect(translation.x, closeTo(50.0, .000000001));
+      expect(translation.y, lessThan(50.0));
+      final double yWhenXHits = translation.y;
+
+      // x is held to the boundary while y slides along.
+      await tester.pump(const Duration(milliseconds: 50));
+      translation = transformationController.value.getTranslation();
+      expect(translation.x, closeTo(50.0, .000000001));
+      expect(translation.y, greaterThan(yWhenXHits));
+      expect(translation.y, lessThan(50.0));
+
+      // Eventually it ends up in the corner.
+      await tester.pumpAndSettle();
+      translation = transformationController.value.getTranslation();
+      expect(translation.x, closeTo(50.0, .000000001));
+      expect(translation.y, closeTo(50.0, .000000001));
+    });
   });
 
   group('getNearestPointOnLine', () {
