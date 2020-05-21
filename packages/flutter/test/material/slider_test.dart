@@ -1953,7 +1953,6 @@ void main() {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
 
-
     Widget buildApp({
       Color activeColor,
       Color inactiveColor,

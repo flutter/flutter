@@ -1404,20 +1404,22 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (isInteractive && label != null && !_valueIndicatorAnimation.isDismissed) {
       if (showValueIndicator) {
         _state.paintValueIndicator = (PaintingContext context, Offset offset) {
-          _sliderTheme.valueIndicatorShape.paint(
-            context,
-            offset + thumbCenter,
-            activationAnimation: _valueIndicatorAnimation,
-            enableAnimation: _enableAnimation,
-            isDiscrete: isDiscrete,
-            labelPainter: _labelPainter,
-            parentBox: this,
-            sliderTheme: _sliderTheme,
-            textDirection: _textDirection,
-            value: _value,
-            textScaleFactor: textScaleFactor,
-            sizeWithOverflow: screenSize.isEmpty ? size : screenSize,
-          );
+          if (attached) {
+            _sliderTheme.valueIndicatorShape.paint(
+              context,
+              offset + thumbCenter,
+              activationAnimation: _valueIndicatorAnimation,
+              enableAnimation: _enableAnimation,
+              isDiscrete: isDiscrete,
+              labelPainter: _labelPainter,
+              parentBox: this,
+              sliderTheme: _sliderTheme,
+              textDirection: _textDirection,
+              value: _value,
+              textScaleFactor: textScaleFactor,
+              sizeWithOverflow: screenSize.isEmpty ? size : screenSize,
+            );
+          }
         };
       }
     }

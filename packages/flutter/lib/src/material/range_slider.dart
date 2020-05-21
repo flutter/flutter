@@ -476,7 +476,6 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       overlayEntry.remove();
       overlayEntry = null;
     }
-
     super.dispose();
   }
 
@@ -1397,22 +1396,24 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
     if (shouldPaintValueIndicators) {
       _state.paintBottomValueIndicator = (PaintingContext context, Offset offset) {
-        _sliderTheme.rangeValueIndicatorShape.paint(
-          context,
-          bottomThumbCenter,
-          activationAnimation: _valueIndicatorAnimation,
-          enableAnimation: _enableAnimation,
-          isDiscrete: isDiscrete,
-          isOnTop: false,
-          labelPainter: bottomLabelPainter,
-          parentBox: this,
-          sliderTheme: _sliderTheme,
-          textDirection: _textDirection,
-          thumb: bottomThumb,
-          value: bottomValue,
-          textScaleFactor: textScaleFactor,
-          sizeWithOverflow: resolvedscreenSize,
-        );
+        if (attached) {
+          _sliderTheme.rangeValueIndicatorShape.paint(
+            context,
+            bottomThumbCenter,
+            activationAnimation: _valueIndicatorAnimation,
+            enableAnimation: _enableAnimation,
+            isDiscrete: isDiscrete,
+            isOnTop: false,
+            labelPainter: bottomLabelPainter,
+            parentBox: this,
+            sliderTheme: _sliderTheme,
+            textDirection: _textDirection,
+            thumb: bottomThumb,
+            value: bottomValue,
+            textScaleFactor: textScaleFactor,
+            sizeWithOverflow: resolvedscreenSize,
+          );
+        }
       };
     }
 
@@ -1471,22 +1472,24 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       }
 
       _state.paintTopValueIndicator = (PaintingContext context, Offset offset) {
-        _sliderTheme.rangeValueIndicatorShape.paint(
-          context,
-          topThumbCenter,
-          activationAnimation: _valueIndicatorAnimation,
-          enableAnimation: _enableAnimation,
-          isDiscrete: isDiscrete,
-          isOnTop: thumbDelta < innerOverflow,
-          labelPainter: topLabelPainter,
-          parentBox: this,
-          sliderTheme: _sliderTheme,
-          textDirection: _textDirection,
-          thumb: topThumb,
-          value: topValue,
-          textScaleFactor: textScaleFactor,
-          sizeWithOverflow: resolvedscreenSize,
-        );
+        if (attached) {
+          _sliderTheme.rangeValueIndicatorShape.paint(
+            context,
+            topThumbCenter,
+            activationAnimation: _valueIndicatorAnimation,
+            enableAnimation: _enableAnimation,
+            isDiscrete: isDiscrete,
+            isOnTop: thumbDelta < innerOverflow,
+            labelPainter: topLabelPainter,
+            parentBox: this,
+            sliderTheme: _sliderTheme,
+            textDirection: _textDirection,
+            thumb: topThumb,
+            value: topValue,
+            textScaleFactor: textScaleFactor,
+            sizeWithOverflow: resolvedscreenSize,
+          );
+        }
       };
     }
 
