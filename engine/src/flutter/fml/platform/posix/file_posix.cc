@@ -206,15 +206,23 @@ bool WriteAtomically(const fml::UniqueFD& base_directory,
     return false;
   }
 
-  FileMapping mapping(temp_file, {FileMapping::Protection::kWrite});
-  if (mapping.GetMutableMapping() == nullptr ||
-      data.GetSize() != mapping.GetSize()) {
-    return false;
+  ssize_t remaining = data.GetSize();
+  ssize_t written = 0;
+  ssize_t offset = 0;
+
+  while (remaining > 0) {
+    written = FML_HANDLE_EINTR(
+        ::write(temp_file.get(), data.GetMapping() + offset, remaining));
+
+    if (written == -1) {
+      return false;
+    }
+
+    remaining -= written;
+    offset += written;
   }
 
-  ::memcpy(mapping.GetMutableMapping(), data.GetMapping(), data.GetSize());
-
-  if (::msync(mapping.GetMutableMapping(), data.GetSize(), MS_SYNC) != 0) {
+  if (::fsync(temp_file.get()) != 0) {
     return false;
   }
 
