@@ -79,7 +79,7 @@ class Form extends StatefulWidget {
     this.autovalidate = false,
     this.onWillPop,
     this.onChanged,
-    this.autovalidateOnUserInteraction = false,
+    this.autoValidateMode = AutoValidateMode.disabled,
   }) : assert(child != null),
        super(key: key);
 
@@ -126,10 +126,15 @@ class Form extends StatefulWidget {
   /// will rebuild.
   final VoidCallback onChanged;
 
-  /// If true this form will only auto-validate after its content changes.
-  /// 
+  /// If [AutoValidateMode.onUserInteraction] this form will only auto-validate
+  /// after its content changes and if [AutoValidateMode.always] will
+  /// autovalidate without user interaction.
+  ///
+  /// Defaults to [AutoValidateMode.disabled] which means no auto-validation
+  /// will occur.
+  ///
   /// This property has no effect if [autovalidate] is false.
-  final bool autovalidateOnUserInteraction;
+  final AutoValidateMode autoValidateMode;
 
   @override
   FormState createState() => FormState();
@@ -170,13 +175,25 @@ class FormState extends State<Form> {
   @override
   Widget build(BuildContext context) {
     // validate only if one of the text form fields changes
-    if (widget.autovalidate) {
-      if (!widget.autovalidateOnUserInteraction) {
+
+    switch (widget.autoValidateMode) {
+      case AutoValidateMode.always:
         _validate();
-      } else if (_generation > 0) {
-        _validate();
-      }
+        break;
+      case AutoValidateMode.onUserInteraction:
+        if (_generation > 0) {
+          _validate();
+        }
+        break;
+      case AutoValidateMode.disabled:
+        // Backward compatibility
+        // User wants auto validation but still using deprecated parameter.
+        if (widget.autovalidate) {
+          _validate();
+        }
+        break;
     }
+
     return WillPopScope(
       onWillPop: widget.onWillPop,
       child: _FormScope(
@@ -297,8 +314,9 @@ class FormField<T> extends StatefulWidget {
     this.initialValue,
     this.autovalidate = false,
     this.enabled = true,
-    this.autovalidateOnUserInteraction = false,
+    this.autoValidateMode = AutoValidateMode.disabled,
   }) : assert(builder != null),
+
        super(key: key);
 
   /// An optional method to call with the final value when the form is saved via
@@ -341,10 +359,13 @@ class FormField<T> extends StatefulWidget {
   /// regardless of [autovalidate].
   final bool enabled;
 
-  /// If true this form will only auto-validate after its content changes.
-  /// 
-  /// This property has no effect if [autovalidate] is false.
-  final bool autovalidateOnUserInteraction;
+  /// If [AutoValidateMode.onUserInteraction] this form will only auto-validate
+  /// after its content changes and if [AutoValidateMode.always] will
+  /// autovalidate without user interaction.
+  ///
+  /// Defaults to [AutoValidateMode.disabled] which means no auto-validation
+  /// will occur.
+  final AutoValidateMode autoValidateMode;
 
   @override
   FormFieldState<T> createState() => FormFieldState<T>();
@@ -453,14 +474,39 @@ class FormFieldState<T> extends State<FormField<T>> {
   Widget build(BuildContext context) {
     // Only autovalidate if the widget is also enabled and
     // if its content has changed or autovalidateOnUserInteraction is false
-    if (widget.autovalidate && widget.enabled) {
-      if (!widget.autovalidateOnUserInteraction) {
-        _validate();
-      } else if (_hasInteractedByUser){
-        _validate();
+    if (widget.enabled) {
+      switch (widget.autoValidateMode) {
+        case AutoValidateMode.always:
+          _validate();
+          break;
+        case AutoValidateMode.onUserInteraction:
+          if (_hasInteractedByUser) {
+            _validate();
+          }
+          break;
+        case AutoValidateMode.disabled:
+          // Backward compatibility
+          // User wants auto validation but still using deprecated parameter.
+          if (widget.autovalidate) {
+            _validate();
+          }
+          break;
       }
     }
     Form.of(context)?._register(this);
     return widget.builder(this);
   }
+}
+
+/// Used to configure the auto validation of [TextFormField] and [Fom] widgets.
+enum AutoValidateMode {
+  /// no auto validation will occur.
+  disabled,
+
+  /// used to auto-validate [Form] and [FormField] without user interaction.
+  always,
+
+  /// used to auto-validate [Form] and [FormField] only after each user
+  /// interaction.
+  onUserInteraction,
 }

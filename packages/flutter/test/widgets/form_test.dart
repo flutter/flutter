@@ -579,7 +579,7 @@ void main() {
     expect(formKey.currentState.validate(), isTrue);
   });
 
-  testWidgets('Do not auto-validate before value changes if both autovalidate and autovalidateOnUserInteraction are true', (WidgetTester tester) async {
+  testWidgets('Do not auto-validate before value changes autoValidateMode was set to onUserInteraction', (WidgetTester tester) async {
     FormFieldState<String> formFieldState;
 
     String errorText(String value) => '$value/error';
@@ -595,7 +595,7 @@ void main() {
                 child: FormField<String>(
                   initialValue: 'foo',
                   autovalidate: true,
-                  autovalidateOnUserInteraction: true,
+                  autoValidateMode: AutoValidateMode.onUserInteraction,
                   builder: (FormFieldState<String> state) {
                     formFieldState = state;
                     return Container();
@@ -616,7 +616,7 @@ void main() {
     expect(find.text(errorText('foo')), findsNothing);
   });
 
-  testWidgets('auto-validate before value changes if autovalidate is true and autovalidateOnUserInteraction is false', (WidgetTester tester) async {
+  testWidgets('auto-validate before value changes if autoValidateMode was set to always', (WidgetTester tester) async {
     FormFieldState<String> formFieldState;
 
     String errorText(String value) => '$value/error';
@@ -632,7 +632,7 @@ void main() {
                 child: FormField<String>(
                   initialValue: 'foo',
                   autovalidate: true,
-                  autovalidateOnUserInteraction: false,
+                  autoValidateMode: AutoValidateMode.always,
                   builder: (FormFieldState<String> state) {
                     formFieldState = state;
                     return Container();
@@ -650,7 +650,7 @@ void main() {
     expect(formFieldState.hasError, isTrue);
   });
 
-  testWidgets('Form only validate TextFormFields after one of the form fields changes', (WidgetTester tester) async {
+  testWidgets('Form auto-validate form fields only after one of them changes if autovalidateMode is onUserInteraction', (WidgetTester tester) async {
     String errorText(String value) => 'error/$value';
 
     Widget builder() {
@@ -661,43 +661,7 @@ void main() {
             child: Material(
               child: Form(
                 autovalidate: true,
-                child: TextFormField(
-                  validator: errorText,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    // The issue only happens on the second build so we need to rebuild the three
-    await tester.pumpWidget(builder());
-    await tester.pumpWidget(builder());
-
-    // we expect no validation error text being shown
-    expect(find.text(errorText('')), findsNothing);
-
-    // set a empty string to trigger the Fields validators
-    await tester.enterText(find.byType(TextFormField), 'foo');
-    await tester.pump();
-
-    // now we expect the error to be shown
-    expect(find.text(errorText('foo')), findsOneWidget);
-  });
-  
-  testWidgets('Form auto-validate form fields only after one of them changes if autovalidate and autovalidateOnUserInteraction are both true', (WidgetTester tester) async {
-    String errorText(String value) => 'error/$value';
-
-    Widget builder() {
-      return MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-            child: Material(
-              child: Form(
-                autovalidate: true,
-                autovalidateOnUserInteraction: true,
+                autoValidateMode: AutoValidateMode.onUserInteraction,
                 child: TextFormField(
                   validator: errorText,
                 ),
@@ -723,7 +687,7 @@ void main() {
     expect(find.text(errorText('foo')), findsOneWidget);
   });
 
-  testWidgets('Form auto-validate form fields even before none of them changes if autovalidate is true and autovalidateOnUserInteraction is false', (WidgetTester tester) async {
+  testWidgets('Form auto-validate form fields even before none of them changes if autovalidateMode is always', (WidgetTester tester) async {
     String errorText(String value) => 'error/$value';
 
     Widget builder() {
@@ -733,8 +697,7 @@ void main() {
           child: Center(
             child: Material(
               child: Form(
-                autovalidate: true,
-                autovalidateOnUserInteraction: false,
+                autoValidateMode: AutoValidateMode.always,
                 child: TextFormField(
                   validator: errorText,
                 ),
@@ -751,5 +714,37 @@ void main() {
 
     // we expect validation error text being shown
     expect(find.text(errorText('')), findsOneWidget);
+  });
+
+  testWidgets('autovalidate parameter is still used if true', (WidgetTester tester) async {
+    FormFieldState<String> formFieldState;
+    String errorText(String value) => '$value/error';
+
+    Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: FormField<String>(
+                  initialValue: 'foo',
+                  autovalidate: true,
+                  builder: (FormFieldState<String> state) {
+                    formFieldState = state;
+                    return Container();
+                  },
+                  validator: errorText,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    expect(formFieldState.hasError, isTrue);
   });
 }

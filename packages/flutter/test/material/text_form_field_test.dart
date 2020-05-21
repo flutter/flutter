@@ -443,7 +443,7 @@ void main() {
     expect(widget.autofillHints, equals(const <String>[AutofillHints.countryName]));
   });
 
-  testWidgets('autovalidateOnUserInteraction is passed to super', (WidgetTester tester) async {
+  testWidgets('autoValidateMode is passed to super', (WidgetTester tester) async {
     int _validateCalled = 0;
 
     await tester.pumpWidget(
@@ -452,7 +452,7 @@ void main() {
           child: Center(
             child: TextFormField(
               autovalidate: true,
-              autovalidateOnUserInteraction: true,
+              autoValidateMode: AutoValidateMode.onUserInteraction,
               validator: (String value) {
                 _validateCalled++;
                 return null;
