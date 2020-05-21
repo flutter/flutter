@@ -268,6 +268,17 @@ enum StackFit {
   passthrough,
 }
 
+// TODO(liyuqian): remove `Overflow` once its usages are removed from Google.
+/// Whether overflowing children should be clipped, or their overflow be
+/// visible.
+enum Overflow {
+  /// Overflowing children will be visible.
+  visible,
+
+  /// Overflowing children will be clipped to the bounds of their parent.
+  clip,
+}
+
 /// Implements the stack layout algorithm
 ///
 /// In a stack layout, the children are positioned on top of each other in the

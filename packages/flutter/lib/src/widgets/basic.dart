@@ -3230,6 +3230,7 @@ class Stack extends MultiChildRenderObjectWidget {
     this.alignment = AlignmentDirectional.topStart,
     this.textDirection,
     this.fit = StackFit.loose,
+    this.overflow = Overflow.clip,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> children = const <Widget>[],
   }) : assert(clipBehavior != null),
@@ -3270,6 +3271,16 @@ class Stack extends MultiChildRenderObjectWidget {
   /// ([StackFit.expand]).
   final StackFit fit;
 
+  // TODO(liyuqian): remove this once its usages are removed from Google.
+  /// Whether overflowing children should be clipped. See [Overflow].
+  ///
+  /// Some children in a stack might overflow its box. When this flag is set to
+  /// [Overflow.clip], children cannot paint outside of the stack's box.
+  ///
+  /// This overrides [clipBehavior] for now due to a staged roll out without
+  /// breaking Google. We will remove it and only use [clipBehavior] soon.
+  final Overflow overflow;
+
   /// {@macro flutter.widgets.Clip}
   ///
   /// Defaults to [Clip.hardEdge].
@@ -3281,7 +3292,7 @@ class Stack extends MultiChildRenderObjectWidget {
       alignment: alignment,
       textDirection: textDirection ?? Directionality.of(context),
       fit: fit,
-      clipBehavior: clipBehavior,
+      clipBehavior: overflow == Overflow.clip ? Clip.hardEdge : clipBehavior,
     );
   }
 
@@ -3291,7 +3302,7 @@ class Stack extends MultiChildRenderObjectWidget {
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.of(context)
       ..fit = fit
-      ..clipBehavior = clipBehavior;
+      ..clipBehavior = overflow == Overflow.clip ? Clip.hardEdge : clipBehavior;
   }
 
   @override
