@@ -1567,35 +1567,41 @@ void main() {
     expect(tabBarBox.size.height, tabBarHeight);
 
     // Tab 0 out of 100 selected
-    double indicatorLeft = 99.0 * 100.0 + indicatorWeight / 2.0;
-    double indicatorRight = 100.0 * 100.0 - indicatorWeight / 2.0;
+    const double startIndicatorLeft = 99.0 * 100.0 + indicatorWeight / 2.0;
+    const double startIndicatorRight = 100.0 * 100.0 - indicatorWeight / 2.0;
+
+    // Tab 99 out of 100 selected, appears on the far left because RTL
+    const double endIndicatorLeft = indicatorWeight / 2.0;
+    const double endIndicatorRight = 100.0 - indicatorWeight / 2.0;
+
     const double indicatorY = 40.0 + indicatorWeight / 2.0;
+
     expect(tabBarBox, paints..line(
       strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
+      p1: const Offset(startIndicatorLeft, indicatorY),
+      p2: const Offset(startIndicatorRight, indicatorY),
     ));
 
     controller.animateTo(tabs.length - 1, duration: const Duration(seconds: 1), curve: Curves.linear);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    // The x coordinates of p1 and p2 were derived empirically, not analytically.
+    // The x coordinates of p1 and p2 are derived analytically.
+    const double midIndicatorLeft = (startIndicatorLeft + endIndicatorLeft) / 2;
+    const double midIndicatorRight = (startIndicatorRight + endIndicatorRight) / 2;
+
     expect(tabBarBox, paints..line(
       strokeWidth: indicatorWeight,
-      p1: const Offset(2476.0, indicatorY),
-      p2: const Offset(2574.0, indicatorY),
+      p1: const Offset(midIndicatorLeft, indicatorY),
+      p2: const Offset(midIndicatorRight, indicatorY),
     ));
 
     await tester.pump(const Duration(milliseconds: 501));
 
-    // Tab 99 out of 100 selected, appears on the far left because RTL
-    indicatorLeft = indicatorWeight / 2.0;
-    indicatorRight = 100.0 - indicatorWeight / 2.0;
     expect(tabBarBox, paints..line(
       strokeWidth: indicatorWeight,
-      p1: Offset(indicatorLeft, indicatorY),
-      p2: Offset(indicatorRight, indicatorY),
+      p1: const Offset(endIndicatorLeft, indicatorY),
+      p2: const Offset(endIndicatorRight, indicatorY),
     ));
   });
 

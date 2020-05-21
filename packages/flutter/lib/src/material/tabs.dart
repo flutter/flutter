@@ -398,7 +398,8 @@ class _IndicatorPainter extends CustomPainter {
     if (controller.indexIsChanging) {
       // The user tapped on a tab, the tab controller's animation is running.
       final Rect targetRect = indicatorRect(size, controller.index);
-      _currentRect = Rect.lerp(targetRect, _currentRect ?? targetRect, _indexChangeProgress(controller));
+      final Rect prevRect = indicatorRect(size, controller.previousIndex);
+      _currentRect = Rect.lerp(targetRect, prevRect, _indexChangeProgress(controller));
     } else {
       // The user is dragging the TabBarView's PageView left or right.
       final int currentIndex = controller.index;
