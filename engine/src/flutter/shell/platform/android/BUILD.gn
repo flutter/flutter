@@ -463,7 +463,7 @@ action("robolectric_tests") {
                         embedding_jar_path,
                       ] + embedding_dependencies_jars
 
-  inputs = _jar_dependencies
+  inputs = _jar_dependencies + additional_jar_files
 
   _rebased_current_path = rebase_path(".")
   _rebased_jar_path = rebase_path(jar_path, root_build_dir)
