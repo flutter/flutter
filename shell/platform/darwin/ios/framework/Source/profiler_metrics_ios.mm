@@ -30,7 +30,7 @@ class MachThreads {
 namespace flutter {
 
 ProfileSample ProfilerMetricsIOS::GenerateSample() {
-  return {.cpu_usage = CpuUsage()};
+  return {.cpu_usage = CpuUsage(), .memory_usage = MemoryUsage()};
 }
 
 std::optional<CpuUsageInfo> ProfilerMetricsIOS::CpuUsage() {
@@ -74,6 +74,35 @@ std::optional<CpuUsageInfo> ProfilerMetricsIOS::CpuUsage() {
   flutter::CpuUsageInfo cpu_usage_info = {.num_threads = mach_threads.thread_count,
                                           .total_cpu_usage = total_cpu_usage * 100.0};
   return cpu_usage_info;
+}
+
+std::optional<MemoryUsageInfo> ProfilerMetricsIOS::MemoryUsage() {
+  kern_return_t kernel_return_code;
+  task_vm_info_data_t task_memory_info;
+  mach_msg_type_number_t task_memory_info_count = TASK_VM_INFO_COUNT;
+
+  kernel_return_code =
+      task_info(mach_task_self(), TASK_VM_INFO, reinterpret_cast<task_info_t>(&task_memory_info),
+                &task_memory_info_count);
+  if (kernel_return_code != KERN_SUCCESS) {
+    FML_LOG(ERROR) << " Error retrieving task memory information: "
+                   << mach_error_string(kernel_return_code);
+    return std::nullopt;
+  }
+
+  // `phys_footprint` is Apple's recommended way to measure app's memory usage. It provides the
+  // best approximate to xcode memory gauge. According to its source code explanation, the physical
+  // footprint mainly consists of app's internal memory data and IOKit mappings. `resident_size`
+  // is the total physical memory used by the app, so we simply do `resident_size - phys_footprint`
+  // to obtain the shared memory usage.
+  const double dirty_memory_usage =
+      static_cast<double>(task_memory_info.phys_footprint) / 1024.0 / 1024.0;
+  const double owned_shared_memory_usage =
+      static_cast<double>(task_memory_info.resident_size) / 1024.0 / 1024.0 - dirty_memory_usage;
+  flutter::MemoryUsageInfo memory_usage_info = {
+      .dirty_memory_usage = dirty_memory_usage,
+      .owned_shared_memory_usage = owned_shared_memory_usage};
+  return memory_usage_info;
 }
 
 }  // namespace flutter

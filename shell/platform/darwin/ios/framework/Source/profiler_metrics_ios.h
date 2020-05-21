@@ -30,6 +30,8 @@ class ProfilerMetricsIOS {
  private:
   std::optional<CpuUsageInfo> CpuUsage();
 
+  std::optional<MemoryUsageInfo> MemoryUsage();
+
   FML_DISALLOW_COPY_AND_ASSIGN(ProfilerMetricsIOS);
 };
 

@@ -32,17 +32,27 @@ void SamplingProfiler::Start() const {
 void SamplingProfiler::SampleRepeatedly(fml::TimeDelta task_delay) const {
   profiler_task_runner_->PostDelayedTask(
       [profiler = this, task_delay = task_delay, sampler = sampler_]() {
+        // TODO(kaushikiska): consider buffering these every n seconds to
+        // avoid spamming the trace buffer.
         const ProfileSample usage = sampler();
         if (usage.cpu_usage) {
           const auto& cpu_usage = usage.cpu_usage;
-          // TODO(kaushikiska): consider buffering these every n seconds to
-          // avoid spamming the trace buffer.
           std::string total_cpu_usage =
               std::to_string(cpu_usage->total_cpu_usage);
           std::string num_threads = std::to_string(cpu_usage->num_threads);
           TRACE_EVENT_INSTANT2("flutter::profiling", "CpuUsage",
                                "total_cpu_usage", total_cpu_usage.c_str(),
                                "num_threads", num_threads.c_str());
+        }
+        if (usage.memory_usage) {
+          std::string dirty_memory_usage =
+              std::to_string(usage.memory_usage->dirty_memory_usage);
+          std::string owned_shared_memory_usage =
+              std::to_string(usage.memory_usage->owned_shared_memory_usage);
+          TRACE_EVENT_INSTANT2("flutter::profiling", "MemoryUsage",
+                               "dirty_memory_usage", dirty_memory_usage.c_str(),
+                               "owned_shared_memory_usage",
+                               owned_shared_memory_usage.c_str());
         }
         profiler->SampleRepeatedly(task_delay);
       },
