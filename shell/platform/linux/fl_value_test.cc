@@ -18,6 +18,12 @@ TEST(FlValueTest, NullEqual) {
   EXPECT_TRUE(fl_value_equal(value1, value2));
 }
 
+TEST(FlValueTest, NullToString) {
+  g_autoptr(FlValue) value = fl_value_new_null();
+  g_autofree gchar* text = fl_value_to_string(value);
+  EXPECT_STREQ(text, "null");
+}
+
 TEST(FlValueTest, BoolTrue) {
   g_autoptr(FlValue) value = fl_value_new_bool(TRUE);
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_BOOL);
@@ -40,6 +46,18 @@ TEST(FlValueTest, BoolNotEqual) {
   g_autoptr(FlValue) value1 = fl_value_new_bool(TRUE);
   g_autoptr(FlValue) value2 = fl_value_new_bool(FALSE);
   EXPECT_FALSE(fl_value_equal(value1, value2));
+}
+
+TEST(FlValueTest, BoolTrueToString) {
+  g_autoptr(FlValue) value = fl_value_new_bool(TRUE);
+  g_autofree gchar* text = fl_value_to_string(value);
+  EXPECT_STREQ(text, "true");
+}
+
+TEST(FlValueTest, BoolFalseToString) {
+  g_autoptr(FlValue) value = fl_value_new_bool(FALSE);
+  g_autofree gchar* text = fl_value_to_string(value);
+  EXPECT_STREQ(text, "false");
 }
 
 TEST(FlValueTest, IntZero) {
@@ -84,6 +102,12 @@ TEST(FlValueTest, IntNotEqual) {
   EXPECT_FALSE(fl_value_equal(value1, value2));
 }
 
+TEST(FlValueTest, IntToString) {
+  g_autoptr(FlValue) value = fl_value_new_int(42);
+  g_autofree gchar* text = fl_value_to_string(value);
+  EXPECT_STREQ(text, "42");
+}
+
 TEST(FlValueTest, FloatZero) {
   g_autoptr(FlValue) value = fl_value_new_float(0.0);
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT);
@@ -118,6 +142,12 @@ TEST(FlValueTest, FloatNotEqual) {
   g_autoptr(FlValue) value1 = fl_value_new_float(M_PI);
   g_autoptr(FlValue) value2 = fl_value_new_float(M_E);
   EXPECT_FALSE(fl_value_equal(value1, value2));
+}
+
+TEST(FlValueTest, FloatToString) {
+  g_autoptr(FlValue) value = fl_value_new_float(M_PI);
+  g_autofree gchar* text = fl_value_to_string(value);
+  EXPECT_STREQ(text, "3.1415926535897931");
 }
 
 TEST(FlValueTest, String) {
@@ -160,6 +190,12 @@ TEST(FlValueTest, StringNotEqual) {
   g_autoptr(FlValue) value1 = fl_value_new_string("hello");
   g_autoptr(FlValue) value2 = fl_value_new_string("world");
   EXPECT_FALSE(fl_value_equal(value1, value2));
+}
+
+TEST(FlValueTest, StringToString) {
+  g_autoptr(FlValue) value = fl_value_new_string("hello");
+  g_autofree gchar* text = fl_value_to_string(value);
+  EXPECT_STREQ(text, "hello");
 }
 
 TEST(FlValueTest, Uint8List) {
@@ -216,6 +252,13 @@ TEST(FlValueTest, Uint8ListEmptyNotEqual) {
   EXPECT_FALSE(fl_value_equal(value1, value2));
 }
 
+TEST(FlValueTest, Uint8ListToString) {
+  uint8_t data[] = {0x00, 0x01, 0xFE, 0xFF};
+  g_autoptr(FlValue) value = fl_value_new_uint8_list(data, 4);
+  g_autofree gchar* text = fl_value_to_string(value);
+  EXPECT_STREQ(text, "[0, 1, 254, 255]");
+}
+
 TEST(FlValueTest, Int32List) {
   int32_t data[] = {0, -1, G_MAXINT32, G_MININT32};
   g_autoptr(FlValue) value = fl_value_new_int32_list(data, 4);
@@ -268,6 +311,13 @@ TEST(FlValueTest, Int32ListEmptyNotEqual) {
   int32_t data[] = {0, G_MAXINT32, G_MININT32};
   g_autoptr(FlValue) value2 = fl_value_new_int32_list(data, 3);
   EXPECT_FALSE(fl_value_equal(value1, value2));
+}
+
+TEST(FlValueTest, Int32ListToString) {
+  int32_t data[] = {0, G_MAXINT32, G_MININT32};
+  g_autoptr(FlValue) value = fl_value_new_int32_list(data, 3);
+  g_autofree gchar* text = fl_value_to_string(value);
+  EXPECT_STREQ(text, "[0, 2147483647, -2147483648]");
 }
 
 TEST(FlValueTest, Int64List) {
@@ -324,6 +374,13 @@ TEST(FlValueTest, Int64ListEmptyNotEqual) {
   EXPECT_FALSE(fl_value_equal(value1, value2));
 }
 
+TEST(FlValueTest, Int64ListToString) {
+  int64_t data[] = {0, G_MAXINT64, G_MININT64};
+  g_autoptr(FlValue) value = fl_value_new_int64_list(data, 3);
+  g_autofree gchar* text = fl_value_to_string(value);
+  EXPECT_STREQ(text, "[0, 9223372036854775807, -9223372036854775808]");
+}
+
 TEST(FlValueTest, FloatList) {
   double data[] = {0.0, -1.0, M_PI};
   g_autoptr(FlValue) value = fl_value_new_float_list(data, 4);
@@ -375,6 +432,13 @@ TEST(FlValueTest, FloatListEmptyNotEqual) {
   double data[] = {0, -0.5, M_PI};
   g_autoptr(FlValue) value2 = fl_value_new_float_list(data, 3);
   EXPECT_FALSE(fl_value_equal(value1, value2));
+}
+
+TEST(FlValueTest, FloatListToString) {
+  double data[] = {0, -0.5, M_PI};
+  g_autoptr(FlValue) value = fl_value_new_float_list(data, 3);
+  g_autofree gchar* text = fl_value_to_string(value);
+  EXPECT_STREQ(text, "[0.0, -0.5, 3.1415926535897931]");
 }
 
 TEST(FlValueTest, ListEmpty) {
@@ -510,6 +574,23 @@ TEST(FlValueTest, ListEmptyNotEqual) {
   EXPECT_FALSE(fl_value_equal(value1, value2));
 }
 
+TEST(FlValueTest, ListToString) {
+  g_autoptr(FlValue) value = fl_value_new_list();
+  fl_value_append_take(value, fl_value_new_null());
+  fl_value_append_take(value, fl_value_new_bool(TRUE));
+  fl_value_append_take(value, fl_value_new_int(42));
+  fl_value_append_take(value, fl_value_new_float(M_PI));
+  fl_value_append_take(value, fl_value_new_uint8_list(nullptr, 0));
+  fl_value_append_take(value, fl_value_new_int32_list(nullptr, 0));
+  fl_value_append_take(value, fl_value_new_int64_list(nullptr, 0));
+  fl_value_append_take(value, fl_value_new_float_list(nullptr, 0));
+  fl_value_append_take(value, fl_value_new_list());
+  fl_value_append_take(value, fl_value_new_map());
+  g_autofree gchar* text = fl_value_to_string(value);
+  EXPECT_STREQ(text,
+               "[null, true, 42, 3.1415926535897931, [], [], [], [], [], {}]");
+}
+
 TEST(FlValueTest, MapEmpty) {
   g_autoptr(FlValue) value = fl_value_new_map();
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_MAP);
@@ -600,6 +681,90 @@ TEST(FlValueTest, MapLookupString) {
   ASSERT_EQ(v, nullptr);
 }
 
+TEST(FlValueTest, MapValueypes) {
+  g_autoptr(FlValue) value = fl_value_new_map();
+  fl_value_set_take(value, fl_value_new_string("null"), fl_value_new_null());
+  fl_value_set_take(value, fl_value_new_string("bool"),
+                    fl_value_new_bool(TRUE));
+  fl_value_set_take(value, fl_value_new_string("int"), fl_value_new_int(42));
+  fl_value_set_take(value, fl_value_new_string("float"),
+                    fl_value_new_float(M_PI));
+  fl_value_set_take(value, fl_value_new_string("uint8_list"),
+                    fl_value_new_uint8_list(nullptr, 0));
+  fl_value_set_take(value, fl_value_new_string("int32_list"),
+                    fl_value_new_int32_list(nullptr, 0));
+  fl_value_set_take(value, fl_value_new_string("int64_list"),
+                    fl_value_new_int64_list(nullptr, 0));
+  fl_value_set_take(value, fl_value_new_string("float_list"),
+                    fl_value_new_float_list(nullptr, 0));
+  fl_value_set_take(value, fl_value_new_string("list"), fl_value_new_list());
+  fl_value_set_take(value, fl_value_new_string("map"), fl_value_new_map());
+  ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_MAP);
+  ASSERT_EQ(fl_value_get_length(value), static_cast<size_t>(10));
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_value(value, 0)),
+            FL_VALUE_TYPE_NULL);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_value(value, 1)),
+            FL_VALUE_TYPE_BOOL);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_value(value, 2)),
+            FL_VALUE_TYPE_INT);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_value(value, 3)),
+            FL_VALUE_TYPE_FLOAT);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_value(value, 4)),
+            FL_VALUE_TYPE_UINT8_LIST);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_value(value, 5)),
+            FL_VALUE_TYPE_INT32_LIST);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_value(value, 6)),
+            FL_VALUE_TYPE_INT64_LIST);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_value(value, 7)),
+            FL_VALUE_TYPE_FLOAT_LIST);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_value(value, 8)),
+            FL_VALUE_TYPE_LIST);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_value(value, 9)),
+            FL_VALUE_TYPE_MAP);
+}
+
+TEST(FlValueTest, MapKeyTypes) {
+  g_autoptr(FlValue) value = fl_value_new_map();
+  fl_value_set_take(value, fl_value_new_null(), fl_value_new_string("null"));
+  fl_value_set_take(value, fl_value_new_bool(TRUE),
+                    fl_value_new_string("bool"));
+  fl_value_set_take(value, fl_value_new_int(42), fl_value_new_string("int"));
+  fl_value_set_take(value, fl_value_new_float(M_PI),
+                    fl_value_new_string("float"));
+  fl_value_set_take(value, fl_value_new_uint8_list(nullptr, 0),
+                    fl_value_new_string("uint8_list"));
+  fl_value_set_take(value, fl_value_new_int32_list(nullptr, 0),
+                    fl_value_new_string("int32_list"));
+  fl_value_set_take(value, fl_value_new_int64_list(nullptr, 0),
+                    fl_value_new_string("int64_list"));
+  fl_value_set_take(value, fl_value_new_float_list(nullptr, 0),
+                    fl_value_new_string("float_list"));
+  fl_value_set_take(value, fl_value_new_list(), fl_value_new_string("list"));
+  fl_value_set_take(value, fl_value_new_map(), fl_value_new_string("map"));
+  ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_MAP);
+  ASSERT_EQ(fl_value_get_length(value), static_cast<size_t>(10));
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_key(value, 0)),
+            FL_VALUE_TYPE_NULL);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_key(value, 1)),
+            FL_VALUE_TYPE_BOOL);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_key(value, 2)),
+            FL_VALUE_TYPE_INT);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_key(value, 3)),
+            FL_VALUE_TYPE_FLOAT);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_key(value, 4)),
+            FL_VALUE_TYPE_UINT8_LIST);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_key(value, 5)),
+            FL_VALUE_TYPE_INT32_LIST);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_key(value, 6)),
+            FL_VALUE_TYPE_INT64_LIST);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_key(value, 7)),
+            FL_VALUE_TYPE_FLOAT_LIST);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_key(value, 8)),
+            FL_VALUE_TYPE_LIST);
+  EXPECT_EQ(fl_value_get_type(fl_value_get_map_key(value, 9)),
+            FL_VALUE_TYPE_MAP);
+}
+
 TEST(FlValueTest, MapEqual) {
   g_autoptr(FlValue) value1 = fl_value_new_map();
   fl_value_set_string_take(value1, "one", fl_value_new_int(1));
@@ -674,6 +839,49 @@ TEST(FlValueTest, MapEmptyNotEqual) {
   fl_value_set_string_take(value2, "two", fl_value_new_int(2));
   fl_value_set_string_take(value2, "three", fl_value_new_int(3));
   EXPECT_FALSE(fl_value_equal(value1, value2));
+}
+
+TEST(FlValueTest, MapToString) {
+  g_autoptr(FlValue) value = fl_value_new_map();
+  fl_value_set_take(value, fl_value_new_string("null"), fl_value_new_null());
+  fl_value_set_take(value, fl_value_new_string("bool"),
+                    fl_value_new_bool(TRUE));
+  fl_value_set_take(value, fl_value_new_string("int"), fl_value_new_int(42));
+  fl_value_set_take(value, fl_value_new_string("float"),
+                    fl_value_new_float(M_PI));
+  fl_value_set_take(value, fl_value_new_string("uint8_list"),
+                    fl_value_new_uint8_list(nullptr, 0));
+  fl_value_set_take(value, fl_value_new_string("int32_list"),
+                    fl_value_new_int32_list(nullptr, 0));
+  fl_value_set_take(value, fl_value_new_string("int64_list"),
+                    fl_value_new_int64_list(nullptr, 0));
+  fl_value_set_take(value, fl_value_new_string("float_list"),
+                    fl_value_new_float_list(nullptr, 0));
+  fl_value_set_take(value, fl_value_new_string("list"), fl_value_new_list());
+  fl_value_set_take(value, fl_value_new_string("map"), fl_value_new_map());
+  fl_value_set_take(value, fl_value_new_null(), fl_value_new_string("null"));
+  fl_value_set_take(value, fl_value_new_bool(TRUE),
+                    fl_value_new_string("bool"));
+  fl_value_set_take(value, fl_value_new_int(42), fl_value_new_string("int"));
+  fl_value_set_take(value, fl_value_new_float(M_PI),
+                    fl_value_new_string("float"));
+  fl_value_set_take(value, fl_value_new_uint8_list(nullptr, 0),
+                    fl_value_new_string("uint8_list"));
+  fl_value_set_take(value, fl_value_new_int32_list(nullptr, 0),
+                    fl_value_new_string("int32_list"));
+  fl_value_set_take(value, fl_value_new_int64_list(nullptr, 0),
+                    fl_value_new_string("int64_list"));
+  fl_value_set_take(value, fl_value_new_float_list(nullptr, 0),
+                    fl_value_new_string("float_list"));
+  fl_value_set_take(value, fl_value_new_list(), fl_value_new_string("list"));
+  fl_value_set_take(value, fl_value_new_map(), fl_value_new_string("map"));
+  g_autofree gchar* text = fl_value_to_string(value);
+  EXPECT_STREQ(text,
+               "{null: null, bool: true, int: 42, float: 3.1415926535897931, "
+               "uint8_list: [], int32_list: [], int64_list: [], float_list: "
+               "[], list: [], map: {}, null: null, true: bool, 42: int, "
+               "3.1415926535897931: float, []: uint8_list, []: int32_list, []: "
+               "int64_list, []: float_list, []: list, {}: map}");
 }
 
 TEST(FlValueTest, EqualSameObject) {
