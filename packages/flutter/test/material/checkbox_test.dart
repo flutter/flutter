@@ -700,6 +700,8 @@ void main() {
     );
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+
+    await tester.pumpAndSettle();
   });
 }
 
