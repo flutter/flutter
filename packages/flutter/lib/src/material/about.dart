@@ -988,24 +988,23 @@ Widget _defaultApplicationIcon(BuildContext context) {
   return null;
 }
 
-double _getGutterSize(BuildContext context) =>
-    MediaQuery.of(context).size.width >= 720 ? 24 : 12;
+double _getGutterSize(BuildContext context) => MediaQuery.of(context).size.width >= 720 ? 24 : 12;
 
-typedef _MasterViewBuilder = Widget Function(
-    BuildContext context,
-    bool isLateralUI,
-    );
+/// Signature for the builder callback used by [_MasterDetailFlow].
+typedef _MasterViewBuilder = Widget Function(BuildContext context, bool isLateralUI);
 
-typedef _DetailPageBuilder = Widget Function(
-    BuildContext context,
-    Object arguments,
-    ScrollController scrollController,
-    );
+/// Signature for the builder callback used by [_MasterDetailFlow.detailPageBuilder].
+///
+/// scrollController is provided when the page destination is the draggable
+/// sheet in the lateral UI. Otherwise, it is null.
+typedef _DetailPageBuilder = Widget Function(BuildContext context, Object arguments, ScrollController scrollController);
 
-typedef _ActionBuilder = List<Widget> Function(
-    BuildContext context,
-    _ActionLevel actionLevel,
-    );
+/// Signature for the builder callback used by [_MasterDetailFlow.actionBuilder].
+///
+/// Builds the actions that go in the app bars constructed for the master and
+/// lateral UI pages. actionLevel indicates the intended destination of the
+/// return actions.
+typedef _ActionBuilder = List<Widget> Function(BuildContext context, _ActionLevel actionLevel);
 
 /// Describes which type of app bar the actions are intended for.
 enum _ActionLevel {
