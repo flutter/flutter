@@ -81,6 +81,12 @@ typedef ReloadMethod = Future<void> Function({
   String libraryId,
 });
 
+
+/// A method that pulls an SkSL shader from the device and writes it to a file.
+///
+/// The name of the file returned as a result.
+typedef SkSLMethod = Future<String> Function();
+
 Future<io.WebSocket> _defaultOpenChannel(String url, {
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault
 }) async {
@@ -126,6 +132,7 @@ typedef VMServiceConnector = Future<vm_service.VmService> Function(Uri httpUri, 
   Restart restart,
   CompileExpression compileExpression,
   ReloadMethod reloadMethod,
+  SkSLMethod skSLMethod,
   io.CompressionOptions compression,
   Device device,
 });
@@ -151,6 +158,7 @@ vm_service.VmService setUpVmService(
   CompileExpression compileExpression,
   Device device,
   ReloadMethod reloadMethod,
+  SkSLMethod skSLMethod,
   vm_service.VmService vmService
 ) {
   if (reloadSources != null) {
@@ -257,6 +265,18 @@ vm_service.VmService setUpVmService(
     });
     vmService.registerService('flutterMemoryInfo', 'Flutter Tools');
   }
+  if (skSLMethod != null) {
+    vmService.registerServiceCallback('flutterGetSkSL', (Map<String, dynamic> params) async {
+      final String filename = await skSLMethod();
+      return <String, dynamic>{
+        'result': <String, Object>{
+          'type': 'Success',
+          'filename': filename,
+        }
+      };
+    });
+    vmService.registerService('flutterGetSkSL', 'Flutter Tools');
+  }
   return vmService;
 }
 
@@ -274,6 +294,7 @@ Future<vm_service.VmService> connectToVmService(
     Restart restart,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
+    SkSLMethod skSLMethod,
     io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
     Device device,
   }) async {
@@ -285,6 +306,7 @@ Future<vm_service.VmService> connectToVmService(
     compression: compression,
     device: device,
     reloadMethod: reloadMethod,
+    skSLMethod: skSLMethod,
   );
 }
 
@@ -294,6 +316,7 @@ Future<vm_service.VmService> _connect(
   Restart restart,
   CompileExpression compileExpression,
   ReloadMethod reloadMethod,
+  SkSLMethod skSLMethod,
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   Device device,
 }) async {
@@ -320,6 +343,7 @@ Future<vm_service.VmService> _connect(
     compileExpression,
     device,
     reloadMethod,
+    skSLMethod,
     delegateService,
   );
   _httpAddressExpando[service] = httpUri;

@@ -101,6 +101,7 @@ void main() {
       null,
       null,
       null,
+      null,
       mockVMService,
     );
 
@@ -119,6 +120,7 @@ void main() {
       null,
       null,
       reloadMethod,
+      null,
       mockVMService,
     );
 
@@ -137,6 +139,7 @@ void main() {
       null,
       mockDevice,
       null,
+      null,
       mockVMService,
     );
 
@@ -145,9 +148,27 @@ void main() {
     Logger: () => BufferLogger.test()
   });
 
+  testUsingContext('VmService registers flutterGetSkSL service', () async {
+    final MockVMService mockVMService = MockVMService();
+    setUpVmService(
+      null,
+      null,
+      null,
+      null,
+      null,
+      () async => 'hello',
+      mockVMService,
+    );
+
+    verify(mockVMService.registerService('flutterGetSkSL', 'Flutter Tools')).called(1);
+  }, overrides: <Type, Generator>{
+    Logger: () => BufferLogger.test()
+  });
+
   testUsingContext('VMService returns correct FlutterVersion', () async {
     final MockVMService mockVMService = MockVMService();
     setUpVmService(
+      null,
       null,
       null,
       null,
