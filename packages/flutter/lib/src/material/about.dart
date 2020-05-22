@@ -1241,6 +1241,8 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
 
   Widget _buildNestedUI(BuildContext context) {
     _builtLayout = _LayoutMode.nested;
+    final MaterialPageRoute<void> masterPageRoute = _masterPageRoute(context);
+
     return WillPopScope(
       // Push pop check into nested navigator.
       onWillPop: () async => !(await _navigatorKey.currentState.maybePop()),
@@ -1250,43 +1252,12 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
         onGenerateInitialRoutes: (NavigatorState navigator, String initialRoute) {
           switch (focus) {
             case _Focus.master:
-              return <Route<dynamic>>[
-                MaterialPageRoute<dynamic>(
-                  builder: widget.masterPageBuilder != null
-                      ? (BuildContext c) => BlockSemantics(
-                            child: widget.masterPageBuilder(c, false),
-                          )
-                      : (BuildContext c) =>
-                          BlockSemantics(child: _buildMasterPage(c, context)),
-                ),
-              ];
+              return <Route<void>>[masterPageRoute];
+            case _Focus.detail:
             default:
-              return <Route<dynamic>>[
-                MaterialPageRoute<dynamic>(
-                  builder: widget.masterPageBuilder != null
-                      ? (BuildContext c) => BlockSemantics(
-                            child: widget.masterPageBuilder(c, false),
-                          )
-                      : (BuildContext c) =>
-                          BlockSemantics(child: _buildMasterPage(c, context)),
-                ),
-                MaterialPageRoute<dynamic>(
-                  builder: (BuildContext context) => WillPopScope(
-                    onWillPop: () async {
-                      // No need for setState() as rebuild happens on navigation pop.
-                      focus = _Focus.master;
-                      Navigator.of(context).pop();
-                      return false;
-                    },
-                    child: BlockSemantics(
-                      child: widget.detailPageBuilder(
-                        context,
-                        _cachedDetailArguments,
-                        null,
-                      ),
-                    ),
-                  ),
-                )
+              return <Route<void>>[
+                masterPageRoute,
+                _detailPageRoute(_cachedDetailArguments)
               ];
           }
         },
@@ -1295,36 +1266,13 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
             case _navMaster:
               // Matching state to navigation event.
               focus = _Focus.master;
-              return MaterialPageRoute<void>(
-                builder: widget.masterPageBuilder != null
-                    ? (BuildContext context) => BlockSemantics(
-                          child: widget.masterPageBuilder(context, false),
-                        )
-                    : (BuildContext c) =>
-                        BlockSemantics(child: _buildMasterPage(c, context)),
-              );
+              return masterPageRoute;
             case _navDetail:
               // Matching state to navigation event.
               focus = _Focus.detail;
               // Cache detail page settings.
               _cachedDetailArguments = settings.arguments;
-              return MaterialPageRoute<void>(
-                builder: (BuildContext context) => WillPopScope(
-                  child: BlockSemantics(
-                    child: widget.detailPageBuilder(
-                      context,
-                      _cachedDetailArguments,
-                      null,
-                    ),
-                  ),
-                  onWillPop: () async {
-                    // No need for setState() as rebuild happens on navigation pop.
-                    focus = _Focus.master;
-                    Navigator.of(context).pop();
-                    return false;
-                  },
-                ),
-              );
+              return _detailPageRoute(_cachedDetailArguments);
             default:
               throw Exception('Unknown route ${settings.name}');
           }
@@ -1333,29 +1281,43 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
     );
   }
 
-  /// Build a master page using the master view builder.
-  ///
-  /// Uses the context (flowContext) from the _MasterDetailFlow widget to pop
-  /// the nav route if there is no back button supplied.
-  Widget _buildMasterPage(BuildContext context, BuildContext flowContext) {
-    return Scaffold(
-      appBar: AppBar(
-        title: widget.title,
-        leading: widget.leading ??
-            (widget.automaticallyImplyLeading &&
-                    Navigator.of(flowContext).canPop()
-                ? BackButton(onPressed: () => Navigator.of(flowContext).pop())
-                : null),
-        actions: widget.actionBuilder == null
-            ? const <Widget>[]
-            : widget.actionBuilder(context, _ActionLevel.composite),
-        centerTitle: widget.centerTitle,
-        flexibleSpace: widget.flexibleSpace,
+  MaterialPageRoute<void> _masterPageRoute(BuildContext context) {
+    return MaterialPageRoute<dynamic>(
+      builder: (BuildContext c) => BlockSemantics(
+        child: widget.masterPageBuilder != null
+            ? widget.masterPageBuilder(c, false)
+            : _MasterPage(
+                leading: widget.leading ??
+                    (widget.automaticallyImplyLeading && Navigator.of(context).canPop()
+                        ? BackButton(onPressed: () => Navigator.of(context).pop())
+                        : null),
+                title: widget.title,
+                centerTitle: widget.centerTitle,
+                flexibleSpace: widget.flexibleSpace,
+                automaticallyImplyLeading: widget.automaticallyImplyLeading,
+                floatingActionButton: widget.floatingActionButton,
+                floatingActionButtonLocation: widget.floatingActionButtonMasterPageLocation,
+                masterViewBuilder: widget.masterViewBuilder,
+                actionBuilder: widget.actionBuilder,
+              ),
       ),
-      body: widget.masterViewBuilder(context, false),
-      floatingActionButton: widget.floatingActionButton,
-      floatingActionButtonLocation: widget.floatingActionButtonLocation,
     );
+  }
+
+  MaterialPageRoute<void> _detailPageRoute(Object arguments) {
+    return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) => WillPopScope(
+                onWillPop: () async {
+                  // No need for setState() as rebuild happens on navigation pop.
+                  focus = _Focus.master;
+                  Navigator.of(context).pop();
+                  return false;
+                },
+                child: BlockSemantics(
+                  child: widget.detailPageBuilder(context, arguments, null),
+                ),
+              ),
+            );
   }
 
   Widget _buildLateralUI(BuildContext context) {
@@ -1385,6 +1347,51 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
       title: widget.title,
     );
   }
+}
+
+class _MasterPage extends StatelessWidget {
+  const _MasterPage({
+    Key key,
+    this.leading,
+    this.title,
+    this.actionBuilder,
+    this.centerTitle,
+    this.flexibleSpace,
+    this.floatingActionButton,
+    this.floatingActionButtonLocation,
+    this.masterViewBuilder,
+    this.automaticallyImplyLeading,
+  }) : super(key: key);
+
+  final _MasterViewBuilder masterViewBuilder;
+  final Widget title;
+  final Widget leading;
+  final bool automaticallyImplyLeading;
+  final bool centerTitle;
+  final Widget flexibleSpace;
+  final _ActionBuilder actionBuilder;
+  final FloatingActionButton floatingActionButton;
+  final FloatingActionButtonLocation floatingActionButtonLocation;
+
+  @override
+  Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: title,
+          leading: leading,
+          actions: actionBuilder == null
+              ? const <Widget>[]
+              : actionBuilder(context, _ActionLevel.composite),
+          centerTitle: centerTitle,
+          flexibleSpace: flexibleSpace,
+          automaticallyImplyLeading: automaticallyImplyLeading,
+        ),
+        body: masterViewBuilder(context, false),
+        floatingActionButton: floatingActionButton,
+        floatingActionButtonLocation: floatingActionButtonLocation,
+      );
+  }
+
 }
 
 const double _kCardElevation = 4;
