@@ -844,50 +844,40 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    final String package = widget.packageName;
     final MaterialLocalizations localisations = MaterialLocalizations.of(context);
-    final double gutterSize = _getGutterSize(context);
-
-    if (widget.scrollController == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: _buildTitle(
-            context,
-            package,
-            localisations
-                .licensesPackageDetailText(widget.licenseEntries.length),
+    final ThemeData theme = Theme.of(context);
+    final String title = widget.packageName;
+    final String subtitle = localisations.licensesPackageDetailText(widget.licenseEntries.length);
+    final double pad = _getGutterSize(context);
+    final EdgeInsets padding = EdgeInsets.only(left: pad, right: pad, bottom: pad);
+    final List<Widget> listWidgets = <Widget>[
+      ..._licenses,
+      if (!_loaded)
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 24.0),
+          child: Center(
+            child: CircularProgressIndicator(),
           ),
+        ),
+    ];
+
+    Widget page;
+    if (widget.scrollController == null) {
+      page = Scaffold(
+        appBar: AppBar(
+          title: _PackageLicensePageTitle(title, subtitle, theme.primaryTextTheme),
         ),
         body: Center(
           child: Material(
-            color: Theme.of(context).cardColor,
+            color: theme.cardColor,
             elevation: 4,
             child: Container(
               constraints: BoxConstraints.loose(const Size.fromWidth(600)),
               child: Localizations.override(
                 locale: const Locale('en', 'US'),
                 context: context,
-                child: DefaultTextStyle(
-                  style: Theme.of(context).textTheme.caption,
-                  child: Scrollbar(
-                    child: ListView(
-                      padding: EdgeInsets.only(
-                        left: gutterSize,
-                        right: gutterSize,
-                        bottom: gutterSize,
-                      ),
-                      children: <Widget>[
-                        ..._licenses,
-                        if (!_loaded)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 24.0),
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+                child: Scrollbar(
+                  child: ListView(padding: padding, children: listWidgets),
                 ),
               ),
             ),
@@ -895,70 +885,58 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
         ),
       );
     } else {
-      return Localizations.override(
-        context: context,
-        locale: const Locale('en', 'US'),
-        child: DefaultTextStyle(
-          style: Theme.of(context).textTheme.caption,
-          child: CustomScrollView(
-            controller: widget.scrollController,
-            slivers: <Widget>[
-              SliverAppBar(
-                automaticallyImplyLeading: false,
-                pinned: true,
-                backgroundColor: Theme.of(context).cardColor,
-                title: _buildTitle(
-                  context,
-                  package,
-                  localisations
-                      .licensesPackageDetailText(widget.licenseEntries.length),
-                  theme: Theme.of(context).textTheme,
-                ),
-              ),
-              SliverPadding(
-                padding: EdgeInsets.only(
-                  left: gutterSize,
-                  right: gutterSize,
-                  bottom: gutterSize,
-                ),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate(
-                    <Widget>[
-                      ..._licenses,
-                      if (!_loaded)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 24.0),
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+      page = CustomScrollView(
+        controller: widget.scrollController,
+        slivers: <Widget>[
+          SliverAppBar(
+            automaticallyImplyLeading: false,
+            pinned: true,
+            backgroundColor: theme.cardColor,
+            title: _PackageLicensePageTitle(title, subtitle, theme.textTheme),
           ),
-        ),
+          SliverPadding(
+            padding: padding,
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) => Localizations.override(
+                  locale: const Locale('en', 'US'),
+                  context: context,
+                  child: listWidgets[index],
+                ),
+                childCount: listWidgets.length,
+              ),
+            ),
+          ),
+        ],
       );
     }
+    return DefaultTextStyle(
+      style: theme.textTheme.caption,
+      child: page,
+    );
   }
+}
 
-  Column _buildTitle(
-    BuildContext context,
-    String package,
-    String subtitle, {
-    TextTheme theme,
-  }) {
-    theme ??= Theme.of(context).primaryTextTheme;
+class _PackageLicensePageTitle extends StatelessWidget {
+  const _PackageLicensePageTitle(
+    this.title,
+    this.subtitle,
+    this.theme, {
+    Key key,
+  }) : super(key: key);
+
+  final String title;
+  final String subtitle;
+  final TextTheme theme;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(package, style: theme.headline6),
-        Text(
-          subtitle,
-          style: theme.subtitle2,
-        ),
+        Text(title, style: theme.headline6),
+        Text(subtitle, style: theme.subtitle2),
       ],
     );
   }
