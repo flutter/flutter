@@ -20,8 +20,6 @@ class TestApp extends StatefulWidget {
 }
 
 class _TestAppState extends State<TestApp> {
-  static final DateTime anUnknownValue = DateTime.fromMillisecondsSinceEpoch(1520777802314);
-
   Future<TestStatusResult> _result;
 
   void _executeNextStatus() {
