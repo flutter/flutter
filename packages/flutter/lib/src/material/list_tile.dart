@@ -89,7 +89,7 @@ class ListTileTheme extends InheritedTheme {
   /// If true then [ListTile]s will have the vertically dense layout.
   final bool dense;
 
-  /// If specified, [shape] defines the shape of the [ListTile]'s [InkWell] border. 
+  /// If specified, [shape] defines the shape of the [ListTile]'s [InkWell] border.
   final ShapeBorder shape;
 
   /// If specified, [style] defines the font used for [ListTile] titles.
@@ -127,6 +127,7 @@ class ListTileTheme extends InheritedTheme {
     final ListTileTheme ancestorTheme = context.findAncestorWidgetOfExactType<ListTileTheme>();
     return identical(this, ancestorTheme) ? child : ListTileTheme(
       dense: dense,
+      shape: shape,
       style: style,
       selectedColor: selectedColor,
       iconColor: iconColor,
@@ -139,6 +140,7 @@ class ListTileTheme extends InheritedTheme {
   @override
   bool updateShouldNotify(ListTileTheme oldWidget) {
     return dense != oldWidget.dense
+        || shape != oldWidget.shape
         || style != oldWidget.style
         || selectedColor != oldWidget.selectedColor
         || iconColor != oldWidget.iconColor
@@ -724,7 +726,7 @@ class ListTile extends StatelessWidget {
   /// If this property is null then [ThemeData.cardTheme.shape] is used.
   /// If that's null then the shape will be a [RoundedRectangleBorder] with a
   /// circular corner radius of 4.0.
-  final ShapeBorder shape;  
+  final ShapeBorder shape;
 
   /// The tile's internal padding.
   ///
