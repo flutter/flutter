@@ -391,6 +391,8 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   void detach() {
     _positionController.stop();
     _reactionController.stop();
+    _reactionHoverFadeController.stop();
+    _reactionFocusFadeController.stop();
     super.detach();
   }
 
