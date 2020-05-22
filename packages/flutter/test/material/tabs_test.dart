@@ -7,9 +7,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
@@ -2675,6 +2675,56 @@ void main() {
 
     final PageView pageView = tester.widget<PageView>(find.byType(PageView));
     expect(pageView.physics.toString().contains('ClampingScrollPhysics'), isFalse);
+  });
+
+  testWidgets('TabController animation stops immediately when user starts dragging TabBarView', (WidgetTester tester) async {
+    const List<Tab> tabs = <Tab>[
+      Tab(text: 'A'), Tab(text: 'B'), Tab(text: 'C')
+    ];
+    TabController tabController;
+
+    Widget buildTabControllerFrame(BuildContext context, TabController controller) {
+      tabController = controller;
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+          body: TabBarView(
+            controller: controller,
+            children: tabs.map((Tab tab) {
+              return Center(child: Text(tab.text));
+            }).toList(),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(TabControllerFrame(
+      builder: buildTabControllerFrame,
+      length: tabs.length,
+      initialIndex: 0,
+    ));
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+
+    expect(tabController.index, 0);
+    tabController.animateTo(2, duration: const Duration(seconds: 1));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Drag the TabBarView while tabController is in animation
+    // and check if its value immediately starts following TarBarView's page value
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
+    await gesture.moveBy(const Offset(1.0, 0.0));
+    expect(tabController.animation.value, pageController.page);
+    expect(tabController.indexIsChanging, false);
+
+    await tester.pumpAndSettle();
   });
 }
 
