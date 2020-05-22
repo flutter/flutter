@@ -151,6 +151,7 @@ class Form extends StatefulWidget {
 /// Typically obtained via [Form.of].
 class FormState extends State<Form> {
   int _generation = 0;
+  bool _hasInteractedByUser = false;
   final Set<FormFieldState<dynamic>> _fields = <FormFieldState<dynamic>>{};
 
   // Called when a form field has changed. This will cause all form fields
@@ -158,6 +159,9 @@ class FormState extends State<Form> {
   void _fieldDidChange() {
     if (widget.onChanged != null)
       widget.onChanged();
+    for (final FormFieldState<dynamic> field in _fields) {
+      _hasInteractedByUser = field._hasInteractedByUser == true;
+    }
     _forceRebuild();
   }
 
@@ -182,7 +186,7 @@ class FormState extends State<Form> {
         _validate();
         break;
       case AutoValidateMode.onUserInteraction:
-        if (_generation > 0) {
+        if (_hasInteractedByUser) {
           _validate();
         }
         break;
@@ -227,6 +231,7 @@ class FormState extends State<Form> {
   ///
   /// The form will rebuild to report the results.
   bool validate() {
+    _hasInteractedByUser = true;
     _forceRebuild();
     return _validate();
   }

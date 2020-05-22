@@ -744,4 +744,48 @@ void main() {
     await tester.pumpWidget(builder());
     expect(formFieldState.hasError, isTrue);
   });
+
+  testWidgets('Form.reset() reset form fields and auto validation will only happen on the next user interaction if autoValidateMode is onUserInteraction', (WidgetTester tester) async {
+    final GlobalKey<FormState> formState = GlobalKey<FormState>();
+    String errorText(String value) => '$value/error';
+
+    Widget builder() {
+      return MaterialApp(
+        theme: ThemeData(),
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Form(
+                key: formState,
+                autoValidateMode: AutoValidateMode.onUserInteraction,
+                child: Material(
+                  child: TextFormField(
+                    initialValue: 'foo',
+                    validator: errorText,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    // no error text is visible yet
+    expect(find.text(errorText('foo')), findsNothing);
+
+    await tester.enterText(find.byType(TextFormField), 'bar');
+    await tester.pumpAndSettle();
+    await tester.pump();
+    expect(find.text(errorText('bar')), findsOneWidget);
+
+    // resetting the form state should remove the error text
+    formState.currentState.reset();
+    await tester.pump();
+    expect(find.text(errorText('bar')), findsNothing);
+  });
 }
