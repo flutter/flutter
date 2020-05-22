@@ -594,7 +594,6 @@ void main() {
               child: Material(
                 child: FormField<String>(
                   initialValue: 'foo',
-                  autovalidate: true,
                   autoValidateMode: AutoValidateMode.onUserInteraction,
                   builder: (FormFieldState<String> state) {
                     formFieldState = state;
@@ -612,7 +611,7 @@ void main() {
     await tester.pumpWidget(builder());
     // form field has no error
     expect(formFieldState.hasError, isFalse);
-    // No error widget is visile
+    // No error widget is visible
     expect(find.text(errorText('foo')), findsNothing);
   });
 
@@ -631,7 +630,6 @@ void main() {
               child: Material(
                 child: FormField<String>(
                   initialValue: 'foo',
-                  autovalidate: true,
                   autoValidateMode: AutoValidateMode.always,
                   builder: (FormFieldState<String> state) {
                     formFieldState = state;
@@ -660,7 +658,6 @@ void main() {
           child: Center(
             child: Material(
               child: Form(
-                autovalidate: true,
                 autoValidateMode: AutoValidateMode.onUserInteraction,
                 child: TextFormField(
                   validator: errorText,
