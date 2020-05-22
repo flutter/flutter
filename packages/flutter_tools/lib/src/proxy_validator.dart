@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'base/io.dart';
 import 'doctor.dart';
 import 'globals.dart' as globals;
 
@@ -34,7 +35,8 @@ class ProxyValidator extends DoctorValidator {
         messages.add(const ValidationMessage.hint('NO_PROXY is not set'));
       } else {
         messages.add(ValidationMessage('NO_PROXY is $_noProxy'));
-        for (final String host in const <String>['127.0.0.1', 'localhost']) {
+        final List<String> loopBackAddresses = await _getLoopbackAddresses();
+        for (final String host in loopBackAddresses) {
           final ValidationMessage msg = _noProxy.contains(host)
               ? ValidationMessage('NO_PROXY contains $host')
               : ValidationMessage.hint('NO_PROXY does not contain $host');
@@ -51,5 +53,19 @@ class ProxyValidator extends DoctorValidator {
       hasIssues ? ValidationType.partial : ValidationType.installed,
       messages,
     );
+  }
+
+  Future<List<String>> _getLoopbackAddresses() async {
+    final List<NetworkInterface> networkInterfaces =
+        await listNetworkInterfaces(includeLinkLocal: true, includeLoopback: true);
+    final List<String> loopBackAddresses = <String>['localhost'];
+    for (final NetworkInterface networkInterface in networkInterfaces) {
+      for (final InternetAddress internetAddress in networkInterface.addresses) {
+        if (internetAddress.isLoopback) {
+          loopBackAddresses.add(internetAddress.address);
+        }
+      }
+    }
+    return loopBackAddresses;
   }
 }

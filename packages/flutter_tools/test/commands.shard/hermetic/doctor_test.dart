@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
@@ -174,6 +175,104 @@ void main() {
       Platform: () => FakePlatform()
         ..environment = <String, String>{
           'HTTP_PROXY': 'fakeproxy.local',
+          'NO_PROXY': 'localhost,127.0.0.1,::1',
+        },
+    });
+
+    testUsingContext('reports success when no_proxy is configured correctly', () async {
+      final ValidationResult results = await ProxyValidator().validate();
+      final List<ValidationMessage> issues = results.messages
+          .where((ValidationMessage msg) => msg.isError || msg.isHint)
+          .toList();
+      expect(issues, hasLength(0));
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform()
+        ..environment = <String, String>{
+          'http_proxy': 'fakeproxy.local',
+          'no_proxy': 'localhost,127.0.0.1,::1',
+        },
+    });
+
+    testUsingContext('reports issues when NO_PROXY is missing ::1', () async {
+      final ValidationResult results = await ProxyValidator().validate();
+      final List<ValidationMessage> issues = results.messages
+          .where((ValidationMessage msg) => msg.isError || msg.isHint)
+          .toList();
+      expect(issues, hasLength(1));
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform()
+        ..environment = <String, String>{
+          'http_proxy': 'fakeproxy.local',
+          'no_proxy': 'localhost,127.0.0.1',
+        },
+    });
+
+    testUsingContext('reports issues when NO_PROXY is missing localhost', () async {
+      final ValidationResult results = await ProxyValidator().validate();
+      final List<ValidationMessage> issues = results.messages
+          .where((ValidationMessage msg) => msg.isError || msg.isHint)
+          .toList();
+      expect(issues, hasLength(1));
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform()
+        ..environment = <String, String>{
+          'HTTP_PROXY': 'fakeproxy.local',
+          'NO_PROXY': '127.0.0.1,::1',
+        },
+    });
+
+    testUsingContext('reports issues when NO_PROXY is missing 127.0.0.1', () async {
+      final ValidationResult results = await ProxyValidator().validate();
+      final List<ValidationMessage> issues = results.messages
+          .where((ValidationMessage msg) => msg.isError || msg.isHint)
+          .toList();
+      expect(issues, hasLength(1));
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform()
+        ..environment = <String, String>{
+          'HTTP_PROXY': 'fakeproxy.local',
+          'NO_PROXY': 'localhost,::1',
+        },
+    });
+  });
+
+  group('proxy validator ipv4', () {
+
+    // Overriding the network interface listener to only return
+    // ipv4 addresses, this is to emulate configurations where ipv6
+    // is not supported.
+    setUp(() {
+      setNetworkInterfaceLister(
+        ({
+          bool includeLoopback,
+          bool includeLinkLocal,
+          InternetAddressType type,
+        }) async {
+          final List<io.NetworkInterface> interfaces = await io.NetworkInterface.list(
+            includeLoopback: includeLoopback,
+            includeLinkLocal: includeLinkLocal,
+            type: InternetAddressType.IPv4,
+          );
+          return interfaces.map(
+            (io.NetworkInterface interface) => NetworkInterface(interface),
+          ).toList();
+        });
+    });
+
+    tearDown(() {
+      resetNetworkInterfaceLister();
+    });
+
+    testUsingContext('reports success when NO_PROXY is configured correctly', () async {
+      final ValidationResult results = await ProxyValidator().validate();
+      final List<ValidationMessage> issues = results.messages
+          .where((ValidationMessage msg) => msg.isError || msg.isHint)
+          .toList();
+      expect(issues, hasLength(0));
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform()
+        ..environment = <String, String>{
+          'HTTP_PROXY': 'fakeproxy.local',
           'NO_PROXY': 'localhost,127.0.0.1',
         },
     });
@@ -197,7 +296,7 @@ void main() {
       final List<ValidationMessage> issues = results.messages
           .where((ValidationMessage msg) => msg.isError || msg.isHint)
           .toList();
-      expect(issues, isNot(hasLength(0)));
+      expect(issues, hasLength(1));
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform()
         ..environment = <String, String>{
@@ -211,7 +310,7 @@ void main() {
       final List<ValidationMessage> issues = results.messages
           .where((ValidationMessage msg) => msg.isError || msg.isHint)
           .toList();
-      expect(issues, isNot(hasLength(0)));
+      expect(issues, hasLength(1));
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform()
         ..environment = <String, String>{
