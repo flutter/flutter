@@ -1311,7 +1311,7 @@ class _TabBarViewState extends State<TabBarView> {
       return false;
 
     _warpUnderwayCount += 1;
-    if (notification is ScrollUpdateNotification && !_controller.indexIsChanging) {
+    if (notification is ScrollUpdateNotification) {
       if ((_pageController.page - _controller.index).abs() > 1.0) {
         _controller.index = _pageController.page.floor();
         _currentIndex =_controller.index;
