@@ -487,12 +487,10 @@ class _LicensePageState extends State<LicensePage> {
   final ValueNotifier<int> selectedId = ValueNotifier<int>(null);
 
   final Future<_LicenseData> licenses =
-      LicenseRegistry.licenses.fold<_LicenseData>(
-    _LicenseData(),
-    (_LicenseData previous, LicenseEntry license) {
-      return previous..addLicense(license);
-    },
-  );
+    LicenseRegistry.licenses.fold<_LicenseData>(
+      _LicenseData(),
+      (_LicenseData previous, LicenseEntry license) => previous..addLicense(license),
+    );
 
   @override
   Widget build(BuildContext context) {
@@ -847,8 +845,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final String package = widget.packageName;
-    final MaterialLocalizations localisations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localisations = MaterialLocalizations.of(context);
     final double gutterSize = _getGutterSize(context);
 
     if (widget.scrollController == null) {
@@ -1174,8 +1171,7 @@ class _MasterDetailFlow extends StatefulWidget {
       BuildContext context, {
         bool nullOk = false,
       }) {
-    _PageOpener pageOpener =
-    context.findAncestorStateOfType<_MasterDetailScaffoldState>();
+    _PageOpener pageOpener = context.findAncestorStateOfType<_MasterDetailScaffoldState>();
     pageOpener ??= context.findAncestorStateOfType<_MasterDetailFlowState>();
     assert(() {
       if (pageOpener == null && !nullOk) {
@@ -1474,13 +1470,10 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
   @override
   void initState() {
     super.initState();
-    detailPageFABlessGutterWidth =
-        widget.detailPageFABlessGutterWidth ?? _kDetailPageFABlessGutterWidth;
-    detailPageFABGutterWidth =
-        widget.detailPageFABGutterWidth ?? _kDetailPageFABGutterWidth;
+    detailPageFABlessGutterWidth = widget.detailPageFABlessGutterWidth ?? _kDetailPageFABlessGutterWidth;
+    detailPageFABGutterWidth = widget.detailPageFABGutterWidth ?? _kDetailPageFABGutterWidth;
     masterViewWidth = widget.masterViewWidth ?? _kMasterViewWidth;
-    floatingActionButtonLocation = widget.floatingActionButtonLocation ??
-        FloatingActionButtonLocation.endTop;
+    floatingActionButtonLocation = widget.floatingActionButtonLocation ?? FloatingActionButtonLocation.endTop;
   }
 
   @override
