@@ -1,4 +1,4 @@
-Signature: 59bfeb65dd9f8419aaf75c1cce9db608
+Signature: 4d1e3ad43c5f90a5b11b6a4c3fabcd9a
 
 UNUSED LICENSES:
 
@@ -463,6 +463,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.data/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory.wlan/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/meta.json
@@ -1374,6 +1375,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/format.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/reader.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/selector.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory.wlan/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/factory.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/annotation.fidl
@@ -2193,6 +2195,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.data/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory.wlan/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/meta.json
@@ -3256,6 +3259,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castwindow/window.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/error.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/types.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory.wlan/iovar.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/crash_register.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_register.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/last_reboot_info.fidl
