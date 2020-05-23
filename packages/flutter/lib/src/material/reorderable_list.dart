@@ -181,6 +181,7 @@ class _ReorderableListContent extends StatefulWidget {
     @required this.padding,
     @required this.onReorder,
     @required this.reverse,
+    @required this.physics,
   });
 
   final Widget header;
@@ -190,6 +191,7 @@ class _ReorderableListContent extends StatefulWidget {
   final EdgeInsets padding;
   final ReorderCallback onReorder;
   final bool reverse;
+  final AlwaysScrollableScrollPhysics physics;
 
   @override
   _ReorderableListContentState createState() => _ReorderableListContentState();
@@ -577,6 +579,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         padding: widget.padding,
         controller: _scrollController,
         reverse: widget.reverse,
+        physics: widget.physics,
         child: _buildContainerForScrollDirection(
           children: <Widget>[
             if (widget.reverse) _wrap(finalDropArea, widget.children.length, constraints),
