@@ -117,4 +117,30 @@ void main() {
       'EXTRA_GEN_SNAPSHOT_OPTIONS': '--enable-experiment=non-nullable,fizz',
     });
   });
+
+  testWithoutContext('encodeDartDefines encodes define values with URI encode compnents', () {
+    expect(encodeDartDefines(<String>['"hello"']), '%22hello%22');
+    expect(encodeDartDefines(<String>['https://www.google.com']), 'https%3A%2F%2Fwww.google.com');
+    expect(encodeDartDefines(<String>['2,3,4', '5']), '2%2C3%2C4,5');
+    expect(encodeDartDefines(<String>['true', 'false', 'flase']), 'true,false,flase');
+    expect(encodeDartDefines(<String>['1232,456', '2']), '1232%2C456,2');
+  });
+
+  testWithoutContext('decodeDartDefines decodes URI encoded dart defines', () {
+    expect(decodeDartDefines(<String, String>{
+      kDartDefines: '%22hello%22'
+    }), <String>['"hello"']);
+    expect(decodeDartDefines(<String, String>{
+      kDartDefines: 'https%3A%2F%2Fwww.google.com'
+    }), <String>['https://www.google.com']);
+    expect(decodeDartDefines(<String, String>{
+      kDartDefines: '2%2C3%2C4,5'
+    }), <String>['2,3,4', '5']);
+    expect(decodeDartDefines(<String, String>{
+      kDartDefines: 'true,false,flase'
+    }), <String>['true', 'false', 'flase']);
+    expect(decodeDartDefines(<String, String>{
+      kDartDefines: '1232%2C456,2'
+    }), <String>['1232,456', '2']);
+  });
 }
