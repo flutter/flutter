@@ -357,7 +357,7 @@ class CheckboxListTile extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// Defines insets for [CheckBox], [title], [subtitle], [secondary].
+  /// Defines insets for [Checkbox], [title], [subtitle], and [secondary].
   ///
   /// When the value is null, the `contentPadding` is `EdgeInsets.symmetric(horizontal: 16.0)`.
   final EdgeInsetsGeometry contentPadding;
