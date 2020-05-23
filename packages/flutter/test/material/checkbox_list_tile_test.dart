@@ -135,7 +135,7 @@ void main() {
 
     final Rect tallerWidget = checkboxRect.height > titleRect.height ? checkboxRect : titleRect;
 
-    // Check the offsets of left and right CheckBox and title after padding is applied.
+    // Check the offsets of CheckBox and title after padding is applied.
     expect(paddingRect.right, checkboxRect.right + 4);
     expect(paddingRect.left, titleRect.left - 10);
 
