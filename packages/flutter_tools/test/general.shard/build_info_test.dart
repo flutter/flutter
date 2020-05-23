@@ -110,7 +110,7 @@ void main() {
     expect(buildInfo.toEnvironmentConfig(), <String, String>{
       'TREE_SHAKE_ICONS': 'true',
       'TRACK_WIDGET_CREATION': 'true',
-      'DART_DEFINES': 'foo=2,bar=2',
+      'DART_DEFINES': 'foo%3D2,bar%3D2',
       'DART_OBFUSCATION': 'true',
       'SPLIT_DEBUG_INFO': 'foo/',
       'EXTRA_FRONT_END_OPTIONS': '--enable-experiment=non-nullable,bar',

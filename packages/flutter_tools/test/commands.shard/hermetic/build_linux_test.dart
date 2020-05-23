@@ -354,7 +354,7 @@ void main() {
     expect(configLines, containsAll(<String>[
       'set(FLUTTER_ROOT "$_kTestFlutterRoot")',
       'set(PROJECT_DIR "${fileSystem.currentDirectory.path}")',
-      '  "DART_DEFINES=\\"foo.bar=2,fizz.far=3\\""',
+      '  "DART_DEFINES=\\"foo.bar%3D2,fizz.far%3D3\\""',
       '  "DART_OBFUSCATION=\\"true\\""',
       '  "EXTRA_FRONT_END_OPTIONS=\\"--enable-experiment=non-nullable\\""',
       '  "EXTRA_GEN_SNAPSHOT_OPTIONS=\\"--enable-experiment=non-nullable\\""',
