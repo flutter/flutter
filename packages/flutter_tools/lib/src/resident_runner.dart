@@ -205,7 +205,7 @@ class FlutterDevice {
           restart: restart,
           compileExpression: compileExpression,
           reloadMethod: reloadMethod,
-          skSLMethod: getSkSLMethod,
+          getSkSLMethod: getSkSLMethod,
           device: device,
         );
       } on Exception catch (exception) {

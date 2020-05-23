@@ -144,7 +144,7 @@ void main() {
       reloadSources: anyNamed('reloadSources'),
       restart: anyNamed('restart'),
       compileExpression: anyNamed('compileExpression'),
-      skSLMethod: anyNamed('skSLMethod'),
+      getSkSLMethod: anyNamed('getSkSLMethod'),
     )).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.setupDevFS(any, any, packagesFilePath: anyNamed('packagesFilePath')))
       .thenAnswer((Invocation invocation) async {

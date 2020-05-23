@@ -225,7 +225,7 @@ class HotRunner extends ResidentRunner {
         restart: _restartService,
         compileExpression: _compileExpressionService,
         reloadMethod: reloadMethod,
-        skSLMethod: writeSkSL,
+        getSkSLMethod: writeSkSL,
       );
     // Catches all exceptions, non-Exception objects are rethrown.
     } catch (error) { // ignore: avoid_catches_without_on_clauses
