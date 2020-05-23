@@ -186,7 +186,11 @@ class _ReorderableListContent extends StatefulWidget {
     @required this.padding,
     @required this.onReorder,
     @required this.reverse,
+<<<<<<< HEAD
     @required this.physics
+=======
+    @required this.physics,
+>>>>>>> cd783729d... add physics property to reorderable list
   });
 
   final Widget header;
@@ -196,7 +200,11 @@ class _ReorderableListContent extends StatefulWidget {
   final EdgeInsets padding;
   final ReorderCallback onReorder;
   final bool reverse;
+<<<<<<< HEAD
   final ScrollPhysics physics;
+=======
+  final AlwaysScrollableScrollPhysics physics;
+>>>>>>> cd783729d... add physics property to reorderable list
 
   @override
   _ReorderableListContentState createState() => _ReorderableListContentState();
