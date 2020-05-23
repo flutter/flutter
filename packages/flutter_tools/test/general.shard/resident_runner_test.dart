@@ -1192,6 +1192,7 @@ void main() {
       Restart restart,
       CompileExpression compileExpression,
       ReloadMethod reloadMethod,
+      GetSkSLMethod getSkSLMethod,
       io.CompressionOptions compression,
       Device device,
     }) async => mockVMService,

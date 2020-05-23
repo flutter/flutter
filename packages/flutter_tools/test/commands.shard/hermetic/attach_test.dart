@@ -678,7 +678,7 @@ VMServiceConnector getFakeVmServiceFactory({
     Restart restart,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
-    SkSLMethod skSLMethod,
+    GetSkSLMethod getSkSLMethod,
     CompressionOptions compression,
     Device device,
   }) async {

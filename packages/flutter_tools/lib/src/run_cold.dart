@@ -130,7 +130,7 @@ class ColdRunner extends ResidentRunner {
     _didAttach = true;
     try {
       await connectToServiceProtocol(
-        skSLMethod: writeSkSL,
+        getSkSLMethod: writeSkSL,
       );
     } on Exception catch (error) {
       globals.printError('Error connecting to the service protocol: $error');

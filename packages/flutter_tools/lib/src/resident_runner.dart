@@ -186,7 +186,7 @@ class FlutterDevice {
     Restart restart,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
-    SkSLMethod skSLMethod,
+    GetSkSLMethod getSkSLMethod,
   }) {
     final Completer<void> completer = Completer<void>();
     StreamSubscription<void> subscription;
@@ -205,7 +205,7 @@ class FlutterDevice {
           restart: restart,
           compileExpression: compileExpression,
           reloadMethod: reloadMethod,
-          skSLMethod: skSLMethod,
+          skSLMethod: getSkSLMethod,
           device: device,
         );
       } on Exception catch (exception) {
@@ -1108,7 +1108,7 @@ abstract class ResidentRunner {
     Restart restart,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
-    SkSLMethod skSLMethod,
+    GetSkSLMethod getSkSLMethod,
   }) async {
     if (!debuggingOptions.debuggingEnabled) {
       throw 'The service protocol is not enabled.';
@@ -1121,7 +1121,7 @@ abstract class ResidentRunner {
         restart: restart,
         compileExpression: compileExpression,
         reloadMethod: reloadMethod,
-        skSLMethod: skSLMethod
+        getSkSLMethod: getSkSLMethod
       );
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(
