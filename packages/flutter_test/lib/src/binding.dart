@@ -517,13 +517,23 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// test failures.
   bool showAppDumpInErrors = false;
 
-  /// Call the testBody inside a [FakeAsync] scope on which [pump] can
-  /// advance time.
+  /// Runs `setUpBody` with the configuration specified in the binding.
+  ///
+  /// Returns a future which completes when the setup has run.
+  ///
+  /// [runSetup] and [runTest] should execute code in the same [Zone] to
+  /// minimize behavioral differences between setup and test code.
+  Future<void> runSetup(Future<void> setupBody());
+
+  /// Runs `testBody` with the configuration specified in the binding.
   ///
   /// Returns a future which completes when the test has run.
   ///
   /// Called by the [testWidgets] and [benchmarkWidgets] functions to
   /// run a test.
+  ///
+  /// [runSetup] and [runTest] should execute code in the same [Zone] to
+  /// minimize behavioral differences between setup and test code.
   ///
   /// The `invariantTester` argument is called after the `testBody`'s [Future]
   /// completes. If it throws, then the test is marked as failed.
@@ -1064,6 +1074,54 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _timeout += duration;
   }
 
+  FakeAsync _initFakeAsync() {
+    assert(!inTest);
+    assert(_currentFakeAsync == null);
+    assert(_clock == null);
+    final FakeAsync fakeAsync = FakeAsync();
+    _currentFakeAsync = fakeAsync; // reset in postTest
+    _clock = fakeAsync.getClock(DateTime.utc(2015, 1, 1));
+    return fakeAsync;
+  }
+
+  FakeAsync _initOrGet() {
+    if (!inTest) {
+      return _initFakeAsync();
+    } else {
+      return _currentFakeAsync;
+    }
+  }
+
+  Future<void> _reconcileFakeMicrotasks(Future<void> fakeAsyncResult) {
+    assert(inTest);
+    return Future<void>.microtask(() async {
+      // fakeAsyncResult is a Future that was created in the Zone of the
+      // fakeAsync. This means that if we await it here, it will register a
+      // microtask to handle the future _in the fake async zone_. We avoid this
+      // by calling '.then' in the current zone. While flushing the microtasks
+      // of the fake-zone below, the new future will be completed and can then
+      // be used without fakeAsync.
+      final Future<void> resultFuture = fakeAsyncResult.then<void>((_) {
+        // Do nothing.
+      });
+
+      // Resolve interplay between fake async and real async calls.
+      _currentFakeAsync.flushMicrotasks();
+      while (_pendingAsyncTasks != null) {
+        await _pendingAsyncTasks.future;
+        _currentFakeAsync.flushMicrotasks();
+      }
+      return resultFuture;
+    });
+  }
+
+  @override
+  Future<void> runSetup(Future<void> setupBody()) {
+    Future<void> result;
+    _initOrGet().run((_) => result = setupBody());
+    return _reconcileFakeMicrotasks(result);
+  }
+
   @override
   Future<void> runTest(
     Future<void> testBody(),
@@ -1072,9 +1130,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Duration timeout,
   }) {
     assert(description != null);
-    assert(!inTest);
-    assert(_currentFakeAsync == null);
-    assert(_clock == null);
 
     _timeout = timeout;
     if (_timeout != null) {
@@ -1083,36 +1138,15 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _timeoutCompleter = Completer<void>();
     }
 
-    final FakeAsync fakeAsync = FakeAsync();
-    _currentFakeAsync = fakeAsync; // reset in postTest
-    _clock = fakeAsync.getClock(DateTime.utc(2015, 1, 1));
     Future<void> testBodyResult;
-    fakeAsync.run((FakeAsync localFakeAsync) {
-      assert(fakeAsync == _currentFakeAsync);
-      assert(fakeAsync == localFakeAsync);
-      testBodyResult = _runTest(testBody, invariantTester, description, timeout: _timeoutCompleter?.future);
+    _initOrGet().run((FakeAsync localFakeAsync) {
+      assert(_currentFakeAsync == localFakeAsync);
+      testBodyResult = _runTest(testBody, invariantTester, description,
+          timeout: _timeoutCompleter?.future);
       assert(inTest);
     });
 
-    return Future<void>.microtask(() async {
-      // testBodyResult is a Future that was created in the Zone of the
-      // fakeAsync. This means that if we await it here, it will register a
-      // microtask to handle the future _in the fake async zone_. We avoid this
-      // by calling '.then' in the current zone. While flushing the microtasks
-      // of the fake-zone below, the new future will be completed and can then
-      // be used without fakeAsync.
-      final Future<void> resultFuture = testBodyResult.then<void>((_) {
-        // Do nothing.
-      });
-
-      // Resolve interplay between fake async and real async calls.
-      fakeAsync.flushMicrotasks();
-      while (_pendingAsyncTasks != null) {
-        await _pendingAsyncTasks.future;
-        fakeAsync.flushMicrotasks();
-      }
-      return resultFuture;
-    });
+    return _reconcileFakeMicrotasks(testBodyResult);
   }
 
   @override
@@ -1464,6 +1498,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _runningAsyncTasks = false;
     }
   }
+
+  @override
+  Future<void> runSetup(Future<void> setupBody()) => setupBody();
 
   @override
   Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, { String description = '', Duration timeout }) async {

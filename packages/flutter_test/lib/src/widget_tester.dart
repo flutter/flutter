@@ -48,7 +48,37 @@ export 'package:test_api/test_api.dart' hide
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 
-/// Runs the [callback] inside the Flutter test environment.
+/// Runs the setup [callback] inside the Flutter test environment.
+///
+/// This is useful if you would like to run [setUp] code that needs to execute
+/// in the same async zone as the test code.
+///
+/// The following test code would never complete without using [setUpWidgets]
+/// because the `foo` Future would be created outside of the FakeAsync zone that
+/// [testWidgets] sets up. By using [setUpWidgets], we ensure the setup code
+/// runs in the same [FakeAsync] zone which allows us to advance the clock and
+/// let the Future resolve during [testWidgets].
+///
+/// ```dart
+/// void main() {
+///   Future<int> five;
+///   setUpWidgets((WidgetTester tester) async {
+///     five = Future.delayed(const Duration(seconds: 5), () => 5);
+///     await tester.pump(const Duration(seconds: 5));
+///   });
+///
+///   testWidgets('Hello world smoke test', (WidgetTester tester) async {
+///     expect(await five, 5);
+///   });
+/// }
+/// ```
+void setUpWidgets(WidgetTesterCallback callback) {
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+  final WidgetTester tester = WidgetTester._(binding);
+  setUp(() => binding.runSetup(() async => await callback(tester)));
+}
+
+/// Runs the test [callback] inside the Flutter test environment.
 ///
 /// Use this function for testing custom [StatelessWidget]s and
 /// [StatefulWidget]s.
