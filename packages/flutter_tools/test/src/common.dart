@@ -371,7 +371,7 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
     final Logger topLevelLogger = globals.logger;
     final Map<Type, dynamic> contextOverrides = <Type, dynamic>{
       if (topLevelResults['verbose'] as bool)
-        Logger: () => VerboseLogger(topLevelLogger),
+        Logger: VerboseLogger(topLevelLogger),
     };
     return context.run<void>(
       overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
