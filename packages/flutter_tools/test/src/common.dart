@@ -368,9 +368,10 @@ class FakeVmServiceStreamResponse implements VmServiceExpectation {
 class TestFlutterCommandRunner extends FlutterCommandRunner {
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
+    final Logger topLevelLogger = globals.logger;
     final Map<Type, dynamic> contextOverrides = <Type, dynamic>{
       if (topLevelResults['verbose'] as bool)
-        Logger: () => VerboseLogger(globals.logger),
+        Logger: () => VerboseLogger(topLevelLogger),
     };
     return context.run<void>(
       overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
