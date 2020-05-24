@@ -1,6 +1,7 @@
 import static groovy.io.FileType.FILES
 
 import com.android.builder.model.AndroidProject
+import com.android.build.gradle.AppPlugin
 import com.android.build.OutputFile
 import groovy.json.JsonSlurper
 import java.nio.file.Path
@@ -731,39 +732,50 @@ class FlutterPlugin implements Plugin<Project> {
                 return
             }
             // Flutter module included as a subproject in add to app.
-            String hostAppProjectName = project.rootProject.hasProperty('flutter.hostAppProjectName') ? project.rootProject.property('flutter.hostAppProjectName')  : "app"
-            Project appProject = project.rootProject.findProject(":${hostAppProjectName}")
-            assert appProject != null : "Project :${hostAppProjectName} doesn't exist. To custom the host app project name, set `org.gradle.project.flutter.hostAppProjectName=<project-name>` in gradle.properties."
-            appProject.afterEvaluate {
-                assert appProject.android != null
-                appProject.android.applicationVariants.all { appProjectVariant ->
-                    // Find a compatible application variant in the host app.
-                    //
-                    // For example, consider a host app that defines the following variants:
-                    // | ----------------- | ----------------------------- |
-                    // |   Build Variant   |   Flutter Equivalent Variant  |
-                    // | ----------------- | ----------------------------- |
-                    // |   freeRelease     |   relese                      |
-                    // |   freeDebug       |   debug                       |
-                    // |   freeDevelop     |   debug                       |
-                    // |   profile         |   profile                     |
-                    // | ----------------- | ----------------------------- |
-                    //
-                    // This mapping is based on the following rules:
-                    // 1. If the host app build variant name is `profile` then the equivalent
-                    //    Flutter variant is `profile`.
-                    // 2. If the host app build variant is debuggable
-                    //    (e.g. `buildType.debuggable = true`), then the equivalent Flutter
-                    //    variant is `debug`.
-                    // 3. Otherwise, the equivalent Flutter variant is `release`.
-                    if (buildModeFor(appProjectVariant.buildType) != variantBuildMode) {
+            project.rootProject.subprojects { Project sp->
+                sp.afterEvaluate {
+                    def isApp = sp.plugins.hasPlugin(AppPlugin)
+                    if (!isApp) {
                         return
                     }
-                    Task mergeAssets = project
-                        .tasks
-                        .findByPath(":${hostAppProjectName}:merge${appProjectVariant.name.capitalize()}Assets")
-                    assert mergeAssets
-                    mergeAssets.dependsOn(copyFlutterAssetsTask)
+                    def depOnFlutter = sp.configurations.find {
+                        it.dependencies.withType(ProjectDependency).find {
+                            it.name == 'flutter'
+                        }
+                    } != null
+                    if (!depOnFlutter) {
+                        return
+                    }
+                    def appProject = sp
+                    appProject.android.applicationVariants.all { appProjectVariant ->
+                        // Find a compatible application variant in the host app.
+                        //
+                        // For example, consider a host app that defines the following variants:
+                        // | ----------------- | ----------------------------- |
+                        // |   Build Variant   |   Flutter Equivalent Variant  |
+                        // | ----------------- | ----------------------------- |
+                        // |   freeRelease     |   relese                      |
+                        // |   freeDebug       |   debug                       |
+                        // |   freeDevelop     |   debug                       |
+                        // |   profile         |   profile                     |
+                        // | ----------------- | ----------------------------- |
+                        //
+                        // This mapping is based on the following rules:
+                        // 1. If the host app build variant name is `profile` then the equivalent
+                        //    Flutter variant is `profile`.
+                        // 2. If the host app build variant is debuggable
+                        //    (e.g. `buildType.debuggable = true`), then the equivalent Flutter
+                        //    variant is `debug`.
+                        // 3. Otherwise, the equivalent Flutter variant is `release`.
+                        if (buildModeFor(appProjectVariant.buildType) != variantBuildMode) {
+                            return
+                        }
+                        Task mergeAssets = project
+                                .tasks
+                                .findByPath(":${appProject.name}:merge${appProjectVariant.name.capitalize()}Assets")
+                        assert mergeAssets
+                        mergeAssets.dependsOn(copyFlutterAssetsTask)
+                    }
                 }
             }
         }

@@ -3,5 +3,7 @@
 // found in the LICENSE file.
 
 include ':SampleApp'
+include ':SampleApp2'
+include ':SampleAppWithoutFlutter'
 setBinding(new Binding([gradle: this]))
 evaluate(new File(settingsDir.parentFile, 'hello/.android/include_flutter.groovy'))
