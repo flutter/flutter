@@ -132,6 +132,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
       if (widget.isAlwaysShown) {
         assert(widget.controller != null);
+        _fadeoutTimer?.cancel();
         widget.controller.position.didUpdateScrollPositionBy(0);
       }
     });

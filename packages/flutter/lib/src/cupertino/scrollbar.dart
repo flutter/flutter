@@ -277,6 +277,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
       if (widget.isAlwaysShown) {
         assert(widget.controller != null);
+        _fadeoutTimer?.cancel();
         widget.controller.position.didUpdateScrollPositionBy(0);
       }
     });
