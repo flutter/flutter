@@ -267,7 +267,7 @@ class CheckboxListTile extends StatelessWidget {
     this.selected = false,
     this.controlAffinity = ListTileControlAffinity.platform,
     this.autofocus = false,
-    this.contentPadding
+    this.contentPadding,
   }) : assert(value != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
