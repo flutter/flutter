@@ -357,7 +357,7 @@ class CheckboxListTile extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// Defines insets surrounding the tile's contents. 
+  /// Defines insets surrounding the tile's contents.
   ///
   /// This value will surround the [Checkbox], [title], [subtitle], and [secondary]
   /// widgets in [CheckboxListTile].
