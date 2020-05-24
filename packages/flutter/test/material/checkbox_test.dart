@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
+import '../gestures/gesture_tester.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
@@ -602,4 +603,53 @@ void main() {
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(60, 36)));
   });
+
+  testWidgets('Checkbox stops hover animation when removed from the tree.', (WidgetTester tester) async {
+    const Key checkboxKey = Key('checkbox');
+    bool checkboxVal = true;
+
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: StatefulBuilder(
+                builder: (_, StateSetter setState) => Checkbox(
+                  key: checkboxKey,
+                  value: checkboxVal,
+                  onChanged: (bool newValue) => setState(() {checkboxVal = newValue;}),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byKey(checkboxKey), findsOneWidget);
+    final Offset checkboxCenter = tester.getCenter(find.byKey(checkboxKey));
+    final TestGesture testGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await testGesture.moveTo(checkboxCenter);
+
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 25)); // hover animation duration is 50 ms. It is half-way.
+
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: Container(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await testGesture.removePointer();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS}));
 }
