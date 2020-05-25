@@ -97,7 +97,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (linuxWorkflow.appliesToHostPlatform)
         LinuxDoctorValidator(
           processManager: globals.processManager,
-          userMessages: userMessages,
         ),
       if (windowsWorkflow.appliesToHostPlatform)
         visualStudioValidator,
@@ -643,12 +642,6 @@ class FlutterValidator extends DoctorValidator {
       )));
       messages.add(ValidationMessage(userMessages.engineRevision(version.engineRevisionShort)));
       messages.add(ValidationMessage(userMessages.dartRevision(version.dartSdkVersion)));
-      if (globals.platform.environment.containsKey('PUB_HOSTED_URL')) {
-        messages.add(ValidationMessage(userMessages.pubMirrorURL(globals.platform.environment['PUB_HOSTED_URL'])));
-      }
-      if (globals.platform.environment.containsKey('FLUTTER_STORAGE_BASE_URL')) {
-        messages.add(ValidationMessage(userMessages.flutterMirrorURL(globals.platform.environment['FLUTTER_STORAGE_BASE_URL'])));
-      }
     } on VersionCheckError catch (e) {
       messages.add(ValidationMessage.error(e.message));
       valid = ValidationType.partial;
@@ -915,13 +908,26 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     }
 
     final List<String> split = version.split('.');
-
     if (split.length < 2) {
       return null;
     }
+    final int major = int.parse(split[0]);
+    final int minor = int.parse(split[1]);
 
-    final String major = split[0];
-    final String minor = split[1];
+    if (major >= 2020) {
+      _pluginsPath = globals.fs.path.join(
+        globals.fsUtils.homeDirPath,
+        'Library',
+        'Application Support',
+        'JetBrains',
+        '$id$major.$minor',
+        'plugins',
+      );
+      if (globals.fs.isDirectorySync(_pluginsPath)) {
+        return _pluginsPath;
+      }
+    }
+
     _pluginsPath = globals.fs.path.join(
       globals.fsUtils.homeDirPath,
       'Library',
