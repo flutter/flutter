@@ -656,7 +656,6 @@ String getFuchsiaBuildDirectory() {
   return globals.fs.path.join(getBuildDirectory(), 'fuchsia');
 }
 
-
 /// Defines specified via the `--dart-define` command-line option.
 ///
 /// These values are URI-encoded and then combined into a comma-separated string.
