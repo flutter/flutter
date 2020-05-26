@@ -482,8 +482,8 @@ class MockStdio extends Stdio {
   List<String> get writtenToStderr => _stderr.writes.map<String>(_stderr.encoding.decode).toList();
 }
 
-class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
-  MockPollingDeviceDiscovery() : super('mock');
+class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
+  FakePollingDeviceDiscovery() : super('mock');
 
   final List<Device> _devices = <Device>[];
   final StreamController<Device> _onAddedController = StreamController<Device>.broadcast();

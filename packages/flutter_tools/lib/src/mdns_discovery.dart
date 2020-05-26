@@ -133,11 +133,6 @@ class MDnsObservatoryDiscovery {
         authCode += '/';
       }
       return MDnsObservatoryDiscoveryResult(srv.first.port, authCode);
-    } on OSError catch (e) {
-      // OSError is neither an Error nor and Exception, so we wrap it in a
-      // SocketException and rethrow.
-      // See: https://github.com/dart-lang/sdk/issues/40934
-      throw SocketException('mdns query failed', osError: e);
     } finally {
       client.stop();
     }

@@ -10,6 +10,7 @@
 library foundation;
 
 export 'package:meta/meta.dart' show
+  factory,
   immutable,
   mustCallSuper,
   nonVirtual,

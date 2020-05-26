@@ -20,7 +20,7 @@ import 'package:meta/meta.dart';
 import 'package:test_api/test_api.dart' as test_package show TypeMatcher, test; // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
 // ignore: deprecated_member_use
-export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
+export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf, test; // Defines a 'package:test' shim.
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
@@ -31,7 +31,9 @@ void tryToDelete(Directory directory) {
   // on Windows it's common for deletions to fail due to
   // bogus (we think) "access denied" errors.
   try {
-    directory.deleteSync(recursive: true);
+    if (directory.existsSync()) {
+      directory.deleteSync(recursive: true);
+    }
   } on FileSystemException catch (error) {
     print('Failed to delete ${directory.path}: $error');
   }
@@ -156,6 +158,35 @@ Matcher containsIgnoringWhitespace(String toSearch) {
   );
 }
 
+/// The tool overrides `test` to ensure that files created under the
+/// system temporary directory are deleted after each test by calling
+/// `LocalFileSystem.dispose()`.
+@isTest
+void test(String description, FutureOr<void> body(), {
+  String testOn,
+  Timeout timeout,
+  dynamic skip,
+  List<String> tags,
+  Map<String, dynamic> onPlatform,
+  int retry,
+}) {
+  test_package.test(
+    description,
+    () async {
+      addTearDown(() async {
+        await LocalFileSystem.dispose();
+      });
+      return body();
+    },
+    timeout: timeout,
+    skip: skip,
+    tags: tags,
+    onPlatform: onPlatform,
+    retry: retry,
+    testOn: testOn,
+  );
+}
+
 /// Executes a test body in zone that does not allow context-based injection.
 ///
 /// For classes which have been refactored to excluded context-based injection
@@ -168,12 +199,12 @@ Matcher containsIgnoringWhitespace(String toSearch) {
 void testWithoutContext(String description, FutureOr<void> body(), {
   String testOn,
   Timeout timeout,
-  bool skip,
+  dynamic skip,
   List<String> tags,
   Map<String, dynamic> onPlatform,
   int retry,
   }) {
-  return test_package.test(
+  return test(
     description, () async {
       return runZoned(body, zoneValues: <Object, Object>{
         contextKey: const NoContext(),

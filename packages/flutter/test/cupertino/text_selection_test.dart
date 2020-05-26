@@ -8,8 +8,25 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import '../widgets/text.dart' show textOffsetToPosition;
+
+class MockClipboard {
+  Object _clipboardData = <String, dynamic>{
+    'text': null,
+  };
+
+  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
+    switch (methodCall.method) {
+      case 'Clipboard.getData':
+        return _clipboardData;
+      case 'Clipboard.setData':
+        _clipboardData = methodCall.arguments;
+        break;
+    }
+  }
+}
 
 class _LongCupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
   const _LongCupertinoLocalizationsDelegate();
@@ -49,6 +66,9 @@ class _LongCupertinoLocalizations extends DefaultCupertinoLocalizations {
 const _LongCupertinoLocalizations longLocalizations = _LongCupertinoLocalizations();
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  final MockClipboard mockClipboard = MockClipboard();
+  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
   // Returns true iff the button is visually enabled.
   bool appearsEnabled(WidgetTester tester, String text) {
@@ -154,6 +174,55 @@ void main() {
     });
   });
 
+  testWidgets('Paste only appears when clipboard has contents', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Column(
+          children: <Widget>[
+            CupertinoTextField(
+              controller: controller,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Make sure the clipboard is empty to start.
+    await Clipboard.setData(const ClipboardData(text: ''));
+
+    // Double tap to selet the first word.
+    const int index = 4;
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pumpAndSettle();
+
+    // No Paste yet, because nothing has been copied.
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Cut'), findsOneWidget);
+
+    // Tap copy to add something to the clipboard and close the menu.
+    await tester.tapAt(tester.getCenter(find.text('Copy')));
+    await tester.pumpAndSettle();
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+
+    // Double tap to show the menu again.
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pumpAndSettle();
+
+    // Paste now shows.
+    expect(find.text('Paste'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Cut'), findsOneWidget);
+  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
   group('Text selection menu overflow (iOS)', () {
     testWidgets('All menu items show when they fit.', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
@@ -181,7 +250,7 @@ void main() {
 
       // Long press on an empty space to show the selection menu.
       await tester.longPressAt(textOffsetToPosition(tester, 4));
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsOneWidget);
@@ -405,7 +474,7 @@ void main() {
       // Long press on an empty space to show the selection menu, with only the
       // paste button visible.
       await tester.longPressAt(textOffsetToPosition(tester, 4));
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.text(longLocalizations.cutButtonLabel), findsNothing);
       expect(find.text(longLocalizations.copyButtonLabel), findsNothing);
       expect(find.text(longLocalizations.pasteButtonLabel), findsOneWidget);

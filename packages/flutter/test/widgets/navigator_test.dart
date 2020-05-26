@@ -628,6 +628,74 @@ void main() {
     expect(aOffset.dx, lessThan(aOffsetOriginal.dx));
   });
 
+  testWidgets('pushReplacement correctly reports didReplace to the observer', (WidgetTester tester) async {
+    // Regression test for  https://github.com/flutter/flutter/issues/56892.
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/' : (BuildContext context) => const OnTapPage(
+        id: '/',
+      ),
+      '/A': (BuildContext context) => const OnTapPage(
+        id: 'A',
+      ),
+      '/A/B': (BuildContext context) => OnTapPage(
+        id: 'B',
+        onTap: (){
+          Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
+          Navigator.of(context).pushReplacementNamed('/C');
+        },
+      ),
+      '/C': (BuildContext context) => const OnTapPage(id: 'C',
+      ),
+    };
+    final List<NavigatorObservation> observations = <NavigatorObservation>[];
+    final TestObserver observer = TestObserver()
+      ..onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        observations.add(
+          NavigatorObservation(
+            current: route.settings.name,
+            previous: previousRoute.settings.name,
+            operation: 'didPop'
+          )
+        );
+      }
+      ..onReplaced = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        observations.add(
+          NavigatorObservation(
+            current: route.settings.name,
+            previous: previousRoute.settings.name,
+            operation: 'didReplace'
+          )
+        );
+      };
+    await tester.pumpWidget(
+      MaterialApp(
+        routes: routes,
+        navigatorObservers: <NavigatorObserver>[observer],
+        initialRoute: '/A/B',
+      )
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('B'), isOnstage);
+
+    await tester.tap(find.text('B'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(observations.length, 3);
+    expect(observations[0].current, '/A/B');
+    expect(observations[0].previous, '/A');
+    expect(observations[0].operation, 'didPop');
+    expect(observations[1].current, '/A');
+    expect(observations[1].previous, '/');
+    expect(observations[1].operation, 'didPop');
+
+    expect(observations[2].current, '/C');
+    expect(observations[2].previous, '/');
+    expect(observations[2].operation, 'didReplace');
+
+    await tester.pumpAndSettle();
+    expect(find.text('C'), isOnstage);
+  });
+
   testWidgets('pushAndRemoveUntil triggers secondaryAnimation', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(
@@ -2582,4 +2650,11 @@ class StatefulTestState extends State<StatefulTestWidget> {
     rebuildCount += 1;
     return Container();
   }
+}
+
+class NavigatorObservation {
+  const NavigatorObservation({this.previous, this.current, this.operation});
+  final String previous;
+  final String current;
+  final String operation;
 }
