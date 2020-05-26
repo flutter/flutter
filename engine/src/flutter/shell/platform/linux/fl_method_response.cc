@@ -93,9 +93,8 @@ G_MODULE_EXPORT FlValue* fl_method_response_get_result(FlMethodResponse* self,
     FlValue* details =
         fl_method_error_response_get_details(FL_METHOD_ERROR_RESPONSE(self));
     g_autofree gchar* details_text = nullptr;
-    if (details != nullptr) {
-      // TODO(robert-ancell): Update this when we have fl_value_to_string()
-    }
+    if (details != nullptr)
+      details_text = fl_value_to_string(details);
 
     g_autoptr(GString) error_message = g_string_new("");
     g_string_append_printf(error_message, "Remote code returned error %s",
