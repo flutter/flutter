@@ -1,0 +1,13 @@
+name: Tests
+on: [push, pull_request]
+
+jobs:
+  tool_test_linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Test
+        run: bin/dart --enable-asserts ./dev/bots/test.dart
+        env:
+          SHARD: tool_tests
