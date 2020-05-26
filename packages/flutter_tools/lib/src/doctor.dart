@@ -918,8 +918,8 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     if (split.length < 2) {
       return null;
     }
-    final int major = int.parse(split[0]);
-    final int minor = int.parse(split[1]);
+    final String major = split[0];
+    final String minor = split[1];
 
     final String homeDirPath = globals.fsUtils.homeDirPath;
     String pluginsPath = globals.fs.path.join(
