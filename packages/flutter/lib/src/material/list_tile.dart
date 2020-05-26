@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -148,6 +149,7 @@ class ListTileTheme extends InheritedTheme {
 ///
 ///  * [CheckboxListTile], which combines a [ListTile] with a [Checkbox].
 ///  * [RadioListTile], which combines a [ListTile] with a [Radio] button.
+///  * [SwitchListTile], which combines a [ListTile] with a [Switch].
 enum ListTileControlAffinity {
   /// Position the control on the leading edge, and the secondary widget, if
   /// any, on the trailing edge.
