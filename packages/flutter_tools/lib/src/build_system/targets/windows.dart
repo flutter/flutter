@@ -121,7 +121,7 @@ abstract class BundleWindowsAssets extends Target {
   @override
   Future<void> build(Environment environment) async {
     if (environment.defines[kBuildMode] == null) {
-      throw MissingDefineException(kBuildMode, 'debug_bundle_windows_assets');
+      throw MissingDefineException(kBuildMode, 'bundle_windows_assets');
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final Directory outputDirectory = environment.outputDir
