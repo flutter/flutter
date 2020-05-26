@@ -601,7 +601,7 @@ class RenderStack extends RenderBox
   ///
   /// This function is called by [paint] after potentially applying
   /// a clip to contain visual overflow.
-  /// children are sorted by child's zIndex in an ascending order then painted 
+  /// children are sorted by child's zIndex in an ascending order then painted
   @protected
   void paintStack(PaintingContext context, Offset offset) {
     RenderBox child = firstChild;

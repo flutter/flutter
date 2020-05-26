@@ -3556,7 +3556,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
   final double height;
 
   /// The child's Z-index
-  /// 
+  ///
   /// This integer is the stack level of the child in the current stacking
   ///  context.
   final int zIndex;
@@ -3725,7 +3725,7 @@ class PositionedDirectional extends StatelessWidget {
   final Widget child;
 
   /// The child's Z-index
-  /// 
+  ///
   /// This integer is the stack level of the child in the current stacking
   ///  context.
   final int zIndex;

@@ -97,7 +97,7 @@ void main() {
       ..right = 0.0
       ..left = 0.0
       ..height = 200.0
-      ..zIndex = 1;  
+      ..zIndex = 1;
 
     layout(stack, phase: EnginePhase.paint);
 
