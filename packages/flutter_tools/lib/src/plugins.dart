@@ -307,7 +307,10 @@ Future<List<Plugin>> findPlugins(FlutterProject project, {
   @required Logger logger,
 }) async {
   final List<Plugin> plugins = <Plugin>[];
-  final String packagesFile = project.packagesFile.path;
+  final String packagesFile = project.packagesFile?.path;
+  if (packagesFile == null) {
+    return plugins;
+  }
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
     fileSystem.file(packagesFile),
     logger: logger,
