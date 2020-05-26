@@ -3404,7 +3404,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
   Positioned.fromRect({
     Key key,
     Rect rect,
-    int zIndex,
+    this.zIndex,
     @required Widget child,
   }) : left = rect.left,
        top = rect.top,
@@ -3421,7 +3421,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
   Positioned.fromRelativeRect({
     Key key,
     RelativeRect rect,
-    int zIndex,
+    this.zIndex,
     @required Widget child,
   }) : left = rect.left,
        top = rect.top,
