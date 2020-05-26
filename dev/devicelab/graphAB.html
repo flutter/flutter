@@ -1,0 +1,218 @@
+<html>
+  <head>
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript">
+      AB_data = null;  // %initial_results_placeholder%
+
+      // Load the Visualization API and the Material chart package.
+      google.charts.load('current', {'packages':['corechart']});
+
+      // Set a callback to run when the Google Visualization API is loaded.
+      google.charts.setOnLoadCallback(drawCharts);
+
+      function drawCharts() {
+        if (AB_data) {
+          clearCharts();
+          makeCharts(AB_data);
+        }
+      }
+
+      var kLocalResultsName = 'local_engine_results';
+      var kDefaultResultsName = 'default_results';
+
+      function combinedKeys(resultsA, resultsB) {
+        var combinedKeys = Object.keys(resultsA);
+        var insertIndex = 0;
+        Object.keys(resultsB).forEach((key) => {
+          var index = combinedKeys.indexOf(key);
+          if (index < 0) {
+            combinedKeys.splice(insertIndex++, 0, key);
+          } else {
+            insertIndex = index+1;
+          }
+        });
+        return combinedKeys;
+      }
+
+      function mergeKeysInto(combinedKeys, runResults) {
+        Object.keys(runResults).forEach((key, value) => {
+          if (combinedKeys.indexOf(key) < 0) {
+            combinedKeys.push(key);
+          }
+        });
+      }
+
+      // All charts created
+      //   charts_by_type[type] = { chart, data, options, element };
+      var charts_by_type = [];
+
+      // Callback that creates and populates a data table,
+      // instantiates the pie chart, passes in the data and
+      // draws it.
+      function loadJSON() {
+        var input = document.getElementById('file-input');
+        if (input.files.length > 0) {
+          var fileReader = new FileReader();
+          fileReader.onload = function(e) {
+            var data = jQuery.parseJSON(fileReader.result);
+            AB_data = data;
+            drawCharts();
+          };
+          fileReader.readAsText(input.files[0]);
+        }
+      }
+
+      function clearCharts() {
+        charts_by_type = [];
+        var grid = document.getElementById('all_charts_flow');
+        while (grid.firstChild) {
+          grid.removeChild(grid.lastChild);
+        }
+      }
+
+      function makeCharts(AB_data) {
+        var localResults = AB_data[kLocalResultsName];
+        var defaultResults = AB_data[kDefaultResultsName];
+        var grid = document.getElementById('all_charts_flow');
+        combinedKeys(localResults, defaultResults).forEach(key => {
+          grid.appendChild(makeChartFromType(key, localResults, defaultResults));
+        });
+        for (var chart_key in charts_by_type) {
+          var info = charts_by_type[chart_key];
+          info.chart.draw(info.data, info.options);
+        }
+      }
+
+      function svg2img(element) {
+        var svg = element.getElementsByTagName('svg')[0];
+        var xml = new XMLSerializer().serializeToString(svg);
+        var svg64 = btoa(xml); //for utf8: btoa(unescape(encodeURIComponent(xml)))
+        var b64start = 'data:image/svg+xml;base64,';
+        var image64 = b64start + svg64;
+        return image64;
+      }
+
+      function clicked(type) {
+        var info = charts_by_type[type];
+        var canvas = document.createElement('canvas');
+        var dpr = window.devicePixelRatio;
+        canvas.width = info.options.width * dpr;
+        canvas.height = info.options.height * dpr;
+        canvas.style.width = info.options.width;
+        canvas.style.height = info.options.height;
+        canvas.style.display = 'none';
+        var context = canvas.getContext('2d');
+        var img_element = document.createElement('img');
+        img_element.onload = function() {
+          context.scale(dpr, dpr);
+          context.drawImage(img_element, 0, 0);
+          var img_data = canvas.toDataURL('image/png');
+          var link = document.createElement('a');
+          link.href = img_data;
+          link.download = 'AB_'+type+'.png';
+          link.click();
+        }
+        img_element.src = svg2img(info.element);
+      }
+
+      function makeDiv(id, style) {
+        var div = document.createElement('div');
+        div.id = id;
+        div.style = style;
+        for (var i = 2; i < arguments.length; i++) {
+          div.appendChild(arguments[i]);
+        }
+        return div;
+      }
+
+      function makeButton(text, onclick) {
+        var button = document.createElement('button');
+        button.innerHTML = text;
+        button.onclick = onclick;
+        return button;
+      }
+
+      function makeChartFromType(type, localResults, defaultResults) {
+        var localTimes = localResults[type];
+        var defaultTimes = defaultResults[type];
+        if (localTimes || defaultTimes) {
+          return makeDiv(
+            'results_' + type,
+            'padding: 5px; border-color: #black;',
+            makeChart(localTimes, defaultTimes, type),
+            makeDiv(
+              'controls_' + type,
+              'padding-top: 10px;',
+              makeButton('Save as PNG', function() { clicked(type); }),
+            ),
+          );
+        }
+
+        console.log('could not make a chart for: ' + type);
+        return null;
+      }
+
+      function makeChart(localTimes, defaultTimes, resultsType) {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', '');
+        var len = Math.max(localTimes ? localTimes.length : 0,
+                           defaultTimes ? defaultTimes.length : 0);
+        for (i = 0; i < len; i++) {
+          data.addColumn('number', 'Run '+(i+1));
+        }
+        if (localTimes) {
+          data.addRow([ 'local engine',   ...localTimes ]);
+        }
+        if (defaultTimes) {
+          data.addRow([ 'default engine', ...defaultTimes ]);
+        }
+
+        var options = {
+          title: resultsType,
+          legend: {
+            position: 'none',
+          },
+          //bars: 'horizontal',
+          chartArea: {
+            left: 30,
+            top:  50,
+            right: 20,
+            bottom: 20,
+          },
+          vAxis: {
+            minValue: 0,
+            textStyle: {
+              fontSize: 12,
+            },
+          },
+          width: 400,
+          height: 300,
+        };
+
+        var chart_div = makeDiv('chart_' + resultsType, null);
+        var chart = new google.visualization.ColumnChart(chart_div);
+        charts_by_type[resultsType] = {
+          chart: chart,
+          data: data,
+          options: options,
+          element: chart_div
+        };
+        return chart_div;
+      }
+
+    </script>
+  </head>
+
+  <body>
+  <div id='all_charts_header'>
+    <button onclick="document.getElementById('file-input').click();">Load results file</button>
+    <input id="file-input" type="file" name="name" style="display: none;" oninput="loadJSON()"/>
+  </div>
+  <div id='all_charts_flow'
+       style="display: flex; flex-wrap: wrap;">
+  </div>
+  </body>
+</html>
+
