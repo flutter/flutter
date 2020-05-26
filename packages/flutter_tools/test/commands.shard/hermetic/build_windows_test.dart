@@ -304,38 +304,6 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
-  testUsingContext('Release build prints an under-construction warning', () async {
-    final BuildWindowsCommand command = BuildWindowsCommand()
-      ..visualStudioOverride = mockVisualStudio;
-    applyMocksToCommand(command);
-    setUpMockProjectFilesForBuild();
-    when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
-
-    when(mockProcessManager.start(
-      <String>[
-        fileSystem.path.join(flutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
-        vcvarsPath,
-        fileSystem.path.basename(solutionPath),
-        'Release',
-      ],
-      environment: <String, String>{},
-      workingDirectory: fileSystem.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
-        return mockProcess;
-      },
-    );
-
-    await createTestCommandRunner(command).run(
-      const <String>['windows', '--no-pub']
-    );
-
-    expect(testLogger.statusText, contains('🚧'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => mockProcessManager,
-    Platform: () => windowsPlatform,
-    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-  });
-
   testUsingContext('hidden when not enabled on Windows host', () {
     expect(BuildWindowsCommand().hidden, true);
   }, overrides: <Type, Generator>{
