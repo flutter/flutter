@@ -1303,6 +1303,7 @@ flutter:
     final MockFlutterProject flutterProject = MockFlutterProject();
     final File packageConfig = fileSystem.file('.dart_tool/package_config.json');
     fileSystem.directory('foo/lib').createSync(recursive: true);
+    fileSystem.directory('fizz/lib').createSync(recursive: true);
     fileSystem.directory('bar/lib').createSync(recursive: true);
     fileSystem.file('foo/pubspec.yaml')
       .writeAsStringSync('''
@@ -1322,6 +1323,15 @@ flutter:
         pluginClass: SamplePlugin
         fileName: bar.dart
 ''');
+    fileSystem.file('fizz/pubspec.yaml')
+      .writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: SamplePlugin
+        fileName: bar.dart
+''');
     when(flutterProject.packagesFile).thenReturn(packageConfig);
 
     packageConfig
@@ -1330,6 +1340,14 @@ flutter:
         <String, Object>{
           'configVersion': 2,
           'packages': <Object>[
+            // Non-alphabetical order that cannot be made alphabetical by
+            // reversal to ensure actual sorting.
+            <String, Object>{
+              'name': 'fizz',
+              'rootUri': 'file:///fizz/',
+              'packageUri': 'lib/',
+              'languageVersion': '2.2'
+            },
             <String, Object>{
               'name': 'foo',
               'rootUri': 'file:///foo/',
@@ -1353,7 +1371,7 @@ flutter:
       logger: BufferLogger.test(),
     );
 
-    expect(results.map((Plugin plugin) => plugin.name), <String>['bar', 'foo']);
+    expect(results.map((Plugin plugin) => plugin.name), <String>['bar', 'fizz', 'foo']);
   });
 }
 
