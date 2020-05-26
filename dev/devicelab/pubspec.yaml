@@ -8,8 +8,6 @@ environment:
   sdk: ">=2.3.0 <3.0.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
   open_url: ^1.0.1
 
   args: 1.6.0
