@@ -672,10 +672,9 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
   const DropdownMenuItem({
     Key key,
     this.onTap,
-    @required this.value,
+    this.value,
     @required Widget child,
   }) : assert(child != null),
-       assert(value != null),
        super(key: key, child: child);
 
   /// Called when the dropdown menu item is tapped.
@@ -1469,8 +1468,8 @@ class DropdownButtonFormField<T> extends FormField<T> {
     FormFieldValidator<T> validator,
     @Deprecated(
         'Use autoValidateMode parameter which provide more specific '
-        'behaviour related to auto validation. '
-        'This feature was deprecated after v1.17.1'
+            'behaviour related to auto validation. '
+            'This feature was deprecated after v1.19.0'
     )
     bool autovalidate = false,
     AutoValidateMode autoValidateMode = AutoValidateMode.disabled,
@@ -1496,8 +1495,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
          initialValue: value,
          validator: validator,
          // ignore: deprecated_member_use_from_same_package
-         autovalidate: autovalidate,
-         autoValidateMode: autoValidateMode,
+         autoValidateMode: autovalidate ? AutoValidateMode.always : autoValidateMode,
          builder: (FormFieldState<T> field) {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
            final InputDecoration decorationArg =  decoration ?? InputDecoration(focusColor: focusColor);

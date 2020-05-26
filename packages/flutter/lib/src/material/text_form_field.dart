@@ -153,9 +153,9 @@ class TextFormField extends FormField<String> {
     SmartQuotesType smartQuotesType,
     bool enableSuggestions = true,
     @Deprecated(
-        'Use autoValidateMode parameter which provide more specific '
-            'behaviour related to auto validation. '
-            'This feature was deprecated after v1.17.1'
+      'Use autoValidateMode parameter which provide more specific '
+        'behaviour related to auto validation. '
+          'This feature was deprecated after v1.19.0'
     )
     bool autovalidate = false,
     bool maxLengthEnforced = true,
@@ -191,6 +191,7 @@ class TextFormField extends FormField<String> {
        assert(enableSuggestions != null),
        // ignore: deprecated_member_use_from_same_package
        assert(autovalidate != null),
+       assert(autoValidateMode != null),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
@@ -212,10 +213,9 @@ class TextFormField extends FormField<String> {
     initialValue: controller != null ? controller.text : (initialValue ?? ''),
     onSaved: onSaved,
     validator: validator,
-    // ignore: deprecated_member_use_from_same_package
-    autovalidate: autovalidate,
     enabled: enabled ?? decoration?.enabled ?? true,
-    autoValidateMode: autoValidateMode,
+    // ignore: deprecated_member_use_from_same_package
+    autoValidateMode: autovalidate ? AutoValidateMode.always : autoValidateMode,
     builder: (FormFieldState<String> field) {
       final _TextFormFieldState state = field as _TextFormFieldState;
       final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())

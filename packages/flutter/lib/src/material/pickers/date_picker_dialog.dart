@@ -286,7 +286,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   DatePickerEntryMode _entryMode;
   DateTime _selectedDate;
-  bool _autoValidate;
+  AutoValidateMode _autoValidateMode;
   final GlobalKey _calendarPickerKey = GlobalKey();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -295,14 +295,14 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     super.initState();
     _entryMode = widget.initialEntryMode;
     _selectedDate = widget.initialDate;
-    _autoValidate = false;
+    _autoValidateMode = AutoValidateMode.disabled;
   }
 
   void _handleOk() {
     if (_entryMode == DatePickerEntryMode.input) {
       final FormState form = _formKey.currentState;
       if (!form.validate()) {
-        setState(() => _autoValidate = true);
+        setState(() => _autoValidateMode = AutoValidateMode.always);
         return;
       }
       form.save();
@@ -318,7 +318,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     setState(() {
       switch (_entryMode) {
         case DatePickerEntryMode.calendar:
-          _autoValidate = false;
+          _autoValidateMode = AutoValidateMode.disabled;
           _entryMode = DatePickerEntryMode.input;
           break;
         case DatePickerEntryMode.input:
@@ -414,8 +414,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       case DatePickerEntryMode.input:
         picker = Form(
           key: _formKey,
-          // ignore: deprecated_member_use_from_same_package
-          autovalidate: _autoValidate,
+          autoValidateMode: _autoValidateMode,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             height: orientation == Orientation.portrait ? _inputFormPortraitHeight : _inputFormLandscapeHeight,

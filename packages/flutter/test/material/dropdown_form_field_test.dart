@@ -27,7 +27,7 @@ Finder _iconRichText(Key iconKey) {
 
 Widget buildFormFrame({
   Key buttonKey,
-  bool autovalidate = false,
+  AutoValidateMode autoValidateMode = AutoValidateMode.disabled,
   int elevation = 8,
   String value = 'two',
   ValueChanged<String> onChanged,
@@ -53,8 +53,7 @@ Widget buildFormFrame({
         child: RepaintBoundary(
           child: DropdownButtonFormField<String>(
             key: buttonKey,
-            // ignore: deprecated_member_use_from_same_package
-            autovalidate: autovalidate,
+            autoValidateMode: autoValidateMode,
             elevation: elevation,
             value: value,
             hint: hint,

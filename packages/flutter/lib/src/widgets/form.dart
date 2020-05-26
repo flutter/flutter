@@ -77,9 +77,9 @@ class Form extends StatefulWidget {
     Key key,
     @required this.child,
     @Deprecated(
-        'Use autoValidateMode parameter which provide more specific '
+      'Use autoValidateMode parameter which provide more specific '
         'behaviour related to auto validation. '
-        'This feature was deprecated after v1.17.1'
+          'This feature was deprecated after v1.19.0'
     )
     // ignore: deprecated_member_use_from_same_package
     this.autovalidate = false,
@@ -87,10 +87,8 @@ class Form extends StatefulWidget {
     this.onChanged,
     AutoValidateMode autoValidateMode = AutoValidateMode.disabled,
   }) : assert(child != null),
-       autoValidateMode = autoValidateMode != AutoValidateMode.disabled
-           // ignore: deprecated_member_use_from_same_package
-           ? autoValidateMode : autovalidate
-           ? AutoValidateMode.always : autoValidateMode,
+       // ignore: deprecated_member_use_from_same_package
+       autoValidateMode = autovalidate ? AutoValidateMode.always : autoValidateMode,
        super(key: key);
 
   /// Returns the closest [FormState] which encloses the given context.
@@ -116,6 +114,11 @@ class Form extends StatefulWidget {
   /// If true, form fields will validate and update their error text
   /// immediately after every change. Otherwise, you must call
   /// [FormState.validate] to validate.
+  @Deprecated(
+    'Use autoValidateMode parameter which provide more specific '
+      'behaviour related to auto validation. '
+        'This feature was deprecated after v1.19.0'
+  )
   final bool autovalidate;
 
   /// Enables the form to veto attempts by the user to dismiss the [ModalRoute]
@@ -136,14 +139,17 @@ class Form extends StatefulWidget {
   /// will rebuild.
   final VoidCallback onChanged;
 
+  /// Used to enable form fields auto validation and update their error text.
+  ///
   /// If [AutoValidateMode.onUserInteraction] this form will only auto-validate
-  /// after its content changes and if [AutoValidateMode.always] will
-  /// autovalidate without user interaction.
+  /// after its content changes and if [AutoValidateMode.always] it will
+  /// auto validate even without user interaction.
   ///
-  /// Defaults to [AutoValidateMode.disabled] which means no auto-validation
-  /// will occur.
-  ///
-  /// This property has no effect if [autovalidate] is false.
+  // ignore: deprecated_member_use_from_same_package
+  /// Defaults to [AutoValidateMode.disabled] if [autovalidate] is false which
+  // ignore: deprecated_member_use_from_same_package
+  /// means no auto validation will occur. If [autovalidate] is true then this
+  /// is set to [AutoValidateMode.always] for backward compatibility.
   final AutoValidateMode autoValidateMode;
 
   @override
@@ -222,11 +228,8 @@ class FormState extends State<Form> {
   ///
   /// The [Form.onChanged] callback will be called.
   ///
-  /// If the form's [Form.autovalidate] property is true, the fields will all be
-  /// revalidated after being reset.
-  ///
-  /// If the form's [Form.autoValidateMode] property is [AutoValidateMode.always], the fields will all be
-  /// revalidated after being reset.
+  /// If the form's [Form.autoValidateMode] property is [AutoValidateMode.always],
+  /// the fields will all be revalidated after being reset.
   void reset() {
     for (final FormFieldState<dynamic> field in _fields)
       field.reset();
@@ -324,9 +327,9 @@ class FormField<T> extends StatefulWidget {
     this.validator,
     this.initialValue,
     @Deprecated(
-        'Use autoValidateMode parameter which provide more specific '
+      'Use autoValidateMode parameter which provide more specific '
         'behaviour related to auto validation. '
-        'This feature was deprecated after v1.17.1'
+          'This feature was deprecated after v1.19.0'
     )
     // ignore: deprecated_member_use_from_same_package
     this.autovalidate = false,
@@ -334,10 +337,8 @@ class FormField<T> extends StatefulWidget {
     AutoValidateMode autoValidateMode = AutoValidateMode.disabled,
   }) :  assert(builder != null),
         assert(autoValidateMode != null),
-        autoValidateMode = autoValidateMode != AutoValidateMode.disabled
-            // ignore: deprecated_member_use_from_same_package
-            ? autoValidateMode : autovalidate
-            ? AutoValidateMode.always : autoValidateMode,
+        // ignore: deprecated_member_use_from_same_package
+        autoValidateMode = autovalidate ? AutoValidateMode.always : autoValidateMode,
         super(key: key);
 
   /// An optional method to call with the final value when the form is saved via
@@ -372,27 +373,31 @@ class FormField<T> extends StatefulWidget {
   /// [FormFieldState.validate] to validate. If part of a [Form] that
   /// auto-validates, this value will be ignored.
   @Deprecated(
-      'Use autoValidateMode parameter which provide more specific '
+    'Use autoValidateMode parameter which provide more specific '
       'behaviour related to auto validation. '
-      'This feature was deprecated after v1.17.1'
+        'This feature was deprecated after v1.19.0'
   )
   final bool autovalidate;
 
   /// Whether the form is able to receive user input.
   ///
-  // ignore: deprecated_member_use_from_same_package
-  /// Defaults to true. If [autovalidate] is true, the field will be validated.
-  /// Likewise, if this field is false, the widget will not be validated
-  // ignore: deprecated_member_use_from_same_package
-  /// regardless of [autovalidate].
+  /// Defaults to true. If [autoValidateMode] is not [AutoValidateMode.disabled],
+  /// the field will be auto validated. Likewise, if this field is false, the widget
+  /// will not be validated regardless of [autoValidateMode].
   final bool enabled;
 
-  /// If [AutoValidateMode.onUserInteraction] this form will only auto-validate
-  /// after its content changes and if [AutoValidateMode.always] will
-  /// autovalidate without user interaction.
+  /// Used to enable auto validation and update their error text.
   ///
-  /// Defaults to [AutoValidateMode.disabled] which means no auto-validation
-  /// will occur.
+  /// If [AutoValidateMode.onUserInteraction] this form will only auto-validate
+  /// after its content changes, if [AutoValidateMode.always] it will auto
+  /// validate even without user interaction and if [AutoValidateMode.disabled]
+  /// no auto validation will occur.
+  ///
+  // ignore: deprecated_member_use_from_same_package
+  /// Defaults to [AutoValidateMode.disabled] if [autovalidate] is false which
+  // ignore: deprecated_member_use_from_same_package
+  /// means no auto validation will occur. If [autovalidate] is true then this
+  /// is set to [AutoValidateMode.always] for backward compatibility.
   final AutoValidateMode autoValidateMode;
 
   @override
@@ -464,8 +469,9 @@ class FormFieldState<T> extends State<FormField<T>> {
   /// Updates this field's state to the new value. Useful for responding to
   /// child widget changes, e.g. [Slider]'s [Slider.onChanged] argument.
   ///
-  /// Triggers the [Form.onChanged] callback and, if the [Form.autovalidate]
-  /// field is set or [Form.autoValidateMode] is [AutoValidateMode.always], revalidates all the fields of the form.
+  /// Triggers the [Form.onChanged] callback and, if [Form.autoValidateMode] is
+  /// [AutoValidateMode.always] or [AutoValidateMode.onUserInteraction],
+  /// revalidates all the fields of the form.
   void didChange(T value) {
     setState(() {
       _value = value;
