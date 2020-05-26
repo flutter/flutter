@@ -268,7 +268,8 @@ enum StackFit {
   passthrough,
 }
 
-// TODO(liyuqian): remove `Overflow` once its usages are removed from Google.
+// TODO(liyuqian): Deprecate and remove `Overflow` once its usages are removed from Google.
+
 /// Whether overflowing children should be clipped, or their overflow be
 /// visible.
 enum Overflow {

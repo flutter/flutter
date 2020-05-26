@@ -3273,7 +3273,8 @@ class Stack extends MultiChildRenderObjectWidget {
   /// ([StackFit.expand]).
   final StackFit fit;
 
-  // TODO(liyuqian): remove this once its usages are removed from Google.
+  // TODO(liyuqian): Deprecate and remove [overflow] once its usages are removed from Google.
+
   /// Whether overflowing children should be clipped. See [Overflow].
   ///
   /// Some children in a stack might overflow its box. When this flag is set to
