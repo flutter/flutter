@@ -210,13 +210,21 @@ class _MaterialStateColor extends MaterialStateColor {
 ///     }
 ///     return SystemMouseCursors.click;
 ///   }
+///
+///   @override
+///   String get debugDescription => 'ButtonCursor()';
 /// }
 ///
-/// FlatButton(
-///   child: Text('FlatButton'),
-///   onPressed: () {},
-///   mouseCursor: ButtonCursor(),
-/// ),
+/// class MyFlatButton extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return FlatButton(
+///       child: Text('FlatButton'),
+///       onPressed: () {},
+///       mouseCursor: const ButtonCursor(),
+///     );
+///   }
+/// }
 /// ```
 /// {@end-tool}
 ///
