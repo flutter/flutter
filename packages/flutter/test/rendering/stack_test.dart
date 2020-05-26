@@ -49,6 +49,61 @@ void main() {
     expect(green.size.height, equals(100.0));
   });
 
+  test('Stack paint child in order according to child zIndex', () {
+    int index = 0, redPaintIndex, greenPaintIndex;
+    final RenderBox size = RenderConstrainedBox(
+      additionalConstraints: BoxConstraints.tight(const Size(100.0, 300.0))
+    );
+
+    final RenderBox red = RenderCustomPaint(
+            painter: TestCallbackPainter(
+              onPaint: () { redPaintIndex = index ++; },
+            ),
+            child: RenderDecoratedBox(
+              decoration: const BoxDecoration(
+                color: Color(0xFFFF0000),
+              ),
+              child: size,
+            ),
+          );
+
+    final RenderBox green = RenderCustomPaint(
+          painter: TestCallbackPainter(
+            onPaint: () { greenPaintIndex = index ++; },
+          ),
+          child: RenderDecoratedBox(
+            decoration: const BoxDecoration(
+              color: Color(0xFF00FF00),
+            ),
+          ),
+        );
+
+    final RenderBox stack = RenderStack(
+      textDirection: TextDirection.ltr,
+      children: <RenderBox>[red, green],
+    );
+
+    final StackParentData redParentData = red.parentData as StackParentData;
+    redParentData
+      ..top = 0.0
+      ..right = 0.0
+      ..left = 0.0
+      ..height = 200
+      ..zIndex = 2;
+
+    final StackParentData greenParentData = green.parentData as StackParentData;
+    greenParentData
+      ..top = 100.0
+      ..right = 0.0
+      ..left = 0.0
+      ..height = 200.0
+      ..zIndex = 1;  
+
+    layout(stack, phase: EnginePhase.paint);
+
+    expect(redPaintIndex, greaterThan(greenPaintIndex));
+  });
+
   test('Stack can layout with no children', () {
     final RenderBox stack = RenderStack(
       textDirection: TextDirection.ltr,

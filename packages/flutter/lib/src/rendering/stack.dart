@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble, hashValues;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import 'box.dart';
@@ -191,6 +192,9 @@ class StackParentData extends ContainerBoxParentData<RenderBox> {
   ///
   /// Ignored if both top and bottom are non-null.
   double height;
+
+  /// The child's Z-index
+  int zIndex;
 
   /// Get or set the current values in terms of a RelativeRect object.
   RelativeRect get rect => RelativeRect.fromLTRB(left, top, right, bottom);
@@ -599,7 +603,29 @@ class RenderStack extends RenderBox
   /// [paint] after potentially applying a clip to contain visual overflow.
   @protected
   void paintStack(PaintingContext context, Offset offset) {
-    defaultPaint(context, offset);
+    RenderBox child = firstChild;
+    final List<RenderBox> children = <RenderBox>[];
+
+    /// Sort the children such that they are ordered
+    while (child != null) {
+      final StackParentData childParentData = child.parentData as StackParentData;
+      children.add(child);
+      child = childParentData.nextSibling;
+    }
+
+    insertionSort(children, compare: (RenderBox childA, RenderBox childB) {
+      final StackParentData childAParentData = childA.parentData as StackParentData;
+      final StackParentData childBParentData = childB.parentData as StackParentData;
+      final int zIndexA = childAParentData.zIndex ?? 0;
+      final int zIndexB = childBParentData.zIndex ?? 0;
+      return zIndexA - zIndexB;
+    });
+
+    for (int i = 0; i < children.length; i++) {
+      final RenderBox paintChild = children[i];
+      final StackParentData paintChildParentData = paintChild.parentData as StackParentData;
+      context.paintChild(paintChild, paintChildParentData.offset + offset);
+    }
   }
 
   @override

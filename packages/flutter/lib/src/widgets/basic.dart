@@ -3390,6 +3390,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
     this.bottom,
     this.width,
     this.height,
+    this.zIndex,
     @required Widget child,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null),
@@ -3403,6 +3404,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
   Positioned.fromRect({
     Key key,
     Rect rect,
+    int zIndex,
     @required Widget child,
   }) : left = rect.left,
        top = rect.top,
@@ -3419,6 +3421,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
   Positioned.fromRelativeRect({
     Key key,
     RelativeRect rect,
+    int zIndex,
     @required Widget child,
   }) : left = rect.left,
        top = rect.top,
@@ -3436,6 +3439,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
     this.top = 0.0,
     this.right = 0.0,
     this.bottom = 0.0,
+    this.zIndex,
     @required Widget child,
   }) : width = null,
        height = null,
@@ -3468,6 +3472,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
     double bottom,
     double width,
     double height,
+    int zIndex,
     @required Widget child,
   }) {
     assert(textDirection != null);
@@ -3491,6 +3496,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
       bottom: bottom,
       width: width,
       height: height,
+      zIndex: zIndex,
       child: child,
     );
   }
@@ -3549,6 +3555,12 @@ class Positioned extends ParentDataWidget<StackParentData> {
   /// vertically.
   final double height;
 
+  /// The child's Z-index
+  /// 
+  /// This integer is the stack level of the child in the current stacking
+  ///  context.
+  final int zIndex;
+
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
@@ -3585,6 +3597,11 @@ class Positioned extends ParentDataWidget<StackParentData> {
       needsLayout = true;
     }
 
+    if (parentData.zIndex!= zIndex) {
+      parentData.zIndex = zIndex;
+      needsLayout = true;
+    }
+
     if (needsLayout) {
       final AbstractNode targetParent = renderObject.parent;
       if (targetParent is RenderObject)
@@ -3604,6 +3621,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
     properties.add(DoubleProperty('bottom', bottom, defaultValue: null));
     properties.add(DoubleProperty('width', width, defaultValue: null));
     properties.add(DoubleProperty('height', height, defaultValue: null));
+    properties.add(IntProperty('zIndex', zIndex, defaultValue: null));
   }
 }
 
@@ -3659,6 +3677,7 @@ class PositionedDirectional extends StatelessWidget {
     this.bottom,
     this.width,
     this.height,
+    this.zIndex,
     @required this.child,
   }) : super(key: key);
 
@@ -3705,6 +3724,12 @@ class PositionedDirectional extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  /// The child's Z-index
+  /// 
+  /// This integer is the stack level of the child in the current stacking
+  ///  context.
+  final int zIndex;
+
   @override
   Widget build(BuildContext context) {
     return Positioned.directional(
@@ -3715,6 +3740,7 @@ class PositionedDirectional extends StatelessWidget {
       bottom: bottom,
       width: width,
       height: height,
+      zIndex: zIndex,
       child: child,
     );
   }
