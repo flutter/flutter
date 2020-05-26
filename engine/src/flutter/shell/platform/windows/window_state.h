@@ -39,6 +39,14 @@ struct FlutterDesktopView {
   flutter::Win32FlutterWindow* window;
 };
 
+struct AotDataDeleter {
+  void operator()(FlutterEngineAOTData aot_data) {
+    FlutterEngineCollectAOTData(aot_data);
+  }
+};
+
+using UniqueAotDataPtr = std::unique_ptr<_FlutterEngineAOTData, AotDataDeleter>;
+
 // Struct for storing state of a Flutter engine instance.
 struct FlutterDesktopEngineState {
   // The handle to the Flutter engine instance.
@@ -46,6 +54,9 @@ struct FlutterDesktopEngineState {
 
   // Task runner for tasks posted from the engine.
   std::unique_ptr<flutter::Win32TaskRunner> task_runner;
+
+  // AOT data, if any.
+  UniqueAotDataPtr aot_data;
 };
 
 // State associated with the plugin registrar.

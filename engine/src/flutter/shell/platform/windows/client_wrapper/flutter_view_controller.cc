@@ -22,6 +22,8 @@ FlutterViewController::FlutterViewController(int width,
   FlutterDesktopEngineProperties properties = {};
   properties.assets_path = project.assets_path().c_str();
   properties.icu_data_path = project.icu_data_path().c_str();
+  // It is harmless to pass this in non-AOT mode.
+  properties.aot_library_path = project.aot_library_path().c_str();
   properties.switches = switch_count > 0 ? switches.data() : nullptr;
   properties.switches_count = switch_count;
   controller_ = FlutterDesktopCreateViewController(width, height, properties);
