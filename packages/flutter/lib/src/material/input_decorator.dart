@@ -465,7 +465,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   }
 }
 
-/// Defines the behaviour of the floating label
+/// Defines the behavior of the floating label
 enum FloatingLabelBehavior {
   /// The label will always be positioned within the content, or hidden.
   never,
@@ -1978,11 +1978,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (widget.decoration != old.decoration)
       _effectiveDecoration = null;
 
-    final bool floatBehaviourChanged = widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior
+    final bool floatBehaviorChanged = widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior
         // ignore: deprecated_member_use_from_same_package
         || widget.decoration.hasFloatingPlaceholder != old.decoration.hasFloatingPlaceholder;
 
-    if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviourChanged) {
+    if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviorChanged) {
       if (_floatingLabelEnabled
           && (widget._labelShouldWithdraw || widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always))
         _floatingLabelController.forward();
@@ -2509,7 +2509,7 @@ class InputDecoration {
     this.errorStyle,
     this.errorMaxLines,
     @Deprecated(
-      'Use floatingLabelBehaviour instead. '
+      'Use floatingLabelBehavior instead. '
       'This feature was deprecated after v1.13.2.'
     )
     this.hasFloatingPlaceholder = true, // ignore: deprecated_member_use_from_same_package
@@ -2555,7 +2555,7 @@ class InputDecoration {
   const InputDecoration.collapsed({
     @required this.hintText,
     @Deprecated(
-      'Use floatingLabelBehaviour instead. '
+      'Use floatingLabelBehavior instead. '
       'This feature was deprecated after v1.13.2.'
     )
     // ignore: deprecated_member_use_from_same_package
@@ -2731,7 +2731,7 @@ class InputDecoration {
   /// Defaults to true.
   ///
   @Deprecated(
-    'Use floatingLabelBehaviour instead. '
+    'Use floatingLabelBehavior instead. '
     'This feature was deprecated after v1.13.2.'
   )
   final bool hasFloatingPlaceholder;
@@ -3613,7 +3613,7 @@ class InputDecorationTheme with Diagnosticable {
     this.errorStyle,
     this.errorMaxLines,
     @Deprecated(
-      'Use floatingLabelBehaviour instead. '
+      'Use floatingLabelBehavior instead. '
       'This feature was deprecated after v1.13.2.'
     )
     // ignore: deprecated_member_use_from_same_package
@@ -3708,7 +3708,7 @@ class InputDecorationTheme with Diagnosticable {
   ///
   /// Defaults to true.
   @Deprecated(
-    'Use floatingLabelBehaviour instead. '
+    'Use floatingLabelBehavior instead. '
     'This feature was deprecated after v1.13.2.'
   )
   final bool hasFloatingPlaceholder;
@@ -3963,7 +3963,7 @@ class InputDecorationTheme with Diagnosticable {
     TextStyle errorStyle,
     int errorMaxLines,
     @Deprecated(
-      'Use floatingLabelBehaviour instead. '
+      'Use floatingLabelBehavior instead. '
       'This feature was deprecated after v1.13.2.'
     )
     bool hasFloatingPlaceholder,
