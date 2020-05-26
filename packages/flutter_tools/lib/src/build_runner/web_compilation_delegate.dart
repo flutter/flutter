@@ -41,7 +41,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       .childDirectory('.dart_tool')
       .createSync();
     final FlutterProject flutterProject = FlutterProject.fromDirectory(projectDirectory);
-    final bool hasWebPlugins = (await findPlugins(flutterProject))
+    final bool hasWebPlugins = (await findPlugins(flutterProject, fileSystem: globals.fs, logger: globals.logger))
       .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final BuildDaemonClient client = await const BuildDaemonCreator().startBuildDaemon(
       projectDirectory.path,

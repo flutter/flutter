@@ -11,6 +11,7 @@ import 'package:yaml/yaml.dart';
 import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
@@ -274,12 +275,15 @@ class Plugin {
   final Map<String, PluginPlatform> platforms;
 }
 
-Plugin _pluginFromPackage(String name, Uri packageRoot) {
-  final String pubspecPath = globals.fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
-  if (!globals.fs.isFileSync(pubspecPath)) {
+Plugin _pluginFromPackage(String name, Uri packageRoot, {
+  @required FileSystem fileSystem,
+  @required Logger logger,
+}) {
+  final String pubspecPath = fileSystem.path.fromUri(packageRoot.resolve('pubspec.yaml'));
+  if (!fileSystem.isFileSync(pubspecPath)) {
     return null;
   }
-  final dynamic pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync());
+  final dynamic pubspec = loadYaml(fileSystem.file(pubspecPath).readAsStringSync());
   if (pubspec == null) {
     return null;
   }
@@ -287,9 +291,9 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
   if (flutterConfig == null || !(flutterConfig.containsKey('plugin') as bool)) {
     return null;
   }
-  final String packageRootPath = globals.fs.path.fromUri(packageRoot);
+  final String packageRootPath = fileSystem.path.fromUri(packageRoot);
   final YamlMap dependencies = pubspec['dependencies'] as YamlMap;
-  globals.printTrace('Found plugin $name at $packageRootPath');
+  logger.printTrace('Found plugin $name at $packageRootPath');
   return Plugin.fromYaml(
     name,
     packageRootPath,
@@ -298,23 +302,31 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
   );
 }
 
-Future<List<Plugin>> findPlugins(FlutterProject project) async {
+Future<List<Plugin>> findPlugins(FlutterProject project, {
+  @required FileSystem fileSystem,
+  @required Logger logger,
+}) async {
   final List<Plugin> plugins = <Plugin>[];
-  final String packagesFile = globals.fs.path.join(
-    project.directory.path,
-    globalPackagesPath,
-  );
+  final String packagesFile = project.packagesFile.path;
   final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-    globals.fs.file(packagesFile),
-    logger: globals.logger,
+    fileSystem.file(packagesFile),
+    logger: logger,
   );
   for (final Package package in packageConfig.packages) {
     final Uri packageRoot = package.packageUriRoot.resolve('..');
-    final Plugin plugin = _pluginFromPackage(package.name, packageRoot);
+    final Plugin plugin = _pluginFromPackage(
+      package.name,
+      packageRoot,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
     if (plugin != null) {
       plugins.add(plugin);
     }
   }
+  // Sort the plugins by name to keep ordering stable.
+  plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
+
   return plugins;
 }
 
@@ -558,8 +570,8 @@ public final class GeneratedPluginRegistrant {
 
 List<Map<String, dynamic>> _extractPlatformMaps(List<Plugin> plugins, String type) {
   final List<Map<String, dynamic>> pluginConfigs = <Map<String, dynamic>>[];
-  for (final Plugin p in plugins) {
-    final PluginPlatform platformPlugin = p.platforms[type];
+  for (final Plugin plugin in plugins) {
+    final PluginPlatform platformPlugin = plugin.platforms[type];
     if (platformPlugin != null) {
       pluginConfigs.add(platformPlugin.toMap());
     }
@@ -1037,7 +1049,7 @@ void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<dynamic> pla
 ///
 /// Assumes `pub get` has been executed since last change to `pubspec.yaml`.
 Future<void> refreshPluginsList(FlutterProject project, {bool checkProjects = false}) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(project, fileSystem: globals.fs, logger: globals.logger);
 
   // TODO(franciscojma): Remove once migration is complete.
   // Write the legacy plugin files to avoid breaking existing apps.
@@ -1064,7 +1076,7 @@ Future<void> refreshPluginsList(FlutterProject project, {bool checkProjects = fa
 ///
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false}) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(project, fileSystem: globals.fs, logger: globals.logger);
   if ((checkProjects && project.android.existsSync()) || !checkProjects) {
     await _writeAndroidPluginRegistrant(project, plugins);
   }

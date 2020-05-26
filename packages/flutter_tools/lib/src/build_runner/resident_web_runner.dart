@@ -558,7 +558,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         ..createSync();
       result = _generatedEntrypointDirectory.childFile('web_entrypoint.dart');
 
-      final bool hasWebPlugins = (await findPlugins(flutterProject))
+      final bool hasWebPlugins = (await findPlugins(flutterProject, fileSystem: globals.fs, logger: globals.logger))
         .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
       await injectPlugins(flutterProject, checkProjects: true);
 

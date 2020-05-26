@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -22,7 +23,7 @@ import '../src/context.dart';
 
 void main() {
   group('plugins', () {
-    FileSystem fs;
+    FileSystem fileSystem;
     MockFlutterProject flutterProject;
     MockIosProject iosProject;
     MockMacOSProject macosProject;
@@ -36,13 +37,13 @@ void main() {
     FlutterVersion mockVersion;
 
     setUp(() async {
-      fs = MemoryFileSystem();
+      fileSystem = MemoryFileSystem.test();
       mockClock = MockClock();
       mockVersion = MockFlutterVersion();
 
       // Add basic properties to the Flutter project and subprojects
       flutterProject = MockFlutterProject();
-      when(flutterProject.directory).thenReturn(fs.directory('/'));
+      when(flutterProject.directory).thenReturn(fileSystem.directory('/'));
       // TODO(franciscojma): Remove logic for .flutter-plugins it's deprecated.
       when(flutterProject.flutterPluginsFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins'));
       when(flutterProject.flutterPluginsDependenciesFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins-dependencies'));
@@ -103,8 +104,8 @@ void main() {
       );
 
       // Set up a simple .packages file for all the tests to use, pointing to one package.
-      dummyPackageDirectory = fs.directory('/pubcache/apackage/lib/');
-      packagesFile = fs.file(fs.path.join(flutterProject.directory.path, globalPackagesPath));
+      dummyPackageDirectory = fileSystem.directory('/pubcache/apackage/lib/');
+      packagesFile = fileSystem.file(fileSystem.path.join(flutterProject.directory.path, globalPackagesPath));
       packagesFile..createSync(recursive: true)
           ..writeAsStringSync('apackage:file://${dummyPackageDirectory.path}\n');
     });
@@ -134,7 +135,7 @@ void main() {
 
     void createNewJavaPlugin1() {
       final Directory pluginUsingJavaAndNewEmbeddingDir =
-              fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
+              fileSystem.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
       pluginUsingJavaAndNewEmbeddingDir
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -163,7 +164,7 @@ flutter:
 
     Directory createPluginWithInvalidAndroidPackage() {
       final Directory pluginUsingJavaAndNewEmbeddingDir =
-              fs.systemTempDirectory.createTempSync('flutter_plugin_invalid_package.');
+              fileSystem.systemTempDirectory.createTempSync('flutter_plugin_invalid_package.');
       pluginUsingJavaAndNewEmbeddingDir
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -194,7 +195,7 @@ flutter:
 
     void createNewKotlinPlugin2() {
       final Directory pluginUsingKotlinAndNewEmbeddingDir =
-          fs.systemTempDirectory.createTempSync('flutter_plugin_using_kotlin_and_new_embedding_dir.');
+          fileSystem.systemTempDirectory.createTempSync('flutter_plugin_using_kotlin_and_new_embedding_dir.');
       pluginUsingKotlinAndNewEmbeddingDir
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -223,7 +224,7 @@ flutter:
 
     void createOldJavaPlugin(String pluginName) {
       final Directory pluginUsingOldEmbeddingDir =
-        fs.systemTempDirectory.createTempSync('flutter_plugin_using_old_embedding_dir.');
+        fileSystem.systemTempDirectory.createTempSync('flutter_plugin_using_old_embedding_dir.');
       pluginUsingOldEmbeddingDir
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -251,7 +252,7 @@ flutter:
 
     void createDualSupportJavaPlugin4() {
       final Directory pluginUsingJavaAndNewEmbeddingDir =
-        fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
+        fileSystem.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
       pluginUsingJavaAndNewEmbeddingDir
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -289,7 +290,7 @@ flutter:
       assert(name != null);
       assert(dependencies != null);
 
-      final Directory pluginDirectory = fs.systemTempDirectory.createTempSync('plugin.');
+      final Directory pluginDirectory = fileSystem.systemTempDirectory.createTempSync('plugin.');
       pluginDirectory
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -365,7 +366,7 @@ EndGlobal''');
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       });
 
@@ -378,7 +379,7 @@ EndGlobal''');
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       });
 
@@ -391,7 +392,7 @@ EndGlobal''');
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       });
 
@@ -493,7 +494,7 @@ EndGlobal''');
         ];
         expect(jsonContent.keys, expectedKeys);
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => mockClock,
         FlutterVersion: () => mockVersion
@@ -510,7 +511,7 @@ EndGlobal''');
         expect(iosProject.podManifestLock.existsSync(), false);
         expect(macosProject.podManifestLock.existsSync(), false);
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => mockClock,
         FlutterVersion: () => mockVersion
@@ -533,7 +534,7 @@ EndGlobal''');
         expect(iosProject.podManifestLock.existsSync(), true);
         expect(macosProject.podManifestLock.existsSync(), true);
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => mockClock,
         FlutterVersion: () => mockVersion
@@ -562,7 +563,7 @@ EndGlobal''');
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(fileSystem.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.existsSync(), isTrue);
@@ -570,7 +571,7 @@ EndGlobal''');
         expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
         expect(registrant.readAsStringSync(), contains('public static void registerWith(PluginRegistry registry)'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -582,7 +583,7 @@ EndGlobal''');
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(fileSystem.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.existsSync(), isTrue);
@@ -590,7 +591,7 @@ EndGlobal''');
         expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
         expect(registrant.readAsStringSync(), contains('public static void registerWith(@NonNull FlutterEngine flutterEngine)'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -606,7 +607,7 @@ EndGlobal''');
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(fileSystem.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.readAsStringSync(),
@@ -619,7 +620,7 @@ EndGlobal''');
         // There should be no warning message
         expect(testLogger.statusText, isNot(contains('go/android-plugin-migration')));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
@@ -641,7 +642,7 @@ EndGlobal''');
           ),
         );
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
@@ -668,7 +669,7 @@ EndGlobal''');
           ),
         );
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
@@ -683,7 +684,7 @@ EndGlobal''');
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(fileSystem.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.existsSync(), isTrue);
@@ -692,7 +693,7 @@ EndGlobal''');
         expect(registrant.readAsStringSync(),
           contains('UseBothEmbedding.registerWith(registry.registrarFor("plugin4.UseBothEmbedding"));'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
@@ -707,7 +708,7 @@ EndGlobal''');
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(fileSystem.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.existsSync(), isTrue);
@@ -716,7 +717,7 @@ EndGlobal''');
         expect(registrant.readAsStringSync(),
           contains('flutterEngine.getPlugins().add(new plugin4.UseBothEmbedding());'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
@@ -729,7 +730,7 @@ EndGlobal''');
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(fileSystem.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.existsSync(), isTrue);
@@ -737,7 +738,7 @@ EndGlobal''');
         expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
         expect(registrant.readAsStringSync(), contains('public static void registerWith(@NonNull FlutterEngine flutterEngine)'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -751,13 +752,13 @@ EndGlobal''');
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(fileSystem.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
         expect(registrant.readAsStringSync(),
           contains('plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
         expect(testLogger.statusText, contains('The plugin `plugin3` is built using an older version of the Android plugin API'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
@@ -772,14 +773,14 @@ EndGlobal''');
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(fileSystem.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
         expect(registrant.readAsStringSync(),
           contains('flutterEngine.getPlugins().add(new plugin1.UseNewEmbedding());'));
 
         expect(testLogger.statusText, isNot(contains('go/android-plugin-migration')));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
@@ -794,14 +795,14 @@ EndGlobal''');
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(fileSystem.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
         expect(registrant.readAsStringSync(),
           contains('flutterEngine.getPlugins().add(new plugin4.UseBothEmbedding());'));
 
         expect(testLogger.statusText, isNot(contains('go/android-plugin-migration')));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
@@ -817,7 +818,7 @@ EndGlobal''');
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(fileSystem.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
         expect(registrant.readAsStringSync(),
           contains('plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
@@ -826,7 +827,7 @@ EndGlobal''');
         expect(testLogger.statusText, contains('The plugin `plugin3` is built using an older version of the Android plugin API'));
         expect(testLogger.statusText, contains('The plugin `plugin4` is built using an older version of the Android plugin API'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
@@ -842,7 +843,7 @@ EndGlobal''');
         await injectPlugins(flutterProject);
 
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       });
 
@@ -852,7 +853,7 @@ EndGlobal''');
         when(webProject.existsSync()).thenReturn(true);
 
         final Directory webPluginWithNestedFile =
-            fs.systemTempDirectory.createTempSync('web_plugin_with_nested');
+            fileSystem.systemTempDirectory.createTempSync('web_plugin_with_nested');
         webPluginWithNestedFile.childFile('pubspec.yaml').writeAsStringSync('''
   flutter:
     plugin:
@@ -882,7 +883,7 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains("import 'package:web_plugin_with_nested/src/web_plugin.dart';"));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -909,7 +910,7 @@ flutter:
         expect(registrantFile, exists);
         expect(registrantFile, isNot(contains('SomePlugin')));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -938,7 +939,7 @@ flutter:
         expect(registrantFile, isNot(contains('SomePlugin')));
         expect(registrantFile, isNot(contains('none')));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -958,7 +959,7 @@ flutter:
         expect(registrantImpl.existsSync(), isTrue);
         expect(registrantImpl.readAsStringSync(), contains('SomePluginRegisterWithRegistrar'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -985,7 +986,7 @@ flutter:
         expect(registrantImpl, exists);
         expect(registrantImpl, isNot(contains('SomePlugin')));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -1014,7 +1015,7 @@ flutter:
         expect(registrantImpl, isNot(contains('SomePlugin')));
         expect(registrantImpl, isNot(contains('none')));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -1034,7 +1035,7 @@ flutter:
         expect(contents, contains('apackage'));
         expect(contents, contains('target_link_libraries(\${BINARY_NAME} PRIVATE \${plugin}_plugin)'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -1057,7 +1058,7 @@ flutter:
         expect(registrantImpl.existsSync(), isTrue);
         expect(registrantImpl.readAsStringSync(), contains('SomePluginRegisterWithRegistrar'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -1087,7 +1088,7 @@ flutter:
         expect(registrantImpl, exists);
         expect(registrantImpl, isNot(contains('SomePlugin')));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -1119,7 +1120,7 @@ flutter:
         expect(registrantImpl, isNot(contains('SomePlugin')));
         expect(registrantImpl, isNot(contains('none')));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -1135,13 +1136,13 @@ flutter:
         await injectPlugins(flutterProject, checkProjects: true);
 
         final File properties = windowsProject.generatedPluginPropertySheetFile;
-        final String includePath = fs.path.join('flutter', 'ephemeral', '.plugin_symlinks', 'apackage', 'windows');
+        final String includePath = fileSystem.path.join('flutter', 'ephemeral', '.plugin_symlinks', 'apackage', 'windows');
 
         expect(properties.existsSync(), isTrue);
         expect(properties.readAsStringSync(), contains('apackage_plugin.lib'));
         expect(properties.readAsStringSync(), contains('>$includePath;'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -1158,7 +1159,7 @@ flutter:
 
         expect(windowsProject.solutionFile.readAsStringSync(), contains(r'apackage\windows\plugin.vcxproj'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -1181,7 +1182,7 @@ flutter:
 
         expect(linuxProject.pluginSymlinkDirectory.childLink('apackage').existsSync(), true);
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -1194,7 +1195,7 @@ flutter:
 
         expect(windowsProject.pluginSymlinkDirectory.childLink('apackage').existsSync(), true);
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -1217,7 +1218,7 @@ flutter:
           expect(file.existsSync(), false);
         }
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -1242,7 +1243,7 @@ flutter:
           expect(file.existsSync(), false);
         }
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -1266,7 +1267,7 @@ flutter:
           expect(file.existsSync(), true);
         }
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
@@ -1290,11 +1291,69 @@ flutter:
           expect(link.existsSync(), true);
         }
       }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
     });
+  });
+
+  testWithoutContext('findPlugins sorts the plugin result', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final MockFlutterProject flutterProject = MockFlutterProject();
+    final File packageConfig = fileSystem.file('.dart_tool/package_config.json');
+    fileSystem.directory('foo/lib').createSync(recursive: true);
+    fileSystem.directory('bar/lib').createSync(recursive: true);
+    fileSystem.file('foo/pubspec.yaml')
+      .writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: SamplePlugin
+        fileName: foo.dart
+''');
+    fileSystem.file('bar/pubspec.yaml')
+      .writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: SamplePlugin
+        fileName: bar.dart
+''');
+    when(flutterProject.packagesFile).thenReturn(packageConfig);
+
+    packageConfig
+      ..createSync(recursive: true)
+      ..writeAsStringSync(json.encode(
+        <String, Object>{
+          'configVersion': 2,
+          'packages': <Object>[
+            <String, Object>{
+              'name': 'foo',
+              'rootUri': 'file:///foo/',
+              'packageUri': 'lib/',
+              'languageVersion': '2.2'
+            },
+            <String, Object>{
+              'name': 'bar',
+              'rootUri': 'file:///bar/',
+              'packageUri': 'lib/',
+              'languageVersion': '2.2'
+            },
+          ],
+        },
+      ),
+    );
+
+    final List<Plugin> results = await findPlugins(
+      flutterProject,
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
+    expect(results.map((Plugin plugin) => plugin.name), <String>['bar', 'foo']);
   });
 }
 
