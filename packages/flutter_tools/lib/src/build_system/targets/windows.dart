@@ -111,9 +111,6 @@ abstract class BundleWindowsAssets extends Target {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[];
-
-  @override
   List<String> get depfiles => const <String>[
     'flutter_assets.d',
   ];
@@ -191,6 +188,9 @@ class ReleaseBundleWindowsAssets extends BundleWindowsAssets {
   String get name => 'release_bundle_windows_assets';
 
   @override
+  List<Source> get outputs => const <Source>[];
+
+  @override
   List<Target> get dependencies => <Target>[
     ...super.dependencies,
     const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64)),
@@ -202,6 +202,9 @@ class ProfileBundleWindowsAssets extends BundleWindowsAssets {
 
   @override
   String get name => 'profile_bundle_windows_assets';
+
+  @override
+  List<Source> get outputs => const <Source>[];
 
   @override
   List<Target> get dependencies => <Target>[
@@ -218,7 +221,6 @@ class DebugBundleWindowsAssets extends BundleWindowsAssets {
 
   @override
   List<Source> get inputs => <Source>[
-    ...super.inputs,
     const Source.pattern('{BUILD_DIR}/app.dill'),
   ];
 
