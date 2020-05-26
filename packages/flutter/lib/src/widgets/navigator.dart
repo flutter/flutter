@@ -3648,11 +3648,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       pop();
       candidate = _history.lastWhere(_RouteEntry.isPresentPredicate, orElse: () => null);
     }
-    // We have popped all routes and still can't find a match.
-    assert(
-      false,
-      'All routes have been popped because none of them matches the predicate.'
-    );
   }
 
   /// Immediately remove `route` from the navigator, and [Route.dispose] it.

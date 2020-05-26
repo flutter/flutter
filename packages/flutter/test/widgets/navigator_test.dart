@@ -696,7 +696,7 @@ void main() {
     expect(find.text('C'), isOnstage);
   });
 
-  testWidgets('accidentally pops all routes should have better error message', (WidgetTester tester) async {
+  testWidgets('Able to pop all routes', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => const OnTapPage(
         id: '/',
@@ -719,10 +719,8 @@ void main() {
       )
     );
     await tester.tap(find.text('B'));
-    final dynamic exception = tester.takeException();
-    expect(exception is AssertionError, isTrue);
-    final AssertionError assertionError = exception as AssertionError;
-    expect(assertionError.message, 'All routes have been popped because none of them matches the predicate.');
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('pushAndRemoveUntil triggers secondaryAnimation', (WidgetTester tester) async {
