@@ -197,6 +197,7 @@ void main() {
         home: Material(
           child: Center(
             child: TextFormField(
+              // ignore: deprecated_member_use_from_same_package
               autovalidate: true,
               validator: (String value) {
                 _validateCalled++;
@@ -223,6 +224,7 @@ void main() {
           child: Center(
             child: TextFormField(
               enabled: true,
+              // ignore: deprecated_member_use_from_same_package
               autovalidate: true,
               validator: (String value) {
                 _validateCalled += 1;
@@ -449,9 +451,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: Center(
-            child: TextFormField(
-              autovalidate: true,
+          child: Scaffold(
+            body: TextFormField(
               autoValidateMode: AutoValidateMode.onUserInteraction,
               validator: (String value) {
                 _validateCalled++;

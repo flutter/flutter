@@ -1467,6 +1467,11 @@ class DropdownButtonFormField<T> extends FormField<T> {
     InputDecoration decoration,
     FormFieldSetter<T> onSaved,
     FormFieldValidator<T> validator,
+    @Deprecated(
+        'Use autoValidateMode parameter which provide more specific '
+        'behaviour related to auto validation. '
+        'This feature was deprecated after v1.17.1'
+    )
     bool autovalidate = false,
     AutoValidateMode autoValidateMode = AutoValidateMode.disabled,
   }) : assert(items == null || items.isEmpty || value == null ||
@@ -1490,6 +1495,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
          onSaved: onSaved,
          initialValue: value,
          validator: validator,
+         // ignore: deprecated_member_use_from_same_package
          autovalidate: autovalidate,
          autoValidateMode: autoValidateMode,
          builder: (FormFieldState<T> field) {

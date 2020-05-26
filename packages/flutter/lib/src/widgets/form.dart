@@ -76,12 +76,19 @@ class Form extends StatefulWidget {
   const Form({
     Key key,
     @required this.child,
+    @Deprecated(
+        'Use autoValidateMode parameter which provide more specific '
+        'behaviour related to auto validation. '
+        'This feature was deprecated after v1.17.1'
+    )
+    // ignore: deprecated_member_use_from_same_package
     this.autovalidate = false,
     this.onWillPop,
     this.onChanged,
     AutoValidateMode autoValidateMode = AutoValidateMode.disabled,
   }) : assert(child != null),
        autoValidateMode = autoValidateMode != AutoValidateMode.disabled
+           // ignore: deprecated_member_use_from_same_package
            ? autoValidateMode : autovalidate
            ? AutoValidateMode.always : autoValidateMode,
        super(key: key);
@@ -316,12 +323,19 @@ class FormField<T> extends StatefulWidget {
     this.onSaved,
     this.validator,
     this.initialValue,
+    @Deprecated(
+        'Use autoValidateMode parameter which provide more specific '
+        'behaviour related to auto validation. '
+        'This feature was deprecated after v1.17.1'
+    )
+    // ignore: deprecated_member_use_from_same_package
     this.autovalidate = false,
     this.enabled = true,
     AutoValidateMode autoValidateMode = AutoValidateMode.disabled,
   }) :  assert(builder != null),
         assert(autoValidateMode != null),
         autoValidateMode = autoValidateMode != AutoValidateMode.disabled
+            // ignore: deprecated_member_use_from_same_package
             ? autoValidateMode : autovalidate
             ? AutoValidateMode.always : autoValidateMode,
         super(key: key);
@@ -357,12 +371,19 @@ class FormField<T> extends StatefulWidget {
   /// immediately after every change. Otherwise, you must call
   /// [FormFieldState.validate] to validate. If part of a [Form] that
   /// auto-validates, this value will be ignored.
+  @Deprecated(
+      'Use autoValidateMode parameter which provide more specific '
+      'behaviour related to auto validation. '
+      'This feature was deprecated after v1.17.1'
+  )
   final bool autovalidate;
 
   /// Whether the form is able to receive user input.
   ///
+  // ignore: deprecated_member_use_from_same_package
   /// Defaults to true. If [autovalidate] is true, the field will be validated.
   /// Likewise, if this field is false, the widget will not be validated
+  // ignore: deprecated_member_use_from_same_package
   /// regardless of [autovalidate].
   final bool enabled;
 

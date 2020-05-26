@@ -53,6 +53,7 @@ Widget buildFormFrame({
         child: RepaintBoundary(
           child: DropdownButtonFormField<String>(
             key: buttonKey,
+            // ignore: deprecated_member_use_from_same_package
             autovalidate: autovalidate,
             elevation: elevation,
             value: value,
@@ -178,6 +179,7 @@ void main() {
                   _validateCalled++;
                   return currentValue == null ? 'Must select value' : null;
                 },
+                // ignore: deprecated_member_use_from_same_package
                 autovalidate: true,
               ),
             ),

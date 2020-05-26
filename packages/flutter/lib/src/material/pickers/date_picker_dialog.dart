@@ -414,6 +414,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       case DatePickerEntryMode.input:
         picker = Form(
           key: _formKey,
+          // ignore: deprecated_member_use_from_same_package
           autovalidate: _autoValidate,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24),

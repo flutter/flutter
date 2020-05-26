@@ -97,6 +97,7 @@ void main() {
               child: Material(
                 child: Form(
                   key: formKey,
+                  // ignore: deprecated_member_use_from_same_package
                   autovalidate: autovalidate,
                   child: TextFormField(
                     validator: errorText,
@@ -158,12 +159,14 @@ void main() {
                         key: fieldKey1,
                         initialValue: validString,
                         validator: validator,
+                        // ignore: deprecated_member_use_from_same_package
                         autovalidate: true
                       ),
                       TextFormField(
                         key: fieldKey2,
                         initialValue: validString,
                         validator: validator,
+                        // ignore: deprecated_member_use_from_same_package
                         autovalidate: true
                       ),
                     ],
@@ -205,12 +208,14 @@ void main() {
                           key: fieldKey1,
                           initialValue: validString,
                           validator: validator,
+                          // ignore: deprecated_member_use_from_same_package
                           autovalidate: false,
                         ),
                         TextFormField(
                           key: fieldKey2,
                           initialValue: '',
                           validator: validator,
+                          // ignore: deprecated_member_use_from_same_package
                           autovalidate: false,
                         ),
                       ],
@@ -247,6 +252,7 @@ void main() {
               child: Material(
                 child: Form(
                   key: formKey,
+                  // ignore: deprecated_member_use_from_same_package
                   autovalidate: true,
                   child: ListView(
                     children: <Widget>[
@@ -727,6 +733,7 @@ void main() {
               child: Material(
                 child: FormField<String>(
                   initialValue: 'foo',
+                  // ignore: deprecated_member_use_from_same_package
                   autovalidate: true,
                   builder: (FormFieldState<String> state) {
                     formFieldState = state;

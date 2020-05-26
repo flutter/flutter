@@ -152,6 +152,11 @@ class TextFormField extends FormField<String> {
     SmartDashesType smartDashesType,
     SmartQuotesType smartQuotesType,
     bool enableSuggestions = true,
+    @Deprecated(
+        'Use autoValidateMode parameter which provide more specific '
+            'behaviour related to auto validation. '
+            'This feature was deprecated after v1.17.1'
+    )
     bool autovalidate = false,
     bool maxLengthEnforced = true,
     int maxLines = 1,
@@ -184,6 +189,7 @@ class TextFormField extends FormField<String> {
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(enableSuggestions != null),
+       // ignore: deprecated_member_use_from_same_package
        assert(autovalidate != null),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
@@ -206,6 +212,7 @@ class TextFormField extends FormField<String> {
     initialValue: controller != null ? controller.text : (initialValue ?? ''),
     onSaved: onSaved,
     validator: validator,
+    // ignore: deprecated_member_use_from_same_package
     autovalidate: autovalidate,
     enabled: enabled ?? decoration?.enabled ?? true,
     autoValidateMode: autoValidateMode,
