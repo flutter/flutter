@@ -206,7 +206,7 @@ G_MODULE_EXPORT void fl_basic_message_channel_send(FlBasicMessageChannel* self,
       g_steal_pointer(&task));
 }
 
-G_MODULE_EXPORT FlValue* fl_basic_message_channel_send_on_channel_finish(
+G_MODULE_EXPORT FlValue* fl_basic_message_channel_send_finish(
     FlBasicMessageChannel* self,
     GAsyncResult* result,
     GError** error) {

@@ -187,10 +187,9 @@ void fl_basic_message_channel_send(FlBasicMessageChannel* channel,
  *
  * Returns: message response on success or %NULL on error.
  */
-FlValue* fl_basic_message_channel_send_on_channel_finish(
-    FlBasicMessageChannel* channel,
-    GAsyncResult* result,
-    GError** error);
+FlValue* fl_basic_message_channel_send_finish(FlBasicMessageChannel* channel,
+                                              GAsyncResult* result,
+                                              GError** error);
 
 G_END_DECLS
 
