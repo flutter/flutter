@@ -27,8 +27,8 @@ import 'ticker_provider.dart';
 /// panning over a large widget representing a table.
 ///
 /// ```dart
-///   const _rowCount = 20;
-///   const _columnCount = 3;
+///   static const int _rowCount = 20;
+///   static const int _columnCount = 3;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
