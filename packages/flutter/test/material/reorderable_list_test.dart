@@ -543,6 +543,9 @@ void main() {
         });
 
         testWidgets('Still builds when shrinkWrap, primary, and physics properties are set', (WidgetTester tester) async {
+          final List<Widget> widgetList = <Widget>[
+            Container(key: const Key('1'), child:  const Icon(Icons.account_circle))
+          ];
           final SingleChildScrollView scrollView = SingleChildScrollView(
             child: SizedBox(
               height: 100,
@@ -553,7 +556,7 @@ void main() {
                 primary: true,
                 physics: const AlwaysScrollableScrollPhysics(),
                 onReorder: (int oldIndex, int newIndex) {},
-                children: List<Widget>(),
+                children: widgetList,
               )
             ),
           );
