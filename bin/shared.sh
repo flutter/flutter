@@ -83,11 +83,17 @@ function _wait_for_lock () {
   local waiting_message_displayed
   while ! _lock "$FLUTTER_UPGRADE_LOCK"; do
     if [[ -z $waiting_message_displayed ]]; then
+      # Print with a return so that if the Dart code also prints this message
+      # when it does its own lock, the message won't appear twice. Be sure that
+      # the clearing printf below has the same number of space characters.
       printf "Waiting for another flutter command to release the startup lock...\r";
       waiting_message_displayed="true"
     fi
     sleep .1;
   done
+  # Clear the waiting message so it doesn't overlap any following text.
+  printf "                                                                  \r";
+  unset waiting_message_displayed
   # If the lock file is acquired, make sure that it is removed on exit.
   trap _rmlock INT TERM EXIT
 }
