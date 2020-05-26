@@ -17,12 +17,14 @@ class DartProject {
   // the following top-level items:
   // - icudtl.dat (provided as a resource by the Flutter tool)
   // - flutter_assets (as built by the Flutter tool)
+  // - app.so, for an AOT build (as built by the Flutter tool)
   //
   // The path can either be absolute, or relative to the directory containing
   // the running executable.
   explicit DartProject(const std::wstring& path) {
     assets_path_ = path + L"\\flutter_assets";
     icu_data_path_ = path + L"\\icudtl.dat";
+    aot_library_path_ = path + L"\\app.so";
   }
 
   ~DartProject() = default;
@@ -48,6 +50,7 @@ class DartProject {
 
   const std::wstring& assets_path() const { return assets_path_; }
   const std::wstring& icu_data_path() const { return icu_data_path_; }
+  const std::wstring& aot_library_path() const { return aot_library_path_; }
   const std::vector<std::string>& engine_switches() const {
     return engine_switches_;
   }
@@ -56,6 +59,9 @@ class DartProject {
   std::wstring assets_path_;
   // The path to the ICU data.
   std::wstring icu_data_path_;
+  // The path to the AOT library. This will always return a path, but non-AOT
+  // builds will not be expected to actually have a library at that path.
+  std::wstring aot_library_path_;
   // Switches to pass to the engine.
   std::vector<std::string> engine_switches_;
 };

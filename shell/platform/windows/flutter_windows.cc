@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
+#include <memory>
 #include <vector>
 
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/plugin_registrar.h"
@@ -28,6 +29,33 @@
 #include "flutter/shell/platform/windows/window_state.h"
 
 static_assert(FLUTTER_ENGINE_VERSION == 1, "");
+
+// Attempts to load AOT data from the given path, which must be absolute and
+// non-empty. Logs and returns nullptr on failure.
+UniqueAotDataPtr LoadAotData(std::filesystem::path aot_data_path) {
+  if (aot_data_path.empty()) {
+    std::cerr
+        << "Attempted to load AOT data, but no aot_library_path was provided."
+        << std::endl;
+    return nullptr;
+  }
+  if (!std::filesystem::exists(aot_data_path)) {
+    std::cerr << "Can't load AOT data from " << aot_data_path.u8string()
+              << "; no such file." << std::endl;
+    return nullptr;
+  }
+  std::string path_string = aot_data_path.u8string();
+  FlutterEngineAOTDataSource source = {};
+  source.type = kFlutterEngineAOTDataSourceTypeElfPath;
+  source.elf_path = path_string.c_str();
+  FlutterEngineAOTData data = nullptr;
+  auto result = FlutterEngineCreateAOTData(&source, &data);
+  if (result != kSuccess) {
+    std::cerr << "Failed to load AOT data from: " << path_string << std::endl;
+    return nullptr;
+  }
+  return UniqueAotDataPtr(data);
+}
 
 // Spins up an instance of the Flutter Engine.
 //
@@ -108,7 +136,12 @@ static std::unique_ptr<FlutterDesktopEngineState> RunFlutterEngine(
 
   std::filesystem::path assets_path(engine_properties.assets_path);
   std::filesystem::path icu_path(engine_properties.icu_data_path);
-  if (assets_path.is_relative() || icu_path.is_relative()) {
+  std::filesystem::path aot_library_path =
+      engine_properties.aot_library_path == nullptr
+          ? std::filesystem::path()
+          : std::filesystem::path(engine_properties.aot_library_path);
+  if (assets_path.is_relative() || icu_path.is_relative() ||
+      (!aot_library_path.empty() && aot_library_path.is_relative())) {
     // Treat relative paths as relative to the directory of this executable.
     std::filesystem::path executable_location =
         flutter::GetExecutableDirectory();
@@ -120,9 +153,21 @@ static std::unique_ptr<FlutterDesktopEngineState> RunFlutterEngine(
     }
     assets_path = std::filesystem::path(executable_location) / assets_path;
     icu_path = std::filesystem::path(executable_location) / icu_path;
+    if (!aot_library_path.empty()) {
+      aot_library_path =
+          std::filesystem::path(executable_location) / aot_library_path;
+    }
   }
   std::string assets_path_string = assets_path.u8string();
   std::string icu_path_string = icu_path.u8string();
+
+  if (FlutterEngineRunsAOTCompiledDartCode()) {
+    state->aot_data = LoadAotData(aot_library_path);
+    if (!state->aot_data) {
+      std::cerr << "Unable to start engine without AOT data." << std::endl;
+      return nullptr;
+    }
+  }
 
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
@@ -137,6 +182,9 @@ static std::unique_ptr<FlutterDesktopEngineState> RunFlutterEngine(
     return window->HandlePlatformMessage(engine_message);
   };
   args.custom_task_runners = &custom_task_runners;
+  if (state->aot_data) {
+    args.aot_data = state->aot_data.get();
+  }
 
   FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
   auto result =
