@@ -7,8 +7,6 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
-import '../cupertino/sliding_segmented_control_test.dart';
-
 void main() {
   group('$ReorderableListView', () {
     const double itemHeight = 48.0;
@@ -545,7 +543,6 @@ void main() {
         });
 
         testWidgets('Still builds when shrinkWrap, primary, and physics properties are set', (WidgetTester tester) async {
-          final List<String> list = <String>['Item 1', 'Item 2', 'Item 3'];
           final SingleChildScrollView scrollView = SingleChildScrollView(
             child: SizedBox(
               height: 100,
@@ -555,22 +552,8 @@ void main() {
                 shrinkWrap: true,
                 primary: true,
                 physics: const AlwaysScrollableScrollPhysics(),
-                onReorder: (int oldIndex, int newIndex) {
-                  setState(() {
-                    if (newIndex > oldIndex) {
-                      newIndex = -1;
-                    }
-                    final String removed = list.removeAt(oldIndex);
-                    list.insert(newIndex, removed);
-                  });
-                },
-                children: List<Widget>.generate(
-                  list.length,
-                  (int index) { return ListTile(
-                    leading: CircleAvatar(
-                    child: Text(index.toString()))
-                  ); },
-                ),
+                onReorder: (int oldIndex, int newIndex) {},
+                children: List<Widget>(),
               )
             ),
           );
