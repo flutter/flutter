@@ -40,7 +40,7 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// The switch is shown on the right by default in left-to-right languages (i.e.
 /// in the [ListTile.trailing] slot) which can be changed using [controlAffinity].
-/// The [secondary] widget is placed in the [ListTile.leading].
+/// The [secondary] widget is placed in the [ListTile.leading] slot.
 ///
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
