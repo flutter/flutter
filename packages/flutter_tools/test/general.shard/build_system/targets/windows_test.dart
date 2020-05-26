@@ -18,7 +18,6 @@ import 'package:mockito/mockito.dart';
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
-import '../../project_test.dart';
 
 final Platform kWindowsPlatform = FakePlatform(
   operatingSystem: 'windows',
@@ -184,10 +183,10 @@ void main() {
     await const ProfileBundleWindowsAssets().build(environment);
 
     // Depfile is created and so is copied.
-    expectExists(environment.buildDir.childFile('flutter_assets.d'));
-    expectExists(fileSystem.file(r'C:\windows\app.so'));
-    expectNotExists(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin'));
-    expectExists(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'));
+    expect(environment.buildDir.childFile('flutter_assets.d'), exists);
+    expect(fileSystem.file(r'C:\windows\app.so'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
+    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
@@ -211,10 +210,10 @@ void main() {
     await const ReleaseBundleWindowsAssets().build(environment);
 
     // Depfile is created and so is copied.
-    expectExists(environment.buildDir.childFile('flutter_assets.d'));
-    expectExists(fileSystem.file(r'C:\windows\app.so'));
-    expectNotExists(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin'));
-    expectExists(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'));
+    expect(environment.buildDir.childFile('flutter_assets.d'), exists);
+    expect(fileSystem.file(r'C:\windows\app.so'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
+    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
