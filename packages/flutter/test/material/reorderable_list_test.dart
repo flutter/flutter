@@ -551,15 +551,25 @@ void main() {
               height: 100,
               width: 100,
               child: ReorderableListView(
+                key: const Key('list'),
                 shrinkWrap: true,
                 primary: true,
                 physics: const AlwaysScrollableScrollPhysics(),
                 onReorder: (int oldIndex, int newIndex) {
-                  setState(() {});
+                  setState(() {
+                    if (newIndex > oldIndex) {
+                      newIndex = -1;
+                    }
+                    final String removed = list.removeAt(oldIndex);
+                    list.insert(newIndex, removed);
+                  });
                 },
                 children: List<Widget>.generate(
                   list.length,
-                  (int index) { return null; },
+                  (int index) { return ListTile(
+                    leading: CircleAvatar(
+                    child: Text(index.toString()))
+                  ); },
                 ),
               )
             ),
