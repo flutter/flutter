@@ -114,10 +114,15 @@ class Application final : public Engine::Delegate,
 
   // |fuchsia::ui::app::ViewProvider|
   void CreateView(
-      zx::eventpair view_token,
+      zx::eventpair token,
       fidl::InterfaceRequest<fuchsia::sys::ServiceProvider> incoming_services,
       fidl::InterfaceHandle<fuchsia::sys::ServiceProvider> outgoing_services)
       override;
+
+  // |fuchsia::ui::app::ViewProvider|
+  void CreateViewWithViewRef(zx::eventpair view_token,
+                             fuchsia::ui::views::ViewRefControl control_ref,
+                             fuchsia::ui::views::ViewRef view_ref) override;
 
   // |flutter::Engine::Delegate|
   void OnEngineTerminate(const Engine* holder) override;
