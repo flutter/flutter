@@ -930,6 +930,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       '$id$major.$minor',
       'plugins',
     );
+    // Fallback to legacy location from < 2020.
     if (!globals.fs.isDirectorySync(pluginsPath)) {
       pluginsPath = globals.fs.path.join(
         homeDirPath,
