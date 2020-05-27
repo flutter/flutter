@@ -29,7 +29,7 @@ template("fixtures_location") {
   # Array of source lines. We use a list to ensure a trailing newline is
   # emitted by write_file() to comply with -Wnewline-eof.
   location_source = [ "namespace flutter {namespace testing {const char* GetFixturesPath() {return \"$location_path\";}}}" ]
-  location_source_path = "$target_gen_dir/fixtures_location$target_name.cc"
+  location_source_path = "$target_gen_dir/_fl_$target_name.cc"
 
   write_file(location_source_path, location_source)
 
@@ -160,7 +160,7 @@ template("dart_snapshot") {
 
   testonly = true
 
-  dart_snapshot_kernel_target_name = "dart_snapshot_kernel_$target_name"
+  dart_snapshot_kernel_target_name = "_dsk_$target_name"
   dart_snapshot_kernel_path = "$target_gen_dir/assets/kernel_blob.bin"
   dart_snapshot_kernel(dart_snapshot_kernel_target_name) {
     dart_main = invoker.dart_main
@@ -171,7 +171,7 @@ template("dart_snapshot") {
   snapshot_public_deps = [ ":$dart_snapshot_kernel_target_name" ]
 
   if (is_aot_test) {
-    dart_snapshot_aot_target_name = "dart_snapshot_aot_$target_name"
+    dart_snapshot_aot_target_name = "_dsa_$target_name"
     dart_snapshot_aot(dart_snapshot_aot_target_name) {
       dart_kernel = dart_snapshot_kernel_path
       deps = [
@@ -240,7 +240,7 @@ template("copy_fixtures") {
 template("test_fixtures") {
   # Even if no fixtures are present, the location of the fixtures directory
   # must always be known to tests.
-  fixtures_location_target_name = "fixtures_location_$target_name"
+  fixtures_location_target_name = "_fl_$target_name"
   fixtures_location(fixtures_location_target_name) {
     if (is_fuchsia) {
       assets_dir = "/pkg/data/assets"
@@ -253,7 +253,7 @@ template("test_fixtures") {
 
   # If the fixtures are specified, copy them to the assets directory.
   if (defined(invoker.fixtures)) {
-    copy_fixtures_target_name = "copy_fixtures_$target_name"
+    copy_fixtures_target_name = "_cf_$target_name"
     copy_fixtures(copy_fixtures_target_name) {
       fixtures = invoker.fixtures
     }
@@ -263,7 +263,7 @@ template("test_fixtures") {
   # If a Dart file is specified, snapshot it and place it in the generated
   # assets directory.
   if (defined(invoker.dart_main)) {
-    dart_snapshot_target_name = "dart_snapshot_$target_name"
+    dart_snapshot_target_name = "_ds_$target_name"
     dart_snapshot(dart_snapshot_target_name) {
       dart_main = invoker.dart_main
     }
