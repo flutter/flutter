@@ -1198,6 +1198,48 @@ void main() {
     }) async => mockVMService,
   }));
 
+  group('Timing test', () {
+    Completer<MockVMService> completer;
+
+    test('Can connect to observatory stream after receiving done event.', () => testbed.run(() async {
+      completer = Completer<MockVMService>();
+      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+      final MockDevice mockDevice = MockDevice();
+      final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
+      when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(mockLogReader);
+      final StreamController<Uri> controller = StreamController<Uri>();
+
+      final TestFlutterDevice flutterDevice = TestFlutterDevice(
+        mockDevice,
+        observatoryUris: controller.stream,
+      );
+
+      final Future<void> connectResult = flutterDevice.connect();
+
+      // First add the observatory URI to connect to.
+      controller.add(testUri);
+
+      // Then close the stream.
+      await controller.close();
+
+      // Then complete the VM service connection.
+      completer.complete(mockVMService);
+
+      await connectResult;
+
+      verify(mockLogReader.connectedVMService = mockVMService);
+    }, overrides: <Type, Generator>{
+      VMServiceConnector: () => (Uri httpUri, {
+        ReloadSources reloadSources,
+        Restart restart,
+        CompileExpression compileExpression,
+        ReloadMethod reloadMethod,
+        io.CompressionOptions compression,
+        Device device,
+      }) async => completer.future,
+    }));
+  });
+
   test('nextPlatform moves through expected platforms', () {
     expect(nextPlatform('android', TestFeatureFlags()), 'iOS');
     expect(nextPlatform('iOS', TestFeatureFlags()), 'fuchsia');
