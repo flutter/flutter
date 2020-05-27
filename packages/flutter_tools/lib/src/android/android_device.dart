@@ -620,7 +620,9 @@ class AndroidDevice extends Device {
       observatoryDiscovery = ProtocolDiscovery.observatory(
         await getLogReader(),
         portForwarder: portForwarder,
-        // DDS will be listening on the hostVmServicePort.
+        // Since DDS will be acting as if it's the VM service, it should bind to the specified
+        // host VM service port. DDS will be the only client connecting to the VM service, so
+        // we don't really care which port it binds to, as long as DDS knows what it is.
         hostPort: 0,
         devicePort: debuggingOptions.deviceVmServicePort,
         ipv6: ipv6,
