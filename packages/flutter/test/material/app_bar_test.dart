@@ -1747,18 +1747,18 @@ void main() {
           builder: (BuildContext context) {
             return Directionality(
               textDirection: textDirection,
-              child: MediaQuery(
-                data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
-                child: Builder(
-                  builder: (BuildContext context) {
-                    return Scaffold(
-                      appBar: AppBar(
-                        centerTitle: centerTitle,
-                        title: const Text('Jumbo'),
+              child: Builder(
+                builder: (BuildContext context) {
+                  return Scaffold(
+                    appBar: AppBar(
+                      centerTitle: centerTitle,
+                      title: MediaQuery(
+                        data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                        child: const Text('Jumbo'),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
             );
           },
