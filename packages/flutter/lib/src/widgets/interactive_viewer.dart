@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
+import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
+
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
@@ -18,9 +20,9 @@ import 'ticker_provider.dart';
 ///
 /// The [child] must not be null.
 ///
-/// [disableRotation] must be true because the rotation feature is not yet
-/// available. This requirement will be removed in the future when rotation is
-/// available.
+/// The parameter [disableRotation] must be true because the rotation feature is
+/// not yet available. This requirement will be removed in the future when
+/// rotation is available.
 ///
 /// {@tool dartpad --template=stateful_widget_material_ticker}
 /// This example shows how to use InteractiveViewer in the simple case of
