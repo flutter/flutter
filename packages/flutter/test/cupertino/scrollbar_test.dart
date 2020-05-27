@@ -385,6 +385,7 @@ void main() {
 
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
+    expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
     await tester.fling(
       find.byType(SingleChildScrollView),
       const Offset(0.0, -10.0),
@@ -393,7 +394,13 @@ void main() {
     expect(find.byType(CupertinoScrollbar), paints..rrect());
 
     await tester.tap(find.byType(CupertinoButton));
+    await tester.pump();
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
+
+    // Wait for the timer delay to expire.
+    await tester.pump(const Duration(milliseconds: 600)); // _kScrollbarTimeToFade
     await tester.pumpAndSettle();
+    // Scrollbar thumb is showing after scroll finishes and timer ends.
     expect(find.byType(CupertinoScrollbar), paints..rrect());
   });
 

@@ -396,6 +396,7 @@ void main() {
 
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
+    expect(find.byType(Scrollbar), isNot(paints..rect()));
     await tester.fling(
       find.byType(SingleChildScrollView),
       const Offset(0.0, -10.0),
@@ -404,8 +405,13 @@ void main() {
     expect(find.byType(Scrollbar), paints..rect());
 
     await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+    expect(find.byType(Scrollbar), paints..rect());
+
+    // Wait for the timer delay to expire.
+    await tester.pump(const Duration(milliseconds: 600)); // _kScrollbarTimeToFade
     await tester.pumpAndSettle();
-    // Scrollbar is not showing after scroll finishes
+    // Scrollbar thumb is showing after scroll finishes and timer ends.
     expect(find.byType(Scrollbar), paints..rect());
   });
 
