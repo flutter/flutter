@@ -322,6 +322,7 @@ void main() {
 
     semantics.dispose();
   });
+
   testWidgets("ink response doesn't focus when disabled", (WidgetTester tester) async {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
@@ -356,6 +357,52 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('ink response accepts focus when disabled in directional navigation mode', (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    final GlobalKey childKey = GlobalKey();
+    await tester.pumpWidget(
+      Material(
+        child: MediaQuery(
+          data: const MediaQueryData(
+            navigationMode: NavigationMode.directional,
+          ),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: InkWell(
+              autofocus: true,
+              onTap: () {},
+              onLongPress: () {},
+              onHover: (bool hover) {},
+              focusNode: focusNode,
+              child: Container(key: childKey),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    await tester.pumpWidget(
+      Material(
+        child: MediaQuery(
+          data: const MediaQueryData(
+            navigationMode: NavigationMode.directional,
+          ),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: InkWell(
+              focusNode: focusNode,
+              child: Container(key: childKey),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
   });
 
   testWidgets("ink response doesn't hover when disabled", (WidgetTester tester) async {

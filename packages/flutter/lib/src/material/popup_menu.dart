@@ -1108,6 +1108,18 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     return null;
   }
 
+  bool get _canRequestFocus {
+    final NavigationMode mode = MediaQuery.of(context, nullOk: true)?.navigationMode ?? NavigationMode.traditional;
+    switch (mode) {
+      case NavigationMode.traditional:
+        return widget.enabled;
+      case NavigationMode.directional:
+        return true;
+    }
+    assert(false, 'Navigation mode $mode not handled');
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -1117,7 +1129,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
           onTap: widget.enabled ? showButtonMenu : null,
-          canRequestFocus: widget.enabled,
+          canRequestFocus: _canRequestFocus,
           child: widget.child,
         ),
       );

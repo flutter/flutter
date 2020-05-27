@@ -127,38 +127,68 @@ void main() {
   });
 
   testWidgets('disabled PopupMenuButton will not call itemBuilder, onSelected or onCanceled', (WidgetTester tester) async {
-    final Key popupButtonKey = UniqueKey();
+    final GlobalKey popupButtonKey = GlobalKey();
     bool itemBuilderCalled = false;
     bool onSelectedCalled = false;
     bool onCanceledCalled = false;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Column(
-            children: <Widget>[
-              PopupMenuButton<int>(
-                key: popupButtonKey,
-                enabled: false,
-                itemBuilder: (BuildContext context) {
-                  itemBuilderCalled = true;
-                  return <PopupMenuEntry<int>>[
-                    const PopupMenuItem<int>(
-                      value: 1,
-                      child: Text('Tap me please!'),
-                    ),
-                  ];
-                },
-                onSelected: (int selected) => onSelectedCalled = true,
-                onCanceled: () => onCanceledCalled = true,
+    Widget buildApp({bool directional = false}) {
+      return MaterialApp(
+        home: Builder(builder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              navigationMode: NavigationMode.directional,
+            ),
+            child: Material(
+              child: Column(
+                children: <Widget>[
+                  PopupMenuButton<int>(
+                    child: Text('Tap Me', key: popupButtonKey),
+                    enabled: false,
+                    itemBuilder: (BuildContext context) {
+                      itemBuilderCalled = true;
+                      return <PopupMenuEntry<int>>[
+                        const PopupMenuItem<int>(
+                          value: 1,
+                          child: Text('Tap me please!'),
+                        ),
+                      ];
+                    },
+                    onSelected: (int selected) => onSelectedCalled = true,
+                    onCanceled: () => onCanceledCalled = true,
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      ),
-    );
+            ),
+          );
+        }),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
 
     // Try to bring up the popup menu and select the first item from it
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+    expect(itemBuilderCalled, isFalse);
+    expect(onSelectedCalled, isFalse);
+
+    // Try to bring up the popup menu and tap outside it to cancel the menu
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(0.0, 0.0));
+    await tester.pumpAndSettle();
+    expect(itemBuilderCalled, isFalse);
+    expect(onCanceledCalled, isFalse);
+
+    // Test again, with directional navigation mode and after focusing the button.
+    await tester.pumpWidget(buildApp(directional: true));
+
+    // Try to bring up the popup menu and select the first item from it
+    Focus.of(popupButtonKey.currentContext).requestFocus();
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(popupButtonKey));
@@ -212,6 +242,47 @@ void main() {
     expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
     expect(itemBuilderCalled, isFalse);
     expect(onSelectedCalled, isFalse);
+  });
+
+  testWidgets('disabled PopupMenuButton is focusable with directional navigation', (WidgetTester tester) async {
+    final Key popupButtonKey = UniqueKey();
+    final GlobalKey childKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(builder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              navigationMode: NavigationMode.directional,
+            ),
+            child: Material(
+              child: Column(
+                children: <Widget>[
+                  PopupMenuButton<int>(
+                    key: popupButtonKey,
+                    child: Container(key: childKey),
+                    enabled: false,
+                    itemBuilder: (BuildContext context) {
+                      return <PopupMenuEntry<int>>[
+                        const PopupMenuItem<int>(
+                          value: 1,
+                          child: Text('Tap me please!'),
+                        ),
+                      ];
+                    },
+                    onSelected: (int selected) {},
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+    Focus.of(childKey.currentContext, nullOk: true).requestFocus();
+    await tester.pump();
+
+    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isTrue);
   });
 
   testWidgets('PopupMenuItem is only focusable when enabled', (WidgetTester tester) async {
