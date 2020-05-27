@@ -475,7 +475,8 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
   flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
       [](flutter::Shell& shell) {
-        return std::make_unique<flutter::Rasterizer>(shell, shell.GetTaskRunners());
+        return std::make_unique<flutter::Rasterizer>(shell, shell.GetTaskRunners(),
+                                                     shell.GetIsGpuDisabledSyncSwitch());
       };
 
   if (flutter::IsIosEmbeddedViewsPreviewEnabled()) {

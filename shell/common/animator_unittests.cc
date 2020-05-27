@@ -58,7 +58,9 @@ TEST_F(ShellTest, VSyncTargetTime) {
               ShellTestPlatformView::BackendType::kDefaultBackend, nullptr);
         },
         [](Shell& shell) {
-          return std::make_unique<Rasterizer>(shell, shell.GetTaskRunners());
+          return std::make_unique<Rasterizer>(
+              shell, shell.GetTaskRunners(),
+              shell.GetIsGpuDisabledSyncSwitch());
         });
     ASSERT_TRUE(DartVMRef::IsInstanceRunning());
 
