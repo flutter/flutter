@@ -44,7 +44,7 @@ class TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
   BinaryMessenger createBinaryMessenger() {
     return super.createBinaryMessenger()
       ..setMockMessageHandler('flutter/assets', (ByteData message) async {
-        if (const StringCodec().decodeMessage(message) == 'LICENSE') {
+        if (const StringCodec().decodeMessage(message) == 'LICENSE' || const StringCodec().decodeMessage(message) == 'NOTICES') {
           return const StringCodec().encodeMessage(licenses);
         }
         return null;
