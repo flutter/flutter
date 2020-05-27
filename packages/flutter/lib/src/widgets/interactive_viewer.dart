@@ -115,7 +115,7 @@ class InteractiveViewer extends StatefulWidget {
   /// No edge can be NaN.
   ///
   /// Defaults to [EdgeInsets.zero], which results in boundaries that are the
-  /// exact same size and position as the constraints.
+  /// exact same size and position as the [child].
   final EdgeInsets boundaryMargin;
 
   /// The Widget to perform the transformations on.
@@ -128,8 +128,9 @@ class InteractiveViewer extends StatefulWidget {
   /// Defaults to true.
   ///
   /// See also:
-  ///   * [scaleEnabled]
-  ///   * [rotationEnabled]
+  ///
+  ///   * [scaleEnabled], which is similar but for scale.
+  ///   * [rotationEnabled], which is similar but for rotation.
   final bool translationEnabled;
 
   /// If false, the user will be prevented from scaling.
@@ -137,8 +138,9 @@ class InteractiveViewer extends StatefulWidget {
   /// Defaults to true.
   ///
   /// See also:
-  ///   * [translationEnabled]
-  ///   * [rotationEnabled]
+  ///
+  ///   * [translationEnabled], which is similar but for translation.
+  ///   * [rotationEnabled], which is similar but for rotation.
   final bool scaleEnabled;
 
   // TODO(justinmc): Update these docs when rotation is available.
@@ -152,8 +154,9 @@ class InteractiveViewer extends StatefulWidget {
   /// available.
   ///
   /// See also:
-  ///   * [translationEnabled]
-  ///   * [scaleEnabled]
+  ///
+  ///   * [translationEnabled], which is similar but for translation.
+  ///   * [scaleEnabled], which is similar but for scale.
   final bool rotationEnabled;
 
   /// The maximum allowed scale.
@@ -190,8 +193,9 @@ class InteractiveViewer extends StatefulWidget {
   /// convert the coordinates to scene coordinates relative to the child.
   ///
   /// See also:
-  ///  * [onInteractionStart]
-  ///  * [onInteractionEnd]
+  ///
+  ///  * [onInteractionStart], which handles the start of the same interaction.
+  ///  * [onInteractionUpdate], which handles an update to the same interaction.
   final GestureScaleEndCallback onInteractionEnd;
 
   /// Called when the user begins a pan or scale gesture on the widget.
@@ -209,8 +213,9 @@ class InteractiveViewer extends StatefulWidget {
   /// convert the coordinates to scene coordinates relative to the child.
   ///
   /// See also:
-  ///  * [onInteractionUpdate]
-  ///  * [onInteractionEnd]
+  ///
+  ///  * [onInteractionUpdate], which handles an update to the same interaction.
+  ///  * [onInteractionEnd], which handles the end of the same interaction.
   final GestureScaleStartCallback onInteractionStart;
 
   /// Called when the user updates a pan or scale gesture on the
@@ -229,8 +234,9 @@ class InteractiveViewer extends StatefulWidget {
   /// convert the coordinates to scene coordinates relative to the child.
   ///
   /// See also:
-  ///  * [onInteractionStart]
-  ///  * [onInteractionEnd]
+  ///
+  ///  * [onInteractionStart], which handles the start of the same interaction.
+  ///  * [onInteractionEnd], which handles the end of the same interaction.
   final GestureScaleUpdateCallback onInteractionUpdate;
 
   /// A [TransformationController] for the transformation performed on the
@@ -342,7 +348,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [ValueNotifier].
+  ///  * [ValueNotifier], the parent class of TransformationController.
   ///  * [TextEditingController] for an example of another similar pattern.
   final TransformationController transformationController;
 
@@ -840,7 +846,9 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 /// transformation.
 ///
 /// See also:
-///  * [InteractiveViewer.transformationController]
+///
+///  * [InteractiveViewer.transformationController] for detailed documentation
+///    on how to use TransformationController with [InteractiveViewer].
 class TransformationController extends ValueNotifier<Matrix4> {
   /// Create an instance of [TransformationController].
   ///
