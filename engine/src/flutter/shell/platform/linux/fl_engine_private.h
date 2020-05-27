@@ -60,6 +60,8 @@ FlEngine* fl_engine_new(FlDartProject* project, FlRenderer* renderer);
  * @engine: an #FlEngine.
  * @handler: function to call when a platform message is received.
  * @user_data: (closure): user data to pass to @handler.
+ * @destroy_notify: (allow-none): a function which gets called to free
+ * @user_data, or %NULL.
  *
  * Registers the function called when a platform message is reveived. Call
  * fl_engine_send_platform_message_response() with the response to this message.
@@ -70,7 +72,8 @@ FlEngine* fl_engine_new(FlDartProject* project, FlRenderer* renderer);
 void fl_engine_set_platform_message_handler(
     FlEngine* engine,
     FlEnginePlatformMessageHandler handler,
-    gpointer user_data);
+    gpointer user_data,
+    GDestroyNotify destroy_notify);
 
 /**
  * fl_engine_start:

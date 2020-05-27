@@ -70,7 +70,8 @@ G_DECLARE_FINAL_TYPE(FlBasicMessageChannelResponseHandle,
  *   g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new ();
  *   channel = fl_basic_message_channel_new (messenger, "flutter/foo",
  *                                           FL_MESSAGE_CODEC (codec));
- *   fl_basic_message_channel_set_message_handler (channel, message_cb, NULL);
+ *   fl_basic_message_channel_set_message_handler (channel, message_cb, NULL,
+ * NULL);
  *
  *   g_autoptr(FlValue) message = fl_value_new_string ("Hello World");
  *   fl_basic_message_channel_send (channel, message, NULL,
@@ -131,13 +132,21 @@ FlBasicMessageChannel* fl_basic_message_channel_new(
  * @handler: (allow-none): function to call when a message is received on this
  * channel or %NULL to disable the handler.
  * @user_data: (closure): user data to pass to @handler.
+ * @destroy_notify: (allow-none): a function which gets called to free
+ * @user_data, or %NULL.
  *
- * Sets the function called when a message is received.
+ * Sets the function called when a message is received from the Dart side of the
+ * channel. See #FlBasicMessageChannelMessageHandler for details on how to
+ * respond to messages.
+ *
+ * The handler is removed if the channel is closed or is replaced by another
+ * handler, set @destroy_notify if you want to detect this.
  */
 void fl_basic_message_channel_set_message_handler(
     FlBasicMessageChannel* channel,
     FlBasicMessageChannelMessageHandler handler,
-    gpointer user_data);
+    gpointer user_data,
+    GDestroyNotify destroy_notify);
 
 /**
  * fl_basic_message_channel_respond:
