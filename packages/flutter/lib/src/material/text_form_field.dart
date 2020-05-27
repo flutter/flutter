@@ -155,7 +155,7 @@ class TextFormField extends FormField<String> {
     @Deprecated(
       'Use autoValidateMode parameter which provide more specific '
       'behaviour related to auto validation. '
-      'This feature was deprecated after v1.19.0'
+      'This feature was deprecated after v1.19.0.'
     )
     bool autovalidate = false,
     bool maxLengthEnforced = true,
