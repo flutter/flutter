@@ -12,6 +12,9 @@ struct _FlBasicMessageChannel {
   // Messenger to communicate on
   FlBinaryMessenger* messenger;
 
+  // TRUE if the channel has been closed
+  gboolean channel_closed;
+
   // Channel name
   gchar* name;
 
@@ -21,6 +24,7 @@ struct _FlBasicMessageChannel {
   // Function called when a message is received
   FlBasicMessageChannelMessageHandler message_handler;
   gpointer message_handler_data;
+  GDestroyNotify message_handler_destroy_notify;
 };
 
 struct _FlBasicMessageChannelResponseHandle {
@@ -106,16 +110,36 @@ static void message_response_cb(GObject* object,
   g_task_return_pointer(task, result, g_object_unref);
 }
 
+// Called when the channel handler is closed
+static void channel_closed_cb(gpointer user_data) {
+  g_autoptr(FlBasicMessageChannel) self = FL_BASIC_MESSAGE_CHANNEL(user_data);
+
+  self->channel_closed = TRUE;
+
+  // Disconnect handler
+  if (self->message_handler_destroy_notify != nullptr)
+    self->message_handler_destroy_notify(self->message_handler_data);
+  self->message_handler = nullptr;
+  self->message_handler_data = nullptr;
+  self->message_handler_destroy_notify = nullptr;
+}
+
 static void fl_basic_message_channel_dispose(GObject* object) {
   FlBasicMessageChannel* self = FL_BASIC_MESSAGE_CHANNEL(object);
 
   if (self->messenger != nullptr)
     fl_binary_messenger_set_message_handler_on_channel(
-        self->messenger, self->name, nullptr, nullptr);
+        self->messenger, self->name, nullptr, nullptr, nullptr);
 
   g_clear_object(&self->messenger);
   g_clear_pointer(&self->name, g_free);
   g_clear_object(&self->codec);
+
+  if (self->message_handler_destroy_notify != nullptr)
+    self->message_handler_destroy_notify(self->message_handler_data);
+  self->message_handler = nullptr;
+  self->message_handler_data = nullptr;
+  self->message_handler_destroy_notify = nullptr;
 
   G_OBJECT_CLASS(fl_basic_message_channel_parent_class)->dispose(object);
 }
@@ -143,7 +167,8 @@ G_MODULE_EXPORT FlBasicMessageChannel* fl_basic_message_channel_new(
   self->codec = FL_MESSAGE_CODEC(g_object_ref(codec));
 
   fl_binary_messenger_set_message_handler_on_channel(
-      self->messenger, self->name, message_cb, self);
+      self->messenger, self->name, message_cb, g_object_ref(self),
+      channel_closed_cb);
 
   return self;
 }
@@ -151,11 +176,25 @@ G_MODULE_EXPORT FlBasicMessageChannel* fl_basic_message_channel_new(
 G_MODULE_EXPORT void fl_basic_message_channel_set_message_handler(
     FlBasicMessageChannel* self,
     FlBasicMessageChannelMessageHandler handler,
-    gpointer user_data) {
+    gpointer user_data,
+    GDestroyNotify destroy_notify) {
   g_return_if_fail(FL_IS_BASIC_MESSAGE_CHANNEL(self));
+
+  // Don't set handler if channel closed
+  if (self->channel_closed) {
+    g_warning(
+        "Attempted to set message handler on closed FlBasicMessageChannel");
+    if (destroy_notify != nullptr)
+      destroy_notify(user_data);
+    return;
+  }
+
+  if (self->message_handler_destroy_notify != nullptr)
+    self->message_handler_destroy_notify(self->message_handler_data);
 
   self->message_handler = handler;
   self->message_handler_data = user_data;
+  self->message_handler_destroy_notify = destroy_notify;
 }
 
 G_MODULE_EXPORT gboolean fl_basic_message_channel_respond(

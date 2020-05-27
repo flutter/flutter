@@ -83,17 +83,22 @@ typedef void (*FlBinaryMessengerMessageHandler)(
  * @handler: (allow-none): function to call when a message is received on this
  * channel or %NULL to disable a handler
  * @user_data: (closure): user data to pass to @handler.
+ * @destroy_notify: (allow-none): a function which gets called to free
+ * @user_data, or %NULL.
  *
  * Sets the function called when a platform message is received on the given
- * channel. Call fl_binary_messenger_send_response() when the message is
- * handled. Ownership of #FlBinaryMessengerResponseHandle is transferred to the
- * caller, and the call must be responded to to avoid memory leaks.
+ * channel. See #FlBinaryMessengerMessageHandler for details on how to respond
+ * to messages.
+ *
+ * The handler is removed if the channel is closed or is replaced by another
+ * handler, set @destroy_notify if you want to detect this.
  */
 void fl_binary_messenger_set_message_handler_on_channel(
     FlBinaryMessenger* messenger,
     const gchar* channel,
     FlBinaryMessengerMessageHandler handler,
-    gpointer user_data);
+    gpointer user_data,
+    GDestroyNotify destroy_notify);
 
 /**
  * fl_binary_messenger_send_response:
