@@ -213,17 +213,29 @@ means it's twice as fast. Higher is better.
 Summarize tool example:
 
 ```sh
-../../bin/cache/dart-sdk/bin/dart bin/summarize.dart  --[no-]tsv-table --[no-]raw-summary \
+../../bin/cache/dart-sdk/bin/dart bin/summarize.dart \
+    --[no-]tsv-table --[no-]raw-summary --[no]-ascii-table --[no]-web-graph \
     ABresults.json ABresults1.json ABresults2.json ...
 ```
 
 `--[no-]tsv-table` tells the tool to print the summary in a table with tabs for easy spreadsheet
-entry. (defaults to on)
+entry. (defaults to off)
 
 `--[no-]raw-summary` tells the tool to print all per-run data collected by the A/B test formatted
-with tabs for easy spreadsheet entry. (defaults to on)
+with tabs for easy spreadsheet entry. (defaults to off)
+
+`--[no]-ascii-table` tells the tool to print the summary in a table that is formatted nicely for
+fixed-width font environments such as a terminal or cutting and pasting to a code section of a
+chat/github comment. (defaults to off)
+
+`--[no]-web-graph` tells the tool to open a web browser page with the graphed results of the A/B
+runs with an option to save the graphs as a PNG image. (defaults to off)
 
 Multiple trailing filenames can be specified and each such results file will be processed in turn.
+
+Optionally you can graph the results of an AB results JSON file by just opening the web template
+in a browser window (for example, using `open graphAB.html` on a Mac) and using the "Load results"
+button to load your JSON results.
 
 # Reproducing broken builds locally
 

@@ -83,6 +83,7 @@ Future<void> main(List<String> rawArgs) async {
     }
     if (!didWork) {
       _usage('Must specify at least one output option');
+      return;
     }
   }
 }
