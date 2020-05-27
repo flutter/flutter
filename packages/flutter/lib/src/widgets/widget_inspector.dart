@@ -943,12 +943,12 @@ mixin WidgetInspectorService {
     _errorsSinceReload = 0;
   }
 
-  bool setStructuredErrorsEarly() {
+  bool isStructuredErrorsEnabled() {
     return const bool.fromEnvironment('structuredErrors');
   }
 
-  void setStructuredErrors() {
-    if (setStructuredErrorsEarly()) {
+  void initStructuredErrorHandler() {
+    if (isStructuredErrorsEnabled()) {
       FlutterError.onError = _structuredExceptionHandler;
     }
   }

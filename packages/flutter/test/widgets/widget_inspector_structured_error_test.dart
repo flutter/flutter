@@ -16,7 +16,7 @@ void main() {
 
 class StructuredErrorTestService extends TestWidgetInspectorService {
   @override
-  bool setStructuredErrorsEarly() {
+  bool isStructuredErrorsEnabled() {
     return true;
   }
 
@@ -31,7 +31,7 @@ class StructuredErrorTestService extends TestWidgetInspectorService {
 
     testWidgets('ext.flutter.inspector.setStructuredErrors',
         (WidgetTester tester) async {
-      WidgetInspectorService.instance.setStructuredErrors();
+      WidgetInspectorService.instance.initStructuredErrorHandler();
 
       List<Map<Object, Object>> flutterErrorEvents =
           service.getEventsDispatched('Flutter.Error');

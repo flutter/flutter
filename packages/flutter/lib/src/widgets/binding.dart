@@ -471,7 +471,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       );
 
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
-      WidgetInspectorService.instance.setStructuredErrors();
+      WidgetInspectorService.instance.initStructuredErrorHandler();
 
       return true;
     }());
