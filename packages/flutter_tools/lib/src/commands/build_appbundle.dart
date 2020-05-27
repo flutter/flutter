@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../android/android_builder.dart';
+import '../android/build_validation.dart';
 import '../android/gradle_utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -83,6 +84,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
       shrink: boolArg('shrink'),
     );
+    validateBuild(androidBuildInfo);
     await androidBuilder.buildAab(
       project: FlutterProject.current(),
       target: targetFile,
