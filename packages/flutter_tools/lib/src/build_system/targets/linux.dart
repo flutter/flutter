@@ -155,64 +155,6 @@ class DebugBundleLinuxAssets extends Target {
   }
 }
 
-/// Generate an ELF binary from a dart kernel file in profile mode.
-class LinuxAotElfProfile extends AotElfBase {
-  const LinuxAotElfProfile();
-
-  @override
-  String get name => 'linux_aot_elf_profile';
-
-  @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
-    Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.artifact(Artifact.skyEnginePath),
-    Source.artifact(Artifact.genSnapshot,
-      platform: TargetPlatform.linux_x64,
-      mode: BuildMode.profile,
-    ),
-  ];
-
-  @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/app.so'),
-  ];
-
-  @override
-  List<Target> get dependencies => const <Target>[
-    KernelSnapshot(),
-  ];
-}
-
-/// Generate an ELF binary from a dart kernel file in release mode.
-class LinuxAotElfRelease extends AotElfBase {
-  const LinuxAotElfRelease();
-
-  @override
-  String get name => 'linux_aot_elf_release';
-
-  @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
-    Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.artifact(Artifact.skyEnginePath),
-    Source.artifact(Artifact.genSnapshot,
-      platform: TargetPlatform.linux_x64,
-      mode: BuildMode.release,
-    ),
-  ];
-
-  @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/app.so'),
-  ];
-
-  @override
-  List<Target> get dependencies => const <Target>[
-    KernelSnapshot(),
-  ];
-}
-
 /// Creates a profile bundle for the Linux desktop target.
 class ProfileBundleLinuxAssets extends Target {
   const ProfileBundleLinuxAssets();
@@ -222,7 +164,7 @@ class ProfileBundleLinuxAssets extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-    LinuxAotElfProfile(),
+    AotElfProfile(TargetPlatform.linux_x64),
     UnpackLinux(),
   ];
 
@@ -236,7 +178,7 @@ class ProfileBundleLinuxAssets extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/flutter_assets/libapp.so'),
+    Source.pattern('{OUTPUT_DIR}/lib/libapp.so'),
   ];
 
   @override
@@ -250,7 +192,7 @@ class ProfileBundleLinuxAssets extends Target {
       throw MissingDefineException(kBuildMode, 'profile_bundle_linux_assets');
     }
     final Directory outputDirectory = environment.outputDir
-      .childDirectory('flutter_assets');
+      .childDirectory('lib');
     if (!outputDirectory.existsSync()) {
       outputDirectory.createSync();
     }
@@ -279,7 +221,7 @@ class ReleaseBundleLinuxAssets extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-    LinuxAotElfRelease(),
+    AotElfRelease(TargetPlatform.linux_x64),
     UnpackLinux(),
   ];
 
@@ -293,7 +235,7 @@ class ReleaseBundleLinuxAssets extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/flutter_assets/libapp.so'),
+    Source.pattern('{OUTPUT_DIR}/lib/libapp.so'),
   ];
 
   @override
@@ -307,7 +249,7 @@ class ReleaseBundleLinuxAssets extends Target {
       throw MissingDefineException(kBuildMode, 'release_bundle_linux_assets');
     }
     final Directory outputDirectory = environment.outputDir
-      .childDirectory('flutter_assets');
+      .childDirectory('lib');
     if (!outputDirectory.existsSync()) {
       outputDirectory.createSync();
     }

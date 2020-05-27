@@ -120,7 +120,7 @@ void main() {
 
     await const ProfileBundleLinuxAssets().build(testEnvironment);
     final Directory output = testEnvironment.outputDir
-      .childDirectory('flutter_assets');
+      .childDirectory('lib');
 
     expect(output.childFile('libapp.so'), exists);
     expect(output.childFile('AssetManifest.json'), exists);
@@ -150,7 +150,7 @@ void main() {
 
     await const ReleaseBundleLinuxAssets().build(testEnvironment);
     final Directory output = testEnvironment.outputDir
-      .childDirectory('flutter_assets');
+      .childDirectory('lib');
 
     expect(output.childFile('libapp.so'), exists);
     expect(output.childFile('AssetManifest.json'), exists);

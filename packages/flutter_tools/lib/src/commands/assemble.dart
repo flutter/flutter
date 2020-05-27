@@ -29,8 +29,8 @@ const List<Target> _kDefaultTargets = <Target>[
   // Shared targets
   CopyAssets(),
   KernelSnapshot(),
-  AotElfProfile(),
-  AotElfRelease(),
+  AotElfProfile(TargetPlatform.android_arm),
+  AotElfRelease(TargetPlatform.android_arm),
   AotAssemblyProfile(),
   AotAssemblyRelease(),
   // macOS targets

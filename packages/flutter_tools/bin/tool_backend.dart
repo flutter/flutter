@@ -50,11 +50,9 @@ or
   } else {
     if (buildMode == 'debug') {
       target = 'debug_bundle_linux_assets';
-    }
-    else if (buildMode == 'release') {
+    } else if (buildMode == 'release') {
       target = 'release_bundle_linux_assets';
-    }
-    else if (buildMode == 'profile') {
+    } else if (buildMode == 'profile') {
       target = 'profile_bundle_linux_assets';
     }
   }
