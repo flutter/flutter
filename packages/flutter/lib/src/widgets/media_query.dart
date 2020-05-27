@@ -365,6 +365,12 @@ class MediaQueryData {
   /// directional events differently. In order to know when to do that, these
   /// widgets will look for the navigation mode in effect for their context.
   ///
+  /// For instance, in a television interface, [NavigationMode.directional]
+  /// should be set, so that directional navigation is used to navigate away
+  /// from a text field using the DPAD. In contrast, on a regular desktop
+  /// application with the `navigationMode` set to [NavigationMode.traditional],
+  /// the arrow keys are used to move the cursor instead of navigating away.
+  ///
   /// The [NavigationMode] values indicate the type of navigation to be used in
   /// a widget subtree for those widgets sensitive to it.
   final NavigationMode navigationMode;
@@ -877,8 +883,8 @@ class MediaQuery extends InheritedWidget {
 /// The different modes indicate the type of navigation to be used in a widget
 /// subtree for those widgets sensitive to it.
 ///
-/// Use `NavigationModality.of(context)` to determine the navigation mode in
-/// effect for the given context. Use a [NavigationModality] widget to set the
+/// Use `MediaQuery.of(context).navigationMode` to determine the navigation mode
+/// in effect for the given context. Use a [MediaQuery] widget to set the
 /// navigation mode for its descendant widgets.
 enum NavigationMode {
   /// This indicates a traditional keyboard-and-mouse navigation modality.
