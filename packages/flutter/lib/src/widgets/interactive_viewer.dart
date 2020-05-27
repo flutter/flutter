@@ -82,7 +82,7 @@ class InteractiveViewer extends StatefulWidget {
     this.onInteractionUpdate,
     this.rotationEnabled = true,
     this.scaleEnabled = true,
-    TransformationController transformationController,
+    this.transformationController,
     this.translationEnabled = true,
   }) : assert(child != null),
        assert(minScale != null),
@@ -98,7 +98,8 @@ class InteractiveViewer extends StatefulWidget {
        // TODO(justinmc): Remove this assertion when rotation is enabled.
        // https://github.com/flutter/flutter/issues/57698
        assert(rotationEnabled == false, 'Set rotationEnabled to false. This requirement will be removed later when the feature is complete.'),
-       transformationController = transformationController ?? TransformationController(),
+       assert(boundaryMargin.horizontal.isFinite),
+       assert(boundaryMargin.vertical.isFinite),
        super(key: key);
 
   /// A margin for the visible boundaries of the child.
@@ -113,7 +114,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// No edge can be NaN.
   ///
-  /// Defaults to EdgeInsets.zero, which results in boundaries that are the
+  /// Defaults to [EdgeInsets.zero], which results in boundaries that are the
   /// exact same size and position as the constraints.
   final EdgeInsets boundaryMargin;
 
@@ -352,10 +353,11 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   final GlobalKey _childKey = GlobalKey();
   Animation<Offset> _animation;
   AnimationController _controller;
+  TransformationController _transformationController;
   Offset _referenceFocalPoint; // Point where the current gesture began.
   double _scaleStart; // Scale value at start of scaling gesture.
   double _rotationStart = 0.0; // Rotation at start of rotation gesture.
-  double _currentRotation = 0.0; // Rotation of widget.transformationController.value.
+  double _currentRotation = 0.0; // Rotation of _transformationController.value.
   BoxConstraints _constraints;
   _GestureType _gestureType;
 
@@ -504,7 +506,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
     // Don't allow a scale that results in an overall scale beyond min/max
     // scale.
-    final double currentScale = widget.transformationController.value.getMaxScaleOnAxis();
+    final double currentScale = _transformationController.value.getMaxScaleOnAxis();
     final double totalScale = currentScale * scale;
     final double clampedTotalScale = totalScale.clamp(
       widget.minScale,
@@ -533,7 +535,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     if (!widget.rotationEnabled || rotation == 0) {
       return matrix;
     }
-    final Offset focalPointScene = widget.transformationController.toScene(
+    final Offset focalPointScene = _transformationController.toScene(
       focalPoint,
     );
     return matrix
@@ -558,8 +560,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
     _gestureType = null;
     setState(() {
-      _scaleStart = widget.transformationController.value.getMaxScaleOnAxis();
-      _referenceFocalPoint = widget.transformationController.toScene(
+      _scaleStart = _transformationController.value.getMaxScaleOnAxis();
+      _referenceFocalPoint = _transformationController.toScene(
         details.localFocalPoint,
       );
       _rotationStart = _currentRotation;
@@ -568,17 +570,17 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Handle an update to an ongoing gesture of _GestureType.
   void _onScaleUpdate(ScaleUpdateDetails details) {
-    final double scale = widget.transformationController.value.getMaxScaleOnAxis();
+    final double scale = _transformationController.value.getMaxScaleOnAxis();
     if (widget.onInteractionUpdate != null) {
       widget.onInteractionUpdate(ScaleUpdateDetails(
-        focalPoint: widget.transformationController.toScene(
+        focalPoint: _transformationController.toScene(
           details.localFocalPoint,
         ),
         scale: details.scale,
         rotation: details.rotation,
       ));
     }
-    final Offset focalPointScene = widget.transformationController.toScene(
+    final Offset focalPointScene = _transformationController.toScene(
       details.localFocalPoint,
     );
     _gestureType ??= _getGestureType(
@@ -597,8 +599,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         final double desiredScale = _scaleStart * details.scale;
         final double scaleChange = desiredScale / scale;
         setState(() {
-          widget.transformationController.value = _matrixScale(
-            widget.transformationController.value,
+          _transformationController.value = _matrixScale(
+            _transformationController.value,
             scaleChange,
           );
 
@@ -606,11 +608,11 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           // the same places in the scene. That means that the focal point of
           // the scale should be on the same place in the scene before and after
           // the scale.
-          final Offset focalPointSceneScaled = widget.transformationController.toScene(
+          final Offset focalPointSceneScaled = _transformationController.toScene(
             details.localFocalPoint,
           );
-          widget.transformationController.value = _matrixTranslate(
-            widget.transformationController.value,
+          _transformationController.value = _matrixTranslate(
+            _transformationController.value,
             focalPointSceneScaled - _referenceFocalPoint,
           );
 
@@ -619,7 +621,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           // the translate came in contact with a boundary. In that case, update
           // _referenceFocalPoint so subsequent updates happen in relation to
           // the new effective focal point.
-          final Offset focalPointSceneCheck = widget.transformationController.toScene(
+          final Offset focalPointSceneCheck = _transformationController.toScene(
             details.localFocalPoint,
           );
           if (_round(_referenceFocalPoint) != _round(focalPointSceneCheck)) {
@@ -634,8 +636,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         }
         final double desiredRotation = _rotationStart + details.rotation;
         setState(() {
-          widget.transformationController.value = _matrixRotate(
-            widget.transformationController.value,
+          _transformationController.value = _matrixRotate(
+            _transformationController.value,
             _currentRotation - desiredRotation,
             details.localFocalPoint,
           );
@@ -651,11 +653,11 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         // focal point before and after the movement.
         final Offset translationChange = focalPointScene - _referenceFocalPoint;
         setState(() {
-          widget.transformationController.value = _matrixTranslate(
-            widget.transformationController.value,
+          _transformationController.value = _matrixTranslate(
+            _transformationController.value,
             translationChange,
           );
-          _referenceFocalPoint = widget.transformationController.toScene(
+          _referenceFocalPoint = _transformationController.toScene(
             details.localFocalPoint,
           );
         });
@@ -682,7 +684,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       return;
     }
 
-    final Vector3 translationVector = widget.transformationController.value.getTranslation();
+    final Vector3 translationVector = _transformationController.value.getTranslation();
     final Offset translation = Offset(translationVector.x, translationVector.y);
     final FrictionSimulation frictionSimulationX = FrictionSimulation(
       _kDrag,
@@ -721,22 +723,22 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       if (scaleChange == 0.0) {
         return;
       }
-      final Offset focalPointScene = widget.transformationController.toScene(
+      final Offset focalPointScene = _transformationController.toScene(
         event.localPosition,
       );
       setState(() {
-        widget.transformationController.value = _matrixScale(
-          widget.transformationController.value,
+        _transformationController.value = _matrixScale(
+          _transformationController.value,
           scaleChange,
         );
 
         // After scaling, translate such that the event's position is at the
         // same scene point before and after the scale.
-        final Offset focalPointSceneScaled = widget.transformationController.toScene(
+        final Offset focalPointSceneScaled = _transformationController.toScene(
           event.localPosition,
         );
-        widget.transformationController.value = _matrixTranslate(
-          widget.transformationController.value,
+        _transformationController.value = _matrixTranslate(
+          _transformationController.value,
           focalPointSceneScaled - focalPointScene,
         );
       });
@@ -752,18 +754,18 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       return;
     }
     // Translate such that the resulting translation is _animation.value.
-    final Vector3 translationVector = widget.transformationController.value.getTranslation();
+    final Vector3 translationVector = _transformationController.value.getTranslation();
     final Offset translation = Offset(translationVector.x, translationVector.y);
-    final Offset translationScene = widget.transformationController.toScene(
+    final Offset translationScene = _transformationController.toScene(
       translation,
     );
-    final Offset animationScene = widget.transformationController.toScene(
+    final Offset animationScene = _transformationController.toScene(
       _animation.value,
     );
     final Offset translationChangeScene = animationScene - translationScene;
     setState(() {
-      widget.transformationController.value = _matrixTranslate(
-        widget.transformationController.value,
+      _transformationController.value = _matrixTranslate(
+        _transformationController.value,
         translationChangeScene,
       );
     });
@@ -773,6 +775,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   void initState() {
     super.initState();
 
+    _transformationController = widget.transformationController
+        ?? TransformationController();
     _controller = AnimationController(
       vsync: this,
     );
@@ -785,11 +789,18 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       || widget.boundaryMargin != oldWidget.boundaryMargin) {
       _boundaryRectCached = null;
     }
+    if (widget.transformationController != null
+        && widget.transformationController != _transformationController) {
+      _transformationController = widget.transformationController;
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    if (widget.transformationController == null) {
+      _transformationController.dispose();
+    }
     super.dispose();
   }
 
@@ -809,7 +820,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
             onScaleUpdate: _onScaleUpdate,
 
             child: Transform(
-              transform: widget.transformationController.value,
+              transform: _transformationController.value,
               child: KeyedSubtree(
                 key: _childKey,
                 child: widget.child,
