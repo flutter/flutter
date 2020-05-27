@@ -6,8 +6,10 @@
 
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_key_event_plugin.h"
+#include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
 #include "flutter/shell/platform/linux/fl_renderer_x11.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
 
 #include <gdk/gdkx.h>
 
@@ -34,7 +36,15 @@ struct _FlView {
 
 enum { PROP_FLUTTER_PROJECT = 1, PROP_LAST };
 
-G_DEFINE_TYPE(FlView, fl_view, GTK_TYPE_WIDGET)
+static void fl_view_plugin_registry_iface_init(
+    FlPluginRegistryInterface* iface);
+
+G_DEFINE_TYPE_WITH_CODE(
+    FlView,
+    fl_view,
+    GTK_TYPE_WIDGET,
+    G_IMPLEMENT_INTERFACE(fl_plugin_registry_get_type(),
+                          fl_view_plugin_registry_iface_init))
 
 // Converts a GDK button event into a Flutter event and sends it to the engine.
 static gboolean fl_view_send_pointer_button_event(FlView* self,
@@ -78,6 +88,21 @@ static gboolean fl_view_send_pointer_button_event(FlView* self,
                                      event->time * kMicrosecondsPerMillisecond,
                                      event->x, event->y, self->button_state);
   return TRUE;
+}
+
+// Implements FlPluginRegistry::get_registrar_for_plugin
+static FlPluginRegistrar* fl_view_get_registrar_for_plugin(
+    FlPluginRegistry* registry,
+    const gchar* name) {
+  FlView* self = FL_VIEW(registry);
+
+  return fl_plugin_registrar_new(self,
+                                 fl_engine_get_binary_messenger(self->engine));
+}
+
+static void fl_view_plugin_registry_iface_init(
+    FlPluginRegistryInterface* iface) {
+  iface->get_registrar_for_plugin = fl_view_get_registrar_for_plugin;
 }
 
 static void fl_view_constructed(GObject* object) {
