@@ -98,8 +98,7 @@ class InteractiveViewer extends StatefulWidget {
        // TODO(justinmc): Remove this assertion when rotation is enabled.
        // https://github.com/flutter/flutter/issues/57698
        assert(rotationEnabled == false, 'Set rotationEnabled to false. This requirement will be removed later when the feature is complete.'),
-       assert(!boundaryMargin.horizontal.isNaN),
-       assert(!boundaryMargin.vertical.isNaN),
+       assert(boundaryMargin.isNonNegative),
        super(key: key);
 
   /// A margin for the visible boundaries of the child.
@@ -247,13 +246,15 @@ class InteractiveViewer extends StatefulWidget {
   /// }
   ///
   /// void _animateResetInitialize() {
-  ///   _controllerReset.reset();
-  ///   _animationReset = Matrix4Tween(
-  ///     begin: _transformationController.value,
-  ///     end: Matrix4.identity(),
-  ///   ).animate(_controllerReset);
-  ///   _animationReset.addListener(_onAnimateReset);
-  ///   _controllerReset.forward();
+  ///   setState(() {
+  ///     _controllerReset.reset();
+  ///     _animationReset = Matrix4Tween(
+  ///       begin: _transformationController.value,
+  ///       end: Matrix4.identity(),
+  ///     ).animate(_controllerReset);
+  ///     _animationReset.addListener(_onAnimateReset);
+  ///     _controllerReset.forward();
+  ///   });
   /// }
   ///
   /// // Stop a running reset to home transform animation.
@@ -270,19 +271,6 @@ class InteractiveViewer extends StatefulWidget {
   ///   if (_controllerReset.status == AnimationStatus.forward) {
   ///     _animateResetStop();
   ///   }
-  /// }
-  ///
-  /// IconButton get _resetButton {
-  ///   return IconButton(
-  ///     onPressed: () {
-  ///       setState(() {
-  ///         _animateResetInitialize();
-  ///       });
-  ///     },
-  ///     tooltip: 'Reset',
-  ///     color: Theme.of(context).colorScheme.surface,
-  ///     icon: const Icon(Icons.replay),
-  ///   );
   /// }
   ///
   /// @override
@@ -317,11 +305,25 @@ class InteractiveViewer extends StatefulWidget {
   ///         maxScale: 1.0,
   ///         onInteractionStart: _onInteractionStart,
   ///         child: Container(
-  ///           color: Colors.pink,
+  ///           decoration: BoxDecoration(
+  ///             gradient: LinearGradient(
+  ///               begin: Alignment.topCenter,
+  ///               end: Alignment.bottomCenter,
+  ///               colors: <Color>[Colors.orange, Colors.red],
+  ///               stops: <double>[0.0, 1.0],
+  ///             )
+  ///           ),
   ///         ),
   ///       ),
   ///     ),
-  ///     persistentFooterButtons: [_resetButton],
+  ///     persistentFooterButtons: [
+  ///       IconButton(
+  ///         onPressed: _animateResetInitialize,
+  ///         tooltip: 'Reset',
+  ///         color: Theme.of(context).colorScheme.surface,
+  ///         icon: const Icon(Icons.replay),
+  ///       ),
+  ///     ],
   ///   );
   /// }
   /// ```
@@ -349,7 +351,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   BoxConstraints _constraints;
   _GestureType _gestureType;
 
-  // This value was eyeballed as to give a feel similar to Google Photos.
+  // Used as the coefficient of friction in the inertial translation animation.
+  // This value was eyeballed to give a feel similar to Google Photos.
   static const double _kDrag = 0.0000135;
 
   // The _boundaryRect is calculated by adding the boundaryMargin to the size of
@@ -369,19 +372,14 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       _childKey.currentContext.findRenderObject() as RenderBox,
       _constraints,
     );
-    _boundaryRectCached = Rect.fromLTRB(
-      -widget.boundaryMargin.left,
-      -widget.boundaryMargin.top,
-      childSize.width + widget.boundaryMargin.right,
-      childSize.height + widget.boundaryMargin.bottom,
-    );
+    _boundaryRectCached = widget.boundaryMargin.inflateRect(Offset.zero & childSize);
     // Boundaries that are partially infinite are not allowed because Matrix4's
     // rotation and translation methods don't handle infinites well.
     assert(_boundaryRectCached.isFinite ||
         (_boundaryRectCached.left.isInfinite
         && _boundaryRectCached.top.isInfinite
         && _boundaryRectCached.right.isInfinite
-        && _boundaryRectCached.bottom.isInfinite));
+        && _boundaryRectCached.bottom.isInfinite), 'boundaryRect must either be infinite in all directions or finite in all directions.');
     return _boundaryRectCached;
   }
 
@@ -405,7 +403,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // translation.
   Matrix4 _matrixTranslate(Matrix4 matrix, Offset translation) {
     if (!widget.translationEnabled || translation == Offset.zero) {
-      return matrix;
+      return matrix.clone();
     }
 
     final Matrix4 nextMatrix = matrix.clone()..translate(
@@ -468,7 +466,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // any translation at all. This happens when the viewport is larger than the
     // entire boundary.
     if (offendingCorrectedDistance.dx != 0.0 && offendingCorrectedDistance.dy != 0.0) {
-      return matrix;
+      return matrix.clone();
     }
 
     // Otherwise, allow translation in only the direction that fits. This
@@ -488,7 +486,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // scale.
   Matrix4 _matrixScale(Matrix4 matrix, double scale) {
     if (!widget.scaleEnabled || scale == 1) {
-      return matrix;
+      return matrix.clone();
     }
     assert(scale != 0.0);
 
@@ -521,12 +519,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // rotation.
   Matrix4 _matrixRotate(Matrix4 matrix, double rotation, Offset focalPoint) {
     if (!widget.rotationEnabled || rotation == 0) {
-      return matrix;
+      return matrix.clone();
     }
     final Offset focalPointScene = _transformationController.toScene(
       focalPoint,
     );
     return matrix
+      .clone()
       ..translate(focalPointScene.dx, focalPointScene.dy)
       ..rotateZ(-rotation)
       ..translate(-focalPointScene.dx, -focalPointScene.dy);
