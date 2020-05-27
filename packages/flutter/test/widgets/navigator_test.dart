@@ -1881,11 +1881,11 @@ void main() {
 
     expect(previousOfFirst, isNull);
     expect(nextOfFirst, secondRoute);
-    expect(popNextOfFirst is NotAnnounced, isTrue);
+    expect(popNextOfFirst, isA<NotAnnounced>());
 
     expect(previousOfSecond, firstRoute);
     expect(nextOfSecond, isNull);
-    expect(popNextOfSecond is NotAnnounced, isTrue);
+    expect(popNextOfSecond, isA<NotAnnounced>());
 
     navigator.currentState.pop();
     expect(popNextOfFirst, secondRoute);
