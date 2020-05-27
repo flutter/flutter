@@ -87,17 +87,10 @@ BuildApp() {
       exit -1;;
   esac
 
-  # Archive builds (ACTION=install) should always run in release mode.
+  # Warn the user if not archiving (ACTION=install) in release mode.
   if [[ "$ACTION" == "install" && "$build_mode" != "release" ]]; then
-    EchoError "========================================================================"
-    EchoError "ERROR: Flutter archive builds must be run in Release mode."
-    EchoError ""
-    EchoError "To correct, ensure FLUTTER_BUILD_MODE is set to release or run:"
-    EchoError "flutter build ios --release"
-    EchoError ""
-    EchoError "then re-run Archive from Xcode."
-    EchoError "========================================================================"
-    exit -1
+    echo "warning: Flutter archive not built in Release mode. Ensure FLUTTER_BUILD_MODE \
+is set to release or run \"flutter build ios --release\", then re-run Archive from Xcode."
   fi
 
   local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
