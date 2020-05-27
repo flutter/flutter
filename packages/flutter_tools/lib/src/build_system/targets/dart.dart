@@ -312,20 +312,20 @@ abstract class AotElfBase extends Target {
 
 /// Generate an ELF binary from a dart kernel file in profile mode.
 class AotElfProfile extends AotElfBase {
-  const AotElfProfile();
+  const AotElfProfile(this.targetPlatform);
 
   @override
   String get name => 'aot_elf_profile';
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
-    Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.pattern('{PROJECT_DIR}/.packages'),
-    Source.artifact(Artifact.engineDartBinary),
-    Source.artifact(Artifact.skyEnginePath),
+  List<Source> get inputs => <Source>[
+    const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
+    const Source.pattern('{BUILD_DIR}/app.dill'),
+    const Source.pattern('{PROJECT_DIR}/.packages'),
+    const Source.artifact(Artifact.engineDartBinary),
+    const Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot,
-      platform: TargetPlatform.android_arm,
+      platform: targetPlatform,
       mode: BuildMode.profile,
     ),
   ];
@@ -339,24 +339,26 @@ class AotElfProfile extends AotElfBase {
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
   ];
+
+  final TargetPlatform  targetPlatform;
 }
 
 /// Generate an ELF binary from a dart kernel file in release mode.
 class AotElfRelease extends AotElfBase {
-  const AotElfRelease();
+  const AotElfRelease(this.targetPlatform);
 
   @override
   String get name => 'aot_elf_release';
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
-    Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.pattern('{PROJECT_DIR}/.packages'),
-    Source.artifact(Artifact.engineDartBinary),
-    Source.artifact(Artifact.skyEnginePath),
+  List<Source> get inputs => <Source>[
+    const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
+    const Source.pattern('{BUILD_DIR}/app.dill'),
+    const Source.pattern('{PROJECT_DIR}/.packages'),
+    const Source.artifact(Artifact.engineDartBinary),
+    const Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot,
-      platform: TargetPlatform.android_arm,
+      platform: targetPlatform,
       mode: BuildMode.release,
     ),
   ];
@@ -370,6 +372,8 @@ class AotElfRelease extends AotElfBase {
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
   ];
+
+  final TargetPlatform  targetPlatform;
 }
 
 /// Copies the pre-built flutter aot bundle.

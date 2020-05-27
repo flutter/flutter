@@ -23,7 +23,6 @@ const List<String> _kWindowsArtifacts = <String>[
   'flutter_messenger.h',
   'flutter_plugin_registrar.h',
   'flutter_windows.h',
-  'icudtl.dat',
 ];
 
 const String _kWindowsDepfile = 'windows_engine_sources.d';
@@ -78,6 +77,10 @@ class UnpackWindows extends Target {
       engineSourcePath: engineSourcePath,
       outputDirectory: outputDirectory,
       clientSourcePaths: <String>[clientSourcePath],
+      icuDataPath: environment.artifacts.getArtifactPath(
+        Artifact.icuData,
+        platform: TargetPlatform.windows_x64
+      )
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
@@ -90,12 +93,9 @@ class UnpackWindows extends Target {
   }
 }
 
-/// Creates a debug bundle for the Windows desktop target.
-class DebugBundleWindowsAssets extends Target {
-  const DebugBundleWindowsAssets();
-
-  @override
-  String get name => 'debug_bundle_windows_assets';
+/// Creates a bundle for the Windows desktop target.
+abstract class BundleWindowsAssets extends Target {
+  const BundleWindowsAssets();
 
   @override
   List<Target> get dependencies => const <Target>[
@@ -105,16 +105,13 @@ class DebugBundleWindowsAssets extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/windows.dart'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     ...IconTreeShaker.inputs,
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
-  ];
+  List<Source> get outputs => const <Source>[];
 
   @override
   List<String> get depfiles => const <String>[
@@ -148,4 +145,49 @@ class DebugBundleWindowsAssets extends Target {
       environment.buildDir.childFile('flutter_assets.d'),
     );
   }
+}
+
+class ReleaseBundleWindowsAssets extends BundleWindowsAssets {
+  const ReleaseBundleWindowsAssets();
+
+  @override
+  String get name => 'release_bundle_windows_assets';
+
+  @override
+  List<Target> get dependencies => <Target>[
+    ...super.dependencies,
+    const AotElfRelease(TargetPlatform.windows_x64),
+  ];
+}
+
+class ProfileBundleWindowsAssets extends BundleWindowsAssets {
+  const ProfileBundleWindowsAssets();
+
+  @override
+  String get name => 'profile_bundle_windows_assets';
+
+  @override
+  List<Target> get dependencies => <Target>[
+    ...super.dependencies,
+    const AotElfProfile(TargetPlatform.windows_x64),
+  ];
+}
+
+class DebugBundleWindowsAssets extends BundleWindowsAssets {
+  const DebugBundleWindowsAssets();
+
+  @override
+  String get name => 'debug_bundle_windows_assets';
+
+  @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.pattern('{BUILD_DIR}/app.dill'),
+  ];
+
+  @override
+  List<Source> get outputs => <Source>[
+    ...super.outputs,
+    const Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
+  ];
 }
