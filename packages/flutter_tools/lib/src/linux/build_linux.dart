@@ -55,9 +55,6 @@ Future<void> buildLinux(
 
   createPluginSymlinks(linuxProject.project);
 
-  // Invoke make.
-  final String buildFlag = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
-  final Stopwatch sw = Stopwatch()..start();
   final Status status = globals.logger.startProgress(
     'Building Linux application...',
     timeout: null,
