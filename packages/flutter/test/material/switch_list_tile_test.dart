@@ -298,7 +298,7 @@ void main() {
     await tester.pump();
     expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
   });
-  
+
   testWidgets('SwitchListTile controlAffinity test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
