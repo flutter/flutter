@@ -58,7 +58,9 @@ static void StartupAndShutdownShell(benchmark::State& state,
           return std::make_unique<PlatformView>(shell, shell.GetTaskRunners());
         },
         [](Shell& shell) {
-          return std::make_unique<Rasterizer>(shell, shell.GetTaskRunners());
+          return std::make_unique<Rasterizer>(
+              shell, shell.GetTaskRunners(),
+              shell.GetIsGpuDisabledSyncSwitch());
         });
   }
 

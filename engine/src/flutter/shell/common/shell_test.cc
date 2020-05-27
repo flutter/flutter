@@ -298,7 +298,8 @@ std::unique_ptr<Shell> ShellTest::CreateShell(
             shell_test_external_view_embedder);
       },
       [](Shell& shell) {
-        return std::make_unique<Rasterizer>(shell, shell.GetTaskRunners());
+        return std::make_unique<Rasterizer>(shell, shell.GetTaskRunners(),
+                                            shell.GetIsGpuDisabledSyncSwitch());
       });
 }
 void ShellTest::DestroyShell(std::unique_ptr<Shell> shell) {
