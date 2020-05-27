@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'widget_inspector_test.dart';
+import 'widget_inspector_test_utils.dart';
 
 void main() {
   StructuredErrorTestService.runTests();
