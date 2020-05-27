@@ -10,6 +10,7 @@ LIBRARY: tonic
 LIBRARY: txt
 ORIGIN: ../../../flutter/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/.clang-tidy
 FILE: ../../../flutter/DEPS
 FILE: ../../../flutter/assets/asset_manager.cc
 FILE: ../../../flutter/assets/asset_manager.h
