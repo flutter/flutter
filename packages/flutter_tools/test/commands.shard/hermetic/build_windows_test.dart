@@ -304,6 +304,35 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
+  testUsingContext('Windows profile build passes Profile configuration', () async {
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = mockVisualStudio;
+    applyMocksToCommand(command);
+    setUpMockProjectFilesForBuild();
+    when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
+
+    when(mockProcessManager.start(<String>[
+        fileSystem.path.join(flutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
+        vcvarsPath,
+        fileSystem.path.basename(solutionPath),
+        'Profile',
+      ],
+      environment: <String, String>{},
+      workingDirectory: fileSystem.path.dirname(solutionPath))
+    ).thenAnswer((Invocation invocation) async {
+      return mockProcess;
+    });
+
+    await createTestCommandRunner(command).run(
+      const <String>['windows', '--profile', '--no-pub']
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => mockProcessManager,
+    Platform: () => windowsPlatform,
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
   testUsingContext('hidden when not enabled on Windows host', () {
     expect(BuildWindowsCommand().hidden, true);
   }, overrides: <Type, Generator>{

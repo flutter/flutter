@@ -7,6 +7,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
@@ -65,7 +66,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     'vs_build.bat',
   );
 
-  final String configuration = buildInfo.isDebug ? 'Debug' : 'Release';
+  final String configuration = toTitleCase(getNameForBuildMode(buildInfo.mode ?? BuildMode.release));
   final String solutionPath = windowsProject.solutionFile.path;
   final Stopwatch sw = Stopwatch()..start();
   final Status status = globals.logger.startProgress(
