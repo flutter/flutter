@@ -605,6 +605,11 @@ class AnimationController extends Animation<double>
   /// repeat. The [status] will be reported as [AnimationStatus.reverse] when
   /// the animation runs from [max] to [min].
   ///
+  /// The animation repeats after a [period] duration. The [period] cannot be null 
+  /// and either the [period] argument to the repeat() method should be provided, or the 
+  /// [duration] property should be set, either in the constructor or later, before 
+  /// calling the repeat() function
+  ///
   /// Returns a [TickerFuture] that never completes. The [TickerFuture.orCancel] future
   /// completes with an error when the animation is stopped (e.g. with [stop]).
   ///
