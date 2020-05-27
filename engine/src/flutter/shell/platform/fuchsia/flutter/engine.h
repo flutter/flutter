@@ -11,7 +11,6 @@
 #include <fuchsia/ui/views/cpp/fidl.h>
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/sys/cpp/service_directory.h>
-#include <lib/ui/scenic/cpp/view_ref_pair.h>
 #include <lib/zx/event.h>
 
 #include "flutter/fml/macros.h"
@@ -38,7 +37,6 @@ class Engine final {
          flutter::Settings settings,
          fml::RefPtr<const flutter::DartSnapshot> isolate_snapshot,
          fuchsia::ui::views::ViewToken view_token,
-         scenic::ViewRefPair view_ref_pair,
          UniqueFDIONS fdio_ns,
          fidl::InterfaceRequest<fuchsia::io::Directory> directory_request,
          FlutterRunnerProductConfiguration product_config);
