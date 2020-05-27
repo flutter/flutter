@@ -16,7 +16,7 @@ void main() {
           home: Scaffold(
             body: Center(
               child: InteractiveViewer(
-                disableRotation: true,
+                rotationEnabled: false,
                 transformationController: transformationController,
                 child: Container(width: 200.0, height: 200.0),
               ),
@@ -73,7 +73,7 @@ void main() {
               child: InteractiveViewer(
                 boundaryMargin: const EdgeInsets.all(boundaryMargin),
                 minScale: minScale,
-                disableRotation: true,
+                rotationEnabled: false,
                 transformationController: transformationController,
                 child: Container(width: 200.0, height: 200.0),
               ),
@@ -129,8 +129,8 @@ void main() {
           home: Scaffold(
             body: Center(
               child: InteractiveViewer(
-                disableRotation: true,
-                disableScale: true,
+                rotationEnabled: false,
+                scaleEnabled: false,
                 transformationController: transformationController,
                 child: Container(width: 2000.0, height: 2000.0),
               ),
@@ -207,7 +207,7 @@ void main() {
           home: Scaffold(
             body: Center(
               child: InteractiveViewer(
-                disableRotation: true,
+                rotationEnabled: false,
                 boundaryMargin: const EdgeInsets.all(double.infinity),
                 minScale: minScale,
                 transformationController: transformationController,
@@ -269,7 +269,7 @@ void main() {
               child: InteractiveViewer(
                 boundaryMargin: const EdgeInsets.all(boundaryMargin),
                 minScale: minScale,
-                disableRotation: true,
+                rotationEnabled: false,
                 transformationController: transformationController,
                 child: Container(width: 200.0, height: 200.0),
               ),
@@ -331,7 +331,7 @@ void main() {
               child: InteractiveViewer(
                 boundaryMargin: const EdgeInsets.all(boundaryMargin),
                 minScale: minScale,
-                disableRotation: true,
+                rotationEnabled: false,
                 transformationController: transformationController,
                 child: Container(width: 200.0, height: 200.0),
               ),
