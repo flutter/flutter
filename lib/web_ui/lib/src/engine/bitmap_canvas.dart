@@ -118,7 +118,7 @@ class BitmapCanvas extends EngineCanvas {
   }
 
   /// Setup cache for reusing DOM elements across frames.
-  set elementCache(CrossFrameCache<html.HtmlElement> cache) {
+  void setElementCache(CrossFrameCache<html.HtmlElement> cache) {
     _elementCache = cache;
   }
 
@@ -178,7 +178,11 @@ class BitmapCanvas extends EngineCanvas {
     _canvasPool.clear();
     final int len = _children.length;
     for (int i = 0; i < len; i++) {
-      _children[i].remove();
+      html.Element child = _children[i];
+      // Don't remove children that have been reused by CrossFrameCache.
+      if (child.parent == rootElement) {
+        child.remove();
+      }
     }
     _children.clear();
     _cachedLastStyle = null;
