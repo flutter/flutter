@@ -264,15 +264,18 @@ ThinAppFrameworks() {
 # Adds the App.framework as an embedded binary and the flutter_assets as
 # resources.
 EmbedFlutterFrameworks() {
-  AssertExists "${FLUTTER_APPLICATION_PATH}"
+  local project_path="${SOURCE_ROOT}/.."
+  if [[ -n "$FLUTTER_APPLICATION_PATH" ]]; then
+    project_path="${FLUTTER_APPLICATION_PATH}"
+  fi
 
   # Prefer the hidden .ios folder, but fallback to a visible ios folder if .ios
   # doesn't exist.
-  local flutter_ios_out_folder="${FLUTTER_APPLICATION_PATH}/.ios/Flutter"
-  local flutter_ios_engine_folder="${FLUTTER_APPLICATION_PATH}/.ios/Flutter/engine"
+  local flutter_ios_out_folder="${project_path}/.ios/Flutter"
+  local flutter_ios_engine_folder="${project_path}/.ios/Flutter/engine"
   if [[ ! -d ${flutter_ios_out_folder} ]]; then
-    flutter_ios_out_folder="${FLUTTER_APPLICATION_PATH}/ios/Flutter"
-    flutter_ios_engine_folder="${FLUTTER_APPLICATION_PATH}/ios/Flutter"
+    flutter_ios_out_folder="${project_path}/ios/Flutter"
+    flutter_ios_engine_folder="${project_path}/ios/Flutter"
   fi
 
   AssertExists "${flutter_ios_out_folder}"
