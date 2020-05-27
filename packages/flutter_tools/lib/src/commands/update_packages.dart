@@ -196,8 +196,9 @@ class UpdatePackagesCommand extends FlutterCommand {
           // If the checksum doesn't match, they may have added or removed some dependencies.
           // we need to run update-packages to recapture the transitive deps.
           globals.printError(
-            'Warning: pubspec in ${directory.path} has invalid dependencies. '
-            'Please run "flutter update-packages --force-upgrade" to update them correctly.'
+            'Warning: pubspec in ${directory.path} has updated or new dependencies. '
+            'Please run "flutter update-packages --force-upgrade" to update them correctly '
+            '(checksum ${pubspec.checksum.value} != $checksum).'
           );
           needsUpdate = true;
         } else {
