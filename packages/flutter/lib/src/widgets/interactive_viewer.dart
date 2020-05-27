@@ -20,10 +20,6 @@ import 'ticker_provider.dart';
 ///
 /// The [child] must not be null.
 ///
-/// The parameter [rotationEnabled] must be set to false because the rotation
-/// feature is not yet available. This requirement will be removed in the future
-/// when rotation is available.
-///
 /// {@tool dartpad --template=stateful_widget_material_ticker}
 /// This example shows how to use InteractiveViewer in the simple case of
 /// panning over a large widget representing a table.
@@ -39,7 +35,6 @@ import 'ticker_provider.dart';
 ///         title: const Text('Pannable Table'),
 ///       ),
 ///       body: InteractiveViewer(
-///         rotationEnabled: false,
 ///         scaleEnabled: false,
 ///         child: Table(
 ///           columnWidths: <int, TableColumnWidth>{
@@ -80,7 +75,6 @@ class InteractiveViewer extends StatefulWidget {
     this.onInteractionEnd,
     this.onInteractionStart,
     this.onInteractionUpdate,
-    this.rotationEnabled = true,
     this.scaleEnabled = true,
     this.transformationController,
     this.translationEnabled = true,
@@ -92,12 +86,8 @@ class InteractiveViewer extends StatefulWidget {
        assert(maxScale > 0),
        assert(!maxScale.isNaN),
        assert(maxScale >= minScale),
-       assert(rotationEnabled != null),
        assert(scaleEnabled != null),
        assert(translationEnabled != null),
-       // TODO(justinmc): Remove this assertion when rotation is enabled.
-       // https://github.com/flutter/flutter/issues/57698
-       assert(rotationEnabled == false, 'Set rotationEnabled to false. This requirement will be removed later when the feature is complete.'),
        assert(boundaryMargin.isNonNegative),
        super(key: key);
 
@@ -129,7 +119,6 @@ class InteractiveViewer extends StatefulWidget {
   /// See also:
   ///
   ///   * [scaleEnabled], which is similar but for scale.
-  ///   * [rotationEnabled], which is similar but for rotation.
   final bool translationEnabled;
 
   /// If false, the user will be prevented from scaling.
@@ -139,24 +128,7 @@ class InteractiveViewer extends StatefulWidget {
   /// See also:
   ///
   ///   * [translationEnabled], which is similar but for translation.
-  ///   * [rotationEnabled], which is similar but for rotation.
   final bool scaleEnabled;
-
-  // TODO(justinmc): Update these docs when rotation is available.
-  // https://github.com/flutter/flutter/issues/57698
-  /// If false, the user will be prevented from rotating.
-  ///
-  /// Defaults to true.
-  ///
-  /// Currently must be set to false because rotation is not fully implemented.
-  /// This requirement will be removed in the future when rotation becomes
-  /// available.
-  ///
-  /// See also:
-  ///
-  ///   * [translationEnabled], which is similar but for translation.
-  ///   * [scaleEnabled], which is similar but for scale.
-  final bool rotationEnabled;
 
   /// The maximum allowed scale.
   ///
@@ -181,7 +153,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// {@template flutter.widgets.interactiveViewer.onInteraction}
   /// Will be called even if the interaction is disabled with
-  /// [translationEnabled], [scaleEnabled], or [rotationEnabled].
+  /// [translationEnabled] or [scaleEnabled].
   ///
   /// A [GestureDetector] wrapping the InteractiveViewer will not respond to
   /// [GestureDetector.onScaleStart], [GestureDetector.onScaleUpdate], and
@@ -299,7 +271,6 @@ class InteractiveViewer extends StatefulWidget {
   ///     body: Center(
   ///       child: InteractiveViewer(
   ///         boundaryMargin: EdgeInsets.all(double.infinity),
-  ///         rotationEnabled: false,
   ///         transformationController: _transformationController,
   ///         minScale: 0.1,
   ///         maxScale: 1.0,
@@ -351,6 +322,11 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   BoxConstraints _constraints;
   _GestureType _gestureType;
 
+  // TODO(justinmc): Add rotationEnabled parameter to the widget and remove this
+  // hardcoded value when the rotation feature is implemented.
+  // https://github.com/flutter/flutter/issues/57698
+  final bool _rotationEnabled = false;
+
   // Used as the coefficient of friction in the inertial translation animation.
   // This value was eyeballed to give a feel similar to Google Photos.
   static const double _kDrag = 0.0000135;
@@ -391,12 +367,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       _constraints,
     );
     final Size viewportSize = _constraints.constrain(childSize);
-    return Rect.fromLTRB(
-      0.0,
-      0.0,
-      viewportSize.width,
-      viewportSize.height,
-    );
+    return Offset.zero & viewportSize;
   }
 
   // Return a new matrix representing the given matrix after applying the given
@@ -518,7 +489,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Return a new matrix representing the given matrix after applying the given
   // rotation.
   Matrix4 _matrixRotate(Matrix4 matrix, double rotation, Offset focalPoint) {
-    if (!widget.rotationEnabled || rotation == 0) {
+    if (!_rotationEnabled || rotation == 0) {
       return matrix.clone();
     }
     final Offset focalPointScene = _transformationController.toScene(
@@ -531,8 +502,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       ..translate(-focalPointScene.dx, -focalPointScene.dy);
   }
 
-  // Handle the start of a gesture of _GestureType. All of translation, scale,
-  // and rotation are handled with GestureDetector's scale gesture.
+  // Handle the start of a gesture. All of translation, scale, and rotation are
+  // handled with GestureDetector's scale gesture.
   void _onScaleStart(ScaleStartDetails details) {
     if (widget.onInteractionStart != null) {
       widget.onInteractionStart(details);
@@ -553,7 +524,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _rotationStart = _currentRotation;
   }
 
-  // Handle an update to an ongoing gesture of _GestureType.
+  // Handle an update to an ongoing gesture. All of translation, scale, and
+  // rotation are handled with GestureDetector's scale gesture.
   void _onScaleUpdate(ScaleUpdateDetails details) {
     final double scale = _transformationController.value.getMaxScaleOnAxis();
     if (widget.onInteractionUpdate != null) {
@@ -570,7 +542,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     );
     _gestureType ??= _getGestureType(
       !widget.scaleEnabled ? 1.0 : details.scale,
-      !widget.rotationEnabled ? 0.0 : details.rotation,
+      !_rotationEnabled ? 0.0 : details.rotation,
     );
 
     switch (_gestureType) {
@@ -644,7 +616,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     }
   }
 
-  // Handle the end of a gesture of _GestureType.
+  // Handle the end of a gesture of _GestureType. All of translation, scale, and
+  // rotation are handled with GestureDetector's scale gesture.
   void _onScaleEnd(ScaleEndDetails details) {
     if (widget.onInteractionEnd != null) {
       widget.onInteractionEnd(details);
@@ -765,8 +738,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   @override
   void didUpdateWidget(InteractiveViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.child != oldWidget.child
-      || widget.boundaryMargin != oldWidget.boundaryMargin) {
+    if (widget.child != oldWidget.child || widget.boundaryMargin != oldWidget.boundaryMargin) {
       _boundaryRectCached = null;
     }
     if (widget.transformationController != null
