@@ -1,4 +1,4 @@
-Signature: 79522934d6d737f86b506ed0879b935e
+Signature: 09e4beba9ab1874ab508d9d7a41ae312
 
 UNUSED LICENSES:
 
@@ -4275,7 +4275,6 @@ FILE: ../../../third_party/skia/docs/examples/Device_Text.cpp
 FILE: ../../../third_party/skia/docs/examples/Difference.cpp
 FILE: ../../../third_party/skia/docs/examples/Dither_a.cpp
 FILE: ../../../third_party/skia/docs/examples/Dither_b.cpp
-FILE: ../../../third_party/skia/docs/examples/Draw_Looper_Methods.cpp
 FILE: ../../../third_party/skia/docs/examples/Dst.cpp
 FILE: ../../../third_party/skia/docs/examples/Dst_Atop.cpp
 FILE: ../../../third_party/skia/docs/examples/Dst_In.cpp
@@ -4548,7 +4547,6 @@ FILE: ../../../third_party/skia/docs/examples/Paint_getBlendMode.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getColor.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getColor4f.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getColorFilter.cpp
-FILE: ../../../third_party/skia/docs/examples/Paint_getDrawLooper.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getFillPath.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getFillPath_2.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getFilterQuality.cpp
@@ -4589,7 +4587,6 @@ FILE: ../../../third_party/skia/docs/examples/Paint_move_operator.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_notequal_operator.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_nothingToDraw.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_refColorFilter.cpp
-FILE: ../../../third_party/skia/docs/examples/Paint_refDrawLooper.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_refImageFilter.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_refMaskFilter.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_refPathEffect.cpp
@@ -4605,7 +4602,6 @@ FILE: ../../../third_party/skia/docs/examples/Paint_setColor.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_setColor4f.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_setColorFilter.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_setDither.cpp
-FILE: ../../../third_party/skia/docs/examples/Paint_setDrawLooper.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_setEmbeddedBitmapText.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_setFakeBoldText.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_setFilterQuality.cpp
