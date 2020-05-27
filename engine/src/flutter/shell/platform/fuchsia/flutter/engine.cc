@@ -202,9 +202,9 @@ Engine::Engine(Delegate& delegate,
         }
 
         return std::make_unique<flutter::Rasterizer>(
-            shell.GetTaskRunners(),        // task runners
-            std::move(compositor_context)  // compositor context
-        );
+            /*task_runners=*/shell.GetTaskRunners(),
+            /*compositor_context=*/std::move(compositor_context),
+            /*is_gpu_disabled_sync_switch=*/shell.GetIsGpuDisabledSyncSwitch());
       });
 
   UpdateNativeThreadLabelNames(thread_label_, task_runners);
