@@ -319,7 +319,10 @@ class AlertDialog extends StatelessWidget {
   /// The (optional) set of actions that are displayed at the bottom of the
   /// dialog.
   ///
-  /// Typically this is a list of [FlatButton] widgets.
+  /// Typically this is a list of [FlatButton] widgets. It is recommended to
+  /// set the [textAlign] to [TextAlign.end] for the [Text] within the
+  /// [FlatButton], so that longer actions that result in multiline text align
+  /// with the default [ButtonBar] alignment.
   ///
   /// These widgets will be wrapped in a [ButtonBar], which introduces 8 pixels
   /// of padding on each side.
@@ -476,8 +479,10 @@ class AlertDialog extends StatelessWidget {
     }
 
     final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final double clampedTextScaleFactor = textScaleFactor.clamp(1.0, 2.0).toDouble();
     final TextDirection textDirection = Directionality.of(context);
-    final double paddingScaleFactor = adjustForTextScale ? lerpDouble(1.0, 1.0 / 3.0, textScaleFactor.clamp(1.0, 2.0).toDouble() - 1.0) : 1.0;
+    // The padding scale factor will produce a padding between 8 and 24.
+    final double paddingScaleFactor = adjustForTextScale ? lerpDouble(1.0, 1.0 / 3.0, clampedTextScaleFactor - 1.0) : 1.0;
 
     Widget titleWidget;
     Widget contentWidget;
@@ -512,8 +517,7 @@ class AlertDialog extends StatelessWidget {
           bottom: actions == null ? defaultContentPadding.bottom * paddingScaleFactor : defaultContentPadding.bottom,
         ),
         child: DefaultTextStyle(
-          style: contentTextStyle ?? dialogTheme.contentTextStyle ??
-              theme.textTheme.subtitle1,
+          style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subtitle1,
           child: content,
         ),
       );
@@ -528,11 +532,14 @@ class AlertDialog extends StatelessWidget {
           top: title == null && content == null ? defaultActionsPadding.top * paddingScaleFactor : defaultActionsPadding.top,
           bottom: defaultActionsPadding.bottom * paddingScaleFactor,
         ),
-        child: ButtonBar(
-          buttonPadding: buttonPadding,
-          overflowDirection: actionsOverflowDirection,
-          overflowButtonSpacing: actionsOverflowButtonSpacing,
-          children: actions,
+        child: DefaultTextStyle.merge(
+          textAlign: TextAlign.end,
+          child: ButtonBar(
+            buttonPadding: buttonPadding,
+            overflowDirection: actionsOverflowDirection,
+            overflowButtonSpacing: actionsOverflowButtonSpacing,
+            children: actions.map((Widget action) => DefaultTextStyle.merge(textAlign: TextAlign.end, child: action)).toList(),
+          ),
         ),
       );
     }
