@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/cache.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -143,6 +144,7 @@ void main() {
       reloadSources: anyNamed('reloadSources'),
       restart: anyNamed('restart'),
       compileExpression: anyNamed('compileExpression'),
+      getSkSLMethod: anyNamed('getSkSLMethod'),
     )).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.setupDevFS(any, any, packagesFilePath: anyNamed('packagesFilePath')))
       .thenAnswer((Invocation invocation) async {
@@ -537,6 +539,61 @@ void main() {
     expect(cacheDill, isNot(exists));
   }));
 
+  test('ResidentRunner can run source generation', () => testbed.run(() async {
+    final FakeProcessManager processManager = globals.processManager as FakeProcessManager;
+    final Directory dependencies = globals.fs.directory(
+      globals.fs.path.join('build', '6ec2559087977927717927ede0a147f1'));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+        globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
+        '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
+      ],
+      onRun: () {
+        dependencies
+          .childFile('gen_l10n_inputs_and_outputs.json')
+          ..createSync()
+          ..writeAsStringSync('{"inputs":[],"outputs":[]}');
+      }
+    ));
+    globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
+      .createSync(recursive: true);
+    globals.fs.file('l10n.yaml').createSync();
+
+    await residentRunner.runSourceGenerators();
+
+    expect(testLogger.errorText, isEmpty);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
+  }));
+
+  test('ResidentRunner can run source generation - generation fails', () => testbed.run(() async {
+    final FakeProcessManager processManager = globals.processManager as FakeProcessManager;
+    final Directory dependencies = globals.fs.directory(
+      globals.fs.path.join('build', '6ec2559087977927717927ede0a147f1'));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+        globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
+        '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
+      ],
+      exitCode: 1,
+      stderr: 'stderr'
+    ));
+    globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
+      .createSync(recursive: true);
+    globals.fs.file('l10n.yaml').createSync();
+
+    await residentRunner.runSourceGenerators();
+
+    expect(testLogger.errorText, allOf(
+      contains('stderr'), // Message from gen_l10n.dart
+      contains('Exception') // Message from build_system
+    ));
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
+  }));
+
   test('ResidentRunner printHelpDetails', () => testbed.run(() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     when(mockDevice.supportsHotRestart).thenReturn(true);
@@ -573,6 +630,7 @@ void main() {
           commandHelp.p,
           commandHelp.o,
           commandHelp.z,
+          commandHelp.g,
           commandHelp.M,
           commandHelp.v,
           commandHelp.P,
@@ -1134,10 +1192,53 @@ void main() {
       Restart restart,
       CompileExpression compileExpression,
       ReloadMethod reloadMethod,
+      GetSkSLMethod getSkSLMethod,
       io.CompressionOptions compression,
       Device device,
     }) async => mockVMService,
   }));
+
+  group('Timing test', () {
+    Completer<MockVMService> completer;
+
+    test('Can connect to observatory stream after receiving done event.', () => testbed.run(() async {
+      completer = Completer<MockVMService>();
+      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+      final MockDevice mockDevice = MockDevice();
+      final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
+      when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(mockLogReader);
+      final StreamController<Uri> controller = StreamController<Uri>();
+
+      final TestFlutterDevice flutterDevice = TestFlutterDevice(
+        mockDevice,
+        observatoryUris: controller.stream,
+      );
+
+      final Future<void> connectResult = flutterDevice.connect();
+
+      // First add the observatory URI to connect to.
+      controller.add(testUri);
+
+      // Then close the stream.
+      await controller.close();
+
+      // Then complete the VM service connection.
+      completer.complete(mockVMService);
+
+      await connectResult;
+
+      verify(mockLogReader.connectedVMService = mockVMService);
+    }, overrides: <Type, Generator>{
+      VMServiceConnector: () => (Uri httpUri, {
+        ReloadSources reloadSources,
+        Restart restart,
+        CompileExpression compileExpression,
+        ReloadMethod reloadMethod,
+        io.CompressionOptions compression,
+        Device device,
+      }) async => completer.future,
+    }));
+  });
 
   test('nextPlatform moves through expected platforms', () {
     expect(nextPlatform('android', TestFeatureFlags()), 'iOS');

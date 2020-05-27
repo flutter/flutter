@@ -103,41 +103,50 @@ class AnalyzeOnce extends AnalyzeBase {
       experiments: experiments,
     );
 
-    StreamSubscription<bool> subscription;
-    subscription = server.onAnalyzing.listen((bool isAnalyzing) {
-      if (!isAnalyzing) {
-        analysisCompleter.complete();
-        subscription?.cancel();
-        subscription = null;
-      }
-    });
-    server.onErrors.listen((FileAnalysisErrors fileErrors) {
-      // Record the issues found (but filter out to do comments).
-      errors.addAll(fileErrors.errors.where((AnalysisError error) => error.type != 'TODO'));
-    });
+    Stopwatch timer;
+    Status progress;
+    try {
+      StreamSubscription<bool> subscription;
+      subscription = server.onAnalyzing.listen((bool isAnalyzing) {
+        if (!isAnalyzing) {
+          analysisCompleter.complete();
+          subscription?.cancel();
+          subscription = null;
+        }
+      });
+      server.onErrors.listen((FileAnalysisErrors fileErrors) {
+        // Record the issues found (but filter out to do comments).
+        errors.addAll(fileErrors.errors.where((AnalysisError error) => error.type != 'TODO'));
+      });
 
-    await server.start();
-    // Completing the future in the callback can't fail.
-    unawaited(server.onExit.then<void>((int exitCode) {
-      if (!analysisCompleter.isCompleted) {
-        analysisCompleter.completeError('analysis server exited: $exitCode');
-      }
-    }));
+      await server.start();
+      // Completing the future in the callback can't fail.
+      unawaited(server.onExit.then<void>((int exitCode) {
+        if (!analysisCompleter.isCompleted) {
+          analysisCompleter.completeError('analysis server exited: $exitCode');
+        }
+      }));
 
-    Cache.releaseLockEarly();
+      Cache.releaseLockEarly();
 
-    // collect results
-    final Stopwatch timer = Stopwatch()..start();
-    final String message = directories.length > 1
-        ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
-        : fileSystem.path.basename(directories.first);
-    final Status progress = argResults['preamble'] as bool
-        ? logger.startProgress('Analyzing $message...', timeout: timeoutConfiguration.slowOperation)
-        : null;
+      // collect results
+      timer = Stopwatch()..start();
+      final String message = directories.length > 1
+          ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
+          : fileSystem.path.basename(directories.first);
+      progress = argResults['preamble'] as bool
+          ? logger.startProgress(
+            'Analyzing $message...',
+            timeout: timeoutConfiguration.slowOperation,
+          )
+          : null;
 
-    await analysisCompleter.future;
-    progress?.cancel();
-    timer.stop();
+      await analysisCompleter.future;
+    } finally {
+      await server.dispose();
+      progress?.cancel();
+      timer?.stop();
+    }
 
     // count missing dartdocs
     final int undocumentedMembers = errors.where((AnalysisError error) {

@@ -58,7 +58,13 @@ abstract class AotAssemblyBase extends Target {
       ?.toList()
       ?? <DarwinArch>[DarwinArch.arm64];
     if (targetPlatform != TargetPlatform.ios) {
-      throw Exception('aot_assembly is only supported for iOS applications');
+      throw Exception('aot_assembly is only supported for iOS applications.');
+    }
+    if (iosArchs.contains(DarwinArch.x86_64)) {
+      throw Exception(
+        'release/profile builds are only supported for physical devices. '
+        'attempted to build for $iosArchs.'
+      );
     }
 
     // If we're building multiple iOS archs the binaries need to be lipo'd

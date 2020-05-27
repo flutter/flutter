@@ -8,7 +8,6 @@ import 'dart:io';
 
 import 'package:file/file.dart' as f;
 import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart' as fuchsia;
-import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
@@ -150,11 +149,37 @@ class VMServiceFlutterDriver extends FlutterDriver {
     }
 
     /// Waits for a signal from the VM service that the extension is registered.
-    /// Returns [_flutterExtensionMethodName]
-    Future<String> waitForServiceExtension() {
-      return isolate.onExtensionAdded.firstWhere((String extension) {
-        return extension == _flutterExtensionMethodName;
-      });
+    ///
+    /// Looks at the list of loaded extensions for the current [isolateRef], as
+    /// well as the stream of added extensions.
+    Future<void> waitForServiceExtension() async {
+      final Future<void> extensionAlreadyAdded = isolateRef
+        .loadRunnable()
+        .then((VMIsolate isolate) async {
+          if (isolate.extensionRpcs.contains(_flutterExtensionMethodName)) {
+            return;
+          }
+          // Never complete. Rely on the stream listener to find the service
+          // extension instead.
+          return Completer<void>().future;
+        });
+
+      final Completer<void> extensionAdded = Completer<void>();
+      StreamSubscription<String> isolateAddedSubscription;
+      isolateAddedSubscription = isolate.onExtensionAdded.listen(
+        (String extensionName) {
+          if (extensionName == _flutterExtensionMethodName) {
+            extensionAdded.complete();
+            isolateAddedSubscription.cancel();
+          }
+        },
+        onError: extensionAdded.completeError,
+        cancelOnError: true);
+
+      await Future.any(<Future<void>>[
+        extensionAlreadyAdded,
+        extensionAdded.future,
+      ]);
     }
 
     /// Tells the Dart VM Service to notify us about "Isolate" events.
@@ -174,25 +199,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
     if (isolate.pauseEvent is VMPauseStartEvent) {
       _log('Isolate is paused at start.');
 
-      // If the isolate is paused at the start, e.g. via the --start-paused
-      // option, then the VM service extension is not registered yet. Wait for
-      // it to be registered.
-      await enableIsolateStreams();
-      final Future<String> whenServiceExtensionReady = waitForServiceExtension();
-      final Future<dynamic> whenResumed = resumeLeniently();
-      await whenResumed;
-
-      _log('Waiting for service extension');
-      // We will never receive the extension event if the user does not
-      // register it. If that happens, show a message but continue waiting.
-      await _warnIfSlow<String>(
-        future: whenServiceExtensionReady,
-        timeout: kUnusuallyLongTimeout,
-        message: 'Flutter Driver extension is taking a long time to become available. '
-            'Ensure your test app (often "lib/main.dart") imports '
-            '"package:flutter_driver/driver_extension.dart" and '
-            'calls enableFlutterDriverExtension() as the first call in main().',
-      );
+      await resumeLeniently();
     } else if (isolate.pauseEvent is VMPauseExitEvent ||
         isolate.pauseEvent is VMPauseBreakpointEvent ||
         isolate.pauseEvent is VMPauseExceptionEvent ||
@@ -210,27 +217,20 @@ class VMServiceFlutterDriver extends FlutterDriver {
       );
     }
 
-    // Invoked checkHealth and try to fix delays in the registration of Service
-    // extensions
-    Future<Health> checkHealth() async {
-      try {
-        // At this point the service extension must be installed. Verify it.
-        return await driver.checkHealth();
-      } on rpc.RpcException catch (e) {
-        if (e.code != error_code.METHOD_NOT_FOUND) {
-          rethrow;
-        }
-        _log(
-            'Check Health failed, try to wait for the service extensions to be '
-                'registered.'
-        );
-        await enableIsolateStreams();
-        await waitForServiceExtension();
-        return driver.checkHealth();
-      }
-    }
+    await enableIsolateStreams();
 
-    final Health health = await checkHealth();
+    // We will never receive the extension event if the user does not register
+    // it. If that happens, show a message but continue waiting.
+    await _warnIfSlow<void>(
+      future: waitForServiceExtension(),
+      timeout: kUnusuallyLongTimeout,
+      message: 'Flutter Driver extension is taking a long time to become available. '
+          'Ensure your test app (often "lib/main.dart") imports '
+          '"package:flutter_driver/driver_extension.dart" and '
+          'calls enableFlutterDriverExtension() as the first call in main().',
+    );
+
+    final Health health = await driver.checkHealth();
     if (health.status != HealthStatus.ok) {
       await client.close();
       throw DriverError('Flutter application health check failed.');

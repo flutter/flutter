@@ -84,6 +84,25 @@ void main() {
       DeviceManager: () => _FakeDeviceManager(),
       ProcessManager: () => MockProcessManager(),
     });
+
+    testUsingContext('available devices and diagnostics', () async {
+      final DevicesCommand command = DevicesCommand();
+      await createTestCommandRunner(command).run(<String>['devices']);
+      expect(
+        testLogger.statusText,
+        '''
+2 connected devices:
+
+ephemeral • ephemeral • android-arm    • Test SDK (1.2.3) (emulator)
+webby     • webby     • web-javascript • Web SDK (1.2.4) (emulator)
+
+• Cannot connect to device ABC
+'''
+      );
+    }, overrides: <Type, Generator>{
+      DeviceManager: () => _FakeDeviceManager(),
+      ProcessManager: () => MockProcessManager(),
+    });
   });
 }
 
@@ -126,4 +145,8 @@ class _FakeDeviceManager extends DeviceManager {
   Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
     getAllConnectedDevices();
 
+  @override
+  Future<List<String>> getDeviceDiagnostics() => Future<List<String>>.value(
+    <String>['Cannot connect to device ABC']
+  );
 }

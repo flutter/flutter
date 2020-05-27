@@ -297,19 +297,21 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   void startPolling() {
     if (_timer == null) {
       _items ??= ItemListNotifier<Device>();
-      _timer = _initTimer();
+      // Make initial population the default, fast polling timeout.
+      _timer = _initTimer(null);
     }
   }
 
-  Timer _initTimer() {
+  Timer _initTimer(Duration pollingTimeout) {
     return Timer(_pollingInterval, () async {
       try {
-        final List<Device> devices = await pollingGetDevices(timeout: _pollingTimeout);
+        final List<Device> devices = await pollingGetDevices(timeout: pollingTimeout);
         _items.updateWithNewList(devices);
       } on TimeoutException {
         globals.printTrace('Device poll timed out. Will retry.');
       }
-      _timer = _initTimer();
+      // Subsequent timeouts after initial population should wait longer.
+      _timer = _initTimer(_pollingTimeout);
     });
   }
 

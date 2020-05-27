@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
+import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -60,6 +61,26 @@ void main() {
       final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
       deviceManager.resetDevices(<Device>[device2]);
       expect(await deviceManager.refreshAllConnectedDevices(), <Device>[device2]);
+    });
+  });
+
+  group('PollingDeviceDiscovery', () {
+    testUsingContext('startPolling', () async {
+      FakeAsync().run((FakeAsync time) {
+        final FakePollingDeviceDiscovery pollingDeviceDiscovery = FakePollingDeviceDiscovery();
+        pollingDeviceDiscovery.startPolling();
+        time.elapse(const Duration(milliseconds: 4001));
+        time.flushMicrotasks();
+        // First check should use the default polling timeout
+        // to quickly populate the list.
+        expect(pollingDeviceDiscovery.lastPollingTimeout, isNull);
+
+        time.elapse(const Duration(milliseconds: 4001));
+        time.flushMicrotasks();
+        // Subsequent polling should be much longer.
+        expect(pollingDeviceDiscovery.lastPollingTimeout, const Duration(seconds: 30));
+        pollingDeviceDiscovery.stopPolling();
+      });
     });
   });
 
@@ -198,12 +219,12 @@ void main() {
 
 class TestDeviceManager extends DeviceManager {
   TestDeviceManager(List<Device> allDevices) {
-    _deviceDiscoverer = MockPollingDeviceDiscovery();
+    _deviceDiscoverer = FakePollingDeviceDiscovery();
     resetDevices(allDevices);
   }
   @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[_deviceDiscoverer];
-  MockPollingDeviceDiscovery _deviceDiscoverer;
+  FakePollingDeviceDiscovery _deviceDiscoverer;
 
   void resetDevices(List<Device> allDevices) {
     _deviceDiscoverer.setDevices(allDevices);

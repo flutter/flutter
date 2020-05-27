@@ -14,6 +14,8 @@ dart_library("flutter_test") {
 
   deps = [
     "../flutter",
+    "//third_party/dart-pkg/pub/clock",
+    "//third_party/dart-pkg/pub/fake_async",
     "//third_party/dart-pkg/pub/image",
     "//third_party/dart-pkg/pub/path",
     "//third_party/dart-pkg/pub/quiver",

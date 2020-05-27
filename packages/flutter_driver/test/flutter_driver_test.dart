@@ -49,6 +49,10 @@ void main() {
       when(mockClient.getVM()).thenAnswer((_) => Future<MockVM>.value(mockVM));
       when(mockVM.isolates).thenReturn(<VMRunnableIsolate>[mockIsolate]);
       when(mockIsolate.loadRunnable()).thenAnswer((_) => Future<MockIsolate>.value(mockIsolate));
+      when(mockIsolate.extensionRpcs).thenReturn(<String>[]);
+      when(mockIsolate.onExtensionAdded).thenAnswer((Invocation invocation) {
+        return Stream<String>.fromIterable(<String>['ext.flutter.driver']);
+      });
       when(mockIsolate.invokeExtension(any, any)).thenAnswer(
           (Invocation invocation) => makeMockResponse(<String, dynamic>{'status': 'ok'}));
       vmServiceConnectFunction = (String url, {Map<String, dynamic> headers}) {
@@ -81,7 +85,7 @@ void main() {
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
       expectLogContains('Isolate is paused at start');
-      expect(connectionLog, <String>['streamListen', 'onExtensionAdded', 'resume']);
+      expect(connectionLog, <String>['resume', 'streamListen', 'onExtensionAdded']);
     });
 
     test('connects to isolate paused mid-flight', () async {
@@ -112,6 +116,18 @@ void main() {
 
     test('connects to unpaused isolate', () async {
       when(mockIsolate.pauseEvent).thenReturn(MockVMResumeEvent());
+      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
+      expect(driver, isNotNull);
+      expectLogContains('Isolate is not paused. Assuming application is ready.');
+    });
+
+    test('connects to unpaused when onExtensionAdded does not contain the '
+      'driver extension', () async {
+      when(mockIsolate.pauseEvent).thenReturn(MockVMResumeEvent());
+      when(mockIsolate.extensionRpcs).thenReturn(<String>['ext.flutter.driver']);
+      when(mockIsolate.onExtensionAdded).thenAnswer((Invocation invocation) {
+        return const Stream<String>.empty();
+      });
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
       expectLogContains('Isolate is not paused. Assuming application is ready.');

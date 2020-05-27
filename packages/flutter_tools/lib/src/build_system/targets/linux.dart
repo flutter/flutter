@@ -15,11 +15,15 @@ import 'icon_tree_shaker.dart';
 
 /// The only files/subdirectories we care out.
 const List<String> _kLinuxArtifacts = <String>[
+  // GLFW. Will be removed after the switch to GTK.
   'libflutter_linux_glfw.so',
   'flutter_export.h',
   'flutter_messenger.h',
   'flutter_plugin_registrar.h',
   'flutter_glfw.h',
+  // GTK. Not yet used by the template.
+  'libflutter_linux_gtk.so',
+  // Shared.
   'icudtl.dat',
 ];
 
@@ -55,9 +59,17 @@ class UnpackLinux extends Target {
         mode: buildMode,
         platform: TargetPlatform.linux_x64,
       );
+    // For the GLFW embedding.
     final String clientSourcePath = environment.artifacts
       .getArtifactPath(
         Artifact.linuxCppClientWrapper,
+        mode: buildMode,
+        platform: TargetPlatform.linux_x64,
+      );
+    // For the GTK embedding.
+    final String headersPath = environment.artifacts
+      .getArtifactPath(
+        Artifact.linuxHeaders,
         mode: buildMode,
         platform: TargetPlatform.linux_x64,
       );
@@ -73,7 +85,7 @@ class UnpackLinux extends Target {
       engineSourcePath: engineSourcePath,
       outputDirectory: outputDirectory,
       artifacts: _kLinuxArtifacts,
-      clientSourcePath: clientSourcePath,
+      clientSourcePaths: <String>[clientSourcePath, headersPath],
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,

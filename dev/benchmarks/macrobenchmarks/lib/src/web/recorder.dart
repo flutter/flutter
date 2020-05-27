@@ -111,6 +111,17 @@ abstract class Recorder {
   /// prefix.
   final String name;
 
+  /// Returns the recorded profile.
+  ///
+  /// This value is only available while the benchmark is running.
+  Profile get profile;
+
+  /// Whether the benchmark should continue running.
+  ///
+  /// Returns `false` if the benchmark collected enough data and it's time to
+  /// stop.
+  bool shouldContinue() => profile.shouldContinue();
+
   /// Called once before all runs of this benchmark recorder.
   ///
   /// This is useful for doing one-time setup work that's needed for the
@@ -159,14 +170,18 @@ abstract class RawRecorder extends Recorder {
   void body(Profile profile);
 
   @override
+  Profile get profile => _profile;
+  Profile _profile;
+
+  @override
   @nonVirtual
   Future<Profile> run() async {
-    final Profile profile = Profile(name: name);
+    _profile = Profile(name: name);
     do {
       await Future<void>.delayed(Duration.zero);
-      body(profile);
-    } while (profile.shouldContinue());
-    return profile;
+      body(_profile);
+    } while (shouldContinue());
+    return _profile;
   }
 }
 
@@ -198,6 +213,10 @@ abstract class RawRecorder extends Recorder {
 abstract class SceneBuilderRecorder extends Recorder {
   SceneBuilderRecorder({@required String name}) : super._(name, true);
 
+  @override
+  Profile get profile => _profile;
+  Profile _profile;
+
   /// Called from [Window.onBeginFrame].
   @mustCallSuper
   void onBeginFrame() {}
@@ -212,7 +231,7 @@ abstract class SceneBuilderRecorder extends Recorder {
   @override
   Future<Profile> run() {
     final Completer<Profile> profileCompleter = Completer<Profile>();
-    final Profile profile = Profile(name: name);
+    _profile = Profile(name: name);
 
     window.onBeginFrame = (_) {
       try {
@@ -225,22 +244,22 @@ abstract class SceneBuilderRecorder extends Recorder {
     };
     window.onDrawFrame = () {
       try {
-        profile.record('drawFrameDuration', () {
+        _profile.record('drawFrameDuration', () {
           final SceneBuilder sceneBuilder = SceneBuilder();
           onDrawFrame(sceneBuilder);
-          profile.record('sceneBuildDuration', () {
+          _profile.record('sceneBuildDuration', () {
             final Scene scene = sceneBuilder.build();
-            profile.record('windowRenderDuration', () {
+            _profile.record('windowRenderDuration', () {
               window.render(scene);
             }, reported: false);
           }, reported: false);
         }, reported: true);
         endMeasureFrame();
 
-        if (profile.shouldContinue()) {
+        if (shouldContinue()) {
           window.scheduleFrame();
         } else {
-          profileCompleter.complete(profile);
+          profileCompleter.complete(_profile);
         }
       } catch (error, stackTrace) {
         profileCompleter.completeError(error, stackTrace);
@@ -326,6 +345,7 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
   @override
   VoidCallback didStop;
 
+  @override
   Profile profile;
   Completer<void> _runCompleter;
 
@@ -344,7 +364,7 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
     endMeasureFrame();
     profile.addDataPoint('drawFrameDuration', _drawFrameStopwatch.elapsed, reported: true);
 
-    if (profile.shouldContinue()) {
+    if (shouldContinue()) {
       window.scheduleFrame();
     } else {
       didStop();
@@ -414,6 +434,7 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
   @override
   VoidCallback didStop;
 
+  @override
   Profile profile;
   Completer<void> _runCompleter;
 
@@ -453,7 +474,7 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
       profile.addDataPoint('drawFrameDuration', _drawFrameStopwatch.elapsed, reported: true);
     }
 
-    if (profile.shouldContinue()) {
+    if (shouldContinue()) {
       showWidget = !showWidget;
       _hostState._setStateTrampoline();
     } else {

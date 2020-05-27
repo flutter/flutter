@@ -219,12 +219,23 @@ class UpgradeCommandRunner {
           workingDirectory: workingDirectory,
       );
       revision = result.stdout.trim();
-    } on Exception {
-      throwToolExit(
-        'Unable to upgrade Flutter: no origin repository configured. '
-        "Run 'git remote add origin "
-        "https://github.com/flutter/flutter' in $workingDirectory",
-      );
+    } on Exception catch (e) {
+      final String errorString = e.toString();
+      if (errorString.contains('fatal: HEAD does not point to a branch')) {
+        throwToolExit(
+          'You are not currently on a release branch. Use git to '
+          'check out an official branch (\'stable\', \'beta\', \'dev\', or \'master\') '
+          'and retry, for example:\n'
+          '  git checkout stable'
+        );
+      } else if (errorString.contains('fatal: no upstream configured for branch')) {
+        throwToolExit(
+          'Unable to upgrade Flutter: no origin repository configured. '
+          'Run \'git remote add origin '
+          'https://github.com/flutter/flutter\' in $workingDirectory');
+      } else {
+        throwToolExit(errorString);
+      }
     }
     return revision;
   }

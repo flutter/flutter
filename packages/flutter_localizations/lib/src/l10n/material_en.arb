@@ -173,6 +173,98 @@
     "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for a modal barrier to indicate that a tap dismisses the barrier. A modal barrier can for example be found behind a alert or popup to block user interaction with elements behind it."
   },
 
+  "dateSeparator": "/",
+  "@dateSeparator": {
+    "description": "The character string used to separate the parts of a compact date format. For example 'mm/dd/yyyy' has a separator of '/'."
+  },
+
+  "dateHelpText": "mm/dd/yyyy",
+  "@dateHelpText": {
+    "description": "The help text used on an empty text input date field to indicate the date format being asked for."
+  },
+
+  "selectYearSemanticsLabel": "Select year",
+  "@selectYearSemanticsLabel": {
+    "description": "The accessibility label used to announce when the user has entered the year selection mode in the date picker."
+  },
+
+  "unspecifiedDate": "Date",
+  "@unspecifiedDate": {
+    "description": "The label used to indicate a date that has not been entered or selected in the date picker."
+  },
+
+  "unspecifiedDateRange": "Date Range",
+  "@unspecifiedDateRange": {
+    "description": "The label used to indicate a date range that has not been entered or selected in the date range picker."
+  },
+
+  "dateInputLabel": "Enter Date",
+  "@dateInputLabel": {
+    "description": "The label used to describe the input text field used in in the date picker."
+  },
+
+  "dateRangeStartLabel": "Start Date",
+  "@dateRangeStartLabel": {
+    "description": "The label used to describe the starting date input text field used in in the date range picker."
+  },
+
+  "dateRangeEndLabel": "End Date",
+  "@dateRangeEndLabel": {
+    "description": "The label used to describe the ending date input text field used in in the date range picker."
+  },
+
+  "dateRangeStartDateSemanticLabel": "Start date $fullDate",
+  "@dateRangeStartDateSemanticLabel": {
+    "description": "Accessibility announcement that is used when the user navigates to the selected start date in the date range picker.",
+    "parameters": "$fullDate"
+  },
+
+  "dateRangeEndDateSemanticLabel": "End date $fullDate",
+  "@dateRangeEndDateSemanticLabel": {
+    "description": "Accessibility announcement that is used when the user navigates to the selected end date in the date range picker.",
+    "parameters": "$fullDate"
+  },
+
+  "invalidDateFormatLabel": "Invalid format.",
+  "@invalidDateFormatLabel": {
+    "description": "Error message displayed to the user when they have entered a text string in an input field of the date picker that is not in a valid date format."
+  },
+
+  "invalidDateRangeLabel": "Invalid range.",
+  "@invalidDateRangeLabel": {
+    "description": "Error message displayed to the user when they have entered an invalid date range in the input fields of the date range picker."
+  },
+
+  "dateOutOfRangeLabel": "Out of range.",
+  "@dateOutOfRangeLabel": {
+    "description": "Error message displayed to the user when they have entered a date that is outside the valid range for the date picker."
+  },
+
+  "saveButtonLabel": "SAVE",
+  "@saveButtonLabel": {
+    "description": "Label for a 'SAVE' button used in full screen dialogs."
+  },
+
+  "datePickerHelpText": "SELECT DATE",
+  "@datePickerHelpText": {
+    "description": "Label used in the header of the date picker dialog"
+  },
+
+  "dateRangePickerHelpText": "SELECT RANGE",
+  "@dateRangePickerHelpText": {
+    "description": "Label used in the header of the date range picker dialog."
+  },
+
+  "calendarModeButtonLabel": "Switch to calendar",
+  "@calendarModeButtonLabel": {
+    "description": "Tooltip used for the calendar mode button of the date pickers."
+  },
+
+  "inputDateModeButtonLabel": "Switch to input",
+  "@inputDateModeButtonLabel": {
+    "description": "Tooltip used for the text input mode button of the date pickers."
+  },
+
   "signedInLabel": "Signed in",
   "@signedInLabel": {
     "description": "The accessibility label used to indicate which account is signed in, in a UserAccountsDrawerHeader, when the accessibility user navigates the UI. This phrase serves as an adjective with respect to the user. The phrase indicates that the user is currently signed in."

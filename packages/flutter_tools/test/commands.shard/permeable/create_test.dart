@@ -634,7 +634,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    expect(projectDir.childDirectory('linux').childFile('Makefile').existsSync(), true);
+    expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt').existsSync(), true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
@@ -649,7 +649,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    expect(projectDir.childDirectory('linux').childFile('Makefile').existsSync(), false);
+    expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt').existsSync(), false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
@@ -664,7 +664,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
-    expect(projectDir.childDirectory('linux').childFile('Makefile').existsSync(), true);
+    expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt').existsSync(), true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
@@ -679,7 +679,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
-    expect(projectDir.childDirectory('linux').childFile('Makefile').existsSync(), false);
+    expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt').existsSync(), false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });

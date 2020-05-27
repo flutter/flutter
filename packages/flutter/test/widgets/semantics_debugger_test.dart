@@ -10,6 +10,16 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('SemanticsDebugger will schedule a frame', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      SemanticsDebugger(
+        child: Container(),
+      ),
+    );
+
+    expect(tester.binding.hasScheduledFrame, isTrue);
+  });
+
   testWidgets('SemanticsDebugger smoke test', (WidgetTester tester) async {
 
     // This is a smoketest to verify that adding a debugger doesn't crash.

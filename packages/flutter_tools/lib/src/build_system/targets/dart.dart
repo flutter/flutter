@@ -17,6 +17,7 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'icon_tree_shaker.dart';
+import 'localizations.dart';
 
 /// The define to pass a [BuildMode].
 const String kBuildMode = 'BuildMode';
@@ -56,9 +57,6 @@ const String kFileSystemScheme = 'FileSystemScheme';
 ///
 /// If provided, must be used along with [kFileSystemScheme].
 const String kFileSystemRoots = 'FileSystemRoots';
-
-/// Defines specified via the `--dart-define` command-line option.
-const String kDartDefines = 'DartDefines';
 
 /// The define to control what iOS architectures are built for.
 ///
@@ -183,7 +181,9 @@ class KernelSnapshot extends Target {
   ];
 
   @override
-  List<Target> get dependencies => <Target>[];
+  List<Target> get dependencies => const <Target>[
+    GenerateLocalizationsTarget(),
+  ];
 
   @override
   Future<void> build(Environment environment) async {
@@ -254,7 +254,7 @@ class KernelSnapshot extends Target {
       extraFrontEndOptions: extraFrontEndOptions,
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme: fileSystemScheme,
-      dartDefines: parseDartDefines(environment),
+      dartDefines: decodeDartDefines(environment.defines),
       packageConfig: packageConfig,
     );
     if (output == null || output.errorCount != 0) {
@@ -395,12 +395,4 @@ abstract class CopyFlutterAotBundle extends Target {
     }
     environment.buildDir.childFile('app.so').copySync(outputFile.path);
   }
-}
-
-/// Dart defines are encoded inside [Environment] as a comma-separated list.
-List<String> parseDartDefines(Environment environment) {
-  if (!environment.defines.containsKey(kDartDefines) || environment.defines[kDartDefines].isEmpty) {
-    return const <String>[];
-  }
-  return environment.defines[kDartDefines].split(',');
 }
