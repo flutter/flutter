@@ -144,7 +144,7 @@ abstract class BundleWindowsAssets extends Target {
   }
 }
 
-/// A wrapper for AOT complitaion that copies app.so into the output directory.
+/// A wrapper for AOT compilation that copies app.so into the output directory.
 class WindowsAotBundle extends Target {
   /// Create a [WindowsAotBundle] wrapper for [aotTarget].
   const WindowsAotBundle(this.aotTarget);
