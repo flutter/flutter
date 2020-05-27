@@ -14,11 +14,8 @@
 
 set -e
 
+# Needed because if it is set, cd may print the path it changed to.
 unset CDPATH
-
-function _rmlock () {
-  [ -n "$FLUTTER_UPGRADE_LOCK" ] && rm -f "$FLUTTER_UPGRADE_LOCK"
-}
 
 function retry_upgrade {
   local total_tries="10"
@@ -37,50 +34,78 @@ function retry_upgrade {
   return 0
 }
 
-function upgrade_flutter () {
+# Trap function for removing any remaining lock file at exit.
+function _rmlock () {
+  [ -n "$FLUTTER_UPGRADE_LOCK" ] && rm -rf "$FLUTTER_UPGRADE_LOCK"
+}
+
+# Determines which lock method to use, based on what is available on the system.
+# Returns a non-zero value if the lock was not acquired, zero if acquired.
+function _lock () {
+  if hash flock 2>/dev/null; then
+    flock --nonblock --exclusive 7 2>/dev/null
+  else
+    mkdir "$1" 2>/dev/null
+  fi
+}
+
+# Waits for an update lock to be acquired.
+#
+# To ensure that we don't simultaneously update Dart in multiple parallel
+# instances, we try to obtain an exclusive lock on this file descriptor (and
+# thus this script's source file) while we are updating Dart and compiling the
+# script. To do this, we try to use the command line program "flock", which is
+# available on many Unix-like platforms, in particular on most Linux
+# distributions. You give it a file descriptor, and it locks the corresponding
+# file, having inherited the file descriptor from the shell.
+#
+# Complicating matters, there are two major scenarios where this will not
+# work.
+#
+# The first is if the platform doesn't have "flock", for example on macOS. There
+# is not a direct equivalent, so on platforms that don't have flock, we fall
+# back to using mkdir as an atomic operation to create a lock directory. If
+# mkdir is able to create the directory, then the lock is acquired. To determine
+# if we have "flock" available, we use the "hash" shell built-in.
+#
+# The second complication is NFS. On NFS, to obtain an exclusive lock you need a
+# file descriptor that is open for writing. Thus, we ignore errors from flock by
+# redirecting all output to /dev/null, since users will typically not care about
+# errors from flock and are more likely to be confused by them than helped.
+#
+# The upgrade_flutter function calling _wait_for_lock is executed in a subshell
+# with a redirect that pipes the source of this script into file descriptor 7.
+# A flock lock is released when this subshell exits and file descriptor 7 is
+# closed. The mkdir lock is released via an exit trap from the subshell that
+# deletes the lock directory.
+function _wait_for_lock () {
+  FLUTTER_UPGRADE_LOCK="$FLUTTER_ROOT/bin/cache/.upgrade_lock"
+  local waiting_message_displayed
+  while ! _lock "$FLUTTER_UPGRADE_LOCK"; do
+    if [[ -z $waiting_message_displayed ]]; then
+      # Print with a return so that if the Dart code also prints this message
+      # when it does its own lock, the message won't appear twice. Be sure that
+      # the clearing printf below has the same number of space characters.
+      printf "Waiting for another flutter command to release the startup lock...\r";
+      waiting_message_displayed="true"
+    fi
+    sleep .1;
+  done
+  # Clear the waiting message so it doesn't overlap any following text.
+  printf "                                                                  \r";
+  unset waiting_message_displayed
+  # If the lock file is acquired, make sure that it is removed on exit.
+  trap _rmlock INT TERM EXIT
+}
+
+# This function is always run in a subshell. Running the function in a subshell
+# is required to make sure any lock directory is cleaned up by the exit trap in
+# _wait_for_lock.
+function upgrade_flutter () (
   mkdir -p "$FLUTTER_ROOT/bin/cache"
 
-  # This function is executed with a redirect that pipes the source of
-  # this script into file descriptor 3.
-  #
-  # To ensure that we don't simultaneously update Dart in multiple
-  # parallel instances, we try to obtain an exclusive lock on this
-  # file descriptor (and thus this script's source file) while we are
-  # updating Dart and compiling the script. To do this, we try to use
-  # the command line program "flock", which is available on many
-  # Unix-like platforms, in particular on most Linux distributions.
-  # You give it a file descriptor, and it locks the corresponding
-  # file, having inherited the file descriptor from the shell.
-  #
-  # Complicating matters, there are two major scenarios where this
-  # will not work.
-  #
-  # The first is if the platform doesn't have "flock", for example on Mac.
-  # There is not a direct equivalent, so on platforms that don't have flock,
-  # we fall back to using a lockfile and spinlock with "shlock".  This
-  # doesn't work as well over NFS as it relies on PIDs. Any platform
-  # without either of these tools has no locking at all. To determine if we
-  # have "flock" or "shlock" available, we abuse the "hash" shell built-in.
-  #
-  # The second complication is NFS. On NFS, to obtain an exclusive
-  # lock you need a file descriptor that is open for writing, because
-  # NFS implements exclusive locks by writing, or some such. Thus, we
-  # ignore errors from flock. We do so by using the '|| true' trick,
-  # since we are running in a 'set -e' environment wherein all errors
-  # are fatal, and by redirecting all output to /dev/null, since
-  # users will typically not care about errors from flock and are
-  # more likely to be confused by them than helped.
-  #
-  # For "flock", the lock is released when the file descriptor goes out of
-  # scope,  i.e. when this function returns.  The lock is released via
-  # a trap when using "shlock".
-  if hash flock 2>/dev/null; then
-    flock 3 2>/dev/null || true
-  elif hash shlock 2>/dev/null; then
-    FLUTTER_UPGRADE_LOCK="$FLUTTER_ROOT/bin/cache/.upgrade_lock"
-    while ! shlock -f "$FLUTTER_UPGRADE_LOCK" -p $$ ; do sleep .1 ; done
-    trap _rmlock EXIT
-  fi
+  # Waits for the update lock to be acquired.
+  _wait_for_lock
 
   local revision="$(cd "$FLUTTER_ROOT"; git rev-parse HEAD)"
 
@@ -111,15 +136,15 @@ function upgrade_flutter () {
     "$DART" --disable-dart-dev $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" --no-enable-mirrors "$SCRIPT_PATH"
     echo "$revision" > "$STAMP_PATH"
   fi
-  # The exit here is duplicitous since the function is run in a subshell,
-  # but this serves as documentation that running the function in a
-  # subshell is required to make sure any lockfile created by shlock
-  # is cleaned up.
+  # The exit here is extraneous since the function is run in a subshell, but
+  # this serves as documentation that running the function in a subshell is
+  # required to make sure any lock directory created by mkdir is cleaned up.
   exit $?
-}
+)
 
 # This function is intended to be executed by entrypoints (e.g. `//bin/flutter`
-# and `//bin/dart`)
+# and `//bin/dart`). PROG_NAME and BIN_DIR should already be set by those
+# entrypoints.
 function shared::execute() {
   export FLUTTER_ROOT="$(cd "${BIN_DIR}/.." ; pwd -P)"
 
@@ -132,8 +157,8 @@ function shared::execute() {
   DART="$DART_SDK_PATH/bin/dart"
   PUB="$DART_SDK_PATH/bin/pub"
 
-  # If running over git-bash, overrides the default UNIX
-  # executables with win32 executables
+  # If running over git-bash, overrides the default UNIX executables with win32
+  # executables
   case "$(uname -s)" in
     MINGW32*)
       DART="$DART.exe"
@@ -159,8 +184,8 @@ function shared::execute() {
   if [[ ! -e "$FLUTTER_ROOT/.git" ]]; then
     echo "Error: The Flutter directory is not a clone of the GitHub project."
     echo "       The flutter tool requires Git in order to operate properly;"
-    echo "       to set up Flutter, run the following command:"
-    echo "       git clone -b stable https://github.com/flutter/flutter.git"
+    echo "       to install Flutter, see the instructions at:"
+    echo "       https://flutter.dev/get-started"
     exit 1
   fi
 
@@ -169,13 +194,13 @@ function shared::execute() {
   # FLUTTER_TOOL_ARGS="--enable-asserts $FLUTTER_TOOL_ARGS"
   # FLUTTER_TOOL_ARGS="$FLUTTER_TOOL_ARGS --observe=65432"
 
-  (upgrade_flutter) 3< "$PROG_NAME"
+  upgrade_flutter 7< "$PROG_NAME"
 
   BIN_NAME="$(basename "$PROG_NAME")"
   case "$BIN_NAME" in
     flutter*)
-      # FLUTTER_TOOL_ARGS aren't quoted below, because it is meant to
-      # be considered as separate space-separated args.
+      # FLUTTER_TOOL_ARGS aren't quoted below, because it is meant to be
+      # considered as separate space-separated args.
       "$DART" --disable-dart-dev --packages="$FLUTTER_TOOLS_DIR/.packages" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
       ;;
     dart*)
