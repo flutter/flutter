@@ -64,7 +64,10 @@ config("feature_flags") {
 # Debug/release ----------------------------------------------------------------
 
 config("debug") {
-  defines = [ "_DEBUG" ]
+  defines = [
+    "DEBUG",  # Dart uses DEBUG
+    "_DEBUG",  # Swiftshader uses _DEBUG
+  ]
 
   if (is_win) {
     if (disable_iterator_debugging) {
