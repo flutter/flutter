@@ -1772,7 +1772,7 @@ class InputDecorator extends StatefulWidget {
   /// be null.
   const InputDecorator({
     Key key,
-    this.decoration,
+    @required this.decoration,
     this.baseStyle,
     this.textAlign,
     this.textAlignVertical,
@@ -1781,7 +1781,8 @@ class InputDecorator extends StatefulWidget {
     this.expands = false,
     this.isEmpty = false,
     this.child,
-  }) : assert(isFocused != null),
+  }) : assert(decoration != null),
+       assert(isFocused != null),
        assert(isHovering != null),
        assert(expands != null),
        assert(isEmpty != null),
@@ -1789,9 +1790,10 @@ class InputDecorator extends StatefulWidget {
 
   /// The text and styles to use when decorating the child.
   ///
-  /// If null, `const InputDecoration()` is used. Null [InputDecoration]
-  /// properties are initialized with the corresponding values from
-  /// [ThemeData.inputDecorationTheme].
+  /// Null [InputDecoration] properties are initialized with the corresponding
+  /// values from [ThemeData.inputDecorationTheme].
+  ///
+  /// Must not be null.
   final InputDecoration decoration;
 
   /// The style on which to base the label, hint, counter, and error styles
@@ -1880,7 +1882,9 @@ class InputDecorator extends StatefulWidget {
 
   /// Whether the label needs to get out of the way of the input, either by
   /// floating or disappearing.
-  bool get _labelShouldWithdraw => !isEmpty || isFocused;
+  ///
+  /// Will withdraw when not empty, or when focused while enabled.
+  bool get _labelShouldWithdraw => !isEmpty || (isFocused && decoration.enabled);
 
   @override
   _InputDecoratorState createState() => _InputDecoratorState();
@@ -1964,7 +1968,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextAlign get textAlign => widget.textAlign;
-  bool get isFocused => widget.isFocused && decoration.enabled;
+  bool get isFocused => widget.isFocused;
   bool get isHovering => widget.isHovering && decoration.enabled;
   bool get isEmpty => widget.isEmpty;
   bool get _floatingLabelEnabled {
@@ -2061,7 +2065,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getDefaultIconColor(ThemeData themeData) {
-    if (!decoration.enabled)
+    if (!decoration.enabled && !isFocused)
       return themeData.disabledColor;
 
     switch (themeData.brightness) {
@@ -2123,7 +2127,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     }
 
     Color borderColor;
-    if (decoration.enabled) {
+    if (decoration.enabled || isFocused) {
       borderColor = decoration.errorText == null
         ? _getDefaultBorderColor(themeData)
         : themeData.errorColor;
