@@ -1822,7 +1822,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     assert(debugCheckHasMaterialLocalizations(context));
 
     final EdgeInsetsGeometry _defaultLabelPadding = EdgeInsets.lerp(
-      const EdgeInsets.symmetric(horizontal: 9.0),
+      const EdgeInsets.symmetric(horizontal: 8.0),
       const EdgeInsets.symmetric(horizontal: 4.0),
       MediaQuery.of(context).textScaleFactor < 2.0
         ? MediaQuery.of(context).textScaleFactor - 1.0 : 1.0,
