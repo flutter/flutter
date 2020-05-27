@@ -696,6 +696,33 @@ void main() {
     expect(find.text('C'), isOnstage);
   });
 
+  testWidgets('Able to pop all routes', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/' : (BuildContext context) => const OnTapPage(
+        id: '/',
+      ),
+      '/A': (BuildContext context) => const OnTapPage(
+        id: 'A',
+      ),
+      '/A/B': (BuildContext context) => OnTapPage(
+        id: 'B',
+        onTap: (){
+          // Pops all routes with bad predicate.
+          Navigator.of(context).popUntil((Route<dynamic> route) => false);
+        },
+      ),
+    };
+    await tester.pumpWidget(
+      MaterialApp(
+        routes: routes,
+        initialRoute: '/A/B',
+      )
+    );
+    await tester.tap(find.text('B'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('pushAndRemoveUntil triggers secondaryAnimation', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(
