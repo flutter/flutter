@@ -191,16 +191,21 @@ class ProfileBundleLinuxAssets extends Target {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'profile_bundle_linux_assets');
     }
-    final Directory outputDirectory = environment.outputDir
+    final Directory assetsDirectory = environment.outputDir
+      .childDirectory('flutter_assets');
+    if (!assetsDirectory.existsSync()) {
+      assetsDirectory.createSync();
+    }
+    final Directory libDirectory = environment.outputDir
       .childDirectory('lib');
-    if (!outputDirectory.existsSync()) {
-      outputDirectory.createSync();
+    if (!libDirectory.existsSync()) {
+      libDirectory.createSync();
     }
 
     environment.buildDir.childFile('app.so')
-      .copySync(outputDirectory.childFile('libapp.so').path);
+      .copySync(libDirectory.childFile('libapp.so').path);
 
-    final Depfile depfile = await copyAssets(environment, outputDirectory);
+    final Depfile depfile = await copyAssets(environment, assetsDirectory);
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
@@ -248,16 +253,21 @@ class ReleaseBundleLinuxAssets extends Target {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'release_bundle_linux_assets');
     }
-    final Directory outputDirectory = environment.outputDir
+    final Directory assetsDirectory = environment.outputDir
+      .childDirectory('flutter_assets');
+    if (!assetsDirectory.existsSync()) {
+      assetsDirectory.createSync();
+    }
+    final Directory libDirectory = environment.outputDir
       .childDirectory('lib');
-    if (!outputDirectory.existsSync()) {
-      outputDirectory.createSync();
+    if (!libDirectory.existsSync()) {
+      libDirectory.createSync();
     }
 
     environment.buildDir.childFile('app.so')
-      .copySync(outputDirectory.childFile('libapp.so').path);
+      .copySync(libDirectory.childFile('libapp.so').path);
 
-    final Depfile depfile = await copyAssets(environment, outputDirectory);
+    final Depfile depfile = await copyAssets(environment, assetsDirectory);
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
       logger: environment.logger,

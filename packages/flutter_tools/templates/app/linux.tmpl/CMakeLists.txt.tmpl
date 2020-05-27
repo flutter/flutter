@@ -75,3 +75,12 @@ INSTALL(CODE "
   " COMPONENT Runtime)
 INSTALL(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
   DESTINATION "${INSTALL_BUNDLE_DATA_DIR}" COMPONENT Runtime)
+
+# Fully re-copy the lib directory on each build to avoid having stale files
+# from a previous install.
+set(LIB_DIR_NAME "lib")
+INSTALL(CODE "
+  file(REMOVE_RECURSE \"${CMAKE_INSTALL_PREFIX}/${LIB_DIR_NAME}\")
+  " COMPONENT Runtime)
+INSTALL(DIRECTORY "${PROJECT_BUILD_DIR}/${LIB_DIR_NAME}"
+  DESTINATION "${CMAKE_INSTALL_PREFIX}" COMPONENT Runtime)
