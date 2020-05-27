@@ -23,29 +23,34 @@ class StructuredErrorTestService extends TestWidgetInspectorService {
   static void runTests() {
     final StructuredErrorTestService service = StructuredErrorTestService();
     WidgetInspectorService.instance = service;
+    FlutterExceptionHandler oldHandler;
 
-    testWidgets('ext.flutter.inspector.setStructuredErrors', (WidgetTester tester) async {
-      final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    setUp(() {
+      oldHandler = FlutterError.onError;
+    });
+
+    testWidgets('ext.flutter.inspector.setStructuredErrors',
+        (WidgetTester tester) async {
       WidgetInspectorService.instance.setStructuredErrors();
 
-      try {
-        List<Map<Object, Object>> flutterErrorEvents = service
-            .getEventsDispatched('Flutter.Error');
-        expect(flutterErrorEvents, hasLength(0));
+      List<Map<Object, Object>> flutterErrorEvents =
+          service.getEventsDispatched('Flutter.Error');
+      expect(flutterErrorEvents, hasLength(0));
 
-        // Create an error.
-        FlutterError.reportError(FlutterErrorDetailsForRendering(
-          library: 'rendering library',
-          context: ErrorDescription('during layout'),
-          exception: StackTrace.current,
-        ));
+      // Create an error.
+      FlutterError.reportError(FlutterErrorDetailsForRendering(
+        library: 'rendering library',
+        context: ErrorDescription('during layout'),
+        exception: StackTrace.current,
+      ));
 
-        // Validate that we received an error.
-        flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
-        expect(flutterErrorEvents, hasLength(1));
-      } finally {
-        FlutterError.onError = oldHandler;
-      }
+      // Validate that we received an error.
+      flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
+      expect(flutterErrorEvents, hasLength(1));
+    });
+
+    tearDown(() {
+      FlutterError.onError = oldHandler;
     });
   }
 }
