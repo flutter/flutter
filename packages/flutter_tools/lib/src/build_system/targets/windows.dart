@@ -226,7 +226,6 @@ class DebugBundleWindowsAssets extends BundleWindowsAssets {
 
   @override
   List<Source> get outputs => <Source>[
-    ...super.outputs,
     const Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
   ];
 }
