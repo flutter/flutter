@@ -84,7 +84,8 @@ G_DECLARE_FINAL_TYPE(FlMethodChannel,
  *   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new ();
  *   channel =
  *     fl_method_channel_new(messenger, "flutter/foo", FL_METHOD_CODEC (codec));
- *   fl_method_channel_set_method_call_handler (channel, method_call_cb, NULL);
+ *   fl_method_channel_set_method_call_handler (channel, method_call_cb, NULL,
+ * NULL);
  *
  *   g_autoptr(FlValue) args = fl_value_new_string ("Hello World");
  *   fl_method_channel_invoke_method (channel, "Foo.foo", args,
@@ -105,7 +106,7 @@ G_DECLARE_FINAL_TYPE(FlMethodChannel,
  * Function called when a method call is received. Respond to the method call
  * with fl_method_call_respond(). If the response is not occurring in this
  * callback take a reference to @method_call and release that once it has been
- * responded to.Failing to respond before the last reference to @method_call is
+ * responded to. Failing to respond before the last reference to @method_call is
  * dropped is a programming error.
  */
 typedef void (*FlMethodChannelMethodCallHandler)(FlMethodChannel* channel,
@@ -132,14 +133,21 @@ FlMethodChannel* fl_method_channel_new(FlBinaryMessenger* messenger,
  * @channel: an #FlMethodChannel.
  * @handler: function to call when a method call is received on this channel.
  * @user_data: (closure): user data to pass to @handler.
+ * @destroy_notify: (allow-none): a function which gets called to free
+ * @user_data, or %NULL.
  *
- * Sets the function called when a method is called. Call
- * fl_method_call_respond() when the method completes.
+ * Sets the function called when a method call is received from the Dart side of
+ * the channel. See #FlMethodChannelMethodCallHandler for details on how to
+ * respond to method calls.
+ *
+ * The handler is removed if the channel is closed or is replaced by another
+ * handler, set @destroy_notify if you want to detect this.
  */
 void fl_method_channel_set_method_call_handler(
     FlMethodChannel* channel,
     FlMethodChannelMethodCallHandler handler,
-    gpointer user_data);
+    gpointer user_data,
+    GDestroyNotify destroy_notify);
 
 /**
  * fl_method_channel_invoke_method:

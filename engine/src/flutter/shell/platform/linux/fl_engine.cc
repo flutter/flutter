@@ -29,6 +29,7 @@ struct _FlEngine {
   // Function to call when a platform message is received
   FlEnginePlatformMessageHandler platform_message_handler;
   gpointer platform_message_handler_data;
+  GDestroyNotify platform_message_handler_destroy_notify;
 };
 
 G_DEFINE_QUARK(fl_engine_error_quark, fl_engine_error)
@@ -161,6 +162,12 @@ static void fl_engine_dispose(GObject* object) {
   g_clear_object(&self->renderer);
   g_clear_object(&self->binary_messenger);
 
+  if (self->platform_message_handler_destroy_notify)
+    self->platform_message_handler_destroy_notify(
+        self->platform_message_handler_data);
+  self->platform_message_handler_data = nullptr;
+  self->platform_message_handler_destroy_notify = nullptr;
+
   G_OBJECT_CLASS(fl_engine_parent_class)->dispose(object);
 }
 
@@ -240,12 +247,18 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
 void fl_engine_set_platform_message_handler(
     FlEngine* self,
     FlEnginePlatformMessageHandler handler,
-    gpointer user_data) {
+    gpointer user_data,
+    GDestroyNotify destroy_notify) {
   g_return_if_fail(FL_IS_ENGINE(self));
   g_return_if_fail(handler != nullptr);
 
+  if (self->platform_message_handler_destroy_notify)
+    self->platform_message_handler_destroy_notify(
+        self->platform_message_handler_data);
+
   self->platform_message_handler = handler;
   self->platform_message_handler_data = user_data;
+  self->platform_message_handler_destroy_notify = destroy_notify;
 }
 
 gboolean fl_engine_send_platform_message_response(
