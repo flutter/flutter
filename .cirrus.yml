@@ -146,3 +146,7 @@ task:
       build_script: |
         cd $ENGINE_PATH/src/flutter
         ./ci/build.sh
+    - name: lint_test
+      lint_script: |
+        cd $ENGINE_PATH/src
+        ./flutter/ci/lint.sh
