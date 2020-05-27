@@ -1736,7 +1736,7 @@ void main() {
     expect(getMaterialWidget(materialFinder).shape, roundedRectangleBorder);
   });
 
-  testWidgets('AppBars title has upper limit on text scaling, textScaleFactor = 1, 1.34, 3', (WidgetTester tester) async {
+  testWidgets('AppBars title has upper limit on text scaling, textScaleFactor = 1, 1.34, 2', (WidgetTester tester) async {
     double textScaleFactor;
 
     Widget buildFrame() {
