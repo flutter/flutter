@@ -1263,6 +1263,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _handleDragStart(DragStartDetails details) => _startInteraction(details.globalPosition);
 
   void _handleDragUpdate(DragUpdateDetails details) {
+    if (!_state.mounted) {
+      return;
+    }
+
     if (isInteractive) {
       final double valueDelta = details.primaryDelta / _trackRect.width;
       switch (textDirection) {

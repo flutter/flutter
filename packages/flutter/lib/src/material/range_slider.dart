@@ -1158,6 +1158,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
+    if (!_state.mounted) {
+      return;
+    }
+
     final double dragValue = _getValueFromGlobalPosition(details.globalPosition);
 
     // If no selection has been made yet, test for thumb selection again now

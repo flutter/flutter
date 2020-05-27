@@ -1396,6 +1396,9 @@ void main() {
 
     await tester.pumpWidget(buildApp(divisions: 3));
 
+    /// The value indicator is added to the overlay when it is clicked or dragged.
+    /// Because both of these gestures are occurring then it adds same value indicator
+    /// twice into the overlay.
     final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
     final Offset topRight = tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
     final TestGesture gesture = await tester.startGesture(topRight);
