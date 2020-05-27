@@ -16,6 +16,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -35,20 +36,83 @@ class IOSDevices extends PollingDeviceDiscovery {
     Platform platform,
     XCDevice xcdevice,
     IOSWorkflow iosWorkflow,
+    Logger logger,
   }) : _platform = platform ?? globals.platform,
        _xcdevice = xcdevice ?? globals.xcdevice,
        _iosWorkflow = iosWorkflow ?? globals.iosWorkflow,
+       _logger = logger ?? globals.logger,
        super('iOS devices');
+
+  @override
+  void dispose() {
+    _observedDeviceEventsSubscription?.cancel();
+  }
 
   final Platform _platform;
   final XCDevice _xcdevice;
   final IOSWorkflow _iosWorkflow;
+  final Logger _logger;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
 
   @override
   bool get canListAnything => _iosWorkflow.canListDevices;
+
+  StreamSubscription<Map<XCDeviceEvent, String>> _observedDeviceEventsSubscription;
+
+  @override
+  Future<void> startPolling() async {
+    if (!_platform.isMacOS) {
+      throw UnsupportedError(
+        'Control of iOS devices or simulators only supported on macOS.'
+      );
+    }
+
+    deviceNotifier ??= ItemListNotifier<Device>();
+
+    // Start by populating all currently attached devices.
+    deviceNotifier.updateWithNewList(await pollingGetDevices());
+
+    _observedDeviceEventsSubscription ??= _xcdevice.observedDeviceEvents().listen(
+      _onDeviceEvent,
+      onError: (dynamic error, StackTrace stack) {
+        _logger.printTrace('Process exception running xcdevice observe:\n$error');
+      }, onDone: () {
+      // If the xcdevice process is killed, restart it.
+      _logger.printTrace('xcdevice observe stopped, restarting');
+      startPolling();
+    },
+      // Don't reset the device subscription on an exception.
+      // If the call to xcdevice asserts, more calls won't fix it.
+      // Avoid hammering on it. If the user runs "flutter doctor"
+      // they may get a real recovery message.
+      cancelOnError: false
+    );
+  }
+
+  Future<void> _onDeviceEvent(Map<XCDeviceEvent, String> event) async {
+    final XCDeviceEvent eventType = event.containsKey(XCDeviceEvent.attach) ? XCDeviceEvent.attach : XCDeviceEvent.detach;
+    final String deviceIdentifier = event[eventType];
+    final Device knownDevice = deviceNotifier.items
+      .firstWhere((Device device) => device.id == deviceIdentifier, orElse: () => null);
+
+    // Ignore already discovered devices (maybe populated at the beginning).
+    if (eventType == XCDeviceEvent.attach && knownDevice == null) {
+      // There's no way to get details for an individual attached device,
+      // so repopulate them all.
+      final List<Device> devices = await pollingGetDevices();
+      deviceNotifier.updateWithNewList(devices);
+    } else if (eventType == XCDeviceEvent.detach && knownDevice != null) {
+      deviceNotifier.removeItem(knownDevice);
+    }
+  }
+
+  @override
+  Future<void> stopPolling() async {
+    await _observedDeviceEventsSubscription?.cancel();
+    _observedDeviceEventsSubscription = null;
+  }
 
   @override
   Future<List<Device>> pollingGetDevices({ Duration timeout }) async {

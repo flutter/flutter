@@ -194,6 +194,11 @@ class Xcode {
   }
 }
 
+enum XCDeviceEvent {
+  attach,
+  detach,
+}
+
 /// A utility class for interacting with Xcode xcdevice command line tools.
 class XCDevice {
   XCDevice({
@@ -218,13 +223,27 @@ class XCDevice {
         platform: platform,
         processManager: processManager,
       ),
-      _xcode = xcode;
+      _xcode = xcode {
+
+    _deviceIdentifierByEvent = StreamController<Map<XCDeviceEvent, String>>.broadcast(
+      onListen: _startObservingTetheredIOSDevices,
+      onCancel: _stopObservingTetheredIOSDevices,
+    );
+  }
+
+  void dispose() {
+    _deviceObservationProcess?.kill();
+  }
 
   final ProcessUtils _processUtils;
   final Logger _logger;
   final IMobileDevice _iMobileDevice;
   final IOSDeploy _iosDeploy;
   final Xcode _xcode;
+
+  List<dynamic> _cachedListResults;
+  Process _deviceObservationProcess;
+  StreamController<Map<XCDeviceEvent, String>> _deviceIdentifierByEvent;
 
   bool get isInstalled => _xcode.isInstalledAndMeetsVersionCheck && xcdevicePath != null;
 
@@ -287,7 +306,87 @@ class XCDevice {
     return null;
   }
 
-  List<dynamic> _cachedListResults;
+  /// Observe identifiers (UDIDs) of devices as they attach and detach.
+  ///
+  /// Each attach and detach event is a tuple of one event type
+  /// and identifier.
+  Stream<Map<XCDeviceEvent, String>> observedDeviceEvents() {
+    if (!isInstalled) {
+      _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
+      return null;
+    }
+    return _deviceIdentifierByEvent.stream;
+  }
+
+  // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+  // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+  final RegExp _observationIdentifierPattern = RegExp(r'^(\w*): (\w*)$');
+
+  Future<void> _startObservingTetheredIOSDevices() async {
+    try {
+      // Run in interactive mode (via script) to convince
+      // xcdevice it has a terminal attached in order to redirect stdout.
+      _deviceObservationProcess = await _processUtils.start(
+        <String>[
+          'script',
+          '-t',
+          '0',
+          '/dev/null',
+          'xcrun',
+          'xcdevice',
+          'observe',
+          '--usb',
+        ],
+      );
+
+      _deviceObservationProcess.stdout
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) async {
+
+        // xcdevice observe example output of UDIDs:
+        //
+        // Listening for all devices, on USB.
+        // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+        // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+        // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+        final RegExpMatch match = _observationIdentifierPattern.firstMatch(line);
+        if (match != null && match.groupCount == 2) {
+          final String verb = match.group(1).toLowerCase();
+          final String identifier = match.group(2);
+          if (verb.startsWith('attach')) {
+            _deviceIdentifierByEvent.add(<XCDeviceEvent, String>{
+              XCDeviceEvent.attach: identifier
+            });
+          } else if (verb.startsWith('detach')) {
+            _deviceIdentifierByEvent.add(<XCDeviceEvent, String>{
+              XCDeviceEvent.detach: identifier
+            });
+          }
+        }
+      });
+      _deviceObservationProcess.stderr
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+        _logger.printTrace('xcdevice observe error: $line');
+      });
+      unawaited(_deviceObservationProcess.exitCode.whenComplete(() {
+        if (_deviceIdentifierByEvent.hasListener) {
+          _deviceIdentifierByEvent.close();
+        }
+        _deviceObservationProcess = null;
+      }));
+    } on ProcessException catch (exception) {
+      _deviceIdentifierByEvent.addError(exception);
+    } on ArgumentError catch (exception) {
+      _deviceIdentifierByEvent.addError(exception);
+    }
+  }
+
+  void _stopObservingTetheredIOSDevices() {
+    _deviceObservationProcess?.kill();
+  }
 
   /// [timeout] defaults to 2 seconds.
   Future<List<IOSDevice>> getAvailableIOSDevices({ Duration timeout }) async {

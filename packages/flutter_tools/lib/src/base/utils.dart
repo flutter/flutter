@@ -104,6 +104,13 @@ class ItemListNotifier<T> {
     removedItems.forEach(_removedController.add);
   }
 
+  void removeItem(T item) {
+    if (_items.contains(item)) {
+      _items.remove(item);
+      _removedController.add(item);
+    }
+  }
+
   /// Close the streams.
   void dispose() {
     _addedController.close();
