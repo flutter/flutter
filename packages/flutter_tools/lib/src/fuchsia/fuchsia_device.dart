@@ -55,14 +55,15 @@ Future<vm_service.VmService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) 
 
 Future<DartDevelopmentService> _kDefaultFuchsiaIsolateDiscoveryDDSConnector(
   Uri remoteVmServiceUri,
-  Uri serviceUri) {
+  Uri serviceUri,
+  ) {
   return DartDevelopmentService.startDartDevelopmentService(
-      remoteVmServiceUri,
-      serviceUri: serviceUri,
-      // TODO(bkonyi): enable authentication codes when we can enable
-      // them on Fuchsia.
-      enableAuthCodes: false,
-    );
+    remoteVmServiceUri,
+    serviceUri: serviceUri,
+    // TODO(bkonyi): enable authentication codes when we can enable
+    // them on Fuchsia.
+    enableAuthCodes: false,
+  );
 }
 
 /// Read the log for a particular device.

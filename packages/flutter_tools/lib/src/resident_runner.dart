@@ -468,17 +468,17 @@ class FlutterDevice {
     LaunchResult result, DebuggingOptions debuggingOptions, bool ipv6) async {
     if (result.hasObservatory) {
       final Uri ddsUri = Uri(
-          scheme: 'http',
-          host: (ipv6 ?
-            io.InternetAddress.loopbackIPv6 :
-            io.InternetAddress.loopbackIPv4
-          ).host,
-          port: debuggingOptions.hostVmServicePort ?? 0,
-        );
+        scheme: 'http',
+        host: (ipv6 ?
+          io.InternetAddress.loopbackIPv6 :
+          io.InternetAddress.loopbackIPv4
+        ).host,
+        port: debuggingOptions.hostVmServicePort ?? 0,
+      );
       globals.printTrace(
-          'Launching a Dart Developer Service (DDS) instance at $ddsUri, '
-          'connecting to VM service at ${result.observatoryUri}.'
-        );
+        'Launching a Dart Developer Service (DDS) instance at $ddsUri, '
+        'connecting to VM service at ${result.observatoryUri}.'
+      );
       final DartDevelopmentService dds =
         await DartDevelopmentService.startDartDevelopmentService(
           result.observatoryUri,
