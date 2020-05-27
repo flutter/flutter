@@ -68,8 +68,7 @@ import 'ticker_provider.dart';
 class InteractiveViewer extends StatefulWidget {
   /// Create an InteractiveViewer.
   ///
-  /// The [child] parameter must not be null. The [minScale] paramter must be
-  /// greater than zero.
+  /// The [child], [minScale], and [maxScale] parameters must not be null.
   InteractiveViewer({
     Key key,
     @required this.child,
@@ -88,6 +87,11 @@ class InteractiveViewer extends StatefulWidget {
   }) : assert(child != null),
        assert(minScale != null),
        assert(minScale > 0),
+       assert(minScale.isFinite),
+       assert(maxScale != null),
+       assert(maxScale > 0),
+       assert(!maxScale.isNaN),
+       assert(maxScale >= minScale),
        assert(disableTranslation != null),
        assert(disableScale != null),
        assert(disableRotation != null),
@@ -153,20 +157,21 @@ class InteractiveViewer extends StatefulWidget {
 
   /// The maximum allowed scale.
   ///
-  /// The scale will be clamped between this and [minScale].
-  ///
-  /// A maxScale of null has no bounds.
+  /// The scale will be clamped between this and [minScale] inclusively.
   ///
   /// Defaults to 2.5.
+  ///
+  /// Cannot be null, and must be greater than zero and greater than minScale.
   final double maxScale;
 
   /// The minimum allowed scale.
   ///
-  /// The scale will be clamped between this and [maxScale].
-  ///
-  /// A minScale of null has no bounds.
+  /// The scale will be clamped between this and [maxScale] inclusively.
   ///
   /// Defaults to 0.8.
+  ///
+  /// Cannot be null, and must be a finite number greater than zero and less
+  /// than maxScale.
   final double minScale;
 
   /// Called when the user ends a pan or scale gesture on the widget.
