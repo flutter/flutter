@@ -244,6 +244,7 @@ class PersistedStandardPicture extends PersistedPicture {
       }
       oldCanvas.bounds = _optimalLocalCullRect;
       _canvas = oldCanvas;
+      oldCanvas.setElementCache(_elementCache);
       _canvas.clear();
       picture.recordingCanvas.apply(_canvas, _optimalLocalCullRect);
     } else {
@@ -258,6 +259,8 @@ class PersistedStandardPicture extends PersistedPicture {
         canvasSize: _optimalLocalCullRect.size,
         paintCallback: () {
           _canvas = _findOrCreateCanvas(_optimalLocalCullRect);
+          assert(_canvas is BitmapCanvas
+              && (_canvas as BitmapCanvas)._elementCache == _elementCache);
           if (_debugExplainSurfaceStats) {
             final BitmapCanvas bitmapCanvas = _canvas;
             _surfaceStatsFor(this).paintPixelCount +=
@@ -332,7 +335,7 @@ class PersistedStandardPicture extends PersistedPicture {
         DebugCanvasReuseOverlay.instance.reusedCount++;
       }
       bestRecycledCanvas.bounds = bounds;
-      bestRecycledCanvas.elementCache = _elementCache;
+      bestRecycledCanvas.setElementCache(_elementCache);
       return bestRecycledCanvas;
     }
 
@@ -340,7 +343,7 @@ class PersistedStandardPicture extends PersistedPicture {
       DebugCanvasReuseOverlay.instance.createdCount++;
     }
     final BitmapCanvas canvas = BitmapCanvas(bounds);
-    canvas.elementCache = _elementCache;
+    canvas.setElementCache(_elementCache);
     if (_debugExplainSurfaceStats) {
       _surfaceStatsFor(this)
         ..allocateBitmapCanvasCount += 1
