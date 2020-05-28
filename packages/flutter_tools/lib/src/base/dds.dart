@@ -6,7 +6,8 @@ import 'dart:async';
 
 import 'package:dds/dds.dart' as dds;
 
-import 'io.dart';
+import '../globals.dart' as globals;
+import 'io.dart' as io;
 
 class DartDevelopmentService {
   DartDevelopmentService._();
@@ -30,7 +31,7 @@ class DartDevelopmentService {
       'connecting to VM service at $observatoryUri.'
     );
     final dds.DartDevelopmentService service =
-      await DartDevelopmentService.startDartDevelopmentService(
+      await dds.DartDevelopmentService.startDartDevelopmentService(
         observatoryUri,
         serviceUri: ddsUri,
         enableAuthCodes: disableServiceAuthCodes,
