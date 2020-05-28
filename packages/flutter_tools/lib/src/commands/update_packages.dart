@@ -22,7 +22,10 @@ import '../runner/flutter_command.dart';
 /// package version in cases when upgrading to the latest breaks Flutter.
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
-  'flutter_gallery_assets': '0.1.9+2', // See //dev/integration_tests/flutter_gallery/pubspec.yaml
+  // Dart analyzer does not catch renamed or deleted files.
+  // Therefore, we control the version of flutter_gallery_assets so that
+  // existing tests do not fail when the package has a new version.
+  'flutter_gallery_assets': '^0.2.0',
   'mockito': '^4.1.0',  // Prevent mockito from downgrading to 4.0.0
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
   'video_player': '0.10.6', // 0.10.7 fails a gallery smoke test for toString.
@@ -30,7 +33,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
-  UpdatePackagesCommand({ this.hidden = false }) {
+  UpdatePackagesCommand() {
     argParser
       ..addFlag(
         'force-upgrade',
@@ -95,7 +98,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   final List<String> aliases = <String>['upgrade-packages'];
 
   @override
-  final bool hidden;
+  final bool hidden = true;
 
 
   // Lazy-initialize the net utilities with values from the context.
@@ -193,8 +196,9 @@ class UpdatePackagesCommand extends FlutterCommand {
           // If the checksum doesn't match, they may have added or removed some dependencies.
           // we need to run update-packages to recapture the transitive deps.
           globals.printError(
-            'Warning: pubspec in ${directory.path} has invalid dependencies. '
-            'Please run "flutter update-packages --force-upgrade" to update them correctly.'
+            'Warning: pubspec in ${directory.path} has updated or new dependencies. '
+            'Please run "flutter update-packages --force-upgrade" to update them correctly '
+            '(checksum ${pubspec.checksum.value} != $checksum).'
           );
           needsUpdate = true;
         } else {

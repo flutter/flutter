@@ -66,6 +66,7 @@ void main() {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
       globals.fs.directory('windows').createSync();
+      globals.fs.file(globals.fs.path.join('windows', 'Runner.sln')).createSync();
       final FlutterProject flutterProject = FlutterProject.current();
 
       expect(WindowsDevice().isSupportedForProject(flutterProject), true);
@@ -77,6 +78,18 @@ void main() {
     testUsingContext('isSupportedForProject is false with no host app', () async {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages').createSync();
+      final FlutterProject flutterProject = FlutterProject.current();
+
+      expect(WindowsDevice().isSupportedForProject(flutterProject), false);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('isSupportedForProject is false with no Runner.sln', () async {
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages').createSync();
+      globals.fs.directory('windows').createSync();
       final FlutterProject flutterProject = FlutterProject.current();
 
       expect(WindowsDevice().isSupportedForProject(flutterProject), false);

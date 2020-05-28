@@ -115,4 +115,33 @@ void main() {
     expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
   });
 
+  testWidgets('CheckoxListTile contentPadding test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: const Center(
+          child: CheckboxListTile(
+            value: false,
+            onChanged: null,
+            title: Text('Title'),
+            contentPadding: EdgeInsets.fromLTRB(10, 18, 4, 2),
+          ),
+        ),
+      )
+    );
+
+    final Rect paddingRect = tester.getRect(find.byType(Padding));
+    final Rect checkboxRect = tester.getRect(find.byType(Checkbox));
+    final Rect titleRect = tester.getRect(find.text('Title'));
+
+    final Rect tallerWidget = checkboxRect.height > titleRect.height ? checkboxRect : titleRect;
+
+    // Check the offsets of CheckBox and title after padding is applied.
+    expect(paddingRect.right, checkboxRect.right + 4);
+    expect(paddingRect.left, titleRect.left - 10);
+
+    // Calculate the remaining height from the default ListTile height.
+    final double remainingHeight = 56 - tallerWidget.height;
+    expect(paddingRect.top, tallerWidget.top - remainingHeight / 2 - 18);
+    expect(paddingRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 2);
+  });
 }

@@ -294,10 +294,16 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
+  bool checkMessageHandler(String channel, MessageHandler handler) => _handlers[channel] == handler;
+
+  @override
   void setMockMessageHandler(String channel, MessageHandler handler) {
     if (handler == null)
       _mockHandlers.remove(channel);
     else
       _mockHandlers[channel] = handler;
   }
+
+  @override
+  bool checkMockMessageHandler(String channel, MessageHandler handler) => _mockHandlers[channel] == handler;
 }

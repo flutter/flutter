@@ -81,20 +81,20 @@ Future<void> buildLinux(
 Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buildDir) async {
   final Stopwatch sw = Stopwatch()..start();
 
+  await buildDir.create(recursive: true);
+
   final String buildFlag = toTitleCase(buildModeName);
   int result;
   try {
     result = await processUtils.stream(
       <String>[
         'cmake',
-        '-S',
-        sourceDir.path,
-        '-B',
-        buildDir.path,
         '-G',
         'Ninja',
         '-DCMAKE_BUILD_TYPE=$buildFlag',
+        sourceDir.path,
       ],
+      workingDirectory: buildDir.path,
       environment: <String, String>{
         'CC': 'clang',
         'CXX': 'clang++'
