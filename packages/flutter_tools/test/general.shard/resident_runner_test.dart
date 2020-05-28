@@ -4,10 +4,10 @@
 
 import 'dart:async';
 
-import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -519,6 +519,24 @@ void main() {
       dillOutputPath: globals.fs.path.join('foobar', 'app.dill'),
     );
     expect(otherRunner.artifactDirectory.path, contains('foobar'));
+  }));
+
+  test('ResidentRunner copies output dill to cache location during preExit', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('hello');
+    await residentRunner.preExit();
+    final File cacheDill = globals.fs.file(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+
+    expect(cacheDill, exists);
+    expect(cacheDill.readAsStringSync(), 'hello');
+  }));
+
+  test('ResidentRunner handles output dill missing during preExit', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    await residentRunner.preExit();
+    final File cacheDill = globals.fs.file(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+
+    expect(cacheDill, isNot(exists));
   }));
 
   test('ResidentRunner can run source generation', () => testbed.run(() async {
@@ -1140,6 +1158,8 @@ void main() {
       target: null,
     )).generator as DefaultResidentCompiler;
 
+    expect(residentCompiler.initializeFromDill,
+      globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
     expect(residentCompiler.librariesSpec,
       globals.fs.file(globals.artifacts.getArtifactPath(Artifact.flutterWebLibrariesJson))
         .uri.toString());
