@@ -142,9 +142,9 @@ class FloatingActionButton extends StatelessWidget {
     this.highlightElevation,
     this.disabledElevation,
     @required this.onPressed,
+    this.mouseCursor,
     this.mini = false,
     this.shape,
-    this.mouseCursor,
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
@@ -183,8 +183,8 @@ class FloatingActionButton extends StatelessWidget {
     this.highlightElevation,
     this.disabledElevation,
     @required this.onPressed,
+    this.mouseCursor = SystemMouseCursors.click,
     this.shape,
-    this.mouseCursor,
     this.isExtended = true,
     this.materialTapTargetSize,
     this.clipBehavior = Clip.none,
@@ -290,6 +290,9 @@ class FloatingActionButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
+  /// {@macro flutter.material.button.mouseCursor}
+  final MouseCursor mouseCursor;
+
   /// The z-coordinate at which to place this button relative to its parent.
   ///
   /// This controls the size of the shadow below the floating action button.
@@ -377,11 +380,6 @@ class FloatingActionButton extends StatelessWidget {
   /// button has an elevation, then its drop shadow is defined by this
   /// shape as well.
   final ShapeBorder shape;
-
-  /// {@macro flutter.material.inkwell.mousecursor}
-  ///
-  /// If the property is null, [SystemMouseCursor.click] is used.
-  final MouseCursor mouseCursor;
 
   /// {@macro flutter.widgets.Clip}
   ///

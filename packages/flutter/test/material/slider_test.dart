@@ -2136,6 +2136,82 @@ void main() {
     expect(renderObject.size.height, 200);
   });
 
+  testWidgets('Slider changes mouse cursor when hovered', (WidgetTester tester) async {
+    // Test Slider() constructor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Slider(
+                  mouseCursor: SystemMouseCursors.text,
+                  value: 0.5,
+                  onChanged: (double newValue) { },
+                ),
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Slider)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test Slider.adaptive() constructor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Slider.adaptive(
+                  mouseCursor: SystemMouseCursors.text,
+                  value: 0.5,
+                  onChanged: (double newValue) { },
+                ),
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Slider(
+                  value: 0.5,
+                  onChanged: (double newValue) { },
+                ),
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
+
   testWidgets('Slider implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
