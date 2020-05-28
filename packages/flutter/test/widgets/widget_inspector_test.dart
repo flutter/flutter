@@ -224,10 +224,10 @@ int getChildLayerCount(OffsetLayer layer) {
 }
 
 void main() {
-  TestService.runTests();
+  _TestWidgetInspectorService.runTests();
 }
 
-class TestService extends TestWidgetInspectorService {
+class _TestWidgetInspectorService extends TestWidgetInspectorService {
   // These tests need access to protected members of WidgetInspectorService.
   static void runTests() {
     final TestWidgetInspectorService service = TestWidgetInspectorService();
