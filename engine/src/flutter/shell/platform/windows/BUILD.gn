@@ -72,6 +72,7 @@ source_set("flutter_windows_source") {
   deps = [
     ":flutter_windows_headers",
     "//flutter/shell/platform/common/cpp:common_cpp",
+    "//flutter/shell/platform/common/cpp:common_cpp_input",
     "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper",
     "//flutter/shell/platform/embedder:embedder_with_symbol_prefix",
     "//flutter/shell/platform/windows/client_wrapper:client_wrapper_windows",

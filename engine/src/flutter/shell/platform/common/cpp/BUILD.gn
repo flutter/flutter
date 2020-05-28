@@ -30,12 +30,28 @@ source_set("common_cpp_library_headers") {
   configs += [ ":desktop_library_implementation" ]
 }
 
+source_set("common_cpp_input") {
+  public = [
+    "text_input_model.h",
+  ]
+
+  sources = [
+    "text_input_model.cc",
+  ]
+
+  configs += [ ":desktop_library_implementation" ]
+
+  if (is_win) {
+    # For wstring_conversion. See issue #50053.
+    defines = [ "_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING" ]
+  }
+}
+
 source_set("common_cpp") {
   public = [
     "incoming_message_dispatcher.h",
     "json_message_codec.h",
     "json_method_codec.h",
-    "text_input_model.h",
   ]
 
   # TODO: Refactor flutter_glfw.cc to move the implementations corresponding
@@ -44,7 +60,6 @@ source_set("common_cpp") {
     "incoming_message_dispatcher.cc",
     "json_message_codec.cc",
     "json_method_codec.cc",
-    "text_input_model.cc",
   ]
 
   configs += [ ":desktop_library_implementation" ]
@@ -59,11 +74,6 @@ source_set("common_cpp") {
     ":common_cpp_core",
     "//third_party/rapidjson",
   ]
-
-  if (is_win) {
-    # For wstring_conversion. See issue #50053.
-    defines = [ "_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING" ]
-  }
 }
 
 # The portion of common_cpp that has no dependencies on the public/
@@ -117,6 +127,7 @@ executable("common_cpp_unittests") {
   deps = [
     ":common_cpp",
     ":common_cpp_fixtures",
+    ":common_cpp_input",
     "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper",
     "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper_library_stubs",
     "//flutter/testing",
