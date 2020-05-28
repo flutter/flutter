@@ -10,12 +10,14 @@ import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_devices.dart';
 import '../src/fakes.dart';
 
 void main() {
   group('service_protocol discovery', () {
     FakeDeviceLogReader logReader;
     ProtocolDiscovery discoverer;
+    FakeDevice device;
 
     /// Performs test set-up functionality that must be performed as part of
     /// the `test()` pass and not part of the `setUp()` pass.
@@ -38,12 +40,14 @@ void main() {
       Duration throttleDuration = const Duration(milliseconds: 200),
     }) {
       logReader = FakeDeviceLogReader();
+      device = FakeDevice('webby', 'webby');
       discoverer = ProtocolDiscovery.observatory(
         logReader,
         ipv6: false,
         hostPort: null,
         devicePort: devicePort,
         throttleDuration: throttleDuration,
+        device: device,
       );
     }
 
@@ -268,6 +272,7 @@ void main() {
           hostPort: null,
           devicePort: null,
           ipv6: false,
+          device: device,
         );
 
         // Get next port future.
@@ -289,6 +294,7 @@ void main() {
           hostPort: 1243,
           devicePort: null,
           ipv6: false,
+          device: device,
         );
 
         // Get next port future.
@@ -310,6 +316,7 @@ void main() {
           hostPort: 0,
           devicePort: null,
           ipv6: false,
+          device: device,
         );
 
         // Get next port future.
@@ -331,6 +338,7 @@ void main() {
           hostPort: 54777,
           ipv6: true,
           devicePort: null,
+          device: device,
         );
 
         // Get next port future.
@@ -352,6 +360,7 @@ void main() {
           hostPort: 54777,
           ipv6: true,
           devicePort: null,
+          device: device,
         );
 
         // Get next port future.

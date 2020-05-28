@@ -13,6 +13,7 @@ import 'base/io.dart';
 import 'build_info.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
+import 'ios/devices.dart';
 import 'reporting/reporting.dart';
 
 /// A wrapper around [MDnsClient] to find a Dart observatory instance.
@@ -152,14 +153,21 @@ class MDnsObservatoryDiscovery {
       return null;
     }
 
-    final String host = usesIpv6
-      ? InternetAddress.loopbackIPv6.address
-      : InternetAddress.loopbackIPv4.address;
+    // If the device is on network, then use the device's IP instead.
+    // (only on iOS)
+    final bool isNetwork =
+      device.platformType == PlatformType.ios
+      && (device as IOSDevice).interfaceType == IOSDeviceInterface.network;
+    final String host = isNetwork
+      ? await (device as IOSDevice).getIP(usesIpv6)
+      : usesIpv6
+        ? InternetAddress.loopbackIPv6.address
+        : InternetAddress.loopbackIPv4.address;
     return await buildObservatoryUri(
       device,
       host,
       result.port,
-      hostVmservicePort,
+      isNetwork ? result.port : hostVmservicePort,
       result.authCode,
     );
   }

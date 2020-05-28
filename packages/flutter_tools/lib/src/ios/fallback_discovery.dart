@@ -12,6 +12,7 @@ import '../device.dart';
 import '../mdns_discovery.dart';
 import '../protocol_discovery.dart';
 import '../reporting/reporting.dart';
+import 'devices.dart';
 
 typedef VmServiceConnector = Future<VmService> Function(String, {Log log});
 
@@ -78,6 +79,8 @@ class FallbackDiscovery {
       assumedDevicePort: assumedDevicePort,
       hostVmservicePort: hostVmservicePort,
       packageName: packageName,
+      device: deivce as IOSDevice,
+      usesIpv6: usesIpv6,
     );
     if (result != null) {
       return result;
@@ -139,15 +142,25 @@ class FallbackDiscovery {
     @required int assumedDevicePort,
     @required int  hostVmservicePort,
     @required String packageName,
+    @required IOSDevice device,
+    @required bool usesIpv6,
   }) async {
     int hostPort;
     Uri assumedWsUri;
+    Uri httpUri;
     try {
-      hostPort = await _portForwarder.forward(
-        assumedDevicePort,
-        hostPort: hostVmservicePort,
-      );
-      assumedWsUri = Uri.parse('ws://localhost:$hostPort/ws');
+      if (device.interfaceType == IOSDeviceInterface.network) {
+        final String host = await device.getIP(usesIpv6);
+        assumedWsUri = Uri.parse('ws://$host:$assumedDevicePort/ws');
+        httpUri = Uri.parse('http://$host:$assumedDevicePort');
+      } else {
+        hostPort = await _portForwarder.forward(
+          assumedDevicePort,
+          hostPort: hostVmservicePort,
+        );
+        assumedWsUri = Uri.parse('ws://localhost:$hostPort/ws');
+        httpUri = Uri.parse('http://localhost:$hostPort');
+      }
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
       _logger.printTrace('Failed to connect directly, falling back to mDNS');
@@ -175,7 +188,7 @@ class FallbackDiscovery {
               'success',
               flutterUsage: _flutterUsage,
             ).send();
-            return Uri.parse('http://localhost:$hostPort');
+            return httpUri;
           }
         }
       } on Exception catch (err) {

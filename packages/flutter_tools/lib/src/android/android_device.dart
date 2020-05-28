@@ -576,6 +576,7 @@ class AndroidDevice extends Device {
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
         ipv6: ipv6,
+        device: this,
       );
     }
 

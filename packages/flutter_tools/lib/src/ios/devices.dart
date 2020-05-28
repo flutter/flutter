@@ -193,13 +193,13 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool get supportsHotReload => interfaceType == IOSDeviceInterface.usb;
+  bool get supportsHotReload => true;
 
   @override
-  bool get supportsHotRestart => interfaceType == IOSDeviceInterface.usb;
+  bool get supportsHotRestart => true;
 
   @override
-  bool get supportsFlutterExit => interfaceType == IOSDeviceInterface.usb;
+  bool get supportsFlutterExit => true;
 
   @override
   final String name;
@@ -211,6 +211,31 @@ class IOSDevice extends Device {
   Map<IOSApp, DeviceLogReader> _logReaders;
 
   DevicePortForwarder _portForwarder;
+
+  /// Uses `nslookup` to get the IP address of this device.
+  Future<String> getIP(bool ipv6) async {
+    // clean device name
+    final String cleanName = name
+        .replaceAll("'", '')
+        .replaceAll('’', '') // fancy apostrophe
+        .replaceAll(',', '')
+        .replaceAll(' ', '-');
+    final RegExp re = RegExp(r'^Address:\s+(.*)$', multiLine: true);
+    final RegExp error_re = RegExp(r'Non-authoritative answer:$', multiLine: true);
+    // Run nslookup
+    final String out = (await ProcessUtils.instance.run(
+      <String>[
+        'nslookup',
+        cleanName,
+      ],
+    )).stdout;
+    if (error_re.hasMatch(out)) {
+      return null;
+    }
+    // 1st match is IPv6, last match is IPv4
+    final String ip = (ipv6 ? re.firstMatch(out) : re.allMatches(out).last).group(1).trim();
+    return ip;
+  }
 
   @override
   Future<bool> get isLocalEmulator async => false;
@@ -351,6 +376,7 @@ class IOSDevice extends Device {
       // described in fallback_discovery.dart.
       '--enable-service-port-fallback',
       '--disable-service-auth-codes',
+      if (interfaceType == IOSDeviceInterface.network) '--observatory-host=${ipv6 ? '::/0' : '0.0.0.0'}',
       '--observatory-port=$assumedObservatoryPort',
       if (debuggingOptions.startPaused) '--start-paused',
       if (debuggingOptions.dartFlags.isNotEmpty) '--dart-flags="${debuggingOptions.dartFlags}"',
@@ -389,6 +415,7 @@ class IOSDevice extends Device {
           hostPort: debuggingOptions.hostVmServicePort,
           devicePort: debuggingOptions.deviceVmServicePort,
           ipv6: ipv6,
+          device: this,
         );
       }
       final int installationResult = await _iosDeploy.runApp(

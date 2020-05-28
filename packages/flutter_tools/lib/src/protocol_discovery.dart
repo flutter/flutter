@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'base/io.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
+import 'ios/devices.dart';
 
 /// Discovers a specific service protocol on a device, and forwards the service
 /// protocol device port to the host.
@@ -21,6 +22,7 @@ class ProtocolDiscovery {
     this.hostPort,
     this.devicePort,
     this.ipv6,
+    this.device,
   }) : assert(logReader != null)
   {
     _deviceLogSubscription = logReader.logLines.listen(
@@ -37,6 +39,7 @@ class ProtocolDiscovery {
     @required int hostPort,
     @required int devicePort,
     @required bool ipv6,
+    @required Device device,
   }) {
     const String kObservatoryService = 'Observatory';
     return ProtocolDiscovery._(
@@ -47,6 +50,7 @@ class ProtocolDiscovery {
       hostPort: hostPort,
       devicePort: devicePort,
       ipv6: ipv6,
+      device: device,
     );
   }
 
@@ -56,6 +60,7 @@ class ProtocolDiscovery {
   final int hostPort;
   final int devicePort;
   final bool ipv6;
+  final Device device;
 
   /// The time to wait before forwarding a new observatory URIs from [logReader].
   final Duration throttleDuration;
@@ -134,17 +139,29 @@ class ProtocolDiscovery {
     globals.printTrace('$serviceName URL on device: $deviceUri');
     Uri hostUri = deviceUri;
 
-    if (portForwarder != null) {
-      final int actualDevicePort = deviceUri.port;
-      final int actualHostPort = await portForwarder.forward(actualDevicePort, hostPort: hostPort);
-      globals.printTrace('Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
-      hostUri = deviceUri.replace(port: actualHostPort);
+    // call origin getter to raise StateError if necessary
+    deviceUri.origin;
+
+    // handle network
+    if (device.platformType == PlatformType.ios
+      && (device as IOSDevice).interfaceType == IOSDeviceInterface.network) {
+      hostUri = deviceUri.replace(host: await (device as IOSDevice).getIP(ipv6));
+    } else {
+      if (portForwarder != null) {
+        final int actualDevicePort = deviceUri.port;
+        final int actualHostPort = await portForwarder.forward(
+            actualDevicePort, hostPort: hostPort);
+        globals.printTrace(
+            'Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
+        hostUri = deviceUri.replace(port: actualHostPort);
+      }
+      if (ipv6) {
+        hostUri = hostUri.replace(host: InternetAddress.loopbackIPv6.host);
+      } else {
+        hostUri = hostUri.replace(host: InternetAddress.loopbackIPv4.host);
+      }
     }
 
-    assert(InternetAddress(hostUri.host).isLoopback);
-    if (ipv6) {
-      hostUri = hostUri.replace(host: InternetAddress.loopbackIPv6.host);
-    }
     return hostUri;
   }
 }

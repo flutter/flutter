@@ -23,6 +23,7 @@ void main() {
   MockPrototcolDiscovery mockPrototcolDiscovery;
   MockPortForwarder mockPortForwarder;
   MockVmService mockVmService;
+  MockIOSDevice mockIOSDevice;
 
   setUp(() {
     logger = BufferLogger(
@@ -33,6 +34,7 @@ void main() {
     mockMDnsObservatoryDiscovery = MockMDnsObservatoryDiscovery();
     mockPrototcolDiscovery = MockPrototcolDiscovery();
     mockPortForwarder = MockPortForwarder();
+    mockIOSDevice = MockIOSDevice();
     fallbackDiscovery = FallbackDiscovery(
       logger: logger,
       mDnsObservatoryDiscovery: mockMDnsObservatoryDiscovery,
@@ -61,7 +63,7 @@ void main() {
 
     expect(await fallbackDiscovery.discover(
       assumedDevicePort: 23,
-      deivce: null,
+      deivce: mockIOSDevice,
       hostVmservicePort: 1,
       packageId: null,
       usesIpv6: false,
@@ -86,7 +88,7 @@ void main() {
     });
     expect(await fallbackDiscovery.discover(
       assumedDevicePort: 23,
-      deivce: null,
+      deivce: mockIOSDevice,
       hostVmservicePort: 1,
       packageId: null,
       usesIpv6: false,
@@ -108,7 +110,7 @@ void main() {
       .thenThrow(SentinelException.parse('Something', <String, dynamic>{}));
     when(mockMDnsObservatoryDiscovery.getObservatoryUri(
       'hello',
-      null, // Device
+      mockIOSDevice, // Device
       usesIpv6: false,
       hostVmservicePort: 1,
     )).thenAnswer((Invocation invocation) async {
@@ -117,7 +119,7 @@ void main() {
 
     expect(await fallbackDiscovery.discover(
       assumedDevicePort: 23,
-      deivce: null,
+      deivce: mockIOSDevice,
       hostVmservicePort: 1,
       packageId: 'hello',
       usesIpv6: false,
@@ -130,7 +132,7 @@ void main() {
 
     when(mockMDnsObservatoryDiscovery.getObservatoryUri(
       'hello',
-      null, // Device
+      mockIOSDevice, // Device
       usesIpv6: false,
       hostVmservicePort: 1,
     )).thenAnswer((Invocation invocation) async {
@@ -139,7 +141,7 @@ void main() {
 
     expect(await fallbackDiscovery.discover(
       assumedDevicePort: 23,
-      deivce: null,
+      deivce: mockIOSDevice,
       hostVmservicePort: 1,
       packageId: 'hello',
       usesIpv6: false,
@@ -151,7 +153,7 @@ void main() {
     when(mockVmService.getVM()).thenThrow(Exception());
     when(mockMDnsObservatoryDiscovery.getObservatoryUri(
       'hello',
-      null, // Device
+      mockIOSDevice, // Device
       usesIpv6: false,
       hostVmservicePort: 1,
     )).thenThrow(Exception());
@@ -161,7 +163,7 @@ void main() {
 
     expect(await fallbackDiscovery.discover(
       assumedDevicePort: 23,
-      deivce: null,
+      deivce: mockIOSDevice,
       hostVmservicePort: 1,
       packageId: 'hello',
       usesIpv6: false,

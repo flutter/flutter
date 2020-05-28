@@ -196,6 +196,7 @@ class FlutterTesterDevice extends Device {
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
         ipv6: ipv6,
+        device: this,
       );
 
       final Uri observatoryUri = await observatoryDiscovery.uri;

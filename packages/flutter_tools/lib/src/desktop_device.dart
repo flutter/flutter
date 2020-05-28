@@ -115,6 +115,7 @@ abstract class DesktopDevice extends Device {
       devicePort: debuggingOptions?.deviceVmServicePort,
       hostPort: debuggingOptions?.hostVmServicePort,
       ipv6: ipv6,
+      device: this
     );
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
