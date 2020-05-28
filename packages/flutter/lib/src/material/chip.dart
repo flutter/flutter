@@ -1824,7 +1824,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final EdgeInsetsGeometry _defaultLabelPadding = EdgeInsets.lerp(
       const EdgeInsets.symmetric(horizontal: 8.0),
       const EdgeInsets.symmetric(horizontal: 4.0),
-        (MediaQuery.of(context).textScaleFactor - 1.0).clamp(0.0, 1.0) as double,
+      (MediaQuery.of(context).textScaleFactor - 1.0).clamp(0.0, 1.0) as double,
     );
 
     final ThemeData theme = Theme.of(context);
