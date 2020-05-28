@@ -17,9 +17,9 @@ namespace {
 void RunHeadless(const std::string& icu_data_path,
                  const std::string& assets_path,
                  const std::vector<std::string>& arguments,
-                 const std::string& lib_path) {
+                 const std::string& aot_library_path) {
   flutter::FlutterEngine engine;
-  engine.Start(icu_data_path, assets_path, arguments, lib_path);
+  engine.Start(icu_data_path, assets_path, arguments, aot_library_path);
   RegisterPlugins(&engine);
   while (true) {
     engine.RunEventLoopWithTimeout();
@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
   std::string icu_data_path = data_directory + "/icudtl.dat";
 
   std::string lib_directory = "lib";
-  std::string lib_path = lib_directory + "/libapp.so";
+  std::string aot_library_path = lib_directory + "/libapp.so";
 
   // Arguments for the Flutter Engine.
   std::vector<std::string> arguments;
@@ -47,10 +47,10 @@ int main(int argc, char **argv) {
 
   // Start the engine.
   if (!flutter_controller.CreateWindow(window_properties, assets_path,
-                                       arguments, lib_path)) {
+                                       arguments, aot_library_path)) {
     if (getenv("DISPLAY") == nullptr) {
       std::cout << "No DISPLAY; falling back to headless mode." << std::endl;
-      RunHeadless(icu_data_path, assets_path, arguments, lib_path);
+      RunHeadless(icu_data_path, assets_path, arguments, aot_library_path);
       return EXIT_SUCCESS;
     }
     return EXIT_FAILURE;
