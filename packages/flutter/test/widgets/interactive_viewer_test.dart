@@ -16,7 +16,6 @@ void main() {
           home: Scaffold(
             body: Center(
               child: InteractiveViewer(
-                rotationEnabled: false,
                 transformationController: transformationController,
                 child: Container(width: 200.0, height: 200.0),
               ),
@@ -73,7 +72,6 @@ void main() {
               child: InteractiveViewer(
                 boundaryMargin: const EdgeInsets.all(boundaryMargin),
                 minScale: minScale,
-                rotationEnabled: false,
                 transformationController: transformationController,
                 child: Container(width: 200.0, height: 200.0),
               ),
@@ -129,7 +127,6 @@ void main() {
           home: Scaffold(
             body: Center(
               child: InteractiveViewer(
-                rotationEnabled: false,
                 scaleEnabled: false,
                 transformationController: transformationController,
                 child: Container(width: 2000.0, height: 2000.0),
@@ -207,7 +204,6 @@ void main() {
           home: Scaffold(
             body: Center(
               child: InteractiveViewer(
-                rotationEnabled: false,
                 boundaryMargin: const EdgeInsets.all(double.infinity),
                 minScale: minScale,
                 transformationController: transformationController,
@@ -269,7 +265,6 @@ void main() {
               child: InteractiveViewer(
                 boundaryMargin: const EdgeInsets.all(boundaryMargin),
                 minScale: minScale,
-                rotationEnabled: false,
                 transformationController: transformationController,
                 child: Container(width: 200.0, height: 200.0),
               ),
@@ -331,7 +326,6 @@ void main() {
               child: InteractiveViewer(
                 boundaryMargin: const EdgeInsets.all(boundaryMargin),
                 minScale: minScale,
-                rotationEnabled: false,
                 transformationController: transformationController,
                 child: Container(width: 200.0, height: 200.0),
               ),
