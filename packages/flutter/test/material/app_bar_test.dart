@@ -1758,19 +1758,18 @@ void main() {
     }
 
     final Finder appBarTitle = find.text('Jumbo');
-    // Left title is padded by 16 on the "start" side
 
-    textScaleFactor = 1; // "Jumbo" title is 90x18.
+    textScaleFactor = 1;
     await tester.pumpWidget(buildFrame());
-    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, 19, 106, 37));
+    expect(tester.getRect(appBarTitle).height, 18);
 
-    textScaleFactor = 1.34; // "Jumbo" title is 121x24.
+    textScaleFactor = 1.34;
     await tester.pumpWidget(buildFrame());
-    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, 16, 137, 40));
+    expect(tester.getRect(appBarTitle).height, 24);
 
-    textScaleFactor = 2; // "Jumbo" title is 121x24 (capped at x1.34).
+    textScaleFactor = 2;
     await tester.pumpWidget(buildFrame());
-    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, 16, 137, 40));
+    expect(tester.getRect(appBarTitle).height, 24);
   });
 
   testWidgets('AppBars with jumbo title, overriding upper limit on text scale limit, textScaleFactor = 3, 3.5, 4', (WidgetTester tester) async {
