@@ -76,6 +76,37 @@ void main() {
     Platform: kNoColorTerminalPlatform,
   });
 
+  testUsingContext('passes VM heap size limit', () async {
+    when(mockFrontendServer.stdout)
+        .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
+          Future<List<int>>.value(utf8.encode(
+            'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0'
+          ))
+        ));
+    final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(null);
+    final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
+      mainPath: '/path/to/main.dart',
+      buildMode: BuildMode.debug,
+      trackWidgetCreation: false,
+      dartDefines: const <String>[],
+      packageConfig: PackageConfig.empty,
+      packagesPath: '.packages',
+    );
+
+    expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
+    expect(testLogger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
+    expect(output.outputFilename, equals('/path/to/main.dart.dill'));
+    final VerificationResult argVerification = verify(mockProcessManager.start(captureAny));
+    expect(argVerification.captured.single, containsAll(<String>[
+      '--disable-dart-dev',
+      '--old_gen_heap_size=2000',
+    ]));
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => mockProcessManager,
+    OutputPreferences: () => OutputPreferences(showColor: false),
+    Platform: kNoColorTerminalPlatform,
+  });
+
   testUsingContext('passes correct AOT config to kernel compiler in aot/profile mode', () async {
     when(mockFrontendServer.stdout)
       .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(

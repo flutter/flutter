@@ -218,7 +218,7 @@ Future<void> _testFile(
 
   expect(exec.exitCode, exitCode);
   final List<String> output = (exec.stdout as String).split('\n');
-  if (output.first == 'Waiting for another flutter command to release the startup lock...') {
+  if (output.first.startsWith('Waiting for another flutter command to release the startup lock...')) {
     output.removeAt(0);
   }
   if (output.first.startsWith('Running "flutter pub get" in')) {

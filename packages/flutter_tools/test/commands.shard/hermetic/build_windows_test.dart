@@ -293,7 +293,7 @@ void main() {
     expect(props.findAllElements('TREE_SHAKE_ICONS').first.text, 'true');
     expect(props.findAllElements('EXTRA_GEN_SNAPSHOT_OPTIONS').first.text, '--enable-experiment=non-nullable');
     expect(props.findAllElements('EXTRA_FRONT_END_OPTIONS').first.text, '--enable-experiment=non-nullable');
-    expect(props.findAllElements('DART_DEFINES').first.text, 'foo=a,bar=b');
+    expect(props.findAllElements('DART_DEFINES').first.text, 'foo%3Da,bar%3Db');
     expect(props.findAllElements('DART_OBFUSCATION').first.text, 'true');
     expect(props.findAllElements('SPLIT_DEBUG_INFO').first.text, r'C:\foo\');
     expect(props.findAllElements('FLUTTER_TARGET').first.text, r'lib\main.dart');

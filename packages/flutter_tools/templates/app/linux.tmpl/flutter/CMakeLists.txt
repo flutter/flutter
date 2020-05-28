@@ -52,6 +52,7 @@ list(APPEND CPP_WRAPPER_SOURCES_PLUGIN
 )
 list_prepend(CPP_WRAPPER_SOURCES_PLUGIN "${WRAPPER_ROOT}/")
 list(APPEND CPP_WRAPPER_SOURCES_APP
+  "flutter_engine.cc"
   "flutter_window_controller.cc"
 )
 list_prepend(CPP_WRAPPER_SOURCES_APP "${WRAPPER_ROOT}/")
@@ -64,6 +65,8 @@ add_library(flutter_wrapper_plugin STATIC
 apply_standard_settings(flutter_wrapper_plugin)
 set_target_properties(flutter_wrapper_plugin PROPERTIES
   POSITION_INDEPENDENT_CODE ON)
+set_target_properties(flutter_wrapper_plugin PROPERTIES
+  CXX_VISIBILITY_PRESET hidden)
 target_link_libraries(flutter_wrapper_plugin PUBLIC flutter)
 target_include_directories(flutter_wrapper_plugin PUBLIC
   "${WRAPPER_ROOT}/include"
