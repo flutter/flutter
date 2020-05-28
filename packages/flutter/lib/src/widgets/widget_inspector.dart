@@ -947,12 +947,6 @@ mixin WidgetInspectorService {
     return const bool.fromEnvironment('structuredErrors');
   }
 
-  void _initStructuredErrorHandler() {
-    if (isStructuredErrorsEnabled()) {
-      FlutterError.onError = _structuredExceptionHandler;
-    }
-  }
-
   /// Called to register service extensions.
   ///
   /// See also:
@@ -962,7 +956,9 @@ mixin WidgetInspectorService {
   ///    extensions can be used.
   void initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) {
     _structuredExceptionHandler = _reportError;
-    _initStructuredErrorHandler();
+    if (isStructuredErrorsEnabled()) {
+      FlutterError.onError = _structuredExceptionHandler;
+    }
     _registerServiceExtensionCallback = registerServiceExtensionCallback;
     assert(!_debugServiceExtensionsRegistered);
     assert(() {
