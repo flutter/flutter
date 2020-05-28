@@ -17,6 +17,7 @@ import 'package:flutter/widgets.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'material.dart';
+import 'material_state.dart';
 import 'slider_theme.dart';
 import 'theme.dart';
 
@@ -159,6 +160,7 @@ class Slider extends StatefulWidget {
     this.label,
     this.activeColor,
     this.inactiveColor,
+    this.mouseCursor,
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
@@ -188,6 +190,7 @@ class Slider extends StatefulWidget {
     this.max = 1.0,
     this.divisions,
     this.label,
+    this.mouseCursor,
     this.activeColor,
     this.inactiveColor,
     this.semanticFormatterCallback,
@@ -381,6 +384,19 @@ class Slider extends StatefulWidget {
   /// Ignored if this slider is created with [Slider.adaptive].
   final Color inactiveColor;
 
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  final MouseCursor mouseCursor;
+
   /// The callback used to create a semantic value from a slider value.
   ///
   /// Defaults to formatting values as a percentage.
@@ -537,7 +553,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     widget.onChangeEnd(_lerp(value));
   }
 
-  void _actionHandler (_AdjustSliderIntent intent) {
+  void _actionHandler(_AdjustSliderIntent intent) {
     final _RenderSlider renderSlider = _renderObjectKey.currentContext.findRenderObject() as _RenderSlider;
     final TextDirection textDirection = Directionality.of(_renderObjectKey.currentContext);
     switch (intent.type) {
@@ -682,6 +698,14 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         color: theme.colorScheme.onPrimary,
       ),
     );
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+      <MaterialState>{
+        if (!_enabled) MaterialState.disabled,
+        if (_hovering) MaterialState.hovered,
+        if (_focused) MaterialState.focused,
+      },
+    );
 
     // This size is used as the max bounds for the painting of the value
     // indicators It must be kept in sync with the function with the same name
@@ -696,6 +720,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       enabled: _enabled,
       onShowFocusHighlight: _handleFocusHighlightChanged,
       onShowHoverHighlight: _handleHoverChanged,
+      mouseCursor: effectiveMouseCursor,
       child: CompositedTransformTarget(
         link: _layerLink,
         child: _SliderRenderObjectWidget(

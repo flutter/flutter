@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -151,6 +152,7 @@ class IconButton extends StatelessWidget {
     this.splashColor,
     this.disabledColor,
     @required this.onPressed,
+    this.mouseCursor = SystemMouseCursors.click,
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
@@ -274,6 +276,11 @@ class IconButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
+  /// {@macro flutter.material.inkwell.mousecursor}
+  ///
+  /// Defaults to [SystemMouseCursors.click].
+  final MouseCursor mouseCursor;
+
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
 
@@ -370,6 +377,7 @@ class IconButton extends StatelessWidget {
         autofocus: autofocus,
         canRequestFocus: onPressed != null,
         onTap: onPressed,
+        mouseCursor: mouseCursor,
         enableFeedback: enableFeedback,
         child: result,
         focusColor: focusColor ?? theme.focusColor,

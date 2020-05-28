@@ -7788,4 +7788,31 @@ void main() {
       expect(triedToReadClipboard, true);
     }
   });
+
+  testWidgets('TextField changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(
+            decoration: InputDecoration(
+              // Add an icon so that the left edge is not the text area
+              icon: Icon(Icons.person),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(TextField)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test top left, which is not the text area
+    await gesture.moveTo(tester.getTopLeft(find.byType(TextField)) + const Offset(1, 1));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+  });
 }

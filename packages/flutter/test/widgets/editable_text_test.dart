@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
@@ -4701,6 +4702,64 @@ void main() {
     expect(state.currentTextEditingValue.text, equals('\u{200E}😀😁😂🤣😃 💑 👩‍❤️‍👩 👨‍❤️‍👨 💏 👩‍❤️‍💋‍👩 👨‍❤️‍💋‍👨 👪 👨‍👩‍👧 👨‍👩‍👧‍👦 👨‍👩‍👦‍👦 \u{200F}'));
     state.updateEditingValue(const TextEditingValue(text: '\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ 🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
     expect(state.currentTextEditingValue.text, equals('\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ \u{200F}🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
+  });
+
+  testWidgets('EditableText changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+                mouseCursor: SystemMouseCursors.click,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(EditableText)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 }
 

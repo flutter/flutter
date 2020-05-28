@@ -1087,6 +1087,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         onSelectionHandleTapped: _handleSelectionHandleTapped,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
+        mouseCursor: MouseCursor.defer, // TextField will handle the cursor
         cursorWidth: widget.cursorWidth,
         cursorRadius: cursorRadius,
         cursorColor: cursorColor,
@@ -1129,6 +1130,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     return IgnorePointer(
       ignoring: !_isEnabled,
       child: MouseRegion(
+        cursor: SystemMouseCursors.text,
         onEnter: (PointerEnterEvent event) => _handleHover(true),
         onExit: (PointerExitEvent event) => _handleHover(false),
         child: AnimatedBuilder(
