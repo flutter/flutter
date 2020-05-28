@@ -47,7 +47,7 @@ void main() {
       'id': 1,
       'method': 'device.enable',
     })}]');
-    response = await stream.first;
+    response = await stream.skip(1).first;
     expect(response['id'], 1);
     expect(response['error'], isNull);
 
