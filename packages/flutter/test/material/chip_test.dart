@@ -93,10 +93,10 @@ Widget _wrapForChip({
 /// Optionally, adding an avatar or delete icon to the chip should not
 /// cause the chip or label to exceed its constrained height.
 Future<void> _testConstrainedLabel(
-    WidgetTester tester, {
-      CircleAvatar avatar,
-      VoidCallback onDeleted,
-    }) async {
+  WidgetTester tester, {
+  CircleAvatar avatar,
+  VoidCallback onDeleted,
+}) async {
   const double labelWidth = 100.0;
   const double labelHeight = 50.0;
   const double chipParentWidth = 75.0;
@@ -152,11 +152,11 @@ Widget _selectedFilterChip({ Color checkmarkColor }) {
 }
 
 Future<void> _pumpCheckmarkChip(
-    WidgetTester tester, {
-      @required Widget chip,
-      Color themeColor,
-      Brightness brightness = Brightness.light,
-    }) async {
+  WidgetTester tester, {
+  @required Widget chip,
+  Color themeColor,
+  Brightness brightness = Brightness.light,
+}) async {
   await tester.pumpWidget(
     _wrapForChip(
       brightness: brightness,
@@ -179,11 +179,11 @@ void _expectCheckmarkColor(Finder finder, Color color) {
   expect(
     finder,
     paints
-    // The first path that is painted is the selection overlay. We do not care
-    // how it is painted but it has to be added it to this pattern so that the
-    // check mark can be checked next.
+      // The first path that is painted is the selection overlay. We do not care
+      // how it is painted but it has to be added it to this pattern so that the
+      // check mark can be checked next.
       ..path()
-    // The second path that is painted is the check mark.
+      // The second path that is painted is the check mark.
       ..path(color: color),
   );
 }
@@ -204,8 +204,8 @@ Widget _chipWithOptionalDeleteButton({
           deleteIcon: Icon(Icons.close, key: deleteButtonKey),
           label: Text(
             deletable
-                ? 'Chip with Delete Button'
-                : 'Chip without Delete Button',
+              ? 'Chip with Delete Button'
+              : 'Chip without Delete Button',
             key: labelKey,
           ),
         ),
@@ -223,12 +223,12 @@ bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
 PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
   return paints
     ..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawCircle)
-        return false;
-      final Offset center = arguments[0] as Offset;
-      final double radius = arguments[1] as double;
-      return offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius);
-    }
+        if (method != #drawCircle)
+          return false;
+        final Offset center = arguments[0] as Offset;
+        final double radius = arguments[1] as double;
+        return offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius);
+      }
     );
 }
 
@@ -238,16 +238,16 @@ PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
 PaintPattern uniqueRipplePattern(Offset expectedCenter, double expectedRadius) {
   return paints
     ..everything((Symbol method, List<dynamic> arguments) {
-      if (method != #drawCircle)
-        return true;
-      final Offset center = arguments[0] as Offset;
-      final double radius = arguments[1] as double;
-      if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius))
-        return true;
-      throw '''
+        if (method != #drawCircle)
+          return true;
+        final Offset center = arguments[0] as Offset;
+        final double radius = arguments[1] as double;
+        if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius))
+          return true;
+        throw '''
               Expected: center == $expectedCenter, radius == $expectedRadius
               Found: center == $center radius == $radius''';
-    }
+      }
     );
 }
 
@@ -311,8 +311,8 @@ void main() {
 
   testWidgets(
     'Chip does not constrain size of label widget if it does not exceed '
-        'the available space',
-        (WidgetTester tester) async {
+    'the available space',
+    (WidgetTester tester) async {
       const double labelWidth = 50.0;
       const double labelHeight = 30.0;
       final Key labelKey = UniqueKey();
@@ -347,16 +347,16 @@ void main() {
 
   testWidgets(
     'Chip constrains the size of the label widget when it exceeds the '
-        'available space',
-        (WidgetTester tester) async {
+    'available space',
+    (WidgetTester tester) async {
       await _testConstrainedLabel(tester);
     },
   );
 
   testWidgets(
     'Chip constrains the size of the label widget when it exceeds the '
-        'available space and the avatar is present',
-        (WidgetTester tester) async {
+    'available space and the avatar is present',
+    (WidgetTester tester) async {
       await _testConstrainedLabel(
         tester,
         avatar: const CircleAvatar(child: Text('A')),
@@ -366,8 +366,8 @@ void main() {
 
   testWidgets(
     'Chip constrains the size of the label widget when it exceeds the '
-        'available space and the delete icon is present',
-        (WidgetTester tester) async {
+    'available space and the delete icon is present',
+    (WidgetTester tester) async {
       await _testConstrainedLabel(
         tester,
         onDeleted: () { },
@@ -377,8 +377,8 @@ void main() {
 
   testWidgets(
     'Chip constrains the size of the label widget when it exceeds the '
-        'available space and both avatar and delete icons are present',
-        (WidgetTester tester) async {
+    'available space and both avatar and delete icons are present',
+    (WidgetTester tester) async {
       await _testConstrainedLabel(
         tester,
         avatar: const CircleAvatar(child: Text('A')),
@@ -389,8 +389,8 @@ void main() {
 
   testWidgets(
     'Chip constrains the avatar, label, and delete icons to the bounds of '
-        'the chip when it exceeds the available space',
-        (WidgetTester tester) async {
+    'the chip when it exceeds the available space',
+    (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/11523
       Widget chipBuilder (String text, {Widget avatar, VoidCallback onDeleted}) {
         return MaterialApp(
@@ -890,11 +890,11 @@ void main() {
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
                 return RawChip(
                   onDeleted: deletable
-                      ? () {
-                    setState(() {
-                      wasDeleted = true;
-                    });
-                  }
+                    ? () {
+                        setState(() {
+                          wasDeleted = true;
+                        });
+                      }
                       : null,
                   deleteIcon: Container(width: 40.0, height: 40.0, key: deleteButtonKey),
                   label: Text('Chip', key: labelKey),
@@ -1202,12 +1202,12 @@ void main() {
                 return RawChip(
                   avatar: avatar,
                   onSelected: selectable != null
-                      ? (bool value) {
+                    ? (bool value) {
                     setState(() {
                       selected = value;
                     });
                   }
-                      : null,
+                    : null,
                   selected: selected,
                   label: Text('Chip', key: labelKey),
                   shape: const StadiumBorder(),
@@ -1284,12 +1284,12 @@ void main() {
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
                 return RawChip(
                   onSelected: selectable != null
-                      ? (bool value) {
+                    ? (bool value) {
                     setState(() {
                       selected = value;
                     });
                   }
-                      : null,
+                    : null,
                   selected: selected,
                   label: Text('Chip', key: labelKey),
                   shape: const StadiumBorder(),
@@ -1361,12 +1361,12 @@ void main() {
                 return RawChip(
                   avatar: avatar,
                   onSelected: selectable != null
-                      ? (bool value) {
+                    ? (bool value) {
                     setState(() {
                       selected = value;
                     });
                   }
-                      : null,
+                    : null,
                   selected: selected,
                   label: Text('Chip', key: labelKey),
                   shape: const StadiumBorder(),
@@ -1508,19 +1508,19 @@ void main() {
                 selected: isSelectable && value,
                 label: Text('$value'),
                 onSelected: isSelectable
-                    ? (bool newValue) {
+                  ? (bool newValue) {
                   setState(() {
                     value = newValue;
                   });
                 }
-                    : null,
+                  : null,
                 onPressed: isPressable
-                    ? () {
+                  ? () {
                   setState(() {
                     value = true;
                   });
                 }
-                    : null,
+                  : null,
               );
             }),
           ),
