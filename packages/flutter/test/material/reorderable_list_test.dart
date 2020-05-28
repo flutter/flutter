@@ -7,6 +7,10 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
+// The `y` offset has to be larger than `ScrollDragController._bigThresholdBreakDistance`
+// to prevent [motionStartDistanceThreshold] from affecting the actual drag distance.
+const Offset _kGestureOffset = Offset(0, -25);
+
 void main() {
   group('$ReorderableListView', () {
     const double itemHeight = 48.0;
@@ -542,7 +546,7 @@ void main() {
           handle.dispose();
         });
 
-        testWidgets('Still builds when shrinkWrap, primary, and physics properties are set', (WidgetTester tester) async {
+        testWidgets('ReorderableListView still scrolls when physics property is set', (WidgetTester tester) async {
           final List<Widget> widgetList = <Widget>[
             Container(key: const Key('1'), child:  const Icon(Icons.account_circle))
           ];
@@ -552,11 +556,10 @@ void main() {
               width: 100,
               child: ReorderableListView(
                 key: const Key('list'),
-                shrinkWrap: true,
-                primary: true,
                 physics: const AlwaysScrollableScrollPhysics(),
                 onReorder: (int oldIndex, int newIndex) {},
                 children: widgetList,
+                scrollController: ScrollController(),
               )
             ),
           );
@@ -567,7 +570,71 @@ void main() {
             child: scrollView,
           ),
         ));
-        expect(tester.takeException(), isNull);
+
+          final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ReorderableListView)));
+          await gesture.moveBy(_kGestureOffset);
+          // Move back to original position.
+          await gesture.moveBy(Offset(-_kGestureOffset.dx, -_kGestureOffset.dy));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 500));
+
+          final TestGesture overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ReorderableListView)));
+          await overscrollGesture.moveBy(_kGestureOffset);
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 500));
+
+          expect(tester.takeException(), isNull);
+        });
+
+        testWidgets('Default ReorderableListViews are not always scrollable', (WidgetTester tester) async {
+          final ReorderableListView view = ReorderableListView(
+            scrollDirection: Axis.horizontal,
+            children: const <Widget>[],
+            onReorder: (int oldIndex, int newIndex) {},
+          );
+          expect(view.physics, isNot(isInstanceOf<AlwaysScrollableScrollPhysics>()));
+        });
+
+        testWidgets('physics:AlwaysScrollableScrollPhysics overrides default behavior', (WidgetTester tester) async {
+          bool scrolled = false;
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: NotificationListener<OverscrollNotification>(
+                onNotification: (OverscrollNotification message) { scrolled = true; return false; },
+                child: ReorderableListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const <Widget>[],
+                  onReorder: (int oldIndex, int newIndex) {},
+                ),
+              ),
+            ),
+            )
+          );
+          await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 100.0));
+          expect(scrolled, isTrue);
+        });
+
+        testWidgets('physics:ScrollPhysics behaves as expected in ReorderableListView', (WidgetTester tester) async {
+          bool scrolled = false;
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: NotificationListener<OverscrollNotification>(
+                onNotification: (OverscrollNotification message) { scrolled = true; return false; },
+                child: ReorderableListView(
+                  physics: const ScrollPhysics(),
+                  children: const <Widget>[],
+                  onReorder: (int oldIndex, int newIndex) {},
+                ),
+              ),
+            ),
+            )
+          );
+          await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 100.0));
+          expect(scrolled, isFalse);
         });
       });
     });
