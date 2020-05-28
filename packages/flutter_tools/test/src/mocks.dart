@@ -672,6 +672,9 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
 
   @override
   void addFileSystemRoot(String root) { }
+
+  @override
+  bool get pendingWrite => false;
 }
 
 /// A fake implementation of [ProcessResult].

@@ -214,6 +214,9 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   void addFileSystemRoot(String root) {
     _residentCompiler.addFileSystemRoot(root);
   }
+
+  @override
+  bool get pendingWrite => _residentCompiler.pendingWrite;
 }
 
 /// The current status of a codegen build.

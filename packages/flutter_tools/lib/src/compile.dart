@@ -444,6 +444,10 @@ abstract class ResidentCompiler {
     String librariesSpec,
   }) = DefaultResidentCompiler;
 
+  /// The frontend_server is currently performing a command that will output a
+  /// dill.
+  bool get pendingWrite;
+
   // TODO(jonahwilliams): find a better way to configure additional file system
   // roots from the runner.
   // See: https://github.com/flutter/flutter/issues/50494
@@ -638,7 +642,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
     if (isEmpty) {
       while (_compilationQueue.isNotEmpty) {
         final _CompilationRequest request = _compilationQueue.first;
+        _pendingWrite = true;
         await request.run(this);
+        _pendingWrite = false;
         _compilationQueue.removeAt(0);
       }
     }
@@ -648,6 +654,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String scriptUri,
     String outputPath,
   ) async {
+    _pendingWrite = true;
     final String frontendServer = globals.artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
@@ -724,7 +731,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _server.stderr
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
-      .listen((String message) { globals.printError(message); });
+      .listen(globals.printError);
 
     unawaited(_server.exitCode.then((int code) {
       if (code != 0) {
@@ -735,7 +742,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _server.stdin.writeln('compile $scriptUri');
     globals.printTrace('<- compile $scriptUri');
 
-    return _stdoutHandler.compilerOutput.future;
+    final CompilerOutput output = await _stdoutHandler.compilerOutput.future;
+    _pendingWrite = false;
+    return output;
   }
 
   @override
@@ -875,4 +884,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _server.kill();
     return _server.exitCode;
   }
+
+  @override
+  bool get pendingWrite => _pendingWrite;
+  bool _pendingWrite = false;
 }

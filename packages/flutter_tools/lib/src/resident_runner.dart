@@ -1204,17 +1204,21 @@ abstract class ResidentRunner {
     return exitCode;
   }
 
-  @mustCallSuper
   Future<void> preExit() async {
     // If _dillOutputPath is null, we created a temporary directory for the dill.
-    if (_dillOutputPath == null && artifactDirectory.existsSync()) {
-      final File outputDill = globals.fs.file(dillOutputPath);
-      if (outputDill.existsSync()) {
-        outputDill.copySync(getDefaultCachedKernelPath(
-          trackWidgetCreation: trackWidgetCreation,
-        ));
-      }
-      artifactDirectory.deleteSync(recursive: true);
+    if (_dillOutputPath != null || !artifactDirectory.existsSync()) {
+      return;
+    }
+    // Do not cache the dill if there is a pending write that may leave it
+    // in a partial state.
+    if (flutterDevices.any((FlutterDevice device) => device.generator.pendingWrite)) {
+      return;
+    }
+    final File outputDill = globals.fs.file(dillOutputPath);
+    if (outputDill.existsSync()) {
+      outputDill.copySync(getDefaultCachedKernelPath(
+        trackWidgetCreation: trackWidgetCreation,
+      ));
     }
   }
 
