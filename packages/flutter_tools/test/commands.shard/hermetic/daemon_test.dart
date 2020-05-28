@@ -323,6 +323,17 @@ void main() {
     expect(message.message, 'hello');
   });
 
+  testUsingContext('notifyingLogger buffers messages sent before a subscription', () async {
+    final NotifyingLogger logger = NotifyingLogger(verbose: false);
+
+    logger.printStatus('hello');
+
+    final LogMessage message = await logger.onMessage.first;
+
+    expect(message.level, 'status');
+    expect(message.message, 'hello');
+  });
+
   group('daemon serialization', () {
     test('OperationResult', () {
       expect(

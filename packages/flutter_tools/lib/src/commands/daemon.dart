@@ -914,11 +914,22 @@ dynamic _toJsonable(dynamic obj) {
 }
 
 class NotifyingLogger extends Logger {
-  NotifyingLogger({ @required this.verbose });
+  NotifyingLogger({ @required this.verbose }) {
+    _messageController = StreamController<LogMessage>.broadcast(
+      onListen: _onListen,
+    );
+  }
 
   final bool verbose;
+  final List<LogMessage> messageBuffer = <LogMessage>[];
+  StreamController<LogMessage> _messageController;
 
-  final StreamController<LogMessage> _messageController = StreamController<LogMessage>.broadcast();
+  void _onListen() {
+    if (messageBuffer.isNotEmpty) {
+      messageBuffer.forEach(_messageController.add);
+      messageBuffer.clear();
+    }
+  }
 
   Stream<LogMessage> get onMessage => _messageController.stream;
 
@@ -932,7 +943,7 @@ class NotifyingLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
-    _messageController.add(LogMessage('error', message, stackTrace));
+    _sendMessage(LogMessage('error', message, stackTrace));
   }
 
   @override
@@ -945,7 +956,7 @@ class NotifyingLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
-    _messageController.add(LogMessage('status', message));
+    _sendMessage(LogMessage('status', message));
   }
 
   @override
@@ -953,7 +964,7 @@ class NotifyingLogger extends Logger {
     if (!verbose) {
       return;
     }
-    _messageController.add(LogMessage('trace', message));
+    _sendMessage(LogMessage('trace', message));
   }
 
   @override
@@ -971,6 +982,13 @@ class NotifyingLogger extends Logger {
       timeoutConfiguration: timeoutConfiguration,
       stopwatch: Stopwatch(),
     );
+  }
+
+  void _sendMessage(LogMessage logMessage) {
+    if (_messageController.hasListener) {
+      return _messageController.add(logMessage);
+    }
+    messageBuffer.add(logMessage);
   }
 
   void dispose() {
