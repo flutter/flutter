@@ -94,12 +94,12 @@ void main() {
                   label: const Text('Chip'),
                   onSelected: (bool newValue) { },
                   onPressed: null,
-                  ),
                 ),
               ),
             ),
           ),
-        ));
+        ),
+      ));
     }
 
     await tester.pumpWidget(buildChip(chipTheme));
@@ -125,7 +125,7 @@ void main() {
     const bool value = false;
     Widget buildChip(ChipThemeData data) {
       return MaterialApp(
-      home: Directionality(
+        home: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: MediaQueryData.fromWindow(window),
@@ -146,13 +146,13 @@ void main() {
                     label: const Text('$value'),
                     onSelected: (bool newValue) { },
                     onPressed: null,
-                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ));
+        ),
+      ));
     }
 
     await tester.pumpWidget(buildChip(chipTheme));
