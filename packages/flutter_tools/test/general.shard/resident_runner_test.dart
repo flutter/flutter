@@ -144,6 +144,7 @@ void main() {
       reloadSources: anyNamed('reloadSources'),
       restart: anyNamed('restart'),
       compileExpression: anyNamed('compileExpression'),
+      getSkSLMethod: anyNamed('getSkSLMethod'),
     )).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.setupDevFS(any, any, packagesFilePath: anyNamed('packagesFilePath')))
       .thenAnswer((Invocation invocation) async {
@@ -1191,6 +1192,7 @@ void main() {
       Restart restart,
       CompileExpression compileExpression,
       ReloadMethod reloadMethod,
+      GetSkSLMethod getSkSLMethod,
       io.CompressionOptions compression,
       Device device,
     }) async => mockVMService,

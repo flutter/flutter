@@ -780,14 +780,14 @@ class DevToolsMemoryTest {
   }
 
   Future<void> _launchDevTools() async {
-    await exec('pub', <String>[
+    await exec(pubBin, <String>[
       'global',
       'activate',
       'devtools',
       '0.2.5',
     ]);
     _devToolsProcess = await startProcess(
-      'pub',
+      pubBin,
       <String>[
         'global',
         'run',

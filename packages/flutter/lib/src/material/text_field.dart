@@ -891,6 +891,24 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     _effectiveFocusNode.canRequestFocus = _isEnabled;
   }
 
+  bool get _canRequestFocus {
+    final NavigationMode mode = MediaQuery.of(context, nullOk: true)?.navigationMode ?? NavigationMode.traditional;
+    switch (mode) {
+      case NavigationMode.traditional:
+        return _isEnabled;
+      case NavigationMode.directional:
+        return true;
+    }
+    assert(false, 'Navigation mode $mode not handled');
+    return null;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _effectiveFocusNode.canRequestFocus = _canRequestFocus;
+  }
+
   @override
   void didUpdateWidget(TextField oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -898,8 +916,8 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
       _controller = TextEditingController.fromValue(oldWidget.controller.value);
     else if (widget.controller != null && oldWidget.controller == null)
       _controller = null;
-    _effectiveFocusNode.canRequestFocus = _isEnabled;
-    if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly) {
+    _effectiveFocusNode.canRequestFocus = _canRequestFocus;
+    if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly && _isEnabled) {
       if(_effectiveController.selection.isCollapsed) {
         _showSelectionHandles = !widget.readOnly;
       }
@@ -928,6 +946,9 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
       return false;
 
     if (widget.readOnly && _effectiveController.selection.isCollapsed)
+      return false;
+
+    if (!_isEnabled)
       return false;
 
     if (cause == SelectionChangedCause.longPress)
@@ -1034,7 +1055,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     Widget child = RepaintBoundary(
       child: EditableText(
         key: editableTextKey,
-        readOnly: widget.readOnly,
+        readOnly: widget.readOnly || !_isEnabled,
         toolbarOptions: widget.toolbarOptions,
         showCursor: widget.showCursor,
         showSelectionHandles: _showSelectionHandles,

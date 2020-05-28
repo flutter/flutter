@@ -465,7 +465,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   }
 }
 
-/// Defines the behaviour of the floating label
+/// Defines the behavior of the floating label
 enum FloatingLabelBehavior {
   /// The label will always be positioned within the content, or hidden.
   never,
@@ -1772,7 +1772,7 @@ class InputDecorator extends StatefulWidget {
   /// be null.
   const InputDecorator({
     Key key,
-    this.decoration,
+    @required this.decoration,
     this.baseStyle,
     this.textAlign,
     this.textAlignVertical,
@@ -1781,7 +1781,8 @@ class InputDecorator extends StatefulWidget {
     this.expands = false,
     this.isEmpty = false,
     this.child,
-  }) : assert(isFocused != null),
+  }) : assert(decoration != null),
+       assert(isFocused != null),
        assert(isHovering != null),
        assert(expands != null),
        assert(isEmpty != null),
@@ -1789,9 +1790,10 @@ class InputDecorator extends StatefulWidget {
 
   /// The text and styles to use when decorating the child.
   ///
-  /// If null, `const InputDecoration()` is used. Null [InputDecoration]
-  /// properties are initialized with the corresponding values from
-  /// [ThemeData.inputDecorationTheme].
+  /// Null [InputDecoration] properties are initialized with the corresponding
+  /// values from [ThemeData.inputDecorationTheme].
+  ///
+  /// Must not be null.
   final InputDecoration decoration;
 
   /// The style on which to base the label, hint, counter, and error styles
@@ -1880,7 +1882,9 @@ class InputDecorator extends StatefulWidget {
 
   /// Whether the label needs to get out of the way of the input, either by
   /// floating or disappearing.
-  bool get _labelShouldWithdraw => !isEmpty || isFocused;
+  ///
+  /// Will withdraw when not empty, or when focused while enabled.
+  bool get _labelShouldWithdraw => !isEmpty || (isFocused && decoration.enabled);
 
   @override
   _InputDecoratorState createState() => _InputDecoratorState();
@@ -1964,7 +1968,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextAlign get textAlign => widget.textAlign;
-  bool get isFocused => widget.isFocused && decoration.enabled;
+  bool get isFocused => widget.isFocused;
   bool get isHovering => widget.isHovering && decoration.enabled;
   bool get isEmpty => widget.isEmpty;
   bool get _floatingLabelEnabled {
@@ -1978,11 +1982,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (widget.decoration != old.decoration)
       _effectiveDecoration = null;
 
-    final bool floatBehaviourChanged = widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior
+    final bool floatBehaviorChanged = widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior
         // ignore: deprecated_member_use_from_same_package
         || widget.decoration.hasFloatingPlaceholder != old.decoration.hasFloatingPlaceholder;
 
-    if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviourChanged) {
+    if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviorChanged) {
       if (_floatingLabelEnabled
           && (widget._labelShouldWithdraw || widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always))
         _floatingLabelController.forward();
@@ -2061,7 +2065,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getDefaultIconColor(ThemeData themeData) {
-    if (!decoration.enabled)
+    if (!decoration.enabled && !isFocused)
       return themeData.disabledColor;
 
     switch (themeData.brightness) {
@@ -2123,7 +2127,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     }
 
     Color borderColor;
-    if (decoration.enabled) {
+    if (decoration.enabled || isFocused) {
       borderColor = decoration.errorText == null
         ? _getDefaultBorderColor(themeData)
         : themeData.errorColor;
@@ -2509,7 +2513,7 @@ class InputDecoration {
     this.errorStyle,
     this.errorMaxLines,
     @Deprecated(
-      'Use floatingLabelBehaviour instead. '
+      'Use floatingLabelBehavior instead. '
       'This feature was deprecated after v1.13.2.'
     )
     this.hasFloatingPlaceholder = true, // ignore: deprecated_member_use_from_same_package
@@ -2555,7 +2559,7 @@ class InputDecoration {
   const InputDecoration.collapsed({
     @required this.hintText,
     @Deprecated(
-      'Use floatingLabelBehaviour instead. '
+      'Use floatingLabelBehavior instead. '
       'This feature was deprecated after v1.13.2.'
     )
     // ignore: deprecated_member_use_from_same_package
@@ -2731,7 +2735,7 @@ class InputDecoration {
   /// Defaults to true.
   ///
   @Deprecated(
-    'Use floatingLabelBehaviour instead. '
+    'Use floatingLabelBehavior instead. '
     'This feature was deprecated after v1.13.2.'
   )
   final bool hasFloatingPlaceholder;
@@ -3613,7 +3617,7 @@ class InputDecorationTheme with Diagnosticable {
     this.errorStyle,
     this.errorMaxLines,
     @Deprecated(
-      'Use floatingLabelBehaviour instead. '
+      'Use floatingLabelBehavior instead. '
       'This feature was deprecated after v1.13.2.'
     )
     // ignore: deprecated_member_use_from_same_package
@@ -3708,7 +3712,7 @@ class InputDecorationTheme with Diagnosticable {
   ///
   /// Defaults to true.
   @Deprecated(
-    'Use floatingLabelBehaviour instead. '
+    'Use floatingLabelBehavior instead. '
     'This feature was deprecated after v1.13.2.'
   )
   final bool hasFloatingPlaceholder;
@@ -3963,7 +3967,7 @@ class InputDecorationTheme with Diagnosticable {
     TextStyle errorStyle,
     int errorMaxLines,
     @Deprecated(
-      'Use floatingLabelBehaviour instead. '
+      'Use floatingLabelBehavior instead. '
       'This feature was deprecated after v1.13.2.'
     )
     bool hasFloatingPlaceholder,

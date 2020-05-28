@@ -1949,6 +1949,96 @@ void main() {
     await gesture.up();
   });
 
+  testWidgets('Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
+    final Key sliderKey = UniqueKey();
+    double value = 0.0;
+
+    Widget buildApp({
+      Color activeColor,
+      Color inactiveColor,
+      int divisions,
+      bool enabled = true,
+    }) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Navigator(onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(builder: (BuildContext context) {
+                return Column(
+                  children: <Widget>[
+                    Slider(
+                      key: sliderKey,
+                      min: 0.0,
+                      max: 100.0,
+                      divisions: divisions,
+                      label: '${value.round()}',
+                      value: value,
+                      onChanged: (double newValue) {
+                        value = newValue;
+                      },
+                    ),
+                    RaisedButton(
+                      child: const Text('Next'),
+                      onPressed: () {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute<void>(
+                            builder: (BuildContext context) {
+                              return RaisedButton(
+                                child: const Text('Inner page'),
+                                onPressed: () => Navigator.of(context).pop(),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                );
+              });
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(divisions: 3));
+
+    /// The value indicator is added to the overlay when it is clicked or dragged.
+    /// Because both of these gestures are occurring then it adds same value indicator
+    /// twice into the overlay.
+    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final Offset topRight = tester.getTopRight(find.byType(Slider)).translate(-24, 0);
+    final TestGesture gesture = await tester.startGesture(topRight);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Slider), isNotNull);
+    expect(
+      valueIndicatorBox,
+      paints
+        ..rrect(color: const Color(0xff2196f3)) // Active track.
+        ..rrect(color: const Color(0x3d2196f3)), // Inactive track.
+    );
+
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Slider), findsNothing);
+    expect(
+      valueIndicatorBox,
+      isNot(
+          paints
+            ..rrect(color: const Color(0xff2196f3)) // Active track.
+            ..rrect(color: const Color(0x3d2196f3)) // Inactive track.
+      ),
+    );
+
+    // Don't stop holding the value indicator.
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('Slider.adaptive', (WidgetTester tester) async {
     double value = 0.5;
 

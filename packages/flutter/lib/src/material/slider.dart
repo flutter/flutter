@@ -528,6 +528,10 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     valueIndicatorController.dispose();
     enableController.dispose();
     positionController.dispose();
+    if (overlayEntry != null) {
+      overlayEntry.remove();
+      overlayEntry = null;
+    }
     super.dispose();
   }
 
@@ -1263,6 +1267,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _endInteraction() {
+    if (!_state.mounted) {
+      return;
+    }
+
     if (_active && _state.mounted) {
       if (onChangeEnd != null) {
         onChangeEnd(_discretize(_currentDragValue));
@@ -1280,6 +1288,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _handleDragStart(DragStartDetails details) => _startInteraction(details.globalPosition);
 
   void _handleDragUpdate(DragUpdateDetails details) {
+    if (!_state.mounted) {
+      return;
+    }
+
     if (isInteractive) {
       final double valueDelta = details.primaryDelta / _trackRect.width;
       switch (textDirection) {
@@ -1421,20 +1433,22 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (isInteractive && label != null && !_valueIndicatorAnimation.isDismissed) {
       if (showValueIndicator) {
         _state.paintValueIndicator = (PaintingContext context, Offset offset) {
-          _sliderTheme.valueIndicatorShape.paint(
-            context,
-            offset + thumbCenter,
-            activationAnimation: _valueIndicatorAnimation,
-            enableAnimation: _enableAnimation,
-            isDiscrete: isDiscrete,
-            labelPainter: _labelPainter,
-            parentBox: this,
-            sliderTheme: _sliderTheme,
-            textDirection: _textDirection,
-            value: _value,
-            textScaleFactor: textScaleFactor,
-            sizeWithOverflow: screenSize.isEmpty ? size : screenSize,
-          );
+          if (attached) {
+            _sliderTheme.valueIndicatorShape.paint(
+              context,
+              offset + thumbCenter,
+              activationAnimation: _valueIndicatorAnimation,
+              enableAnimation: _enableAnimation,
+              isDiscrete: isDiscrete,
+              labelPainter: _labelPainter,
+              parentBox: this,
+              sliderTheme: _sliderTheme,
+              textDirection: _textDirection,
+              value: _value,
+              textScaleFactor: textScaleFactor,
+              sizeWithOverflow: screenSize.isEmpty ? size : screenSize,
+            );
+          }
         };
       }
     }
