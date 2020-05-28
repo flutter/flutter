@@ -103,8 +103,8 @@ TEST(TextInputModel, AddCodePointSelectionWideCharacter) {
 TEST(TextInputModel, AddText) {
   auto model = std::make_unique<TextInputModel>("", "");
   model->AddText(u"ABCDE");
-  model->AddText(u"😄");
-  model->AddText(u"FGHIJ");
+  model->AddText("😄");
+  model->AddText("FGHIJ");
   EXPECT_EQ(model->selection_base(), 12);
   EXPECT_EQ(model->selection_extent(), 12);
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE😄FGHIJ");
@@ -113,7 +113,7 @@ TEST(TextInputModel, AddText) {
 TEST(TextInputModel, AddTextSelection) {
   auto model = std::make_unique<TextInputModel>("", "");
   EXPECT_TRUE(model->SetEditingState(1, 4, "ABCDE"));
-  model->AddText(u"xy");
+  model->AddText("xy");
   EXPECT_EQ(model->selection_base(), 3);
   EXPECT_EQ(model->selection_extent(), 3);
   EXPECT_STREQ(model->GetText().c_str(), "AxyE");
@@ -171,6 +171,96 @@ TEST(TextInputModel, DeleteSelection) {
   EXPECT_EQ(model->selection_base(), 1);
   EXPECT_EQ(model->selection_extent(), 1);
   EXPECT_STREQ(model->GetText().c_str(), "AE");
+}
+
+TEST(TextInputModel, DeleteSurroundingAtCursor) {
+  auto model = std::make_unique<TextInputModel>("", "");
+  model->SetEditingState(2, 2, "ABCDE");
+  EXPECT_TRUE(model->DeleteSurrounding(0, 1));
+  EXPECT_EQ(model->selection_base(), 2);
+  EXPECT_EQ(model->selection_extent(), 2);
+  EXPECT_STREQ(model->GetText().c_str(), "ABDE");
+}
+
+TEST(TextInputModel, DeleteSurroundingAtCursorAll) {
+  auto model = std::make_unique<TextInputModel>("", "");
+  model->SetEditingState(2, 2, "ABCDE");
+  EXPECT_TRUE(model->DeleteSurrounding(0, 3));
+  EXPECT_EQ(model->selection_base(), 2);
+  EXPECT_EQ(model->selection_extent(), 2);
+  EXPECT_STREQ(model->GetText().c_str(), "AB");
+}
+
+TEST(TextInputModel, DeleteSurroundingAtCursorGreedy) {
+  auto model = std::make_unique<TextInputModel>("", "");
+  model->SetEditingState(2, 2, "ABCDE");
+  EXPECT_TRUE(model->DeleteSurrounding(0, 4));
+  EXPECT_EQ(model->selection_base(), 2);
+  EXPECT_EQ(model->selection_extent(), 2);
+  EXPECT_STREQ(model->GetText().c_str(), "AB");
+}
+
+TEST(TextInputModel, DeleteSurroundingBeforeCursor) {
+  auto model = std::make_unique<TextInputModel>("", "");
+  model->SetEditingState(2, 2, "ABCDE");
+  EXPECT_TRUE(model->DeleteSurrounding(-1, 1));
+  EXPECT_EQ(model->selection_base(), 1);
+  EXPECT_EQ(model->selection_extent(), 1);
+  EXPECT_STREQ(model->GetText().c_str(), "ACDE");
+}
+
+TEST(TextInputModel, DeleteSurroundingBeforeCursorAll) {
+  auto model = std::make_unique<TextInputModel>("", "");
+  model->SetEditingState(2, 2, "ABCDE");
+  EXPECT_TRUE(model->DeleteSurrounding(-2, 2));
+  EXPECT_EQ(model->selection_base(), 0);
+  EXPECT_EQ(model->selection_extent(), 0);
+  EXPECT_STREQ(model->GetText().c_str(), "CDE");
+}
+
+TEST(TextInputModel, DeleteSurroundingBeforeCursorGreedy) {
+  auto model = std::make_unique<TextInputModel>("", "");
+  model->SetEditingState(2, 2, "ABCDE");
+  EXPECT_TRUE(model->DeleteSurrounding(-3, 3));
+  EXPECT_EQ(model->selection_base(), 0);
+  EXPECT_EQ(model->selection_extent(), 0);
+  EXPECT_STREQ(model->GetText().c_str(), "CDE");
+}
+
+TEST(TextInputModel, DeleteSurroundingAfterCursor) {
+  auto model = std::make_unique<TextInputModel>("", "");
+  model->SetEditingState(2, 2, "ABCDE");
+  EXPECT_TRUE(model->DeleteSurrounding(1, 1));
+  EXPECT_EQ(model->selection_base(), 2);
+  EXPECT_EQ(model->selection_extent(), 2);
+  EXPECT_STREQ(model->GetText().c_str(), "ABCE");
+}
+
+TEST(TextInputModel, DeleteSurroundingAfterCursorAll) {
+  auto model = std::make_unique<TextInputModel>("", "");
+  model->SetEditingState(2, 2, "ABCDE");
+  EXPECT_TRUE(model->DeleteSurrounding(1, 2));
+  EXPECT_EQ(model->selection_base(), 2);
+  EXPECT_EQ(model->selection_extent(), 2);
+  EXPECT_STREQ(model->GetText().c_str(), "ABC");
+}
+
+TEST(TextInputModel, DeleteSurroundingAfterCursorGreedy) {
+  auto model = std::make_unique<TextInputModel>("", "");
+  model->SetEditingState(2, 2, "ABCDE");
+  EXPECT_TRUE(model->DeleteSurrounding(1, 3));
+  EXPECT_EQ(model->selection_base(), 2);
+  EXPECT_EQ(model->selection_extent(), 2);
+  EXPECT_STREQ(model->GetText().c_str(), "ABC");
+}
+
+TEST(TextInputModel, DeleteSurroundingSelection) {
+  auto model = std::make_unique<TextInputModel>("", "");
+  model->SetEditingState(2, 3, "ABCDE");
+  EXPECT_TRUE(model->DeleteSurrounding(0, 1));
+  EXPECT_EQ(model->selection_base(), 3);
+  EXPECT_EQ(model->selection_extent(), 3);
+  EXPECT_STREQ(model->GetText().c_str(), "ABCE");
 }
 
 TEST(TextInputModel, BackspaceStart) {
@@ -378,6 +468,27 @@ TEST(TextInputModel, MoveCursorToEndSelection) {
   EXPECT_EQ(model->selection_base(), 5);
   EXPECT_EQ(model->selection_extent(), 5);
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
+TEST(TextInputModel, GetCursorOffset) {
+  auto model = std::make_unique<TextInputModel>("", "");
+  // These characters take 1, 2, 3 and 4 bytes in UTF-8.
+  model->SetEditingState(0, 0, "$¢€𐍈");
+  EXPECT_EQ(model->GetCursorOffset(), 0);
+  EXPECT_TRUE(model->MoveCursorForward());
+  EXPECT_EQ(model->GetCursorOffset(), 1);
+  EXPECT_TRUE(model->MoveCursorForward());
+  EXPECT_EQ(model->GetCursorOffset(), 3);
+  EXPECT_TRUE(model->MoveCursorForward());
+  EXPECT_EQ(model->GetCursorOffset(), 6);
+  EXPECT_TRUE(model->MoveCursorForward());
+  EXPECT_EQ(model->GetCursorOffset(), 10);
+}
+
+TEST(TextInputModel, GetCursorOffsetSelection) {
+  auto model = std::make_unique<TextInputModel>("", "");
+  model->SetEditingState(1, 4, "ABCDE");
+  EXPECT_EQ(model->GetCursorOffset(), 4);
 }
 
 }  // namespace flutter

@@ -53,6 +53,7 @@ source_set("flutter_glfw") {
     ":flutter_glfw_headers",
     "//build/secondary/third_party/glfw",
     "//flutter/shell/platform/common/cpp:common_cpp",
+    "//flutter/shell/platform/common/cpp:common_cpp_input",
     "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper",
     "//flutter/shell/platform/embedder:embedder_with_symbol_prefix",
     "//flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw",

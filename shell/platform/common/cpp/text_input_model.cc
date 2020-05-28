@@ -85,6 +85,12 @@ void TextInputModel::AddText(const std::u16string& text) {
   selection_base_ = selection_extent_;
 }
 
+void TextInputModel::AddText(const std::string& text) {
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>
+      utf16_converter;
+  AddText(utf16_converter.from_bytes(text));
+}
+
 bool TextInputModel::Backspace() {
   if (selection_base_ != selection_extent_) {
     DeleteSelected();
@@ -111,6 +117,46 @@ bool TextInputModel::Delete() {
     return true;
   }
   return false;
+}
+
+bool TextInputModel::DeleteSurrounding(int offset_from_cursor, int count) {
+  auto start = selection_extent_;
+  if (offset_from_cursor < 0) {
+    for (int i = 0; i < -offset_from_cursor; i++) {
+      // If requested start is before the available text then reduce the
+      // number of characters to delete.
+      if (start == text_.begin()) {
+        count = i;
+        break;
+      }
+      start -= IsTrailingSurrogate(*(start - 1)) ? 2 : 1;
+    }
+  } else {
+    for (int i = 0; i < offset_from_cursor && start != text_.end(); i++) {
+      start += IsLeadingSurrogate(*start) ? 2 : 1;
+    }
+  }
+
+  auto end = start;
+  for (int i = 0; i < count && end != text_.end(); i++) {
+    end += IsLeadingSurrogate(*start) ? 2 : 1;
+  }
+
+  if (start == end) {
+    return false;
+  }
+
+  auto new_base = text_.erase(start, end);
+
+  // Cursor moves only if deleted area is before it.
+  if (offset_from_cursor <= 0) {
+    selection_base_ = new_base;
+  }
+
+  // Clear selection.
+  selection_extent_ = selection_base_;
+
+  return true;
 }
 
 bool TextInputModel::MoveCursorToBeginning() {
@@ -170,6 +216,15 @@ std::string TextInputModel::GetText() const {
   std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>
       utf8_converter;
   return utf8_converter.to_bytes(text_);
+}
+
+int TextInputModel::GetCursorOffset() const {
+  // Measure the length of the current text up to the cursor.
+  // There is probably a much more efficient way of doing this.
+  auto leading_text = text_.substr(0, selection_extent_ - text_.begin());
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>
+      utf8_converter;
+  return utf8_converter.to_bytes(leading_text).size();
 }
 
 }  // namespace flutter
