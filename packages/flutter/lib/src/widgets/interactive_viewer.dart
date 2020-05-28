@@ -12,6 +12,8 @@ import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'layout_builder.dart';
+import 'scroll_physics.dart';
+import 'single_child_scroll_view.dart';
 import 'ticker_provider.dart';
 
 /// A widget that enables pan and zoom interactions with its child.
@@ -20,43 +22,30 @@ import 'ticker_provider.dart';
 ///
 /// The [child] must not be null.
 ///
-/// {@tool dartpad --template=stateful_widget_material_ticker}
-/// This example shows how to use InteractiveViewer in the simple case of
-/// panning over a large widget representing a table.
+/// {@tool dartpad --template=stateless_widget_scaffold}
+/// This example shows a simple Container that can be panned and zoomed.
 ///
 /// ```dart
-///   static const int _rowCount = 20;
-///   static const int _columnCount = 3;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       appBar: AppBar(
-///         title: const Text('Pannable Table'),
-///       ),
-///       body: InteractiveViewer(
-///         scaleEnabled: false,
-///         child: Table(
-///           columnWidths: <int, TableColumnWidth>{
-///             for (int column = 0; column < _columnCount; column += 1)
-///               column: const FixedColumnWidth(300.0),
-///           },
-///           children: <TableRow>[
-///             for (int row = 0; row < _rowCount; row += 1)
-///               TableRow(
-///                 children: <Widget>[
-///                   for (int column = 0; column < _columnCount; column += 1)
-///                     Container(
-///                       height: 100,
-///                       color: row % 2 + column % 2 == 1 ? Colors.red : Colors.green,
-///                     ),
-///                 ],
-///               ),
-///           ],
+/// @override
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: InteractiveViewer(
+///       boundaryMargin: EdgeInsets.all(20.0),
+///       minScale: 0.1,
+///       maxScale: 1.6,
+///       child: Container(
+///         decoration: BoxDecoration(
+///           gradient: LinearGradient(
+///             begin: Alignment.topCenter,
+///             end: Alignment.bottomCenter,
+///             colors: <Color>[Colors.orange, Colors.red],
+///             stops: <double>[0.0, 1.0],
+///           ),
 ///         ),
 ///       ),
-///     );
-///   }
+///     ),
+///   );
+/// }
 /// ```
 /// {@end-tool}
 @immutable
@@ -68,6 +57,7 @@ class InteractiveViewer extends StatefulWidget {
     Key key,
     @required this.child,
     this.boundaryMargin = EdgeInsets.zero,
+    this.constrained = true,
     // These default scale values were eyeballed as reasonable limits for common
     // use cases.
     this.maxScale = 2.5,
@@ -79,6 +69,7 @@ class InteractiveViewer extends StatefulWidget {
     this.transformationController,
     this.translationEnabled = true,
   }) : assert(child != null),
+       assert(constrained != null),
        assert(minScale != null),
        assert(minScale > 0),
        assert(minScale.isFinite),
@@ -116,6 +107,57 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// Cannot be null.
   final Widget child;
+
+  /// Whether the normal size constraints at this point in the widget tree are
+  /// applied to the child.
+  ///
+  /// If set to false, then the child will be given infinite constraints. This
+  /// is often useful when a child should be bigger than the InteractiveViewer.
+  ///
+  /// Defaults to true.
+  ///
+  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// This example shows how to create a table that is larger than the
+  /// InteractiveViewer. By setting constrained to false, the parts of the table
+  /// that are overflowing can be panned into view.
+  ///
+  /// ```dart
+  ///   static const int _rowCount = 20;
+  ///   static const int _columnCount = 3;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Scaffold(
+  ///       appBar: AppBar(
+  ///         title: const Text('Pannable Table'),
+  ///       ),
+  ///       body: InteractiveViewer(
+  ///         constrained: false,
+  ///         scaleEnabled: false,
+  ///         child: Table(
+  ///           columnWidths: <int, TableColumnWidth>{
+  ///             for (int column = 0; column < _columnCount; column += 1)
+  ///               column: const FixedColumnWidth(300.0),
+  ///           },
+  ///           children: <TableRow>[
+  ///             for (int row = 0; row < _rowCount; row += 1)
+  ///               TableRow(
+  ///                 children: <Widget>[
+  ///                   for (int column = 0; column < _columnCount; column += 1)
+  ///                     Container(
+  ///                       height: 100,
+  ///                       color: row % 2 + column % 2 == 1 ? Colors.red : Colors.green,
+  ///                     ),
+  ///                 ],
+  ///               ),
+  ///           ],
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// ```
+  /// {@end-tool}
+  final bool constrained;
 
   /// If false, the user will be prevented from translating.
   ///
@@ -287,7 +329,7 @@ class InteractiveViewer extends StatefulWidget {
   ///               end: Alignment.bottomCenter,
   ///               colors: <Color>[Colors.orange, Colors.red],
   ///               stops: <double>[0.0, 1.0],
-  ///             )
+  ///             ),
   ///           ),
   ///         ),
   ///       ),
@@ -349,10 +391,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     assert(!widget.boundaryMargin.top.isNaN);
     assert(!widget.boundaryMargin.bottom.isNaN);
 
-    final Size childSize = _getChildSize(
-      _childKey.currentContext.findRenderObject() as RenderBox,
-      _constraints,
-    );
+    final RenderBox childRenderBox = _childKey.currentContext.findRenderObject() as RenderBox;
+    final Size childSize = childRenderBox.size;
     _boundaryRectCached = widget.boundaryMargin.inflateRect(Offset.zero & childSize);
     // Boundaries that are partially infinite are not allowed because Matrix4's
     // rotation and translation methods don't handle infinites well.
@@ -367,10 +407,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // The Rect representing the child's parent.
   Rect get _viewport {
     assert(_childKey.currentContext != null);
-    final Size childSize = _getChildSize(
-      _childKey.currentContext.findRenderObject() as RenderBox,
-      _constraints,
-    );
+    final RenderBox childRenderBox = _childKey.currentContext.findRenderObject() as RenderBox;
+    final Size childSize = childRenderBox.size;
     final Size viewportSize = _constraints.constrain(childSize);
     return Offset.zero & viewportSize;
   }
@@ -670,10 +708,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Handle mousewheel scroll events.
   void _receivedPointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent) {
-      final Size childSize = _getChildSize(
-        _childKey.currentContext.findRenderObject() as RenderBox,
-        _constraints,
-      );
+      final RenderBox childRenderBox = _childKey.currentContext.findRenderObject() as RenderBox;
+      final Size childSize = childRenderBox.size;
       final double scaleChange = 1.0 + event.scrollDelta.dy / childSize.height;
       if (scaleChange == 0.0) {
         return;
@@ -766,6 +802,28 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
+    Widget child = Transform(
+      transform: _transformationController.value,
+      child: KeyedSubtree(
+        key: _childKey,
+        child: widget.child,
+      ),
+    );
+
+    if (!widget.constrained) {
+      // These SingleChildScrollViews effectively remove the size constraints
+      // from the child. The child can even be bigger than the screen.
+      child = SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        scrollDirection: Axis.vertical,
+        child: SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          scrollDirection: Axis.horizontal,
+          child: child,
+        ),
+      );
+    }
+
     // A GestureDetector allows the detection of panning and zooming gestures on
     // the child.
     return LayoutBuilder(
@@ -778,13 +836,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
             onScaleEnd: _onScaleEnd,
             onScaleStart: _onScaleStart,
             onScaleUpdate: _onScaleUpdate,
-            child: Transform(
-              transform: _transformationController.value,
-              child: KeyedSubtree(
-                key: _childKey,
-                child: widget.child,
-              ),
-            ),
+            child: child,
           ),
         );
       },
@@ -1033,35 +1085,6 @@ Quad _transformViewport(Matrix4 matrix, Rect viewport) {
       0.0,
     )),
   );
-}
-
-// Get the size of the child given its RenderBox and the viewport's Size.
-//
-// In some cases (i.e. a Table that's wider and/or taller than the device),
-// renderBox.size will give the size of the device, even though the child is
-// drawn beyond the viewport. The intrinsic size can then be used to set the
-// boundary to the full size of the child.
-//
-// In other cases (i.e. an Image whose original size is larger than the
-// viewport but is being fit to the viewport), renderBox.size will also give
-// the size of the viewport, and the boundary should remain at the viewport. In
-// that case, the intrinsic size is not used.
-Size _getChildSize(RenderBox renderBox, BoxConstraints constraints) {
-  double width = renderBox.size.width;
-  double height = renderBox.size.height;
-  final double minIntrinsicWidth = renderBox.getMinIntrinsicWidth(constraints.maxHeight);
-  final double maxIntrinsicWidth = renderBox.getMaxIntrinsicWidth(constraints.maxHeight);
-  final double minIntrinsicHeight = renderBox.getMinIntrinsicHeight(constraints.maxWidth);
-  final double maxIntrinsicHeight = renderBox.getMaxIntrinsicHeight(constraints.maxWidth);
-
-  if (minIntrinsicWidth == maxIntrinsicWidth) {
-    width = minIntrinsicWidth;
-  }
-  if (minIntrinsicHeight == maxIntrinsicHeight) {
-    height = minIntrinsicHeight;
-  }
-
-  return Size(width, height);
 }
 
 // Find the axis aligned bounding box for the rect rotated about its center by

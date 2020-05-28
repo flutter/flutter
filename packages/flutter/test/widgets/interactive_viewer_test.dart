@@ -127,6 +127,7 @@ void main() {
           home: Scaffold(
             body: Center(
               child: InteractiveViewer(
+                constrained: false,
                 scaleEnabled: false,
                 transformationController: transformationController,
                 child: Container(width: 2000.0, height: 2000.0),
@@ -153,7 +154,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(transformationController.value, equals(Matrix4.identity()));
 
-      // Attempting to pinch to zoom doens't work.
+      // Attempting to pinch to zoom doens't work because it's disabled.
       final Offset scaleStart1 = childInterior;
       final Offset scaleStart2 = Offset(childInterior.dx + 10.0, childInterior.dy);
       final Offset scaleEnd1 = Offset(childInterior.dx - 10.0, childInterior.dy);
