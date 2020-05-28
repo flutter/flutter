@@ -825,7 +825,6 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// The default behavior for the [onError] handler is to call this function.
   static void dumpErrorToConsole(FlutterErrorDetails details, { bool forceReport = false }) {
-    print('in dumpErrorToConsole');
     assert(details != null);
     assert(details.exception != null);
     bool reportError = details.silent != true; // could be null
