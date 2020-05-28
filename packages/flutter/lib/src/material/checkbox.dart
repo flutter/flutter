@@ -123,7 +123,7 @@ class Checkbox extends StatefulWidget {
   /// When [value] is null and [tristate] is true, [MaterialState.selected] is
   /// included as a state.
   ///
-  /// If this property is null, [ClickableMouseCursor] will be used.
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
   final MouseCursor mouseCursor;
 
   /// The color to use when this checkbox is checked.

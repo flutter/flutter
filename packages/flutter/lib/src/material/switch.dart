@@ -220,7 +220,7 @@ class Switch extends StatefulWidget {
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
   ///
-  /// If this property is null, [ClickableMouseCursor] will be used.
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
   final MouseCursor mouseCursor;
 
   /// The color for the button's [Material] when it has the input focus.

@@ -252,7 +252,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   ///
   ///  * [MaterialState.disabled].
   ///
-  /// If this property is null, [ClickableMouseCursor] will be used.
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
   final MouseCursor mouseCursor;
 
   /// The widget below this widget in the tree.

@@ -170,7 +170,7 @@ class Radio<T> extends StatefulWidget {
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
   ///
-  /// If this property is null, [ClickableMouseCursor] will be used.
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
   final MouseCursor mouseCursor;
 
   /// Set to true if this radio button is allowed to be returned to an

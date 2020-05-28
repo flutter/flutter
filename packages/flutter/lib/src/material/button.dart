@@ -115,7 +115,7 @@ class RawMaterialButton extends StatefulWidget {
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
   ///
-  /// If this property is null, [ClickableMouseCursor] will be used.
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
   /// {@endtemplate flutter.material.button.mouseCursor}
   final MouseCursor mouseCursor;
 

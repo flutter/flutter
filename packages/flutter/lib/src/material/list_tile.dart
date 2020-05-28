@@ -747,7 +747,7 @@ class ListTile extends StatelessWidget {
   ///  * [MaterialState.selected].
   ///  * [MaterialState.disabled].
   ///
-  /// If this property is null, [ClickableMouseCursor] will be used.
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
   final MouseCursor mouseCursor;
 
   /// If this tile is also [enabled] then icons and text are rendered with the same color.

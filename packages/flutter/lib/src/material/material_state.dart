@@ -270,7 +270,7 @@ class _ClickableMouseCursor extends MaterialStateMouseCursor {
   }
 
   @override
-  String get debugDescription => 'ClickableMouseCursor()';
+  String get debugDescription => 'MaterialStateMouseCursor(clickable)';
 }
 
 /// Interface for classes that can return a value of type `T` based on a set of
