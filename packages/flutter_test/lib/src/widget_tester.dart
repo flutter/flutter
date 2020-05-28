@@ -75,7 +75,17 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 void setUpWidgets(WidgetTesterCallback callback) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   final WidgetTester tester = WidgetTester._(binding);
-  setUp(() => binding.runSetup(() async => await callback(tester)));
+  setUp(() => binding.addSetup(() async => await callback(tester)));
+}
+
+/// Runs the teardown [callback] inside the Flutter test environment.
+///
+/// This is useful if you would like to run [tearDown] code that needs to execute
+/// in the same async zone as the test code.
+void tearDownWidgets(WidgetTesterCallback callback) {
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+  final WidgetTester tester = WidgetTester._(binding);
+  setUp(() => binding.addTeardown(() async => await callback(tester)));
 }
 
 /// Runs the test [callback] inside the Flutter test environment.

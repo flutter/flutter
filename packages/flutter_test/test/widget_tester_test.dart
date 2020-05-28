@@ -802,6 +802,73 @@ void main() {
       expect(flutterErrorDetails?.exception?.message, 'A Timer is still pending even after the widget tree was disposed.');
     });
   });
+
+  group('setupWidgets', () {
+    setUpWidgets((WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) => GestureDetector(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('page 2'),
+              ),
+            ),
+            child: const Text('page 1'),
+          ),
+        ),
+      ));
+    });
+
+    testWidgets('sets up the first page', (WidgetTester tester) async {
+      expect(find.text('page 1'), findsOneWidget);
+    });
+
+    group('tapping the text', () {
+      setUpWidgets((WidgetTester tester) async {
+        await tester.tap(find.text('page 1'));
+        await tester.pump();
+        await tester.pump();
+      });
+
+      testWidgets('shows the second page', (WidgetTester tester) async {
+        expect(find.text('page 2'), findsOneWidget);
+      });
+
+      group('popping the second page', () {
+        setUpWidgets((WidgetTester tester) async {
+          tester.state<NavigatorState>(find.byType(Navigator)).pop();
+          await tester.pump();
+        });
+
+        testWidgets('makes page 1 visible again', (WidgetTester tester) async {
+          expect(find.text('page 2'), findsNothing);
+          expect(find.text('page 1'), findsOneWidget);
+        });
+      });
+    });
+  });
+
+  group('setupWidgets with Futures', () {
+    Future<int> future;
+
+    group('with an inner group', () {
+      setUpWidgets((WidgetTester tester) async {
+        future = Future<int>.delayed(const Duration(seconds: 1), () => 5);
+      });
+
+      testWidgets('works within FakeAsync', (WidgetTester tester) async {
+        await tester.pump(const Duration(milliseconds: 1000));
+        expect(await future, 5);
+      });
+
+      tearDownWidgets((WidgetTester tester) async {
+        future = null;
+      });
+    });
+    test('makes sure future is cleaned up during teardown', () {
+      expect(future, isNull);
+    });
+  });
 }
 
 class FakeMatcher extends AsyncMatcher {
