@@ -153,7 +153,7 @@ class ProfileAndroidApplication extends CopyFlutterAotBundle {
 
   @override
   List<Target> get dependencies => const <Target>[
-    AotElfProfile(),
+    AotElfProfile(TargetPlatform.android_arm),
     AotAndroidAssetBundle(),
   ];
 }
@@ -167,7 +167,7 @@ class ReleaseAndroidApplication extends CopyFlutterAotBundle {
 
   @override
   List<Target> get dependencies => const <Target>[
-    AotElfRelease(),
+    AotElfRelease(TargetPlatform.android_arm),
     AotAndroidAssetBundle(),
   ];
 }

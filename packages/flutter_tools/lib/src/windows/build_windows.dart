@@ -7,6 +7,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
@@ -57,15 +58,6 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
         'Please run `flutter doctor` for more details.');
   }
 
-  if (!buildInfo.isDebug) {
-    const String warning = '🚧 ';
-    globals.printStatus(warning * 20);
-    globals.printStatus('Warning: Only debug is currently implemented for Windows. This is effectively a debug build.');
-    globals.printStatus('See https://github.com/flutter/flutter/issues/38477 for details and updates.');
-    globals.printStatus(warning * 20);
-    globals.printStatus('');
-  }
-
   final String buildScript = globals.fs.path.join(
     Cache.flutterRoot,
     'packages',
@@ -74,7 +66,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     'vs_build.bat',
   );
 
-  final String configuration = buildInfo.isDebug ? 'Debug' : 'Release';
+  final String configuration = toTitleCase(getNameForBuildMode(buildInfo.mode ?? BuildMode.release));
   final String solutionPath = windowsProject.solutionFile.path;
   final Stopwatch sw = Stopwatch()..start();
   final Status status = globals.logger.startProgress(

@@ -39,9 +39,8 @@ enum _SwitchListTileType { material, adaptive }
 /// appear selected when the switch is on, pass the same value to both.
 ///
 /// The switch is shown on the right by default in left-to-right languages (i.e.
-/// in the [ListTile.trailing] slot). The [secondary] widget is placed in the
-/// [ListTile.leading] slot. This cannot be changed; there is not sufficient
-/// space in a [ListTile]'s [ListTile.leading] slot for a [Switch].
+/// in the [ListTile.trailing] slot) which can be changed using [controlAffinity].
+/// The [secondary] widget is placed in the [ListTile.leading] slot.
 ///
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
@@ -273,6 +272,7 @@ class SwitchListTile extends StatelessWidget {
     this.secondary,
     this.selected = false,
     this.autofocus = false,
+    this.controlAffinity = ListTileControlAffinity.platform,
   }) : _switchListTileType = _SwitchListTileType.material,
        assert(value != null),
        assert(isThreeLine != null),
@@ -307,6 +307,7 @@ class SwitchListTile extends StatelessWidget {
     this.secondary,
     this.selected = false,
     this.autofocus = false,
+    this.controlAffinity = ListTileControlAffinity.platform,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
        assert(value != null),
        assert(isThreeLine != null),
@@ -429,6 +430,11 @@ class SwitchListTile extends StatelessWidget {
   /// If adaptive, creates the switch with [Switch.adaptive].
   final _SwitchListTileType _switchListTileType;
 
+  /// Defines the position of control and [secondary], relative to text.
+  ///
+  /// By default, the value of `controlAffinity` is [ListTileControlAffinity.platform].
+  final ListTileControlAffinity controlAffinity;
+
   @override
   Widget build(BuildContext context) {
     Widget control;
@@ -462,14 +468,28 @@ class SwitchListTile extends StatelessWidget {
           autofocus: autofocus,
         );
     }
+
+    Widget leading, trailing;
+    switch (controlAffinity) {
+      case ListTileControlAffinity.leading:
+        leading = control;
+        trailing = secondary;
+        break;
+      case ListTileControlAffinity.trailing:
+      case ListTileControlAffinity.platform:
+        leading = secondary;
+        trailing = control;
+        break;
+    }
+
     return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context).accentColor,
         child: ListTile(
-          leading: secondary,
+          leading: leading,
           title: title,
           subtitle: subtitle,
-          trailing: control,
+          trailing: trailing,
           isThreeLine: isThreeLine,
           dense: dense,
           contentPadding: contentPadding,

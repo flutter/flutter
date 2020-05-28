@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
+import '../android/android_workflow.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -1039,7 +1040,13 @@ class EmulatorDomain extends Domain {
     registerHandler('create', create);
   }
 
-  EmulatorManager emulators = EmulatorManager();
+  EmulatorManager emulators = EmulatorManager(
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    androidSdk: globals.androidSdk,
+    processManager: globals.processManager,
+    androidWorkflow: androidWorkflow,
+  );
 
   Future<List<Map<String, dynamic>>> getEmulators([ Map<String, dynamic> args ]) async {
     final List<Emulator> list = await emulators.getAllAvailableEmulators();

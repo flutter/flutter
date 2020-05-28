@@ -20,7 +20,9 @@ void main() {
     final AndroidDevices androidDevices = AndroidDevices(
       androidSdk: MockAndroidSdk(null),
       logger: BufferLogger.test(),
-      androidWorkflow: AndroidWorkflow(),
+      androidWorkflow: AndroidWorkflow(
+        androidSdk: MockAndroidSdk(null),
+      ),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
     );
 
@@ -39,7 +41,9 @@ void main() {
     final AndroidDevices androidDevices = AndroidDevices(
       androidSdk: MockAndroidSdk(),
       logger: BufferLogger.test(),
-      androidWorkflow: AndroidWorkflow(),
+      androidWorkflow: AndroidWorkflow(
+        androidSdk: MockAndroidSdk(),
+      ),
       processManager: processManager,
     );
 
@@ -57,7 +61,9 @@ void main() {
     final AndroidDevices androidDevices = AndroidDevices(
       androidSdk: MockAndroidSdk(),
       logger: BufferLogger.test(),
-      androidWorkflow: AndroidWorkflow(),
+      androidWorkflow: AndroidWorkflow(
+        androidSdk: MockAndroidSdk(),
+      ),
       processManager: processManager,
     );
 

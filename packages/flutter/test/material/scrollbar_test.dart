@@ -309,6 +309,54 @@ void main() {
   });
 
   testWidgets(
+      'With isAlwaysShown: false, set isAlwaysShown: true. The thumb should be always shown directly',
+      (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    bool isAlwaysShown = false;
+    Widget viewWithScroll() {
+      return _buildBoilerplate(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Theme(
+              data: ThemeData(),
+              child: Scaffold(
+                floatingActionButton: FloatingActionButton(
+                  child: const Icon(Icons.threed_rotation),
+                  onPressed: () {
+                    setState(() {
+                      isAlwaysShown = !isAlwaysShown;
+                    });
+                  },
+                ),
+                body: Scrollbar(
+                  isAlwaysShown: isAlwaysShown,
+                  controller: controller,
+                  child: SingleChildScrollView(
+                    controller: controller,
+                    child: const SizedBox(
+                      width: 4000.0,
+                      height: 4000.0,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    await tester.pumpAndSettle();
+    expect(find.byType(Scrollbar), isNot(paints..rect()));
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    // Scrollbar is not showing after scroll finishes
+    expect(find.byType(Scrollbar), paints..rect());
+  });
+
+  testWidgets(
       'With isAlwaysShown: false, fling a scroll. While it is still scrolling, set isAlwaysShown: true. The thumb should not fade even after the scrolling stops',
       (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -348,6 +396,7 @@ void main() {
 
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
+    expect(find.byType(Scrollbar), isNot(paints..rect()));
     await tester.fling(
       find.byType(SingleChildScrollView),
       const Offset(0.0, -10.0),
@@ -356,8 +405,13 @@ void main() {
     expect(find.byType(Scrollbar), paints..rect());
 
     await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+    expect(find.byType(Scrollbar), paints..rect());
+
+    // Wait for the timer delay to expire.
+    await tester.pump(const Duration(milliseconds: 600)); // _kScrollbarTimeToFade
     await tester.pumpAndSettle();
-    // Scrollbar is not showing after scroll finishes
+    // Scrollbar thumb is showing after scroll finishes and timer ends.
     expect(find.byType(Scrollbar), paints..rect());
   });
 

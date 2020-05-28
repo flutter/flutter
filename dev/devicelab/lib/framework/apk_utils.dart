@@ -226,6 +226,7 @@ class FlutterProject {
 
   String get rootPath => path.join(parent.path, name);
   String get androidPath => path.join(rootPath, 'android');
+  String get iosPath => path.join(rootPath, 'ios');
 
   Future<void> addCustomBuildType(String name, {String initWith}) async {
     final File buildScript = File(

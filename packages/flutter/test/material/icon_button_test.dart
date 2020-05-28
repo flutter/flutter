@@ -459,6 +459,46 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
   });
 
+  testWidgets('IconButton keeps focus when disabled in directional navigation mode.', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'IconButton');
+    await tester.pumpWidget(
+      wrap(
+        child: MediaQuery(
+          data: const MediaQueryData(
+            navigationMode: NavigationMode.directional,
+          ),
+          child: IconButton(
+            focusNode: focusNode,
+            autofocus: true,
+            onPressed: () {},
+            icon: const Icon(Icons.link),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    await tester.pumpWidget(
+      wrap(
+        child: MediaQuery(
+          data: const MediaQueryData(
+            navigationMode: NavigationMode.directional,
+          ),
+          child: IconButton(
+            focusNode: focusNode,
+            autofocus: true,
+            onPressed: null,
+            icon: const Icon(Icons.link),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+  });
+
   testWidgets("Disabled IconButton can't be traversed to when disabled.", (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: 'IconButton 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: 'IconButton 2');
