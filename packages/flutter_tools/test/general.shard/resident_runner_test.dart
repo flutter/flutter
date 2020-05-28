@@ -523,6 +523,10 @@ void main() {
 
   test('ResidentRunner copies output dill to cache location during preExit', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final MockResidentCompiler compiler = MockResidentCompiler();
+    when(compiler.pendingWrite).thenReturn(false);
+    when(residentRunner.flutterDevices.first.generator).thenReturn(compiler);
+
     residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('hello');
     await residentRunner.preExit();
     final File cacheDill = globals.fs.file(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
@@ -531,8 +535,25 @@ void main() {
     expect(cacheDill.readAsStringSync(), 'hello');
   }));
 
-  test('ResidentRunner handles output dill missing during preExit', () => testbed.run(() async {
+  test('ResidentRunner handles output dill missing during preExit copy of dill', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final MockResidentCompiler compiler = MockResidentCompiler();
+    when(compiler.pendingWrite).thenReturn(false);
+    when(residentRunner.flutterDevices.first.generator).thenReturn(compiler);
+
+    await residentRunner.preExit();
+    final File cacheDill = globals.fs.file(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+
+    expect(cacheDill, isNot(exists));
+  }));
+
+  test('ResidentRunner handles pending write during preExit copy of dill', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final MockResidentCompiler compiler = MockResidentCompiler();
+    when(compiler.pendingWrite).thenReturn(true);
+    when(residentRunner.flutterDevices.first.generator).thenReturn(compiler);
+
+    residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('hello');
     await residentRunner.preExit();
     final File cacheDill = globals.fs.file(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
 
@@ -1215,6 +1236,7 @@ class MockDeviceLogReader extends Mock implements DeviceLogReader {}
 class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockUsage extends Mock implements Usage {}
 class MockProcessManager extends Mock implements ProcessManager {}
+class MockResidentCompiler extends Mock implements ResidentCompiler {}
 
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(Device device, { Stream<Uri> observatoryUris })

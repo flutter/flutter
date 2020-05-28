@@ -58,12 +58,22 @@ void main() {
           ))
         ));
 
-    final CompilerOutput output = await generator.recompile(
+    expect(generator.pendingWrite, false);
+
+    final Future<CompilerOutput> pendingOutput = generator.recompile(
       Uri.parse('/path/to/main.dart'),
         null /* invalidatedFiles */,
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
     );
+    // Wait one event-turn for the request to be received.
+    await null;
+    expect(generator.pendingWrite, true);
+
+    final CompilerOutput output = await pendingOutput;
+
+    expect(generator.pendingWrite, false);
+
     expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
     verifyNoMoreInteractions(mockFrontendServerStdIn);
     expect(testLogger.errorText, equals('\nCompiler message:\nline1\nline2\n'));

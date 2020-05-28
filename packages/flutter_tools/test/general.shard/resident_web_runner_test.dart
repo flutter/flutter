@@ -1015,6 +1015,9 @@ void main() {
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
+    final MockResidentCompiler compiler = MockResidentCompiler();
+    when(compiler.pendingWrite).thenReturn(false);
+    when(residentWebRunner.flutterDevices.first.generator).thenReturn(compiler);
 
     await residentWebRunner.exit();
     await residentWebRunner.exit();
