@@ -125,7 +125,7 @@ Future<void> main(List<String> args) async {
        // The mustache dependency is different in google3
        TemplateRenderer: () => const MustacheTemplateRenderer(),
        if (daemon)
-        Logger: () => NotifyingLogger()
+        Logger: () => NotifyingLogger(verbose: verbose)
        else if (verbose)
         Logger: () => VerboseLogger(StdoutLogger(
           timeoutConfiguration: timeoutConfiguration,

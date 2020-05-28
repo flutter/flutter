@@ -914,6 +914,10 @@ dynamic _toJsonable(dynamic obj) {
 }
 
 class NotifyingLogger extends Logger {
+  NotifyingLogger({ @required this.verbose });
+
+  final bool verbose;
+
   final StreamController<LogMessage> _messageController = StreamController<LogMessage>.broadcast();
 
   Stream<LogMessage> get onMessage => _messageController.stream;
@@ -946,7 +950,10 @@ class NotifyingLogger extends Logger {
 
   @override
   void printTrace(String message) {
-    // This is a lot of traffic to send over the wire.
+    if (!verbose) {
+      return;
+    }
+    _messageController.add(LogMessage('trace', message));
   }
 
   @override
