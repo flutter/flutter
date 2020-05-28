@@ -24,10 +24,10 @@ class StructuredErrorTestService extends TestWidgetInspectorService {
     final StructuredErrorTestService service = StructuredErrorTestService();
     WidgetInspectorService.instance = service;
     FlutterExceptionHandler testHandler;
-    FlutterExceptionHandler setUpAllHandler;
+    FlutterExceptionHandler inspectorServiceErrorHandler;
 
     setUpAll(() {
-      setUpAllHandler = FlutterError.onError;
+      inspectorServiceErrorHandler = FlutterError.onError;
     });
 
     setUp(() {
@@ -38,7 +38,7 @@ class StructuredErrorTestService extends TestWidgetInspectorService {
         (WidgetTester tester) async {
       // The test framework resets FlutterError.onError, so we set it back to
       // what it was after WidgetInspectorService::initServiceExtensions ran.
-      FlutterError.onError = setUpAllHandler;
+      FlutterError.onError = inspectorServiceErrorHandler;
 
       List<Map<Object, Object>> flutterErrorEvents =
           service.getEventsDispatched('Flutter.Error');
