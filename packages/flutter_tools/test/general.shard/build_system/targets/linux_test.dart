@@ -119,13 +119,15 @@ void main() {
     testEnvironment.buildDir.childFile('app.so').createSync();
 
     await const ProfileBundleLinuxAssets().build(testEnvironment);
-    final Directory output = testEnvironment.outputDir
+    final Directory lib_dir = testEnvironment.outputDir
       .childDirectory('lib');
+    final Directory assets_dir = testEnvironment.outputDir
+      .childDirectory('flutter_assets');
 
-    expect(output.childFile('libapp.so'), exists);
-    expect(output.childFile('AssetManifest.json'), exists);
+    expect(lib_dir.childFile('libapp.so'), exists);
+    expect(assets_dir.childFile('AssetManifest.json'), exists);
     // No bundled fonts
-    expect(output.childFile('FontManifest.json'), isNot(exists));
+    expect(assets_dir.childFile('FontManifest.json'), isNot(exists));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
@@ -149,13 +151,15 @@ void main() {
     testEnvironment.buildDir.childFile('app.so').createSync();
 
     await const ReleaseBundleLinuxAssets().build(testEnvironment);
-    final Directory output = testEnvironment.outputDir
+    final Directory lib_dir = testEnvironment.outputDir
       .childDirectory('lib');
+    final Directory assets_dir = testEnvironment.outputDir
+      .childDirectory('flutter_assets');
 
-    expect(output.childFile('libapp.so'), exists);
-    expect(output.childFile('AssetManifest.json'), exists);
+    expect(lib_dir.childFile('libapp.so'), exists);
+    expect(assets_dir.childFile('AssetManifest.json'), exists);
     // No bundled fonts
-    expect(output.childFile('FontManifest.json'), isNot(exists));
+    expect(assets_dir.childFile('FontManifest.json'), isNot(exists));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
