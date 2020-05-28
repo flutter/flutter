@@ -33,11 +33,17 @@ class TextInputModel {
   // code point.
   void AddCodePoint(char32_t c);
 
-  // Adds a UTF-16 text.
+  // Adds UTF-16 text.
   //
   // Either appends after the cursor (when selection base and extent are the
   // same), or deletes the selected text, replacing it with the given text.
   void AddText(const std::u16string& text);
+
+  // Adds UTF-8 text.
+  //
+  // Either appends after the cursor (when selection base and extent are the
+  // same), or deletes the selected text, replacing it with the given text.
+  void AddText(const std::string& text);
 
   // Deletes either the selection, or one character ahead of the cursor.
   //
@@ -46,6 +52,17 @@ class TextInputModel {
   //
   // Returns true if any deletion actually occurred.
   bool Delete();
+
+  // Deletes text near the cursor.
+  //
+  // A section is made starting at @offset code points past the cursor (negative
+  // values go before the cursor). @count code points are removed. The selection
+  // may go outside the bounds of the text and will result in only the part
+  // selection that covers the available text being deleted. The existing
+  // selection is ignored and removed after this operation.
+  //
+  // Returns true if any deletion actually occurred.
+  bool DeleteSurrounding(int offset_from_cursor, int count);
 
   // Deletes either the selection, or one character behind the cursor.
   //
@@ -77,8 +94,12 @@ class TextInputModel {
   // Returns true if the cursor could be moved.
   bool MoveCursorToEnd();
 
-  // Get the current text
+  // Gets the current text as UTF-8.
   std::string GetText() const;
+
+  // Gets the cursor position as a byte offset in UTF-8 string returned from
+  // GetText().
+  int GetCursorOffset() const;
 
   // The position of the cursor
   int selection_base() const {
