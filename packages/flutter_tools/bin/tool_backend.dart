@@ -44,21 +44,9 @@ or
 
   final String flutterExecutable = path.join(
     flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
-  String target;
-  if (targetPlatform == 'windows-x64') {
-    target = 'debug_bundle_windows_assets';
-  } else {
-    if (buildMode == 'debug') {
-      target = 'debug_bundle_linux_assets';
-    } else if (buildMode == 'release') {
-      target = 'release_bundle_linux_assets';
-    } else if (buildMode == 'profile') {
-      target = 'profile_bundle_linux_assets';
-    }
-  }
+  final String bundlePlatform = targetPlatform == 'windows-x64' ? 'windows' : 'linux';
+  final String target = '${buildMode}_bundle_${bundlePlatform}_assets';
 
-  // TODO(jonahwilliams): currently all builds are debug builds. Remove the
-  // hardcoded mode when profile and release support is added.
   final Process assembleProcess = await Process.start(
     flutterExecutable,
     <String>[

@@ -65,6 +65,8 @@ const List<Target> _kDefaultTargets = <Target>[
   // Windows targets
   UnpackWindows(),
   DebugBundleWindowsAssets(),
+  ProfileBundleWindowsAssets(),
+  ReleaseBundleWindowsAssets(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
