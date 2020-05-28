@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:dds/dds.dart';
 import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -15,6 +14,7 @@ import 'artifacts.dart';
 import 'asset.dart';
 import 'base/command_help.dart';
 import 'base/common.dart';
+import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
@@ -464,38 +464,6 @@ class FlutterDevice {
     logReader.appPid = vm.pid;
   }
 
-  Future<void> _startDartDevelopmentService(
-    LaunchResult result, DebuggingOptions debuggingOptions, bool ipv6) async {
-    if (result.hasObservatory) {
-      final Uri ddsUri = Uri(
-        scheme: 'http',
-        host: (ipv6 ?
-          io.InternetAddress.loopbackIPv6 :
-          io.InternetAddress.loopbackIPv4
-        ).host,
-        port: debuggingOptions.hostVmServicePort ?? 0,
-      );
-      globals.printTrace(
-        'Launching a Dart Developer Service (DDS) instance at $ddsUri, '
-        'connecting to VM service at ${result.observatoryUri}.'
-      );
-      final DartDevelopmentService dds =
-        await DartDevelopmentService.startDartDevelopmentService(
-          result.observatoryUri,
-          serviceUri: ddsUri,
-          enableAuthCodes: debuggingOptions.disableServiceAuthCodes,
-        );
-      globals.printTrace('DDS is listening at ${dds.uri}.');
-      observatoryUris = Stream<Uri>
-        .value(dds.uri)
-        .asBroadcastStream();
-    } else {
-      observatoryUris = const Stream<Uri>
-        .empty()
-        .asBroadcastStream();
-    }
-  }
-
   Future<int> runHot({
     HotRunner hotRunner,
     String route,
@@ -547,11 +515,18 @@ class FlutterDevice {
       await stopEchoingDeviceLog();
       return 2;
     }
-    await _startDartDevelopmentService(
-      result,
-      hotRunner.debuggingOptions,
-      hotRunner.ipv6,
-    );
+    if (result.hasObservatory) {
+      observatoryUris = await DartDevelopmentService.startDartDevelopmentService(
+        result.observatoryUri,
+        hotRunner.debuggingOptions.hostVmServicePort,
+        hotRunner.debuggingOptions.disableServiceAuthCodes,
+        hotRunner.ipv6,
+      );
+    } else {
+      observatoryUris = const Stream<Uri>
+        .empty()
+        .asBroadcastStream();
+    }
     return 0;
   }
 
@@ -615,11 +590,18 @@ class FlutterDevice {
       await stopEchoingDeviceLog();
       return 2;
     }
-    await _startDartDevelopmentService(
-      result,
-      coldRunner.debuggingOptions,
-      coldRunner.ipv6,
-    );
+    if (result.hasObservatory) {
+      observatoryUris = await DartDevelopmentService.startDartDevelopmentService(
+        result.observatoryUri,
+        coldRunner.debuggingOptions.hostVmServicePort,
+        coldRunner.debuggingOptions.disableServiceAuthCodes,
+        coldRunner.ipv6,
+      );
+    } else {
+      observatoryUris = const Stream<Uri>
+        .empty()
+        .asBroadcastStream();
+    }
     return 0;
   }
 
