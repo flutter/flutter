@@ -547,9 +547,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// Called by the [testWidgets] and [benchmarkWidgets] functions to
   /// run a test.
   ///
-  /// [runSetup] and [runTest] should execute code in the same [Zone] to
-  /// minimize behavioral differences between setup and test code.
-  ///
   /// The `invariantTester` argument is called after the `testBody`'s [Future]
   /// completes. If it throws, then the test is marked as failed.
   ///
