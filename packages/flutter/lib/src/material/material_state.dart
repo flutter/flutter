@@ -181,15 +181,16 @@ class _MaterialStateColor extends MaterialStateColor {
   Color resolve(Set<MaterialState> states) => _resolve(states);
 }
 
+
 /// Defines a [MouseCursor] whose value depends on a set of [MaterialState]s which
 /// represent the interactive state of a component.
 ///
-/// This is useful when the widget's intractability varies with its state. For
-/// example, a mouse pointer hovering over a disabled [FlatButton] should not
-/// display [SystemMouseCursors.click], since the button is not clickable. To
-/// solve this, you can use [MaterialStateMouseCursor] to assign a different
-/// cursor (such as [SystemMouseCursors.basic]) when the [FlatButton] is
-/// disabled.
+/// This kind of [MouseCursor] is useful when the set of interactive actions a
+/// widget supports varies with its state. For example, a mouse pointer hovering
+/// over a disabled [FlatButton] should not display [SystemMouseCursors.click],
+/// since the button is not clickable. To solve this, you can use
+/// [MaterialStateMouseCursor] to assign a different cursor (such as
+/// [SystemMouseCursors.basic]) when the [FlatButton] is disabled.
 ///
 /// To use a [MaterialStateMouseCursor], you should create a subclass of
 /// [MaterialStateMouseCursor] and implement the abstract `resolve` method.
@@ -246,16 +247,19 @@ abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialS
   /// This method should never return null.
   @override
   MouseCursor resolve(Set<MaterialState> states);
+
+  /// A mouse cursor for clickable material widgets, which resolves differently
+  /// when the widget is disabled.
+  ///
+  /// By default this cursor resolves to [SystemMouseCursors.click]. If the widget is
+  /// disabled, the cursor resolves to [SystemMouseCursors.basic].
+  ///
+  /// This cursor is the default for many Material widgets.
+  static const MaterialStateMouseCursor clickable = _ClickableMouseCursor();
 }
 
-/// A state-dependent mouse cursor that is usually used on clickable material
-/// widgets.
-///
-/// By default this cursor resolves to [SystemMouseCursors.click]. If the widget is
-/// disabled, the cursor resolves to [SystemMouseCursors.basic].
-class ClickableMouseCursor extends MaterialStateMouseCursor {
-  /// Create a [ClickableMouseCursor].
-  const ClickableMouseCursor();
+class _ClickableMouseCursor extends MaterialStateMouseCursor {
+  const _ClickableMouseCursor();
 
   @override
   MouseCursor resolve(Set<MaterialState> states) {

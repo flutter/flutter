@@ -321,7 +321,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white10 : Colors.black12);
     }
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? const ClickableMouseCursor(),
+      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
       <MaterialState>{
         if (!enabled) MaterialState.disabled,
         if (_hovering) MaterialState.hovered,

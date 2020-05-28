@@ -334,7 +334,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
       );
     }
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? const ClickableMouseCursor(),
+      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
       <MaterialState>{
         if (!widget.enabled) MaterialState.disabled,
       },

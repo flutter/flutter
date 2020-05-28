@@ -343,7 +343,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
     final bool selected = widget.value == widget.groupValue;
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? const ClickableMouseCursor(),
+      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
       <MaterialState>{
         if (!enabled) MaterialState.disabled,
         if (_hovering) MaterialState.hovered,

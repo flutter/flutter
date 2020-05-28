@@ -924,7 +924,7 @@ class ListTile extends StatelessWidget {
       ?? _defaultContentPadding;
 
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      mouseCursor ?? const ClickableMouseCursor(),
+      mouseCursor ?? MaterialStateMouseCursor.clickable,
       <MaterialState>{
         if (!enabled) MaterialState.disabled,
         if (selected) MaterialState.selected,

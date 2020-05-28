@@ -246,7 +246,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
     size += (widget.visualDensity ?? themeData.visualDensity).baseSizeAdjustment;
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? const ClickableMouseCursor(),
+      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
       <MaterialState>{
         if (!enabled) MaterialState.disabled,
         if (_hovering) MaterialState.hovered,

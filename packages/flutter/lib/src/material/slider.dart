@@ -699,7 +699,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       ),
     );
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? const ClickableMouseCursor(),
+      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
       <MaterialState>{
         if (!_enabled) MaterialState.disabled,
         if (_hovering) MaterialState.hovered,
