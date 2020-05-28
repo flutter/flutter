@@ -88,7 +88,12 @@ class InteractiveViewer extends StatefulWidget {
        assert(maxScale >= minScale),
        assert(scaleEnabled != null),
        assert(translationEnabled != null),
-       assert(boundaryMargin.isNonNegative),
+       // boundaryMargin must be either fully infinite or fully finite, but not
+       // a mix of both.
+       assert((boundaryMargin.horizontal.isInfinite
+           && boundaryMargin.vertical.isInfinite) || (boundaryMargin.top.isFinite
+           && boundaryMargin.right.isFinite && boundaryMargin.bottom.isFinite
+           && boundaryMargin.left.isFinite)),
        super(key: key);
 
   /// A margin for the visible boundaries of the child.
@@ -773,7 +778,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
             onScaleEnd: _onScaleEnd,
             onScaleStart: _onScaleStart,
             onScaleUpdate: _onScaleUpdate,
-
             child: Transform(
               transform: _transformationController.value,
               child: KeyedSubtree(
