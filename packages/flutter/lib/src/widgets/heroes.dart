@@ -533,6 +533,8 @@ class _HeroFlight {
   }
 
   void _handleAnimationUpdate(AnimationStatus status) {
+    if (manifest.fromRoute?.navigator?.userGestureInProgress == true)
+      return;
     if (status == AnimationStatus.completed || status == AnimationStatus.dismissed) {
       _proxyAnimation.parent = null;
 
