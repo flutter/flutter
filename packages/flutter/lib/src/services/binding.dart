@@ -101,7 +101,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     // TODO(ianh): Remove this complexity once these bugs are fixed.
     final Completer<String> rawLicenses = Completer<String>();
     scheduleTask(() async {
-      rawLicenses.complete(rootBundle.loadString('LICENSE', cache: false));
+      // TODO(jonahwilliams): temporary catch to allow migrating LICENSE to NOTICES.
+      // Once both the tool and google3 use notices this can be removed after PR:
+      // https://github.com/flutter/flutter/pull/57871
+      try {
+        rawLicenses.complete(await rootBundle.loadString('NOTICES', cache: false));
+      } on FlutterError {
+        rawLicenses.complete(await rootBundle.loadString('LICENSE', cache: false));
+      }
     }, Priority.animation);
     await rawLicenses.future;
     final Completer<List<LicenseEntry>> parsedLicenses = Completer<List<LicenseEntry>>();
