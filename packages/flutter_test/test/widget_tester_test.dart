@@ -778,12 +778,15 @@ void main() {
 
   group('Pending timer', () {
     TestExceptionReporter currentExceptionReporter;
+    TestWidgetsFlutterBinding binding;
     setUp(() {
       currentExceptionReporter = reportTestException;
+      binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
     });
 
     tearDown(() {
       reportTestException = currentExceptionReporter;
+      binding.postTest();
     });
 
     test('Throws assertion message without code', () async {
@@ -792,7 +795,6 @@ void main() {
         flutterErrorDetails = details;
       };
 
-      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
       await binding.runTest(() async {
         final Timer timer = Timer(const Duration(seconds: 1), () {});
         expect(timer.isActive, true);
