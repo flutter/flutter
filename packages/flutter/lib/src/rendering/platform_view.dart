@@ -231,10 +231,10 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
 /// A render object for an iOS UIKit UIView.
 ///
 /// {@template flutter.rendering.platformView.preview}
-/// Embedding UIViews is still in release preview, to enable the preview for an iOS app add a boolean
+/// Embedding UIViews is still preview-quality. To enable the preview for an iOS app add a boolean
 /// field with the key 'io.flutter.embedded_views_preview' and the value set to 'YES' to the
 /// application's Info.plist file. A list of open issued with embedding UIViews is available on
-/// [Github](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22a%3A+platform-views%22+label%3A%22%E2%8C%BA%E2%80%AC+platform-ios%22)
+/// [Github](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22a%3A+platform-views%22+label%3Aplatform-ios+sort%3Acreated-asc)
 /// {@endtemplate}
 ///
 /// [RenderUiKitView] is responsible for sizing and displaying an iOS
