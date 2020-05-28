@@ -2036,7 +2036,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls controls = widget.selectionControls;
-<<<<<<< HEAD
     return MouseRegion(
       cursor: widget.mouseCursor ?? SystemMouseCursors.text,
       child: Scrollable(
