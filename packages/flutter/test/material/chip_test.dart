@@ -895,7 +895,7 @@ void main() {
                           wasDeleted = true;
                         });
                       }
-                      : null,
+                    : null,
                   deleteIcon: Container(width: 40.0, height: 40.0, key: deleteButtonKey),
                   label: Text('Chip', key: labelKey),
                   shape: const StadiumBorder(),
@@ -1203,10 +1203,10 @@ void main() {
                   avatar: avatar,
                   onSelected: selectable != null
                     ? (bool value) {
-                    setState(() {
-                      selected = value;
-                    });
-                  }
+                        setState(() {
+                          selected = value;
+                        });
+                      }
                     : null,
                   selected: selected,
                   label: Text('Chip', key: labelKey),
@@ -1285,10 +1285,10 @@ void main() {
                 return RawChip(
                   onSelected: selectable != null
                     ? (bool value) {
-                    setState(() {
-                      selected = value;
-                    });
-                  }
+                        setState(() {
+                          selected = value;
+                        });
+                      }
                     : null,
                   selected: selected,
                   label: Text('Chip', key: labelKey),
@@ -1362,10 +1362,10 @@ void main() {
                   avatar: avatar,
                   onSelected: selectable != null
                     ? (bool value) {
-                    setState(() {
-                      selected = value;
-                    });
-                  }
+                        setState(() {
+                          selected = value;
+                        });
+                      }
                     : null,
                   selected: selected,
                   label: Text('Chip', key: labelKey),
@@ -1509,17 +1509,17 @@ void main() {
                 label: Text('$value'),
                 onSelected: isSelectable
                   ? (bool newValue) {
-                  setState(() {
-                    value = newValue;
-                  });
-                }
+                      setState(() {
+                        value = newValue;
+                      });
+                    }
                   : null,
                 onPressed: isPressable
                   ? () {
-                  setState(() {
-                    value = true;
-                  });
-                }
+                      setState(() {
+                        value = true;
+                      });
+                    }
                   : null,
               );
             }),
