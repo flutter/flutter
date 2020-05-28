@@ -1205,18 +1205,7 @@ abstract class ResidentRunner {
   }
 
   @mustCallSuper
-  Future<void> preExit() async {
-    // If _dillOutputPath is null, we created a temporary directory for the dill.
-    if (_dillOutputPath == null && artifactDirectory.existsSync()) {
-      final File outputDill = globals.fs.file(dillOutputPath);
-      if (outputDill.existsSync()) {
-        outputDill.copySync(getDefaultCachedKernelPath(
-          trackWidgetCreation: trackWidgetCreation,
-        ));
-      }
-      artifactDirectory.deleteSync(recursive: true);
-    }
-  }
+  Future<void> preExit() async { }
 
   Future<void> exitApp() async {
     final List<Future<void>> futures = <Future<void>>[

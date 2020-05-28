@@ -63,7 +63,6 @@ class DeviceReloadReport {
   List<vm_service.ReloadReport> reports; // List has one report per Flutter view.
 }
 
-// TODO(mklim): Test this, flutter/flutter#23031.
 class HotRunner extends ResidentRunner {
   HotRunner(
     List<FlutterDevice> devices, {
@@ -387,6 +386,16 @@ class HotRunner extends ResidentRunner {
       final List<bool> results = await Future.wait(startupTasks);
       if (!results.every((bool passed) => passed)) {
         return 1;
+      }
+      globals.logger.printTrace('Caching compiled dill');
+
+      final File outputDill = globals.fs.file(dillOutputPath);
+      if (outputDill.existsSync()) {
+        final String copyPath = getDefaultCachedKernelPath(
+          trackWidgetCreation: trackWidgetCreation,
+        );
+        globals.fs.file(copyPath).parent.createSync(recursive: true);
+        outputDill.copySync(copyPath);
       }
     } on Exception catch (err) {
       globals.printError(err.toString());
