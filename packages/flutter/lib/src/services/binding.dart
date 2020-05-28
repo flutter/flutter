@@ -102,7 +102,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     final Completer<String> rawLicenses = Completer<String>();
     scheduleTask(() async {
       // TODO(jonahwilliams): temporary catch to allow migrating LICENSE to NOTICES.
-      // Once both the tool and google3 use notices this can be removed.
+      // Once both the tool and google3 use notices this can be removed after PR:
+      // https://github.com/flutter/flutter/pull/57871
       try {
         rawLicenses.complete(await rootBundle.loadString('NOTICES', cache: false));
       } on FlutterError {
