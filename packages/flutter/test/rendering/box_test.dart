@@ -1035,7 +1035,7 @@ void main() {
 
     expect(errorDetails, isNotNull);
 
-    // Check the ErrorDetails without the stack trace
+    // Check the ErrorDetails without the stack trace.
     final List<String> lines =  errorDetails.toString().split('\n');
     expect(
       lines.take(5).join('\n'),
