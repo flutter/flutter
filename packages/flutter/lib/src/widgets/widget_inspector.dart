@@ -944,7 +944,7 @@ mixin WidgetInspectorService {
   }
 
   bool isStructuredErrorsEnabled() {
-    return const bool.fromEnvironment('structuredErrors');
+    return const bool.fromEnvironment('flutter.inspector.structuredErrors');
   }
 
   /// Called to register service extensions.
