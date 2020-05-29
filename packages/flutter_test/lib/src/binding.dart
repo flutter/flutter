@@ -540,6 +540,20 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _teardowns.add(callback);
   }
 
+  /// Executes all setup functions registered via [addSetup].
+  Future<void> runTestSetups() async {
+    while (_setups.isNotEmpty) {
+      await _setups.removeAt(0)();
+    }
+  }
+
+  /// Executes all teardown functions registered via [addTeardown].
+  Future<void> runTestTeardowns() async {
+    while (_teardowns.isNotEmpty) {
+      await _teardowns.removeLast()();
+    }
+  }
+
   /// Runs `testBody` with the configuration specified in the binding.
   ///
   /// Returns a future which completes when the test has run.
@@ -731,14 +745,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     final TestExceptionReporter reportTestExceptionBeforeTest = reportTestException;
     final ErrorWidgetBuilder errorWidgetBuilderBeforeTest = ErrorWidget.builder;
 
-    // run the test including the setup and teardown code that was requested
-    while (_setups.isNotEmpty) {
-      await _setups.removeAt(0)();
-    }
+    // run the test
     await testBody();
-    while (_teardowns.isNotEmpty) {
-      await _teardowns.removeLast()();
-    }
     asyncBarrier(); // drains the microtasks in `flutter test` mode (when using AutomatedTestWidgetsFlutterBinding)
 
     if (_pendingExceptionDetails == null) {

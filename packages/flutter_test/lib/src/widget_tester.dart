@@ -181,7 +181,9 @@ void testWidgets(
             Object memento;
             try {
               memento = await variant.setUp(value);
+              await binding.runTestSetups();
               await callback(tester);
+              await binding.runTestTeardowns();
             } finally {
               await variant.tearDown(value, memento);
             }
