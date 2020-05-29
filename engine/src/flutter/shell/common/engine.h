@@ -364,6 +364,11 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   [[nodiscard]] bool Restart(RunConfiguration configuration);
 
   //----------------------------------------------------------------------------
+  /// @brief      Setup default font manager according to specific platform.
+  ///
+  void SetupDefaultFontManager();
+
+  //----------------------------------------------------------------------------
   /// @brief      Updates the asset manager referenced by the root isolate of a
   ///             Flutter application. This happens implicitly in the call to
   ///             `Engine::Run` and `Engine::Restart` as the asset manager is
