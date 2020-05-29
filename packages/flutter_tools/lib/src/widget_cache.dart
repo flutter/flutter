@@ -183,7 +183,7 @@ class WidgetBuildCollector extends Listener {
 
   @override
   void handleClassExtends(Token extendsKeyword) {
-    if (extendsKeyword.next.lexeme == 'StatelessWidget') {
+    if (extendsKeyword != null && extendsKeyword?.next?.lexeme == 'StatelessWidget') {
       currentDeclaration.isStatelessWidget = true;
     }
   }

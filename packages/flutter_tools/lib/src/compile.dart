@@ -631,7 +631,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
     String widgetName;
     if (request.invalidatedFiles.length == 1) {
-      widgetName = widgetCache.validate(request.invalidatedFiles.single);
+      widgetName = widgetCache?.validate(request.invalidatedFiles.single);
     }
 
     return _stdoutHandler.compilerOutput.future.then((CompilerOutput compilerOutput) {

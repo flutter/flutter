@@ -121,7 +121,9 @@ class FlutterDevice {
         experimentalFlags: experimentalFlags,
         dartDefines: buildInfo.dartDefines,
         packagesPath: globalPackagesPath,
-        widgetCache: WidgetCache(fileSystem: globals.fs),
+        widgetCache: featureFlags.isSingleWidgetReloadEnabled
+          ? WidgetCache(fileSystem: globals.fs)
+          : null,
       );
     }
 

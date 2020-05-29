@@ -725,7 +725,11 @@ class TestFeatureFlags implements FeatureFlags {
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
     this.isAndroidEmbeddingV2Enabled = false,
+    this.isSingleWidgetReloadEnabled = false,
 });
+
+  @override
+  final bool isSingleWidgetReloadEnabled;
 
   @override
   final bool isLinuxEnabled;

@@ -424,12 +424,13 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
             if (element == null) {
               return;
             }
-            if (element.widget?.runtimeType?.toString()?.startsWith(className) ?? false) {
+            if (element.widget?.runtimeType?.toString() == className) {
               element.markNeedsBuild();
             }
             element.visitChildElements(markElementsDirty);
           }
           markElementsDirty(renderViewElement);
+          await endOfFrame;
           return <String, String>{'Success': 'true'};
         },
       );

@@ -37,6 +37,9 @@ class FeatureFlags {
   /// Whether the Android embedding V2 is enabled.
   bool get isAndroidEmbeddingV2Enabled => isEnabled(flutterAndroidEmbeddingV2Feature);
 
+  /// Whether the single widget reload optimization is enabled.
+  bool get isSingleWidgetReloadEnabled => isEnabled(singleWidgetReload);
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -69,6 +72,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
   flutterAndroidEmbeddingV2Feature,
+  singleWidgetReload,
 ];
 
 /// The [Feature] for flutter web.
@@ -148,6 +152,15 @@ const Feature flutterAndroidEmbeddingV2Feature = Feature(
     available: true,
     enabledByDefault: true,
   ),
+);
+
+const Feature singleWidgetReload = Feature(
+  name: 'Hot reload optimization for changes to class body of a single widget',
+  configSetting: 'single-widget-reload-optimization',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  )
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.
