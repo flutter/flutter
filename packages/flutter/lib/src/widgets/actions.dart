@@ -985,7 +985,6 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
 
   bool _hovering = false;
   void _handleMouseEnter(PointerEnterEvent event) {
-    assert(widget.onShowHoverHighlight != null);
     if (!_hovering) {
       _mayTriggerCallback(task: () {
         _hovering = true;
@@ -994,7 +993,6 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 
   void _handleMouseExit(PointerExitEvent event) {
-    assert(widget.onShowHoverHighlight != null);
     if (_hovering) {
       _mayTriggerCallback(task: () {
         _hovering = false;
