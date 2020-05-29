@@ -5,7 +5,6 @@
 assert(is_ios)
 
 import("//build/config/ios/ios_sdk.gni")
-import("//flutter/build/darwin/ios_app.gni")
 import("//flutter/common/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_shared.gni")
@@ -328,29 +327,6 @@ shared_library("copy_and_verify_framework_headers") {
   ]
   deps = [
     ":copy_framework_headers",
-  ]
-}
-
-test_fixtures("flutter_tests_fixtures") {
-  fixtures = []
-}
-
-# Note: This currently isn't used, it might be removed.
-ios_app("FlutterTests") {
-  testonly = true
-
-  info_plist = "FlutterTestsInfo.plist"
-
-  sources = [
-    "flutter_unittests.mm",
-  ]
-
-  libs = [ "Foundation.framework" ]
-
-  deps = [
-    ":flutter_tests_fixtures",
-    "//flutter/runtime:libdart",
-    "//flutter/testing",
   ]
 }
 
