@@ -99,7 +99,7 @@ void main() {
         when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
           .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '2']));
 
-        expect(await xcdevice.getAvailableTetheredIOSDevices(), isEmpty);
+        expect(await xcdevice.getAvailableIOSDevices(), isEmpty);
       });
 
       testWithoutContext('diagnostics xcdevice fails', () async {
@@ -359,7 +359,7 @@ void main() {
         testWithoutContext('Xcode not installed', () async {
           when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
 
-          expect(await xcdevice.getAvailableTetheredIOSDevices(), isEmpty);
+          expect(await xcdevice.getAvailableIOSDevices(), isEmpty);
         });
 
         testUsingContext('returns devices', () async {
@@ -466,7 +466,7 @@ void main() {
             command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
             stdout: devicesOutput,
           ));
-          final List<IOSDevice> devices = await xcdevice.getAvailableTetheredIOSDevices();
+          final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
           expect(devices, hasLength(3));
           expect(devices[0].id, 'd83d5bc53967baa0ee18626ba87b6254b2ab5418');
           expect(devices[0].name, 'An iPhone (Space Gray)');
@@ -496,7 +496,7 @@ void main() {
             command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '20'],
             stdout: '[]',
           ));
-          await xcdevice.getAvailableTetheredIOSDevices(timeout: const Duration(seconds: 20));
+          await xcdevice.getAvailableIOSDevices(timeout: const Duration(seconds: 20));
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         });
 
@@ -535,7 +535,7 @@ void main() {
             command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
             stdout: devicesOutput,
           ));
-          final List<IOSDevice> devices = await xcdevice.getAvailableTetheredIOSDevices();
+          final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
           expect(devices, hasLength(1));
           expect(devices[0].id, '43ad2fda7991b34fe1acbda82f9e2fd3d6ddc9f7');
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
@@ -583,7 +583,7 @@ void main() {
             command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
             stdout: devicesOutput,
           ));
-          final List<IOSDevice> devices = await xcdevice.getAvailableTetheredIOSDevices();
+          final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
           expect(devices[0].cpuArchitecture, DarwinArch.armv7);
           expect(devices[1].cpuArchitecture, DarwinArch.arm64);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
@@ -634,7 +634,7 @@ void main() {
             stdout: devicesOutput,
           ));
 
-          await xcdevice.getAvailableTetheredIOSDevices();
+          await xcdevice.getAvailableIOSDevices();
           final List<String> errors = await xcdevice.getDiagnostics();
           expect(errors, hasLength(1));
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);

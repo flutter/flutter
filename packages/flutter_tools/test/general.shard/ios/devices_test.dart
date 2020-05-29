@@ -72,7 +72,8 @@ void main() {
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         sdkVersion: '13.3',
-        cpuArchitecture: DarwinArch.arm64
+        cpuArchitecture: DarwinArch.arm64,
+        interfaceType: IOSDeviceInterface.usb,
       );
     });
 
@@ -87,7 +88,8 @@ void main() {
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
-        sdkVersion: '1.0.0'
+        sdkVersion: '1.0.0',
+        interfaceType: IOSDeviceInterface.usb,
       ).majorSdkVersion, 1);
       expect(IOSDevice(
         'device-123',
@@ -99,7 +101,8 @@ void main() {
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
-        sdkVersion: '13.1.1'
+        sdkVersion: '13.1.1',
+        interfaceType: IOSDeviceInterface.usb,
       ).majorSdkVersion, 13);
       expect(IOSDevice(
         'device-123',
@@ -111,7 +114,8 @@ void main() {
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
-        sdkVersion: '10'
+        sdkVersion: '10',
+        interfaceType: IOSDeviceInterface.usb,
       ).majorSdkVersion, 10);
       expect(IOSDevice(
         'device-123',
@@ -123,7 +127,8 @@ void main() {
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
-        sdkVersion: '0'
+        sdkVersion: '0',
+        interfaceType: IOSDeviceInterface.usb,
       ).majorSdkVersion, 0);
       expect(IOSDevice(
         'device-123',
@@ -135,7 +140,8 @@ void main() {
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
-        sdkVersion: 'bogus'
+        sdkVersion: 'bogus',
+        interfaceType: IOSDeviceInterface.usb,
       ).majorSdkVersion, 0);
     });
 
@@ -154,6 +160,7 @@ void main() {
               name: 'iPhone 1',
               sdkVersion: '13.3',
               cpuArchitecture: DarwinArch.arm64,
+              interfaceType: IOSDeviceInterface.usb,
             );
           },
           throwsAssertionError,
@@ -237,6 +244,7 @@ void main() {
           name: 'iPhone 1',
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
+          interfaceType: IOSDeviceInterface.usb,
         );
         logReader1 = createLogReader(device, appPackage1, mockProcess1);
         logReader2 = createLogReader(device, appPackage2, mockProcess2);
@@ -321,8 +329,9 @@ void main() {
         logger: logger,
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
+        interfaceType: IOSDeviceInterface.usb,
       );
-      when(mockXcdevice.getAvailableTetheredIOSDevices())
+      when(mockXcdevice.getAvailableIOSDevices())
           .thenAnswer((Invocation invocation) => Future<List<IOSDevice>>.value(<IOSDevice>[device]));
 
       final List<Device> devices = await iosDevices.pollingGetDevices();
