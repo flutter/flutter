@@ -4,7 +4,7 @@
 
 import 'dart:developer';
 import 'dart:io' show Platform;
-import 'dart:ui' as ui show Scene, SceneBuilder, Window;
+import 'dart:ui' as ui show Scene, SceneBuilder, SingletonFlutterWindow;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -57,7 +57,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   RenderView({
     RenderBox child,
     @required ViewConfiguration configuration,
-    @required ui.Window window,
+    @required ui.SingletonFlutterWindow window,
   }) : assert(configuration != null),
        _configuration = configuration,
        _window = window {
@@ -85,7 +85,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
-  final ui.Window _window;
+  final ui.SingletonFlutterWindow _window;
 
   /// Whether Flutter should automatically compute the desired system UI.
   ///

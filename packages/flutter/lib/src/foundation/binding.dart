@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' as ui show saveCompilationTrace, Window, window, PlatformDispatcher;
+import 'dart:ui' as ui show saveCompilationTrace, SingletonFlutterWindow, window, PlatformDispatcher;
 // Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
@@ -73,19 +73,19 @@ abstract class BindingBase {
   ///
   /// A number of additional bindings are defined as extensions of [BindingBase],
   /// e.g., [ServicesBinding], [RendererBinding], and [WidgetsBinding]. Each of
-  /// these bindings define behaviors that interact with a [ui.Window], e.g.,
-  /// [ServicesBinding] registers a [ui.Window.onPlatformMessage] handler, and
-  /// [RendererBinding] registers [ui.Window.onMetricsChanged],
-  /// [ui.Window.onTextScaleFactorChanged], [ui.Window.onSemanticsEnabledChanged],
-  /// and [ui.Window.onSemanticsAction] handlers.
+  /// these bindings define behaviors that interact with a [ui.FlutterWindow], e.g.,
+  /// [ServicesBinding] registers a [ui.FlutterWindow.onPlatformMessage] handler, and
+  /// [RendererBinding] registers [ui.FlutterWindow.onMetricsChanged],
+  /// [ui.FlutterWindow.onTextScaleFactorChanged], [ui.FlutterWindow.onSemanticsEnabledChanged],
+  /// and [ui.FlutterWindow.onSemanticsAction] handlers.
   ///
-  /// Each of these other bindings could individually access a [Window] statically,
+  /// Each of these other bindings could individually access a [FlutterWindow] statically,
   /// but that would preclude the ability to test these behaviors with a fake
   /// window for verification purposes.  Therefore, [BindingBase] exposes this
-  /// [Window] for use by other bindings.  A subclass of [BindingBase], such as
+  /// [FlutterWindow] for use by other bindings.  A subclass of [BindingBase], such as
   /// [TestWidgetsFlutterBinding], can override this accessor to return a
-  /// different [Window] implementation, such as a [TestWindow].
-  ui.Window get window => ui.window;
+  /// different [FlutterWindow] implementation, such as a [TestWindow].
+  ui.SingletonFlutterWindow get window => ui.window;
 
   /// The platform dispatcher to which this binding is bound.
   ///

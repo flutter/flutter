@@ -43,7 +43,7 @@ Future<void> main() async {
   await SchedulerBinding.instance.endOfFrame;
 
   // We are waiting for the GPU to rasterize a frame here. This makes this flaky,
-  // we can rely on a more deterministic such as `Window.onReportTimings` once
+  // we can rely on a more deterministic such as `FlutterWindow.onReportTimings` once
   // https://github.com/flutter/flutter/issues/26154 is addressed.
   await Future<void>.delayed(const Duration(milliseconds: 50));
   debugPrint('==== MEMORY BENCHMARK ==== READY ====');

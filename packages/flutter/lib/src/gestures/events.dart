@@ -194,7 +194,7 @@ bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == 
 ///
 /// See also:
 ///
-///  * [Window.devicePixelRatio], which defines the device's current resolution.
+///  * [FlutterWindow.devicePixelRatio], which defines the device's current resolution.
 @immutable
 abstract class PointerEvent with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide

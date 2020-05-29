@@ -44,8 +44,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       ..onSemanticsAction = _handleSemanticsAction
       ..onViewCreated = handleViewCreated
       ..onViewDisposed = handleViewDisposed
-      ..onScreenAdded = handleScreenAdded
-      ..onScreenRemoved = handleScreenRemoved
       ..onMetricsChanged = handleMetricsChanged;
 
     initRenderView();
@@ -185,12 +183,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @protected
   void handleViewDisposed(ui.FlutterView view) { }
 
-  @protected
-  void handleScreenAdded(ui.Screen screen) { }
-
-  @protected
-  void handleScreenRemoved(ui.Screen screen) { }
-
   /// Called when the system metrics change.
   ///
   /// See [ui.PlatformDispatcher.onMetricsChanged].
@@ -203,7 +195,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   /// Called when the platform text scale factor changes.
   ///
-  /// See [Window.onTextScaleFactorChanged].
+  /// See [FlutterWindow.onTextScaleFactorChanged].
   @protected
   void handleTextScaleFactorChanged() { }
 
@@ -215,7 +207,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// changes.
   ///
   /// {@tool snippet}
-  /// Querying [Window.platformBrightness].
+  /// Querying [FlutterWindow.platformBrightness].
   ///
   /// ```dart
   /// final Brightness brightness = WidgetsBinding.instance.window.platformBrightness;
@@ -239,7 +231,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// ```
   /// {@end-tool}
   ///
-  /// See [Window.onPlatformBrightnessChanged].
+  /// See [FlutterWindow.onPlatformBrightnessChanged].
   @protected
   void handlePlatformBrightnessChanged() { }
 
@@ -254,8 +246,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// this to force the display into 800x600 when a test is run on the device
   /// using `flutter run`.
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = ui.PlatformDispatcher.instance.views.isEmpty ? 1.0 : window.devicePixelRatio;
-    final Size physicalSize = ui.PlatformDispatcher.instance.views.isEmpty ? Size.zero : window.physicalSize;
+    final double devicePixelRatio = platformDispatcher.views.isEmpty ? 1.0 : window.devicePixelRatio;
+    final Size physicalSize = platformDispatcher.views.isEmpty ? Size.zero : window.physicalSize;
     return ViewConfiguration(
       size: physicalSize / devicePixelRatio,
       devicePixelRatio: devicePixelRatio,
@@ -374,7 +366,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// Each frame consists of the following phases:
   ///
   /// 1. The animation phase: The [handleBeginFrame] method, which is registered
-  /// with [Window.onBeginFrame], invokes all the transient frame callbacks
+  /// with [FlutterWindow.onBeginFrame], invokes all the transient frame callbacks
   /// registered with [scheduleFrameCallback], in registration order. This
   /// includes all the [Ticker] instances that are driving [AnimationController]
   /// objects, which means all of the active [Animation] objects tick at this
@@ -386,7 +378,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// completed this frame.
   ///
   /// After [handleBeginFrame], [handleDrawFrame], which is registered with
-  /// [Window.onDrawFrame], is called, which invokes all the persistent frame
+  /// [FlutterWindow.onDrawFrame], is called, which invokes all the persistent frame
   /// callbacks, of which the most notable is this method, [drawFrame], which
   /// proceeds as follows:
   ///

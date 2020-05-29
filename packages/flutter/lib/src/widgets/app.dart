@@ -401,7 +401,7 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.initialRoute}
   /// The name of the first route to show, if a [Navigator] is built.
   ///
-  /// Defaults to [Window.initialRouteName], which may be overridden by the code
+  /// Defaults to [FlutterWindow.initialRouteName], which may be overridden by the code
   /// that launched the application.
   ///
   /// If the route name starts with a slash and has multiple slashes in it, then

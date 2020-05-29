@@ -85,7 +85,7 @@ class MediaQueryData {
   /// Creates data for a media query with explicit values.
   ///
   /// Consider using [MediaQueryData.fromWindow] to create data based on a
-  /// [Window].
+  /// [FlutterWindow].
   const MediaQueryData({
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
@@ -125,8 +125,8 @@ class MediaQueryData {
   /// If you use this, you should ensure that you also register for
   /// notifications so that you can update your [MediaQueryData] when the
   /// window's metrics change. For example, see
-  /// [WidgetsBindingObserver.didChangeMetrics] or [Window.onMetricsChanged].
-  MediaQueryData.fromWindow(ui.Window window)
+  /// [WidgetsBindingObserver.didChangeMetrics] or [FlutterWindow.onMetricsChanged].
+  MediaQueryData.fromWindow(ui.SingletonFlutterWindow window)
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
       textScaleFactor = window.textScaleFactor,
@@ -136,12 +136,12 @@ class MediaQueryData {
       viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
       systemGestureInsets = EdgeInsets.fromWindowPadding(window.systemGestureInsets, window.devicePixelRatio),
       physicalDepth = window.physicalDepth,
-      accessibleNavigation = platformDispatcher.accessibilityFeatures.accessibleNavigation,
-      invertColors = platformDispatcher.accessibilityFeatures.invertColors,
-      disableAnimations = platformDispatcher.accessibilityFeatures.disableAnimations,
-      boldText = platformDispatcher.accessibilityFeatures.boldText,
-      highContrast = platformDispatcher.accessibilityFeatures.highContrast,
-      alwaysUse24HourFormat = platformDispatcher.alwaysUse24HourFormat,
+      accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
+      invertColors = window.accessibilityFeatures.invertColors,
+      disableAnimations = window.accessibilityFeatures.disableAnimations,
+      boldText = window.accessibilityFeatures.boldText,
+      highContrast = window.accessibilityFeatures.highContrast,
+      alwaysUse24HourFormat = window.alwaysUse24HourFormat,
       navigationMode = NavigationMode.traditional;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
@@ -289,7 +289,7 @@ class MediaQueryData {
   /// {@end-tool}
   final EdgeInsets systemGestureInsets;
 
-  /// The physical depth is the maximum elevation that the Window allows.
+  /// The physical depth is the maximum elevation that the FlutterWindow allows.
   ///
   /// Physical layers drawn at or above this elevation will have their elevation
   /// clamped to this value. This can happen if the physical layer itself has
@@ -323,7 +323,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///  * [FlutterWindow.AccessibilityFeatures], where the setting originates.
   final bool accessibleNavigation;
 
   /// Whether the device is inverting the colors of the platform.
@@ -332,7 +332,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///  * [FlutterWindow.AccessibilityFeatures], where the setting originates.
   final bool invertColors;
 
   /// Whether the user requested a high contrast between foreground and background
@@ -347,7 +347,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///  * [FlutterWindow.AccessibilityFeatures], where the setting originates.
   final bool disableAnimations;
 
   /// Whether the platform is requesting that text be drawn with a bold font
@@ -355,7 +355,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///  * [FlutterWindow.AccessibilityFeatures], where the setting originates.
   final bool boldText;
 
   /// Describes the navigation mode requested by the platform.

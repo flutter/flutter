@@ -74,22 +74,6 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     _platformDispatcher.onPlatformConfigurationChanged = callback;
   }
 
-  /// Called when a screen is added to the device.
-  @override
-  ScreenAddedCallback get onScreenAdded => _platformDispatcher.onScreenAdded;
-  @override
-  set onScreenAdded(ScreenAddedCallback callback) {
-    _platformDispatcher.onScreenAdded = callback;
-  }
-
-  /// Called when a screen is removed from the device.
-  @override
-  ScreenRemovedCallback get onScreenRemoved => _platformDispatcher.onScreenRemoved;
-  @override
-  set onScreenRemoved(ScreenRemovedCallback callback) {
-    _platformDispatcher.onScreenRemoved = callback;
-  }
-
   /// Is called when [openWindow] is called.
   ///
   /// Sends the opaque ID of the newly opened window.

@@ -483,7 +483,7 @@ class XCDevice {
 
       final IOSDeviceInterface interface = _interfaceType(deviceProperties);
 
-      // Only support USB devices, skip "network" interface (Xcode > Window > Devices and Simulators > Connect via network).
+      // Only support USB devices, skip "network" interface (Xcode > FlutterWindow > Devices and Simulators > Connect via network).
       // TODO(jmagman): Remove this check once wirelessly detected devices can be observed and attached, https://github.com/flutter/flutter/issues/15072.
       if (interface != IOSDeviceInterface.usb) {
         continue;

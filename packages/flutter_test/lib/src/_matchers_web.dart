@@ -90,7 +90,7 @@ RenderObject _findRepaintBoundary(Element element) {
   return renderObject;
 }
 
-void _renderElement(ui.Window window, RenderObject renderObject) {
+void _renderElement(ui.FlutterWindow window, RenderObject renderObject) {
   final Layer layer = renderObject.debugLayer;
   final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
   if (layer is OffsetLayer) {

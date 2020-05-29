@@ -89,7 +89,7 @@ class AnnotationResult<T> {
 /// To composite the tree, create a [SceneBuilder] object, pass it to the
 /// root [Layer] object's [addToScene] method, and then call
 /// [SceneBuilder.build] to obtain a [Scene]. A [Scene] can then be painted
-/// using [Window.render].
+/// using [FlutterWindow.render].
 ///
 /// See also:
 ///
