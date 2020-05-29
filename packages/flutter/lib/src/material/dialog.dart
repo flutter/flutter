@@ -261,13 +261,9 @@ class AlertDialog extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.shape,
     this.scrollable = false,
-    this.adjustForTextScale = true, // TODO(clocksmith): For demo only, remove!
   }) : assert(contentPadding != null),
        assert(clipBehavior != null),
        super(key: key);
-
-  /// TODO(clocksmith): For demo only, remove!
-  final bool adjustForTextScale;
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -478,11 +474,8 @@ class AlertDialog extends StatelessWidget {
       }
     }
 
-    final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    final double clampedTextScaleFactor = textScaleFactor.clamp(1.0, 2.0).toDouble();
+    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
     final TextDirection textDirection = Directionality.of(context);
-    // The padding scale factor will produce a padding between 8 and 24.
-    final double paddingScaleFactor = adjustForTextScale ? lerpDouble(1.0, 1.0 / 3.0, clampedTextScaleFactor - 1.0) : 1.0;
 
     Widget titleWidget;
     Widget contentWidget;
@@ -847,6 +840,42 @@ class SimpleDialog extends StatelessWidget {
       }
     }
 
+    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
+    final TextDirection textDirection = Directionality.of(context);
+
+    Widget titleWidget;
+    if (title != null) {
+      final EdgeInsets defaultTitlePadding = titlePadding.resolve(textDirection);
+      titleWidget = Padding(
+        padding: EdgeInsets.only(
+          left: defaultTitlePadding.left * paddingScaleFactor,
+          right: defaultTitlePadding.right * paddingScaleFactor,
+          top: defaultTitlePadding.top * paddingScaleFactor,
+          bottom: children == null ? defaultTitlePadding.bottom * paddingScaleFactor : defaultTitlePadding.bottom,
+        ),
+        child: DefaultTextStyle(
+          style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6,
+          child: Semantics(namesRoute: true, child: title),
+        ),
+      );
+    }
+
+    Widget contentWidget;
+    if (children != null) {
+      final EdgeInsets defaultContentPadding = contentPadding.resolve(textDirection);
+      contentWidget = Flexible(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: defaultContentPadding.left * paddingScaleFactor,
+            right: defaultContentPadding.right * paddingScaleFactor,
+            top: title == null ? defaultContentPadding.top * paddingScaleFactor : defaultContentPadding.top,
+            bottom: defaultContentPadding.bottom * paddingScaleFactor,
+          ),
+          child: ListBody(children: children),
+        ),
+      );
+    }
+
     Widget dialogChild = IntrinsicWidth(
       stepWidth: 56.0,
       child: ConstrainedBox(
@@ -856,20 +885,9 @@ class SimpleDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             if (title != null)
-              Padding(
-                padding: titlePadding,
-                child: DefaultTextStyle(
-                  style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6,
-                  child: Semantics(namesRoute: true, child: title),
-                ),
-              ),
+              titleWidget,
             if (children != null)
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: contentPadding,
-                  child: ListBody(children: children),
-                ),
-              ),
+              contentWidget,
           ],
         ),
       ),
@@ -1000,4 +1018,11 @@ Future<T> showDialog<T>({
     useRootNavigator: useRootNavigator,
     routeSettings: routeSettings,
   );
+}
+
+double _paddingScaleFactor(double textScaleFactor) {
+  final double clampedTextScaleFactor = textScaleFactor.clamp(1.0, 2.0).toDouble();
+  // Since the default edge padding is 24, a padding scale factor between
+  // 1/3 and 1 will produce a padding between 8 and 24.
+  return lerpDouble(1.0, 1.0 / 3.0, clampedTextScaleFactor - 1.0);
 }
