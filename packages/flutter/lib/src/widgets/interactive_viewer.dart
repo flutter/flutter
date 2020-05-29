@@ -26,7 +26,6 @@ import 'ticker_provider.dart';
 /// This example shows a simple Container that can be panned and zoomed.
 ///
 /// ```dart
-/// @override
 /// Widget build(BuildContext context) {
 ///   return Center(
 ///     child: InteractiveViewer(
@@ -122,11 +121,10 @@ class InteractiveViewer extends StatefulWidget {
   /// that are overflowing can be panned into view.
   ///
   /// ```dart
-  ///   static const int _rowCount = 20;
-  ///   static const int _columnCount = 3;
-  ///
-  ///   @override
   ///   Widget build(BuildContext context) {
+  ///     const int _rowCount = 20;
+  ///     const int _columnCount = 3;
+  ///
   ///     return Scaffold(
   ///       appBar: AppBar(
   ///         title: const Text('Pannable Table'),
