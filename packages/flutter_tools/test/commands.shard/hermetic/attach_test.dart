@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -71,6 +72,7 @@ void main() {
 
       FakeDeviceLogReader mockLogReader;
       MockPortForwarder portForwarder;
+      MockDartDevelopmentService mockDds;
       MockAndroidDevice device;
       MockHttpClient httpClient;
 
@@ -78,6 +80,7 @@ void main() {
         mockLogReader = FakeDeviceLogReader();
         portForwarder = MockPortForwarder();
         device = MockAndroidDevice();
+        mockDds = MockDartDevelopmentService();
         when(device.portForwarder)
           .thenReturn(portForwarder);
         when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
@@ -86,7 +89,13 @@ void main() {
           .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
         when(portForwarder.unforward(any))
           .thenAnswer((_) async => null);
-
+        when(device.dds).thenReturn(mockDds);
+        final Uri ipv4Uri = Uri(scheme: 'http', host: InternetAddress.loopbackIPv4.host, port: hostPort);
+        when(mockDds.startDartDevelopmentService(any, any, any, false))
+          .thenAnswer((_) async => Stream<Uri>.value(ipv4Uri).asBroadcastStream());
+        final Uri ipv6Uri = Uri(scheme: 'http', host: InternetAddress.loopbackIPv6.host, port: hostPort);
+        when(mockDds.startDartDevelopmentService(any, any, any, true))
+          .thenAnswer((_) async => Stream<Uri>.value(ipv6Uri).asBroadcastStream());
         final HttpClientRequest httpClientRequest = MockHttpClientRequest();
         httpClient = MockHttpClient();
         when(httpClient.putUrl(any))
@@ -287,6 +296,7 @@ void main() {
       final FakeDeviceLogReader mockLogReader = FakeDeviceLogReader();
       final MockPortForwarder portForwarder = MockPortForwarder();
       final MockAndroidDevice device = MockAndroidDevice();
+      final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
       final MockHotRunner mockHotRunner = MockHotRunner();
       final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
       when(device.portForwarder)
@@ -309,6 +319,13 @@ void main() {
       )).thenReturn(mockHotRunner);
       when(mockHotRunner.exited).thenReturn(false);
       when(mockHotRunner.isWaitingForObservatory).thenReturn(false);
+
+      when(device.dds).thenReturn(mockDds);
+      final Uri ipv4Uri = Uri(scheme: 'http', host: InternetAddress.loopbackIPv4.host, port: hostPort);
+      when(mockDds.startDartDevelopmentService(any, any, any, false))
+        .thenAnswer((_) async =>
+          Stream<Uri>.value(ipv4Uri).asBroadcastStream()
+        );
 
       testDeviceManager.addDevice(device);
       when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
@@ -362,6 +379,7 @@ void main() {
       final MockIOSDevice device = MockIOSDevice();
       final MockHotRunner mockHotRunner = MockHotRunner();
       final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
+      final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
       when(device.portForwarder).thenReturn(portForwarder);
       when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
         .thenAnswer((_) => mockLogReader);
@@ -383,7 +401,21 @@ void main() {
       )).thenReturn(mockHotRunner);
       when(mockHotRunner.exited).thenReturn(false);
       when(mockHotRunner.isWaitingForObservatory).thenReturn(false);
+      when(device.dds).thenReturn(mockDds);
+     final Uri ipv4Uri = Uri(scheme: 'http', host: InternetAddress.loopbackIPv4.host, port: hostPort);
+      when(mockDds.startDartDevelopmentService(any, any, any, any))
+        .thenAnswer((_) async =>
+          Stream<Uri>.value(ipv4Uri).asBroadcastStream()
+        );
 
+      when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
+        .thenAnswer((_) {
+          // Now that the reader is used, start writing messages to it.
+          mockLogReader.addLine('Foo');
+          mockLogReader.addLine(
+              'Observatory listening on http://127.0.0.1:$devicePort');
+          return mockLogReader;
+        });
       testDeviceManager.addDevice(device);
 
       final File foo = globals.fs.file('lib/foo.dart')..createSync();
@@ -411,14 +443,23 @@ void main() {
       const int devicePort = 499;
       const int hostPort = 42;
       MockPortForwarder portForwarder;
+      MockDartDevelopmentService mockDds;
       MockAndroidDevice device;
 
       setUp(() {
         portForwarder = MockPortForwarder();
         device = MockAndroidDevice();
-
+        mockDds = MockDartDevelopmentService();
         when(device.portForwarder)
           .thenReturn(portForwarder);
+        when(device.dds)
+          .thenReturn(mockDds);
+        final Uri ipv4Uri = Uri(scheme: 'http', host: InternetAddress.loopbackIPv4.host, port: hostPort);
+        when(mockDds.startDartDevelopmentService(any, any, any, false))
+          .thenAnswer((_) async => Stream<Uri>.value(ipv4Uri).asBroadcastStream());
+        final Uri ipv6Uri = Uri(scheme: 'http', host: InternetAddress.loopbackIPv6.host, port: hostPort);
+        when(mockDds.startDartDevelopmentService(any, any, any, true))
+          .thenAnswer((_) async => Stream<Uri>.value(ipv6Uri).asBroadcastStream());
         when(portForwarder.forward(devicePort))
           .thenAnswer((_) async => hostPort);
         when(portForwarder.forwardedPorts)
@@ -432,7 +473,7 @@ void main() {
 
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
+          if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
             completer.complete();
@@ -456,7 +497,7 @@ void main() {
 
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] Connecting to service protocol: http://[::1]:42/') {
+          if (message == '[verbose] Connecting to service protocol: http://[::1]:42') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
             completer.complete();
@@ -480,7 +521,7 @@ void main() {
 
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
+          if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
             completer.complete();
@@ -511,7 +552,7 @@ void main() {
 
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] Connecting to service protocol: http://[::1]:42/') {
+          if (message == '[verbose] Connecting to service protocol: http://[::1]:42') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
             completer.complete();
@@ -795,6 +836,7 @@ class TestHotRunnerFactory extends HotRunnerFactory {
   }
 }
 
+class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}

@@ -516,7 +516,7 @@ class FlutterDevice {
       return 2;
     }
     if (result.hasObservatory) {
-      observatoryUris = await DartDevelopmentService.startDartDevelopmentService(
+      observatoryUris = await device.dds.startDartDevelopmentService(
         result.observatoryUri,
         hotRunner.debuggingOptions.hostVmServicePort,
         hotRunner.debuggingOptions.disableServiceAuthCodes,
@@ -591,7 +591,7 @@ class FlutterDevice {
       return 2;
     }
     if (result.hasObservatory) {
-      observatoryUris = await DartDevelopmentService.startDartDevelopmentService(
+      observatoryUris = await device.dds.startDartDevelopmentService(
         result.observatoryUri,
         coldRunner.debuggingOptions.hostVmServicePort,
         coldRunner.debuggingOptions.disableServiceAuthCodes,

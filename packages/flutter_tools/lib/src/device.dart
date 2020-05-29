@@ -13,6 +13,7 @@ import 'android/android_workflow.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'base/context.dart';
+import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/utils.dart';
@@ -468,6 +469,9 @@ abstract class Device {
 
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;
+
+  DartDevelopmentService get dds => _dds ??= DartDevelopmentService();
+  DartDevelopmentService _dds;
 
   /// Clear the device's logs.
   void clearLogs();

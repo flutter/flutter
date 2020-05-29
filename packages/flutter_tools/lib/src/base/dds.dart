@@ -10,9 +10,7 @@ import '../globals.dart' as globals;
 import 'io.dart' as io;
 
 class DartDevelopmentService {
-  DartDevelopmentService._();
-
-  static Future<Stream<Uri>> startDartDevelopmentService(
+  Future<Stream<Uri>> startDartDevelopmentService(
     Uri observatoryUri,
     int hostVmServicePort,
     bool disableServiceAuthCodes,

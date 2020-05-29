@@ -371,12 +371,17 @@ class AttachCommand extends FlutterCommand {
     );
 
     final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo());
-    flutterDevice.observatoryUris = await DartDevelopmentService.startDartDevelopmentService(
-      await observatoryUris.first,
-      debuggingOptions.hostVmServicePort,
-      debuggingOptions.disableServiceAuthCodes,
-      usesIpv6,
-    );
+    try {
+      flutterDevice.observatoryUris =
+        await device.dds.startDartDevelopmentService(
+          await observatoryUris.first,
+          debuggingOptions.hostVmServicePort,
+          debuggingOptions.disableServiceAuthCodes,
+          usesIpv6,
+        );
+    } on StateError {
+      flutterDevice.observatoryUris = const Stream<Uri>.empty().asBroadcastStream();
+    }
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
 
     return getBuildInfo().isDebug

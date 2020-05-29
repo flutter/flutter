@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -12,6 +11,7 @@ import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
+import '../base/dds.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -53,17 +53,20 @@ Future<vm_service.VmService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) 
   return connectToVmService(uri);
 }
 
-Future<DartDevelopmentService> _kDefaultFuchsiaIsolateDiscoveryDDSConnector(
+Future<Uri> _kDefaultFuchsiaIsolateDiscoveryDDSConnector(
+  FuchsiaDevice device,
   Uri remoteVmServiceUri,
   Uri serviceUri,
-  ) {
-  return DartDevelopmentService.startDartDevelopmentService(
+  ) async {
+  final Stream<Uri> dds = await device.dds.startDartDevelopmentService(
     remoteVmServiceUri,
-    serviceUri: serviceUri,
+    serviceUri.port,
     // TODO(bkonyi): enable authentication codes when we can enable
     // them on Fuchsia.
-    enableAuthCodes: false,
+    false,
+    false,
   );
+  return await dds.first;
 }
 
 /// Read the log for a particular device.
@@ -719,7 +722,7 @@ class FuchsiaIsolateDiscoveryProtocol {
   final String _isolateName;
   final Completer<Uri> _foundUri = Completer<Uri>();
   final Future<vm_service.VmService> Function(Uri) _vmServiceConnector;
-  final Future<DartDevelopmentService> Function(Uri, Uri) _ddsConnector;
+  final Future<Uri> Function(FuchsiaDevice, Uri, Uri) _ddsConnector;
 
   // whether to only poll once.
   final bool _pollOnce;
@@ -755,7 +758,7 @@ class FuchsiaIsolateDiscoveryProtocol {
 
   Future<void> _findIsolate() async {
     final List<int> ports = await _device.servicePorts();
-    DartDevelopmentService dds;
+    Uri ddsUri;
     for (final int port in ports) {
       vm_service.VmService service;
       if (_ports.containsKey(port)) {
@@ -766,10 +769,10 @@ class FuchsiaIsolateDiscoveryProtocol {
         final Uri serviceUri = _device.ipv6 ?
           Uri.parse('http://[$_ipv6Loopback]') :
           Uri.parse('http://$_ipv4Loopback');
-        dds = await _ddsConnector(remoteVmServiceUri, serviceUri);
+        ddsUri = await _ddsConnector(_device, remoteVmServiceUri, serviceUri);
 
         try {
-          service = await _vmServiceConnector(dds.uri);
+          service = await _vmServiceConnector(ddsUri);
           _ports[port] = service;
         } on SocketException catch (err) {
           globals.printTrace('Failed to connect to $localPort: $err');
@@ -782,7 +785,7 @@ class FuchsiaIsolateDiscoveryProtocol {
           continue;
         }
         if (flutterView.uiIsolate.name.contains(_isolateName)) {
-          _foundUri.complete(dds.uri);
+          _foundUri.complete(ddsUri);
           _status.stop();
           return;
         }
