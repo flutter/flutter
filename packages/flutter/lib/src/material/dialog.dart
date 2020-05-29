@@ -1023,6 +1023,6 @@ Future<T> showDialog<T>({
 double _paddingScaleFactor(double textScaleFactor) {
   final double clampedTextScaleFactor = textScaleFactor.clamp(1.0, 2.0).toDouble();
   // Since the default edge padding is 24, a padding scale factor between
-  // 1/3 and 1 will produce a padding between 8 and 24.
+  // 1 and 1/3 will produce a padding between 24 and 8.
   return lerpDouble(1.0, 1.0 / 3.0, clampedTextScaleFactor - 1.0);
 }
