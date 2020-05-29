@@ -864,4 +864,19 @@ void main() {
     final RawMaterialButton rawMaterialButton = tester.widget(rawMaterialButtonFinder);
     expect(rawMaterialButton.disabledElevation, equals(disabledElevation));
   });
+
+  testWidgets("MaterialButton's disabledElevation should not be null", (WidgetTester tester) async {
+    expect(() async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MaterialButton(
+            disabledElevation: null,
+            onPressed: null,
+            child: const Text('button'),
+          ),
+        ),
+      );
+    }, throwsAssertionError);
+  });
 }
