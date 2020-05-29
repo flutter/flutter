@@ -68,7 +68,7 @@ class MaterialButton extends StatelessWidget {
     this.focusElevation,
     this.hoverElevation,
     this.highlightElevation,
-    this.disabledElevation,
+    this.disabledElevation = 0.0,
     this.padding,
     this.visualDensity,
     this.shape,
