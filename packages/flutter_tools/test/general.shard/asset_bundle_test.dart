@@ -211,14 +211,14 @@ assets:
       as DevFSStringContent;
     final DevFSStringContent fontManifest = bundle.entries['FontManifest.json']
       as DevFSStringContent;
-    final DevFSStringContent license = bundle.entries['LICENSE']
+    final DevFSStringContent license = bundle.entries['NOTICES']
       as DevFSStringContent;
 
     await bundle.build(manifestPath: 'pubspec.yaml');
 
     expect(assetManifest, bundle.entries['AssetManifest.json']);
     expect(fontManifest, bundle.entries['FontManifest.json']);
-    expect(license, bundle.entries['LICENSE']);
+    expect(license, bundle.entries['NOTICES']);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
