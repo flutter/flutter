@@ -340,7 +340,7 @@ class AotElfProfile extends AotElfBase {
     KernelSnapshot(),
   ];
 
-  final TargetPlatform  targetPlatform;
+  final TargetPlatform targetPlatform;
 }
 
 /// Generate an ELF binary from a dart kernel file in release mode.
@@ -373,7 +373,7 @@ class AotElfRelease extends AotElfBase {
     KernelSnapshot(),
   ];
 
-  final TargetPlatform  targetPlatform;
+  final TargetPlatform targetPlatform;
 }
 
 /// Copies the pre-built flutter aot bundle.

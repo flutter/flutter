@@ -40,6 +40,8 @@ const List<Target> _kDefaultTargets = <Target>[
   ReleaseMacOSBundleFlutterAssets(),
   // Linux targets
   DebugBundleLinuxAssets(),
+  ProfileBundleLinuxAssets(),
+  ReleaseBundleLinuxAssets(),
   // Web targets
   WebServiceWorker(),
   ReleaseAndroidApplication(),

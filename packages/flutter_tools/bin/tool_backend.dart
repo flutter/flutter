@@ -45,10 +45,7 @@ or
   final String flutterExecutable = path.join(
     flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
   final String bundlePlatform = targetPlatform == 'windows-x64' ? 'windows' : 'linux';
-  // TODO(jonahwilliams): currently all Linux builds are debug builds. Remove the
-  // hardcoded mode when profile and release support is added.
-  final String bundleMode = targetPlatform == 'windows-x64' ? buildMode : 'debug';
-  final String target = '${bundleMode}_bundle_${bundlePlatform}_assets';
+  final String target = '${buildMode}_bundle_${bundlePlatform}_assets';
 
   final Process assembleProcess = await Process.start(
     flutterExecutable,
@@ -61,7 +58,7 @@ or
       '--output=build',
       '-dTargetPlatform=$targetPlatform',
       '-dTrackWidgetCreation=$trackWidgetCreation',
-      '-dBuildMode=$bundleMode',
+      '-dBuildMode=$buildMode',
       '-dTargetFile=$flutterTarget',
       '-dTreeShakeIcons="$treeShakeIcons"',
       '-dDartObfuscation=$dartObfuscation',
