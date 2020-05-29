@@ -91,6 +91,15 @@ struct FlutterDesktopWindow {
   bool skip_next_window_refresh = false;
 };
 
+// Custom deleter for FlutterEngineAOTData.
+struct AOTDataDeleter {
+  void operator()(FlutterEngineAOTData aot_data) {
+    FlutterEngineCollectAOTData(aot_data);
+  }
+};
+
+using UniqueAotDataPtr = std::unique_ptr<_FlutterEngineAOTData, AOTDataDeleter>;
+
 // Struct for storing state of a Flutter engine instance.
 struct FlutterDesktopEngineState {
   // The handle to the Flutter engine instance.
@@ -117,6 +126,9 @@ struct FlutterDesktopEngineState {
   // The controller associated with this engine instance, if any.
   // This will always be null for a headless engine.
   FlutterDesktopWindowControllerState* window_controller = nullptr;
+
+  // AOT data for this engine instance, if applicable.
+  UniqueAotDataPtr aot_data = nullptr;
 };
 
 // State associated with the plugin registrar.
@@ -550,6 +562,33 @@ static void GLFWErrorCallback(int error_code, const char* description) {
   std::cerr << "GLFW error " << error_code << ": " << description << std::endl;
 }
 
+// Attempts to load AOT data from the given path, which must be absolute and
+// non-empty. Logs and returns nullptr on failure.
+UniqueAotDataPtr LoadAotData(std::filesystem::path aot_data_path) {
+  if (aot_data_path.empty()) {
+    std::cerr
+        << "Attempted to load AOT data, but no aot_data_path was provided."
+        << std::endl;
+    return nullptr;
+  }
+  if (!std::filesystem::exists(aot_data_path)) {
+    std::cerr << "Can't load AOT data from " << aot_data_path.u8string()
+              << "; no such file." << std::endl;
+    return nullptr;
+  }
+  std::string path_string = aot_data_path.u8string();
+  FlutterEngineAOTDataSource source = {};
+  source.type = kFlutterEngineAOTDataSourceTypeElfPath;
+  source.elf_path = path_string.c_str();
+  FlutterEngineAOTData data = nullptr;
+  auto result = FlutterEngineCreateAOTData(&source, &data);
+  if (result != kSuccess) {
+    std::cerr << "Failed to load AOT data from: " << path_string << std::endl;
+    return nullptr;
+  }
+  return UniqueAotDataPtr(data);
+}
+
 // Starts an instance of the Flutter Engine.
 //
 // Configures the engine according to |engine_propreties| and using |event_loop|
@@ -574,7 +613,10 @@ static bool RunFlutterEngine(
       std::filesystem::u8path(engine_properties.assets_path);
   std::filesystem::path icu_path =
       std::filesystem::u8path(engine_properties.icu_data_path);
-  if (assets_path.is_relative() || icu_path.is_relative()) {
+  std::filesystem::path aot_library_path =
+      std::filesystem::u8path(engine_properties.aot_library_path);
+  if (assets_path.is_relative() || icu_path.is_relative() ||
+      (!aot_library_path.empty() && aot_library_path.is_relative())) {
     // Treat relative paths as relative to the directory of this executable.
     std::filesystem::path executable_location =
         flutter::GetExecutableDirectory();
@@ -585,9 +627,14 @@ static bool RunFlutterEngine(
     }
     assets_path = std::filesystem::path(executable_location) / assets_path;
     icu_path = std::filesystem::path(executable_location) / icu_path;
+    if (!aot_library_path.empty()) {
+      aot_library_path =
+          std::filesystem::path(executable_location) / aot_library_path;
+    }
   }
   std::string assets_path_string = assets_path.u8string();
   std::string icu_path_string = icu_path.u8string();
+  std::string lib_path_string = aot_library_path.u8string();
 
   // Configure a task runner using the event loop.
   engine_state->event_loop = std::move(event_loop);
@@ -618,6 +665,16 @@ static bool RunFlutterEngine(
   args.command_line_argv = &argv[0];
   args.platform_message_callback = EngineOnFlutterPlatformMessage;
   args.custom_task_runners = &task_runners;
+
+  if (FlutterEngineRunsAOTCompiledDartCode()) {
+    engine_state->aot_data = LoadAotData(lib_path_string);
+    if (!engine_state->aot_data) {
+      std::cerr << "Unable to start engine without AOT data." << std::endl;
+      return false;
+    }
+    args.aot_data = engine_state->aot_data.get();
+  }
+
   FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
   auto result = FlutterEngineRun(FLUTTER_ENGINE_VERSION, &config, &args,
                                  engine_state, &engine);

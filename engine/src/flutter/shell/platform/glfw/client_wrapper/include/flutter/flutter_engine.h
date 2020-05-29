@@ -32,7 +32,8 @@ class FlutterEngine : public PluginRegistry {
   // successful.
   bool Start(const std::string& icu_data_path,
              const std::string& assets_path,
-             const std::vector<std::string>& arguments);
+             const std::vector<std::string>& arguments,
+             const std::string& aot_library_path = "");
 
   // Terminates the running engine.
   void ShutDown();

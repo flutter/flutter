@@ -15,7 +15,8 @@ FlutterEngine::~FlutterEngine() {}
 
 bool FlutterEngine::Start(const std::string& icu_data_path,
                           const std::string& assets_path,
-                          const std::vector<std::string>& arguments) {
+                          const std::vector<std::string>& arguments,
+                          const std::string& aot_library_path) {
   if (engine_) {
     std::cerr << "Cannot run an already running engine. Create a new instance "
                  "or call ShutDown first."
@@ -26,6 +27,7 @@ bool FlutterEngine::Start(const std::string& icu_data_path,
   FlutterDesktopEngineProperties c_engine_properties = {};
   c_engine_properties.assets_path = assets_path.c_str();
   c_engine_properties.icu_data_path = icu_data_path.c_str();
+  c_engine_properties.aot_library_path = aot_library_path.c_str();
   std::vector<const char*> engine_switches;
   std::transform(
       arguments.begin(), arguments.end(), std::back_inserter(engine_switches),

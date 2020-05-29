@@ -45,6 +45,10 @@ typedef struct {
   // This can either be an absolute path, or on Windows or Linux, a path
   // relative to the directory containing the executable.
   const char* icu_data_path;
+  // The path to the libapp.so file for the application to be run.
+  // This can either be an absolute path or a path relative to the directory
+  // containing the executable.
+  const char* aot_library_path;
   // The switches to pass to the Flutter engine.
   //
   // See: https://github.com/flutter/engine/blob/master/shell/common/switches.h
