@@ -380,7 +380,7 @@ void main() {
               'xcrun',
               'xcdevice',
               'observe',
-              '--usb',
+              '--both',
             ], stdout: 'Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418\n'
             'Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418',
             stderr: 'Some error',
