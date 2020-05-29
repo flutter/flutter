@@ -432,9 +432,6 @@ void main() {
 
       // Pretend xcdevice crashed.
       await eventStream.close();
-
-      // Give it a tick for the close handlers to run.
-      FakeAsync().flushMicrotasks();
       expect(logger.traceText, contains('xcdevice observe stopped'));
 
       // Confirm a restart still gets streamed events.
