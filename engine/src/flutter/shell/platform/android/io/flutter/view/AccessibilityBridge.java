@@ -435,6 +435,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           touchExplorationStateChangeListener);
     }
     contentResolver.unregisterContentObserver(animationScaleObserver);
+    accessibilityChannel.setAccessibilityMessageHandler(null);
   }
 
   /** Returns true if the Android OS currently has accessibility enabled, false otherwise. */
