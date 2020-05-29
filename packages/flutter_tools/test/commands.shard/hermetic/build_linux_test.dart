@@ -401,25 +401,6 @@ set(BINARY_NAME "fizz_bar")
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
 
-  testUsingContext('Release build prints an under-construction warning', () async {
-    final BuildCommand command = BuildCommand();
-    setUpMockProjectFilesForBuild();
-    processManager = FakeProcessManager.list(<FakeCommand>[
-      cmakeCommand('release'),
-      ninjaCommand('release'),
-    ]);
-
-    await createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--no-pub']
-    );
-    expect(testLogger.statusText, contains('🚧'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Platform: () => linuxPlatform,
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-  });
-
   testUsingContext('hidden when not enabled on Linux host', () {
     expect(BuildLinuxCommand().hidden, true);
   }, overrides: <Type, Generator>{
