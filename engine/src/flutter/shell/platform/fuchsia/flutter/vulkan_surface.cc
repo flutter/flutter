@@ -19,7 +19,24 @@ namespace flutter_runner {
 
 namespace {
 
+// Immutable format is technically limited to R8G8B8A8_SRGB but
+// R8G8B8A8_UNORM works with existing ARM drivers so we allow that
+// until we have a more reliable API for creating external Vulkan
+// images using sysmem. TODO(fxb/52835)
+#if defined(__aarch64__)
+constexpr SkColorType kSkiaColorType = kRGBA_8888_SkColorType;
+constexpr fuchsia::images::PixelFormat kPixelFormat =
+    fuchsia::images::PixelFormat::R8G8B8A8;
+constexpr VkFormat kVulkanFormat = VK_FORMAT_R8G8B8A8_UNORM;
+constexpr VkImageCreateFlags kVulkanImageCreateFlags = 0;
+#else
 constexpr SkColorType kSkiaColorType = kBGRA_8888_SkColorType;
+constexpr fuchsia::images::PixelFormat kPixelFormat =
+    fuchsia::images::PixelFormat::BGRA_8;
+constexpr VkFormat kVulkanFormat = VK_FORMAT_B8G8R8A8_UNORM;
+constexpr VkImageCreateFlags kVulkanImageCreateFlags =
+    VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
+#endif
 
 }  // namespace
 
@@ -44,9 +61,9 @@ bool CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
   out_vulkan_image->vk_image_create_info = {
       .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
       .pNext = &out_vulkan_image->vk_external_image_create_info,
-      .flags = VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT,
+      .flags = kVulkanImageCreateFlags,
       .imageType = VK_IMAGE_TYPE_2D,
-      .format = VK_FORMAT_B8G8R8A8_UNORM,
+      .format = kVulkanFormat,
       .extent = VkExtent3D{static_cast<uint32_t>(size.width()),
                            static_cast<uint32_t>(size.height()), 1},
       .mipLevels = 1,
@@ -335,7 +352,7 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrContext> context,
                                              sk_render_target,          //
                                              kTopLeft_GrSurfaceOrigin,  //
                                              color_type,                //
-                                             nullptr,                   //
+                                             SkColorSpace::MakeSRGB(),  //
                                              &sk_surface_props          //
       );
 
@@ -358,7 +375,7 @@ bool VulkanSurface::PushSessionImageSetupOps(scenic::Session* session) {
   image_info.width = sk_surface_->width();
   image_info.height = sk_surface_->height();
   image_info.stride = 4 * sk_surface_->width();
-  image_info.pixel_format = fuchsia::images::PixelFormat::BGRA_8;
+  image_info.pixel_format = kPixelFormat;
   image_info.color_space = fuchsia::images::ColorSpace::SRGB;
   switch (vulkan_image_.vk_image_create_info.tiling) {
     case VK_IMAGE_TILING_OPTIMAL:
