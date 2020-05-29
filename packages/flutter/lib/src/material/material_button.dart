@@ -87,7 +87,7 @@ class MaterialButton extends StatelessWidget {
        assert(focusElevation == null || focusElevation >= 0.0),
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
-       assert(disabledElevation != null && disabledElevation >= 0.0),
+       assert(disabledElevation == null || disabledElevation >= 0.0),
        super(key: key);
 
   /// The callback that is called when the button is tapped or otherwise activated.
