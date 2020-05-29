@@ -662,9 +662,13 @@ abstract class StatelessWidget extends Widget {
 
   /// Describes the part of the user interface represented by this widget.
   ///
-  /// The framework calls this method when this widget is inserted into the
-  /// tree in a given [BuildContext] and when the dependencies of this widget
-  /// change (e.g., an [InheritedWidget] referenced by this widget changes).
+  /// The framework calls this method when this widget is inserted into the tree
+  /// in a given [BuildContext] and when the dependencies of this widget change
+  /// (e.g., an [InheritedWidget] referenced by this widget changes). However,
+  /// these are not the only place this method gets called. This method can be
+  /// called multiple times during a build cycle in arbitrarily ways, and you
+  /// should keep in mind that this method should not do anything beyond
+  /// building a widget.
   ///
   /// The framework replaces the subtree below this widget with the widget
   /// returned by this method, either by updating the existing subtree or by
@@ -1315,7 +1319,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
 
   /// Describes the part of the user interface represented by this widget.
   ///
-  /// The framework calls this method in a number of different situations:
+  /// The framework calls this method in a number of different situations. For
+  /// example:
   ///
   ///  * After calling [initState].
   ///  * After calling [didUpdateWidget].
@@ -1324,6 +1329,11 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///    [InheritedWidget] referenced by the previous [build] changes).
   ///  * After calling [deactivate] and then reinserting the [State] object into
   ///    the tree at another location.
+  ///
+  /// These are not the only place this method gets called. This method can be
+  /// called multiple times during a build cycle in arbitrarily ways, and you
+  /// should keep in mind that this method should not do anything beyond
+  /// building a widget.
   ///
   /// The framework replaces the subtree below this widget with the widget
   /// returned by this method, either by updating the existing subtree or by
