@@ -28,7 +28,6 @@ void main() {
   });
 
   test('Initializes httpOverrides and testTextInput', () async {
-    expect(HttpOverrides.current, null);
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
     expect(binding.testTextInput.isRegistered, true);
     expect(HttpOverrides.current, isNotNull);
