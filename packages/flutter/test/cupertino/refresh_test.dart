@@ -356,7 +356,7 @@ void main() {
         final FlutterError error = FlutterError('Oops');
         double errorCount = 0;
 
-        runZoned(
+        await runZoned(
           () async {
             refreshCompleter = Completer<void>.sync();
 
