@@ -414,7 +414,8 @@ class XCDevice {
   }
 
   static IOSDeviceInterface _interfaceType(Map<String, dynamic> deviceProperties) {
-    // Interface can be "usb", "network", or not present for simulators.
+    // Interface can be "usb", "network", or "none" for simulators
+    // and unknown future interfaces.
     if (deviceProperties.containsKey('interface')) {
       if ((deviceProperties['interface'] as String).toLowerCase() == 'network') {
         return IOSDeviceInterface.network;
