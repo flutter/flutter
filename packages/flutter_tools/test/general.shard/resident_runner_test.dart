@@ -1227,6 +1227,7 @@ class TestFlutterDevice extends FlutterDevice {
   Stream<Uri> _observatoryUris;
 }
 
+
 class ThrowingForwardingFileSystem extends ForwardingFileSystem {
   ThrowingForwardingFileSystem(FileSystem delegate) : super(delegate);
 
