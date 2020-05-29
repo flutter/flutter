@@ -94,13 +94,15 @@ echo "$(date) START:flutter_runner_tests ----------------------------"
     --packages-directory packages
 echo "$(date) DONE:flutter_runner_tests ----------------------------"
 
-# TODO(https://github.com/flutter/flutter/issues/??): Re-enable
-# FileTest's once they pass on Fuchsia.
+# TODO(https://github.com/flutter/flutter/issues/57709): Re-enable FileTest's
+# once they pass on Fuchsia.
+# TODO(https://github.com/flutter/flutter/issues/58211): Re-enable MessageLoop
+# tests once they pass on Fuchsia.
 echo "$(date) START:fml_tests ---------------------------------------"
 ./fuchsia_ctl -d $device_name test \
     -f fml_tests-0.far  \
     -t fml_tests \
-    -a "--gtest_filter=-FileTest.CanTruncateAndWrite:FileTest.CreateDirectoryStructure" \
+    -a "--gtest_filter=-MessageLoop.TimeSensistiveTest_*:FileTest.CanTruncateAndWrite:FileTest.CreateDirectoryStructure" \
     --identity-file $pkey \
     --timeout-seconds $test_timeout_seconds \
     --packages-directory packages
