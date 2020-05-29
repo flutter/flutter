@@ -4761,6 +4761,48 @@ void main() {
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
+
+  testWidgets('EditableText can set and update clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(devicePixelRatio: 1.0),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: FocusScope(
+          node: focusScopeNode,
+          autofocus: true,
+          child: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    ));
+    final RenderEditable renderObject = tester.allRenderObjects.whereType<RenderEditable>().first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(devicePixelRatio: 1.0),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: FocusScope(
+          node: focusScopeNode,
+          autofocus: true,
+          child: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            clipBehavior: Clip.antiAlias,
+          ),
+        ),
+      ),
+    ));
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
 }
 
 class MockTextFormatter extends TextInputFormatter {

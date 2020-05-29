@@ -61,6 +61,33 @@ void main() {
     expect(stack.size.height, equals(100.0));
   });
 
+  test('Stack respects clipBehavior', () {
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    final TestClipPaintingContext context = TestClipPaintingContext();
+
+    // By default, clipBehavior should be Clip.none
+    final RenderStack defaultStack = RenderStack(textDirection: TextDirection.ltr, children: <RenderBox>[box200x200]);
+    layout(defaultStack, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+    defaultStack.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.none));
+
+    for (final Clip clip in Clip.values) {
+      final RenderBox child = box200x200;
+      final RenderStack stack = RenderStack(
+          textDirection: TextDirection.ltr,
+          children: <RenderBox>[child],
+          clipBehavior: clip,
+      );
+      { // Make sure that the child is positioned so the stack will consider it as overflowed.
+        final StackParentData parentData = child.parentData as StackParentData;
+        parentData.left = parentData.right = 0;
+      }
+      layout(stack, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+      stack.paint(context, Offset.zero);
+      expect(context.clipBehavior, equals(clip));
+    }
+  });
+
   group('RenderIndexedStack', () {
     test('visitChildrenForSemantics only visits displayed child', () {
       final RenderBox child1 = RenderConstrainedBox(
