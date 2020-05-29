@@ -1714,6 +1714,19 @@ void main() {
     expect(find.text('World'), findsNothing);
   });
 
+  testWidgets('Navigator.of able to handle input context is a navigator context', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> g = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: g,
+        home: const Text('home'),
+      )
+    );
+
+    final NavigatorState state = Navigator.of(g.currentContext);
+    expect(state, g.currentState);
+  });
+
   testWidgets('pushAndRemove until animates the push', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/25080.
 

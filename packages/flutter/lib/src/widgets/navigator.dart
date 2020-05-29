@@ -2131,6 +2131,12 @@ class Navigator extends StatefulWidget {
     bool rootNavigator = false,
     bool nullOk = false,
   }) {
+    // Short circuit when the context is a navigator element.
+    if (context is StatefulElement) {
+      if (context.state is NavigatorState)
+        return context.state as NavigatorState;
+    }
+
     final NavigatorState navigator = rootNavigator
         ? context.findRootAncestorStateOfType<NavigatorState>()
         : context.findAncestorStateOfType<NavigatorState>();
