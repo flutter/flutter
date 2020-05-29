@@ -1,4 +1,4 @@
-Signature: 9ff7b9454781eb05f8a1a33bdf59b42f
+Signature: 3c58a3a8e454e1243a22c70aaba41890
 
 UNUSED LICENSES:
 
@@ -1311,6 +1311,7 @@ FILE: ../../../third_party/skia/modules/canvaskit/interface.js
 FILE: ../../../third_party/skia/modules/canvaskit/karma.bench.conf.js
 FILE: ../../../third_party/skia/modules/canvaskit/karma.conf.js
 FILE: ../../../third_party/skia/modules/canvaskit/karma.google3.conf.js
+FILE: ../../../third_party/skia/modules/canvaskit/package-lock.json
 FILE: ../../../third_party/skia/modules/canvaskit/package.json
 FILE: ../../../third_party/skia/modules/canvaskit/paragraph.js
 FILE: ../../../third_party/skia/modules/canvaskit/particles.js
@@ -3915,6 +3916,7 @@ FILE: ../../../third_party/skia/experimental/skottiekit/skottiekit_bindings.cpp
 FILE: ../../../third_party/skia/gm/crbug_1041204.cpp
 FILE: ../../../third_party/skia/gm/crbug_224618.cpp
 FILE: ../../../third_party/skia/gm/userfont.cpp
+FILE: ../../../third_party/skia/include/gpu/GrBackendSurfaceMutableState.h
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DBackendContext.h
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DTypes.h
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DTypesMinimal.h
@@ -3925,6 +3927,7 @@ FILE: ../../../third_party/skia/modules/canvaskit/viewer_bindings.cpp
 FILE: ../../../third_party/skia/src/core/SkIDChangeListener.cpp
 FILE: ../../../third_party/skia/src/core/SkMatrixProvider.h
 FILE: ../../../third_party/skia/src/core/SkVM_fwd.h
+FILE: ../../../third_party/skia/src/gpu/GrBackendSurfaceMutableStateImpl.h
 FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.h
 FILE: ../../../third_party/skia/src/gpu/GrManagedResource.cpp
@@ -5087,7 +5090,6 @@ FILE: ../../../third_party/skia/docs/examples/State_Stack_a.cpp
 FILE: ../../../third_party/skia/docs/examples/State_Stack_b.cpp
 FILE: ../../../third_party/skia/docs/examples/Stroke_Width.cpp
 FILE: ../../../third_party/skia/docs/examples/Surface_MakeFromBackendTexture.cpp
-FILE: ../../../third_party/skia/docs/examples/Surface_MakeFromBackendTextureAsRenderTarget.cpp
 FILE: ../../../third_party/skia/docs/examples/Surface_MakeNull.cpp
 FILE: ../../../third_party/skia/docs/examples/Surface_MakeRaster.cpp
 FILE: ../../../third_party/skia/docs/examples/Surface_MakeRasterDirect.cpp
