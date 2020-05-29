@@ -47,6 +47,6 @@ PROG_NAME="$(follow_links "$BASH_SOURCE")"
 BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
 
 # To define `shared::execute()` function
-source "$BIN_DIR/shared.sh"
+source "$BIN_DIR/internal/shared.sh"
 
 shared::execute "$@"
