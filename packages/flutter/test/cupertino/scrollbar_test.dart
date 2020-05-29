@@ -164,7 +164,7 @@ void main() {
     await tester.pump(_kScrollbarFadeDuration);
   });
 
-  testWidgets('When isAlwaysShown is truew, must pass a controller',
+  testWidgets('When isAlwaysShown is true, must pass a controller',
       (WidgetTester tester) async {
     Widget viewWithScroll() {
       return Directionality(
