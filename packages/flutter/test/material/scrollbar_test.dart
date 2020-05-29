@@ -201,7 +201,7 @@ void main() {
     expect(scrollbar.controller, isNotNull);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('When isAlwaysShown is truew, must pass a controller',
+  testWidgets('When isAlwaysShown is true, must pass a controller',
       (WidgetTester tester) async {
     Widget viewWithScroll() {
       return _buildBoilerplate(
