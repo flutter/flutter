@@ -6,6 +6,7 @@ package io.flutter.view;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -155,6 +156,20 @@ public class AccessibilityBridgeTest {
 
     // Pass an out of bounds MotionEvent.
     accessibilityBridge.onAccessibilityHoverEvent(MotionEvent.obtain(1, 1, 1, -10, -10, 0));
+  }
+
+  @Test
+  public void releaseDropsChannelMessageHandler() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    when(mockManager.isEnabled()).thenReturn(true);
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(null, mockChannel, mockManager, null, null, null);
+    verify(mockChannel)
+        .setAccessibilityMessageHandler(
+            any(AccessibilityChannel.AccessibilityMessageHandler.class));
+    accessibilityBridge.release();
+    verify(mockChannel).setAccessibilityMessageHandler(null);
   }
 
   AccessibilityBridge setUpBridge() {
