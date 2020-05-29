@@ -90,6 +90,11 @@ fml::WeakPtr<Engine> Engine::GetWeakPtr() const {
   return weak_factory_.GetWeakPtr();
 }
 
+void Engine::SetupDefaultFontManager() {
+  TRACE_EVENT0("flutter", "Engine::SetupDefaultFontManager");
+  font_collection_.SetupDefaultFontManager();
+}
+
 bool Engine::UpdateAssetManager(
     std::shared_ptr<AssetManager> new_asset_manager) {
   if (asset_manager_ == new_asset_manager) {

@@ -542,6 +542,14 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   weak_rasterizer_ = rasterizer_->GetWeakPtr();
   weak_platform_view_ = platform_view_->GetWeakPtr();
 
+  // Setup the time-consuming default font manager right after engine created.
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
+                                    [engine = weak_engine_] {
+                                      if (engine) {
+                                        engine->SetupDefaultFontManager();
+                                      }
+                                    });
+
   is_setup_ = true;
 
   vm_->GetServiceProtocol()->AddHandler(this, GetServiceProtocolDescription());
