@@ -600,6 +600,7 @@ void main() {
         WidgetTester tester, {
           bool enabled = true,
           bool directional = false,
+          bool supplyCallbacks = true,
           @required Key key,
         }) async {
       await tester.pumpWidget(
@@ -620,8 +621,8 @@ void main() {
                 actions: <Type, Action<Intent>>{
                   TestIntent: testAction,
                 },
-                onShowHoverHighlight: (bool value) => hovering = value,
-                onShowFocusHighlight: (bool value) => focusing = value,
+                onShowHoverHighlight: supplyCallbacks ? (bool value) => hovering = value : null,
+                onShowFocusHighlight: supplyCallbacks ? (bool value) => focusing = value : null,
                 child: Container(width: 100, height: 100, key: key),
               ),
             ),
@@ -708,6 +709,40 @@ void main() {
       focusNode.requestFocus();
       await tester.pump();
       expect(focusing, isTrue);
+    });
+    testWidgets('FocusableActionDetector can be used without callbacks', (WidgetTester tester) async {
+      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      final GlobalKey containerKey = GlobalKey();
+
+      await pumpTest(tester, enabled: true, key: containerKey, supplyCallbacks: false);
+      focusNode.requestFocus();
+      await tester.pump();
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(hovering, isFalse);
+      expect(focusing, isFalse);
+      expect(invoked, isTrue);
+
+      invoked = false;
+      await pumpTest(tester, enabled: false, key: containerKey, supplyCallbacks: false);
+      expect(hovering, isFalse);
+      expect(focusing, isFalse);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(invoked, isFalse);
+      await pumpTest(tester, enabled: true, key: containerKey, supplyCallbacks: false);
+      expect(focusing, isFalse);
+      expect(hovering, isFalse);
+      await pumpTest(tester, enabled: false, key: containerKey, supplyCallbacks: false);
+      expect(focusing, isFalse);
+      expect(hovering, isFalse);
+      await gesture.moveTo(Offset.zero);
+      await pumpTest(tester, enabled: true, key: containerKey, supplyCallbacks: false);
+      expect(hovering, isFalse);
+      expect(focusing, isFalse);
     });
   });
 
