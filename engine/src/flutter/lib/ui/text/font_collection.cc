@@ -47,8 +47,6 @@ void _LoadFontFromList(Dart_NativeArguments args) {
 
 FontCollection::FontCollection()
     : collection_(std::make_shared<txt::FontCollection>()) {
-  collection_->SetupDefaultFontManager();
-
   dynamic_font_manager_ = sk_make_sp<txt::DynamicFontManager>();
   collection_->SetDynamicFontManager(dynamic_font_manager_);
 }
@@ -66,6 +64,10 @@ void FontCollection::RegisterNatives(tonic::DartLibraryNatives* natives) {
 
 std::shared_ptr<txt::FontCollection> FontCollection::GetFontCollection() const {
   return collection_;
+}
+
+void FontCollection::SetupDefaultFontManager() {
+  collection_->SetupDefaultFontManager();
 }
 
 void FontCollection::RegisterFonts(
