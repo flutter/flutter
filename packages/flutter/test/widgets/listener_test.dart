@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -83,9 +83,9 @@ void main() {
       await gesture.up();
 
       expect(events, hasLength(3));
-      final PointerDownEvent down = events[0];
-      final PointerMoveEvent move = events[1];
-      final PointerUpEvent up = events[2];
+      final PointerDownEvent down = events[0] as PointerDownEvent;
+      final PointerMoveEvent move = events[1] as PointerMoveEvent;
+      final PointerUpEvent up = events[2] as PointerUpEvent;
 
       final Matrix4 expectedTransform = Matrix4.translationValues(-topLeft.dx, -topLeft.dy, 0);
 
@@ -160,9 +160,9 @@ void main() {
       await gesture.up();
 
       expect(events, hasLength(3));
-      final PointerDownEvent down = events[0];
-      final PointerMoveEvent move = events[1];
-      final PointerUpEvent up = events[2];
+      final PointerDownEvent down = events[0] as PointerDownEvent;
+      final PointerMoveEvent move = events[1] as PointerMoveEvent;
+      final PointerUpEvent up = events[2] as PointerUpEvent;
 
       final Matrix4 expectedTransform = Matrix4.identity()
         ..scale(1 / scaleFactor, 1 / scaleFactor, 1.0);
@@ -238,9 +238,9 @@ void main() {
       await gesture.up();
 
       expect(events, hasLength(3));
-      final PointerDownEvent down = events[0];
-      final PointerMoveEvent move = events[1];
-      final PointerUpEvent up = events[2];
+      final PointerDownEvent down = events[0] as PointerDownEvent;
+      final PointerMoveEvent move = events[1] as PointerMoveEvent;
+      final PointerUpEvent up = events[2] as PointerUpEvent;
 
       final Matrix4 expectedTransform = Matrix4.identity()
         ..scale(1 / scaleFactor, 1 / scaleFactor, 1.0)
@@ -315,9 +315,9 @@ void main() {
       await gesture.up();
 
       expect(events, hasLength(3));
-      final PointerDownEvent down = events[0];
-      final PointerMoveEvent move = events[1];
-      final PointerUpEvent up = events[2];
+      final PointerDownEvent down = events[0] as PointerDownEvent;
+      final PointerMoveEvent move = events[1] as PointerMoveEvent;
+      final PointerUpEvent up = events[2] as PointerUpEvent;
 
       const Offset offset = Offset((800 - 100) / 2, (600 - 100) / 2);
       final Matrix4 expectedTransform = Matrix4.identity()
@@ -354,7 +354,7 @@ void main() {
     });
   });
 
-  testWidgets('RenderPointerListener\'s debugFillProperties when default', (WidgetTester tester) async {
+  testWidgets("RenderPointerListener's debugFillProperties when default", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     RenderPointerListener().debugFillProperties(builder);
 
@@ -372,7 +372,7 @@ void main() {
     ]);
   });
 
-  testWidgets('RenderPointerListener\'s debugFillProperties when full', (WidgetTester tester) async {
+  testWidgets("RenderPointerListener's debugFillProperties when full", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     RenderPointerListener(
       onPointerDown: (PointerDownEvent event) {},

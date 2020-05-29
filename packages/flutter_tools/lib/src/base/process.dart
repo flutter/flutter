@@ -1,16 +1,17 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+import 'package:process/process.dart';
+
 import '../convert.dart';
-import '../globals.dart';
 import 'common.dart';
 import 'context.dart';
-import 'file_system.dart';
 import 'io.dart';
-import 'process_manager.dart';
+import 'logger.dart';
 import 'utils.dart';
 
 typedef StringConverter = String Function(String string);
@@ -53,50 +54,80 @@ class ShutdownStage implements Comparable<ShutdownStage> {
   int compareTo(ShutdownStage other) => priority.compareTo(other.priority);
 }
 
-Map<ShutdownStage, List<ShutdownHook>> _shutdownHooks = <ShutdownStage, List<ShutdownHook>>{};
-bool _shutdownHooksRunning = false;
+ShutdownHooks get shutdownHooks => ShutdownHooks.instance;
 
-/// Registers a [ShutdownHook] to be executed before the VM exits.
-///
-/// If [stage] is specified, the shutdown hook will be run during the specified
-/// stage. By default, the shutdown hook will be run during the
-/// [ShutdownStage.CLEANUP] stage.
-void addShutdownHook(
-  ShutdownHook shutdownHook, [
-  ShutdownStage stage = ShutdownStage.CLEANUP,
-]) {
-  assert(!_shutdownHooksRunning);
-  _shutdownHooks.putIfAbsent(stage, () => <ShutdownHook>[]).add(shutdownHook);
+abstract class ShutdownHooks {
+  factory ShutdownHooks({
+    @required Logger logger,
+  }) => _DefaultShutdownHooks(
+    logger: logger,
+  );
+
+  static ShutdownHooks get instance => context.get<ShutdownHooks>();
+
+  /// Registers a [ShutdownHook] to be executed before the VM exits.
+  ///
+  /// If [stage] is specified, the shutdown hook will be run during the specified
+  /// stage. By default, the shutdown hook will be run during the
+  /// [ShutdownStage.CLEANUP] stage.
+  void addShutdownHook(
+    ShutdownHook shutdownHook, [
+    ShutdownStage stage = ShutdownStage.CLEANUP,
+  ]);
+
+  /// Runs all registered shutdown hooks and returns a future that completes when
+  /// all such hooks have finished.
+  ///
+  /// Shutdown hooks will be run in groups by their [ShutdownStage]. All shutdown
+  /// hooks within a given stage will be started in parallel and will be
+  /// guaranteed to run to completion before shutdown hooks in the next stage are
+  /// started.
+  Future<void> runShutdownHooks();
 }
 
-/// Runs all registered shutdown hooks and returns a future that completes when
-/// all such hooks have finished.
-///
-/// Shutdown hooks will be run in groups by their [ShutdownStage]. All shutdown
-/// hooks within a given stage will be started in parallel and will be
-/// guaranteed to run to completion before shutdown hooks in the next stage are
-/// started.
-Future<void> runShutdownHooks() async {
-  printTrace('Running shutdown hooks');
-  _shutdownHooksRunning = true;
-  try {
-    for (ShutdownStage stage in _shutdownHooks.keys.toList()..sort()) {
-      printTrace('Shutdown hook priority ${stage.priority}');
-      final List<ShutdownHook> hooks = _shutdownHooks.remove(stage);
-      final List<Future<dynamic>> futures = <Future<dynamic>>[];
-      for (ShutdownHook shutdownHook in hooks) {
-        final FutureOr<dynamic> result = shutdownHook();
-        if (result is Future<dynamic>) {
-          futures.add(result);
-        }
-      }
-      await Future.wait<dynamic>(futures);
-    }
-  } finally {
-    _shutdownHooksRunning = false;
+class _DefaultShutdownHooks implements ShutdownHooks {
+  _DefaultShutdownHooks({
+    @required Logger logger,
+  }) : _logger = logger;
+
+  final Logger _logger;
+
+  final Map<ShutdownStage, List<ShutdownHook>> _shutdownHooks = <ShutdownStage, List<ShutdownHook>>{};
+
+  bool _shutdownHooksRunning = false;
+
+  @override
+  void addShutdownHook(
+    ShutdownHook shutdownHook, [
+    ShutdownStage stage = ShutdownStage.CLEANUP,
+  ]) {
+    assert(!_shutdownHooksRunning);
+    _shutdownHooks.putIfAbsent(stage, () => <ShutdownHook>[]).add(shutdownHook);
   }
-  assert(_shutdownHooks.isEmpty);
-  printTrace('Shutdown hooks complete');
+
+  @override
+  Future<void> runShutdownHooks() async {
+    _logger.printTrace('Running shutdown hooks');
+    _shutdownHooksRunning = true;
+    try {
+      for (final ShutdownStage stage in _shutdownHooks.keys.toList()..sort()) {
+        _logger.printTrace('Shutdown hook priority ${stage.priority}');
+        final List<ShutdownHook> hooks = _shutdownHooks.remove(stage);
+        final List<Future<dynamic>> futures = <Future<dynamic>>[];
+        for (final ShutdownHook shutdownHook in hooks) {
+          final FutureOr<dynamic> result = shutdownHook();
+          if (result is Future<dynamic>) {
+            futures.add(result);
+          }
+        }
+        await Future.wait<dynamic>(futures);
+      }
+    } finally {
+      _shutdownHooksRunning = false;
+    }
+    assert(_shutdownHooks.isEmpty);
+    _logger.printTrace('Shutdown hooks complete');
+  }
 }
 
 class ProcessExit implements Exception {
@@ -121,17 +152,17 @@ class RunResult {
   final List<String> _command;
 
   int get exitCode => processResult.exitCode;
-  String get stdout => processResult.stdout;
-  String get stderr => processResult.stderr;
+  String get stdout => processResult.stdout as String;
+  String get stderr => processResult.stderr as String;
 
   @override
   String toString() {
     final StringBuffer out = StringBuffer();
-    if (processResult.stdout.isNotEmpty) {
-      out.writeln(processResult.stdout);
+    if (stdout.isNotEmpty) {
+      out.writeln(stdout);
     }
-    if (processResult.stderr.isNotEmpty) {
-      out.writeln(processResult.stderr);
+    if (stderr.isNotEmpty) {
+      out.writeln(stderr);
     }
     return out.toString().trimRight();
   }
@@ -152,7 +183,13 @@ typedef RunResultChecker = bool Function(int);
 ProcessUtils get processUtils => ProcessUtils.instance;
 
 abstract class ProcessUtils {
-  factory ProcessUtils() => _DefaultProcessUtils();
+  factory ProcessUtils({
+    @required ProcessManager processManager,
+    @required Logger logger,
+  }) => _DefaultProcessUtils(
+    processManager: processManager,
+    logger: logger,
+  );
 
   static ProcessUtils get instance => context.get<ProcessUtils>();
 
@@ -241,6 +278,16 @@ abstract class ProcessUtils {
 }
 
 class _DefaultProcessUtils implements ProcessUtils {
+  _DefaultProcessUtils({
+    @required ProcessManager processManager,
+    @required Logger logger,
+  }) : _processManager = processManager,
+      _logger = logger;
+
+  final ProcessManager _processManager;
+
+  final Logger _logger;
+
   @override
   Future<RunResult> run(
     List<String> cmd, {
@@ -261,15 +308,15 @@ class _DefaultProcessUtils implements ProcessUtils {
     _traceCommand(cmd, workingDirectory: workingDirectory);
 
     // When there is no timeout, there's no need to kill a running process, so
-    // we can just use processManager.run().
+    // we can just use _processManager.run().
     if (timeout == null) {
-      final ProcessResult results = await processManager.run(
+      final ProcessResult results = await _processManager.run(
         cmd,
         workingDirectory: workingDirectory,
         environment: _environment(allowReentrantFlutter, environment),
       );
       final RunResult runResult = RunResult(results, cmd);
-      printTrace(runResult.toString());
+      _logger.printTrace(runResult.toString());
       if (throwOnError && runResult.exitCode != 0 &&
           (whiteListFailures == null || !whiteListFailures(runResult.exitCode))) {
         runResult.throwException('Process exited abnormally:\n$runResult');
@@ -278,7 +325,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     }
 
     // When there is a timeout, we have to kill the running process, so we have
-    // to use processManager.start() through _runCommand() above.
+    // to use _processManager.start() through _runCommand() above.
     while (true) {
       assert(timeoutRetries >= 0);
       timeoutRetries = timeoutRetries - 1;
@@ -304,7 +351,7 @@ class _DefaultProcessUtils implements ProcessUtils {
       int exitCode;
       exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
         // The process timed out. Kill it.
-        processManager.killPid(process.pid);
+        _processManager.killPid(process.pid);
         return null;
       });
 
@@ -320,7 +367,7 @@ class _DefaultProcessUtils implements ProcessUtils {
           stdioFuture = stdioFuture.timeout(const Duration(seconds: 1));
         }
         await stdioFuture;
-      } catch (_) {
+      } on Exception catch (_) {
         // Ignore errors on the process' stdout and stderr streams. Just capture
         // whatever we got, and use the exit code
       }
@@ -333,7 +380,7 @@ class _DefaultProcessUtils implements ProcessUtils {
 
       // If the process did not timeout. We are done.
       if (exitCode != null) {
-        printTrace(runResult.toString());
+        _logger.printTrace(runResult.toString());
         if (throwOnError && runResult.exitCode != 0 &&
             (whiteListFailures == null || !whiteListFailures(exitCode))) {
           runResult.throwException('Process exited abnormally:\n$runResult');
@@ -347,8 +394,10 @@ class _DefaultProcessUtils implements ProcessUtils {
       }
 
       // Log the timeout with a trace message in verbose mode.
-      printTrace('Process "${cmd[0]}" timed out. $timeoutRetries attempts left:\n'
-                 '$runResult');
+      _logger.printTrace(
+        'Process "${cmd[0]}" timed out. $timeoutRetries attempts left:\n'
+        '$runResult',
+      );
     }
 
     // Unreachable.
@@ -365,14 +414,14 @@ class _DefaultProcessUtils implements ProcessUtils {
     bool allowReentrantFlutter = false,
   }) {
     _traceCommand(cmd, workingDirectory: workingDirectory);
-    final ProcessResult results = processManager.runSync(
+    final ProcessResult results = _processManager.runSync(
       cmd,
       workingDirectory: workingDirectory,
       environment: _environment(allowReentrantFlutter, environment),
     );
     final RunResult runResult = RunResult(results, cmd);
 
-    printTrace('Exit code ${runResult.exitCode} from: ${cmd.join(' ')}');
+    _logger.printTrace('Exit code ${runResult.exitCode} from: ${cmd.join(' ')}');
 
     bool failedExitCode = runResult.exitCode != 0;
     if (whiteListFailures != null && failedExitCode) {
@@ -381,17 +430,17 @@ class _DefaultProcessUtils implements ProcessUtils {
 
     if (runResult.stdout.isNotEmpty && !hideStdout) {
       if (failedExitCode && throwOnError) {
-        printStatus(runResult.stdout.trim());
+        _logger.printStatus(runResult.stdout.trim());
       } else {
-        printTrace(runResult.stdout.trim());
+        _logger.printTrace(runResult.stdout.trim());
       }
     }
 
     if (runResult.stderr.isNotEmpty) {
       if (failedExitCode && throwOnError) {
-        printError(runResult.stderr.trim());
+        _logger.printError(runResult.stderr.trim());
       } else {
-        printTrace(runResult.stderr.trim());
+        _logger.printTrace(runResult.stderr.trim());
       }
     }
 
@@ -410,7 +459,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     Map<String, String> environment,
   }) {
     _traceCommand(cmd, workingDirectory: workingDirectory);
-    return processManager.start(
+    return _processManager.start(
       cmd,
       workingDirectory: workingDirectory,
       environment: _environment(allowReentrantFlutter, environment),
@@ -445,9 +494,9 @@ class _DefaultProcessUtils implements ProcessUtils {
         if (line != null) {
           final String message = '$prefix$line';
           if (trace) {
-            printTrace(message);
+            _logger.printTrace(message);
           } else {
-            printStatus(message, wrap: false);
+            _logger.printStatus(message, wrap: false);
           }
         }
       });
@@ -460,7 +509,7 @@ class _DefaultProcessUtils implements ProcessUtils {
           line = mapFunction(line);
         }
         if (line != null) {
-          printError('$prefix$line', wrap: false);
+          _logger.printError('$prefix$line', wrap: false);
         }
       });
 
@@ -488,10 +537,15 @@ class _DefaultProcessUtils implements ProcessUtils {
     Map<String, String> environment,
   }) {
     _traceCommand(cli);
+    if (!_processManager.canRun(cli.first)) {
+      _logger.printTrace('$cli either does not exist or is not executable.');
+      return false;
+    }
+
     try {
-      return processManager.runSync(cli, environment: environment).exitCode == 0;
-    } catch (error) {
-      printTrace('$cli failed with $error');
+      return _processManager.runSync(cli, environment: environment).exitCode == 0;
+    } on Exception catch (error) {
+      _logger.printTrace('$cli failed with $error');
       return false;
     }
   }
@@ -502,10 +556,15 @@ class _DefaultProcessUtils implements ProcessUtils {
     Map<String, String> environment,
   }) async {
     _traceCommand(cli);
+    if (!_processManager.canRun(cli.first)) {
+      _logger.printTrace('$cli either does not exist or is not executable.');
+      return false;
+    }
+
     try {
-      return (await processManager.run(cli, environment: environment)).exitCode == 0;
-    } catch (error) {
-      printTrace('$cli failed with $error');
+      return (await _processManager.run(cli, environment: environment)).exitCode == 0;
+    } on Exception catch (error) {
+      _logger.printTrace('$cli failed with $error');
       return false;
     }
   }
@@ -527,9 +586,9 @@ class _DefaultProcessUtils implements ProcessUtils {
   void _traceCommand(List<String> args, { String workingDirectory }) {
     final String argsText = args.join(' ');
     if (workingDirectory == null) {
-      printTrace('executing: $argsText');
+      _logger.printTrace('executing: $argsText');
     } else {
-      printTrace('executing: [$workingDirectory${fs.path.separator}] $argsText');
+      _logger.printTrace('executing: [$workingDirectory/] $argsText');
     }
   }
 }

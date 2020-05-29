@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -214,5 +214,5 @@ void main() {
     // coordinate space of the screen, the scroll view actually moved far more
     // pixels in its local coordinate system due to the perspective transform.
     expect(controller.offset, greaterThan(100));
-  }, skip: isBrowser);
+  });
 }

@@ -1,11 +1,10 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 #import <Foundation/Foundation.h>
 
 #import "NativeViewController.h"
-#import "MDButton.h"
 
 @interface NativeViewController ()
 @property int counter;
@@ -19,7 +18,7 @@
   self.counter = 0;
 }
 
-- (IBAction)handleIncrement:(MDButton*)sender {
+- (IBAction)handleIncrement:(id)sender {
   [self.delegate didTapIncrementButton];
 }
 

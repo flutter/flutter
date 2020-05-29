@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -21,15 +21,15 @@ dynamic getRenderSegmentedControl(WidgetTester tester) {
 
 Rect currentUnscaledThumbRect(WidgetTester tester, { bool useGlobalCoordinate = false }) {
   final dynamic renderSegmentedControl = getRenderSegmentedControl(tester);
-  final Rect local = renderSegmentedControl.currentThumbRect;
+  final Rect local = renderSegmentedControl.currentThumbRect as Rect;
   if (!useGlobalCoordinate)
     return local;
 
-  final RenderBox segmentedControl = renderSegmentedControl;
+  final RenderBox segmentedControl = renderSegmentedControl as RenderBox;
   return local?.shift(segmentedControl.localToGlobal(Offset.zero));
 }
 
-double currentThumbScale(WidgetTester tester) => getRenderSegmentedControl(tester).currentThumbScale;
+double currentThumbScale(WidgetTester tester) => getRenderSegmentedControl(tester).currentThumbScale as double;
 
 Widget setupSimpleSegmentedControl() {
   const Map<int, Widget> children = <int, Widget>{
@@ -349,7 +349,7 @@ void main() {
     final BoxDecoration decoration = tester.widget<Container>(find.descendant(
       of: find.byType(UnconstrainedBox),
       matching: find.byType(Container),
-    )).decoration;
+    )).decoration as BoxDecoration;
 
     expect(getRenderSegmentedControl(tester).thumbColor.value, CupertinoColors.systemGreen.color.value);
     expect(decoration.color.value, CupertinoColors.systemRed.color.value);
@@ -360,7 +360,7 @@ void main() {
     final BoxDecoration decorationDark = tester.widget<Container>(find.descendant(
       of: find.byType(UnconstrainedBox),
       matching: find.byType(Container),
-    )).decoration;
+    )).decoration as BoxDecoration;
 
 
     expect(getRenderSegmentedControl(tester).thumbColor.value, CupertinoColors.systemGreen.darkColor.value);
@@ -776,10 +776,43 @@ void main() {
     expect(groupValue, 0);
 
     final Offset centerOfTwo = tester.getCenter(find.byWidget(children[1]));
-    // Tap just inside segment bounds
+    // Tap within the bounds of children[1], but not at the center.
+    // children[1] is a SizedBox thus not hittable by itself.
     await tester.tapAt(centerOfTwo + const Offset(10, 0));
 
     expect(groupValue, 1);
+  });
+
+  testWidgets('Hit-tests report accurate local position in segments', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{};
+    TapDownDetails tapDownDetails;
+    children[0] = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (TapDownDetails details) { tapDownDetails = details; },
+      child: const SizedBox(width: 200, height: 200),
+    );
+    children[1] = const Text('Child 2');
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    expect(groupValue, 0);
+
+    final Offset segment0GlobalOffset = tester.getTopLeft(find.byWidget(children[0]));
+    await tester.tapAt(segment0GlobalOffset + const Offset(7, 11));
+
+    expect(tapDownDetails.localPosition, const Offset(7, 11));
+    expect(tapDownDetails.globalPosition, segment0GlobalOffset + const Offset(7, 11));
   });
 
   testWidgets('Thumb animation is correct when the selected segment changes', (WidgetTester tester) async {

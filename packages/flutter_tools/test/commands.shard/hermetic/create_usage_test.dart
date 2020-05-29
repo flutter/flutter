@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -23,17 +24,25 @@ void main() {
 
     setUp(() {
       testbed = Testbed(setup: () {
+        Cache.flutterRoot = 'flutter';
         final List<String> paths = <String>[
-          fs.path.join('flutter', 'packages', 'flutter', 'pubspec.yaml'),
-          fs.path.join('flutter', 'packages', 'flutter_driver', 'pubspec.yaml'),
-          fs.path.join('flutter', 'packages', 'flutter_test', 'pubspec.yaml'),
-          fs.path.join('flutter', 'bin', 'cache', 'artifacts', 'gradle_wrapper', 'wrapper'),
-          fs.path.join('usr', 'local', 'bin', 'adb'),
-          fs.path.join('Android', 'platform-tools', 'adb.exe'),
+          globals.fs.path.join('flutter', 'packages', 'flutter', 'pubspec.yaml'),
+          globals.fs.path.join('flutter', 'packages', 'flutter_driver', 'pubspec.yaml'),
+          globals.fs.path.join('flutter', 'packages', 'flutter_test', 'pubspec.yaml'),
+          globals.fs.path.join('flutter', 'bin', 'cache', 'artifacts', 'gradle_wrapper', 'wrapper'),
+          globals.fs.path.join('usr', 'local', 'bin', 'adb'),
+          globals.fs.path.join('Android', 'platform-tools', 'adb.exe'),
         ];
-        for (String path in paths) {
-          fs.file(path).createSync(recursive: true);
+        for (final String path in paths) {
+          globals.fs.file(path).createSync(recursive: true);
         }
+        // Set up enough of the packages to satisfy the templating code.
+        final File packagesFile = globals.fs.file(
+          globals.fs.path.join('flutter', 'packages', 'flutter_tools', '.packages'));
+        final Directory templateImagesDirectory = globals.fs.directory('flutter_template_images');
+        templateImagesDirectory.createSync(recursive: true);
+        packagesFile.createSync(recursive: true);
+        packagesFile.writeAsStringSync('flutter_template_images:file:///${templateImagesDirectory.uri}');
       }, overrides: <Type, Generator>{
         DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
       });

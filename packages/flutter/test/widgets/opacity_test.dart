@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -180,7 +180,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('opacity_test.offset.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('empty opacity does not crash', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -189,7 +189,7 @@ void main() {
     final Element element = find.byType(RepaintBoundary).first.evaluate().single;
     // The following line will send the layer to engine and cause crash if an
     // empty opacity layer is sent.
-    final OffsetLayer offsetLayer = element.renderObject.debugLayer;
+    final OffsetLayer offsetLayer = element.renderObject.debugLayer as OffsetLayer;
     await offsetLayer.toImage(const Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/52856
 }

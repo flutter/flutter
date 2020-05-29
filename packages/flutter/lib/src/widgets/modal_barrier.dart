@@ -1,9 +1,10 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'container.dart';
@@ -79,9 +80,12 @@ class ModalBarrier extends StatelessWidget {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         platformSupportsDismissingBarrier = false;
         break;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         platformSupportsDismissingBarrier = true;
         break;
     }
@@ -101,11 +105,15 @@ class ModalBarrier extends StatelessWidget {
           child: Semantics(
             label: semanticsDismissible ? semanticsLabel : null,
             textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints.expand(),
-              child: color == null ? null : DecoratedBox(
-                decoration: BoxDecoration(
-                  color: color,
+            child: MouseRegion(
+              cursor: SystemMouseCursors.basic,
+              opaque: true,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints.expand(),
+                child: color == null ? null : DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: color,
+                  ),
                 ),
               ),
             ),
@@ -148,7 +156,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
   ///
   ///  * [ModalRoute.barrierColor], which controls this property for the
   ///    [AnimatedModalBarrier] built by [ModalRoute] pages.
-  Animation<Color> get color => listenable;
+  Animation<Color> get color => listenable as Animation<Color>;
 
   /// Whether touching the barrier will pop the current route off the [Navigator].
   ///

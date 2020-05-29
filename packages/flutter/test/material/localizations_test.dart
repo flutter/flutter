@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,6 +13,7 @@ void main() {
     expect(localizations.backButtonTooltip, isNotNull);
     expect(localizations.closeButtonTooltip, isNotNull);
     expect(localizations.deleteButtonTooltip, isNotNull);
+    expect(localizations.moreButtonTooltip, isNotNull);
     expect(localizations.nextMonthTooltip, isNotNull);
     expect(localizations.previousMonthTooltip, isNotNull);
     expect(localizations.nextPageTooltip, isNotNull);
@@ -29,18 +30,41 @@ void main() {
     expect(localizations.pasteButtonLabel, isNotNull);
     expect(localizations.selectAllButtonLabel, isNotNull);
     expect(localizations.viewLicensesButtonLabel, isNotNull);
+    expect(localizations.anteMeridiemAbbreviation, isNotNull);
+    expect(localizations.postMeridiemAbbreviation, isNotNull);
+    expect(localizations.timePickerHourModeAnnouncement, isNotNull);
+    expect(localizations.timePickerMinuteModeAnnouncement, isNotNull);
     expect(localizations.modalBarrierDismissLabel, isNotNull);
     expect(localizations.drawerLabel, isNotNull);
     expect(localizations.popupMenuLabel, isNotNull);
     expect(localizations.dialogLabel, isNotNull);
     expect(localizations.alertDialogLabel, isNotNull);
     expect(localizations.searchFieldLabel, isNotNull);
+    expect(localizations.dateSeparator, isNotNull);
+    expect(localizations.dateHelpText, isNotNull);
+    expect(localizations.selectYearSemanticsLabel, isNotNull);
+    expect(localizations.unspecifiedDate, isNotNull);
+    expect(localizations.unspecifiedDateRange, isNotNull);
+    expect(localizations.dateInputLabel, isNotNull);
+    expect(localizations.dateRangeStartLabel, isNotNull);
+    expect(localizations.dateRangeEndLabel, isNotNull);
+    expect(localizations.invalidDateFormatLabel, isNotNull);
+    expect(localizations.invalidDateRangeLabel, isNotNull);
+    expect(localizations.dateOutOfRangeLabel, isNotNull);
+    expect(localizations.saveButtonLabel, isNotNull);
+    expect(localizations.datePickerHelpText, isNotNull);
+    expect(localizations.dateRangePickerHelpText, isNotNull);
+    expect(localizations.calendarModeButtonLabel, isNotNull);
+    expect(localizations.inputDateModeButtonLabel, isNotNull);
+    expect(localizations.signedInLabel, isNotNull);
+    expect(localizations.hideAccountsLabel, isNotNull);
+    expect(localizations.showAccountsLabel, isNotNull);
+    expect(localizations.reorderItemToStart, isNotNull);
+    expect(localizations.reorderItemToEnd, isNotNull);
     expect(localizations.reorderItemUp, isNotNull);
     expect(localizations.reorderItemDown, isNotNull);
     expect(localizations.reorderItemLeft, isNotNull);
     expect(localizations.reorderItemRight, isNotNull);
-    expect(localizations.reorderItemToEnd, isNotNull);
-    expect(localizations.reorderItemToStart, isNotNull);
 
     expect(localizations.aboutListTileTitle('FOO'), isNotNull);
     expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));

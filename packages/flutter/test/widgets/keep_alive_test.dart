@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -289,8 +289,9 @@ void main() {
       '                     │ crossAxisDirection: right\n'
       '                     │ offset: ScrollPositionWithSingleContext#00000(offset: 0.0, range:\n'
       '                     │   0.0..39400.0, viewport: 600.0, ScrollableState,\n'
-      '                     │   AlwaysScrollableScrollPhysics -> ClampingScrollPhysics,\n'
-      '                     │   IdleScrollActivity#00000, ScrollDirection.idle)\n'
+      '                     │   AlwaysScrollableScrollPhysics -> ClampingScrollPhysics ->\n'
+      '                     │   RangeMaintainingScrollPhysics, IdleScrollActivity#00000,\n'
+      '                     │   ScrollDirection.idle)\n'
       '                     │ anchor: 0.0\n'
       '                     │\n'
       '                     └─center child: RenderSliverFixedExtentList#00000 relayoutBoundary=up1\n'
@@ -299,8 +300,8 @@ void main() {
       '                       │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
       '                       │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
       '                       │   crossAxisDirection: AxisDirection.right,\n'
-      '                       │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0\n'
-      '                       │   cacheOrigin: 0.0 )\n'
+      '                       │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0,\n'
+      '                       │   cacheOrigin: 0.0)\n'
       '                       │ geometry: SliverGeometry(scrollExtent: 40000.0, paintExtent:\n'
       '                       │   600.0, maxPaintExtent: 40000.0, hasVisualOverflow: true,\n'
       '                       │   cacheExtent: 850.0)\n'
@@ -436,8 +437,9 @@ void main() {
       '                     │ crossAxisDirection: right\n'
       '                     │ offset: ScrollPositionWithSingleContext#00000(offset: 2000.0,\n'
       '                     │   range: 0.0..39400.0, viewport: 600.0, ScrollableState,\n'
-      '                     │   AlwaysScrollableScrollPhysics -> ClampingScrollPhysics,\n'
-      '                     │   IdleScrollActivity#00000, ScrollDirection.idle)\n'
+      '                     │   AlwaysScrollableScrollPhysics -> ClampingScrollPhysics ->\n'
+      '                     │   RangeMaintainingScrollPhysics, IdleScrollActivity#00000,\n'
+      '                     │   ScrollDirection.idle)\n'
       '                     │ anchor: 0.0\n'
       '                     │\n'
       '                     └─center child: RenderSliverFixedExtentList#00000 relayoutBoundary=up1\n'
@@ -446,8 +448,8 @@ void main() {
       '                       │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
       '                       │   2000.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
       '                       │   crossAxisDirection: AxisDirection.right,\n'
-      '                       │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 1100.0\n'
-      '                       │   cacheOrigin: -250.0 )\n'
+      '                       │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 1100.0,\n'
+      '                       │   cacheOrigin: -250.0)\n'
       '                       │ geometry: SliverGeometry(scrollExtent: 40000.0, paintExtent:\n'
       '                       │   600.0, maxPaintExtent: 40000.0, hasVisualOverflow: true,\n'
       '                       │   cacheExtent: 1100.0)\n'

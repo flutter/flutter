@@ -1,8 +1,10 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 import 'border_radius.dart';
@@ -16,19 +18,17 @@ import 'edge_insets.dart';
 /// but not farther than the side's center. If all the border radii
 /// exceed the sides' half widths/heights the resulting shape is
 /// diamond made by connecting the centers of the sides.
-class BeveledRectangleBorder extends ShapeBorder {
+class BeveledRectangleBorder extends OutlinedBorder {
   /// Creates a border like a [RoundedRectangleBorder] except that the corners
   /// are joined by straight lines instead of arcs.
   ///
   /// The arguments must not be null.
   const BeveledRectangleBorder({
-    this.side = BorderSide.none,
+    BorderSide side = BorderSide.none,
     this.borderRadius = BorderRadius.zero,
   }) : assert(side != null),
-       assert(borderRadius != null);
-
-  /// The style of this border.
-  final BorderSide side;
+       assert(borderRadius != null),
+       super(side: side);
 
   /// The radii for each corner.
   ///
@@ -76,6 +76,16 @@ class BeveledRectangleBorder extends ShapeBorder {
       );
     }
     return super.lerpTo(b, t);
+  }
+
+  /// Returns a copy of this RoundedRectangleBorder with the given fields
+  /// replaced with the new values.
+  @override
+  BeveledRectangleBorder copyWith({ BorderSide side, BorderRadius borderRadius }) {
+    return BeveledRectangleBorder(
+      side: side ?? this.side,
+      borderRadius: borderRadius ?? this.borderRadius,
+    );
   }
 
   Path _getPath(RRect rrect) {
@@ -133,12 +143,12 @@ class BeveledRectangleBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
-    final BeveledRectangleBorder typedOther = other;
-    return side == typedOther.side
-        && borderRadius == typedOther.borderRadius;
+    return other is BeveledRectangleBorder
+        && other.side == side
+        && other.borderRadius == borderRadius;
   }
 
   @override
@@ -146,6 +156,6 @@ class BeveledRectangleBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType($side, $borderRadius)';
+    return '${objectRuntimeType(this, 'BeveledRectangleBorder')}($side, $borderRadius)';
   }
 }

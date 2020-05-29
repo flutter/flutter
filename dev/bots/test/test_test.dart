@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,11 +23,11 @@ void main() {
       const List<String> valid_versions = <String>[
         '1.2.3',
         '12.34.56',
-        '1.2.3-pre.1',
-        '1.2.3+hotfix.1',
-        '1.2.3+hotfix.12-pre.12',
+        '1.2.3.pre.1',
+        '1.2.3-4.5.pre',
+        '1.2.3-5.0.pre.12',
       ];
-      for (String version in valid_versions) {
+      for (final String version in valid_versions) {
         when(file.readAsString()).thenAnswer((Invocation invocation) => Future<String>.value(version));
         expect(
           await verifyVersion(file),
@@ -41,13 +41,13 @@ void main() {
       const List<String> invalid_versions = <String>[
         '1.2.3.4',
         '1.2.3.',
-        '1.2-pre.1',
-        '1.2.3-pre',
+        '1.2.pre.1',
+        '1.2.3-pre.1',
         '1.2.3-pre.1+hotfix.1',
         '  1.2.3',
         '1.2.3-hotfix.1',
       ];
-      for (String version in invalid_versions) {
+      for (final String version in invalid_versions) {
         when(file.readAsString()).thenAnswer((Invocation invocation) => Future<String>.value(version));
         expect(
           await verifyVersion(file),

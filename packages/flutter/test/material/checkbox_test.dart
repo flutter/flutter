@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -99,10 +99,9 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
+    expect(tester.getSemantics(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_CheckboxRenderObjectWidget')), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
-      isFocusable: true,
     ));
 
     await tester.pumpWidget(const Material(
@@ -112,7 +111,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
+    expect(tester.getSemantics(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_CheckboxRenderObjectWidget')), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isChecked: true,
@@ -134,7 +133,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Focus).last), matchesSemantics(
       label: 'foo',
       textDirection: TextDirection.ltr,
       hasCheckedState: true,
@@ -566,4 +565,157 @@ void main() {
     await tester.pumpAndSettle();
     expect(value, isTrue);
   });
+
+  testWidgets('Checkbox responds to density changes.', (WidgetTester tester) async {
+    const Key key = Key('test');
+    Future<void> buildTest(VisualDensity visualDensity) async {
+      return await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Checkbox(
+                visualDensity: visualDensity,
+                key: key,
+                onChanged: (bool value) {},
+                value: true,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await buildTest(const VisualDensity());
+    final RenderBox box = tester.renderObject(find.byKey(key));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(48, 48)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(60, 60)));
+
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(36, 36)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(60, 36)));
+  });
+
+  testWidgets('Checkbox changes mouse cursor when hovered', (WidgetTester tester) async {
+    // Test Checkbox() constructor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Checkbox(
+                  mouseCursor: SystemMouseCursors.text,
+                  value: true,
+                  onChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Checkbox)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Checkbox(
+                  value: true,
+                  onChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Checkbox(
+                  value: true,
+                  onChanged: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Test cursor when tristate
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Checkbox(
+                  value: null,
+                  tristate: true,
+                  onChanged: null,
+                  mouseCursor: _SelectedGrabMouseCursor(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+
+    await tester.pumpAndSettle();
+  });
+}
+
+class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
+  const _SelectedGrabMouseCursor();
+
+  @override
+  MouseCursor resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.selected)) {
+      return SystemMouseCursors.grab;
+    }
+    return SystemMouseCursors.basic;
+  }
+
+  @override
+  String get debugDescription => '_SelectedGrabMouseCursor()';
 }

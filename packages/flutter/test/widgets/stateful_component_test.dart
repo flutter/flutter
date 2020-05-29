@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,8 +16,8 @@ void main() {
         find.byElementPredicate((Element element) => element is SingleChildRenderObjectElement)
       );
       expect(element, isNotNull);
-      expect(element.renderObject is RenderDecoratedBox, isTrue);
-      final RenderDecoratedBox renderObject = element.renderObject;
+      expect(element.renderObject, isA<RenderDecoratedBox>());
+      final RenderDecoratedBox renderObject = element.renderObject as RenderDecoratedBox;
       expect(renderObject.decoration, equals(expectedDecoration));
     }
 
@@ -55,12 +55,12 @@ void main() {
     checkTree(kBoxDecorationB);
   });
 
-  testWidgets('Don\'t rebuild subwidgets', (WidgetTester tester) async {
+  testWidgets("Don't rebuild subwidgets", (WidgetTester tester) async {
     await tester.pumpWidget(
-      FlipWidget(
-        key: const Key('rebuild test'),
+      const FlipWidget(
+        key: Key('rebuild test'),
         left: TestBuildCounter(),
-        right: const DecoratedBox(decoration: kBoxDecorationB),
+        right: DecoratedBox(decoration: kBoxDecorationB),
       ),
     );
 

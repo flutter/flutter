@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -349,14 +349,14 @@ void main() {
         ],
       ),
     );
-  }, skip: isBrowser);
+  });
 
   test('BorderDirectional constructor', () {
     expect(() => BorderDirectional(top: nonconst(null)), throwsAssertionError);
     expect(() => BorderDirectional(start: nonconst(null)), throwsAssertionError);
     expect(() => BorderDirectional(end: nonconst(null)), throwsAssertionError);
     expect(() => BorderDirectional(bottom: nonconst(null)), throwsAssertionError);
-  }, skip: isBrowser);
+  });
 
   test('BorderDirectional.merge', () {
     const BorderSide magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
@@ -395,7 +395,7 @@ void main() {
       ),
       throwsAssertionError,
     );
-  }, skip: isBrowser);
+  });
 
   test('BorderDirectional.dimensions', () {
     expect(
@@ -407,7 +407,7 @@ void main() {
       ).dimensions,
       const EdgeInsetsDirectional.fromSTEB(2.0, 3.0, 7.0, 5.0),
     );
-  }, skip: isBrowser);
+  });
 
   test('BorderDirectional.isUniform', () {
     expect(
@@ -477,7 +477,7 @@ void main() {
       const BorderDirectional().isUniform,
       true,
     );
-  }, skip: isBrowser);
+  });
 
   test('BorderDirectional.add - all directional', () {
     const BorderSide magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
@@ -502,7 +502,7 @@ void main() {
     );
     expect(
       const BorderDirectional(start: magenta3) + const BorderDirectional(start: yellow2),
-      isNot(isInstanceOf<BorderDirectional>()), // see shape_border_test.dart for better tests of this case
+      isNot(isA<BorderDirectional>()), // see shape_border_test.dart for better tests of this case
     );
     const BorderDirectional b3 = BorderDirectional(top: magenta3);
     const BorderDirectional b6 = BorderDirectional(top: magenta6);
@@ -513,7 +513,7 @@ void main() {
     expect(bZ + bZ, bZ);
     expect(b0 + bZ, bZ);
     expect(bZ + b0, bZ);
-  }, skip: isBrowser);
+  });
 
   test('BorderDirectional.add', () {
     const BorderSide side1 = BorderSide(color: Color(0x11111111));
@@ -565,7 +565,7 @@ void main() {
     expect((borderDirectionalWithStart + borderWithoutSides).toString(), '${const BorderDirectional(start: side1, top: doubleSide2, bottom: doubleSide2)}');
     expect((borderDirectionalWithEnd + borderWithoutSides).toString(), '${const BorderDirectional(end: side1, top: doubleSide2, bottom: doubleSide2)}');
     expect((borderDirectionalWithoutSides + borderWithoutSides).toString(), '${const Border(top: doubleSide2, bottom: doubleSide2)}');
-  }, skip: isBrowser);
+  });
 
   test('BorderDirectional.scale', () {
     const BorderSide magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
@@ -579,7 +579,7 @@ void main() {
     expect(bY0.scale(3.0), bY0);
     const BorderDirectional bY2 = BorderDirectional(top: yellow2);
     expect(bY2.scale(0.0), bY0);
-  }, skip: isBrowser);
+  });
 
   test('BorderDirectional.lerp', () {
     const BorderDirectional directionalWithTop10 = BorderDirectional(top: BorderSide(width: 10.0));
@@ -653,7 +653,7 @@ void main() {
       },
       paintsAssertion, // no TextDirection
     );
-  }, skip: isBrowser);
+  });
 
   test('BorderDirectional hashCode', () {
     final BorderSide side = BorderSide(width: nonconst(2.0));
@@ -703,5 +703,5 @@ void main() {
     expect(decoration2.padding, const EdgeInsetsDirectional.fromSTEB(2.0, 0.0, 0.0, 0.0));
     expect(decoration2.scale(2.0), decoration4);
     expect(BoxDecoration.lerp(decoration2, decoration6, 0.5), decoration4);
-  }, skip: isBrowser);
+  });
 }

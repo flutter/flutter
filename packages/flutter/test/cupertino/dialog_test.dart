@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -52,6 +52,62 @@ void main() {
     expect(find.text('Delete'), findsNothing);
   });
 
+  testWidgets('Dialog not barrier dismissible by default', (WidgetTester tester) async {
+    await tester.pumpWidget(createAppWithCenteredButton(const Text('Go')));
+
+    final BuildContext context = tester.element(find.text('Go'));
+
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          width: 100.0,
+          height: 100.0,
+          alignment: Alignment.center,
+          child: const Text('Dialog'),
+        );
+      },
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog'), findsOneWidget);
+
+    // Tap on the barrier, which shouldn't do anything this time.
+    await tester.tapAt(const Offset(10.0, 10.0));
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog'), findsOneWidget);
+
+  });
+
+ testWidgets('Dialog configurable to be barrier dismissible', (WidgetTester tester) async {
+    await tester.pumpWidget(createAppWithCenteredButton(const Text('Go')));
+
+    final BuildContext context = tester.element(find.text('Go'));
+
+    showCupertinoDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Container(
+          width: 100.0,
+          height: 100.0,
+          alignment: Alignment.center,
+          child: const Text('Dialog'),
+        );
+      },
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog'), findsOneWidget);
+
+    // Tap off the barrier.
+    await tester.tapAt(const Offset(10.0, 10.0));
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog'), findsNothing);
+  });
+
   testWidgets('Dialog destructive action style', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDestructiveAction: true,
@@ -60,7 +116,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.withAlpha(255).value, CupertinoColors.destructiveRed.value);
+    expect(widget.style.color.withAlpha(255), CupertinoColors.systemRed.color);
   });
 
   testWidgets('Dialog dark theme', (WidgetTester tester) async {
@@ -183,7 +239,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.withAlpha(255).value, CupertinoColors.destructiveRed.value);
+    expect(widget.style.color.withAlpha(255), CupertinoColors.systemRed.color);
     expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
@@ -642,7 +698,7 @@ void main() {
 
     final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
 
-    // The two multi-line buttons with large text are taller than 50% of the
+    // The two multiline buttons with large text are taller than 50% of the
     // dialog height, but with the accessibility layout policy, the 2 buttons
     // should be in a scrollable area equal to half the dialog height.
     expect(
@@ -852,9 +908,9 @@ void main() {
     );
 
     // We must explicitly cause an "up" gesture to avoid a crash.
-    // todo(mattcarroll) remove this call when #19540 is fixed
+    // todo(mattcarroll) remove this call, https://github.com/flutter/flutter/issues/19540
     await gesture.up();
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/52960
 
   testWidgets('ScaleTransition animation for showCupertinoDialog()', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1002,27 +1058,27 @@ void main() {
 
     // Exit animation, look at reverse FadeTransition.
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
     expect(transition.opacity.value, closeTo(0.500, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
     expect(transition.opacity.value, closeTo(0.332, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
     expect(transition.opacity.value, closeTo(0.188, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
     expect(transition.opacity.value, closeTo(0.081, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
     expect(transition.opacity.value, closeTo(0.019, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
     expect(transition.opacity.value, closeTo(0.0, 0.001));
   });
 
@@ -1090,7 +1146,7 @@ void main() {
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
   final RenderObject buttonBox = tester.renderObject(find.widgetWithText(CupertinoDialogAction, title));
   assert(buttonBox is RenderBox);
-  return buttonBox;
+  return buttonBox as RenderBox;
 }
 
 RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
@@ -1100,7 +1156,7 @@ RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
     }),
   );
   assert(actionsSection is RenderBox);
-  return actionsSection;
+  return actionsSection as RenderBox;
 }
 
 Widget createAppWithButtonThatLaunchesDialog({ WidgetBuilder dialogBuilder }) {
@@ -1127,5 +1183,18 @@ Widget boilerplate(Widget child) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: child,
+  );
+}
+
+Widget createAppWithCenteredButton(Widget child) {
+  return MaterialApp(
+    home: Material(
+      child: Center(
+        child: RaisedButton(
+          onPressed: null,
+          child: child
+        ),
+      )
+    )
   );
 }

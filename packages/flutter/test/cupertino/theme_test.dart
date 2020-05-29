@@ -1,9 +1,12 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
+import 'package:collection/collection.dart' show SetEquality;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -49,17 +52,17 @@ void main() {
   testWidgets('Default theme has defaults', (WidgetTester tester) async {
     final CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData());
 
-    expect(theme.brightness, Brightness.light);
+    expect(theme.brightness, isNull);
     expect(theme.primaryColor, CupertinoColors.activeBlue);
     expect(theme.textTheme.textStyle.fontSize, 17.0);
   });
 
   testWidgets('Theme attributes cascade', (WidgetTester tester) async {
     final CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData(
-      primaryColor: CupertinoColors.destructiveRed,
+      primaryColor: CupertinoColors.systemRed,
     ));
 
-    expect(theme.textTheme.actionTextStyle.color, isSameColorAs(CupertinoColors.destructiveRed));
+    expect(theme.textTheme.actionTextStyle.color, isSameColorAs(CupertinoColors.systemRed.color));
   });
 
   testWidgets('Dependent attribute can be overridden from cascaded value', (WidgetTester tester) async {
@@ -137,12 +140,12 @@ void main() {
   );
 
   testWidgets("Theme has default IconThemeData, which is derived from the theme's primary color", (WidgetTester tester) async {
-    const CupertinoDynamicColor primaryColor = CupertinoColors.destructiveRed;
+    const CupertinoDynamicColor primaryColor = CupertinoColors.systemRed;
     const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
 
     final IconThemeData resultingIconTheme = await testIconTheme(tester, themeData);
 
-    expect(resultingIconTheme.color, themeData.primaryColor);
+    expect(resultingIconTheme.color, isSameColorAs(primaryColor));
 
     // Works in dark mode if primaryColor is a CupertinoDynamicColor.
     final Color darkColor = (await testIconTheme(
@@ -164,6 +167,47 @@ void main() {
     expect(iconTheme.color, CupertinoColors.activeOrange);
   });
 
+  testWidgets('CupertinoTheme diagnostics', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const CupertinoThemeData().debugFillProperties(builder);
+
+    final Set<String> description = builder.properties
+      .map((DiagnosticsNode node) => node.name.toString())
+      .toSet();
+
+    expect(
+      const SetEquality<String>().equals(
+        description,
+        <String>{ 'brightness',
+          'primaryColor',
+          'primaryContrastingColor',
+          'barBackgroundColor',
+          'scaffoldBackgroundColor',
+          'textStyle',
+          'actionTextStyle',
+          'tabLabelTextStyle',
+          'navTitleTextStyle',
+          'navLargeTitleTextStyle',
+          'navActionTextStyle',
+          'pickerTextStyle',
+          'dateTimePickerTextStyle',
+        }
+      ),
+      isTrue,
+    );
+  });
+
+  testWidgets('CupertinoTheme.toStringDeep uses single-line style', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/47651.
+    expect(
+      const CupertinoTheme(
+        data: CupertinoThemeData(primaryColor: Color(0x00000000)),
+        child: SizedBox(),
+      ).toStringDeep().trimRight(),
+      isNot(contains('\n')),
+    );
+  });
+
   Brightness currentBrightness;
   void colorMatches(Color componentColor, CupertinoDynamicColor expectedDynamicColor) {
     switch (currentBrightness) {
@@ -176,12 +220,12 @@ void main() {
     }
   }
 
-  final Function dynamicColorsTestGroup = () {
+  final VoidCallback dynamicColorsTestGroup = () {
     testWidgets('CupertinoTheme.of resolves colors', (WidgetTester tester) async {
       final CupertinoThemeData data = CupertinoThemeData(brightness: currentBrightness, primaryColor: CupertinoColors.systemRed);
       final CupertinoThemeData theme = await testTheme(tester, data);
 
-      expect(data.primaryColor, isSameColorAs(CupertinoColors.systemRed.color));
+      expect(data.primaryColor, isSameColorAs(CupertinoColors.systemRed));
       colorMatches(theme.primaryColor, CupertinoColors.systemRed);
     });
 

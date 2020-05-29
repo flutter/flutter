@@ -1,4 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
 set -e
 
 function deploy {
@@ -6,7 +10,7 @@ function deploy {
   local remaining_tries=$(($total_tries - 1))
   shift
   while [[ "$remaining_tries" > 0 ]]; do
-    (cd "$FLUTTER_ROOT/dev/docs" && firebase deploy --token "$FIREBASE_TOKEN" --project "$@") && break
+    (cd "$FLUTTER_ROOT/dev/docs" && firebase --debug deploy --token "$FIREBASE_TOKEN" --project "$@") && break
     remaining_tries=$(($remaining_tries - 1))
     echo "Error: Unable to deploy documentation to Firebase. Retrying in five seconds... ($remaining_tries tries left)"
     sleep 5
@@ -14,7 +18,10 @@ function deploy {
 
   [[ "$remaining_tries" == 0 ]] && {
     echo "Command still failed after $total_tries tries: '$@'"
-    return 1
+    cat firebase-debug.log || echo "Unable to show contents of firebase-debug.log."
+    # TODO(jackson): Return an error here when the Firebase service is more reliable.
+    # https://github.com/flutter/flutter/issues/44452
+    return 0
   }
   return 0
 }
@@ -104,7 +111,7 @@ if [[ -d "$FLUTTER_PUB_CACHE" ]]; then
 fi
 
 # Install and activate dartdoc.
-"$PUB" global activate dartdoc 0.29.0
+"$PUB" global activate dartdoc 0.31.0
 
 # This script generates a unified doc set, and creates
 # a custom index.html, placing everything into dev/docs/doc.
@@ -142,4 +149,3 @@ if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
     deploy 5 docs-flutter-dev
   fi
 fi
-

@@ -1,158 +1,218 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/linux/linux_doctor.dart';
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 
-void main() {
-  group(LinuxDoctorValidator, () {
-    ProcessManager processManager;
-    LinuxDoctorValidator linuxDoctorValidator;
-
-    setUp(() {
-      processManager = MockProcessManager();
-      linuxDoctorValidator = LinuxDoctorValidator();
-    });
-
-    testUsingContext('Returns full validation when clang++ and make are availibe', () async {
-      when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: 'clang version 4.0.1-10 (tags/RELEASE_401/final)\njunk',
-          exitCode: 0,
-        );
-      });
-      when(processManager.run(<String>[
-        'make',
-        '--version',
-      ])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: 'GNU Make 4.1\njunk',
-          exitCode: 0,
-        );
-      });
-
-      final ValidationResult result = await linuxDoctorValidator.validate();
-      expect(result.type, ValidationType.installed);
-      expect(result.messages, <ValidationMessage>[
-        ValidationMessage('clang++ 4.0.1'),
-        ValidationMessage('GNU Make 4.1'),
-      ]);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
-    });
-
-    testUsingContext('Returns partial validation when clang++ version is too old', () async {
-      when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: 'clang version 2.0.1-10 (tags/RELEASE_401/final)\njunk',
-          exitCode: 0,
-        );
-      });
-      when(processManager.run(<String>[
-        'make',
-        '--version',
-      ])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: 'GNU Make 4.1\njunk',
-          exitCode: 0,
-        );
-      });
-
-      final ValidationResult result = await linuxDoctorValidator.validate();
-      expect(result.type, ValidationType.partial);
-      expect(result.messages, <ValidationMessage>[
-        ValidationMessage.error('clang++ 2.0.1 is below minimum version of 3.4.0'),
-        ValidationMessage('GNU Make 4.1'),
-      ]);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
-    });
-
-    testUsingContext('Returns mising validation when make is not availible', () async {
-      when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: 'clang version 4.0.1-10 (tags/RELEASE_401/final)\njunk',
-          exitCode: 0,
-        );
-      });
-      when(processManager.run(<String>[
-        'make',
-        '--version',
-      ])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: '',
-          exitCode: 1,
-        );
-      });
-
-      final ValidationResult result = await linuxDoctorValidator.validate();
-      expect(result.type, ValidationType.missing);
-      expect(result.messages, <ValidationMessage>[
-        ValidationMessage('clang++ 4.0.1'),
-        ValidationMessage.error('make is not installed'),
-      ]);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
-    });
-
-    testUsingContext('Returns mising validation when clang++ is not availible', () async {
-      when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: '',
-          exitCode: 1,
-        );
-      });
-      when(processManager.run(<String>[
-        'make',
-        '--version',
-      ])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: 'GNU Make 4.1\njunk',
-          exitCode: 0,
-        );
-      });
-
-      final ValidationResult result = await linuxDoctorValidator.validate();
-      expect(result.type, ValidationType.missing);
-      expect(result.messages, <ValidationMessage>[
-        ValidationMessage.error('clang++ is not installed'),
-        ValidationMessage('GNU Make 4.1'),
-      ]);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
-    });
-
-
-    testUsingContext('Returns missing validation when clang and make are not availible', () async {
-      when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: '',
-          exitCode: 1,
-        );
-      });
-      when(processManager.run(<String>[
-        'make',
-        '--version',
-      ])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: '',
-          exitCode: 1,
-        );
-      });
-
-      final ValidationResult result = await linuxDoctorValidator.validate();
-      expect(result.type, ValidationType.missing);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
-    });
-  });
+// A command that will return typical-looking 'clang++ --version' output with
+// the given version number.
+FakeCommand _clangPresentCommand(String version) {
+  return FakeCommand(
+    command: const <String>['clang++', '--version'],
+    stdout: '''
+clang version $version-6+build1
+Target: x86_64-pc-linux-gnu
+Thread model: posix
+InstalledDir: /usr/bin
+''',
+  );
 }
 
-class MockProcessManager extends Mock implements ProcessManager {}
+// A command that will return typical-looking 'cmake --version' output with the
+// given version number.
+FakeCommand _cmakePresentCommand(String version) {
+  return FakeCommand(
+    command: const <String>['cmake', '--version'],
+    stdout: '''
+cmake version $version
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+''',
+  );
+}
+
+// A command that will return typical-looking 'ninja --version' output with the
+// given version number.
+FakeCommand _ninjaPresentCommand(String version) {
+  return FakeCommand(
+    command: const <String>['ninja', '--version'],
+    stdout: version,
+  );
+}
+
+// A command that will failure when running '[binary] --version'.
+FakeCommand _missingBinaryCommand(String binary) {
+  return FakeCommand(
+    command: <String>[binary, '--version'],
+    exitCode: 1,
+  );
+}
+
+void main() {
+  testWithoutContext('Full validation when everything is available at the necessary version',() async {
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      _clangPresentCommand('4.0.1'),
+      _cmakePresentCommand('3.16.3'),
+      _ninjaPresentCommand('1.10.0'),
+    ]);
+    final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
+      processManager: processManager,
+      userMessages: UserMessages(),
+    );
+    final ValidationResult result = await linuxDoctorValidator.validate();
+
+    expect(result.type, ValidationType.installed);
+    expect(result.messages, const <ValidationMessage>[
+      ValidationMessage('clang version 4.0.1-6+build1'),
+      ValidationMessage('cmake version 3.16.3'),
+      ValidationMessage('ninja version 1.10.0'),
+    ]);
+  });
+
+  testWithoutContext('Partial validation when clang++ version is too old', () async {
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      _clangPresentCommand('2.0.1'),
+      _cmakePresentCommand('3.16.3'),
+      _ninjaPresentCommand('1.10.0'),
+    ]);
+    final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
+      processManager: processManager,
+      userMessages: UserMessages(),
+    );
+    final ValidationResult result = await linuxDoctorValidator.validate();
+
+    expect(result.type, ValidationType.partial);
+    expect(result.messages, const <ValidationMessage>[
+      ValidationMessage('clang version 2.0.1-6+build1'),
+      ValidationMessage.error('clang++ 3.4.0 or later is required.'),
+      ValidationMessage('cmake version 3.16.3'),
+      ValidationMessage('ninja version 1.10.0'),
+    ]);
+  });
+
+  testWithoutContext('Partial validation when CMake version is too old', () async {
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      _clangPresentCommand('4.0.1'),
+      _cmakePresentCommand('3.2.0'),
+      _ninjaPresentCommand('1.10.0'),
+    ]);
+    final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
+      processManager: processManager,
+      userMessages: UserMessages(),
+    );
+    final ValidationResult result = await linuxDoctorValidator.validate();
+
+    expect(result.type, ValidationType.partial);
+    expect(result.messages, const <ValidationMessage>[
+      ValidationMessage('clang version 4.0.1-6+build1'),
+      ValidationMessage('cmake version 3.2.0'),
+      ValidationMessage.error('cmake 3.10.0 or later is required.'),
+      ValidationMessage('ninja version 1.10.0'),
+    ]);
+  });
+
+  testWithoutContext('Partial validation when ninja version is too old', () async {
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      _clangPresentCommand('4.0.1'),
+      _cmakePresentCommand('3.16.3'),
+      _ninjaPresentCommand('0.8.1'),
+    ]);
+    final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
+      processManager: processManager,
+      userMessages: UserMessages(),
+    );
+    final ValidationResult result = await linuxDoctorValidator.validate();
+
+    expect(result.type, ValidationType.partial);
+    expect(result.messages, const <ValidationMessage>[
+      ValidationMessage('clang version 4.0.1-6+build1'),
+      ValidationMessage('cmake version 3.16.3'),
+      ValidationMessage('ninja version 0.8.1'),
+      ValidationMessage.error('ninja 1.8.0 or later is required.'),
+    ]);
+  });
+
+  testWithoutContext('Missing validation when CMake is not available', () async {
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      _clangPresentCommand('4.0.1'),
+      _missingBinaryCommand('cmake'),
+      _ninjaPresentCommand('1.10.0'),
+    ]);
+    final UserMessages userMessages = UserMessages();
+    final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
+      processManager: processManager,
+      userMessages: userMessages,
+    );
+    final ValidationResult result = await linuxDoctorValidator.validate();
+
+    expect(result.type, ValidationType.missing);
+    expect(result.messages, <ValidationMessage>[
+      const ValidationMessage('clang version 4.0.1-6+build1'),
+      ValidationMessage.error(userMessages.cmakeMissing),
+      const ValidationMessage('ninja version 1.10.0'),
+    ]);
+  });
+
+  testWithoutContext('Missing validation when clang++ is not available', () async {
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      _missingBinaryCommand('clang++'),
+      _cmakePresentCommand('3.16.3'),
+      _ninjaPresentCommand('1.10.0'),
+    ]);
+    final UserMessages userMessages = UserMessages();
+    final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
+      processManager: processManager,
+      userMessages: userMessages,
+    );
+    final ValidationResult result = await linuxDoctorValidator.validate();
+
+    expect(result.type, ValidationType.missing);
+    expect(result.messages, <ValidationMessage>[
+      ValidationMessage.error(userMessages.clangMissing),
+      const ValidationMessage('cmake version 3.16.3'),
+      const ValidationMessage('ninja version 1.10.0'),
+    ]);
+  });
+
+  testWithoutContext('Missing validation when ninja is not available', () async {
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      _clangPresentCommand('4.0.1'),
+      _cmakePresentCommand('3.16.3'),
+      _missingBinaryCommand('ninja'),
+    ]);
+    final UserMessages userMessages = UserMessages();
+    final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
+      processManager: processManager,
+      userMessages: userMessages,
+    );
+    final ValidationResult result = await linuxDoctorValidator.validate();
+
+    expect(result.type, ValidationType.missing);
+    expect(result.messages, <ValidationMessage>[
+      const ValidationMessage('clang version 4.0.1-6+build1'),
+      const ValidationMessage('cmake version 3.16.3'),
+      ValidationMessage.error(userMessages.ninjaMissing),
+    ]);
+  });
+
+  testWithoutContext('Missing validation when multiple dependencies are not available', () async {
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      _missingBinaryCommand('clang++'),
+      _missingBinaryCommand('cmake'),
+      _ninjaPresentCommand('1.10.0'),
+    ]);
+    final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
+      processManager: processManager,
+      userMessages: UserMessages(),
+    );
+
+    final ValidationResult result = await linuxDoctorValidator.validate();
+    expect(result.type, ValidationType.missing);
+  });
+}

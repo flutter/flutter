@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,7 +19,7 @@ class ColorFiltered extends SingleChildRenderObjectWidget {
       : assert(colorFilter != null),
         super(key: key, child: child);
 
-  /// The color filter to apply to the child of this widvget.
+  /// The color filter to apply to the child of this widget.
   final ColorFilter colorFilter;
 
   @override
@@ -27,7 +27,7 @@ class ColorFiltered extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _ColorFilterRenderObject renderObject) {
-    renderObject..colorFilter = colorFilter;
+    renderObject.colorFilter = colorFilter;
   }
 
   @override
@@ -55,6 +55,6 @@ class _ColorFilterRenderObject extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    layer = context.pushColorFilter(offset, colorFilter, super.paint, oldLayer: layer);
+    layer = context.pushColorFilter(offset, colorFilter, super.paint, oldLayer: layer as ColorFilterLayer);
   }
 }

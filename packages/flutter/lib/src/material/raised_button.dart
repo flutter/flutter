@@ -1,8 +1,9 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -31,7 +32,7 @@ import 'theme_data.dart';
 /// Raised buttons have a minimum size of 88.0 by 36.0 which can be overridden
 /// with [ButtonTheme].
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to render a disabled RaisedButton, an enabled RaisedButton
 /// and lastly a RaisedButton with gradient background.
@@ -110,6 +111,7 @@ class RaisedButton extends MaterialButton {
     @required VoidCallback onPressed,
     VoidCallback onLongPress,
     ValueChanged<bool> onHighlightChanged,
+    MouseCursor mouseCursor,
     ButtonTextTheme textTheme,
     Color textColor,
     Color disabledTextColor,
@@ -126,6 +128,7 @@ class RaisedButton extends MaterialButton {
     double highlightElevation,
     double disabledElevation,
     EdgeInsetsGeometry padding,
+    VisualDensity visualDensity,
     ShapeBorder shape,
     Clip clipBehavior = Clip.none,
     FocusNode focusNode,
@@ -145,6 +148,7 @@ class RaisedButton extends MaterialButton {
          onPressed: onPressed,
          onLongPress: onLongPress,
          onHighlightChanged: onHighlightChanged,
+         mouseCursor: mouseCursor,
          textTheme: textTheme,
          textColor: textColor,
          disabledTextColor: disabledTextColor,
@@ -161,6 +165,7 @@ class RaisedButton extends MaterialButton {
          highlightElevation: highlightElevation,
          disabledElevation: disabledElevation,
          padding: padding,
+         visualDensity: visualDensity,
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
@@ -183,6 +188,7 @@ class RaisedButton extends MaterialButton {
     @required VoidCallback onPressed,
     VoidCallback onLongPress,
     ValueChanged<bool> onHighlightChanged,
+    MouseCursor mouseCursor,
     ButtonTextTheme textTheme,
     Color textColor,
     Color disabledTextColor,
@@ -200,6 +206,7 @@ class RaisedButton extends MaterialButton {
     Clip clipBehavior,
     FocusNode focusNode,
     bool autofocus,
+    EdgeInsetsGeometry padding,
     MaterialTapTargetSize materialTapTargetSize,
     Duration animationDuration,
     @required Widget icon,
@@ -214,6 +221,7 @@ class RaisedButton extends MaterialButton {
       onPressed: onPressed,
       onLongPress: onLongPress,
       onHighlightChanged: onHighlightChanged,
+      mouseCursor: mouseCursor,
       clipBehavior: clipBehavior,
       fillColor: buttonTheme.getFillColor(this),
       textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
@@ -227,6 +235,7 @@ class RaisedButton extends MaterialButton {
       highlightElevation: buttonTheme.getHighlightElevation(this),
       disabledElevation: buttonTheme.getDisabledElevation(this),
       padding: buttonTheme.getPadding(this),
+      visualDensity: visualDensity ?? theme.visualDensity,
       constraints: buttonTheme.getConstraints(this),
       shape: buttonTheme.getShape(this),
       focusNode: focusNode,
@@ -258,6 +267,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
     @required VoidCallback onPressed,
     VoidCallback onLongPress,
     ValueChanged<bool> onHighlightChanged,
+    MouseCursor mouseCursor,
     ButtonTextTheme textTheme,
     Color textColor,
     Color disabledTextColor,
@@ -275,6 +285,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
     Clip clipBehavior = Clip.none,
     FocusNode focusNode,
     bool autofocus = false,
+    EdgeInsetsGeometry padding,
     MaterialTapTargetSize materialTapTargetSize,
     Duration animationDuration,
     @required Widget icon,
@@ -291,6 +302,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
          onPressed: onPressed,
          onLongPress: onLongPress,
          onHighlightChanged: onHighlightChanged,
+         mouseCursor: mouseCursor,
          textTheme: textTheme,
          textColor: textColor,
          disabledTextColor: disabledTextColor,
@@ -308,6 +320,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
          clipBehavior: clipBehavior,
          focusNode: focusNode,
          autofocus: autofocus,
+         padding: padding,
          materialTapTargetSize: materialTapTargetSize,
          animationDuration: animationDuration,
          child: Row(

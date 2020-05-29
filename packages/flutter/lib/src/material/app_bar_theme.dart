@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -27,7 +27,8 @@ import 'theme.dart';
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
-class AppBarTheme extends Diagnosticable {
+@immutable
+class AppBarTheme with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.AppBarTheme].
   const AppBarTheme({
     this.brightness,
@@ -36,6 +37,7 @@ class AppBarTheme extends Diagnosticable {
     this.iconTheme,
     this.actionsIconTheme,
     this.textTheme,
+    this.centerTitle,
   });
 
   /// Default value for [AppBar.brightness].
@@ -68,6 +70,11 @@ class AppBarTheme extends Diagnosticable {
   /// If null, [AppBar] uses [ThemeData.primaryTextTheme].
   final TextTheme textTheme;
 
+  /// Default value for [AppBar.centerTitle].
+  ///
+  /// If null, the value is adapted to current [TargetPlatform].
+  final bool centerTitle;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   AppBarTheme copyWith({
@@ -77,6 +84,7 @@ class AppBarTheme extends Diagnosticable {
     double elevation,
     IconThemeData iconTheme,
     TextTheme textTheme,
+    bool centerTitle,
   }) {
     return AppBarTheme(
       brightness: brightness ?? this.brightness,
@@ -85,6 +93,7 @@ class AppBarTheme extends Diagnosticable {
       iconTheme: iconTheme ?? this.iconTheme,
       actionsIconTheme: actionsIconTheme ?? this.actionsIconTheme,
       textTheme: textTheme ?? this.textTheme,
+      centerTitle: centerTitle ?? this.centerTitle,
     );
   }
 
@@ -107,6 +116,7 @@ class AppBarTheme extends Diagnosticable {
       iconTheme: IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t),
       actionsIconTheme: IconThemeData.lerp(a?.actionsIconTheme, b?.actionsIconTheme, t),
       textTheme: TextTheme.lerp(a?.textTheme, b?.textTheme, t),
+      centerTitle: t < 0.5 ? a?.centerTitle : b?.centerTitle,
     );
   }
 
@@ -119,22 +129,24 @@ class AppBarTheme extends Diagnosticable {
       iconTheme,
       actionsIconTheme,
       textTheme,
+      centerTitle,
     );
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final AppBarTheme typedOther = other;
-    return typedOther.brightness == brightness
-        && typedOther.color == color
-        && typedOther.elevation == elevation
-        && typedOther.iconTheme == iconTheme
-        && typedOther.actionsIconTheme == actionsIconTheme
-        && typedOther.textTheme == textTheme;
+    return other is AppBarTheme
+        && other.brightness == brightness
+        && other.color == color
+        && other.elevation == elevation
+        && other.iconTheme == iconTheme
+        && other.actionsIconTheme == actionsIconTheme
+        && other.textTheme == textTheme
+        && other.centerTitle == centerTitle;
   }
 
   @override
@@ -146,5 +158,6 @@ class AppBarTheme extends Diagnosticable {
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('actionsIconTheme', actionsIconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('centerTitle', centerTitle, defaultValue: null));
   }
 }

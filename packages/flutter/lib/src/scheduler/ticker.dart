@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -35,10 +35,11 @@ abstract class TickerProvider {
   /// Creates a ticker with the given callback.
   ///
   /// The kind of ticker provided depends on the kind of ticker provider.
+  @factory
   Ticker createTicker(TickerCallback onTick);
 }
 
-// TODO(jacobr): make Ticker Diagnosticable to simplify reporting errors
+// TODO(jacobr): make Ticker use DiagnosticableMixin to simplify reporting errors
 // related to a ticker.
 /// Calls its callback once per animation frame.
 ///
@@ -322,7 +323,7 @@ class Ticker {
   @override
   String toString({ bool debugIncludeStack = false }) {
     final StringBuffer buffer = StringBuffer();
-    buffer.write('$runtimeType(');
+    buffer.write('${objectRuntimeType(this, 'Ticker')}(');
     assert(() {
       buffer.write(debugLabel ?? '');
       return true;
@@ -433,8 +434,8 @@ class TickerFuture implements Future<void> {
   }
 
   @override
-  Future<E> then<E>(dynamic f(void value), { Function onError }) {
-    return _primaryCompleter.future.then<E>(f, onError: onError);
+  Future<R> then<R>(FutureOr<R> onValue(void value), { Function onError }) {
+    return _primaryCompleter.future.then<R>(onValue, onError: onError);
   }
 
   @override

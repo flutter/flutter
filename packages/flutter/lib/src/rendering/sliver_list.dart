@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -44,6 +44,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
 
   @override
   void performLayout() {
+    final SliverConstraints constraints = this.constraints;
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
 
@@ -90,8 +91,28 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     // it's possible for a child to get removed without notice.
     RenderBox leadingChildWithLayout, trailingChildWithLayout;
 
-    // Find the last child that is at or before the scrollOffset.
     RenderBox earliestUsefulChild = firstChild;
+
+    // A firstChild with null layout offset is likely a result of children
+    // reordering.
+    //
+    // We rely on firstChild to have accurate layout offset. In the case of null
+    // layout offset, we have to find the first child that has valid layout
+    // offset.
+    if (childScrollOffset(firstChild) == null) {
+      int leadingChildrenWithoutLayoutOffset = 0;
+      while (childScrollOffset(earliestUsefulChild) == null) {
+        earliestUsefulChild = childAfter(firstChild);
+        leadingChildrenWithoutLayoutOffset += 1;
+      }
+      // We should be able to destroy children with null layout offset safely,
+      // because they are likely outside of viewport
+      collectGarbage(leadingChildrenWithoutLayoutOffset, 0);
+      assert(firstChild != null);
+    }
+
+    // Find the last child that is at or before the scrollOffset.
+    earliestUsefulChild = firstChild;
     for (double earliestScrollOffset = childScrollOffset(earliestUsefulChild);
         earliestScrollOffset > scrollOffset;
         earliestScrollOffset = childScrollOffset(earliestUsefulChild)) {
@@ -99,7 +120,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
 
       if (earliestUsefulChild == null) {
-        final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData;
+        final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData as SliverMultiBoxAdaptorParentData;
         childParentData.layoutOffset = 0.0;
 
         if (scrollOffset == 0.0) {
@@ -139,15 +160,18 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
           correction += paintExtentOf(firstChild);
           earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
         }
-        geometry = SliverGeometry(
-          scrollOffsetCorrection: correction - earliestScrollOffset,
-        );
-        final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData;
-        childParentData.layoutOffset = 0.0;
-        return;
+        earliestUsefulChild = firstChild;
+        if ((correction - earliestScrollOffset).abs() > precisionErrorTolerance) {
+          geometry = SliverGeometry(
+            scrollOffsetCorrection: correction - earliestScrollOffset,
+          );
+          final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData as SliverMultiBoxAdaptorParentData;
+          childParentData.layoutOffset = 0.0;
+          return;
+        }
       }
 
-      final SliverMultiBoxAdaptorParentData childParentData = earliestUsefulChild.parentData;
+      final SliverMultiBoxAdaptorParentData childParentData = earliestUsefulChild.parentData as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = firstChildScrollOffset;
       assert(earliestUsefulChild == firstChild);
       leadingChildWithLayout = earliestUsefulChild;
@@ -207,7 +231,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         trailingChildWithLayout = child;
       }
       assert(child != null);
-      final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+      final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = endScrollOffset;
       assert(childParentData.index == index);
       endScrollOffset = childScrollOffset(child) + paintExtentOf(child);

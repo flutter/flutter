@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,6 +12,8 @@ import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'layer.dart';
+import 'mouse_cursor.dart';
+import 'mouse_tracking.dart';
 import 'object.dart';
 
 
@@ -229,10 +231,10 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
 /// A render object for an iOS UIKit UIView.
 ///
 /// {@template flutter.rendering.platformView.preview}
-/// Embedding UIViews is still in release preview, to enable the preview for an iOS app add a boolean
+/// Embedding UIViews is still preview-quality. To enable the preview for an iOS app add a boolean
 /// field with the key 'io.flutter.embedded_views_preview' and the value set to 'YES' to the
 /// application's Info.plist file. A list of open issued with embedding UIViews is available on
-/// [Github](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22a%3A+platform-views%22+label%3A%22%E2%8C%BA%E2%80%AC+platform-ios%22)
+/// [Github](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22a%3A+platform-views%22+label%3Aplatform-ios+sort%3Acreated-asc)
 /// {@endtemplate}
 ///
 /// [RenderUiKitView] is responsible for sizing and displaying an iOS
@@ -341,7 +343,7 @@ class RenderUiKitView extends RenderBox {
     if (event is! PointerDownEvent) {
       return;
     }
-    _gestureRecognizer.addPointer(event);
+    _gestureRecognizer.addPointer(event as PointerDownEvent);
     _lastPointerDownEvent = event.original ?? event;
   }
 
@@ -350,7 +352,7 @@ class RenderUiKitView extends RenderBox {
     if (event is! PointerDownEvent) {
       return;
     }
-    if (!(Offset.zero & size).contains(event.localPosition)) {
+    if (!(Offset.zero & size).contains(globalToLocal(event.position))) {
       return;
     }
     if ((event.original ?? event) != _lastPointerDownEvent) {
@@ -416,7 +418,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
     startTrackingPointer(event.pointer, event.transform);
-    for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
+    for (final OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
     }
   }
@@ -492,7 +494,7 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
     startTrackingPointer(event.pointer, event.transform);
-    for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
+    for (final OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
     }
   }
@@ -686,8 +688,7 @@ class _MotionEventsDispatcher {
     return AndroidPointerProperties(id: pointerId, toolType: toolType);
   }
 
-  bool isSinglePointerAction(PointerEvent event) =>
-      !(event is PointerDownEvent) && !(event is PointerUpEvent);
+  bool isSinglePointerAction(PointerEvent event) => event is! PointerDownEvent && event is! PointerUpEvent;
 }
 
 /// A render object for embedding a platform view.
@@ -729,11 +730,6 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     }
   }
 
-  /// How to behave during hit testing.
-  // The implicit setter is enough here as changing this value will just affect
-  // any newly arriving events there's nothing we need to invalidate.
-  // PlatformViewHitTestBehavior hitTestBehavior;
-
   /// {@macro  flutter.rendering.platformView.updateGestureRecognizers}
   ///
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
@@ -762,8 +758,10 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   void paint(PaintingContext context, Offset offset) {
     assert(_controller.viewId != null);
     context.addLayer(PlatformViewLayer(
-            rect: offset & size,
-            viewId: _controller.viewId));
+      rect: offset & size,
+      viewId: _controller.viewId,
+      hoverAnnotation: _hoverAnnotation,
+    ));
   }
 
   @override
@@ -783,11 +781,32 @@ mixin _PlatformViewGestureMixin on RenderBox {
   // any newly arriving events there's nothing we need to invalidate.
   PlatformViewHitTestBehavior hitTestBehavior;
 
+  /// [MouseTrackerAnnotation] associated with the platform view layer.
+  ///
+  /// Gesture recognizers don't receive hover events due to the performance
+  /// cost associated with hit testing a sequence of potentially thousands of
+  /// events -- move events only hit-test the down event, then cache the result
+  /// and apply it to all subsequent move events, but there is no down event
+  /// for a hover. To support native hover gesture handling by platform views,
+  /// we attach/detach this layer annotation as necessary.
+  MouseTrackerAnnotation get _hoverAnnotation {
+    return _cachedHoverAnnotation ??= MouseTrackerAnnotation(
+      onHover: (PointerHoverEvent event) {
+        if (_handlePointerEvent != null)
+          _handlePointerEvent(event);
+      },
+      cursor: MouseCursor.uncontrolled,
+    );
+  }
+  MouseTrackerAnnotation _cachedHoverAnnotation;
+
+  _HandlePointerEvent _handlePointerEvent;
+
   /// {@macro  flutter.rendering.platformView.updateGestureRecognizers}
   ///
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
   /// set of gesture recognizers is changed.
-  void _updateGestureRecognizersWithCallBack(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers, _HandlePointerEvent _handlePointerEvent) {
+  void _updateGestureRecognizersWithCallBack(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers, _HandlePointerEvent handlePointerEvent) {
     assert(gestureRecognizers != null);
     assert(
     _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
@@ -797,7 +816,8 @@ mixin _PlatformViewGestureMixin on RenderBox {
       return;
     }
     _gestureRecognizer?.dispose();
-    _gestureRecognizer = _PlatformViewGestureRecognizer(_handlePointerEvent, gestureRecognizers);
+    _gestureRecognizer = _PlatformViewGestureRecognizer(handlePointerEvent, gestureRecognizers);
+    _handlePointerEvent = handlePointerEvent;
   }
 
   _PlatformViewGestureRecognizer _gestureRecognizer;

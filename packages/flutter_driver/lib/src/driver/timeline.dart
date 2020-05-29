@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -29,20 +29,16 @@ class TimelineEvent {
   factory TimelineEvent(Map<String, dynamic> json) {
     return TimelineEvent._(
       json,
-      json['name'],
-      json['cat'],
-      json['ph'],
-      json['pid'],
-      json['tid'],
-      json['dur'] != null
-        ? Duration(microseconds: json['dur'])
-        : null,
-      json['tdur'] != null
-        ? Duration(microseconds: json['tdur'])
-        : null,
-      json['ts'],
-      json['tts'],
-      json['args'],
+      json['name'] as String,
+      json['cat'] as String,
+      json['ph'] as String,
+      json['pid'] as int,
+      json['tid'] as int,
+      json['dur'] != null ? Duration(microseconds: json['dur'] as int) : null,
+      json['tdur'] != null ? Duration(microseconds: json['tdur'] as int) : null,
+      json['ts'] as int,
+      json['tts'] as int,
+      json['args'] as Map<String, dynamic>,
     );
   }
 
@@ -122,13 +118,34 @@ class TimelineEvent {
 }
 
 List<TimelineEvent> _parseEvents(Map<String, dynamic> json) {
-  final List<dynamic> jsonEvents = json['traceEvents'];
+  final List<dynamic> jsonEvents = json['traceEvents'] as List<dynamic>;
 
-  if (jsonEvents == null)
+  if (jsonEvents == null) {
     return null;
+  }
 
   // TODO(vegorov): use instance method version of castFrom when it is available.
-  return Iterable.castFrom<dynamic, Map<String, dynamic>>(jsonEvents)
-    .map<TimelineEvent>((Map<String, dynamic> eventJson) => TimelineEvent(eventJson))
-    .toList();
+  final List<TimelineEvent> timelineEvents =
+      Iterable.castFrom<dynamic, Map<String, dynamic>>(jsonEvents)
+          .map<TimelineEvent>(
+              (Map<String, dynamic> eventJson) => TimelineEvent(eventJson))
+          .toList();
+
+  timelineEvents.sort((TimelineEvent e1, TimelineEvent e2) {
+    final int ts1 = e1.timestampMicros;
+    final int ts2 = e2.timestampMicros;
+    if (ts1 == null) {
+      if (ts2 == null) {
+        return 0;
+      } else {
+        return -1;
+      }
+    } else if (ts2 == null) {
+      return 1;
+    } else {
+      return ts1.compareTo(ts2);
+    }
+  });
+
+  return timelineEvents;
 }

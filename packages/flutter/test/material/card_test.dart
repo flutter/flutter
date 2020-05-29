@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -187,5 +187,38 @@ void main() {
       );
     }));
     expect(tester.widget<Material>(find.byType(Material)).clipBehavior, Clip.antiAliasWithSaveLayer);
+  });
+
+  testWidgets('Card shadowColor', (WidgetTester tester) async {
+    Material _getCardMaterial(WidgetTester tester) {
+      return tester.widget<Material>(
+        find.descendant(
+          of: find.byType(Card),
+          matching: find.byType(Material),
+        ),
+      );
+    }
+
+    Card _getCard(WidgetTester tester) {
+      return tester.widget<Card>(
+          find.byType(Card)
+      );
+    }
+
+    await tester.pumpWidget(
+      const Card(),
+    );
+
+    expect(_getCard(tester).shadowColor, null);
+    expect(_getCardMaterial(tester).shadowColor, const Color(0xFF000000));
+
+    await tester.pumpWidget(
+      const Card(
+        shadowColor: Colors.red,
+      ),
+    );
+
+    expect(_getCardMaterial(tester).shadowColor, _getCard(tester).shadowColor);
+    expect(_getCardMaterial(tester).shadowColor, Colors.red);
   });
 }

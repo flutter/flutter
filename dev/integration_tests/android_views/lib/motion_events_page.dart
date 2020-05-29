@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -18,7 +18,7 @@ MethodChannel channel = const MethodChannel('android_views_integration');
 
 const String kEventsFileName = 'touchEvents';
 
-class MotionEventsPage extends Page {
+class MotionEventsPage extends PageWidget {
   const MotionEventsPage()
       : super('Motion Event Tests', const ValueKey<String>('MotionEventsListTile'));
 
@@ -79,31 +79,46 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
         ),
         Row(
           children: <Widget>[
-            RaisedButton(
-              child: const Text('RECORD'),
-              onPressed: listenToFlutterViewEvents,
+            Expanded(
+              child: RaisedButton(
+                child: const Text('RECORD'),
+                onPressed: listenToFlutterViewEvents,
+              ),
             ),
-            RaisedButton(
-              child: const Text('CLEAR'),
-              onPressed: () {
-                setState(() {
-                  flutterViewEvents.clear();
-                  embeddedViewEvents.clear();
-                });
-              },
+            Expanded(
+              child: RaisedButton(
+                child: const Text('CLEAR'),
+                onPressed: () {
+                  setState(() {
+                    flutterViewEvents.clear();
+                    embeddedViewEvents.clear();
+                  });
+                },
+              ),
             ),
-            RaisedButton(
-              child: const Text('SAVE'),
-              onPressed: () {
-                const StandardMessageCodec codec = StandardMessageCodec();
-                saveRecordedEvents(
+            Expanded(
+              child: RaisedButton(
+                child: const Text('SAVE'),
+                onPressed: () {
+                  const StandardMessageCodec codec = StandardMessageCodec();
+                  saveRecordedEvents(
                     codec.encodeMessage(flutterViewEvents), context);
-              },
+                },
+              ),
             ),
-            RaisedButton(
-              key: const ValueKey<String>('play'),
-              child: const Text('PLAY FILE'),
-              onPressed: () { playEventsFile(); },
+            Expanded(
+              child: RaisedButton(
+                key: const ValueKey<String>('play'),
+                child: const Text('PLAY FILE'),
+                onPressed: () { playEventsFile(); },
+              ),
+            ),
+            Expanded(
+              child: RaisedButton(
+                key: const ValueKey<String>('back'),
+                child: const Text('BACK'),
+                onPressed: () { Navigator.pop(context); },
+              ),
             ),
           ],
         ),
@@ -115,7 +130,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
     const StandardMessageCodec codec = StandardMessageCodec();
     try {
       final ByteData data = await rootBundle.load('packages/assets_for_android_views/assets/touchEvents');
-      final List<dynamic> unTypedRecordedEvents = codec.decodeMessage(data);
+      final List<dynamic> unTypedRecordedEvents = codec.decodeMessage(data) as List<dynamic>;
       final List<Map<String, dynamic>> recordedEvents = unTypedRecordedEvents
           .cast<Map<dynamic, dynamic>>()
           .map<Map<String, dynamic>>((Map<dynamic, dynamic> e) =>e.cast<String, dynamic>())
@@ -123,7 +138,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       await channel.invokeMethod<void>('pipeFlutterViewEvents');
       await viewChannel.invokeMethod<void>('pipeTouchEvents');
       print('replaying ${recordedEvents.length} motion events');
-      for (Map<String, dynamic> event in recordedEvents.reversed) {
+      for (final Map<String, dynamic> event in recordedEvents.reversed) {
         await channel.invokeMethod<void>('synthesizeEvent', event);
       }
 
@@ -204,7 +219,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   Future<dynamic> onMethodChannelCall(MethodCall call) {
     switch (call.method) {
       case 'onTouch':
-        final Map<dynamic, dynamic> map = call.arguments;
+        final Map<dynamic, dynamic> map = call.arguments as Map<dynamic, dynamic>;
         flutterViewEvents.insert(0, map.cast<String, dynamic>());
         if (flutterViewEvents.length > kEventsBufferSize)
           flutterViewEvents.removeLast();
@@ -217,7 +232,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   Future<dynamic> onViewMethodChannelCall(MethodCall call) {
     switch (call.method) {
       case 'onTouch':
-        final Map<dynamic, dynamic> map = call.arguments;
+        final Map<dynamic, dynamic> map = call.arguments as Map<dynamic, dynamic>;
         embeddedViewEvents.insert(0, map.cast<String, dynamic>());
         if (embeddedViewEvents.length > kEventsBufferSize)
           embeddedViewEvents.removeLast();
@@ -248,7 +263,7 @@ class TouchEventDiff extends StatelessWidget {
     Color color;
     final String diff = diffMotionEvents(originalEvent, synthesizedEvent);
     String msg;
-    final int action = synthesizedEvent['action'];
+    final int action = synthesizedEvent['action'] as int;
     final String actionName = getActionName(getActionMasked(action), action);
     if (diff.isEmpty) {
       color = Colors.green;
@@ -274,7 +289,7 @@ class TouchEventDiff extends StatelessWidget {
 
   void prettyPrintEvent(Map<String, dynamic> event) {
     final StringBuffer buffer = StringBuffer();
-    final int action = event['action'];
+    final int action = event['action'] as int;
     final int maskedAction = getActionMasked(action);
     final String actionName = getActionName(maskedAction, action);
 
@@ -283,7 +298,7 @@ class TouchEventDiff extends StatelessWidget {
      buffer.write('pointer: ${getPointerIdx(action)} ');
     }
 
-    final List<Map<dynamic, dynamic>> coords = event['pointerCoords'].cast<Map<dynamic, dynamic>>();
+    final List<Map<dynamic, dynamic>> coords = (event['pointerCoords'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
     for (int i = 0; i < coords.length; i++) {
       buffer.write('p$i x: ${coords[i]['x']} y: ${coords[i]['y']}, pressure: ${coords[i]['pressure']} ');
     }

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -17,7 +17,7 @@ class ComplexLayoutApp extends StatefulWidget {
   @override
   ComplexLayoutAppState createState() => ComplexLayoutAppState();
 
-  static ComplexLayoutAppState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<ComplexLayoutAppState>());
+  static ComplexLayoutAppState of(BuildContext context) => context.findAncestorStateOfType<ComplexLayoutAppState>();
 }
 
 class ComplexLayoutAppState extends State<ComplexLayoutApp> {
@@ -84,7 +84,7 @@ class ComplexLayout extends StatefulWidget {
   @override
   ComplexLayoutState createState() => ComplexLayoutState();
 
-  static ComplexLayoutState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<ComplexLayoutState>());
+  static ComplexLayoutState of(BuildContext context) => context.findAncestorStateOfType<ComplexLayoutState>();
 }
 
 class ComplexLayoutState extends State<ComplexLayout> {
@@ -363,7 +363,7 @@ class UserHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 RichText(text: TextSpan(
-                  style: Theme.of(context).textTheme.body1,
+                  style: Theme.of(context).textTheme.bodyText2,
                   children: <TextSpan>[
                     TextSpan(text: userName, style: const TextStyle(fontWeight: FontWeight.bold)),
                     const TextSpan(text: ' shared a new '),
@@ -462,8 +462,8 @@ class ItemImageBox extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  Text('Artisans of Southern India', style: Theme.of(context).textTheme.body2),
-                  Text('Silk Spinners', style: Theme.of(context).textTheme.body1),
+                  Text('Artisans of Southern India', style: Theme.of(context).textTheme.bodyText1),
+                  Text('Silk Spinners', style: Theme.of(context).textTheme.bodyText2),
                   Text('Sivaganga, Tamil Nadu', style: Theme.of(context).textTheme.caption),
                 ],
               ),
@@ -506,7 +506,7 @@ class ItemGalleryBox extends StatelessWidget {
                               child: Container(
                                 color: Theme.of(context).primaryColor,
                                 child: Center(
-                                  child: Text(tabName, style: Theme.of(context).textTheme.headline.copyWith(color: Colors.white)),
+                                  child: Text(tabName, style: Theme.of(context).textTheme.headline5.copyWith(color: Colors.white)),
                                 ),
                               ),
                             ),

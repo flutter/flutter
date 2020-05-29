@@ -1,8 +1,9 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -127,7 +128,12 @@ Widget buildFrame({
 typedef TabControllerFrameBuilder = Widget Function(BuildContext context, TabController controller);
 
 class TabControllerFrame extends StatefulWidget {
-  const TabControllerFrame({ this.length, this.initialIndex = 0, this.builder });
+  const TabControllerFrame({
+    Key key,
+    this.length,
+    this.initialIndex = 0,
+    this.builder,
+  }) : super(key: key);
 
   final int length;
   final int initialIndex;
@@ -244,7 +250,7 @@ void main() {
     );
     expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style.fontFamily, 'Ahem');
     expect(tester.getSize(find.byType(Tab)), const Size(14.0, 46.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Tab sizing - icon and text', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -252,7 +258,31 @@ void main() {
     );
     expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style.fontFamily, 'Ahem');
     expect(tester.getSize(find.byType(Tab)), const Size(14.0, 72.0));
-  }, skip: isBrowser);
+  });
+
+  testWidgets('Tab sizing - icon, iconMargin and text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(fontFamily: 'Ahem'),
+        home: const Center(
+          child: Material(
+            child: Tab(
+              icon: SizedBox(
+                width: 10.0,
+                height: 10.0,
+              ),
+              iconMargin: EdgeInsets.symmetric(
+                horizontal: 100.0,
+              ),
+              text: 'x',
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style.fontFamily, 'Ahem');
+    expect(tester.getSize(find.byType(Tab)), const Size(210.0, 72.0));
+  });
 
   testWidgets('Tab sizing - icon and child', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -260,7 +290,7 @@ void main() {
     );
     expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style.fontFamily, 'Ahem');
     expect(tester.getSize(find.byType(Tab)), const Size(14.0, 72.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Tab color - normal', (WidgetTester tester) async {
     final Widget tabBar = TabBar(tabs: const <Widget>[SizedBox.shrink()], controller: TabController(length: 1, vsync: tester));
@@ -383,7 +413,7 @@ void main() {
 
     // Scrolling the TabBar doesn't change the selection
     expect(controller.index, 0);
-  }, skip: isBrowser);
+  });
 
   testWidgets('TabBarView maintains state', (WidgetTester tester) async {
     final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE'];
@@ -978,8 +1008,7 @@ void main() {
     expect(tabController.index, 0);
   });
 
-  testWidgets('Nested TabBarView sets ScrollController pixels to non-null value '
-  'when disposed before it is set by the applyViewportDimension', (WidgetTester tester) async {
+  testWidgets('Can switch to non-neighboring tab in nested TabBarView without crashing', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/18756
     final TabController _mainTabController = TabController(length: 4, vsync: const TestVSync());
     final TabController _nestedTabController = TabController(length: 2, vsync: const TestVSync());
@@ -1643,7 +1672,7 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics));
 
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 
   testWidgets('correct scrolling semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1911,7 +1940,7 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics));
 
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 
   testWidgets('can be notified of TabBar onTap behavior', (WidgetTester tester) async {
     int tabIndex = -1;
@@ -2000,6 +2029,45 @@ void main() {
     expect(() => Tab(text: 'foo', child: Container()), throwsAssertionError);
   });
 
+  testWidgets('Tabs changes mouse cursor when a tab is hovered', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B'];
+    await tester.pumpWidget(MaterialApp(home: DefaultTabController(
+        length: tabs.length,
+        child: Scaffold(
+          body: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TabBar(
+              mouseCursor: SystemMouseCursors.text,
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Tab).first));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(MaterialApp(home: DefaultTabController(
+        length: tabs.length,
+        child: Scaffold(
+          body: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            ),
+          ),
+        ),
+      ),
+    ));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
 
   testWidgets('TabController changes', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/14812
@@ -2381,7 +2449,7 @@ void main() {
                 ),
                 body: tabTextContent.isNotEmpty
                   ? TabBarView(
-                      children: tabTextContent.map((String textContent) => Tab(text: '$textContent\'s view')).toList()
+                      children: tabTextContent.map((String textContent) => Tab(text: "$textContent's view")).toList()
                     )
                   : const Center(child: Text('No tabs')),
                 bottomNavigationBar: BottomAppBar(
@@ -2424,11 +2492,92 @@ void main() {
     await tester.tap(find.byKey(const Key('Add tab')));
     await tester.pumpAndSettle();
     expect(find.text('Tab 1'), findsOneWidget);
-    expect(find.text('Tab 1\'s view'), findsOneWidget);
+    expect(find.text("Tab 1's view"), findsOneWidget);
 
     // Dynamically updates to zero tabs properly
     await tester.tap(find.byKey(const Key('Delete tab')));
     await tester.pumpAndSettle();
     expect(find.text('No tabs'), findsOneWidget);
+  });
+
+   testWidgets('TabBar expands vertically to accommodate the Icon and child Text() pair the same amount it would expand for Icon and text pair.', (WidgetTester tester) async {
+    const double indicatorWeight = 2.0;
+
+    const List<Widget> tabListWithText = <Widget>[
+      Tab(icon: Icon(Icons.notifications), text: 'Test'),
+    ];
+    const List<Widget> tabListWithTextChild = <Widget>[
+      Tab(icon: Icon(Icons.notifications), child: Text('Test')),
+    ];
+
+    const TabBar tabBarWithText = TabBar(tabs: tabListWithText, indicatorWeight: indicatorWeight,);
+    const TabBar tabBarWithTextChild = TabBar(tabs: tabListWithTextChild, indicatorWeight: indicatorWeight,);
+
+    expect(tabBarWithText.preferredSize, tabBarWithTextChild.preferredSize);
+   });
+
+  testWidgets('Setting TabController index should make TabBar indicator immediately pop into the position', (WidgetTester tester) async {
+    const List<Tab> tabs = <Tab>[
+      Tab(text: 'A'), Tab(text: 'B'), Tab(text: 'C')
+    ];
+    const Color indicatorColor = Color(0xFFFF0000);
+    TabController tabController;
+
+    Widget buildTabControllerFrame(BuildContext context, TabController controller) {
+      tabController = controller;
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              controller: controller,
+              tabs: tabs,
+              indicatorColor: indicatorColor,
+            ),
+          ),
+          body: TabBarView(
+            controller: controller,
+            children: tabs.map((Tab tab) {
+              return Center(child: Text(tab.text));
+            }).toList(),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(TabControllerFrame(
+      builder: buildTabControllerFrame,
+      length: tabs.length,
+      initialIndex: 0,
+    ));
+
+    final RenderBox box = tester.renderObject(find.byType(TabBar));
+    final TabIndicatorRecordingCanvas canvas = TabIndicatorRecordingCanvas(indicatorColor);
+    final TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
+
+    box.paint(context, Offset.zero);
+    double expectedIndicatorLeft = canvas.indicatorRect.left;
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    void pageControllerListener() {
+      // Whenever TabBarView scrolls due to changing TabController's index,
+      // check if indicator stays idle in its expectedIndicatorLeft
+      box.paint(context, Offset.zero);
+      expect(canvas.indicatorRect.left, expectedIndicatorLeft);
+    }
+
+    // Moving from index 0 to 2 (distanced tabs)
+    tabController.index = 2;
+    box.paint(context, Offset.zero);
+    expectedIndicatorLeft = canvas.indicatorRect.left;
+    pageController.addListener(pageControllerListener);
+    await tester.pumpAndSettle();
+
+    // Moving from index 2 to 1 (neighboring tabs)
+    tabController.index = 1;
+    box.paint(context, Offset.zero);
+    expectedIndicatorLeft = canvas.indicatorRect.left;
+    await tester.pumpAndSettle();
+    pageController.removeListener(pageControllerListener);
   });
 }

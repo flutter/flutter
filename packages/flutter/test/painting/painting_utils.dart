@@ -1,4 +1,4 @@
-// Copyright 2014 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,9 +7,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-class PaintingBindingSpy extends BindingBase with ServicesBinding, PaintingBinding {
+class PaintingBindingSpy extends BindingBase with SchedulerBinding, ServicesBinding, PaintingBinding {
   int counter = 0;
   int get instantiateImageCodecCalledCount => counter;
 

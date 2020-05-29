@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,6 +19,7 @@ typedef SliverLayoutWidgetBuilder = Widget Function(BuildContext context, Sliver
 /// The [SliverLayoutBuilder]'s final [SliverGeometry] will match the [SliverGeometry]
 /// of its child.
 ///
+/// {@macro flutter.widgets.layoutBuilder.builderFunctionInvocation}
 ///
 /// See also:
 ///
@@ -52,7 +53,7 @@ class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChild
 
   @override
   void performLayout() {
-    layoutAndBuildChild();
+    rebuildIfNecessary();
     child?.layout(constraints, parentUsesSize: true);
     geometry = child?.geometry ?? SliverGeometry.zero;
   }

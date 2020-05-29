@@ -1,4 +1,4 @@
-// Copyright (c) 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
@@ -30,7 +29,6 @@ Future<void> main() async {
           ],
         );
       });
-      await prepareProvisioningCertificates(projectDir.path);
 
       section('Build ephemeral host app in release mode without CocoaPods');
 
@@ -56,13 +54,6 @@ Future<void> main() async {
       if (!await _isAppAotBuild(ephemeralReleaseHostApp)) {
         return TaskResult.failure(
           'Ephemeral host app ${ephemeralReleaseHostApp.path} was not a release build as expected'
-        );
-      }
-
-      if (await _hasDebugSymbols(ephemeralReleaseHostApp)) {
-        return TaskResult.failure(
-          "Ephemeral host app ${ephemeralReleaseHostApp.path}'s App.framework's "
-          "debug symbols weren't stripped in release mode"
         );
       }
 
@@ -96,12 +87,6 @@ Future<void> main() async {
       if (!await _isAppAotBuild(ephemeralProfileHostApp)) {
         return TaskResult.failure(
           'Ephemeral host app ${ephemeralProfileHostApp.path} was not a profile build as expected'
-        );
-      }
-
-      if (!await _hasDebugSymbols(ephemeralProfileHostApp)) {
-        return TaskResult.failure(
-          "Ephemeral host app ${ephemeralProfileHostApp.path}'s App.framework does not contain debug symbols"
         );
       }
 
@@ -244,7 +229,13 @@ Future<void> main() async {
       final File objectiveCAnalyticsOutputFile = File(path.join(tempDir.path, 'analytics-objc.log'));
       final Directory objectiveCBuildDirectory = Directory(path.join(tempDir.path, 'build-objc'));
       await inDirectory(objectiveCHostApp, () async {
-        await exec('pod', <String>['install']);
+        await exec(
+          'pod',
+          <String>['install'],
+          environment: <String, String>{
+            'LANG': 'en_US.UTF-8',
+          },
+        );
         await exec(
           'xcodebuild',
           <String>[
@@ -279,10 +270,10 @@ Future<void> main() async {
       final String objectiveCAnalyticsOutput = objectiveCAnalyticsOutputFile.readAsStringSync();
       if (!objectiveCAnalyticsOutput.contains('cd24: ios')
           || !objectiveCAnalyticsOutput.contains('cd25: true')
-          || !objectiveCAnalyticsOutput.contains('viewName: build/bundle')) {
+          || !objectiveCAnalyticsOutput.contains('viewName: assemble')) {
         return TaskResult.failure(
-          'Building outer Objective-C app produced the following analytics: "$objectiveCAnalyticsOutput"'
-          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: build/bundle"'
+          'Building outer Objective-C app produced the following analytics: "$objectiveCAnalyticsOutput" '
+          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: assemble"'
         );
       }
 
@@ -327,7 +318,13 @@ Future<void> main() async {
       final Directory swiftBuildDirectory = Directory(path.join(tempDir.path, 'build-swift'));
 
       await inDirectory(swiftHostApp, () async {
-        await exec('pod', <String>['install']);
+        await exec(
+          'pod',
+          <String>['install'],
+          environment: <String, String>{
+            'LANG': 'en_US.UTF-8',
+          },
+        );
         await exec(
           'xcodebuild',
           <String>[
@@ -362,10 +359,10 @@ Future<void> main() async {
       final String swiftAnalyticsOutput = swiftAnalyticsOutputFile.readAsStringSync();
       if (!swiftAnalyticsOutput.contains('cd24: ios')
           || !swiftAnalyticsOutput.contains('cd25: true')
-          || !swiftAnalyticsOutput.contains('viewName: build/bundle')) {
+          || !swiftAnalyticsOutput.contains('viewName: assemble')) {
         return TaskResult.failure(
-          'Building outer Swift app produced the following analytics: "$swiftAnalyticsOutput"'
-          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: build/bundle"'
+          'Building outer Swift app produced the following analytics: "$swiftAnalyticsOutput" '
+          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: assemble"'
         );
       }
 
@@ -395,27 +392,4 @@ Future<bool> _isAppAotBuild(Directory app) async {
   );
 
   return symbolTable.contains('kDartIsolateSnapshotInstructions');
-}
-
-Future<bool> _hasDebugSymbols(Directory app) async {
-  final String binary = path.join(
-    app.path,
-    'Frameworks',
-    'App.framework',
-    'App',
-  );
-
-  final String symbolTable = await eval(
-    'dsymutil',
-    <String> [
-      '--dump-debug-map',
-      binary,
-    ],
-    // The output is huge.
-    printStdout: false,
-  );
-
-  // Search for some random Flutter framework Dart function which should always
-  // be in App.framework.
-  return symbolTable.contains('BuildOwner_reassemble');
 }

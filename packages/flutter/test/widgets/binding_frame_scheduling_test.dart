@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,7 +19,7 @@ void main() {
     expect(window.onDrawFrame, isNull);
 
     // Instantiation does nothing with regards to frame scheduling.
-    final WidgetsFlutterBinding binding = WidgetsFlutterBinding.ensureInitialized();
+    final WidgetsFlutterBinding binding = WidgetsFlutterBinding.ensureInitialized() as WidgetsFlutterBinding;
     expect(binding.hasScheduledFrame, isFalse);
     expect(window.onBeginFrame, isNull);
     expect(window.onDrawFrame, isNull);
@@ -27,6 +27,9 @@ void main() {
     // Framework starts with detached statue. Sends resumed signal to enable frame.
     final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+
+    // A frame can only be scheduled when there is a root widget.
+    binding.attachRootWidget(const Placeholder());
 
     // Frame callbacks are registered lazily when a frame is scheduled.
     binding.scheduleFrame();

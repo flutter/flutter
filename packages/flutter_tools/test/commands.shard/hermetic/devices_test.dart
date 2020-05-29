@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -15,6 +15,7 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_devices.dart';
 
 void main() {
   group('devices', () {
@@ -30,10 +31,76 @@ void main() {
     testUsingContext('no error when no connected devices', () async {
       final DevicesCommand command = DevicesCommand();
       await createTestCommandRunner(command).run(<String>['devices']);
-      expect(testLogger.statusText, contains('No devices detected'));
+      expect(testLogger.statusText, containsIgnoringWhitespace('No devices detected'));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => null,
       DeviceManager: () => DeviceManager(),
+      ProcessManager: () => MockProcessManager(),
+    });
+
+    testUsingContext('Outputs parsable JSON with --machine flag', () async {
+      final DevicesCommand command = DevicesCommand();
+      await createTestCommandRunner(command).run(<String>['devices', '--machine']);
+      expect(
+        json.decode(testLogger.statusText),
+        <Map<String,Object>>[
+          <String, Object>{
+            'name': 'ephemeral',
+            'id': 'ephemeral',
+            'isSupported': true,
+            'targetPlatform': 'android-arm',
+            'emulator': true,
+            'sdk': 'Test SDK (1.2.3)',
+            'capabilities': <String, Object>{
+              'hotReload': true,
+              'hotRestart': true,
+              'screenshot': false,
+              'fastStart': false,
+              'flutterExit': true,
+              'hardwareRendering': true,
+              'startPaused': true
+            }
+          },
+          <String,Object>{
+            'name': 'webby',
+            'id': 'webby',
+            'isSupported': true,
+            'targetPlatform': 'web-javascript',
+            'emulator': true,
+            'sdk': 'Web SDK (1.2.4)',
+            'capabilities': <String, Object>{
+              'hotReload': true,
+              'hotRestart': true,
+              'screenshot': false,
+              'fastStart': false,
+              'flutterExit': true,
+              'hardwareRendering': false,
+              'startPaused': true
+            }
+          }
+        ]
+      );
+    }, overrides: <Type, Generator>{
+      DeviceManager: () => _FakeDeviceManager(),
+      ProcessManager: () => MockProcessManager(),
+    });
+
+    testUsingContext('available devices and diagnostics', () async {
+      final DevicesCommand command = DevicesCommand();
+      await createTestCommandRunner(command).run(<String>['devices']);
+      expect(
+        testLogger.statusText,
+        '''
+2 connected devices:
+
+ephemeral • ephemeral • android-arm    • Test SDK (1.2.3) (emulator)
+webby     • webby     • web-javascript • Web SDK (1.2.4) (emulator)
+
+• Cannot connect to device ABC
+'''
+      );
+    }, overrides: <Type, Generator>{
+      DeviceManager: () => _FakeDeviceManager(),
       ProcessManager: () => MockProcessManager(),
     });
   });
@@ -65,4 +132,21 @@ class MockProcessManager extends Mock implements ProcessManager {
   }) {
     return ProcessResult(0, 0, '', '');
   }
+}
+
+class _FakeDeviceManager extends DeviceManager {
+  _FakeDeviceManager();
+
+  @override
+  Future<List<Device>> getAllConnectedDevices() =>
+    Future<List<Device>>.value(fakeDevices.map((FakeDeviceJsonData d) => d.dev).toList());
+
+  @override
+  Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
+    getAllConnectedDevices();
+
+  @override
+  Future<List<String>> getDeviceDiagnostics() => Future<List<String>>.value(
+    <String>['Cannot connect to device ABC']
+  );
 }

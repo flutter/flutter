@@ -1,4 +1,4 @@
-// Copyright (c) 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,13 +7,12 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 /// Combines several TaskFunctions with trivial success value into one.
 TaskFunction combine(List<TaskFunction> tasks) {
   return () async {
-    for (TaskFunction task in tasks) {
+    for (final TaskFunction task in tasks) {
       final TaskResult result = await task();
       if (result.failed) {
         return result;
@@ -47,8 +46,6 @@ class PluginTest {
       final _FlutterProject app = await _FlutterProject.create(tempDir, options,
           name: 'plugintestapp', template: 'app', environment: appCreateEnvironment);
       try {
-        if (buildTarget == 'ios')
-          await prepareProvisioningCertificates(app.rootPath);
         section('Add plugins');
         await app.addPlugin('plugintest',
             pluginPath: path.join('..', 'plugintest'));

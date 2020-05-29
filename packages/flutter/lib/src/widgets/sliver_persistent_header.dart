@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -91,8 +91,11 @@ abstract class SliverPersistentHeaderDelegate {
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate);
 }
 
-/// A sliver whose size varies when the sliver is scrolled to the leading edge
-/// of the viewport.
+/// A sliver whose size varies when the sliver is scrolled to the edge
+/// of the viewport opposite the sliver's [GrowthDirection].
+///
+/// In the normal case of a [CustomScrollView] with no centered sliver, this
+/// sliver will vary its size when scrolled to the leading edge of the viewport.
 ///
 /// This is the layout primitive that [SliverAppBar] uses for its
 /// shrinking/growing effect.
@@ -173,10 +176,10 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
   _SliverPersistentHeaderElement(_SliverPersistentHeaderRenderObjectWidget widget) : super(widget);
 
   @override
-  _SliverPersistentHeaderRenderObjectWidget get widget => super.widget;
+  _SliverPersistentHeaderRenderObjectWidget get widget => super.widget as _SliverPersistentHeaderRenderObjectWidget;
 
   @override
-  _RenderSliverPersistentHeaderForWidgetsMixin get renderObject => super.renderObject;
+  _RenderSliverPersistentHeaderForWidgetsMixin get renderObject => super.renderObject as _RenderSliverPersistentHeaderForWidgetsMixin;
 
   @override
   void mount(Element parent, dynamic newSlot) {
@@ -227,10 +230,11 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
   void forgetChild(Element child) {
     assert(child == this.child);
     this.child = null;
+    super.forgetChild(child);
   }
 
   @override
-  void insertChildRenderObject(covariant RenderObject child, dynamic slot) {
+  void insertChildRenderObject(covariant RenderBox child, dynamic slot) {
     assert(renderObject.debugValidateChild(child));
     renderObject.child = child;
   }

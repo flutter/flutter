@@ -1,12 +1,14 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'base/context.dart';
-import 'base/file_system.dart';
-import 'base/platform.dart';
+import 'base/logger.dart';
 import 'base/utils.dart';
-import 'globals.dart';
+import 'build_system/targets/icon_tree_shaker.dart';
+import 'globals.dart' as globals;
 
 /// Information about a build to be performed or used.
 class BuildInfo {
@@ -20,9 +22,19 @@ class BuildInfo {
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
+    this.splitDebugInfoPath,
+    this.dartObfuscation = false,
+    this.dartDefines = const <String>[],
+    this.bundleSkSLPath,
+    this.dartExperiments = const <String>[],
+    @required this.treeShakeIcons,
+    this.performanceMeasurementFile,
   });
 
   final BuildMode mode;
+
+  /// Whether the build should subdset icon fonts.
+  final bool treeShakeIcons;
 
   /// Represents a custom Android product flavor or an Xcode scheme, null for
   /// using the default.
@@ -39,10 +51,10 @@ class BuildInfo {
   final bool trackWidgetCreation;
 
   /// Extra command-line options for front-end.
-  final String extraFrontEndOptions;
+  final List<String> extraFrontEndOptions;
 
   /// Extra command-line options for gen_snapshot.
-  final String extraGenSnapshotOptions;
+  final List<String> extraGenSnapshotOptions;
 
   /// Internal version number (not displayed to users).
   /// Each build must have a unique number to differentiate it from previous builds.
@@ -57,9 +69,39 @@ class BuildInfo {
   /// On Xcode builds it is used as CFBundleShortVersionString,
   final String buildName;
 
-  static const BuildInfo debug = BuildInfo(BuildMode.debug, null);
-  static const BuildInfo profile = BuildInfo(BuildMode.profile, null);
-  static const BuildInfo release = BuildInfo(BuildMode.release, null);
+  /// An optional directory path to save debugging information from dwarf stack
+  /// traces. If null, stack trace information is not stripped from the
+  /// executable.
+  final String splitDebugInfoPath;
+
+  /// Whether to apply dart source code obfuscation.
+  final bool dartObfuscation;
+
+  /// An optional path to a JSON containing object SkSL shaders
+  ///
+  /// Currently this is only supported for Android builds.
+  final String bundleSkSLPath;
+
+  /// Additional constant values to be made available in the Dart program.
+  ///
+  /// These values can be used with the const `fromEnvironment` constructors of
+  /// [bool], [String], [int], and [double].
+  final List<String> dartDefines;
+
+  /// A list of Dart experiments.
+  final List<String> dartExperiments;
+
+  /// The name of a file where flutter assemble will output performance
+  /// information in a JSON format.
+  ///
+  /// This is not considered a build input and will not force assemble to
+  /// rerun tasks.
+  final String performanceMeasurementFile;
+
+  static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+  static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
+  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
+  static const BuildInfo release = BuildInfo(BuildMode.release, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
 
   /// Returns whether a debug build is requested.
   ///
@@ -68,19 +110,52 @@ class BuildInfo {
 
   /// Returns whether a profile build is requested.
   ///
-  /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
+  /// Exactly one of [isDebug], [isProfile], [isJitRelease],
+  /// or [isRelease] is true.
   bool get isProfile => mode == BuildMode.profile;
 
   /// Returns whether a release build is requested.
   ///
-  /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
+  /// Exactly one of [isDebug], [isProfile], [isJitRelease],
+  /// or [isRelease] is true.
   bool get isRelease => mode == BuildMode.release;
+
+  /// Returns whether a JIT release build is requested.
+  ///
+  /// Exactly one of [isDebug], [isProfile], [isJitRelease],
+  /// or [isRelease] is true.
+  bool get isJitRelease => mode == BuildMode.jitRelease;
 
   bool get usesAot => isAotBuildMode(mode);
   bool get supportsEmulator => isEmulatorBuildMode(mode);
   bool get supportsSimulator => isEmulatorBuildMode(mode);
   String get modeName => getModeName(mode);
   String get friendlyModeName => getFriendlyModeName(mode);
+
+  /// Convert to a structued string encoded structure appropriate for usage as
+  /// environment variables or to embed in other scripts.
+  ///
+  /// Fields that are `null` are excluded from this configration.
+  Map<String, String> toEnvironmentConfig() {
+    return <String, String>{
+      if (dartDefines?.isNotEmpty ?? false)
+        'DART_DEFINES': encodeDartDefines(dartDefines),
+      if (dartObfuscation != null)
+        'DART_OBFUSCATION': dartObfuscation.toString(),
+      if (extraFrontEndOptions?.isNotEmpty ?? false)
+        'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
+      if (extraGenSnapshotOptions?.isNotEmpty ?? false)
+        'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions.join(','),
+      if (splitDebugInfoPath != null)
+        'SPLIT_DEBUG_INFO': splitDebugInfoPath,
+      if (trackWidgetCreation != null)
+        'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
+      if (treeShakeIcons != null)
+        'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
+      if (performanceMeasurementFile != null)
+        'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile,
+    };
+  }
 }
 
 /// Information about an Android build to be performed or used.
@@ -94,6 +169,7 @@ class AndroidBuildInfo {
     ],
     this.splitPerAbi = false,
     this.shrink = false,
+    this.fastStart = false,
   });
 
   // The build info containing the mode and flavor.
@@ -111,6 +187,9 @@ class AndroidBuildInfo {
 
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
+
+  /// Whether to bootstrap an empty application.
+  final bool fastStart;
 }
 
 /// A summary of the compilation strategy used for Dart.
@@ -164,7 +243,7 @@ class BuildMode {
   /// other development features.
   bool get isRelease => releaseModes.contains(this);
 
-  /// Whether this mode is using the jit runtime.
+  /// Whether this mode is using the JIT runtime.
   bool get isJit => jitModes.contains(this);
 
   /// Whether this mode is using the precompiled runtime.
@@ -187,7 +266,7 @@ BuildMode getBuildModeForName(String name) {
   return BuildMode.fromName(name);
 }
 
-String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber) {
+String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber, Logger logger) {
   if (buildNumber == null) {
     return null;
   }
@@ -208,7 +287,7 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     }
     tmpBuildNumber = segments.join('.');
     if (tmpBuildNumber != buildNumber) {
-      printTrace('Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
+      logger.printTrace('Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
           'See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
     }
     return tmpBuildNumber;
@@ -226,7 +305,7 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     }
     tmpBuildNumberStr = tmpBuildNumberInt.toString();
     if (tmpBuildNumberStr != buildNumber) {
-      printTrace('Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
+      logger.printTrace('Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
           'See versionCode at https://developer.android.com/studio/publish/versioning');
     }
     return tmpBuildNumberStr;
@@ -234,7 +313,7 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
   return buildNumber;
 }
 
-String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String buildName) {
+String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String buildName, Logger logger) {
   if (buildName == null) {
     return null;
   }
@@ -255,12 +334,13 @@ String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String build
     }
     tmpBuildName = segments.join('.');
     if (tmpBuildName != buildName) {
-      printTrace('Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
+      logger.printTrace('Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
           'See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
     }
     return tmpBuildName;
   }
-  if (targetPlatform == TargetPlatform.android_arm ||
+  if (targetPlatform == TargetPlatform.android ||
+      targetPlatform == TargetPlatform.android_arm ||
       targetPlatform == TargetPlatform.android_arm64 ||
       targetPlatform == TargetPlatform.android_x64 ||
       targetPlatform == TargetPlatform.android_x86) {
@@ -306,10 +386,7 @@ String getNameForHostPlatform(HostPlatform platform) {
 }
 
 enum TargetPlatform {
-  android_arm,
-  android_arm64,
-  android_x64,
-  android_x86,
+  android,
   ios,
   darwin_x64,
   linux_x64,
@@ -318,6 +395,14 @@ enum TargetPlatform {
   fuchsia_x64,
   tester,
   web_javascript,
+  // The arch specific android target platforms are soft-depreacted.
+  // Instead of using TargetPlatform as a combination arch + platform
+  // the code will be updated to carry arch information in [DarwinArch]
+  // and [AndroidArch].
+  android_arm,
+  android_arm64,
+  android_x64,
+  android_x86,
 }
 
 /// iOS and macOS target device architecture.
@@ -329,6 +414,7 @@ enum DarwinArch {
   x86_64,
 }
 
+// TODO(jonahwilliams): replace all android TargetPlatform usage with AndroidArch.
 enum AndroidArch {
   armeabi_v7a,
   arm64_v8a,
@@ -357,15 +443,19 @@ String getNameForDarwinArch(DarwinArch arch) {
 DarwinArch getIOSArchForName(String arch) {
   switch (arch) {
     case 'armv7':
+    case 'armv7f': // iPhone 4S.
+    case 'armv7s': // iPad 4.
       return DarwinArch.armv7;
     case 'arm64':
+    case 'arm64e': // iPhone XS/XS Max/XR and higher. arm64 runs on arm64e devices.
       return DarwinArch.arm64;
+    case 'x86_64':
+      return DarwinArch.x86_64;
   }
-  assert(false);
-  return null;
+  throw Exception('Unsupported iOS arch name "$arch"');
 }
 
-String getNameForTargetPlatform(TargetPlatform platform) {
+String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch darwinArch}) {
   switch (platform) {
     case TargetPlatform.android_arm:
       return 'android-arm';
@@ -376,6 +466,9 @@ String getNameForTargetPlatform(TargetPlatform platform) {
     case TargetPlatform.android_x86:
       return 'android-x86';
     case TargetPlatform.ios:
+      if (darwinArch != null) {
+        return 'ios-${getNameForDarwinArch(darwinArch)}';
+      }
       return 'ios';
     case TargetPlatform.darwin_x64:
       return 'darwin-x64';
@@ -391,6 +484,8 @@ String getNameForTargetPlatform(TargetPlatform platform) {
       return 'flutter-tester';
     case TargetPlatform.web_javascript:
       return 'web-javascript';
+    case TargetPlatform.android:
+      return 'android';
   }
   assert(false);
   return null;
@@ -398,6 +493,8 @@ String getNameForTargetPlatform(TargetPlatform platform) {
 
 TargetPlatform getTargetPlatformForName(String platform) {
   switch (platform) {
+    case 'android':
+      return TargetPlatform.android;
     case 'android-arm':
       return TargetPlatform.android_arm;
     case 'android-arm64':
@@ -436,8 +533,7 @@ AndroidArch getAndroidArchForName(String platform) {
     case 'android-x86':
       return AndroidArch.x86;
   }
-  assert(false);
-  return null;
+  throw Exception('Unsupported Android arch name "$platform"');
 }
 
 String getNameForAndroidArch(AndroidArch arch) {
@@ -483,17 +579,17 @@ String fuchsiaArchForTargetPlatform(TargetPlatform targetPlatform) {
 }
 
 HostPlatform getCurrentHostPlatform() {
-  if (platform.isMacOS) {
+  if (globals.platform.isMacOS) {
     return HostPlatform.darwin_x64;
   }
-  if (platform.isLinux) {
+  if (globals.platform.isLinux) {
     return HostPlatform.linux_x64;
   }
-  if (platform.isWindows) {
+  if (globals.platform.isWindows) {
     return HostPlatform.windows_x64;
   }
 
-  printError('Unsupported host platform, defaulting to Linux');
+  globals.printError('Unsupported host platform, defaulting to Linux');
 
   return HostPlatform.linux_x64;
 }
@@ -502,14 +598,14 @@ HostPlatform getCurrentHostPlatform() {
 String getBuildDirectory() {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  if (context == null || config == null) {
+  if (context == null || globals.config == null) {
     return 'build';
   }
 
-  final String buildDir = config.getValue('build-dir') ?? 'build';
-  if (fs.path.isAbsolute(buildDir)) {
+  final String buildDir = globals.config.getValue('build-dir') as String ?? 'build';
+  if (globals.fs.path.isAbsolute(buildDir)) {
     throw Exception(
-        'build-dir config setting in ${config.configPath} must be relative');
+        'build-dir config setting in ${globals.config.configPath} must be relative');
   }
   return buildDir;
 }
@@ -522,40 +618,62 @@ String getAndroidBuildDirectory() {
 
 /// Returns the AOT build output directory.
 String getAotBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'aot');
+  return globals.fs.path.join(getBuildDirectory(), 'aot');
 }
 
 /// Returns the asset build output directory.
 String getAssetBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'flutter_assets');
+  return globals.fs.path.join(getBuildDirectory(), 'flutter_assets');
 }
 
 /// Returns the iOS build output directory.
 String getIosBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'ios');
+  return globals.fs.path.join(getBuildDirectory(), 'ios');
 }
 
 /// Returns the macOS build output directory.
 String getMacOSBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'macos');
+  return globals.fs.path.join(getBuildDirectory(), 'macos');
 }
 
 /// Returns the web build output directory.
 String getWebBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'web');
+  return globals.fs.path.join(getBuildDirectory(), 'web');
 }
 
 /// Returns the Linux build output directory.
 String getLinuxBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'linux');
+  return globals.fs.path.join(getBuildDirectory(), 'linux');
 }
 
 /// Returns the Windows build output directory.
 String getWindowsBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'windows');
+  return globals.fs.path.join(getBuildDirectory(), 'windows');
 }
 
 /// Returns the Fuchsia build output directory.
 String getFuchsiaBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'fuchsia');
+  return globals.fs.path.join(getBuildDirectory(), 'fuchsia');
+}
+
+/// Defines specified via the `--dart-define` command-line option.
+///
+/// These values are URI-encoded and then combined into a comma-separated string.
+const String kDartDefines = 'DartDefines';
+
+/// Encode a List of dart defines in a URI string.
+String encodeDartDefines(List<String> defines) {
+  return defines.map(Uri.encodeComponent).join(',');
+}
+
+/// Dart defines are encoded inside [environmentDefines] as a comma-separated list.
+List<String> decodeDartDefines(Map<String, String> environmentDefines) {
+  if (!environmentDefines.containsKey(kDartDefines) || environmentDefines[kDartDefines].isEmpty) {
+    return const <String>[];
+  }
+  return environmentDefines[kDartDefines]
+    .split(',')
+    .map<Object>(Uri.decodeComponent)
+    .cast<String>()
+    .toList();
 }

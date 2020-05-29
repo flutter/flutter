@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -59,14 +59,14 @@ Future<void> main() async {
         ..rect(color: Colors.black)
         ..rect(color: Colors.white),
     );
-  }, skip: isBrowser);
+  });
 
   test('ShapeDecoration with BorderDirectional', () {
     const ShapeDecoration decoration = ShapeDecoration(
       shape: BorderDirectional(start: BorderSide(color: Colors.red, width: 3)),
     );
 
-    expect(decoration.padding, isInstanceOf<EdgeInsetsDirectional>());
+    expect(decoration.padding, isA<EdgeInsetsDirectional>());
   });
 
   testWidgets('TestBorder and Directionality - 1', (WidgetTester tester) async {

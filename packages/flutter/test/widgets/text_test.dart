@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -91,7 +91,7 @@ void main() {
     expect(largeSize.height, equals(26.0));
   });
 
-  testWidgets('Text throws a nice error message if there\'s no Directionality', (WidgetTester tester) async {
+  testWidgets("Text throws a nice error message if there's no Directionality", (WidgetTester tester) async {
     await tester.pumpWidget(const Text('Hello'));
     final String message = tester.takeException().toString();
     expect(message, contains('Directionality'));
@@ -165,7 +165,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       const Text(
-        '\$\$',
+        r'$$',
         semanticsLabel: 'Double dollars',
         textDirection: TextDirection.ltr,
       )
@@ -191,7 +191,7 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Text('\$\$', semanticsLabel: 'Double dollars')),
+        child: Text(r'$$', semanticsLabel: 'Double dollars')),
     );
 
     expect(
@@ -772,8 +772,7 @@ void main() {
                 // Each word takes up more than a half of a line. Together they
                 // wrap onto two lines, but leave a lot of extra space.
                 child: Text(
-                  'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywr'
-                    'apwithlotsofextraspace',
+                  'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
                   textDirection: TextDirection.ltr,
                   textWidthBasis: textWidthBasis,
                 ),
@@ -799,6 +798,56 @@ void main() {
     final Size textSizeLongestLine = tester.getSize(find.byType(Text));
     expect(textSizeLongestLine.width, equals(630.0));
     expect(textSizeLongestLine.height, equals(fontHeight * 2));
+  }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
+
+  testWidgets('textWidthBasis with textAlign still obeys parent alignment', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const <Widget>[
+                Text(
+                  'LEFT ALIGNED, PARENT',
+                  textAlign: TextAlign.left,
+                  textWidthBasis: TextWidthBasis.parent,
+                ),
+                Text(
+                  'RIGHT ALIGNED, PARENT',
+                  textAlign: TextAlign.right,
+                  textWidthBasis: TextWidthBasis.parent,
+                ),
+                Text(
+                  'LEFT ALIGNED, LONGEST LINE',
+                  textAlign: TextAlign.left,
+                  textWidthBasis: TextWidthBasis.longestLine,
+                ),
+                Text(
+                  'RIGHT ALIGNED, LONGEST LINE',
+                  textAlign: TextAlign.right,
+                  textWidthBasis: TextWidthBasis.longestLine,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // All Texts have the same horizontal alignment.
+    final double offsetX = tester.getTopLeft(find.text('LEFT ALIGNED, PARENT')).dx;
+    expect(tester.getTopLeft(find.text('RIGHT ALIGNED, PARENT')).dx, equals(offsetX));
+    expect(tester.getTopLeft(find.text('LEFT ALIGNED, LONGEST LINE')).dx, equals(offsetX));
+    expect(tester.getTopLeft(find.text('RIGHT ALIGNED, LONGEST LINE')).dx, equals(offsetX));
+
+    // All Texts are less than or equal to the width of the Column.
+    final double width = tester.getSize(find.byType(Column)).width;
+    expect(tester.getSize(find.text('LEFT ALIGNED, PARENT')).width, lessThan(width));
+    expect(tester.getSize(find.text('RIGHT ALIGNED, PARENT')).width, lessThan(width));
+    expect(tester.getSize(find.text('LEFT ALIGNED, LONGEST LINE')).width, lessThan(width));
+    expect(tester.getSize(find.text('RIGHT ALIGNED, LONGEST LINE')).width, equals(width));
   }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
 
   testWidgets('Paragraph.getBoxesForRange returns nothing when selection range is zero length', (WidgetTester tester) async {

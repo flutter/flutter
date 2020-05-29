@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,6 +7,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'localizations.dart';
 import 'theme.dart';
 
 // Standard iOS 10 tab bar height.
@@ -16,10 +17,7 @@ const Color _kDefaultTabBarBorderColor = CupertinoDynamicColor.withBrightness(
   color: Color(0x4C000000),
   darkColor: Color(0x29000000),
 );
-const Color _kDefaultTabBarInactiveColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFF999999),
-  darkColor: Color(0xFF757575),
-);
+const Color _kDefaultTabBarInactiveColor = CupertinoColors.inactiveGray;
 
 /// An iOS-styled bottom navigation tab bar.
 ///
@@ -181,10 +179,13 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
             style: CupertinoTheme.of(context).textTheme.tabLabelTextStyle.copyWith(color: inactive),
             child: Padding(
               padding: EdgeInsets.only(bottom: bottomPadding),
-              child: Row(
-                // Align bottom since we want the labels to be aligned.
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: _buildTabItems(context),
+              child: Semantics(
+                explicitChildNodes: true,
+                child: Row(
+                  // Align bottom since we want the labels to be aligned.
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: _buildTabItems(context),
+                ),
               ),
             ),
           ),
@@ -207,6 +208,14 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   List<Widget> _buildTabItems(BuildContext context) {
     final List<Widget> result = <Widget>[];
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+    assert(
+      localizations != null,
+      'CupertinoTabBar requires a Localizations parent in order to provide an '
+        'appropriate Semantics hint for tab indexing. A CupertinoApp will '
+        'provide the DefaultCupertinoLocalizations, or you can instantiate your '
+        'own Localizations.'
+    );
 
     for (int index = 0; index < items.length; index += 1) {
       final bool active = index == currentIndex;
@@ -216,8 +225,10 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
           Expanded(
             child: Semantics(
               selected: active,
-              // TODO(xster): This needs localization support. https://github.com/flutter/flutter/issues/13452
-              hint: 'tab, ${index + 1} of ${items.length}',
+              hint: localizations.tabSemanticsLabel(
+                tabIndex: index + 1,
+                tabCount: items.length,
+              ),
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: onTap == null ? null : () { onTap(index); },
@@ -274,7 +285,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     Color backgroundColor,
     Color activeColor,
     Color inactiveColor,
-    Size iconSize,
+    double iconSize,
     Border border,
     int currentIndex,
     ValueChanged<int> onTap,

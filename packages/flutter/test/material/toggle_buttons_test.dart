@@ -1,9 +1,10 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -228,7 +229,7 @@ void main() {
             ),
           ),
         );
-        fail('Should not be possible to create a toggle button with mismatching'
+        fail('Should not be possible to create a toggle button with mismatching '
             'children.length and isSelected.length.');
       } on AssertionError catch (e) {
         expect(e.toString(), contains('children.length'));
@@ -259,15 +260,15 @@ void main() {
         of: find.widgetWithText(RawMaterialButton, 'First child'),
         matching: find.byType(DefaultTextStyle),
     )).style;
-    expect(textStyle.fontFamily, theme.textTheme.body1.fontFamily);
-    expect(textStyle.decoration, theme.textTheme.body1.decoration);
+    expect(textStyle.fontFamily, theme.textTheme.bodyText2.fontFamily);
+    expect(textStyle.decoration, theme.textTheme.bodyText2.decoration);
 
     textStyle = tester.widget<DefaultTextStyle>(find.descendant(
         of: find.widgetWithText(RawMaterialButton, 'Second child'),
         matching: find.byType(DefaultTextStyle),
     )).style;
-    expect(textStyle.fontFamily, theme.textTheme.body1.fontFamily);
-    expect(textStyle.decoration, theme.textTheme.body1.decoration);
+    expect(textStyle.fontFamily, theme.textTheme.bodyText2.fontFamily);
+    expect(textStyle.decoration, theme.textTheme.bodyText2.decoration);
   });
 
   testWidgets('Custom text style except color is applied', (WidgetTester tester) async {
@@ -1434,4 +1435,74 @@ void main() {
       );
     },
   );
+
+  testWidgets('ToggleButtons changes mouse cursor when the button is hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: ToggleButtons(
+              mouseCursor: SystemMouseCursors.text,
+              onPressed: (int index) {},
+              isSelected: const <bool>[false, true],
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.text('First child')));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: ToggleButtons(
+              onPressed: (int index) {},
+              isSelected: const <bool>[false, true],
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: ToggleButtons(
+              isSelected: const <bool>[false, true],
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
 }

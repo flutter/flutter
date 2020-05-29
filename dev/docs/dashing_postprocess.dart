@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -21,7 +21,7 @@ void main(List<String> args) {
 
   // Since I didn't want to add the XML package as a dependency just for this,
   // I just used a regular expression to make this simple change.
-  final RegExp findRe = RegExp(r'''(\s*<key>DocSetPlatformFamily</key>\s*<string>)[^<]+(</string>)''', multiLine: true);
+  final RegExp findRe = RegExp(r'(\s*<key>DocSetPlatformFamily</key>\s*<string>)[^<]+(</string>)', multiLine: true);
   contents = contents.replaceAllMapped(findRe, (Match match) {
     return '${match.group(1)}dartlang${match.group(2)}';
   });

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -52,7 +52,7 @@ import 'transitions.dart';
 /// different image. This is known as "gapless playback" (see also
 /// [Image.gaplessPlayback]).
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// FadeInImage(
@@ -77,7 +77,9 @@ class FadeInImage extends StatelessWidget {
   const FadeInImage({
     Key key,
     @required this.placeholder,
+    this.placeholderErrorBuilder,
     @required this.image,
+    this.imageErrorBuilder,
     this.excludeFromSemantics = false,
     this.imageSemanticLabel,
     this.fadeOutDuration = const Duration(milliseconds: 300),
@@ -132,7 +134,9 @@ class FadeInImage extends StatelessWidget {
   FadeInImage.memoryNetwork({
     Key key,
     @required Uint8List placeholder,
+    this.placeholderErrorBuilder,
     @required String image,
+    this.imageErrorBuilder,
     double placeholderScale = 1.0,
     double imageScale = 1.0,
     this.excludeFromSemantics = false,
@@ -200,7 +204,9 @@ class FadeInImage extends StatelessWidget {
   FadeInImage.assetNetwork({
     Key key,
     @required String placeholder,
+    this.placeholderErrorBuilder,
     @required String image,
+    this.imageErrorBuilder,
     AssetBundle bundle,
     double placeholderScale,
     double imageScale = 1.0,
@@ -239,8 +245,23 @@ class FadeInImage extends StatelessWidget {
   /// Image displayed while the target [image] is loading.
   final ImageProvider placeholder;
 
+  /// A builder function that is called if an error occurs during placeholder
+  /// image loading.
+  ///
+  /// If this builder is not provided, any exceptions will be reported to
+  /// [FlutterError.onError]. If it is provided, the caller should either handle
+  /// the exception by providing a replacement widget, or rethrow the exception.
+  final ImageErrorWidgetBuilder placeholderErrorBuilder;
+
   /// The target image that is displayed once it has loaded.
   final ImageProvider image;
+
+  /// A builder function that is called if an error occurs during image loading.
+  ///
+  /// If this builder is not provided, any exceptions will be reported to
+  /// [FlutterError.onError]. If it is provided, the caller should either handle
+  /// the exception by providing a replacement widget, or rethrow the exception.
+  final ImageErrorWidgetBuilder imageErrorBuilder;
 
   /// The duration of the fade-out animation for the [placeholder].
   final Duration fadeOutDuration;
@@ -337,11 +358,13 @@ class FadeInImage extends StatelessWidget {
 
   Image _image({
     @required ImageProvider image,
+    ImageErrorWidgetBuilder errorBuilder,
     ImageFrameBuilder frameBuilder,
   }) {
     assert(image != null);
     return Image(
       image: image,
+      errorBuilder: errorBuilder,
       frameBuilder: frameBuilder,
       width: width,
       height: height,
@@ -358,12 +381,13 @@ class FadeInImage extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget result = _image(
       image: image,
+      errorBuilder: imageErrorBuilder,
       frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
         if (wasSynchronouslyLoaded)
           return child;
         return _AnimatedFadeOutFadeIn(
           target: child,
-          placeholder: _image(image: placeholder),
+          placeholder: _image(image: placeholder, errorBuilder: placeholderErrorBuilder),
           isTargetLoaded: frame != null,
           fadeInDuration: fadeInDuration,
           fadeOutDuration: fadeOutDuration,
@@ -428,13 +452,13 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
     _targetOpacity = visitor(
       _targetOpacity,
       widget.isTargetLoaded ? 1.0 : 0.0,
-      (dynamic value) => Tween<double>(begin: value),
-    );
+      (dynamic value) => Tween<double>(begin: value as double),
+    ) as Tween<double>;
     _placeholderOpacity = visitor(
       _placeholderOpacity,
       widget.isTargetLoaded ? 0.0 : 1.0,
-      (dynamic value) => Tween<double>(begin: value),
-    );
+      (dynamic value) => Tween<double>(begin: value as double),
+    ) as Tween<double>;
   }
 
   @override
@@ -448,7 +472,13 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
         tween: ConstantTween<double>(0),
         weight: widget.fadeInDuration.inMilliseconds.toDouble(),
       ),
-    ]));
+    ]))..addStatusListener((AnimationStatus status) {
+      if (_placeholderOpacityAnimation.isCompleted) {
+        // Need to rebuild to remove placeholder now that it is invisibile.
+        setState(() {});
+      }
+    });
+
     _targetOpacityAnimation = animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
         tween: ConstantTween<double>(0),
@@ -472,6 +502,15 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
 
   @override
   Widget build(BuildContext context) {
+    final Widget target = FadeTransition(
+      opacity: _targetOpacityAnimation,
+      child: widget.target,
+    );
+
+    if (_placeholderOpacityAnimation.isCompleted) {
+      return target;
+    }
+
     return Stack(
       fit: StackFit.passthrough,
       alignment: AlignmentDirectional.center,
@@ -479,10 +518,7 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
       // but it allows the Stack to avoid a call to Directionality.of()
       textDirection: TextDirection.ltr,
       children: <Widget>[
-        FadeTransition(
-          opacity: _targetOpacityAnimation,
-          child: widget.target,
-        ),
+        target,
         FadeTransition(
           opacity: _placeholderOpacityAnimation,
           child: widget.placeholder,

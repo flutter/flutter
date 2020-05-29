@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -22,6 +22,49 @@ import 'theme.dart';
 /// The box's total height is controlled by [height]. The appropriate
 /// padding is automatically computed from the height.
 ///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This sample shows how to display a Divider between an orange and blue box
+/// inside a column. The Divider is 20 logical pixels in height and contains a
+/// vertically centered black line that is 5 logical pixels thick. The black
+/// line is indented by 20 logical pixels.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/divider.png)
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: Column(
+///       children: <Widget>[
+///         Expanded(
+///           child: Container(
+///             color: Colors.amber,
+///             child: const Center(
+///               child: Text('Above'),
+///             ),
+///           ),
+///         ),
+///         const Divider(
+///           color: Colors.black,
+///           height: 20,
+///           thickness: 5,
+///           indent: 20,
+///           endIndent: 0,
+///         ),
+///         Expanded(
+///           child: Container(
+///             color: Colors.blue,
+///             child: const Center(
+///               child: Text('Below'),
+///             ),
+///           ),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 /// See also:
 ///
 ///  * [PopupMenuDivider], which is the equivalent but for popup menus.
@@ -81,7 +124,7 @@ class Divider extends StatelessWidget {
   /// If this is null, then the [DividerThemeData.color] is used. If that is
   /// also null, then [ThemeData.dividerColor] is used.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Divider(
@@ -102,7 +145,7 @@ class Divider extends StatelessWidget {
   /// If [context] is null, the default color of [BorderSide] is used and the
   /// default width of 0.0 is used.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This example uses this method to create a box that has a divider above and
   /// below it. This is sometimes useful with lists, for instance, to separate a
@@ -231,7 +274,7 @@ class VerticalDivider extends StatelessWidget {
   /// If this is null, then the [DividerThemeData.color] is used. If that is
   /// also null, then [ThemeData.dividerColor] is used.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Divider(

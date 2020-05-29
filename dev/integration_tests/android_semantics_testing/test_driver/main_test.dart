@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -62,6 +62,38 @@ void main() {
       setUpAll(() async {
         await driver.tap(find.text(textFieldRoute));
         // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+
+        // The text selection menu and related semantics vary depending on if
+        // the clipboard contents are pasteable. Copy some text into the
+        // clipboard to make sure these tests always run with pasteable content
+        // in the clipboard.
+        // Ideally this should test the case where there is nothing on the
+        // clipboard as well, but there is no reliable way to clear the
+        // clipboard on Android devices.
+        final SerializableFinder normalTextField = find.descendant(
+          of: find.byValueKey(normalTextFieldKeyValue),
+          matching: find.byType('Semantics'),
+          firstMatchOnly: true,
+        );
+        await driver.tap(normalTextField);
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await driver.enterText('hello world');
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await driver.tap(normalTextField);
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await driver.tap(normalTextField);
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await driver.tap(find.text('SELECT ALL'));
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await driver.tap(find.text('COPY'));
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await driver.enterText('');
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        // Go back to previous page and forward again to unfocus the field.
+        await driver.tap(find.byValueKey(backButtonKeyValue));
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await driver.tap(find.text(textFieldRoute));
         await Future<void>.delayed(const Duration(milliseconds: 500));
       });
 
@@ -399,7 +431,7 @@ void main() {
           // catch up.
           await Future<void>.delayed(const Duration(milliseconds: 1500));
 
-          for (String item in popupItems) {
+          for (final String item in popupItems) {
             expect(
                 await getSemantics(find.byValueKey('$popupKeyValue.$item')),
                 hasAndroidSemantics(
@@ -423,7 +455,7 @@ void main() {
           await driver.tap(find.byValueKey(popupButtonKeyValue));
           await Future<void>.delayed(const Duration(milliseconds: 1500));
 
-          for (String item in popupItems) {
+          for (final String item in popupItems) {
             expect(
                 await getSemantics(find.byValueKey('$popupKeyValue.$item')),
                 hasAndroidSemantics(
@@ -467,7 +499,7 @@ void main() {
         try {
           await Future<void>.delayed(const Duration(milliseconds: 1500));
 
-          for (String item in popupItems) {
+          for (final String item in popupItems) {
             // There are two copies of each item, so we want to find the version
             // that is in the overlay, not the one in the dropdown.
             expect(
@@ -503,7 +535,7 @@ void main() {
           await driver.tap(find.byValueKey(dropdownButtonKeyValue));
           await Future<void>.delayed(const Duration(milliseconds: 1500));
 
-          for (String item in popupItems) {
+          for (final String item in popupItems) {
             // There are two copies of each item, so we want to find the version
             // that is in the overlay, not the one in the dropdown.
             expect(
@@ -572,7 +604,7 @@ void main() {
               ),
               reason: "Alert OK button doesn't have the right semantics");
 
-          for (String item in <String>['Title', 'Body1', 'Body2']) {
+          for (final String item in <String>['Title', 'Body1', 'Body2']) {
             expect(
                 await getSemantics(find.byValueKey('$alertKeyValue.$item')),
                 hasAndroidSemantics(
@@ -611,7 +643,7 @@ void main() {
               ),
               reason: "Alert OK button doesn't have the right semantics");
 
-          for (String item in <String>['Title', 'Body1', 'Body2']) {
+          for (final String item in <String>['Title', 'Body1', 'Body2']) {
             expect(
                 await getSemantics(find.byValueKey('$alertKeyValue.$item')),
                 hasAndroidSemantics(

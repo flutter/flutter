@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -29,7 +29,7 @@ enum BorderStyle {
 /// Note that setting [BorderSide.width] to 0.0 will result in hairline
 /// rendering. A more involved explanation is present in [BorderSide.width].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample shows how [BorderSide] objects can be used in a [Container], via
 /// a [BoxDecoration] and a [Border], to decorate some [Text]. In this example,
@@ -252,22 +252,22 @@ class BorderSide {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
-    final BorderSide typedOther = other;
-    return color == typedOther.color &&
-           width == typedOther.width &&
-           style == typedOther.style;
+    return other is BorderSide
+        && other.color == color
+        && other.width == width
+        && other.style == style;
   }
 
   @override
   int get hashCode => hashValues(color, width, style);
 
   @override
-  String toString() => '$runtimeType($color, ${width.toStringAsFixed(1)}, $style)';
+  String toString() => '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style)';
 }
 
 /// Base class for shape outlines.
@@ -488,8 +488,29 @@ abstract class ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType()';
+    return '${objectRuntimeType(this, 'ShapeBorder')}()';
   }
+}
+
+/// A ShapeBorder that draws an outline with the width and color specified
+/// by [side].
+@immutable
+abstract class OutlinedBorder extends ShapeBorder {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  ///
+  /// The value of [side] must not be null.
+  const OutlinedBorder({ this.side = BorderSide.none }) : assert(side != null);
+
+  /// The border outline's color and weight.
+  ///
+  /// If [side] is [BorderSide.none], which is the default, an outline is not drawn.
+  /// Otherwise the outline is centered over the shape's boundary.
+  final BorderSide side;
+
+  /// Returns a copy of this OutlinedBorder that draws its outline with the
+  /// specified [side], if [side] is non-null.
+  OutlinedBorder copyWith({ BorderSide side });
 }
 
 /// Represents the addition of two otherwise-incompatible borders.
@@ -603,28 +624,20 @@ class _CompoundBorder extends ShapeBorder {
 
   @override
   void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
-    for (ShapeBorder border in borders) {
+    for (final ShapeBorder border in borders) {
       border.paint(canvas, rect, textDirection: textDirection);
       rect = border.dimensions.resolve(textDirection).deflateRect(rect);
     }
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
-    final _CompoundBorder typedOther = other;
-    if (borders == typedOther.borders)
-      return true;
-    if (borders.length != typedOther.borders.length)
-      return false;
-    for (int index = 0; index < borders.length; index += 1) {
-      if (borders[index] != typedOther.borders[index])
-        return false;
-    }
-    return true;
+    return other is _CompoundBorder
+        && listEquals<ShapeBorder>(other.borders, borders);
   }
 
   @override

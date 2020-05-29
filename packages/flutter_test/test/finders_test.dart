@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -128,7 +128,7 @@ void main() {
     final Text text = find.descendant(
       of: find.byKey(key1),
       matching: find.byType(Text),
-    ).last.evaluate().single.widget;
+    ).last.evaluate().single.widget as Text;
 
     expect(text.data, '1');
   });

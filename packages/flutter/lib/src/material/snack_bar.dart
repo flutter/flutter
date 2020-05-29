@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -18,9 +18,9 @@ const double _singleLineVerticalPadding = 14.0;
 
 // TODO(ianh): We should check if the given text and actions are going to fit on
 // one line or not, and if they are, use the single-line layout, and if not, use
-// the multiline layout. See link above.
-
-// TODO(ianh): Implement the Tablet version of snackbar if we're "on a tablet".
+// the multiline layout, https://github.com/flutter/flutter/issues/32782
+// See https://material.io/components/snackbars#specs, 'Longer Action Text' does
+// not match spec.
 
 const Duration _snackBarTransitionDuration = Duration(milliseconds: 250);
 const Duration _snackBarDisplayDuration = Duration(milliseconds: 4000);
@@ -107,7 +107,7 @@ class SnackBarAction extends StatefulWidget {
   final VoidCallback onPressed;
 
   @override
-  _SnackBarActionState createState() => _SnackBarActionState();
+  State<SnackBarAction> createState() => _SnackBarActionState();
 }
 
 class _SnackBarActionState extends State<SnackBarAction> {
@@ -360,7 +360,7 @@ class _SnackBarState extends State<SnackBar> {
       snackBarTheme: snackBarTheme,
     );
 
-    final TextStyle contentTextStyle = snackBarTheme.contentTextStyle ?? inverseTheme.textTheme.subhead;
+    final TextStyle contentTextStyle = snackBarTheme.contentTextStyle ?? inverseTheme.textTheme.subtitle1;
     final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.fixed;
     final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
     final double snackBarPadding = isFloatingSnackBar ? 16.0 : 24.0;

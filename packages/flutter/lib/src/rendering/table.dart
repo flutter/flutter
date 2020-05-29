@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -76,7 +76,7 @@ abstract class TableColumnWidth {
   double flex(Iterable<RenderBox> cells) => null;
 
   @override
-  String toString() => '$runtimeType';
+  String toString() => objectRuntimeType(this, 'TableColumnWidth');
 }
 
 /// Sizes the column according to the intrinsic dimensions of all the
@@ -96,7 +96,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   @override
   double minIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     double result = 0.0;
-    for (RenderBox cell in cells)
+    for (final RenderBox cell in cells)
       result = math.max(result, cell.getMinIntrinsicWidth(double.infinity));
     return result;
   }
@@ -104,7 +104,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   @override
   double maxIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     double result = 0.0;
-    for (RenderBox cell in cells)
+    for (final RenderBox cell in cells)
       result = math.max(result, cell.getMaxIntrinsicWidth(double.infinity));
     return result;
   }
@@ -115,7 +115,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   double flex(Iterable<RenderBox> cells) => _flex;
 
   @override
-  String toString() => '$runtimeType(flex: ${_flex?.toStringAsFixed(1)})';
+  String toString() => '${objectRuntimeType(this, 'IntrinsicColumnWidth')}(flex: ${_flex?.toStringAsFixed(1)})';
 }
 
 /// Sizes the column to a specific number of pixels.
@@ -141,7 +141,7 @@ class FixedColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType(${debugFormatDouble(value)})';
+  String toString() => '${objectRuntimeType(this, 'FixedColumnWidth')}(${debugFormatDouble(value)})';
 }
 
 /// Sizes the column to a fraction of the table's constraints' maxWidth.
@@ -173,7 +173,7 @@ class FractionColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($value)';
+  String toString() => '${objectRuntimeType(this, 'FractionColumnWidth')}($value)';
 }
 
 /// Sizes the column by taking a part of the remaining space once all
@@ -210,7 +210,7 @@ class FlexColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType(${debugFormatDouble(value)})';
+  String toString() => '${objectRuntimeType(this, 'FlexColumnWidth')}(${debugFormatDouble(value)})';
 }
 
 /// Sizes the column such that it is the size that is the maximum of
@@ -261,7 +261,7 @@ class MaxColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($a, $b)';
+  String toString() => '${objectRuntimeType(this, 'MaxColumnWidth')}($a, $b)';
 }
 
 /// Sizes the column such that it is the size that is the minimum of
@@ -312,7 +312,7 @@ class MinColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($a, $b)';
+  String toString() => '${objectRuntimeType(this, 'MinColumnWidth')}($a, $b)';
 }
 
 /// Vertical alignment options for cells in [RenderTable] objects.
@@ -527,7 +527,7 @@ class RenderTable extends RenderBox {
       return;
     _rowDecorations = value;
     if (_rowDecorationPainters != null) {
-      for (BoxPainter painter in _rowDecorationPainters)
+      for (final BoxPainter painter in _rowDecorationPainters)
         painter?.dispose();
     }
     _rowDecorationPainters = _rowDecorations != null ? List<BoxPainter>(_rowDecorations.length) : null;
@@ -592,7 +592,7 @@ class RenderTable extends RenderBox {
         assert(_rows == 0);
         return;
       }
-      for (RenderBox oldChild in _children) {
+      for (final RenderBox oldChild in _children) {
         if (oldChild != null)
           dropChild(oldChild);
       }
@@ -645,7 +645,7 @@ class RenderTable extends RenderBox {
       setFlatChildren(0, null);
       return;
     }
-    for (RenderBox oldChild in _children) {
+    for (final RenderBox oldChild in _children) {
       if (oldChild != null)
         dropChild(oldChild);
     }
@@ -664,7 +664,7 @@ class RenderTable extends RenderBox {
     assert(_children.length == rows * columns);
     _rows += 1;
     _children.addAll(cells);
-    for (RenderBox cell in cells) {
+    for (final RenderBox cell in cells) {
       if (cell != null)
         adoptChild(cell);
     }
@@ -695,7 +695,7 @@ class RenderTable extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (RenderBox child in _children)
+    for (final RenderBox child in _children)
       child?.attach(owner);
   }
 
@@ -703,18 +703,18 @@ class RenderTable extends RenderBox {
   void detach() {
     super.detach();
     if (_rowDecorationPainters != null) {
-      for (BoxPainter painter in _rowDecorationPainters)
+      for (final BoxPainter painter in _rowDecorationPainters)
         painter?.dispose();
       _rowDecorationPainters = List<BoxPainter>(_rowDecorations.length);
     }
-    for (RenderBox child in _children)
+    for (final RenderBox child in _children)
       child?.detach();
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
     assert(_children.length == rows * columns);
-    for (RenderBox child in _children) {
+    for (final RenderBox child in _children) {
       if (child != null)
         visitor(child);
     }
@@ -992,6 +992,7 @@ class RenderTable extends RenderBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     final int rows = this.rows;
     final int columns = this.columns;
     assert(_children.length == rows * columns);
@@ -1036,7 +1037,7 @@ class RenderTable extends RenderBox {
         final int xy = x + y * columns;
         final RenderBox child = _children[xy];
         if (child != null) {
-          final TableCellParentData childParentData = child.parentData;
+          final TableCellParentData childParentData = child.parentData as TableCellParentData;
           assert(childParentData != null);
           childParentData.x = x;
           childParentData.y = y;
@@ -1075,7 +1076,7 @@ class RenderTable extends RenderBox {
         final int xy = x + y * columns;
         final RenderBox child = _children[xy];
         if (child != null) {
-          final TableCellParentData childParentData = child.parentData;
+          final TableCellParentData childParentData = child.parentData as TableCellParentData;
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
               if (baselines[x] != null)
@@ -1110,7 +1111,7 @@ class RenderTable extends RenderBox {
     for (int index = _children.length - 1; index >= 0; index -= 1) {
       final RenderBox child = _children[index];
       if (child != null) {
-        final BoxParentData childParentData = child.parentData;
+        final BoxParentData childParentData = child.parentData as BoxParentData;
         final bool isHit = result.addWithPaintOffset(
           offset: childParentData.offset,
           position: position,
@@ -1156,7 +1157,7 @@ class RenderTable extends RenderBox {
     for (int index = 0; index < _children.length; index += 1) {
       final RenderBox child = _children[index];
       if (child != null) {
-        final BoxParentData childParentData = child.parentData;
+        final BoxParentData childParentData = child.parentData as BoxParentData;
         context.paintChild(child, childParentData.offset + offset);
       }
     }

@@ -1,8 +1,9 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -11,12 +12,14 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group(GlobalMaterialLocalizations, () {
     test('uses exact locale when exists', () async {
-      final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'PT'));
+      final GlobalMaterialLocalizations localizations =
+        await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'PT')) as GlobalMaterialLocalizations;
       expect(localizations.formatDecimal(10000), '10\u00A0000');
     });
 
     test('falls back to language code when exact locale is missing', () async {
-      final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'XX'));
+      final GlobalMaterialLocalizations localizations =
+        await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'XX')) as GlobalMaterialLocalizations;
       expect(localizations.formatDecimal(10000), '10.000');
     });
 
@@ -24,6 +27,19 @@ void main() {
       await expectLater(() async {
         await GlobalMaterialLocalizations.delegate.load(const Locale('xx', 'XX'));
       }, throwsAssertionError);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/53036.
+    test('`nb` uses `no` as a synonym when `nb` arb file is not present', () async {
+      final File nbMaterialArbFile = File('lib/src/l10n/material_nb.arb');
+      final File noMaterialArbFile = File('lib/src/l10n/material_no.arb');
+
+      // No need to run test if `nb` arb file exists or if `no` arb file does not exist.
+      if (noMaterialArbFile.existsSync() && !nbMaterialArbFile.existsSync()) {
+        final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate
+          .load(const Locale('nb')) as GlobalMaterialLocalizations;
+        expect(localizations.formatMediumDate(DateTime(2020, 4, 3)), 'fre. 3. apr.');
+      }
     });
 
     group('formatHour', () {
@@ -67,7 +83,8 @@ void main() {
 
     group('formatMinute', () {
       test('formats English', () async {
-        final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en', 'US'));
+        final GlobalMaterialLocalizations localizations =
+          await GlobalMaterialLocalizations.delegate.load(const Locale('en', 'US')) as GlobalMaterialLocalizations;
         expect(localizations.formatMinute(const TimeOfDay(hour: 1, minute: 32)), '32');
       });
     });

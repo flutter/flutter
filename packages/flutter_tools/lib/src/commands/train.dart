@@ -1,10 +1,10 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import '../runner/flutter_command.dart';
 
-/// This command is run when generating the app-jit snapshot for the tool, so it cannot access the Cache
+/// This command is run when generating the app-JIT snapshot for the tool, so it cannot access the Cache
 /// or any artifacts that haven't been downloaded yet.
 class TrainingCommand extends FlutterCommand {
   @override
@@ -22,6 +22,6 @@ class TrainingCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     // This command does not do anything yet :).
-    return null;
+    return FlutterCommandResult.success();
   }
 }
