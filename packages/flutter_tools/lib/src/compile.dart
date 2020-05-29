@@ -18,6 +18,7 @@ import 'codegen.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
+import 'widget_cache.dart';
 
 KernelCompilerFactory get kernelCompilerFactory => context.get<KernelCompilerFactory>();
 
@@ -77,11 +78,12 @@ class TargetModel {
 }
 
 class CompilerOutput {
-  const CompilerOutput(this.outputFilename, this.errorCount, this.sources);
+  CompilerOutput(this.outputFilename, this.errorCount, this.sources);
 
   final String outputFilename;
   final int errorCount;
   final List<Uri> sources;
+  String invalidatedSingleWidget;
 }
 
 enum StdoutState { CollectDiagnostic, CollectDependencies }
@@ -442,6 +444,7 @@ abstract class ResidentCompiler {
     String platformDill,
     List<String> dartDefines,
     String librariesSpec,
+    WidgetCache widgetCache,
   }) = DefaultResidentCompiler;
 
   // TODO(jonahwilliams): find a better way to configure additional file system
@@ -537,6 +540,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.platformDill,
     List<String> dartDefines,
     this.librariesSpec,
+    this.widgetCache,
   }) : assert(sdkRoot != null),
        _stdoutHandler = StdoutHandler(consumer: compilerMessageConsumer),
        dartDefines = dartDefines ?? const <String>[],
@@ -554,6 +558,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final List<String> experimentalFlags;
   final List<String> dartDefines;
   final String librariesSpec;
+  final WidgetCache widgetCache;
 
   @override
   void addFileSystemRoot(String root) {
@@ -624,7 +629,15 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _server.stdin.writeln(inputKey);
     globals.printTrace('<- $inputKey');
 
-    return _stdoutHandler.compilerOutput.future;
+    String widgetName;
+    if (request.invalidatedFiles.length == 1) {
+      widgetName = widgetCache.validate(request.invalidatedFiles.single);
+    }
+
+    return _stdoutHandler.compilerOutput.future.then((CompilerOutput compilerOutput) {
+      return compilerOutput
+        ..invalidatedSingleWidget = widgetName;
+    });
   }
 
   final List<_CompilationRequest> _compilationQueue = <_CompilationRequest>[];

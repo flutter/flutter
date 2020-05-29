@@ -383,7 +383,7 @@ void main() {
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation invocation) async {
-      return const CompilerOutput('a', 0, <Uri>[]);
+      return CompilerOutput('a', 0, <Uri>[]);
     });
 
     final WebDevFS webDevFS = WebDevFS(
@@ -477,7 +477,7 @@ void main() {
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation invocation) async {
-      return const CompilerOutput('a', 0, <Uri>[]);
+      return CompilerOutput('a', 0, <Uri>[]);
     });
 
     final WebDevFS webDevFS = WebDevFS(

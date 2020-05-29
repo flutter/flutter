@@ -237,7 +237,7 @@ void main() {
         outputPath: anyNamed('outputPath'),
         packageConfig: anyNamed('packageConfig'),
       )).thenAnswer((Invocation invocation) {
-        return Future<CompilerOutput>.value(const CompilerOutput('example', 2, <Uri>[]));
+        return Future<CompilerOutput>.value(CompilerOutput('example', 2, <Uri>[]));
       });
 
       final UpdateFSReport report = await devFS.update(

@@ -26,7 +26,7 @@ void main() {
     when(residentCompiler.compileExpressionToJs(
       any, any, any, any, any, any, any
     )).thenAnswer((Invocation invocation) async {
-      return const CompilerOutput('compilerOutput', 0, <Uri>[]);
+      return CompilerOutput('compilerOutput', 0, <Uri>[]);
     });
 
     final ExpressionCompiler expressionCompiler =
@@ -46,7 +46,7 @@ void main() {
     when(residentCompiler.compileExpressionToJs(
       any, any, any, any, any, any, any
     )).thenAnswer((Invocation invocation) async {
-      return const CompilerOutput('compilerOutput', 1, <Uri>[]);
+      return CompilerOutput('compilerOutput', 1, <Uri>[]);
     });
 
     final ExpressionCompiler expressionCompiler =

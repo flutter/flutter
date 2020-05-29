@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_server/devtools_server.dart' as devtools_server;
+import 'package:flutter_tools/src/widget_cache.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -120,6 +121,7 @@ class FlutterDevice {
         experimentalFlags: experimentalFlags,
         dartDefines: buildInfo.dartDefines,
         packagesPath: globalPackagesPath,
+        widgetCache: WidgetCache(fileSystem: globals.fs),
       );
     }
 

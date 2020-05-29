@@ -341,6 +341,7 @@ class UpdateFSReport {
     bool success = false,
     int invalidatedSourcesCount = 0,
     int syncedBytes = 0,
+    this.invalidatedSingleWidget,
   }) {
     _success = success;
     _invalidatedSourcesCount = invalidatedSourcesCount;
@@ -356,6 +357,7 @@ class UpdateFSReport {
   ///
   /// Only used for JavaScript compilation.
   List<String> invalidatedModules;
+  String invalidatedSingleWidget;
 
   void incorporateResults(UpdateFSReport report) {
     if (!report._success) {
@@ -364,6 +366,7 @@ class UpdateFSReport {
     _invalidatedSourcesCount += report._invalidatedSourcesCount;
     _syncedBytes += report._syncedBytes;
     invalidatedModules ??= report.invalidatedModules;
+    invalidatedSingleWidget ??= report.invalidatedSingleWidget;
   }
 
   bool _success;
@@ -540,8 +543,12 @@ class DevFS {
       }
     }
     globals.printTrace('DevFS: Sync finished');
-    return UpdateFSReport(success: true, syncedBytes: syncedBytes,
-         invalidatedSourcesCount: invalidatedFiles.length);
+    return UpdateFSReport(
+      success: true,
+      syncedBytes: syncedBytes,
+      invalidatedSourcesCount: invalidatedFiles.length,
+      invalidatedSingleWidget: compilerOutput.invalidatedSingleWidget,
+    );
   }
 }
 

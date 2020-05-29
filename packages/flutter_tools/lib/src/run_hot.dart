@@ -942,10 +942,21 @@ class HotRunner extends ResidentRunner {
             serviceEventKind = ''; // many kinds
           }
         } else {
+          // If the tool identified a change in a single widget, do a fast instead
+          // of a full reassemble.
           reassembleViews[view] = device.vmService;
-          reassembleFutures.add(device.vmService.flutterReassemble(
-            isolateId: view.uiIsolate.id,
-          ).catchError((dynamic error) {
+          Future<void> pendingWork;
+          if (updatedDevFS.invalidatedSingleWidget != null) {
+            pendingWork = device.vmService.flutterFastReassemble(
+              updatedDevFS.invalidatedSingleWidget,
+              isolateId: view.uiIsolate.id,
+            );
+          } else {
+            pendingWork = device.vmService.flutterReassemble(
+              isolateId: view.uiIsolate.id,
+            );
+          }
+          reassembleFutures.add(pendingWork.catchError((dynamic error) {
             failedReassemble = true;
             globals.printError('Reassembling ${view.uiIsolate.name} failed: $error');
           }, test: (dynamic error) => error is Exception));
