@@ -91,8 +91,10 @@ function _wait_for_lock () {
     fi
     sleep .1;
   done
-  # Clear the waiting message so it doesn't overlap any following text.
-  printf "                                                                  \r";
+  if [[ $waiting_message_displayed == "true" ]]; then
+    # Clear the waiting message so it doesn't overlap any following text.
+    printf "                                                                  \r";
+  fi
   unset waiting_message_displayed
   # If the lock file is acquired, make sure that it is removed on exit.
   trap _rmlock INT TERM EXIT
