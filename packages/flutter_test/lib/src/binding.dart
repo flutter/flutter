@@ -135,8 +135,18 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
+  bool checkMessageHandler(String channel, MessageHandler handler) {
+    return delegate.checkMessageHandler(channel, handler);
+  }
+
+  @override
   void setMockMessageHandler(String channel, MessageHandler handler) {
     delegate.setMockMessageHandler(channel, handler);
+  }
+
+  @override
+  bool checkMockMessageHandler(String channel, MessageHandler handler) {
+    return delegate.checkMockMessageHandler(channel, handler);
   }
 }
 
@@ -1116,23 +1126,20 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void _verifyInvariants() {
     super._verifyInvariants();
 
-    assert(() {
-      if (   _currentFakeAsync.periodicTimerCount == 0
-          && _currentFakeAsync.nonPeriodicTimerCount == 0) {
-        return true;
-      }
-
-      debugPrint('Pending timers:');
-      for (final FakeTimer timer in _currentFakeAsync.pendingTimers) {
-        debugPrint(
-          'Timer (duration: ${timer.duration}, '
-          'periodic: ${timer.isPeriodic}), created:');
-        debugPrintStack(stackTrace: timer.creationStackTrace);
-        debugPrint('');
-      }
-      return false;
-    }(), 'A Timer is still pending even after the widget tree was disposed.');
-
+    bool timersPending = false;
+    if (_currentFakeAsync.periodicTimerCount != 0 ||
+        _currentFakeAsync.nonPeriodicTimerCount != 0) {
+        debugPrint('Pending timers:');
+        for (final FakeTimer timer in _currentFakeAsync.pendingTimers) {
+          debugPrint(
+            'Timer (duration: ${timer.duration}, '
+            'periodic: ${timer.isPeriodic}), created:');
+          debugPrintStack(stackTrace: timer.creationStackTrace);
+          debugPrint('');
+        }
+        timersPending = true;
+    }
+    assert(!timersPending, 'A Timer is still pending even after the widget tree was disposed.');
     assert(_currentFakeAsync.microtaskCount == 0); // Shouldn't be possible.
   }
 
