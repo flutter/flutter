@@ -14,6 +14,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'widget_inspector_test_utils.dart';
+
 // Start of block of code where widget creation location line numbers and
 // columns will impact whether tests pass.
 
@@ -222,64 +224,10 @@ int getChildLayerCount(OffsetLayer layer) {
 }
 
 void main() {
-  TestWidgetInspectorService.runTests();
+  _TestWidgetInspectorService.runTests();
 }
 
-class TestWidgetInspectorService extends Object with WidgetInspectorService {
-  final Map<String, InspectorServiceExtensionCallback> extensions = <String, InspectorServiceExtensionCallback>{};
-
-  final Map<String, List<Map<Object, Object>>> eventsDispatched = <String, List<Map<Object, Object>>>{};
-
-  @override
-  void registerServiceExtension({
-    @required String name,
-    @required FutureOr<Map<String, Object>> callback(Map<String, String> parameters),
-  }) {
-    assert(!extensions.containsKey(name));
-    extensions[name] = callback;
-  }
-
-  @override
-  void postEvent(String eventKind, Map<Object, Object> eventData) {
-    getEventsDispatched(eventKind).add(eventData);
-  }
-
-  List<Map<Object, Object>> getEventsDispatched(String eventKind) {
-    return eventsDispatched.putIfAbsent(eventKind, () => <Map<Object, Object>>[]);
-  }
-
-  Iterable<Map<Object, Object>> getServiceExtensionStateChangedEvents(String extensionName) {
-    return getEventsDispatched('Flutter.ServiceExtensionStateChanged')
-      .where((Map<Object, Object> event) => event['extension'] == extensionName);
-  }
-
-  Future<Object> testExtension(String name, Map<String, String> arguments) async {
-    expect(extensions, contains(name));
-    // Encode and decode to JSON to match behavior using a real service
-    // extension where only JSON is allowed.
-    return json.decode(json.encode(await extensions[name](arguments)))['result'];
-  }
-
-  Future<String> testBoolExtension(String name, Map<String, String> arguments) async {
-    expect(extensions, contains(name));
-    // Encode and decode to JSON to match behavior using a real service
-    // extension where only JSON is allowed.
-    return json.decode(json.encode(await extensions[name](arguments)))['enabled'] as String;
-  }
-
-  int rebuildCount = 0;
-
-  @override
-  Future<void> forceRebuild() async {
-    rebuildCount++;
-    final WidgetsBinding binding = WidgetsBinding.instance;
-
-    if (binding.renderViewElement != null) {
-      binding.buildOwner.reassemble(binding.renderViewElement);
-    }
-  }
-
-
+class _TestWidgetInspectorService extends TestWidgetInspectorService {
   // These tests need access to protected members of WidgetInspectorService.
   static void runTests() {
     final TestWidgetInspectorService service = TestWidgetInspectorService();
@@ -1725,7 +1673,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       _CreationLocation location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(51));
+      expect(location.line, equals(53));
       expect(location.column, equals(9));
       expect(count, equals(1));
 
@@ -1734,7 +1682,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(89));
+      expect(location.line, equals(91));
       expect(location.column, equals(12));
       expect(count, equals(1));
 
@@ -1759,7 +1707,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(51));
+      expect(location.line, equals(53));
       expect(location.column, equals(9));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
@@ -1768,7 +1716,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(89));
+      expect(location.line, equals(91));
       expect(location.column, equals(12));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 

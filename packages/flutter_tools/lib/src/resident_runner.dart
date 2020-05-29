@@ -4,10 +4,10 @@
 
 import 'dart:async';
 
-import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -21,7 +21,9 @@ import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'bundle.dart';
+import 'build_system/build_system.dart';
+import 'build_system/targets/localizations.dart';
+import 'cache.dart';
 import 'codegen.dart';
 import 'compile.dart';
 import 'convert.dart';
@@ -81,12 +83,6 @@ class FlutterDevice {
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
     }
-    // For both web and non-web platforms we initialize dill to/from
-    // a shared location for faster bootstrapping. If the compiler fails
-    // due to a kernel target or version mismatch, no error is reported
-    // and the compiler starts up as normal. Unexpected errors will print
-    // a warning message and dump some debug information which can be
-    // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
       generator = ResidentCompiler(
         globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildInfo.mode),
@@ -99,9 +95,6 @@ class FlutterDevice {
         compilerMessageConsumer:
           (String message, {bool emphasis, TerminalColor color, }) =>
             globals.printTrace(message),
-        initializeFromDill: getDefaultCachedKernelPath(
-          trackWidgetCreation: buildInfo.trackWidgetCreation,
-        ),
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
         platformDill: globals.fs.file(globals.artifacts
@@ -126,9 +119,6 @@ class FlutterDevice {
         targetModel: targetModel,
         experimentalFlags: experimentalFlags,
         dartDefines: buildInfo.dartDefines,
-        initializeFromDill: getDefaultCachedKernelPath(
-          trackWidgetCreation: buildInfo.trackWidgetCreation,
-        ),
         packagesPath: globalPackagesPath,
       );
     }
@@ -183,6 +173,7 @@ class FlutterDevice {
     Restart restart,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
+    GetSkSLMethod getSkSLMethod,
   }) {
     final Completer<void> completer = Completer<void>();
     StreamSubscription<void> subscription;
@@ -201,6 +192,7 @@ class FlutterDevice {
           restart: restart,
           compileExpression: compileExpression,
           reloadMethod: reloadMethod,
+          getSkSLMethod: getSkSLMethod,
           device: device,
         );
       } on Exception catch (exception) {
@@ -699,6 +691,7 @@ abstract class ResidentRunner {
   final bool ipv6;
   final String _dillOutputPath;
   /// The parent location of the incremental artifacts.
+  @visibleForTesting
   final Directory artifactDirectory;
   final String packagesFilePath;
   final String projectRootPath;
@@ -800,6 +793,40 @@ abstract class ResidentRunner {
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
   }
 
+
+  BuildResult _lastBuild;
+  Environment _environment;
+  Future<void> runSourceGenerators() async {
+    _environment ??= Environment(
+      artifacts: globals.artifacts,
+      logger: globals.logger,
+      cacheDir: globals.cache.getRoot(),
+      engineVersion: globals.flutterVersion.engineRevision,
+      fileSystem: globals.fs,
+      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+      outputDir: globals.fs.directory(getBuildDirectory()),
+      processManager: globals.processManager,
+      projectDir: globals.fs.currentDirectory,
+    );
+    globals.logger.printTrace('Starting incremental build...');
+    _lastBuild = await globals.buildSystem.buildIncremental(
+      const GenerateLocalizationsTarget(),
+      _environment,
+      _lastBuild,
+    );
+    if (!_lastBuild.success) {
+      for (final ExceptionMeasurement exceptionMeasurement in _lastBuild.exceptions.values) {
+        globals.logger.printError(
+          exceptionMeasurement.exception.toString(),
+          stackTrace: globals.logger.isVerbose
+            ? exceptionMeasurement.stackTrace
+            : null,
+        );
+      }
+    }
+    globals.logger.printTrace('complete');
+  }
+
   /// Toggle whether canvaskit is being used for rendering, returning the new
   /// state.
   ///
@@ -816,7 +843,9 @@ abstract class ResidentRunner {
   }
 
   /// Write the SkSL shaders to a zip file in build directory.
-  Future<void> writeSkSL() async {
+  ///
+  /// Returns the name of the file, or `null` on failures.
+  Future<String> writeSkSL() async {
     if (!supportsWriteSkSL) {
       throw Exception('writeSkSL is not supported by this runner.');
     }
@@ -833,7 +862,7 @@ abstract class ResidentRunner {
         '  1. Pass "--cache-sksl" as an argument to flutter run.\n'
         '  2. Interact with the application to force shaders to be compiled.\n'
       );
-      return;
+      return null;
     }
     final File outputFile = globals.fsUtils.getUniqueFile(
       globals.fs.currentDirectory,
@@ -862,6 +891,7 @@ abstract class ResidentRunner {
     };
     outputFile.writeAsStringSync(json.encode(manifest));
     globals.logger.printStatus('Wrote SkSL data to ${outputFile.path}.');
+    return outputFile.path;
   }
 
   /// The resident runner API for interaction with the reloadMethod vmservice
@@ -1066,6 +1096,7 @@ abstract class ResidentRunner {
     Restart restart,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
+    GetSkSLMethod getSkSLMethod,
   }) async {
     if (!debuggingOptions.debuggingEnabled) {
       throw 'The service protocol is not enabled.';
@@ -1078,6 +1109,7 @@ abstract class ResidentRunner {
         restart: restart,
         compileExpression: compileExpression,
         reloadMethod: reloadMethod,
+        getSkSLMethod: getSkSLMethod
       );
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(
@@ -1164,12 +1196,6 @@ abstract class ResidentRunner {
   Future<void> preExit() async {
     // If _dillOutputPath is null, we created a temporary directory for the dill.
     if (_dillOutputPath == null && artifactDirectory.existsSync()) {
-      final File outputDill = globals.fs.file(dillOutputPath);
-      if (outputDill.existsSync()) {
-        outputDill.copySync(getDefaultCachedKernelPath(
-          trackWidgetCreation: trackWidgetCreation,
-        ));
-      }
       artifactDirectory.deleteSync(recursive: true);
     }
   }
@@ -1200,6 +1226,7 @@ abstract class ResidentRunner {
         commandHelp.p.print();
         commandHelp.o.print();
         commandHelp.z.print();
+        commandHelp.g.print();
       } else {
         commandHelp.S.print();
         commandHelp.U.print();
@@ -1336,6 +1363,9 @@ class TerminalHandler {
       case 'd':
       case 'D':
         await residentRunner.detach();
+        return true;
+      case 'g':
+        await residentRunner.runSourceGenerators();
         return true;
       case 'h':
       case 'H':

@@ -3713,45 +3713,6 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('TextField loses focus when disabled', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'TextField');
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: TextField(
-              focusNode: focusNode,
-              autofocus: true,
-              maxLength: 10,
-              enabled: true,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.pump();
-    expect(focusNode.hasPrimaryFocus, isTrue);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: TextField(
-              focusNode: focusNode,
-              autofocus: true,
-              maxLength: 10,
-              enabled: false,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.pump();
-    expect(focusNode.hasPrimaryFocus, isFalse);
-  });
-
   testWidgets("Disabled TextField can't be traversed to when disabled.", (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: 'TextField 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: 'TextField 2');
@@ -5147,6 +5108,47 @@ void main() {
       ),
     );
     expect(focusNode.hasFocus, isFalse);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: Builder(builder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              navigationMode: NavigationMode.directional,
+            ),
+            child: TextField(
+              focusNode: focusNode,
+              autofocus: true,
+              enabled: true,
+            ),
+          );
+        }),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pump();
+
+    expect(focusNode.hasFocus, isTrue);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: Builder(builder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              navigationMode: NavigationMode.directional,
+            ),
+            child:  TextField(
+              focusNode: focusNode,
+              autofocus: true,
+              enabled: false,
+            ),
+          );
+        }),
+      ),
+    );
+    await tester.pump();
+
+    expect(focusNode.hasFocus, isTrue);
   });
 
   testWidgets('TextField displays text with text direction', (WidgetTester tester) async {
@@ -7742,4 +7744,75 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('Web does not check the clipboard status', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    bool triedToReadClipboard = false;
+    SystemChannels.platform
+      .setMockMethodCallHandler((MethodCall methodCall) async {
+        if (methodCall.method == 'Clipboard.getData') {
+          triedToReadClipboard = true;
+        }
+        return null;
+      });
+
+    final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+    // Double tap like when showing the text selection menu on Android/iOS.
+    await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
+    await tester.pump();
+
+    if (kIsWeb) {
+      // The clipboard is not checked because it requires user permissions and
+      // web doesn't show a custom text selection menu.
+      expect(triedToReadClipboard, false);
+    } else {
+      // The clipboard is checked in order to decide if the content can be
+      // pasted.
+      expect(triedToReadClipboard, true);
+    }
+  });
+
+  testWidgets('TextField changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TextField(
+            decoration: InputDecoration(
+              // Add an icon so that the left edge is not the text area
+              icon: Icon(Icons.person),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(TextField)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test top left, which is not the text area
+    await gesture.moveTo(tester.getTopLeft(find.byType(TextField)) + const Offset(1, 1));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+  });
 }

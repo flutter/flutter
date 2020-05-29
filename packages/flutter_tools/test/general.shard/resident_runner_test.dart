@@ -4,9 +4,10 @@
 
 import 'dart:async';
 
+import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:file/memory.dart';
-import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -143,6 +144,7 @@ void main() {
       reloadSources: anyNamed('reloadSources'),
       restart: anyNamed('restart'),
       compileExpression: anyNamed('compileExpression'),
+      getSkSLMethod: anyNamed('getSkSLMethod'),
     )).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.setupDevFS(any, any, packagesFilePath: anyNamed('packagesFilePath')))
       .thenAnswer((Invocation invocation) async {
@@ -519,22 +521,59 @@ void main() {
     expect(otherRunner.artifactDirectory.path, contains('foobar'));
   }));
 
-  test('ResidentRunner copies output dill to cache location during preExit', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('hello');
-    await residentRunner.preExit();
-    final File cacheDill = globals.fs.file(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+  test('ResidentRunner can run source generation', () => testbed.run(() async {
+    final FakeProcessManager processManager = globals.processManager as FakeProcessManager;
+    final Directory dependencies = globals.fs.directory(
+      globals.fs.path.join('build', '6ec2559087977927717927ede0a147f1'));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+        globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
+        '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
+      ],
+      onRun: () {
+        dependencies
+          .childFile('gen_l10n_inputs_and_outputs.json')
+          ..createSync()
+          ..writeAsStringSync('{"inputs":[],"outputs":[]}');
+      }
+    ));
+    globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
+      .createSync(recursive: true);
+    globals.fs.file('l10n.yaml').createSync();
 
-    expect(cacheDill, exists);
-    expect(cacheDill.readAsStringSync(), 'hello');
+    await residentRunner.runSourceGenerators();
+
+    expect(testLogger.errorText, isEmpty);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
   }));
 
-  test('ResidentRunner handles output dill missing during preExit', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    await residentRunner.preExit();
-    final File cacheDill = globals.fs.file(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+  test('ResidentRunner can run source generation - generation fails', () => testbed.run(() async {
+    final FakeProcessManager processManager = globals.processManager as FakeProcessManager;
+    final Directory dependencies = globals.fs.directory(
+      globals.fs.path.join('build', '6ec2559087977927717927ede0a147f1'));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+        globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
+        '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
+      ],
+      exitCode: 1,
+      stderr: 'stderr'
+    ));
+    globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
+      .createSync(recursive: true);
+    globals.fs.file('l10n.yaml').createSync();
 
-    expect(cacheDill, isNot(exists));
+    await residentRunner.runSourceGenerators();
+
+    expect(testLogger.errorText, allOf(
+      contains('stderr'), // Message from gen_l10n.dart
+      contains('Exception') // Message from build_system
+    ));
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
   }));
 
   test('ResidentRunner printHelpDetails', () => testbed.run(() {
@@ -573,6 +612,7 @@ void main() {
           commandHelp.p,
           commandHelp.o,
           commandHelp.z,
+          commandHelp.g,
           commandHelp.M,
           commandHelp.v,
           commandHelp.P,
@@ -1100,8 +1140,6 @@ void main() {
       target: null,
     )).generator as DefaultResidentCompiler;
 
-    expect(residentCompiler.initializeFromDill,
-      globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
     expect(residentCompiler.librariesSpec,
       globals.fs.file(globals.artifacts.getArtifactPath(Artifact.flutterWebLibrariesJson))
         .uri.toString());
@@ -1134,6 +1172,7 @@ void main() {
       Restart restart,
       CompileExpression compileExpression,
       ReloadMethod reloadMethod,
+      GetSkSLMethod getSkSLMethod,
       io.CompressionOptions compression,
       Device device,
     }) async => mockVMService,

@@ -287,6 +287,59 @@ void main() {
   });
 
   testWidgets(
+      'With isAlwaysShown: false, set isAlwaysShown: true. The thumb should be always shown directly',
+      (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    bool isAlwaysShown = false;
+    Widget viewWithScroll() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(),
+              child: Stack(
+                children: <Widget>[
+                  CupertinoScrollbar(
+                    isAlwaysShown: isAlwaysShown,
+                    controller: controller,
+                    child: SingleChildScrollView(
+                      controller: controller,
+                      child: const SizedBox(
+                        width: 4000.0,
+                        height: 4000.0,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 10,
+                    child: CupertinoButton(
+                      onPressed: () {
+                        setState(() {
+                          isAlwaysShown = !isAlwaysShown;
+                        });
+                      },
+                      child: const Text('change isAlwaysShown'),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
+
+    await tester.tap(find.byType(CupertinoButton));
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
+  });
+
+  testWidgets(
       'With isAlwaysShown: false, fling a scroll. While it is still scrolling, set isAlwaysShown: true. The thumb should not fade even after the scrolling stops',
       (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -332,6 +385,7 @@ void main() {
 
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
+    expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
     await tester.fling(
       find.byType(SingleChildScrollView),
       const Offset(0.0, -10.0),
@@ -340,7 +394,13 @@ void main() {
     expect(find.byType(CupertinoScrollbar), paints..rrect());
 
     await tester.tap(find.byType(CupertinoButton));
+    await tester.pump();
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
+
+    // Wait for the timer delay to expire.
+    await tester.pump(const Duration(milliseconds: 600)); // _kScrollbarTimeToFade
     await tester.pumpAndSettle();
+    // Scrollbar thumb is showing after scroll finishes and timer ends.
     expect(find.byType(CupertinoScrollbar), paints..rrect());
   });
 

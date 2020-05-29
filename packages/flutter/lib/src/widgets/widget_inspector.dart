@@ -744,6 +744,8 @@ mixin WidgetInspectorService {
   bool _trackRebuildDirtyWidgets = false;
   bool _trackRepaintWidgets = false;
 
+  FlutterExceptionHandler _structuredExceptionHandler;
+
   _RegisterServiceExtensionCallback _registerServiceExtensionCallback;
   /// Registers a service extension method with the given name (full
   /// name "ext.flutter.inspector.name").
@@ -941,6 +943,10 @@ mixin WidgetInspectorService {
     _errorsSinceReload = 0;
   }
 
+  bool isStructuredErrorsEnabled() {
+    return const bool.fromEnvironment('flutter.inspector.structuredErrors');
+  }
+
   /// Called to register service extensions.
   ///
   /// See also:
@@ -949,6 +955,10 @@ mixin WidgetInspectorService {
   ///  * [BindingBase.initServiceExtensions], which explains when service
   ///    extensions can be used.
   void initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) {
+    _structuredExceptionHandler = _reportError;
+    if (isStructuredErrorsEnabled()) {
+      FlutterError.onError = _structuredExceptionHandler;
+    }
     _registerServiceExtensionCallback = registerServiceExtensionCallback;
     assert(!_debugServiceExtensionsRegistered);
     assert(() {
@@ -958,14 +968,13 @@ mixin WidgetInspectorService {
 
     SchedulerBinding.instance.addPersistentFrameCallback(_onFrameStart);
 
-    final FlutterExceptionHandler structuredExceptionHandler = _reportError;
     final FlutterExceptionHandler defaultExceptionHandler = FlutterError.presentError;
 
     _registerBoolServiceExtension(
       name: 'structuredErrors',
-      getter: () async => FlutterError.presentError == structuredExceptionHandler,
+      getter: () async => FlutterError.presentError == _structuredExceptionHandler,
       setter: (bool value) {
-        FlutterError.presentError = value ? structuredExceptionHandler : defaultExceptionHandler;
+        FlutterError.presentError = value ? _structuredExceptionHandler : defaultExceptionHandler;
         return Future<void>.value();
       },
     );

@@ -16,6 +16,7 @@ import 'inherited_model.dart';
 export 'dart:ui' show hashValues, hashList;
 
 export 'package:flutter/foundation.dart' show
+  factory,
   immutable,
   mustCallSuper,
   optionalTypeArgs,
@@ -488,6 +489,7 @@ abstract class Widget extends DiagnosticableTree {
   /// widget that is incorporated into the tree multiple times will be inflated
   /// multiple times.
   @protected
+  @factory
   Element createElement();
 
   /// A short, textual description of this widget.
@@ -911,6 +913,7 @@ abstract class StatefulWidget extends Widget {
   /// again to create a fresh [State] object, simplifying the lifecycle of
   /// [State] objects.
   @protected
+  @factory
   State createState();
 }
 
@@ -1730,6 +1733,7 @@ abstract class RenderObjectWidget extends Widget {
 
   /// RenderObjectWidgets always inflate to a [RenderObjectElement] subclass.
   @override
+  @factory
   RenderObjectElement createElement();
 
   /// Creates an instance of the [RenderObject] class that this
@@ -1742,6 +1746,7 @@ abstract class RenderObjectWidget extends Widget {
   /// [createElement] method. See, for example,
   /// [SingleChildRenderObjectElement.mount].
   @protected
+  @factory
   RenderObject createRenderObject(BuildContext context);
 
   /// Copies the configuration described by this [RenderObjectWidget] to the

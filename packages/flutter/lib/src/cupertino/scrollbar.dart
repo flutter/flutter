@@ -238,15 +238,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
         ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context)
         ..padding = MediaQuery.of(context).padding;
     }
-    WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
-      if (widget.isAlwaysShown) {
-        assert(widget.controller != null);
-        // Wait one frame and cause an empty scroll event.  This allows the
-        // thumb to show immediately when isAlwaysShown is true.  A scroll
-        // event is required in order to paint the thumb.
-        widget.controller.position.didUpdateScrollPositionBy(0);
-      }
-    });
+    _triggerScrollbar();
   }
 
   @override
@@ -254,7 +246,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     super.didUpdateWidget(oldWidget);
     if (widget.isAlwaysShown != oldWidget.isAlwaysShown) {
       if (widget.isAlwaysShown == true) {
-        assert(widget.controller != null);
+        _triggerScrollbar();
         _fadeoutAnimationController.animateTo(1.0);
       } else {
         _fadeoutAnimationController.reverse();
@@ -276,6 +268,19 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
       minLength: _kScrollbarMinLength,
       minOverscrollLength: _kScrollbarMinOverscrollLength,
     );
+  }
+
+  // Wait one frame and cause an empty scroll event.  This allows the thumb to
+  // show immediately when isAlwaysShown is true.  A scroll event is required in
+  // order to paint the thumb.
+  void _triggerScrollbar() {
+    WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+      if (widget.isAlwaysShown) {
+        assert(widget.controller != null);
+        _fadeoutTimer?.cancel();
+        widget.controller.position.didUpdateScrollPositionBy(0);
+      }
+    });
   }
 
   // Handle a gesture that drags the scrollbar by the given amount.

@@ -13,6 +13,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
 import 'ink_well.dart';
+import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -148,6 +149,7 @@ class ListTileTheme extends InheritedTheme {
 ///
 ///  * [CheckboxListTile], which combines a [ListTile] with a [Checkbox].
 ///  * [RadioListTile], which combines a [ListTile] with a [Radio] button.
+///  * [SwitchListTile], which combines a [ListTile] with a [Switch].
 enum ListTileControlAffinity {
   /// Position the control on the leading edge, and the secondary widget, if
   /// any, on the trailing edge.
@@ -639,6 +641,7 @@ class ListTile extends StatelessWidget {
     this.enabled = true,
     this.onTap,
     this.onLongPress,
+    this.mouseCursor,
     this.selected = false,
     this.focusColor,
     this.hoverColor,
@@ -734,6 +737,18 @@ class ListTile extends StatelessWidget {
   ///
   /// Inoperative if [enabled] is false.
   final GestureLongPressCallback onLongPress;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  final MouseCursor mouseCursor;
 
   /// If this tile is also [enabled] then icons and text are rendered with the same color.
   ///
@@ -908,9 +923,18 @@ class ListTile extends StatelessWidget {
       ?? tileTheme?.contentPadding?.resolve(textDirection)
       ?? _defaultContentPadding;
 
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+      mouseCursor ?? MaterialStateMouseCursor.clickable,
+      <MaterialState>{
+        if (!enabled) MaterialState.disabled,
+        if (selected) MaterialState.selected,
+      },
+    );
+
     return InkWell(
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
+      mouseCursor: effectiveMouseCursor,
       canRequestFocus: enabled,
       focusNode: focusNode,
       focusColor: focusColor,

@@ -129,7 +129,9 @@ class ColdRunner extends ResidentRunner {
   }) async {
     _didAttach = true;
     try {
-      await connectToServiceProtocol();
+      await connectToServiceProtocol(
+        getSkSLMethod: writeSkSL,
+      );
     } on Exception catch (error) {
       globals.printError('Error connecting to the service protocol: $error');
       // https://github.com/flutter/flutter/issues/33050

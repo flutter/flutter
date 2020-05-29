@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
@@ -174,6 +176,30 @@ void main() {
     expect(assetDirectory.childFile('AssetManifest.json'), exists);
     expect(assetDirectory.childFile('vm_snapshot_data'), isNot(exists));
     expect(assetDirectory.childFile('isolate_snapshot_data'), isNot(exists));
+  }));
+
+  test('AotAssemblyRelease throws exception if asked to build for x86 target', () => testbed.run(() async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{
+        kTargetPlatform: 'ios',
+      },
+      processManager: processManager,
+      artifacts: MockArtifacts(),
+      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+    );
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[kIosArchs] = 'x86_64';
+
+    expect(const AotAssemblyRelease().build(environment), throwsA(isA<Exception>()
+      .having(
+        (Exception exception) => exception.toString(),
+        'description',
+        contains('release/profile builds are only supported for physical devices.'),
+      )
+    ));
   }));
 }
 
