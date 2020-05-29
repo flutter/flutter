@@ -225,10 +225,7 @@ class XCDevice {
       ),
       _xcode = xcode {
 
-    _deviceIdentifierByEvent = StreamController<Map<XCDeviceEvent, String>>.broadcast(
-      onListen: _startObservingTetheredIOSDevices,
-      onCancel: _stopObservingTetheredIOSDevices,
-    );
+    _setupDeviceIdentifierByEventStream();
   }
 
   void dispose() {
@@ -244,6 +241,15 @@ class XCDevice {
   List<dynamic> _cachedListResults;
   Process _deviceObservationProcess;
   StreamController<Map<XCDeviceEvent, String>> _deviceIdentifierByEvent;
+
+  void _setupDeviceIdentifierByEventStream() {
+    // _deviceIdentifierByEvent Should always be available for listeners
+    // in case polling needs to be stopped and restarted.
+    _deviceIdentifierByEvent = StreamController<Map<XCDeviceEvent, String>>.broadcast(
+      onListen: _startObservingTetheredIOSDevices,
+      onCancel: _stopObservingTetheredIOSDevices,
+    );
+  }
 
   bool get isInstalled => _xcode.isInstalledAndMeetsVersionCheck && xcdevicePath != null;
 
@@ -324,6 +330,10 @@ class XCDevice {
 
   Future<void> _startObservingTetheredIOSDevices() async {
     try {
+      if (_deviceObservationProcess != null) {
+        throw Exception('xcdevice observe restart failed');
+      }
+
       // Run in interactive mode (via script) to convince
       // xcdevice it has a terminal attached in order to redirect stdout.
       _deviceObservationProcess = await _processUtils.start(
@@ -335,7 +345,7 @@ class XCDevice {
           'xcrun',
           'xcdevice',
           'observe',
-          '--usb',
+          '--both',
         ],
       );
 
@@ -346,7 +356,7 @@ class XCDevice {
 
         // xcdevice observe example output of UDIDs:
         //
-        // Listening for all devices, on USB.
+        // Listening for all devices, on both interfaces.
         // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
         // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
         // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
@@ -371,8 +381,15 @@ class XCDevice {
         .listen((String line) {
         _logger.printTrace('xcdevice observe error: $line');
       });
-      unawaited(_deviceObservationProcess.exitCode.whenComplete(() {
+      unawaited(_deviceObservationProcess.exitCode.whenComplete(() async {
+        if (_deviceIdentifierByEvent.hasListener) {
+          // Tell listeners the process died.
+          await _deviceIdentifierByEvent.close();
+        }
         _deviceObservationProcess = null;
+
+        // Reopen it so new listeners can resume polling.
+        _setupDeviceIdentifierByEventStream();
       }));
     } on ProcessException catch (exception) {
       _deviceIdentifierByEvent.addError(exception);

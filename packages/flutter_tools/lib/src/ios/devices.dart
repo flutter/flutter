@@ -81,18 +81,13 @@ class IOSDevices extends PollingDeviceDiscovery {
       onError: (dynamic error, StackTrace stack) {
         _logger.printTrace('Process exception running xcdevice observe:\n$error');
       }, onDone: () {
-        _logger.printTrace('xcdevice observe stopped, restarting');
-
-        // If the xcdevice process is killed, give it a few seconds and restart it.
-        Timer(const Duration(seconds: 10), () {
-          startPolling();
-        });
+        // If xcdevice is killed or otherwise dies, polling will be stopped.
+        // No retry is attempted and the polling client will have to restart polling
+        // (restart the browser). Avoid hammering on a process that is
+        // continuously failing.
+        _logger.printTrace('xcdevice observe stopped');
       },
-      // Don't reset the device subscription on an exception.
-      // If the call to xcdevice asserts, more calls won't fix it.
-      // Avoid hammering on it. If the user runs "flutter doctor"
-      // they may get a real recovery message.
-      cancelOnError: false
+      cancelOnError: true,
     );
   }
 
@@ -116,7 +111,6 @@ class IOSDevices extends PollingDeviceDiscovery {
   @override
   Future<void> stopPolling() async {
     await _observedDeviceEventsSubscription?.cancel();
-    _observedDeviceEventsSubscription = null;
   }
 
   @override

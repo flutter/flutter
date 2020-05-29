@@ -402,7 +402,7 @@ void main() {
       expect(eventStream.hasListener, isFalse);
     });
 
-    testWithoutContext('polling restarts if stream is closed', () async {
+    testWithoutContext('polling can be restarted if stream is closed', () async {
       final IOSDevices iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: mockXcdevice,
@@ -411,20 +411,8 @@ void main() {
       );
       when(mockXcdevice.isInstalled).thenReturn(true);
 
-      int fetchDevicesCount = 0;
       when(mockXcdevice.getAvailableIOSDevices())
-        .thenAnswer((Invocation invocation) {
-        if (fetchDevicesCount == 0) {
-          // Initial time, no devices.
-          fetchDevicesCount++;
-          return Future<List<IOSDevice>>.value(<IOSDevice>[]);
-        } else if (fetchDevicesCount == 1) {
-          // Simulate a device added later.
-          fetchDevicesCount++;
-          return Future<List<IOSDevice>>.value(<IOSDevice>[device1]);
-        }
-        fail('Too many calls to getAvailableTetheredIOSDevices');
-      });
+        .thenAnswer((Invocation invocation) => Future<List<IOSDevice>>.value(<IOSDevice>[]));
 
       final StreamController<Map<XCDeviceEvent, String>> eventStream = StreamController<Map<XCDeviceEvent, String>>();
       final StreamController<Map<XCDeviceEvent, String>> rescheduledStream = StreamController<Map<XCDeviceEvent, String>>();
@@ -438,33 +426,25 @@ void main() {
         return rescheduledStream.stream;
       });
 
-      final Completer<void> added = Completer<void>();
-      iosDevices.onAdded.listen((Device device) {
-        added.complete();
-      });
-
       await iosDevices.startPolling();
+      expect(eventStream.hasListener, isTrue);
       verify(mockXcdevice.getAvailableIOSDevices()).called(1);
 
-      expect(iosDevices.deviceNotifier.items, isEmpty);
-      expect(eventStream.hasListener, isTrue);
+      // Pretend xcdevice crashed.
+      await eventStream.close();
 
-      FakeAsync().run((FakeAsync time) async {
-        // Pretend xcdevice crashed.
-        await eventStream.close();
+      // Give it a tick for the close handlers to run.
+      FakeAsync().flushMicrotasks();
+      expect(logger.traceText, contains('xcdevice observe stopped'));
 
-        // Will restart after 10 seconds.
-        time.elapse(const Duration(milliseconds: 10001));
-        // Polling should restart and add the "new" device.
-        await added.future;
-        expect(iosDevices.deviceNotifier.items, <Device>[device1]);
-        expect(logger.traceText, contains('xcdevice observe stopped, restarting'));
+      // Confirm a restart still gets streamed events.
+      await iosDevices.startPolling();
 
-        expect(eventStream.hasListener, isFalse);
-        expect(rescheduledStream.hasListener, isTrue);
+      expect(eventStream.hasListener, isFalse);
+      expect(rescheduledStream.hasListener, isTrue);
 
-        await iosDevices.stopPolling();
-      });
+      await iosDevices.stopPolling();
+      expect(rescheduledStream.hasListener, isFalse);
     });
 
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
