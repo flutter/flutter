@@ -21,7 +21,6 @@ import '../base/net.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../bundle.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
@@ -435,15 +434,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             return 1;
           }
           device.generator.accept();
-          globals.logger.printTrace('caching compiled dill...');
-          final File outputDill = globals.fs.file(dillOutputPath);
-          if (outputDill.existsSync()) {
-            final String copyPath = getDefaultCachedKernelPath(
-              trackWidgetCreation: trackWidgetCreation,
-            );
-            globals.fs.file(copyPath).parent.createSync(recursive: true);
-            outputDill.copySync(copyPath);
-          }
+          cacheInitialDillCompilation();
         } else {
           await buildWeb(
             flutterProject,

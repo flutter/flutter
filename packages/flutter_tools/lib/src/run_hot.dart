@@ -387,16 +387,7 @@ class HotRunner extends ResidentRunner {
       if (!results.every((bool passed) => passed)) {
         return 1;
       }
-      globals.logger.printTrace('Caching compiled dill');
-
-      final File outputDill = globals.fs.file(dillOutputPath);
-      if (outputDill.existsSync()) {
-        final String copyPath = getDefaultCachedKernelPath(
-          trackWidgetCreation: trackWidgetCreation,
-        );
-        globals.fs.file(copyPath).parent.createSync(recursive: true);
-        outputDill.copySync(copyPath);
-      }
+      cacheInitialDillCompilation();
     } on Exception catch (err) {
       globals.printError(err.toString());
       return 1;
