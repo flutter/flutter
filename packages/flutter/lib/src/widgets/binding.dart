@@ -247,16 +247,6 @@ abstract class WidgetsBindingObserver {
   /// This method exposes notifications from [FlutterWindow.onAccessibilityFeaturesChanged].
   void didChangeAccessibilityFeatures() { }
 
-  /// Called whenever a physical screen is added to the system, and at startup
-  /// when screens are detected.
-  ///
-  /// The configuration of the screen can be obtained with
-  /// `WidgetsBinding.instance.platformDispatcher.screens[id]`.
-  void didAddScreen(Screen id) { }
-
-  /// Called whenever a physical screen is removed from the system.
-  void didRemoveScreen(Screen id) { }
-
   /// Called whenever a window is added to the system, and at startup
   /// when the initial window is opened.
   ///
