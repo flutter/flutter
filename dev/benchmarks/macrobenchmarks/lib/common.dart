@@ -15,4 +15,4 @@ const String kColorFilterAndFadeRouteName = '/color_filter_and_fade';
 const String kFadingChildAnimationRouteName = '/fading_child_animation';
 const String kImageFilteredTransformAnimationRouteName = '/imagefiltered_transform_animation';
 
-const String kScrollableName = "/macrobenchmark_listview";
+const String kScrollableName = '/macrobenchmark_listview';
