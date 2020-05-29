@@ -670,6 +670,33 @@ void main() {
     expect(unconstrained.size.height, equals(100.0), reason: 'constrained height');
   });
 
+  test('clipBehavior is respected', () {
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    final TestClipPaintingContext context = TestClipPaintingContext();
+
+    // By default, clipBehavior should be Clip.none
+    final RenderUnconstrainedBox defaultBox = RenderUnconstrainedBox(
+      alignment: Alignment.center,
+      textDirection: TextDirection.ltr,
+      child: box200x200,
+    );
+    layout(defaultBox, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+    defaultBox.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.none));
+
+    for (final Clip clip in Clip.values) {
+      final RenderUnconstrainedBox box = RenderUnconstrainedBox(
+          alignment: Alignment.center,
+          textDirection: TextDirection.ltr,
+          child: box200x200,
+          clipBehavior: clip,
+      );
+      layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+      box.paint(context, Offset.zero);
+      expect(context.clipBehavior, equals(clip));
+    }
+  });
+
   group('hit testing', () {
     test('BoxHitTestResult wrapping HitTestResult', () {
       final HitTestEntry entry1 = HitTestEntry(_DummyHitTestTarget());
