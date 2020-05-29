@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
+import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -426,7 +427,16 @@ void main() {
       });
 
       final StreamController<Map<XCDeviceEvent, String>> eventStream = StreamController<Map<XCDeviceEvent, String>>();
-      when(mockXcdevice.observedDeviceEvents()).thenAnswer((_) => eventStream.stream);
+      final StreamController<Map<XCDeviceEvent, String>> rescheduledStream = StreamController<Map<XCDeviceEvent, String>>();
+
+      bool reschedule = false;
+      when(mockXcdevice.observedDeviceEvents()).thenAnswer((Invocation invocation) {
+        if (!reschedule) {
+          reschedule = true;
+          return eventStream.stream;
+        }
+        return rescheduledStream.stream;
+      });
 
       final Completer<void> added = Completer<void>();
       iosDevices.onAdded.listen((Device device) {
@@ -439,17 +449,22 @@ void main() {
       expect(iosDevices.deviceNotifier.items, isEmpty);
       expect(eventStream.hasListener, isTrue);
 
-      // Pretend xcdevice crashed.
-      await eventStream.close();
+      FakeAsync().run((FakeAsync time) async {
+        // Pretend xcdevice crashed.
+        await eventStream.close();
 
-      // Polling should restart and add the "new" device.
-      await added.future;
-      expect(iosDevices.deviceNotifier.items, <Device>[device1]);
-      expect(logger.traceText, contains('xcdevice observe stopped, restarting'));
+        // Will restart after 10 seconds.
+        time.elapse(const Duration(milliseconds: 10001));
+        // Polling should restart and add the "new" device.
+        await added.future;
+        expect(iosDevices.deviceNotifier.items, <Device>[device1]);
+        expect(logger.traceText, contains('xcdevice observe stopped, restarting'));
 
-      await iosDevices.stopPolling();
+        expect(eventStream.hasListener, isFalse);
+        expect(rescheduledStream.hasListener, isTrue);
 
-      expect(eventStream.hasListener, isFalse);
+        await iosDevices.stopPolling();
+      });
     });
 
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];

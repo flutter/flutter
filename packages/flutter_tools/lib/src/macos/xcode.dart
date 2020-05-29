@@ -372,9 +372,6 @@ class XCDevice {
         _logger.printTrace('xcdevice observe error: $line');
       });
       unawaited(_deviceObservationProcess.exitCode.whenComplete(() {
-        if (_deviceIdentifierByEvent.hasListener) {
-          _deviceIdentifierByEvent.close();
-        }
         _deviceObservationProcess = null;
       }));
     } on ProcessException catch (exception) {

@@ -399,8 +399,9 @@ void main() {
             } else if (event.containsKey(XCDeviceEvent.detach)) {
               expect(event[XCDeviceEvent.detach], 'd83d5bc53967baa0ee18626ba87b6254b2ab5418');
               detach.complete();
+            } else {
+              fail('Unexpected event');
             }
-            fail('Unexpected event');
           });
           await attach.future;
           await detach.future;

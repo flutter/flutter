@@ -105,8 +105,7 @@ class ItemListNotifier<T> {
   }
 
   void removeItem(T item) {
-    if (_items.contains(item)) {
-      _items.remove(item);
+    if (_items.remove(item)) {
       _removedController.add(item);
     }
   }

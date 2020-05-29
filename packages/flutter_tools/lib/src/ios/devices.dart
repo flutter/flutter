@@ -74,15 +74,20 @@ class IOSDevices extends PollingDeviceDiscovery {
     // Start by populating all currently attached devices.
     deviceNotifier.updateWithNewList(await pollingGetDevices());
 
-    _observedDeviceEventsSubscription ??= _xcdevice.observedDeviceEvents().listen(
+    // cancel any outstanding subscriptions.
+    await _observedDeviceEventsSubscription?.cancel();
+    _observedDeviceEventsSubscription = _xcdevice.observedDeviceEvents().listen(
       _onDeviceEvent,
       onError: (dynamic error, StackTrace stack) {
         _logger.printTrace('Process exception running xcdevice observe:\n$error');
       }, onDone: () {
-      // If the xcdevice process is killed, restart it.
-      _logger.printTrace('xcdevice observe stopped, restarting');
-      startPolling();
-    },
+        _logger.printTrace('xcdevice observe stopped, restarting');
+
+        // If the xcdevice process is killed, give it a few seconds and restart it.
+        Timer(const Duration(seconds: 10), () {
+          startPolling();
+        });
+      },
       // Don't reset the device subscription on an exception.
       // If the call to xcdevice asserts, more calls won't fix it.
       // Avoid hammering on it. If the user runs "flutter doctor"
