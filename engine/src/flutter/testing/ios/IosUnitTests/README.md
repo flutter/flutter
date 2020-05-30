@@ -6,13 +6,12 @@ also run in LUCI builds.
 ## Running Tests
 
 ```sh
-./flutter/tools/gn --ios --simulator --unoptimized
-cd flutter/testing/ios/IosUnitTests
-./build_and_run_tests.sh
+testing/run_tests.py [--type=objc]
 ```
 
 After the `ios_flutter_test` target is built you can also run the tests inside
-of xcode with `IosUnitTests.xcodeproj`.
+of Xcode with `testing/ios/IosUnitTests/IosUnitTests.xcodeproj`. If you
+modify the test or under-test files, you'll have to run `run_tests.py` again.
 
 ## Adding Tests
 

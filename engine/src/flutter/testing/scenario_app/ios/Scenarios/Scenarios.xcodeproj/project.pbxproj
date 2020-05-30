@@ -308,7 +308,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 248D76F322E388380012F0C1 /* Build configuration list for PBXNativeTarget "Scenarios" */;
 			buildPhases = (
-				0D8470A8241035AD0030B565 /* Compile iOS JIT */,
 				248D76C322E388370012F0C1 /* Sources */,
 				248D76C422E388370012F0C1 /* Frameworks */,
 				248D76C522E388370012F0C1 /* Resources */,
@@ -450,27 +449,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		0D8470A8241035AD0030B565 /* Compile iOS JIT */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Compile iOS JIT";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "set -e\ncd ../..\nif [ -z ${FLUTTER_ENGINE+x} ]; then \n  FLUTTER_ENGINE=ios_debug_sim_unopt\nfi\n./compile_ios_jit.sh ../../../out/host_debug_unopt ../../../out/$FLUTTER_ENGINE/clang_x64\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		248D76C322E388370012F0C1 /* Sources */ = {
