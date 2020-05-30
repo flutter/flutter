@@ -2254,6 +2254,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
         // Validate that we received an error count.
         expect(error['errorsSinceReload'], 0);
+        expect(
+            error['renderedErrorText'],
+            startsWith(
+                '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞════════════'));
 
         // Send a second error.
         FlutterError.reportError(FlutterErrorDetailsForRendering(
