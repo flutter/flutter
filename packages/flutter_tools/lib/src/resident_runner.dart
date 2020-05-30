@@ -210,7 +210,7 @@ class FlutterDevice {
         await service.streamListen(EventStreams.kExtension);
         service.onExtensionEvent.listen((vm_service.Event event) {
           if (event.extensionKind == 'Flutter.Error') {
-            Map json = event.extensionData?.data;
+            final Map<dynamic, dynamic> json = event.extensionData?.data;
             if (json != null && json.containsKey('renderedErrorText')) {
               print('\n' + json['renderedErrorText'].toString());
             }
