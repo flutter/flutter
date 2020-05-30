@@ -76,27 +76,6 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  codegen_integration_win:
-    description: >
-      Runs codegeneration and verifies that it can execute
-      correctly.
-    stage: devicelab_win
-    required_agent_capabilities: ["windows/android"]
-
-  codegen_integration_mac:
-    description: >
-      Runs codegeneration and verifies that it can execute
-      correctly.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  codegen_integration_linux:
-    description: >
-      Runs codegeneration and verifies that it can execute
-      correctly.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-
   uncaught_image_error_linux:
     description: >
       Ensures that an error thrown into the zone can be caught by the ImageStream

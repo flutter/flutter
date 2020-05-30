@@ -139,6 +139,14 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
     if (runCold) {
       return residentCompiler;
     }
+    globals.printError(<String>[
+      '"flutter generate" is deprecated, use "dart pub run build_runner" instead. ',
+      'The following dependencies must be added to dev_dependencies in pubspec.yaml:',
+      'build_runner: 1.10.0',
+      for (Object dependency in flutterProject.builders?.keys ?? const <Object>[])
+        '$dependency: ${flutterProject.builders[dependency]}'
+    ].join('\n'));
+
     final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
     codegenDaemon.startBuild();
     final CodegenStatus status = await codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
