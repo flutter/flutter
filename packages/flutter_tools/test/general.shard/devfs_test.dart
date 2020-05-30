@@ -82,7 +82,7 @@ void main() {
     expect(content.isModified, isTrue);
     expect(content.isModified, isFalse);
     expect(await content.contentsAsBytes(), <int>[2, 3, 4]);
-    updateFileModificationTime(file.path, fiveSecondsAgo, 0);
+
     expect(content.isModified, isFalse);
     expect(content.isModified, isFalse);
 
