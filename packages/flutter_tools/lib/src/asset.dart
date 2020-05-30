@@ -180,6 +180,7 @@ class ManifestAssetBundle implements AssetBundle {
       flutterManifest,
       includeDefaultFonts,
       packageConfig,
+      primary: true,
     );
 
     // Add fonts and assets from packages.
@@ -221,6 +222,7 @@ class ManifestAssetBundle implements AssetBundle {
           includeDefaultFonts,
           packageConfig,
           packageName: package.name,
+          primary: false,
         ));
       }
     }
@@ -251,7 +253,7 @@ class ManifestAssetBundle implements AssetBundle {
         entries[variant.entryUri.path] ??= DevFSFileContent(variant.assetFile);
       }
     }
-
+    print(flutterManifest.usesMaterialDesign);
     final List<_Asset> materialAssets = <_Asset>[
       if (flutterManifest.usesMaterialDesign && includeDefaultFonts)
         ..._getMaterialAssets(_kFontSetMaterial),
@@ -523,9 +525,10 @@ List<Map<String, dynamic>> _parseFonts(
   bool includeDefaultFonts,
   PackageConfig packageConfig, {
   String packageName,
+  @required bool primary,
 }) {
   return <Map<String, dynamic>>[
-    if (manifest.usesMaterialDesign && includeDefaultFonts)
+    if (primary && manifest.usesMaterialDesign && includeDefaultFonts)
       ..._getMaterialFonts(ManifestAssetBundle._kFontSetMaterial),
     if (packageName == null)
       ...manifest.fontsDescriptor
