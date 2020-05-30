@@ -123,7 +123,7 @@ void main() {
       outputPath: anyNamed('outputPath'),
       packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation invocation) async {
-      fileSystem.file('lib/foo.txt.dill')
+      fileSystem.file('lib/foo.dill')
         ..createSync(recursive: true)
         ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
       return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
