@@ -73,7 +73,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   }
 }
 
-class IOSDevice extends Device<IOSApp> {
+class IOSDevice extends Device {
   IOSDevice(String id, {
     @required IOSInstallationService installationService,
     @required this.name,
@@ -310,7 +310,7 @@ String decodeSyslog(String line) {
 ///
 /// Neither [isLatestBuildInstalled] nor [stopApp] are fully implemented, so
 /// these methods always return a reasonable default value.
-class IOSInstallationService extends InstallationService<IOSDevice, IOSApp> {
+class IOSInstallationService extends InstallationService {
   IOSInstallationService({
     @required Logger logger,
     @required IOSDeploy iosDeploy,
@@ -327,7 +327,7 @@ class IOSInstallationService extends InstallationService<IOSDevice, IOSApp> {
   final Platform _platform;
 
   @override
-  Future<bool> isAppInstalled(IOSDevice device, IOSApp application) async {
+  Future<bool> isAppInstalled(covariant IOSDevice device, covariant IOSApp application) async {
     bool result;
     try {
       result = await _iosDeploy.isAppInstalled(
@@ -342,10 +342,10 @@ class IOSInstallationService extends InstallationService<IOSDevice, IOSApp> {
   }
 
   @override
-  Future<bool> isLatestBuildInstalled(IOSDevice device, IOSApp application) async => false;
+  Future<bool> isLatestBuildInstalled(covariant IOSDevice device, covariant IOSApp application) async => false;
 
   @override
-  Future<bool> installApp(IOSDevice device, IOSApp application) async {
+  Future<bool> installApp(covariant IOSDevice device, covariant IOSApp application) async {
     final Directory bundle = _fileSystem.directory(application.deviceBundlePath);
     if (!bundle.existsSync()) {
       _logger.printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
@@ -374,7 +374,7 @@ class IOSInstallationService extends InstallationService<IOSDevice, IOSApp> {
   }
 
   @override
-  Future<bool> uninstallApp(IOSDevice device, IOSApp application) async {
+  Future<bool> uninstallApp(covariant IOSDevice device, covariant IOSApp application) async {
     int uninstallationResult;
     try {
       uninstallationResult = await _iosDeploy.uninstallApp(
@@ -393,15 +393,15 @@ class IOSInstallationService extends InstallationService<IOSDevice, IOSApp> {
   }
 
   @override
-  Future<bool> stopApp(IOSDevice device, IOSApp application) async {
+  Future<bool> stopApp(covariant IOSDevice device, covariant IOSApp application) async {
     // Currently we don't have a way to stop an app running on iOS.
     return false;
   }
 
   @override
   Future<LaunchResult> startApp(
-    IOSDevice device,
-    IOSApp application, {
+    covariant IOSDevice device,
+    covariant IOSApp application, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,

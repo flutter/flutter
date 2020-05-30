@@ -352,8 +352,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   String toString() => '$name device discovery';
 }
 
-@optionalTypeArgs
-abstract class Device<A extends ApplicationPackage> {
+abstract class Device {
   Device(this.id, {@required this.category, @required this.platformType, @required this.ephemeral});
 
   final String id;
@@ -581,21 +580,20 @@ abstract class Device<A extends ApplicationPackage> {
   Future<void> dispose();
 }
 
-
 /// Service responsible for install applications to remote devices and emulators.
-abstract class InstallationService<D extends Device<A>, A extends ApplicationPackage> {
+abstract class InstallationService {
 
   /// Stop the given [application] on [device] and return whether it was
   /// successfully terminated.
-  Future<bool> stopApp(D device, A application);
+  Future<bool> stopApp(Device device, ApplicationPackage application);
 
   /// Start the given [application] on the current device.
   ///
   /// [platformArgs] allows callers to pass platform-specific arguments to the
   /// start call. The build mode is not used by all platforms.
   Future<LaunchResult> startApp(
-    D device,
-    A application, {
+    Device device,
+    ApplicationPackage application, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -606,19 +604,19 @@ abstract class InstallationService<D extends Device<A>, A extends ApplicationPac
 
   /// Check if a version of the given [application] is already installed on
   /// [device].
-  Future<bool> isAppInstalled(D device, A application);
+  Future<bool> isAppInstalled(Device device, ApplicationPackage application);
 
   /// Check if the latest build of the [application] is already installed on
   /// [device].
-  Future<bool> isLatestBuildInstalled(D device, A application);
+  Future<bool> isLatestBuildInstalled(Device device, ApplicationPackage application);
 
   /// Install [application] on [device] and return whether this process was
   /// successful.
-  Future<bool> installApp(D device, A application);
+  Future<bool> installApp(Device device, ApplicationPackage application);
 
   /// Uninstall [application] from [device] and return whether this process was
   /// successful.
-  Future<bool> uninstallApp(D device, A application);
+  Future<bool> uninstallApp(Device device, ApplicationPackage application);
 }
 
 /// Information about an application's memory usage.

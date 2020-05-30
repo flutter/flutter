@@ -252,7 +252,6 @@ IOSDevice setUpIOSDevice({
     '1234',
     name: 'iPhone 1',
     logger: logger,
-    fileSystem: fileSystem ?? MemoryFileSystem.test(),
     sdkVersion: '13.3',
     cpuArchitecture: DarwinArch.arm64,
     platform: platform,
@@ -262,12 +261,17 @@ IOSDevice setUpIOSDevice({
       artifacts: artifacts,
       cache: cache,
     ),
-    iosDeploy: IOSDeploy(
-      logger: logger,
+    installationService: IOSInstallationService(
       platform: platform,
-      processManager: processManager,
-      artifacts: artifacts,
-      cache: cache,
+      logger: logger,
+      fileSystem: fileSystem ?? MemoryFileSystem.test(),
+      iosDeploy: IOSDeploy(
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+        artifacts: artifacts,
+        cache: cache,
+      ),
     ),
     artifacts: artifacts,
   );

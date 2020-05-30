@@ -80,16 +80,16 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     .thenReturn('ios-deploy');
   return IOSDevice(
     'test',
-    fileSystem: fileSystem,
     logger: BufferLogger.test(),
-    iosDeploy: null, // not used in this test
     iMobileDevice: null, // not used in this test
     platform: FakePlatform(operatingSystem: 'macos'),
     name: 'iPhone 1',
     sdkVersion: '13.3',
     cpuArchitecture: DarwinArch.arm64,
     artifacts: artifacts,
+    installationService: MockIOSInstallationService(),
   );
 }
 
 class MockArtifacts extends Mock implements Artifacts {}
+class MockIOSInstallationService extends Mock implements IOSInstallationService {}
