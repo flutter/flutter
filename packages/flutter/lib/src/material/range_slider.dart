@@ -472,6 +472,10 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     enableController.dispose();
     startPositionController.dispose();
     endPositionController.dispose();
+    if (overlayEntry != null) {
+      overlayEntry.remove();
+      overlayEntry = null;
+    }
     super.dispose();
   }
 
@@ -1154,6 +1158,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
+    if (!_state.mounted) {
+      return;
+    }
+
     final double dragValue = _getValueFromGlobalPosition(details.globalPosition);
 
     // If no selection has been made yet, test for thumb selection again now
@@ -1190,7 +1198,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   void _endInteraction() {
-    _state.overlayController.reverse();
+    if (!_state.mounted) {
+      return;
+    }
+
     if (showValueIndicator && _state.interactionTimer == null) {
       _state.valueIndicatorController.reverse();
     }
@@ -1202,6 +1213,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       }
       _active = false;
     }
+    _state.overlayController.reverse();
   }
 
   void _handleDragStart(DragStartDetails details) {
@@ -1388,22 +1400,24 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
     if (shouldPaintValueIndicators) {
       _state.paintBottomValueIndicator = (PaintingContext context, Offset offset) {
-        _sliderTheme.rangeValueIndicatorShape.paint(
-          context,
-          bottomThumbCenter,
-          activationAnimation: _valueIndicatorAnimation,
-          enableAnimation: _enableAnimation,
-          isDiscrete: isDiscrete,
-          isOnTop: false,
-          labelPainter: bottomLabelPainter,
-          parentBox: this,
-          sliderTheme: _sliderTheme,
-          textDirection: _textDirection,
-          thumb: bottomThumb,
-          value: bottomValue,
-          textScaleFactor: textScaleFactor,
-          sizeWithOverflow: resolvedscreenSize,
-        );
+        if (attached) {
+          _sliderTheme.rangeValueIndicatorShape.paint(
+            context,
+            bottomThumbCenter,
+            activationAnimation: _valueIndicatorAnimation,
+            enableAnimation: _enableAnimation,
+            isDiscrete: isDiscrete,
+            isOnTop: false,
+            labelPainter: bottomLabelPainter,
+            parentBox: this,
+            sliderTheme: _sliderTheme,
+            textDirection: _textDirection,
+            thumb: bottomThumb,
+            value: bottomValue,
+            textScaleFactor: textScaleFactor,
+            sizeWithOverflow: resolvedscreenSize,
+          );
+        }
       };
     }
 
@@ -1462,22 +1476,24 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       }
 
       _state.paintTopValueIndicator = (PaintingContext context, Offset offset) {
-        _sliderTheme.rangeValueIndicatorShape.paint(
-          context,
-          topThumbCenter,
-          activationAnimation: _valueIndicatorAnimation,
-          enableAnimation: _enableAnimation,
-          isDiscrete: isDiscrete,
-          isOnTop: thumbDelta < innerOverflow,
-          labelPainter: topLabelPainter,
-          parentBox: this,
-          sliderTheme: _sliderTheme,
-          textDirection: _textDirection,
-          thumb: topThumb,
-          value: topValue,
-          textScaleFactor: textScaleFactor,
-          sizeWithOverflow: resolvedscreenSize,
-        );
+        if (attached) {
+          _sliderTheme.rangeValueIndicatorShape.paint(
+            context,
+            topThumbCenter,
+            activationAnimation: _valueIndicatorAnimation,
+            enableAnimation: _enableAnimation,
+            isDiscrete: isDiscrete,
+            isOnTop: thumbDelta < innerOverflow,
+            labelPainter: topLabelPainter,
+            parentBox: this,
+            sliderTheme: _sliderTheme,
+            textDirection: _textDirection,
+            thumb: topThumb,
+            value: topValue,
+            textScaleFactor: textScaleFactor,
+            sizeWithOverflow: resolvedscreenSize,
+          );
+        }
       };
     }
 

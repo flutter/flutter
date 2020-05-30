@@ -7,6 +7,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/build_system/targets/linux.dart';
@@ -96,6 +97,72 @@ void main() {
     expect(output.childFile('AssetManifest.json'), exists);
     // No bundled fonts
     expect(output.childFile('FontManifest.json'), isNot(exists));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('ProfileBundleLinuxAssets copies artifacts to out directory', () async {
+    final Environment testEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{
+        kBuildMode: 'profile',
+      },
+      artifacts: MockArtifacts(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
+    testEnvironment.buildDir.createSync(recursive: true);
+
+    // Create input files.
+    testEnvironment.buildDir.childFile('app.so').createSync();
+
+    await const LinuxAotBundle(AotElfProfile(TargetPlatform.linux_x64)).build(testEnvironment);
+    await const ProfileBundleLinuxAssets().build(testEnvironment);
+    final Directory libDir = testEnvironment.outputDir
+      .childDirectory('lib');
+    final Directory assetsDir = testEnvironment.outputDir
+      .childDirectory('flutter_assets');
+
+    expect(libDir.childFile('libapp.so'), exists);
+    expect(assetsDir.childFile('AssetManifest.json'), exists);
+    // No bundled fonts
+    expect(assetsDir.childFile('FontManifest.json'), isNot(exists));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('ReleaseBundleLinuxAssets copies artifacts to out directory', () async {
+    final Environment testEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{
+        kBuildMode: 'release',
+      },
+      artifacts: MockArtifacts(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
+    testEnvironment.buildDir.createSync(recursive: true);
+
+    // Create input files.
+    testEnvironment.buildDir.childFile('app.so').createSync();
+
+    await const LinuxAotBundle(AotElfRelease(TargetPlatform.linux_x64)).build(testEnvironment);
+    await const ReleaseBundleLinuxAssets().build(testEnvironment);
+    final Directory libDir = testEnvironment.outputDir
+      .childDirectory('lib');
+    final Directory assetsDir = testEnvironment.outputDir
+      .childDirectory('flutter_assets');
+
+    expect(libDir.childFile('libapp.so'), exists);
+    expect(assetsDir.childFile('AssetManifest.json'), exists);
+    // No bundled fonts
+    expect(assetsDir.childFile('FontManifest.json'), isNot(exists));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),

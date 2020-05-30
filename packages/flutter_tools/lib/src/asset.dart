@@ -82,9 +82,9 @@ class ManifestAssetBundle implements AssetBundle {
 
   DateTime _lastBuildTimestamp;
 
-  static const String _assetManifestJson = 'AssetManifest.json';
-  static const String _fontSetMaterial = 'material';
-  static const String _license = 'LICENSE';
+  static const String _kAssetManifestJson = 'AssetManifest.json';
+  static const String _kFontSetMaterial = 'material';
+  static const String _kNoticeFile = 'NOTICES';
 
   @override
   bool wasBuiltOnce() => _lastBuildTimestamp != null;
@@ -149,7 +149,7 @@ class ManifestAssetBundle implements AssetBundle {
     // device.
     _lastBuildTimestamp = DateTime.now();
     if (flutterManifest.isEmpty) {
-      entries[_assetManifestJson] = DevFSStringContent('{}');
+      entries[_kAssetManifestJson] = DevFSStringContent('{}');
       return 0;
     }
 
@@ -254,7 +254,7 @@ class ManifestAssetBundle implements AssetBundle {
 
     final List<_Asset> materialAssets = <_Asset>[
       if (flutterManifest.usesMaterialDesign && includeDefaultFonts)
-        ..._getMaterialAssets(_fontSetMaterial),
+        ..._getMaterialAssets(_kFontSetMaterial),
     ];
     for (final _Asset asset in materialAssets) {
       assert(asset.assetFileExists);
@@ -285,9 +285,9 @@ class ManifestAssetBundle implements AssetBundle {
         globals.fs.file('DOES_NOT_EXIST_RERUN_FOR_WILDCARD$suffix').absolute);
     }
 
-    _setIfChanged(_assetManifestJson, assetManifest);
+    _setIfChanged(_kAssetManifestJson, assetManifest);
     _setIfChanged(kFontManifestJson, fontManifest);
-    _setIfChanged(_license, licenses);
+    _setIfChanged(_kNoticeFile, licenses);
     return 0;
   }
 
@@ -395,28 +395,23 @@ List<_Asset> _getMaterialAssets(String fontSet) {
 }
 
 
-/// Processes dependencies into a string representing the license file.
+/// Processes dependencies into a string representing the NOTICES file.
 ///
-/// Reads the LICENSE file from each package in the .packages file, splitting
-/// each one into each component license (so that we can de-dupe if possible).
-/// If provided with a pubspec.yaml file, only direct depedencies are included
-/// in the resulting LICENSE file.
+/// Reads the NOTICES or LICENSE file from each package in the .packages file,
+/// splitting each one into each component license so that it can be de-duped
+/// if possible. If the NOTICES file exists, it is preferred over the LICENSE
+/// file.
 ///
 /// Individual licenses inside each LICENSE file should be separated by 80
 /// hyphens on their own on a line.
 ///
-/// If a LICENSE file contains more than one component license, then each
-/// component license must start with the names of the packages to which the
-/// component license applies, with each package name on its own line, and the
-/// list of package names separated from the actual license text by a blank
-/// line. (The packages need not match the names of the pub package. For
+/// If a LICENSE or NOTICES file contains more than one component license,
+/// then each component license must start with the names of the packages to
+/// which the component license applies, with each package name on its own line
+/// and the list of package names separated from the actual license text by a
+/// blank line. The packages need not match the names of the pub package. For
 /// example, a package might itself contain code from multiple third-party
-/// sources, and might need to include a license for each one.)
-// Note: this logic currently has a bug, in that we collect LICENSE information
-// for dev_dependencies and transitive dev_dependencies. These are not actually
-// compiled into the released application and don't need to be included. Unfortunately,
-// the pubspec.yaml alone does not have enough information to determine which
-// dependencies are transitive of dev_dependencies, so a simple filter isn't sufficient.
+/// sources, and might need to include a license for each one.
 class LicenseCollector {
   LicenseCollector({
     @required FileSystem fileSystem
@@ -440,7 +435,11 @@ class LicenseCollector {
       if (packageUri == null || packageUri.scheme != 'file') {
         continue;
       }
-      final File file = _fileSystem.file(packageUri.resolve('../LICENSE'));
+      // First check for NOTICES, then fallback to LICENSE
+      File file = _fileSystem.file(packageUri.resolve('../NOTICES'));
+      if (!file.existsSync()) {
+        file = _fileSystem.file(packageUri.resolve('../LICENSE'));
+      }
       if (!file.existsSync()) {
         continue;
       }
@@ -527,7 +526,7 @@ List<Map<String, dynamic>> _parseFonts(
 }) {
   return <Map<String, dynamic>>[
     if (manifest.usesMaterialDesign && includeDefaultFonts)
-      ..._getMaterialFonts(ManifestAssetBundle._fontSetMaterial),
+      ..._getMaterialFonts(ManifestAssetBundle._kFontSetMaterial),
     if (packageName == null)
       ...manifest.fontsDescriptor
     else

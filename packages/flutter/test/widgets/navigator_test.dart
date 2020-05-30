@@ -696,6 +696,33 @@ void main() {
     expect(find.text('C'), isOnstage);
   });
 
+  testWidgets('Able to pop all routes', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/' : (BuildContext context) => const OnTapPage(
+        id: '/',
+      ),
+      '/A': (BuildContext context) => const OnTapPage(
+        id: 'A',
+      ),
+      '/A/B': (BuildContext context) => OnTapPage(
+        id: 'B',
+        onTap: (){
+          // Pops all routes with bad predicate.
+          Navigator.of(context).popUntil((Route<dynamic> route) => false);
+        },
+      ),
+    };
+    await tester.pumpWidget(
+      MaterialApp(
+        routes: routes,
+        initialRoute: '/A/B',
+      )
+    );
+    await tester.tap(find.text('B'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('pushAndRemoveUntil triggers secondaryAnimation', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(
@@ -1813,6 +1840,57 @@ void main() {
     expect(tickCount, 4);
   });
 
+  testWidgets('Route annouce correctly for first route and last route', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/57133.
+    Route<void> previousOfFirst = NotAnnounced();
+    Route<void> nextOfFirst = NotAnnounced();
+    Route<void> popNextOfFirst = NotAnnounced();
+    Route<void> firstRoute;
+
+    Route<void> previousOfSecond = NotAnnounced();
+    Route<void> nextOfSecond = NotAnnounced();
+    Route<void> popNextOfSecond = NotAnnounced();
+    Route<void> secondRoute;
+
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        initialRoute: '/second',
+        onGenerateRoute: (RouteSettings settings) {
+          if (settings.name == '/') {
+            firstRoute = RouteAnnouncementSpy(
+              onDidChangeNext: (Route<void> next) => nextOfFirst = next,
+              onDidChangePrevious: (Route<void> previous) => previousOfFirst = previous,
+              onDidPopNext: (Route<void> next) => popNextOfFirst = next,
+              settings: settings,
+            );
+            return firstRoute;
+          }
+          secondRoute = RouteAnnouncementSpy(
+            onDidChangeNext: (Route<void> next) => nextOfSecond = next,
+            onDidChangePrevious: (Route<void> previous) => previousOfSecond = previous,
+            onDidPopNext: (Route<void> next) => popNextOfSecond = next,
+            settings: settings,
+          );
+          return secondRoute;
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(previousOfFirst, isNull);
+    expect(nextOfFirst, secondRoute);
+    expect(popNextOfFirst, isA<NotAnnounced>());
+
+    expect(previousOfSecond, firstRoute);
+    expect(nextOfSecond, isNull);
+    expect(popNextOfSecond, isA<NotAnnounced>());
+
+    navigator.currentState.pop();
+    expect(popNextOfFirst, secondRoute);
+  });
+
   group('Page api', (){
     Widget buildNavigator(
       List<Page<dynamic>> pages,
@@ -2532,6 +2610,50 @@ void main() {
       expect(find.text('initial'), findsOneWidget);
     });
   });
+}
+
+typedef AnnouncementCallBack = void Function(Route<dynamic>);
+
+class NotAnnounced extends Route<void> {/* A place holder for not announced route*/}
+
+class RouteAnnouncementSpy extends Route<void> {
+  RouteAnnouncementSpy({
+    this.onDidChangePrevious,
+    this.onDidChangeNext,
+    this.onDidPopNext,
+    RouteSettings settings,
+  }) : super(settings: settings);
+  final AnnouncementCallBack onDidChangePrevious;
+  final AnnouncementCallBack onDidChangeNext;
+  final AnnouncementCallBack onDidPopNext;
+
+  @override
+  List<OverlayEntry> get overlayEntries => <OverlayEntry>[
+    OverlayEntry(
+      builder: (BuildContext context) => const Placeholder(),
+    )
+  ];
+
+  @override
+  void didChangeNext(Route<dynamic> nextRoute) {
+    super.didChangeNext(nextRoute);
+    if (onDidChangeNext != null)
+      onDidChangeNext(nextRoute);
+  }
+
+  @override
+  void didChangePrevious(Route<dynamic> previousRoute) {
+    super.didChangePrevious(previousRoute);
+    if (onDidChangePrevious != null)
+      onDidChangePrevious(previousRoute);
+  }
+
+  @override
+  void didPopNext(Route<dynamic> nextRoute) {
+    super.didPopNext(nextRoute);
+    if (onDidPopNext != null)
+      onDidPopNext(nextRoute);
+  }
 }
 
 class _TickingWidget extends StatefulWidget {

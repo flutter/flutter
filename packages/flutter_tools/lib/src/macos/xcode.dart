@@ -290,7 +290,7 @@ class XCDevice {
   List<dynamic> _cachedListResults;
 
   /// [timeout] defaults to 2 seconds.
-  Future<List<IOSDevice>> getAvailableTetheredIOSDevices({ Duration timeout }) async {
+  Future<List<IOSDevice>> getAvailableIOSDevices({ Duration timeout }) async {
     final List<dynamic> allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 2));
 
     if (allAvailableDevices == null) {
@@ -364,8 +364,11 @@ class XCDevice {
         }
       }
 
+      final IOSDeviceInterface interface = _interfaceType(deviceProperties);
+
       // Only support USB devices, skip "network" interface (Xcode > Window > Devices and Simulators > Connect via network).
-      if (!_isUSBTethered(deviceProperties)) {
+      // TODO(jmagman): Remove this check once wirelessly detected devices can be observed and attached, https://github.com/flutter/flutter/issues/15072.
+      if (interface != IOSDeviceInterface.usb) {
         continue;
       }
 
@@ -373,6 +376,7 @@ class XCDevice {
         device['identifier'] as String,
         name: device['name'] as String,
         cpuArchitecture: _cpuArchitecture(deviceProperties),
+        interfaceType: interface,
         sdkVersion: _sdkVersion(deviceProperties),
         artifacts: globals.artifacts,
         fileSystem: globals.fs,
@@ -409,10 +413,18 @@ class XCDevice {
     return null;
   }
 
-  static bool _isUSBTethered(Map<String, dynamic> deviceProperties) {
-    // Interface can be "usb", "network", or not present for simulators.
-    return deviceProperties.containsKey('interface') &&
-        (deviceProperties['interface'] as String).toLowerCase() == 'usb';
+  static IOSDeviceInterface _interfaceType(Map<String, dynamic> deviceProperties) {
+    // Interface can be "usb", "network", or "none" for simulators
+    // and unknown future interfaces.
+    if (deviceProperties.containsKey('interface')) {
+      if ((deviceProperties['interface'] as String).toLowerCase() == 'network') {
+        return IOSDeviceInterface.network;
+      } else {
+        return IOSDeviceInterface.usb;
+      }
+    }
+
+    return IOSDeviceInterface.none;
   }
 
   static String _sdkVersion(Map<String, dynamic> deviceProperties) {

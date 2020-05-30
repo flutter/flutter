@@ -72,6 +72,17 @@ double getBorderBottom(WidgetTester tester) {
   return box.size.height;
 }
 
+Finder findLabel() {
+  return find.descendant(
+    of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Shaker'),
+    matching: find.byWidgetPredicate((Widget w) => w is Text),
+  );
+}
+
+Rect getLabelRect(WidgetTester tester) {
+  return tester.getRect(findLabel());
+}
+
 InputBorder getBorder(WidgetTester tester) {
   if (!tester.any(findBorderPainter()))
     return null;
@@ -3453,6 +3464,66 @@ void main() {
     expect(getBorderColor(tester), equals(disabledColor));
     await tester.pump(const Duration(seconds: 10));
     expect(getBorderColor(tester), equals(disabledColor));
+  });
+
+  testWidgets('InputDecorator withdraws label when not empty or focused', (WidgetTester tester) async {
+    Future<void> pumpDecorator({bool focused, bool enabled = true, bool filled = false, bool empty = true, bool directional = false}) async {
+      return await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: empty,
+          isFocused: focused,
+          decoration: InputDecoration(
+            labelText: 'Label',
+            enabled: enabled,
+            filled: filled,
+            focusedBorder: const OutlineInputBorder(),
+            disabledBorder: const OutlineInputBorder(),
+            border: const OutlineInputBorder(),
+          ),
+        ),
+      );
+    }
+
+    await pumpDecorator(focused: false, empty: true);
+    await tester.pumpAndSettle();
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+
+    await pumpDecorator(focused: false, empty: false);
+    await tester.pumpAndSettle();
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -4)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+
+    await pumpDecorator(focused: true, empty: true);
+    await tester.pumpAndSettle();
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -4)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+
+    await pumpDecorator(focused: true, empty: false);
+    await tester.pumpAndSettle();
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -4)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+
+    await pumpDecorator(focused: false, empty: true, enabled: false);
+    await tester.pumpAndSettle();
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+
+    await pumpDecorator(focused: false, empty: false, enabled: false);
+    await tester.pumpAndSettle();
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -4)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+
+    // Focused and disabled happens with NavigationMode.directional.
+    await pumpDecorator(focused: true, empty: true, enabled: false);
+    await tester.pumpAndSettle();
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
+
+    await pumpDecorator(focused: true, empty: false, enabled: false);
+    await tester.pumpAndSettle();
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -4)));
+    expect(getLabelRect(tester).size, equals(const Size(80, 16)));
   });
 
   testWidgets('InputDecorationTheme.toString()', (WidgetTester tester) async {

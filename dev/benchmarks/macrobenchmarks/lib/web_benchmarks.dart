@@ -30,7 +30,8 @@ const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultVal
 /// When adding a new benchmark, add it to this map. Make sure that the name
 /// of your benchmark is unique.
 final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
-  BenchCardInfiniteScroll.benchmarkName: () => BenchCardInfiniteScroll(),
+  BenchCardInfiniteScroll.benchmarkName: () => BenchCardInfiniteScroll.forward(),
+  BenchCardInfiniteScroll.benchmarkNameBackward: () => BenchCardInfiniteScroll.backward(),
   BenchClippedOutPictures.benchmarkName: () => BenchClippedOutPictures(),
   BenchDrawRect.benchmarkName: () => BenchDrawRect(),
   BenchPathRecording.benchmarkName: () => BenchPathRecording(),
