@@ -258,6 +258,7 @@ def EnsureDebugUnoptSkyPackagesAreBuilt():
   RunCmd(ninja_command, cwd=buildroot_dir)
 
 def EnsureJavaTestsAreBuilt(android_out_dir):
+  """Builds the engine variant and the test jar containing the JUnit tests"""
   ninja_command = [
     'autoninja',
     '-C',
@@ -271,6 +272,8 @@ def EnsureJavaTestsAreBuilt(android_out_dir):
     RunCmd(ninja_command, cwd=buildroot_dir)
     return
 
+  assert android_out_dir != "out/android_debug_unopt", "%s doesn't exist. Run GN to generate the directory first" % android_out_dir
+
   # Otherwise prepare the directory first, then build the test.
   gn_command = [
     os.path.join(buildroot_dir, 'flutter', 'tools', 'gn'),
@@ -282,15 +285,53 @@ def EnsureJavaTestsAreBuilt(android_out_dir):
   RunCmd(gn_command, cwd=buildroot_dir)
   RunCmd(ninja_command, cwd=buildroot_dir)
 
+def EnsureIosTestsAreBuilt(ios_out_dir):
+  """Builds the engine variant and the test dylib containing the XCTests"""
+  ninja_command = [
+    'autoninja',
+    '-C',
+    ios_out_dir,
+    'ios_test_flutter'
+  ]
+
+  # Attempt running Ninja if the out directory exists.
+  # We don't want to blow away any custom GN args the caller may have already set.
+  if os.path.exists(ios_out_dir):
+    RunCmd(ninja_command, cwd=buildroot_dir)
+    return
+
+  assert ios_out_dir != "out/ios_debug_sim_unopt", "%s doesn't exist. Run GN to generate the directory first" % ios_out_dir
+
+  # Otherwise prepare the directory first, then build the test.
+  gn_command = [
+    os.path.join(buildroot_dir, 'flutter', 'tools', 'gn'),
+    '--ios',
+    '--unoptimized',
+    '--runtime-mode=debug',
+    '--no-lto',
+    '--simulator'
+  ]
+  RunCmd(gn_command, cwd=buildroot_dir)
+  RunCmd(ninja_command, cwd=buildroot_dir)
+
 def AssertExpectedJavaVersion():
+  """Checks that the user has Java 8 which is the supported Java version for Android"""
   EXPECTED_VERSION = '1.8'
   # `java -version` is output to stderr. https://bugs.java.com/bugdatabase/view_bug.do?bug_id=4380614
   version_output = subprocess.check_output(['java', '-version'], stderr=subprocess.STDOUT)
   match = bool(re.compile('version "%s' % EXPECTED_VERSION).search(version_output))
   message = "JUnit tests need to be run with Java %s. Check the `java -version` on your PATH." % EXPECTED_VERSION
-  assert True, message
+  assert match, message
+
+def AssertExpectedXcodeVersion():
+  """Checks that the user has a recent version of Xcode installed"""
+  EXPECTED_MAJOR_VERSION = '11'
+  version_output = subprocess.check_output(['xcodebuild', '-version'])
+  message = "Xcode must be installed to run the iOS embedding unit tests"
+  assert "Xcode %s." % EXPECTED_MAJOR_VERSION in version_output, message
 
 def RunJavaTests(filter, android_variant='android_debug_unopt'):
+  """Runs the Java JUnit unit tests for the Android embedding"""
   AssertExpectedJavaVersion()
   android_out_dir = os.path.join(out_dir, android_variant)
   EnsureJavaTestsAreBuilt(android_out_dir)
@@ -315,6 +356,26 @@ def RunJavaTests(filter, android_variant='android_debug_unopt'):
   ]
 
   RunCmd(command)
+
+def RunObjcTests(ios_variant='ios_debug_sim_unopt'):
+  """Runs Objective-C XCTest unit tests for the iOS embedding"""
+  AssertExpectedXcodeVersion()
+  ios_out_dir = os.path.join(out_dir, ios_variant)
+  EnsureIosTestsAreBuilt(ios_out_dir)
+
+  pretty = "cat" if subprocess.call(["which", "xcpretty"]) else "xcpretty"
+  ios_unit_test_dir = os.path.join(buildroot_dir, 'flutter', 'testing', 'ios', 'IosUnitTests')
+
+  command = [
+    'xcodebuild '
+    '-sdk iphonesimulator '
+    '-scheme IosUnitTests '
+    "-destination platform='iOS Simulator,name=iPhone 8' "
+    'test '
+    'FLUTTER_ENGINE=' + ios_variant +
+    ' | ' + pretty
+  ]
+  RunCmd(command, cwd=ios_unit_test_dir, shell=True)
 
 def RunDartTests(build_dir, filter, verbose_dart_snapshot):
   # This one is a bit messy. The pubspec.yaml at flutter/testing/dart/pubspec.yaml
@@ -375,13 +436,16 @@ def main():
   parser.add_argument('--android-variant', dest='android_variant', action='store',
       default='android_debug_unopt',
       help='The engine build variant to run java tests for')
+  parser.add_argument('--ios-variant', dest='ios_variant', action='store',
+      default='ios_debug_sim_unopt',
+      help='The engine build variant to run objective-c tests for')
   parser.add_argument('--verbose-dart-snapshot', dest='verbose_dart_snapshot', action='store_true',
       default=False, help='Show extra dart snapshot logging.')
 
   args = parser.parse_args()
 
   if args.type == 'all':
-    types = ['engine', 'dart', 'benchmarks', 'java', 'font-subset']
+    types = ['engine', 'dart', 'benchmarks', 'java', 'objc', 'font-subset']
   else:
     types = args.type.split(',')
 
@@ -407,6 +471,10 @@ def main():
       print('Can only filter JUnit4 tests by single entire class name, eg "io.flutter.SmokeTest". Ignoring filter=' + java_filter)
       java_filter = None
     RunJavaTests(java_filter, args.android_variant)
+
+  if 'objc' in types:
+    assert IsMac(), "iOS embedding tests can only be run on macOS."
+    RunObjcTests(args.ios_variant)
 
   # https://github.com/flutter/flutter/issues/36300
   if 'benchmarks' in types and not IsWindows():
