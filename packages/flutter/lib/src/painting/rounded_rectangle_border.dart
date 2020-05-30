@@ -35,7 +35,7 @@ class RoundedRectangleBorder extends OutlinedBorder {
        assert(borderRadius != null),
        super(side: side);
 
-  /// The radii for each corner.
+  /// The radius for each corner.
   final BorderRadiusGeometry borderRadius;
 
   @override
