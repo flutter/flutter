@@ -929,6 +929,13 @@ mixin WidgetInspectorService {
     );
 
     errorJson['errorsSinceReload'] = _errorsSinceReload;
+    errorJson['renderedErrorText'] = TextTreeRenderer(
+      wrapWidth: FlutterError.wrapWidth,
+      wrapWidthProperties: FlutterError.wrapWidth,
+      maxDescendentsTruncatableNode: 5,
+    )
+        .render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error))
+        .trimRight();
     _errorsSinceReload += 1;
 
     postEvent('Flutter.Error', errorJson);

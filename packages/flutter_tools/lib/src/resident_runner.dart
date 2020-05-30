@@ -8,6 +8,7 @@ import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
+import 'package:vm_service/vm_service.dart';
 
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -206,6 +207,15 @@ class FlutterDevice {
           getSkSLMethod: getSkSLMethod,
           device: device,
         );
+        await service.streamListen(EventStreams.kExtension);
+        service.onExtensionEvent.listen((vm_service.Event event) {
+          if (event.extensionKind == 'Flutter.Error') {
+            Map json = event.extensionData?.data;
+            if (json != null && json.containsKey('renderedErrorText')) {
+              print('\n' + json['renderedErrorText'].toString());
+            }
+          }
+        });
       } on Exception catch (exception) {
         globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
         if (!completer.isCompleted && !_isListeningForObservatoryUri) {
