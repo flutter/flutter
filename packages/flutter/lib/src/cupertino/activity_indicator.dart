@@ -27,9 +27,13 @@ class CupertinoActivityIndicator extends StatefulWidget {
     Key key,
     this.animating = true,
     this.radius = _kDefaultIndicatorRadius,
+    this.progress = 1.0,
   }) : assert(animating != null),
        assert(radius != null),
        assert(radius > 0),
+       assert(progress != null),
+       assert(progress >= 0),
+       assert(progress <= 1),
        super(key: key);
 
   /// Whether the activity indicator is running its animation.
@@ -41,6 +45,14 @@ class CupertinoActivityIndicator extends StatefulWidget {
   ///
   /// Defaults to 10px. Must be positive and cannot be null.
   final double radius;
+
+  /// Determines the number of spinner segments that will be show. Typical usage would
+  /// display all segments, however, this allows for more fine-grained control such as
+  /// during pull-to-refresh when the drag-down action shows one segment at a time as
+  /// the user continues to drag down.
+  ///
+  /// Defaults to 1.0. Must be between 0.0 and 1.0 inclusive, and cannot be null.
+  final double progress;
 
   @override
   _CupertinoActivityIndicatorState createState() => _CupertinoActivityIndicatorState();
@@ -89,6 +101,7 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
           position: _controller,
           activeColor: CupertinoDynamicColor.resolve(_kActiveTickColor, context),
           radius: widget.radius,
+          progress: widget.progress,
         ),
       ),
     );
@@ -107,6 +120,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     @required this.position,
     @required this.activeColor,
     double radius,
+    @required this.progress,
   }) : tickFundamentalRRect = RRect.fromLTRBXY(
          -radius,
          radius / _kDefaultIndicatorRadius,
@@ -120,6 +134,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
   final Animation<double> position;
   final RRect tickFundamentalRRect;
   final Color activeColor;
+  final double progress;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -128,13 +143,17 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     canvas.save();
     canvas.translate(size.width / 2.0, size.height / 2.0);
 
+    // The standard iOS implementation has the top tick appearing first,
+    // so need to rotate so that that is the first one that gets drawn
+    canvas.rotate(math.pi / 2);
+
     final int activeTick = (_kTickCount * position.value).floor();
 
-    for (int i = 0; i < _kTickCount; ++ i) {
+    for (int i = ((_kTickCount - 1) * progress).toInt(); i >= 0; --i) {
       final int t = (i + activeTick) % _kTickCount;
-      paint.color = activeColor.withAlpha(_alphaValues[t]);
+      paint.color = activeColor.withAlpha(progress < 1 ? _alphaValues[0] : _alphaValues[t]);
       canvas.drawRRect(tickFundamentalRRect, paint);
-      canvas.rotate(-_kTwoPI / _kTickCount);
+      canvas.rotate(_kTwoPI / _kTickCount);
     }
 
     canvas.restore();

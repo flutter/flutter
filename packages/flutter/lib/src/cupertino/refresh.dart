@@ -292,7 +292,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     Key key,
     this.refreshTriggerPullDistance = _defaultRefreshTriggerPullDistance,
     this.refreshIndicatorExtent = _defaultRefreshIndicatorExtent,
-    this.builder = buildSimpleRefreshIndicator,
+    this.builder = buildAppleRefreshIndicator,
     this.onRefresh,
   }) : assert(refreshTriggerPullDistance != null),
        assert(refreshTriggerPullDistance > 0.0),
@@ -394,6 +394,46 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
               ),
       ),
     );
+  }
+
+  static Widget buildAppleRefreshIndicator(
+    BuildContext context,
+    RefreshIndicatorMode refreshState,
+    double pulledExtent,
+    double refreshTriggerPullDistance,
+    double refreshIndicatorExtent,
+  ) {
+    final percentageComplete = min(pulledExtent / refreshTriggerPullDistance, 1.0);
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 16.0),
+        child: _buildIndicatorForRefreshState(refreshState, 14.0, percentageComplete),
+      ),
+    );
+  }
+
+  static Widget _buildIndicatorForRefreshState(RefreshIndicatorMode refreshState, double radius, double percentageComplete) {
+    switch (refreshState) {
+      case RefreshIndicatorMode.drag:
+        // While we're dragging, we draw individual segments of the spinner while simultaneously
+        // easing the opacity in.
+        const Curve opacityCurve = Interval(0.0, 0.2, curve: Curves.easeInOut);
+        return Opacity(
+          opacity: opacityCurve.transform(percentageComplete),
+          child: CupertinoActivityIndicator(radius: radius, animating: false, progress: percentageComplete),
+        );
+      case RefreshIndicatorMode.armed:
+      case RefreshIndicatorMode.refresh:
+        // Once we're armed or performing the refresh, we just show the normal spinner
+        return CupertinoActivityIndicator(radius: radius);
+      case RefreshIndicatorMode.done:
+        // When the user let's go, the standard transition is to shrink the spinner
+        return CupertinoActivityIndicator(radius: radius * percentageComplete);
+      default:
+        // Anything else doesn't show anything
+        return Container();
+    }
   }
 
   @override
