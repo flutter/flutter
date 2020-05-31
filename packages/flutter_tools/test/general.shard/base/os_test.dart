@@ -67,6 +67,7 @@ void main() {
     testWithoutContext('returns null when executable does not exist', () async {
       when(mockProcessManager.runSync(<String>['where', kExecutable]))
           .thenReturn(ProcessResult(0, 1, null, null));
+      when(mockProcessManager.canRun('pwsh.exe')).thenReturn(true);
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
       expect(utils.which(kExecutable), isNull);
     });
@@ -74,6 +75,7 @@ void main() {
     testWithoutContext('returns exactly one result', () async {
       when(mockProcessManager.runSync(<String>['where', 'foo']))
           .thenReturn(ProcessResult(0, 0, '$kPath1\n$kPath2', null));
+      when(mockProcessManager.canRun('pwsh.exe')).thenReturn(true);
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
       expect(utils.which(kExecutable).path, kPath1);
     });
@@ -81,6 +83,7 @@ void main() {
     testWithoutContext('returns all results for whichAll', () async {
       when(mockProcessManager.runSync(<String>['where', kExecutable]))
           .thenReturn(ProcessResult(0, 0, '$kPath1\n$kPath2', null));
+      when(mockProcessManager.canRun('pwsh.exe')).thenReturn(true);
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
       final List<File> result = utils.whichAll(kExecutable);
       expect(result, hasLength(2));
@@ -97,6 +100,7 @@ void main() {
       when(mockFile.readAsBytesSync()).thenThrow(
         const FileSystemException('error'),
       );
+      when(mockProcessManager.canRun('pwsh.exe')).thenReturn(true);
       final OperatingSystemUtils osUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -116,6 +120,7 @@ void main() {
         0x01,
         0x02,
       ]));
+      when(mockProcessManager.canRun('pwsh.exe')).thenReturn(true);
       final OperatingSystemUtils osUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -131,6 +136,7 @@ void main() {
       final MockFile mockFile = MockFile();
       when(fileSystem.file(any)).thenReturn(mockFile);
       when(mockFile.readAsBytesSync()).thenReturn(Uint8List(0));
+      when(mockProcessManager.canRun('pwsh.exe')).thenReturn(true);
       final OperatingSystemUtils osUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -140,6 +146,58 @@ void main() {
 
       expect(osUtils.verifyGzip(mockFile), isFalse);
     });
+  });
+
+  testWithoutContext('Windows PowerShell Expand-Archive', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'pwsh.exe',
+          'Expand-Archive',
+          '-Path',
+          'a',
+          '-DestinationPath',
+          'b'
+        ],
+      ),
+    ]);
+    final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    final OperatingSystemUtils osUtils = OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'windows'),
+      processManager: processManager,
+    );
+
+    osUtils.unzip(fileSystem.file('a'), fileSystem.directory('b'));
+
+    expect(processManager.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('Windows PowerShell Compress-Archive', () {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'pwsh.exe',
+          'Compress-Archive',
+          '-Path',
+          'b',
+          '-DestinationPath',
+          'a'
+        ],
+      ),
+    ]);
+    final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    final OperatingSystemUtils osUtils = OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'windows'),
+      processManager: processManager,
+    );
+
+    osUtils.zip(fileSystem.directory('b'), fileSystem.file('a'));
+
+    expect(processManager.hasRemainingExpectations, false);
   });
 
   testWithoutContext('stream compression level', () {
