@@ -69,6 +69,66 @@ void main() {
     );
   });
 
+  testWidgets('Activity indicator 0% in progress', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          key: key,
+          child: Container(
+            color: CupertinoColors.white,
+            child: const CupertinoActivityIndicator(animating: false, progress: 0),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('activityIndicator.inprogress.0.0.png'),
+    );
+  });
+
+  testWidgets('Activity indicator 30% in progress', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          key: key,
+          child: Container(
+            color: CupertinoColors.white,
+            child: const CupertinoActivityIndicator(animating: false, progress: 0.5),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('activityIndicator.inprogress.0.3.png'),
+    );
+  });
+
+  testWidgets('Activity indicator 100% in progress', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          key: key,
+          child: Container(
+            color: CupertinoColors.white,
+            child: const CupertinoActivityIndicator(animating: false, progress: 1),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('activityIndicator.inprogress.1.0.png'),
+    );
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/41345.
   testWidgets('has the correct corner radius', (WidgetTester tester) async {
     await tester.pumpWidget(
