@@ -86,7 +86,7 @@ class UnpackLinux extends Target {
       clientSourcePaths: <String>[clientSourcePath, headersPath],
       icuDataPath: environment.artifacts.getArtifactPath(
         Artifact.icuData,
-        platform: TargetPlatform.linux_x64
+        platform: TargetPlatform.linux_x64,
       )
     );
     final DepfileService depfileService = DepfileService(
