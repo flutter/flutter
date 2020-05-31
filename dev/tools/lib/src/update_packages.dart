@@ -319,6 +319,7 @@ class UpdatePackagesCommand extends Command<void> {
             'deps',
             '--style=compact',
           ],
+          workingDirectory: tempDir.path,
           environment: <String, String>{
             'FLUTTER_ROOT': flutterRoot,
           },
