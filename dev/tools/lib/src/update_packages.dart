@@ -12,7 +12,8 @@ import 'package:http/http.dart' as http;
 import 'package:args/command_runner.dart';
 import 'package:meta/meta.dart';
 
-String get flutterRoot => path.normalize(path.join(Platform.resolvedExecutable, '..', '..', '..', '..', '..'));
+String get flutterRoot => path.absolute(
+  path.normalize(path.join(Platform.resolvedExecutable, '..', '..', '..', '..', '..')));
 
 /// Map from package name to package version, used to artificially pin a pub
 /// package version in cases when upgrading to the latest breaks Flutter.
@@ -318,6 +319,9 @@ class UpdatePackagesCommand extends Command<void> {
             'deps',
             '--style=compact',
           ],
+          environment: <String, String>{
+            'FLUTTER_ROOT': flutterRoot,
+          },
         );
         process
           .stdout
@@ -382,6 +386,7 @@ class UpdatePackagesCommand extends Command<void> {
     int count = 0;
 
     for (final Directory dir in packages) {
+      print('running pub get in ${dir.path}');
       final ProcessResult result = await Process.run(
         'dart',
         <String>[
