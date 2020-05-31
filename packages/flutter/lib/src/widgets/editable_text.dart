@@ -1492,10 +1492,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // large to be fully revealed in `renderEditable`, it will be centered along
   // the main axis.
   //
-  // If the main axis is Axis.horizontal (which means this is a multiline
-  // EditableText), the given rect's height will first be extended to match
+  // If this is a multiline EditableText (which means the Editable can only
+  // scroll vertically), the given rect's height will first be extended to match
   // `renderEditable.preferredLineHeight`, before the target scroll offset is
-  // computed.
+  // calculated.
   RevealedOffset _getOffsetToRevealCaret(Rect rect) {
     if (!_scrollController.position.allowImplicitScrolling)
       return RevealedOffset(offset: _scrollController.offset, rect: rect);
@@ -1506,9 +1506,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (!_isMultiline) {
       additionalOffset = rect.width >= editableSize.width
-        // Center `rect` if it's oversized
+        // Center `rect` if it's oversized.
         ? editableSize.width / 2 - rect.center.dx
-        // The valid additional offset ranges from (rect.right - size.width)
+        // Valid additional offsets range from (rect.right - size.width)
         // to (rect.left). Pick the closest one if out of range.
         : 0.0.clamp(rect.right - editableSize.width, rect.left) as double;
       unitOffset = const Offset(1, 0);
@@ -1528,7 +1528,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       unitOffset = const Offset(0, 1);
     }
 
-    // No overscrolling.
+    // No overscrolling when encountering tall fonts/scripts that extend past
+    // the ascent.
     final double targetOffset = (additionalOffset + _scrollController.offset)
       .clamp(
         _scrollController.position.minScrollExtent,

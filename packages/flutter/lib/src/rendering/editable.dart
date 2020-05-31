@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui show TextBox, lerpDouble, BoxHeightStyle, BoxWidthStyle;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
@@ -1504,47 +1503,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     return rect.shift(_getPixelPerfectCursorOffset(rect));
   }
-
-  //@override
-  //void showOnScreen({
-  //  RenderObject descendant,
-  //  Rect rect,
-  //  Duration duration = Duration.zero,
-  //  Curve curve = Curves.ease,
-  //}) {
-  //  assert(descendant == null);
-
-  //  Rect newRect = rect;
-  //  if (rect != null && offset.allowImplicitScrolling) {
-  //    double shift;
-  //    switch (_viewportAxis) {
-  //      case Axis.horizontal:
-  //        shift = rect.width >= size.width
-  //          // Center `rect` if it's oversized
-  //          ? size.width / 2 - rect.center.dx
-  //          // The valid additional offset ranges from (rect.right - size.width)
-  //          // to (rect.left).
-  //          : 0.0.clamp(rect.right - size.width, rect.left) as double;
-  //        newRect = rect.translate(-shift, 0);
-  //        break;
-  //      case Axis.vertical:
-  //        shift = rect.height >= size.height
-  //          ? size.height / 2 - rect.center.dy
-  //          : 0.0.clamp(rect.bottom - size.height, rect.top) as double;
-  //        newRect = rect.translate(0, -shift);
-  //        break;
-  //    }
-
-  //    offset.moveTo(offset.pixels + shift, duration: duration, curve: curve);
-  //  }
-
-  //  return super.showOnScreen(
-  //    rect: newRect,
-  //    descendant: this,
-  //    duration: duration,
-  //    curve: curve,
-  //  );
-  //}
 
   @override
   double computeMinIntrinsicWidth(double height) {
