@@ -291,7 +291,15 @@ class _WindowsUtils extends OperatingSystemUtils {
     logger: logger,
     platform: platform,
     processManager: processManager,
-  );
+  ) {
+    if (processManager.canRun('pwsh.exe')) {
+      _activePowershell = 'pwsh.exe';
+    } else {
+      _activePowershell = 'PowerShell.exe';
+    }
+  }
+
+  String _activePowershell;
 
   @override
   void makeExecutable(File file) {}
@@ -315,23 +323,26 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   void zip(Directory data, File zipFile) {
-    final Archive archive = Archive();
-    for (final FileSystemEntity entity in data.listSync(recursive: true)) {
-      if (entity is! File) {
-        continue;
-      }
-      final File file = entity as File;
-      final String path = file.fileSystem.path.relative(file.path, from: data.path);
-      final List<int> bytes = file.readAsBytesSync();
-      archive.addFile(ArchiveFile(path, bytes.length, bytes));
-    }
-    zipFile.writeAsBytesSync(ZipEncoder().encode(archive), flush: true);
+    _processManager.runSync(<String>[
+      _activePowershell,
+      'Compress-Archive',
+      '-Path',
+      data.path,
+      '-DestinationPath',
+      zipFile.path,
+    ]);
   }
 
   @override
   void unzip(File file, Directory targetDirectory) {
-    final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
-    _unpackArchive(archive, targetDirectory);
+    _processManager.runSync(<String>[
+      _activePowershell,
+      'Expand-Archive',
+      '-Path',
+      file.path,
+      '-DestinationPath',
+      targetDirectory.path,
+    ]);
   }
 
   @override
