@@ -2292,14 +2292,11 @@ class RenderFittedBox extends RenderProxyBox {
     AlignmentGeometry alignment = Alignment.center,
     TextDirection textDirection,
     RenderBox child,
-    Clip clipBehavior = Clip.none,
   }) : assert(fit != null),
        assert(alignment != null),
-       assert(clipBehavior != null),
        _fit = fit,
        _alignment = alignment,
        _textDirection = textDirection,
-       _clipBehavior = clipBehavior,
        super(child);
 
   Alignment _resolvedAlignment;
@@ -2376,20 +2373,6 @@ class RenderFittedBox extends RenderProxyBox {
   bool _hasVisualOverflow;
   Matrix4 _transform;
 
-  /// {@macro flutter.widgets.Clip}
-  ///
-  /// Defaults to [Clip.none], and must not be null.
-  Clip get clipBehavior => _clipBehavior;
-  Clip _clipBehavior = Clip.none;
-  set clipBehavior(Clip value) {
-    assert(value != null);
-    if (value != _clipBehavior) {
-      _clipBehavior = value;
-      markNeedsPaint();
-      markNeedsSemanticsUpdate();
-    }
-  }
-
   void _clearPaintData() {
     _hasVisualOverflow = null;
     _transform = null;
@@ -2435,9 +2418,9 @@ class RenderFittedBox extends RenderProxyBox {
       return;
     _updatePaintData();
     if (child != null) {
-      if (_hasVisualOverflow && clipBehavior != Clip.none)
+      if (_hasVisualOverflow)
         layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform,
-            oldLayer: layer is ClipRectLayer ? layer as ClipRectLayer : null, clipBehavior: clipBehavior);
+            oldLayer: layer is ClipRectLayer ? layer as ClipRectLayer : null);
       else
         layer = _paintChildWithTransform(context, offset);
     }

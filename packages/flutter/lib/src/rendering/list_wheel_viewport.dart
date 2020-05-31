@@ -143,8 +143,8 @@ class RenderListWheelViewport
     double overAndUnderCenterOpacity = 1,
     @required double itemExtent,
     double squeeze = 1,
+    bool clipToSize = true,
     bool renderChildrenOutsideViewport = false,
-    Clip clipBehavior = Clip.none,
     List<RenderBox> children,
   }) : assert(childManager != null),
        assert(offset != null),
@@ -163,11 +163,11 @@ class RenderListWheelViewport
        assert(squeeze != null),
        assert(squeeze > 0),
        assert(itemExtent > 0),
+       assert(clipToSize != null),
        assert(renderChildrenOutsideViewport != null),
-       assert(clipBehavior != null),
        assert(
-         !renderChildrenOutsideViewport || clipBehavior == Clip.none,
-         clipBehaviorAndRenderChildrenOutsideViewportConflict,
+         !renderChildrenOutsideViewport || !clipToSize,
+         clipToSizeAndRenderChildrenOutsideViewportConflict,
        ),
        _offset = offset,
        _diameterRatio = diameterRatio,
@@ -178,8 +178,8 @@ class RenderListWheelViewport
        _overAndUnderCenterOpacity = overAndUnderCenterOpacity,
        _itemExtent = itemExtent,
        _squeeze = squeeze,
-       _renderChildrenOutsideViewport = renderChildrenOutsideViewport,
-       _clipBehavior = clipBehavior {
+       _clipToSize = clipToSize,
+       _renderChildrenOutsideViewport = renderChildrenOutsideViewport {
     addAll(children);
   }
 
@@ -199,10 +199,10 @@ class RenderListWheelViewport
       'be clipped in the z-axis and therefore not renderable. Value must be '
       'between 0 and 0.01.';
 
-  /// An error message to show when [clipBehavior] and [renderChildrenOutsideViewport]
+  /// An error message to show when [clipToSize] and [renderChildrenOutsideViewport]
   /// are set to conflicting values.
-  static const String clipBehaviorAndRenderChildrenOutsideViewportConflict =
-      'Cannot renderChildrenOutsideViewport and clip since children '
+  static const String clipToSizeAndRenderChildrenOutsideViewportConflict =
+      'Cannot renderChildrenOutsideViewport and clipToSize since children '
       'rendered outside will be clipped anyway.';
 
   /// The delegate that manages the children of this object.
@@ -441,14 +441,37 @@ class RenderListWheelViewport
     markNeedsSemanticsUpdate();
   }
 
+  /// {@template flutter.rendering.wheelList.clipToSize}
+  /// Whether to clip painted children to the inside of this viewport.
+  ///
+  /// Defaults to [true]. Must not be null.
+  ///
+  /// If this is false and [renderChildrenOutsideViewport] is false, the
+  /// first and last children may be painted partly outside of this scroll view.
+  /// {@endtemplate}
+  bool get clipToSize => _clipToSize;
+  bool _clipToSize;
+  set clipToSize(bool value) {
+    assert(value != null);
+    assert(
+      !renderChildrenOutsideViewport || !clipToSize,
+      clipToSizeAndRenderChildrenOutsideViewportConflict,
+    );
+    if (value == _clipToSize)
+      return;
+    _clipToSize = value;
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+  }
+
   /// {@template flutter.rendering.wheelList.renderChildrenOutsideViewport}
   /// Whether to paint children inside the viewport only.
   ///
   /// If false, every child will be painted. However the [Scrollable] is still
   /// the size of the viewport and detects gestures inside only.
   ///
-  /// Defaults to [false]. Must not be null. Cannot be true if [clipBehavior]
-  /// is not [Clip.none] since children outside the viewport will be clipped, and
+  /// Defaults to [false]. Must not be null. Cannot be true if [clipToSize]
+  /// is also true since children outside the viewport will be clipped, and
   /// therefore cannot render children outside the viewport.
   /// {@endtemplate}
   bool get renderChildrenOutsideViewport => _renderChildrenOutsideViewport;
@@ -456,28 +479,14 @@ class RenderListWheelViewport
   set renderChildrenOutsideViewport(bool value) {
     assert(value != null);
     assert(
-      !renderChildrenOutsideViewport || clipBehavior == Clip.none,
-      clipBehaviorAndRenderChildrenOutsideViewportConflict,
+      !renderChildrenOutsideViewport || !clipToSize,
+      clipToSizeAndRenderChildrenOutsideViewportConflict,
     );
     if (value == _renderChildrenOutsideViewport)
       return;
     _renderChildrenOutsideViewport = value;
     markNeedsLayout();
     markNeedsSemanticsUpdate();
-  }
-
-  /// {@macro flutter.widgets.Clip}
-  ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
-  Clip get clipBehavior => _clipBehavior;
-  Clip _clipBehavior = Clip.hardEdge;
-  set clipBehavior(Clip value) {
-    assert(value != null);
-    if (value != _clipBehavior) {
-      _clipBehavior = value;
-      markNeedsPaint();
-      markNeedsSemanticsUpdate();
-    }
   }
 
   void _hasScrolled() {
@@ -778,13 +787,12 @@ class RenderListWheelViewport
   @override
   void paint(PaintingContext context, Offset offset) {
     if (childCount > 0) {
-      if (_shouldClipAtCurrentOffset() && clipBehavior != Clip.none) {
+      if (_clipToSize && _shouldClipAtCurrentOffset()) {
         context.pushClipRect(
           needsCompositing,
           offset,
           Offset.zero & size,
           _paintVisibleChildren,
-          clipBehavior: clipBehavior,
         );
       } else {
         _paintVisibleChildren(context, offset);

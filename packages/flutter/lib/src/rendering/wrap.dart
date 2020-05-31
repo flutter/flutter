@@ -101,9 +101,8 @@ class WrapParentData extends ContainerBoxParentData<RenderBox> {
 ///
 /// The runs themselves are then positioned in the cross axis according to the
 /// [runSpacing] and [runAlignment].
-class RenderWrap extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, WrapParentData>,
-         RenderBoxContainerDefaultsMixin<RenderBox, WrapParentData> {
+class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, WrapParentData>,
+                                        RenderBoxContainerDefaultsMixin<RenderBox, WrapParentData> {
   /// Creates a wrap render object.
   ///
   /// By default, the wrap layout is horizontal and both the children and the
@@ -118,14 +117,12 @@ class RenderWrap extends RenderBox
     WrapCrossAlignment crossAxisAlignment = WrapCrossAlignment.start,
     TextDirection textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
-    Clip clipBehavior = Clip.none,
   }) : assert(direction != null),
        assert(alignment != null),
        assert(spacing != null),
        assert(runAlignment != null),
        assert(runSpacing != null),
        assert(crossAxisAlignment != null),
-       assert(clipBehavior != null),
        _direction = direction,
        _alignment = alignment,
        _spacing = spacing,
@@ -133,8 +130,7 @@ class RenderWrap extends RenderBox
        _runSpacing = runSpacing,
        _crossAxisAlignment = crossAxisAlignment,
        _textDirection = textDirection,
-       _verticalDirection = verticalDirection,
-       _clipBehavior = clipBehavior {
+       _verticalDirection = verticalDirection {
     addAll(children);
   }
 
@@ -327,20 +323,6 @@ class RenderWrap extends RenderBox
     if (_verticalDirection != value) {
       _verticalDirection = value;
       markNeedsLayout();
-    }
-  }
-
-  /// {@macro flutter.widgets.Clip}
-  ///
-  /// Defaults to [Clip.none], and must not be null.
-  Clip get clipBehavior => _clipBehavior;
-  Clip _clipBehavior = Clip.none;
-  set clipBehavior(Clip value) {
-    assert(value != null);
-    if (value != _clipBehavior) {
-      _clipBehavior = value;
-      markNeedsPaint();
-      markNeedsSemanticsUpdate();
     }
   }
 
@@ -767,8 +749,8 @@ class RenderWrap extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     // TODO(ianh): move the debug flex overflow paint logic somewhere common so
     // it can be reused here
-    if (_hasVisualOverflow && clipBehavior != Clip.none)
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint, clipBehavior: clipBehavior);
+    if (_hasVisualOverflow)
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint);
     else
       defaultPaint(context, offset);
   }
