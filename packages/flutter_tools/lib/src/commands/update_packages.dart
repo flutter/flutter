@@ -39,15 +39,18 @@ class UpdatePackagesCommand extends FlutterCommand {
       ],
       workingDirectory: globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools')
     );
-    await globals.processManager.start(
+    final Process process = await globals.processManager.start(
       <String>[
         'dart',
+        '--disable-dart-dev',
         'lib/repo_tools.dart',
+        'update-packages',
         ...argResults.arguments,
       ],
       workingDirectory: globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools'),
       mode: ProcessStartMode.inheritStdio,
     );
+    await process.exitCode;
     return FlutterCommandResult.success();
   }
 }
