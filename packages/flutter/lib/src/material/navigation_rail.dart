@@ -142,7 +142,7 @@ class NavigationRail extends StatefulWidget {
     this.selectedIconTheme,
     this.minWidth,
     this.minExtendedWidth,
-  }) :  assert(destinations != null && destinations.length >= 2),
+  }) :  assert(destinations != null && destinations.length >= 1),
         assert(selectedIndex != null),
         assert(0 <= selectedIndex && selectedIndex < destinations.length),
         assert(elevation == null || elevation > 0),
@@ -199,7 +199,7 @@ class NavigationRail extends StatefulWidget {
   /// Defines the appearance of the button items that are arrayed within the
   /// navigation rail.
   ///
-  /// The value must be a list of two or more [NavigationRailDestination]
+  /// The value must be a list of one or more [NavigationRailDestination]
   /// values.
   final List<NavigationRailDestination> destinations;
 
