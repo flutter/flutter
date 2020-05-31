@@ -614,7 +614,7 @@ void main() {
 
   testWithoutContext('Linux desktop artifacts include profile and release artifacts', () {
     final MockCache mockCache = MockCache();
-    final WindowsEngineArtifacts artifacts = LinuxEngineArtifacts(
+    final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
       mockCache,
       platform: FakePlatform(operatingSystem: 'linux'),
     );
