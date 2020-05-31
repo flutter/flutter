@@ -265,6 +265,8 @@ task:
       script:
         - rm -rf bin/cache/pkg/tests
         - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
+        # For hotfix only, pin this
+        - (cd bin/cache/pkg/tests; git checkout e52a08b377a2a954b0778f0eb94a44040efdd9f4)
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
     - name: firebase_test_lab_tests-linux # linux-only
@@ -481,6 +483,10 @@ task:
       script:
         - CMD /S /C "IF EXIST "bin\cache\pkg\tests\" RMDIR /S /Q bin\cache\pkg\tests"
         - git clone https://github.com/flutter/tests.git bin\cache\pkg\tests
+        # For hotfix only, pin this
+        - CD bin\cache\pkg\tests
+        - git checkout e52a08b377a2a954b0778f0eb94a44040efdd9f4
+        - CD ..\..\..\..
         - dart --enable-asserts dev\customer_testing\run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
 # MACOS SHARDS
@@ -593,6 +599,8 @@ task:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - rm -rf bin/cache/pkg/tests
         - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
+        # For hotfix only, pin this
+        - (cd bin/cache/pkg/tests; git checkout e52a08b377a2a954b0778f0eb94a44040efdd9f4)
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
     - name: deploy_gallery-macos # linux- and macos- only

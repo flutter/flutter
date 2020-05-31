@@ -74,7 +74,7 @@ platform :ios do
       scheme: 'Runner',
       export_method: 'app-store',
       # Verify that the right signing identity is used for publishing.
-      codesigning_identity: 'iPhone Distribution: FLUTTER.IO LLC (S8QB4VV633)',
+      codesigning_identity: 'Apple Distribution: FLUTTER.IO LLC (S8QB4VV633)',
     )
 
     if options[:upload]
