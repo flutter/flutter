@@ -216,7 +216,7 @@ class AnimatedCrossFade extends StatefulWidget {
   /// [AnimatedCrossFadeBuilder].
   static Widget defaultLayoutBuilder(Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey) {
     return Stack(
-      clipBehavior: Clip.none,
+      overflow: Overflow.visible,
       children: <Widget>[
         Positioned(
           key: bottomChildKey,

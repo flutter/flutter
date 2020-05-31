@@ -579,8 +579,8 @@ class ListWheelScrollView extends StatefulWidget {
     @required this.itemExtent,
     this.squeeze = 1.0,
     this.onSelectedItemChanged,
+    this.clipToSize = true,
     this.renderChildrenOutsideViewport = false,
-    this.clipBehavior = Clip.hardEdge,
     @required List<Widget> children,
   }) : assert(children != null),
        assert(diameterRatio != null),
@@ -595,11 +595,11 @@ class ListWheelScrollView extends StatefulWidget {
        assert(itemExtent > 0),
        assert(squeeze != null),
        assert(squeeze > 0),
+       assert(clipToSize != null),
        assert(renderChildrenOutsideViewport != null),
-       assert(clipBehavior != null),
        assert(
-         !renderChildrenOutsideViewport || clipBehavior == Clip.none,
-         RenderListWheelViewport.clipBehaviorAndRenderChildrenOutsideViewportConflict,
+         !renderChildrenOutsideViewport || !clipToSize,
+         RenderListWheelViewport.clipToSizeAndRenderChildrenOutsideViewportConflict,
        ),
        childDelegate = ListWheelChildListDelegate(children: children),
        super(key: key);
@@ -619,8 +619,8 @@ class ListWheelScrollView extends StatefulWidget {
     @required this.itemExtent,
     this.squeeze = 1.0,
     this.onSelectedItemChanged,
+    this.clipToSize = true,
     this.renderChildrenOutsideViewport = false,
-    this.clipBehavior = Clip.hardEdge,
     @required this.childDelegate,
   }) : assert(childDelegate != null),
        assert(diameterRatio != null),
@@ -635,11 +635,11 @@ class ListWheelScrollView extends StatefulWidget {
        assert(itemExtent > 0),
        assert(squeeze != null),
        assert(squeeze > 0),
+       assert(clipToSize != null),
        assert(renderChildrenOutsideViewport != null),
-       assert(clipBehavior != null),
        assert(
-         !renderChildrenOutsideViewport || clipBehavior == Clip.none,
-         RenderListWheelViewport.clipBehaviorAndRenderChildrenOutsideViewportConflict,
+         !renderChildrenOutsideViewport || !clipToSize,
+         RenderListWheelViewport.clipToSizeAndRenderChildrenOutsideViewportConflict,
        ),
        super(key: key);
 
@@ -698,16 +698,14 @@ class ListWheelScrollView extends StatefulWidget {
   /// On optional listener that's called when the centered item changes.
   final ValueChanged<int> onSelectedItemChanged;
 
+  /// {@macro flutter.rendering.wheelList.clipToSize}
+  final bool clipToSize;
+
   /// {@macro flutter.rendering.wheelList.renderChildrenOutsideViewport}
   final bool renderChildrenOutsideViewport;
 
   /// A delegate that helps lazily instantiating child.
   final ListWheelChildDelegate childDelegate;
-
-  /// {@macro flutter.widgets.Clip}
-  ///
-  /// Defaults to [Clip.hardEdge].
-  final Clip clipBehavior;
 
   @override
   _ListWheelScrollViewState createState() => _ListWheelScrollViewState();
@@ -771,10 +769,10 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
             overAndUnderCenterOpacity: widget.overAndUnderCenterOpacity,
             itemExtent: widget.itemExtent,
             squeeze: widget.squeeze,
+            clipToSize: widget.clipToSize,
             renderChildrenOutsideViewport: widget.renderChildrenOutsideViewport,
             offset: offset,
             childDelegate: widget.childDelegate,
-            clipBehavior: widget.clipBehavior,
           );
         },
       ),
@@ -952,7 +950,7 @@ class ListWheelViewport extends RenderObjectWidget {
   ///
   /// The [itemExtent] argument in pixels must be provided and must be positive.
   ///
-  /// The [clipBehavior] argument defaults to [Clip.hardEdge] and must not be null.
+  /// The [clipToSize] argument defaults to true and must not be null.
   ///
   /// The [renderChildrenOutsideViewport] argument defaults to false and must
   /// not be null.
@@ -968,10 +966,10 @@ class ListWheelViewport extends RenderObjectWidget {
     this.overAndUnderCenterOpacity = 1.0,
     @required this.itemExtent,
     this.squeeze = 1.0,
+    this.clipToSize = true,
     this.renderChildrenOutsideViewport = false,
     @required this.offset,
     @required this.childDelegate,
-    this.clipBehavior = Clip.hardEdge,
   }) : assert(childDelegate != null),
        assert(offset != null),
        assert(diameterRatio != null),
@@ -985,11 +983,11 @@ class ListWheelViewport extends RenderObjectWidget {
        assert(itemExtent > 0),
        assert(squeeze != null),
        assert(squeeze > 0),
+       assert(clipToSize != null),
        assert(renderChildrenOutsideViewport != null),
-       assert(clipBehavior != null),
        assert(
-         !renderChildrenOutsideViewport || clipBehavior == Clip.none,
-         RenderListWheelViewport.clipBehaviorAndRenderChildrenOutsideViewportConflict,
+         !renderChildrenOutsideViewport || !clipToSize,
+         RenderListWheelViewport.clipToSizeAndRenderChildrenOutsideViewportConflict,
        ),
        super(key: key);
 
@@ -1019,6 +1017,9 @@ class ListWheelViewport extends RenderObjectWidget {
   /// Defaults to 1.
   final double squeeze;
 
+  /// {@macro flutter.rendering.wheelList.clipToSize}
+  final bool clipToSize;
+
   /// {@macro flutter.rendering.wheelList.renderChildrenOutsideViewport}
   final bool renderChildrenOutsideViewport;
 
@@ -1028,11 +1029,6 @@ class ListWheelViewport extends RenderObjectWidget {
 
   /// A delegate that lazily instantiates children.
   final ListWheelChildDelegate childDelegate;
-
-  /// {@macro flutter.widgets.Clip}
-  ///
-  /// Defaults to [Clip.none].
-  final Clip clipBehavior;
 
   @override
   ListWheelElement createElement() => ListWheelElement(this);
@@ -1051,8 +1047,8 @@ class ListWheelViewport extends RenderObjectWidget {
       overAndUnderCenterOpacity: overAndUnderCenterOpacity,
       itemExtent: itemExtent,
       squeeze: squeeze,
+      clipToSize: clipToSize,
       renderChildrenOutsideViewport: renderChildrenOutsideViewport,
-      clipBehavior: clipBehavior,
     );
   }
 
@@ -1068,7 +1064,7 @@ class ListWheelViewport extends RenderObjectWidget {
       ..overAndUnderCenterOpacity = overAndUnderCenterOpacity
       ..itemExtent = itemExtent
       ..squeeze = squeeze
-      ..renderChildrenOutsideViewport = renderChildrenOutsideViewport
-      ..clipBehavior = clipBehavior;
+      ..clipToSize = clipToSize
+      ..renderChildrenOutsideViewport = renderChildrenOutsideViewport;
   }
 }
