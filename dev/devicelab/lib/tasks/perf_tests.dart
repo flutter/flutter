@@ -217,6 +217,14 @@ TaskFunction createFadingChildAnimationPerfTest() {
   ).run;
 }
 
+TaskFunction createImageFilteredTransformAnimationPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/imagefiltered_transform_animation_perf.dart',
+    'imagefiltered_transform_animation_perf',
+  ).run;
+}
+
 /// Measure application startup performance.
 class StartupTest {
   const StartupTest(this.testDirectory, { this.reportMetrics = true });
