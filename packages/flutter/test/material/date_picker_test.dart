@@ -3,12 +3,31 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import 'feedback_tester.dart';
 
+class MockClipboard {
+  Object _clipboardData = <String, dynamic>{
+    'text': null,
+  };
+
+  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
+    switch (methodCall.method) {
+      case 'Clipboard.getData':
+        return _clipboardData;
+      case 'Clipboard.setData':
+        _clipboardData = methodCall.arguments;
+        break;
+    }
+  }
+}
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  final MockClipboard mockClipboard = MockClipboard();
 
   DateTime firstDate;
   DateTime lastDate;
@@ -35,7 +54,7 @@ void main() {
     return tester.widget<TextField>(find.byType(TextField));
   }
 
-  setUp(() {
+  setUp(() async {
     firstDate = DateTime(2001, DateTime.january, 1);
     lastDate = DateTime(2031, DateTime.december, 31);
     initialDate = DateTime(2016, DateTime.january, 15);
@@ -51,6 +70,15 @@ void main() {
     fieldHintText = null;
     fieldLabelText = null;
     helpText = null;
+
+    // Fill the clipboard so that the PASTE option is available in the text
+    // selection menu.
+    SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+  });
+
+  tearDown(() {
+    SystemChannels.platform.setMockMethodCallHandler(null);
   });
 
   Future<void> prepareDatePicker(WidgetTester tester, Future<void> callback(Future<DateTime> date)) async {
@@ -1075,7 +1103,6 @@ void main() {
 
       semantics.dispose();
     });
-
   });
 
   group('Screen configurations', () {

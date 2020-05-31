@@ -88,6 +88,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     cpuArchitecture: DarwinArch.arm64,
     artifacts: artifacts,
     installationService: MockIOSInstallationService(),
+    interfaceType: IOSDeviceInterface.usb,
   );
 }
 

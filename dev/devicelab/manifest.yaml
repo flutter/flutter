@@ -213,6 +213,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  imagefiltered_transform_animation_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of imagefiltered widget with transform on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   flavors_test:
     description: >
       Checks that flavored builds work on Android.
@@ -284,6 +290,12 @@ tasks:
       Measures memory usage of the scroll performance test.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+
+  complex_layout_scroll_perf__devtools_memory:
+    description: >
+      Measures memory usage of the scroll performance test using DevTools.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
 
   hello_world_android__compile:
     description: >

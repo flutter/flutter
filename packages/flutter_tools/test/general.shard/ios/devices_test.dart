@@ -60,6 +60,7 @@ void main() {
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
         installationService: MockIOSInstallationService(),
+        interfaceType: IOSDeviceInterface.usb,
       );
     });
 
@@ -74,6 +75,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '1.0.0',
         installationService: MockIOSInstallationService(),
+        interfaceType: IOSDeviceInterface.usb,
       ).majorSdkVersion, 1);
       expect(IOSDevice(
         'device-123',
@@ -85,6 +87,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '13.1.1',
         installationService: MockIOSInstallationService(),
+        interfaceType: IOSDeviceInterface.usb,
       ).majorSdkVersion, 13);
       expect(IOSDevice(
         'device-123',
@@ -96,6 +99,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '10',
         installationService: MockIOSInstallationService(),
+        interfaceType: IOSDeviceInterface.usb,
       ).majorSdkVersion, 10);
       expect(IOSDevice(
         'device-123',
@@ -107,6 +111,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '0',
         installationService: MockIOSInstallationService(),
+        interfaceType: IOSDeviceInterface.usb,
       ).majorSdkVersion, 0);
       expect(IOSDevice(
         'device-123',
@@ -118,6 +123,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: 'bogus',
         installationService: MockIOSInstallationService(),
+        interfaceType: IOSDeviceInterface.usb,
       ).majorSdkVersion, 0);
     });
 
@@ -135,6 +141,7 @@ void main() {
               sdkVersion: '13.3',
               cpuArchitecture: DarwinArch.arm64,
               installationService: MockIOSInstallationService(),
+              interfaceType: IOSDeviceInterface.usb,
             );
           },
           throwsAssertionError,
@@ -208,6 +215,7 @@ void main() {
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
           installationService: MockIOSInstallationService(),
+          interfaceType: IOSDeviceInterface.usb,
         );
         logReader1 = createLogReader(device, appPackage1, mockProcess1);
         logReader2 = createLogReader(device, appPackage2, mockProcess2);
@@ -283,8 +291,9 @@ void main() {
         logger: logger,
         platform: macPlatform,
         installationService: MockIOSInstallationService(),
+        interfaceType: IOSDeviceInterface.usb,
       );
-      when(mockXcdevice.getAvailableTetheredIOSDevices())
+      when(mockXcdevice.getAvailableIOSDevices())
           .thenAnswer((Invocation invocation) => Future<List<IOSDevice>>.value(<IOSDevice>[device]));
 
       final List<Device> devices = await iosDevices.pollingGetDevices();

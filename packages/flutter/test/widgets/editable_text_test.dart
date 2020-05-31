@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
@@ -48,9 +49,12 @@ void main() {
   final MockClipboard mockClipboard = MockClipboard();
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
-  setUp(() {
+  setUp(() async {
     debugResetSemanticsIdCounter();
     controller = TextEditingController();
+    // Fill the clipboard so that the PASTE option is available in the text
+    // selection menu.
+    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
   tearDown(() {
@@ -961,7 +965,7 @@ void main() {
 
     // Can't show the toolbar when there's no focus.
     expect(state.showToolbar(), false);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('PASTE'), findsNothing);
 
     // Can show the toolbar when focused even though there's no text.
@@ -971,7 +975,7 @@ void main() {
     );
     await tester.pump();
     expect(state.showToolbar(), true);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('PASTE'), findsOneWidget);
 
     // Hide the menu again.
@@ -983,7 +987,7 @@ void main() {
     controller.text = 'blah';
     await tester.pump();
     expect(state.showToolbar(), true);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('PASTE'), findsOneWidget);
   }, skip: isBrowser);
 
@@ -1023,7 +1027,7 @@ void main() {
 
     // Should be able to show the toolbar.
     expect(state.showToolbar(), true);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('PASTE'), findsOneWidget);
   });
 
@@ -1192,7 +1196,7 @@ void main() {
     final Finder textFinder = find.byType(EditableText);
     await tester.longPress(textFinder);
     tester.state<EditableTextState>(textFinder).showToolbar();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('PASTE'));
     await tester.pump();
@@ -2412,12 +2416,13 @@ void main() {
 
       controls = MockTextSelectionControls();
       when(controls.buildHandle(any, any, any)).thenReturn(Container());
-      when(controls.buildToolbar(any, any, any, any, any, any))
+      when(controls.buildToolbar(any, any, any, any, any, any, any))
           .thenReturn(Container());
     });
 
     testWidgets('are exposed', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
+      addTearDown(semantics.dispose);
 
       when(controls.canCopy(any)).thenReturn(false);
       when(controls.canCut(any)).thenReturn(false);
@@ -2457,6 +2462,7 @@ void main() {
       when(controls.canCopy(any)).thenReturn(false);
       when(controls.canPaste(any)).thenReturn(true);
       await _buildApp(controls, tester);
+      await tester.pumpAndSettle();
       expect(
         semantics,
         includesNodeWith(
@@ -2504,8 +2510,6 @@ void main() {
           ],
         ),
       );
-
-      semantics.dispose();
     });
 
     testWidgets('can copy/cut/paste with a11y', (WidgetTester tester) async {
@@ -2564,7 +2568,7 @@ void main() {
       );
 
       owner.performAction(expectedNodeId, SemanticsAction.copy);
-      verify(controls.handleCopy(any)).called(1);
+      verify(controls.handleCopy(any, any)).called(1);
 
       owner.performAction(expectedNodeId, SemanticsAction.cut);
       verify(controls.handleCut(any)).called(1);
@@ -4698,6 +4702,64 @@ void main() {
     expect(state.currentTextEditingValue.text, equals('\u{200E}😀😁😂🤣😃 💑 👩‍❤️‍👩 👨‍❤️‍👨 💏 👩‍❤️‍💋‍👩 👨‍❤️‍💋‍👨 👪 👨‍👩‍👧 👨‍👩‍👧‍👦 👨‍👩‍👦‍👦 \u{200F}'));
     state.updateEditingValue(const TextEditingValue(text: '\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ 🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
     expect(state.currentTextEditingValue.text, equals('\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ \u{200F}🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
+  });
+
+  testWidgets('EditableText changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+                mouseCursor: SystemMouseCursors.click,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(EditableText)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 }
 

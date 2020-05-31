@@ -139,7 +139,7 @@ Future<void> buildWithAssemble({
       kTrackWidgetCreation: trackWidgetCreation?.toString(),
       kIconTreeShakerFlag: treeShakeIcons ? 'true' : null,
       if (dartDefines != null && dartDefines.isNotEmpty)
-        kDartDefines: dartDefines.join(','),
+        kDartDefines: encodeDartDefines(dartDefines),
     },
     artifacts: globals.artifacts,
     fileSystem: globals.fs,

@@ -2293,6 +2293,12 @@ enum _RouteLifecycle {
 
 typedef _RouteEntryPredicate = bool Function(_RouteEntry entry);
 
+class _NotAnnounced extends Route<void> {
+  // A placeholder for the lastAnnouncedPreviousRoute, the
+  // lastAnnouncedPoppedNextRoute, and the lastAnnouncedNextRoute before any
+  // change has been announced.
+}
+
 class _RouteEntry extends RouteTransitionRecord {
   _RouteEntry(
     this.route, {
@@ -2311,10 +2317,12 @@ class _RouteEntry extends RouteTransitionRecord {
   @override
   final Route<dynamic> route;
 
+  static Route<dynamic> notAnnounced = _NotAnnounced();
+
   _RouteLifecycle currentState;
-  Route<dynamic> lastAnnouncedPreviousRoute; // last argument to Route.didChangePrevious
-  Route<dynamic> lastAnnouncedPoppedNextRoute; // last argument to Route.didPopNext
-  Route<dynamic> lastAnnouncedNextRoute; // last argument to Route.didChangeNext
+  Route<dynamic> lastAnnouncedPreviousRoute = notAnnounced; // last argument to Route.didChangePrevious
+  Route<dynamic> lastAnnouncedPoppedNextRoute = notAnnounced; // last argument to Route.didPopNext
+  Route<dynamic> lastAnnouncedNextRoute = notAnnounced; // last argument to Route.didChangeNext
 
   bool get hasPage => route.settings is Page;
 
@@ -3642,8 +3650,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   void popUntil(RoutePredicate predicate) {
-    while (!predicate(_history.lastWhere(_RouteEntry.isPresentPredicate).route)) {
+    _RouteEntry candidate = _history.lastWhere(_RouteEntry.isPresentPredicate, orElse: () => null);
+    while(candidate != null) {
+      if (predicate(candidate.route))
+        return;
       pop();
+      candidate = _history.lastWhere(_RouteEntry.isPresentPredicate, orElse: () => null);
     }
   }
 
