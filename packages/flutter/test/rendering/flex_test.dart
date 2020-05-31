@@ -52,24 +52,6 @@ void main() {
     FlutterError.onError = oldHandler;
   });
 
-  test('Clip behavior is respected', () {
-    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
-    final TestClipPaintingContext context = TestClipPaintingContext();
-
-    // By default, clipBehavior should be Clip.none
-    final RenderFlex defaultFlex = RenderFlex(direction: Axis.vertical, children: <RenderBox>[box200x200]);
-    layout(defaultFlex, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-    defaultFlex.paint(context, Offset.zero);
-    expect(context.clipBehavior, equals(Clip.none));
-
-    for (final Clip clip in Clip.values) {
-      final RenderFlex flex = RenderFlex(direction: Axis.vertical, children: <RenderBox>[box200x200], clipBehavior: clip);
-      layout(flex, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-      flex.paint(context, Offset.zero);
-      expect(context.clipBehavior, equals(clip));
-    }
-  });
-
   test('Vertical Overflow', () {
     final RenderConstrainedBox flexible = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.expand()

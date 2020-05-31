@@ -268,8 +268,6 @@ enum StackFit {
   passthrough,
 }
 
-// TODO(liyuqian): Deprecate and remove `Overflow` once its usages are removed from Google.
-
 /// Whether overflowing children should be clipped, or their overflow be
 /// visible.
 enum Overflow {
@@ -328,14 +326,14 @@ class RenderStack extends RenderBox
     AlignmentGeometry alignment = AlignmentDirectional.topStart,
     TextDirection textDirection,
     StackFit fit = StackFit.loose,
-    Clip clipBehavior = Clip.hardEdge,
+    Overflow overflow = Overflow.clip,
   }) : assert(alignment != null),
        assert(fit != null),
-       assert(clipBehavior != null),
+       assert(overflow != null),
        _alignment = alignment,
        _textDirection = textDirection,
        _fit = fit,
-       _clipBehavior = clipBehavior {
+       _overflow = overflow {
     addAll(children);
   }
 
@@ -413,17 +411,17 @@ class RenderStack extends RenderBox
     }
   }
 
-  /// {@macro flutter.widgets.Clip}
+  /// Whether overflowing children should be clipped. See [Overflow].
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
-  Clip get clipBehavior => _clipBehavior;
-  Clip _clipBehavior = Clip.hardEdge;
-  set clipBehavior(Clip value) {
+  /// Some children in a stack might overflow its box. When this flag is set to
+  /// [Overflow.clip], children cannot paint outside of the stack's box.
+  Overflow get overflow => _overflow;
+  Overflow _overflow;
+  set overflow(Overflow value) {
     assert(value != null);
-    if (value != _clipBehavior) {
-      _clipBehavior = value;
+    if (_overflow != value) {
+      _overflow = value;
       markNeedsPaint();
-      markNeedsSemanticsUpdate();
     }
   }
 
@@ -606,8 +604,8 @@ class RenderStack extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (clipBehavior != Clip.none && _hasVisualOverflow) {
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack, clipBehavior: clipBehavior);
+    if (_overflow == Overflow.clip && _hasVisualOverflow) {
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack);
     } else {
       paintStack(context, offset);
     }
@@ -622,7 +620,7 @@ class RenderStack extends RenderBox
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection));
     properties.add(EnumProperty<StackFit>('fit', fit));
-    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
+    properties.add(EnumProperty<Overflow>('overflow', overflow));
   }
 }
 

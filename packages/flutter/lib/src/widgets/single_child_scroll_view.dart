@@ -219,10 +219,8 @@ class SingleChildScrollView extends StatelessWidget {
     this.controller,
     this.child,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.clipBehavior = Clip.hardEdge,
   }) : assert(scrollDirection != null),
        assert(dragStartBehavior != null),
-       assert(clipBehavior != null),
        assert(!(controller != null && primary == true),
           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
           'You cannot both set primary to true and pass an explicit controller.'
@@ -292,11 +290,6 @@ class SingleChildScrollView extends StatelessWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
-  /// {@macro flutter.widgets.Clip}
-  ///
-  /// Defaults to [Clip.hardEdge].
-  final Clip clipBehavior;
-
   AxisDirection _getDirection(BuildContext context) {
     return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
   }
@@ -320,7 +313,6 @@ class SingleChildScrollView extends StatelessWidget {
           axisDirection: axisDirection,
           offset: offset,
           child: contents,
-          clipBehavior: clipBehavior,
         );
       },
     );
@@ -336,21 +328,17 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
     this.axisDirection = AxisDirection.down,
     this.offset,
     Widget child,
-    @required this.clipBehavior,
   }) : assert(axisDirection != null),
-       assert(clipBehavior != null),
        super(key: key, child: child);
 
   final AxisDirection axisDirection;
   final ViewportOffset offset;
-  final Clip clipBehavior;
 
   @override
   _RenderSingleChildViewport createRenderObject(BuildContext context) {
     return _RenderSingleChildViewport(
       axisDirection: axisDirection,
       offset: offset,
-      clipBehavior: clipBehavior,
     );
   }
 
@@ -359,8 +347,7 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
     // Order dependency: The offset setter reads the axis direction.
     renderObject
       ..axisDirection = axisDirection
-      ..offset = offset
-      ..clipBehavior = clipBehavior;
+      ..offset = offset;
   }
 }
 
@@ -370,15 +357,12 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     @required ViewportOffset offset,
     double cacheExtent = RenderAbstractViewport.defaultCacheExtent,
     RenderBox child,
-    @required Clip clipBehavior,
   }) : assert(axisDirection != null),
        assert(offset != null),
        assert(cacheExtent != null),
-       assert(clipBehavior != null),
        _axisDirection = axisDirection,
        _offset = offset,
-       _cacheExtent = cacheExtent,
-       _clipBehavior = clipBehavior {
+       _cacheExtent = cacheExtent {
     this.child = child;
   }
 
@@ -417,20 +401,6 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       return;
     _cacheExtent = value;
     markNeedsLayout();
-  }
-
-  /// {@macro flutter.widgets.Clip}
-  ///
-  /// Defaults to [Clip.none], and must not be null.
-  Clip get clipBehavior => _clipBehavior;
-  Clip _clipBehavior = Clip.none;
-  set clipBehavior(Clip value) {
-    assert(value != null);
-    if (value != _clipBehavior) {
-      _clipBehavior = value;
-      markNeedsPaint();
-      markNeedsSemanticsUpdate();
-    }
   }
 
   void _hasScrolled() {
@@ -578,8 +548,8 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
         context.paintChild(child, offset + paintOffset);
       }
 
-      if (_shouldClipAtPaintOffset(paintOffset) && clipBehavior != Clip.none) {
-        context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintContents, clipBehavior: clipBehavior);
+      if (_shouldClipAtPaintOffset(paintOffset)) {
+        context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintContents);
       } else {
         paintContents(context, offset);
       }

@@ -277,20 +277,17 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     TextDirection textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline textBaseline,
-    Clip clipBehavior = Clip.none,
   }) : assert(direction != null),
        assert(mainAxisAlignment != null),
        assert(mainAxisSize != null),
        assert(crossAxisAlignment != null),
-       assert(clipBehavior != null),
        _direction = direction,
        _mainAxisAlignment = mainAxisAlignment,
        _mainAxisSize = mainAxisSize,
        _crossAxisAlignment = crossAxisAlignment,
        _textDirection = textDirection,
        _verticalDirection = verticalDirection,
-       _textBaseline = textBaseline,
-       _clipBehavior = clipBehavior {
+       _textBaseline = textBaseline {
     addAll(children);
   }
 
@@ -476,20 +473,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   // Check whether any meaningful overflow is present. Values below an epsilon
   // are treated as not overflowing.
   bool get _hasOverflow => _overflow > precisionErrorTolerance;
-
-  /// {@macro flutter.widgets.Clip}
-  ///
-  /// Defaults to [Clip.none], and must not be null.
-  Clip get clipBehavior => _clipBehavior;
-  Clip _clipBehavior = Clip.none;
-  set clipBehavior(Clip value) {
-    assert(value != null);
-    if (value != _clipBehavior) {
-      _clipBehavior = value;
-      markNeedsPaint();
-      markNeedsSemanticsUpdate();
-    }
-  }
 
   @override
   void setupParentData(RenderBox child) {
@@ -972,12 +955,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     if (size.isEmpty)
       return;
 
-    if (clipBehavior == Clip.none) {
-      defaultPaint(context, offset);
-    } else {
-      // We have overflow and the clipBehavior isn't none. Clip it.
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint, clipBehavior: clipBehavior);
-    }
+    // We have overflow. Clip it.
+    context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint);
 
     assert(() {
       // Only set this if it's null to save work. It gets reset to null if the

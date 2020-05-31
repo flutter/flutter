@@ -413,7 +413,6 @@ class EditableText extends StatefulWidget {
       selectAll: true,
     ),
     this.autofillHints,
-    this.clipBehavior = Clip.hardEdge,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscuringCharacter != null && obscuringCharacter.length == 1),
@@ -451,7 +450,6 @@ class EditableText extends StatefulWidget {
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
        assert(toolbarOptions != null),
-       assert(clipBehavior != null),
        _strutStyle = strutStyle,
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
@@ -1121,11 +1119,6 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.autofill.autofillHints}
   /// {@endtemplate}
   final Iterable<String> autofillHints;
-
-  /// {@macro flutter.widgets.Clip}
-  ///
-  /// Defaults to [Clip.hardEdge].
-  final Clip clipBehavior;
 
   @override
   EditableTextState createState() => EditableTextState();
@@ -2096,7 +2089,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 devicePixelRatio: _devicePixelRatio,
                 promptRectRange: _currentPromptRectRange,
                 promptRectColor: widget.autocorrectionTextRectColor,
-                clipBehavior: widget.clipBehavior,
               ),
             ),
           );
@@ -2171,7 +2163,6 @@ class _Editable extends LeafRenderObjectWidget {
     this.devicePixelRatio,
     this.promptRectRange,
     this.promptRectColor,
-    this.clipBehavior,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key);
@@ -2217,7 +2208,6 @@ class _Editable extends LeafRenderObjectWidget {
   final double devicePixelRatio;
   final TextRange promptRectRange;
   final Color promptRectColor;
-  final Clip clipBehavior;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -2259,7 +2249,6 @@ class _Editable extends LeafRenderObjectWidget {
       devicePixelRatio: devicePixelRatio,
       promptRectRange: promptRectRange,
       promptRectColor: promptRectColor,
-      clipBehavior: clipBehavior,
     );
   }
 
@@ -2300,7 +2289,6 @@ class _Editable extends LeafRenderObjectWidget {
       ..devicePixelRatio = devicePixelRatio
       ..paintCursorAboveText = paintCursorAboveText
       ..promptRectColor = promptRectColor
-      ..clipBehavior = clipBehavior
       ..setPromptRectRange(promptRectRange);
   }
 }
