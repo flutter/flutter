@@ -1437,7 +1437,7 @@ environment:
   }
 
   // Create the sky engine pubspec.yaml
-  File(path.join('bin', 'cache', 'pkg', 'sky_engine', 'pubspec.yaml'))
+  File(path.join(directory.path, 'bin', 'cache', 'pkg', 'sky_engine', 'pubspec.yaml'))
     ..createSync(recursive: true)
     ..writeAsStringSync('''
 name: sky_engine
