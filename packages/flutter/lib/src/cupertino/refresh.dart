@@ -359,43 +359,6 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     return state.refreshState;
   }
 
-  /// Builds a simple refresh indicator that fades in a bottom aligned down
-  /// arrow before the refresh is triggered, a [CupertinoActivityIndicator]
-  /// during the refresh and fades the [CupertinoActivityIndicator] away when
-  /// the refresh is done.
-  static Widget buildSimpleRefreshIndicator(
-    BuildContext context,
-    RefreshIndicatorMode refreshState,
-    double pulledExtent,
-    double refreshTriggerPullDistance,
-    double refreshIndicatorExtent,
-  ) {
-    const Curve opacityCurve = Interval(0.4, 0.8, curve: Curves.easeInOut);
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 16.0),
-        child: refreshState == RefreshIndicatorMode.drag
-            ? Opacity(
-                opacity: opacityCurve.transform(
-                  min(pulledExtent / refreshTriggerPullDistance, 1.0)
-                ),
-                child: Icon(
-                  CupertinoIcons.down_arrow,
-                  color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context),
-                  size: 36.0,
-                ),
-              )
-            : Opacity(
-                opacity: opacityCurve.transform(
-                  min(pulledExtent / refreshIndicatorExtent, 1.0)
-                ),
-                child: const CupertinoActivityIndicator(radius: 14.0),
-              ),
-      ),
-    );
-  }
-
   static Widget buildAppleRefreshIndicator(
     BuildContext context,
     RefreshIndicatorMode refreshState,
