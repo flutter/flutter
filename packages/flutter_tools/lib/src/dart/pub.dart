@@ -430,7 +430,6 @@ class _DefaultPub implements Pub {
   /// [context] provides extra information to package server requests to
   /// understand usage.
   Future<Map<String, String>> _createPubEnvironment(PubContext context, [ String flutterRootOverride ]) async {
-    print(Cache.flutterRoot);
     final Map<String, String> environment = <String, String>{
       'FLUTTER_ROOT': flutterRootOverride ?? Cache.flutterRoot,
       _kPubEnvironmentKey: await _getPubEnvironmentValue(context),
