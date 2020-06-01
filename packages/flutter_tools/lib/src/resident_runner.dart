@@ -207,15 +207,6 @@ class FlutterDevice {
           getSkSLMethod: getSkSLMethod,
           device: device,
         );
-        await service.streamListen(EventStreams.kExtension);
-        service.onExtensionEvent.listen((vm_service.Event event) {
-          if (event.extensionKind == 'Flutter.Error') {
-            final Map<dynamic, dynamic> json = event.extensionData?.data;
-            if (json != null && json.containsKey('renderedErrorText')) {
-              print('\n' + json['renderedErrorText'].toString());
-            }
-          }
-        });
       } on Exception catch (exception) {
         globals.printTrace('Fail to connect to service protocol: $observatoryUri: $exception');
         if (!completer.isCompleted && !_isListeningForObservatoryUri) {
@@ -223,6 +214,19 @@ class FlutterDevice {
         }
         return;
       }
+      try {
+        await service.streamListen(EventStreams.kExtension);
+      } on Exception catch (exception) {
+        globals.printTrace('Fail to listen to extension stream: $observatoryUri: $exception');
+      }
+      service.onExtensionEvent.listen((vm_service.Event event) {
+        if (event.extensionKind == 'Flutter.Error') {
+          final Map<dynamic, dynamic> json = event.extensionData?.data;
+          if (json != null && json.containsKey('renderedErrorText')) {
+            globals.printStatus('\n' + json['renderedErrorText'].toString());
+          }
+        }
+      });
       if (completer.isCompleted) {
         return;
       }
