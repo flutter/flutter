@@ -37,10 +37,16 @@ class SafariArgParser extends BrowserArgParser {
   void parseOptions(ArgResults argResults) {
     _version = argResults['safari-version'] as String;
     assert(_version == 'system');
+    final String browser = argResults['browser'] as String;
+    _isMobileBrowser = browser == 'ios-safari' ? true : false;
   }
 
   @override
   String get version => _version;
+
+  bool _isMobileBrowser;
+
+  bool get isMobileBrowser => _isMobileBrowser;
 }
 
 /// Returns the installation of Safari.
@@ -57,16 +63,16 @@ Future<BrowserInstallation> getOrInstallSafari(
   StringSink infoLog,
 }) async {
 
-  // These tests are aimed to run only on MacOs machines local or on LUCI.
+  // These tests are aimed to run only on macOS machines local or on LUCI.
   if (!io.Platform.isMacOS) {
     throw UnimplementedError('Safari on ${io.Platform.operatingSystem} is'
-        ' not supported. Safari is only supported on MacOS.');
+        ' not supported. Safari is only supported on macOS.');
   }
 
   infoLog ??= io.stdout;
 
   if (requestedVersion == 'system') {
-    // Since Safari is included in MacOS, always assume there will be one on the
+    // Since Safari is included in macOS, always assume there will be one on the
     // system.
     infoLog.writeln('Using the system version that is already installed.');
     return BrowserInstallation(
