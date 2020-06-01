@@ -550,31 +550,38 @@ void main() {
           final List<Widget> widgetList = <Widget>[
             Container(key: const Key('1'), child:  const Icon(Icons.account_circle))
           ];
-          final SingleChildScrollView scrollView = SingleChildScrollView(
-            child: SizedBox(
-              height: 100,
-              width: 100,
-              child: ReorderableListView(
+          /*final ReorderableListView listView = ReorderableListView(
                 key: const Key('list'),
                 physics: const AlwaysScrollableScrollPhysics(),
                 onReorder: (int oldIndex, int newIndex) {},
                 children: widgetList,
                 scrollController: ScrollController(),
-              )
-            ),
-          );
+              
+            );*/
+
+          final ScrollConfiguration configuration = ScrollConfiguration(
+           behavior: const ScrollBehavior(),
+           child: ReorderableListView(
+                key: const Key('list'),
+                physics: const AlwaysScrollableScrollPhysics(),
+                onReorder: (int oldIndex, int newIndex) {},
+                children: widgetList,
+                scrollController: ScrollController(),
+              
+          ));
+
           await tester.pumpWidget(MaterialApp(
           home: SizedBox(
             height: 100,
             width: 100,
-            child: scrollView,
+            child: configuration,
           ),
         ));
 
           final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ReorderableListView)));
           await gesture.moveBy(_kGestureOffset);
           // Move back to original position.
-          await gesture.moveBy(Offset(-_kGestureOffset.dx, -_kGestureOffset.dy));
+          await gesture.moveBy(Offset(0, -_kGestureOffset.dy));
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 500));
 
@@ -583,47 +590,90 @@ void main() {
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 500));
 
-          expect(tester.takeException(), isNull);
+          ScrollPhysics physics;
+          await tester.pumpWidget(
+            Builder(
+              builder: (BuildContext context) {
+                physics = configuration.behavior.getScrollPhysics(context);
+                return Container();
+              },
+            ),
+          );
+          expect(physics, isNotNull);
         });
 
         testWidgets('Default ReorderableListViews are not always scrollable', (WidgetTester tester) async {
-          final ReorderableListView view = ReorderableListView(
+          final ScrollConfiguration configuration = ScrollConfiguration(
+           behavior: const ScrollBehavior(),
+           child: ReorderableListView(
             scrollDirection: Axis.horizontal,
             children: const <Widget>[],
             onReorder: (int oldIndex, int newIndex) {},
+          ));
+
+          ScrollPhysics physics;
+          await tester.pumpWidget(
+            Builder(
+              builder: (BuildContext context) {
+                physics = configuration.behavior.getScrollPhysics(context);
+                return Container();
+              },
+            ),
           );
-          expect(view.physics, isNot(isInstanceOf<AlwaysScrollableScrollPhysics>()));
+          expect(physics, isNotNull);
         });
 
         testWidgets('physics:AlwaysScrollableScrollPhysics overrides default behavior', (WidgetTester tester) async {
           bool scrolled = false;
+          final ReorderableListView listViewDefault = ReorderableListView(
+            children: const <Widget>[],
+            onReorder: (int oldIndex, int newIndex) {},
+          );
+
+          final ReorderableListView listViewOverride = ReorderableListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[],
+            onReorder: (int oldIndex, int newIndex) {},
+          );
+
           await tester.pumpWidget(
             MaterialApp(
               home: Directionality(
               textDirection: TextDirection.ltr,
               child: NotificationListener<OverscrollNotification>(
                 onNotification: (OverscrollNotification message) { scrolled = true; return false; },
-                child: ReorderableListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: const <Widget>[],
-                  onReorder: (int oldIndex, int newIndex) {},
-                ),
+                child: listViewDefault,
               ),
             ),
             )
           );
           await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 100.0));
-          expect(scrolled, isTrue);
-        });
+          expect(scrolled, isFalse);
 
-        testWidgets('physics:ScrollPhysics behaves as expected in ReorderableListView', (WidgetTester tester) async {
-          bool scrolled = false;
           await tester.pumpWidget(
             MaterialApp(
               home: Directionality(
               textDirection: TextDirection.ltr,
               child: NotificationListener<OverscrollNotification>(
                 onNotification: (OverscrollNotification message) { scrolled = true; return false; },
+                child: listViewOverride,
+              ),
+            ),
+            )
+          );
+
+          await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 100.0));
+          expect(scrolled, isTrue);
+        });
+
+        testWidgets('physics:ScrollPhysics displayed no overscrolling in ReorderableListView', (WidgetTester tester) async {
+          bool wasOverscrolled = false;
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: NotificationListener<OverscrollNotification>(
+                onNotification: (OverscrollNotification message) { wasOverscrolled = true; return false; },
                 child: ReorderableListView(
                   physics: const ScrollPhysics(),
                   children: const <Widget>[],
@@ -634,7 +684,7 @@ void main() {
             )
           );
           await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 100.0));
-          expect(scrolled, isFalse);
+          expect(wasOverscrolled, isFalse);
         });
       });
     });
