@@ -326,11 +326,6 @@ class FormField<T> extends StatefulWidget {
     this.onSaved,
     this.validator,
     this.initialValue,
-    @Deprecated(
-      'Use autoValidateMode parameter which provide more specific '
-      'behaviour related to auto validation. '
-      'This feature was deprecated after v1.19.0.'
-    )
     // ignore: deprecated_member_use_from_same_package
     this.autovalidate = false,
     this.enabled = true,
