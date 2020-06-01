@@ -790,18 +790,20 @@ class DeviceDomain extends Domain {
 
   /// Enable device events.
   Future<void> enable(Map<String, dynamic> args) {
+    final List<Future<void>> calls = <Future<void>>[];
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      discoverer.startPolling();
+      calls.add(discoverer.startPolling());
     }
-    return Future<void>.value();
+    return Future.wait<void>(calls);
   }
 
   /// Disable device events.
-  Future<void> disable(Map<String, dynamic> args) {
+  Future<void> disable(Map<String, dynamic> args) async {
+    final List<Future<void>> calls = <Future<void>>[];
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      discoverer.stopPolling();
+      calls.add(discoverer.stopPolling());
     }
-    return Future<void>.value();
+    return Future.wait<void>(calls);
   }
 
   /// Forward a host port to a device port.
