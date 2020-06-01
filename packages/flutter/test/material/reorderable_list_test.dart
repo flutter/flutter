@@ -548,7 +548,7 @@ void main() {
 
         testWidgets('ReorderableListView still scrolls when physics property is set', (WidgetTester tester) async {
           final List<Widget> widgetList = <Widget>[
-            Container(key: const Key('1'), child:  const Icon(Icons.account_circle))
+            Container(key: const Key('1'), child: const Icon(Icons.account_circle)),
           ];
           final SingleChildScrollView scrollView = SingleChildScrollView(
             child: SizedBox(
