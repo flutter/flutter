@@ -357,6 +357,13 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     return state.refreshState;
   }
 
+  /// Builds a refresh indicator that reflects the standard iOS pull-to-refresh 
+  /// behaviour. Specifically, this entails presenting an activity indicator that 
+  /// changes depending on the current refreshState. As the user initially drags 
+  /// down, the indicator will gradually reveal individual ticks until the refresh 
+  /// becomes armed. At this point, the animated activity indicator will begin rotating. 
+  /// Once the refresh has completed, the activity indicator shrinks away as the 
+  /// space allocation animated back to closed.
   static Widget buildAppleRefreshIndicator(
     BuildContext context,
     RefreshIndicatorMode refreshState,
