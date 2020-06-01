@@ -1327,48 +1327,40 @@ void main() {
         );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-    testWidgets('buildSimpleRefreshIndicator dark mode', (WidgetTester tester) async {
-      const CupertinoDynamicColor color = CupertinoColors.inactiveGray;
-
+    testWidgets('buildAppleRefreshIndicator progress', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MediaQuery(
-          data: const MediaQueryData(platformBrightness: Brightness.light),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Builder(
-              builder: (BuildContext context) {
-                return CupertinoSliverRefreshControl.buildSimpleRefreshIndicator(
-                  context,
-                  RefreshIndicatorMode.drag,
-                  10, 10, 10,
-                );
-              },
-            ),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Builder(
+            builder: (BuildContext context) {
+              return CupertinoSliverRefreshControl.buildAppleRefreshIndicator(
+                context,
+                RefreshIndicatorMode.drag,
+                10, 100, 10,
+              );
+            },
           ),
         ),
       );
 
-      expect(tester.widget<Icon>(find.byType(Icon)).color.value, color.color.value);
+      expect(tester.widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator)).progress, 0.1);
 
       await tester.pumpWidget(
-        MediaQuery(
-          data: const MediaQueryData(platformBrightness: Brightness.dark),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Builder(
-              builder: (BuildContext context) {
-                return CupertinoSliverRefreshControl.buildSimpleRefreshIndicator(
-                  context,
-                  RefreshIndicatorMode.drag,
-                  10, 10, 10,
-                );
-              },
-            ),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Builder(
+            builder: (BuildContext context) {
+              return CupertinoSliverRefreshControl.buildAppleRefreshIndicator(
+                context,
+                RefreshIndicatorMode.drag,
+                100, 100, 10,
+              );
+            },
           ),
         ),
       );
 
-      expect(tester.widget<Icon>(find.byType(Icon)).color.value, color.darkColor.value);
+      expect(tester.widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator)).progress, 1.0);
     });
   };
 
