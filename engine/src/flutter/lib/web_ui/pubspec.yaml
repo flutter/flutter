@@ -17,6 +17,8 @@ dev_dependencies:
   build_runner: 1.7.2
   build_test: 1.0.0
   build_web_compilers: 2.7.1
+  # TODO(yjbanov): the Dart SDK complains about nonVirtual for some reason.
+  petitparser: 3.0.2
   yaml: 2.2.0
   watcher: 0.9.7+12
   web_engine_tester:

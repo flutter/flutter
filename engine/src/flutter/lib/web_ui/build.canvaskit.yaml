@@ -1,0 +1,17 @@
+# Build configuration used by CanvasKit tests. When building for CanvasKit
+# we must pass FLUTTER_WEB_USE_SKIA=true to dart2js.
+#
+# See also `build.html.yaml`.
+targets:
+  $default:
+    builders:
+      build_web_compilers|entrypoint:
+        options:
+          compiler: dart2js
+          dart2js_args:
+            - --no-minify
+            - --enable-asserts
+            - -DFLUTTER_WEB_USE_SKIA=true
+        generate_for:
+          include:
+            - test/canvaskit/**.dart
