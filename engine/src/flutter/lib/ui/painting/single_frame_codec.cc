@@ -101,7 +101,7 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
   return Dart_Null();
 }
 
-size_t SingleFrameCodec::GetAllocationSize() {
+size_t SingleFrameCodec::GetAllocationSize() const {
   const auto& data = descriptor_.data;
   const auto data_byte_size = data ? data->size() : 0;
   const auto frame_byte_size = (cached_frame_ && cached_frame_->image())

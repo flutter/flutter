@@ -28,7 +28,7 @@ class SingleFrameCodec : public Codec {
   Dart_Handle getNextFrame(Dart_Handle args) override;
 
   // |DartWrappable|
-  size_t GetAllocationSize() override;
+  size_t GetAllocationSize() const override;
 
  private:
   enum class Status { kNew, kInProgress, kComplete };
