@@ -261,7 +261,6 @@ class ManifestAssetBundle implements AssetBundle {
         entries[variant.entryUri.path] ??= DevFSFileContent(variant.assetFile);
       }
     }
-
     final List<_Asset> materialAssets = <_Asset>[
       if (flutterManifest.usesMaterialDesign && includeDefaultFonts)
         ..._getMaterialAssets(_kFontSetMaterial),
