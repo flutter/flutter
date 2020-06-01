@@ -125,32 +125,6 @@ class ReorderableListView extends StatefulWidget {
   /// Determines the physics of a [Scrollable] widget.
   final ScrollPhysics physics;
 
-<<<<<<< HEAD
-=======
-  /// Whether the extent of the scroll view in the [scrollDirection[] should be
-  /// determined by the contents being viewed.
-  ///
-  /// If the scroll view does not shrink wrap, then the scroll view will expand
-  /// to the maximum allowed size in the [scrollDirection]. If the scroll view has
-  /// unbounded constraints in the [scrollDirection], then [shrinkWrap] must be true.
-  ///
-  /// Shrink wrapping the content of the scroll view is significantly more expensive
-  /// than expanding to the maximum allowed size because the content can expand and
-  /// contract during scrolling, which means the size of the scroll view needs to be
-  /// recomputed whenever the scroll position changes.
-  ///
-  /// Defaults to false.
-  final bool shrinkWrap;
-
-  /// Whether this is the primary scroll view associated with the parent
-  /// [PrimaryScrollController].
-  ///
-  /// When this is true, the scroll view is scrollable even if it does not have
-  /// sufficient content to actually scroll. Otherwise, by default the user can
-  /// only scroll the view if it has sufficient content.
-  final bool primary;
-
->>>>>>> af59618fa... format
   @override
   _ReorderableListViewState createState() => _ReorderableListViewState();
 }
@@ -212,11 +186,7 @@ class _ReorderableListContent extends StatefulWidget {
     @required this.padding,
     @required this.onReorder,
     @required this.reverse,
-<<<<<<< HEAD
     @required this.physics,
-=======
-    @required this.physics,
->>>>>>> cd783729d... add physics property to reorderable list
   });
 
   final Widget header;
@@ -226,11 +196,7 @@ class _ReorderableListContent extends StatefulWidget {
   final EdgeInsets padding;
   final ReorderCallback onReorder;
   final bool reverse;
-<<<<<<< HEAD
   final ScrollPhysics physics;
-=======
-  final AlwaysScrollableScrollPhysics physics;
->>>>>>> cd783729d... add physics property to reorderable list
 
   @override
   _ReorderableListContentState createState() => _ReorderableListContentState();
