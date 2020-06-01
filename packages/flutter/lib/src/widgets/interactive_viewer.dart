@@ -54,7 +54,6 @@ class InteractiveViewer extends StatefulWidget {
   /// The [child] parameter must not be null.
   InteractiveViewer({
     Key key,
-    @required this.child,
     this.boundaryMargin = EdgeInsets.zero,
     this.constrained = true,
     // These default scale values were eyeballed as reasonable limits for common
@@ -64,9 +63,10 @@ class InteractiveViewer extends StatefulWidget {
     this.onInteractionEnd,
     this.onInteractionStart,
     this.onInteractionUpdate,
+    this.panEnabled = true,
     this.scaleEnabled = true,
     this.transformationController,
-    this.translationEnabled = true,
+    @required this.child,
   }) : assert(child != null),
        assert(constrained != null),
        assert(minScale != null),
@@ -76,8 +76,8 @@ class InteractiveViewer extends StatefulWidget {
        assert(maxScale > 0),
        assert(!maxScale.isNaN),
        assert(maxScale >= minScale),
+       assert(panEnabled != null),
        assert(scaleEnabled != null),
-       assert(translationEnabled != null),
        // boundaryMargin must be either fully infinite or fully finite, but not
        // a mix of both.
        assert((boundaryMargin.horizontal.isInfinite
@@ -157,14 +157,14 @@ class InteractiveViewer extends StatefulWidget {
   /// {@end-tool}
   final bool constrained;
 
-  /// If false, the user will be prevented from translating.
+  /// If false, the user will be prevented from panning.
   ///
   /// Defaults to true.
   ///
   /// See also:
   ///
   ///   * [scaleEnabled], which is similar but for scale.
-  final bool translationEnabled;
+  final bool panEnabled;
 
   /// If false, the user will be prevented from scaling.
   ///
@@ -172,7 +172,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [translationEnabled], which is similar but for translation.
+  ///   * [panEnabled], which is similar but for panning.
   final bool scaleEnabled;
 
   /// The maximum allowed scale.
@@ -198,7 +198,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// {@template flutter.widgets.interactiveViewer.onInteraction}
   /// Will be called even if the interaction is disabled with
-  /// [translationEnabled] or [scaleEnabled].
+  /// [panEnabled] or [scaleEnabled].
   ///
   /// A [GestureDetector] wrapping the InteractiveViewer will not respond to
   /// [GestureDetector.onScaleStart], [GestureDetector.onScaleUpdate], and
@@ -367,10 +367,10 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   BoxConstraints _constraints;
   _GestureType _gestureType;
 
-  // TODO(justinmc): Add rotationEnabled parameter to the widget and remove this
+  // TODO(justinmc): Add rotateEnabled parameter to the widget and remove this
   // hardcoded value when the rotation feature is implemented.
   // https://github.com/flutter/flutter/issues/57698
-  final bool _rotationEnabled = false;
+  final bool _rotateEnabled = false;
 
   // Used as the coefficient of friction in the inertial translation animation.
   // This value was eyeballed to give a feel similar to Google Photos.
@@ -414,7 +414,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Return a new matrix representing the given matrix after applying the given
   // translation.
   Matrix4 _matrixTranslate(Matrix4 matrix, Offset translation) {
-    if (!widget.translationEnabled || translation == Offset.zero) {
+    if (translation == Offset.zero) {
       return matrix.clone();
     }
 
@@ -497,7 +497,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Return a new matrix representing the given matrix after applying the given
   // scale.
   Matrix4 _matrixScale(Matrix4 matrix, double scale) {
-    if (!widget.scaleEnabled || scale == 1) {
+    if (scale == 1.0) {
       return matrix.clone();
     }
     assert(scale != 0.0);
@@ -530,7 +530,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // Return a new matrix representing the given matrix after applying the given
   // rotation.
   Matrix4 _matrixRotate(Matrix4 matrix, double rotation, Offset focalPoint) {
-    if (!_rotationEnabled || rotation == 0) {
+    if (rotation == 0) {
       return matrix.clone();
     }
     final Offset focalPointScene = _transformationController.toScene(
@@ -543,8 +543,22 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       ..translate(-focalPointScene.dx, -focalPointScene.dy);
   }
 
-  // Handle the start of a gesture. All of translation, scale, and rotation are
-  // handled with GestureDetector's scale gesture.
+  // Returns true iff the given _GestureType is enabled.
+  bool _gestureIsSupported(_GestureType gestureType) {
+    if (_gestureType == _GestureType.pan && !widget.panEnabled) {
+      return false;
+    }
+    if (_gestureType == _GestureType.scale && !widget.scaleEnabled) {
+      return false;
+    }
+    if (_gestureType == _GestureType.rotate && !_rotateEnabled) {
+      return false;
+    }
+    return true;
+  }
+
+  // Handle the start of a gesture. All of pan, scale, and rotate are handled
+  // with GestureDetector's scale gesture.
   void _onScaleStart(ScaleStartDetails details) {
     if (widget.onInteractionStart != null) {
       widget.onInteractionStart(details);
@@ -565,8 +579,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _rotationStart = _currentRotation;
   }
 
-  // Handle an update to an ongoing gesture. All of translation, scale, and
-  // rotation are handled with GestureDetector's scale gesture.
+  // Handle an update to an ongoing gesture. All of pan, scale, and rotate are
+  // handled with GestureDetector's scale gesture.
   void _onScaleUpdate(ScaleUpdateDetails details) {
     final double scale = _transformationController.value.getMaxScaleOnAxis();
     if (widget.onInteractionUpdate != null) {
@@ -583,8 +597,12 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     );
     _gestureType ??= _getGestureType(
       !widget.scaleEnabled ? 1.0 : details.scale,
-      !_rotationEnabled ? 0.0 : details.rotation,
+      !_rotateEnabled ? 0.0 : details.rotation,
     );
+
+    if (!_gestureIsSupported(_gestureType)) {
+      return;
+    }
 
     switch (_gestureType) {
       case _GestureType.scale:
@@ -639,7 +657,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         _currentRotation = desiredRotation;
         return;
 
-      case _GestureType.translate:
+      case _GestureType.pan:
         if (_referenceFocalPoint == null || details.scale != 1.0) {
           return;
         }
@@ -657,8 +675,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     }
   }
 
-  // Handle the end of a gesture of _GestureType. All of translation, scale, and
-  // rotation are handled with GestureDetector's scale gesture.
+  // Handle the end of a gesture of _GestureType. All of pan, scale, and rotate
+  // are handled with GestureDetector's scale gesture.
   void _onScaleEnd(ScaleEndDetails details) {
     if (widget.onInteractionEnd != null) {
       widget.onInteractionEnd(details);
@@ -670,8 +688,12 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _animation?.removeListener(_onAnimate);
     _controller.reset();
 
+    if (!_gestureIsSupported(_gestureType)) {
+      return;
+    }
+
     // If the scale ended with enough velocity, animate inertial movement.
-    if (details.velocity.pixelsPerSecond.distance < kMinFlingVelocity) {
+    if (_gestureType != _GestureType.pan || details.velocity.pixelsPerSecond.distance < kMinFlingVelocity) {
       return;
     }
 
@@ -830,7 +852,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         return Listener(
           onPointerSignal: _receivedPointerSignal,
           child: GestureDetector(
-            behavior: HitTestBehavior.opaque, // Necessary when translating off screen
+            behavior: HitTestBehavior.opaque, // Necessary when panning off screen.
             onScaleEnd: _onScaleEnd,
             onScaleStart: _onScaleStart,
             onScaleUpdate: _onScaleUpdate,
@@ -905,7 +927,7 @@ class TransformationController extends ValueNotifier<Matrix4> {
 // A classification of relevant user gestures. Each contiguous user gesture is
 // represented by exactly one _GestureType.
 enum _GestureType {
-  translate,
+  pan,
   scale,
   rotate,
 }
@@ -1037,15 +1059,15 @@ double _getFinalTime(double velocity, double drag) {
 
 // Decide which type of gesture this is by comparing the amount of scale
 // and rotation in the gesture, if any. Scale starts at 1 and rotation
-// starts at 0. Translate will have 0 scale and 0 rotation because it uses
-// only one finger.
+// starts at 0. Pan will have 0 scale and 0 rotation because it uses only one
+// finger.
 _GestureType _getGestureType(double scale, double rotation) {
   if ((scale - 1).abs() > rotation.abs()) {
     return _GestureType.scale;
   } else if (rotation != 0) {
     return _GestureType.rotate;
   } else {
-    return _GestureType.translate;
+    return _GestureType.pan;
   }
 }
 
