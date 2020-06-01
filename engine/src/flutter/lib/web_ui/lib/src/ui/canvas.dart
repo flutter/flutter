@@ -747,9 +747,10 @@ class Canvas {
     assert(engine.rectIsValid(dst));
     assert(paint != null);
 
-    // Assert you can fit the scaled image into dst.
-    assert(image.width - center.width >= dst.width);
-    assert(image.height - center.height >= dst.height);
+    // Assert you can fit the scaled part of the image (exluding the
+    // center source).
+    assert(image.width - center.width < dst.width);
+    assert(image.height - center.height < dst.height);
 
     // The four unscaled corner rectangles in the from the src.
     final Rect srcTopLeft = Rect.fromLTWH(
