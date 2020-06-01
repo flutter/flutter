@@ -11,13 +11,17 @@ part of engine;
 class SkPath implements ui.Path {
   js.JsObject _skPath;
 
+  /// Cached constructor function for `SkPath`, so we don't have to look it up
+  /// every time we construct a new path.
+  static final js.JsFunction _skPathConstructor = canvasKit['SkPath'];
+
   SkPath() {
-    _skPath = js.JsObject(canvasKit['SkPath']);
+    _skPath = js.JsObject(_skPathConstructor);
     fillType = ui.PathFillType.nonZero;
   }
 
   SkPath.from(SkPath other) {
-    _skPath = js.JsObject(canvasKit['SkPath'], <js.JsObject>[other._skPath]);
+    _skPath = js.JsObject(_skPathConstructor, <js.JsObject>[other._skPath]);
     fillType = other.fillType;
   }
 
@@ -322,5 +326,10 @@ class SkPath implements ui.Path {
 
   String toSvgString() {
     return _skPath.callMethod('toSVGString');
+  }
+
+  /// Return `true` if this path contains no segments.
+  bool get isEmpty {
+    return _skPath.callMethod('isEmpty');
   }
 }
