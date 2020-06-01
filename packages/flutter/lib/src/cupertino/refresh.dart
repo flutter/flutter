@@ -11,8 +11,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'activity_indicator.dart';
-import 'colors.dart';
-import 'icons.dart';
 
 class _CupertinoSliverRefresh extends SingleChildRenderObjectWidget {
   const _CupertinoSliverRefresh({
@@ -366,7 +364,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     double refreshTriggerPullDistance,
     double refreshIndicatorExtent,
   ) {
-    final percentageComplete = min(pulledExtent / refreshTriggerPullDistance, 1.0);
+    final double percentageComplete = min(pulledExtent / refreshTriggerPullDistance, 1.0);
     return Align(
       alignment: Alignment.topCenter,
       child: Padding(
