@@ -408,7 +408,7 @@ void main() {
       final Vector3 a = Vector3(0.0, 0.0, 0.0);
       final Vector3 b = Vector3(10.0, 0.0, 0.0);
 
-      final Vector3 closestPoint = getNearestPointOnLine(point, a , b);
+      final Vector3 closestPoint = InteractiveViewer.getNearestPointOnLine(point, a , b);
 
       expect(closestPoint, Vector3(5.0, 0.0, 0.0));
       expect(point, Vector3(5.0, 5.0, 0.0));
@@ -421,7 +421,7 @@ void main() {
       final Vector3 a = Vector3(0.0, 0.0, 0.0);
       final Vector3 b = Vector3(5.0, 5.0, 0.0);
 
-      expect(getNearestPointOnLine(point, a, b), Vector3(2.5, 2.5, 0.0));
+      expect(InteractiveViewer.getNearestPointOnLine(point, a, b), Vector3(2.5, 2.5, 0.0));
     });
 
     test('closest to a', () {
@@ -429,7 +429,7 @@ void main() {
       final Vector3 a = Vector3(0.0, 0.0, 0.0);
       final Vector3 b = Vector3(5.0, 5.0, 0.0);
 
-      expect(getNearestPointOnLine(point, a, b), a);
+      expect(InteractiveViewer.getNearestPointOnLine(point, a, b), a);
     });
 
     test('closest to b', () {
@@ -437,7 +437,7 @@ void main() {
       final Vector3 a = Vector3(0.0, 0.0, 0.0);
       final Vector3 b = Vector3(5.0, 5.0, 0.0);
 
-      expect(getNearestPointOnLine(point, a, b), b);
+      expect(InteractiveViewer.getNearestPointOnLine(point, a, b), b);
     });
 
     test('point already on the line returns the point', () {
@@ -445,7 +445,7 @@ void main() {
       final Vector3 a = Vector3(0.0, 0.0, 0.0);
       final Vector3 b = Vector3(5.0, 5.0, 0.0);
 
-      expect(getNearestPointOnLine(point, a, b), point);
+      expect(InteractiveViewer.getNearestPointOnLine(point, a, b), point);
     });
 
     test('real example', () {
@@ -453,7 +453,7 @@ void main() {
       final Vector3 a = Vector3(-1114.0, -60.3, 0.0);
       final Vector3 b = Vector3(288.8, 432.7, 0.0);
 
-      final Vector3 closestPoint = getNearestPointOnLine(point, a , b);
+      final Vector3 closestPoint = InteractiveViewer.getNearestPointOnLine(point, a , b);
 
       expect(closestPoint.x, closeTo(-356.8, 0.1));
       expect(closestPoint.y, closeTo(205.8, 0.1));
@@ -469,7 +469,7 @@ void main() {
         Vector3(0.0, 10.0, 0.0),
       );
 
-      final Quad aabb = getAxisAlignedBoundingBox(quad);
+      final Quad aabb = InteractiveViewer.getAxisAlignedBoundingBox(quad);
 
       expect(aabb.point0, quad.point0);
       expect(aabb.point1, quad.point1);
@@ -485,7 +485,7 @@ void main() {
         Vector3(5.0, 0.0, 0.0),
       );
 
-      final Quad aabb = getAxisAlignedBoundingBox(quad);
+      final Quad aabb = InteractiveViewer.getAxisAlignedBoundingBox(quad);
 
       expect(aabb.point0, Vector3(0.0, 0.0, 0.0));
       expect(aabb.point1, Vector3(10.0, 0.0, 0.0));
@@ -501,7 +501,7 @@ void main() {
         Vector3(9.0, -1.0, 0.0),
       );
 
-      final Quad aabb = getAxisAlignedBoundingBox(quad);
+      final Quad aabb = InteractiveViewer.getAxisAlignedBoundingBox(quad);
 
       expect(aabb.point0, Vector3(0.0, -1.0, 0.0));
       expect(aabb.point1, Vector3(11.0, -1.0, 0.0));
@@ -517,7 +517,7 @@ void main() {
         Vector3(34.9, 938.6, 0.0),
       );
 
-      final Quad aabb = getAxisAlignedBoundingBox(quad);
+      final Quad aabb = InteractiveViewer.getAxisAlignedBoundingBox(quad);
 
       expect(aabb.point0, Vector3(-462.7, -576.7, 0.0));
       expect(aabb.point1, Vector3(1188.1, -576.7, 0.0));
@@ -536,7 +536,7 @@ void main() {
       );
       final Vector3 point = Vector3(5.0, 5.0, 0.0);
 
-      expect(pointIsInside(point, quad), true);
+      expect(InteractiveViewer.pointIsInside(point, quad), true);
     });
 
     test('outside', () {
@@ -548,7 +548,7 @@ void main() {
       );
       final Vector3 point = Vector3(12.0, 0.0, 0.0);
 
-      expect(pointIsInside(point, quad), false);
+      expect(InteractiveViewer.pointIsInside(point, quad), false);
     });
 
     test('on the edge', () {
@@ -560,7 +560,7 @@ void main() {
       );
       final Vector3 point = Vector3(0.0, 0.0, 0.0);
 
-      expect(pointIsInside(point, quad), true);
+      expect(InteractiveViewer.pointIsInside(point, quad), true);
     });
   });
 
@@ -574,7 +574,7 @@ void main() {
         Vector3(10.0, 0.0, 0.0),
       );
 
-      final Vector3 nearestPoint = getNearestPointInside(point, quad);
+      final Vector3 nearestPoint = InteractiveViewer.getNearestPointInside(point, quad);
 
       expect(nearestPoint, point);
     });
@@ -588,7 +588,7 @@ void main() {
         Vector3(10.0, 0.0, 0.0),
       );
 
-      final Vector3 nearestPoint = getNearestPointInside(point, quad);
+      final Vector3 nearestPoint = InteractiveViewer.getNearestPointInside(point, quad);
 
       expect(nearestPoint, Vector3(5.0, 10.0, 0.0));
     });
@@ -602,7 +602,7 @@ void main() {
         Vector3(10.0, 2.0, 0.0),
       );
 
-      final Vector3 nearestPoint = getNearestPointInside(point, quad);
+      final Vector3 nearestPoint = InteractiveViewer.getNearestPointInside(point, quad);
 
       expect(nearestPoint.x, closeTo(5.8, 0.1));
       expect(nearestPoint.y, closeTo(10.8, 0.1));

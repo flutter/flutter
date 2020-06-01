@@ -11,7 +11,6 @@ import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
-import 'layout_builder.dart';
 import 'scroll_physics.dart';
 import 'single_child_scroll_view.dart';
 import 'ticker_provider.dart';
@@ -116,9 +115,10 @@ class InteractiveViewer extends StatefulWidget {
   /// Defaults to true.
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold}
-  /// This example shows how to create a table that is larger than the
-  /// InteractiveViewer. By setting constrained to false, the parts of the table
-  /// that are overflowing can be panned into view.
+  /// This example shows how to create a pannable table. Because the table is
+  /// larger than the entire screen, setting `constrained` to false is necessary
+  /// to allow it to be drawn to its full size. The parts of the table that
+  /// exceed the screen size can then be panned into view.
   ///
   /// ```dart
   ///   Widget build(BuildContext context) {
@@ -348,6 +348,124 @@ class InteractiveViewer extends StatefulWidget {
   ///  * [ValueNotifier], the parent class of TransformationController.
   ///  * [TextEditingController] for an example of another similar pattern.
   final TransformationController transformationController;
+
+  /// Returns the closest point to the given point on the given line segment.
+  @visibleForTesting
+  static Vector3 getNearestPointOnLine(Vector3 point, Vector3 l1, Vector3 l2) {
+    final double lengthSquared = math.pow(l2.x - l1.x, 2.0).toDouble()
+        + math.pow(l2.y - l1.y, 2.0).toDouble();
+
+    // In this case, l1 == l2.
+    if (lengthSquared == 0) {
+      return l1;
+    }
+
+    // Calculate how far down the line segment the closest point is and return
+    // the point.
+    final Vector3 l1P = point - l1;
+    final Vector3 l1L2 = l2 - l1;
+    final double fraction = (l1P.dot(l1L2) / lengthSquared).clamp(0.0, 1.0).toDouble();
+    return l1 + l1L2 * fraction;
+  }
+
+  /// Given a quad, return its axis aligned bounding box.
+  @visibleForTesting
+  static Quad getAxisAlignedBoundingBox(Quad quad) {
+    final double minX = math.min(
+      quad.point0.x,
+      math.min(
+        quad.point1.x,
+        math.min(
+          quad.point2.x,
+          quad.point3.x,
+        ),
+      ),
+    );
+    final double minY = math.min(
+      quad.point0.y,
+      math.min(
+        quad.point1.y,
+        math.min(
+          quad.point2.y,
+          quad.point3.y,
+        ),
+      ),
+    );
+    final double maxX = math.max(
+      quad.point0.x,
+      math.max(
+        quad.point1.x,
+        math.max(
+          quad.point2.x,
+          quad.point3.x,
+        ),
+      ),
+    );
+    final double maxY = math.max(
+      quad.point0.y,
+      math.max(
+        quad.point1.y,
+        math.max(
+          quad.point2.y,
+          quad.point3.y,
+        ),
+      ),
+    );
+    return Quad.points(
+      Vector3(minX, minY, 0),
+      Vector3(maxX, minY, 0),
+      Vector3(maxX, maxY, 0),
+      Vector3(minX, maxY, 0),
+    );
+  }
+
+  /// Returns true iff the point is inside the rectangle given by the Quad,
+  /// inclusively.
+  /// Algorithm from https://math.stackexchange.com/a/190373.
+  @visibleForTesting
+  static bool pointIsInside(Vector3 point, Quad quad) {
+    final Vector3 aM = point - quad.point0;
+    final Vector3 aB = quad.point1 - quad.point0;
+    final Vector3 aD = quad.point3 - quad.point0;
+
+    final double aMAB = aM.dot(aB);
+    final double aBAB = aB.dot(aB);
+    final double aMAD = aM.dot(aD);
+    final double aDAD = aD.dot(aD);
+
+    return 0 <= aMAB && aMAB <= aBAB && 0 <= aMAD && aMAD <= aDAD;
+  }
+
+  /// Get the point inside (inclusively) the given Quad that is nearest to the
+  /// given Vector3.
+  @visibleForTesting
+  static Vector3 getNearestPointInside(Vector3 point, Quad quad) {
+    // If the point is inside the axis aligned bounding box, then it's ok where
+    // it is.
+    if (pointIsInside(point, quad)) {
+      return point;
+    }
+
+    // Otherwise, return the nearest point on the quad.
+    final List<Vector3> closestPoints = <Vector3>[
+      InteractiveViewer.getNearestPointOnLine(point, quad.point0, quad.point1),
+      InteractiveViewer.getNearestPointOnLine(point, quad.point1, quad.point2),
+      InteractiveViewer.getNearestPointOnLine(point, quad.point2, quad.point3),
+      InteractiveViewer.getNearestPointOnLine(point, quad.point3, quad.point0),
+    ];
+    double minDistance = double.infinity;
+    Vector3 closestOverall;
+    for (final Vector3 closePoint in closestPoints) {
+      final double distance = math.sqrt(
+        math.pow(point.x - closePoint.x, 2) + math.pow(point.y - closePoint.y, 2),
+      );
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestOverall = closePoint;
+      }
+    }
+    return closestOverall;
+  }
 
   @override _InteractiveViewerState createState() => _InteractiveViewerState();
 }
@@ -941,124 +1059,6 @@ enum _GestureType {
   rotate,
 }
 
-/// Returns the closest point to the given point on the given line segment.
-@visibleForTesting
-Vector3 getNearestPointOnLine(Vector3 point, Vector3 l1, Vector3 l2) {
-  final double lengthSquared = math.pow(l2.x - l1.x, 2.0).toDouble()
-      + math.pow(l2.y - l1.y, 2.0).toDouble();
-
-  // In this case, l1 == l2.
-  if (lengthSquared == 0) {
-    return l1;
-  }
-
-  // Calculate how far down the line segment the closest point is and return
-  // the point.
-  final Vector3 l1P = point - l1;
-  final Vector3 l1L2 = l2 - l1;
-  final double fraction = (l1P.dot(l1L2) / lengthSquared).clamp(0.0, 1.0).toDouble();
-  return l1 + l1L2 * fraction;
-}
-
-/// Given a quad, return its axis aligned bounding box.
-@visibleForTesting
-Quad getAxisAlignedBoundingBox(Quad quad) {
-  final double minX = math.min(
-    quad.point0.x,
-    math.min(
-      quad.point1.x,
-      math.min(
-        quad.point2.x,
-        quad.point3.x,
-      ),
-    ),
-  );
-  final double minY = math.min(
-    quad.point0.y,
-    math.min(
-      quad.point1.y,
-      math.min(
-        quad.point2.y,
-        quad.point3.y,
-      ),
-    ),
-  );
-  final double maxX = math.max(
-    quad.point0.x,
-    math.max(
-      quad.point1.x,
-      math.max(
-        quad.point2.x,
-        quad.point3.x,
-      ),
-    ),
-  );
-  final double maxY = math.max(
-    quad.point0.y,
-    math.max(
-      quad.point1.y,
-      math.max(
-        quad.point2.y,
-        quad.point3.y,
-      ),
-    ),
-  );
-  return Quad.points(
-    Vector3(minX, minY, 0),
-    Vector3(maxX, minY, 0),
-    Vector3(maxX, maxY, 0),
-    Vector3(minX, maxY, 0),
-  );
-}
-
-/// Returns true iff the point is inside the rectangle given by the Quad,
-/// inclusively.
-/// Algorithm from https://math.stackexchange.com/a/190373.
-@visibleForTesting
-bool pointIsInside(Vector3 point, Quad quad) {
-  final Vector3 aM = point - quad.point0;
-  final Vector3 aB = quad.point1 - quad.point0;
-  final Vector3 aD = quad.point3 - quad.point0;
-
-  final double aMAB = aM.dot(aB);
-  final double aBAB = aB.dot(aB);
-  final double aMAD = aM.dot(aD);
-  final double aDAD = aD.dot(aD);
-
-  return 0 <= aMAB && aMAB <= aBAB && 0 <= aMAD && aMAD <= aDAD;
-}
-
-/// Get the point inside (inclusively) the given Quad that is nearest to the
-/// given Vector3.
-@visibleForTesting
-Vector3 getNearestPointInside(Vector3 point, Quad quad) {
-  // If the point is inside the axis aligned bounding box, then it's ok where
-  // it is.
-  if (pointIsInside(point, quad)) {
-    return point;
-  }
-
-  // Otherwise, return the nearest point on the quad.
-  final List<Vector3> closestPoints = <Vector3>[
-    getNearestPointOnLine(point, quad.point0, quad.point1),
-    getNearestPointOnLine(point, quad.point1, quad.point2),
-    getNearestPointOnLine(point, quad.point2, quad.point3),
-    getNearestPointOnLine(point, quad.point3, quad.point0),
-  ];
-  double minDistance = double.infinity;
-  Vector3 closestOverall;
-  for (final Vector3 closePoint in closestPoints) {
-    final double distance = math.sqrt(
-      math.pow(point.x - closePoint.x, 2) + math.pow(point.y - closePoint.y, 2),
-    );
-    if (distance < minDistance) {
-      minDistance = distance;
-      closestOverall = closePoint;
-    }
-  }
-  return closestOverall;
-}
-
 // Given a velocity and drag, calculate the time at which motion will come to
 // a stop, within the margin of effectivelyMotionless.
 double _getFinalTime(double velocity, double drag) {
@@ -1129,7 +1129,7 @@ Quad _getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
     rotationMatrix.transform3(Vector3(rect.right, rect.bottom, 0.0)),
     rotationMatrix.transform3(Vector3(rect.left, rect.bottom, 0.0)),
   );
-  return getAxisAlignedBoundingBox(boundariesRotated);
+  return InteractiveViewer.getAxisAlignedBoundingBox(boundariesRotated);
 }
 
 // Return the amount that viewport lies outside of boundary. If the viewport
@@ -1141,7 +1141,7 @@ Offset _exceedsBy(Quad boundary, Quad viewport) {
   ];
   Offset largestExcess = Offset.zero;
   for (final Vector3 point in viewportPoints) {
-    final Vector3 pointInside = getNearestPointInside(point, boundary);
+    final Vector3 pointInside = InteractiveViewer.getNearestPointInside(point, boundary);
     final Offset excess = Offset(
       pointInside.x - point.x,
       pointInside.y - point.y,
