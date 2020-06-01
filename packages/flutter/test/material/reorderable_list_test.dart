@@ -550,14 +550,6 @@ void main() {
           final List<Widget> widgetList = <Widget>[
             Container(key: const Key('1'), child: const Icon(Icons.account_circle)),
           ];
-          /*final ReorderableListView listView = ReorderableListView(
-                key: const Key('list'),
-                physics: const AlwaysScrollableScrollPhysics(),
-                onReorder: (int oldIndex, int newIndex) {},
-                children: widgetList,
-                scrollController: ScrollController(),
-              
-            );*/
 
           final ScrollConfiguration configuration = ScrollConfiguration(
            behavior: const ScrollBehavior(),
@@ -567,7 +559,6 @@ void main() {
                 onReorder: (int oldIndex, int newIndex) {},
                 children: widgetList,
                 scrollController: ScrollController(),
-              
           ));
 
           await tester.pumpWidget(MaterialApp(

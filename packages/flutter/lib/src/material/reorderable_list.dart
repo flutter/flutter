@@ -147,7 +147,7 @@ class ReorderableListView extends StatefulWidget {
   /// ScrollPhysics physics = const BouncingScrollPhysics();
   /// // ...
   /// physics.applyTo(const AlwaysScrollableScrollPhysics())
-  /// ```  
+  /// ```
   final ScrollPhysics physics;
 
   @override
