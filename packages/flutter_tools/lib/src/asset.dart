@@ -176,10 +176,12 @@ class ManifestAssetBundle implements AssetBundle {
       return 1;
     }
 
+    final bool includesMaterialFonts = flutterManifest.usesMaterialDesign;
     final List<Map<String, dynamic>> fonts = _parseFonts(
       flutterManifest,
       includeDefaultFonts,
       packageConfig,
+      primary: true,
     );
 
     // Add fonts and assets from packages.
@@ -215,12 +217,20 @@ class ManifestAssetBundle implements AssetBundle {
           return 1;
         }
         assetVariants.addAll(packageAssets);
-
+        if (!includesMaterialFonts && packageFlutterManifest.usesMaterialDesign) {
+          globals.printError(
+            'package:${package.name} has `uses-material-design: true` set but '
+            'the primary pubspec contains `uses-material-design: false`. '
+            'If the application needs material icons, then `uses-material-design` '
+            ' must be set to true.'
+          );
+        }
         fonts.addAll(_parseFonts(
           packageFlutterManifest,
           includeDefaultFonts,
           packageConfig,
           packageName: package.name,
+          primary: false,
         ));
       }
     }
@@ -251,7 +261,6 @@ class ManifestAssetBundle implements AssetBundle {
         entries[variant.entryUri.path] ??= DevFSFileContent(variant.assetFile);
       }
     }
-
     final List<_Asset> materialAssets = <_Asset>[
       if (flutterManifest.usesMaterialDesign && includeDefaultFonts)
         ..._getMaterialAssets(_kFontSetMaterial),
@@ -523,9 +532,10 @@ List<Map<String, dynamic>> _parseFonts(
   bool includeDefaultFonts,
   PackageConfig packageConfig, {
   String packageName,
+  @required bool primary,
 }) {
   return <Map<String, dynamic>>[
-    if (manifest.usesMaterialDesign && includeDefaultFonts)
+    if (primary && manifest.usesMaterialDesign && includeDefaultFonts)
       ..._getMaterialFonts(ManifestAssetBundle._kFontSetMaterial),
     if (packageName == null)
       ...manifest.fontsDescriptor

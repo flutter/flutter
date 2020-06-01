@@ -399,6 +399,44 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
     Platform: () => FakePlatform(operatingSystem: 'linux'),
   });
+
+  testUsingContext('does not include material design assets if uses-material-design: true is '
+    'specified only by a dependency', () async {
+    globals.fs.file('.packages').writeAsStringSync(r'''
+example:lib/
+foo:foo/lib/
+''');
+    globals.fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+dependencies:
+  foo: any
+
+flutter:
+  uses-material-design: false
+''');
+    globals.fs.file('foo/pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'''
+name: foo
+
+flutter:
+  uses-material-design: true
+''');
+    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+
+    expect(await bundle.build(manifestPath: 'pubspec.yaml'), 0);
+    expect((bundle.entries['FontManifest.json'] as DevFSStringContent).string, '[]');
+    expect((bundle.entries['AssetManifest.json'] as DevFSStringContent).string, '{}');
+    expect(testLogger.errorText, contains(
+      'package:foo has `uses-material-design: true` set'
+    ));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
+  });
 }
 
 class MockDirectory extends Mock implements Directory {}
