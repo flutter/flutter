@@ -23,8 +23,6 @@ const List<String> _kLinuxArtifacts = <String>[
   'flutter_glfw.h',
   // GTK. Not yet used by the template.
   'libflutter_linux_gtk.so',
-  // Shared.
-  'icudtl.dat',
 ];
 
 const String _kLinuxDepfile = 'linux_engine_sources.d';
@@ -86,6 +84,10 @@ class UnpackLinux extends Target {
       outputDirectory: outputDirectory,
       artifacts: _kLinuxArtifacts,
       clientSourcePaths: <String>[clientSourcePath, headersPath],
+      icuDataPath: environment.artifacts.getArtifactPath(
+        Artifact.icuData,
+        platform: TargetPlatform.linux_x64,
+      )
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
