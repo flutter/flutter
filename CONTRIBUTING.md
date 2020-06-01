@@ -1,7 +1,7 @@
 Contributing to Flutter
 =======================
 
-[![Build Status](https://api.cirrus-ci.com/github/flutter/flutter.svg)](https://cirrus-ci.org/flutter/flutter)
+[![good](https://api.cirrus.ci.com/github/flutter/flutter.svg)](https://cirrus-ci.org/flutter/flutter)
 
 _See also: [Flutter's code of conduct](CODE_OF_CONDUCT.md)_
 
