@@ -551,9 +551,11 @@ abstract class Device {
   }
 
   static List<String> devicesPlatformTypes(List<Device> devices) {
-    return devices.map(
+    final List<String> platformTypes = devices.map(
         (Device d) => d.platformType.toString(),
       ).toSet().toList();
+    platformTypes.sort();
+    return platformTypes;
   }
 
   /// Convert the Device object to a JSON representation suitable for serialization.

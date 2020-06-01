@@ -220,10 +220,9 @@ class UserMessages {
       "matching '$deviceId'";
   String get flutterNoDevicesFound => 'No devices found';
   String get flutterNoSupportedDevices => 'No supported devices connected.';
-  String flutterMissPlatformProject(String flutterProject, List<String> unsupportedDevicesType) =>
-      'Your project $flutterProject is missing some platform projects.'
-          '\nIf you would like your app to run on ${unsupportedDevicesType.join(' or ')}, consider running `flutter create .` to generate projects for these platforms.';
-  String get flutterFoundButUnsupportedDevices=> 'The following devices were found, but are not supported by this project:';
+  String flutterMissPlatformProject(List<String> unsupportedDevicesType) =>
+          'If you would like your app to run on ${unsupportedDevicesType.join(' or ')}, consider running `flutter create .` to generate projects for these platforms.';
+  String get flutterFoundButUnsupportedDevices => 'The following devices were found, but are not supported by this project:';
   String flutterFoundSpecifiedDevices(int count, String deviceId) =>
       'Found $count devices with name or id matching $deviceId:';
   String get flutterSpecifyDeviceWithAllOption =>

@@ -286,7 +286,6 @@ void main() {
           testLogger.statusText,
           containsIgnoringWhitespace(
             userMessages.flutterMissPlatformProject(
-              fs.path.current,
               Device.devicesPlatformTypes(<Device>[mockDevice]),
             ),
           ),

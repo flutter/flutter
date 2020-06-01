@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -36,6 +37,17 @@ void main() {
       AndroidSdk: () => null,
       DeviceManager: () => DeviceManager(),
       ProcessManager: () => MockProcessManager(),
+    });
+
+    testUsingContext('get devices\' platform types', () async {
+      final List<String> platformTypes = Device.devicesPlatformTypes(await deviceManager.getAllConnectedDevices());
+      expect(
+        platformTypes,
+        <String>['android', 'web']
+      );
+    }, overrides: <Type, Generator>{
+          DeviceManager: () => _FakeDeviceManager(),
+          ProcessManager: () => MockProcessManager(),
     });
 
     testUsingContext('Outputs parsable JSON with --machine flag', () async {
