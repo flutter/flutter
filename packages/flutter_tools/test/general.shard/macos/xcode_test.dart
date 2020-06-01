@@ -363,7 +363,6 @@ void main() {
           expect(logger.traceText, contains("Xcode not found. Run 'flutter doctor' for more information."));
         });
 
-
         testUsingContext('relays events', () async {
           when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
           fakeProcessManager.addCommand(const FakeCommand(
@@ -405,7 +404,7 @@ void main() {
           });
           await attach.future;
           await detach.future;
-          expect(logger.traceText, contains('Some error'));
+          expect(logger.traceText, contains('xcdevice observe error: Some error'));
         });
       });
 

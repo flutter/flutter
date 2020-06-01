@@ -349,10 +349,10 @@ class XCDevice {
         ],
       );
 
-      _deviceObservationProcess.stdout
+      final StreamSubscription<String> stdoutSubscription = _deviceObservationProcess.stdout
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
-        .listen((String line) async {
+        .listen((String line) {
 
         // xcdevice observe example output of UDIDs:
         //
@@ -375,13 +375,17 @@ class XCDevice {
           }
         }
       });
-      _deviceObservationProcess.stderr
+      final StreamSubscription<String> stderrSubscription = _deviceObservationProcess.stderr
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
         .listen((String line) {
         _logger.printTrace('xcdevice observe error: $line');
       });
-      unawaited(_deviceObservationProcess.exitCode.whenComplete(() async {
+      unawaited(_deviceObservationProcess.exitCode.then((int status) {
+        _logger.printTrace('xcdevice exited with code $exitCode');
+        unawaited(stdoutSubscription.cancel());
+        unawaited(stderrSubscription.cancel());
+      }).whenComplete(() async {
         if (_deviceIdentifierByEvent.hasListener) {
           // Tell listeners the process died.
           await _deviceIdentifierByEvent.close();
@@ -391,10 +395,10 @@ class XCDevice {
         // Reopen it so new listeners can resume polling.
         _setupDeviceIdentifierByEventStream();
       }));
-    } on ProcessException catch (exception) {
-      _deviceIdentifierByEvent.addError(exception);
-    } on ArgumentError catch (exception) {
-      _deviceIdentifierByEvent.addError(exception);
+    } on ProcessException catch (exception, stackTrace) {
+      _deviceIdentifierByEvent.addError(exception, stackTrace);
+    } on ArgumentError catch (exception, stackTrace) {
+      _deviceIdentifierByEvent.addError(exception, stackTrace);
     }
   }
 

@@ -79,11 +79,11 @@ class IOSDevices extends PollingDeviceDiscovery {
     _observedDeviceEventsSubscription = _xcdevice.observedDeviceEvents().listen(
       _onDeviceEvent,
       onError: (dynamic error, StackTrace stack) {
-        _logger.printTrace('Process exception running xcdevice observe:\n$error');
+        _logger.printTrace('Process exception running xcdevice observe:\n$error\n$stack');
       }, onDone: () {
         // If xcdevice is killed or otherwise dies, polling will be stopped.
         // No retry is attempted and the polling client will have to restart polling
-        // (restart the browser). Avoid hammering on a process that is
+        // (restart the IDE). Avoid hammering on a process that is
         // continuously failing.
         _logger.printTrace('xcdevice observe stopped');
       },
