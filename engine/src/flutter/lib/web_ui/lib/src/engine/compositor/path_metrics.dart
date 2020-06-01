@@ -7,120 +7,97 @@ part of engine;
 
 class SkPathMetrics extends IterableBase<ui.PathMetric>
     implements ui.PathMetrics {
-  SkPathMetrics(SkPath path, bool forceClosed)
-      : _iterator = SkPathMetricIterator._(_SkPathMeasure(path, forceClosed));
+  SkPathMetrics(this._path, this._forceClosed);
 
-  final Iterator<ui.PathMetric> _iterator;
+  final SkPath _path;
+  final bool _forceClosed;
 
+  /// The [SkPath.isEmpty] case is special-cased to avoid booting the WASM machinery just to find out there are no contours.
   @override
-  Iterator<ui.PathMetric> get iterator => _iterator;
+  Iterator<ui.PathMetric> get iterator => _path.isEmpty ? const SkPathMetricIteratorEmpty._() : SkContourMeasureIter(_path, _forceClosed);
 }
 
-class SkPathMetricIterator implements Iterator<ui.PathMetric> {
-  SkPathMetricIterator._(this._pathMeasure) : assert(_pathMeasure != null);
+class SkContourMeasureIter implements Iterator<ui.PathMetric> {
+  /// Cached constructor function for `SkContourMeasureIter`, so we don't have to look it
+  /// up every time we're constructing a new instance.
+  static final js.JsFunction _skContourMeasureIterConstructor = canvasKit['SkContourMeasureIter'];
 
-  _SkPathMetric _pathMetric;
-  _SkPathMeasure _pathMeasure;
+  SkContourMeasureIter(SkPath path, bool forceClosed)
+    : _skObject = js.JsObject(_skContourMeasureIterConstructor, <dynamic>[
+        path._skPath,
+        forceClosed,
+        1,
+      ]);
+
+  /// The JavaScript `SkContourMeasureIter` object.
+  final js.JsObject _skObject;
+
+  /// A monotonically increasing counter used to generate [ui.PathMetric.contourIndex].
+  ///
+  /// CanvasKit does not supply the contour index. We have to add it ourselves.
+  int _contourIndexCounter = 0;
 
   @override
-  ui.PathMetric get current => _pathMetric;
+  ui.PathMetric get current => _current;
+  SkContourMeasure _current;
 
   @override
   bool moveNext() {
-    if (_pathMeasure._nextContour()) {
-      _pathMetric = _SkPathMetric._(_pathMeasure);
-      return true;
+    final js.JsObject skContourMeasure = _skObject.callMethod('next');
+    if (skContourMeasure == null) {
+      _current = null;
+      return false;
     }
-    _pathMetric = null;
-    return false;
+
+    _current = SkContourMeasure(_contourIndexCounter, skContourMeasure);
+    _contourIndexCounter += 1;
+    return true;
   }
 }
 
-class _SkPathMetric implements ui.PathMetric {
-  _SkPathMetric._(this._measure)
-      : assert(_measure != null),
-        length = _measure.length(_measure.currentContourIndex),
-        isClosed = _measure.isClosed(_measure.currentContourIndex),
-        contourIndex = _measure.currentContourIndex;
+class SkContourMeasure implements ui.PathMetric {
+  SkContourMeasure(this.contourIndex, this._skObject);
 
-  @override
-  final double length;
-
-  @override
-  final bool isClosed;
+  final js.JsObject _skObject;
 
   @override
   final int contourIndex;
 
-  final _SkPathMeasure _measure;
+  @override
+  ui.Path extractPath(double start, double end, {bool startWithMoveTo = true}) {
+    final js.JsObject skPath = _skObject
+        .callMethod('getSegment', <dynamic>[start, end, startWithMoveTo]);
+    return SkPath._fromSkPath(skPath);
+  }
 
   @override
   ui.Tangent getTangentForOffset(double distance) {
-    return _measure.getTangentForOffset(contourIndex, distance);
-  }
-
-  @override
-  ui.Path extractPath(double start, double end, {bool startWithMoveTo = true}) {
-    return _measure.extractPath(contourIndex, start, end,
-        startWithMoveTo: startWithMoveTo);
-  }
-
-  @override
-  String toString() => 'PathMetric{length: $length, isClosed: $isClosed, '
-      'contourIndex: $contourIndex}';
-}
-
-class _SkPathMeasure {
-  _SkPathMeasure(SkPath path, bool forceClosed) {
-    currentContourIndex = -1;
-    pathMeasure = js.JsObject(canvasKit['SkPathMeasure'], <dynamic>[
-      path._skPath,
-      forceClosed,
-      1,
-    ]);
-  }
-
-  js.JsObject pathMeasure;
-
-  double length(int contourIndex) {
-    assert(contourIndex == currentContourIndex,
-        'PathMetrics are invalid if it is not the current contour.');
-    return pathMeasure.callMethod('getLength');
-  }
-
-  ui.Tangent getTangentForOffset(int contourIndex, double distance) {
-    assert(contourIndex == currentContourIndex,
-        'PathMetrics are invalid if it is not the current contour.');
-    final js.JsObject posTan =
-        pathMeasure.callMethod('getPosTan', <double>[distance]);
+    final js.JsObject posTan = _skObject.callMethod('getPosTan', <double>[distance]);
     return ui.Tangent(
       ui.Offset(posTan[0], posTan[1]),
       ui.Offset(posTan[2], posTan[3]),
     );
   }
 
-  ui.Path extractPath(int contourIndex, double start, double end,
-      {bool startWithMoveTo = true}) {
-    assert(contourIndex == currentContourIndex,
-        'PathMetrics are invalid if it is not the current contour.');
-    final js.JsObject skPath = pathMeasure
-        .callMethod('getSegment', <dynamic>[start, end, startWithMoveTo]);
-    return SkPath._fromSkPath(skPath);
+  @override
+  bool get isClosed {
+    return _skObject.callMethod('isClosed');
   }
 
-  bool isClosed(int contourIndex) {
-    assert(contourIndex == currentContourIndex,
-        'PathMetrics are invalid if it is not the current contour.');
-    return pathMeasure.callMethod('isClosed');
+  @override
+  double get length {
+    return _skObject.callMethod('length');
   }
+}
 
-  bool _nextContour() {
-    final bool next = pathMeasure.callMethod('nextContour');
-    if (next) {
-      currentContourIndex++;
-    }
-    return next;
+class SkPathMetricIteratorEmpty implements Iterator<ui.PathMetric> {
+  const SkPathMetricIteratorEmpty._();
+
+  @override
+  ui.PathMetric get current => null;
+
+  @override
+  bool moveNext() {
+    return false;
   }
-
-  int currentContourIndex;
 }

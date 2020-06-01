@@ -1,3 +1,6 @@
+# Build configuration used by HTML (non-CanvasKit) tests.
+#
+# See also `build.canvaskit.yaml`.
 targets:
   $default:
     builders:
@@ -12,4 +15,4 @@ targets:
             - test/**.dart
           exclude:
             - test/**vm_test.dart
-
+            - test/canvaskit/**.dart
