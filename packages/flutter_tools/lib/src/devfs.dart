@@ -209,8 +209,8 @@ class DevFSException implements Exception {
   final StackTrace stackTrace;
 }
 
-class DevFSHttpWriter {
-  DevFSHttpWriter(
+class _DevFSHttpWriter {
+  _DevFSHttpWriter(
     this.fsName,
     vm_service.VmService serviceProtocol, {
     @required OperatingSystemUtils osUtils,
@@ -345,7 +345,7 @@ class DevFS {
   }) : _vmService = serviceProtocol,
        _logger = logger,
        _fileSystem = fileSystem,
-       _httpWriter = DevFSHttpWriter(
+       _httpWriter = _DevFSHttpWriter(
         fsName,
         serviceProtocol,
         osUtils: osUtils,
@@ -356,7 +356,7 @@ class DevFS {
       );
 
   final vm_service.VmService _vmService;
-  final DevFSHttpWriter _httpWriter;
+  final _DevFSHttpWriter _httpWriter;
   final Logger _logger;
   final FileSystem _fileSystem;
 
