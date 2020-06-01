@@ -13,6 +13,7 @@ import 'debug.dart';
 import 'feedback.dart';
 import 'ink_highlight.dart';
 import 'material.dart';
+import 'material_state.dart';
 import 'theme.dart';
 
 /// An ink feature that displays a [color] "splash" in response to a user
@@ -296,7 +297,7 @@ class InkResponse extends StatelessWidget {
     this.onLongPress,
     this.onHighlightChanged,
     this.onHover,
-    this.mouseCursor = MouseCursor.defer,
+    this.mouseCursor = SystemMouseCursors.click,
     this.containedInkWell = false,
     this.highlightShape = BoxShape.circle,
     this.radius,
@@ -367,8 +368,17 @@ class InkResponse extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// The [cursor] defaults to [MouseCursor.defer], deferring the choice of
-  /// cursor to the next region behing it in hit-test order.
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
+  /// When [value] is null and [tristate] is true, [MaterialState.selected] is
+  /// included as a state.
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
   final MouseCursor mouseCursor;
 
   /// Whether this ink response should be clipped its bounds.
@@ -1025,6 +1035,14 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       _highlights[type]?.color = getHighlightColorForType(type);
     }
     _currentSplash?.color = widget.splashColor ?? Theme.of(context).splashColor;
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+      <MaterialState>{
+        if (!enabled) MaterialState.disabled,
+        if (_hovering) MaterialState.hovered,
+        if (_hasFocus) MaterialState.focused,
+      },
+    );
     return _ParentInkResponseProvider(
       state: this,
       child: Actions(
@@ -1035,7 +1053,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           onFocusChange: _handleFocusUpdate,
           autofocus: widget.autofocus,
           child: MouseRegion(
-            cursor: widget.mouseCursor,
+            cursor: effectiveMouseCursor,
             onEnter: enabled ? _handleMouseEnter : null,
             onExit: enabled ? _handleMouseExit : null,
             child: GestureDetector(
@@ -1160,7 +1178,7 @@ class InkWell extends InkResponse {
     GestureTapCancelCallback onTapCancel,
     ValueChanged<bool> onHighlightChanged,
     ValueChanged<bool> onHover,
-    MouseCursor mouseCursor = MouseCursor.defer,
+    MouseCursor mouseCursor = SystemMouseCursors.click,
     Color focusColor,
     Color hoverColor,
     Color highlightColor,
