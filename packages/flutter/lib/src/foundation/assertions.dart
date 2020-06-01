@@ -750,7 +750,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///           ErrorHint('Draconis is currently not alive.'),
   ///         if (!draconisAmulet)
   ///           ErrorHint('The Amulet of Draconis is currently not wielded.'),
-  ///         draconis.toDiagnosticsNode('Draconis'),
+  ///         draconis.toDiagnosticsNode(name: 'Draconis'),
   ///       ]);
   ///     }
   ///     return true;
