@@ -182,8 +182,10 @@ G_MODULE_EXPORT void fl_basic_message_channel_set_message_handler(
 
   // Don't set handler if channel closed
   if (self->channel_closed) {
-    g_warning(
-        "Attempted to set message handler on closed FlBasicMessageChannel");
+    if (handler != nullptr) {
+      g_warning(
+          "Attempted to set message handler on a closed FlBasicMessageChannel");
+    }
     if (destroy_notify != nullptr)
       destroy_notify(user_data);
     return;

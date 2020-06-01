@@ -140,7 +140,10 @@ G_MODULE_EXPORT void fl_method_channel_set_method_call_handler(
 
   // Don't set handler if channel closed
   if (self->channel_closed) {
-    g_warning("Attempted to set method call handler on closed FlMethodChannel");
+    if (handler != nullptr) {
+      g_warning(
+          "Attempted to set method call handler on a closed FlMethodChannel");
+    }
     if (destroy_notify != nullptr)
       destroy_notify(user_data);
     return;
