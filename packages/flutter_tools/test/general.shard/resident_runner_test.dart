@@ -521,6 +521,14 @@ void main() {
     expect(otherRunner.artifactDirectory.path, contains('foobar'));
   }));
 
+  test('ResidentRunner deletes artifact directory on preExit', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    residentRunner.artifactDirectory.childFile('app.dill').createSync();
+    await residentRunner.preExit();
+
+    expect(residentRunner.artifactDirectory, isNot(exists));
+  }));
+
   test('ResidentRunner can run source generation', () => testbed.run(() async {
     final FakeProcessManager processManager = globals.processManager as FakeProcessManager;
     final Directory dependencies = globals.fs.directory(

@@ -1218,7 +1218,13 @@ abstract class ResidentRunner {
   }
 
   @mustCallSuper
-  Future<void> preExit() async { }
+  Future<void> preExit() async {
+    // If _dillOutputPath is null, the tool created a temporary directory for
+    // the dill.
+    if (_dillOutputPath == null && artifactDirectory.existsSync()) {
+      artifactDirectory.deleteSync(recursive: true);
+    }
+  }
 
   Future<void> exitApp() async {
     final List<Future<void>> futures = <Future<void>>[
