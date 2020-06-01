@@ -40,7 +40,7 @@ void CanvasImage::dispose() {
   ClearDartWrapper();
 }
 
-size_t CanvasImage::GetAllocationSize() {
+size_t CanvasImage::GetAllocationSize() const {
   if (auto image = image_.get()) {
     const auto& info = image->imageInfo();
     const auto kMipmapOverhead = 4.0 / 3.0;

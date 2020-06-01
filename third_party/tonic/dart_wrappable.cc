@@ -77,7 +77,7 @@ void DartWrappable::FinalizeDartWrapper(void* isolate_callback_data,
   wrappable->ReleaseDartWrappableReference();  // Balanced in CreateDartWrapper.
 }
 
-size_t DartWrappable::GetAllocationSize() {
+size_t DartWrappable::GetAllocationSize() const {
   return GetDartWrapperInfo().size_in_bytes;
 }
 

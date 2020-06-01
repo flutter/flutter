@@ -18,7 +18,7 @@ EngineLayer::EngineLayer(std::shared_ptr<flutter::ContainerLayer> layer)
 
 EngineLayer::~EngineLayer() = default;
 
-size_t EngineLayer::GetAllocationSize() {
+size_t EngineLayer::GetAllocationSize() const {
   // Provide an approximation of the total memory impact of this object to the
   // Dart GC.  The ContainerLayer may hold references to a tree of other layers,
   // which in turn may contain Skia objects.
