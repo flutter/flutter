@@ -20,6 +20,9 @@ compile_platform("kernel_platform_files") {
   ]
 
   args = [
+    "--enable-experiment=non-nullable",
+    "--nnbd-weak",
+
     # TODO(dartbug.com/36342): enable bytecode for core libraries when performance of bytecode
     # pipeline is on par with default pipeline and continuously tracked.
     # "--bytecode",
