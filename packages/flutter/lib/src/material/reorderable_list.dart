@@ -213,7 +213,7 @@ class _ReorderableListContent extends StatefulWidget {
     @required this.onReorder,
     @required this.reverse,
 <<<<<<< HEAD
-    @required this.physics
+    @required this.physics,
 =======
     @required this.physics,
 >>>>>>> cd783729d... add physics property to reorderable list
