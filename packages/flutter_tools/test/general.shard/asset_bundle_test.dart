@@ -429,6 +429,9 @@ flutter:
     expect(await bundle.build(manifestPath: 'pubspec.yaml'), 0);
     expect((bundle.entries['FontManifest.json'] as DevFSStringContent).string, '[]');
     expect((bundle.entries['AssetManifest.json'] as DevFSStringContent).string, '{}');
+    expect(testLogger.errorText, contains(
+      'package:foo has `uses-material-design: true` set'
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
