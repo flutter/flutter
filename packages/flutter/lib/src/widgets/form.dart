@@ -76,11 +76,6 @@ class Form extends StatefulWidget {
   const Form({
     Key key,
     @required this.child,
-    @Deprecated(
-      'Use autoValidateMode parameter which provide more specific '
-      'behaviour related to auto validation. '
-      'This feature was deprecated after v1.19.0.'
-    )
     // ignore: deprecated_member_use_from_same_package
     this.autovalidate = false,
     this.onWillPop,
@@ -114,11 +109,6 @@ class Form extends StatefulWidget {
   /// If true, form fields will validate and update their error text
   /// immediately after every change. Otherwise, you must call
   /// [FormState.validate] to validate.
-  @Deprecated(
-    'Use autoValidateMode parameter which provide more specific '
-    'behaviour related to auto validation. '
-    'This feature was deprecated after v1.19.0.'
-  )
   final bool autovalidate;
 
   /// Enables the form to veto attempts by the user to dismiss the [ModalRoute]
@@ -367,11 +357,6 @@ class FormField<T> extends StatefulWidget {
   /// immediately after every change. Otherwise, you must call
   /// [FormFieldState.validate] to validate. If part of a [Form] that
   /// auto-validates, this value will be ignored.
-  @Deprecated(
-    'Use autoValidateMode parameter which provide more specific '
-    'behaviour related to auto validation. '
-    'This feature was deprecated after v1.19.0.'
-  )
   final bool autovalidate;
 
   /// Whether the form is able to receive user input.
