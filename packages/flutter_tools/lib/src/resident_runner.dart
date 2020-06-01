@@ -39,6 +39,8 @@ import 'run_cold.dart';
 import 'run_hot.dart';
 import 'vmservice.dart';
 
+typedef PrintErrorEventMethod = void Function(vm_service.Event);
+
 class FlutterDevice {
   FlutterDevice(
     this.device, {
@@ -186,6 +188,7 @@ class FlutterDevice {
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
+    PrintErrorEventMethod printErrorEventMethod,
   }) {
     final Completer<void> completer = Completer<void>();
     StreamSubscription<void> subscription;
@@ -219,14 +222,9 @@ class FlutterDevice {
       } on Exception catch (exception) {
         globals.printTrace('Fail to listen to extension stream: $observatoryUri: $exception');
       }
-      service.onExtensionEvent.listen((vm_service.Event event) {
-        if (event.extensionKind == 'Flutter.Error') {
-          final Map<dynamic, dynamic> json = event.extensionData?.data;
-          if (json != null && json.containsKey('renderedErrorText')) {
-            globals.printStatus('\n' + json['renderedErrorText'].toString());
-          }
-        }
-      });
+      if (printErrorEventMethod != null) {
+        service.onExtensionEvent.listen(printErrorEventMethod);
+      }
       if (completer.isCompleted) {
         return;
       }
@@ -1105,8 +1103,20 @@ abstract class ResidentRunner {
       final String copyPath = getDefaultCachedKernelPath(
         trackWidgetCreation: trackWidgetCreation,
       );
-      globals.fs.file(copyPath).parent.createSync(recursive: true);
+      globals.fs
+          .file(copyPath)
+          .parent
+          .createSync(recursive: true);
       outputDill.copySync(copyPath);
+    }
+  }
+
+  void printErrorEvent(vm_service.Event event) {
+    if (event.extensionKind == 'Flutter.Error') {
+      final Map<dynamic, dynamic> json = event.extensionData?.data;
+      if (json != null && json.containsKey('renderedErrorText')) {
+        globals.printStatus('\n' + json['renderedErrorText'].toString());
+      }
     }
   }
 
@@ -1134,7 +1144,8 @@ abstract class ResidentRunner {
         restart: restart,
         compileExpression: compileExpression,
         reloadMethod: reloadMethod,
-        getSkSLMethod: getSkSLMethod
+        getSkSLMethod: getSkSLMethod,
+        printErrorEventMethod: printErrorEvent,
       );
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(
