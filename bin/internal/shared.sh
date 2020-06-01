@@ -44,6 +44,8 @@ function _rmlock () {
 function _lock () {
   if hash flock 2>/dev/null; then
     flock --nonblock --exclusive 7 2>/dev/null
+  elif hash shlock 2>/dev/null; then
+    shlock -f "$1" -p $$
   else
     mkdir "$1" 2>/dev/null
   fi
@@ -64,14 +66,20 @@ function _lock () {
 #
 # The first is if the platform doesn't have "flock", for example on macOS. There
 # is not a direct equivalent, so on platforms that don't have flock, we fall
-# back to using mkdir as an atomic operation to create a lock directory. If
-# mkdir is able to create the directory, then the lock is acquired. To determine
-# if we have "flock" available, we use the "hash" shell built-in.
+# back to using trying to use the shlock command, and if that doesn't exist,
+# then we use mkdir as an atomic operation to create a lock directory. If mkdir
+# is able to create the directory, then the lock is acquired. To determine if we
+# have "flock" or "shlock" available, we use the "hash" shell built-in.
 #
-# The second complication is NFS. On NFS, to obtain an exclusive lock you need a
-# file descriptor that is open for writing. Thus, we ignore errors from flock by
-# redirecting all output to /dev/null, since users will typically not care about
-# errors from flock and are more likely to be confused by them than helped.
+# The second complication is on network file shares. On NFS, to obtain an
+# exclusive lock you need a file descriptor that is open for writing. Thus, we
+# ignore errors from flock by redirecting all output to /dev/null, since users
+# will typically not care about errors from flock and are more likely to be
+# confused by them than helped. The "shlock" method doesn't work for network
+# shares, since it is PID-based. The "mkdir" method does work over NFS
+# implementations that support atomic directory creation (which is most of
+# them). The "schlock" and "flock" commands are more reliable than the mkdir
+# method, however, or we would use mkdir in all cases.
 #
 # The upgrade_flutter function calling _wait_for_lock is executed in a subshell
 # with a redirect that pipes the source of this script into file descriptor 7.
