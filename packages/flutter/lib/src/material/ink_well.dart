@@ -297,7 +297,7 @@ class InkResponse extends StatelessWidget {
     this.onLongPress,
     this.onHighlightChanged,
     this.onHover,
-    this.mouseCursor = SystemMouseCursors.click,
+    this.mouseCursor,
     this.containedInkWell = false,
     this.highlightShape = BoxShape.circle,
     this.radius,
@@ -314,8 +314,7 @@ class InkResponse extends StatelessWidget {
     this.canRequestFocus = true,
     this.onFocusChange,
     this.autofocus = false,
-  }) : assert(mouseCursor != null),
-       assert(containedInkWell != null),
+  }) : assert(containedInkWell != null),
        assert(highlightShape != null),
        assert(enableFeedback != null),
        assert(excludeFromSemantics != null),
@@ -611,7 +610,7 @@ class _InkResponseStateWidget extends StatefulWidget {
     this.onLongPress,
     this.onHighlightChanged,
     this.onHover,
-    this.mouseCursor = MouseCursor.defer,
+    this.mouseCursor,
     this.containedInkWell = false,
     this.highlightShape = BoxShape.circle,
     this.radius,
@@ -636,8 +635,7 @@ class _InkResponseStateWidget extends StatefulWidget {
        assert(enableFeedback != null),
        assert(excludeFromSemantics != null),
        assert(autofocus != null),
-       assert(canRequestFocus != null),
-       assert(mouseCursor != null);
+       assert(canRequestFocus != null);
 
   final Widget child;
   final GestureTapCallback onTap;
@@ -682,7 +680,7 @@ class _InkResponseStateWidget extends StatefulWidget {
       if (onTapCancel != null) 'tap cancel',
     ];
     properties.add(IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
-    properties.add(DiagnosticsProperty<MouseCursor>('mouseCursor', mouseCursor, defaultValue: MouseCursor.defer));
+    properties.add(DiagnosticsProperty<MouseCursor>('mouseCursor', mouseCursor));
     properties.add(DiagnosticsProperty<bool>('containedInkWell', containedInkWell, level: DiagnosticLevel.fine));
     properties.add(DiagnosticsProperty<BoxShape>(
       'highlightShape',
@@ -1178,7 +1176,7 @@ class InkWell extends InkResponse {
     GestureTapCancelCallback onTapCancel,
     ValueChanged<bool> onHighlightChanged,
     ValueChanged<bool> onHover,
-    MouseCursor mouseCursor = SystemMouseCursors.click,
+    MouseCursor mouseCursor,
     Color focusColor,
     Color hoverColor,
     Color highlightColor,
