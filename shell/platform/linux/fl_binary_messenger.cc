@@ -175,9 +175,11 @@ G_MODULE_EXPORT void fl_binary_messenger_set_message_handler_on_channel(
 
   // Don't set handlers if engine already gone
   if (self->engine == nullptr) {
-    g_warning(
-        "Attempted to set message handler on closed FlBinaryMessenger without "
-        "engine");
+    if (handler != nullptr) {
+      g_warning(
+          "Attempted to set message handler on an FlBinaryMessenger without an "
+          "engine");
+    }
     if (destroy_notify != nullptr)
       destroy_notify(user_data);
     return;
