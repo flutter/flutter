@@ -263,15 +263,13 @@ class InteractiveViewer extends StatefulWidget {
   /// }
   ///
   /// void _animateResetInitialize() {
-  ///   setState(() {
-  ///     _controllerReset.reset();
-  ///     _animationReset = Matrix4Tween(
-  ///       begin: _transformationController.value,
-  ///       end: Matrix4.identity(),
-  ///     ).animate(_controllerReset);
-  ///     _animationReset.addListener(_onAnimateReset);
-  ///     _controllerReset.forward();
-  ///   });
+  ///   _controllerReset.reset();
+  ///   _animationReset = Matrix4Tween(
+  ///     begin: _transformationController.value,
+  ///     end: Matrix4.identity(),
+  ///   ).animate(_controllerReset);
+  ///   _animationReset.addListener(_onAnimateReset);
+  ///   _controllerReset.forward();
   /// }
   ///
   /// // Stop a running reset to home transform animation.
@@ -358,13 +356,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   TransformationController _transformationController;
 
   final GlobalKey _childKey = GlobalKey();
+  final GlobalKey _parentKey = GlobalKey();
   Animation<Offset> _animation;
   AnimationController _controller;
   Offset _referenceFocalPoint; // Point where the current gesture began.
   double _scaleStart; // Scale value at start of scaling gesture.
   double _rotationStart = 0.0; // Rotation at start of rotation gesture.
   double _currentRotation = 0.0; // Rotation of _transformationController.value.
-  BoxConstraints _constraints;
   _GestureType _gestureType;
 
   // TODO(justinmc): Add rotateEnabled parameter to the widget and remove this
@@ -404,11 +402,9 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // The Rect representing the child's parent.
   Rect get _viewport {
-    assert(_childKey.currentContext != null);
-    final RenderBox childRenderBox = _childKey.currentContext.findRenderObject() as RenderBox;
-    final Size childSize = childRenderBox.size;
-    final Size viewportSize = _constraints.constrain(childSize);
-    return Offset.zero & viewportSize;
+    assert(_parentKey.currentContext != null);
+    final RenderBox parentRenderBox = _parentKey.currentContext.findRenderObject() as RenderBox;
+    return Offset.zero & parentRenderBox.size;
   }
 
   // Return a new matrix representing the given matrix after applying the given
@@ -802,11 +798,28 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     if (widget.child != oldWidget.child || widget.boundaryMargin != oldWidget.boundaryMargin) {
       _boundaryRectCached = null;
     }
-    if (widget.transformationController != null
-        && widget.transformationController != _transformationController) {
-      _transformationController.removeListener(_onTransformationControllerChange);
-      _transformationController = widget.transformationController;
-      _transformationController.addListener(_onTransformationControllerChange);
+
+    // Handle all cases of needing to dispose and initialize
+    // transformationControllers.
+    if (oldWidget.transformationController == null) {
+      if (widget.transformationController != null) {
+        _transformationController.removeListener(_onTransformationControllerChange);
+        _transformationController.dispose();
+        _transformationController = widget.transformationController;
+        _transformationController.addListener(_onTransformationControllerChange);
+      }
+    } else {
+      if (widget.transformationController == null) {
+        _transformationController.removeListener(_onTransformationControllerChange);
+        _transformationController.dispose();
+        _transformationController = TransformationController();
+        _transformationController.addListener(_onTransformationControllerChange);
+      } else if (widget.transformationController != oldWidget.transformationController) {
+        _transformationController.removeListener(_onTransformationControllerChange);
+        _transformationController.dispose();
+        _transformationController = widget.transformationController;
+        _transformationController.addListener(_onTransformationControllerChange);
+      }
     }
   }
 
@@ -846,20 +859,16 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
     // A GestureDetector allows the detection of panning and zooming gestures on
     // the child.
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        _constraints = constraints;
-        return Listener(
-          onPointerSignal: _receivedPointerSignal,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque, // Necessary when panning off screen.
-            onScaleEnd: _onScaleEnd,
-            onScaleStart: _onScaleStart,
-            onScaleUpdate: _onScaleUpdate,
-            child: child,
-          ),
-        );
-      },
+    return Listener(
+      key: _parentKey,
+      onPointerSignal: _receivedPointerSignal,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque, // Necessary when panning off screen.
+        onScaleEnd: _onScaleEnd,
+        onScaleStart: _onScaleStart,
+        onScaleUpdate: _onScaleUpdate,
+        child: child,
+      ),
     );
   }
 }
