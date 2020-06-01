@@ -37,7 +37,7 @@ class DartWrappable {
   // Override this to customize the object size reported to the Dart garbage
   // collector.
   // Implement using IMPLEMENT_WRAPPERTYPEINFO macro
-  virtual size_t GetAllocationSize();
+  virtual size_t GetAllocationSize() const;
 
   virtual void RetainDartWrappableReference() const = 0;
 

@@ -54,7 +54,7 @@ void Picture::dispose() {
   ClearDartWrapper();
 }
 
-size_t Picture::GetAllocationSize() {
+size_t Picture::GetAllocationSize() const {
   if (auto picture = picture_.get()) {
     return picture->approximateBytesUsed();
   } else {
