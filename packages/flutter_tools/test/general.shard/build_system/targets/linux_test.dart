@@ -36,6 +36,11 @@ void main() {
       mode: anyNamed('mode'),
       platform: anyNamed('platform'),
     )).thenReturn('linux-x64/flutter_linux');
+    when(mockArtifacts.getArtifactPath(
+      Artifact.icuData,
+      mode: anyNamed('mode'),
+      platform: anyNamed('platform'),
+    )).thenReturn(r'linux-x64/icudtl.dat');
 
     final Environment testEnvironment = Environment.test(
       fileSystem.currentDirectory,
