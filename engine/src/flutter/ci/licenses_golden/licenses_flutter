@@ -1189,10 +1189,12 @@ FILE: ../../../flutter/shell/platform/glfw/public/flutter_glfw.h
 FILE: ../../../flutter/shell/platform/glfw/text_input_plugin.cc
 FILE: ../../../flutter/shell/platform/glfw/text_input_plugin.h
 FILE: ../../../flutter/shell/platform/linux/fl_basic_message_channel.cc
+FILE: ../../../flutter/shell/platform/linux/fl_basic_message_channel_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_binary_codec.cc
 FILE: ../../../flutter/shell/platform/linux/fl_binary_codec_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_binary_messenger.cc
 FILE: ../../../flutter/shell/platform/linux/fl_binary_messenger_private.h
+FILE: ../../../flutter/shell/platform/linux/fl_binary_messenger_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_dart_project.cc
 FILE: ../../../flutter/shell/platform/linux/fl_dart_project_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_engine.cc
@@ -1209,6 +1211,7 @@ FILE: ../../../flutter/shell/platform/linux/fl_method_call.cc
 FILE: ../../../flutter/shell/platform/linux/fl_method_call_private.h
 FILE: ../../../flutter/shell/platform/linux/fl_method_channel.cc
 FILE: ../../../flutter/shell/platform/linux/fl_method_channel_private.h
+FILE: ../../../flutter/shell/platform/linux/fl_method_channel_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_method_codec.cc
 FILE: ../../../flutter/shell/platform/linux/fl_method_codec_private.h
 FILE: ../../../flutter/shell/platform/linux/fl_method_codec_test.cc

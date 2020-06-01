@@ -24,7 +24,6 @@ template("embedder_source_set") {
   source_set(target_name) {
     sources = [
       "embedder.cc",
-      "embedder.h",
       "embedder_engine.cc",
       "embedder_engine.h",
       "embedder_external_texture_gl.cc",
@@ -75,6 +74,10 @@ template("embedder_source_set") {
       "//third_party/skia",
     ]
 
+    public_deps = [
+      ":embedder_headers",
+    ]
+
     public_configs += [ "//flutter:config" ]
   }
 }
@@ -85,6 +88,14 @@ embedder_source_set("embedder") {
 
 embedder_source_set("embedder_with_symbol_prefix") {
   public_configs = [ ":embedder_prefix_config" ]
+}
+
+source_set("embedder_headers") {
+  public = [
+    "embedder.h",
+  ]
+
+  public_configs = [ "//flutter:config" ]
 }
 
 config("embedder_prefix_config") {
