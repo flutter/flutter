@@ -17,14 +17,14 @@ Future<void> main() async {
     String watchDeviceID;
     String phoneDeviceID;
     final Directory tempDir = Directory.systemTemp
-        .createTempSync('ios_app_with_watch_companion_test');
+        .createTempSync('ios_app_with_extensions_test');
     final Directory projectDir =
-        Directory(path.join(tempDir.path, 'app_with_companion'));
+        Directory(path.join(tempDir.path, 'app_with_extensions'));
     try {
       mkdir(projectDir);
       recursiveCopy(
         Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests',
-            'ios_app_with_watch_companion')),
+            'ios_app_with_extensions')),
         projectDir,
       );
 
