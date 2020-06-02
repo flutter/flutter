@@ -1258,11 +1258,11 @@ class _TabBarViewState extends State<TabBarView> {
 
     if (_controller.index != _currentIndex) {
       _currentIndex = _controller.index;
-      _warpToCurrentIndex();
       if(widget.onTabChanged != null){
         _lastTabReported = _currentIndex;
         widget.onTabChanged(_currentIndex);
       }
+      _warpToCurrentIndex();
     }
   }
 

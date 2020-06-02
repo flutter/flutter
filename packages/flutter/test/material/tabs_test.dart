@@ -2540,4 +2540,43 @@ void main() {
     await tester.pumpAndSettle();
     pageController.removeListener(pageControllerListener);
   });
+
+  testWidgets('onTabChanged responds to TabBar click and Scroll Notifications', (WidgetTester tester) async {
+    const List<Tab> tabs = <Tab>[
+      Tab(text: 'Zeroth'), Tab(text: 'First'), Tab(text: 'Second')
+    ];
+    final List<int> logs = <int>[];
+
+    await tester.pumpWidget(MaterialApp(
+        home: DefaultTabController(
+          length: tabs.length,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: const TabBar(tabs: tabs),
+            ),
+            body: TabBarView(
+              children: tabs.map((Tab tab) => Center(child: Text('${tab.text} Tab'),)).toList(),
+              onTabChanged: (int tabNumber){
+                logs.add(tabNumber);
+              },
+            ),
+          ),
+        )));
+
+    // Initially logs should be empty
+    expect(logs.isEmpty, isTrue);
+
+    // Change the Tab through TabBar
+    await tester.tap(find.text('Second'));
+    await tester.pumpAndSettle();
+
+    expect(logs.first, 2);
+    logs.removeLast();
+
+    // Change the Tab through swipe gesture
+    await tester.fling(find.text('Second Tab'), const Offset(400, 0), 800);
+    await tester.pumpAndSettle();
+
+    expect(logs.first, 1);
+  });
 }
