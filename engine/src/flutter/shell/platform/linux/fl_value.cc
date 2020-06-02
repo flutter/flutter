@@ -92,19 +92,19 @@ static ssize_t fl_value_lookup_index(FlValue* self, FlValue* key) {
   return -1;
 }
 
-// Converts an integer to a string and adds it to the buffer
+// Converts an integer to a string and adds it to the buffer.
 static void int_to_string(int64_t value, GString* buffer) {
   g_string_append_printf(buffer, "%" G_GINT64_FORMAT, value);
 }
 
-// Converts a floating point number to a string and adds it to the buffer
+// Converts a floating point number to a string and adds it to the buffer.
 static void float_to_string(double value, GString* buffer) {
   g_string_append_printf(buffer, "%.16f", value);
 
-  // Strip trailing zeros
+  // Strip trailing zeros.
   int zero_count = 0;
   for (int i = buffer->len - 1; i >= 0; i--) {
-    // Leave one zero after a decimal point
+    // Leave one zero after a decimal point.
     if (buffer->str[i] == '.') {
       zero_count = zero_count == 0 ? 0 : zero_count - 1;
       break;

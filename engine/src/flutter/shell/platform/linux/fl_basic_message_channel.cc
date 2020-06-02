@@ -9,19 +9,19 @@
 struct _FlBasicMessageChannel {
   GObject parent_instance;
 
-  // Messenger to communicate on
+  // Messenger to communicate on.
   FlBinaryMessenger* messenger;
 
-  // TRUE if the channel has been closed
+  // TRUE if the channel has been closed.
   gboolean channel_closed;
 
-  // Channel name
+  // Channel name.
   gchar* name;
 
-  // Codec to en/decode messages
+  // Codec to en/decode messages.
   FlMessageCodec* codec;
 
-  // Function called when a message is received
+  // Function called when a message is received.
   FlBasicMessageChannelMessageHandler message_handler;
   gpointer message_handler_data;
   GDestroyNotify message_handler_destroy_notify;
@@ -33,7 +33,7 @@ struct _FlBasicMessageChannelResponseHandle {
   FlBinaryMessengerResponseHandle* response_handle;
 };
 
-// Added here to stop the compiler from optimising this function away
+// Added here to stop the compiler from optimising this function away.
 G_MODULE_EXPORT GType fl_basic_message_channel_get_type();
 
 G_DEFINE_TYPE(FlBasicMessageChannel, fl_basic_message_channel, G_TYPE_OBJECT)
@@ -73,7 +73,7 @@ fl_basic_message_channel_response_handle_new(
   return self;
 }
 
-// Called when a binary message is received on this channel
+// Called when a binary message is received on this channel.
 static void message_cb(FlBinaryMessenger* messenger,
                        const gchar* channel,
                        GBytes* message,
@@ -102,7 +102,7 @@ static void message_cb(FlBinaryMessenger* messenger,
                         self->message_handler_data);
 }
 
-// Called when a response is received to a sent message
+// Called when a response is received to a sent message.
 static void message_response_cb(GObject* object,
                                 GAsyncResult* result,
                                 gpointer user_data) {
@@ -110,13 +110,13 @@ static void message_response_cb(GObject* object,
   g_task_return_pointer(task, result, g_object_unref);
 }
 
-// Called when the channel handler is closed
+// Called when the channel handler is closed.
 static void channel_closed_cb(gpointer user_data) {
   g_autoptr(FlBasicMessageChannel) self = FL_BASIC_MESSAGE_CHANNEL(user_data);
 
   self->channel_closed = TRUE;
 
-  // Disconnect handler
+  // Disconnect handler.
   if (self->message_handler_destroy_notify != nullptr)
     self->message_handler_destroy_notify(self->message_handler_data);
   self->message_handler = nullptr;
@@ -180,7 +180,7 @@ G_MODULE_EXPORT void fl_basic_message_channel_set_message_handler(
     GDestroyNotify destroy_notify) {
   g_return_if_fail(FL_IS_BASIC_MESSAGE_CHANNEL(self));
 
-  // Don't set handler if channel closed
+  // Don't set handler if channel closed.
   if (self->channel_closed) {
     if (handler != nullptr) {
       g_warning(

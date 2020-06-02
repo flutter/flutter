@@ -10,9 +10,9 @@
 #include <gmodule.h>
 
 // See lib/src/services/message_codecs.dart in Flutter source for description of
-// encoding
+// encoding.
 
-// Envelope codes
+// Envelope codes.
 static constexpr guint8 kEnvelopeTypeSuccess = 0;
 static constexpr guint8 kEnvelopeTypeError = 1;
 
@@ -34,7 +34,7 @@ static void fl_standard_method_codec_dispose(GObject* object) {
   G_OBJECT_CLASS(fl_standard_method_codec_parent_class)->dispose(object);
 }
 
-// Implements FlMethodCodec::encode_method_code
+// Implements FlMethodCodec::encode_method_call.
 static GBytes* fl_standard_method_codec_encode_method_call(FlMethodCodec* codec,
                                                            const gchar* name,
                                                            FlValue* args,
@@ -53,7 +53,7 @@ static GBytes* fl_standard_method_codec_encode_method_call(FlMethodCodec* codec,
       static_cast<GByteArray*>(g_steal_pointer(&buffer)));
 }
 
-// Implements FlMethodCodec::decode_method_code
+// Implements FlMethodCodec::decode_method_call.
 static gboolean fl_standard_method_codec_decode_method_call(
     FlMethodCodec* codec,
     GBytes* message,
@@ -90,7 +90,7 @@ static gboolean fl_standard_method_codec_decode_method_call(
   return TRUE;
 }
 
-// Implements FlMethodCodec::encode_success_envelope
+// Implements FlMethodCodec::encode_success_envelope.
 static GBytes* fl_standard_method_codec_encode_success_envelope(
     FlMethodCodec* codec,
     FlValue* result,
@@ -108,7 +108,7 @@ static GBytes* fl_standard_method_codec_encode_success_envelope(
       static_cast<GByteArray*>(g_steal_pointer(&buffer)));
 }
 
-// Implements FlMethodCodec::encode_error_envelope
+// Implements FlMethodCodec::encode_error_envelope.
 static GBytes* fl_standard_method_codec_encode_error_envelope(
     FlMethodCodec* codec,
     const gchar* code,
@@ -137,7 +137,7 @@ static GBytes* fl_standard_method_codec_encode_error_envelope(
       static_cast<GByteArray*>(g_steal_pointer(&buffer)));
 }
 
-// Implements FlMethodCodec::encode_decode_reponse
+// Implements FlMethodCodec::encode_decode_reponse.
 static FlMethodResponse* fl_standard_method_codec_decode_response(
     FlMethodCodec* codec,
     GBytes* message,
@@ -150,7 +150,7 @@ static FlMethodResponse* fl_standard_method_codec_decode_response(
     return nullptr;
   }
 
-  // First byte is response type
+  // First byte is response type.
   const guint8* data =
       static_cast<const guint8*>(g_bytes_get_data(message, nullptr));
   guint8 type = data[0];
