@@ -63,6 +63,7 @@ class DeviceReloadReport {
   List<vm_service.ReloadReport> reports; // List has one report per Flutter view.
 }
 
+// TODO(mklim): Test this, flutter/flutter#23031.
 class HotRunner extends ResidentRunner {
   HotRunner(
     List<FlutterDevice> devices, {
@@ -387,7 +388,6 @@ class HotRunner extends ResidentRunner {
       if (!results.every((bool passed) => passed)) {
         return 1;
       }
-      cacheInitialDillCompilation();
     } on Exception catch (err) {
       globals.printError(err.toString());
       return 1;
