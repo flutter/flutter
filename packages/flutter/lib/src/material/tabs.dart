@@ -1168,6 +1168,12 @@ class TabBarView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// This is called every time the tab is changed either through scroll or
+  /// tapping on [Tab].
+  ///
+  /// The `onTabChanged` can be used with [DefaultTabController] to listen to
+  /// tab changes. When defining a explicit [TabController] for [TabBar],
+  /// you can listening to changes with the help of `TabController.addListener()`.
   final ValueChanged<int> onTabChanged;
 
   @override
