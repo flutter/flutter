@@ -50,15 +50,7 @@ void main () {
         memoryFileSystem = MemoryFileSystem();
         mockXcode = MockXcode();
         xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
-
-        testLogger = BufferLogger(
-          terminal: AnsiTerminal(
-            stdio: null,
-            platform: const LocalPlatform(),
-          ),
-          outputPreferences: OutputPreferences.test(),
-        );
-
+        testLogger = BufferLogger.test();
         mockIosProject = MockIosProject();
         when(mockIosProject.xcodeProjectInfoFile).thenReturn(xcodeProjectInfoFile);
       });
@@ -269,15 +261,7 @@ keep this 2
       setUp(() {
         memoryFileSystem = MemoryFileSystem();
         xcodeWorkspaceSharedSettings = memoryFileSystem.file('WorkspaceSettings.xcsettings');
-
-        testLogger = BufferLogger(
-          terminal: AnsiTerminal(
-            stdio: null,
-            platform: const LocalPlatform(),
-          ),
-          outputPreferences: OutputPreferences.test(),
-        );
-
+        testLogger = BufferLogger.test();
         mockIosProject = MockIosProject();
         when(mockIosProject.xcodeWorkspaceSharedSettings).thenReturn(xcodeWorkspaceSharedSettings);
       });
@@ -349,15 +333,7 @@ keep this 2
       setUp(() {
         memoryFileSystem = MemoryFileSystem();
         xcodeProjectWorkspaceData = memoryFileSystem.file('contents.xcworkspacedata');
-
-        testLogger = BufferLogger(
-          terminal: AnsiTerminal(
-            stdio: null,
-            platform: const LocalPlatform(),
-          ),
-          outputPreferences: OutputPreferences.test(),
-        );
-
+        testLogger = BufferLogger.test();
         mockIosProject = MockIosProject();
         when(mockIosProject.xcodeProjectWorkspaceData).thenReturn(xcodeProjectWorkspaceData);
       });
@@ -423,8 +399,9 @@ keep this 2
     <FileRef
       location = "self:Pods/Pods.xcodeproj">
     </FileRef>
- </Workspace>''');
-        expect(testLogger.statusText, contains('Legacy build location detected, removing.'));
+ </Workspace>
+''');
+        expect(testLogger.statusText, contains('Upgrading contents.xcworkspacedata'));
       });
     });
 
@@ -437,15 +414,7 @@ keep this 2
       setUp(() {
         memoryFileSystem = MemoryFileSystem();
         xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
-
-        testLogger = BufferLogger(
-          terminal: AnsiTerminal(
-            stdio: null,
-            platform: const LocalPlatform(),
-          ),
-          outputPreferences: OutputPreferences.test(),
-        );
-
+        testLogger = BufferLogger.test();
         mockIosProject = MockIosProject();
         when(mockIosProject.xcodeProjectInfoFile).thenReturn(xcodeProjectInfoFile);
       });

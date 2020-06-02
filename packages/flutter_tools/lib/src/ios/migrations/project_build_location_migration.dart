@@ -24,17 +24,15 @@ class ProjectBuildLocationMigration extends IOSMigrator {
       return true;
     }
 
-    final String contents = _xcodeProjectWorkspaceData.readAsStringSync();
+    processFileLines(_xcodeProjectWorkspaceData);
+    return true;
+  }
 
+  @override
+  String migrateLine(String line) {
     const String legacyBuildLocation = 'location = "group:';
     const String defaultBuildLocation = 'location = "self:';
 
-    final String newContents = contents.replaceAll(legacyBuildLocation, defaultBuildLocation);
-    if (contents != newContents) {
-      logger.printStatus('Legacy build location detected, removing.');
-      _xcodeProjectWorkspaceData.writeAsStringSync(newContents.toString());
-    }
-
-    return true;
+    return line.replaceAll(legacyBuildLocation, defaultBuildLocation);
   }
 }
