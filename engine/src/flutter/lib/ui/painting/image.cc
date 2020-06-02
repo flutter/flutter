@@ -38,6 +38,7 @@ Dart_Handle CanvasImage::toByteData(int format, Dart_Handle callback) {
 
 void CanvasImage::dispose() {
   ClearDartWrapper();
+  image_.reset();
 }
 
 size_t CanvasImage::GetAllocationSize() const {

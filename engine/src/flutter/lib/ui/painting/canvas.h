@@ -170,6 +170,8 @@ class Canvas : public RefCountedDartWrappable<Canvas> {
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
+  size_t image_allocation_size() const { return image_allocation_size_; }
+
  private:
   explicit Canvas(SkCanvas* canvas);
 
@@ -177,6 +179,7 @@ class Canvas : public RefCountedDartWrappable<Canvas> {
   // which does not transfer ownership.  For this reason, we hold a raw
   // pointer and manually set to null in Clear.
   SkCanvas* canvas_;
+  size_t image_allocation_size_ = 0;
 };
 
 }  // namespace flutter
