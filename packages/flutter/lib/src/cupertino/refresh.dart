@@ -290,7 +290,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     Key key,
     this.refreshTriggerPullDistance = _defaultRefreshTriggerPullDistance,
     this.refreshIndicatorExtent = _defaultRefreshIndicatorExtent,
-    this.builder = buildAppleRefreshIndicator,
+    this.builder = buildRefreshIndicator,
     this.onRefresh,
   }) : assert(refreshTriggerPullDistance != null),
        assert(refreshTriggerPullDistance > 0.0),
@@ -364,7 +364,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
   /// becomes armed. At this point, the animated activity indicator will begin rotating.
   /// Once the refresh has completed, the activity indicator shrinks away as the
   /// space allocation animated back to closed.
-  static Widget buildAppleRefreshIndicator(
+  static Widget buildRefreshIndicator(
     BuildContext context,
     RefreshIndicatorMode refreshState,
     double pulledExtent,

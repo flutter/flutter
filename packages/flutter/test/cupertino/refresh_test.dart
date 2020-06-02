@@ -1327,13 +1327,13 @@ void main() {
         );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-    testWidgets('buildAppleRefreshIndicator progress', (WidgetTester tester) async {
+    testWidgets('buildRefreshIndicator progress', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Builder(
             builder: (BuildContext context) {
-              return CupertinoSliverRefreshControl.buildAppleRefreshIndicator(
+              return CupertinoSliverRefreshControl.buildRefreshIndicator(
                 context,
                 RefreshIndicatorMode.drag,
                 10, 100, 10,
@@ -1350,7 +1350,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Builder(
             builder: (BuildContext context) {
-              return CupertinoSliverRefreshControl.buildAppleRefreshIndicator(
+              return CupertinoSliverRefreshControl.buildRefreshIndicator(
                 context,
                 RefreshIndicatorMode.drag,
                 100, 100, 10,
