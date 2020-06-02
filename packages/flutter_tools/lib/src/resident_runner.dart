@@ -217,11 +217,7 @@ class FlutterDevice {
         }
         return;
       }
-      try {
-        await service.streamListen(EventStreams.kExtension);
-      } on Exception catch (exception) {
-        globals.printTrace('Fail to listen to extension stream: $observatoryUri: $exception');
-      }
+      await service.streamListen(EventStreams.kExtension);
       if (printStructuredErrorLogMethod != null) {
         service.onExtensionEvent.listen(printStructuredErrorLogMethod);
       }
