@@ -1076,6 +1076,33 @@ void main() {
     expect(await globals.fs.file(globals.fs.path.join('build', 'cache.dill')).readAsString(), 'ABC');
   }));
 
+  test('HotRunner does not copy app.dill if a dillOutputPath is given', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+    ]);
+    setWsAddress(testUri, fakeVmServiceHost.vmService);
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      dillOutputPath: 'test',
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
+    residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
+    when(mockFlutterDevice.runHot(
+      hotRunner: anyNamed('hotRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+    await residentRunner.run();
+
+    expect(globals.fs.file(globals.fs.path.join('build', 'cache.dill')), isNot(exists));
+  }));
+
   test('HotRunner copies compiled app.dill to cache during startup with --track-widget-creation', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,

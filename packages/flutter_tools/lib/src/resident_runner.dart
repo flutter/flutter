@@ -1099,6 +1099,9 @@ abstract class ResidentRunner {
 
   @protected
   void cacheInitialDillCompilation() {
+    if (_dillOutputPath != null) {
+      return;
+    }
     globals.logger.printTrace('Caching compiled dill');
     final File outputDill = globals.fs.file(dillOutputPath);
     if (outputDill.existsSync()) {
