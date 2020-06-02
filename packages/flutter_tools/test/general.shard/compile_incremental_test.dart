@@ -179,9 +179,9 @@ void main() {
 
     // Compiler message is not printed with suppressErrors: true above.
     expect(testLogger.errorText, isNot(equals(
-      '\nCompiler message:\nline0\nline1\n'
-      '\nCompiler message:\nline1\nline2\n'
-      '\nCompiler message:\nline1\nline2\n'
+      '\n\nline0\nline1\n'
+      '\n\nline1\nline2\n'
+      '\n\nline1\nline2\n'
     )));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
@@ -212,9 +212,9 @@ void main() {
     verifyNoMoreInteractions(mockFrontendServerStdIn);
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
     expect(testLogger.errorText, equals(
-      '\nCompiler message:\nline0\nline1\n'
-      '\nCompiler message:\nline1\nline2\n'
-      '\nCompiler message:\nline2\nline3\n'
+      '\n\nline0\nline1\n'
+      '\n\nline1\nline2\n'
+      '\n\nline2\nline3\n'
     ));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,

@@ -372,7 +372,7 @@ class HotRunner extends ResidentRunner {
           device.generator.recompile(
             globals.fs.file(mainPath).uri,
             <Uri>[],
-            suppressErrors: true,
+            suppressErrors: applicationBinary == null,
             outputPath: dillOutputPath ??
               getDefaultApplicationKernelPath(trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation),
             packageConfig: packageConfig,
