@@ -617,7 +617,7 @@ void main() {
     await tester.pumpWidget(builder());
     // form field has no error
     expect(formFieldState.hasError, isFalse);
-    // No error widget is visible
+    // No error widget is visible.
     expect(find.text(errorText('foo')), findsNothing);
   });
 
