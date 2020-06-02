@@ -10,22 +10,22 @@ part of dart.ui;
 @pragma('vm:entry-point')
 // ignore: unused_element
 void _updateWindowMetrics(
-  double devicePixelRatio,
-  double width,
-  double height,
-  double depth,
-  double viewPaddingTop,
-  double viewPaddingRight,
-  double viewPaddingBottom,
-  double viewPaddingLeft,
-  double viewInsetTop,
-  double viewInsetRight,
-  double viewInsetBottom,
-  double viewInsetLeft,
-  double systemGestureInsetTop,
-  double systemGestureInsetRight,
-  double systemGestureInsetBottom,
-  double systemGestureInsetLeft,
+  double/*!*/ devicePixelRatio,
+  double/*!*/ width,
+  double/*!*/ height,
+  double/*!*/ depth,
+  double/*!*/ viewPaddingTop,
+  double/*!*/ viewPaddingRight,
+  double/*!*/ viewPaddingBottom,
+  double/*!*/ viewPaddingLeft,
+  double/*!*/ viewInsetTop,
+  double/*!*/ viewInsetRight,
+  double/*!*/ viewInsetBottom,
+  double/*!*/ viewInsetLeft,
+  double/*!*/ systemGestureInsetTop,
+  double/*!*/ systemGestureInsetRight,
+  double/*!*/ systemGestureInsetBottom,
+  double/*!*/ systemGestureInsetLeft,
 ) {
   window
     .._devicePixelRatio = devicePixelRatio
@@ -54,9 +54,9 @@ void _updateWindowMetrics(
   _invoke(window.onMetricsChanged, window._onMetricsChangedZone);
 }
 
-typedef _LocaleClosure = String Function();
+typedef _LocaleClosure = String/*?*/ Function();
 
-String _localeClosure() {
+String/*?*/ _localeClosure() {
   if (window.locale == null) {
     return null;
   }
@@ -65,11 +65,11 @@ String _localeClosure() {
 
 @pragma('vm:entry-point')
 // ignore: unused_element
-_LocaleClosure _getLocaleClosure() => _localeClosure;
+_LocaleClosure/*?*/ _getLocaleClosure() => _localeClosure;
 
 @pragma('vm:entry-point')
 // ignore: unused_element
-void _updateLocales(List<String> locales) {
+void _updateLocales(List<String/*!*/>/*!*/ locales) {
   const int stringsPerLocale = 4;
   final int numLocales = locales.length ~/ stringsPerLocale;
   window._locales = List<Locale>(numLocales);
@@ -88,7 +88,7 @@ void _updateLocales(List<String> locales) {
 
 @pragma('vm:entry-point')
 // ignore: unused_element
-void _updatePlatformResolvedLocale(List<String> localeData) {
+void _updatePlatformResolvedLocale(List<String/*!*/>/*!*/ localeData) {
   if (localeData.length != 4) {
     return;
   }
@@ -104,7 +104,7 @@ void _updatePlatformResolvedLocale(List<String> localeData) {
 
 @pragma('vm:entry-point')
 // ignore: unused_element
-void _updateUserSettingsData(String jsonData) {
+void _updateUserSettingsData(String/*!*/ jsonData) {
   final Map<String, dynamic> data = json.decode(jsonData) as Map<String, dynamic>;
   if (data.isEmpty) {
     return;
@@ -116,7 +116,7 @@ void _updateUserSettingsData(String jsonData) {
 
 @pragma('vm:entry-point')
 // ignore: unused_element
-void _updateLifecycleState(String state) {
+void _updateLifecycleState(String/*!*/ state) {
   // We do not update the state if the state has already been used to initialize
   // the lifecycleState.
   if (!window._initialLifecycleStateAccessed)
@@ -124,30 +124,30 @@ void _updateLifecycleState(String state) {
 }
 
 
-void _updateTextScaleFactor(double textScaleFactor) {
+void _updateTextScaleFactor(double/*!*/ textScaleFactor) {
   window._textScaleFactor = textScaleFactor;
   _invoke(window.onTextScaleFactorChanged, window._onTextScaleFactorChangedZone);
 }
 
-void _updateAlwaysUse24HourFormat(bool alwaysUse24HourFormat) {
+void _updateAlwaysUse24HourFormat(bool/*!*/ alwaysUse24HourFormat) {
   window._alwaysUse24HourFormat = alwaysUse24HourFormat;
 }
 
-void _updatePlatformBrightness(String brightnessName) {
+void _updatePlatformBrightness(String/*!*/ brightnessName) {
   window._platformBrightness = brightnessName == 'dark' ? Brightness.dark : Brightness.light;
   _invoke(window.onPlatformBrightnessChanged, window._onPlatformBrightnessChangedZone);
 }
 
 @pragma('vm:entry-point')
 // ignore: unused_element
-void _updateSemanticsEnabled(bool enabled) {
+void _updateSemanticsEnabled(bool/*!*/ enabled) {
   window._semanticsEnabled = enabled;
   _invoke(window.onSemanticsEnabledChanged, window._onSemanticsEnabledChangedZone);
 }
 
 @pragma('vm:entry-point')
 // ignore: unused_element
-void _updateAccessibilityFeatures(int values) {
+void _updateAccessibilityFeatures(int/*!*/ values) {
   final AccessibilityFeatures newFeatures = AccessibilityFeatures._(values);
   if (newFeatures == window._accessibilityFeatures)
     return;
@@ -157,7 +157,7 @@ void _updateAccessibilityFeatures(int values) {
 
 @pragma('vm:entry-point')
 // ignore: unused_element
-void _dispatchPlatformMessage(String name, ByteData data, int responseId) {
+void _dispatchPlatformMessage(String/*!*/ name, ByteData/*?*/ data, int/*!*/ responseId) {
   if (name == ChannelBuffers.kControlChannelName) {
     try {
       channelBuffers.handleMessage(data);
@@ -185,14 +185,14 @@ void _dispatchPlatformMessage(String name, ByteData data, int responseId) {
 
 @pragma('vm:entry-point')
 // ignore: unused_element
-void _dispatchPointerDataPacket(ByteData packet) {
+void _dispatchPointerDataPacket(ByteData/*!*/ packet) {
   if (window.onPointerDataPacket != null)
     _invoke1<PointerDataPacket>(window.onPointerDataPacket, window._onPointerDataPacketZone, _unpackPointerDataPacket(packet));
 }
 
 @pragma('vm:entry-point')
 // ignore: unused_element
-void _dispatchSemanticsAction(int id, int action, ByteData args) {
+void _dispatchSemanticsAction(int/*!*/ id, int/*!*/ action, ByteData/*?*/ args) {
   _invoke3<int, SemanticsAction, ByteData>(
     window.onSemanticsAction,
     window._onSemanticsActionZone,
@@ -204,13 +204,13 @@ void _dispatchSemanticsAction(int id, int action, ByteData args) {
 
 @pragma('vm:entry-point')
 // ignore: unused_element
-void _beginFrame(int microseconds) {
+void _beginFrame(int/*!*/ microseconds) {
   _invoke1<Duration>(window.onBeginFrame, window._onBeginFrameZone, Duration(microseconds: microseconds));
 }
 
 @pragma('vm:entry-point')
 // ignore: unused_element
-void _reportTimings(List<int> timings) {
+void _reportTimings(List<int/*!*/>/*!*/ timings) {
   assert(timings.length % FramePhase.values.length == 0);
   final List<FrameTiming> frameTimings = <FrameTiming>[];
   for (int i = 0; i < timings.length; i += FramePhase.values.length) {
@@ -226,15 +226,15 @@ void _drawFrame() {
 }
 
 // ignore: always_declare_return_types, prefer_generic_function_type_aliases
-typedef _UnaryFunction(Null args);
+typedef _UnaryFunction(Null/*!*/ args);
 // ignore: always_declare_return_types, prefer_generic_function_type_aliases
-typedef _BinaryFunction(Null args, Null message);
+typedef _BinaryFunction(Null/*!*/ args, Null/*!*/ message);
 
 @pragma('vm:entry-point')
 // ignore: unused_element
-void _runMainZoned(Function startMainIsolateFunction,
-                   Function userMainFunction,
-                   List<String> args) {
+void _runMainZoned(Function/*!*/ startMainIsolateFunction,
+                   Function/*!*/ userMainFunction,
+                   List<String/*!*/>/*!*/ args) {
   startMainIsolateFunction((){
     runZonedGuarded<void>(() {
       if (userMainFunction is _BinaryFunction) {
@@ -252,10 +252,10 @@ void _runMainZoned(Function startMainIsolateFunction,
   }, null);
 }
 
-void _reportUnhandledException(String error, String stackTrace) native 'Window_reportUnhandledException';
+void _reportUnhandledException(String/*!*/ error, String/*!*/ stackTrace) native 'Window_reportUnhandledException';
 
 /// Invokes [callback] inside the given [zone].
-void _invoke(void callback(), Zone zone) {
+void _invoke(void callback()/*?*/, Zone/*!*/ zone) {
   if (callback == null)
     return;
 
@@ -269,7 +269,7 @@ void _invoke(void callback(), Zone zone) {
 }
 
 /// Invokes [callback] inside the given [zone] passing it [arg].
-void _invoke1<A>(void callback(A a), Zone zone, A arg) {
+void _invoke1<A>(void callback(A a)/*?*/, Zone/*!*/ zone, A arg) {
   if (callback == null)
     return;
 
@@ -283,7 +283,7 @@ void _invoke1<A>(void callback(A a), Zone zone, A arg) {
 }
 
 /// Invokes [callback] inside the given [zone] passing it [arg1], [arg2], and [arg3].
-void _invoke3<A1, A2, A3>(void callback(A1 a1, A2 a2, A3 a3), Zone zone, A1 arg1, A2 arg2, A3 arg3) {
+void _invoke3<A1, A2, A3>(void callback(A1 a1, A2 a2, A3 a3)/*?*/, Zone/*!*/ zone, A1 arg1, A2 arg2, A3 arg3) {
   if (callback == null)
     return;
 
@@ -305,7 +305,7 @@ void _invoke3<A1, A2, A3>(void callback(A1 a1, A2 a2, A3 a3), Zone zone, A1 arg1
 //  * AndroidTouchProcessor.java
 const int _kPointerDataFieldCount = 28;
 
-PointerDataPacket _unpackPointerDataPacket(ByteData packet) {
+PointerDataPacket/*!*/ _unpackPointerDataPacket(ByteData/*!*/ packet) {
   const int kStride = Int64List.bytesPerElement;
   const int kBytesPerPointerData = _kPointerDataFieldCount * kStride;
   final int length = packet.lengthInBytes ~/ kBytesPerPointerData;
