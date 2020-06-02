@@ -649,6 +649,10 @@ void main() {
       ),
     );
 
+    // Hover animation should not trigger an exception when the checkbox is removed
+    // before the hover animation should complete.
+    expect(tester.takeException(), isNull);
+
     await testGesture.removePointer();
   });
 
