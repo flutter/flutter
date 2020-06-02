@@ -521,12 +521,22 @@ void main() {
     expect(otherRunner.artifactDirectory.path, contains('foobar'));
   }));
 
-  test('ResidentRunner deletes artifact directory on preExit', () => testbed.run(() async {
+  test('ResidentRunner copies output dill to cache location during preExit', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    residentRunner.artifactDirectory.childFile('app.dill').createSync();
+    residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('hello');
     await residentRunner.preExit();
+    final File cacheDill = globals.fs.file(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
 
-    expect(residentRunner.artifactDirectory, isNot(exists));
+    expect(cacheDill, exists);
+    expect(cacheDill.readAsStringSync(), 'hello');
+  }));
+
+  test('ResidentRunner handles output dill missing during preExit', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    await residentRunner.preExit();
+    final File cacheDill = globals.fs.file(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+
+    expect(cacheDill, isNot(exists));
   }));
 
   test('ResidentRunner can run source generation', () => testbed.run(() async {
@@ -1049,64 +1059,6 @@ void main() {
 
     expect(await globals.fs.file('foo').readAsString(), testUri.toString());
   }));
-
-  test('HotRunner copies compiled app.dill to cache during startup', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      listViews,
-      listViews,
-    ]);
-    setWsAddress(testUri, fakeVmServiceHost.vmService);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    residentRunner = HotRunner(
-      <FlutterDevice>[
-        mockFlutterDevice,
-      ],
-      stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-    );
-    residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
-    when(mockFlutterDevice.runHot(
-      hotRunner: anyNamed('hotRunner'),
-      route: anyNamed('route'),
-    )).thenAnswer((Invocation invocation) async {
-      return 0;
-    });
-    await residentRunner.run();
-
-    expect(await globals.fs.file(globals.fs.path.join('build', 'cache.dill')).readAsString(), 'ABC');
-  }));
-
-  test('HotRunner copies compiled app.dill to cache during startup with --track-widget-creation', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      listViews,
-      listViews,
-    ]);
-    setWsAddress(testUri, fakeVmServiceHost.vmService);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    residentRunner = HotRunner(
-      <FlutterDevice>[
-        mockFlutterDevice,
-      ],
-      stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(const BuildInfo(
-        BuildMode.debug,
-        '',
-        treeShakeIcons: false,
-        trackWidgetCreation: true,
-      )),
-    );
-    residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
-    when(mockFlutterDevice.runHot(
-      hotRunner: anyNamed('hotRunner'),
-      route: anyNamed('route'),
-    )).thenAnswer((Invocation invocation) async {
-      return 0;
-    });
-    await residentRunner.run();
-
-    expect(await globals.fs.file(globals.fs.path.join('build', 'cache.dill.track.dill')).readAsString(), 'ABC');
-  }));
-
 
   test('HotRunner unforwards device ports', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
