@@ -12,13 +12,13 @@
 
 static constexpr int kMicrosecondsPerNanosecond = 1000;
 
-// Unique number associated with platform tasks
+// Unique number associated with platform tasks.
 static constexpr size_t kPlatformTaskRunnerIdentifier = 1;
 
 struct _FlEngine {
   GObject parent_instance;
 
-  // Thread the GLib main loop is running on
+  // Thread the GLib main loop is running on.
   GThread* thread;
 
   FlDartProject* project;
@@ -26,7 +26,7 @@ struct _FlEngine {
   FlBinaryMessenger* binary_messenger;
   FLUTTER_API_SYMBOL(FlutterEngine) engine;
 
-  // Function to call when a platform message is received
+  // Function to call when a platform message is received.
   FlEnginePlatformMessageHandler platform_message_handler;
   gpointer platform_message_handler_data;
   GDestroyNotify platform_message_handler_destroy_notify;
@@ -36,14 +36,14 @@ G_DEFINE_QUARK(fl_engine_error_quark, fl_engine_error)
 
 G_DEFINE_TYPE(FlEngine, fl_engine, G_TYPE_OBJECT)
 
-// Subclass of GSource that integrates Flutter tasks into the GLib main loop
+// Subclass of GSource that integrates Flutter tasks into the GLib main loop.
 typedef struct {
   GSource parent;
   FlEngine* self;
   FlutterTask task;
 } FlutterSource;
 
-// Callback to run a Flutter task in the GLib main loop
+// Callback to run a Flutter task in the GLib main loop.
 static gboolean flutter_source_dispatch(GSource* source,
                                         GSourceFunc callback,
                                         gpointer user_data) {
@@ -58,7 +58,7 @@ static gboolean flutter_source_dispatch(GSource* source,
   return G_SOURCE_REMOVE;
 }
 
-// Table of functions for Flutter GLib main loop integration
+// Table of functions for Flutter GLib main loop integration.
 static GSourceFuncs flutter_source_funcs = {
     nullptr,                  // prepare
     nullptr,                  // check
@@ -68,7 +68,7 @@ static GSourceFuncs flutter_source_funcs = {
     nullptr  // Internal usage
 };
 
-// Flutter engine callbacks
+// Flutter engine rendering callbacks.
 
 static void* fl_engine_gl_proc_resolver(void* user_data, const char* name) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
@@ -107,11 +107,13 @@ static bool fl_engine_gl_present(void* user_data) {
   return result;
 }
 
+// Called by the engine to determine if it is on the GTK thread.
 static bool fl_engine_runs_task_on_current_thread(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
   return self->thread == g_thread_self();
 }
 
+// Called when the engine has a task to perform in the GTK thread.
 static void fl_engine_post_task(FlutterTask task,
                                 uint64_t target_time_nanos,
                                 void* user_data) {
@@ -127,6 +129,7 @@ static void fl_engine_post_task(FlutterTask task,
   g_source_attach(source, nullptr);
 }
 
+// Called when a platform message is received from the engine.
 static void fl_engine_platform_message_cb(const FlutterPlatformMessage* message,
                                           void* user_data) {
   FlEngine* self = FL_ENGINE(user_data);
@@ -145,6 +148,8 @@ static void fl_engine_platform_message_cb(const FlutterPlatformMessage* message,
                                              nullptr, nullptr);
 }
 
+// Called when a response to a sent platform message is received from the
+// engine.
 static void fl_engine_platform_message_response_cb(const uint8_t* data,
                                                    size_t data_length,
                                                    void* user_data) {

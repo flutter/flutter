@@ -14,7 +14,7 @@ struct _FlBinaryCodec {
 
 G_DEFINE_TYPE(FlBinaryCodec, fl_binary_codec, fl_message_codec_get_type())
 
-// Implements FlMessageCodec::encode_message
+// Implements FlMessageCodec::encode_message.
 static GBytes* fl_binary_codec_encode_message(FlMessageCodec* codec,
                                               FlValue* value,
                                               GError** error) {
@@ -29,7 +29,7 @@ static GBytes* fl_binary_codec_encode_message(FlMessageCodec* codec,
                      fl_value_get_length(value));
 }
 
-// Implements FlMessageCodec::decode_message
+// Implements FlMessageCodec::decode_message.
 static FlValue* fl_binary_codec_decode_message(FlMessageCodec* codec,
                                                GBytes* message,
                                                GError** error) {

@@ -56,7 +56,7 @@ TEST(FlMethodResponseTest, NotImplemented) {
   g_autoptr(FlMethodNotImplementedResponse) response =
       fl_method_not_implemented_response_new();
   // Trivial check to stop the compiler deciding that 'response' is an unused
-  // variable
+  // variable.
   EXPECT_TRUE(FL_IS_METHOD_NOT_IMPLEMENTED_RESPONSE(response));
 }
 

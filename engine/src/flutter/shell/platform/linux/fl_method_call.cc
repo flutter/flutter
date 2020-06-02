@@ -11,13 +11,13 @@
 struct _FlMethodCall {
   GObject parent_instance;
 
-  // Name of method being called
+  // Name of method being called.
   gchar* name;
 
-  // Arguments provided to method call
+  // Arguments provided to method call.
   FlValue* args;
 
-  // Channel to respond on
+  // Channel to respond on.
   FlMethodChannel* channel;
   FlBinaryMessengerResponseHandle* response_handle;
 };

@@ -19,7 +19,7 @@ G_DEFINE_TYPE(FlJsonMessageCodec,
               fl_json_message_codec,
               fl_message_codec_get_type())
 
-// Recursively writes #FlValue objects using rapidjson
+// Recursively writes #FlValue objects using rapidjson.
 static gboolean write_value(rapidjson::Writer<rapidjson::StringBuffer>& writer,
                             FlValue* value,
                             GError** error) {
@@ -111,7 +111,7 @@ static gboolean write_value(rapidjson::Writer<rapidjson::StringBuffer>& writer,
   return TRUE;
 }
 
-// Handler to parse JSON using rapidjson in SAX mode
+// Handler to parse JSON using rapidjson in SAX mode.
 struct FlValueHandler {
   GPtrArray* stack;
   FlValue* key;
@@ -132,20 +132,20 @@ struct FlValueHandler {
       g_error_free(error);
   }
 
-  // Gets the current head of the stack
+  // Gets the current head of the stack.
   FlValue* get_head() {
     if (stack->len == 0)
       return nullptr;
     return static_cast<FlValue*>(g_ptr_array_index(stack, stack->len - 1));
   }
 
-  // Pushes a value onto the stack
+  // Pushes a value onto the stack.
   void push(FlValue* value) { g_ptr_array_add(stack, fl_value_ref(value)); }
 
-  // Pops the stack
+  // Pops the stack.
   void pop() { g_ptr_array_remove_index(stack, stack->len - 1); }
 
-  // Adds a new value to the stack
+  // Adds a new value to the stack.
   bool add(FlValue* value) {
     g_autoptr(FlValue) owned_value = value;
     FlValue* head = get_head();
@@ -169,7 +169,7 @@ struct FlValueHandler {
     return true;
   }
 
-  // The following implements the rapidjson SAX API
+  // The following implements the rapidjson SAX API.
 
   bool Null() { return add(fl_value_new_null()); }
 
@@ -182,7 +182,7 @@ struct FlValueHandler {
   bool Int64(int64_t i) { return add(fl_value_new_int(i)); }
 
   bool Uint64(uint64_t i) {
-    // For some reason (bug in rapidjson?) this is not returned in Int64
+    // For some reason (bug in rapidjson?) this is not returned in Int64.
     if (i == G_MAXINT64)
       return add(fl_value_new_int(i));
     else
@@ -224,7 +224,7 @@ struct FlValueHandler {
   }
 };
 
-// Implements FlMessageCodec:encode_message
+// Implements FlMessageCodec:encode_message.
 static GBytes* fl_json_message_codec_encode_message(FlMessageCodec* codec,
                                                     FlValue* message,
                                                     GError** error) {
@@ -238,7 +238,7 @@ static GBytes* fl_json_message_codec_encode_message(FlMessageCodec* codec,
   return g_bytes_new(text, strlen(text));
 }
 
-// Implements FlMessageCodec:decode_message
+// Implements FlMessageCodec:decode_message.
 static FlValue* fl_json_message_codec_decode_message(FlMessageCodec* codec,
                                                      GBytes* message,
                                                      GError** error) {

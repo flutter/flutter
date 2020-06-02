@@ -8,7 +8,7 @@
 
 G_DEFINE_QUARK(fl_message_codec_error_quark, fl_message_codec_error)
 
-// Added here to stop the compiler from optimising this function away
+// Added here to stop the compiler from optimising this function away.
 G_MODULE_EXPORT GType fl_message_codec_get_type();
 
 G_DEFINE_TYPE(FlMessageCodec, fl_message_codec, G_TYPE_OBJECT)
@@ -23,7 +23,7 @@ G_MODULE_EXPORT GBytes* fl_message_codec_encode_message(FlMessageCodec* self,
   g_return_val_if_fail(FL_IS_MESSAGE_CODEC(self), nullptr);
 
   // If the user provided NULL, then make a temporary FlValue object for this to
-  // make it simpler for the subclasses
+  // make it simpler for the subclasses.
   g_autoptr(FlValue) null_value = nullptr;
   if (message == nullptr) {
     null_value = fl_value_new_null();

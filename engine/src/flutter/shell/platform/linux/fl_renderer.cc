@@ -121,7 +121,7 @@ gboolean fl_renderer_clear_current(FlRenderer* self, GError** error) {
 }
 
 guint32 fl_renderer_get_fbo(FlRenderer* self) {
-  // There is only one frame buffer object - always return that
+  // There is only one frame buffer object - always return that.
   return 0;
 }
 

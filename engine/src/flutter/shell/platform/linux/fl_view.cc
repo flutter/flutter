@@ -19,16 +19,16 @@ static constexpr int kMicrosecondsPerMillisecond = 1000;
 struct _FlView {
   GtkWidget parent_instance;
 
-  // Project being run
+  // Project being run.
   FlDartProject* project;
 
-  // Rendering output
+  // Rendering output.
   FlRendererX11* renderer;
 
-  // Engine running @project
+  // Engine running @project.
   FlEngine* engine;
 
-  // Pointer button state recorded for sending status updates
+  // Pointer button state recorded for sending status updates.
   int64_t button_state;
 
   // Flutter system channel handlers.
@@ -68,14 +68,14 @@ static gboolean fl_view_send_pointer_button_event(FlView* self,
   int old_button_state = self->button_state;
   FlutterPointerPhase phase;
   if (event->type == GDK_BUTTON_PRESS) {
-    // Drop the event if Flutter already thinks the button is down
+    // Drop the event if Flutter already thinks the button is down.
     if ((self->button_state & button) != 0)
       return FALSE;
     self->button_state ^= button;
 
     phase = old_button_state == 0 ? kDown : kMove;
   } else if (event->type == GDK_BUTTON_RELEASE) {
-    // Drop the event if Flutter already thinks the button is up
+    // Drop the event if Flutter already thinks the button is up.
     if ((self->button_state & button) == 0)
       return FALSE;
     self->button_state ^= button;
@@ -92,7 +92,7 @@ static gboolean fl_view_send_pointer_button_event(FlView* self,
   return TRUE;
 }
 
-// Implements FlPluginRegistry::get_registrar_for_plugin
+// Implements FlPluginRegistry::get_registrar_for_plugin.
 static FlPluginRegistrar* fl_view_get_registrar_for_plugin(
     FlPluginRegistry* registry,
     const gchar* name) {
@@ -113,7 +113,7 @@ static void fl_view_constructed(GObject* object) {
   self->renderer = fl_renderer_x11_new();
   self->engine = fl_engine_new(self->project, FL_RENDERER(self->renderer));
 
-  // Create system channel handlers
+  // Create system channel handlers.
   FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(self->engine);
   self->key_event_plugin = fl_key_event_plugin_new(messenger);
   self->text_input_plugin = fl_text_input_plugin_new(messenger);
@@ -164,7 +164,7 @@ static void fl_view_dispose(GObject* object) {
   G_OBJECT_CLASS(fl_view_parent_class)->dispose(object);
 }
 
-// Implements GtkWidget::realize
+// Implements GtkWidget::realize.
 static void fl_view_realize(GtkWidget* widget) {
   FlView* self = FL_VIEW(widget);
 
@@ -202,7 +202,7 @@ static void fl_view_realize(GtkWidget* widget) {
     g_warning("Failed to start Flutter engine: %s", error->message);
 }
 
-// Implements GtkWidget::size-allocate
+// Implements GtkWidget::size-allocate.
 static void fl_view_size_allocate(GtkWidget* widget,
                                   GtkAllocation* allocation) {
   FlView* self = FL_VIEW(widget);
@@ -214,17 +214,17 @@ static void fl_view_size_allocate(GtkWidget* widget,
                            allocation->y, allocation->width,
                            allocation->height);
 
-  // TODO(robert-ancell): This pixel ratio won't work on hidpi displays
+  // TODO(robert-ancell): This pixel ratio won't work on hidpi displays.
   fl_engine_send_window_metrics_event(self->engine, allocation->width,
                                       allocation->height, 1);
 }
 
-// Implements GtkWidget::button_press_event
+// Implements GtkWidget::button_press_event.
 static gboolean fl_view_button_press_event(GtkWidget* widget,
                                            GdkEventButton* event) {
   FlView* self = FL_VIEW(widget);
 
-  // Flutter doesn't handle double and triple click events
+  // Flutter doesn't handle double and triple click events.
   if (event->type == GDK_DOUBLE_BUTTON_PRESS ||
       event->type == GDK_TRIPLE_BUTTON_PRESS)
     return FALSE;
@@ -232,7 +232,7 @@ static gboolean fl_view_button_press_event(GtkWidget* widget,
   return fl_view_send_pointer_button_event(self, event);
 }
 
-// Implements GtkWidget::button_release_event
+// Implements GtkWidget::button_release_event.
 static gboolean fl_view_button_release_event(GtkWidget* widget,
                                              GdkEventButton* event) {
   FlView* self = FL_VIEW(widget);
@@ -240,7 +240,7 @@ static gboolean fl_view_button_release_event(GtkWidget* widget,
   return fl_view_send_pointer_button_event(self, event);
 }
 
-// Implements GtkWidget::motion_notify_event
+// Implements GtkWidget::motion_notify_event.
 static gboolean fl_view_motion_notify_event(GtkWidget* widget,
                                             GdkEventMotion* event) {
   FlView* self = FL_VIEW(widget);
@@ -256,7 +256,7 @@ static gboolean fl_view_motion_notify_event(GtkWidget* widget,
   return TRUE;
 }
 
-// Implements GtkWidget::key_press_event
+// Implements GtkWidget::key_press_event.
 static gboolean fl_view_key_press_event(GtkWidget* widget, GdkEventKey* event) {
   FlView* self = FL_VIEW(widget);
 
@@ -268,7 +268,7 @@ static gboolean fl_view_key_press_event(GtkWidget* widget, GdkEventKey* event) {
   return TRUE;
 }
 
-// Implements GtkWidget::key_release_event
+// Implements GtkWidget::key_release_event.
 static gboolean fl_view_key_release_event(GtkWidget* widget,
                                           GdkEventKey* event) {
   FlView* self = FL_VIEW(widget);

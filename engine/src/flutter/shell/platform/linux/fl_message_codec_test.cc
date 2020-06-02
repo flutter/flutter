@@ -8,14 +8,14 @@
 G_DECLARE_FINAL_TYPE(FlTestCodec, fl_test_codec, FL, TEST_CODEC, FlMessageCodec)
 
 // Implement the FlMessageCodec API for the following tests to check it works as
-// expected
+// expected.
 struct _FlTestCodec {
   FlMessageCodec parent_instance;
 };
 
 G_DEFINE_TYPE(FlTestCodec, fl_test_codec, fl_message_codec_get_type())
 
-// Implements FlMessageCodec::encode_message
+// Implements FlMessageCodec::encode_message.
 static GBytes* fl_test_codec_encode_message(FlMessageCodec* codec,
                                             FlValue* value,
                                             GError** error) {
@@ -31,7 +31,7 @@ static GBytes* fl_test_codec_encode_message(FlMessageCodec* codec,
   }
 }
 
-// Implements FlMessageCodec::decode_message
+// Implements FlMessageCodec::decode_message.
 static FlValue* fl_test_codec_decode_message(FlMessageCodec* codec,
                                              GBytes* message,
                                              GError** error) {
