@@ -541,6 +541,7 @@ class TestFlutterDevice extends FlutterDevice {
     Restart restart,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
+    GetSkSLMethod getSkSLMethod,
   }) async {
     throw exception;
   }

@@ -15,6 +15,7 @@ import 'src/web/bench_card_infinite_scroll.dart';
 import 'src/web/bench_clipped_out_pictures.dart';
 import 'src/web/bench_draw_rect.dart';
 import 'src/web/bench_dynamic_clip_on_static_picture.dart';
+import 'src/web/bench_paths.dart';
 import 'src/web/bench_picture_recording.dart';
 import 'src/web/bench_simple_lazy_text_scroll.dart';
 import 'src/web/bench_text_out_of_picture_bounds.dart';
@@ -29,9 +30,11 @@ const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultVal
 /// When adding a new benchmark, add it to this map. Make sure that the name
 /// of your benchmark is unique.
 final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
-  BenchCardInfiniteScroll.benchmarkName: () => BenchCardInfiniteScroll(),
+  BenchCardInfiniteScroll.benchmarkName: () => BenchCardInfiniteScroll.forward(),
+  BenchCardInfiniteScroll.benchmarkNameBackward: () => BenchCardInfiniteScroll.backward(),
   BenchClippedOutPictures.benchmarkName: () => BenchClippedOutPictures(),
   BenchDrawRect.benchmarkName: () => BenchDrawRect(),
+  BenchPathRecording.benchmarkName: () => BenchPathRecording(),
   BenchTextOutOfPictureBounds.benchmarkName: () => BenchTextOutOfPictureBounds(),
   BenchSimpleLazyTextScroll.benchmarkName: () => BenchSimpleLazyTextScroll(),
   BenchBuildMaterialCheckbox.benchmarkName: () => BenchBuildMaterialCheckbox(),

@@ -67,16 +67,19 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// app bar, see [SliverAppBar], which embeds an [AppBar] in a sliver for use in
 /// a [CustomScrollView].
 ///
-/// When not used as [Scaffold.appBar], or when wrapped in a [Hero], place the app
-/// bar in a [MediaQuery] to take care of the padding around the content of the
-/// app bar if needed, as the padding will not be handled by [Scaffold].
-///
 /// The AppBar displays the toolbar widgets, [leading], [title], and [actions],
 /// above the [bottom] (if any). The [bottom] is usually used for a [TabBar]. If
 /// a [flexibleSpace] widget is specified then it is stacked behind the toolbar
 /// and the bottom widget. The following diagram shows where each of these slots
 /// appears in the toolbar when the writing language is left-to-right (e.g.
 /// English):
+///
+/// The [AppBar] insets its content based on the ambient [MediaQuery]'s padding,
+/// to avoid system UI intrusions. It's taken care of by [Scaffold] when used in
+/// the [Scaffold.appBar] property. When animating an [AppBar], unexpected
+/// [MediaQuery] changes (as is common in [Hero] animations) may cause the content
+/// to suddenly jump. Wrap the [AppBar] in a [MediaQuery] widget, and adjust its
+/// padding such that the animation is smooth.
 ///
 /// ![The leading widget is in the top left, the actions are in the top right,
 /// the title is between them. The bottom is, naturally, at the bottom, and the
@@ -171,8 +174,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// [elevation] is specified, it must be non-negative.
   ///
   /// If [backgroundColor], [elevation], [brightness], [iconTheme],
-  /// [actionsIconTheme], or [textTheme] are null, then their [AppBarTheme]
-  /// values will be used. If the corresponding [AppBarTheme] property is null,
+  /// [actionsIconTheme], [textTheme] or [centerTitle] are null, then their
+  /// [AppBarTheme] values will be used. If the corresponding [AppBarTheme] property is null,
   /// then the default specified in the property's documentation will be used.
   ///
   /// Typically used in the [Scaffold.appBar] property.
@@ -385,7 +388,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// Whether the title should be centered.
   ///
-  /// Defaults to being adapted to the current [TargetPlatform].
+  /// If this property is null, then [ThemeData.appBarTheme.centerTitle] is used,
+  /// if that is also null, then value is adapted to the current [TargetPlatform].
   final bool centerTitle;
 
   /// Whether the title should be wrapped with header [Semantics].
@@ -428,6 +432,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   bool _getEffectiveCenterTitle(ThemeData theme) {
     if (centerTitle != null)
       return centerTitle;
+    if (theme.appBarTheme.centerTitle != null)
+      return theme.appBarTheme.centerTitle;
     assert(theme.platform != null);
     switch (theme.platform) {
       case TargetPlatform.android:

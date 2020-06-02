@@ -21,7 +21,7 @@ void main() {
     FlutterRunTestDriver flutter;
     VmService vmService;
 
-    setUpAll(() async {
+    setUp(() async {
       tempDir = createResolvedTempDirectorySync('vmservice_integration_test.');
 
       final BasicProject _project = BasicProject();
@@ -33,7 +33,7 @@ void main() {
       vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
     });
 
-    tearDownAll(() async {
+    tearDown(() async {
       await flutter?.stop();
       tryToDelete(tempDir);
     });
@@ -80,6 +80,12 @@ void main() {
       final Future<Response> response = vmService.callMethod('s0.hotRestart',
           args: <String, dynamic>{'pause': 'not_a_bool'});
       expect(response, throwsA(const TypeMatcher<RPCError>()));
+    });
+
+    test('flutterGetSkSL can be called', () async {
+      final Response response = await vmService.callMethod('s0.flutterGetSkSL');
+
+      expect(response.type, 'Success');
     });
 
     // TODO(devoncarew): These tests fail on cirrus-ci windows.

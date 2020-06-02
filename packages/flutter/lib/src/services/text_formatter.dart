@@ -107,10 +107,11 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue, // unused.
+    TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
     return _selectionAwareTextManipulation(
+      oldValue,
       newValue,
       (String substring) {
         return substring.replaceAll(blacklistedPattern, replacementString);
@@ -239,10 +240,11 @@ class WhitelistingTextInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue, // unused.
+    TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
     return _selectionAwareTextManipulation(
+      oldValue,
       newValue,
       (String substring) {
         return whitelistedPattern
@@ -259,6 +261,7 @@ class WhitelistingTextInputFormatter extends TextInputFormatter {
 }
 
 TextEditingValue _selectionAwareTextManipulation(
+  TextEditingValue oldValue,
   TextEditingValue value,
   String substringManipulation(String substring),
 ) {
@@ -268,6 +271,19 @@ TextEditingValue _selectionAwareTextManipulation(
   TextSelection manipulatedSelection;
   if (selectionStartIndex < 0 || selectionEndIndex < 0) {
     manipulatedText = substringManipulation(value.text);
+  } else if (value.selection.isCollapsed) { // Non-selection text manipulation
+    int cursorPosition = value.selection.baseOffset;
+    manipulatedText = substringManipulation(value.text);
+    // We only return the old valid value if the current value is not empty and
+    // if manipulation fails.
+    if (value.text.isNotEmpty && manipulatedText.isEmpty) {
+      manipulatedText = oldValue.text;
+      // We decrease cursorPosition by one because
+      // user entered a invalid character.
+      cursorPosition -= 1;
+    }
+    // Move the caret to its previous position.
+    manipulatedSelection = TextSelection.collapsed(offset: cursorPosition);
   } else {
     final String beforeSelection = substringManipulation(
       value.text.substring(0, selectionStartIndex)

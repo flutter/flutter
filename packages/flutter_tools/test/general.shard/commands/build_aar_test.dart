@@ -142,8 +142,10 @@ void main() {
         buildModes.add(buildInfo.mode);
         if (buildInfo.mode.isPrecompiled) {
           expect(buildInfo.treeShakeIcons, isTrue);
+          expect(buildInfo.trackWidgetCreation, isTrue);
         } else {
           expect(buildInfo.treeShakeIcons, isFalse);
+          expect(buildInfo.trackWidgetCreation, isTrue);
         }
         expect(buildInfo.flavor, isNull);
         expect(buildInfo.splitDebugInfoPath, isNull);

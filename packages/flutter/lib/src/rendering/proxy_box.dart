@@ -2682,15 +2682,17 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
   /// Creates a render object that forwards pointer events to callbacks.
   ///
   /// All parameters are optional. By default this method creates an opaque
-  /// mouse region with no callbacks.
+  /// mouse region with no callbacks and cursor being [MouseCursor.defer]. The
+  /// [cursor] must not be null.
   RenderMouseRegion({
     PointerEnterEventListener onEnter,
     PointerHoverEventListener onHover,
     PointerExitEventListener onExit,
-    MouseCursor cursor,
+    MouseCursor cursor = MouseCursor.defer,
     bool opaque = true,
     RenderBox child,
   }) : assert(opaque != null),
+       assert(cursor != null),
        _onEnter = onEnter,
        _onHover = onHover,
        _onExit = onExit,
@@ -2781,7 +2783,7 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
         _onEnter != null ||
         _onHover != null ||
         _onExit != null ||
-        _cursor != null ||
+        _cursor != MouseCursor.defer ||
         opaque
       ) && RendererBinding.instance.mouseTracker.mouseIsConnected;
     _setAnnotationIsActive(newAnnotationIsActive);
@@ -2853,7 +2855,7 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
       },
       ifEmpty: '<none>',
     ));
-    properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: MouseCursor.defer));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
   }
 }

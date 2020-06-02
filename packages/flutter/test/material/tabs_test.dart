@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -2028,6 +2029,45 @@ void main() {
     expect(() => Tab(text: 'foo', child: Container()), throwsAssertionError);
   });
 
+  testWidgets('Tabs changes mouse cursor when a tab is hovered', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B'];
+    await tester.pumpWidget(MaterialApp(home: DefaultTabController(
+        length: tabs.length,
+        child: Scaffold(
+          body: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TabBar(
+              mouseCursor: SystemMouseCursors.text,
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Tab).first));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(MaterialApp(home: DefaultTabController(
+        length: tabs.length,
+        child: Scaffold(
+          body: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            ),
+          ),
+        ),
+      ),
+    ));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
 
   testWidgets('TabController changes', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/14812
@@ -2475,4 +2515,69 @@ void main() {
 
     expect(tabBarWithText.preferredSize, tabBarWithTextChild.preferredSize);
    });
+
+  testWidgets('Setting TabController index should make TabBar indicator immediately pop into the position', (WidgetTester tester) async {
+    const List<Tab> tabs = <Tab>[
+      Tab(text: 'A'), Tab(text: 'B'), Tab(text: 'C')
+    ];
+    const Color indicatorColor = Color(0xFFFF0000);
+    TabController tabController;
+
+    Widget buildTabControllerFrame(BuildContext context, TabController controller) {
+      tabController = controller;
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              controller: controller,
+              tabs: tabs,
+              indicatorColor: indicatorColor,
+            ),
+          ),
+          body: TabBarView(
+            controller: controller,
+            children: tabs.map((Tab tab) {
+              return Center(child: Text(tab.text));
+            }).toList(),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(TabControllerFrame(
+      builder: buildTabControllerFrame,
+      length: tabs.length,
+      initialIndex: 0,
+    ));
+
+    final RenderBox box = tester.renderObject(find.byType(TabBar));
+    final TabIndicatorRecordingCanvas canvas = TabIndicatorRecordingCanvas(indicatorColor);
+    final TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
+
+    box.paint(context, Offset.zero);
+    double expectedIndicatorLeft = canvas.indicatorRect.left;
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    void pageControllerListener() {
+      // Whenever TabBarView scrolls due to changing TabController's index,
+      // check if indicator stays idle in its expectedIndicatorLeft
+      box.paint(context, Offset.zero);
+      expect(canvas.indicatorRect.left, expectedIndicatorLeft);
+    }
+
+    // Moving from index 0 to 2 (distanced tabs)
+    tabController.index = 2;
+    box.paint(context, Offset.zero);
+    expectedIndicatorLeft = canvas.indicatorRect.left;
+    pageController.addListener(pageControllerListener);
+    await tester.pumpAndSettle();
+
+    // Moving from index 2 to 1 (neighboring tabs)
+    tabController.index = 1;
+    box.paint(context, Offset.zero);
+    expectedIndicatorLeft = canvas.indicatorRect.left;
+    await tester.pumpAndSettle();
+    pageController.removeListener(pageControllerListener);
+  });
 }

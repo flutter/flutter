@@ -524,6 +524,7 @@ abstract class Page<T> extends RouteSettings {
   /// Creates the [Route] that corresponds to this page.
   ///
   /// The created [Route] must have its [Route.settings] property set to this [Page].
+  @factory
   Route<T> createRoute(BuildContext context);
 
   @override
@@ -2151,9 +2152,10 @@ class Navigator extends StatefulWidget {
   /// This is the default value of [onGenerateInitialRoutes], which is used if
   /// [initialRoute] is not null.
   ///
-  /// If this string contains any `/` characters, then the string is split on
-  /// those characters and substrings from the start of the string up to each
-  /// such character are, in turn, used as routes to push.
+  /// If this string starts with a `/` character and has multiple `/` characters
+  /// in it, then the string is split on those characters and substrings from
+  /// the start of the string up to each such character are, in turn, used as
+  /// routes to push.
   ///
   /// For example, if the route `/stocks/HOOLI` was used as the [initialRoute],
   /// then the [Navigator] would push the following routes on startup: `/`,
@@ -2291,6 +2293,12 @@ enum _RouteLifecycle {
 
 typedef _RouteEntryPredicate = bool Function(_RouteEntry entry);
 
+class _NotAnnounced extends Route<void> {
+  // A placeholder for the lastAnnouncedPreviousRoute, the
+  // lastAnnouncedPoppedNextRoute, and the lastAnnouncedNextRoute before any
+  // change has been announced.
+}
+
 class _RouteEntry extends RouteTransitionRecord {
   _RouteEntry(
     this.route, {
@@ -2309,10 +2317,12 @@ class _RouteEntry extends RouteTransitionRecord {
   @override
   final Route<dynamic> route;
 
+  static Route<dynamic> notAnnounced = _NotAnnounced();
+
   _RouteLifecycle currentState;
-  Route<dynamic> lastAnnouncedPreviousRoute; // last argument to Route.didChangePrevious
-  Route<dynamic> lastAnnouncedPoppedNextRoute; // last argument to Route.didPopNext
-  Route<dynamic> lastAnnouncedNextRoute; // last argument to Route.didChangeNext
+  Route<dynamic> lastAnnouncedPreviousRoute = notAnnounced; // last argument to Route.didChangePrevious
+  Route<dynamic> lastAnnouncedPoppedNextRoute = notAnnounced; // last argument to Route.didPopNext
+  Route<dynamic> lastAnnouncedNextRoute = notAnnounced; // last argument to Route.didChangeNext
 
   bool get hasPage => route.settings is Page;
 
@@ -3640,8 +3650,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   void popUntil(RoutePredicate predicate) {
-    while (!predicate(_history.lastWhere(_RouteEntry.isPresentPredicate).route)) {
+    _RouteEntry candidate = _history.lastWhere(_RouteEntry.isPresentPredicate, orElse: () => null);
+    while(candidate != null) {
+      if (predicate(candidate.route))
+        return;
       pop();
+      candidate = _history.lastWhere(_RouteEntry.isPresentPredicate, orElse: () => null);
     }
   }
 

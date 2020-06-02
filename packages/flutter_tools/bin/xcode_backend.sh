@@ -87,17 +87,10 @@ BuildApp() {
       exit -1;;
   esac
 
-  # Archive builds (ACTION=install) should always run in release mode.
+  # Warn the user if not archiving (ACTION=install) in release mode.
   if [[ "$ACTION" == "install" && "$build_mode" != "release" ]]; then
-    EchoError "========================================================================"
-    EchoError "ERROR: Flutter archive builds must be run in Release mode."
-    EchoError ""
-    EchoError "To correct, ensure FLUTTER_BUILD_MODE is set to release or run:"
-    EchoError "flutter build ios --release"
-    EchoError ""
-    EchoError "then re-run Archive from Xcode."
-    EchoError "========================================================================"
-    exit -1
+    echo "warning: Flutter archive not built in Release mode. Ensure FLUTTER_BUILD_MODE \
+is set to release or run \"flutter build ios --release\", then re-run Archive from Xcode."
   fi
 
   local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
@@ -264,15 +257,18 @@ ThinAppFrameworks() {
 # Adds the App.framework as an embedded binary and the flutter_assets as
 # resources.
 EmbedFlutterFrameworks() {
-  AssertExists "${FLUTTER_APPLICATION_PATH}"
+  local project_path="${SOURCE_ROOT}/.."
+  if [[ -n "$FLUTTER_APPLICATION_PATH" ]]; then
+    project_path="${FLUTTER_APPLICATION_PATH}"
+  fi
 
   # Prefer the hidden .ios folder, but fallback to a visible ios folder if .ios
   # doesn't exist.
-  local flutter_ios_out_folder="${FLUTTER_APPLICATION_PATH}/.ios/Flutter"
-  local flutter_ios_engine_folder="${FLUTTER_APPLICATION_PATH}/.ios/Flutter/engine"
+  local flutter_ios_out_folder="${project_path}/.ios/Flutter"
+  local flutter_ios_engine_folder="${project_path}/.ios/Flutter/engine"
   if [[ ! -d ${flutter_ios_out_folder} ]]; then
-    flutter_ios_out_folder="${FLUTTER_APPLICATION_PATH}/ios/Flutter"
-    flutter_ios_engine_folder="${FLUTTER_APPLICATION_PATH}/ios/Flutter"
+    flutter_ios_out_folder="${project_path}/ios/Flutter"
+    flutter_ios_engine_folder="${project_path}/ios/Flutter"
   fi
 
   AssertExists "${flutter_ios_out_folder}"
@@ -288,8 +284,8 @@ EmbedFlutterFrameworks() {
 
   # Copy Xcode behavior and don't copy over headers or modules.
   RunCommand rsync -av --delete --filter "- .DS_Store/" --filter "- Headers/" --filter "- Modules/" "${flutter_ios_engine_folder}/Flutter.framework" "${xcode_frameworks_dir}/"
-  if [[ "$ACTION" != "install" ]]; then
-    # Strip bitcode from the destination unless archiving.
+  if [[ "$ACTION" != "install" || "$ENABLE_BITCODE" == "NO" ]]; then
+    # Strip bitcode from the destination unless archiving, or if bitcode is disabled entirely.
     RunCommand "${DT_TOOLCHAIN_DIR}"/usr/bin/bitcode_strip "${flutter_ios_engine_folder}/Flutter.framework/Flutter" -r -o "${xcode_frameworks_dir}/Flutter.framework/Flutter"
   fi
 
