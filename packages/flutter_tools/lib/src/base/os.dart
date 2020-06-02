@@ -323,7 +323,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   void zip(Directory data, File zipFile) {
-    _processManager.runSync(<String>[
+    final RunResult result = _processUtils.runSync(<String>[
       _activePowershell,
       'Compress-Archive',
       '-Path',
@@ -331,31 +331,28 @@ class _WindowsUtils extends OperatingSystemUtils {
       '-DestinationPath',
       zipFile.path,
     ]);
+    if (result.stderr.isNotEmpty) {
+      throw ProcessException(_activePowershell, <String>['Compress-Archive'], result.stderr);
+    }
   }
 
   @override
   void unzip(File file, Directory targetDirectory) {
-    _processManager.runSync(<String>[
+    final RunResult result = _processUtils.runSync(<String>[
       _activePowershell,
       'Expand-Archive',
       '-Path',
       file.path,
       '-DestinationPath',
       targetDirectory.path,
-    ]);
+    ], throwOnError: true);
+    if (result.stderr.isNotEmpty) {
+      throw ProcessException(_activePowershell, <String>['Expand-Archive'], result.stderr);
+    }
   }
 
   @override
-  bool verifyZip(File zipFile) {
-    try {
-      ZipDecoder().decodeBytes(zipFile.readAsBytesSync(), verify: true);
-    } on FileSystemException catch (_) {
-      return false;
-    } on ArchiveException catch (_) {
-      return false;
-    }
-    return true;
-  }
+  bool verifyZip(File zipFile) => true;
 
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {

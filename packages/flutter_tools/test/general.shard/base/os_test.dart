@@ -21,6 +21,17 @@ const String kExecutable = 'foo';
 const String kPath1 = '/bar/bin/$kExecutable';
 const String kPath2 = '/another/bin/$kExecutable';
 
+const String kPowershellException = r'''
+New-Object : Exception calling ".ctor" with "3" argument(s): "End of Central Directory record could not be found."
+At
+C:\Windows\system32\WindowsPowerShell\v1.0\Modules\Microsoft.PowerShell.Archive\Microsoft.PowerShell.Archive.psm1:934
+char:23
++ ... ipArchive = New-Object -TypeName System.IO.Compression.ZipArchive -Ar ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [New-Object], MethodInvocationException
+    + FullyQualifiedErrorId : ConstructorInvokedThrowException,Microsoft.PowerShell.Commands.NewObjectCommand
+''';
+
 void main() {
   MockProcessManager mockProcessManager;
 
@@ -174,6 +185,34 @@ void main() {
     expect(processManager.hasRemainingExpectations, false);
   });
 
+  testWithoutContext('Windows PowerShell Expand-Archive with stderr', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'pwsh.exe',
+          'Expand-Archive',
+          '-Path',
+          'a',
+          '-DestinationPath',
+          'b'
+        ],
+        stderr: kPowershellException,
+      ),
+    ]);
+    final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    final OperatingSystemUtils osUtils = OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'windows'),
+      processManager: processManager,
+    );
+
+    expect(() => osUtils.unzip(fileSystem.file('a'), fileSystem.directory('b')),
+      throwsA(isA<ProcessException>()));
+
+    expect(processManager.hasRemainingExpectations, false);
+  });
+
   testWithoutContext('Windows PowerShell Compress-Archive', () {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
@@ -197,6 +236,48 @@ void main() {
 
     osUtils.zip(fileSystem.directory('b'), fileSystem.file('a'));
 
+    expect(processManager.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('Windows PowerShell Compress-Archive with stderr', () {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'pwsh.exe',
+          'Compress-Archive',
+          '-Path',
+          'b',
+          '-DestinationPath',
+          'a'
+        ],
+        stderr: kPowershellException,
+      ),
+    ]);
+    final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    final OperatingSystemUtils osUtils = OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'windows'),
+      processManager: processManager,
+    );
+
+    expect(() => osUtils.zip(fileSystem.directory('b'), fileSystem.file('a')),
+      throwsA(isA<ProcessException>()));
+
+    expect(processManager.hasRemainingExpectations, false);
+  });
+
+   testWithoutContext('Windows PowerShell verifyZip is a no-op', () {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    final OperatingSystemUtils osUtils = OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'windows'),
+      processManager: processManager,
+    );
+
+    expect(osUtils.verifyZip(fileSystem.file('a')), true);
     expect(processManager.hasRemainingExpectations, false);
   });
 
