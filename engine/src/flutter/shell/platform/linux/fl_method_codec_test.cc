@@ -46,10 +46,10 @@ static GBytes* fl_test_codec_encode_method_call(FlMethodCodec* codec,
   g_autofree gchar* text = nullptr;
   if (args == nullptr || fl_value_get_type(args) == FL_VALUE_TYPE_NULL)
     text = g_strdup_printf("%s()", name);
-  else if (fl_value_get_type(args) == FL_VALUE_TYPE_INT)
+  else if (fl_value_get_type(args) == FL_VALUE_TYPE_INT) {
     text = g_strdup_printf("%s(%" G_GINT64_FORMAT ")", name,
                            fl_value_get_int(args));
-  else {
+  } else {
     g_set_error(error, FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_FAILED,
                 "ERROR");
     return nullptr;
@@ -117,15 +117,17 @@ static GBytes* fl_test_codec_encode_error_envelope(FlMethodCodec* codec,
   if (message == nullptr) {
     if (details == nullptr || fl_value_get_type(details) == FL_VALUE_TYPE_NULL)
       text = g_strdup_printf("Error_%s()", code);
-    else
+    else {
       text = g_strdup_printf("Error_%s(%" G_GINT64_FORMAT ")", code,
                              fl_value_get_int(details));
+    }
   } else {
     if (details == nullptr || fl_value_get_type(details) == FL_VALUE_TYPE_NULL)
       text = g_strdup_printf("Error_%s(%s)", code, message);
-    else
+    else {
       text = g_strdup_printf("Error_%s(%s,%" G_GINT64_FORMAT ")", code, message,
                              fl_value_get_int(details));
+    }
   }
 
   return text_to_message(text);

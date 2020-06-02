@@ -246,9 +246,10 @@ void fl_key_event_plugin_send_key_event(FlKeyEventPlugin* self,
                            fl_value_new_string(kGLFWToolkit));
   fl_value_set_string_take(message, kKeyCodeKey, fl_value_new_int(key_code));
   fl_value_set_string_take(message, kModifiersKey, fl_value_new_int(modifiers));
-  if (unicodeScalarValues != 0)
+  if (unicodeScalarValues != 0) {
     fl_value_set_string_take(message, kUnicodeScalarValuesKey,
                              fl_value_new_int(unicodeScalarValues));
+  }
 
   fl_basic_message_channel_send(self->channel, message, nullptr, nullptr,
                                 nullptr);

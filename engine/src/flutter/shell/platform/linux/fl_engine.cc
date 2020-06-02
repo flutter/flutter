@@ -143,9 +143,10 @@ static void fl_engine_platform_message_cb(const FlutterPlatformMessage* message,
         self->platform_message_handler_data);
   }
 
-  if (!handled)
+  if (!handled) {
     fl_engine_send_platform_message_response(self, message->response_handle,
                                              nullptr, nullptr);
+  }
 }
 
 // Called when a response to a sent platform message is received from the
@@ -167,9 +168,10 @@ static void fl_engine_dispose(GObject* object) {
   g_clear_object(&self->renderer);
   g_clear_object(&self->binary_messenger);
 
-  if (self->platform_message_handler_destroy_notify)
+  if (self->platform_message_handler_destroy_notify) {
     self->platform_message_handler_destroy_notify(
         self->platform_message_handler_data);
+  }
   self->platform_message_handler_data = nullptr;
   self->platform_message_handler_destroy_notify = nullptr;
 
@@ -257,9 +259,10 @@ void fl_engine_set_platform_message_handler(
   g_return_if_fail(FL_IS_ENGINE(self));
   g_return_if_fail(handler != nullptr);
 
-  if (self->platform_message_handler_destroy_notify)
+  if (self->platform_message_handler_destroy_notify) {
     self->platform_message_handler_destroy_notify(
         self->platform_message_handler_data);
+  }
 
   self->platform_message_handler = handler;
   self->platform_message_handler_data = user_data;
@@ -276,9 +279,10 @@ gboolean fl_engine_send_platform_message_response(
 
   gsize data_length = 0;
   const uint8_t* data = nullptr;
-  if (response != nullptr)
+  if (response != nullptr) {
     data =
         static_cast<const uint8_t*>(g_bytes_get_data(response, &data_length));
+  }
   FlutterEngineResult result = FlutterEngineSendPlatformMessageResponse(
       self->engine, handle, data, data_length);
 

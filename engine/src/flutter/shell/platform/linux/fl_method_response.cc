@@ -81,9 +81,10 @@ static void fl_method_not_implemented_response_init(
 
 G_MODULE_EXPORT FlValue* fl_method_response_get_result(FlMethodResponse* self,
                                                        GError** error) {
-  if (FL_IS_METHOD_SUCCESS_RESPONSE(self))
+  if (FL_IS_METHOD_SUCCESS_RESPONSE(self)) {
     return fl_method_success_response_get_result(
         FL_METHOD_SUCCESS_RESPONSE(self));
+  }
 
   if (FL_IS_METHOD_ERROR_RESPONSE(self)) {
     const gchar* code =
