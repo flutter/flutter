@@ -249,12 +249,16 @@ void main() {
   });
 
   testWithoutContext('processes dependent licenses according to instructions', () async {
-    fileSystem.file('foo/LICENSE')
+    fileSystem.file('foo/NOTICES')
       ..createSync(recursive: true)
       ..writeAsStringSync(_kMitLicense);
-    fileSystem.file('bar/LICENSE')
+    fileSystem.file('bar/NOTICES')
       ..createSync(recursive: true)
       ..writeAsStringSync(_kApacheLicense);
+    // NOTICES is preferred over LICENSE
+    fileSystem.file('bar/LICENSE')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('SHOULD NOT BE INCLUDED');
     fileSystem.file('fizz/LICENSE')
       ..createSync(recursive: true)
       ..writeAsStringSync(_kMitLicense); // intentionally a duplicate
@@ -292,14 +296,17 @@ void main() {
     expect(result.combinedLicenses, contains(_kApacheLicense));
     expect(result.combinedLicenses, contains(_kMitLicense));
 
+    // String from LICENSE file was not included when NOTICES exists.
+    expect(result.combinedLicenses, isNot(contains('SHOULD NOT BE INCLUDED')));
+
     // Licenses are de-duplicated correctly.
     expect(result.combinedLicenses.split(LicenseCollector.licenseSeparator), hasLength(2));
 
     // All input licenses included in result.
     final Iterable<String> filePaths = result.dependencies.map((File file) => file.path);
     expect(filePaths, unorderedEquals(<String>[
-      '/foo/LICENSE',
-      '/bar/LICENSE',
+      '/foo/NOTICES',
+      '/bar/NOTICES',
       '/fizz/LICENSE'
     ]));
   });

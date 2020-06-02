@@ -211,14 +211,14 @@ assets:
       as DevFSStringContent;
     final DevFSStringContent fontManifest = bundle.entries['FontManifest.json']
       as DevFSStringContent;
-    final DevFSStringContent license = bundle.entries['LICENSE']
+    final DevFSStringContent license = bundle.entries['NOTICES']
       as DevFSStringContent;
 
     await bundle.build(manifestPath: 'pubspec.yaml');
 
     expect(assetManifest, bundle.entries['AssetManifest.json']);
     expect(fontManifest, bundle.entries['FontManifest.json']);
-    expect(license, bundle.entries['LICENSE']);
+    expect(license, bundle.entries['NOTICES']);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
@@ -394,6 +394,44 @@ flutter:
 
     expect(await bundle.build(manifestPath: 'pubspec.yaml'), 1);
     expect(testLogger.errorText, isNot(contains('This asset was included from')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
+  });
+
+  testUsingContext('does not include material design assets if uses-material-design: true is '
+    'specified only by a dependency', () async {
+    globals.fs.file('.packages').writeAsStringSync(r'''
+example:lib/
+foo:foo/lib/
+''');
+    globals.fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+dependencies:
+  foo: any
+
+flutter:
+  uses-material-design: false
+''');
+    globals.fs.file('foo/pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'''
+name: foo
+
+flutter:
+  uses-material-design: true
+''');
+    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+
+    expect(await bundle.build(manifestPath: 'pubspec.yaml'), 0);
+    expect((bundle.entries['FontManifest.json'] as DevFSStringContent).string, '[]');
+    expect((bundle.entries['AssetManifest.json'] as DevFSStringContent).string, '{}');
+    expect(testLogger.errorText, contains(
+      'package:foo has `uses-material-design: true` set'
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
