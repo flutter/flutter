@@ -19,11 +19,11 @@ import 'object.dart';
 
 /// The layout constraints for the root render object.
 @immutable
-class ViewConfiguration {
+class RenderViewConfiguration {
   /// Creates a view configuration.
   ///
   /// By default, the view has zero [size] and a [devicePixelRatio] of 1.0.
-  const ViewConfiguration({
+  const RenderViewConfiguration({
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
   });
@@ -56,7 +56,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// The [configuration] must not be null.
   RenderView({
     RenderBox child,
-    @required ViewConfiguration configuration,
+    @required RenderViewConfiguration configuration,
     @required ui.SingletonFlutterWindow window,
   }) : assert(configuration != null),
        _configuration = configuration,
@@ -69,13 +69,13 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   Size _size = Size.zero;
 
   /// The constraints used for the root layout.
-  ViewConfiguration get configuration => _configuration;
-  ViewConfiguration _configuration;
+  RenderViewConfiguration get configuration => _configuration;
+  RenderViewConfiguration _configuration;
   /// The configuration is initially set by the `configuration` argument
   /// passed to the constructor.
   ///
   /// Always call [prepareInitialFrame] before changing the configuration.
-  set configuration(ViewConfiguration value) {
+  set configuration(RenderViewConfiguration value) {
     assert(value != null);
     if (configuration == value)
       return;
@@ -294,7 +294,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     }());
     properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));
     properties.add(DoubleProperty('device pixel ratio', _window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
-    properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
+    properties.add(DiagnosticsProperty<RenderViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
     if (_window.semanticsEnabled)
       properties.add(DiagnosticsNode.message('semantics enabled'));
   }

@@ -235,7 +235,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @protected
   void handlePlatformBrightnessChanged() { }
 
-  /// Returns a [ViewConfiguration] configured for the [RenderView] based on the
+  /// Returns a [RenderViewConfiguration] configured for the [RenderView] based on the
   /// current environment.
   ///
   /// This is called during construction and also in response to changes to the
@@ -245,10 +245,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// ratio the [RenderView] will use. For example, the testing framework uses
   /// this to force the display into 800x600 when a test is run on the device
   /// using `flutter run`.
-  ViewConfiguration createViewConfiguration() {
+  RenderViewConfiguration createViewConfiguration() {
     final double devicePixelRatio = platformDispatcher.views.isEmpty ? 1.0 : window.devicePixelRatio;
     final Size physicalSize = platformDispatcher.views.isEmpty ? Size.zero : window.physicalSize;
-    return ViewConfiguration(
+    return RenderViewConfiguration(
       size: physicalSize / devicePixelRatio,
       devicePixelRatio: devicePixelRatio,
     );

@@ -423,10 +423,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   @override
-  ViewConfiguration createViewConfiguration() {
+  RenderViewConfiguration createViewConfiguration() {
     final double devicePixelRatio = window.devicePixelRatio;
     final Size size = _surfaceSize ?? window.physicalSize / devicePixelRatio;
-    return ViewConfiguration(
+    return RenderViewConfiguration(
       size: size,
       devicePixelRatio: devicePixelRatio,
     );
@@ -1528,7 +1528,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  ViewConfiguration createViewConfiguration() {
+  RenderViewConfiguration createViewConfiguration() {
     return TestViewConfiguration(
       size: _surfaceSize ?? _kDefaultTestViewportSize,
       window: window,
@@ -1551,10 +1551,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 }
 
-/// A [ViewConfiguration] that pretends the display is of a particular size. The
+/// A [RenderViewConfiguration] that pretends the display is of a particular size. The
 /// size is in logical pixels. The resulting ViewConfiguration maps the given
 /// size onto the actual display using the [BoxFit.contain] algorithm.
-class TestViewConfiguration extends ViewConfiguration {
+class TestViewConfiguration extends RenderViewConfiguration {
   /// Creates a [TestViewConfiguration] with the given size. Defaults to 800x600.
   ///
   /// If a [window] instance is not provided it defaults to [ui.window].
@@ -1630,7 +1630,7 @@ class _LiveTestPointerRecord {
 
 class _LiveTestRenderView extends RenderView {
   _LiveTestRenderView({
-    ViewConfiguration configuration,
+    RenderViewConfiguration configuration,
     this.onNeedPaint,
     @required ui.SingletonFlutterWindow window,
   }) : super(configuration: configuration, window: window);
