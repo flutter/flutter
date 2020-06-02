@@ -687,7 +687,7 @@ tasks:
 
   ios_app_with_extensions_test:
     description: >
-      Checks that an iOS app with extensions can be build for physical and simulated devices.
+      Checks that an iOS app with extensions can be built for physical and simulated devices.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
