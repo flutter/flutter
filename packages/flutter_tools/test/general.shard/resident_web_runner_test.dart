@@ -257,21 +257,13 @@ void main() {
     expect(bufferLogger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
     expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
   }, overrides: <Type, Generator>{
-    Logger: () => DelegateLogger(BufferLogger.test()),
-  }));
-
-  test('WebRunner copies compiled app.dill to cache during startup', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
-    _setupMocks();
-
-    residentWebRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    expect(await globals.fs.file(globals.fs.path.join('build', 'cache.dill')).readAsString(), 'ABC');
+    Logger: () => DelegateLogger(BufferLogger(
+      terminal: AnsiTerminal(
+        stdio: null,
+        platform: const LocalPlatform(),
+      ),
+      outputPreferences: OutputPreferences.test(),
+    )),
   }));
 
   test('Can successfully run without an index.html including status warning', () => testbed.run(() async {
