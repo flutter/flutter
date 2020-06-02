@@ -230,6 +230,46 @@ void main() {
     expect(find.text('Subtitle'), findsOneWidget);
   });
 
+  testWidgets('ExpansionTile maintainState', (WidgetTester tester) async {
+     await tester.pumpWidget(
+       MaterialApp(
+         theme: ThemeData(
+           platform: TargetPlatform.iOS,
+           dividerColor: _dividerColor,
+         ),
+         home: Material(
+           child: SingleChildScrollView(
+             child: Column(
+               children: const <Widget>[
+                 ExpansionTile(
+                   title: Text('Tile 1'),
+                   initiallyExpanded: false,
+                   maintainState: true,
+                   children: <Widget>[
+                     Text('Maintaining State'),
+                   ],
+                 ),
+                 ExpansionTile(
+                   title: Text('Title 2'),
+                   initiallyExpanded: false,
+                   maintainState: false,
+                   children: <Widget>[
+                     Text('Discarding State'),
+                   ],
+                 ),
+               ],
+             ),
+           ),
+         ),
+     ));
+
+     // This text should be offstage while ExpansionTile collapsed
+     expect(find.text('Maintaining State', skipOffstage: false), findsOneWidget);
+     expect(find.text('Maintaining State'), findsNothing);
+     // This text shouldn't be there while ExpansionTile collapsed
+     expect(find.text('Discarding State'), findsNothing);
+   });
+
   testWidgets('ExpansionTile padding test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
@@ -382,6 +422,63 @@ void main() {
     // the offset of left and right edges from Column should be equal.
     expect(child1Rect.left - columnRect.left, columnRect.right - child1Rect.right);
 
+  });
+
+  testWidgets('childrenPadding default value', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: ExpansionTile(
+            title: const Text('title'),
+            children: <Widget>[
+              Container(height: 100, width: 100),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    final Rect columnRect = tester.getRect(find.byType(Column).last);
+    final Rect paddingRect = tester.getRect(find.byType(Padding).last);
+
+    // By default, the value of childrenPadding is EdgeInsets.zero, hence offset
+    // of all the edges from x-axis and y-axis should be equal for Padding and Column.
+    expect(columnRect.top, paddingRect.top);
+    expect(columnRect.left, paddingRect.left);
+    expect(columnRect.right, paddingRect.right);
+    expect(columnRect.bottom, paddingRect.bottom);
+  });
+
+  testWidgets('ExpansionTile childrenPadding test', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: ExpansionTile(
+            title: const Text('title'),
+            childrenPadding: const EdgeInsets.fromLTRB(10, 8, 12, 4),
+            children: <Widget>[
+              Container(height: 100, width: 100),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    final Rect columnRect = tester.getRect(find.byType(Column).last);
+    final Rect paddingRect = tester.getRect(find.byType(Padding).last);
+
+    // Check the offset of all the edges from x-axis and y-axis after childrenPadding
+    // is applied.
+    expect(columnRect.left, paddingRect.left + 10);
+    expect(columnRect.top, paddingRect.top + 8);
+    expect(columnRect.right, paddingRect.right - 12);
+    expect(columnRect.bottom, paddingRect.bottom - 4);
   });
 
 }

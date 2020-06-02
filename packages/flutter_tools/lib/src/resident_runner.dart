@@ -4,10 +4,10 @@
 
 import 'dart:async';
 
-import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -21,7 +21,10 @@ import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'build_system/build_system.dart';
+import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
+import 'cache.dart';
 import 'codegen.dart';
 import 'compile.dart';
 import 'convert.dart';
@@ -181,6 +184,7 @@ class FlutterDevice {
     Restart restart,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
+    GetSkSLMethod getSkSLMethod,
   }) {
     final Completer<void> completer = Completer<void>();
     StreamSubscription<void> subscription;
@@ -199,6 +203,7 @@ class FlutterDevice {
           restart: restart,
           compileExpression: compileExpression,
           reloadMethod: reloadMethod,
+          getSkSLMethod: getSkSLMethod,
           device: device,
         );
       } on Exception catch (exception) {
@@ -286,6 +291,8 @@ class FlutterDevice {
       fsName,
       rootDirectory,
       osUtils: globals.os,
+      fileSystem: globals.fs,
+      logger: globals.logger,
     );
     return devFS.create();
   }
@@ -798,6 +805,40 @@ abstract class ResidentRunner {
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
   }
 
+
+  BuildResult _lastBuild;
+  Environment _environment;
+  Future<void> runSourceGenerators() async {
+    _environment ??= Environment(
+      artifacts: globals.artifacts,
+      logger: globals.logger,
+      cacheDir: globals.cache.getRoot(),
+      engineVersion: globals.flutterVersion.engineRevision,
+      fileSystem: globals.fs,
+      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+      outputDir: globals.fs.directory(getBuildDirectory()),
+      processManager: globals.processManager,
+      projectDir: globals.fs.currentDirectory,
+    );
+    globals.logger.printTrace('Starting incremental build...');
+    _lastBuild = await globals.buildSystem.buildIncremental(
+      const GenerateLocalizationsTarget(),
+      _environment,
+      _lastBuild,
+    );
+    if (!_lastBuild.success) {
+      for (final ExceptionMeasurement exceptionMeasurement in _lastBuild.exceptions.values) {
+        globals.logger.printError(
+          exceptionMeasurement.exception.toString(),
+          stackTrace: globals.logger.isVerbose
+            ? exceptionMeasurement.stackTrace
+            : null,
+        );
+      }
+    }
+    globals.logger.printTrace('complete');
+  }
+
   /// Toggle whether canvaskit is being used for rendering, returning the new
   /// state.
   ///
@@ -814,7 +855,9 @@ abstract class ResidentRunner {
   }
 
   /// Write the SkSL shaders to a zip file in build directory.
-  Future<void> writeSkSL() async {
+  ///
+  /// Returns the name of the file, or `null` on failures.
+  Future<String> writeSkSL() async {
     if (!supportsWriteSkSL) {
       throw Exception('writeSkSL is not supported by this runner.');
     }
@@ -831,7 +874,7 @@ abstract class ResidentRunner {
         '  1. Pass "--cache-sksl" as an argument to flutter run.\n'
         '  2. Interact with the application to force shaders to be compiled.\n'
       );
-      return;
+      return null;
     }
     final File outputFile = globals.fsUtils.getUniqueFile(
       globals.fs.currentDirectory,
@@ -860,6 +903,7 @@ abstract class ResidentRunner {
     };
     outputFile.writeAsStringSync(json.encode(manifest));
     globals.logger.printStatus('Wrote SkSL data to ${outputFile.path}.');
+    return outputFile.path;
   }
 
   /// The resident runner API for interaction with the reloadMethod vmservice
@@ -1064,6 +1108,7 @@ abstract class ResidentRunner {
     Restart restart,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
+    GetSkSLMethod getSkSLMethod,
   }) async {
     if (!debuggingOptions.debuggingEnabled) {
       throw 'The service protocol is not enabled.';
@@ -1076,6 +1121,7 @@ abstract class ResidentRunner {
         restart: restart,
         compileExpression: compileExpression,
         reloadMethod: reloadMethod,
+        getSkSLMethod: getSkSLMethod
       );
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(
@@ -1198,6 +1244,7 @@ abstract class ResidentRunner {
         commandHelp.p.print();
         commandHelp.o.print();
         commandHelp.z.print();
+        commandHelp.g.print();
       } else {
         commandHelp.S.print();
         commandHelp.U.print();
@@ -1334,6 +1381,9 @@ class TerminalHandler {
       case 'd':
       case 'D':
         await residentRunner.detach();
+        return true;
+      case 'g':
+        await residentRunner.runSourceGenerators();
         return true;
       case 'h':
       case 'H':

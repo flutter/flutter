@@ -86,6 +86,8 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
+        '--old_gen_heap_size=2000',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -115,6 +117,8 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
+        '--old_gen_heap_size=2000',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -144,6 +148,8 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
+        '--old_gen_heap_size=2000',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -174,6 +180,8 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
+        '--old_gen_heap_size=2000',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -206,6 +214,8 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
+        '--old_gen_heap_size=2000',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -236,6 +246,8 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
+        '--old_gen_heap_size=2000',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -278,6 +290,8 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
+        '--old_gen_heap_size=2000',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -319,7 +333,7 @@ void main() {
     ]);
     androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
 
-    await const AotElfProfile().build(androidEnvironment);
+    await const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment);
 
     expect(processManager.hasRemainingExpectations, false);
   }));
@@ -327,14 +341,14 @@ void main() {
   test('AotElfProfile throws error if missing build mode', () => testbed.run(() async {
     androidEnvironment.defines.remove(kBuildMode);
 
-    expect(const AotElfProfile().build(androidEnvironment),
+    expect(const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment),
       throwsA(isA<MissingDefineException>()));
   }));
 
   test('AotElfProfile throws error if missing target platform', () => testbed.run(() async {
     androidEnvironment.defines.remove(kTargetPlatform);
 
-    expect(const AotElfProfile().build(androidEnvironment),
+    expect(const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment),
       throwsA(isA<MissingDefineException>()));
   }));
 
@@ -580,7 +594,7 @@ void main() {
       ]),
     ]);
 
-    await const AotElfRelease().build(androidEnvironment);
+    await const AotElfRelease(TargetPlatform.android_arm).build(androidEnvironment);
 
     expect(processManager.hasRemainingExpectations, false);
   }));

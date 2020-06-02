@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/depfile.dart';
 import '../build_system/targets/android.dart';
@@ -28,8 +29,8 @@ const List<Target> _kDefaultTargets = <Target>[
   // Shared targets
   CopyAssets(),
   KernelSnapshot(),
-  AotElfProfile(),
-  AotElfRelease(),
+  AotElfProfile(TargetPlatform.android_arm),
+  AotElfRelease(TargetPlatform.android_arm),
   AotAssemblyProfile(),
   AotAssemblyRelease(),
   // macOS targets
@@ -39,6 +40,8 @@ const List<Target> _kDefaultTargets = <Target>[
   ReleaseMacOSBundleFlutterAssets(),
   // Linux targets
   DebugBundleLinuxAssets(),
+  ProfileBundleLinuxAssets(),
+  ReleaseBundleLinuxAssets(),
   // Web targets
   WebServiceWorker(),
   ReleaseAndroidApplication(),
@@ -62,6 +65,8 @@ const List<Target> _kDefaultTargets = <Target>[
   // Windows targets
   UnpackWindows(),
   DebugBundleWindowsAssets(),
+  ProfileBundleWindowsAssets(),
+  ReleaseBundleWindowsAssets(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build

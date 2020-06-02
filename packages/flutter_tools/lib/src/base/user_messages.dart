@@ -98,7 +98,7 @@ class UserMessages {
       'Android license status unknown.\n'
       'Try re-installing or updating your Android SDK Manager.\n'
       'See https://developer.android.com/studio/#downloads or visit '
-      'visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
+      '${_androidSdkInstallUrl(platform)} for detailed instructions.';
   String androidSdkManagerOutdated(String managerPath) =>
       'A newer version of the Android SDK is required. To update, run:\n'
       '$managerPath --update\n';
@@ -212,6 +212,21 @@ class UserMessages {
       'The current Visual Studio installation is not launchable. Please reinstall Visual Studio.';
   String get visualStudioIsIncomplete => 'The current Visual Studio installation is incomplete. Please reinstall Visual Studio.';
   String get visualStudioRebootRequired => 'Visual Studio requires a reboot of your system to complete installation.';
+
+  // Messages used in LinuxDoctorValidator
+  String get clangMissing => 'clang++ is required for Linux development.\n'
+      'It is likely available from your distribution (e.g.: apt install clang), or '
+      'can be downloaded from https://releases.llvm.org/';
+  String clangTooOld(String minimumVersion) => 'clang++ $minimumVersion or later is required.';
+  String get cmakeMissing => 'CMake is required for Linux development.\n'
+      'It is likely available from your distribution (e.g.: apt install cmake), or '
+      'can be downloaded from https://cmake.org/download/';
+  String cmakeTooOld(String minimumVersion) => 'cmake $minimumVersion or later is required.';
+  String ninjaVersion(String version) => 'ninja version $version';
+  String get ninjaMissing => 'ninja is required for Linux development.\n'
+      'It is likely available from your distribution (e.g.: apt install ninja-build), or '
+      'can be downloaded from https://github.com/ninja-build/ninja/releases';
+  String ninjaTooOld(String minimumVersion) => 'ninja $minimumVersion or later is required.';
 
   // Messages used in FlutterCommand
   String flutterElapsedTime(String name, String elapsedTime) => '"flutter $name" took $elapsedTime.';

@@ -1927,7 +1927,6 @@ abstract class RenderBox extends RenderObject {
     assert(constraints != null);
     assert(() {
       if (!hasSize) {
-        assert(!debugNeedsLayout); // this is called in the size= setter during layout, but in that case we have a size
         DiagnosticsNode contract;
         if (sizedByParent)
           contract = ErrorDescription('Because this RenderBox has sizedByParent set to true, it must set its size in performResize().');

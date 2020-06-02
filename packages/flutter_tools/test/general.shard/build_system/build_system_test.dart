@@ -581,6 +581,50 @@ void main() {
     expect(fileSystem.file('output/debug'), isNot(exists));
     expect(fileSystem.file('output/release'), exists);
   });
+
+  testWithoutContext('A target using canSkip can create a conditional output',  () async {
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+    final File bar = environment.buildDir.childFile('bar');
+    final File foo = environment.buildDir.childFile('foo');
+
+    // The target will write a file `foo`, but only if `bar` already exists.
+    final TestTarget target = TestTarget(
+      (Environment environment) async {
+        foo.writeAsStringSync(bar.readAsStringSync());
+        environment.buildDir
+          .childFile('example.d')
+          .writeAsStringSync('${foo.path}: ${bar.path}');
+      },
+      (Environment environment) {
+        return !environment.buildDir.childFile('bar').existsSync();
+      }
+    )
+      ..depfiles = const <String>['example.d'];
+
+    // bar does not exist, there should be no inputs/outputs.
+    final BuildResult firstResult = await buildSystem.build(target, environment);
+
+    expect(foo, isNot(exists));
+    expect(firstResult.inputFiles, isEmpty);
+    expect(firstResult.outputFiles, isEmpty);
+
+    // bar is created, the target should be able to run.
+    bar.writeAsStringSync('content-1');
+    final BuildResult secondResult = await buildSystem.build(target, environment);
+
+    expect(foo, exists);
+    expect(secondResult.inputFiles.map((File file) => file.path), <String>[bar.path]);
+    expect(secondResult.outputFiles.map((File file) => file.path), <String>[foo.path]);
+
+    // bar is destroyed, foo is also deleted.
+    bar.deleteSync();
+    final BuildResult thirdResult = await buildSystem.build(target, environment);
+
+    expect(foo, isNot(exists));
+    expect(thirdResult.inputFiles, isEmpty);
+    expect(thirdResult.outputFiles, isEmpty);
+  });
+
 }
 
 BuildSystem setUpBuildSystem(FileSystem fileSystem) {
@@ -592,9 +636,19 @@ BuildSystem setUpBuildSystem(FileSystem fileSystem) {
 }
 
 class TestTarget extends Target {
-  TestTarget([this._build]);
+  TestTarget([this._build, this._canSkip]);
 
   final Future<void> Function(Environment environment) _build;
+
+  final bool Function(Environment environment) _canSkip;
+
+  @override
+  bool canSkip(Environment environment) {
+    if (_canSkip != null) {
+      return _canSkip(environment);
+    }
+    return super.canSkip(environment);
+  }
 
   @override
   Future<void> build(Environment environment) => _build(environment);

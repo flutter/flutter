@@ -263,6 +263,11 @@ class KernelCompiler {
     }
     final List<String> command = <String>[
       engineDartPath,
+      '--disable-dart-dev',
+      // This limit is in place to help track down
+      // https://github.com/flutter/flutter/issues/54420. It should be removed
+      // when the underlying issue is identified and fixed.
+      '--old_gen_heap_size=2000',
       frontendServer,
       '--sdk-root',
       sdkRoot,
@@ -648,6 +653,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
     );
     final List<String> command = <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--disable-dart-dev',
+      // This limit is in place to help track down
+      // https://github.com/flutter/flutter/issues/54420. It should be removed
+      // when the underlying issue is identified and fixed.
+      '--old_gen_heap_size=2000',
       frontendServer,
       '--sdk-root',
       sdkRoot,

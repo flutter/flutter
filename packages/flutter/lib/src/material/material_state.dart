@@ -4,6 +4,9 @@
 
 import 'dart:ui' show Color;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+
 /// Interactive states that some of the Material widgets can take on when
 /// receiving input from the user.
 ///
@@ -176,6 +179,98 @@ class _MaterialStateColor extends MaterialStateColor {
 
   @override
   Color resolve(Set<MaterialState> states) => _resolve(states);
+}
+
+
+/// Defines a [MouseCursor] whose value depends on a set of [MaterialState]s which
+/// represent the interactive state of a component.
+///
+/// This kind of [MouseCursor] is useful when the set of interactive actions a
+/// widget supports varies with its state. For example, a mouse pointer hovering
+/// over a disabled [FlatButton] should not display [SystemMouseCursors.click],
+/// since the button is not clickable. To solve this, you can use
+/// [MaterialStateMouseCursor] to assign a different cursor (such as
+/// [SystemMouseCursors.basic]) when the [FlatButton] is disabled.
+///
+/// To use a [MaterialStateMouseCursor], you should create a subclass of
+/// [MaterialStateMouseCursor] and implement the abstract `resolve` method.
+///
+/// {@tool snippet}
+///
+/// In this next example, we see how you can create a `MaterialStateMouseCursor` by
+/// extending the abstract class and overriding the `resolve` method.
+///
+/// ```dart
+/// class ButtonCursor extends MaterialStateMouseCursor {
+///   const ButtonCursor();
+///
+///   @override
+///   MouseCursor resolve(Set<MaterialState> states) {
+///     if (states.contains(MaterialState.disabled)) {
+///       return SystemMouseCursors.forbidden;
+///     }
+///     return SystemMouseCursors.click;
+///   }
+///
+///   @override
+///   String get debugDescription => 'ButtonCursor()';
+/// }
+///
+/// class MyFlatButton extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return FlatButton(
+///       child: Text('FlatButton'),
+///       onPressed: () {},
+///       mouseCursor: const ButtonCursor(),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
+/// This should only be used as parameters when they are documented to take
+/// [MaterialStateMouseCursor], otherwise only the default state will be used.
+abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialStateProperty<MouseCursor> {
+  /// Creates a [MaterialStateMouseCursor].
+  const MaterialStateMouseCursor();
+
+  @protected
+  @override
+  MouseCursorSession createSession(int device) {
+    return resolve(<MaterialState>{}).createSession(device);
+  }
+
+  /// Returns a [MouseCursor] that's to be used when a Material component is in
+  /// the specified state.
+  ///
+  /// This method should never return null.
+  @override
+  MouseCursor resolve(Set<MaterialState> states);
+
+  /// A mouse cursor for clickable material widgets, which resolves differently
+  /// when the widget is disabled.
+  ///
+  /// By default this cursor resolves to [SystemMouseCursors.click]. If the widget is
+  /// disabled, the cursor resolves to [SystemMouseCursors.basic].
+  ///
+  /// This cursor is the default for many Material widgets.
+  static const MaterialStateMouseCursor clickable = _ClickableMouseCursor();
+}
+
+class _ClickableMouseCursor extends MaterialStateMouseCursor {
+  const _ClickableMouseCursor();
+
+  @override
+  MouseCursor resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return SystemMouseCursors.basic;
+    }
+    return SystemMouseCursors.click;
+  }
+
+  @override
+  String get debugDescription => 'MaterialStateMouseCursor(clickable)';
 }
 
 /// Interface for classes that can return a value of type `T` based on a set of
