@@ -691,7 +691,7 @@ class BoxHitTestResult extends HitTestResult {
   /// parent don't share the same origin.
   ///
   /// ```dart
-  /// abstract class Foo extends RenderBox {
+  /// abstract class RenderFoo extends RenderBox {
   ///
   ///   final Matrix4 _effectiveTransform = Matrix4.rotationZ(50);
   ///
@@ -752,7 +752,7 @@ class BoxHitTestResult extends HitTestResult {
   ///
   /// A null value for `offset` is treated as if [Offset.zero] was provided.
   ///
-  /// Se also:
+  /// See also:
   ///
   ///  * [addWithPaintTransform], which takes a generic paint transform matrix and
   ///    documents the intended usage of this API in more detail.
@@ -789,7 +789,7 @@ class BoxHitTestResult extends HitTestResult {
   /// the child speaks a different hit test protocol then the parent and the
   /// position is not required to do the actual hit testing in that protocol.
   ///
-  /// Se also:
+  /// See also:
   ///
   ///  * [addWithPaintTransform], which accomplishes the same thing, but takes a
   ///    _paint_ transform matrix.
