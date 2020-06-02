@@ -166,9 +166,9 @@ void main() {
           'pwsh.exe',
           'Expand-Archive',
           '-Path',
-          'a',
+          '"a"',
           '-DestinationPath',
-          'b'
+          '"b"'
         ],
       ),
     ]);
@@ -192,9 +192,9 @@ void main() {
           'pwsh.exe',
           'Expand-Archive',
           '-Path',
-          'a',
+          '"a"',
           '-DestinationPath',
-          'b'
+          '"b"'
         ],
         stderr: kPowershellException,
       ),
@@ -220,9 +220,9 @@ void main() {
           'pwsh.exe',
           'Compress-Archive',
           '-Path',
-          'b',
+          '"b"',
           '-DestinationPath',
-          'a'
+          '"a"'
         ],
       ),
     ]);
@@ -246,9 +246,9 @@ void main() {
           'pwsh.exe',
           'Compress-Archive',
           '-Path',
-          'b',
+          '"b"',
           '-DestinationPath',
-          'a'
+          '"a"'
         ],
         stderr: kPowershellException,
       ),

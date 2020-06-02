@@ -327,9 +327,9 @@ class _WindowsUtils extends OperatingSystemUtils {
       _activePowershell,
       'Compress-Archive',
       '-Path',
-      data.path,
+      '"${data.path}"',
       '-DestinationPath',
-      zipFile.path,
+      '"${zipFile.path}"',
     ]);
     if (result.stderr.isNotEmpty) {
       throw ProcessException(_activePowershell, <String>['Compress-Archive'], result.stderr);
@@ -342,9 +342,9 @@ class _WindowsUtils extends OperatingSystemUtils {
       _activePowershell,
       'Expand-Archive',
       '-Path',
-      file.path,
+      '"${file.path}"',
       '-DestinationPath',
-      targetDirectory.path,
+      '"${targetDirectory.path}"',
     ], throwOnError: true);
     if (result.stderr.isNotEmpty) {
       throw ProcessException(_activePowershell, <String>['Expand-Archive'], result.stderr);
