@@ -14,6 +14,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('PaintingBinding with memory pressure before initInstances', () {
+    // Observed in devicelab: the device sends a memory pressure event to us
+    // after PaintingBinding has been created but before initInstances called,
+    // meaning the imageCache member is still null.
     final PaintingBinding binding = TestPaintingBinding();
     expect(binding.imageCache, null);
     binding.handleMemoryPressure();
