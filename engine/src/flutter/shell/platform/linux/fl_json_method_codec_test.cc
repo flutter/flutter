@@ -119,22 +119,24 @@ static void decode_response_with_error(const char* text,
   EXPECT_STREQ(
       fl_method_error_response_get_code(FL_METHOD_ERROR_RESPONSE(response)),
       code);
-  if (error_message == nullptr)
+  if (error_message == nullptr) {
     EXPECT_EQ(fl_method_error_response_get_message(
                   FL_METHOD_ERROR_RESPONSE(response)),
               nullptr);
-  else
+  } else {
     EXPECT_STREQ(fl_method_error_response_get_message(
                      FL_METHOD_ERROR_RESPONSE(response)),
                  error_message);
-  if (details == nullptr)
+  }
+  if (details == nullptr) {
     EXPECT_EQ(fl_method_error_response_get_details(
                   FL_METHOD_ERROR_RESPONSE(response)),
               nullptr);
-  else
+  } else {
     EXPECT_TRUE(fl_value_equal(fl_method_error_response_get_details(
                                    FL_METHOD_ERROR_RESPONSE(response)),
                                details));
+  }
 }
 
 // Decode a response using JsonMethodCodec. Expect the given error.

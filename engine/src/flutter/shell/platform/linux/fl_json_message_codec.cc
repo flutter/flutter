@@ -259,10 +259,11 @@ static FlValue* fl_json_message_codec_decode_message(FlMessageCodec* codec,
     if (handler.error != nullptr) {
       g_propagate_error(error, handler.error);
       handler.error = nullptr;
-    } else
+    } else {
       g_set_error(error, FL_JSON_MESSAGE_CODEC_ERROR,
                   FL_JSON_MESSAGE_CODEC_ERROR_INVALID_JSON,
                   "Message is not valid JSON");
+    }
     return nullptr;
   }
 

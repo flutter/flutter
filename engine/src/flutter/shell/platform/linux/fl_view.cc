@@ -209,10 +209,11 @@ static void fl_view_size_allocate(GtkWidget* widget,
 
   gtk_widget_set_allocation(widget, allocation);
 
-  if (gtk_widget_get_realized(widget) && gtk_widget_get_has_window(widget))
+  if (gtk_widget_get_realized(widget) && gtk_widget_get_has_window(widget)) {
     gdk_window_move_resize(gtk_widget_get_window(widget), allocation->x,
                            allocation->y, allocation->width,
                            allocation->height);
+  }
 
   // TODO(robert-ancell): This pixel ratio won't work on hidpi displays.
   fl_engine_send_window_metrics_event(self->engine, allocation->width,
