@@ -205,104 +205,104 @@ static gchar* encode_float(double value) {
 
 TEST(FlStandardMessageCodecTest, EncodeFloatZero) {
   g_autofree gchar* hex_string = encode_float(0);
-  EXPECT_STREQ(hex_string, "060000000000000000");
+  EXPECT_STREQ(hex_string, "06000000000000000000000000000000");
 }
 
 TEST(FlStandardMessageCodecTest, EncodeFloatOne) {
   g_autofree gchar* hex_string = encode_float(1);
-  EXPECT_STREQ(hex_string, "06000000000000f03f");
+  EXPECT_STREQ(hex_string, "0600000000000000000000000000f03f");
 }
 
 TEST(FlStandardMessageCodecTest, EncodeFloatMinusOne) {
   g_autofree gchar* hex_string = encode_float(-1);
-  EXPECT_STREQ(hex_string, "06000000000000f0bf");
+  EXPECT_STREQ(hex_string, "0600000000000000000000000000f0bf");
 }
 
 TEST(FlStandardMessageCodecTest, EncodeFloatHalf) {
   g_autofree gchar* hex_string = encode_float(0.5);
-  EXPECT_STREQ(hex_string, "06000000000000e03f");
+  EXPECT_STREQ(hex_string, "0600000000000000000000000000e03f");
 }
 
 TEST(FlStandardMessageCodecTest, EncodeFloatFraction) {
   g_autofree gchar* hex_string = encode_float(M_PI);
-  EXPECT_STREQ(hex_string, "06182d4454fb210940");
+  EXPECT_STREQ(hex_string, "0600000000000000182d4454fb210940");
 }
 
 TEST(FlStandardMessageCodecTest, EncodeFloatMinusZero) {
   g_autofree gchar* hex_string = encode_float(-0.0);
-  EXPECT_STREQ(hex_string, "060000000000000080");
+  EXPECT_STREQ(hex_string, "06000000000000000000000000000080");
 }
 
 TEST(FlStandardMessageCodecTest, EncodeFloatNaN) {
   g_autofree gchar* hex_string = encode_float(NAN);
-  EXPECT_STREQ(hex_string, "06000000000000f87f");
+  EXPECT_STREQ(hex_string, "0600000000000000000000000000f87f");
 }
 
 TEST(FlStandardMessageCodecTest, EncodeFloatInfinity) {
   g_autofree gchar* hex_string = encode_float(INFINITY);
-  EXPECT_STREQ(hex_string, "06000000000000f07f");
+  EXPECT_STREQ(hex_string, "0600000000000000000000000000f07f");
 }
 
 TEST(FlStandardMessageCodecTest, DecodeFloatZero) {
-  g_autoptr(FlValue) value = decode_message("060000000000000000");
+  g_autoptr(FlValue) value = decode_message("06000000000000000000000000000000");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT);
   EXPECT_EQ(fl_value_get_float(value), 0.0);
 }
 
 TEST(FlStandardMessageCodecTest, DecodeFloatOne) {
-  g_autoptr(FlValue) value = decode_message("06000000000000f03f");
+  g_autoptr(FlValue) value = decode_message("0600000000000000000000000000f03f");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT);
   EXPECT_EQ(fl_value_get_float(value), 1.0);
 }
 
 TEST(FlStandardMessageCodecTest, DecodeFloatMinusOne) {
-  g_autoptr(FlValue) value = decode_message("06000000000000f0bf");
+  g_autoptr(FlValue) value = decode_message("0600000000000000000000000000f0bf");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT);
   EXPECT_EQ(fl_value_get_float(value), -1.0);
 }
 
 TEST(FlStandardMessageCodecTest, DecodeFloatHalf) {
-  g_autoptr(FlValue) value = decode_message("06000000000000e03f");
+  g_autoptr(FlValue) value = decode_message("0600000000000000000000000000e03f");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT);
   EXPECT_EQ(fl_value_get_float(value), 0.5);
 }
 
 TEST(FlStandardMessageCodecTest, DecodeFloatPi) {
-  g_autoptr(FlValue) value = decode_message("06182d4454fb210940");
+  g_autoptr(FlValue) value = decode_message("0600000000000000182d4454fb210940");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT);
   EXPECT_EQ(fl_value_get_float(value), M_PI);
 }
 
 TEST(FlStandardMessageCodecTest, DecodeFloatMinusZero) {
-  g_autoptr(FlValue) value = decode_message("060000000000000080");
+  g_autoptr(FlValue) value = decode_message("06000000000000000000000000000080");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT);
   EXPECT_EQ(fl_value_get_float(value), -0.0);
 }
 
 TEST(FlStandardMessageCodecTest, DecodeFloatNaN) {
-  g_autoptr(FlValue) value = decode_message("06000000000000f87f");
+  g_autoptr(FlValue) value = decode_message("0600000000000000000000000000f87f");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT);
   EXPECT_TRUE(isnan(fl_value_get_float(value)));
 }
 
 TEST(FlStandardMessageCodecTest, DecodeFloatInfinity) {
-  g_autoptr(FlValue) value = decode_message("06000000000000f07f");
+  g_autoptr(FlValue) value = decode_message("0600000000000000000000000000f07f");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT);
   EXPECT_TRUE(isinf(fl_value_get_float(value)));
 }
 
 TEST(FlStandardMessageCodecTest, DecodeFloatNoData) {
-  decode_error_value("0600", FL_MESSAGE_CODEC_ERROR,
+  decode_error_value("060000000000000000", FL_MESSAGE_CODEC_ERROR,
                      FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
 }
 
 TEST(FlStandardMessageCodecTest, DecodeFloatShortData1) {
-  decode_error_value("0600", FL_MESSAGE_CODEC_ERROR,
+  decode_error_value("060000000000000000", FL_MESSAGE_CODEC_ERROR,
                      FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
 }
 
 TEST(FlStandardMessageCodecTest, DecodeFloatShortData2) {
-  decode_error_value("0600000000000000", FL_MESSAGE_CODEC_ERROR,
+  decode_error_value("060000000000000000000000000000", FL_MESSAGE_CODEC_ERROR,
                      FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
 }
 
@@ -419,25 +419,25 @@ TEST(FlStandardMessageCodecTest, DecodeUint8ListShortData2) {
 TEST(FlStandardMessageCodecTest, EncodeInt32ListEmpty) {
   g_autoptr(FlValue) value = fl_value_new_int32_list(nullptr, 0);
   g_autofree gchar* hex_string = encode_message(value);
-  EXPECT_STREQ(hex_string, "0900");
+  EXPECT_STREQ(hex_string, "09000000");
 }
 
 TEST(FlStandardMessageCodecTest, EncodeInt32List) {
   int32_t data[] = {0, -1, 2, -3, 4};
   g_autoptr(FlValue) value = fl_value_new_int32_list(data, 5);
   g_autofree gchar* hex_string = encode_message(value);
-  EXPECT_STREQ(hex_string, "090500000000ffffffff02000000fdffffff04000000");
+  EXPECT_STREQ(hex_string, "0905000000000000ffffffff02000000fdffffff04000000");
 }
 
 TEST(FlStandardMessageCodecTest, DecodeInt32ListEmpty) {
-  g_autoptr(FlValue) value = decode_message("0900");
+  g_autoptr(FlValue) value = decode_message("09000000");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_INT32_LIST);
   EXPECT_EQ(fl_value_get_length(value), static_cast<size_t>(0));
 }
 
 TEST(FlStandardMessageCodecTest, DecodeInt32List) {
   g_autoptr(FlValue) value =
-      decode_message("090500000000ffffffff02000000fdffffff04000000");
+      decode_message("0905000000000000ffffffff02000000fdffffff04000000");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_INT32_LIST);
   const int32_t* data = fl_value_get_int32_list(value);
   EXPECT_EQ(data[0], 0);
@@ -453,12 +453,12 @@ TEST(FlStandardMessageCodecTest, DecodeInt32ListNoData) {
 }
 
 TEST(FlStandardMessageCodecTest, DecodeInt32ListLengthNoData) {
-  decode_error_value("0905", FL_MESSAGE_CODEC_ERROR,
+  decode_error_value("09050000", FL_MESSAGE_CODEC_ERROR,
                      FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
 }
 
 TEST(FlStandardMessageCodecTest, DecodeInt32ListShortData1) {
-  decode_error_value("090500", FL_MESSAGE_CODEC_ERROR,
+  decode_error_value("0905000000", FL_MESSAGE_CODEC_ERROR,
                      FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
 }
 
@@ -471,27 +471,28 @@ TEST(FlStandardMessageCodecTest, DecodeInt32ListShortData2) {
 TEST(FlStandardMessageCodecTest, EncodeInt64ListEmpty) {
   g_autoptr(FlValue) value = fl_value_new_int64_list(nullptr, 0);
   g_autofree gchar* hex_string = encode_message(value);
-  EXPECT_STREQ(hex_string, "0a00");
+  EXPECT_STREQ(hex_string, "0a00000000000000");
 }
 
 TEST(FlStandardMessageCodecTest, EncodeInt64List) {
   int64_t data[] = {0, -1, 2, -3, 4};
   g_autoptr(FlValue) value = fl_value_new_int64_list(data, 5);
   g_autofree gchar* hex_string = encode_message(value);
-  EXPECT_STREQ(hex_string,
-               "0a050000000000000000ffffffffffffffff0200000000000000fdffffff"
-               "ffffffff0400000000000000");
+  EXPECT_STREQ(
+      hex_string,
+      "0a050000000000000000000000000000ffffffffffffffff0200000000000000fdffffff"
+      "ffffffff0400000000000000");
 }
 
 TEST(FlStandardMessageCodecTest, DecodeInt64ListEmpty) {
-  g_autoptr(FlValue) value = decode_message("0a00");
+  g_autoptr(FlValue) value = decode_message("0a00000000000000");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_INT64_LIST);
   EXPECT_EQ(fl_value_get_length(value), static_cast<size_t>(0));
 }
 
 TEST(FlStandardMessageCodecTest, DecodeInt64List) {
   g_autoptr(FlValue) value = decode_message(
-      "0a050000000000000000ffffffffffffffff0200000000000000fdffffff"
+      "0a050000000000000000000000000000ffffffffffffffff0200000000000000fdffffff"
       "ffffffff0400000000000000");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_INT64_LIST);
   const int64_t* data = fl_value_get_int64_list(value);
@@ -508,18 +509,19 @@ TEST(FlStandardMessageCodecTest, DecodeInt64ListNoData) {
 }
 
 TEST(FlStandardMessageCodecTest, DecodeInt64ListLengthNoData) {
-  decode_error_value("0a05", FL_MESSAGE_CODEC_ERROR,
+  decode_error_value("0a05000000000000", FL_MESSAGE_CODEC_ERROR,
                      FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
 }
 
 TEST(FlStandardMessageCodecTest, DecodeInt64ListShortData1) {
-  decode_error_value("0a0500", FL_MESSAGE_CODEC_ERROR,
+  decode_error_value("0a0500000000000000", FL_MESSAGE_CODEC_ERROR,
                      FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
 }
 
 TEST(FlStandardMessageCodecTest, DecodeInt64ListShortData2) {
   decode_error_value(
-      "0a050000000000000000ffffffffffffffff0200000000000000fdffffffffffffff0400"
+      "0a050000000000000000000000000000ffffffffffffffff0200000000000000fdffffff"
+      "ffffffff0400"
       "0000000000",
       FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
 }
@@ -527,27 +529,28 @@ TEST(FlStandardMessageCodecTest, DecodeInt64ListShortData2) {
 TEST(FlStandardMessageCodecTest, EncodeFloatListEmpty) {
   g_autoptr(FlValue) value = fl_value_new_float_list(nullptr, 0);
   g_autofree gchar* hex_string = encode_message(value);
-  EXPECT_STREQ(hex_string, "0b00");
+  EXPECT_STREQ(hex_string, "0b00000000000000");
 }
 
 TEST(FlStandardMessageCodecTest, EncodeFloatList) {
   double data[] = {0, -0.5, 0.25, -0.125, 0.00625};
   g_autoptr(FlValue) value = fl_value_new_float_list(data, 5);
   g_autofree gchar* hex_string = encode_message(value);
-  EXPECT_STREQ(hex_string,
-               "0b050000000000000000000000000000e0bf000000000000d03f00000000"
-               "0000c0bf9a9999999999793f");
+  EXPECT_STREQ(
+      hex_string,
+      "0b050000000000000000000000000000000000000000e0bf000000000000d03f00000000"
+      "0000c0bf9a9999999999793f");
 }
 
 TEST(FlStandardMessageCodecTest, DecodeFloatListEmpty) {
-  g_autoptr(FlValue) value = decode_message("0b00");
+  g_autoptr(FlValue) value = decode_message("0b00000000000000");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT_LIST);
   EXPECT_EQ(fl_value_get_length(value), static_cast<size_t>(0));
 }
 
 TEST(FlStandardMessageCodecTest, DecodeFloatList) {
   g_autoptr(FlValue) value = decode_message(
-      "0b050000000000000000000000000000e0bf000000000000d03f00000000"
+      "0b050000000000000000000000000000000000000000e0bf000000000000d03f00000000"
       "0000c0bf9a9999999999793f");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT_LIST);
   const double* data = fl_value_get_float_list(value);
@@ -564,18 +567,19 @@ TEST(FlStandardMessageCodecTest, DecodeFloatListNoData) {
 }
 
 TEST(FlStandardMessageCodecTest, DecodeFloatListLengthNoData) {
-  decode_error_value("0b05", FL_MESSAGE_CODEC_ERROR,
+  decode_error_value("0b05000000000000", FL_MESSAGE_CODEC_ERROR,
                      FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
 }
 
 TEST(FlStandardMessageCodecTest, DecodeFloatListShortData1) {
-  decode_error_value("0b0500", FL_MESSAGE_CODEC_ERROR,
+  decode_error_value("0b0500000000000000", FL_MESSAGE_CODEC_ERROR,
                      FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
 }
 
 TEST(FlStandardMessageCodecTest, DecodeFloatListShortData2) {
   decode_error_value(
-      "0b050000000000000000000000000000e0bf000000000000d03f000000000000c0bf9a99"
+      "0b050000000000000000000000000000000000000000e0bf000000000000d03f00000000"
+      "0000c0bf9a99"
       "9999999979",
       FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
 }
@@ -596,8 +600,9 @@ TEST(FlStandardMessageCodecTest, EncodeListTypes) {
   fl_value_append_take(value, fl_value_new_list());
   fl_value_append_take(value, fl_value_new_map());
   g_autofree gchar* hex_string = encode_message(value);
-  EXPECT_STREQ(hex_string,
-               "0c070001032a00000006182d4454fb210940070568656c6c6f0c000d00");
+  EXPECT_STREQ(
+      hex_string,
+      "0c070001032a00000006000000000000182d4454fb210940070568656c6c6f0c000d00");
 }
 
 TEST(FlStandardMessageCodecTest, EncodeListNested) {
@@ -626,7 +631,7 @@ TEST(FlStandardMessageCodecTest, DecodeListEmpty) {
 
 TEST(FlStandardMessageCodecTest, DecodeListTypes) {
   g_autoptr(FlValue) value = decode_message(
-      "0c070001032a00000006182d4454fb210940070568656c6c6f0c000d00");
+      "0c070001032a00000006000000000000182d4454fb210940070568656c6c6f0c000d00");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_LIST);
   ASSERT_EQ(fl_value_get_length(value), static_cast<size_t>(7));
   ASSERT_EQ(fl_value_get_type(fl_value_get_list_value(value, 0)),
@@ -692,9 +697,9 @@ TEST(FlStandardMessageCodecTest, DecodeListShortData1) {
 }
 
 TEST(FlStandardMessageCodecTest, DecodeListShortData2) {
-  decode_error_value("0c070001032a00000006000000000000f8bf070568656c6c6f0c000d",
-                     FL_MESSAGE_CODEC_ERROR,
-                     FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
+  decode_error_value(
+      "0c070001032a00000006000000000000182d4454fb210940070568656c6c6f0c000d",
+      FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
 }
 
 TEST(FlStandardMessageCodecTest, EncodeDecodeLargeList) {
@@ -738,9 +743,9 @@ TEST(FlStandardMessageCodecTest, EncodeMapKeyTypes) {
   fl_value_set_take(value, fl_value_new_map(), fl_value_new_string("map"));
   g_autofree gchar* hex_string = encode_message(value);
   EXPECT_STREQ(hex_string,
-               "0d070007046e756c6c010704626f6f6c032a0000000703696e7406182d4454f"
-               "b2109400705666c6f6174070568656c6c6f0706737472696e670c0007046c69"
-               "73740d0007036d6170");
+               "0d070007046e756c6c010704626f6f6c032a0000000703696e7406000000000"
+               "0182d4454fb2109400705666c6f6174070568656c6c6f0706737472696e670c"
+               "0007046c6973740d0007036d6170");
 }
 
 TEST(FlStandardMessageCodecTest, EncodeMapValueTypes) {
@@ -758,8 +763,8 @@ TEST(FlStandardMessageCodecTest, EncodeMapValueTypes) {
   g_autofree gchar* hex_string = encode_message(value);
   EXPECT_STREQ(hex_string,
                "0d0707046e756c6c000704626f6f6c010703696e74032a0000000705666c6f6"
-               "17406182d4454fb2109400706737472696e67070568656c6c6f07046c697374"
-               "0c0007036d61700d00");
+               "17406000000000000182d4454fb2109400706737472696e67070568656c6c6f"
+               "07046c6973740c0007036d61700d00");
 }
 
 TEST(FlStandardMessageCodecTest, EncodeMapNested) {
@@ -777,10 +782,10 @@ TEST(FlStandardMessageCodecTest, EncodeMapNested) {
   fl_value_set_string(value, "int-to-str", int_to_str);
   g_autofree gchar* hex_string = encode_message(value);
   EXPECT_STREQ(hex_string,
-               "0d02070a7374722d746f2d696e740d0407047a65726f030000000007036f"
-               "6e650301000000070374776f030200000007057468726565030300000007"
-               "0a696e742d746f2d7374720d04030000000007047a65726f030100000007"
-               "036f6e650302000000070374776f030300000007057468726565");
+               "0d02070a7374722d746f2d696e740d0407047a65726f030000000007036f6e6"
+               "50301000000070374776f0302000000070574687265650303000000070a696e"
+               "742d746f2d7374720d04030000000007047a65726f030100000007036f6e650"
+               "302000000070374776f030300000007057468726565");
 }
 
 TEST(FlStandardMessageCodecTest, DecodeMapEmpty) {
@@ -791,9 +796,9 @@ TEST(FlStandardMessageCodecTest, DecodeMapEmpty) {
 
 TEST(FlStandardMessageCodecTest, DecodeMapKeyTypes) {
   g_autoptr(FlValue) value = decode_message(
-      "0d070007046e756c6c010704626f6f6c032a0000000703696e7406182d4454fb21094007"
-      "05666c6f6174070568656c6c6f0706737472696e670c0007046c6973740d0007036d617"
-      "0");
+      "0d070007046e756c6c010704626f6f6c032a0000000703696e74060000000000182d4454"
+      "fb2109400705666c6f6174070568656c6c6f0706737472696e670c0007046c6973740d00"
+      "07036d6170");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_MAP);
   ASSERT_EQ(fl_value_get_length(value), static_cast<size_t>(7));
 
@@ -850,9 +855,9 @@ TEST(FlStandardMessageCodecTest, DecodeMapKeyTypes) {
 
 TEST(FlStandardMessageCodecTest, DecodeMapValueTypes) {
   g_autoptr(FlValue) value = decode_message(
-      "0d0707046e756c6c000704626f6f6c010703696e74032a0000000705666c6f617406182d"
-      "4454fb2109400706737472696e67070568656c6c6f07046c6973740c0007036d61700d0"
-      "0");
+      "0d0707046e756c6c000704626f6f6c010703696e74032a0000000705666c6f6174060000"
+      "00000000182d4454fb2109400706737472696e67070568656c6c6f07046c6973740c0007"
+      "036d61700d00");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_MAP);
   ASSERT_EQ(fl_value_get_length(value), static_cast<size_t>(7));
 
@@ -909,10 +914,10 @@ TEST(FlStandardMessageCodecTest, DecodeMapValueTypes) {
 
 TEST(FlStandardMessageCodecTest, DecodeMapNested) {
   g_autoptr(FlValue) value = decode_message(
-      "0d02070a7374722d746f2d696e740d0407047a65726f030000000007036f"
-      "6e650301000000070374776f030200000007057468726565030300000007"
-      "0a696e742d746f2d7374720d04030000000007047a65726f030100000007"
-      "036f6e650302000000070374776f030300000007057468726565");
+      "0d02070a7374722d746f2d696e740d0407047a65726f030000000007036f6e6503010000"
+      "00070374776f0302000000070574687265650303000000070a696e742d746f2d7374720d"
+      "04030000000007047a65726f030100000007036f6e650302000000070374776f03030000"
+      "0007057468726565");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_MAP);
   ASSERT_EQ(fl_value_get_length(value), static_cast<size_t>(2));
 
@@ -971,9 +976,9 @@ TEST(FlStandardMessageCodecTest, DecodeMapShortData1) {
 
 TEST(FlStandardMessageCodecTest, DecodeMapShortData2) {
   decode_error_value(
-      "0d0707046e756c6c000704626f6f6c010703696e74032a0000000705666c"
-      "6f617406000000000000f8bf0706737472696e67070568656c6c6f07046c"
-      "6973740c0007036d61700d",
+      "0d0707046e756c6c000704626f6f6c010703696e74032a0000000705666c6f6174060000"
+      "00000000182d4454fb2109400706737472696e67070568656c6c6f07046c6973740c0007"
+      "036d61700d",
       FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA);
 }
 
