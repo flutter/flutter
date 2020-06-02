@@ -151,7 +151,7 @@ TEST(FlJsonMessageCodecTest, DecodeIntMax) {
 
 TEST(FlJsonMessageCodecTest, DecodeUintMax) {
   // This is bigger than an signed 64 bit integer, so we expect it to be
-  // represented as a double
+  // represented as a double.
   g_autoptr(FlValue) value = decode_message("18446744073709551615");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT);
   EXPECT_EQ(fl_value_get_float(value), 1.8446744073709551615e+19);
@@ -159,7 +159,7 @@ TEST(FlJsonMessageCodecTest, DecodeUintMax) {
 
 TEST(FlJsonMessageCodecTest, DecodeHugeNumber) {
   // This is bigger than an unsigned 64 bit integer, so we expect it to be
-  // represented as a double
+  // represented as a double.
   g_autoptr(FlValue) value = decode_message("184467440737095516150");
   ASSERT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT);
   EXPECT_EQ(fl_value_get_float(value), 1.84467440737095516150e+20);

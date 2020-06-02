@@ -29,7 +29,7 @@ static void fl_json_method_codec_dispose(GObject* object) {
   G_OBJECT_CLASS(fl_json_method_codec_parent_class)->dispose(object);
 }
 
-// Implements FlMethodCodec::encode_method_call
+// Implements FlMethodCodec::encode_method_call.
 static GBytes* fl_json_method_codec_encode_method_call(FlMethodCodec* codec,
                                                        const gchar* name,
                                                        FlValue* args,
@@ -46,7 +46,7 @@ static GBytes* fl_json_method_codec_encode_method_call(FlMethodCodec* codec,
                                          error);
 }
 
-// Implements FlMethodCodec::decode_method_call
+// Implements FlMethodCodec::decode_method_call.
 static gboolean fl_json_method_codec_decode_method_call(FlMethodCodec* codec,
                                                         GBytes* message,
                                                         gchar** name,
@@ -86,7 +86,7 @@ static gboolean fl_json_method_codec_decode_method_call(FlMethodCodec* codec,
   return TRUE;
 }
 
-// Implements FlMethodCodec::encode_success_envelope
+// Implements FlMethodCodec::encode_success_envelope.
 static GBytes* fl_json_method_codec_encode_success_envelope(
     FlMethodCodec* codec,
     FlValue* result,
@@ -101,7 +101,7 @@ static GBytes* fl_json_method_codec_encode_success_envelope(
                                          error);
 }
 
-// Implements FlMethodCodec::encode_error_envelope
+// Implements FlMethodCodec::encode_error_envelope.
 static GBytes* fl_json_method_codec_encode_error_envelope(
     FlMethodCodec* codec,
     const gchar* code,
@@ -122,7 +122,7 @@ static GBytes* fl_json_method_codec_encode_error_envelope(
                                          error);
 }
 
-// Implements FlMethodCodec::decode_response
+// Implements FlMethodCodec::decode_response.
 static FlMethodResponse* fl_json_method_codec_decode_response(
     FlMethodCodec* codec,
     GBytes* message,

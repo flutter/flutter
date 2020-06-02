@@ -18,7 +18,7 @@ struct _FlBinaryMessenger {
 
   FlEngine* engine;
 
-  // PlatformMessageHandler keyed by channel name
+  // PlatformMessageHandler keyed by channel name.
   GHashTable* platform_message_handlers;
 };
 
@@ -27,7 +27,7 @@ G_DEFINE_TYPE(FlBinaryMessenger, fl_binary_messenger, G_TYPE_OBJECT)
 struct _FlBinaryMessengerResponseHandle {
   GObject parent_instance;
 
-  // Messenger sending response on
+  // Messenger sending response on.
   FlBinaryMessenger* messenger;
 
   // Handle to send the response with. This is cleared to nullptr when it is
@@ -102,7 +102,7 @@ static void engine_weak_notify_cb(gpointer user_data, GObject* object) {
   FlBinaryMessenger* self = FL_BINARY_MESSENGER(user_data);
   self->engine = nullptr;
 
-  // Disconnect any handlers
+  // Disconnect any handlers.
   g_hash_table_remove_all(self->platform_message_handlers);
 }
 
@@ -173,7 +173,7 @@ G_MODULE_EXPORT void fl_binary_messenger_set_message_handler_on_channel(
   g_return_if_fail(FL_IS_BINARY_MESSENGER(self));
   g_return_if_fail(channel != nullptr);
 
-  // Don't set handlers if engine already gone
+  // Don't set handlers if engine already gone.
   if (self->engine == nullptr) {
     if (handler != nullptr) {
       g_warning(
