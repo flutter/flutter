@@ -27,6 +27,7 @@ import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
+import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
 import io.flutter.embedding.engine.systemchannels.NavigationChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
@@ -615,6 +616,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(engine.getNavigationChannel()).thenReturn(mock(NavigationChannel.class));
     when(engine.getSystemChannel()).thenReturn(mock(SystemChannel.class));
     when(engine.getTextInputChannel()).thenReturn(mock(TextInputChannel.class));
+    when(engine.getMouseCursorChannel()).thenReturn(mock(MouseCursorChannel.class));
     when(engine.getActivityControlSurface()).thenReturn(mock(ActivityControlSurface.class));
 
     return engine;
