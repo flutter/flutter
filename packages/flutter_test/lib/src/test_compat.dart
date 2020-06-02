@@ -226,38 +226,6 @@ void group(Object description, void Function() body, { dynamic skip }) {
   _declarer.group(description.toString(), body, skip: skip);
 }
 
-/// Registers a function to be run before tests.
-///
-/// This function will be called before each test is run. [callback] may be
-/// asynchronous; if so, it must return a [Future].
-///
-/// If this is called within a test group, it applies only to tests in that
-/// group. [callback] will be run after any set-up callbacks in parent groups or
-/// at the top level.
-///
-/// Each callback at the top level or in a given group will be run in the order
-/// they were declared.
-void setUp(dynamic Function() body) {
-  _declarer.setUp(body);
-}
-
-/// Registers a function to be run after tests.
-///
-/// This function will be called after each test is run. [callback] may be
-/// asynchronous; if so, it must return a [Future].
-///
-/// If this is called within a test group, it applies only to tests in that
-/// group. [callback] will be run before any tear-down callbacks in parent
-/// groups or at the top level.
-///
-/// Each callback at the top level or in a given group will be run in the
-/// reverse of the order they were declared.
-///
-/// See also [addTearDown], which adds tear-downs to a running test.
-void tearDown(dynamic Function() body) {
-  _declarer.tearDown(body);
-}
-
 /// Registers a function to be run once before all tests.
 ///
 /// [callback] may be asynchronous; if so, it must return a [Future].

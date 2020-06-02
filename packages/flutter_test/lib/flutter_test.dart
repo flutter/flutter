@@ -11,9 +11,9 @@
 ///
 /// ### Per test or per file
 ///
-/// Due to its use of `package:test` as a foundation, the testing library
-/// allows for tests to be initialized using the existing constructs found in
-/// `package:test`. These include the [setUp] and [setUpAll] methods.
+/// The testing library allows for tests to be configured using [setUp] and
+/// [tearDown] functions. It is inadvisable for developers to use the equivalent
+/// functions in `package:test` as it might lead to unpredictable behavior.
 ///
 /// ### Per directory hierarchy
 ///

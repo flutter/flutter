@@ -517,8 +517,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// test failures.
   bool showAppDumpInErrors = false;
 
-  final List<Future<void> Function()> _setups = <Future<void> Function()>[];
-  final List<Future<void> Function()> _teardowns = <Future<void> Function()>[];
+  final List<dynamic Function()> _setups = <dynamic Function()>[];
+  final List<dynamic Function()> _teardowns = <dynamic Function()>[];
 
   /// Adds `callback` to be executed prior to test with the configuration
   /// specified in the binding.
@@ -526,7 +526,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// Callbacks registered via [addSetup] and [addTeardown] should be executed
   /// within [runTest] to minimize surprising behavior with respect to state
   /// and zone cleanup.
-  void addSetup(Future<void> callback()) {
+  void addSetup(dynamic callback()) {
     _setups.add(callback);
   }
 
@@ -536,7 +536,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// Callbacks registered via [addSetup] and [addTeardown] should be executed
   /// within [runTest] to minimize surprising behavior with respect to state
   /// and zone cleanup.
-  void addTeardown(Future<void> callback()) {
+  void addTeardown(dynamic callback()) {
     _teardowns.add(callback);
   }
 
