@@ -57,6 +57,12 @@ const List<VmServiceExpectation> kAttachIsolateExpectations = <VmServiceExpectat
     }
   ),
   FakeVmServiceRequest(
+    method: 'streamListen',
+    args: <String, Object>{
+      'streamId': 'Extension',
+    },
+  ),
+  FakeVmServiceRequest(
     method: 'registerService',
     args: <String, Object>{
       'service': 'reloadSources',
@@ -1073,19 +1079,7 @@ void main() {
   test('Sends launched app.webLaunchUrl event for Chrome device', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachLogExpectations,
-      const FakeVmServiceRequest(
-        method: 'streamListen',
-        args: <String, Object>{
-          'streamId': 'Isolate'
-        }
-      ),
-      const FakeVmServiceRequest(
-        method: 'registerService',
-        args: <String, Object>{
-          'service': 'reloadSources',
-          'alias': 'FlutterTools',
-        }
-      )
+      ...kAttachIsolateExpectations,
     ]);
     _setupMocks();
     final ChromiumLauncher chromiumLauncher = MockChromeLauncher();
