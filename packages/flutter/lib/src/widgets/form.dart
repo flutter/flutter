@@ -503,7 +503,7 @@ enum AutoValidateMode {
   /// no auto validation will occur.
   disabled,
 
-  /// used to auto-validate [Form] and [FormField] without user interaction.
+  /// used to auto-validate [Form] and [FormField] even without user interaction.
   always,
 
   /// used to auto-validate [Form] and [FormField] only after each user
