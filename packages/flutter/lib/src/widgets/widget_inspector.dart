@@ -1519,9 +1519,11 @@ mixin WidgetInspectorService {
   /// object that `diagnosticsNodeId` references only including children that
   /// were created directly by user code.
   ///
+  /// {@template widgets.inspector.trackCreation}
   /// Requires [Widget] creation locations which are only available for debug
-  /// mode builds when the `--track-widget-creation` flag is passed to
-  /// `flutter_tool`.
+  /// mode builds when the `--track-widget-creation` flag is enabled on the call
+  /// to the `flutter` tool. This flag is enabled by default in debug builds.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
@@ -1803,10 +1805,7 @@ mixin WidgetInspectorService {
 
   /// Returns whether [Widget] creation locations are available.
   ///
-  /// [Widget] creation locations are only available for debug mode builds when
-  /// the `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0
-  /// is required as injecting creation locations requires a
-  /// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
+  /// {@macro widgets.inspector.trackCreation}
   bool isWidgetCreationTracked() {
     _widgetCreationTracked ??= _WidgetForTypeTests() is _HasCreationLocation;
     return _widgetCreationTracked;
@@ -2704,11 +2703,7 @@ const TextStyle _messageStyle = TextStyle(
 /// Interface for classes that track the source code location the their
 /// constructor was called from.
 ///
-/// A [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
-/// adds this interface to the [Widget] class when the
-/// `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0 is
-/// required as injecting creation locations requires a
-/// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
+/// {@macro widgets.inspector.trackCreation}
 // ignore: unused_element
 abstract class _HasCreationLocation {
   _Location get _location;
@@ -2841,10 +2836,7 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
 
 /// Returns if an object is user created.
 ///
-/// This function will only work in debug mode builds when
-/// the `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0 is
-/// required as injecting creation locations requires a
-/// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
+/// {@macro widgets.inspector.trackCreation}
 ///
 /// Currently is local creation locations are only available for
 /// [Widget] and [Element].
@@ -2859,10 +2851,7 @@ bool _isLocalCreationLocation(Object object) {
 ///
 /// ex: "file:///path/to/main.dart:4:3"
 ///
-/// Creation locations are only available for debug mode builds when
-/// the `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0 is
-/// required as injecting creation locations requires a
-/// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
+/// {@macro widgets.inspector.trackCreation}
 ///
 /// Currently creation locations are only available for [Widget] and [Element].
 String _describeCreationLocation(Object object) {
@@ -2872,10 +2861,7 @@ String _describeCreationLocation(Object object) {
 
 /// Returns the creation location of an object if one is available.
 ///
-/// Creation locations are only available for debug mode builds when
-/// the `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0 is
-/// required as injecting creation locations requires a
-/// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
+/// {@macro widgets.inspector.trackCreation}
 ///
 /// Currently creation locations are only available for [Widget] and [Element].
 _Location _getCreationLocation(Object object) {

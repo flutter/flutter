@@ -398,6 +398,7 @@ IOSDevice setUpIOSDevice({
       cache: cache,
     ),
     cpuArchitecture: DarwinArch.arm64,
+    interfaceType: IOSDeviceInterface.usb,
   );
 }
 

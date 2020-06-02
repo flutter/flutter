@@ -164,6 +164,58 @@ void main() {
     await tester.pump(_kScrollbarFadeDuration);
   });
 
+  testWidgets('When isAlwaysShown is true, must pass a controller',
+      (WidgetTester tester) async {
+    Widget viewWithScroll() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoScrollbar(
+            isAlwaysShown: true,
+            child: const SingleChildScrollView(
+              child: SizedBox(
+                width: 4000.0,
+                height: 4000.0,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    expect(() async {
+      await tester.pumpWidget(viewWithScroll());
+    }, throwsAssertionError);
+  });
+
+  testWidgets('When isAlwaysShown is true, must pass a controller that is attached to a scroll view',
+      (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    Widget viewWithScroll() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoScrollbar(
+            controller: controller,
+            isAlwaysShown: true,
+            child: const SingleChildScrollView(
+              child: SizedBox(
+                width: 4000.0,
+                height: 4000.0,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
+  });
+
   testWidgets('On first render with isAlwaysShown: true, the thumb shows',
       (WidgetTester tester) async {
     final ScrollController controller = ScrollController();

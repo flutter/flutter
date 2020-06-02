@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
+import 'package:macrobenchmarks/common.dart';
+
 void macroPerfTest(
     String testName,
     String routeName,
@@ -27,8 +29,11 @@ void macroPerfTest(
 
     await driver.forceGC();
 
+    final SerializableFinder scrollable = find.byValueKey(kScrollableName);
+    expect(scrollable, isNotNull);
     final SerializableFinder button = find.byValueKey(routeName);
     expect(button, isNotNull);
+    await driver.scrollUntilVisible(scrollable, button, dyScroll: -50.0);
     await driver.tap(button);
 
     if (pageDelay != null) {
