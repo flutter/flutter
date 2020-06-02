@@ -64,12 +64,23 @@ class BenchUpdateManyChildLayers extends SceneBuilderRecorder {
     for (int row = 0; row < kRows; row++) {
       for (int col = 0; col < kColumns; col++) {
         final int layerId = 1000000 * row + col;
-        _layers[layerId] = sceneBuilder.pushOffset(
-          col * cellSize.width + (wobbleCounter - 5).abs(),
-          row * cellSize.height, oldLayer: _layers[layerId],
-        );
-        sceneBuilder.addPicture(Offset.zero, _pictures[row * kColumns + col]);
-        sceneBuilder.pop();
+        final OffsetEngineLayer oldLayer = _layers[layerId];
+        final double wobbleOffsetX = col * cellSize.width + (wobbleCounter - 5).abs();
+        final double offsetY = row * cellSize.height;
+        // Retain every other layer, so we exercise the update path 50% of the
+        // time and the retain path the other 50%.
+        final bool shouldRetain = oldLayer != null && (row + col) % 2 == 0;
+        if (shouldRetain) {
+          sceneBuilder.addRetained(oldLayer);
+        } else {
+          _layers[layerId] = sceneBuilder.pushOffset(
+            wobbleOffsetX,
+            offsetY,
+            oldLayer: oldLayer,
+          );
+          sceneBuilder.addPicture(Offset.zero, _pictures[row * kColumns + col]);
+          sceneBuilder.pop();
+        }
       }
     }
     sceneBuilder.pop();
