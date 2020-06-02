@@ -1061,7 +1061,7 @@ class _NavigationBarStaticComponents {
   }) {
     // Auto use the CupertinoPageRoute's title if middle not provided.
     if (automaticallyImplyTitle &&
-        currentRoute is CupertinoPageRoute &&
+        currentRoute is CupertinoRouteTransitionMixin &&
         currentRoute.title != null) {
       return Text(currentRoute.title);
     }
