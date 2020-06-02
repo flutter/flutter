@@ -675,7 +675,7 @@ void main() {
       );
     }
 
-    // The issue only happens on the second build so we need to rebuild the three
+    // The issue only happens on the second build so we need to rebuild the three.
     await tester.pumpWidget(builder());
     await tester.pumpWidget(builder());
 
