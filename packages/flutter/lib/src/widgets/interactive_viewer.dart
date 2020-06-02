@@ -962,14 +962,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     );
 
     if (!widget.constrained) {
-      // These SingleChildScrollViews effectively remove the size constraints
-      // from the child. The child can even be bigger than the screen.
-      child = SingleChildScrollView(
-        physics: const NeverScrollableScrollPhysics(),
-        scrollDirection: Axis.vertical,
-        child: SingleChildScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          scrollDirection: Axis.horizontal,
+      child = ClipRect(
+        child: OverflowBox(
+          alignment: Alignment.topLeft,
+          minWidth: 0.0,
+          minHeight: 0.0,
+          maxWidth: double.infinity,
+          maxHeight: double.infinity,
           child: child,
         ),
       );
