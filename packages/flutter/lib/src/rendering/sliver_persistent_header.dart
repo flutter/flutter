@@ -542,14 +542,9 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   /// to be animated from the _FloatingAppBarState instead. This is relevant if
   /// [FloatingHeaderSnapConfiguration.nestedSnap] is true, indicating we are
   /// snapping an outer scrollable over a nested inner scrollable.
-  bool maybeStartSnapAnimation(ScrollDirection direction) {
-    if ((snapConfiguration == null)
-      || (direction == ScrollDirection.forward && _effectiveScrollOffset <= 0.0)
-      || (direction == ScrollDirection.reverse && _effectiveScrollOffset >= maxExtent))
-      return false;
-
-    if (snapConfiguration.nestedSnap)
-      return true;
+  void maybeStartSnapAnimation(ScrollDirection direction) {
+    if (!canStartSnap(direction))
+      return;
 
     final TickerProvider vsync = snapConfiguration.vsync;
     final Duration duration = snapConfiguration.duration;
@@ -571,12 +566,23 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     );
 
     _controller.forward(from: 0.0);
-    return false;
   }
 
   /// If a header snap animation is underway then stop it.
   void maybeStopSnapAnimation(ScrollDirection direction) {
     _controller?.stop();
+  }
+
+  /// Returns true if the conditions are right to execute the snap animation,
+  /// either through animating the _effectiveScrollOffset or the scroll position.
+  bool canStartSnap(ScrollDirection direction) {
+    if (snapConfiguration == null)
+      return false;
+    if (direction == ScrollDirection.forward && _effectiveScrollOffset <= 0.0)
+      return false;
+    if (direction == ScrollDirection.reverse && _effectiveScrollOffset >= maxExtent)
+      return false;
+    return true;
   }
 
   @override

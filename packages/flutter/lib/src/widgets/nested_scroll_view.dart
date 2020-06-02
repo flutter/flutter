@@ -192,9 +192,8 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// As the inner or outer [Scrollable]s are moved, the app bar persists as
 /// expected.
 ///
-/// If the app bar is floating, pinned and using an expanded height, follow the
+/// If the app bar is floating, pinned, and using an expanded height, follow the
 /// floating convention laid out below.
-///
 ///
 /// ### Floating [SliverAppBar]s
 ///
@@ -212,7 +211,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// the header slivers before applying the remaining drag to the body.
 ///
 /// Furthermore, the `floatHeaderSlivers` flag should also be used when using an
-/// app bar that is floating, pinned, and having an expanded height. In this
+/// app bar that is floating, pinned, and has an expanded height. In this
 /// configuration, the flexible space of the app bar should open and collapse,
 /// while the primary portion of the app bar remains pinned.
 ///
@@ -1195,17 +1194,17 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     } else {
       // Dragging "down" - delta is positive
       double innerDelta = delta;
-      // Apply delta to the outer header first if they are expected to float.
+      // Apply delta to the outer header first if it is configured to float.
       if (_floatHeaderSlivers)
         innerDelta = _outerPosition.applyClampedDragUpdate(delta);
 
       if (innerDelta != 0.0) {
-        // Prioritize the inner views, so that the inner content will move
-        // before the app bar grows
+        // Apply the innerDelta, if we have not floated in the outer scrollable,
+        // any leftover delta after this will be passed on to the outer
+        // scrollable by the outerDelta.
         double outerDelta = 0.0; // it will go positive if it changes
         final List<double> overscrolls = <double>[];
-        final List<_NestedScrollPosition> innerPositions = _innerPositions
-          .toList();
+        final List<_NestedScrollPosition> innerPositions = _innerPositions.toList();
         for (final _NestedScrollPosition position in innerPositions) {
           final double overscroll = position.applyClampedDragUpdate(innerDelta);
           outerDelta = math.max(outerDelta, overscroll);
@@ -1213,7 +1212,12 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         }
         if (outerDelta != 0.0)
           outerDelta -= _outerPosition.applyClampedDragUpdate(outerDelta);
+
         // Now deal with any overscroll
+        // TODO(Piinks): Configure which scrollable receives overscroll to
+        // support stretching app bars. createOuterBallisticScrollActivity will
+        // need to be updated as it currently assumes the outer position will
+        // never overscroll, https://github.com/flutter/flutter/issues/54059
         for (int i = 0; i < innerPositions.length; ++i) {
           final double remainingDelta = overscrolls[i] - outerDelta;
           if (remainingDelta > 0.0)

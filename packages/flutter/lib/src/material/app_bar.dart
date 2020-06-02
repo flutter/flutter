@@ -699,6 +699,8 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   void dispose() {
     if (_position != null)
       _position.isScrollingNotifier.removeListener(_isScrollingListener);
+    _controller?.dispose();
+    _controller = null; // lazily recreated if we're reattached.
     super.dispose();
   }
 
@@ -713,7 +715,7 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
     // When a scroll stops, then maybe snap the appbar into view.
     // Similarly, when a scroll starts, then maybe stop the snap animation.
 
-    // This animation is typically driven  by the RenderSliverFloatingPersistentHeader,
+    // This animation is typically driven by the RenderSliverFloatingPersistentHeader,
     // which mocks a change in the scroll position (the _effectiveScrollOffset)
     // to float the header in and out.
     // When used in a NestedScrollView however, the header is not within the
@@ -721,7 +723,7 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
     // same effect. In this case, indicated by
     // FloatingHeaderSnapConfiguration.nestedSnap, we drive the animation on the
     // scroll position here instead.
-    if (widget.snapConfiguration != null && widget.snapConfiguration.nestedSnap) {
+    if (widget.snapConfiguration?.nestedSnap == true) {
       _nestedAnimation();
     } else {
       _defaultAnimation();
@@ -741,18 +743,18 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
     if (_position.isScrollingNotifier.value) {
       _controller?.stop();
     } else {
-      final bool shouldAnimate = header?.maybeStartSnapAnimation(_position.userScrollDirection);
-      if (shouldAnimate) {
+      if (header?.canStartSnap(_position.userScrollDirection) == true) {
         final FloatingHeaderSnapConfiguration snapConfiguration = widget.snapConfiguration;
+
         _controller ??= AnimationController(
           vsync: snapConfiguration.vsync,
           duration: snapConfiguration.duration,
-        )
-          ..addListener(() {
-            if (_position.pixels == _animation.value)
-              return;
-            _position.setPixels(_animation.value);
-          });
+        )..addListener(() {
+          if (_position.pixels == _animation.value)
+            return;
+          _position.setPixels(_animation.value);
+        });
+
         _animation = _controller.drive(
           Tween<double>(
             begin: _position.pixels,
@@ -760,9 +762,10 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
               ? 0.0
               : _position.maxScrollExtent,
           ).chain(CurveTween(
-            curve: Curves.ease,
+            curve: snapConfiguration.curve,
           )),
         );
+
         _controller.forward(from: 0.0);
       }
     }
@@ -1006,8 +1009,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 class SliverAppBar extends StatefulWidget {
   /// Creates a material design app bar that can be placed in a [CustomScrollView].
   ///
-  /// The arguments [forceElevated], [primary], [floating], [pinned], [snap]
-  /// and [automaticallyImplyLeading] must not be null.
+  /// The arguments [forceElevated], [primary], [floating], [pinned], [snap],
+  /// [nestedSnap], and [automaticallyImplyLeading] must not be null.
   const SliverAppBar({
     Key key,
     this.leading,
