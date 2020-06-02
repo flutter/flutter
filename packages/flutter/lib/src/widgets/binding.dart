@@ -944,6 +944,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       buildOwner.reassemble(renderViewElement);
     return super.performReassemble();
   }
+
+  Locale computePlatformResolvedLocale(List<Locale> supportedLocales) {
+    window.computePlatformResolvedLocale(supportedLocales);
+  }
 }
 
 /// Inflate the given widget and attach it to the screen.

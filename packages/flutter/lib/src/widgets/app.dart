@@ -1398,6 +1398,20 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       );
     }
 
+    // List<String> localeData = <String>[];
+    // for (Locale locale in widget.supportedLocales) {
+    //   localeData.add(locale.languageCode);
+    //   localeData.add(locale.countryCode);
+    // }
+    // Map<String, dynamic> args = <String, dynamic> {
+    //   'count': widget.supportedLocales.length,
+    //   'localeData': localeData,
+    // }
+    // final Locale platformResolvedLocale = SystemChannels.localization.invokeMethod<List<String>>(
+    //   'Localization.resolveLocale',
+    //   args,
+    // );
+    final Locale platformResolvedLocale = WidgetsBinding.instance.computePlatformResolvedLocale(widget.supportedLocales);
     final Locale appLocale = widget.locale != null
       ? _resolveLocales(<Locale>[widget.locale], widget.supportedLocales)
       : _locale;
