@@ -258,7 +258,7 @@ class KernelSnapshot extends Target {
       packageConfig: packageConfig,
     );
     if (output == null || output.errorCount != 0) {
-      throw Exception('Errors during snapshot creation: $output');
+      throw Exception();
     }
   }
 }

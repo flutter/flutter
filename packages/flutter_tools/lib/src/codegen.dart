@@ -178,6 +178,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
     List<Uri> invalidatedFiles, {
       String outputPath,
       PackageConfig packageConfig,
+      bool suppressErrors = false,
     }) async {
     if (_codegenDaemon.lastStatus != CodegenStatus.Succeeded && _codegenDaemon.lastStatus != CodegenStatus.Failed) {
       await _codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
@@ -192,6 +193,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
       invalidatedFiles,
       outputPath: outputPath,
       packageConfig: packageConfig,
+      suppressErrors: suppressErrors,
     );
   }
 

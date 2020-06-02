@@ -151,6 +151,44 @@ void main() {
     Platform: kNoColorTerminalPlatform,
   });
 
+  testUsingContext('incremental compile can suppress errors', () async {
+    final StreamController<List<int>> stdoutController = StreamController<List<int>>();
+    when(mockFrontendServer.stdout)
+      .thenAnswer((Invocation invocation) => stdoutController.stream);
+
+    stdoutController.add(utf8.encode('result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0\n'));
+
+    await generator.recompile(
+      Uri.parse('/path/to/main.dart'),
+      <Uri>[],
+      outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
+    );
+    expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
+
+    await _recompile(stdoutController, generator, mockFrontendServerStdIn,
+      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
+
+    await _accept(stdoutController, generator, mockFrontendServerStdIn, r'^accept\n$');
+
+    await _recompile(stdoutController, generator, mockFrontendServerStdIn,
+      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n', suppressErrors: true);
+
+    verifyNoMoreInteractions(mockFrontendServerStdIn);
+    expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
+
+    // Compiler message is not printed with suppressErrors: true above.
+    expect(testLogger.errorText, isNot(equals(
+      '\nCompiler message:\nline0\nline1\n'
+      '\nCompiler message:\nline1\nline2\n'
+      '\nCompiler message:\nline1\nline2\n'
+    )));
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => mockProcessManager,
+    OutputPreferences: () => OutputPreferences(showColor: false),
+    Platform: kNoColorTerminalPlatform,
+  });
+
   testUsingContext('incremental compile and recompile twice', () async {
     final StreamController<List<int>> streamController = StreamController<List<int>>();
     when(mockFrontendServer.stdout)
@@ -190,6 +228,7 @@ Future<void> _recompile(
   ResidentCompiler generator,
   MockStdIn mockFrontendServerStdIn,
   String mockCompilerOutput,
+  { bool suppressErrors = false }
 ) async {
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
@@ -201,6 +240,7 @@ Future<void> _recompile(
     <Uri>[Uri.parse('/path/to/main.dart')],
     outputPath: '/build/',
     packageConfig: PackageConfig.empty,
+    suppressErrors: suppressErrors,
   );
   expect(output.outputFilename, equals('/path/to/main.dart.dill'));
   final String commands = mockFrontendServerStdIn.getAndClear();

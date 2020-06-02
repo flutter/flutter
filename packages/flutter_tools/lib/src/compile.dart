@@ -354,12 +354,14 @@ class _RecompileRequest extends _CompilationRequest {
     this.invalidatedFiles,
     this.outputPath,
     this.packageConfig,
+    this.suppressErrors,
   ) : super(completer);
 
   Uri mainUri;
   List<Uri> invalidatedFiles;
   String outputPath;
   PackageConfig packageConfig;
+  bool suppressErrors;
 
   @override
   Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
@@ -461,6 +463,7 @@ abstract class ResidentCompiler {
     List<Uri> invalidatedFiles, {
     @required String outputPath,
     @required PackageConfig packageConfig,
+    bool suppressErrors = false,
   });
 
   Future<CompilerOutput> compileExpression(
@@ -582,6 +585,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     List<Uri> invalidatedFiles, {
     @required String outputPath,
     @required PackageConfig packageConfig,
+    bool suppressErrors = false,
   }) async {
     assert(outputPath != null);
     if (!_controller.hasListener) {
@@ -590,7 +594,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
     final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
     _controller.add(
-      _RecompileRequest(completer, mainUri, invalidatedFiles, outputPath, packageConfig)
+      _RecompileRequest(completer, mainUri, invalidatedFiles, outputPath, packageConfig, suppressErrors)
     );
     return completer.future;
   }
@@ -598,6 +602,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   Future<CompilerOutput> _recompile(_RecompileRequest request) async {
     _stdoutHandler.reset();
     _compileRequestNeedsConfirmation = true;
+    _stdoutHandler._suppressCompilerMessages = request.suppressErrors;
 
     if (_server == null) {
       return _compile(
@@ -724,7 +729,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _server.stderr
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
-      .listen((String message) { globals.printError(message); });
+      .listen(globals.printError);
 
     unawaited(_server.exitCode.then((int code) {
       if (code != 0) {
