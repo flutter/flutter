@@ -1449,8 +1449,8 @@ class _BackLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     if (specifiedPreviousTitle != null) {
       return _buildPreviousTitleWidget(context, specifiedPreviousTitle, null);
-    } else if (route is CupertinoPageRoute<dynamic> && !route.isFirst) {
-      final CupertinoPageRoute<dynamic> cupertinoRoute = route as CupertinoPageRoute<dynamic>;
+    } else if (route is CupertinoRouteTransitionMixin<dynamic> && !route.isFirst) {
+      final CupertinoRouteTransitionMixin<dynamic> cupertinoRoute = route as CupertinoRouteTransitionMixin<dynamic>;
       // There is no timing issue because the previousTitle Listenable changes
       // happen during route modifications before the ValueListenableBuilder
       // is built.
