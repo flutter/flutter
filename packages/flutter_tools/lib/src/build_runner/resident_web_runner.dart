@@ -678,7 +678,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         globals.printStatus(message, newline: false);
       });
       _extensionEventSub =
-          _vmService.onExtensionEvent.listen(printErrorEvent);
+          _vmService.onExtensionEvent.listen(printStructuredErrorLog);
       try {
         await _vmService.streamListen(vmservice.EventStreams.kStdout);
       } on vmservice.RPCError {

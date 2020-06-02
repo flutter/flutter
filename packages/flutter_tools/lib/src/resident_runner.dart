@@ -39,7 +39,7 @@ import 'run_cold.dart';
 import 'run_hot.dart';
 import 'vmservice.dart';
 
-typedef PrintErrorEventMethod = void Function(vm_service.Event);
+typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
 class FlutterDevice {
   FlutterDevice(
@@ -188,7 +188,7 @@ class FlutterDevice {
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
-    PrintErrorEventMethod printErrorEventMethod,
+    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   }) {
     final Completer<void> completer = Completer<void>();
     StreamSubscription<void> subscription;
@@ -222,8 +222,8 @@ class FlutterDevice {
       } on Exception catch (exception) {
         globals.printTrace('Fail to listen to extension stream: $observatoryUri: $exception');
       }
-      if (printErrorEventMethod != null) {
-        service.onExtensionEvent.listen(printErrorEventMethod);
+      if (printStructuredErrorLogMethod != null) {
+        service.onExtensionEvent.listen(printStructuredErrorLogMethod);
       }
       if (completer.isCompleted) {
         return;
@@ -1111,7 +1111,7 @@ abstract class ResidentRunner {
     }
   }
 
-  void printErrorEvent(vm_service.Event event) {
+  void printStructuredErrorLog(vm_service.Event event) {
     if (event.extensionKind == 'Flutter.Error') {
       final Map<dynamic, dynamic> json = event.extensionData?.data;
       if (json != null && json.containsKey('renderedErrorText')) {
@@ -1145,7 +1145,7 @@ abstract class ResidentRunner {
         compileExpression: compileExpression,
         reloadMethod: reloadMethod,
         getSkSLMethod: getSkSLMethod,
-        printErrorEventMethod: printErrorEvent,
+        printStructuredErrorLogMethod: printStructuredErrorLog,
       );
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(
