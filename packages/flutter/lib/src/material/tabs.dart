@@ -1137,6 +1137,7 @@ class TabBarView extends StatefulWidget {
     this.controller,
     this.physics,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.onTabChanged,
   }) : assert(children != null),
        assert(dragStartBehavior != null),
        super(key: key);
@@ -1167,6 +1168,8 @@ class TabBarView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  final ValueChanged<int> onTabChanged;
+
   @override
   _TabBarViewState createState() => _TabBarViewState();
 }
@@ -1180,6 +1183,7 @@ class _TabBarViewState extends State<TabBarView> {
   List<Widget> _childrenWithKey;
   int _currentIndex;
   int _warpUnderwayCount = 0;
+  int _lastTabReported = 0;
 
   // If the TabBarView is rebuilt with a new tab controller, the caller should
   // dispose the old one. In that case the old controller's animation will be
@@ -1255,6 +1259,10 @@ class _TabBarViewState extends State<TabBarView> {
     if (_controller.index != _currentIndex) {
       _currentIndex = _controller.index;
       _warpToCurrentIndex();
+      if(widget.onTabChanged != null){
+        _lastTabReported = _currentIndex;
+        widget.onTabChanged(_currentIndex);
+      }
     }
   }
 
@@ -1319,6 +1327,10 @@ class _TabBarViewState extends State<TabBarView> {
     } else if (notification is ScrollEndNotification) {
       _controller.index = _pageController.page.round();
       _currentIndex = _controller.index;
+      if(widget.onTabChanged != null && _currentIndex != _lastTabReported){
+        _lastTabReported = _currentIndex;
+        widget.onTabChanged(_currentIndex);
+      }
     }
     _warpUnderwayCount -= 1;
 
