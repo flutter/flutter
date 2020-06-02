@@ -1311,9 +1311,9 @@ void main() {
         key: pageKey,
         title: 'title one',
         builder: (BuildContext context) {
-          return const CupertinoPageScaffold(
-            navigationBar: CupertinoNavigationBar(),
-            child: Text('first'),
+          return CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(key: UniqueKey()),
+            child: const Text('first'),
           );
         }
       ),
@@ -1335,9 +1335,9 @@ void main() {
         key: pageKey,
         title: 'title two',
         builder: (BuildContext context) {
-          return const CupertinoPageScaffold(
-            navigationBar: CupertinoNavigationBar(),
-            child: Text('second'),
+          return CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(key: UniqueKey()),
+            child: const Text('second'),
           );
         }
       ),
@@ -1350,6 +1350,7 @@ void main() {
         transitionDelegate: detector,
       )
     );
+
     // There should be no transition because the page has the same key.
     expect(detector.hasTransition, isFalse);
     // The content does update.
