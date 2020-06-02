@@ -122,16 +122,21 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
   static final BlacklistingTextInputFormatter singleLineFormatter
       = BlacklistingTextInputFormatter(RegExp(r'\n'));
 }
+///when are you need to use: When your input text box sets the maximum length and needs the maximum length of the callback,
+/// or the text box supports the expression while setting the maximum length, it can be used to meet the above scenarios.
+///Deal with question: https://github.com/flutter/flutter/pull/55821
 ///Used to support the problem of limiting the maximum length when there is an emoji in the input box
 ///author: linsixudream@163.com
 ///data: April 28, 2020
 ///defect：When the maximum length is reached, the cursor will move after the last character. Temporarily unable to resolve
 class EmojiLengthLimitingTextInputFormatter extends TextInputFormatter {
-  EmojiLengthLimitingTextInputFormatter(this.maxLength) : assert(maxLength == null || maxLength == -1 || maxLength > 0);
+  EmojiLengthLimitingTextInputFormatter(this.maxLength, {this.maxLengthCallBack}) : assert(maxLength == null || maxLength == -1 || maxLength > 0);
 
   final int maxLength;
 
   bool hasAlreadyMaxLength = false;
+
+  final Function maxLengthCallBack;
 
   @override
   TextEditingValue formatEditUpdate(
@@ -139,11 +144,14 @@ class EmojiLengthLimitingTextInputFormatter extends TextInputFormatter {
       TextEditingValue newValue,
       ) {
     hasAlreadyMaxLength = oldValue.text.length >= maxLength && newValue.text.length >= maxLength;
-    if (!hasAlreadyMaxLength && maxLength != null && maxLength > 0 && newValue.text.runes.length >= maxLength) {
+    if (!hasAlreadyMaxLength && maxLength != null && maxLength > 0 && newValue.text.length >= maxLength) {
+      if(maxLengthCallBack != null) maxLengthCallBack();
       return _resetSelection(newValue);
-    } else if (hasAlreadyMaxLength && maxLength != null && maxLength > 0 && newValue.text.runes.length >= maxLength) {
+    } else if (hasAlreadyMaxLength && maxLength != null && maxLength > 0 && newValue.text.length >= maxLength) {
+      if(maxLengthCallBack != null) maxLengthCallBack();
       return _initOldDataSelection(oldValue, newValue);
     } else {
+      hasAlreadyMaxLength = false;
       return newValue;
     }
   }
@@ -175,7 +183,7 @@ class EmojiLengthLimitingTextInputFormatter extends TextInputFormatter {
   }
 
   TextEditingValue _initOldDataSelection(TextEditingValue oldValue, TextEditingValue newValue) {
-    TextSelection actualSelection = newValue.selection;
+    TextSelection actualSelection = oldValue.selection;
     actualSelection = newValue.selection.copyWith(
       baseOffset: oldValue.text.length,
       extentOffset: oldValue.text.length,
