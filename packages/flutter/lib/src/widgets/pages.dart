@@ -183,7 +183,7 @@ class TransitionPage<T> extends Page<T> {
 // A page-based version of the [PageRouteBuilder].
 //
 // This class gets its builder and settings directly from the [TransitionPage],
-// so that its content updates with the [TransitionPage] accordingly.
+// so that its content updates accordingly to the [TransitionPage].
 class _PageBasedPageRouteBuilder<T> extends PageRoute<T>{
   _PageBasedPageRouteBuilder(
     TransitionPage<T> page,

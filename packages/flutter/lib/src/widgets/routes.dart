@@ -1077,6 +1077,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   // The API for subclasses to override - used by this class
+
   /// {@template flutter.widgets.modalRoute.barrierDismissible}
   /// Whether you can dismiss this route by tapping the modal barrier.
   ///

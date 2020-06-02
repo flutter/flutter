@@ -1326,9 +1326,6 @@ void main() {
       )
     );
 
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-
     expect(detector.hasTransition, isFalse);
     expect(find.widgetWithText(CupertinoNavigationBar, 'title one'), findsOneWidget);
     expect(find.text('first'), findsOneWidget);
