@@ -927,12 +927,10 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     } else {
       if (widget.transformationController == null) {
         _transformationController.removeListener(_onTransformationControllerChange);
-        _transformationController.dispose();
         _transformationController = TransformationController();
         _transformationController.addListener(_onTransformationControllerChange);
       } else if (widget.transformationController != oldWidget.transformationController) {
         _transformationController.removeListener(_onTransformationControllerChange);
-        _transformationController.dispose();
         _transformationController = widget.transformationController;
         _transformationController.addListener(_onTransformationControllerChange);
       }
