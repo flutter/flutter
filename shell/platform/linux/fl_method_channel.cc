@@ -86,9 +86,10 @@ static void channel_closed_cb(gpointer user_data) {
 static void fl_method_channel_dispose(GObject* object) {
   FlMethodChannel* self = FL_METHOD_CHANNEL(object);
 
-  if (self->messenger != nullptr)
+  if (self->messenger != nullptr) {
     fl_binary_messenger_set_message_handler_on_channel(
         self->messenger, self->name, nullptr, nullptr, nullptr);
+  }
 
   g_clear_object(&self->messenger);
   g_clear_pointer(&self->name, g_free);
