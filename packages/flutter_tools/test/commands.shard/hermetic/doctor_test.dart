@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/proxy_validator.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -55,6 +56,14 @@ void main() {
   });
 
   group('doctor', () {
+    MockPlistParser mockPlistParser;
+    MemoryFileSystem fileSystem;
+
+    setUp(() {
+      mockPlistParser = MockPlistParser();
+      fileSystem = MemoryFileSystem.test();
+    });
+
     testUsingContext('intellij validator', () async {
       const String installPath = '/path/to/intelliJ';
       final ValidationResult result = await IntelliJValidatorTestTarget('Test', installPath).validate();
@@ -77,14 +86,39 @@ void main() {
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('intellij plugins path checking on mac', () async {
-      final String pathViaToolbox = globals.fs.path.join('test', 'data', 'intellij', 'mac_via_toolbox');
-      final String pathNotViaToolbox = globals.fs.path.join('test', 'data', 'intellij', 'mac_not_via_toolbox');
+      when(mockPlistParser.getValueFromFile(any, PlistParser.kCFBundleShortVersionStringKey)).thenReturn('2020.10');
 
-      final IntelliJValidatorOnMac validatorViaToolbox = IntelliJValidatorOnMac('Test', 'Test', pathViaToolbox);
-      expect(validatorViaToolbox.plistFile, 'test/data/intellij/mac_via_toolbox/Contents/Info.plist');
+      final Directory pluginsDirectory = fileSystem.directory('/foo/bar/Library/Application Support/JetBrains/TestID2020.10/plugins')
+        ..createSync(recursive: true);
+      final IntelliJValidatorOnMac validator = IntelliJValidatorOnMac('Test', 'TestID', '/path/to/app');
+      expect(validator.plistFile, '/path/to/app/Contents/Info.plist');
+      expect(validator.pluginsPath, pluginsDirectory.path);
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform()
+        ..environment = <String, String>{'HOME': '/foo/bar'},
+      PlistParser: () => mockPlistParser,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => mockProcessManager,
+    });
 
-      final IntelliJValidatorOnMac validatorNotViaToolbox = IntelliJValidatorOnMac('Test', 'Test', pathNotViaToolbox);
-      expect(validatorNotViaToolbox.plistFile, 'test/data/intellij/mac_not_via_toolbox/Contents/Info.plist');
+    testUsingContext('legacy intellij plugins path checking on mac', () async {
+      when(mockPlistParser.getValueFromFile(any, PlistParser.kCFBundleShortVersionStringKey)).thenReturn('2020.10');
+
+      final IntelliJValidatorOnMac validator = IntelliJValidatorOnMac('Test', 'TestID', '/foo');
+      expect(validator.pluginsPath, '/foo/bar/Library/Application Support/TestID2020.10');
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform()
+        ..environment = <String, String>{'HOME': '/foo/bar'},
+      PlistParser: () => mockPlistParser,
+    });
+
+    testUsingContext('intellij plugins path checking on mac with override', () async {
+      when(mockPlistParser.getValueFromFile(any, 'JetBrainsToolboxApp')).thenReturn('/path/to/JetBrainsToolboxApp');
+
+      final IntelliJValidatorOnMac validator = IntelliJValidatorOnMac('Test', 'TestID', '/foo');
+      expect(validator.pluginsPath, '/path/to/JetBrainsToolboxApp.plugins');
+    }, overrides: <Type, Generator>{
+      PlistParser: () => mockPlistParser,
     });
 
     testUsingContext('vs code validator when both installed', () async {
@@ -1185,3 +1219,4 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
 
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockArtifacts extends Mock implements Artifacts {}
+class MockPlistParser extends Mock implements PlistParser {}

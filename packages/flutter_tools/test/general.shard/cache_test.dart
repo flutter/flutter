@@ -611,6 +611,19 @@ void main() {
 
     expect(artifacts.getBinaryDirs(), isNotEmpty);
   });
+
+  testWithoutContext('Linux desktop artifacts include profile and release artifacts', () {
+    final MockCache mockCache = MockCache();
+    final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
+      mockCache,
+      platform: FakePlatform(operatingSystem: 'linux'),
+    );
+
+    expect(artifacts.getBinaryDirs(), containsAll(<Matcher>[
+      contains(contains('profile')),
+      contains(contains('release')),
+    ]));
+  });
 }
 
 class FakeCachedArtifact extends EngineCachedArtifact {

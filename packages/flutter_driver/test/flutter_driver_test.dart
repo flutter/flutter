@@ -538,6 +538,12 @@ void main() {
             return null;
           });
 
+        when(mockPeer.sendRequest('getVMTimelineMicros'))
+          .thenAnswer((Invocation invocation) async {
+            log.add('getVMTimelineMicros');
+            return <String, Object>{};
+          });
+
         when(mockPeer.sendRequest('setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[all]'}))))
           .thenAnswer((Invocation invocation) async {
             log.add('startTracing');
@@ -568,8 +574,10 @@ void main() {
         }, retainPriorEvents: true);
 
         expect(log, const <String>[
+          'getVMTimelineMicros',
           'startTracing',
           'action',
+          'getVMTimelineMicros',
           'stopTracing',
           'download',
         ]);
@@ -583,12 +591,76 @@ void main() {
 
         expect(log, const <String>[
           'clear',
+          'getVMTimelineMicros',
           'startTracing',
           'action',
+          'getVMTimelineMicros',
           'stopTracing',
           'download',
         ]);
         expect(timeline.events.single.name, 'test event');
+      });
+
+      test('with time interval', () async {
+        int count = 0;
+        when(mockPeer.sendRequest('getVMTimelineMicros'))
+          .thenAnswer((Invocation invocation) async {
+            log.add('getVMTimelineMicros');
+            return <String, Object>{
+              if (count++ == 0)
+                'timestamp': 0
+              else
+                'timestamp': 1000001,
+            };
+          });
+        when(mockPeer.sendRequest('getVMTimeline', argThat(equals(<String, dynamic>{
+          'timeOriginMicros': 0,
+          'timeExtentMicros': 999999
+        }))))
+          .thenAnswer((Invocation invocation) async {
+            log.add('download 1');
+            return <String, dynamic>{
+              'traceEvents': <dynamic>[
+                <String, String>{
+                  'name': 'test event 1',
+                },
+              ],
+            };
+          });
+        when(mockPeer.sendRequest('getVMTimeline', argThat(equals(<String, dynamic>{
+          'timeOriginMicros': 1000000,
+          'timeExtentMicros': 999999,
+        }))))
+          .thenAnswer((Invocation invocation) async {
+            log.add('download 2');
+            return <String, dynamic>{
+              'traceEvents': <dynamic>[
+                <String, String>{
+                  'name': 'test event 2',
+                },
+              ],
+            };
+          });
+
+
+        final Timeline timeline = await driver.traceAction(() async {
+          log.add('action');
+        });
+
+        expect(log, const <String>[
+          'clear',
+          'getVMTimelineMicros',
+          'startTracing',
+          'action',
+          'getVMTimelineMicros',
+          'stopTracing',
+          'download 1',
+          'download 2',
+        ]);
+        expect(timeline.events.map((TimelineEvent event) => event.name), <String>[
+          'test event 1',
+          'test event 2',
+        ]);
       });
     });
 
@@ -597,6 +669,12 @@ void main() {
         bool actionCalled = false;
         bool startTracingCalled = false;
         bool stopTracingCalled = false;
+
+        when(mockPeer.sendRequest('getVMTimelineMicros'))
+          .thenAnswer((Invocation invocation) async {
+            log.add('getVMTimelineMicros');
+            return <String, Object>{};
+          });
 
         when(mockPeer.sendRequest('setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[Dart, GC, Compiler]'}))))
           .thenAnswer((Invocation invocation) async {

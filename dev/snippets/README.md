@@ -225,4 +225,14 @@ Instead, you can run the analysis locally with this command from the Flutter roo
 TMPDIR=/tmp bin/cache/dart-sdk/bin/dart dev/bots/analyze-sample-code.dart --temp=samples
 ```
 
-This will analyze the samples, and leave the output in /tmp/samples
+This will analyze the samples, and leave the generated files in `/tmp/samples`
+
+You can find the sample you are working on in `/tmp/samples`. It is named using the
+path to the file it is in, and the line of the file that the `{@tool ...}` directive
+is on.
+
+For example, the file `sample.src.widgets.animated_list.52.dart` points to the sample
+in `packages/flutter/src/widgets/animated_list.dart` at line 52. You can then take the
+contents of that file, and paste it into [Dartpad](https://dartpad.dev) and see if it
+works. If the sample relies on new features that have just landed, it may not work
+until the features make it into the `dev` branch.
