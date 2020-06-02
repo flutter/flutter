@@ -278,7 +278,7 @@ static SkiaGPUObject<SkImage> UploadRasterImage(
                   SkSafeUnref(static_cast<SkImage*>(context));
                 },
                 image.get());
-            result = {texture_image, nullptr};
+            result = {std::move(texture_image), nullptr};
           })
           .SetIfFalse([&result, context = io_manager->GetResourceContext(),
                        &pixmap, queue = io_manager->GetSkiaUnrefQueue()] {
@@ -293,7 +293,7 @@ static SkiaGPUObject<SkImage> UploadRasterImage(
               FML_LOG(ERROR) << "Could not make x-context image.";
               result = {};
             } else {
-              result = {texture_image, queue};
+              result = {std::move(texture_image), queue};
             }
           }));
 
