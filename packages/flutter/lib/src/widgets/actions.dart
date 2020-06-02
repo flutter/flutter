@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'focus_manager.dart';
@@ -869,7 +870,7 @@ class _ActionsMarker extends InheritedWidget {
 class FocusableActionDetector extends StatefulWidget {
   /// Create a const [FocusableActionDetector].
   ///
-  /// The [enabled], [autofocus], and [child] arguments must not be null.
+  /// The [enabled], [autofocus], [mouseCursor], and [child] arguments must not be null.
   const FocusableActionDetector({
     Key key,
     this.enabled = true,
@@ -880,9 +881,11 @@ class FocusableActionDetector extends StatefulWidget {
     this.onShowFocusHighlight,
     this.onShowHoverHighlight,
     this.onFocusChange,
+    this.mouseCursor = MouseCursor.defer,
     @required this.child,
   })  : assert(enabled != null),
         assert(autofocus != null),
+        assert(mouseCursor != null),
         assert(child != null),
         super(key: key);
 
@@ -922,6 +925,13 @@ class FocusableActionDetector extends StatefulWidget {
   ///
   /// Called with true if the [focusNode] has primary focus.
   final ValueChanged<bool> onFocusChange;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// The [cursor] defaults to [MouseCursor.defer], deferring the choice of
+  /// cursor to the next region behing it in hit-test order.
+  final MouseCursor mouseCursor;
 
   /// The child widget for this [FocusableActionDetector] widget.
   ///
@@ -975,7 +985,6 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
 
   bool _hovering = false;
   void _handleMouseEnter(PointerEnterEvent event) {
-    assert(widget.onShowHoverHighlight != null);
     if (!_hovering) {
       _mayTriggerCallback(task: () {
         _hovering = true;
@@ -984,7 +993,6 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 
   void _handleMouseExit(PointerExitEvent event) {
-    assert(widget.onShowHoverHighlight != null);
     if (_hovering) {
       _mayTriggerCallback(task: () {
         _hovering = false;
@@ -1073,6 +1081,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     Widget child = MouseRegion(
       onEnter: _handleMouseEnter,
       onExit: _handleMouseExit,
+      cursor: widget.mouseCursor,
       child: Focus(
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,

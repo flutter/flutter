@@ -44,7 +44,10 @@ class TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
   BinaryMessenger createBinaryMessenger() {
     return super.createBinaryMessenger()
       ..setMockMessageHandler('flutter/assets', (ByteData message) async {
-        if (const StringCodec().decodeMessage(message) == 'LICENSE') {
+        // Temporarily check for both LICENSE and NOTICES
+        // Once both the tool and google3 use notices this can be removed after PR:
+        // https://github.com/flutter/flutter/pull/57871
+        if (const StringCodec().decodeMessage(message) == 'LICENSE' || const StringCodec().decodeMessage(message) == 'NOTICES') {
           return const StringCodec().encodeMessage(licenses);
         }
         return null;
