@@ -751,7 +751,7 @@ class FlutterPlatform extends PlatformPlugin {
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl)),
       host: host,
       updateGoldens: updateGoldens,
-      nullSafety: extraFrontEndOptions.contains('--enable-experiment=non-nullable'),
+      nullSafety: extraFrontEndOptions?.contains('--enable-experiment=non-nullable') ?? false,
     );
   }
 
