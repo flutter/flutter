@@ -184,7 +184,6 @@ class TextFormField extends FormField<String> {
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(enableSuggestions != null),
-       // ignore: deprecated_member_use_from_same_package
        assert(autovalidate != null),
        assert(autoValidateMode != null),
        assert(maxLengthEnforced != null),
@@ -209,7 +208,6 @@ class TextFormField extends FormField<String> {
     onSaved: onSaved,
     validator: validator,
     enabled: enabled ?? decoration?.enabled ?? true,
-    // ignore: deprecated_member_use_from_same_package
     autoValidateMode: autovalidate ? AutoValidateMode.always : autoValidateMode,
     builder: (FormFieldState<String> field) {
       final _TextFormFieldState state = field as _TextFormFieldState;

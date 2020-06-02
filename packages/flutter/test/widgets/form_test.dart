@@ -87,7 +87,7 @@ void main() {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String errorText(String value) => value + '/error';
 
-    Widget builder(bool autovalidate) {
+    Widget builder(AutoValidateMode autoValidateMode) {
       return MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(devicePixelRatio: 1.0),
@@ -97,8 +97,7 @@ void main() {
               child: Material(
                 child: Form(
                   key: formKey,
-                  // ignore: deprecated_member_use_from_same_package
-                  autovalidate: autovalidate,
+                  autoValidateMode: autoValidateMode,
                   child: TextFormField(
                     validator: errorText,
                   ),
@@ -111,11 +110,11 @@ void main() {
     }
 
     // Start off not autovalidating.
-    await tester.pumpWidget(builder(false));
+    await tester.pumpWidget(builder(AutoValidateMode.disabled));
 
     Future<void> checkErrorText(String testValue) async {
       formKey.currentState.reset();
-      await tester.pumpWidget(builder(false));
+      await tester.pumpWidget(builder(AutoValidateMode.disabled));
       await tester.enterText(find.byType(TextFormField), testValue);
       await tester.pump();
 
@@ -127,7 +126,7 @@ void main() {
 
       // Try again with autovalidation. Should validate immediately.
       formKey.currentState.reset();
-      await tester.pumpWidget(builder(true));
+      await tester.pumpWidget(builder(AutoValidateMode.always));
       await tester.enterText(find.byType(TextFormField), testValue);
       await tester.pump();
 
@@ -159,15 +158,13 @@ void main() {
                         key: fieldKey1,
                         initialValue: validString,
                         validator: validator,
-                        // ignore: deprecated_member_use_from_same_package
-                        autovalidate: true
+                        autoValidateMode: AutoValidateMode.always,
                       ),
                       TextFormField(
                         key: fieldKey2,
                         initialValue: validString,
                         validator: validator,
-                        // ignore: deprecated_member_use_from_same_package
-                        autovalidate: true
+                        autoValidateMode: AutoValidateMode.always,
                       ),
                     ],
                   ),
@@ -208,15 +205,13 @@ void main() {
                           key: fieldKey1,
                           initialValue: validString,
                           validator: validator,
-                          // ignore: deprecated_member_use_from_same_package
-                          autovalidate: false,
+                          autoValidateMode: AutoValidateMode.disabled,
                         ),
                         TextFormField(
                           key: fieldKey2,
                           initialValue: '',
                           validator: validator,
-                          // ignore: deprecated_member_use_from_same_package
-                          autovalidate: false,
+                          autoValidateMode: AutoValidateMode.disabled,
                         ),
                       ],
                     ),
@@ -252,8 +247,7 @@ void main() {
               child: Material(
                 child: Form(
                   key: formKey,
-                  // ignore: deprecated_member_use_from_same_package
-                  autovalidate: true,
+                  autoValidateMode: AutoValidateMode.always,
                   child: ListView(
                     children: <Widget>[
                       TextFormField(
@@ -728,11 +722,12 @@ void main() {
       );
     }
 
-    // The issue only happens on the second build so we need to rebuild the three
+    // The issue only happens on the second build so we
+    // need to rebuild the three twice.
     await tester.pumpWidget(builder());
     await tester.pumpWidget(builder());
 
-    // we expect validation error text being shown
+    // We expect validation error text being shown.
     expect(find.text(errorText('')), findsOneWidget);
   });
 
@@ -750,8 +745,7 @@ void main() {
               child: Material(
                 child: FormField<String>(
                   initialValue: 'foo',
-                  // ignore: deprecated_member_use_from_same_package
-                  autovalidate: true,
+                  autoValidateMode: AutoValidateMode.always,
                   builder: (FormFieldState<String> state) {
                     formFieldState = state;
                     return Container();
@@ -799,7 +793,7 @@ void main() {
 
     await tester.pumpWidget(builder());
 
-    // no error text is visible yet
+    // No error text is visible yet.
     expect(find.text(errorText('foo')), findsNothing);
 
     await tester.enterText(find.byType(TextFormField), 'bar');
@@ -807,7 +801,7 @@ void main() {
     await tester.pump();
     expect(find.text(errorText('bar')), findsOneWidget);
 
-    // resetting the form state should remove the error text
+    // Resetting the form state should remove the error text.
     formState.currentState.reset();
     await tester.pump();
     expect(find.text(errorText('bar')), findsNothing);
