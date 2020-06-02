@@ -20,6 +20,7 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/testbed.dart';
 
 void main() {
   group('plugins', () {
@@ -547,16 +548,9 @@ EndGlobal''');
     });
 
     group('injectPlugins', () {
-      MockFeatureFlags featureFlags;
       MockXcodeProjectInterpreter xcodeProjectInterpreter;
 
       setUp(() {
-        featureFlags = MockFeatureFlags();
-        when(featureFlags.isLinuxEnabled).thenReturn(false);
-        when(featureFlags.isMacOSEnabled).thenReturn(false);
-        when(featureFlags.isWindowsEnabled).thenReturn(false);
-        when(featureFlags.isWebEnabled).thenReturn(false);
-
         xcodeProjectInterpreter = MockXcodeProjectInterpreter();
         when(xcodeProjectInterpreter.isInstalled).thenReturn(false);
       });
@@ -578,7 +572,7 @@ EndGlobal''');
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(),
       });
 
       testUsingContext('Registrant uses new embedding if app uses new embedding', () async {
@@ -598,7 +592,7 @@ EndGlobal''');
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(),
       });
 
       testUsingContext('Registrant uses shim for plugins using old embedding if app uses new embedding', () async {
@@ -629,7 +623,7 @@ EndGlobal''');
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(),
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
@@ -651,7 +645,7 @@ EndGlobal''');
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(),
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
@@ -678,7 +672,7 @@ EndGlobal''');
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(),
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
@@ -702,7 +696,7 @@ EndGlobal''');
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(),
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
@@ -726,7 +720,7 @@ EndGlobal''');
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(),
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
@@ -747,7 +741,7 @@ EndGlobal''');
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(),
       });
 
       testUsingContext('Module using old plugin shows warning', () async {
@@ -767,7 +761,7 @@ EndGlobal''');
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(),
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
@@ -789,7 +783,7 @@ EndGlobal''');
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(),
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
@@ -811,7 +805,7 @@ EndGlobal''');
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(),
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
@@ -836,7 +830,7 @@ EndGlobal''');
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(),
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
@@ -856,7 +850,6 @@ EndGlobal''');
 
       testUsingContext("Registrant for web doesn't escape slashes in imports", () async {
         when(flutterProject.isModule).thenReturn(true);
-        when(featureFlags.isWebEnabled).thenReturn(true);
         when(webProject.existsSync()).thenReturn(true);
 
         final Directory webPluginWithNestedFile =
@@ -892,12 +885,11 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       });
 
       testUsingContext('Injecting creates generated macos registrant, but does not include Dart-only plugins', () async {
         when(macosProject.existsSync()).thenReturn(true);
-        when(featureFlags.isMacOSEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(true);
         // Create a plugin without a pluginClass.
         dummyPackageDirectory.parent.childFile('pubspec.yaml')
@@ -919,12 +911,11 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       });
 
       testUsingContext('pluginClass: none doesn\'t trigger registrant entry on macOS', () async {
         when(macosProject.existsSync()).thenReturn(true);
-        when(featureFlags.isMacOSEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(true);
         // Create a plugin without a pluginClass.
         dummyPackageDirectory.parent.childFile('pubspec.yaml')
@@ -948,12 +939,11 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       });
 
       testUsingContext('Injecting creates generated Linux registrant', () async {
         when(linuxProject.existsSync()).thenReturn(true);
-        when(featureFlags.isLinuxEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
         configureDummyPackageAsPlugin();
 
@@ -968,12 +958,11 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
       });
 
       testUsingContext('Injecting creates generated Linux registrant, but does not include Dart-only plugins', () async {
         when(linuxProject.existsSync()).thenReturn(true);
-        when(featureFlags.isLinuxEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
         // Create a plugin without a pluginClass.
         dummyPackageDirectory.parent.childFile('pubspec.yaml')
@@ -995,12 +984,11 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
       });
 
       testUsingContext('pluginClass: none doesn\'t trigger registrant entry on Linux', () async {
         when(linuxProject.existsSync()).thenReturn(true);
-        when(featureFlags.isLinuxEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
         // Create a plugin without a pluginClass.
         dummyPackageDirectory.parent.childFile('pubspec.yaml')
@@ -1024,12 +1012,11 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
       });
 
       testUsingContext('Injecting creates generated Linux plugin Cmake file', () async {
         when(linuxProject.existsSync()).thenReturn(true);
-        when(featureFlags.isLinuxEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
         configureDummyPackageAsPlugin();
 
@@ -1044,13 +1031,12 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
       });
 
 
       testUsingContext('Injecting creates generated Windows registrant', () async {
         when(windowsProject.existsSync()).thenReturn(true);
-        when(featureFlags.isWindowsEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
         configureDummyPackageAsPlugin();
         createDummyWindowsSolutionFile();
@@ -1058,8 +1044,10 @@ flutter:
 
         await injectPlugins(flutterProject, checkProjects: true);
 
-        final File registrantHeader = windowsProject.managedDirectory.childFile('generated_plugin_registrant.h');
-        final File registrantImpl = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
+        final File registrantHeader = windowsProject.managedDirectory
+          .childFile('generated_plugin_registrant.h');
+        final File registrantImpl = windowsProject.managedDirectory
+          .childFile('generated_plugin_registrant.cc');
 
         expect(registrantHeader, exists);
         expect(registrantImpl, exists);
@@ -1067,12 +1055,11 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
       });
 
       testUsingContext('Injecting creates generated Windows registrant, but does not include Dart-only plugins', () async {
         when(windowsProject.existsSync()).thenReturn(true);
-        when(featureFlags.isWindowsEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
         // Create a plugin without a pluginClass.
         dummyPackageDirectory.parent.childFile('pubspec.yaml')
@@ -1097,12 +1084,11 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
       });
 
       testUsingContext('pluginClass: none doesn\'t trigger registrant entry on Windows', () async {
         when(windowsProject.existsSync()).thenReturn(true);
-        when(featureFlags.isWindowsEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
         // Create a plugin without a pluginClass.
         dummyPackageDirectory.parent.childFile('pubspec.yaml')
@@ -1129,12 +1115,11 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
       });
 
       testUsingContext('Injecting creates generated Windows plugin properties', () async {
         when(windowsProject.existsSync()).thenReturn(true);
-        when(featureFlags.isWindowsEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
         configureDummyPackageAsPlugin();
         createDummyWindowsSolutionFile();
@@ -1151,12 +1136,11 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
       });
 
       testUsingContext('Injecting updates Windows solution file', () async {
         when(windowsProject.existsSync()).thenReturn(true);
-        when(featureFlags.isWindowsEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
         configureDummyPackageAsPlugin();
         createDummyWindowsSolutionFile();
@@ -1168,18 +1152,11 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
       });
     });
 
     group('createPluginSymlinks', () {
-      MockFeatureFlags featureFlags;
-
-      setUp(() {
-        featureFlags = MockFeatureFlags();
-        when(featureFlags.isLinuxEnabled).thenReturn(true);
-        when(featureFlags.isWindowsEnabled).thenReturn(true);
-      });
 
       testUsingContext('Symlinks are created for Linux plugins', () async {
         when(linuxProject.existsSync()).thenReturn(true);
@@ -1191,7 +1168,10 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(
+          isLinuxEnabled: true,
+          isWindowsEnabled: true,
+        ),
       });
 
       testUsingContext('Symlinks are created for Windows plugins', () async {
@@ -1204,7 +1184,10 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(
+          isLinuxEnabled: true,
+          isWindowsEnabled: true,
+        ),
       });
 
       testUsingContext('Existing symlinks are removed when no longer in use with force', () {
@@ -1227,7 +1210,10 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(
+          isLinuxEnabled: true,
+          isWindowsEnabled: true,
+        ),
       });
 
       testUsingContext('Existing symlinks are removed automatically on refresh when no longer in use', () async {
@@ -1252,7 +1238,10 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(
+          isLinuxEnabled: true,
+          isWindowsEnabled: true,
+        ),
       });
 
       testUsingContext('createPluginSymlinks is a no-op without force when up to date', () {
@@ -1276,7 +1265,10 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(
+          isLinuxEnabled: true,
+          isWindowsEnabled: true,
+        ),
       });
 
       testUsingContext('createPluginSymlinks repairs missing links', () async {
@@ -1300,7 +1292,10 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () => featureFlags,
+        FeatureFlags: () => TestFeatureFlags(
+          isLinuxEnabled: true,
+          isWindowsEnabled: true,
+        ),
       });
     });
   });
@@ -1385,10 +1380,8 @@ flutter:
 }
 
 class MockAndroidProject extends Mock implements AndroidProject {}
-class MockFeatureFlags extends Mock implements FeatureFlags {}
 class MockFlutterProject extends Mock implements FlutterProject {}
 class MockFile extends Mock implements File {}
-class MockFileSystem extends Mock implements FileSystem {}
 class MockIosProject extends Mock implements IosProject {}
 class MockMacOSProject extends Mock implements MacOSProject {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
