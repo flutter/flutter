@@ -1115,7 +1115,7 @@ abstract class ResidentRunner {
     if (event.extensionKind == 'Flutter.Error') {
       final Map<dynamic, dynamic> json = event.extensionData?.data;
       if (json != null && json.containsKey('renderedErrorText')) {
-        globals.printStatus('\n' + json['renderedErrorText'].toString());
+        globals.printStatus('\n${json['renderedErrorText']}');
       }
     }
   }
