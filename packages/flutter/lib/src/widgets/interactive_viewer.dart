@@ -11,8 +11,6 @@ import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
-import 'scroll_physics.dart';
-import 'single_child_scroll_view.dart';
 import 'ticker_provider.dart';
 
 /// A widget that enables pan and zoom interactions with its child.
