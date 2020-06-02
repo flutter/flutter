@@ -655,6 +655,7 @@ void main() {
   });
 
   testWidgets('Form auto-validate form fields only after one of them changes if autovalidateMode is onUserInteraction', (WidgetTester tester) async {
+    const String initialValue = 'foo';
     String errorText(String value) => 'error/$value';
 
     Widget builder() {
@@ -665,8 +666,21 @@ void main() {
             child: Material(
               child: Form(
                 autoValidateMode: AutoValidateMode.onUserInteraction,
-                child: TextFormField(
-                  validator: errorText,
+                child: Column(
+                  children: <Widget>[
+                    TextFormField(
+                      initialValue: initialValue,
+                      validator: errorText,
+                    ),
+                    TextFormField(
+                      initialValue: initialValue,
+                      validator: errorText,
+                    ),
+                    TextFormField(
+                      initialValue: initialValue,
+                      validator: errorText,
+                    )
+                  ],
                 ),
               ),
             ),
@@ -679,15 +693,18 @@ void main() {
     await tester.pumpWidget(builder());
     await tester.pumpWidget(builder());
 
-    // we expect no validation error text being shown
-    expect(find.text(errorText('')), findsNothing);
+    // We expect no validation error text being shown.
+    expect(find.text(errorText(initialValue)), findsNothing);
 
-    // set a empty string to trigger the Fields validators
-    await tester.enterText(find.byType(TextFormField), 'foo');
+    // Set a empty string into the first form field to
+    // trigger the Fields validators.
+    await tester.enterText(find.byType(TextFormField).first, '');
     await tester.pump();
 
-    // now we expect the error to be shown
-    expect(find.text(errorText('foo')), findsOneWidget);
+    // Now we expect the errors to be shown for the first Text Field and
+    // for the next two form fields that have their contents unchanged.
+    expect(find.text(errorText('')), findsOneWidget);
+    expect(find.text(errorText(initialValue)), findsNWidgets(2));
   });
 
   testWidgets('Form auto-validate form fields even before none of them changes if autovalidateMode is always', (WidgetTester tester) async {
