@@ -189,7 +189,7 @@ void main() {
     expect(_value, 'Soup');
   });
 
-  testWidgets('autovalidate is passed to super', (WidgetTester tester) async {
+  testWidgets('autoValidateMode is passed to super', (WidgetTester tester) async {
     int _validateCalled = 0;
 
     await tester.pumpWidget(
@@ -197,8 +197,7 @@ void main() {
         home: Material(
           child: Center(
             child: TextFormField(
-              // ignore: deprecated_member_use_from_same_package
-              autovalidate: true,
+              autoValidateMode: AutoValidateMode.always,
               validator: (String value) {
                 _validateCalled++;
                 return null;
@@ -224,8 +223,7 @@ void main() {
           child: Center(
             child: TextFormField(
               enabled: true,
-              // ignore: deprecated_member_use_from_same_package
-              autovalidate: true,
+              autoValidateMode: AutoValidateMode.always,
               validator: (String value) {
                 _validateCalled += 1;
                 return null;

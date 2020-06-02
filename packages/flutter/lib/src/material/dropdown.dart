@@ -1489,7 +1489,6 @@ class DropdownButtonFormField<T> extends FormField<T> {
          onSaved: onSaved,
          initialValue: value,
          validator: validator,
-         // ignore: deprecated_member_use_from_same_package
          autoValidateMode: autovalidate ? AutoValidateMode.always : autoValidateMode,
          builder: (FormFieldState<T> field) {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;

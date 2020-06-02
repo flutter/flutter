@@ -178,8 +178,7 @@ void main() {
                   _validateCalled++;
                   return currentValue == null ? 'Must select value' : null;
                 },
-                // ignore: deprecated_member_use_from_same_package
-                autovalidate: true,
+                autoValidateMode: AutoValidateMode.always,
               ),
             ),
           );
