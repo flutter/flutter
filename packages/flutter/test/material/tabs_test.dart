@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -2028,6 +2029,45 @@ void main() {
     expect(() => Tab(text: 'foo', child: Container()), throwsAssertionError);
   });
 
+  testWidgets('Tabs changes mouse cursor when a tab is hovered', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B'];
+    await tester.pumpWidget(MaterialApp(home: DefaultTabController(
+        length: tabs.length,
+        child: Scaffold(
+          body: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TabBar(
+              mouseCursor: SystemMouseCursors.text,
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Tab).first));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(MaterialApp(home: DefaultTabController(
+        length: tabs.length,
+        child: Scaffold(
+          body: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            ),
+          ),
+        ),
+      ),
+    ));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
 
   testWidgets('TabController changes', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/14812

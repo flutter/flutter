@@ -25,7 +25,7 @@ const Map<String, String> kDyLdLibEntry = <String, String>{
 };
 
 void main() {
-  testWithoutContext('IOSDevice.installApp calls ios-deploy correctly', () async {
+  testWithoutContext('IOSDevice.installApp calls ios-deploy correctly with USB', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -47,6 +47,36 @@ void main() {
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
       fileSystem: fileSystem,
+      interfaceType: IOSDeviceInterface.usb,
+    );
+    final bool wasInstalled = await device.installApp(iosApp);
+
+    expect(wasInstalled, true);
+    expect(processManager.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('IOSDevice.installApp calls ios-deploy correctly with network', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final IOSApp iosApp = PrebuiltIOSApp(
+      projectBundleId: 'app',
+      bundleDir: fileSystem.currentDirectory,
+    );
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(command: <String>[
+        'ios-deploy',
+        '--id',
+        '1234',
+        '--bundle',
+        '/',
+      ], environment: <String, String>{
+        'PATH': '/usr/bin:null',
+        ...kDyLdLibEntry,
+      })
+    ]);
+    final IOSDevice device = setUpIOSDevice(
+      processManager: processManager,
+      fileSystem: fileSystem,
+      interfaceType: IOSDeviceInterface.network,
     );
     final bool wasInstalled = await device.installApp(iosApp);
 
@@ -237,6 +267,7 @@ IOSDevice setUpIOSDevice({
   @required ProcessManager processManager,
   FileSystem fileSystem,
   Logger logger,
+  IOSDeviceInterface interfaceType,
 }) {
   logger ??= BufferLogger.test();
   final FakePlatform platform = FakePlatform(
@@ -270,6 +301,7 @@ IOSDevice setUpIOSDevice({
       cache: cache,
     ),
     artifacts: artifacts,
+    interfaceType: interfaceType,
   );
 }
 

@@ -6,6 +6,7 @@ import 'dart:collection' show Queue;
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import 'bottom_navigation_bar_theme.dart';
@@ -187,6 +188,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.unselectedLabelStyle,
     this.showSelectedLabels = true,
     this.showUnselectedLabels,
+    this.mouseCursor,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
@@ -314,6 +316,12 @@ class BottomNavigationBar extends StatefulWidget {
   /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
   final bool showSelectedLabels;
 
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// tiles.
+  ///
+  /// If this property is null, [SystemMouseCursors.click] will be used.
+  final MouseCursor mouseCursor;
+
   @override
   _BottomNavigationBarState createState() => _BottomNavigationBarState();
 }
@@ -337,12 +345,14 @@ class _BottomNavigationTile extends StatelessWidget {
     this.showSelectedLabels,
     this.showUnselectedLabels,
     this.indexLabel,
+    @required this.mouseCursor,
     }) : assert(type != null),
          assert(item != null),
          assert(animation != null),
          assert(selected != null),
          assert(selectedLabelStyle != null),
-         assert(unselectedLabelStyle != null);
+         assert(unselectedLabelStyle != null),
+         assert(mouseCursor != null);
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -359,6 +369,7 @@ class _BottomNavigationTile extends StatelessWidget {
   final String indexLabel;
   final bool showSelectedLabels;
   final bool showUnselectedLabels;
+  final MouseCursor mouseCursor;
 
   @override
   Widget build(BuildContext context) {
@@ -452,6 +463,7 @@ class _BottomNavigationTile extends StatelessWidget {
           children: <Widget>[
             InkResponse(
               onTap: onTap,
+              mouseCursor: mouseCursor,
               child: Padding(
                 padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
                 child: Column(
@@ -833,6 +845,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         );
         break;
     }
+    final MouseCursor effectiveMouseCursor = widget.mouseCursor ?? SystemMouseCursors.click;
 
     final List<Widget> tiles = <Widget>[];
     for (int i = 0; i < widget.items.length; i++) {
@@ -855,6 +868,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         showSelectedLabels: widget.showSelectedLabels ?? bottomTheme.showSelectedLabels,
         showUnselectedLabels: widget.showUnselectedLabels ?? bottomTheme.showUnselectedLabels ?? _defaultShowUnselected,
         indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
+        mouseCursor: effectiveMouseCursor,
       ));
     }
     return tiles;

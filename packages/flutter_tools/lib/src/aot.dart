@@ -62,8 +62,8 @@ class AotBuilder {
       case TargetPlatform.android_x64:
         expectSo = true;
         target = buildInfo.isRelease
-          ? const AotElfRelease()
-          : const AotElfProfile();
+          ? const AotElfRelease(TargetPlatform.android_arm)
+          : const AotElfProfile(TargetPlatform.android_arm);
     }
 
     Status status;

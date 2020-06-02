@@ -139,7 +139,7 @@ class BuildInfo {
   Map<String, String> toEnvironmentConfig() {
     return <String, String>{
       if (dartDefines?.isNotEmpty ?? false)
-        'DART_DEFINES': dartDefines.join(','),
+        'DART_DEFINES': encodeDartDefines(dartDefines),
       if (dartObfuscation != null)
         'DART_OBFUSCATION': dartObfuscation.toString(),
       if (extraFrontEndOptions?.isNotEmpty ?? false)
@@ -654,4 +654,26 @@ String getWindowsBuildDirectory() {
 /// Returns the Fuchsia build output directory.
 String getFuchsiaBuildDirectory() {
   return globals.fs.path.join(getBuildDirectory(), 'fuchsia');
+}
+
+/// Defines specified via the `--dart-define` command-line option.
+///
+/// These values are URI-encoded and then combined into a comma-separated string.
+const String kDartDefines = 'DartDefines';
+
+/// Encode a List of dart defines in a URI string.
+String encodeDartDefines(List<String> defines) {
+  return defines.map(Uri.encodeComponent).join(',');
+}
+
+/// Dart defines are encoded inside [environmentDefines] as a comma-separated list.
+List<String> decodeDartDefines(Map<String, String> environmentDefines) {
+  if (!environmentDefines.containsKey(kDartDefines) || environmentDefines[kDartDefines].isEmpty) {
+    return const <String>[];
+  }
+  return environmentDefines[kDartDefines]
+    .split(',')
+    .map<Object>(Uri.decodeComponent)
+    .cast<String>()
+    .toList();
 }

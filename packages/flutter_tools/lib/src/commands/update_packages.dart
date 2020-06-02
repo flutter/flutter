@@ -33,7 +33,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
-  UpdatePackagesCommand({ this.hidden = false }) {
+  UpdatePackagesCommand() {
     argParser
       ..addFlag(
         'force-upgrade',
@@ -98,7 +98,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   final List<String> aliases = <String>['upgrade-packages'];
 
   @override
-  final bool hidden;
+  final bool hidden = true;
 
 
   // Lazy-initialize the net utilities with values from the context.
@@ -196,8 +196,9 @@ class UpdatePackagesCommand extends FlutterCommand {
           // If the checksum doesn't match, they may have added or removed some dependencies.
           // we need to run update-packages to recapture the transitive deps.
           globals.printError(
-            'Warning: pubspec in ${directory.path} has invalid dependencies. '
-            'Please run "flutter update-packages --force-upgrade" to update them correctly.'
+            'Warning: pubspec in ${directory.path} has updated or new dependencies. '
+            'Please run "flutter update-packages --force-upgrade" to update them correctly '
+            '(checksum ${pubspec.checksum.value} != $checksum).'
           );
           needsUpdate = true;
         } else {

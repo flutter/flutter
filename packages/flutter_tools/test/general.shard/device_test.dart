@@ -66,9 +66,9 @@ void main() {
 
   group('PollingDeviceDiscovery', () {
     testUsingContext('startPolling', () async {
-      FakeAsync().run((FakeAsync time) {
+      FakeAsync().run((FakeAsync time) async {
         final FakePollingDeviceDiscovery pollingDeviceDiscovery = FakePollingDeviceDiscovery();
-        pollingDeviceDiscovery.startPolling();
+        await pollingDeviceDiscovery.startPolling();
         time.elapse(const Duration(milliseconds: 4001));
         time.flushMicrotasks();
         // First check should use the default polling timeout
@@ -79,7 +79,7 @@ void main() {
         time.flushMicrotasks();
         // Subsequent polling should be much longer.
         expect(pollingDeviceDiscovery.lastPollingTimeout, const Duration(seconds: 30));
-        pollingDeviceDiscovery.stopPolling();
+        await pollingDeviceDiscovery.stopPolling();
       });
     });
   });
