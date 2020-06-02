@@ -200,7 +200,7 @@ void main() {
     expect(darkTheme.disabledColor, equals(Colors.white.withAlpha(0x0c)));
     expect(darkTheme.selectedColor, equals(Colors.white.withAlpha(0x3d)));
     expect(darkTheme.secondarySelectedColor, equals(customColor1.withAlpha(0x3d)));
-    expect(lightTheme.labelPadding, isNull);
+    expect(darkTheme.labelPadding, isNull);
     expect(darkTheme.padding, equals(const EdgeInsets.all(4.0)));
     expect(darkTheme.shape, isA<StadiumBorder>());
     expect(darkTheme.labelStyle.color, equals(Colors.white.withAlpha(0xde)));
@@ -218,7 +218,7 @@ void main() {
     expect(customTheme.disabledColor, equals(customColor1.withAlpha(0x0c)));
     expect(customTheme.selectedColor, equals(customColor1.withAlpha(0x3d)));
     expect(customTheme.secondarySelectedColor, equals(customColor2.withAlpha(0x3d)));
-    expect(lightTheme.labelPadding, isNull);
+    expect(customTheme.labelPadding, isNull);
     expect(customTheme.padding, equals(const EdgeInsets.all(4.0)));
     expect(customTheme.shape, isA<StadiumBorder>());
     expect(customTheme.labelStyle.color, equals(customColor1.withAlpha(0xde)));
