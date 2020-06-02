@@ -227,7 +227,22 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test disabled
+    await tester.pumpWidget(
+      const Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: InkWell(),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     // Test default of InkResponse()
     await tester.pumpWidget(
@@ -244,7 +259,22 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test disabled
+    await tester.pumpWidget(
+      const Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: InkResponse(),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   group('feedback', () {
