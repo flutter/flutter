@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/cache.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -143,6 +144,7 @@ void main() {
       reloadSources: anyNamed('reloadSources'),
       restart: anyNamed('restart'),
       compileExpression: anyNamed('compileExpression'),
+      getSkSLMethod: anyNamed('getSkSLMethod'),
     )).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.setupDevFS(any, any, packagesFilePath: anyNamed('packagesFilePath')))
       .thenAnswer((Invocation invocation) async {
@@ -202,6 +204,93 @@ void main() {
     expect(onConnectionInfo.isCompleted, true);
     expect((await connectionInfo).baseUri, 'foo://bar');
     expect(onAppStart.isCompleted, true);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }));
+
+  test('ResidentRunner suppresses errors for the initial compilation', () => testbed.run(() async {
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+      .createSync(recursive: true);
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+    ]);
+    final MockResidentCompiler residentCompiler = MockResidentCompiler();
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
+    when(mockFlutterDevice.generator).thenReturn(residentCompiler);
+    when(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packageConfig: anyNamed('packageConfig'),
+      suppressErrors: true,
+    )).thenAnswer((Invocation invocation) async {
+      return const CompilerOutput('foo', 0 ,<Uri>[]);
+    });
+    when(mockFlutterDevice.runHot(
+      hotRunner: anyNamed('hotRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+
+    expect(await residentRunner.run(), 0);
+    verify(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packageConfig: anyNamed('packageConfig'),
+      suppressErrors: true,
+    )).called(1);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }));
+
+  test('ResidentRunner does not suppressErrors if running with an applicationBinary', () => testbed.run(() async {
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+      .createSync(recursive: true);
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+    ]);
+    final MockResidentCompiler residentCompiler = MockResidentCompiler();
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      applicationBinary: globals.fs.file('app.apk'),
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
+    when(mockFlutterDevice.generator).thenReturn(residentCompiler);
+    when(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packageConfig: anyNamed('packageConfig'),
+      suppressErrors: false,
+    )).thenAnswer((Invocation invocation) async {
+      return const CompilerOutput('foo', 0, <Uri>[]);
+    });
+    when(mockFlutterDevice.runHot(
+      hotRunner: anyNamed('hotRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+
+    expect(await residentRunner.run(), 0);
+    verify(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packageConfig: anyNamed('packageConfig'),
+      suppressErrors: false,
+    )).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
@@ -537,6 +626,61 @@ void main() {
     expect(cacheDill, isNot(exists));
   }));
 
+  test('ResidentRunner can run source generation', () => testbed.run(() async {
+    final FakeProcessManager processManager = globals.processManager as FakeProcessManager;
+    final Directory dependencies = globals.fs.directory(
+      globals.fs.path.join('build', '6ec2559087977927717927ede0a147f1'));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+        globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
+        '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
+      ],
+      onRun: () {
+        dependencies
+          .childFile('gen_l10n_inputs_and_outputs.json')
+          ..createSync()
+          ..writeAsStringSync('{"inputs":[],"outputs":[]}');
+      }
+    ));
+    globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
+      .createSync(recursive: true);
+    globals.fs.file('l10n.yaml').createSync();
+
+    await residentRunner.runSourceGenerators();
+
+    expect(testLogger.errorText, isEmpty);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
+  }));
+
+  test('ResidentRunner can run source generation - generation fails', () => testbed.run(() async {
+    final FakeProcessManager processManager = globals.processManager as FakeProcessManager;
+    final Directory dependencies = globals.fs.directory(
+      globals.fs.path.join('build', '6ec2559087977927717927ede0a147f1'));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+        globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
+        '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
+      ],
+      exitCode: 1,
+      stderr: 'stderr'
+    ));
+    globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
+      .createSync(recursive: true);
+    globals.fs.file('l10n.yaml').createSync();
+
+    await residentRunner.runSourceGenerators();
+
+    expect(testLogger.errorText, allOf(
+      contains('stderr'), // Message from gen_l10n.dart
+      contains('Exception') // Message from build_system
+    ));
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
+  }));
+
   test('ResidentRunner printHelpDetails', () => testbed.run(() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     when(mockDevice.supportsHotRestart).thenReturn(true);
@@ -573,6 +717,7 @@ void main() {
           commandHelp.p,
           commandHelp.o,
           commandHelp.z,
+          commandHelp.g,
           commandHelp.M,
           commandHelp.v,
           commandHelp.P,
@@ -1134,6 +1279,7 @@ void main() {
       Restart restart,
       CompileExpression compileExpression,
       ReloadMethod reloadMethod,
+      GetSkSLMethod getSkSLMethod,
       io.CompressionOptions compression,
       Device device,
     }) async => mockVMService,
@@ -1156,6 +1302,7 @@ class MockDeviceLogReader extends Mock implements DeviceLogReader {}
 class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockUsage extends Mock implements Usage {}
 class MockProcessManager extends Mock implements ProcessManager {}
+class MockResidentCompiler extends Mock implements ResidentCompiler {}
 
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(Device device, { Stream<Uri> observatoryUris })

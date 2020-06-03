@@ -184,6 +184,11 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// `width`, `height`, and [constraints] arguments to the constructor override
 /// this.
 ///
+/// By default, containers return false for all hit tests. If the [color]
+/// property is specified, the hit testing is handled by [ColoredBox], which
+/// always returns true. If the [decoration] or [foregroundDecoration] properties
+/// are specified, hit testing is handled by [Decoration.hitTest].
+///
 /// ## Layout behavior
 ///
 /// _See [BoxConstraints] for an introduction to box layout models._

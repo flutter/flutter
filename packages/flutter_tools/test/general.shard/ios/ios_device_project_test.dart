@@ -89,6 +89,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     sdkVersion: '13.3',
     cpuArchitecture: DarwinArch.arm64,
     artifacts: artifacts,
+    interfaceType: IOSDeviceInterface.usb,
   );
 }
 

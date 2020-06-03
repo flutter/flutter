@@ -15,6 +15,7 @@ import '../build_system.dart';
 import '../depfile.dart';
 import 'assets.dart';
 import 'dart.dart';
+import 'localizations.dart';
 
 /// Whether web builds should call the platform initialization logic.
 const String kInitializePlatform = 'InitializePlatform';
@@ -132,7 +133,8 @@ class Dart2JSTarget extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-    WebEntrypointTarget()
+    WebEntrypointTarget(),
+    GenerateLocalizationsTarget(),
   ];
 
   @override
@@ -162,7 +164,7 @@ class Dart2JSTarget extends Target {
     final String packageFile = globalPackagesPath;
     final File outputKernel = environment.buildDir.childFile('app.dill');
     final File outputFile = environment.buildDir.childFile('main.dart.js');
-    final List<String> dartDefines = parseDartDefines(environment);
+    final List<String> dartDefines = decodeDartDefines(environment.defines);
     final String enabledExperiments = environment.defines[kEnableExperiment];
 
     // Run the dart2js compilation in two stages, so that icon tree shaking can

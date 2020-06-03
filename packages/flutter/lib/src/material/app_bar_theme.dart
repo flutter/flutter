@@ -37,6 +37,7 @@ class AppBarTheme with Diagnosticable {
     this.iconTheme,
     this.actionsIconTheme,
     this.textTheme,
+    this.centerTitle,
   });
 
   /// Default value for [AppBar.brightness].
@@ -69,6 +70,11 @@ class AppBarTheme with Diagnosticable {
   /// If null, [AppBar] uses [ThemeData.primaryTextTheme].
   final TextTheme textTheme;
 
+  /// Default value for [AppBar.centerTitle].
+  ///
+  /// If null, the value is adapted to current [TargetPlatform].
+  final bool centerTitle;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   AppBarTheme copyWith({
@@ -78,6 +84,7 @@ class AppBarTheme with Diagnosticable {
     double elevation,
     IconThemeData iconTheme,
     TextTheme textTheme,
+    bool centerTitle,
   }) {
     return AppBarTheme(
       brightness: brightness ?? this.brightness,
@@ -86,6 +93,7 @@ class AppBarTheme with Diagnosticable {
       iconTheme: iconTheme ?? this.iconTheme,
       actionsIconTheme: actionsIconTheme ?? this.actionsIconTheme,
       textTheme: textTheme ?? this.textTheme,
+      centerTitle: centerTitle ?? this.centerTitle,
     );
   }
 
@@ -108,6 +116,7 @@ class AppBarTheme with Diagnosticable {
       iconTheme: IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t),
       actionsIconTheme: IconThemeData.lerp(a?.actionsIconTheme, b?.actionsIconTheme, t),
       textTheme: TextTheme.lerp(a?.textTheme, b?.textTheme, t),
+      centerTitle: t < 0.5 ? a?.centerTitle : b?.centerTitle,
     );
   }
 
@@ -120,6 +129,7 @@ class AppBarTheme with Diagnosticable {
       iconTheme,
       actionsIconTheme,
       textTheme,
+      centerTitle,
     );
   }
 
@@ -135,7 +145,8 @@ class AppBarTheme with Diagnosticable {
         && other.elevation == elevation
         && other.iconTheme == iconTheme
         && other.actionsIconTheme == actionsIconTheme
-        && other.textTheme == textTheme;
+        && other.textTheme == textTheme
+        && other.centerTitle == centerTitle;
   }
 
   @override
@@ -147,5 +158,6 @@ class AppBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('actionsIconTheme', actionsIconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('centerTitle', centerTitle, defaultValue: null));
   }
 }

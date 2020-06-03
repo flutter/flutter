@@ -368,6 +368,8 @@ class ArchiveCreator {
     // the archive, but some are checked in, and we don't want to skip
     // those.
     await _runGit(<String>['clean', '-f', '-X', '**/.packages']);
+    /// Remove package_config files and any contents in .dart_tool
+    await _runGit(<String>['clean', '-f', '-X', '**/.dart_tool']);
   }
 
   /// Write the archive to the given output file.

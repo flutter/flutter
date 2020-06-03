@@ -174,8 +174,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
     }
     const String fire = '🔥';
     const String rawMessage =
-        '  To hot restart changes while running, press "r". '
-        'To hot restart (and refresh the browser), press "R".';
+        '  To hot restart changes while running, press "r" or "R".';
     final String message = globals.terminal.color(
       fire + globals.terminal.bolden(rawMessage),
       TerminalColor.red,
@@ -487,6 +486,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
     );
 
     if (debuggingOptions.buildInfo.isDebug) {
+      await runSourceGenerators();
       // Full restart is always false for web, since the extra recompile is wasteful.
       final UpdateFSReport report = await _updateDevFS(fullRestart: false);
       if (report.success) {

@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(shihaohong): remove ignoring deprecated member use analysis
-// when AlertDialog.scrollable parameter is removed. See
-// https://flutter.dev/go/scrollable-alert-dialog for more details.
+// TODO(shihaohong-Piinks): remove ignoring deprecated member use analysis
+//   * when AlertDialog.scrollable parameter is removed. See
+//     https://flutter.dev/go/scrollable-alert-dialog for more details.
+//   * when Dialog.useMaterialBorderRadius parameter is removed.
 // ignore_for_file: deprecated_member_use_from_same_package
 
 import 'dart:async';
@@ -55,7 +56,9 @@ class Dialog extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.shape,
     this.child,
+    bool useMaterialBorderRadius,
   }) : assert(clipBehavior != null),
+       useMaterialBorderRadius = useMaterialBorderRadius ?? false,
        super(key: key);
 
   /// {@template flutter.material.dialog.backgroundColor}
@@ -117,7 +120,8 @@ class Dialog extends StatelessWidget {
   ///
   /// Defines the dialog's [Material.shape].
   ///
-  /// The default shape is a [RoundedRectangleBorder] with a radius of 2.0.
+  /// The default shape is a [RoundedRectangleBorder] with a radius of 2.0
+  /// (temporarily, set [useMaterialBorderRadius] to match Material guidelines).
   /// {@endtemplate}
   final ShapeBorder shape;
 
@@ -126,8 +130,19 @@ class Dialog extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  // TODO(johnsonmh): Update default dialog border radius to 4.0 to match material spec.
+  /// Indicates whether the [Dialog.shape]'s default [RoundedRectangleBorder]
+  /// should have a radius of 4.0 pixels to match Material Design, or use the
+  /// prior default of 2.0 pixels.
+  @Deprecated(
+    'Set useMaterialBorderRadius to `true`. This parameter will be removed and '
+    'was introduced to migrate Dialog to the correct border radius by default. '
+    'This feature was deprecated after v1.18.0.'
+  )
+  final bool useMaterialBorderRadius;
+
   static const RoundedRectangleBorder _defaultDialogShape =
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+  static const RoundedRectangleBorder _oldDefaultDialogShape =
     RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
   static const double _defaultElevation = 24.0;
 
@@ -151,7 +166,11 @@ class Dialog extends StatelessWidget {
             child: Material(
               color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
               elevation: elevation ?? dialogTheme.elevation ?? _defaultElevation,
-              shape: shape ?? dialogTheme.shape ?? _defaultDialogShape,
+              shape: shape ?? dialogTheme.shape ?? (
+                useMaterialBorderRadius ?
+                  _defaultDialogShape :
+                  _oldDefaultDialogShape
+              ),
               type: MaterialType.card,
               clipBehavior: clipBehavior,
               child: child,
@@ -260,8 +279,10 @@ class AlertDialog extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.shape,
     this.scrollable = false,
+    bool useMaterialBorderRadius,
   }) : assert(contentPadding != null),
        assert(clipBehavior != null),
+       useMaterialBorderRadius = useMaterialBorderRadius ?? false,
        super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
@@ -449,6 +470,16 @@ class AlertDialog extends StatelessWidget {
   )
   final bool scrollable;
 
+  /// Indicates whether the [Dialog.shape]'s default [RoundedRectangleBorder]
+  /// should have a radius of 4.0 pixels to match Material Design, or use the
+  /// prior default of 2.0 pixels.
+  @Deprecated(
+    'Set useMaterialBorderRadius to `true`. This parameter will be removed and '
+    'was introduced to migrate Dialog to the correct border radius by default. '
+    'This feature was deprecated after v1.18.0.'
+  )
+  final bool useMaterialBorderRadius;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -560,6 +591,7 @@ class AlertDialog extends StatelessWidget {
       clipBehavior: clipBehavior,
       shape: shape,
       child: dialogChild,
+      useMaterialBorderRadius: useMaterialBorderRadius,
     );
   }
 }
@@ -719,8 +751,10 @@ class SimpleDialog extends StatelessWidget {
     this.elevation,
     this.semanticLabel,
     this.shape,
+    bool useMaterialBorderRadius,
   }) : assert(titlePadding != null),
        assert(contentPadding != null),
+       useMaterialBorderRadius = useMaterialBorderRadius ?? false,
        super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
@@ -789,6 +823,16 @@ class SimpleDialog extends StatelessWidget {
   /// {@macro flutter.material.dialog.shape}
   final ShapeBorder shape;
 
+  /// Indicates whether the [Dialog.shape]'s default [RoundedRectangleBorder]
+  /// should have a radius of 4.0 pixels to match Material Design, or use the
+  /// prior default of 2.0 pixels.
+  @Deprecated(
+    'Set useMaterialBorderRadius to `true`. This parameter will be removed and '
+    'was introduced to migrate Dialog to the correct border radius by default. '
+    'This feature was deprecated after v1.18.0.'
+  )
+  final bool useMaterialBorderRadius;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -848,6 +892,7 @@ class SimpleDialog extends StatelessWidget {
       elevation: elevation,
       shape: shape,
       child: dialogChild,
+      useMaterialBorderRadius: useMaterialBorderRadius,
     );
   }
 }

@@ -82,6 +82,12 @@ void main() {
       expect(response, throwsA(const TypeMatcher<RPCError>()));
     });
 
+    test('flutterGetSkSL can be called', () async {
+      final Response response = await vmService.callMethod('s0.flutterGetSkSL');
+
+      expect(response.type, 'Success');
+    });
+
     // TODO(devoncarew): These tests fail on cirrus-ci windows.
   }, skip: Platform.isWindows);
 }
