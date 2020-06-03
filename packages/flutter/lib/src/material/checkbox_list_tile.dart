@@ -253,7 +253,7 @@ class CheckboxListTile extends StatelessWidget {
   /// * [onChanged], which is called when the value of the checkbox should
   ///   change. It can be set to null to disable the checkbox.
   ///
-  /// The values of [tristate] must not be null.
+  /// The value of [tristate] must not be null.
   const CheckboxListTile({
     Key key,
     @required this.value,
