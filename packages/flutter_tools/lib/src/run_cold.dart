@@ -132,7 +132,8 @@ class ColdRunner extends ResidentRunner {
       await connectToServiceProtocol(
         getSkSLMethod: writeSkSL,
       );
-    } on Exception {
+    } on Exception catch (error) {
+      globals.printError('Error connecting to the service protocol: $error');
       return 2;
     }
     for (final FlutterDevice device in flutterDevices) {
