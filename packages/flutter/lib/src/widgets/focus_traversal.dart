@@ -256,16 +256,16 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   /// node that is a descendant of the given scope, then the user will be unable
   /// to use next/previous keyboard traversal to reach that node.
   ///
-  /// If a removed node is used as the originator of a call to next/previous
-  /// (i.e. supplied as the argument to [next] or [previous]), then the next or
-  /// previous node will not be able to be determined and the focus will not
-  /// change, and [next] or [previous] will return false.
+  /// The node used to initiate the traversal (the one passed to [next] or
+  /// [previous]) is passed as `currentNode`.
+  ///
+  /// Having the current node in the list is what allows the algorithm to
+  /// determine which nodes are adjacent to the current node. If the
+  /// `currentNode` is removed from the list, then the focus will be unchanged
+  /// when [next] or [previous] are called, and they will return false.
   ///
   /// This is not used for directional focus ([inDirection]), only for
   /// determining the focus order for [next] and [previous].
-  ///
-  /// The node used to initiate the traversal (the one passed to [next] or
-  /// [previous]) is passed as `currentNode`.
   ///
   /// When implementing an override for this function, be sure to use
   /// [mergeSort] instead of Dart's default list sorting algorithm when sorting
