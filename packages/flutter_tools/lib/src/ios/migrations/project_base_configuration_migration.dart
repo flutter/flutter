@@ -84,7 +84,7 @@ class ProjectBaseConfigurationMigration extends IOSMigrator {
     newProjectContents = newProjectContents.replaceAll(releaseBaseConfigurationOriginal, releaseBaseConfigurationReplacement);
     if (originalProjectContents != newProjectContents) {
       logger.printStatus('Project base configurations detected, removing.');
-      _xcodeProjectInfoFile.writeAsStringSync(newProjectContents);
+      _xcodeProjectInfoFile.writeAsStringSync(newProjectContents.toString());
     }
     return true;
   }

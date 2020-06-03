@@ -2,9 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:Runner.xcodeproj">
+      location = "group:Runner.xcodeproj">
    </FileRef>
    <FileRef
-      location = "self:Pods/Pods.xcodeproj">
+      location = "group:Pods/Pods.xcodeproj">
    </FileRef>
 </Workspace>
