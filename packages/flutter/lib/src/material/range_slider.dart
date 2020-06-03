@@ -1217,7 +1217,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   void _handleDragStart(DragStartDetails details) {
-    _startInteraction(details.globalPosition);
+      print('drag start');
+      _startInteraction(details.globalPosition);
   }
 
   void _handleDragEnd(DragEndDetails details) {
@@ -1229,7 +1230,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   void _handleTapDown(TapDownDetails details) {
-    _startInteraction(details.globalPosition);
+      print('tap start');
+      _startInteraction(details.globalPosition);
   }
 
   void _handleTapUp(TapUpDetails details) {

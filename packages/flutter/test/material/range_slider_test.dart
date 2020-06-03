@@ -1319,7 +1319,7 @@ void main() {
 
     await tester.pumpWidget(buildApp(divisions: 3));
 
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     final Offset topRight = tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
     final TestGesture gesture = await tester.startGesture(topRight);
@@ -1399,7 +1399,9 @@ void main() {
     /// The value indicator is added to the overlay when it is clicked or dragged.
     /// Because both of these gestures are occurring then it adds same value indicator
     /// twice into the overlay.
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    print(tester.renderObjectList(find.byType(Overlay)));
+    final Iterable<RenderObject> valueIndicatorBox = tester.renderObjectList(find.byType(Overlay));
+//    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
     final Offset topRight = tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
     final TestGesture gesture = await tester.startGesture(topRight);
     // Wait for value indicator animation to finish.
@@ -1407,7 +1409,14 @@ void main() {
 
     expect(find.byType(RangeSlider), isNotNull);
     expect(
-      valueIndicatorBox,
+      valueIndicatorBox.first,
+      paints
+        ..rrect(color: sliderTheme.inactiveTrackColor)
+        ..rect(color: sliderTheme.activeTrackColor)
+        ..rrect(color: sliderTheme.inactiveTrackColor),
+    );
+    expect(
+      valueIndicatorBox.last,
       paints
         ..rrect(color: sliderTheme.inactiveTrackColor)
         ..rect(color: sliderTheme.activeTrackColor)
@@ -1419,12 +1428,21 @@ void main() {
 
     expect(find.byType(RangeSlider), findsNothing);
     expect(
-      valueIndicatorBox,
+      valueIndicatorBox.first,
       isNot(
          paints
            ..rrect(color: sliderTheme.inactiveTrackColor)
            ..rect(color: sliderTheme.activeTrackColor)
            ..rrect(color: sliderTheme.inactiveTrackColor)
+      ),
+    );
+    expect(
+      valueIndicatorBox.last,
+      isNot(
+          paints
+            ..rrect(color: sliderTheme.inactiveTrackColor)
+            ..rect(color: sliderTheme.activeTrackColor)
+            ..rrect(color: sliderTheme.inactiveTrackColor)
       ),
     );
 
@@ -1548,7 +1566,7 @@ void main() {
       ),
     );
 
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
@@ -1624,7 +1642,7 @@ void main() {
       ),
     );
 
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.

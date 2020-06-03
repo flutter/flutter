@@ -653,7 +653,7 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     // Check default theme for enabled widget.
     expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.inactiveTrackColor));
@@ -1037,7 +1037,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester.firstRenderObject(find.byType(Overlay)),
+      tester.renderObject(find.byType(Overlay)),
       paints
         ..path(
           includes: const <Offset>[
@@ -1059,7 +1059,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester.firstRenderObject(find.byType(Overlay)),
+      tester.renderObject(find.byType(Overlay)),
       paints
         ..path(
           includes: const <Offset>[
@@ -1085,7 +1085,7 @@ void main() {
     gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    expect(tester.firstRenderObject(find.byType(Overlay)),
+    expect(tester.renderObject(find.byType(Overlay)),
       paints
         ..path(
           includes: const <Offset>[
@@ -1111,7 +1111,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester.firstRenderObject(find.byType(Overlay)),
+      tester.renderObject(find.byType(Overlay)),
       paints
         ..path(
           includes: const <Offset>[
@@ -1868,7 +1868,7 @@ void main() {
       await tester.pumpAndSettle();
 
 
-      final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+      final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
       expect(
         valueIndicatorBox,
         isVisible
@@ -2007,7 +2007,8 @@ void main() {
     /// The value indicator is added to the overlay when it is clicked or dragged.
     /// Because both of these gestures are occurring then it adds same value indicator
     /// twice into the overlay.
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    print(tester.renderObjectList(find.byType(Overlay)));
+    final Iterable<RenderObject> valueIndicatorBox = tester.renderObjectList(find.byType(Overlay));
     final Offset topRight = tester.getTopRight(find.byType(Slider)).translate(-24, 0);
     final TestGesture gesture = await tester.startGesture(topRight);
     // Wait for value indicator animation to finish.
@@ -2015,7 +2016,7 @@ void main() {
 
     expect(find.byType(Slider), isNotNull);
     expect(
-      valueIndicatorBox,
+      valueIndicatorBox.first,
       paints
         ..rrect(color: const Color(0xff2196f3)) // Active track.
         ..rrect(color: const Color(0x3d2196f3)), // Inactive track.
@@ -2026,7 +2027,7 @@ void main() {
 
     expect(find.byType(Slider), findsNothing);
     expect(
-      valueIndicatorBox,
+      valueIndicatorBox.first,
       isNot(
           paints
             ..rrect(color: const Color(0xff2196f3)) // Active track.
