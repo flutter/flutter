@@ -603,31 +603,10 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
 
     _subscriptions.add(html.document.onSelectionChange.listen(_handleChange));
 
-    // The behavior for blur in DOM elements changes depending on the reason of
-    // blur:
-    //
-    // (1) If the blur is triggered due to tab change or browser minimize, same
-    // element receives the focus as soon as the page reopens. Hence, text
-    // editing connection does not need to be closed. In this case we dot blur
-    // the DOM element.
-    //
-    // (2) On the other hand if the blur is triggered due to interaction with
-    // another element on the page, the current text connection is obsolete so
-    // connection close request is send to Flutter.
-    //
-    // See [HybridTextEditing.sendTextConnectionClosedToFlutterIfAny].
-    //
-    // In order to detect between these two cases, after a blur event is
-    // triggered [domRenderer.windowHasFocus] method which checks the window
-    // focus is called.
+    // Refocus on the domElement after blur, so that user can keep editing the
+    // text field.
     _subscriptions.add(domElement.onBlur.listen((_) {
-      if (domRenderer.windowHasFocus) {
-        // Focus is still on the body. Continue with blur.
-        owner.sendTextConnectionClosedToFrameworkIfAny();
-      } else {
-        // Refocus.
-        domElement.focus();
-      }
+      domElement.focus();
     }));
 
     preventDefaultForMouseEvents();
@@ -1000,26 +979,10 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     // enough for covering "Select All" functionality.
     _subscriptions.add(domElement.onSelect.listen(_handleChange));
 
-    // For Firefox, we also use the same approach as the parent class.
-    //
-    // Do not blur the DOM element if the user goes to another tab or minimizes
-    // the browser. See [super.addEventHandlers] for more comments.
-    //
-    // The different part is, in Firefox, we are not able to get correct value
-    // when we check the window focus like [domRendered.windowHasFocus].
-    //
-    // However [document.activeElement] always equals to [domElement] if the
-    // user goes to another tab, minimizes the browser or opens the dev tools.
-    // Hence [document.activeElement] is checked in this listener.
+    // Refocus on the domElement after blur, so that user can keep editing the
+    // text field.
     _subscriptions.add(domElement.onBlur.listen((_) {
-      html.Element activeElement = html.document.activeElement;
-      if (activeElement != domElement) {
-        // Focus is still on the body. Continue with blur.
-        owner.sendTextConnectionClosedToFrameworkIfAny();
-      } else {
-        // Refocus.
-        domElement.focus();
-      }
+      domElement.focus();
     }));
 
     preventDefaultForMouseEvents();
