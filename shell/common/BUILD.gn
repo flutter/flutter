@@ -199,14 +199,10 @@ if (enable_unittests) {
     fixtures = [ "fixtures/shelltest_screenshot.png" ]
   }
 
-  shell_host_executable("shell_unittests") {
+  source_set("shell_test_fixture_sources") {
+    testonly = true
+
     sources = [
-      "animator_unittests.cc",
-      "canvas_spy_unittests.cc",
-      "input_events_unittests.cc",
-      "persistent_cache_unittests.cc",
-      "pipeline_unittests.cc",
-      "renderer_context_manager_unittests.cc",
       "renderer_context_test.cc",
       "renderer_context_test.h",
       "shell_test.cc",
@@ -215,27 +211,21 @@ if (enable_unittests) {
       "shell_test_external_view_embedder.h",
       "shell_test_platform_view.cc",
       "shell_test_platform_view.h",
-      "shell_unittests.cc",
       "vsync_waiters_test.cc",
       "vsync_waiters_test.h",
     ]
 
-    deps = [
-      ":shell_unittests_fixtures",
-      ":shell_unittests_gpu_configuration",
-      "//flutter/assets",
-      "//flutter/common",
+    public_deps = [
       "//flutter/flow",
       "//flutter/fml/dart",
-      "//flutter/lib/ui:ui",
+      "//flutter/lib/ui",
+      "//flutter/runtime",
       "//flutter/shell",
+      "//flutter/shell/common",
       "//flutter/testing",
       "//flutter/testing:dart",
     ]
-
-    if (!defined(defines)) {
-      defines = []
-    }
+    defines = []
 
     # SwiftShader only supports x86/x64_64
     if (target_cpu == "x86" || target_cpu == "x64") {
@@ -245,7 +235,10 @@ if (enable_unittests) {
           "shell_test_platform_view_gl.h",
         ]
 
-        deps += [ "//flutter/testing:opengl" ]
+        public_deps += [
+          "//flutter/shell/gpu:gpu_surface_gl",
+          "//flutter/testing:opengl",
+        ]
 
         defines += [ "SHELL_ENABLE_GL" ]
       }
@@ -256,13 +249,39 @@ if (enable_unittests) {
           "shell_test_platform_view_vulkan.h",
         ]
 
-        deps += [
+        public_deps += [
+          "//flutter/shell/gpu:gpu_surface_vulkan",
           "//flutter/testing:vulkan",
           "//flutter/vulkan",
         ]
 
         defines += [ "SHELL_ENABLE_VULKAN" ]
       }
+    }
+  }
+
+  shell_host_executable("shell_unittests") {
+    sources = [
+      "animator_unittests.cc",
+      "canvas_spy_unittests.cc",
+      "input_events_unittests.cc",
+      "persistent_cache_unittests.cc",
+      "pipeline_unittests.cc",
+      "renderer_context_manager_unittests.cc",
+      "shell_unittests.cc",
+    ]
+
+    deps = [
+      ":shell_test_fixture_sources",
+      ":shell_unittests_fixtures",
+      ":shell_unittests_gpu_configuration",
+      "//flutter/assets",
+      "//flutter/common",
+      "//flutter/shell",
+    ]
+
+    if (!defined(defines)) {
+      defines = []
     }
   }
 

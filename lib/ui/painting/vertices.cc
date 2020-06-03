@@ -27,11 +27,6 @@ void DecodeInts(const tonic::Int32List& ints, T* out) {
 
 }  // namespace
 
-static void Vertices_constructor(Dart_NativeArguments args) {
-  UIDartState::ThrowIfUIOperationsProhibited();
-  DartCallConstructor(&Vertices::Create, args);
-}
-
 IMPLEMENT_WRAPPERTYPEINFO(ui, Vertices);
 
 #define FOR_EACH_BINDING(V) V(Vertices, init)
@@ -43,19 +38,16 @@ Vertices::Vertices() {}
 Vertices::~Vertices() {}
 
 void Vertices::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register({{"Vertices_constructor", Vertices_constructor, 1, true},
-                     FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
+  natives->Register({FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-fml::RefPtr<Vertices> Vertices::Create() {
-  return fml::MakeRefCounted<Vertices>();
-}
-
-bool Vertices::init(SkVertices::VertexMode vertex_mode,
+bool Vertices::init(Dart_Handle vertices_handle,
+                    SkVertices::VertexMode vertex_mode,
                     const tonic::Float32List& positions,
                     const tonic::Float32List& texture_coordinates,
                     const tonic::Int32List& colors,
                     const tonic::Uint16List& indices) {
+  UIDartState::ThrowIfUIOperationsProhibited();
   uint32_t builderFlags = 0;
   if (texture_coordinates.data())
     builderFlags |= SkVertices::kHasTexCoords_BuilderFlag;
@@ -89,9 +81,15 @@ bool Vertices::init(SkVertices::VertexMode vertex_mode,
               builder.indices());
   }
 
-  vertices_ = builder.detach();
+  auto vertices = fml::MakeRefCounted<Vertices>();
+  vertices->vertices_ = builder.detach();
+  vertices->AssociateWithDartWrapper(vertices_handle);
 
   return true;
+}
+
+size_t Vertices::GetAllocationSize() const {
+  return sizeof(Vertices) + vertices_->approximateSize();
 }
 
 }  // namespace flutter
