@@ -261,16 +261,19 @@ void main() {
         ])
       );
 
-      final LaunchResult launchResult = await iosDevice.startApp(
-        buildableIOSApp,
-        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-        platformArgs: <String, Object>{},
-      );
+      FakeAsync().run((FakeAsync time) async {
+        final LaunchResult launchResult = await iosDevice.startApp(
+          buildableIOSApp,
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+          platformArgs: <String, Object>{},
+        );
+        time.elapse(const Duration(seconds: 2));
 
-      expect(logger.statusText,
-        contains('Xcode build failed due to concurrent builds, will retry in 2 seconds'));
-      expect(launchResult.started, true);
-      expect(processManager.hasRemainingExpectations, false);
+        expect(logger.statusText,
+          contains('Xcode build failed due to concurrent builds, will retry in 2 seconds'));
+        expect(launchResult.started, true);
+        expect(processManager.hasRemainingExpectations, false);
+      });
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FileSystem: () => fileSystem,
