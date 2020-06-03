@@ -86,6 +86,22 @@ class MockDelegate : public PlatformView::Delegate {
   void OnPlatformViewUnregisterTexture(int64_t texture_id) override {}
   void OnPlatformViewMarkTextureFrameAvailable(int64_t texture_id) override {}
 };
+
+class MockIosDelegate : public AccessibilityBridge::IosDelegate {
+ public:
+  bool IsFlutterViewControllerPresentingModalViewController(UIView* view) override {
+    return result_IsFlutterViewControllerPresentingModalViewController_;
+  };
+
+  void PostAccessibilityNotification(UIAccessibilityNotifications notification,
+                                     id argument) override {
+    if (on_PostAccessibilityNotification_) {
+      on_PostAccessibilityNotification_(notification, argument);
+    }
+  }
+  std::function<void(UIAccessibilityNotifications, id)> on_PostAccessibilityNotification_;
+  bool result_IsFlutterViewControllerPresentingModalViewController_ = false;
+};
 }  // namespace
 }  // namespace flutter
 
@@ -236,6 +252,114 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
     flutterPlatformViewsController->Reset();
   }
   XCTAssertNil(gMockPlatformView);
+}
+
+- (void)testAnnouncesRouteChanges {
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*task_runners=*/runners);
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  std::string label = "some label";
+
+  NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
+      [[[NSMutableArray alloc] init] autorelease];
+  auto ios_delegate = std::make_unique<flutter::MockIosDelegate>();
+  ios_delegate->on_PostAccessibilityNotification_ =
+      [accessibility_notifications](UIAccessibilityNotifications notification, id argument) {
+        [accessibility_notifications addObject:@{
+          @"notification" : @(notification),
+          @"argument" : argument ? argument : [NSNull null],
+        }];
+      };
+  __block auto bridge =
+      std::make_unique<flutter::AccessibilityBridge>(/*view=*/mockFlutterView,
+                                                     /*platform_view=*/platform_view.get(),
+                                                     /*platform_views_controller=*/nil,
+                                                     /*ios_delegate=*/std::move(ios_delegate));
+
+  flutter::CustomAccessibilityActionUpdates actions;
+  flutter::SemanticsNodeUpdates nodes;
+
+  flutter::SemanticsNode route_node;
+  route_node.id = 1;
+  route_node.label = label;
+  route_node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute) |
+                     static_cast<int32_t>(flutter::SemanticsFlags::kNamesRoute);
+  route_node.label = "route";
+  nodes[route_node.id] = route_node;
+  flutter::SemanticsNode root_node;
+  root_node.id = kRootNodeId;
+  root_node.label = label;
+  root_node.childrenInTraversalOrder = {1};
+  root_node.childrenInHitTestOrder = {1};
+  nodes[root_node.id] = root_node;
+  bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
+
+  XCTAssertEqual([accessibility_notifications count], 1ul);
+  XCTAssertEqualObjects(accessibility_notifications[0][@"argument"], @"route");
+  XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
+                 UIAccessibilityScreenChangedNotification);
+}
+
+- (void)testAnnouncesIgnoresRouteChangesWhenModal {
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*task_runners=*/runners);
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  std::string label = "some label";
+
+  NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
+      [[[NSMutableArray alloc] init] autorelease];
+  auto ios_delegate = std::make_unique<flutter::MockIosDelegate>();
+  ios_delegate->on_PostAccessibilityNotification_ =
+      [accessibility_notifications](UIAccessibilityNotifications notification, id argument) {
+        [accessibility_notifications addObject:@{
+          @"notification" : @(notification),
+          @"argument" : argument ? argument : [NSNull null],
+        }];
+      };
+  ios_delegate->result_IsFlutterViewControllerPresentingModalViewController_ = true;
+  __block auto bridge =
+      std::make_unique<flutter::AccessibilityBridge>(/*view=*/mockFlutterView,
+                                                     /*platform_view=*/platform_view.get(),
+                                                     /*platform_views_controller=*/nil,
+                                                     /*ios_delegate=*/std::move(ios_delegate));
+
+  flutter::CustomAccessibilityActionUpdates actions;
+  flutter::SemanticsNodeUpdates nodes;
+
+  flutter::SemanticsNode route_node;
+  route_node.id = 1;
+  route_node.label = label;
+  route_node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute) |
+                     static_cast<int32_t>(flutter::SemanticsFlags::kNamesRoute);
+  route_node.label = "route";
+  nodes[route_node.id] = route_node;
+  flutter::SemanticsNode root_node;
+  root_node.id = kRootNodeId;
+  root_node.label = label;
+  root_node.childrenInTraversalOrder = {1};
+  root_node.childrenInHitTestOrder = {1};
+  nodes[root_node.id] = root_node;
+  bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
+
+  XCTAssertEqual([accessibility_notifications count], 0ul);
 }
 
 @end
