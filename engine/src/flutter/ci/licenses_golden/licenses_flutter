@@ -354,6 +354,7 @@ FILE: ../../../flutter/lib/ui/painting/single_frame_codec.cc
 FILE: ../../../flutter/lib/ui/painting/single_frame_codec.h
 FILE: ../../../flutter/lib/ui/painting/vertices.cc
 FILE: ../../../flutter/lib/ui/painting/vertices.h
+FILE: ../../../flutter/lib/ui/painting/vertices_unittests.cc
 FILE: ../../../flutter/lib/ui/plugins.dart
 FILE: ../../../flutter/lib/ui/plugins/callback_cache.cc
 FILE: ../../../flutter/lib/ui/plugins/callback_cache.h

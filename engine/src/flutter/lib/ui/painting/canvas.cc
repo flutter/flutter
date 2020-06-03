@@ -293,7 +293,7 @@ void Canvas::drawImage(const CanvasImage* image,
   if (!image)
     Dart_ThrowException(
         ToDart("Canvas.drawImage called with non-genuine Image."));
-  image_allocation_size_ += image->GetAllocationSize();
+  external_allocation_size_ += image->GetAllocationSize();
   canvas_->drawImage(image->image(), x, y, paint.paint());
 }
 
@@ -315,7 +315,7 @@ void Canvas::drawImageRect(const CanvasImage* image,
         ToDart("Canvas.drawImageRect called with non-genuine Image."));
   SkRect src = SkRect::MakeLTRB(src_left, src_top, src_right, src_bottom);
   SkRect dst = SkRect::MakeLTRB(dst_left, dst_top, dst_right, dst_bottom);
-  image_allocation_size_ += image->GetAllocationSize();
+  external_allocation_size_ += image->GetAllocationSize();
   canvas_->drawImageRect(image->image(), src, dst, paint.paint(),
                          SkCanvas::kFast_SrcRectConstraint);
 }
@@ -341,7 +341,7 @@ void Canvas::drawImageNine(const CanvasImage* image,
   SkIRect icenter;
   center.round(&icenter);
   SkRect dst = SkRect::MakeLTRB(dst_left, dst_top, dst_right, dst_bottom);
-  image_allocation_size_ += image->GetAllocationSize();
+  external_allocation_size_ += image->GetAllocationSize();
   canvas_->drawImageNine(image->image(), icenter, dst, paint.paint());
 }
 
@@ -351,7 +351,7 @@ void Canvas::drawPicture(Picture* picture) {
   if (!picture)
     Dart_ThrowException(
         ToDart("Canvas.drawPicture called with non-genuine Picture."));
-  image_allocation_size_ += picture->GetAllocationSize();
+  external_allocation_size_ += picture->GetAllocationSize();
   canvas_->drawPicture(picture->picture().get());
 }
 
@@ -380,7 +380,7 @@ void Canvas::drawVertices(const Vertices* vertices,
   if (!vertices)
     Dart_ThrowException(
         ToDart("Canvas.drawVertices called with non-genuine Vertices."));
-
+  external_allocation_size_ += vertices->GetAllocationSize();
   canvas_->drawVertices(vertices->vertices(), blend_mode, *paint.paint());
 }
 
@@ -406,7 +406,7 @@ void Canvas::drawAtlas(const Paint& paint,
   static_assert(sizeof(SkRect) == sizeof(float) * 4,
                 "SkRect doesn't use floats.");
 
-  image_allocation_size_ += atlas->GetAllocationSize();
+  external_allocation_size_ += atlas->GetAllocationSize();
   canvas_->drawAtlas(
       skImage.get(), reinterpret_cast<const SkRSXform*>(transforms.data()),
       reinterpret_cast<const SkRect*>(rects.data()),
