@@ -1399,8 +1399,7 @@ void main() {
     /// The value indicator is added to the overlay when it is clicked or dragged.
     /// Because both of these gestures are occurring then it adds same value indicator
     /// twice into the overlay.
-    print(tester.renderObjectList(find.byType(Overlay)));
-    final Iterable<RenderObject> valueIndicatorBox = tester.renderObjectList(find.byType(Overlay));
+    final RenderObject valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 //    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
     final Offset topRight = tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
     final TestGesture gesture = await tester.startGesture(topRight);
@@ -1409,14 +1408,7 @@ void main() {
 
     expect(find.byType(RangeSlider), isNotNull);
     expect(
-      valueIndicatorBox.first,
-      paints
-        ..rrect(color: sliderTheme.inactiveTrackColor)
-        ..rect(color: sliderTheme.activeTrackColor)
-        ..rrect(color: sliderTheme.inactiveTrackColor),
-    );
-    expect(
-      valueIndicatorBox.last,
+      valueIndicatorBox,
       paints
         ..rrect(color: sliderTheme.inactiveTrackColor)
         ..rect(color: sliderTheme.activeTrackColor)
@@ -1428,21 +1420,12 @@ void main() {
 
     expect(find.byType(RangeSlider), findsNothing);
     expect(
-      valueIndicatorBox.first,
+      valueIndicatorBox,
       isNot(
          paints
            ..rrect(color: sliderTheme.inactiveTrackColor)
            ..rect(color: sliderTheme.activeTrackColor)
            ..rrect(color: sliderTheme.inactiveTrackColor)
-      ),
-    );
-    expect(
-      valueIndicatorBox.last,
-      isNot(
-          paints
-            ..rrect(color: sliderTheme.inactiveTrackColor)
-            ..rect(color: sliderTheme.activeTrackColor)
-            ..rrect(color: sliderTheme.inactiveTrackColor)
       ),
     );
 

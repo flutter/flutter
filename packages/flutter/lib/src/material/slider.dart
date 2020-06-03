@@ -1285,13 +1285,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
   }
 
-  void _handleDragStart(DragStartDetails details) {
-    print('handle drag start');
-    _startInteraction(details.globalPosition);
-  }
+  void _handleDragStart(DragStartDetails details) => _startInteraction(details.globalPosition);
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    print('handle drag update');
     if (!_state.mounted) {
       return;
     }
@@ -1310,20 +1306,11 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
   }
 
-  void _handleDragEnd(DragEndDetails details) {
-    print('handle drag end');
-    _endInteraction();
-  }
+  void _handleDragEnd(DragEndDetails details) => _endInteraction();
 
-  void _handleTapDown(TapDownDetails details) {
-    print('handle tap down');
-    _startInteraction(details.globalPosition);
-  }
+  void _handleTapDown(TapDownDetails details) => _startInteraction(details.globalPosition);
 
-  void _handleTapUp(TapUpDetails details) {
-    print('handle tap up');
-    _endInteraction();
-  }
+  void _handleTapUp(TapUpDetails details) => _endInteraction();
 
   @override
   bool hitTestSelf(Offset position) => true;

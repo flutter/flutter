@@ -2004,8 +2004,7 @@ void main() {
     /// The value indicator is added to the overlay when it is clicked or dragged.
     /// Because both of these gestures are occurring then it adds same value indicator
     /// twice into the overlay.
-    print(tester.renderObjectList(find.byType(Overlay)));
-    final Iterable<RenderObject> valueIndicatorBox = tester.renderObjectList(find.byType(Overlay));
+    final RenderObject valueIndicatorBox = tester.renderObject(find.byType(Overlay));
     final Offset topRight = tester.getTopRight(find.byType(Slider)).translate(-24, 0);
     final TestGesture gesture = await tester.startGesture(topRight);
     // Wait for value indicator animation to finish.
@@ -2013,7 +2012,7 @@ void main() {
 
     expect(find.byType(Slider), isNotNull);
     expect(
-      valueIndicatorBox.first,
+      valueIndicatorBox,
       paints
         ..rrect(color: const Color(0xff2196f3)) // Active track.
         ..rrect(color: const Color(0x3d2196f3)), // Inactive track.
@@ -2024,7 +2023,7 @@ void main() {
 
     expect(find.byType(Slider), findsNothing);
     expect(
-      valueIndicatorBox.first,
+      valueIndicatorBox,
       isNot(
           paints
             ..rrect(color: const Color(0xff2196f3)) // Active track.

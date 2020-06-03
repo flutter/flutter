@@ -1216,31 +1216,17 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     _state.overlayController.reverse();
   }
 
-  void _handleDragStart(DragStartDetails details) {
-      print('drag start');
-      _startInteraction(details.globalPosition);
-  }
+  void _handleDragStart(DragStartDetails details) => _startInteraction(details.globalPosition);
 
-  void _handleDragEnd(DragEndDetails details) {
-    _endInteraction();
-  }
+  void _handleDragEnd(DragEndDetails details) => _endInteraction();
 
-  void _handleDragCancel() {
-    _endInteraction();
-  }
+  void _handleDragCancel() => _endInteraction();
 
-  void _handleTapDown(TapDownDetails details) {
-      print('tap start');
-      _startInteraction(details.globalPosition);
-  }
+  void _handleTapDown(TapDownDetails details) => _startInteraction(details.globalPosition);
 
-  void _handleTapUp(TapUpDetails details) {
-    _endInteraction();
-  }
+  void _handleTapUp(TapUpDetails details) => _endInteraction();
 
-  void _handleTapCancel() {
-    _endInteraction();
-  }
+  void _handleTapCancel() => _endInteraction();
 
   @override
   bool hitTestSelf(Offset position) => true;
