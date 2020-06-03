@@ -326,6 +326,8 @@ Future<void> _runToolTests() async {
         testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
         tableData: bigqueryApi?.tabledata,
         enableFlutterToolAsserts: true,
+        // Detect unit test time regressions (poor time delay handling, etc).
+        perTestTimeout: (subshard == 'general') ? const Duration(seconds: 2) : null,
       );
     },
   );
@@ -933,6 +935,7 @@ Future<void> _pubRunTest(String workingDirectory, {
   String coverage,
   bq.TabledataResourceApi tableData,
   bool forceSingleCore = false,
+  Duration perTestTimeout,
 }) async {
   int cpus;
   final String cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -964,6 +967,8 @@ Future<void> _pubRunTest(String workingDirectory, {
       '--no-color',
     if (coverage != null)
       '--coverage=$coverage',
+    if (perTestTimeout != null)
+      '--timeout=${perTestTimeout.inMilliseconds.toString()}ms',
     if (testPaths != null)
       for (final String testPath in testPaths)
         testPath,
