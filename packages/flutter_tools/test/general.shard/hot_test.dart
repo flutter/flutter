@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -410,6 +411,41 @@ void main() {
         Artifacts: () => mockArtifacts,
         HotRunnerConfig: () => shutdownTestingConfig,
       });
+    });
+  });
+
+  group('hot attach', () {
+    MockLocalEngineArtifacts mockArtifacts;
+
+    setUp(() {
+      mockArtifacts = MockLocalEngineArtifacts();
+    });
+
+    testUsingContext('Exits with code 2 when when HttpException is thrown '
+      'during VM service connection', () async {
+      final MockResidentCompiler residentCompiler = MockResidentCompiler();
+      final MockDevice mockDevice = MockDevice();
+      when(mockDevice.supportsHotReload).thenReturn(true);
+      when(mockDevice.supportsHotRestart).thenReturn(false);
+      when(mockDevice.targetPlatform).thenAnswer((Invocation _) async => TargetPlatform.tester);
+      when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation _) async => 'Android 10');
+
+      final List<FlutterDevice> devices = <FlutterDevice>[
+        TestFlutterDevice(
+          device: mockDevice,
+          generator: residentCompiler,
+          exception: const HttpException('Connection closed before full header was received, '
+              'uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws'),
+        ),
+      ];
+
+      final int exitCode = await HotRunner(devices,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      ).attach();
+      expect(exitCode, 2);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => mockArtifacts,
+      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
     });
   });
 

@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -16,8 +17,33 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/mocks.dart';
 
 void main() {
+  testUsingContext('Exits with code 2 when when HttpException is thrown '
+    'during VM service connection', () async {
+    final MockResidentCompiler residentCompiler = MockResidentCompiler();
+    final MockDevice mockDevice = MockDevice();
+    when(mockDevice.supportsHotReload).thenReturn(true);
+    when(mockDevice.supportsHotRestart).thenReturn(false);
+    when(mockDevice.targetPlatform).thenAnswer((Invocation _) async => TargetPlatform.tester);
+    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation _) async => 'Android 10');
+
+    final List<FlutterDevice> devices = <FlutterDevice>[
+      TestFlutterDevice(
+        device: mockDevice,
+        generator: residentCompiler,
+        exception: const HttpException('Connection closed before full header was received, '
+            'uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws'),
+      ),
+    ];
+
+    final int exitCode = await ColdRunner(devices,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    ).attach();
+    expect(exitCode, 2);
+  });
+
   group('cleanupAtFinish()', () {
     MockFlutterDevice mockFlutterDeviceFactory(Device device) {
       final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
