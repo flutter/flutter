@@ -300,7 +300,7 @@ class IOSDevice extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    Duration fallbackPollingDelay,
+    @visibleForTesting Duration fallbackPollingDelay,
   }) async {
     String packageId;
 
