@@ -19,14 +19,6 @@ void main() {
     expect(output.outputFilename, 'message');
   });
 
-  testUsingContext('StdOutHandler crash test', () async {
-    final StdoutHandler stdoutHandler = StdoutHandler();
-    final Future<CompilerOutput> output = stdoutHandler.compilerOutput.future;
-    stdoutHandler.handler('message with no result');
-
-    expect(output, throwsToolExit());
-  });
-
   test('TargetModel values', () {
     expect(TargetModel('vm'), TargetModel.vm);
     expect(TargetModel.vm.toString(), 'vm');
