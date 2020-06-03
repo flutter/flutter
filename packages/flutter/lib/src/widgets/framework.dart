@@ -2627,7 +2627,34 @@ class BuildOwner {
       while (index < dirtyCount) {
         assert(_dirtyElements[index] != null);
         assert(_dirtyElements[index]._inDirtyList);
-        assert(!_dirtyElements[index]._active || _dirtyElements[index]._debugIsInScope(context));
+        assert(() {
+          if (_dirtyElements[index]._active && !_dirtyElements[index]._debugIsInScope(context)) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Tried to build dirty widget in the wrong build scope.'),
+              ErrorDescription(
+                'A widget which was marked as dirty and is still active was scheduled to be built, '
+                'but the current build scope unexpectedly does not contain that widget.',
+              ),
+              ErrorHint(
+                'Sometimes this is detected when an element is removed from the widget tree, but the '
+                'element somehow did not get marked as inactive. In that case, it might be caused by '
+                'an ancestor element failing to implement visitChildren correctly, thus preventing '
+                'some or all of its descendants from being correctly deactivated.',
+              ),
+              DiagnosticsProperty<Element>(
+                'The root of the build scope was',
+                context,
+                style: DiagnosticsTreeStyle.errorProperty,
+              ),
+              DiagnosticsProperty<Element>(
+                'The offending element (which does not appear to be a descendant of the root of the build scope) was',
+                _dirtyElements[index],
+                style: DiagnosticsTreeStyle.errorProperty,
+              ),
+            ]);
+          }
+          return true;
+        }());
         try {
           _dirtyElements[index].rebuild();
         } catch (e, stack) {
