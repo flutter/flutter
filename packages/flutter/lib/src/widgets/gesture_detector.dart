@@ -178,6 +178,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// ```dart
 /// Container(
 ///   color: _color,
+///   height: 200.0,
 ///   child: GestureDetector(
 ///     onTap: () {
 ///       setState(() {
