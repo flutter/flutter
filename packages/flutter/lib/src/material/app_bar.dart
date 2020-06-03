@@ -979,6 +979,7 @@ class SliverAppBar extends StatefulWidget {
     this.centerTitle,
     this.excludeHeaderSemantics = false,
     this.titleSpacing = NavigationToolbar.kMiddleSpacing,
+    this.collapsedHeight,
     this.expandedHeight,
     this.floating = false,
     this.pinned = false,
@@ -1154,6 +1155,17 @@ class SliverAppBar extends StatefulWidget {
   /// Defaults to [NavigationToolbar.kMiddleSpacing].
   final double titleSpacing;
 
+
+  /// The size of the app bar when it is collapsed.
+  ///
+  /// By default, the collapsed height is set to [kToolbarHeight]. If the
+  /// [bottom] widget is set, then its [bottom.preferredSize.height] is added
+  /// to the height. If [primary] is true, any top padding from [MediaQuery]
+  /// is added to the height. If [pinned] and [floating] is true,
+  /// with [bottom] set, the collapsed height is only
+  /// [bottom.preferredSize.height] with any top padding.
+  final double collapsedHeight;
+
   /// The size of the app bar when it is fully expanded.
   ///
   /// By default, the total height of the toolbar and the bottom widget (if
@@ -1311,7 +1323,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     final double topPadding = widget.primary ? MediaQuery.of(context).padding.top : 0.0;
-    final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
+    final double floatingPinnedCollapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
       ? widget.bottom.preferredSize.height + topPadding : null;
 
     return MediaQuery.removePadding(
@@ -1339,7 +1351,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           excludeHeaderSemantics: widget.excludeHeaderSemantics,
           titleSpacing: widget.titleSpacing,
           expandedHeight: widget.expandedHeight,
-          collapsedHeight: collapsedHeight,
+          collapsedHeight: widget.collapsedHeight ?? floatingPinnedCollapsedHeight,
           topPadding: topPadding,
           floating: widget.floating,
           pinned: widget.pinned,
