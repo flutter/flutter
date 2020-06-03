@@ -98,6 +98,18 @@ class TimelineSummary {
     final SceneDisplayLagSummarizer sceneDisplayLagSummarizer = _sceneDisplayLagSummarizer();
 
     return <String, dynamic>{
+      'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
+      '90th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(90.0),
+      '99th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(99.0),
+      'worst_frame_build_time_millis': computeWorstFrameBuildTimeMillis(),
+      'missed_frame_build_budget_count': computeMissedFrameBuildBudgetCount(),
+      'average_frame_rasterizer_time_millis': computeAverageFrameRasterizerTimeMillis(),
+      '90th_percentile_frame_rasterizer_time_millis': computePercentileFrameRasterizerTimeMillis(90.0),
+      '99th_percentile_frame_rasterizer_time_millis': computePercentileFrameRasterizerTimeMillis(99.0),
+      'worst_frame_rasterizer_time_millis': computeWorstFrameRasterizerTimeMillis(),
+      'missed_frame_rasterizer_budget_count': computeMissedFrameRasterizerBudgetCount(),
+      'frame_count': countFrames(),
+      'frame_rasterizer_count': countRasterizations(),
       'frame_build_times': _extractFrameDurations()
           .map<int>((Duration duration) => duration.inMicroseconds)
           .toList(),
@@ -110,21 +122,9 @@ class TimelineSummary {
       'frame_rasterizer_begin_times': _extractBeginTimestamps(kRasterizeFrameEventName)
           .map<int>((Duration duration) => duration.inMicroseconds)
           .toList(),
-      'frame_count': countFrames(),
-      'frame_rasterizer_count': countRasterizations(),
-      'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
-      '90th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(90.0),
-      '99th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(99.0),
-      'worst_frame_build_time_millis': computeWorstFrameBuildTimeMillis(),
-      'missed_frame_build_budget_count': computeMissedFrameBuildBudgetCount(),
-      'average_frame_rasterizer_time_millis': computeAverageFrameRasterizerTimeMillis(),
-      '90th_percentile_frame_rasterizer_time_millis': computePercentileFrameRasterizerTimeMillis(90.0),
-      '99th_percentile_frame_rasterizer_time_millis': computePercentileFrameRasterizerTimeMillis(99.0),
-      'worst_frame_rasterizer_time_millis': computeWorstFrameRasterizerTimeMillis(),
-      'missed_frame_rasterizer_budget_count': computeMissedFrameRasterizerBudgetCount(),
       'average_vsync_transitions_missed': sceneDisplayLagSummarizer.computeAverageVsyncTransitionsMissed(),
       '90th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(90.0),
-      '99th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(99.0)
+      '99th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(99.0),
     };
   }
 
