@@ -112,7 +112,9 @@ void main() {
       'splashColor: Color(0xff9e9e9e)',
       'disabledElevation: 0.0',
     ]);
-  });
+    // skipping testing on the browser because disabledElevation evaluates to 0 instead of 0.0
+    // on the browser.
+  }, skip: isBrowser);
 
   testWidgets('Default RaisedButton meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
