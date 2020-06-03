@@ -66,21 +66,25 @@ void main() {
       ..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')
       ..writeAsStringSync('{}');
+    final File metadata = globals.fs.file('metadata')
+      ..writeAsStringSync('{}');
 
     // Missing ending offset.
     final File manifestMissingOffset = globals.fs.file('manifestA')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0],
         'sourcemap': <int>[0],
+        'metadata': <int>[0],
       }}));
     final File manifestOutOfBounds = globals.fs.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0, 100],
         'sourcemap': <int>[0],
+        'metadata': <int>[0],
       }}));
 
-    expect(webAssetServer.write(source, manifestMissingOffset, sourcemap), isEmpty);
-    expect(webAssetServer.write(source, manifestOutOfBounds, sourcemap), isEmpty);
+    expect(webAssetServer.write(source, manifestMissingOffset, sourcemap, metadata), isEmpty);
+    expect(webAssetServer.write(source, manifestOutOfBounds, sourcemap, metadata), isEmpty);
   }));
 
   test('serves JavaScript files from in memory cache', () => testbed.run(() async {
@@ -88,12 +92,15 @@ void main() {
       ..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')
       ..writeAsStringSync('{}');
+    final File metadata = globals.fs.file('sourcemap')
+      ..writeAsStringSync('{}');
     final File manifest = globals.fs.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0, source.lengthSync()],
         'sourcemap': <int>[0, 2],
+        'metadata':  <int>[0, 2],
       }}));
-    webAssetServer.write(source, manifest, sourcemap);
+    webAssetServer.write(source, manifest, sourcemap, metadata);
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/foo.js')));
@@ -165,12 +172,15 @@ void main() {
       ..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')
       ..writeAsStringSync('{}');
+    final File metadata = globals.fs.file('metadata')
+      ..writeAsStringSync('{}');
     final File manifest = globals.fs.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0, source.lengthSync()],
         'sourcemap': <int>[0, 2],
+        'metadata': <int>[0],
       }}));
-    webAssetServer.write(source, manifest, sourcemap);
+    webAssetServer.write(source, manifest, sourcemap, metadata);
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/bar.js')));
@@ -192,12 +202,15 @@ void main() {
       ..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')
       ..writeAsStringSync('{}');
+    final File metadata = globals.fs.file('metadata')
+      ..writeAsStringSync('{}');
     final File manifest = globals.fs.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.dart.lib.js': <String, Object>{
         'code': <int>[0, source.lengthSync()],
         'sourcemap': <int>[0, 2],
+        'metadata': <int>[0],
       }}));
-    webAssetServer.write(source, manifest, sourcemap);
+    webAssetServer.write(source, manifest, sourcemap, metadata);
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/foo.dart.js')));
@@ -210,12 +223,15 @@ void main() {
       ..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')
       ..writeAsStringSync('{}');
+    final File metadata = globals.fs.file('metadata')
+      ..writeAsStringSync('{}');
     final File manifest = globals.fs.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0, source.lengthSync()],
         'sourcemap': <int>[0, 2],
+        'metadata': <int>[0],
       }}));
-    webAssetServer.write(source, manifest, sourcemap);
+    webAssetServer.write(source, manifest, sourcemap, metadata);
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://localhost/foo.js')));
 
