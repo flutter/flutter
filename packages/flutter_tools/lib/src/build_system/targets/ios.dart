@@ -46,7 +46,7 @@ abstract class AotAssemblyBase extends Target {
     if (environment.defines[kTargetPlatform] == null) {
       throw MissingDefineException(kTargetPlatform, 'aot_assembly');
     }
-    final List<String> extraGenSnapshotOptions = parseExtraGenSnapshotOptions(environment);
+    final List<String> extraGenSnapshotOptions = decodeDartDefines(environment.defines, kExtraGenSnapshotOptions);
     final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
@@ -446,14 +446,4 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool in
       throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
     }
   }
-}
-
-/// iOS and macOS build scripts may pass extraGenSnapshotOptions as an empty
-/// string.
-List<String> parseExtraGenSnapshotOptions(Environment environment) {
-  final String value = environment.defines[kExtraGenSnapshotOptions];
-  if (value == null || value.trim().isEmpty) {
-    return <String>[];
-  }
-  return value.split(',');
 }

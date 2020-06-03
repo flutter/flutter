@@ -311,7 +311,14 @@ class KernelCompiler {
         '--platform',
         platformDill,
       ],
-      ...?extraFrontEndOptions,
+      if (extraFrontEndOptions != null)
+        for (String arg in extraFrontEndOptions)
+          if (arg == '--sound-null-safety')
+            '--null-safety'
+          else if (arg == '--no-sound-null-safety')
+            '--no-null-safety'
+          else
+            arg,
       mainUri?.toString() ?? mainPath,
     ];
 
@@ -702,7 +709,14 @@ class DefaultResidentCompiler implements ResidentCompiler {
         platformDill,
       ],
       if (unsafePackageSerialization == true) '--unsafe-package-serialization',
-      ...?extraFrontEndOptions
+      if (extraFrontEndOptions != null)
+        for (String arg in extraFrontEndOptions)
+          if (arg == '--sound-null-safety')
+            '--null-safety'
+          else if (arg == '--no-sound-null-safety')
+            '--no-null-safety'
+          else
+            arg,
     ];
     globals.printTrace(command.join(' '));
     _server = await globals.processManager.start(command);

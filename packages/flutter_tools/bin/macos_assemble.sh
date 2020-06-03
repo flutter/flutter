@@ -82,7 +82,7 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \
     -dTrackWidgetCreation="${TRACK_WIDGET_CREATION}"                        \
     --DartDefines="${DART_DEFINES}"                                         \
     --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"               \
-    -dExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                     \
+    --ExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                     \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \
     --output="${ephemeral_dir}"                                             \
