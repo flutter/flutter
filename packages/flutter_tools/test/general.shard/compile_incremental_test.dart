@@ -66,7 +66,7 @@ void main() {
     );
     expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
     verifyNoMoreInteractions(mockFrontendServerStdIn);
-    expect(testLogger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
+    expect(testLogger.errorText, equals('line1\nline2\n'));
     expect(output.outputFilename, equals('/path/to/main.dart.dill'));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
@@ -141,9 +141,9 @@ void main() {
     verifyNoMoreInteractions(mockFrontendServerStdIn);
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
     expect(testLogger.errorText, equals(
-      '\nCompiler message:\nline0\nline1\n'
-      '\nCompiler message:\nline1\nline2\n'
-      '\nCompiler message:\nline1\nline2\n'
+      'line0\nline1\n'
+      'line1\nline2\n'
+      'line1\nline2\n'
     ));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
@@ -179,9 +179,9 @@ void main() {
 
     // Compiler message is not printed with suppressErrors: true above.
     expect(testLogger.errorText, isNot(equals(
-      '\n\nline0\nline1\n'
-      '\n\nline1\nline2\n'
-      '\n\nline1\nline2\n'
+      'line0\nline1\n'
+      'line1\nline2\n'
+      'line1\nline2\n'
     )));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
@@ -212,9 +212,9 @@ void main() {
     verifyNoMoreInteractions(mockFrontendServerStdIn);
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
     expect(testLogger.errorText, equals(
-      '\n\nline0\nline1\n'
-      '\n\nline1\nline2\n'
-      '\n\nline2\nline3\n'
+      'line0\nline1\n'
+      'line1\nline2\n'
+      'line2\nline3\n'
     ));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,

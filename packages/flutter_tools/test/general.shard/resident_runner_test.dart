@@ -208,6 +208,8 @@ void main() {
   }));
 
   test('ResidentRunner suppresses errors for the initial compilation', () => testbed.run(() async {
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+      .createSync(recursive: true);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -221,6 +223,21 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
     );
     when(mockFlutterDevice.generator).thenReturn(residentCompiler);
+    when(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packageConfig: anyNamed('packageConfig'),
+      suppressErrors: true,
+    )).thenAnswer((Invocation invocation) async {
+      return const CompilerOutput('foo', 0 ,<Uri>[]);
+    });
+    when(mockFlutterDevice.runHot(
+      hotRunner: anyNamed('hotRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
 
     expect(await residentRunner.run(), 0);
     verify(residentCompiler.recompile(
@@ -234,6 +251,8 @@ void main() {
   }));
 
   test('ResidentRunner does not suppressErrors if running with an applicationBinary', () => testbed.run(() async {
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+      .createSync(recursive: true);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
       listViews,
@@ -248,8 +267,23 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
     );
     when(mockFlutterDevice.generator).thenReturn(residentCompiler);
+    when(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packageConfig: anyNamed('packageConfig'),
+      suppressErrors: false,
+    )).thenAnswer((Invocation invocation) async {
+      return const CompilerOutput('foo', 0, <Uri>[]);
+    });
+    when(mockFlutterDevice.runHot(
+      hotRunner: anyNamed('hotRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
 
-    expect(await residentRunner.run(), 1);
+    expect(await residentRunner.run(), 0);
     verify(residentCompiler.recompile(
       any,
       any,
