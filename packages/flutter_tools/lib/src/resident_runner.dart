@@ -1543,7 +1543,6 @@ class TerminalHandler {
       rethrow;
     } finally {
       _processingUserRequest = false;
-      await globals.logger.flush();
     }
   }
 
