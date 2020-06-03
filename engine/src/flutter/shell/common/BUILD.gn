@@ -120,6 +120,7 @@ source_set("common") {
   ]
 
   deps = [
+    ":surface_frame",
     "//flutter/assets",
     "//flutter/common",
     "//flutter/flow",
@@ -139,6 +140,18 @@ source_set("common") {
   ]
 
   public_configs = [ "//flutter:config" ]
+}
+
+source_set("surface_frame") {
+  sources = [
+    "surface_frame.cc",
+    "surface_frame.h",
+  ]
+
+  deps = [
+    "//flutter/fml",
+    "//third_party/skia",
+  ]
 }
 
 template("shell_host_executable") {

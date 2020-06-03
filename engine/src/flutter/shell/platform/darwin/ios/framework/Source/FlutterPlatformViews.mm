@@ -470,7 +470,7 @@ SkRect FlutterPlatformViewsController::GetPlatformViewRect(int view_id) {
 
 bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
                                                  std::shared_ptr<IOSContext> ios_context,
-                                                 SkCanvas* background_canvas) {
+                                                 std::unique_ptr<SurfaceFrame> frame) {
   if (merge_threads_) {
     // Threads are about to be merged, we drop everything from this frame
     // and possibly resubmit the same layer tree in the next frame.
@@ -487,6 +487,8 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
   FML_DCHECK([[NSThread currentThread] isMainThread] || !HasPlatformViewThisOrNextFrame());
 
   DisposeViews();
+
+  SkCanvas* background_canvas = frame->SkiaCanvas();
 
   // Resolve all pending GPU operations before allocating a new surface.
   background_canvas->flush();
@@ -568,6 +570,8 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
   layer_pool_->RecycleLayers();
   // Reset the composition order, so next frame starts empty.
   composition_order_.clear();
+
+  did_submit &= frame->Submit();
 
   return did_submit;
 }

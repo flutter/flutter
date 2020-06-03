@@ -73,6 +73,7 @@ source_set("flow") {
   deps = [
     "//flutter/common",
     "//flutter/fml",
+    "//flutter/shell/common:surface_frame",
     "//third_party/skia",
   ]
 

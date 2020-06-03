@@ -616,6 +616,8 @@ FILE: ../../../flutter/shell/common/skia_event_tracer_impl.cc
 FILE: ../../../flutter/shell/common/skia_event_tracer_impl.h
 FILE: ../../../flutter/shell/common/surface.cc
 FILE: ../../../flutter/shell/common/surface.h
+FILE: ../../../flutter/shell/common/surface_frame.cc
+FILE: ../../../flutter/shell/common/surface_frame.h
 FILE: ../../../flutter/shell/common/switches.cc
 FILE: ../../../flutter/shell/common/switches.h
 FILE: ../../../flutter/shell/common/thread_host.cc

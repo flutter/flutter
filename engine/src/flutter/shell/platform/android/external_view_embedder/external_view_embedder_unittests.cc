@@ -37,17 +37,6 @@ TEST(AndroidExternalViewEmbedder, CompositeEmbeddedView) {
   ASSERT_TRUE(embedder->CompositeEmbeddedView(1) != nullptr);
 }
 
-TEST(AndroidExternalViewEmbedder, FinishFrame) {
-  auto embedder = new AndroidExternalViewEmbedder();
-
-  embedder->PrerollCompositeEmbeddedView(
-      0, std::make_unique<EmbeddedViewParams>());
-  embedder->FinishFrame();
-
-  auto canvases = embedder->GetCurrentCanvases();
-  ASSERT_EQ(0UL, canvases.size());
-}
-
 TEST(AndroidExternalViewEmbedder, CancelFrame) {
   auto embedder = new AndroidExternalViewEmbedder();
 
