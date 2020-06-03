@@ -557,6 +557,13 @@ abstract class Device {
     await descriptions(devices).forEach(globals.printStatus);
   }
 
+  static List<String> devicesPlatformTypes(List<Device> devices) {
+    return devices
+        .map(
+          (Device d) => d.platformType.toString(),
+        ).toSet().toList()..sort();
+  }
+
   /// Convert the Device object to a JSON representation suitable for serialization.
   Future<Map<String, Object>> toJson() async {
     final bool isLocalEmu = await isLocalEmulator;
