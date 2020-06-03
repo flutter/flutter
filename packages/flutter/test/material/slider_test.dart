@@ -1960,43 +1960,40 @@ void main() {
       bool enabled = true,
     }) {
       return MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(
-            child: Navigator(onGenerateRoute: (RouteSettings settings) {
-              return MaterialPageRoute<void>(builder: (BuildContext context) {
-                return Column(
-                  children: <Widget>[
-                    Slider(
-                      key: sliderKey,
-                      min: 0.0,
-                      max: 100.0,
-                      divisions: divisions,
-                      label: '${value.round()}',
-                      value: value,
-                      onChanged: (double newValue) {
-                        value = newValue;
-                      },
-                    ),
-                    RaisedButton(
-                      child: const Text('Next'),
-                      onPressed: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute<void>(
-                            builder: (BuildContext context) {
-                              return RaisedButton(
-                                child: const Text('Inner page'),
-                                onPressed: () => Navigator.of(context).pop(),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                );
-              });
-            }),
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return Column(
+                children: <Widget>[
+                  Slider(
+                    key: sliderKey,
+                    min: 0.0,
+                    max: 100.0,
+                    divisions: divisions,
+                    label: '${value.round()}',
+                    value: value,
+                    onChanged: (double newValue) {
+                      value = newValue;
+                    },
+                  ),
+                  RaisedButton(
+                    child: const Text('Next'),
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) {
+                            return RaisedButton(
+                              child: const Text('Inner page'),
+                              onPressed: () => Navigator.of(context).pop(),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
           ),
         ),
       );
