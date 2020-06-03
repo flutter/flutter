@@ -239,36 +239,6 @@ class TextSpan extends InlineSpan {
     return true;
   }
 
-  // TODO(garyq): Remove this after next stable release.
-  /// Walks this [TextSpan] and any descendants in pre-order and calls `visitor`
-  /// for each span that has content.
-  ///
-  /// When `visitor` returns true, the walk will continue. When `visitor`
-  /// returns false, then the walk will end.
-  @override
-  @Deprecated(
-    'Use to visitChildren instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  bool visitTextSpan(bool visitor(TextSpan span)) {
-    if (text != null) {
-      if (!visitor(this))
-        return false;
-    }
-    if (children != null) {
-      for (final InlineSpan child in children) {
-        assert(
-          child is TextSpan,
-          'visitTextSpan is deprecated. Use visitChildren to support InlineSpans',
-        );
-        final TextSpan textSpanChild = child as TextSpan;
-        if (!textSpanChild.visitTextSpan(visitor))
-          return false;
-      }
-    }
-    return true;
-  }
-
   /// Returns the text span that contains the given position in the text.
   @override
   InlineSpan getSpanForPositionVisitor(TextPosition position, Accumulator offset) {

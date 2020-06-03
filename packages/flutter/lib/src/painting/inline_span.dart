@@ -155,24 +155,6 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// of [TextSpan].
   final TextStyle style;
 
-  // TODO(garyq): Remove the deprecated visitTextSpan, text, and children.
-  /// Returns the text associated with this span if this is an instance of [TextSpan],
-  /// otherwise returns null.
-  @Deprecated(
-    'InlineSpan does not innately have text. Use TextSpan.text instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  String get text => null;
-
-  // TODO(garyq): Remove the deprecated visitTextSpan, text, and children.
-  /// Returns the [InlineSpan] children list associated with this span if this is an
-  /// instance of [TextSpan], otherwise returns null.
-  @Deprecated(
-    'InlineSpan does not innately have children. Use TextSpan.children instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  List<InlineSpan> get children => null;
-
   /// Returns the [GestureRecognizer] associated with this span if this is an
   /// instance of [TextSpan], otherwise returns null.
   @Deprecated(
@@ -194,18 +176,6 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// [Paragraph] objects can be drawn on [Canvas] objects.
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions });
-
-  // TODO(garyq): Remove the deprecated visitTextSpan, text, and children.
-  /// Walks this [TextSpan] and any descendants in pre-order and calls `visitor`
-  /// for each span that has content.
-  ///
-  /// When `visitor` returns true, the walk will continue. When `visitor` returns
-  /// false, then the walk will end.
-  @Deprecated(
-    'Use visitChildren instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  bool visitTextSpan(bool visitor(TextSpan span));
 
   /// Walks this [InlineSpan] and any descendants in pre-order and calls `visitor`
   /// for each span that has content.

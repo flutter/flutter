@@ -65,18 +65,6 @@ abstract class PlaceholderSpan extends InlineSpan {
     collector.add(InlineSpanSemanticsInformation.placeholder);
   }
 
-  // TODO(garyq): Remove this after next stable release.
-  /// The [visitTextSpan] method is invalid on [PlaceholderSpan]s
-  @override
-  @Deprecated(
-    'Use to visitChildren instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  bool visitTextSpan(bool visitor(TextSpan span)) {
-    assert(false, 'visitTextSpan is deprecated. Use visitChildren to support InlineSpans');
-    return false;
-  }
-
   /// Populates the `semanticsOffsets` and `semanticsElements` with the appropriate data
   /// to be able to construct a [SemanticsNode].
   ///
