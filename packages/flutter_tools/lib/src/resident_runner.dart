@@ -186,6 +186,7 @@ class FlutterDevice {
     Restart restart,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
+    GetSkSLMethod getSkSLMethod,
   }) {
     final Completer<void> completer = Completer<void>();
     StreamSubscription<void> subscription;
@@ -204,6 +205,7 @@ class FlutterDevice {
           restart: restart,
           compileExpression: compileExpression,
           reloadMethod: reloadMethod,
+          getSkSLMethod: getSkSLMethod,
           device: device,
         );
       } on Exception catch (exception) {
@@ -291,6 +293,8 @@ class FlutterDevice {
       fsName,
       rootDirectory,
       osUtils: globals.os,
+      fileSystem: globals.fs,
+      logger: globals.logger,
     );
     return devFS.create();
   }
@@ -644,23 +648,6 @@ class FlutterDevice {
   }
 }
 
-// Issue: https://github.com/flutter/flutter/issues/33050
-// Matches the following patterns:
-//    HttpException: Connection closed before full header was received, uri = *
-//    HttpException: , uri = *
-final RegExp kAndroidQHttpConnectionClosedExp = RegExp(r'^HttpException\:.+\, uri \=.+$');
-
-/// Returns `true` if any of the devices is running Android Q.
-Future<bool> hasDeviceRunningAndroidQ(List<FlutterDevice> flutterDevices) async {
-  for (final FlutterDevice flutterDevice in flutterDevices) {
-    final String sdkNameAndVersion = await flutterDevice.device.sdkNameAndVersion;
-    if (sdkNameAndVersion != null && sdkNameAndVersion.startsWith('Android 10')) {
-      return true;
-    }
-  }
-  return false;
-}
-
 // Shared code between different resident application runners.
 abstract class ResidentRunner {
   ResidentRunner(
@@ -853,7 +840,9 @@ abstract class ResidentRunner {
   }
 
   /// Write the SkSL shaders to a zip file in build directory.
-  Future<void> writeSkSL() async {
+  ///
+  /// Returns the name of the file, or `null` on failures.
+  Future<String> writeSkSL() async {
     if (!supportsWriteSkSL) {
       throw Exception('writeSkSL is not supported by this runner.');
     }
@@ -870,7 +859,7 @@ abstract class ResidentRunner {
         '  1. Pass "--cache-sksl" as an argument to flutter run.\n'
         '  2. Interact with the application to force shaders to be compiled.\n'
       );
-      return;
+      return null;
     }
     final File outputFile = globals.fsUtils.getUniqueFile(
       globals.fs.currentDirectory,
@@ -899,6 +888,7 @@ abstract class ResidentRunner {
     };
     outputFile.writeAsStringSync(json.encode(manifest));
     globals.logger.printStatus('Wrote SkSL data to ${outputFile.path}.');
+    return outputFile.path;
   }
 
   /// The resident runner API for interaction with the reloadMethod vmservice
@@ -1103,6 +1093,7 @@ abstract class ResidentRunner {
     Restart restart,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
+    GetSkSLMethod getSkSLMethod,
   }) async {
     if (!debuggingOptions.debuggingEnabled) {
       throw 'The service protocol is not enabled.';
@@ -1115,6 +1106,7 @@ abstract class ResidentRunner {
         restart: restart,
         compileExpression: compileExpression,
         reloadMethod: reloadMethod,
+        getSkSLMethod: getSkSLMethod
       );
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(

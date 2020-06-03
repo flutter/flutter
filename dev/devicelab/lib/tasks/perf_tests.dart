@@ -217,6 +217,14 @@ TaskFunction createFadingChildAnimationPerfTest() {
   ).run;
 }
 
+TaskFunction createImageFilteredTransformAnimationPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/imagefiltered_transform_animation_perf.dart',
+    'imagefiltered_transform_animation_perf',
+  ).run;
+}
+
 /// Measure application startup performance.
 class StartupTest {
   const StartupTest(this.testDirectory, { this.reportMetrics = true });
@@ -544,7 +552,7 @@ class CompileTest {
 
     final _UnzipListEntry libflutter = fileToMetadata['lib/armeabi-v7a/libflutter.so'];
     final _UnzipListEntry libapp = fileToMetadata['lib/armeabi-v7a/libapp.so'];
-    final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/LICENSE'];
+    final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/NOTICES'];
 
     return <String, dynamic>{
       'libflutter_uncompressed_bytes': libflutter.uncompressedSize,
@@ -780,14 +788,14 @@ class DevToolsMemoryTest {
   }
 
   Future<void> _launchDevTools() async {
-    await exec('pub', <String>[
+    await exec(pubBin, <String>[
       'global',
       'activate',
       'devtools',
       '0.2.5',
     ]);
     _devToolsProcess = await startProcess(
-      'pub',
+      pubBin,
       <String>[
         'global',
         'run',

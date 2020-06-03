@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
@@ -67,6 +68,11 @@ void main() {
       mode: anyNamed('mode'),
       platform: anyNamed('platform')
     )).thenReturn(r'C:\bin\cache\artifacts\engine\windows-x64\cpp_client_wrapper\');
+    when(artifacts.getArtifactPath(
+      Artifact.icuData,
+      mode: anyNamed('mode'),
+      platform: anyNamed('platform')
+    )).thenReturn(r'C:\bin\cache\artifacts\engine\windows-x64\icudtl.dat');
     for (final String path in kRequiredFiles) {
       fileSystem.file(path).createSync(recursive: true);
     }
@@ -153,6 +159,60 @@ void main() {
     // Depfile is created and dill is copied.
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
     expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('ProfileBundleWindowsAssets creates correct bundle structure', () async {
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: MockArtifacts(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      defines: <String, String>{
+        kBuildMode: 'profile',
+      }
+    );
+
+    environment.buildDir.childFile('app.so').createSync(recursive: true);
+
+    await const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64)).build(environment);
+    await const ProfileBundleWindowsAssets().build(environment);
+
+    // Depfile is created and so is copied.
+    expect(environment.buildDir.childFile('flutter_assets.d'), exists);
+    expect(fileSystem.file(r'C:\windows\app.so'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
+    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('ReleaseBundleWindowsAssets creates correct bundle structure', () async {
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: MockArtifacts(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      defines: <String, String>{
+        kBuildMode: 'release',
+      }
+    );
+
+    environment.buildDir.childFile('app.so').createSync(recursive: true);
+
+    await const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64)).build(environment);
+    await const ReleaseBundleWindowsAssets().build(environment);
+
+    // Depfile is created and so is copied.
+    expect(environment.buildDir.childFile('flutter_assets.d'), exists);
+    expect(fileSystem.file(r'C:\windows\app.so'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
     expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

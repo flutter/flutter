@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/depfile.dart';
 import '../build_system/targets/android.dart';
@@ -28,8 +29,8 @@ const List<Target> _kDefaultTargets = <Target>[
   // Shared targets
   CopyAssets(),
   KernelSnapshot(),
-  AotElfProfile(),
-  AotElfRelease(),
+  AotElfProfile(TargetPlatform.android_arm),
+  AotElfRelease(TargetPlatform.android_arm),
   AotAssemblyProfile(),
   AotAssemblyRelease(),
   // macOS targets
@@ -39,6 +40,8 @@ const List<Target> _kDefaultTargets = <Target>[
   ReleaseMacOSBundleFlutterAssets(),
   // Linux targets
   DebugBundleLinuxAssets(),
+  ProfileBundleLinuxAssets(),
+  ReleaseBundleLinuxAssets(),
   // Web targets
   WebServiceWorker(),
   ReleaseAndroidApplication(),
@@ -62,6 +65,8 @@ const List<Target> _kDefaultTargets = <Target>[
   // Windows targets
   UnpackWindows(),
   DebugBundleWindowsAssets(),
+  ProfileBundleWindowsAssets(),
+  ReleaseBundleWindowsAssets(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
@@ -221,13 +226,13 @@ class AssembleCommand extends FlutterCommand {
       );
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
-          stackTrace: measurement.fatal
-            ? measurement.stackTrace
-            : null,
-        );
+        if (measurement.fatal || globals.logger.isVerbose) {
+          globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
+            stackTrace: measurement.stackTrace
+          );
+        }
       }
-      throwToolExit('build failed.');
+      throwToolExit('');
     }
     globals.printTrace('build succeeded.');
     if (argResults.wasParsed('build-inputs')) {

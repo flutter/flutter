@@ -11,48 +11,62 @@ import 'test_data.dart';
 
 /// Creates an infinite list of Material cards and scrolls it.
 class BenchCardInfiniteScroll extends WidgetRecorder {
-  BenchCardInfiniteScroll() : super(name: benchmarkName);
+  BenchCardInfiniteScroll.forward()
+    : initialOffset = 0.0,
+      finalOffset = 30000.0,
+      super(name: benchmarkName);
+
+  BenchCardInfiniteScroll.backward()
+    : initialOffset = 30000.0,
+      finalOffset = 0.0,
+      super(name: benchmarkNameBackward);
 
   static const String benchmarkName = 'bench_card_infinite_scroll';
+  static const String benchmarkNameBackward = 'bench_card_infinite_scroll_backward';
+
+  final double initialOffset;
+  final double finalOffset;
 
   @override
-  Widget createWidget() => const MaterialApp(
-        title: 'Infinite Card Scroll Benchmark',
-        home: _InfiniteScrollCards(),
-      );
+  Widget createWidget() => MaterialApp(
+    title: 'Infinite Card Scroll Benchmark',
+    home: _InfiniteScrollCards(initialOffset, finalOffset),
+  );
 }
 
 class _InfiniteScrollCards extends StatefulWidget {
-  const _InfiniteScrollCards({Key key}) : super(key: key);
+  const _InfiniteScrollCards(this.initialOffset, this.finalOffset, {Key key}) : super(key: key);
+
+  final double initialOffset;
+  final double finalOffset;
 
   @override
   State<_InfiniteScrollCards> createState() => _InfiniteScrollCardsState();
 }
 
 class _InfiniteScrollCardsState extends State<_InfiniteScrollCards> {
-  ScrollController scrollController;
+  static const Duration stepDuration = Duration(seconds: 20);
 
+  ScrollController scrollController;
   double offset;
-  static const double distance = 1000;
-  static const Duration stepDuration = Duration(seconds: 1);
 
   @override
   void initState() {
     super.initState();
 
-    scrollController = ScrollController();
-    offset = 0;
+    offset = widget.initialOffset;
+
+    scrollController = ScrollController(
+      initialScrollOffset: offset,
+    );
 
     // Without the timer the animation doesn't begin.
     Timer.run(() async {
-      while (true) {
-        await scrollController.animateTo(
-          offset + distance,
-          curve: Curves.linear,
-          duration: stepDuration,
-        );
-        offset += distance;
-      }
+      await scrollController.animateTo(
+        widget.finalOffset,
+        curve: Curves.linear,
+        duration: stepDuration,
+      );
     });
   }
 
@@ -60,13 +74,14 @@ class _InfiniteScrollCardsState extends State<_InfiniteScrollCards> {
   Widget build(BuildContext context) {
     return ListView.builder(
       controller: scrollController,
+      itemExtent: 100.0,
       itemBuilder: (BuildContext context, int index) {
         return SizedBox(
           height: 100.0,
           child: Card(
             elevation: 16.0,
             child: Text(
-              lipsum[index % lipsum.length],
+              '${lipsum[index % lipsum.length]} $index',
               textAlign: TextAlign.center,
             ),
           ),

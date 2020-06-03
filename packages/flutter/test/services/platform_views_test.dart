@@ -85,6 +85,23 @@ void main() {
       await viewController.dispose();
     });
 
+    test('dispose clears focusCallbacks', () async {
+      bool didFocus = false;
+      viewsController.registerViewType('webview');
+      final AndroidViewController viewController = PlatformViewsService.initAndroidView(
+          id: 0,
+          viewType: 'webview',
+          layoutDirection: TextDirection.ltr,
+          onFocus: () { didFocus = true; }
+      );
+      await viewController.setSize(const Size(100.0, 100.0));
+      await viewController.dispose();
+      final ByteData message =
+          SystemChannels.platform_views.codec.encodeMethodCall(const MethodCall('viewFocused', 0));
+      await SystemChannels.platform_views.binaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, message, (_) { });
+      expect(didFocus, isFalse);
+    });
+
     test('resize Android view', () async {
       viewsController.registerViewType('webview');
       await PlatformViewsService.initAndroidView(
