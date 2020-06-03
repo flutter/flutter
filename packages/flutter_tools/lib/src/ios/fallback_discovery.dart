@@ -46,14 +46,14 @@ class FallbackDiscovery {
     @required Usage flutterUsage,
     VmServiceConnector vmServiceConnectUri =
       vm_service_io.vmServiceConnectUri,
-    Duration pollingDelay = const Duration(seconds: 2),
+    Duration pollingDelay,
   }) : _logger = logger,
        _mDnsObservatoryDiscovery = mDnsObservatoryDiscovery,
        _portForwarder = portForwarder,
        _protocolDiscovery = protocolDiscovery,
        _flutterUsage = flutterUsage,
        _vmServiceConnectUri = vmServiceConnectUri,
-       _pollingDelay = pollingDelay;
+       _pollingDelay = pollingDelay ?? const Duration(seconds: 2);
 
   static const String _kEventName = 'ios-handshake';
 
