@@ -606,9 +606,9 @@ abstract class FlutterCommand extends Command<void> {
       // passing a flag. This will use the automatically detected null-safety
       // value based on the entrypoint
       if (nullSafety == true) {
-        extraFrontEndOptions.add('--null-safety');
+        extraFrontEndOptions.add('--sound-null-safety');
       } else if (nullSafety == false) {
-        extraFrontEndOptions.add('--no-null-safety');
+        extraFrontEndOptions.add('--no-sound-null-safety');
       }
     }
 

@@ -113,8 +113,8 @@ void main() {
       'DART_DEFINES': 'foo%3D2,bar%3D2',
       'DART_OBFUSCATION': 'true',
       'SPLIT_DEBUG_INFO': 'foo/',
-      'EXTRA_FRONT_END_OPTIONS': '--enable-experiment=non-nullable,bar',
-      'EXTRA_GEN_SNAPSHOT_OPTIONS': '--enable-experiment=non-nullable,fizz',
+      'EXTRA_FRONT_END_OPTIONS': '--enable-experiment%3Dnon-nullable,bar',
+      'EXTRA_GEN_SNAPSHOT_OPTIONS': '--enable-experiment%3Dnon-nullable,fizz',
     });
   });
 
@@ -129,18 +129,18 @@ void main() {
   testWithoutContext('decodeDartDefines decodes URI encoded dart defines', () {
     expect(decodeDartDefines(<String, String>{
       kDartDefines: '%22hello%22'
-    }), <String>['"hello"']);
+    }, kDartDefines), <String>['"hello"']);
     expect(decodeDartDefines(<String, String>{
       kDartDefines: 'https%3A%2F%2Fwww.google.com'
-    }), <String>['https://www.google.com']);
+    }, kDartDefines), <String>['https://www.google.com']);
     expect(decodeDartDefines(<String, String>{
       kDartDefines: '2%2C3%2C4,5'
-    }), <String>['2,3,4', '5']);
+    }, kDartDefines), <String>['2,3,4', '5']);
     expect(decodeDartDefines(<String, String>{
       kDartDefines: 'true,false,flase'
-    }), <String>['true', 'false', 'flase']);
+    }, kDartDefines), <String>['true', 'false', 'flase']);
     expect(decodeDartDefines(<String, String>{
       kDartDefines: '1232%2C456,2'
-    }), <String>['1232,456', '2']);
+    }, kDartDefines), <String>['1232,456', '2']);
   });
 }

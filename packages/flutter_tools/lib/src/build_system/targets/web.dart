@@ -159,8 +159,8 @@ class Dart2JSTarget extends Target {
     final String packageFile = globalPackagesPath;
     final File outputKernel = environment.buildDir.childFile('app.dill');
     final File outputFile = environment.buildDir.childFile('main.dart.js');
-    final List<String> dartDefines = decodeDartDefines(environment.defines);
-    final List<String> extraFrontEndOptions = environment.defines[kExtraFrontEndOptions]?.split(',');
+    final List<String> dartDefines = decodeDartDefines(environment.defines, kDartDefines);
+    final List<String> extraFrontEndOptions = decodeDartDefines(environment.defines, kExtraFrontEndOptions);
 
     // Run the dart2js compilation in two stages, so that icon tree shaking can
     // parse the kernel file for web builds.
