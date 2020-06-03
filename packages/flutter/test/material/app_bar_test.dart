@@ -10,7 +10,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-Widget buildSliverAppBarApp({ bool floating, bool pinned, double collapsedHeight, double expandedHeight, bool snap = false }) {
+Widget buildSliverAppBarApp({
+  bool floating,
+  bool pinned,
+  double collapsedHeight,
+  double expandedHeight,
+  bool snap = false,
+}) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: const <LocalizationsDelegate<dynamic>>[
@@ -846,27 +852,28 @@ void main() {
   });
 
   testWidgets('SliverAppBar expandedHeight, collapsedHeight', (WidgetTester tester) async {
+    const double expandedAppBarHeight = 400.0;
+    const double collapsedAppBarHeight = 200.0;
+
     await tester.pumpWidget(buildSliverAppBarApp(
       floating: false,
       pinned: false,
-      collapsedHeight: 200.0,
-      expandedHeight: 400.0,
+      collapsedHeight: collapsedAppBarHeight,
+      expandedHeight: expandedAppBarHeight,
     ));
 
     final ScrollController controller = primaryScrollController(tester);
     expect(controller.offset, 0.0);
     expect(find.byType(SliverAppBar), findsOneWidget);
-    expect(appBarHeight(tester), 400.0);
+    expect(appBarHeight(tester), expandedAppBarHeight);
 
-    const double initialAppBarHeight = 400.0;
-    const double collapsedAppBarHeight = 200.0;
     final double initialTabBarHeight = tabBarHeight(tester);
 
     // Scroll the not-pinned appbar partially out of view
     controller.jumpTo(50.0);
     await tester.pump();
     expect(find.byType(SliverAppBar), findsOneWidget);
-    expect(appBarHeight(tester), initialAppBarHeight - 50.0);
+    expect(appBarHeight(tester), expandedAppBarHeight - 50.0);
     expect(tabBarHeight(tester), initialTabBarHeight);
 
     // Scroll the not-pinned appbar out of view, to its collapsed height
@@ -880,7 +887,7 @@ void main() {
     controller.jumpTo(0.0);
     await tester.pump();
     expect(find.byType(SliverAppBar), findsOneWidget);
-    expect(appBarHeight(tester), initialAppBarHeight);
+    expect(appBarHeight(tester), expandedAppBarHeight);
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
 
