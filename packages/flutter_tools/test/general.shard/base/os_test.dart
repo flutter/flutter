@@ -164,11 +164,8 @@ void main() {
       const FakeCommand(
         command: <String>[
           'pwsh.exe',
-          'Expand-Archive',
-          '-Path',
-          '"a"',
-          '-DestinationPath',
-          '"b"'
+          '-command',
+          '"Expand-Archive a -DestinationPath b"',
         ],
       ),
     ]);
@@ -190,11 +187,8 @@ void main() {
       const FakeCommand(
         command: <String>[
           'pwsh.exe',
-          'Expand-Archive',
-          '-Path',
-          '"a"',
-          '-DestinationPath',
-          '"b"'
+          '-command',
+          '"Expand-Archive a -DestinationPath b"',
         ],
         stderr: kPowershellException,
       ),
@@ -218,11 +212,8 @@ void main() {
       const FakeCommand(
         command: <String>[
           'pwsh.exe',
-          'Compress-Archive',
-          '-Path',
-          '"b"',
-          '-DestinationPath',
-          '"a"'
+          '-command',
+          '"Compress-Archive b -DestinationPath a"',
         ],
       ),
     ]);
@@ -244,11 +235,8 @@ void main() {
       const FakeCommand(
         command: <String>[
           'pwsh.exe',
-          'Compress-Archive',
-          '-Path',
-          '"b"',
-          '-DestinationPath',
-          '"a"'
+          '-command',
+          '"Compress-Archive b -DestinationPath a"',
         ],
         stderr: kPowershellException,
       ),

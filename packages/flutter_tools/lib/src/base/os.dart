@@ -325,11 +325,8 @@ class _WindowsUtils extends OperatingSystemUtils {
   void zip(Directory data, File zipFile) {
     final RunResult result = _processUtils.runSync(<String>[
       _activePowershell,
-      'Compress-Archive',
-      '-Path',
-      '"${data.path}"',
-      '-DestinationPath',
-      '"${zipFile.path}"',
+      '-command',
+      '"Compress-Archive ${data.path} -DestinationPath ${zipFile.path}"',
     ]);
     if (result.stderr.isNotEmpty) {
       throw ProcessException(_activePowershell, <String>['Compress-Archive'], result.stderr);
@@ -340,11 +337,8 @@ class _WindowsUtils extends OperatingSystemUtils {
   void unzip(File file, Directory targetDirectory) {
     final RunResult result = _processUtils.runSync(<String>[
       _activePowershell,
-      'Expand-Archive',
-      '-Path',
-      '"${file.path}"',
-      '-DestinationPath',
-      '"${targetDirectory.path}"',
+      '-command',
+      '"Expand-Archive ${file.path} -DestinationPath ${targetDirectory.path}"',
     ], throwOnError: true);
     if (result.stderr.isNotEmpty) {
       throw ProcessException(_activePowershell, <String>['Expand-Archive'], result.stderr);
