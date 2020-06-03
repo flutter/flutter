@@ -189,6 +189,94 @@ void main() {
     expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
   });
 
+  testWidgets('InkWell.mouseCursor changes cursor on hover', (WidgetTester tester) async {
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(1, 1));
+    addTearDown(gesture.removePointer);
+
+    // Test argument works
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: InkWell(
+              mouseCursor: SystemMouseCursors.click,
+              onTap: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default of InkWell()
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: InkWell(
+              onTap: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test disabled
+    await tester.pumpWidget(
+      const Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: InkWell(),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Test default of InkResponse()
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: InkResponse(
+              onTap: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test disabled
+    await tester.pumpWidget(
+      const Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: InkResponse(),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
   group('feedback', () {
     FeedbackTester feedback;
 

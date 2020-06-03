@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -317,6 +318,109 @@ void main() {
       expect(() => Actions.find<DoNothingIntent>(containerKey.currentContext), throwsAssertionError);
       expect(Actions.find<DoNothingIntent>(containerKey.currentContext, nullOk: true), isNull);
     });
+    testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.', (WidgetTester tester) async {
+      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      final GlobalKey containerKey = GlobalKey();
+      bool invoked = false;
+      const Intent intent = TestIntent();
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      final Action<Intent> testAction = TestAction(
+        onInvoke: (Intent intent) {
+          invoked = true;
+          return invoked;
+        },
+      );
+      bool hovering = false;
+      bool focusing = false;
+
+      Future<void> buildTest(bool enabled) async {
+        await tester.pumpWidget(
+          Center(
+            child: Actions(
+              dispatcher: TestDispatcher1(postInvoke: collect),
+              actions: const <Type, Action<Intent>>{},
+              child: FocusableActionDetector(
+                enabled: enabled,
+                focusNode: focusNode,
+                shortcuts: <LogicalKeySet, Intent>{
+                  LogicalKeySet(LogicalKeyboardKey.enter): intent,
+                },
+                actions: <Type, Action<Intent>>{
+                  TestIntent: testAction,
+                },
+                onShowHoverHighlight: (bool value) => hovering = value,
+                onShowFocusHighlight: (bool value) => focusing = value,
+                child: Container(width: 100, height: 100, key: containerKey),
+              ),
+            ),
+          ),
+        );
+        return tester.pump();
+      }
+
+      await buildTest(true);
+      focusNode.requestFocus();
+      await tester.pump();
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(hovering, isTrue);
+      expect(focusing, isTrue);
+      expect(invoked, isTrue);
+
+      invoked = false;
+      await buildTest(false);
+      expect(hovering, isFalse);
+      expect(focusing, isFalse);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(invoked, isFalse);
+      await buildTest(true);
+      expect(focusing, isFalse);
+      expect(hovering, isTrue);
+      await buildTest(false);
+      expect(focusing, isFalse);
+      expect(hovering, isFalse);
+      await gesture.moveTo(Offset.zero);
+      await buildTest(true);
+      expect(hovering, isFalse);
+      expect(focusing, isFalse);
+    });
+    testWidgets('FocusableActionDetector changes mouse cursor when hovered', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: FocusableActionDetector(
+            mouseCursor: SystemMouseCursors.text,
+            onShowHoverHighlight: (_) {},
+            onShowFocusHighlight: (_) {},
+            child: Container(),
+          ),
+        ),
+      );
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+      await gesture.addPointer(location: const Offset(1, 1));
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+      // Test default
+      await tester.pumpWidget(
+        MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: FocusableActionDetector(
+            onShowHoverHighlight: (_) {},
+            onShowFocusHighlight: (_) {},
+            child: Container(),
+          ),
+        ),
+      );
+
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    });
   });
 
   group('Listening', () {
@@ -496,6 +600,7 @@ void main() {
         WidgetTester tester, {
           bool enabled = true,
           bool directional = false,
+          bool supplyCallbacks = true,
           @required Key key,
         }) async {
       await tester.pumpWidget(
@@ -516,8 +621,8 @@ void main() {
                 actions: <Type, Action<Intent>>{
                   TestIntent: testAction,
                 },
-                onShowHoverHighlight: (bool value) => hovering = value,
-                onShowFocusHighlight: (bool value) => focusing = value,
+                onShowHoverHighlight: supplyCallbacks ? (bool value) => hovering = value : null,
+                onShowFocusHighlight: supplyCallbacks ? (bool value) => focusing = value : null,
                 child: Container(width: 100, height: 100, key: key),
               ),
             ),
@@ -604,6 +709,40 @@ void main() {
       focusNode.requestFocus();
       await tester.pump();
       expect(focusing, isTrue);
+    });
+    testWidgets('FocusableActionDetector can be used without callbacks', (WidgetTester tester) async {
+      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      final GlobalKey containerKey = GlobalKey();
+
+      await pumpTest(tester, enabled: true, key: containerKey, supplyCallbacks: false);
+      focusNode.requestFocus();
+      await tester.pump();
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(hovering, isFalse);
+      expect(focusing, isFalse);
+      expect(invoked, isTrue);
+
+      invoked = false;
+      await pumpTest(tester, enabled: false, key: containerKey, supplyCallbacks: false);
+      expect(hovering, isFalse);
+      expect(focusing, isFalse);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(invoked, isFalse);
+      await pumpTest(tester, enabled: true, key: containerKey, supplyCallbacks: false);
+      expect(focusing, isFalse);
+      expect(hovering, isFalse);
+      await pumpTest(tester, enabled: false, key: containerKey, supplyCallbacks: false);
+      expect(focusing, isFalse);
+      expect(hovering, isFalse);
+      await gesture.moveTo(Offset.zero);
+      await pumpTest(tester, enabled: true, key: containerKey, supplyCallbacks: false);
+      expect(hovering, isFalse);
+      expect(focusing, isFalse);
     });
   });
 

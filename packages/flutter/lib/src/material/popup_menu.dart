@@ -17,6 +17,7 @@ import 'ink_well.dart';
 import 'list_tile.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'popup_menu_theme.dart';
 import 'theme.dart';
 import 'tooltip.dart';
@@ -216,6 +217,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
     this.enabled = true,
     this.height = kMinInteractiveDimension,
     this.textStyle,
+    this.mouseCursor,
     @required this.child,
   }) : assert(enabled != null),
        assert(height != null),
@@ -241,6 +243,17 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// If this property is null, then [PopupMenuThemeData.textStyle] is used.
   /// If [PopupMenuThemeData.textStyle] is also null, then [ThemeData.textTheme.subtitle1] is used.
   final TextStyle textStyle;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]:
+  ///
+  ///  * [MaterialState.disabled].
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  final MouseCursor mouseCursor;
 
   /// The widget below this widget in the tree.
   ///
@@ -320,10 +333,17 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
         child: item,
       );
     }
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+      <MaterialState>{
+        if (!widget.enabled) MaterialState.disabled,
+      },
+    );
 
     return InkWell(
       onTap: widget.enabled ? handleTap : null,
       canRequestFocus: widget.enabled,
+      mouseCursor: effectiveMouseCursor,
       child: item,
     );
   }
