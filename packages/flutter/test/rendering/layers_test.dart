@@ -563,7 +563,7 @@ void main() {
 
       _testConflicts(layerA, layerB, expectedErrorCount: 1);
     });
-  }, skip: isBrowser);
+  });
 
   test('ContainerLayer.toImage can render interior layer', () {
     final OffsetLayer parent = OffsetLayer();
