@@ -129,7 +129,6 @@ void main() {
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       platformArgs: <String, dynamic>{},
-      fallbackPollingDelay: Duration.zero,
     );
 
     verify(globals.flutterUsage.sendEvent('ios-handshake', 'mdns-success')).called(1);
@@ -174,7 +173,6 @@ void main() {
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       platformArgs: <String, dynamic>{},
-      fallbackPollingDelay: Duration.zero,
     );
 
     expect(launchResult.started, true);
@@ -221,7 +219,6 @@ void main() {
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       platformArgs: <String, dynamic>{},
-      fallbackPollingDelay: Duration.zero,
     );
 
     expect(launchResult.started, false);
@@ -260,7 +257,6 @@ void main() {
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       platformArgs: <String, dynamic>{},
-      fallbackPollingDelay: Duration.zero,
     );
 
     expect(launchResult.started, true);
@@ -351,7 +347,6 @@ void main() {
         verboseSystemLogs: true,
       ),
       platformArgs: <String, dynamic>{},
-      fallbackPollingDelay: Duration.zero,
     );
 
     expect(launchResult.started, true);
