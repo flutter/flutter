@@ -127,18 +127,6 @@ task:
         - $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/pub get
         - $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/dartanalyzer --fatal-warnings --fatal-hints dev/ lib/ test/ tool/
 
-    - name: build_and_test_web_linux_firefox
-      compile_host_script: |
-        cd $ENGINE_PATH/src
-        ./flutter/tools/gn --unoptimized --full-dart-sdk
-        ninja -C out/host_debug_unopt
-      test_web_engine_firefox_script: |
-        cd $ENGINE_PATH/src/flutter/web_sdk/web_engine_tester
-        $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/pub get
-        cd $ENGINE_PATH/src/flutter/lib/web_ui
-        $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/pub get
-        export FELT="$ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/dart dev/felt.dart"
-        $FELT test --browser=firefox
     - name: format_and_dart_test
       format_script: |
         cd $ENGINE_PATH/src/flutter
