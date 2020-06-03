@@ -7,11 +7,9 @@
 namespace flutter {
 
 bool ExternalViewEmbedder::SubmitFrame(GrContext* context,
-                                       SkCanvas* background_canvas) {
-  return false;
+                                       std::unique_ptr<SurfaceFrame> frame) {
+  return frame->Submit();
 };
-
-void ExternalViewEmbedder::FinishFrame(){};
 
 void MutatorsStack::PushClipRect(const SkRect& rect) {
   std::shared_ptr<Mutator> element = std::make_shared<Mutator>(rect);

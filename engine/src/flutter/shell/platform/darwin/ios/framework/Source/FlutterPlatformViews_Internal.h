@@ -163,7 +163,7 @@ class FlutterPlatformViewsController {
 
   bool SubmitFrame(GrContext* gr_context,
                    std::shared_ptr<IOSContext> ios_context,
-                   SkCanvas* background_canvas);
+                   std::unique_ptr<SurfaceFrame> frame);
 
   // Invoked at the very end of a frame.
   // After invoking this method, nothing should happen on the current TaskRunner during the same

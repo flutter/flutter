@@ -78,10 +78,7 @@ class IOSSurface : public ExternalViewEmbedder {
   SkCanvas* CompositeEmbeddedView(int view_id) override;
 
   // |ExternalViewEmbedder|
-  bool SubmitFrame(GrContext* context, SkCanvas* background_canvas) override;
-
-  // |ExternalViewEmbedder|
-  void FinishFrame() override;
+  bool SubmitFrame(GrContext* context, std::unique_ptr<SurfaceFrame> frame) override;
 
   // |ExternalViewEmbedder|
   void EndFrame(fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
