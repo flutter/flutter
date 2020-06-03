@@ -1403,6 +1403,9 @@ void main() {
         ..rrect(color: const Color(0x3d2196f3)),
     );
 
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawRect, 1));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawRRect, 2));
+
     await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();
 
@@ -1416,6 +1419,9 @@ void main() {
            ..rrect(color: const Color(0x3d2196f3)),
       ),
     );
+
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawRect, 0));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawRRect, 0));
 
     // Don't stop holding the value indicator.
     await gesture.up();
