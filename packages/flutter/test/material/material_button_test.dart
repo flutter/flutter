@@ -864,4 +864,24 @@ void main() {
     final RawMaterialButton rawMaterialButton = tester.widget(rawMaterialButtonFinder);
     expect(rawMaterialButton.disabledElevation, equals(disabledElevation));
   });
+
+  testWidgets('MaterialButton.disabledElevation defaults to 0.0 when not provided', (WidgetTester tester) async {
+    final Finder rawMaterialButtonFinder = find.descendant(
+        of: find.byType(MaterialButton),
+        matching: find.byType(RawMaterialButton)
+    );
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          onPressed: null, // disabled button
+          child: Text('button'),
+        ),
+      ),
+    );
+
+    final RawMaterialButton rawMaterialButton = tester.widget(rawMaterialButtonFinder);
+    expect(rawMaterialButton.disabledElevation, equals(0.0));
+  });
 }
