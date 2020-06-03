@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h"
 
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
@@ -13,17 +14,54 @@
 FLUTTER_ASSERT_NOT_ARC
 
 namespace flutter {
+namespace {
+
+FlutterViewController* _Nullable GetFlutterViewControllerForView(UIView* view) {
+  // There is no way to get a view's view controller in UIKit directly, this is
+  // somewhat of a hacky solution to get that.  This could be eliminated if the
+  // bridge actually kept a reference to a FlutterViewController instead of a
+  // UIView.
+  id nextResponder = [view nextResponder];
+  if ([nextResponder isKindOfClass:[FlutterViewController class]]) {
+    return nextResponder;
+  } else if ([nextResponder isKindOfClass:[UIView class]]) {
+    return GetFlutterViewControllerForView(nextResponder);
+  } else {
+    return nil;
+  }
+}
+
+class DefaultIosDelegate : public AccessibilityBridge::IosDelegate {
+ public:
+  bool IsFlutterViewControllerPresentingModalViewController(UIView* view) override {
+    FlutterViewController* viewController = GetFlutterViewControllerForView(view);
+    if (viewController) {
+      return viewController.isPresentingViewController;
+    } else {
+      return false;
+    }
+  }
+
+  void PostAccessibilityNotification(UIAccessibilityNotifications notification,
+                                     id argument) override {
+    UIAccessibilityPostNotification(notification, argument);
+  }
+};
+}  // namespace
 
 AccessibilityBridge::AccessibilityBridge(UIView* view,
                                          PlatformViewIOS* platform_view,
-                                         FlutterPlatformViewsController* platform_views_controller)
+                                         FlutterPlatformViewsController* platform_views_controller,
+                                         std::unique_ptr<IosDelegate> ios_delegate)
     : view_(view),
       platform_view_(platform_view),
       platform_views_controller_(platform_views_controller),
       objects_([[NSMutableDictionary alloc] init]),
       weak_factory_(this),
       previous_route_id_(0),
-      previous_routes_({}) {
+      previous_routes_({}),
+      ios_delegate_(ios_delegate ? std::move(ios_delegate)
+                                 : std::make_unique<DefaultIosDelegate>()) {
   accessibility_channel_.reset([[FlutterBasicMessageChannel alloc]
          initWithName:@"flutter/accessibility"
       binaryMessenger:platform_view->GetOwnerViewController().get().engine.binaryMessenger
@@ -137,15 +175,18 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
 
   layoutChanged = layoutChanged || [doomed_uids count] > 0;
   if (routeChanged) {
-    NSString* routeName = [lastAdded routeName];
-    UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, routeName);
+    if (!ios_delegate_->IsFlutterViewControllerPresentingModalViewController(view_)) {
+      NSString* routeName = [lastAdded routeName];
+      ios_delegate_->PostAccessibilityNotification(UIAccessibilityScreenChangedNotification,
+                                                   routeName);
+    }
   } else if (layoutChanged) {
     // TODO(goderbauer): figure out which node to focus next.
-    UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
+    ios_delegate_->PostAccessibilityNotification(UIAccessibilityLayoutChangedNotification, nil);
   }
   if (scrollOccured) {
     // TODO(tvolkert): provide meaningful string (e.g. "page 2 of 5")
-    UIAccessibilityPostNotification(UIAccessibilityPageScrolledNotification, @"");
+    ios_delegate_->PostAccessibilityNotification(UIAccessibilityPageScrolledNotification, @"");
   }
 }
 
@@ -233,7 +274,7 @@ void AccessibilityBridge::HandleEvent(NSDictionary<NSString*, id>* annotatedEven
   NSString* type = annotatedEvent[@"type"];
   if ([type isEqualToString:@"announce"]) {
     NSString* message = annotatedEvent[@"data"][@"message"];
-    UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, message);
+    ios_delegate_->PostAccessibilityNotification(UIAccessibilityAnnouncementNotification, message);
   }
 }
 
