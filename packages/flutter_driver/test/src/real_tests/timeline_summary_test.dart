@@ -372,9 +372,11 @@ void main() {
             'worst_frame_rasterizer_time_millis': 20.0,
             'missed_frame_rasterizer_budget_count': 2,
             'frame_count': 3,
+            'frame_rasterizer_count': 3,
             'frame_build_times': <int>[17000, 9000, 19000],
             'frame_rasterizer_times': <int>[18000, 10000, 20000],
             'frame_begin_times': <int>[0, 18000, 28000],
+            'frame_rasterizer_begin_times': <int>[0, 18000, 28000],
             'average_vsync_transitions_missed': 0.0,
             '90th_percentile_vsync_transitions_missed': 0.0,
             '99th_percentile_vsync_transitions_missed': 0.0
@@ -431,9 +433,11 @@ void main() {
           'worst_frame_rasterizer_time_millis': 20.0,
           'missed_frame_rasterizer_budget_count': 2,
           'frame_count': 3,
+          'frame_rasterizer_count': 3,
           'frame_build_times': <int>[17000, 9000, 19000],
           'frame_rasterizer_times': <int>[18000, 10000, 20000],
           'frame_begin_times': <int>[0, 18000, 28000],
+          'frame_rasterizer_begin_times': <int>[0, 18000, 28000],
           'average_vsync_transitions_missed': 8.0,
           '90th_percentile_vsync_transitions_missed': 12.0,
           '99th_percentile_vsync_transitions_missed': 12.0
