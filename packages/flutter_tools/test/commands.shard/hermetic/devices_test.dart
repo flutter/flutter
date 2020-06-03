@@ -39,14 +39,13 @@ void main() {
     });
 
     testUsingContext('get devices\' platform types', () async {
-      final List<String> platformTypes = Device.devicesPlatformTypes(await deviceManager.getAllConnectedDevices());
-      expect(
-        platformTypes,
-        <String>['android', 'web']
+      final List<String> platformTypes = Device.devicesPlatformTypes(
+        await deviceManager.getAllConnectedDevices(),
       );
+      expect(platformTypes, <String>['android', 'web']);
     }, overrides: <Type, Generator>{
-          DeviceManager: () => _FakeDeviceManager(),
-          ProcessManager: () => MockProcessManager(),
+      DeviceManager: () => _FakeDeviceManager(),
+      ProcessManager: () => MockProcessManager(),
     });
 
     testUsingContext('Outputs parsable JSON with --machine flag', () async {

@@ -251,6 +251,7 @@ void main() {
         when(mockDevice.supportsFastStart).thenReturn(true);
         when(mockDevice.id).thenReturn('mock-id');
         when(mockDevice.name).thenReturn('mock-name');
+        when(mockDevice.platformType).thenReturn(PlatformType.android);
         when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) => Future<String>.value('api-14'));
 
         when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
@@ -285,7 +286,7 @@ void main() {
         expect(
           testLogger.statusText,
           containsIgnoringWhitespace(
-            userMessages.flutterMissPlatformProject(
+            userMessages.flutterMissPlatformProjects(
               Device.devicesPlatformTypes(<Device>[mockDevice]),
             ),
           ),
