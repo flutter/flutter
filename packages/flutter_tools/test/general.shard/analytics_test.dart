@@ -36,7 +36,6 @@ void main() {
     MockFlutterConfig mockFlutterConfig;
 
     setUp(() {
-      Cache.flutterRoot = '../..';
       fileSystem = MemoryFileSystem.test();
       mockFlutterConfig = MockFlutterConfig();
     });
