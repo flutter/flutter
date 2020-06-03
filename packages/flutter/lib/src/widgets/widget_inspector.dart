@@ -933,9 +933,7 @@ mixin WidgetInspectorService {
       wrapWidth: FlutterError.wrapWidth,
       wrapWidthProperties: FlutterError.wrapWidth,
       maxDescendentsTruncatableNode: 5,
-    )
-        .render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error))
-        .trimRight();
+    ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight();
     _errorsSinceReload += 1;
 
     postEvent('Flutter.Error', errorJson);
