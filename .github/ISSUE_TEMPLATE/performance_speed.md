@@ -45,7 +45,7 @@ assignees: ''
 5.  Open Observatory and save a timeline trace of the performance issue
      so we know which functions might be causing it. See "How to Collect
      and Read Timeline Traces" on this blog post:
-       https://medium.com/flutter/profiling-flutter-applications-using-the-timeline-a1a434964af03#a499
+       https://medium.com/flutter/profiling-flutter-applications-using-the-timeline-a1a434964af3#a499
 -->
 
 <!--
