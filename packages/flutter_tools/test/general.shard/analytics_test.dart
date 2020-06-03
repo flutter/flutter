@@ -55,7 +55,10 @@ void main() {
 
       globals.flutterUsage.enabled = true;
       await runner.run(<String>['fake']);
-      expect(count, globals.flutterUsage.isFirstRun ? 0 : 4);
+      // LogToFileAnalytics isFirstRun is hardcoded to false
+      // so this usage will never act like the first run
+      // (which would not send usage).
+      expect(count, 4);
 
       count = 0;
       globals.flutterUsage.enabled = false;
