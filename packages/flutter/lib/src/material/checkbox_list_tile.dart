@@ -248,11 +248,12 @@ class CheckboxListTile extends StatelessWidget {
   ///
   /// The following arguments are required:
   ///
-  /// * [value], which determines whether the checkbox is checked, and must not
-  ///   be null.
-  ///
+  /// * [value], which determines whether the checkbox is checked. The [value]
+  ///   can only be null if [tristate] is true.
   /// * [onChanged], which is called when the value of the checkbox should
   ///   change. It can be set to null to disable the checkbox.
+  ///
+  /// The values of [tristate] must not be null.
   const CheckboxListTile({
     Key key,
     @required this.value,
@@ -279,8 +280,6 @@ class CheckboxListTile extends StatelessWidget {
        super(key: key);
 
   /// Whether this checkbox is checked.
-  ///
-  /// This property must not be null.
   final bool value;
 
   /// Called when the value of the checkbox should change.
