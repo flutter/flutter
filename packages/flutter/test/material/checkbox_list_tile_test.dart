@@ -144,4 +144,43 @@ void main() {
     expect(paddingRect.top, tallerWidget.top - remainingHeight / 2 - 18);
     expect(paddingRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 2);
   });
+
+  testWidgets('CheckboxListTile tristate test', (WidgetTester tester) async {
+    bool _value;
+
+    await tester.pumpWidget(
+      Material(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return wrap(
+              child: CheckboxListTile(
+                title: const Text('Title'),
+                tristate: true,
+                value: _value,
+                onChanged: (bool value) {
+                  setState(() {
+                    _value = value;
+                  });
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, null);
+
+    await tester.tap(find.byType(Checkbox));
+    await tester.pumpAndSettle();
+    expect(_value, false);
+
+    await tester.tap(find.byType(Checkbox));
+    await tester.pumpAndSettle();
+    expect(_value, true);
+
+    await tester.tap(find.byType(Checkbox));
+    await tester.pumpAndSettle();
+    expect(_value, null);
+  });
 }
