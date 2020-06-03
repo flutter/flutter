@@ -50,7 +50,7 @@ void main() {
       Cache.enableLocking();
     });
 
-    testUsingContext('error handling crash report (direct crash)', () async {
+    testUsingContext('error handling crash report (synchronous crash)', () async {
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.
@@ -94,7 +94,7 @@ void main() {
       Usage: () => CrashingUsage(),
     });
 
-    testUsingContext('error handling crash report (indirect crash)', () async {
+    testUsingContext('error handling crash report (asynchronous crash)', () async {
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.
@@ -103,7 +103,7 @@ void main() {
           unawaited(runner.run(
             <String>['crash'],
             <FlutterCommand>[
-              CrashingFlutterCommand(direct: false),
+              CrashingFlutterCommand(asyncCrash: true),
             ],
             // This flutterVersion disables crash reporting.
             flutterVersion: '[user-branch]/',
@@ -126,7 +126,7 @@ void main() {
       }),
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
-      CrashReporter: () => SlowCrashReporter(),
+      CrashReporter: () => WaitingCrashReporter(runner.runCompleted.future),
     });
 
     testUsingContext('create local report', () async {
@@ -191,9 +191,9 @@ void main() {
 }
 
 class CrashingFlutterCommand extends FlutterCommand {
-  CrashingFlutterCommand({this.direct = true});
+  CrashingFlutterCommand({this.asyncCrash = false});
 
-  final bool direct;
+  final bool asyncCrash;
 
   @override
   String get description => null;
@@ -204,14 +204,17 @@ class CrashingFlutterCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     const String error = 'an exception % --'; // Test URL encoding.
-    if (direct) {
+    if (!asyncCrash) {
       throw error;
     }
 
-    Timer.run(() => throw error);
+    final Completer<void> completer = Completer<void>();
+    Timer.run(() {
+      completer.complete();
+      throw error;
+    });
 
-    // Give the Timer time to fire.
-    await Future<void>.delayed(const Duration(milliseconds: 100));
+    await completer.future;
     return FlutterCommandResult.success();
   }
 }
@@ -303,15 +306,15 @@ class CustomBugInstructions extends UserMessages {
   String get flutterToolBugInstructions => kCustomBugInstructions;
 }
 
-class SlowCrashReporter implements CrashReporter {
-  /// A fake [CrashReporter] with an artificial delay.
-  ///
-  /// Used to exacerbate a race between the success and failure paths of
-  /// runner.run.  See https://github.com/flutter/flutter/issues/56406.
+/// A fake [CrashReporter] that waits for a [Future] to complete.
+///
+/// Used to exacerbate a race between the success and failure paths of
+/// [runner.run].  See https://github.com/flutter/flutter/issues/56406.
+class WaitingCrashReporter implements CrashReporter {
+  WaitingCrashReporter(Future<void> future) : _future = future;
+
+  final Future<void> _future;
+
   @override
-  Future<void> informUser(CrashDetails details, File crashFile) async {
-    // This hardcoded wait is undesirable, but there isn't anything good to
-    // wait for.
-    await Future<void>.delayed(const Duration(milliseconds: 500));
-  }
+  Future<void> informUser(CrashDetails details, File crashFile) => _future;
 }
