@@ -30,9 +30,20 @@ class ProjectBuildLocationMigration extends IOSMigrator {
 
   @override
   String migrateLine(String line) {
-    const String legacyBuildLocation = 'location = "group:';
-    const String defaultBuildLocation = 'location = "self:';
+    const String legacyBuildLocation = 'location = "group:Runner.xcodeproj"';
+    const String defaultBuildLocation = 'location = "self:"';
 
     return line.replaceAll(legacyBuildLocation, defaultBuildLocation);
+  }
+
+  @override
+  String migrateFileContents(String fileContents) {
+    const String podLocation = '''
+   <FileRef
+      location = "group:Pods/Pods.xcodeproj">
+   </FileRef>
+''';
+
+    return fileContents.replaceAll(podLocation, '');
   }
 }
