@@ -487,7 +487,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final bool obscureText;
 
-  /// {@macro flutter.widgets.text.DefaultTextStyle.textHeightBehavior}
+  /// {@macro flutter.dart:ui.textHeightBehavior},
   final TextHeightBehavior textHeightBehavior;
 
   /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
