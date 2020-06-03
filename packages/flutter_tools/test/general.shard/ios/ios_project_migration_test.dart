@@ -371,14 +371,15 @@ keep this 2
         const String contents = '''
  <?xml version="1.0" encoding="UTF-8"?>
  <Workspace
-    version = "1.0">
-    <FileRef
+   version = "1.0">
+   <FileRef
       location = "group:Runner.xcodeproj">
-    </FileRef>
-    <FileRef
+   </FileRef>
+   <FileRef
       location = "group:Pods/Pods.xcodeproj">
-    </FileRef>
- </Workspace>''';
+   </FileRef>
+ </Workspace>
+''';
         xcodeProjectWorkspaceData.writeAsStringSync(contents);
 
         final ProjectBuildLocationMigration iosProjectMigration = ProjectBuildLocationMigration(
@@ -389,14 +390,12 @@ keep this 2
         expect(xcodeProjectWorkspaceData.readAsStringSync(), '''
  <?xml version="1.0" encoding="UTF-8"?>
  <Workspace
-    version = "1.0">
-    <FileRef
-      location = "self:Runner.xcodeproj">
-    </FileRef>
-    <FileRef
-      location = "self:Pods/Pods.xcodeproj">
-    </FileRef>
+   version = "1.0">
+   <FileRef
+      location = "self:">
+   </FileRef>
  </Workspace>
+
 ''');
         expect(testLogger.statusText, contains('Upgrading contents.xcworkspacedata'));
       });
