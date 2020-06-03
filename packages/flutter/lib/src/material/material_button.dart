@@ -68,7 +68,7 @@ class MaterialButton extends StatelessWidget {
     this.focusElevation,
     this.hoverElevation,
     this.highlightElevation,
-    this.disabledElevation = 0.0,
+    this.disabledElevation,
     this.padding,
     this.visualDensity,
     this.shape,
@@ -415,7 +415,7 @@ class MaterialButton extends StatelessWidget {
       animationDuration: buttonTheme.getAnimationDuration(this),
       child: child,
       materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
-      disabledElevation: disabledElevation,
+      disabledElevation: disabledElevation ?? 0.0,
     );
   }
 
