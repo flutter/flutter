@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
-import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
@@ -597,31 +596,6 @@ class BasicMock {
     final bool result = messages.contains(match);
     messages.clear();
     return result;
-  }
-}
-
-class MockDevFSOperations extends BasicMock implements DevFSOperations {
-  Map<Uri, DevFSContent> devicePathToContent = <Uri, DevFSContent>{};
-
-  @override
-  Future<Uri> create(String fsName) async {
-    messages.add('create $fsName');
-    return Uri.parse('file:///$fsName');
-  }
-
-  @override
-  Future<dynamic> destroy(String fsName) async {
-    messages.add('destroy $fsName');
-  }
-
-  @override
-  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
-    String message = 'writeFile $fsName $deviceUri';
-    if (content is DevFSFileContent) {
-      message += ' ${content.file.path}';
-    }
-    messages.add(message);
-    devicePathToContent[deviceUri] = content;
   }
 }
 

@@ -76,27 +76,6 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  codegen_integration_win:
-    description: >
-      Runs codegeneration and verifies that it can execute
-      correctly.
-    stage: devicelab_win
-    required_agent_capabilities: ["windows/android"]
-
-  codegen_integration_mac:
-    description: >
-      Runs codegeneration and verifies that it can execute
-      correctly.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  codegen_integration_linux:
-    description: >
-      Runs codegeneration and verifies that it can execute
-      correctly.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-
   uncaught_image_error_linux:
     description: >
       Ensures that an error thrown into the zone can be caught by the ImageStream
@@ -213,6 +192,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  imagefiltered_transform_animation_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of imagefiltered widget with transform on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   flavors_test:
     description: >
       Checks that flavored builds work on Android.
@@ -284,6 +269,12 @@ tasks:
       Measures memory usage of the scroll performance test.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+
+  complex_layout_scroll_perf__devtools_memory:
+    description: >
+      Measures memory usage of the scroll performance test using DevTools.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
 
   hello_world_android__compile:
     description: >
@@ -479,7 +470,6 @@ tasks:
       32-bit iOS (iPhone 4S).
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
-    flaky: true # TODO(jmagman): https://github.com/flutter/flutter/issues/57225
 
   flavors_test_ios:
     description: >
@@ -560,7 +550,6 @@ tasks:
       iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true # TODO(jmagman): https://github.com/flutter/flutter/issues/57225
 
   hello_world_ios__compile:
     description: >
@@ -673,9 +662,9 @@ tasks:
 #    required_agent_capabilities: ["mac/ios"]
 #    flaky: true
 
-  ios_app_with_watch_companion:
+  ios_app_with_extensions_test:
     description: >
-      Checks that an iOS app with a watchOS companion can be build for physical and simulated devices.
+      Checks that an iOS app with extensions can be built for physical and simulated devices.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 

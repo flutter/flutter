@@ -612,13 +612,6 @@ Future<void> _runFrameworkTests() async {
       options: <String>['--enable-vmservice'],
       tableData: bigqueryApi?.tabledata,
     );
-    await _runFlutterTest(
-      path.join(flutterRoot, 'dev', 'integration_tests', 'codegen'),
-      tableData: bigqueryApi?.tabledata,
-      environment: <String, String>{
-        'FLUTTER_EXPERIMENTAL_BUILD': 'true',
-      },
-    );
     const String httpClientWarning =
       'Warning: At least one test in this suite creates an HttpClient. When\n'
       'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'

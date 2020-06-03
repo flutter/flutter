@@ -370,6 +370,10 @@ class VMServiceFlutterDriver extends FlutterDriver {
         : const <Map<String, dynamic>>[];
   }
 
+  Future<Map<String, Object>> _getVMTimelineMicros() async {
+    return await _peer.sendRequest('getVMTimelineMicros') as Map<String, dynamic>;
+  }
+
   @override
   Future<void> startTracing({
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
@@ -397,15 +401,43 @@ class VMServiceFlutterDriver extends FlutterDriver {
   @override
   Future<Timeline> stopTracingAndDownloadTimeline({
     Duration timeout = kUnusuallyLongTimeout,
+    int startTime,
+    int endTime,
   }) async {
     assert(timeout != null);
+    assert((startTime == null && endTime == null) ||
+           (startTime != null && endTime != null));
+
     try {
       await _warnIfSlow<void>(
         future: _peer.sendRequest(_setVMTimelineFlagsMethodName, <String, String>{'recordedStreams': '[]'}),
         timeout: timeout,
         message: 'VM is taking an unusually long time to respond to being told to stop tracing...',
       );
-      return Timeline.fromJson(await _peer.sendRequest(_getVMTimelineMethodName) as Map<String, dynamic>);
+      if (startTime == null) {
+        return Timeline.fromJson(await _peer.sendRequest(_getVMTimelineMethodName) as Map<String, dynamic>);
+      }
+      const int kSecondInMicros = 1000000;
+      int currentStart = startTime;
+      int currentEnd = startTime + kSecondInMicros; // 1 second of timeline
+      final List<Map<String, Object>> chunks = <Map<String, Object>>[];
+      do {
+        final Map<String, Object> chunk = await _peer.sendRequest(_getVMTimelineMethodName, <String, Object>{
+          'timeOriginMicros': currentStart,
+          // The range is inclusive, avoid double counting on the chance something
+          // aligns on the boundary.
+          'timeExtentMicros': kSecondInMicros - 1,
+        }) as Map<String, dynamic>;
+        chunks.add(chunk);
+        currentStart = currentEnd;
+        currentEnd += kSecondInMicros;
+      } while (currentStart < endTime);
+      return Timeline.fromJson(<String, Object>{
+        'traceEvents': <Object> [
+          for (Map<String, Object> chunk in chunks)
+            ...chunk['traceEvents'] as List<Object>,
+        ],
+      });
     } catch (error, stackTrace) {
       throw DriverError(
         'Failed to stop tracing due to remote error',
@@ -434,13 +466,19 @@ class VMServiceFlutterDriver extends FlutterDriver {
     if (!retainPriorEvents) {
       await clearTimeline();
     }
+    final Map<String, Object> startTimestamp = await _getVMTimelineMicros();
     await startTracing(streams: streams);
     await action();
+    final Map<String, Object> endTimestamp = await _getVMTimelineMicros();
 
     if (!(await _isPrecompiledMode())) {
       _log(_kDebugWarning);
     }
-    return stopTracingAndDownloadTimeline();
+
+    return stopTracingAndDownloadTimeline(
+      startTime: startTimestamp['timestamp'] as int,
+      endTime: endTimestamp['timestamp'] as int,
+    );
   }
 
   @override
