@@ -164,6 +164,7 @@ if (current_toolchain == host_toolchain) {
       "painting/image_decoder_test.cc",
       "painting/image_decoder_test.h",
       "painting/image_decoder_unittests.cc",
+      "painting/vertices_unittests.cc",
       "window/pointer_data_packet_converter_unittests.cc",
     ]
 
@@ -171,6 +172,7 @@ if (current_toolchain == host_toolchain) {
       ":ui",
       ":ui_unittests_fixtures",
       "//flutter/common",
+      "//flutter/shell/common:shell_test_fixture_sources",
       "//flutter/testing",
       "//flutter/testing:dart",
       "//flutter/testing:opengl",

@@ -28,18 +28,18 @@ DART_BIND_ALL(Picture, FOR_EACH_BINDING)
 
 fml::RefPtr<Picture> Picture::Create(Dart_Handle dart_handle,
                                      flutter::SkiaGPUObject<SkPicture> picture,
-                                     size_t image_allocation_size) {
-  auto canvas_picture =
-      fml::MakeRefCounted<Picture>(std::move(picture), image_allocation_size);
+                                     size_t external_allocation_size) {
+  auto canvas_picture = fml::MakeRefCounted<Picture>(std::move(picture),
+                                                     external_allocation_size);
 
   canvas_picture->AssociateWithDartWrapper(dart_handle);
   return canvas_picture;
 }
 
 Picture::Picture(flutter::SkiaGPUObject<SkPicture> picture,
-                 size_t image_allocation_size)
+                 size_t external_allocation_size)
     : picture_(std::move(picture)),
-      image_allocation_size_(image_allocation_size) {}
+      external_allocation_size_(external_allocation_size) {}
 
 Picture::~Picture() = default;
 
@@ -61,7 +61,7 @@ void Picture::dispose() {
 size_t Picture::GetAllocationSize() const {
   if (auto picture = picture_.get()) {
     return picture->approximateBytesUsed() + sizeof(Picture) +
-           image_allocation_size_;
+           external_allocation_size_;
   } else {
     return sizeof(Picture);
   }

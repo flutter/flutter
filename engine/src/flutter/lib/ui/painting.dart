@@ -3249,8 +3249,7 @@ class Vertices extends NativeFieldWrapperClass2 {
       ? Uint16List.fromList(indices)
       : null;
 
-    _constructor();
-    if (!_init(mode.index, encodedPositions, encodedTextureCoordinates, encodedColors, encodedIndices))
+    if (!_init(this, mode.index, encodedPositions, encodedTextureCoordinates, encodedColors, encodedIndices))
       throw ArgumentError('Invalid configuration for vertices.');
   }
 
@@ -3287,14 +3286,12 @@ class Vertices extends NativeFieldWrapperClass2 {
     if (indices != null && indices.any((int i) => i < 0 || i >= positions.length))
       throw ArgumentError('"indices" values must be valid indices in the positions list.');
 
-    _constructor();
-    if (!_init(mode.index, positions, textureCoordinates, colors, indices))
+    if (!_init(this, mode.index, positions, textureCoordinates, colors, indices))
       throw ArgumentError('Invalid configuration for vertices.');
   }
 
-  void _constructor() native 'Vertices_constructor';
-
-  bool _init(int mode,
+  bool _init(Vertices outVertices,
+             int mode,
              Float32List positions,
              Float32List textureCoordinates,
              Int32List colors,
