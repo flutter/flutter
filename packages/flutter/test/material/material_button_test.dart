@@ -884,4 +884,18 @@ void main() {
     final RawMaterialButton rawMaterialButton = tester.widget(rawMaterialButtonFinder);
     expect(rawMaterialButton.disabledElevation, equals(0.0));
   });
+
+  testWidgets('MaterialButton assertion - null disabledElevation', (WidgetTester tester) async {
+    expect(() => MaterialButton(
+      onPressed: () {},
+      disabledElevation: null,
+    ), throwsAssertionError);
+  });
+
+  testWidgets('MaterialButton assertion - negative disabledElevation', (WidgetTester tester) async {
+    expect(() => MaterialButton(
+      onPressed: () {},
+      disabledElevation: -0.5,
+    ), throwsAssertionError);
+  });
 }

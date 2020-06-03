@@ -280,7 +280,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
     Brightness colorBrightness,
     double elevation,
     double highlightElevation,
-    double disabledElevation,
+    double disabledElevation = 0.0,
     ShapeBorder shape,
     Clip clipBehavior = Clip.none,
     FocusNode focusNode,

@@ -110,6 +110,7 @@ void main() {
       'color: Color(0xff000000)',
       'highlightColor: Color(0xff1565c0)',
       'splashColor: Color(0xff9e9e9e)',
+      'disabledElevation: 0.0',
     ]);
   });
 
@@ -726,6 +727,20 @@ void main() {
     final Rect tallerWidget = iconRect.height > labelRect.height ? iconRect : labelRect;
     expect(paddingRect.top, tallerWidget.top - 5);
     expect(paddingRect.bottom, tallerWidget.bottom + 12);
+  });
+
+  testWidgets('RaisedButton assertion - null disabledElevation', (WidgetTester tester) async {
+    expect(() => RaisedButton(
+      onPressed: () {},
+      disabledElevation: null,
+    ), throwsAssertionError);
+  });
+
+  testWidgets('RaisedButton assertion - negative disabledElevation', (WidgetTester tester) async {
+    expect(() => RaisedButton(
+      onPressed: () {},
+      disabledElevation: -0.5,
+    ), throwsAssertionError);
   });
 }
 
