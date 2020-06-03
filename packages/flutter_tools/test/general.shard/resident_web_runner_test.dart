@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -344,6 +345,54 @@ void main() {
 
     expect(testLogger.statusText, contains('THIS MESSAGE IS IMPORTANT'));
     expect(testLogger.statusText, contains('SO IS THIS'));
+  }));
+
+  test('Listens to extension events with structured errors', () => testbed.run(() async {
+    final Map<String, String> extensionData = {
+      'test': 'data',
+      'renderedErrorText': 'error text',
+    };
+    final Map<String, String> nonStructuredErrorData = {
+      'other': 'other stuff',
+    };
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      ...kAttachExpectations,
+      FakeVmServiceStreamResponse(
+        streamId: 'Extension',
+        event: vm_service.Event(
+          timestamp: 0,
+          extensionKind: 'Flutter.Error',
+          extensionData: vm_service.ExtensionData.parse(extensionData),
+          kind: vm_service.EventStreams.kExtension,
+        ),
+      ),
+      // This is not Flutter.Error kind data, so it should not be logged.
+      FakeVmServiceStreamResponse(
+        streamId: 'Extension',
+        event: vm_service.Event(
+          timestamp: 0,
+          extensionKind: 'Other',
+          extensionData: vm_service.ExtensionData.parse(nonStructuredErrorData),
+          kind: vm_service.EventStreams.kExtension,
+        ),
+      ),
+    ]);
+
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    // Need these to run events, otherwise expect statements below run before
+    // structured errors are processed.
+    await null;
+    await null;
+    await null;
+
+    expect(testLogger.statusText, contains('\nerror text'));
+    expect(testLogger.statusText.contains('other stuff'), false);
   }));
 
   test('Does not run main with --start-paused', () => testbed.run(() async {
