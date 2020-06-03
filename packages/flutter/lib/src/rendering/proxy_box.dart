@@ -2701,6 +2701,16 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
        _annotationIsActive = false,
        super(child);
 
+  @protected
+  @override
+  bool hitTestSelf(Offset position) => true;
+
+  @override
+  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+    final bool hit = super.hitTest(result, position: position);
+    return hit && _opaque;
+  }
+
   /// Whether this object should prevent [RenderMouseRegion]s visually behind it
   /// from detecting the pointer, thus affecting how their [onHover], [onEnter],
   /// and [onExit] behave.
