@@ -415,15 +415,15 @@ void main() {
   });
 
   group('hot attach', () {
-    MockResidentCompiler residentCompiler = MockResidentCompiler();
     MockLocalEngineArtifacts mockArtifacts;
 
     setUp(() {
-      residentCompiler = MockResidentCompiler();
       mockArtifacts = MockLocalEngineArtifacts();
     });
 
-    testUsingContext('Prints message when HttpException is thrown - 1', () async {
+    testUsingContext('Exits with code 2 when when HttpException is thrown '
+      'during VM service connection', () async {
+      final MockResidentCompiler residentCompiler = MockResidentCompiler();
       final MockDevice mockDevice = MockDevice();
       when(mockDevice.supportsHotReload).thenReturn(true);
       when(mockDevice.supportsHotRestart).thenReturn(false);
@@ -443,38 +443,6 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ).attach();
       expect(exitCode, 2);
-      expect(testLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
-          'consider using an emulator running API level 29 or lower.'));
-      expect(testLogger.statusText, contains('Learn more about the status of this issue on '
-          'https://issuetracker.google.com/issues/132325318'));
-    }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
-      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
-    });
-
-    testUsingContext('Prints message when HttpException is thrown - 2', () async {
-      final MockDevice mockDevice = MockDevice();
-      when(mockDevice.supportsHotReload).thenReturn(true);
-      when(mockDevice.supportsHotRestart).thenReturn(false);
-      when(mockDevice.targetPlatform).thenAnswer((Invocation _) async => TargetPlatform.tester);
-      when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation _) async => 'Android 10');
-
-      final List<FlutterDevice> devices = <FlutterDevice>[
-        TestFlutterDevice(
-          device: mockDevice,
-          generator: residentCompiler,
-          exception: const HttpException(', uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws'),
-        ),
-      ];
-
-      final int exitCode = await HotRunner(devices,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ).attach();
-      expect(exitCode, 2);
-      expect(testLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
-          'consider using an emulator running API level 29 or lower.'));
-      expect(testLogger.statusText, contains('Learn more about the status of this issue on '
-          'https://issuetracker.google.com/issues/132325318'));
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
       HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
