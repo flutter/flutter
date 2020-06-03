@@ -2133,8 +2133,7 @@ class Navigator extends StatefulWidget {
   }) {
     // Handles the case where the input context is a navigator element.
     NavigatorState navigator;
-    if (context is StatefulElement) {
-      if (context.state is NavigatorState)
+    if (context is StatefulElement && context.state is NavigatorState) {
         navigator = context.state as NavigatorState;
     }
     if (rootNavigator) {
