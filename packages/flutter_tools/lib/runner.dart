@@ -15,6 +15,7 @@ import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/process.dart';
+import 'src/base/signals.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart' as globals;
@@ -54,6 +55,12 @@ Future<int> run(
     );
 
     String getVersion() => flutterVersion ?? globals.flutterVersion.getVersionString(redactUnknownBranches: true);
+    Future<void> disposeLogger(ProcessSignal signal) => globals.logger.dispose();
+
+    for (final ProcessSignal exitSignal in Signals.defaultExitSignals) {
+      globals.signals.addHandler(exitSignal, disposeLogger);
+    }
+
     Object firstError;
     StackTrace firstStackTrace;
     return await runZoned<Future<int>>(() async {
@@ -240,6 +247,8 @@ Future<int> _exit(int code) async {
   await shutdownHooks.runShutdownHooks();
 
   final Completer<void> completer = Completer<void>();
+
+  await globals.logger.dispose();
 
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {

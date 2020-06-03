@@ -979,8 +979,10 @@ class NotifyingLogger extends Logger {
     );
   }
 
-  void dispose() {
+  @override
+  Future<void> dispose() {
     _messageController.close();
+    return super.dispose();
   }
 
   @override

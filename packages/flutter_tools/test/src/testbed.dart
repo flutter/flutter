@@ -779,6 +779,12 @@ class DelegateLogger implements Logger {
   bool get isVerbose => delegate.isVerbose;
 
   @override
+  Future<void> dispose() => delegate.dispose();
+
+  @override
+  Future<void> flush() => delegate.flush();
+
+  @override
   void printError(String message, {StackTrace stackTrace, bool emphasis, TerminalColor color, int indent, int hangingIndent, bool wrap}) {
     delegate.printError(
       message,

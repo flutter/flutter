@@ -64,6 +64,15 @@ abstract class Logger {
 
   TimeoutConfiguration get _timeoutConfiguration;
 
+  /// Closes any resources used by the [Logger].
+  ///
+  /// This should be idempotent.
+  @mustCallSuper
+  Future<void> dispose() async {}
+
+  /// If the [Logger] is writing to a file, flushes pending output.
+  Future<void> flush() async {}
+
   /// Display an error `message` to the user. Commands should use this if they
   /// fail in some way.
   ///
