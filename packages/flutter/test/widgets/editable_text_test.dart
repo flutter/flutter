@@ -4083,6 +4083,95 @@ void main() {
     expect(scrollable.controller.position.pixels, equals(renderEditable.maxScrollExtent));
   }, skip: isBrowser);
 
+  testWidgets('bringIntoView brings the caret into view when in a viewport', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/55547.
+    final TextEditingController controller = TextEditingController(text: testText * 20);
+    final ScrollController editableScrollController = ScrollController();
+    final ScrollController outerController = ScrollController();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 200,
+          height: 200,
+          child: SingleChildScrollView(
+            controller: outerController,
+            child: EditableText(
+              maxLines: null,
+              controller: controller,
+              scrollController: editableScrollController,
+              focusNode: FocusNode(),
+              style: textStyle,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+
+    expect(outerController.offset, 0);
+    expect(editableScrollController.offset, 0);
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.bringIntoView(TextPosition(offset: controller.text.length));
+
+    await tester.pumpAndSettle();
+    // The SingleChildScrollView is scrolled instead of the EditableText to
+    // reveal the caret.
+    expect(outerController.offset, outerController.position.maxScrollExtent);
+    expect(editableScrollController.offset, 0);
+  });
+
+  testWidgets('bringIntoView does nothing if the physics prohibits implicit scrolling', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: testText * 20);
+    final ScrollController scrollController = ScrollController();
+
+    Future<void> buildWithPhysics({ ScrollPhysics physics }) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200,
+            height: 200,
+            child: EditableText(
+              maxLines: null,
+              controller: controller,
+              scrollController: scrollController,
+              focusNode: FocusNode(),
+              style: textStyle,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              scrollPhysics: physics,
+            ),
+          ),
+        ),
+      ));
+    }
+
+
+    await buildWithPhysics();
+    expect(scrollController.offset, 0);
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.bringIntoView(TextPosition(offset: controller.text.length));
+
+    await tester.pumpAndSettle();
+    // Scrolled to the maxScrollExtent to reveal to caret.
+    expect(scrollController.offset, scrollController.position.maxScrollExtent);
+
+    scrollController.jumpTo(0);
+    await buildWithPhysics(physics: const NoImplicitScrollPhysics());
+    expect(scrollController.offset, 0);
+
+    state.bringIntoView(TextPosition(offset: controller.text.length));
+
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0);
+  });
+
   testWidgets('obscured multiline fields throw an exception', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
     expect(
@@ -4898,5 +4987,17 @@ class _TransformedEditableTextState extends State<TransformedEditableText> {
         ),
       ),
     );
+  }
+}
+
+class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
+  const NoImplicitScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
+
+  @override
+  bool get allowImplicitScrolling => false;
+
+  @override
+  NoImplicitScrollPhysics applyTo(ScrollPhysics ancestor) {
+    return NoImplicitScrollPhysics(parent: buildParent(ancestor));
   }
 }

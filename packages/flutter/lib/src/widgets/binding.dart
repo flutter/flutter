@@ -419,15 +419,17 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       registerServiceExtension(
         name: 'fastReassemble',
         callback: (Map<String, Object> params) async {
-          final String className = params['class'] as String;
           void markElementsDirty(Element element) {
             if (element == null) {
               return;
             }
-            if (element.widget?.runtimeType?.toString() == className) {
+            if (debugFastReassembleMethod(element.widget)) {
               element.markNeedsBuild();
             }
             element.visitChildElements(markElementsDirty);
+          }
+          if (debugFastReassembleMethod == null) {
+            throw StateError('this should never happen!');
           }
           markElementsDirty(renderViewElement);
           await endOfFrame;

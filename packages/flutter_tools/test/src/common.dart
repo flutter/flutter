@@ -85,16 +85,6 @@ CommandRunner<void> createTestCommandRunner([ FlutterCommand command ]) {
   return runner;
 }
 
-/// Updates [path] to have a modification time [seconds] from now.
-void updateFileModificationTime(
-  String path,
-  DateTime baseTime,
-  int seconds,
-) {
-  final DateTime modificationTime = baseTime.add(Duration(seconds: seconds));
-  globals.fs.file(path).setLastModifiedSync(modificationTime);
-}
-
 /// Matcher for functions that throw [AssertionError].
 final Matcher throwsAssertionError = throwsA(isA<AssertionError>());
 

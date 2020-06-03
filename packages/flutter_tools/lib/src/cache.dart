@@ -1392,7 +1392,11 @@ const List<List<String>> _windowsDesktopBinaryDirs = <List<String>>[
 const List<List<String>> _linuxDesktopBinaryDirs = <List<String>>[
   <String>['linux-x64', 'linux-x64/linux-x64-flutter-glfw.zip'],
   <String>['linux-x64', 'linux-x64/flutter-cpp-client-wrapper-glfw.zip'],
+  <String>['linux-x64-profile', 'linux-x64-profile/linux-x64-flutter-glfw.zip'],
+  <String>['linux-x64-release', 'linux-x64-release/linux-x64-flutter-glfw.zip'],
   <String>['linux-x64', 'linux-x64/linux-x64-flutter-gtk.zip'],
+  <String>['linux-x64-profile', 'linux-x64-profile/linux-x64-flutter-gtk.zip'],
+  <String>['linux-x64-release', 'linux-x64-release/linux-x64-flutter-gtk.zip'],
 ];
 
 const List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[

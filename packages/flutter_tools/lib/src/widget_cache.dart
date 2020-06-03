@@ -4,7 +4,6 @@
 
 import 'dart:typed_data';
 
-import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 
 import 'package:_fe_analyzer_shared/src/parser/parser.dart';
@@ -25,8 +24,8 @@ class WidgetCache {
   final Map<Uri, TokenCache> _cache = <Uri, TokenCache>{};
 
   /// Return the name of a single widget invalidation.
-  String validate(Uri uri) {
-    final Uint8List rawBytes = _fileSystem.file(uri).readAsBytesSync();
+  Future<String> validateLibrary(Uri uri) async {
+    final Uint8List rawBytes = await _fileSystem.file(uri).readAsBytes();
     final Uint8List resultBytes = Uint8List(rawBytes.length + 1);
     resultBytes.setRange(0, rawBytes.length, rawBytes);
     final Utf8BytesScanner scanner = Utf8BytesScanner(
@@ -36,6 +35,7 @@ class WidgetCache {
     final Token firstToken = scanner.tokenize();
     final WidgetBuildCollector collector = WidgetBuildCollector();
     final Token endToken = Parser(collector).parseUnit(firstToken);
+    await null;
 
     final TokenCache tokenCache = _cache[uri];
     if (tokenCache == null) {
@@ -134,33 +134,6 @@ class WidgetCache {
     }
     return null;
   }
-}
-
-void main() {
-  final MemoryFileSystem fileSystem = MemoryFileSystem();
-  final File dartFile = fileSystem.file('a.dart');
-  dartFile.writeAsStringSync('''
-class Foo extends StatelessWidget {
-
-  Widget buildContext(context) {
-    return Text('hello');
-  }
-}
-  ''');
-  final WidgetCache cache = WidgetCache(fileSystem: fileSystem);
-  cache.validate(dartFile.uri);
-
-  dartFile.writeAsStringSync('''
-
-class Foo extends StatelessWidget {
-  Widget buildContext(context) {
-    return Text('he2llo');
-  }
-}
-  ''');
-  final Stopwatch sw = Stopwatch()..start();
-  print( cache.validate(dartFile.uri));
-  print(sw.elapsedMilliseconds);
 }
 
 class TokenCache {

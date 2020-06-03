@@ -4,10 +4,10 @@
 
 import 'dart:async';
 
-import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -129,6 +129,7 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       dillOutputPath: anyNamed('dillOutputPath'),
       packageConfig: anyNamed('packageConfig'),
+      widgetCache: anyNamed('widgetCache'),
     )).thenAnswer((Invocation invocation) async {
       return UpdateFSReport(
         success: true,
@@ -204,6 +205,93 @@ void main() {
     expect(onConnectionInfo.isCompleted, true);
     expect((await connectionInfo).baseUri, 'foo://bar');
     expect(onAppStart.isCompleted, true);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }));
+
+  test('ResidentRunner suppresses errors for the initial compilation', () => testbed.run(() async {
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+      .createSync(recursive: true);
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+    ]);
+    final MockResidentCompiler residentCompiler = MockResidentCompiler();
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
+    when(mockFlutterDevice.generator).thenReturn(residentCompiler);
+    when(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packageConfig: anyNamed('packageConfig'),
+      suppressErrors: true,
+    )).thenAnswer((Invocation invocation) async {
+      return const CompilerOutput('foo', 0 ,<Uri>[]);
+    });
+    when(mockFlutterDevice.runHot(
+      hotRunner: anyNamed('hotRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+
+    expect(await residentRunner.run(), 0);
+    verify(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packageConfig: anyNamed('packageConfig'),
+      suppressErrors: true,
+    )).called(1);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  }));
+
+  test('ResidentRunner does not suppressErrors if running with an applicationBinary', () => testbed.run(() async {
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+      .createSync(recursive: true);
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+    ]);
+    final MockResidentCompiler residentCompiler = MockResidentCompiler();
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      applicationBinary: globals.fs.file('app.apk'),
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
+    when(mockFlutterDevice.generator).thenReturn(residentCompiler);
+    when(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packageConfig: anyNamed('packageConfig'),
+      suppressErrors: false,
+    )).thenAnswer((Invocation invocation) async {
+      return const CompilerOutput('foo', 0, <Uri>[]);
+    });
+    when(mockFlutterDevice.runHot(
+      hotRunner: anyNamed('hotRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+
+    expect(await residentRunner.run(), 0);
+    verify(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packageConfig: anyNamed('packageConfig'),
+      suppressErrors: false,
+    )).called(1);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
@@ -320,6 +408,7 @@ void main() {
       invalidatedFiles: anyNamed('invalidatedFiles'),
       dillOutputPath: anyNamed('dillOutputPath'),
       packageConfig: anyNamed('packageConfig'),
+      widgetCache: anyNamed('widgetCache'),
     )).thenThrow(vm_service.RPCError('something bad happened', 666, ''));
 
     final OperationResult result = await residentRunner.restart(fullRestart: false);
@@ -489,6 +578,7 @@ void main() {
       invalidatedFiles: anyNamed('invalidatedFiles'),
       dillOutputPath: anyNamed('dillOutputPath'),
       packageConfig: anyNamed('packageConfig'),
+      widgetCache: anyNamed('widgetCache'),
     )).thenThrow(vm_service.RPCError('something bad happened', 666, ''));
 
     final OperationResult result = await residentRunner.restart(fullRestart: true);
@@ -519,6 +609,24 @@ void main() {
       dillOutputPath: globals.fs.path.join('foobar', 'app.dill'),
     );
     expect(otherRunner.artifactDirectory.path, contains('foobar'));
+  }));
+
+  test('ResidentRunner copies output dill to cache location during preExit', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('hello');
+    await residentRunner.preExit();
+    final File cacheDill = globals.fs.file(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+
+    expect(cacheDill, exists);
+    expect(cacheDill.readAsStringSync(), 'hello');
+  }));
+
+  test('ResidentRunner handles output dill missing during preExit', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    await residentRunner.preExit();
+    final File cacheDill = globals.fs.file(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+
+    expect(cacheDill, isNot(exists));
   }));
 
   test('ResidentRunner can run source generation', () => testbed.run(() async {
@@ -1140,6 +1248,8 @@ void main() {
       target: null,
     )).generator as DefaultResidentCompiler;
 
+    expect(residentCompiler.initializeFromDill,
+      globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
     expect(residentCompiler.librariesSpec,
       globals.fs.file(globals.artifacts.getArtifactPath(Artifact.flutterWebLibrariesJson))
         .uri.toString());
@@ -1195,6 +1305,7 @@ class MockDeviceLogReader extends Mock implements DeviceLogReader {}
 class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockUsage extends Mock implements Usage {}
 class MockProcessManager extends Mock implements ProcessManager {}
+class MockResidentCompiler extends Mock implements ResidentCompiler {}
 
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(Device device, { Stream<Uri> observatoryUris })

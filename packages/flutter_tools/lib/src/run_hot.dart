@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'package:flutter_tools/src/widget_cache.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:meta/meta.dart';
@@ -21,6 +22,7 @@ import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'features.dart';
 import 'globals.dart' as globals;
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
@@ -85,12 +87,17 @@ class HotRunner extends ResidentRunner {
              stayResident: stayResident,
              hotMode: true,
              dillOutputPath: dillOutputPath,
-             ipv6: ipv6);
+             ipv6: ipv6) {
+    _widgetCache = featureFlags.isSingleWidgetReloadEnabled
+      ? WidgetCache(fileSystem: globals.fs)
+      : null;
+  }
 
   final bool benchmarkMode;
   final File applicationBinary;
   final bool hostIsIde;
   bool _didAttach = false;
+  WidgetCache _widgetCache;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
 
@@ -152,66 +159,6 @@ class HotRunner extends ResidentRunner {
     throw 'Failed to compile $expression';
   }
 
-  @override
-  Future<OperationResult> reloadMethod({ String libraryId, String classId }) async {
-    final Stopwatch stopwatch = Stopwatch()..start();
-    final UpdateFSReport results = UpdateFSReport(success: true);
-    final List<Uri> invalidated =  <Uri>[Uri.parse(libraryId)];
-    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      globals.fs.file(globalPackagesPath),
-      logger: globals.logger,
-    );
-    for (final FlutterDevice device in flutterDevices) {
-      results.incorporateResults(await device.updateDevFS(
-        mainUri: globals.fs.file(mainPath).absolute.uri,
-        target: target,
-        bundle: assetBundle,
-        firstBuildTime: firstBuildTime,
-        bundleFirstUpload: false,
-        bundleDirty: false,
-        fullRestart: false,
-        projectRootPath: projectRootPath,
-        pathToReload: getReloadPath(fullRestart: false),
-        invalidatedFiles: invalidated,
-        packageConfig: packageConfig,
-        dillOutputPath: dillOutputPath,
-      ));
-    }
-    if (!results.success) {
-      return OperationResult(1, 'Failed to compile');
-    }
-    try {
-      final String entryPath = globals.fs.path.relative(
-        getReloadPath(fullRestart: false),
-        from: projectRootPath,
-      );
-      for (final FlutterDevice device in flutterDevices) {
-        final List<Future<vm_service.ReloadReport>> reportFutures = await device.reloadSources(
-          entryPath, pause: false,
-        );
-        final List<vm_service.ReloadReport> reports = await Future.wait(reportFutures);
-        final vm_service.ReloadReport firstReport = reports.first;
-        await device.updateReloadStatus(validateReloadReport(firstReport.json, printErrors: false));
-      }
-    } on Exception catch (error) {
-      return OperationResult(1, error.toString());
-    }
-
-    for (final FlutterDevice device in flutterDevices) {
-      final List<FlutterView> views = await device.vmService.getFlutterViews();
-      for (final FlutterView view in views) {
-        await device.vmService.flutterFastReassemble(
-          classId,
-          isolateId: view.uiIsolate.id,
-        );
-      }
-    }
-
-    globals.printStatus('reloadMethod took ${stopwatch.elapsedMilliseconds}');
-    globals.flutterUsage.sendTiming('hot', 'ui', stopwatch.elapsed);
-    return OperationResult.ok;
-  }
-
   // Returns the exit code of the flutter tool process, like [run].
   @override
   Future<int> attach({
@@ -233,20 +180,6 @@ class HotRunner extends ResidentRunner {
         rethrow;
       }
       globals.printError('Error connecting to the service protocol: $error');
-      // https://github.com/flutter/flutter/issues/33050
-      // TODO(blasten): Remove this check once
-      // https://issuetracker.google.com/issues/132325318 has been fixed.
-      if (await hasDeviceRunningAndroidQ(flutterDevices) &&
-          error.toString().contains(kAndroidQHttpConnectionClosedExp)) {
-        globals.printStatus(
-          '🔨 If you are using an emulator running Android Q Beta, '
-          'consider using an emulator running API level 29 or lower.',
-        );
-        globals.printStatus(
-          'Learn more about the status of this issue on '
-          'https://issuetracker.google.com/issues/132325318.',
-        );
-      }
       return 2;
     }
 
@@ -372,6 +305,11 @@ class HotRunner extends ResidentRunner {
           device.generator.recompile(
             globals.fs.file(mainPath).uri,
             <Uri>[],
+            // When running without a provided applicationBinary, the tool will
+            // simultaneously run the initial frontend_server compilation and
+            // the native build step. If there is a Dart compilation error, it
+            // should only be displayed once.
+            suppressErrors: applicationBinary == null,
             outputPath: dillOutputPath ??
               getDefaultApplicationKernelPath(trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation),
             packageConfig: packageConfig,
@@ -444,6 +382,7 @@ class HotRunner extends ResidentRunner {
         invalidatedFiles: invalidationResult.uris,
         packageConfig: invalidationResult.packageConfig,
         dillOutputPath: dillOutputPath,
+        widgetCache: _widgetCache,
       ));
     }
     return results;
@@ -946,9 +885,8 @@ class HotRunner extends ResidentRunner {
           // of a full reassemble.
           reassembleViews[view] = device.vmService;
           Future<void> pendingWork;
-          if (updatedDevFS.invalidatedSingleWidget != null) {
+          if (updatedDevFS.fastReassemble) {
             pendingWork = device.vmService.flutterFastReassemble(
-              updatedDevFS.invalidatedSingleWidget,
               isolateId: view.uiIsolate.id,
             );
           } else {

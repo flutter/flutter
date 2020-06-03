@@ -18,7 +18,6 @@ import 'codegen.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
-import 'widget_cache.dart';
 
 KernelCompilerFactory get kernelCompilerFactory => context.get<KernelCompilerFactory>();
 
@@ -78,12 +77,11 @@ class TargetModel {
 }
 
 class CompilerOutput {
-  CompilerOutput(this.outputFilename, this.errorCount, this.sources);
+  const CompilerOutput(this.outputFilename, this.errorCount, this.sources);
 
   final String outputFilename;
   final int errorCount;
   final List<Uri> sources;
-  String invalidatedSingleWidget;
 }
 
 enum StdoutState { CollectDiagnostic, CollectDependencies }
@@ -94,7 +92,6 @@ class StdoutHandler {
     reset();
   }
 
-  bool compilerMessageReceived = false;
   final CompilerMessageConsumer consumer;
   String boundaryKey;
   StdoutState state = StdoutState.CollectDiagnostic;
@@ -103,42 +100,11 @@ class StdoutHandler {
 
   bool _suppressCompilerMessages;
   bool _expectSources;
-  bool _badState = false;
 
   void handler(String message) {
-    if (_badState) {
-      return;
-    }
     const String kResultPrefix = 'result ';
     if (boundaryKey == null && message.startsWith(kResultPrefix)) {
       boundaryKey = message.substring(kResultPrefix.length);
-      return;
-    }
-    // Invalid state, see commented issue below for more information.
-    // NB: both the completeError and _badState flags are required to avoid
-    // filling the console with exceptions.
-    if (boundaryKey == null) {
-      // Throwing a synchronous exception via throwToolExit will fail to cancel
-      // the stream. Instead use completeError so that the error is returned
-      // from the awaited future that the compiler consumers are expecting.
-      compilerOutput.completeError(ToolExit(
-        'The Dart compiler encountered an internal problem. '
-        'The Flutter team would greatly appreciate if you could leave a '
-        'comment on the issue https://github.com/flutter/flutter/issues/35924 '
-        'describing what you were doing when the crash happened.\n\n'
-        'Additional debugging information:\n'
-        '  StdoutState: $state\n'
-        '  compilerMessageReceived: $compilerMessageReceived\n'
-        '  _expectSources: $_expectSources\n'
-        '  sources: $sources\n'
-      ));
-      // There are several event turns before the tool actually exits from a
-      // tool exception. Normally, the stream should be cancelled to prevent
-      // more events from entering the bad state, but because the error
-      // is coming from handler itself, there is no clean way to pipe this
-      // through. Instead, we set a flag to prevent more messages from
-      // registering.
-      _badState = true;
       return;
     }
     if (message.startsWith(boundaryKey)) {
@@ -162,10 +128,6 @@ class StdoutHandler {
     }
     if (state == StdoutState.CollectDiagnostic) {
       if (!_suppressCompilerMessages) {
-        if (compilerMessageReceived == false) {
-          consumer('\nCompiler message:');
-          compilerMessageReceived = true;
-        }
         consumer(message);
       }
     } else {
@@ -187,7 +149,6 @@ class StdoutHandler {
   // with its own boundary key and new completer.
   void reset({ bool suppressCompilerMessages = false, bool expectSources = true }) {
     boundaryKey = null;
-    compilerMessageReceived = false;
     compilerOutput = Completer<CompilerOutput>();
     _suppressCompilerMessages = suppressCompilerMessages;
     _expectSources = expectSources;
@@ -265,11 +226,6 @@ class KernelCompiler {
     }
     final List<String> command = <String>[
       engineDartPath,
-      '--disable-dart-dev',
-      // This limit is in place to help track down
-      // https://github.com/flutter/flutter/issues/54420. It should be removed
-      // when the underlying issue is identified and fixed.
-      '--old_gen_heap_size=2000',
       frontendServer,
       '--sdk-root',
       sdkRoot,
@@ -356,12 +312,14 @@ class _RecompileRequest extends _CompilationRequest {
     this.invalidatedFiles,
     this.outputPath,
     this.packageConfig,
+    this.suppressErrors,
   ) : super(completer);
 
   Uri mainUri;
   List<Uri> invalidatedFiles;
   String outputPath;
   PackageConfig packageConfig;
+  bool suppressErrors;
 
   @override
   Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
@@ -444,7 +402,6 @@ abstract class ResidentCompiler {
     String platformDill,
     List<String> dartDefines,
     String librariesSpec,
-    WidgetCache widgetCache,
   }) = DefaultResidentCompiler;
 
   // TODO(jonahwilliams): find a better way to configure additional file system
@@ -464,6 +421,7 @@ abstract class ResidentCompiler {
     List<Uri> invalidatedFiles, {
     @required String outputPath,
     @required PackageConfig packageConfig,
+    bool suppressErrors = false,
   });
 
   Future<CompilerOutput> compileExpression(
@@ -540,7 +498,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.platformDill,
     List<String> dartDefines,
     this.librariesSpec,
-    this.widgetCache,
   }) : assert(sdkRoot != null),
        _stdoutHandler = StdoutHandler(consumer: compilerMessageConsumer),
        dartDefines = dartDefines ?? const <String>[],
@@ -558,7 +515,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final List<String> experimentalFlags;
   final List<String> dartDefines;
   final String librariesSpec;
-  final WidgetCache widgetCache;
 
   @override
   void addFileSystemRoot(String root) {
@@ -587,6 +543,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     List<Uri> invalidatedFiles, {
     @required String outputPath,
     @required PackageConfig packageConfig,
+    bool suppressErrors = false,
   }) async {
     assert(outputPath != null);
     if (!_controller.hasListener) {
@@ -595,7 +552,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
     final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
     _controller.add(
-      _RecompileRequest(completer, mainUri, invalidatedFiles, outputPath, packageConfig)
+      _RecompileRequest(completer, mainUri, invalidatedFiles, outputPath, packageConfig, suppressErrors)
     );
     return completer.future;
   }
@@ -603,6 +560,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   Future<CompilerOutput> _recompile(_RecompileRequest request) async {
     _stdoutHandler.reset();
     _compileRequestNeedsConfirmation = true;
+    _stdoutHandler._suppressCompilerMessages = request.suppressErrors;
 
     if (_server == null) {
       return _compile(
@@ -629,15 +587,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _server.stdin.writeln(inputKey);
     globals.printTrace('<- $inputKey');
 
-    String widgetName;
-    if (request.invalidatedFiles.length == 1) {
-      widgetName = widgetCache?.validate(request.invalidatedFiles.single);
-    }
-
-    return _stdoutHandler.compilerOutput.future.then((CompilerOutput compilerOutput) {
-      return compilerOutput
-        ..invalidatedSingleWidget = widgetName;
-    });
+    return _stdoutHandler.compilerOutput.future;
   }
 
   final List<_CompilationRequest> _compilationQueue = <_CompilationRequest>[];
@@ -666,11 +616,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     );
     final List<String> command = <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
-      '--disable-dart-dev',
-      // This limit is in place to help track down
-      // https://github.com/flutter/flutter/issues/54420. It should be removed
-      // when the underlying issue is identified and fixed.
-      '--old_gen_heap_size=2000',
       frontendServer,
       '--sdk-root',
       sdkRoot,
@@ -737,7 +682,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _server.stderr
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
-      .listen((String message) { globals.printError(message); });
+      .listen(globals.printError);
 
     unawaited(_server.exitCode.then((int code) {
       if (code != 0) {

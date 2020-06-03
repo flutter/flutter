@@ -24,6 +24,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/targets/localizations.dart';
+import 'bundle.dart';
 import 'cache.dart';
 import 'codegen.dart';
 import 'compile.dart';
@@ -84,6 +85,12 @@ class FlutterDevice {
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
     }
+    // For both web and non-web platforms we initialize dill to/from
+    // a shared location for faster bootstrapping. If the compiler fails
+    // due to a kernel target or version mismatch, no error is reported
+    // and the compiler starts up as normal. Unexpected errors will print
+    // a warning message and dump some debug information which can be
+    // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
       generator = ResidentCompiler(
         globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildInfo.mode),
@@ -96,6 +103,9 @@ class FlutterDevice {
         compilerMessageConsumer:
           (String message, {bool emphasis, TerminalColor color, }) =>
             globals.printTrace(message),
+        initializeFromDill: getDefaultCachedKernelPath(
+          trackWidgetCreation: buildInfo.trackWidgetCreation,
+        ),
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
         platformDill: globals.fs.file(globals.artifacts
@@ -120,10 +130,13 @@ class FlutterDevice {
         targetModel: targetModel,
         experimentalFlags: experimentalFlags,
         dartDefines: buildInfo.dartDefines,
+        initializeFromDill: getDefaultCachedKernelPath(
+          trackWidgetCreation: buildInfo.trackWidgetCreation,
+        ),
         packagesPath: globalPackagesPath,
-        widgetCache: featureFlags.isSingleWidgetReloadEnabled
-          ? WidgetCache(fileSystem: globals.fs)
-          : null,
+        // widgetCache: featureFlags.isSingleWidgetReloadEnabled
+        //   ? WidgetCache(fileSystem: globals.fs)
+        //   : null,
       );
     }
 
@@ -284,6 +297,8 @@ class FlutterDevice {
       fsName,
       rootDirectory,
       osUtils: globals.os,
+      fileSystem: globals.fs,
+      logger: globals.logger,
     );
     return devFS.create();
   }
@@ -597,35 +612,74 @@ class FlutterDevice {
     @required String dillOutputPath,
     @required List<Uri> invalidatedFiles,
     @required PackageConfig packageConfig,
+    @required WidgetCache widgetCache,
   }) async {
     final Status devFSStatus = globals.logger.startProgress(
       'Syncing files to device ${device.name}...',
       timeout: timeoutConfiguration.fastOperation,
     );
+
+    bool fastReassemble = false;
+    Future<void> attemptFastReassembleCheck() async {
+      final List<FlutterView> views = await vmService.getFlutterViews();
+      if (widgetCache == null || invalidatedFiles.length != 1) {
+        return;
+      }
+      final String widgetName = await widgetCache?.validateLibrary(invalidatedFiles.single);
+      if (widgetName == null) {
+        return;
+      }
+      for (final FlutterView view in views) {
+        final vm_service.Isolate isolate = await vmService.getIsolateOrNull(view.uiIsolate.id);
+        vm_service.LibraryRef targetLibrary;
+        for (final vm_service.LibraryRef libraryRef in isolate.libraries) {
+          if (libraryRef.uri == 'package:flutter_gallery/gallery/home.dart') {
+            targetLibrary = libraryRef;
+            break;
+          }
+        }
+        try {
+        await vmService.evaluate(
+          view.uiIsolate.id,
+          targetLibrary.id,
+          '((){debugFastReassembleMethod=(Object _) => _ is $widgetName})()',
+        );
+        } on Exception {
+          // Do nothing, but dont set fastReassemble to true.
+          return;
+        }
+        fastReassemble = true;
+      }
+    }
+
     UpdateFSReport report;
     try {
-      report = await devFS.update(
-        mainUri: mainUri,
-        target: target,
-        bundle: bundle,
-        firstBuildTime: firstBuildTime,
-        bundleFirstUpload: bundleFirstUpload,
-        generator: generator,
-        fullRestart: fullRestart,
-        dillOutputPath: dillOutputPath,
-        trackWidgetCreation: buildInfo.trackWidgetCreation,
-        projectRootPath: projectRootPath,
-        pathToReload: pathToReload,
-        invalidatedFiles: invalidatedFiles,
-        packageConfig: packageConfig,
-      );
+      await Future.wait(<Future<void>>[
+        attemptFastReassembleCheck(),
+        devFS.update(
+          mainUri: mainUri,
+          target: target,
+          bundle: bundle,
+          firstBuildTime: firstBuildTime,
+          bundleFirstUpload: bundleFirstUpload,
+          generator: generator,
+          fullRestart: fullRestart,
+          dillOutputPath: dillOutputPath,
+          trackWidgetCreation: buildInfo.trackWidgetCreation,
+          projectRootPath: projectRootPath,
+          pathToReload: pathToReload,
+          invalidatedFiles: invalidatedFiles,
+          packageConfig: packageConfig,
+        ).then((UpdateFSReport updatedReport) => report = updatedReport)
+      ]);
     } on DevFSException {
       devFSStatus.cancel();
       return UpdateFSReport(success: false);
     }
     devFSStatus.stop();
     globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
-    return report;
+    return report
+      ..fastReassemble = fastReassemble;
   }
 
   Future<void> updateReloadStatus(bool wasReloadSuccessful) async {
@@ -635,23 +689,6 @@ class FlutterDevice {
       await generator?.reject();
     }
   }
-}
-
-// Issue: https://github.com/flutter/flutter/issues/33050
-// Matches the following patterns:
-//    HttpException: Connection closed before full header was received, uri = *
-//    HttpException: , uri = *
-final RegExp kAndroidQHttpConnectionClosedExp = RegExp(r'^HttpException\:.+\, uri \=.+$');
-
-/// Returns `true` if any of the devices is running Android Q.
-Future<bool> hasDeviceRunningAndroidQ(List<FlutterDevice> flutterDevices) async {
-  for (final FlutterDevice flutterDevice in flutterDevices) {
-    final String sdkNameAndVersion = await flutterDevice.device.sdkNameAndVersion;
-    if (sdkNameAndVersion != null && sdkNameAndVersion.startsWith('Android 10')) {
-      return true;
-    }
-  }
-  return false;
 }
 
 // Shared code between different resident application runners.
@@ -695,7 +732,6 @@ abstract class ResidentRunner {
   final bool ipv6;
   final String _dillOutputPath;
   /// The parent location of the incremental artifacts.
-  @visibleForTesting
   final Directory artifactDirectory;
   final String packagesFilePath;
   final String projectRootPath;
@@ -1200,6 +1236,12 @@ abstract class ResidentRunner {
   Future<void> preExit() async {
     // If _dillOutputPath is null, we created a temporary directory for the dill.
     if (_dillOutputPath == null && artifactDirectory.existsSync()) {
+      final File outputDill = globals.fs.file(dillOutputPath);
+      if (outputDill.existsSync()) {
+        outputDill.copySync(getDefaultCachedKernelPath(
+          trackWidgetCreation: trackWidgetCreation,
+        ));
+      }
       artifactDirectory.deleteSync(recursive: true);
     }
   }

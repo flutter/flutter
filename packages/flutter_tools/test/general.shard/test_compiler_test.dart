@@ -53,7 +53,7 @@ void main() {
         packageConfig: anyNamed('packageConfig'),
       )).thenAnswer((Invocation invocation) async {
         globals.fs.file('abc.dill').createSync();
-        return CompilerOutput('abc.dill', 0, <Uri>[]);
+        return const CompilerOutput('abc.dill', 0, <Uri>[]);
       });
 
       expect(await testCompiler.compile(Uri.parse('test/foo.dart')), 'test/foo.dart.dill');
@@ -68,7 +68,7 @@ void main() {
         packageConfig: anyNamed('packageConfig'),
       )).thenAnswer((Invocation invocation) async {
         globals.fs.file('abc.dill').createSync();
-        return CompilerOutput('abc.dill', 1, <Uri>[]);
+        return const CompilerOutput('abc.dill', 1, <Uri>[]);
       });
 
       expect(await testCompiler.compile(Uri.parse('test/foo.dart')), null);

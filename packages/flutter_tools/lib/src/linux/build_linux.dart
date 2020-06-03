@@ -55,15 +55,6 @@ Future<void> buildLinux(
 
   createPluginSymlinks(linuxProject.project);
 
-  if (!buildInfo.isDebug) {
-    const String warning = '🚧 ';
-    globals.printStatus(warning * 20);
-    globals.printStatus('Warning: Only debug is currently implemented for Linux. This is effectively a debug build.');
-    globals.printStatus('See https://github.com/flutter/flutter/issues/38478 for details and updates.');
-    globals.printStatus(warning * 20);
-    globals.printStatus('');
-  }
-
   final Status status = globals.logger.startProgress(
     'Building Linux application...',
     timeout: null,
