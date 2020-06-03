@@ -1821,9 +1821,10 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
 
-    /// The chip starts with 8px on each side and as text scaling gets closer to
-    /// 2 the label padding is linearly interpolated from 8px to 4px. Once the
-    /// widget has a text scaling of 2 or higher than the label padding remains 4px.
+    /// The chip at text scale 1 starts with 8px on each side and as text scaling
+    /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
+    /// Once the widget has a text scaling of 2 or higher than the label padding
+    /// remains 4px.
     final EdgeInsetsGeometry _defaultLabelPadding = EdgeInsets.lerp(
       const EdgeInsets.symmetric(horizontal: 8.0),
       const EdgeInsets.symmetric(horizontal: 4.0),
