@@ -32,17 +32,13 @@ void main() {
   });
 
   group('analytics', () {
-    Directory tempDir;
+    FileSystem fileSystem;
     MockFlutterConfig mockFlutterConfig;
 
     setUp(() {
       Cache.flutterRoot = '../..';
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_analytics_test.');
+      fileSystem = MemoryFileSystem.test();
       mockFlutterConfig = MockFlutterConfig();
-    });
-
-    tearDown(() {
-      tryToDelete(tempDir);
     });
 
     // Ensure we don't send anything when analytics is disabled.
@@ -50,28 +46,30 @@ void main() {
       int count = 0;
       globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
+      final FlutterCommand command = FakeFlutterCommand();
+      final CommandRunner<void>runner = createTestCommandRunner(command);
+
       globals.flutterUsage.enabled = false;
-      await createProject(tempDir);
+      await runner.run(<String>['fake']);
       expect(count, 0);
 
       globals.flutterUsage.enabled = true;
-      await createProject(tempDir);
+      await runner.run(<String>['fake']);
       expect(count, globals.flutterUsage.isFirstRun ? 0 : 4);
 
       count = 0;
       globals.flutterUsage.enabled = false;
-      final DoctorCommand doctorCommand = DoctorCommand();
-      final CommandRunner<void>runner = createTestCommandRunner(doctorCommand);
-      await runner.run(<String>['doctor']);
+      await runner.run(<String>['fake']);
 
       expect(count, 0);
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       Usage: () => Usage(
-        configDirOverride: tempDir.path,
-        logFile: tempDir.childFile('analytics.log').path,
+        logFile: 'analytics.log',
         runningOnBot: true,
       ),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     // Ensure we don't send for the 'flutter config' command.
@@ -92,10 +90,11 @@ void main() {
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       Usage: () => Usage(
-        configDirOverride: tempDir.path,
-        logFile: tempDir.childFile('analytics.log').path,
+        logFile: 'analytics.log',
         runningOnBot: true,
       ),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Usage records one feature in experiment setting', () async {
@@ -113,7 +112,7 @@ void main() {
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -139,7 +138,7 @@ void main() {
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
-      FileSystem: () => MemoryFileSystem(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
@@ -361,6 +360,19 @@ Analytics throwingAnalyticsIOFactory(
   Directory documentDirectory,
 }) {
   throw const FileSystemException('Could not create file');
+}
+
+class FakeFlutterCommand extends FlutterCommand {
+  @override
+  String get description => 'A fake command';
+
+  @override
+  String get name => 'fake';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
 }
 
 class MockUsage extends Mock implements Usage {}
