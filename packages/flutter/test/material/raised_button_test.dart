@@ -110,11 +110,8 @@ void main() {
       'color: Color(0xff000000)',
       'highlightColor: Color(0xff1565c0)',
       'splashColor: Color(0xff9e9e9e)',
-      'disabledElevation: 0.0',
     ]);
-    // skipping testing on the browser because disabledElevation evaluates to 0 instead of 0.0
-    // on the browser.
-  }, skip: isBrowser);
+  });
 
   testWidgets('Default RaisedButton meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -731,11 +728,24 @@ void main() {
     expect(paddingRect.bottom, tallerWidget.bottom + 12);
   });
 
-  testWidgets('RaisedButton assertion - null disabledElevation', (WidgetTester tester) async {
-    expect(() => RaisedButton(
-      onPressed: () {},
-      disabledElevation: null,
-    ), throwsAssertionError);
+  testWidgets('RaisedButton.disabledElevation defaults to 0.0 when not provided', (WidgetTester tester) async {
+    final Finder rawMaterialButtonFinder = find.descendant(
+        of: find.byType(RaisedButton),
+        matching: find.byType(RawMaterialButton)
+    );
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: RaisedButton(
+          onPressed: null, // disabled button
+          child: Text('button'),
+        ),
+      ),
+    );
+
+    final RawMaterialButton rawMaterialButton = tester.widget(rawMaterialButtonFinder);
+    expect(rawMaterialButton.disabledElevation, equals(0.0));
   });
 
   testWidgets('RaisedButton assertion - negative disabledElevation', (WidgetTester tester) async {

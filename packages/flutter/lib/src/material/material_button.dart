@@ -68,7 +68,7 @@ class MaterialButton extends StatelessWidget {
     this.focusElevation,
     this.hoverElevation,
     this.highlightElevation,
-    this.disabledElevation = 0.0,
+    this.disabledElevation,
     this.padding,
     this.visualDensity,
     this.shape,
@@ -87,7 +87,7 @@ class MaterialButton extends StatelessWidget {
        assert(focusElevation == null || focusElevation >= 0.0),
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
-       assert(disabledElevation != null && disabledElevation >= 0.0),
+       assert(disabledElevation == null || disabledElevation >= 0.0),
        super(key: key);
 
   /// The callback that is called when the button is tapped or otherwise activated.
@@ -402,7 +402,7 @@ class MaterialButton extends StatelessWidget {
       focusElevation: buttonTheme.getFocusElevation(this),
       hoverElevation: buttonTheme.getHoverElevation(this),
       highlightElevation: buttonTheme.getHighlightElevation(this),
-      disabledElevation: disabledElevation,
+      disabledElevation: disabledElevation ?? 0.0,
       padding: buttonTheme.getPadding(this),
       visualDensity: visualDensity ?? theme.visualDensity,
       constraints: buttonTheme.getConstraints(this).copyWith(
