@@ -36,6 +36,7 @@ void main() {
     MockFlutterConfig mockFlutterConfig;
 
     setUp(() {
+      Cache.flutterRoot = '/flutter';
       fileSystem = MemoryFileSystem.test();
       mockFlutterConfig = MockFlutterConfig();
     });
@@ -107,7 +108,7 @@ void main() {
 
       final String featuresKey = cdKey(CustomDimensions.enabledFlutterFeatures);
 
-      expect(globals.fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web'));
+      expect(fileSystem.file('test').readAsStringSync(), contains('$featuresKey: enable-web'));
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       Config: () => mockFlutterConfig,
@@ -131,7 +132,7 @@ void main() {
       final String featuresKey = cdKey(CustomDimensions.enabledFlutterFeatures);
 
       expect(
-        globals.fs.file('test').readAsStringSync(),
+        fileSystem.file('test').readAsStringSync(),
         contains('$featuresKey: enable-web,enable-linux-desktop,enable-macos-desktop'),
       );
     }, overrides: <Type, Generator>{
