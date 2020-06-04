@@ -84,6 +84,7 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
                                           flutter::CustomAccessibilityActionUpdates actions) {
   BOOL layoutChanged = NO;
   BOOL scrollOccured = NO;
+  BOOL needsAnnouncement = NO;
   for (const auto& entry : actions) {
     const flutter::CustomAccessibilityAction& action = entry.second;
     actions_[action.id] = action;
@@ -93,6 +94,7 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
     SemanticsObject* object = GetOrCreateObject(node.id, nodes);
     layoutChanged = layoutChanged || [object nodeWillCauseLayoutChange:&node];
     scrollOccured = scrollOccured || [object nodeWillCauseScroll:&node];
+    needsAnnouncement = [object nodeShouldTriggerAnnouncement:&node];
     [object setSemanticsNode:&node];
     NSUInteger newChildCount = node.childrenInTraversalOrder.size();
     NSMutableArray* newChildren =
@@ -132,6 +134,26 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
       }
     } else if (object.platformViewSemanticsContainer) {
       object.platformViewSemanticsContainer = nil;
+    }
+    if (needsAnnouncement) {
+      // Try to be more polite - iOS 11+ supports
+      // UIAccessibilitySpeechAttributeQueueAnnouncement which should avoid
+      // interrupting system notifications or other elements.
+      // Expectation: roughly match the behavior of polite announcements on
+      // Android.
+      NSString* announcement =
+          [[[NSString alloc] initWithUTF8String:object.node.label.c_str()] autorelease];
+      if (@available(iOS 11.0, *)) {
+        UIAccessibilityPostNotification(
+            UIAccessibilityAnnouncementNotification,
+            [[[NSAttributedString alloc]
+                initWithString:announcement
+                    attributes:@{
+                      UIAccessibilitySpeechAttributeQueueAnnouncement : @YES
+                    }] autorelease]);
+      } else {
+        UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, announcement);
+      }
     }
   }
 

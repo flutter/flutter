@@ -483,9 +483,12 @@ class SemanticsFlag {
   /// Platforms may use this information to make polite announcements to the
   /// user to inform them of updates to this node.
   ///
-  /// An example of a live region is a [SnackBar] widget. On Android, A live
-  /// region causes a polite announcement to be generated automatically, even
-  /// if the user does not have focus of the widget.
+  /// An example of a live region is a [SnackBar] widget. On Android and iOS,
+  /// live region causes a polite announcement to be generated automatically,
+  /// even if the widget does not have accessibility focus. This announcement
+  /// may not be spoken if the OS accessibility services are already
+  /// announcing something else, such as reading the label of a focused
+  /// widget or providing a system announcement.
   static const SemanticsFlag isLiveRegion = SemanticsFlag._(_kIsLiveRegionIndex);
 
   /// The semantics node has the quality of either being "on" or "off".

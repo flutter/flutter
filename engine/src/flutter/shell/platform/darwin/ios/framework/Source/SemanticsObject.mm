@@ -180,6 +180,25 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
          [self node].scrollPosition != node->scrollPosition;
 }
 
+/**
+ * Whether calling `setSemanticsNode:` with `node` should trigger an
+ * announcement.
+ */
+- (BOOL)nodeShouldTriggerAnnouncement:(const flutter::SemanticsNode*)node {
+  // The node dropped the live region flag, if it ever had one.
+  if (!node || !node->HasFlag(flutter::SemanticsFlags::kIsLiveRegion)) {
+    return NO;
+  }
+
+  // The node has gained a new live region flag, always announce.
+  if (![self node].HasFlag(flutter::SemanticsFlags::kIsLiveRegion)) {
+    return YES;
+  }
+
+  // The label has updated, and the new node has a live region flag.
+  return [self node].label != node->label;
+}
+
 - (BOOL)hasChildren {
   if (_node.IsPlatformViewNode()) {
     return YES;
