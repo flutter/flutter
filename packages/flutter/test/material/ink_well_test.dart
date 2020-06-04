@@ -120,6 +120,43 @@ void main() {
     expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
   });
 
+  testWidgets('ink well changes color on hover with overlayColor', (WidgetTester tester) async {
+    // Same test as 'ink well changes color on hover' except that the
+    // hover color is specified with the overlayColor parameter.
+    await tester.pumpWidget(Material(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            width: 100,
+            height: 100,
+            child: InkWell(
+              overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                if (states.contains(MaterialState.hovered))
+                  return const Color(0xff00ff00);
+                if (states.contains(MaterialState.focused))
+                  return const Color(0xff0000ff);
+                if (states.contains(MaterialState.pressed))
+                  return const Color(0xf00fffff);
+                return const Color(0xffbadbad); // Shouldn't happen.
+              }),
+              onTap: () { },
+              onLongPress: () { },
+              onHover: (bool hover) { },
+            ),
+          ),
+        ),
+      ),
+    ));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byType(Container)));
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
+  });
+
   testWidgets('ink response changes color on focus', (WidgetTester tester) async {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
@@ -153,6 +190,49 @@ void main() {
     await tester.pumpAndSettle();
     expect(inkFeatures, paints
       ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
+  });
+
+  testWidgets('ink response changes color on focus with overlayColor', (WidgetTester tester) async {
+    // Same test as 'ink well changes color on focus' except that the
+    // hover color is specified with the overlayColor parameter.
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Container(
+              width: 100,
+              height: 100,
+              child: InkWell(
+                focusNode: focusNode,
+                overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.hovered))
+                    return const Color(0xff00ff00);
+                  if (states.contains(MaterialState.focused))
+                    return const Color(0xff0000ff);
+                  if (states.contains(MaterialState.pressed))
+                    return const Color(0xf00fffff);
+                  return const Color(0xffbadbad); // Shouldn't happen.
+                }),
+                highlightColor: const Color(0xf00fffff),
+                onTap: () { },
+                onLongPress: () { },
+                onHover: (bool hover) { },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paints
+           ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
   });
 
   testWidgets("ink response doesn't change color on focus when on touch device", (WidgetTester tester) async {
