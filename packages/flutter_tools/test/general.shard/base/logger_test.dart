@@ -8,11 +8,14 @@ import 'dart:convert' show jsonEncode;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/mocks.dart' as mocks;
 
 final Platform _kNoAnsiPlatform = FakePlatform(stdoutSupportsAnsi: false);
@@ -22,6 +25,8 @@ final String resetBold = RegExp.escape(AnsiTerminal.resetBold);
 final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
 
 class MockStdout extends Mock implements Stdout {}
+class MockIoProcessSignal extends Mock implements ProcessSignal {}
+class MockShutdownHooks extends Mock implements ShutdownHooks {}
 
 void main() {
   group('AppContext', () {
@@ -32,9 +37,7 @@ void main() {
     });
 
     testWithoutContext('error', () async {
-      final BufferLogger mockLogger = BufferLogger.test(
-        outputPreferences: OutputPreferences.test(showColor: false),
-      );
+      final TestLogger mockLogger = TestLogger();
       final VerboseLogger verboseLogger = VerboseLogger(
         mockLogger,
         stopwatchFactory: FakeStopwatchFactory(fakeStopWatch),
@@ -973,6 +976,45 @@ void main() {
       expect(logger.statusText, 'AAA\nBBB\n');
     });
   });
+
+  testUsingContext('Registered Logger is disposed of on a fatal signal', () async {
+    MockIoProcessSignal mockSignal = MockIoProcessSignal();
+    StreamController<ProcessSignal> controller = StreamController<ProcessSignal>();
+
+    when(mockSignal.watch()).thenAnswer((Invocation invocation) => controller.stream);
+
+    final Completer<void> completer = Completer<void>();
+    final Signals signals = Signals.test();
+
+    final TestLogger testLogger = TestLogger();
+
+    testLogger.registerForDisposal(
+      shutdownHooks: MockShutdownHooks(),
+      signals: signals,
+      fatalSignals: [mockSignal],
+    );
+
+    signals.addHandler(mockSignal, (ProcessSignal s) => completer.complete());
+
+    expect(testLogger.disposed, false);
+
+    controller.add(mockSignal);
+    await completer.future;
+
+    expect(testLogger.disposed, true);
+  });
+}
+
+class TestLogger extends BufferLogger {
+  TestLogger() : super.test(outputPreferences: OutputPreferences.test(showColor: false));
+
+  bool disposed = false;
+
+  @override
+  Future<void> dispose() {
+    disposed = true;
+    return super.dispose();
+  }
 }
 
 class FakeStopwatch implements Stopwatch {

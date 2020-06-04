@@ -782,6 +782,9 @@ class DelegateLogger implements Logger {
   Future<void> dispose() => delegate.dispose();
 
   @override
+  void registerForDisposal(Signals signals) => delegate.registerForDisposal(signals);
+
+  @override
   void printError(String message, {StackTrace stackTrace, bool emphasis, TerminalColor color, int indent, int hangingIndent, bool wrap}) {
     delegate.printError(
       message,

@@ -986,6 +986,9 @@ class NotifyingLogger extends Logger {
   }
 
   @override
+  void registerForDisposal(Signals signals) {}
+
+  @override
   void sendEvent(String name, [Map<String, dynamic> args]) { }
 
   @override

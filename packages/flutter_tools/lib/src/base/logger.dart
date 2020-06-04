@@ -10,6 +10,8 @@ import '../base/context.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import 'io.dart';
+import 'process.dart';
+import 'signals.dart';
 import 'terminal.dart' show AnsiTerminal, Terminal, TerminalColor, OutputPreferences;
 import 'utils.dart';
 
@@ -69,6 +71,25 @@ abstract class Logger {
   /// This should be idempotent.
   @mustCallSuper
   Future<void> dispose() async {}
+
+  /// Registers to automatically dispose the [Logger] when the process exits.
+  void registerForDisposal({
+    @required ShutdownHooks shutdownHooks,
+    @required Signals signals,
+    List<ProcessSignal> fatalSignals,
+  }) {
+    assert(shutdownHooks != null);
+    assert(signals != null);
+
+    fatalSignals ??= Signals.defaultExitSignals;
+
+    shutdownHooks.addShutdownHook(dispose, ShutdownStage.CLEANUP);
+
+    Future<void> disposeLogger(ProcessSignal signal) => dispose();
+    for (final ProcessSignal exitSignal in fatalSignals) {
+      signals.addHandler(exitSignal, disposeLogger);
+    }
+  }
 
   /// Display an error `message` to the user. Commands should use this if they
   /// fail in some way.
