@@ -61,7 +61,7 @@ class AndroidExternalViewEmbedder : public ExternalViewEmbedder {
   std::map<int64_t, std::unique_ptr<SkPictureRecorder>> picture_recorders_;
 
   /// Resets the state.
-  void ClearFrame();
+  void Reset();
 };
 
 }  // namespace flutter

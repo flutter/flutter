@@ -66,22 +66,22 @@ SkCanvas* AndroidExternalViewEmbedder::GetRootCanvas() {
   return nullptr;
 }
 
+void AndroidExternalViewEmbedder::Reset() {
+  composition_order_.clear();
+  picture_recorders_.clear();
+}
+
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::BeginFrame(SkISize frame_size,
                                              GrContext* context,
                                              double device_pixel_ratio) {
+  Reset();
   frame_size_ = frame_size;
-}
-
-void AndroidExternalViewEmbedder::ClearFrame() {
-  composition_order_.clear();
-  picture_recorders_.clear();
-  frame_size_ = SkISize::MakeEmpty();
 }
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::CancelFrame() {
-  ClearFrame();
+  Reset();
 }
 
 // |ExternalViewEmbedder|
