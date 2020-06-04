@@ -11,7 +11,7 @@ import '../build_info.dart';
 import '../features.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart'
-    show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
+    show DevelopmentArtifact, FlutterCommandResult;
 import '../web/compile.dart';
 import 'build.dart';
 
@@ -25,6 +25,7 @@ class BuildWebCommand extends BuildSubCommand {
     addBuildModeFlags(excludeDebug: true);
     usesDartDefineOption();
     addEnableExperimentation(hide: !verboseHelp);
+    addNullSafetyModeOptions();
     argParser.addFlag('web-initialize-platform',
         defaultsTo: true,
         negatable: true,
@@ -71,7 +72,6 @@ class BuildWebCommand extends BuildSubCommand {
       buildInfo,
       boolArg('web-initialize-platform'),
       boolArg('csp'),
-      stringsArg(FlutterOptions.kEnableExperiment),
     );
     return FlutterCommandResult.success();
   }

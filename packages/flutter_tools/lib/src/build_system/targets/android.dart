@@ -246,8 +246,7 @@ class AndroidAot extends AotElfBase {
     if (!output.existsSync()) {
       output.createSync(recursive: true);
     }
-    final List<String> extraGenSnapshotOptions = environment.defines[kExtraGenSnapshotOptions]?.split(',')
-      ?? const <String>[];
+    final List<String> extraGenSnapshotOptions = decodeDartDefines(environment.defines, kExtraGenSnapshotOptions);
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final int snapshotExitCode = await snapshotter.build(
