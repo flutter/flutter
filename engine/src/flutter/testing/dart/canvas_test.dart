@@ -286,4 +286,23 @@ void main() {
 
     expect(picture2.approximateBytesUsed, greaterThan(minimumExpected));
   });
+
+  test('Path reflected in picture size for drawPath, clipPath, and drawShadow', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    final Path path = Path();
+    for (int i = 0; i < 10000; i++) {
+      path.lineTo(5, 9);
+      path.lineTo(i.toDouble(), i.toDouble());
+    }
+    path.close();
+    canvas.drawPath(path, Paint());
+    canvas.drawShadow(path, const Color(0xFF000000), 5.0, false);
+    canvas.clipPath(path);
+    final Picture picture = recorder.endRecording();
+
+    // Slightly fuzzy here to allow for platform specific differences
+    // Measurement on macOS: 541078
+    expect(picture.approximateBytesUsed, greaterThan(530000));
+  });
 }

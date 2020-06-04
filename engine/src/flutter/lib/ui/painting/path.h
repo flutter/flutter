@@ -110,6 +110,8 @@ class CanvasPath : public RefCountedDartWrappable<CanvasPath> {
 
   const SkPath& path() const { return path_; }
 
+  size_t GetAllocationSize() const override;
+
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:

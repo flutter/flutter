@@ -181,6 +181,7 @@ void Canvas::clipPath(const CanvasPath* path, bool doAntiAlias) {
   if (!path)
     Dart_ThrowException(
         ToDart("Canvas.clipPath called with non-genuine Path."));
+  external_allocation_size_ += path->path().approximateBytesUsed();
   canvas_->clipPath(path->path(), doAntiAlias);
 }
 
@@ -280,6 +281,7 @@ void Canvas::drawPath(const CanvasPath* path,
   if (!path)
     Dart_ThrowException(
         ToDart("Canvas.drawPath called with non-genuine Path."));
+  external_allocation_size_ += path->path().approximateBytesUsed();
   canvas_->drawPath(path->path(), *paint.paint());
 }
 
@@ -425,6 +427,7 @@ void Canvas::drawShadow(const CanvasPath* path,
         ToDart("Canvas.drawShader called with non-genuine Path."));
   SkScalar dpr =
       UIDartState::Current()->window()->viewport_metrics().device_pixel_ratio;
+  external_allocation_size_ += path->path().approximateBytesUsed();
   flutter::PhysicalShapeLayer::DrawShadow(canvas_, path->path(), color,
                                           elevation, transparentOccluder, dpr);
 }
