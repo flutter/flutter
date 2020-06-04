@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -261,6 +261,7 @@ void _tests() {
     WidgetTester tester,
     bool alwaysUse24HourFormat, {
     TimeOfDay initialTime = const TimeOfDay(hour: 7, minute: 0),
+    double textScaleFactor = 1.0,
   }) async {
     await tester.pumpWidget(
       Localizations(
@@ -270,7 +271,10 @@ void _tests() {
           DefaultWidgetsLocalizations.delegate,
         ],
         child: MediaQuery(
-          data: MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),
+          data: MediaQueryData(
+            alwaysUse24HourFormat: alwaysUse24HourFormat,
+            textScaleFactor: textScaleFactor,
+          ),
           child: Material(
             child: Directionality(
               textDirection: TextDirection.ltr,
@@ -301,12 +305,12 @@ void _tests() {
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
-    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels;
-    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11);
+    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels as List<dynamic>;
+    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11);
     expect(dialPainter.primaryInnerLabels, null);
 
-    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
-    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11);
+    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels as List<dynamic>;
+    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11);
     expect(dialPainter.secondaryInnerLabels, null);
   });
 
@@ -315,15 +319,15 @@ void _tests() {
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
-    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels;
-    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels00To23);
-    final List<dynamic> primaryInnerLabels = dialPainter.primaryInnerLabels;
-    expect(primaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11TwoDigit);
+    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels as List<dynamic>;
+    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
+    final List<dynamic> primaryInnerLabels = dialPainter.primaryInnerLabels as List<dynamic>;
+    expect(primaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11TwoDigit);
 
-    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
-    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels00To23);
-    final List<dynamic> secondaryInnerLabels = dialPainter.secondaryInnerLabels;
-    expect(secondaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11TwoDigit);
+    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels as List<dynamic>;
+    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
+    final List<dynamic> secondaryInnerLabels = dialPainter.secondaryInnerLabels as List<dynamic>;
+    expect(secondaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11TwoDigit);
   });
 
   testWidgets('provides semantics information for AM/PM indicator', (WidgetTester tester) async {
@@ -689,6 +693,53 @@ void _tests() {
     expect(rootObserver.pickerCount, 0);
     expect(nestedObserver.pickerCount, 1);
   });
+
+  testWidgets('text scale affects certain elements and not others',
+      (WidgetTester tester) async {
+    await mediaQueryBoilerplate(
+        tester,
+        false,
+        textScaleFactor: 1.0,
+        initialTime: const TimeOfDay(hour: 7, minute: 41),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final double minutesDisplayHeight = tester.getSize(find.text('41')).height;
+    final double amHeight = tester.getSize(find.text('AM')).height;
+
+    await tester.tap(find.text('OK')); // dismiss the dialog
+    await tester.pumpAndSettle();
+
+    // Verify that the time display is not affected by text scale.
+    await mediaQueryBoilerplate(
+        tester,
+        false,
+        textScaleFactor: 2.0,
+        initialTime: const TimeOfDay(hour: 7, minute: 41),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.text('41')).height, equals(minutesDisplayHeight));
+    expect(tester.getSize(find.text('AM')).height, equals(amHeight * 2));
+
+    await tester.tap(find.text('OK')); // dismiss the dialog
+    await tester.pumpAndSettle();
+
+    // Verify that text scale for AM/PM is at most 2x.
+    await mediaQueryBoilerplate(
+        tester,
+        false,
+        textScaleFactor: 3.0,
+        initialTime: const TimeOfDay(hour: 7, minute: 41),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.text('41')).height, equals(minutesDisplayHeight));
+    expect(tester.getSize(find.text('AM')).height, equals(amHeight * 2));
+  });
 }
 
 final Finder findDialPaint = find.descendant(
@@ -727,14 +778,14 @@ class _CustomPainterSemanticsTester {
         return recordedInvocation.invocation.memberName == #drawParagraph;
       })
       .map<ui.Paragraph>((RecordedInvocation recordedInvocation) {
-        return recordedInvocation.invocation.positionalArguments.first;
+        return recordedInvocation.invocation.positionalArguments.first as ui.Paragraph;
       })
       .toList();
 
     final PaintPattern expectedLabels = paints;
     int i = 0;
 
-    for (_SemanticsNodeExpectation expectation in expectedNodes) {
+    for (final _SemanticsNodeExpectation expectation in expectedNodes) {
       expect(semantics, includesNodeWith(value: expectation.label));
       final Iterable<SemanticsNode> dialLabelNodes = semantics
           .nodesWith(value: expectation.label)

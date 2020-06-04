@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -42,21 +42,29 @@ class AndroidConsole {
   }
 
   Future<String> getAvdName() async {
+    if (_queue == null) {
+      return null;
+    }
     _write('avd name\n');
     return _readResponse();
   }
 
   void destroy() {
-    if (_socket != null) {
-      _socket.destroy();
-      _socket = null;
-      _queue = null;
-    }
+    _socket?.destroy();
+    _socket = null;
+    _queue = null;
   }
 
   Future<String> _readResponse() async {
+    if (_queue == null) {
+      return null;
+    }
     final StringBuffer output = StringBuffer();
     while (true) {
+      if (!await _queue.hasNext) {
+        destroy();
+        return null;
+      }
       final String text = await _queue.next;
       final String trimmedText = text.trim();
       if (trimmedText == 'OK') {
@@ -72,6 +80,6 @@ class AndroidConsole {
   }
 
   void _write(String text) {
-    _socket.add(ascii.encode(text));
+    _socket?.add(ascii.encode(text));
   }
 }

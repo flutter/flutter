@@ -18,5 +18,7 @@
   "cutButtonLabel": "काटें",
   "copyButtonLabel": "कॉपी करें",
   "pasteButtonLabel": "चिपकाएं",
-  "selectAllButtonLabel": "सभी चुनें"
+  "selectAllButtonLabel": "सभी चुनें",
+  "tabSemanticsLabel": "TBD",
+  "modalBarrierDismissLabel": "खारिज करें"
 }

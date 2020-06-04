@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,6 +25,7 @@ const String kUpstreamRemote = 'git@github.com:flutter/flutter.git';
 
 void main(List<String> args) {
   final ArgParser argParser = ArgParser(allowTrailingOptions: false);
+
   argParser.addOption(
     kIncrement,
     help: 'Specifies which part of the x.y.z version number to increment. Required.',
@@ -38,9 +39,9 @@ void main(List<String> args) {
   );
   argParser.addOption(
     kCommit,
-    help: 'Specifies which git commit to roll to the dev branch.',
+    help: 'Specifies which git commit to roll to the dev branch. Required.',
     valueHelp: 'hash',
-    defaultsTo: 'upstream/master',
+    defaultsTo: null, // This option is required
   );
   argParser.addOption(
     kOrigin,
@@ -52,11 +53,12 @@ void main(List<String> args) {
     kJustPrint,
     negatable: false,
     help:
-        'Don\'t actually roll the dev channel; '
+        "Don't actually roll the dev channel; "
         'just print the would-be version and quit.',
   );
   argParser.addFlag(kYes, negatable: false, abbr: 'y', help: 'Skip the confirmation prompt.');
   argParser.addFlag(kHelp, negatable: false, help: 'Show this help message.', hide: true);
+
   ArgResults argResults;
   try {
     argResults = argParser.parse(args);
@@ -66,14 +68,14 @@ void main(List<String> args) {
     exit(1);
   }
 
-  final String level = argResults[kIncrement];
-  final String commit = argResults[kCommit];
-  final String origin = argResults[kOrigin];
-  final bool justPrint = argResults[kJustPrint];
-  final bool autoApprove = argResults[kYes];
-  final bool help = argResults[kHelp];
+  final String level = argResults[kIncrement] as String;
+  final String commit = argResults[kCommit] as String;
+  final String origin = argResults[kOrigin] as String;
+  final bool justPrint = argResults[kJustPrint] as bool;
+  final bool autoApprove = argResults[kYes] as bool;
+  final bool help = argResults[kHelp] as bool;
 
-  if (help || level == null) {
+  if (help || level == null || commit == null) {
     print('roll_dev.dart --increment=level --commit=hash • update the version tags and roll a new dev build.\n');
     print(argParser.usage);
     exit(0);
@@ -85,8 +87,6 @@ void main(List<String> args) {
     exit(1);
   }
 
-  runGit('checkout master', 'switch to master branch');
-
   if (getGitOutput('status --porcelain', 'check status of your local checkout') != '') {
     print('Your git repository is not clean. Try running "git clean -fd". Warning, this ');
     print('will delete files! Run with -n to find out which ones.');
@@ -94,7 +94,7 @@ void main(List<String> args) {
   }
 
   runGit('fetch $origin', 'fetch $origin');
-  runGit('reset $commit --hard', 'check out master branch');
+  runGit('reset $commit --hard', 'reset to the release commit');
 
   String version = getFullTag();
   final Match match = parseFullTag(version);
@@ -105,10 +105,10 @@ void main(List<String> args) {
     exit(1);
   }
 
-  final List<int> parts = match.groups(<int>[1, 2, 3]).map<int>(int.parse).toList();
+  final List<int> parts = match.groups(<int>[1, 2, 3, 4, 5]).map<int>(int.parse).toList();
 
-  if (match.group(4) == '0') {
-    print('This commit has already been released, as version ${parts.join(".")}.');
+  if (match.group(6) == '0') {
+    print('This commit has already been released, as version ${getVersionFromParts(parts)}.');
     exit(0);
   }
 
@@ -117,19 +117,25 @@ void main(List<String> args) {
       parts[0] += 1;
       parts[1] = 0;
       parts[2] = 0;
+      parts[3] = 0;
+      parts[4] = 0;
       break;
     case kY:
       parts[1] += 1;
       parts[2] = 0;
+      parts[3] = 0;
+      parts[4] = 0;
       break;
     case kZ:
-      parts[2] += 1;
+      parts[2] = 0;
+      parts[3] += 1;
+      parts[4] = 0;
       break;
     default:
       print('Unknown increment level. The valid values are "$kX", "$kY", and "$kZ".');
       exit(1);
   }
-  version = parts.join('.');
+  version = getVersionFromParts(parts);
 
   if (justPrint) {
     print(version);
@@ -138,7 +144,7 @@ void main(List<String> args) {
 
   final String hash = getGitOutput('rev-parse HEAD', 'Get git hash for $commit');
 
-  runGit('tag v$version', 'tag the commit with the version label');
+  runGit('tag $version', 'tag the commit with the version label');
 
   // PROMPT
 
@@ -149,33 +155,50 @@ void main(List<String> args) {
       'to the "dev" channel.');
     stdout.write('Are you? [yes/no] ');
     if (stdin.readLineSync() != 'yes') {
-      runGit('tag -d v$version', 'remove the tag you did not want to publish');
+      runGit('tag -d $version', 'remove the tag you did not want to publish');
       print('The dev roll has been aborted.');
       exit(0);
     }
   }
 
-  runGit('push $origin v$version', 'publish the version');
+  runGit('push $origin $version', 'publish the version');
   runGit('push $origin HEAD:dev', 'land the new version on the "dev" branch');
   print('Flutter version $version has been rolled to the "dev" channel!');
 }
 
 String getFullTag() {
+  const String glob = '*.*.*-*.*.pre';
   return getGitOutput(
-    'describe --match v*.*.* --first-parent --long --tags',
+    'describe --match $glob --first-parent --long --tags',
     'obtain last released version number',
   );
 }
 
 Match parseFullTag(String version) {
-  final RegExp versionPattern = RegExp('^v([0-9]+)\.([0-9]+)\.([0-9]+)-([0-9]+)-g([a-f0-9]+)\$');
+  // of the form: x.y.z-m.n.pre-c-g<revision>
+  final RegExp versionPattern = RegExp(
+    r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre-(\d+)-g([a-f0-9]+)$');
   return versionPattern.matchAsPrefix(version);
+}
+
+String getVersionFromParts(List<int> parts) {
+  // where parts correspond to [x, y, z, m, n] from tag
+  assert(parts.length == 5);
+  final StringBuffer buf = StringBuffer()
+    // take x, y, and z
+    ..write(parts.take(3).join('.'))
+    ..write('-')
+    // skip x, y, and z, take m and n
+    ..write(parts.skip(3).take(2).join('.'))
+    ..write('.pre');
+  // return a string that looks like: '1.2.3-4.5.pre'
+  return buf.toString();
 }
 
 String getGitOutput(String command, String explanation) {
   final ProcessResult result = _runGit(command);
-  if (result.stderr.isEmpty && result.exitCode == 0)
-    return result.stdout.trim();
+  if ((result.stderr as String).isEmpty && result.exitCode == 0)
+    return (result.stdout as String).trim();
   _reportGitFailureAndExit(result, explanation);
   return null; // for the analyzer's sake
 }
@@ -196,9 +219,9 @@ void _reportGitFailureAndExit(ProcessResult result, String explanation) {
   } else {
     print('Failed to $explanation.');
   }
-  if (result.stdout.isNotEmpty)
+  if ((result.stdout as String).isNotEmpty)
     print('stdout from git:\n${result.stdout}\n');
-  if (result.stderr.isNotEmpty)
+  if ((result.stderr as String).isNotEmpty)
     print('stderr from git:\n${result.stderr}\n');
   exit(1);
 }

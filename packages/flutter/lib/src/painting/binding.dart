@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -44,9 +44,9 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// installation or a data wipe. The warm up does not block the main thread
   /// so there should be no "Application Not Responding" warning.
   ///
-  /// Currently the warm-up happens synchronously on the GPU thread which means
-  /// the rendering of the first frame on the GPU thread will be postponed until
-  /// the warm-up is finished.
+  /// Currently the warm-up happens synchronously on the raster thread which
+  /// means the rendering of the first frame on the raster thread will be
+  /// postponed until the warm-up is finished.
   ///
   /// See also:
   ///
@@ -96,6 +96,13 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   void evict(String asset) {
     super.evict(asset);
     imageCache.clear();
+    imageCache.clearLiveImages();
+  }
+
+  @override
+  void handleMemoryPressure() {
+    super.handleMemoryPressure();
+    imageCache.clear();
   }
 
   /// Listenable that notifies when the available fonts on the system have
@@ -113,8 +120,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   @override
   Future<void> handleSystemMessage(Object systemMessage) async {
     await super.handleSystemMessage(systemMessage);
-    final Map<String, dynamic> message = systemMessage;
-    final String type = message['type'];
+    final Map<String, dynamic> message = systemMessage as Map<String, dynamic>;
+    final String type = message['type'] as String;
     switch (type) {
       case 'fontsChange':
         _systemFonts.notifyListeners();
@@ -128,7 +135,7 @@ class _SystemFontsNotifier extends Listenable {
   final Set<VoidCallback> _systemFontsCallbacks = <VoidCallback>{};
 
   void notifyListeners () {
-    for (VoidCallback callback in _systemFontsCallbacks) {
+    for (final VoidCallback callback in _systemFontsCallbacks) {
       callback();
     }
   }

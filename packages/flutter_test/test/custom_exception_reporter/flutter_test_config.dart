@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 Future<void> main(FutureOr<void> testMain()) async {
   reportTestException = (FlutterErrorDetails details, String testDescription) {
-    expect(details.exception, isInstanceOf<StateError>());
+    expect(details.exception, isA<StateError>());
     expect(details.exception.message, 'foo');
     expect(testDescription, 'custom exception reporter');
   };

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -27,12 +27,21 @@ import 'typography.dart';
 //
 // 4. Update the flutter_localizations package. To add a new string to the
 //    flutter_localizations package, you must first add it to the English
-//    translations (lib/src/l10n/material_en.arb), including a description, then
-//    you must add it to every other language (all the other *.arb files in that
-//    same directory), listing the translation as `TBD`. After that you have to
-//    re-generate lib/src/l10n/localizations.dart by running
-//    `dart dev/tools/localization/gen_localizations.dart --overwrite`. There is
-//    a README file with further information in the lib/src/l10n/ directory.
+//    translations (lib/src/l10n/material_en.arb), including a description.
+//
+//    Then you need to add  new `TBD` entries for the string to all of the other
+//    language locale files by running:
+//    ```
+//    dart dev/tools/localization/bin/gen_missing_localizations.dart
+//    ```
+//
+//    Finally you need to re-generate lib/src/l10n/localizations.dart by running:
+//    ```
+//    dart dev/tools/localization/bin/gen_localizations.dart --overwrite
+//    ```
+//
+//    There is a README file with further information in the lib/src/l10n/
+//    directory.
 //
 // 5. If you are a Google employee, you should then also follow the instructions
 //    at go/flutter-l10n. If you're not, don't worry about it.
@@ -61,6 +70,9 @@ abstract class MaterialLocalizations {
 
   /// The tooltip for the delete button on a [Chip].
   String get deleteButtonTooltip;
+
+  /// The tooltip for the more button on an overflowing text selection menu.
+  String get moreButtonTooltip;
 
   /// The tooltip for the [MonthPicker]'s "next month" button.
   String get nextMonthTooltip;
@@ -177,7 +189,7 @@ abstract class MaterialLocalizations {
   /// Defines the localized [TextStyle] geometry for [ThemeData.textTheme].
   ///
   /// The [scriptCategory] defines the overall geometry of a [TextTheme] for
-  /// the static [MaterialTextGeometry.localizedFor] method in terms of the
+  /// the [Typography.geometryThemeFor] method in terms of the
   /// three language categories defined in https://material.io/go/design-typography.
   ///
   /// Generally speaking, font sizes for [ScriptCategory.tall] and
@@ -212,6 +224,29 @@ abstract class MaterialLocalizations {
   /// Full unabbreviated year format, e.g. 2017 rather than 17.
   String formatYear(DateTime date);
 
+  /// Formats the date in a compact format.
+  ///
+  /// Usually just the numeric values for the for day, month and year are used.
+  ///
+  /// Examples:
+  ///
+  /// - US English: 02/21/2019
+  /// - Russian: 21.02.2019
+  ///
+  /// See also:
+  ///   * [parseCompactDate], which will convert a compact date string to a [DateTime].
+  String formatCompactDate(DateTime date);
+
+  /// Formats the date using a short-width format.
+  ///
+  /// Includes the abbreviation of the month, the day and year.
+  ///
+  /// Examples:
+  ///
+  /// - US English: Feb 21, 2019
+  /// - Russian: 21 февр. 2019 г.
+  String formatShortDate(DateTime date);
+
   /// Formats the date using a medium-width format.
   ///
   /// Abbreviates month and days of week. This appears in the header of the date
@@ -239,6 +274,24 @@ abstract class MaterialLocalizations {
   /// The returned string does not contain the day of the month. This appears
   /// in the date picker invoked using [showDatePicker].
   String formatMonthYear(DateTime date);
+
+  /// Formats the month and day of the given [date].
+  ///
+  /// Examples:
+  ///
+  /// - US English: Feb 21
+  /// - Russian: 21 февр.
+  String formatShortMonthDay(DateTime date);
+
+  /// Converts the given compact date formatted string into a [DateTime].
+  ///
+  /// The format of the string must be a valid compact date format for the
+  /// given locale. If the text doesn't represent a valid date, `null` will be
+  /// returned.
+  ///
+  /// See also:
+  ///   * [formatCompactDate], which will convert a [DateTime] into a string in the compact format.
+  DateTime parseCompactDate(String inputString);
 
   /// List of week day names in narrow format, usually 1- or 2-letter
   /// abbreviations of full names.
@@ -353,7 +406,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 ///
 ///  * [GlobalMaterialLocalizations], which provides material localizations for
 ///    many languages.
-///  * [MaterialApp.delegates], which automatically includes
+///  * [MaterialApp.localizationsDelegates], which automatically includes
 ///    [DefaultMaterialLocalizations.delegate] by default.
 class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// Constructs an object that defines the material widgets' localized strings
@@ -425,6 +478,23 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'December',
   ];
 
+  /// Returns the number of days in a month, according to the proleptic
+  /// Gregorian calendar.
+  ///
+  /// This applies the leap year logic introduced by the Gregorian reforms of
+  /// 1582. It will not give valid results for dates prior to that time.
+  int _getDaysInMonth(int year, int month) {
+    if (month == DateTime.february) {
+      final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) ||
+          (year % 400 == 0);
+      if (isLeapYear)
+        return 29;
+      return 28;
+    }
+    const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    return daysInMonth[month - 1];
+  }
+
   @override
   String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
     final TimeOfDayFormat format = timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat);
@@ -459,6 +529,21 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String formatYear(DateTime date) => date.year.toString();
 
   @override
+  String formatCompactDate(DateTime date) {
+    // Assumes US mm/dd/yyyy format
+    final String month = _formatTwoDigitZeroPad(date.month);
+    final String day = _formatTwoDigitZeroPad(date.day);
+    final String year = date.year.toString().padLeft(4, '0');
+    return '$month/$day/$year';
+  }
+
+  @override
+  String formatShortDate(DateTime date) {
+    final String month = _shortMonths[date.month - DateTime.january];
+    return '$month ${date.day}, ${date.year}';
+  }
+
+  @override
   String formatMediumDate(DateTime date) {
     final String day = _shortWeekdays[date.weekday - DateTime.monday];
     final String month = _shortMonths[date.month - DateTime.january];
@@ -476,6 +561,37 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     final String year = formatYear(date);
     final String month = _months[date.month - DateTime.january];
     return '$month $year';
+  }
+
+  @override
+  String formatShortMonthDay(DateTime date) {
+    final String month = _shortMonths[date.month - DateTime.january];
+    return '$month ${date.day}';
+  }
+
+  @override
+  DateTime parseCompactDate(String inputString) {
+    // Assumes US mm/dd/yyyy format
+    final List<String> inputParts = inputString.split('/');
+    if (inputParts.length != 3) {
+      return null;
+    }
+
+    final int year = int.tryParse(inputParts[2], radix: 10);
+    if (year == null || year < 1) {
+      return null;
+    }
+
+    final int month = int.tryParse(inputParts[0], radix: 10);
+    if (month == null || month < 1 || month > 12) {
+      return null;
+    }
+
+    final int day = int.tryParse(inputParts[1], radix: 10);
+    if (day == null || day < 1 || day > _getDaysInMonth(year, month)) {
+      return null;
+    }
+    return DateTime(year, month, day);
   }
 
   @override
@@ -551,6 +667,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get deleteButtonTooltip => 'Delete';
+
+  @override
+  String get moreButtonTooltip => 'More';
 
   @override
   String get nextMonthTooltip => 'Next month';

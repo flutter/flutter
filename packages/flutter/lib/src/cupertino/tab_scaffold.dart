@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -15,7 +15,7 @@ import 'theme.dart';
 /// [CupertinoTabController] controls, as well as the currently selected tab item of
 /// its [CupertinoTabBar].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// [CupertinoTabController] can be used to switch tabs:
 ///
@@ -59,8 +59,8 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-/// * [CupertinoTabScaffold], a tabbed application root layout that can be
-///   controlled by a [CupertinoTabController].
+///  * [CupertinoTabScaffold], a tabbed application root layout that can be
+///    controlled by a [CupertinoTabController].
 class CupertinoTabController extends ChangeNotifier {
   /// Creates a [CupertinoTabController] to control the tab index of [CupertinoTabScaffold]
   /// and [CupertinoTabBar].
@@ -119,7 +119,7 @@ class CupertinoTabController extends ChangeNotifier {
 ///
 /// Tabs' contents are built with the provided [tabBuilder] at the active
 /// tab index. The [tabBuilder] must be able to build the same number of
-/// pages as there are [tabBar.items]. Inactive tabs will be moved [Offstage]
+/// pages as there are [tabBar] items. Inactive tabs will be moved [Offstage]
 /// and their animations disabled.
 ///
 /// Adding/removing tabs, or changing the order of tabs is supported but not
@@ -135,7 +135,7 @@ class CupertinoTabController extends ChangeNotifier {
 /// (via [State.setState], for instance) from its descendant rather than from
 /// its ancestor.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// A sample code implementing a typical iOS information architecture with tabs.
 ///
@@ -280,7 +280,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// By default uses [CupertinoTheme]'s `scaffoldBackgroundColor` when null.
   final Color backgroundColor;
 
-  /// Whether the [child] should size itself to avoid the window's bottom inset.
+  /// Whether the body should size itself to avoid the window's bottom inset.
   ///
   /// For example, if there is an onscreen keyboard displayed above the
   /// scaffold, the body can be resized to avoid overlapping the keyboard, which
@@ -380,6 +380,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       // obstructed area.
       if (widget.tabBar.opaque(context)) {
         contentPadding = EdgeInsets.only(bottom: bottomPadding);
+        newMediaQuery = newMediaQuery.removePadding(removeBottom: true);
       } else {
         newMediaQuery = newMediaQuery.copyWith(
           padding: newMediaQuery.padding.copyWith(
@@ -522,10 +523,10 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
 
   @override
   void dispose() {
-    for (FocusScopeNode focusScopeNode in tabFocusNodes) {
+    for (final FocusScopeNode focusScopeNode in tabFocusNodes) {
       focusScopeNode.dispose();
     }
-    for (FocusScopeNode focusScopeNode in discardedNodes) {
+    for (final FocusScopeNode focusScopeNode in discardedNodes) {
       focusScopeNode.dispose();
     }
     super.dispose();

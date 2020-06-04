@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -103,13 +103,13 @@ class FakeImageStreamCompleter extends ImageStreamCompleter {
 }
 
 class TestAssetImage extends AssetImage {
-  TestAssetImage(String name) : super(name);
+  const TestAssetImage(String name) : super(name);
 
   @override
   ImageStreamCompleter load(AssetBundleImageKey key, DecoderCallback decode) {
     ImageInfo imageInfo;
     key.bundle.load(key.name).then<void>((ByteData data) {
-      final TestByteData testData = data;
+      final TestByteData testData = data as TestByteData;
       final ui.Image image = TestImage(testData.scale);
       imageInfo = ImageInfo(image: image, scale: key.scale);
     });
@@ -180,7 +180,7 @@ RenderImage getRenderImage(WidgetTester tester, Key key) {
   return tester.renderObject<RenderImage>(find.byKey(key));
 }
 TestImage getTestImage(WidgetTester tester, Key key) {
-  return tester.renderObject<RenderImage>(find.byKey(key)).image;
+  return tester.renderObject<RenderImage>(find.byKey(key)).image as TestImage;
 }
 
 Future<void> pumpTreeToLayout(WidgetTester tester, Widget widget) {

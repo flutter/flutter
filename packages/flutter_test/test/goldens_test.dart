@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -52,8 +52,8 @@ void main() {
   }
 
   void test(String description, FutureOr<void> body()) {
-    test_package.test(description, () {
-      return io.IOOverrides.runZoned<FutureOr<void>>(
+    test_package.test(description, () async {
+      await io.IOOverrides.runZoned<FutureOr<void>>(
         body,
         createDirectory: (String path) => fs.directory(path),
         createFile: (String path) => fs.file(path),
@@ -76,8 +76,8 @@ void main() {
   group('goldenFileComparator', () {
     test('is initialized by test framework', () {
       expect(goldenFileComparator, isNotNull);
-      expect(goldenFileComparator, isInstanceOf<LocalFileComparator>());
-      final LocalFileComparator comparator = goldenFileComparator;
+      expect(goldenFileComparator, isA<LocalFileComparator>());
+      final LocalFileComparator comparator = goldenFileComparator as LocalFileComparator;
       expect(comparator.basedir.path, contains('flutter_test'));
     });
   });
@@ -149,11 +149,40 @@ void main() {
 
       group('fails', () {
 
-        test('and generates correct output in the correct location', () async {
+        test('and generates correct output in the correct base location', () async {
           comparator = LocalFileComparator(Uri.parse('local_test.dart'), pathStyle: fs.path.style);
           await fs.file(fix('/golden.png')).writeAsBytes(_kColorFailurePngBytes);
           try {
             await doComparison();
+            fail('TestFailure expected but not thrown.');
+          } on TestFailure catch (error) {
+            expect(error.message, contains('% diff detected'));
+            final io.File master = fs.file(
+              fix('/failures/golden_masterImage.png')
+            );
+            final io.File test = fs.file(
+              fix('/failures/golden_testImage.png')
+            );
+            final io.File isolated = fs.file(
+              fix('/failures/golden_isolatedDiff.png')
+            );
+            final io.File masked = fs.file(
+              fix('/failures/golden_maskedDiff.png')
+            );
+            expect(master.existsSync(), isTrue);
+            expect(test.existsSync(), isTrue);
+            expect(isolated.existsSync(), isTrue);
+            expect(masked.existsSync(), isTrue);
+          }
+        });
+
+        test('and generates correct output when files are in a subdirectory', () async {
+          comparator = LocalFileComparator(Uri.parse('local_test.dart'), pathStyle: fs.path.style);
+          fs.file(fix('subdir/golden.png'))
+            ..createSync(recursive:true)
+            ..writeAsBytesSync(_kColorFailurePngBytes);
+          try {
+            await doComparison('subdir/golden.png');
             fail('TestFailure expected but not thrown.');
           } on TestFailure catch (error) {
             expect(error.message, contains('% diff detected'));

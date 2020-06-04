@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -259,9 +259,8 @@ void main() {
       ),
     );
 
-    DecoratedBox widget = tester.firstWidget(find.byType(DecoratedBox));
-    BoxDecoration decoration = widget.decoration;
-    expect(decoration.color, equals(Colors.blue));
+    Container widget = tester.firstWidget(find.byType(Container));
+    expect(widget.color, equals(Colors.blue));
 
     setState(() {
       themeData = ThemeData(primarySwatch: Colors.green);
@@ -269,9 +268,8 @@ void main() {
 
     await tester.pump();
 
-    widget = tester.firstWidget(find.byType(DecoratedBox));
-    decoration = widget.decoration;
-    expect(decoration.color, equals(Colors.green));
+    widget = tester.firstWidget(find.byType(Container));
+    expect(widget.color, equals(Colors.green));
   });
 
   testWidgets('ListView padding', (WidgetTester tester) async {
@@ -335,8 +333,8 @@ void main() {
         ' │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
         ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
         ' │   crossAxisDirection: AxisDirection.right,\n'
-        ' │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0\n'
-        ' │   cacheOrigin: 0.0 )\n'
+        ' │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0,\n'
+        ' │   cacheOrigin: 0.0)\n'
         ' │ geometry: SliverGeometry(scrollExtent: 300.0, paintExtent: 300.0,\n'
         ' │   maxPaintExtent: 300.0, cacheExtent: 300.0)\n'
         ' │ currently live children: 0 to 2\n'

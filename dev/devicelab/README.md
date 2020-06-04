@@ -1,41 +1,30 @@
 # Flutter devicelab
 
-"Devicelab" (a.k.a. "cocoon") is a physical lab that tests Flutter on real
-Android and iOS devices.
+"Devicelab" (a.k.a. [Cocoon](https://github.com/flutter/cocoon)) is a physical
+lab that tests Flutter on real Android and iOS devices.
 
 This package contains the code for test framework and the tests. More generally
 the tests are referred to as "tasks" in the API, but since we primarily use it
 for testing, this document refers to them as "tests".
 
-Build results are available at https://flutter-dashboard.appspot.com.
+Current statuses for the devicelab are available at
+https://flutter-dashboard.appspot.com.
 
-# Reading the dashboard
+# Dashboards
 
-## The build page
+## Build dashboard
 
-The build page is accessible at https://flutter-dashboard.appspot.com/build.html.
-This page reports the health of build servers, called _agents_, and the statuses
-of build tasks.
-
-### Agents
-
-A green agent is considered healthy and ready to receive new tasks to build. A
-red agent is broken and does not receive new tasks.
-
-In the example below, the dashboard shows that the `linux2` agent is broken and
-requires attention. All other agents are healthy.
-
-![Agent statuses](images/agent-statuses.png)
+The build page is accessible at https://flutter-dashboard.appspot.com/#/build.
+This page reports the build statuses of commits to the flutter/flutter repo.
 
 ### Tasks
 
-The table below the agent statuses displays the statuses of build tasks. Task
-statuses are color-coded. The following statuses are available:
+Task statuses are color-coded in the following manner:
 
-**New task** (light blue): the task is waiting for an agent to pick it up and
+**New task** (blue): the task is waiting for an agent to pick it up and
 start the build.
 
-**Task is running** (spinning blue): an agent is currently building the task.
+**Task is running** (blue with clock): an agent is currently building the task.
 
 **Task succeeded** (green): an agent reported a successful completion of the
 task.
@@ -45,12 +34,10 @@ latest attempt succeeded (we currently only try twice).
 
 **Task failed** (red): the task failed all of the attempts.
 
-**Task underperformed** (orange): currently not used.
+**Task is rerunning** (orange): the task is being rerun.
 
 **Task was skipped** (transparent): the task is not scheduled for a build. This
 usually happens when a task is removed from `manifest.yaml` file.
-
-**Task status unknown** (purple): currently not used.
 
 In addition to color-coding, a task may display a question mark. This means
 that the task was marked as flaky manually. The status of such task is ignored
@@ -59,18 +46,11 @@ task fails, GitHub will not prevent PR submissions. However, if the latest
 status of a non-flaky task is red, all pending PRs will contain a warning about
 the broken build and recommend caution when submitting.
 
-Legend:
-
-![Task status legend](images/legend.png)
-
-The example below shows that commit `e122d5d` caused a wide-spread breakage,
-which was fixed by `bdc6f10`. It also shows that Cirrus and Chrome
-Infra (left-most tasks) decided to skip building these commits. Hovering over
-a cell will pop up a tooltip containing the name of the broken task. Clicking
-on the cell will open the log file in a new browser tab (only visible to core
-contributors as of today).
-
-![Broken Test](images/broken-test.png)
+Clicking a cell will pop up an overlay with information about that task. It
+includes information such as the task name, number of attempts, run time,
+queue time, whether it is manually marked flaky, and the agent it was run on.
+It has actions to download the log, rerun the task, and view the agent on
+the agent dashboard.
 
 ## Why is a task stuck on "new task" status?
 
@@ -81,7 +61,19 @@ may skip some commits. For example, Cirrus will only test the
 _last_ commit of a PR that's merged into the `master` branch. Chrome Infra may
 skip commits when they come in too fast.
 
-## How the devicelab runs the tasks
+## Agent dashboard
+
+Agent statuses are available at https://flutter-dashboard.appspot.com/#/agents.
+
+A green agent is considered healthy and ready to receive new tasks to build. A
+red agent is broken and does not receive new tasks.
+
+## Performance dashboard
+
+Flutter benchmarks are available at
+https://flutter-dashboard.appspot.com/benchmarks.html.
+
+# How the devicelab runs tasks
 
 The devicelab agents have a small script installed on them that continuously
 asks the CI server for tasks to run. When the server finds a suitable task for
@@ -168,7 +160,48 @@ flags to `bin/run.dart`:
   --local-engine=[local_engine_architecture]
 ```
 
-An example of of a local engine architecture is `android_debug_unopt_x86`.
+An example of a local engine architecture is `android_debug_unopt_x86`.
+
+## Running an A/B test for engine changes
+
+You can run an A/B test that compares the performance of the default engine
+against a local engine build. The test runs the same benchmark a specified
+number of times against both engines, then outputs a tab-separated spreadsheet
+with the results. The results can be copied to a Google Spreadsheet for further
+inspection.
+
+Example:
+
+```sh
+../../bin/cache/dart-sdk/bin/dart bin/run.dart --ab=10 \
+  --local-engine=host_debug_unopt \
+  -t bin/tasks/web_benchmarks_canvaskit.dart
+```
+
+The `--ab=10` tells the runner to run an A/B test 10 times.
+
+`--local-engine=host_debug_unopt` tells the A/B test to use the `host_debug_unopt`
+engine build. `--local-engine` is required for A/B test.
+
+A/B can run exactly one task. Multiple tasks are not supported.
+
+Example output:
+
+```
+Score	Average A (noise)	Average B (noise)	Speed-up
+bench_card_infinite_scroll.canvaskit.drawFrameDuration.average	2900.20 (8.44%)	2426.70 (8.94%)	1.20x
+bench_card_infinite_scroll.canvaskit.totalUiFrame.average	4964.00 (6.29%)	4098.00 (8.03%)	1.21x
+draw_rect.canvaskit.windowRenderDuration.average	1959.45 (16.56%)	2286.65 (0.61%)	0.86x
+draw_rect.canvaskit.sceneBuildDuration.average	1969.45 (16.37%)	2294.90 (0.58%)	0.86x
+draw_rect.canvaskit.drawFrameDuration.average	5335.20 (17.59%)	6437.60 (0.59%)	0.83x
+draw_rect.canvaskit.totalUiFrame.average	6832.00 (13.16%)	7932.00 (0.34%)	0.86x
+```
+
+The output contains averages and noises for each score. More importantly, it
+contains the speed-up value, i.e. how much _faster_ is the local engine than
+the default engine. Values less than 1.0 indicate a slow-down. For example,
+0.5x means the local engine is twice as slow as the default engine, and 2.0x
+means it's twice as fast. Higher is better.
 
 # Reproducing broken builds locally
 
@@ -238,5 +271,10 @@ Where:
  - `{STAGE}` is `devicelab` if you want to run on Android, or `devicelab_ios` if
  you want to run on iOS.
  - `{CAPABILITIES}` is an array that lists the capabilities required of
- the test agent (the computer that runs the test) to run your test. Available
- capabilities are: `has-android-device`, `has-ios-device`.
+ the test agent (the computer that runs the test) to run your test. As of writing,
+ the available  capabilities are: `linux`, `linux/android`, `linux-vm`,
+`mac`, `mac/ios`, `mac/iphonexs`, `mac/ios32`, `mac-catalina/ios`,
+`mac-catalina/android`, `ios/gl-render-image`, `windows`, `windows/android`.
+
+If your test needs to run on multiple operating systems, create a separate test
+for each operating system.

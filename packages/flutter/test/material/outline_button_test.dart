@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -200,8 +200,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
     semanticsEnabled: true,
-    skip: isBrowser,
   );
 
   testWidgets('OutlineButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
@@ -265,7 +265,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
-    skip: isBrowser,
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
     semanticsEnabled: true,
   );
 
@@ -616,7 +616,7 @@ void main() {
     expect(tester.widget<OutlineButton>(outlineButton).enabled, false);
   });
 
-  testWidgets('Outline button doesn\'t crash if disabled during a gesture', (WidgetTester tester) async {
+  testWidgets("Outline button doesn't crash if disabled during a gesture", (WidgetTester tester) async {
     Widget buildFrame(VoidCallback onPressed) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -747,7 +747,7 @@ void main() {
       clipPath: clipPath,
       clipRect: clipRect,
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('OutlineButton has no clip by default', (WidgetTester tester) async {
     final GlobalKey buttonKey = GlobalKey();
@@ -882,7 +882,7 @@ void main() {
     expect(tester.getSize(find.byType(FlatButton)).height, equals(48.0));
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));
     expect(tester.getSize(find.byType(Text)).height, equals(42.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('OutlineButton pressed fillColor default', (WidgetTester tester) async {
     Widget buildFrame(ThemeData theme) {
@@ -978,18 +978,79 @@ void main() {
     await tester.longPress(outlineButton);
     expect(didLongPressButton, isTrue);
   });
+
+  testWidgets('OutlineButton responds to density changes.', (WidgetTester tester) async {
+    const Key key = Key('test');
+    const Key childKey = Key('test child');
+
+    Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
+      return await tester.pumpWidget(
+        MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Center(
+              child: OutlineButton(
+                visualDensity: visualDensity,
+                key: key,
+                onPressed: () {},
+                child: useText ? const Text('Text', key: childKey) : Container(key: childKey, width: 100, height: 100, color: const Color(0xffff0000)),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await buildTest(const VisualDensity());
+    final RenderBox box = tester.renderObject(find.byKey(key));
+    Rect childRect = tester.getRect(find.byKey(childKey));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(132, 100)));
+    expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(156, 124)));
+    expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
+
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(108, 100)));
+    expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
+
+    await buildTest(const VisualDensity(), useText: true);
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(88, 48)));
+    expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0), useText: true);
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(112, 60)));
+    expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
+
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0), useText: true);
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(76, 36)));
+    expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
+  });
 }
 
 PhysicalModelLayer _findPhysicalLayer(Element element) {
   expect(element, isNotNull);
   RenderObject object = element.renderObject;
   while (object != null && object is! RenderRepaintBoundary && object is! RenderView) {
-    object = object.parent;
+    object = object.parent as RenderObject;
   }
   expect(object.debugLayer, isNotNull);
-  expect(object.debugLayer.firstChild, isInstanceOf<PhysicalModelLayer>());
-  final PhysicalModelLayer layer = object.debugLayer.firstChild;
-  return layer.firstChild is PhysicalModelLayer ? layer.firstChild : layer;
+  expect(object.debugLayer.firstChild, isA<PhysicalModelLayer>());
+  final PhysicalModelLayer layer = object.debugLayer.firstChild as PhysicalModelLayer;
+  final Layer child = layer.firstChild;
+  return child is PhysicalModelLayer ? child : layer;
 }
 
 void _checkPhysicalLayer(Element element, Color expectedColor, { Path clipPath, Rect clipRect }) {

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -66,6 +66,8 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, Lis
 /// A widget that by default does a cross-fade between a new widget and the
 /// widget previously set on the [AnimatedSwitcher] as a child.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=2W7POjFb88g}
+///
 /// If they are swapped fast enough (i.e. before [duration] elapses), more than
 /// one previous child can exist and be transitioning out while the newest one
 /// is transitioning in.
@@ -85,53 +87,48 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, Lis
 /// progress indicator and the image will be fading out while a new progress
 /// indicator is fading in.)
 ///
-/// {@tool sample}
+/// The type of transition can be changed from a cross-fade to a custom
+/// transition by setting the [transitionBuilder].
+///
+/// {@tool dartpad --template=stateful_widget_material}
+/// This sample shows a counter that animates the scale of a text widget
+/// whenever the value changes.
 ///
 /// ```dart
-/// class ClickCounter extends StatefulWidget {
-///   const ClickCounter({Key key}) : super(key: key);
+/// int _count = 0;
 ///
-///   @override
-///   _ClickCounterState createState() => _ClickCounterState();
-/// }
-///
-/// class _ClickCounterState extends State<ClickCounter> {
-///   int _count = 0;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: Material(
-///         child: Column(
-///           mainAxisAlignment: MainAxisAlignment.center,
-///           children: <Widget>[
-///             AnimatedSwitcher(
-///               duration: const Duration(milliseconds: 500),
-///               transitionBuilder: (Widget child, Animation<double> animation) {
-///                 return ScaleTransition(child: child, scale: animation);
-///               },
-///               child: Text(
-///                 '$_count',
-///                 // This key causes the AnimatedSwitcher to interpret this as a "new"
-///                 // child each time the count changes, so that it will begin its animation
-///                 // when the count changes.
-///                 key: ValueKey<int>(_count),
-///                 style: Theme.of(context).textTheme.display1,
-///               ),
-///             ),
-///             RaisedButton(
-///               child: const Text('Increment'),
-///               onPressed: () {
-///                 setState(() {
-///                   _count += 1;
-///                 });
-///               },
-///             ),
-///           ],
+/// @override
+/// Widget build(BuildContext context) {
+///   return Container(
+///     color: Colors.white,
+///     child: Column(
+///       mainAxisAlignment: MainAxisAlignment.center,
+///       children: <Widget>[
+///         AnimatedSwitcher(
+///           duration: const Duration(milliseconds: 500),
+///           transitionBuilder: (Widget child, Animation<double> animation) {
+///             return ScaleTransition(child: child, scale: animation);
+///           },
+///           child: Text(
+///             '$_count',
+///             // This key causes the AnimatedSwitcher to interpret this as a "new"
+///             // child each time the count changes, so that it will begin its animation
+///             // when the count changes.
+///             key: ValueKey<int>(_count),
+///             style: Theme.of(context).textTheme.headline4,
+///           ),
 ///         ),
-///       ),
-///     );
-///   }
+///         RaisedButton(
+///           child: const Text('Increment'),
+///           onPressed: () {
+///             setState(() {
+///               _count += 1;
+///             });
+///           },
+///         ),
+///       ],
+///     ),
+///   );
 /// }
 /// ```
 /// {@end-tool}
@@ -423,7 +420,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   void dispose() {
     if (_currentEntry != null)
       _currentEntry.controller.dispose();
-    for (_ChildEntry entry in _outgoingEntries)
+    for (final _ChildEntry entry in _outgoingEntries)
       entry.controller.dispose();
     super.dispose();
   }

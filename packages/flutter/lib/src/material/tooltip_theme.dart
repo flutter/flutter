@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,7 +23,8 @@ import 'theme.dart';
 ///    subtree.
 ///  * [TooltipThemeData], which describes the actual configuration of a
 ///    tooltip theme.
-class TooltipThemeData extends Diagnosticable {
+@immutable
+class TooltipThemeData with Diagnosticable {
   /// Creates the set of properties used to configure [Tooltip]s.
   const TooltipThemeData({
     this.height,
@@ -122,8 +123,8 @@ class TooltipThemeData extends Diagnosticable {
     assert(t != null);
     return TooltipThemeData(
       height: lerpDouble(a?.height, b?.height, t),
-      padding: EdgeInsets.lerp(a?.padding, b?.padding, t),
-      margin: EdgeInsets.lerp(a?.margin, b?.margin, t),
+      padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
+      margin: EdgeInsetsGeometry.lerp(a?.margin, b?.margin, t),
       verticalOffset: lerpDouble(a?.verticalOffset, b?.verticalOffset, t),
       preferBelow: t < 0.5 ? a.preferBelow: b.preferBelow,
       excludeFromSemantics: t < 0.5 ? a.excludeFromSemantics : b.excludeFromSemantics,
@@ -154,17 +155,17 @@ class TooltipThemeData extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final TooltipThemeData typedOther = other;
-    return typedOther.height == height
-        && typedOther.padding == padding
-        && typedOther.margin == margin
-        && typedOther.verticalOffset == verticalOffset
-        && typedOther.preferBelow == preferBelow
-        && typedOther.excludeFromSemantics == excludeFromSemantics
-        && typedOther.decoration == decoration
-        && typedOther.textStyle == textStyle
-        && typedOther.waitDuration == waitDuration
-        && typedOther.showDuration == showDuration;
+    return other is TooltipThemeData
+        && other.height == height
+        && other.padding == padding
+        && other.margin == margin
+        && other.verticalOffset == verticalOffset
+        && other.preferBelow == preferBelow
+        && other.excludeFromSemantics == excludeFromSemantics
+        && other.decoration == decoration
+        && other.textStyle == textStyle
+        && other.waitDuration == waitDuration
+        && other.showDuration == showDuration;
   }
 
   @override
@@ -189,7 +190,7 @@ class TooltipThemeData extends Diagnosticable {
 /// Values specified here are used for [Tooltip] properties that are not
 /// given an explicit non-null value.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Here is an example of a tooltip theme that applies a blue foreground
 /// with non-rounded corners.
@@ -237,13 +238,13 @@ class TooltipTheme extends InheritedTheme {
   /// TooltipThemeData theme = TooltipTheme.of(context);
   /// ```
   static TooltipThemeData of(BuildContext context) {
-    final TooltipTheme tooltipTheme = context.inheritFromWidgetOfExactType(TooltipTheme);
+    final TooltipTheme tooltipTheme = context.dependOnInheritedWidgetOfExactType<TooltipTheme>();
     return tooltipTheme?.data ?? Theme.of(context).tooltipTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final TooltipTheme ancestorTheme = context.ancestorWidgetOfExactType(TooltipTheme);
+    final TooltipTheme ancestorTheme = context.findAncestorWidgetOfExactType<TooltipTheme>();
     return identical(this, ancestorTheme) ? child : TooltipTheme(data: data, child: child);
   }
 

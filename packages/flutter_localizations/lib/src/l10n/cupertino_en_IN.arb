@@ -18,5 +18,6 @@
   "cutButtonLabel": "Cut",
   "copyButtonLabel": "Copy",
   "pasteButtonLabel": "Paste",
-  "selectAllButtonLabel": "Select all"
+  "selectAllButtonLabel": "Select all",
+  "modalBarrierDismissLabel": "Dismiss"
 }

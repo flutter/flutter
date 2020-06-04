@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,6 +13,10 @@ import '../rendering/mock_canvas.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
 final ValueChanged<String> onChanged = (_) { };
+final Type dropdownButtonType = DropdownButton<String>(
+  onChanged: (_) { },
+  items: const <DropdownMenuItem<String>>[],
+).runtimeType;
 
 Finder _iconRichText(Key iconKey) {
   return find.descendant(
@@ -27,11 +31,12 @@ Widget buildFormFrame({
   int elevation = 8,
   String value = 'two',
   ValueChanged<String> onChanged,
+  VoidCallback onTap,
   Widget icon,
   Color iconDisabledColor,
   Color iconEnabledColor,
   double iconSize = 24.0,
-  bool isDense = false,
+  bool isDense = true,
   bool isExpanded = false,
   Widget hint,
   Widget disabledHint,
@@ -54,6 +59,7 @@ Widget buildFormFrame({
             hint: hint,
             disabledHint: disabledHint,
             onChanged: onChanged,
+            onTap: onTap,
             icon: icon,
             iconSize: iconSize,
             iconDisabledColor: iconDisabledColor,
@@ -103,10 +109,17 @@ class _TestAppState extends State<TestApp> {
 }
 
 class TestApp extends StatefulWidget {
-  const TestApp({ this.textDirection, this.child, this.mediaSize });
+  const TestApp({
+    Key key,
+    this.textDirection,
+    this.child,
+    this.mediaSize,
+  }) : super(key: key);
+
   final TextDirection textDirection;
   final Widget child;
   final Size mediaSize;
+
   @override
   _TestAppState createState() => _TestAppState();
 }
@@ -227,7 +240,6 @@ void main() {
       buildFormFrame(
         buttonKey: buttonKey,
         value: value,
-        isDense: true,
         onChanged: onChanged,
       ),
     );
@@ -254,12 +266,41 @@ void main() {
     final double menuItemHeight = itemBoxesHeight.reduce(math.max);
     expect(menuItemHeight, greaterThanOrEqualTo(buttonBox.size.height));
 
-    for (RenderBox itemBox in itemBoxes) {
+    for (final RenderBox itemBox in itemBoxes) {
       expect(itemBox.attached, isTrue);
       final Offset buttonBoxCenter = buttonBox.size.center(buttonBox.localToGlobal(Offset.zero));
       final Offset itemBoxCenter = itemBox.size.center(itemBox.localToGlobal(Offset.zero));
       expect(buttonBoxCenter.dy, equals(itemBoxCenter.dy));
     }
+  });
+
+  testWidgets('DropdownButtonFormField.isDense is true by default', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/46844
+    final Key buttonKey = UniqueKey();
+    const String value = 'two';
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<String>(
+            key: buttonKey,
+            value: value,
+            onChanged: onChanged,
+            items: menuItems.map<DropdownMenuItem<String>>((String item) {
+              return DropdownMenuItem<String>(
+                key: ValueKey<String>(item),
+                value: item,
+                child: Text(item, key: ValueKey<String>(item + 'Text')),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
+    expect(box.size.height, 24.0);
   });
 
   testWidgets('DropdownButtonFormField - custom text style', (WidgetTester tester) async {
@@ -551,7 +592,7 @@ void main() {
     } on AssertionError catch (error) {
       expect(
         error.toString(),
-        contains('There should be exactly one item with [DropdownButton]\'s value'),
+        contains("There should be exactly one item with [DropdownButton]'s value"),
       );
     }
   });
@@ -582,7 +623,7 @@ void main() {
     } on AssertionError catch (error) {
       expect(
         error.toString(),
-        contains('There should be exactly one item with [DropdownButton]\'s value'),
+        contains("There should be exactly one item with [DropdownButton]'s value"),
       );
     }
   });
@@ -629,5 +670,49 @@ void main() {
     await tester.tap(find.text('Two'));
     await tester.pumpAndSettle();
     expect(find.text('Two as an Arabic numeral: 2'), findsOneWidget);
+  });
+
+  testWidgets('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
+    int dropdownButtonTapCounter = 0;
+    String value = 'one';
+    void onChanged(String newValue) { value = newValue; }
+    void onTap() { dropdownButtonTapCounter += 1; }
+
+    Widget build() => buildFormFrame(
+      value: value,
+      onChanged: onChanged,
+      onTap: onTap,
+    );
+    await tester.pumpWidget(build());
+
+    expect(dropdownButtonTapCounter, 0);
+
+    // Tap dropdown button.
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();
+
+    expect(value, equals('one'));
+    expect(dropdownButtonTapCounter, 1); // Should update counter.
+
+    // Tap dropdown menu item.
+    await tester.tap(find.text('three').last);
+    await tester.pumpAndSettle();
+
+    expect(value, equals('three'));
+    expect(dropdownButtonTapCounter, 1); // Should not change.
+
+    // Tap dropdown button again.
+    await tester.tap(find.text('three'));
+    await tester.pumpAndSettle();
+
+    expect(value, equals('three'));
+    expect(dropdownButtonTapCounter, 2); // Should update counter.
+
+    // Tap dropdown menu item.
+    await tester.tap(find.text('two').last);
+    await tester.pumpAndSettle();
+
+    expect(value, equals('two'));
+    expect(dropdownButtonTapCounter, 2); // Should not change.
   });
 }

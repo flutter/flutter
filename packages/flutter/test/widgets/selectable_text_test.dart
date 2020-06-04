@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
+import 'package:flutter/gestures.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -132,7 +132,7 @@ void main() {
       'Third line of stuff';
   const String kMoreThanFourLines =
       kThreeLines +
-          '\nFourth line won\'t display and ends at';
+          "\nFourth line won't display and ends at";
 
   // Returns the first RenderEditable.
   RenderEditable findRenderEditable(WidgetTester tester) {
@@ -180,29 +180,26 @@ void main() {
   Widget selectableTextBuilder({
     String text = '',
     int maxLines = 1,
+    int minLines,
   }) {
     return boilerplate(
       child: SelectableText(
         text,
         style: const TextStyle(color: Colors.black, fontSize: 34.0),
         maxLines: maxLines,
+        minLines: minLines,
       ),
     );
   }
 
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MediaQuery(
-        data: MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: SelectableText('selectable text'),
-        ),
+      boilerplate(
+          child: const SelectableText('selectable text'),
       ),
     );
 
-    final SelectableText selectableText =
-    tester.firstWidget(find.byType(SelectableText));
+    final SelectableText selectableText = tester.firstWidget(find.byType(SelectableText));
     expect(selectableText.showCursor, false);
     expect(selectableText.autofocus, false);
     expect(selectableText.dragStartBehavior, DragStartBehavior.start);
@@ -326,6 +323,29 @@ void main() {
 
     final RenderBox longtextBox = findSelectableTextBox();
     expect(longtextBox.size, const Size(199.0, 14.0));
+  });
+
+  testWidgets('can scale with textScaleFactor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate(
+        child: const SelectableText('selectable text'),
+      ),
+    );
+
+    final RenderBox renderBox = tester.renderObject(find.byType(SelectableText));
+    expect(renderBox.size.height, 14.0);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: const SelectableText(
+          'selectable text',
+          textScaleFactor: 1.9,
+        ),
+      ),
+    );
+
+    final RenderBox scaledBox = tester.renderObject(find.byType(SelectableText));
+    expect(scaledBox.size.height, 27.0);
   });
 
   testWidgets('can switch between textWidthBasis', (WidgetTester tester) async {
@@ -510,7 +530,7 @@ void main() {
     expect(editableText.controller.selection.baseOffset, 9);
   });
 
-  testWidgets('Slight movements in longpress don\'t hide/show handles', (WidgetTester tester) async {
+  testWidgets("Slight movements in longpress don't hide/show handles", (WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),
@@ -975,7 +995,6 @@ void main() {
           dragStartBehavior: DragStartBehavior.down,
           style: TextStyle(color: Colors.black, fontSize: 34.0),
           maxLines: 3,
-          strutStyle: StrutStyle.disabled,
         ),
       ),
     );
@@ -1140,6 +1159,41 @@ void main() {
     expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
   });
 
+  testWidgets('minLines cannot be greater than maxLines', (WidgetTester tester) async {
+    try {
+      await tester.pumpWidget(
+        overlay(
+          child: Container(
+            width: 300.0,
+            child: SelectableText(
+              'abcd',
+              minLines: 4,
+              maxLines: 3,
+            ),
+          ),
+        ),
+      );
+    } on AssertionError catch (e) {
+      expect(e.toString(), contains("minLines can't be greater than maxLines"));
+      return;
+    }
+    fail('An assert should be triggered when minLines is greater than maxLines');
+  });
+
+  testWidgets('Selectable height with minLine', (WidgetTester tester) async {
+    await tester.pumpWidget(selectableTextBuilder());
+
+    RenderBox findTextBox() => tester.renderObject(find.byType(SelectableText));
+
+    final RenderBox textBox = findTextBox();
+    final Size emptyInputSize = textBox.size;
+
+    // Even if the text is a one liner, minimum height of SelectableText will determined by minLines
+    await tester.pumpWidget(selectableTextBuilder(text: 'No wrapping here.', minLines: 2, maxLines: 3));
+    expect(findTextBox(), equals(textBox));
+    expect(textBox.size.height, emptyInputSize.height * 2);
+  });
+
   testWidgets('Can align to center', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
@@ -1261,7 +1315,6 @@ void main() {
               child: SelectableText(
                 text,
                 maxLines: 3,
-                strutStyle: StrutStyle.disabled,
               ),
             ),
           ),
@@ -1381,7 +1434,7 @@ void main() {
     String clipboardContent = '';
     SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.setData')
-        clipboardContent = methodCall.arguments['text'];
+        clipboardContent = methodCall.arguments['text'] as String;
       else if (methodCall.method == 'Clipboard.getData')
         return <String, dynamic>{'text': clipboardContent};
       return null;
@@ -2306,12 +2359,11 @@ void main() {
   });
 
   testWidgets(
-    'tap moves cursor to the edge of the word it tapped on (iOS)',
+    'tap moves cursor to the edge of the word it tapped',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2334,8 +2386,7 @@ void main() {
 
       // But don't trigger the toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
     'tap moves cursor to the position tapped (Android)',
@@ -2370,12 +2421,11 @@ void main() {
   );
 
   testWidgets(
-    'two slow taps do not trigger a word selection (iOS)',
+    'two slow taps do not trigger a word selection',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2401,16 +2451,14 @@ void main() {
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'double tap selects word and first tap of double tap moves cursor (iOS)',
+    'double tap selects word and first tap of double tap moves cursor',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2447,8 +2495,7 @@ void main() {
 
       // Selected text shows 1 toolbar buttons.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
     'double tap selects word and first tap of double tap moves cursor and shows toolbar (Android)',
@@ -2545,12 +2592,11 @@ void main() {
   );
 
   testWidgets(
-    'double tap hold selects word (iOS)',
+    'double tap hold selects word',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2588,16 +2634,14 @@ void main() {
       );
       // The toolbar is still showing.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
     'tap after a double tap select is not affected (iOS)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2635,16 +2679,14 @@ void main() {
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'long press moves cursor to the exact long press position and shows toolbar (iOS)',
+    'long press moves cursor to the exact long press position and shows toolbar',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2668,8 +2710,7 @@ void main() {
 
       // Collapsed toolbar shows 2 buttons.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
     'long press selects word and shows toolbar (Android)',
@@ -2704,12 +2745,11 @@ void main() {
   );
 
   testWidgets(
-    'long press tap cannot initiate a double tap (iOS)',
+    'long press tap cannot initiate a double tap',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2736,16 +2776,14 @@ void main() {
       );
 
       expect(find.byType(CupertinoButton), findsNothing);
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
     'long press drag moves the cursor under the drag and shows toolbar on lift (iOS)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2802,14 +2840,12 @@ void main() {
       );
       // The toolbar now shows up.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('long press drag can edge scroll (iOS)', (WidgetTester tester) async {
+  testWidgets('long press drag can edge scroll', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: Center(
             child: SelectableText(
               'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
@@ -2893,15 +2929,14 @@ void main() {
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
     expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-125, epsilon: 1));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'long tap after a double tap select is not affected (iOS)',
+    'long tap after a double tap select is not affected',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2936,16 +2971,14 @@ void main() {
 
       // Long press toolbar.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 //convert
   testWidgets(
-    'double tap after a long tap is not affected (iOS)',
+    'double tap after a long tap is not affected',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2978,16 +3011,14 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'double tap chains work (iOS)',
+    'double tap chains work',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -3045,8 +3076,7 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('force press does not select a word on (android)', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -3084,11 +3114,10 @@ void main() {
     expect(find.byType(FlatButton), findsNothing);
   });
 
-  testWidgets('force press selects word (iOS)', (WidgetTester tester) async {
+  testWidgets('force press selects word', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
         ),
       ),
@@ -3124,13 +3153,12 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(find.byType(CupertinoButton), findsNWidgets(1));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('tap on non-force-press-supported devices work (iOS)', (WidgetTester tester) async {
+  testWidgets('tap on non-force-press-supported devices work', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
         ),
       ),
@@ -3169,7 +3197,11 @@ void main() {
     await tester.pump();
     // Single taps shouldn't trigger the toolbar.
     expect(find.byType(CupertinoButton), findsNothing);
-  });
+
+    // TODO(gspencergoog): Add in TargetPlatform.macOS in the line below when we
+    // figure out what global state is leaking.
+    // https://github.com/flutter/flutter/issues/43445
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('default SelectableText debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -3186,27 +3218,16 @@ void main() {
   testWidgets('SelectableText implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-//    properties.add(DiagnosticsProperty<String>('data', data, defaultValue: null));
-//    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
-//    properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
-//    properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-//    properties.add(DiagnosticsProperty<bool>('showCursor', showCursor, defaultValue: false));
-//    properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
-//    properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-//    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-//    properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
-//    properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
-//    properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
-//    properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
-//    properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     // Not checking controller, inputFormatters, focusNode
     const SelectableText(
       'something',
       style: TextStyle(color: Color(0xff00ff00)),
       textAlign: TextAlign.end,
       textDirection: TextDirection.ltr,
+      textScaleFactor: 1.0,
       autofocus: true,
       showCursor: true,
+      minLines: 2,
       maxLines: 10,
       cursorWidth: 1.0,
       cursorRadius: Radius.zero,
@@ -3224,9 +3245,11 @@ void main() {
       'style: TextStyle(inherit: true, color: Color(0xff00ff00))',
       'autofocus: true',
       'showCursor: true',
+      'minLines: 2',
       'maxLines: 10',
       'textAlign: end',
       'textDirection: ltr',
+      'textScaleFactor: 1.0',
       'cursorWidth: 1.0',
       'cursorRadius: Radius.circular(0.0)',
       'cursorColor: Color(0xff00ff00)',
@@ -3550,20 +3573,19 @@ void main() {
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pumpAndSettle();
 
-    final List<Widget> transitions =
-    find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
-    // On Android, an empty app contains a single FadeTransition. The following
-    // two are the left and right text selection handles, respectively.
-    expect(transitions.length, 3);
-    final FadeTransition left = transitions[1];
-    final FadeTransition right = transitions[2];
+    final List<FadeTransition> transitions = find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
+      matching: find.byType(FadeTransition),
+    ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
+    expect(transitions.length, 2);
+    final FadeTransition left = transitions[0];
+    final FadeTransition right = transitions[1];
 
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));
   });
 
-  testWidgets('iOS selection handles are rendered and not faded away', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+  testWidgets('selection handles are rendered and not faded away', (WidgetTester tester) async {
     const String testText = 'lorem ipsum';
 
     await tester.pumpWidget(
@@ -3584,14 +3606,12 @@ void main() {
     final List<Widget> transitions =
     find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
     expect(transitions.length, 2);
-    final FadeTransition left = transitions[0];
-    final FadeTransition right = transitions[1];
+    final FadeTransition left = transitions[0] as FadeTransition;
+    final FadeTransition right = transitions[1] as FadeTransition;
 
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));
-
-    debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Long press shows handles and toolbar', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -3723,4 +3743,105 @@ void main() {
       expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
     },
   );
+
+  testWidgets('text span with tap gesture recognizer works in selectable rich text', (WidgetTester tester) async {
+    int spyTaps = 0;
+    final TapGestureRecognizer spyRecognizer = TapGestureRecognizer()
+      ..onTap = () {
+        spyTaps += 1;
+      };
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SelectableText.rich(
+              TextSpan(
+                children: <TextSpan>[
+                  const TextSpan(text: 'Atwater '),
+                  TextSpan(text: 'Peel', recognizer: spyRecognizer),
+                  const TextSpan(text: ' Sherbrooke Bonaventure'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(spyTaps, 0);
+    final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+    await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
+    expect(spyTaps, 1);
+
+    // Waits for a while to avoid double taps.
+    await tester.pump(const Duration(seconds: 1));
+
+    // Starts a long press.
+    final TestGesture gesture =
+      await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    await tester.pump();
+    final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+
+    final TextEditingController controller = editableTextWidget.controller;
+    // Long press still triggers selection.
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 8, extentOffset: 12),
+    );
+    // Long press does not trigger gesture recognizer.
+    expect(spyTaps, 1);
+  });
+
+  testWidgets('text span with long press gesture recognizer works in selectable rich text', (WidgetTester tester) async {
+    int spyLongPress = 0;
+    final LongPressGestureRecognizer spyRecognizer = LongPressGestureRecognizer()
+      ..onLongPress = () {
+        spyLongPress += 1;
+      };
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SelectableText.rich(
+              TextSpan(
+                children: <TextSpan>[
+                  const TextSpan(text: 'Atwater '),
+                  TextSpan(text: 'Peel', recognizer: spyRecognizer),
+                  const TextSpan(text: ' Sherbrooke Bonaventure'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(spyLongPress, 0);
+    final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+    await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
+    expect(spyLongPress, 0);
+
+    // Waits for a while to avoid double taps.
+    await tester.pump(const Duration(seconds: 1));
+
+    // Starts a long press.
+    final TestGesture gesture =
+    await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    await tester.pump();
+    final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+
+    final TextEditingController controller = editableTextWidget.controller;
+    // Long press does not trigger selection if there is text span with long
+    // press recognizer.
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 11, extentOffset: 11, affinity: TextAffinity.upstream),
+    );
+    // Long press triggers gesture recognizer.
+    expect(spyLongPress, 1);
+  });
 }

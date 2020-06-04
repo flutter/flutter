@@ -1,33 +1,45 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
 import 'package:meta/meta.dart';
-
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test_core/backend.dart';
+import 'package:test_core/backend.dart'; // ignore: deprecated_member_use
 
 import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
   group('FlutterPlatform', () {
-    testUsingContext('ensureConfiguration throws an error if an explicitObservatoryPort is specified and more than one test file', () async {
-      final FlutterPlatform flutterPlatform = FlutterPlatform(buildMode: BuildMode.debug, shellPath: '/', explicitObservatoryPort: 1234);
+    testUsingContext('ensureConfiguration throws an error if an '
+      'explicitObservatoryPort is specified and more than one test file', () async {
+      final FlutterPlatform flutterPlatform = FlutterPlatform(
+        buildMode: BuildMode.debug,
+        shellPath: '/',
+        explicitObservatoryPort: 1234,
+        dartExperiments: <String>[],
+      );
       flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
-      expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsA(isA<ToolExit>()));
+
+      expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsToolExit());
     });
 
-    testUsingContext('ensureConfiguration throws an error if a precompiled entrypoint is specified and more that one test file', () {
-      final FlutterPlatform flutterPlatform = FlutterPlatform(buildMode: BuildMode.debug, shellPath: '/', precompiledDillPath: 'example.dill');
+    testUsingContext('ensureConfiguration throws an error if a precompiled '
+      'entrypoint is specified and more that one test file', () {
+      final FlutterPlatform flutterPlatform = FlutterPlatform(
+        buildMode: BuildMode.debug,
+        shellPath: '/',
+        precompiledDillPath: 'example.dill',
+        dartExperiments: <String>[],
+      );
       flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
-      expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsA(isA<ToolExit>()));
+
+      expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsToolExit());
     });
 
     group('The FLUTTER_TEST environment variable is passed to the test process', () {
@@ -47,11 +59,20 @@ void main() {
 
       Future<Map<String, String>> captureEnvironment() async {
         flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
+        when(mockProcessManager.start(
+          any,
+          environment: anyNamed('environment')),
+        ).thenAnswer((_) {
+          return Future<Process>.value(MockProcess());
+        });
         await untilCalled(mockProcessManager.start(any, environment: anyNamed('environment')));
-        final VerificationResult toVerify = verify(mockProcessManager.start(any, environment: captureAnyNamed('environment')));
+        final VerificationResult toVerify = verify(mockProcessManager.start(
+          any,
+          environment: captureAnyNamed('environment'),
+        ));
         expect(toVerify.captured, hasLength(1));
-        expect(toVerify.captured.first, isInstanceOf<Map<String, String>>());
-        return toVerify.captured.first;
+        expect(toVerify.captured.first, isA<Map<String, String>>());
+        return toVerify.captured.first as Map<String, String>;
       }
 
       testUsingContext('as true when not originally set', () async {
@@ -91,7 +112,8 @@ void main() {
         shellPath: 'abc',
         enableObservatory: false,
         startPaused: true,
-      ), throwsA(isA<AssertionError>()));
+        dartExperiments: <String>[],
+      ), throwsAssertionError);
 
       expect(() => installHook(
         buildMode: BuildMode.debug,
@@ -99,7 +121,8 @@ void main() {
         enableObservatory: false,
         startPaused: false,
         observatoryPort: 123,
-      ), throwsA(isA<AssertionError>()));
+        dartExperiments: <String>[],
+      ), throwsAssertionError);
 
       FlutterPlatform capturedPlatform;
       final Map<String, String> expectedPrecompiledDillFiles = <String, String>{'Key': 'Value'};
@@ -119,6 +142,7 @@ void main() {
         observatoryPort: 200,
         serverType: InternetAddressType.IPv6,
         icudtlPath: 'ghi',
+        dartExperiments: <String>[],
         platformPluginRegistration: (FlutterPlatform platform) {
           capturedPlatform = platform;
         });
@@ -147,6 +171,8 @@ class MockSuitePlatform extends Mock implements SuitePlatform {}
 
 class MockProcessManager extends Mock implements ProcessManager {}
 
+class MockProcess extends Mock implements Process {}
+
 class MockPlatform extends Mock implements Platform {}
 
 class MockHttpServer extends Mock implements HttpServer {}
@@ -165,6 +191,7 @@ class TestFlutterPlatform extends FlutterPlatform {
     startPaused: false,
     enableObservatory: false,
     buildTestAssets: false,
+    dartExperiments: <String>[],
   );
 
   @override

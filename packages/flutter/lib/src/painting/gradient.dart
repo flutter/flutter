@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -82,7 +82,7 @@ abstract class GradientTransform {
 /// A [GradientTransform] that rotates the gradient around the center-point of
 /// its bounding box.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample would rotate a sweep gradient by a quarter turn clockwise:
 ///
@@ -327,7 +327,7 @@ abstract class Gradient {
 /// Typically this class is used with [BoxDecoration], which does the painting.
 /// To use a [LinearGradient] to paint on a canvas directly, see [createShader].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample draws a picture that looks like vertical window shades by having
 /// a [Container] display a [BoxDecoration] with a [LinearGradient].
@@ -438,14 +438,14 @@ class LinearGradient extends Gradient {
   @override
   Gradient lerpFrom(Gradient a, double t) {
     if (a == null || (a is LinearGradient))
-      return LinearGradient.lerp(a, this, t);
+      return LinearGradient.lerp(a as LinearGradient, this, t);
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient lerpTo(Gradient b, double t) {
     if (b == null || (b is LinearGradient))
-      return LinearGradient.lerp(this, b, t);
+      return LinearGradient.lerp(this, b as LinearGradient, t);
     return super.lerpTo(b, t);
   }
 
@@ -493,35 +493,17 @@ class LinearGradient extends Gradient {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
-    final LinearGradient typedOther = other;
-    if (begin != typedOther.begin ||
-        end != typedOther.end ||
-        tileMode != typedOther.tileMode ||
-        colors?.length != typedOther.colors?.length ||
-        stops?.length != typedOther.stops?.length)
-      return false;
-    if (colors != null) {
-      assert(typedOther.colors != null);
-      assert(colors.length == typedOther.colors.length);
-      for (int i = 0; i < colors.length; i += 1) {
-        if (colors[i] != typedOther.colors[i])
-          return false;
-      }
-    }
-    if (stops != null) {
-      assert(typedOther.stops != null);
-      assert(stops.length == typedOther.stops.length);
-      for (int i = 0; i < stops.length; i += 1) {
-        if (stops[i] != typedOther.stops[i])
-          return false;
-      }
-    }
-    return true;
+    return other is LinearGradient
+        && other.begin == begin
+        && other.end == end
+        && other.tileMode == tileMode
+        && listEquals<Color>(other.colors, colors)
+        && listEquals<double>(other.stops, stops);
   }
 
   @override
@@ -529,7 +511,7 @@ class LinearGradient extends Gradient {
 
   @override
   String toString() {
-    return '$runtimeType($begin, $end, $colors, $stops, $tileMode)';
+    return '${objectRuntimeType(this, 'LinearGradient')}($begin, $end, $colors, $stops, $tileMode)';
   }
 }
 
@@ -569,7 +551,7 @@ class LinearGradient extends Gradient {
 /// Typically this class is used with [BoxDecoration], which does the painting.
 /// To use a [RadialGradient] to paint on a canvas directly, see [createShader].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This function draws a gradient that looks like a sun in a blue sky.
 ///
@@ -714,14 +696,14 @@ class RadialGradient extends Gradient {
   @override
   Gradient lerpFrom(Gradient a, double t) {
     if (a == null || (a is RadialGradient))
-      return RadialGradient.lerp(a, this, t);
+      return RadialGradient.lerp(a as RadialGradient, this, t);
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient lerpTo(Gradient b, double t) {
     if (b == null || (b is RadialGradient))
-      return RadialGradient.lerp(this, b, t);
+      return RadialGradient.lerp(this, b as RadialGradient, t);
     return super.lerpTo(b, t);
   }
 
@@ -771,37 +753,19 @@ class RadialGradient extends Gradient {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
-    final RadialGradient typedOther = other;
-    if (center != typedOther.center ||
-        radius != typedOther.radius ||
-        tileMode != typedOther.tileMode ||
-        colors?.length != typedOther.colors?.length ||
-        stops?.length != typedOther.stops?.length ||
-        focal != typedOther.focal ||
-        focalRadius != typedOther.focalRadius)
-      return false;
-    if (colors != null) {
-      assert(typedOther.colors != null);
-      assert(colors.length == typedOther.colors.length);
-      for (int i = 0; i < colors.length; i += 1) {
-        if (colors[i] != typedOther.colors[i])
-          return false;
-      }
-    }
-    if (stops != null) {
-      assert(typedOther.stops != null);
-      assert(stops.length == typedOther.stops.length);
-      for (int i = 0; i < stops.length; i += 1) {
-        if (stops[i] != typedOther.stops[i])
-          return false;
-      }
-    }
-    return true;
+    return other is RadialGradient
+        && other.center == center
+        && other.radius == radius
+        && other.tileMode == tileMode
+        && listEquals<Color>(other.colors, colors)
+        && listEquals<double>(other.stops, stops)
+        && other.focal == focal
+        && other.focalRadius == focalRadius;
   }
 
   @override
@@ -809,7 +773,7 @@ class RadialGradient extends Gradient {
 
   @override
   String toString() {
-    return '$runtimeType($center, $radius, $colors, $stops, $tileMode, $focal, $focalRadius)';
+    return '${objectRuntimeType(this, 'RadialGradient')}($center, $radius, $colors, $stops, $tileMode, $focal, $focalRadius)';
   }
 }
 
@@ -835,7 +799,7 @@ class RadialGradient extends Gradient {
 /// Typically this class is used with [BoxDecoration], which does the painting.
 /// To use a [SweepGradient] to paint on a canvas directly, see [createShader].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample draws a different color in each quadrant.
 ///
@@ -860,7 +824,7 @@ class RadialGradient extends Gradient {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample takes the above gradient and rotates it by `math.pi/4` radians,
 /// i.e. 45 degrees.
@@ -980,14 +944,14 @@ class SweepGradient extends Gradient {
   @override
   Gradient lerpFrom(Gradient a, double t) {
     if (a == null || (a is SweepGradient))
-      return SweepGradient.lerp(a, this, t);
+      return SweepGradient.lerp(a as SweepGradient, this, t);
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient lerpTo(Gradient b, double t) {
     if (b == null || (b is SweepGradient))
-      return SweepGradient.lerp(this, b, t);
+      return SweepGradient.lerp(this, b as SweepGradient, t);
     return super.lerpTo(b, t);
   }
 
@@ -1035,36 +999,18 @@ class SweepGradient extends Gradient {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
-    final SweepGradient typedOther = other;
-    if (center != typedOther.center ||
-        startAngle != typedOther.startAngle ||
-        endAngle != typedOther.endAngle ||
-        tileMode != typedOther.tileMode ||
-        colors?.length != typedOther.colors?.length ||
-        stops?.length != typedOther.stops?.length)
-      return false;
-    if (colors != null) {
-      assert(typedOther.colors != null);
-      assert(colors.length == typedOther.colors.length);
-      for (int i = 0; i < colors.length; i += 1) {
-        if (colors[i] != typedOther.colors[i])
-          return false;
-      }
-    }
-    if (stops != null) {
-      assert(typedOther.stops != null);
-      assert(stops.length == typedOther.stops.length);
-      for (int i = 0; i < stops.length; i += 1) {
-        if (stops[i] != typedOther.stops[i])
-          return false;
-      }
-    }
-    return true;
+    return other is SweepGradient
+        && other.center == center
+        && other.startAngle == startAngle
+        && other.endAngle == endAngle
+        && other.tileMode == tileMode
+        && listEquals<Color>(other.colors, colors)
+        && listEquals<double>(other.stops, stops);
   }
 
   @override
@@ -1072,6 +1018,6 @@ class SweepGradient extends Gradient {
 
   @override
   String toString() {
-    return '$runtimeType($center, $startAngle, $endAngle, $colors, $stops, $tileMode)';
+    return '${objectRuntimeType(this, 'SweepGradient')}($center, $startAngle, $endAngle, $colors, $stops, $tileMode)';
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,7 +8,7 @@ import 'colors.dart';
 
 /// An [IconThemeData] subclass that automatically resolves its [color] when retrieved
 /// using [IconTheme.of].
-class CupertinoIconThemeData extends IconThemeData with DiagnosticableMixin {
+class CupertinoIconThemeData extends IconThemeData with Diagnosticable {
   /// Creates a [CupertinoIconThemeData].
   ///
   /// The opacity applies to both explicit and default icon colors. The value
@@ -19,7 +19,7 @@ class CupertinoIconThemeData extends IconThemeData with DiagnosticableMixin {
     double size
   }) : super(color: color, opacity: opacity, size: size);
 
-  /// Called by [IconThemeData.of] to resolve [color] against the given [BuildContext].
+  /// Called by [IconTheme.of] to resolve [color] against the given [BuildContext].
   @override
   IconThemeData resolve(BuildContext context) {
     final Color resolvedColor = CupertinoDynamicColor.resolve(color, context);

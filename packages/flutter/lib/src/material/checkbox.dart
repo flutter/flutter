@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -65,6 +65,7 @@ class Checkbox extends StatefulWidget {
     this.focusColor,
     this.hoverColor,
     this.materialTapTargetSize,
+    this.visualDensity,
     this.focusNode,
     this.autofocus = false,
   }) : assert(tristate != null),
@@ -137,6 +138,16 @@ class Checkbox extends StatefulWidget {
   ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
 
+  /// Defines how compact the checkbox's layout will be.
+  ///
+  /// {@macro flutter.material.themedata.visualDensity}
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
+  ///    within a [Theme].
+  final VisualDensity visualDensity;
+
   /// The color for the checkbox's [Material] when it has the input focus.
   final Color focusColor;
 
@@ -158,21 +169,17 @@ class Checkbox extends StatefulWidget {
 
 class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
   bool get enabled => widget.onChanged != null;
-  Map<LocalKey, ActionFactory> _actionMap;
-  bool _showHighlight = false;
+  Map<Type, Action<Intent>> _actionMap;
 
   @override
   void initState() {
     super.initState();
-    _actionMap = <LocalKey, ActionFactory>{
-      SelectAction.key: _createAction,
-      if (!kIsWeb) ActivateAction.key: _createAction,
+    _actionMap = <Type, Action<Intent>>{
+      ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _actionHandler),
     };
-    _updateHighlightMode(FocusManager.instance.highlightMode);
-    FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
-  void _actionHandler(FocusNode node, Intent intent){
+  void _actionHandler(ActivateIntent intent) {
     if (widget.onChanged != null) {
       switch (widget.value) {
         case false:
@@ -186,38 +193,23 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
           break;
       }
     }
-    final RenderObject renderObject = node.context.findRenderObject();
+    final RenderObject renderObject = context.findRenderObject();
     renderObject.sendSemanticsEvent(const TapSemanticEvent());
   }
 
-  Action _createAction() {
-    return CallbackAction(
-      SelectAction.key,
-      onInvoke: _actionHandler,
-    );
-  }
-
-  void _updateHighlightMode(FocusHighlightMode mode) {
-    switch (FocusManager.instance.highlightMode) {
-      case FocusHighlightMode.touch:
-        _showHighlight = false;
-        break;
-      case FocusHighlightMode.traditional:
-        _showHighlight = true;
-        break;
+  bool _focused = false;
+  void _handleFocusHighlightChanged(bool focused) {
+    if (focused != _focused) {
+      setState(() { _focused = focused; });
     }
   }
 
-  void _handleFocusHighlightModeChange(FocusHighlightMode mode) {
-    if (!mounted) {
-      return;
+  bool _hovering = false;
+  void _handleHoverChanged(bool hovering) {
+    if (hovering != _hovering) {
+      setState(() { _hovering = hovering; });
     }
-    setState(() { _updateHighlightMode(mode); });
   }
-
-  bool hovering = false;
-  void _handleMouseEnter(PointerEnterEvent event) => setState(() { hovering = true; });
-  void _handleMouseExit(PointerExitEvent event) => setState(() { hovering = false; });
 
   @override
   Widget build(BuildContext context) {
@@ -232,36 +224,32 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
         size = const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius);
         break;
     }
+    size += (widget.visualDensity ?? themeData.visualDensity).baseSizeAdjustment;
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
-    return MouseRegion(
-      onEnter: enabled ? _handleMouseEnter : null,
-      onExit: enabled ? _handleMouseExit : null,
-      child: Actions(
-        actions: _actionMap,
-        child: Focus(
-          focusNode: widget.focusNode,
-          autofocus: widget.autofocus,
-          canRequestFocus: enabled,
-          debugLabel: '${describeIdentity(widget)}(${widget.value})',
-          child: Builder(
-            builder: (BuildContext context) {
-              return _CheckboxRenderObjectWidget(
-                value: widget.value,
-                tristate: widget.tristate,
-                activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
-                checkColor: widget.checkColor ?? const Color(0xFFFFFFFF),
-                inactiveColor: enabled ? themeData.unselectedWidgetColor : themeData.disabledColor,
-                focusColor: widget.focusColor ?? themeData.focusColor,
-                hoverColor: widget.hoverColor ?? themeData.hoverColor,
-                onChanged: widget.onChanged,
-                additionalConstraints: additionalConstraints,
-                vsync: this,
-                hasFocus: enabled && _showHighlight && Focus.of(context).hasFocus,
-                hovering: enabled && _showHighlight && hovering,
-              );
-            },
-          ),
-        ),
+    return FocusableActionDetector(
+      actions: _actionMap,
+      focusNode: widget.focusNode,
+      autofocus: widget.autofocus,
+      enabled: enabled,
+      onShowFocusHighlight: _handleFocusHighlightChanged,
+      onShowHoverHighlight: _handleHoverChanged,
+      child: Builder(
+        builder: (BuildContext context) {
+          return _CheckboxRenderObjectWidget(
+            value: widget.value,
+            tristate: widget.tristate,
+            activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
+            checkColor: widget.checkColor ?? const Color(0xFFFFFFFF),
+            inactiveColor: enabled ? themeData.unselectedWidgetColor : themeData.disabledColor,
+            focusColor: widget.focusColor ?? themeData.focusColor,
+            hoverColor: widget.hoverColor ?? themeData.hoverColor,
+            onChanged: widget.onChanged,
+            additionalConstraints: additionalConstraints,
+            vsync: this,
+            hasFocus: _focused,
+            hovering: _hovering,
+          );
+        },
       ),
     );
   }
@@ -463,7 +451,7 @@ class _RenderCheckbox extends RenderToggleable {
     paintRadialReaction(canvas, offset, size.center(Offset.zero));
 
     final Paint strokePaint = _createStrokePaint();
-    final Offset origin = offset + (size / 2.0 - const Size.square(_kEdgeSize) / 2.0);
+    final Offset origin = offset + (size / 2.0 - const Size.square(_kEdgeSize) / 2.0 as Offset);
     final AnimationStatus status = position.status;
     final double tNormalized = status == AnimationStatus.forward || status == AnimationStatus.completed
       ? position.value

@@ -18,5 +18,7 @@
   "cutButtonLabel": "Ausschneiden",
   "copyButtonLabel": "Kopieren",
   "pasteButtonLabel": "Einsetzen",
-  "selectAllButtonLabel": "Alles auswählen"
+  "selectAllButtonLabel": "Alles auswählen",
+  "tabSemanticsLabel": "TBD",
+  "modalBarrierDismissLabel": "Schließen"
 }

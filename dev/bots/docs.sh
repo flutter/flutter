@@ -1,4 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
 set -e
 
 function deploy {
@@ -107,7 +111,7 @@ if [[ -d "$FLUTTER_PUB_CACHE" ]]; then
 fi
 
 # Install and activate dartdoc.
-"$PUB" global activate dartdoc 0.29.1
+"$PUB" global activate dartdoc 0.31.0
 
 # This script generates a unified doc set, and creates
 # a custom index.html, placing everything into dev/docs/doc.
@@ -145,4 +149,3 @@ if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
     deploy 5 docs-flutter-dev
   fi
 fi
-

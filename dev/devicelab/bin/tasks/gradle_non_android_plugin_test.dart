@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -37,7 +37,7 @@ Future<void> main() async {
         );
       });
 
-      section('Delete plugin\'s Android folder');
+      section("Delete plugin's Android folder");
 
       final File androidFolder = File(path.join(
         projectDir.path,
@@ -50,15 +50,20 @@ Future<void> main() async {
       final String pubspecString = pubspecFile.readAsStringSync();
 
       final StringBuffer iosOnlyPubspec = StringBuffer();
-      for (String line in pubspecString.split('\n')) {
-        if (line.startsWith('    androidPackage:')) {
+      bool inAndroidSection = false;
+      const String pluginPlatformIndentation = '      ';
+      for (final String line in pubspecString.split('\n')) {
+        // Skip everything in the Android section of the plugin platforms list.
+        if (line.startsWith('${pluginPlatformIndentation}android:')) {
+          inAndroidSection = true;
           continue;
         }
-        if (line.startsWith('    pluginClass:')) {
-          iosOnlyPubspec.write('    platforms:\n');
-          iosOnlyPubspec.write('      ios:\n');
-          iosOnlyPubspec.write('        pluginClass: IosOnlyPlugin\n');
-          continue;
+        if (inAndroidSection) {
+          if (line.startsWith('$pluginPlatformIndentation  ')) {
+            continue;
+          } else {
+            inAndroidSection = false;
+          }
         }
         iosOnlyPubspec.write('$line\n');
       }

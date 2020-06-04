@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,9 +11,16 @@ import '../widgets/semantics_tester.dart';
 
 Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async {
   await tester.pumpWidget(
-    Directionality(
-      textDirection: TextDirection.ltr,
-      child: widget,
+    Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultCupertinoLocalizations.delegate,
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: widget,
+      ),
     ),
   );
 }
@@ -117,7 +124,7 @@ void main() {
     ));
 
     // Border color is resolved correctly.
-    final BoxDecoration decoration1 = renderDecoratedBox.decoration;
+    final BoxDecoration decoration1 = renderDecoratedBox.decoration as BoxDecoration;
     expect(decoration1.border.top.color.value, 0x4C000000);
 
     // Switch to dark mode.
@@ -153,7 +160,7 @@ void main() {
     expect(actualActive.text.style.color.value, 0xFF000001);
 
     // Border color is resolved correctly.
-    final BoxDecoration decoration2 = renderDecoratedBox.decoration;
+    final BoxDecoration decoration2 = renderDecoratedBox.decoration as BoxDecoration;
     expect(decoration2.border.top.color.value, 0x29000000);
   });
 
@@ -451,7 +458,7 @@ void main() {
         ));
 
     final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox));
-    final BoxDecoration boxDecoration = decoratedBox.decoration;
+    final BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
     expect(boxDecoration.border, isNotNull);
 
     await pumpWidgetWithBoilerplate(
@@ -481,7 +488,7 @@ void main() {
     final DecoratedBox decoratedBoxHiddenBorder =
         tester.widget(find.byType(DecoratedBox));
     final BoxDecoration boxDecorationHiddenBorder =
-        decoratedBoxHiddenBorder.decoration;
+        decoratedBoxHiddenBorder.decoration as BoxDecoration;
     expect(boxDecorationHiddenBorder.border, isNull);
   });
 }

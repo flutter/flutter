@@ -1,4 +1,4 @@
-// Copyright 2014 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,7 +6,7 @@ import 'localizations_utils.dart';
 
 HeaderGenerator generateMaterialHeader = (String regenerateInstructions) {
   return '''
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -38,20 +38,26 @@ ConstructorGenerator generateMaterialConstructor = (LocaleInfo locale) {
   /// Create an instance of the translation bundle for ${describeLocale(localeName)}.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
-  const MaterialLocalization${camelCase(locale)}({
+  const MaterialLocalization${locale.camelCase()}({
     String localeName = '$localeName',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );''';
@@ -63,15 +69,18 @@ const String materialFactoryDeclaration = '''
 GlobalMaterialLocalizations getMaterialTranslation(
   Locale locale,
   intl.DateFormat fullYearFormat,
+  intl.DateFormat compactDateFormat,
+  intl.DateFormat shortDateFormat,
   intl.DateFormat mediumDateFormat,
   intl.DateFormat longDateFormat,
   intl.DateFormat yearMonthFormat,
+  intl.DateFormat shortMonthDayFormat,
   intl.NumberFormat decimalFormat,
   intl.NumberFormat twoDigitZeroPaddedFormat,
 ) {''';
 
 const String materialFactoryArguments =
-    'fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat';
+    'fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat';
 
 const String materialSupportedLanguagesConstant = 'kMaterialSupportedLanguages';
 

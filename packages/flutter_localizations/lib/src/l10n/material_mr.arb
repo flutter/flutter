@@ -17,8 +17,8 @@
   "rowsPerPageTitle": "प्रति पेज पंक्ती:",
   "tabLabel": "$tabCount पैकी $tabIndex टॅब",
   "selectedRowCountTitleZero": "कोणतेही आयटम निवडलेले नाहीत",
-  "selectedRowCountTitleOne": "एक अायटम निवडला",
-  "selectedRowCountTitleOther": "$selectedRowCount अायटम निवडले",
+  "selectedRowCountTitleOne": "एक आयटम निवडला",
+  "selectedRowCountTitleOther": "$selectedRowCount आयटम निवडले",
   "cancelButtonLabel": "रद्द करा",
   "closeButtonLabel": "बंद करा",
   "continueButtonLabel": "सुरू ठेवा",
@@ -52,5 +52,6 @@
   "remainingTextFieldCharacterCountZero": "कोणतेही वर्ण शिल्लक नाहीत",
   "remainingTextFieldCharacterCountOne": "एक वर्ण शिल्लक",
   "remainingTextFieldCharacterCountOther": "$remainingCount वर्ण शिल्लक",
-  "refreshIndicatorSemanticLabel": "रिफ्रेश करा"
+  "refreshIndicatorSemanticLabel": "रिफ्रेश करा",
+  "moreButtonTooltip": "आणखी"
 }

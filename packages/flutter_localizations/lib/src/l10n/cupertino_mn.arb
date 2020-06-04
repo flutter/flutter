@@ -18,5 +18,7 @@
   "cutButtonLabel": "Таслах",
   "copyButtonLabel": "Хуулах",
   "pasteButtonLabel": "Буулгах",
-  "selectAllButtonLabel": "Бүгдийг сонгох"
+  "selectAllButtonLabel": "Бүгдийг сонгох",
+  "tabSemanticsLabel": "TBD",
+  "modalBarrierDismissLabel": "Үл хэрэгсэх"
 }

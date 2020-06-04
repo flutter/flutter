@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -40,7 +40,7 @@ Future<void> main() async {
         print('^ not sure what to do with that line ^');
       }
     }
-    await for (String entry in analysis.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
+    await for (final String entry in analysis.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
       print('analyzer stderr: $entry');
       if (entry.contains(' (ran in ') && !sawFinalLine) {
         // ignore this line once

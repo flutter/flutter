@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -122,7 +122,7 @@ class LoadErrorImageProvider extends ImageProvider<LoadErrorImageProvider> {
 class LoadErrorCompleterImageProvider extends ImageProvider<LoadErrorCompleterImageProvider> {
   @override
   ImageStreamCompleter load(LoadErrorCompleterImageProvider key, DecoderCallback decode) {
-    final Completer<void> completer = Completer<void>.sync();
+    final Completer<ImageInfo> completer = Completer<ImageInfo>.sync();
     completer.completeError(Error());
     return OneFrameImageStreamCompleter(completer.future);
   }
@@ -133,4 +133,8 @@ class LoadErrorCompleterImageProvider extends ImageProvider<LoadErrorCompleterIm
   }
 }
 
-class TestImageStreamCompleter extends ImageStreamCompleter {}
+class TestImageStreamCompleter extends ImageStreamCompleter {
+  void testSetImage(TestImage image) {
+    setImage(ImageInfo(image: image, scale: 1.0));
+  }
+}

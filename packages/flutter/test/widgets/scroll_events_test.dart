@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -20,8 +20,8 @@ Widget _buildScroller({ List<String> log }) {
       }
       return false;
     },
-    child: SingleChildScrollView(
-      child: Container(width: 1000.0, height: 1000.0),
+    child: const SingleChildScrollView(
+      child: SizedBox(width: 1000.0, height: 1000.0),
     ),
   );
 }

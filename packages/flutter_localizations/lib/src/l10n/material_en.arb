@@ -31,6 +31,11 @@
     "description": "The tooltip for the delete button of chips."
   },
 
+  "moreButtonTooltip": "More",
+  "@moreButtonTooltip": {
+    "description": "The tooltip for the more button in the text selection menu, which shows the overflowing menu items."
+  },
+
   "nextMonthTooltip": "Next month",
   "@nextMonthTooltip": {
     "description": "The tooltip for the month picker's 'next month' button."
@@ -165,7 +170,7 @@
 
   "modalBarrierDismissLabel": "Dismiss",
   "@modalBarrierDismissLabel": {
-    "description": "Label read out by accessibility tools (TalkBack or VocieOver) for a modal barrier to indicate that a tap dismisses the barrier. A modal barrier can for example be found behind a alert or popup to block user interaction with elements behind it."
+    "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for a modal barrier to indicate that a tap dismisses the barrier. A modal barrier can for example be found behind a alert or popup to block user interaction with elements behind it."
   },
 
   "signedInLabel": "Signed in",

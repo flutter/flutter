@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -115,19 +115,20 @@ void main() {
       );
 
       final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
-      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != CupertinoColors.white), false);
+      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != null), false);
     });
 
-    testWidgets('background color is not null', (WidgetTester tester) async {
-      expect(
-        () {
-          CupertinoTimerPicker(
+    testWidgets('background color can be null', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTimerPicker(
             onTimerDurationChanged: (_) { },
             backgroundColor: null,
-          );
-        },
-        throwsAssertionError,
+          ),
+        ),
       );
+
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('specified background color is applied', (WidgetTester tester) async {
@@ -316,19 +317,20 @@ void main() {
       );
 
       final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
-      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != CupertinoColors.white), false);
+      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != null), false);
     });
 
-    testWidgets('background color is not null', (WidgetTester tester) async {
-      expect(
-        () {
-          CupertinoDatePicker(
+    testWidgets('background color can be null', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoDatePicker(
             onDateTimeChanged: (_) { },
             backgroundColor: null,
-          );
-        },
-        throwsAssertionError,
+          ),
+        ),
       );
+
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('specified background color is applied', (WidgetTester tester) async {
@@ -659,7 +661,7 @@ void main() {
     });
 
     testWidgets(
-      'picker automatically scrolls away from invalid date, '
+      'date picker automatically scrolls away from invalid date, '
       "and onDateTimeChanged doesn't report these dates",
       (WidgetTester tester) async {
         DateTime date;
@@ -725,6 +727,160 @@ void main() {
         );
     });
 
+    testWidgets(
+      'dateTime picker automatically scrolls away from invalid date, '
+      "and onDateTimeChanged doesn't report these dates",
+      (WidgetTester tester) async {
+        DateTime date;
+        final DateTime minimum = DateTime(2019, 11, 11, 3, 30);
+        final DateTime maximum = DateTime(2019, 11, 11, 14, 59, 59);
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: SizedBox(
+                height: 400.0,
+                width: 400.0,
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.dateAndTime,
+                  minimumDate: minimum,
+                  maximumDate: maximum,
+                  onDateTimeChanged: (DateTime newDate) {
+                    date = newDate;
+                    // Callback doesn't transiently go into invalid dates.
+                    expect(minimum.isAfter(newDate), isFalse);
+                    expect(maximum.isBefore(newDate), isFalse);
+                  },
+                  initialDateTime: DateTime(2019, 11, 11, 4),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // 3:00 is valid but 2:00 should be invalid.
+        expect(
+          tester.widget<Text>(find.text('3')).style.color,
+          isNot(isSameColorAs(CupertinoColors.inactiveGray.color)),
+        );
+
+        expect(
+          tester.widget<Text>(find.text('2')).style.color,
+          isSameColorAs(CupertinoColors.inactiveGray.color),
+        );
+
+        // 'PM' is greyed out.
+        expect(
+          tester.widget<Text>(find.text('PM')).style.color,
+          isSameColorAs(CupertinoColors.inactiveGray.color),
+        );
+
+        await tester.drag(find.text('AM'), const Offset(0.0, -32.0), touchSlopY: 0.0);
+        await tester.pump();
+        await tester.pumpAndSettle(); // Now the autoscrolling should happen.
+
+        expect(
+          date,
+          DateTime(2019, 11, 11, 14, 59),
+        );
+
+        // 3'o clock and 'AM' are now greyed out.
+        expect(
+          tester.widget<Text>(find.text('AM')).style.color,
+          isSameColorAs(CupertinoColors.inactiveGray.color),
+        );
+        expect(
+          tester.widget<Text>(find.text('3')).style.color,
+          isSameColorAs(CupertinoColors.inactiveGray.color),
+        );
+
+        await tester.drag(find.text('PM'), const Offset(0.0, 32.0), touchSlopY: 0.0);
+        await tester.pump(); // Once to trigger the post frame animate call.
+        await tester.pumpAndSettle();
+
+        // Returns to min date.
+        expect(
+          date,
+          DateTime(2019, 11, 11, 3, 30),
+        );
+    });
+
+    testWidgets(
+      'time picker automatically scrolls away from invalid date, '
+      "and onDateTimeChanged doesn't report these dates",
+      (WidgetTester tester) async {
+        DateTime date;
+        final DateTime minimum = DateTime(2019, 11, 11, 3, 30);
+        final DateTime maximum = DateTime(2019, 11, 11, 14, 59, 59);
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: SizedBox(
+                height: 400.0,
+                width: 400.0,
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.time,
+                  minimumDate: minimum,
+                  maximumDate: maximum,
+                  onDateTimeChanged: (DateTime newDate) {
+                    date = newDate;
+                    // Callback doesn't transiently go into invalid dates.
+                    expect(minimum.isAfter(newDate), isFalse);
+                    expect(maximum.isBefore(newDate), isFalse);
+                  },
+                  initialDateTime: DateTime(2019, 11, 11, 4),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // 3:00 is valid but 2:00 should be invalid.
+        expect(
+          tester.widget<Text>(find.text('3')).style.color,
+          isNot(isSameColorAs(CupertinoColors.inactiveGray.color)),
+        );
+
+        expect(
+          tester.widget<Text>(find.text('2')).style.color,
+          isSameColorAs(CupertinoColors.inactiveGray.color),
+        );
+
+        // 'PM' is greyed out.
+        expect(
+          tester.widget<Text>(find.text('PM')).style.color,
+          isSameColorAs(CupertinoColors.inactiveGray.color),
+        );
+
+        await tester.drag(find.text('AM'), const Offset(0.0, -32.0), touchSlopY: 0.0);
+        await tester.pump();
+        await tester.pumpAndSettle(); // Now the autoscrolling should happen.
+
+        expect(
+          date,
+          DateTime(2019, 11, 11, 14, 59),
+        );
+
+        // 3'o clock and 'AM' are now greyed out.
+        expect(
+          tester.widget<Text>(find.text('AM')).style.color,
+          isSameColorAs(CupertinoColors.inactiveGray.color),
+        );
+        expect(
+          tester.widget<Text>(find.text('3')).style.color,
+          isSameColorAs(CupertinoColors.inactiveGray.color),
+        );
+
+        await tester.drag(find.text('PM'), const Offset(0.0, 32.0), touchSlopY: 0.0);
+        await tester.pump(); // Once to trigger the post frame animate call.
+        await tester.pumpAndSettle();
+
+        // Returns to min date.
+        expect(
+          date,
+          DateTime(2019, 11, 11, 3, 30),
+        );
+    });
+
     testWidgets('picker automatically scrolls away from invalid date on day change', (WidgetTester tester) async {
       DateTime date;
       await tester.pumpWidget(
@@ -778,6 +934,39 @@ void main() {
         tester.getTopLeft(find.text('28')).dy,
       );
     });
+
+    testWidgets(
+      'date picker should only take into account the date part of minimumDate and maximumDate',
+      (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/49606.
+        DateTime date;
+        final DateTime minDate = DateTime(2020, 1, 1, 12);
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: SizedBox(
+                height: 400.0,
+                width: 400.0,
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  minimumDate: minDate,
+                  onDateTimeChanged: (DateTime newDate) { date = newDate; },
+                  initialDateTime: DateTime(2020, 1, 12),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Scroll to 2019.
+        await tester.drag(find.text('2020'), const Offset(0.0, 32.0), touchSlopY: 0.0);
+        await tester.pump();
+        await tester.pumpAndSettle();
+        expect(date.year, minDate.year);
+        expect(date.month, minDate.month);
+        expect(date.day, minDate.day);
+    });
+
 
     group('Picker handles initial noon/midnight times', () {
       testWidgets('midnight', (WidgetTester tester) async {
@@ -1183,6 +1372,51 @@ void main() {
     expect(lastSelectedItem, 3);
 
     handle.dispose();
+  });
+
+  testWidgets('CupertinoDataPicker does not provide invalid MediaQuery', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/47989.
+    Brightness brightness = Brightness.light;
+    StateSetter setState;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          textTheme: CupertinoTextThemeData(
+            dateTimePickerTextStyle: TextStyle(
+              color: CupertinoDynamicColor.withBrightness(
+                color: Color(0xFFFFFFFF),
+                darkColor: Color(0xFF000000),
+              ),
+            ),
+          ),
+        ),
+        home: StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
+          setState = stateSetter;
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(platformBrightness: brightness),
+            child: CupertinoDatePicker(
+              initialDateTime: DateTime(2019),
+              mode: CupertinoDatePickerMode.date,
+              onDateTimeChanged: (DateTime date) {},
+            ),
+          );
+        }),
+      ),
+    );
+
+    expect(
+      tester.widget<Text>(find.text('2019')).style.color,
+      isSameColorAs(const Color(0xFFFFFFFF)),
+    );
+
+    setState(() { brightness = Brightness.dark; });
+    await tester.pump();
+
+    expect(
+      tester.widget<Text>(find.text('2019')).style.color,
+      isSameColorAs(const Color(0xFF000000)),
+    );
   });
 
   testWidgets('picker exports semantics', (WidgetTester tester) async {

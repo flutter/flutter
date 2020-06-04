@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -142,6 +142,10 @@ class ScrollController extends ChangeNotifier {
   ///
   /// The duration must not be zero. To jump to a particular value without an
   /// animation, use [jumpTo].
+  ///
+  /// When calling [animateTo] in widget tests, `await`ing the returned
+  /// [Future] may cause the test to hang and timeout. Instead, use
+  /// [WidgetTester.pumpAndSettle].
   Future<void> animateTo(
     double offset, {
     @required Duration duration,
@@ -168,7 +172,7 @@ class ScrollController extends ChangeNotifier {
   /// value was out of range.
   void jumpTo(double value) {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
-    for (ScrollPosition position in List<ScrollPosition>.from(_positions))
+    for (final ScrollPosition position in List<ScrollPosition>.from(_positions))
       position.jumpTo(value);
   }
 
@@ -194,7 +198,7 @@ class ScrollController extends ChangeNotifier {
 
   @override
   void dispose() {
-    for (ScrollPosition position in _positions)
+    for (final ScrollPosition position in _positions)
       position.removeListener(notifyListeners);
     super.dispose();
   }
@@ -284,7 +288,7 @@ class ScrollController extends ChangeNotifier {
 /// It tracks the most recently updated scroll position and reports it as its
 /// `initialScrollOffset`.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// In this example each [PageView] page contains a [ListView] and all three
 /// [ListView]'s share a [TrackingScrollController]. The scroll offsets of all
@@ -367,7 +371,7 @@ class TrackingScrollController extends ScrollController {
 
   @override
   void dispose() {
-    for (ScrollPosition position in positions) {
+    for (final ScrollPosition position in positions) {
       assert(_positionToListener.containsKey(position));
       position.removeListener(_positionToListener[position]);
     }

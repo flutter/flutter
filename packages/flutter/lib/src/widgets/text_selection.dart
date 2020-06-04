@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -84,6 +84,22 @@ typedef TextSelectionOverlayChanged = void Function(TextEditingValue value, Rect
 /// easier for various text fields to use [TextSelectionGestureDetector] without
 /// having to store the start position.
 typedef DragSelectionUpdateCallback = void Function(DragStartDetails startDetails, DragUpdateDetails updateDetails);
+
+/// ParentData that determines whether or not to paint the corresponding child.
+///
+/// Used in the layout of the Cupertino and Material text selection menus, which
+/// decide whether or not to paint their buttons after laying them out and
+/// determining where they overflow.
+class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
+  /// Whether or not this child is painted.
+  ///
+  /// Children in the selection toolbar may be laid out for measurement purposes
+  /// but not painted. This allows these children to be identified.
+  bool shouldPaint = false;
+
+  @override
+  String toString() => '${super.toString()}; shouldPaint=$shouldPaint';
+}
 
 /// An interface for building the selection UI, to be provided by the
 /// implementor of the toolbar widget.
@@ -262,7 +278,7 @@ abstract class TextSelectionControls {
 /// The selection handles are displayed in the [Overlay] that most closely
 /// encloses the given [BuildContext].
 class TextSelectionOverlay {
-  /// Creates an object that manages overly entries for selection handles.
+  /// Creates an object that manages overlay entries for selection handles.
   ///
   /// The [context] must not be null and must have an [Overlay] as an ancestor.
   TextSelectionOverlay({
@@ -283,7 +299,7 @@ class TextSelectionOverlay {
        assert(handlesVisible != null),
        _handlesVisible = handlesVisible,
        _value = value {
-    final OverlayState overlay = Overlay.of(context);
+    final OverlayState overlay = Overlay.of(context, rootOverlay: true);
     assert(overlay != null,
       'No Overlay widget exists above $context.\n'
       'Usually the Navigator created by WidgetsApp provides the overlay. Perhaps your '
@@ -410,7 +426,7 @@ class TextSelectionOverlay {
 
 
 
-    Overlay.of(context, debugRequiredFor: debugRequiredFor).insertAll(_handles);
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insertAll(_handles);
   }
 
   /// Destroys the handles by removing them from overlay.
@@ -426,7 +442,7 @@ class TextSelectionOverlay {
   void showToolbar() {
     assert(_toolbar == null);
     _toolbar = OverlayEntry(builder: _buildToolbar);
-    Overlay.of(context, debugRequiredFor: debugRequiredFor).insert(_toolbar);
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insert(_toolbar);
     _toolbarController.forward(from: 0.0);
   }
 
@@ -819,8 +835,9 @@ class _TextSelectionHandleOverlayState
 ///
 /// See also:
 ///
-/// * [TextField], which implements this delegate for the Material textfield.
-/// * [CupertinoTextField], which implements this delegate for the Cupertino textfield.
+///  * [TextField], which implements this delegate for the Material textfield.
+///  * [CupertinoTextField], which implements this delegate for the Cupertino
+///    textfield.
 abstract class TextSelectionGestureDetectorBuilderDelegate {
   /// [GlobalKey] to the [EditableText] for which the
   /// [TextSelectionGestureDetectorBuilder] will build a [TextSelectionGestureDetector].

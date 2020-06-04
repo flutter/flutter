@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -85,7 +85,7 @@ int debugDoublePrecision;
 
 /// Formats a double to have standard formatting.
 ///
-/// This behavior can be overriden by [debugDoublePrecision].
+/// This behavior can be overridden by [debugDoublePrecision].
 String debugFormatDouble(double value) {
   if (value == null) {
     return 'null';

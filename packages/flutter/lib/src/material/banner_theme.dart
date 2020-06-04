@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,7 +23,8 @@ import 'theme.dart';
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
-class MaterialBannerThemeData extends Diagnosticable {
+@immutable
+class MaterialBannerThemeData with Diagnosticable {
 
   /// Creates a theme that can be used for [MaterialBannerTheme] or
   /// [ThemeData.bannerTheme].
@@ -73,8 +74,8 @@ class MaterialBannerThemeData extends Diagnosticable {
     return MaterialBannerThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
-      padding: EdgeInsets.lerp(a?.padding, b?.padding, t),
-      leadingPadding: EdgeInsets.lerp(a?.leadingPadding, b?.leadingPadding, t),
+      padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
+      leadingPadding: EdgeInsetsGeometry.lerp(a?.leadingPadding, b?.leadingPadding, t),
     );
   }
 
@@ -89,16 +90,16 @@ class MaterialBannerThemeData extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final MaterialBannerThemeData typedOther = other;
-    return typedOther.backgroundColor == backgroundColor
-        && typedOther.contentTextStyle == contentTextStyle
-        && typedOther.padding == padding
-        && typedOther.leadingPadding == leadingPadding;
+    return other is MaterialBannerThemeData
+        && other.backgroundColor == backgroundColor
+        && other.contentTextStyle == contentTextStyle
+        && other.padding == padding
+        && other.leadingPadding == leadingPadding;
   }
 
   @override
@@ -140,13 +141,13 @@ class MaterialBannerTheme extends InheritedTheme {
   /// MaterialBannerThemeData theme = MaterialBannerTheme.of(context);
   /// ```
   static MaterialBannerThemeData of(BuildContext context) {
-    final MaterialBannerTheme bannerTheme = context.inheritFromWidgetOfExactType(MaterialBannerTheme);
+    final MaterialBannerTheme bannerTheme = context.dependOnInheritedWidgetOfExactType<MaterialBannerTheme>();
     return bannerTheme?.data ?? Theme.of(context).bannerTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final MaterialBannerTheme ancestorTheme = context.ancestorWidgetOfExactType(MaterialBannerTheme);
+    final MaterialBannerTheme ancestorTheme = context.findAncestorWidgetOfExactType<MaterialBannerTheme>();
     return identical(this, ancestorTheme) ? child : MaterialBannerTheme(data: data, child: child);
   }
 

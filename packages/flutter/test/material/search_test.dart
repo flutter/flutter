@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -509,6 +509,23 @@ void main() {
     expect(find.text(searchHint), findsOneWidget);
   });
 
+  testWidgets('Custom searchFieldStyle value', (WidgetTester tester) async {
+    const TextStyle searchStyle = TextStyle(color: Colors.red, fontSize: 3);
+
+    final _TestSearchDelegate delegate = _TestSearchDelegate(searchFieldStyle: searchStyle);
+
+    await tester.pumpWidget(
+      TestHomePage(
+      delegate: delegate,
+    ));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+    final TextStyle hintStyle = textField.decoration.hintStyle;
+    expect(hintStyle, delegate.searchFieldStyle);
+  });
+
   testWidgets('keyboard show search button by default', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
@@ -573,7 +590,8 @@ void main() {
                           SemanticsFlag.isTextField,
                           SemanticsFlag.isFocused,
                           SemanticsFlag.isHeader,
-                          if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS) SemanticsFlag.namesRoute,
+                          if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
+                              debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
                         ],
                         actions: <SemanticsAction>[
                           SemanticsAction.tap,
@@ -622,8 +640,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('does not include routeName on iOS', (WidgetTester tester) async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    testWidgets('does not include routeName', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final _TestSearchDelegate delegate = _TestSearchDelegate();
       await tester.pumpWidget(TestHomePage(
@@ -636,19 +653,19 @@ void main() {
       expect(semantics, hasSemantics(buildExpected(routeName: ''),
           ignoreId: true, ignoreRect: true, ignoreTransform: true));
 
-      debugDefaultTargetPlatformOverride = null;
       semantics.dispose();
-    });
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
   });
 }
 
 class TestHomePage extends StatelessWidget {
   const TestHomePage({
+    Key key,
     this.results,
     this.delegate,
     this.passInInitialQuery = false,
     this.initialQuery,
-  });
+  }) : super(key: key);
 
   final List<String> results;
   final SearchDelegate<String> delegate;
@@ -697,9 +714,10 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     this.suggestions = 'Suggestions',
     this.result = 'Result',
     this.actions = const <Widget>[],
+    TextStyle searchFieldStyle,
     String searchHint,
     TextInputAction textInputAction = TextInputAction.search,
-  }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction);
+  }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction, searchFieldStyle: searchFieldStyle);
 
   final String suggestions;
   final String result;

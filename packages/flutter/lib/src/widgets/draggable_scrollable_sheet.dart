@@ -1,7 +1,8 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'basic.dart';
@@ -32,6 +33,8 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// A container for a [Scrollable] that responds to drag gestures by resizing
 /// the scrollable until a limit is reached, and then scrolling.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=Hgw819mL_78}
+///
 /// This widget can be dragged along the vertical axis between its
 /// [minChildSize], which defaults to `0.25` and [maxChildSize], which defaults
 /// to `1.0`. These sizes are percentages of the height of the parent container.
@@ -52,7 +55,7 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// to position sheet based on the space it is taking, the [expand] property
 /// may be set to false.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This is a sample widget which shows a [ListView] that has 25 [ListTile]s.
 /// It starts out as taking up half the body of the [Scaffold], and can be
@@ -258,7 +261,7 @@ class _DraggableSheetExtent {
 
   set currentExtent(double value) {
     assert(value != null);
-    _currentExtent.value = value.clamp(minExtent, maxExtent);
+    _currentExtent.value = value.clamp(minExtent, maxExtent) as double;
   }
   double get currentExtent => _currentExtent.value;
 
@@ -473,7 +476,7 @@ class _DraggableScrollableSheetScrollPosition
     );
 
     final AnimationController ballisticController = AnimationController.unbounded(
-      debugLabel: '$runtimeType',
+      debugLabel: objectRuntimeType(this, '_DraggableScrollableSheetPosition'),
       vsync: context.vsync,
     );
     double lastDelta = 0;
@@ -488,6 +491,8 @@ class _DraggableScrollableSheetScrollPosition
         velocity = ballisticController.velocity + (physics.tolerance.velocity * ballisticController.velocity.sign);
         super.goBallistic(velocity);
         ballisticController.stop();
+      } else if (ballisticController.isCompleted) {
+        super.goBallistic(0);
       }
     }
 
@@ -509,7 +514,7 @@ class _DraggableScrollableSheetScrollPosition
 /// A widget that can notify a descendent [DraggableScrollableSheet] that it
 /// should reset its position to the initial state.
 ///
-/// The [Scaffold] uses this widget to notify a persistentent bottom sheet that
+/// The [Scaffold] uses this widget to notify a persistent bottom sheet that
 /// the user has tapped back if the sheet has started to cover more of the body
 /// than when at its initial position. This is important for users of assistive
 /// technology, where dragging may be difficult to communicate.
@@ -538,7 +543,7 @@ class DraggableScrollableActuator extends StatelessWidget {
   /// some [DraggableScrollableSheet] is listening for updates, `false`
   /// otherwise.
   static bool reset(BuildContext context) {
-    final _InheritedResetNotifier notifier = context.inheritFromWidgetOfExactType(_InheritedResetNotifier);
+    final _InheritedResetNotifier notifier = context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
     if (notifier == null) {
       return false;
     }
@@ -590,12 +595,12 @@ class _InheritedResetNotifier extends InheritedNotifier<_ResetNotifier> {
   ///
   /// Returns true if the notifier requested a reset, false otherwise.
   static bool shouldReset(BuildContext context) {
-    final InheritedWidget widget = context.inheritFromWidgetOfExactType(_InheritedResetNotifier);
+    final InheritedWidget widget = context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
     if (widget == null) {
       return false;
     }
     assert(widget is _InheritedResetNotifier);
-    final _InheritedResetNotifier inheritedNotifier = widget;
+    final _InheritedResetNotifier inheritedNotifier = widget as _InheritedResetNotifier;
     final bool wasCalled = inheritedNotifier.notifier._wasCalled;
     inheritedNotifier.notifier._wasCalled = false;
     return wasCalled;

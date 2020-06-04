@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -20,9 +20,9 @@ void main() {
 
   test('doctor validators includes desktop when features are enabled', () => testbed.run(() {
     expect(DoctorValidatorsProvider.defaultInstance.validators,
-        contains(isInstanceOf<LinuxDoctorValidator>()));
+        contains(isA<LinuxDoctorValidator>()));
     expect(DoctorValidatorsProvider.defaultInstance.validators,
-        contains(isInstanceOf<VisualStudioValidator>()));
+        contains(isA<VisualStudioValidator>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(
       isLinuxEnabled: true,
@@ -32,9 +32,9 @@ void main() {
 
   test('doctor validators does not include desktop when features are enabled', () => testbed.run(() {
     expect(DoctorValidatorsProvider.defaultInstance.validators,
-        isNot(contains(isInstanceOf<LinuxDoctorValidator>())));
+        isNot(contains(isA<LinuxDoctorValidator>())));
     expect(DoctorValidatorsProvider.defaultInstance.validators,
-        isNot(contains(isInstanceOf<VisualStudioValidator>())));
+        isNot(contains(isA<VisualStudioValidator>())));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(
       isLinuxEnabled: false,
@@ -44,7 +44,7 @@ void main() {
 
   test('doctor validators includes web when feature is enabled', () => testbed.run(() {
     expect(DoctorValidatorsProvider.defaultInstance.validators,
-        contains(isInstanceOf<WebValidator>()));
+        contains(isA<ChromiumValidator>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(
       isWebEnabled: true,
@@ -53,7 +53,7 @@ void main() {
 
   test('doctor validators does not include web when feature is disabled', () => testbed.run(() {
     expect(DoctorValidatorsProvider.defaultInstance.validators,
-        isNot(contains(isInstanceOf<WebValidator>())));
+        isNot(contains(isA<ChromiumValidator>())));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(
       isWebEnabled: false,

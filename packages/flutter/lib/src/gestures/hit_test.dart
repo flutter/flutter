@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,8 +11,9 @@ import 'events.dart';
 
 /// An object that can hit-test pointers.
 abstract class HitTestable {
-  // This class is intended to be used as an interface with the implements
-  // keyword, and should not be extended directly.
+  // This class is intended to be used as an interface, and should not be
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory HitTestable._() => null;
 
   /// Check whether the given position hits this object.
@@ -24,8 +25,9 @@ abstract class HitTestable {
 
 /// An object that can dispatch events.
 abstract class HitTestDispatcher {
-  // This class is intended to be used as an interface with the implements
-  // keyword, and should not be extended directly.
+  // This class is intended to be used as an interface, and should not be
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory HitTestDispatcher._() => null;
 
   /// Override this method to dispatch events.
@@ -34,8 +36,9 @@ abstract class HitTestDispatcher {
 
 /// An object that can handle events.
 abstract class HitTestTarget {
-  // This class is intended to be used as an interface with the implements
-  // keyword, and should not be extended directly.
+  // This class is intended to be used as an interface, and should not be
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory HitTestTarget._() => null;
 
   /// Override this method to receive events.
@@ -62,8 +65,8 @@ class HitTestEntry {
   ///
   /// See also:
   ///
-  ///  * [HitTestResult.addWithPaintTransform], which is used during hit testing
-  ///    to build up the transform returned by this method.
+  ///  * [HitTestResult.pushTransform], which is used during hit
+  ///    testing to build up the transform returned by this method.
   Matrix4 get transform => _transform;
   Matrix4 _transform;
 }
@@ -126,10 +129,11 @@ class HitTestResult {
   /// [popTransform] has to be called to remove the child-specific `transform`.
   ///
   /// See also:
+  ///
   ///  * [BoxHitTestResult.addWithPaintTransform], which is a public wrapper
   ///    around this function for hit testing on [RenderBox]s.
   ///  * [SliverHitTestResult.addWithAxisOffset], which is a public wrapper
-  ///    around this function for hit testing on [RenderSlivers]s.
+  ///    around this function for hit testing on [RenderSliver]s.
   @protected
   void pushTransform(Matrix4 transform) {
     assert(transform != null);
@@ -139,10 +143,10 @@ class HitTestResult {
       'The third row and third column of a transform matrix for pointer '
       'events must be Vector4(0, 0, 1, 0) to ensure that a transformed '
       'point is directly under the pointer device. Did you forget to run the paint '
-      'matrix through PointerEvent.removePerspectiveTransform?'
+      'matrix through PointerEvent.removePerspectiveTransform? '
       'The provided matrix is:\n$transform'
     );
-    _transforms.add(_transforms.isEmpty ? transform :  transform * _transforms.last);
+    _transforms.add(_transforms.isEmpty ? transform : (transform * _transforms.last as Matrix4));
   }
 
   /// Removes the last transform added via [pushTransform].

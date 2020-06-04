@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -80,7 +80,7 @@ import 'scrollable.dart';
 /// with some remaining space to allocate as specified by its
 /// [Column.mainAxisAlignment] argument.
 ///
-/// {@tool snippet --template=stateless_widget}
+/// {@tool dartpad --template=stateless_widget_material}
 /// In this example, the children are spaced out equally, unless there's no more
 /// room, in which case they stack vertically and scroll.
 ///
@@ -89,35 +89,42 @@ import 'scrollable.dart';
 /// The next section describes a technique for providing a maximum height constraint.
 ///
 /// ```dart
-/// Widget build(BuildContext context) {
-///   return LayoutBuilder(
-///     builder: (BuildContext context, BoxConstraints viewportConstraints) {
-///       return SingleChildScrollView(
-///         child: ConstrainedBox(
-///           constraints: BoxConstraints(
-///             minHeight: viewportConstraints.maxHeight,
-///           ),
-///           child: Column(
-///             mainAxisSize: MainAxisSize.min,
-///             mainAxisAlignment: MainAxisAlignment.spaceAround,
-///             children: <Widget>[
-///               Container(
-///                 // A fixed-height child.
-///                 color: const Color(0xff808000), // Yellow
-///                 height: 120.0,
-///               ),
-///               Container(
-///                 // Another fixed-height child.
-///                 color: const Color(0xff008000), // Green
-///                 height: 120.0,
-///               ),
-///             ],
-///           ),
-///         ),
-///       );
-///     },
-///   );
-/// }
+///  Widget build(BuildContext context) {
+///    return DefaultTextStyle(
+///      style: Theme.of(context).textTheme.bodyText2,
+///      child: LayoutBuilder(
+///        builder: (BuildContext context, BoxConstraints viewportConstraints) {
+///          return SingleChildScrollView(
+///            child: ConstrainedBox(
+///              constraints: BoxConstraints(
+///                minHeight: viewportConstraints.maxHeight,
+///              ),
+///              child: Column(
+///                mainAxisSize: MainAxisSize.min,
+///                mainAxisAlignment: MainAxisAlignment.spaceAround,
+///                children: <Widget>[
+///                  Container(
+///                    // A fixed-height child.
+///                    color: const Color(0xffeeee00), // Yellow
+///                    height: 120.0,
+///                    alignment: Alignment.center,
+///                    child: const Text('Fixed Height Content'),
+///                  ),
+///                  Container(
+///                    // Another fixed-height child.
+///                    color: const Color(0xff008000), // Green
+///                    height: 120.0,
+///                    alignment: Alignment.center,
+///                    child: const Text('Fixed Height Content'),
+///                  ),
+///                ],
+///              ),
+///            ),
+///          );
+///        },
+///      ),
+///    );
+///  }
 /// ```
 /// {@end-tool}
 ///
@@ -147,43 +154,50 @@ import 'scrollable.dart';
 /// so that the intrinsic sizing algorithm can short-circuit the computation when it
 /// reaches those parts of the subtree.
 ///
-/// {@tool snippet --template=stateless_widget}
+/// {@tool dartpad --template=stateless_widget_material}
 /// In this example, the column becomes either as big as viewport, or as big as
 /// the contents, whichever is biggest.
 ///
 /// ```dart
-/// Widget build(BuildContext context) {
-///   return LayoutBuilder(
-///     builder: (BuildContext context, BoxConstraints viewportConstraints) {
-///       return SingleChildScrollView(
-///         child: ConstrainedBox(
-///           constraints: BoxConstraints(
-///             minHeight: viewportConstraints.maxHeight,
-///           ),
-///           child: IntrinsicHeight(
-///             child: Column(
-///               children: <Widget>[
-///                 Container(
-///                   // A fixed-height child.
-///                   color: const Color(0xff808000), // Yellow
-///                   height: 120.0,
-///                 ),
-///                 Expanded(
-///                   // A flexible child that will grow to fit the viewport but
-///                   // still be at least as big as necessary to fit its contents.
-///                   child: Container(
-///                     color: const Color(0xff800000), // Red
-///                     height: 120.0,
-///                   ),
-///                 ),
-///               ],
-///             ),
-///           ),
-///         ),
-///       );
-///     },
-///   );
-/// }
+///  Widget build(BuildContext context) {
+///    return DefaultTextStyle(
+///      style: Theme.of(context).textTheme.bodyText2,
+///      child: LayoutBuilder(
+///        builder: (BuildContext context, BoxConstraints viewportConstraints) {
+///          return SingleChildScrollView(
+///            child: ConstrainedBox(
+///              constraints: BoxConstraints(
+///                minHeight: viewportConstraints.maxHeight,
+///              ),
+///              child: IntrinsicHeight(
+///                child: Column(
+///                  children: <Widget>[
+///                    Container(
+///                      // A fixed-height child.
+///                      color: const Color(0xffeeee00), // Yellow
+///                      height: 120.0,
+///                      alignment: Alignment.center,
+///                      child: const Text('Fixed Height Content'),
+///                    ),
+///                    Expanded(
+///                      // A flexible child that will grow to fit the viewport but
+///                      // still be at least as big as necessary to fit its contents.
+///                      child: Container(
+///                        color: const Color(0xffee0000), // Red
+///                        height: 120.0,
+///                        alignment: Alignment.center,
+///                        child: const Text('Flexible Content'),
+///                      ),
+///                    ),
+///                  ],
+///                ),
+///              ),
+///            ),
+///          );
+///        },
+///      ),
+///    );
+///  }
 /// ```
 /// {@end-tool}
 ///
@@ -491,6 +505,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     if (child == null) {
       size = constraints.smallest;
     } else {
@@ -575,7 +590,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     if (target is! RenderBox)
       return RevealedOffset(offset: offset.pixels, rect: rect);
 
-    final RenderBox targetBox = target;
+    final RenderBox targetBox = target as RenderBox;
     final Matrix4 transform = targetBox.getTransformTo(child);
     final Rect bounds = MatrixUtils.transformRect(transform, rect);
     final Size contentSize = child.size;

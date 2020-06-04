@@ -50,5 +50,6 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "TBD",
   "remainingTextFieldCharacterCountOther": "TBD",
-  "refreshIndicatorSemanticLabel": "TBD"
+  "refreshIndicatorSemanticLabel": "TBD",
+  "moreButtonTooltip": "TBD"
 }

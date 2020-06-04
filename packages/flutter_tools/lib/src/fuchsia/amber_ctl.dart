@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -58,7 +58,7 @@ class FuchsiaAmberCtl {
   /// Teaches the amber instance running on [device] about the Fuchsia package
   /// server accessible via [configUrl].
   Future<bool> addSrc(FuchsiaDevice device, FuchsiaPackageServer server) async {
-    final String configUrl = '${server.url}/config.json';
+    final String configUrl = '${server.interfaceStrippedUrl}/config.json';
     final RunResult result =
         await device.shell('amber_ctl add_src -x -f $configUrl');
     return result.exitCode == 0;
@@ -68,7 +68,7 @@ class FuchsiaAmberCtl {
   /// Fuchsia package server that it was accessing via [serverUrl].
   Future<bool> rmSrc(FuchsiaDevice device, FuchsiaPackageServer server) async {
     final RunResult result =
-        await device.shell('amber_ctl rm_src -n ${server.url}');
+        await device.shell('amber_ctl rm_src -n ${server.interfaceStrippedUrl}');
     return result.exitCode == 0;
   }
 
@@ -84,7 +84,7 @@ class FuchsiaAmberCtl {
   /// pkg_resolver repo config, and teaches the pkg_resolver instance running
   /// on [device] about the [FuchsiaPackageServer].
   Future<bool> addRepoCfg(FuchsiaDevice device, FuchsiaPackageServer server) async {
-    final String configUrl = '${server.url}/config.json';
+    final String configUrl = '${server.interfaceStrippedUrl}/config.json';
     final RunResult result =
         await device.shell('amber_ctl add_repo_cfg -n ${server.name} -f $configUrl');
     return result.exitCode == 0;
@@ -102,7 +102,7 @@ class FuchsiaAmberCtl {
   /// the Fuchsia package server that it was accessing via [serverUrl].
   Future<bool> pkgCtlRepoRemove(FuchsiaDevice device, FuchsiaPackageServer server) async {
     final String repoUrl = 'fuchsia-pkg://${server.name}';
-    final RunResult result = await device.shell('pkgctl repo remove --repo-url $repoUrl');
+    final RunResult result = await device.shell('pkgctl repo rm $repoUrl');
     return result.exitCode == 0;
   }
 }

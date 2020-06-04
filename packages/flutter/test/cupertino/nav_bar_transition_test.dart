@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -51,7 +51,7 @@ Future<void> startTransitionBetween(
 CupertinoPageScaffold scaffoldForNavBar(Widget navBar) {
   if (navBar is CupertinoNavigationBar || navBar == null) {
     return CupertinoPageScaffold(
-      navigationBar: navBar ?? const CupertinoNavigationBar(),
+      navigationBar: navBar as CupertinoNavigationBar ?? const CupertinoNavigationBar(),
       child: const Placeholder(),
     );
   } else if (navBar is CupertinoSliverNavigationBar) {
@@ -72,12 +72,9 @@ CupertinoPageScaffold scaffoldForNavBar(Widget navBar) {
 }
 
 Finder flying(WidgetTester tester, Finder finder) {
-  final RenderObjectWithChildMixin<RenderStack> theater =
-      tester.renderObject(find.byType(Overlay));
-  final RenderStack theaterStack = theater.child;
+  final ContainerRenderObjectMixin<RenderBox, StackParentData> theater = tester.renderObject(find.byType(Overlay));
   final Finder lastOverlayFinder = find.byElementPredicate((Element element) {
-    return element is RenderObjectElement &&
-        element.renderObject == theaterStack.lastChild;
+    return element is RenderObjectElement && element.renderObject == theater.lastChild;
   });
 
   assert(
