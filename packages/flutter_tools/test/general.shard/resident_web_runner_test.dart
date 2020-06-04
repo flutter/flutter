@@ -352,6 +352,10 @@ void main() {
       'test': 'data',
       'renderedErrorText': 'error text',
     };
+    final Map<String, String> emptyExtensionData = <String, String>{
+      'test': 'data',
+      'renderedErrorText': '',
+    };
     final Map<String, String> nonStructuredErrorData = <String, String>{
       'other': 'other stuff',
     };
@@ -363,6 +367,16 @@ void main() {
           timestamp: 0,
           extensionKind: 'Flutter.Error',
           extensionData: vm_service.ExtensionData.parse(extensionData),
+          kind: vm_service.EventStreams.kExtension,
+        ),
+      ),
+      // Empty error text should not break anything.
+      FakeVmServiceStreamResponse(
+        streamId: 'Extension',
+        event: vm_service.Event(
+          timestamp: 0,
+          extensionKind: 'Flutter.Error',
+          extensionData: vm_service.ExtensionData.parse(emptyExtensionData),
           kind: vm_service.EventStreams.kExtension,
         ),
       ),
