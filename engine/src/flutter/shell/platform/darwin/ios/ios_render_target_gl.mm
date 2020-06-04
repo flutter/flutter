@@ -13,20 +13,16 @@
 namespace flutter {
 
 IOSRenderTargetGL::IOSRenderTargetGL(fml::scoped_nsobject<CAEAGLLayer> layer,
-                                     fml::scoped_nsobject<EAGLContext> context,
-                                     fml::scoped_nsobject<EAGLContext> resource_context)
-    : layer_(std::move(layer)),
-      context_(std::move(context)),
-      resource_context_(std::move(resource_context)) {
+                                     fml::scoped_nsobject<EAGLContext> context)
+    : layer_(std::move(layer)), context_(context) {
   FML_DCHECK(layer_ != nullptr);
   FML_DCHECK(context_ != nullptr);
-  FML_DCHECK(resource_context_ != nullptr);
 
   if (@available(iOS 9.0, *)) {
     [layer_ setPresentsWithTransaction:YES];
   }
-
-  bool context_current = [EAGLContext setCurrentContext:context_];
+  auto context_switch = GLContextSwitch(std::make_unique<IOSSwitchableGLContext>(context_.get()));
+  bool context_current = context_switch.GetResult();
 
   FML_DCHECK(context_current);
   FML_DCHECK(glGetError() == GL_NO_ERROR);
@@ -61,8 +57,7 @@ IOSRenderTargetGL::IOSRenderTargetGL(fml::scoped_nsobject<CAEAGLLayer> layer,
 }
 
 IOSRenderTargetGL::~IOSRenderTargetGL() {
-  EAGLContext* context = EAGLContext.currentContext;
-  [EAGLContext setCurrentContext:context_];
+  auto context_switch = GLContextSwitch(std::make_unique<IOSSwitchableGLContext>(context_.get()));
   FML_DCHECK(glGetError() == GL_NO_ERROR);
 
   // Deletes on GL_NONEs are ignored
@@ -70,11 +65,6 @@ IOSRenderTargetGL::~IOSRenderTargetGL() {
   glDeleteRenderbuffers(1, &colorbuffer_);
 
   FML_DCHECK(glGetError() == GL_NO_ERROR);
-  if (context == context_.get()) {
-    [EAGLContext setCurrentContext:nil];
-  } else {
-    [EAGLContext setCurrentContext:context];
-  }
 }
 
 // |IOSRenderTarget|
@@ -118,7 +108,8 @@ bool IOSRenderTargetGL::UpdateStorageSizeIfNecessary() {
 
   FML_DCHECK(glGetError() == GL_NO_ERROR);
 
-  if (![EAGLContext setCurrentContext:context_]) {
+  auto context_switch = GLContextSwitch(std::make_unique<IOSSwitchableGLContext>(context_.get()));
+  if (!context_switch.GetResult()) {
     return false;
   }
 
@@ -129,7 +120,8 @@ bool IOSRenderTargetGL::UpdateStorageSizeIfNecessary() {
   glBindRenderbuffer(GL_RENDERBUFFER, colorbuffer_);
   FML_DCHECK(glGetError() == GL_NO_ERROR);
 
-  if (![context_.get() renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer_.get()]) {
+  auto current_context = [EAGLContext currentContext];
+  if (![current_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer_.get()]) {
     return false;
   }
 

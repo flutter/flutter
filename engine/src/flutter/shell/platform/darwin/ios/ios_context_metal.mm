@@ -96,9 +96,9 @@ sk_sp<GrContext> IOSContextMetal::CreateResourceContext() {
 }
 
 // |IOSContext|
-bool IOSContextMetal::MakeCurrent() {
+std::unique_ptr<GLContextResult> IOSContextMetal::MakeCurrent() {
   // This only makes sense for context that need to be bound to a specific thread.
-  return true;
+  return std::make_unique<GLContextDefaultResult>(true);
 }
 
 // |IOSContext|

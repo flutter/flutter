@@ -59,16 +59,20 @@ bool IOSSurfaceGL::SurfaceSupportsReadback() const {
 }
 
 // |GPUSurfaceGLDelegate|
-bool IOSSurfaceGL::GLContextMakeCurrent() {
+std::unique_ptr<GLContextResult> IOSSurfaceGL::GLContextMakeCurrent() {
   if (!IsValid()) {
-    return false;
+    return std::make_unique<GLContextDefaultResult>(false);
   }
-  return render_target_->UpdateStorageSizeIfNecessary() && GetContext()->MakeCurrent();
+  bool update_if_necessary = render_target_->UpdateStorageSizeIfNecessary();
+  if (!update_if_necessary) {
+    return std::make_unique<GLContextDefaultResult>(false);
+  }
+  return GetContext()->MakeCurrent();
 }
 
 // |GPUSurfaceGLDelegate|
 bool IOSSurfaceGL::GLContextClearCurrent() {
-  [EAGLContext setCurrentContext:nil];
+  // |GLContextMakeCurrent| should handle the scope of the gl context.
   return true;
 }
 

@@ -10,6 +10,7 @@
 #include "flutter/flow/texture.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
+#include "flutter/shell/common/gl_context_switch.h"
 #include "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
 #include "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 #include "third_party/skia/include/gpu/GrContext.h"
@@ -84,9 +85,12 @@ class IOSContext {
   /// @attention  Only one context may be bound to a thread at any given time.
   ///             Making a binding on a thread, clears the old binding.
   ///
-  /// @return     If the on-screen context could be bound to the current thread.
+  /// @return     A GLContextResult that represents the result of the method.
+  ///             The GetResult() returns a bool that indicates If the on-screen context could be
+  ///             bound to the current
+  /// thread.
   ///
-  virtual bool MakeCurrent() = 0;
+  virtual std::unique_ptr<GLContextResult> MakeCurrent() = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Creates an external texture proxy of the appropriate client

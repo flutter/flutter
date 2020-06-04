@@ -44,8 +44,9 @@ PointerDataDispatcherMaker ShellTestPlatformViewGL::GetDispatcherMaker() {
 }
 
 // |GPUSurfaceGLDelegate|
-bool ShellTestPlatformViewGL::GLContextMakeCurrent() {
-  return gl_surface_.MakeCurrent();
+std::unique_ptr<GLContextResult>
+ShellTestPlatformViewGL::GLContextMakeCurrent() {
+  return std::make_unique<GLContextDefaultResult>(gl_surface_.MakeCurrent());
 }
 
 // |GPUSurfaceGLDelegate|

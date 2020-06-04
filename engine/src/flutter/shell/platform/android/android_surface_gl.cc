@@ -106,9 +106,11 @@ bool AndroidSurfaceGL::SetNativeWindow(
   return true;
 }
 
-bool AndroidSurfaceGL::GLContextMakeCurrent() {
+std::unique_ptr<GLContextResult> AndroidSurfaceGL::GLContextMakeCurrent() {
   FML_DCHECK(onscreen_context_ && onscreen_context_->IsValid());
-  return onscreen_context_->MakeCurrent();
+  auto default_context_result = std::make_unique<GLContextDefaultResult>(
+      onscreen_context_->MakeCurrent());
+  return std::move(default_context_result);
 }
 
 bool AndroidSurfaceGL::GLContextClearCurrent() {

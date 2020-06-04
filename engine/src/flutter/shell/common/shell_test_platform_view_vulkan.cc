@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/common/shell_test_platform_view_vulkan.h"
+#include "flutter/shell/common/gl_context_switch.h"
 #include "flutter/vulkan/vulkan_utilities.h"
 
 namespace flutter {
