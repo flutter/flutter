@@ -8,6 +8,11 @@ part of engine;
 /// When set to true, all platform messages will be printed to the console.
 const bool _debugPrintPlatformMessages = false;
 
+/// Requests that the browser schedule a frame.
+///
+/// This may be overridden in tests, for example, to pump fake frames.
+ui.VoidCallback scheduleFrameCallback;
+
 /// The Web implementation of [ui.Window].
 class EngineWindow extends ui.Window {
   EngineWindow() {
@@ -156,6 +161,15 @@ class EngineWindow extends ui.Window {
   @override
   String/*!*/ get defaultRouteName => _defaultRouteName ??= _browserHistory.currentPath;
 
+  @override
+  void scheduleFrame() {
+    if (scheduleFrameCallback == null) {
+      throw new Exception(
+          'scheduleFrameCallback must be initialized first.');
+    }
+    scheduleFrameCallback();
+  }
+
   /// Change the strategy to use for handling browser history location.
   /// Setting this member will automatically update [_browserHistory].
   ///
@@ -198,9 +212,9 @@ class EngineWindow extends ui.Window {
   }
 
   @override
-  ui.VoidCallback get onMetricsChanged => _onMetricsChanged;
-  ui.VoidCallback _onMetricsChanged;
-  Zone _onMetricsChangedZone;
+  ui.VoidCallback/*?*/ get onMetricsChanged => _onMetricsChanged;
+  ui.VoidCallback/*?*/ _onMetricsChanged;
+  Zone/*!*/ _onMetricsChangedZone = Zone.root;
   @override
   set onMetricsChanged(ui.VoidCallback callback) {
     _onMetricsChanged = callback;
@@ -766,7 +780,7 @@ void _invoke3<A1, A2, A3>(
 /// `dart:ui` window delegates to this value. However, this value has a wider
 /// API surface, providing Web-specific functionality that the standard
 /// `dart:ui` version does not.
-final EngineWindow window = EngineWindow();
+final EngineWindow/*!*/ window = EngineWindow();
 
 /// The Web implementation of [ui.WindowPadding].
 class WindowPadding implements ui.WindowPadding {
