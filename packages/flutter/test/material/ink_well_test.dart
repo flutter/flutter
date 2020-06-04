@@ -235,6 +235,84 @@ void main() {
            ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
   });
 
+  testWidgets("ink response splashColor matches splashColor parameter", (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    const Color splashColor = Color(0xffff0000);
+    await tester.pumpWidget(Material(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Focus(
+            focusNode: focusNode,
+            child: Container(
+              width: 100,
+              height: 100,
+              child: InkWell(
+                  hoverColor: const Color(0xff00ff00),
+                  splashColor: splashColor,
+                  focusColor: const Color(0xff0000ff),
+                  highlightColor: const Color(0xf00fffff),
+                  onTap: () { },
+                  onLongPress: () { },
+                  onHover: (bool hover) { },
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    await tester.pump(const Duration(milliseconds: 200)); // unconfirmed splash is well underway
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..circle(x: 50, y: 50, color: splashColor));
+    await gesture.up();
+  });
+
+  testWidgets("ink response splashColor matches resolved overlayColor for MaterialState.pressed", (WidgetTester tester) async {
+    // Same test as 'ink response splashColor matches splashColor
+    // parameter' except that the splash color is specified with the
+    // overlayColor parameter.
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    const Color splashColor = Color(0xffff0000);
+    await tester.pumpWidget(Material(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Focus(
+            focusNode: focusNode,
+            child: Container(
+              width: 100,
+              height: 100,
+              child: InkWell(
+                  overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                    if (states.contains(MaterialState.hovered))
+                      return const Color(0xff00ff00);
+                    if (states.contains(MaterialState.focused))
+                      return const Color(0xff0000ff);
+                    if (states.contains(MaterialState.pressed))
+                      return splashColor;
+                    return const Color(0xffbadbad); // Shouldn't happen.
+                  }),
+                  onTap: () { },
+                  onLongPress: () { },
+                  onHover: (bool hover) { },
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    await tester.pump(const Duration(milliseconds: 200)); // unconfirmed splash is well underway
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..circle(x: 50, y: 50, color: splashColor));
+    await gesture.up();
+  });
+
   testWidgets("ink response doesn't change color on focus when on touch device", (WidgetTester tester) async {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
