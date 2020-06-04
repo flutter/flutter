@@ -13,7 +13,7 @@ dependencies:
   args: 1.6.0
   dwds: 3.1.1
   completion: 0.2.2
-  coverage: 0.13.9
+  coverage: 0.13.10
   crypto: 2.1.5
   file: 5.1.0
   flutter_template_images: 1.0.1
