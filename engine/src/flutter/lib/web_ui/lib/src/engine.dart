@@ -184,7 +184,7 @@ void webOnlyInitializeEngine() {
   }
 
   bool waitingForAnimation = false;
-  ui.webOnlyScheduleFrameCallback = () {
+  scheduleFrameCallback = () {
     // We're asked to schedule a frame and call `frameHandler` when the frame
     // fires.
     if (!waitingForAnimation) {
