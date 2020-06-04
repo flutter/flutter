@@ -1,4 +1,4 @@
-Signature: 7318f6f371a740777f3ae427ae8d52d8
+Signature: 376ee1d188f47d2ee75c740dfcecb91e
 
 UNUSED LICENSES:
 
@@ -5141,6 +5141,7 @@ FILE: ../../../third_party/skia/gm/labyrinth.cpp
 FILE: ../../../third_party/skia/gm/preservefillrule.cpp
 FILE: ../../../third_party/skia/gm/sample_matrix_constant.cpp
 FILE: ../../../third_party/skia/gm/sample_matrix_variable.cpp
+FILE: ../../../third_party/skia/gm/swizzle.cpp
 FILE: ../../../third_party/skia/gm/tilemodes_alpha.cpp
 FILE: ../../../third_party/skia/include/core/SkPathTypes.h
 FILE: ../../../third_party/skia/modules/skparagraph/bench/ParagraphBench.cpp
