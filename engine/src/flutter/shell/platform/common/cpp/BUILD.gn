@@ -67,7 +67,7 @@ source_set("common_cpp") {
   deps = [
     ":common_cpp_library_headers",
     "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper",
-    "//flutter/shell/platform/embedder:embedder_with_symbol_prefix",
+    "//flutter/shell/platform/embedder:embedder_as_internal_library",
   ]
 
   public_deps = [
