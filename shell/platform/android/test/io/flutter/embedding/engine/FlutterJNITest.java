@@ -1,6 +1,7 @@
 package io.flutter.embedding.engine;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
 
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,5 +44,22 @@ public class FlutterJNITest {
 
     // --- Verify Results ---
     assertEquals(1, callbackInvocationCount.get());
+  }
+
+  @Test
+  public void onDisplayPlatformView__callsPlatformViewsController() {
+    PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
+
+    FlutterJNI flutterJNI = new FlutterJNI();
+    flutterJNI.setPlatformViewsController(platformViewsController);
+
+    // --- Execute Test ---
+    flutterJNI.onDisplayPlatformView(
+        /*viewId=*/ 1, /*x=*/ 10, /*y=*/ 20, /*width=*/ 100, /*height=*/ 200);
+
+    // --- Verify Results ---
+    verify(platformViewsController, times(1))
+        .onDisplayPlatformView(
+            /*viewId=*/ 1, /*x=*/ 10, /*y=*/ 20, /*width=*/ 100, /*height=*/ 200);
   }
 }
