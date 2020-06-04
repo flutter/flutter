@@ -62,7 +62,7 @@ class CupertinoScrollbar extends StatefulWidget {
     this.controller,
     this.isAlwaysShown = false,
     @required this.child,
-  }) : assert(!isAlwaysShown || controller != null, 'When isAlwaysShown is true, must pass a controller that is attached to a scroll view'),
+  }) : assert(!isAlwaysShown || controller != null, 'When isAlwaysShown is true, must pass a controller'),
        super(key: key);
 
   /// The subtree to place inside the [CupertinoScrollbar].
@@ -278,7 +278,9 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
       if (widget.isAlwaysShown) {
         _fadeoutTimer?.cancel();
-        widget.controller.position.didUpdateScrollPositionBy(0);
+        if (mounted && widget.controller.hasClients) {
+          widget.controller.position.didUpdateScrollPositionBy(0);
+        }
       }
     });
   }

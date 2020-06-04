@@ -189,7 +189,7 @@ void main() {
     }, throwsAssertionError);
   });
 
-  testWidgets('When isAlwaysShown is true, must pass a controller that is attached to a scroll view',
+  testWidgets('When isAlwaysShown is true, controller does not need to be attached to a scroll view',
       (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
@@ -213,7 +213,7 @@ void main() {
 
     await tester.pumpWidget(viewWithScroll());
     final dynamic exception = tester.takeException();
-    expect(exception, isAssertionError);
+    expect(exception, null);
   });
 
   testWidgets('On first render with isAlwaysShown: true, the thumb shows',
