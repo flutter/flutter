@@ -5,37 +5,35 @@
 #ifndef FLUTTER_SHELL_RENDERER_CONTEXT_TEST_H_
 #define FLUTTER_SHELL_RENDERER_CONTEXT_TEST_H_
 
-#include "flutter/fml/thread_local.h"
+#include "gl_context_switch.h"
 #include "gtest/gtest.h"
-#include "renderer_context_manager.h"
 
 namespace flutter {
 namespace testing {
 
-class RendererContextTest : public ::testing::Test {
+class GLContextSwitchTest : public ::testing::Test {
  public:
-  RendererContextTest();
+  GLContextSwitchTest();
 };
 
 //------------------------------------------------------------------------------
 /// The renderer context used for testing
-class TestRendererContext : public RendererContext {
+class TestSwitchableGLContext : public SwitchableGLContext {
  public:
-  TestRendererContext(int context);
+  TestSwitchableGLContext(int context);
 
-  ~TestRendererContext() override;
+  ~TestSwitchableGLContext() override;
 
   bool SetCurrent() override;
 
-  void RemoveCurrent() override;
+  bool RemoveCurrent() override;
 
   int GetContext();
 
   static int GetCurrentContext();
 
   //------------------------------------------------------------------------------
-  /// Set the current context without going through the
-  /// |RendererContextManager|.
+  /// Set the current context
   ///
   /// This is to mimic how other programs outside flutter sets the context.
   static void SetCurrentContext(int context);
@@ -43,7 +41,7 @@ class TestRendererContext : public RendererContext {
  private:
   int context_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(TestRendererContext);
+  FML_DISALLOW_COPY_AND_ASSIGN(TestSwitchableGLContext);
 };
 }  // namespace testing
 }  // namespace flutter

@@ -28,7 +28,7 @@ IOSContextGL::~IOSContextGL() = default;
 
 std::unique_ptr<IOSRenderTargetGL> IOSContextGL::CreateRenderTarget(
     fml::scoped_nsobject<CAEAGLLayer> layer) {
-  return std::make_unique<IOSRenderTargetGL>(std::move(layer), context_, resource_context_);
+  return std::make_unique<IOSRenderTargetGL>(std::move(layer), context_);
 }
 
 // |IOSContext|
@@ -44,8 +44,9 @@ sk_sp<GrContext> IOSContextGL::CreateResourceContext() {
 }
 
 // |IOSContext|
-bool IOSContextGL::MakeCurrent() {
-  return [EAGLContext setCurrentContext:context_.get()];
+std::unique_ptr<GLContextResult> IOSContextGL::MakeCurrent() {
+  return std::make_unique<GLContextSwitch>(
+      std::make_unique<IOSSwitchableGLContext>(context_.get()));
 }
 
 // |IOSContext|

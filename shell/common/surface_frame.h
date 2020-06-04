@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/common/gl_context_switch.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
@@ -23,6 +24,11 @@ class SurfaceFrame {
   SurfaceFrame(sk_sp<SkSurface> surface,
                bool supports_readback,
                const SubmitCallback& submit_callback);
+
+  SurfaceFrame(sk_sp<SkSurface> surface,
+               bool supports_readback,
+               const SubmitCallback& submit_callback,
+               std::unique_ptr<GLContextResult> context_result);
 
   ~SurfaceFrame();
 
@@ -41,6 +47,7 @@ class SurfaceFrame {
   sk_sp<SkSurface> surface_;
   bool supports_readback_;
   SubmitCallback submit_callback_;
+  std::unique_ptr<GLContextResult> context_result_;
 
   bool PerformSubmit();
 
