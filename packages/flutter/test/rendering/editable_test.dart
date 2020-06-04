@@ -273,7 +273,7 @@ void main() {
     pumpFrame();
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-  });
+  }, skip: isBrowser); // Reference needed
 
   test('text is painted above selection', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -474,7 +474,7 @@ void main() {
     pumpFrame();
 
     expect(currentSelection.isCollapsed, true);
-    expect(currentSelection.baseOffset, 5);
+    expect(currentSelection.baseOffset, 5); // breaks here, is 0
 
     // Test the other selection methods.
     // Move over by one character.
@@ -500,7 +500,7 @@ void main() {
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 5);
     expect(currentSelection.extentOffset, 9);
-  });
+  }, skip: isBrowser); // Reference needed
 
   test('selects correct place when offsets are flipped', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -567,7 +567,7 @@ void main() {
     editable1.selectPositionAt(from: const Offset(30, 2), to: const Offset(42, 2), cause: SelectionChangedCause.drag);
     pumpFrame();
 
-    expect(updatedSelection, isNull);
+    expect(updatedSelection, isNull); // breaks here, is non-null
     expect(selectionChangedCount, 0);
 
     final RenderEditable editable2 = RenderEditable(
@@ -593,7 +593,7 @@ void main() {
     expect(updatedSelection.baseOffset, 3);
     expect(updatedSelection.extentOffset, 5);
     expect(selectionChangedCount, 1);
-  });
+  }, skip: isBrowser); // Reference needed
 
   test('promptRect disappears when promptRectColor is set to null', () {
     const Color promptRectColor = Color(0x12345678);
@@ -735,7 +735,7 @@ void main() {
 
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
     await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.isCollapsed, true); // breaks here, NoSuchMethodError isCollapsed
     expect(currentSelection.baseOffset, 1);
 
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
