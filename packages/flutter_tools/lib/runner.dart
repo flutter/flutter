@@ -23,6 +23,9 @@ import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 
 /// Runs the Flutter tool with support for the specified list of [commands].
+///
+/// [commands] must be either `List<FlutterCommand>` or `List<FlutterCommand> Function()`.
+// TODO(jonahwilliams): update command type once g3 has rolled.
 Future<int> run(
   List<String> args,
   dynamic commands, {
