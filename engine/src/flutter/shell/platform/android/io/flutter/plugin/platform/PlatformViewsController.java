@@ -533,8 +533,4 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     }
     vdControllers.clear();
   }
-
-  public void onDisplayPlatformView(int viewId, int x, int y, int width, int height) {
-    // TODO: Implement this method. https://github.com/flutter/flutter/issues/58288
-  }
 }

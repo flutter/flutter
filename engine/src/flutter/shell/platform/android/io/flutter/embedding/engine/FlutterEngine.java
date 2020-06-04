@@ -103,10 +103,6 @@ public class FlutterEngine {
 
           platformViewsController.onPreEngineRestart();
         }
-
-        public void onDisplayPlatformView(int viewId, int x, int y, int width, int height) {
-          platformViewsController.onDisplayPlatformView(viewId, x, y, width, height);
-        }
       };
 
   /**
@@ -211,7 +207,6 @@ public class FlutterEngine {
     flutterLoader.ensureInitializationComplete(context, dartVmArgs);
 
     flutterJNI.addEngineLifecycleListener(engineLifecycleListener);
-    flutterJNI.setPlatformViewsController(platformViewsController);
     attachToJni();
 
     this.dartExecutor = new DartExecutor(flutterJNI, context.getAssets());
