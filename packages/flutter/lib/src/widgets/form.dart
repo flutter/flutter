@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'autofill.dart';
 import 'framework.dart';
 import 'navigator.dart';
 import 'will_pop_scope.dart';
@@ -179,6 +180,8 @@ class FormState extends State<Form> {
   void save() {
     for (final FormFieldState<dynamic> field in _fields)
       field.save();
+
+    AutofillContextLifecycleAction.of(context).onFormSave(this);
   }
 
   /// Resets every [FormField] that is a descendant of this [Form] back to its
