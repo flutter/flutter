@@ -32,13 +32,17 @@ void main() {
   });
 
   group('analytics', () {
-    FileSystem fileSystem;
+    Directory tempDir;
     MockFlutterConfig mockFlutterConfig;
 
     setUp(() {
-      Cache.flutterRoot = '/flutter';
-      fileSystem = MemoryFileSystem.test();
+      Cache.flutterRoot = '../..';
+      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_analytics_test.');
       mockFlutterConfig = MockFlutterConfig();
+    });
+
+    tearDown(() {
+      tryToDelete(tempDir);
     });
 
     // Ensure we don't send anything when analytics is disabled.
@@ -68,11 +72,10 @@ void main() {
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       Usage: () => Usage(
-        logFile: 'analytics.log',
+        configDirOverride: tempDir.path,
+        logFile: tempDir.childFile('analytics.log').path,
         runningOnBot: true,
       ),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
     // Ensure we don't send for the 'flutter config' command.
@@ -93,11 +96,10 @@ void main() {
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       Usage: () => Usage(
-        logFile: 'analytics.log',
+        configDirOverride: tempDir.path,
+        logFile: tempDir.childFile('analytics.log').path,
         runningOnBot: true,
       ),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Usage records one feature in experiment setting', () async {
@@ -108,14 +110,14 @@ void main() {
 
       final String featuresKey = cdKey(CustomDimensions.enabledFlutterFeatures);
 
-      expect(fileSystem.file('test').readAsStringSync(), contains('$featuresKey: enable-web'));
+      expect(globals.fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web'));
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       Config: () => mockFlutterConfig,
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
-      FileSystem: () => fileSystem,
+      FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -132,7 +134,7 @@ void main() {
       final String featuresKey = cdKey(CustomDimensions.enabledFlutterFeatures);
 
       expect(
-        fileSystem.file('test').readAsStringSync(),
+        globals.fs.file('test').readAsStringSync(),
         contains('$featuresKey: enable-web,enable-linux-desktop,enable-macos-desktop'),
       );
     }, overrides: <Type, Generator>{
@@ -141,7 +143,7 @@ void main() {
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
-      FileSystem: () => fileSystem,
+      FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
