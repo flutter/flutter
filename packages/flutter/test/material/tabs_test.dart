@@ -2581,7 +2581,7 @@ void main() {
     pageController.removeListener(pageControllerListener);
   });
 
-  testWidgets('Setting BouncingScrollPhysics on TabView does not create glow', (WidgetTester tester) async {
+  testWidgets('Setting BouncingScrollPhysics on TabBarView does not include ClampingScrollPhysics', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/57708
     await tester.pumpWidget(MaterialApp(
       home: DefaultTabController(
