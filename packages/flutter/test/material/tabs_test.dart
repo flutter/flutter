@@ -2580,4 +2580,22 @@ void main() {
     await tester.pumpAndSettle();
     pageController.removeListener(pageControllerListener);
   });
+
+  testWidgets('Setting BouncingScrollPhysics on TabBarView does not include ClampingScrollPhysics', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/57708
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: 10,
+        child: Scaffold(
+          body: TabBarView(
+            physics: const BouncingScrollPhysics(),
+            children: List<Widget>.generate(10, (int i) => Center(child: Text('index $i'))),
+          ),
+        ),
+      )
+    ));
+
+    final PageView pageView = tester.widget<PageView>(find.byType(PageView));
+    expect(pageView.physics.toString().contains('ClampingScrollPhysics'), isFalse);
+  });
 }
