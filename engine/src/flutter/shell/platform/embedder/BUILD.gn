@@ -86,8 +86,8 @@ embedder_source_set("embedder") {
   public_configs = []
 }
 
-embedder_source_set("embedder_with_symbol_prefix") {
-  public_configs = [ ":embedder_prefix_config" ]
+embedder_source_set("embedder_as_internal_library") {
+  public_configs = [ ":embedder_internal_library_config" ]
 }
 
 source_set("embedder_headers") {
@@ -98,8 +98,16 @@ source_set("embedder_headers") {
   public_configs = [ "//flutter:config" ]
 }
 
-config("embedder_prefix_config") {
-  defines = [ "FLUTTER_API_SYMBOL_PREFIX=Embedder" ]
+# For using the embedder API as internal implementation detail of an
+# embedding.
+config("embedder_internal_library_config") {
+  defines = [
+    # Use prefixed symbols to avoid collisions with higher level API.
+    "FLUTTER_API_SYMBOL_PREFIX=Embedder",
+
+    # Don't export the embedder.h API surface.
+    "FLUTTER_NO_EXPORT",
+  ]
 }
 
 test_fixtures("fixtures") {

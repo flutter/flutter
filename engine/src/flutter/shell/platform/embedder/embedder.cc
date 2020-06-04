@@ -14,11 +14,13 @@
 #include "third_party/dart/runtime/bin/elf_loader.h"
 #include "third_party/dart/runtime/include/dart_native_api.h"
 
+#if !defined(FLUTTER_NO_EXPORT)
 #if OS_WIN
 #define FLUTTER_EXPORT __declspec(dllexport)
 #else  // OS_WIN
 #define FLUTTER_EXPORT __attribute__((visibility("default")))
 #endif  // OS_WIN
+#endif  // !FLUTTER_NO_EXPORT
 
 extern "C" {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
