@@ -228,7 +228,8 @@ sk_sp<SkImage> Rasterizer::DoMakeRasterSnapshot(
               result = DrawSnapshot(surface, draw_callback);
             })
             .SetIfFalse([&] {
-              if (!surface_->MakeRenderContextCurrent()) {
+              auto context_switch = surface_->MakeRenderContextCurrent();
+              if (!context_switch->GetResult()) {
                 return;
               }
 

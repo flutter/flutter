@@ -31,7 +31,7 @@ class Surface {
 
   virtual flutter::ExternalViewEmbedder* GetExternalViewEmbedder();
 
-  virtual bool MakeRenderContextCurrent();
+  virtual std::unique_ptr<GLContextResult> MakeRenderContextCurrent();
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(Surface);

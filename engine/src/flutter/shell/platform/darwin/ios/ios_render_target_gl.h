@@ -13,14 +13,14 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
+#include "flutter/shell/platform/darwin/ios/ios_switchable_gl_context.h"
 
 namespace flutter {
 
 class IOSRenderTargetGL {
  public:
   IOSRenderTargetGL(fml::scoped_nsobject<CAEAGLLayer> layer,
-                    fml::scoped_nsobject<EAGLContext> context,
-                    fml::scoped_nsobject<EAGLContext> resource_context);
+                    fml::scoped_nsobject<EAGLContext> context_);
 
   ~IOSRenderTargetGL();
 
@@ -35,7 +35,6 @@ class IOSRenderTargetGL {
  private:
   fml::scoped_nsobject<CAEAGLLayer> layer_;
   fml::scoped_nsobject<EAGLContext> context_;
-  fml::scoped_nsobject<EAGLContext> resource_context_;
   GLuint framebuffer_ = GL_NONE;
   GLuint colorbuffer_ = GL_NONE;
   GLint storage_size_width_ = GL_NONE;

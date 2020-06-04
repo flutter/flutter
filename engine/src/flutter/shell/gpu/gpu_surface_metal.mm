@@ -127,9 +127,9 @@ flutter::ExternalViewEmbedder* GPUSurfaceMetal::GetExternalViewEmbedder() {
 }
 
 // |Surface|
-bool GPUSurfaceMetal::MakeRenderContextCurrent() {
+std::unique_ptr<GLContextResult> GPUSurfaceMetal::MakeRenderContextCurrent() {
   // This backend has no such concept.
-  return true;
+  return std::make_unique<GLContextDefaultResult>(true);
 }
 
 void GPUSurfaceMetal::ReleaseUnusedDrawableIfNecessary() {
