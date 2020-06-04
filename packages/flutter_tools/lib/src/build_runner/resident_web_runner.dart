@@ -434,6 +434,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             return 1;
           }
           device.generator.accept();
+          cacheInitialDillCompilation();
         } else {
           await buildWeb(
             flutterProject,
