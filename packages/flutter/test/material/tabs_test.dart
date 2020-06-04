@@ -2580,4 +2580,8 @@ void main() {
     await tester.pumpAndSettle();
     pageController.removeListener(pageControllerListener);
   });
+
+  testWidgets('Setting BouncingScrollPhysics on TabView does not create glow', (WidgetTester tester) async {
+    
+  });
 }
