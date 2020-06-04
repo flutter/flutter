@@ -15,10 +15,9 @@ void main() {
 
   testWidgets('Passing no AppBarTheme returns defaults', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-          appBar: AppBar(
+      home: Scaffold(appBar: AppBar(
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.share), onPressed: () { }),
         ],
       )),
     ));
@@ -44,11 +43,10 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: appBarTheme),
-      home: Scaffold(
-          appBar: AppBar(
+      home: Scaffold(appBar: AppBar(
         title: const Text('App Bar Title'),
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.share), onPressed: () { }),
         ],
       )),
     ));
@@ -82,8 +80,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
-      home: Scaffold(
-          appBar: AppBar(
+      home: Scaffold(appBar: AppBar(
         backgroundColor: color,
         brightness: brightness,
         elevation: elevation,
@@ -92,7 +89,7 @@ void main() {
         actionsIconTheme: actionsIconThemeData,
         textTheme: textTheme,
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.share), onPressed: () { }),
         ],
       )),
     ));
@@ -122,12 +119,11 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
-      home: Scaffold(
-          appBar: AppBar(
+      home: Scaffold(appBar: AppBar(
         iconTheme: iconThemeData,
         actionsIconTheme: actionsIconThemeData,
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share), color: color, onPressed: () {}),
+          IconButton(icon: const Icon(Icons.share), color: color, onPressed: () { }),
         ],
       )),
     ));
@@ -142,10 +138,9 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
-      home: Scaffold(
-          appBar: AppBar(
+      home: Scaffold(appBar: AppBar(
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.share), onPressed: () { }),
         ],
       )),
     ));
@@ -171,10 +166,9 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
-      home: Scaffold(
-          appBar: AppBar(
+      home: Scaffold(appBar: AppBar(
         actions: <Widget>[
-          IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.share), onPressed: () { }),
         ],
       )),
     ));
@@ -211,9 +205,9 @@ void main() {
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
       home: Scaffold(
           appBar: AppBar(
-        title: const Text('Title'),
-        centerTitle: false,
-      )),
+            title: const Text('Title'),
+            centerTitle: false,
+          )),
     ));
 
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
@@ -221,7 +215,7 @@ void main() {
     expect(navToolBar.centerMiddle, false);
   });
 
-  testWidgets('AppBar.centerTitle adapts to TargetPlatform when AppBarTheme.centerTitle is null', (WidgetTester tester) async {
+  testWidgets('AppBar.centerTitle adapts to TargetPlatform when AppBarTheme.centerTitle is null', (WidgetTester tester) async{
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
       home: Scaffold(appBar: AppBar(title: const Text('Title'))),
@@ -288,44 +282,36 @@ Material _getAppBarMaterial(WidgetTester tester) {
 
 IconTheme _getAppBarIconTheme(WidgetTester tester) {
   return tester.widget<IconTheme>(
-    find
-        .descendant(
-          of: find.byType(AppBar),
-          matching: find.byType(IconTheme),
-        )
-        .first,
+    find.descendant(
+      of: find.byType(AppBar),
+      matching: find.byType(IconTheme),
+    ).first,
   );
 }
 
 IconTheme _getAppBarActionsIconTheme(WidgetTester tester) {
   return tester.widget<IconTheme>(
-    find
-        .descendant(
-          of: find.byType(NavigationToolbar),
-          matching: find.byType(IconTheme),
-        )
-        .first,
+    find.descendant(
+      of: find.byType(NavigationToolbar),
+      matching: find.byType(IconTheme),
+    ).first,
   );
 }
 
 RichText _getAppBarIconRichText(WidgetTester tester) {
   return tester.widget<RichText>(
-    find
-        .descendant(
-          of: find.byType(Icon),
-          matching: find.byType(RichText),
-        )
-        .first,
+    find.descendant(
+      of: find.byType(Icon),
+      matching: find.byType(RichText),
+    ).first,
   );
 }
 
 DefaultTextStyle _getAppBarText(WidgetTester tester) {
   return tester.widget<DefaultTextStyle>(
-    find
-        .descendant(
-          of: find.byType(CustomSingleChildLayout),
-          matching: find.byType(DefaultTextStyle),
-        )
-        .first,
+    find.descendant(
+      of: find.byType(CustomSingleChildLayout),
+      matching: find.byType(DefaultTextStyle),
+    ).first,
   );
 }
