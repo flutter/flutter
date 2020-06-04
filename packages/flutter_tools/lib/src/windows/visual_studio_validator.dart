@@ -67,7 +67,7 @@ class VisualStudioValidator extends DoctorValidator {
       } else if (!_visualStudio.isLaunchable) {
         status = ValidationType.partial;
         messages.add(ValidationMessage.error(_userMessages.visualStudioNotLaunchable));
-      } else if (!_visualStudio.hasNecessaryComponents || windows10SdkVersion == null) {
+      } else if (!_visualStudio.hasNecessaryComponents) {
         status = ValidationType.partial;
         messages.add(ValidationMessage.error(
             _userMessages.visualStudioMissingComponents(
@@ -75,6 +75,9 @@ class VisualStudioValidator extends DoctorValidator {
                 _visualStudio.necessaryComponentDescriptions(),
             ),
         ));
+      } else if (windows10SdkVersion == null) {
+        status = ValidationType.partial;
+        messages.add(ValidationMessage.hint(_userMessages.windows10SdkNotFound));
       }
       versionInfo = '${_visualStudio.displayName} ${_visualStudio.displayVersion}';
     } else {

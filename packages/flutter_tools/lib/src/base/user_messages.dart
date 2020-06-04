@@ -200,6 +200,8 @@ class UserMessages {
       'Visual Studio installer for the "$workload" workload, and include these components:\n'
       '  ${components.join('\n  ')}\n'
       '  Windows 10 SDK';
+  String get windows10SdkNotFound =>
+      'Unable to locate a Windows 10 SDK. If building fails, install the Windows 10 SDK in Visual Studio.';
   String visualStudioMissing(String workload) =>
       'Visual Studio not installed; this is necessary for Windows development.\n'
       'Download at https://visualstudio.microsoft.com/downloads/.\n'
