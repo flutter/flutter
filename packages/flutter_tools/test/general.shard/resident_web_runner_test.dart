@@ -348,11 +348,11 @@ void main() {
   }));
 
   test('Listens to extension events with structured errors', () => testbed.run(() async {
-    final Map<String, String> extensionData = {
+    final Map<String, String> extensionData = <String, String>{
       'test': 'data',
       'renderedErrorText': 'error text',
     };
-    final Map<String, String> nonStructuredErrorData = {
+    final Map<String, String> nonStructuredErrorData = <String, String>{
       'other': 'other stuff',
     };
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
