@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'form.dart' show FormState;
 import 'framework.dart';
 import 'navigator.dart' show Route;
+import 'routes.dart';
 
 export 'package:flutter/services.dart' show AutofillHints;
-
-typedef OnAutofillGroupDisposeCallback = bool Function({ BuildContext from });
 
 /// An [AutofillScope] widget that groups [AutofillClient]s together.
 ///
@@ -233,24 +231,26 @@ class _AutofillScope extends InheritedWidget {
 
 /// An [InheritedWidget] that configures its descendant [Navigator]s and [Form]s,
 /// as to whether the current autofill context should be saved or discarded, or
-/// no action should be taken at all, when the [Navigator]s' [Route]s change, or
-/// when the [Form] is saved.
+/// no action should be taken at all, when any of the [Navigator]s' topmost
+/// opaque [ModalRoute]s changes, or when [FormState.save] is called on any of
+/// the [Form]s.
 ///
 /// {@macro flutter.services.autofill.autofillContext}
 ///
 /// Set [AutofillContextLifecycleAction.globalLifecycleDelegate] if you wish to
-/// set up a global [AutofillContextLifecycleDelegate] for the entire app.
+/// change the default [AutofillContextLifecycleDelegate] for the entire app.
 ///
 /// The default [globalLifecycleDelegate] saves the current autofill context
-/// when there's a route change,
-///
+/// when any [Navigator] observes a change in its topmost opaque [ModalRoute],
+/// or when a [Form] is saved.
 ///
 /// See also:
 ///
 /// * [AutofillContextLifecycleDelegate], the configuration data this
 ///   [InheritWidget] carries.
 ///
-/// * [TextInput.finishAutofillContext],
+/// * [TextInput.finishAutofillContext], the method that cleans up the current
+///   autofill context.
 class AutofillContextLifecycleAction extends InheritedWidget {
   /// Creates a widget that provides its descendants with an
   /// [AutofillContextLifecycleDelegate], which cleans up the current autofill
@@ -303,8 +303,8 @@ class AutofillContextLifecycleAction extends InheritedWidget {
 ///
 /// The default implementation signals the platform to save the current autofill
 /// context (before discarding it), when any of the affected [Form]s is saved,
-/// or any of the affected [Navigator]s pushes/pops/removes an opaque
-/// [ModalRoute], or the current route is replaced with an opaque [ModalRoute].
+/// or any of the affected [Navigator]s pushes/pops opaque [ModalRoute], or the
+/// current route is replaced with an opaque [ModalRoute].
 class AutofillContextLifecycleDelegate {
   /// Creates a delegate object that can be used to clean up the current
   /// autofill context at proper times, for example, when [Route]s change or
@@ -350,20 +350,19 @@ class AutofillContextLifecycleDelegate {
   ///
   /// {@macro flutter.widgets.navigatorObserver.didRemove}
   ///
-  /// The default implementation saves the current autofill context if [route]
-  /// is an opaque [ModalRoute].
+  /// The default implementation does not do anything.
   void didRemove(Route<dynamic> route, Route<dynamic> previousRoute) {
-    if (route is ModalRoute && route.opaque)
-      TextInput.finishAutofillContext(shouldSave: true);
   }
 
   /// The action to take when any [Navigator] in the app replaced [oldRoute]
   /// with [newRoute].
   ///
   /// The default implementation saves the current autofill context if
-  /// [newRoute] or [oldRoute] is an opaque [ModalRoute].
+  /// [newRoute] or [oldRoute] is an opaque [ModalRoute], and [newRoute] is the
+  /// current route.
   void didReplace({ Route<dynamic> newRoute, Route<dynamic> oldRoute }) {
-    if ((oldRoute is ModalRoute && oldRoute.opaque) || (newRoute is ModalRoute && newRoute.opaque))
+    if ((oldRoute is ModalRoute && oldRoute.opaque && oldRoute.isCurrent)
+      || (newRoute is ModalRoute && newRoute.opaque && newRoute.isCurrent))
       TextInput.finishAutofillContext(shouldSave: true);
   }
 }

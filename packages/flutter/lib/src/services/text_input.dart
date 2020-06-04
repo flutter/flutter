@@ -1216,18 +1216,19 @@ class TextInput {
   /// Once added to an autofill context, an input field will stay in the context
   /// until the context is destroyed. To prevent leaks, call [finishAutofillContext]
   /// to signal the text input plugin that the user has finalized their input in
-  /// the current autofill context. The platform text input plugin will encourage
-  /// or discourage the platform from saving the user input based on the value
-  /// of the [shouldSave] parameter. The platform usually shows a "Save for
-  /// autofill" prompt to ask for permission from the user for saving the input.
+  /// the current autofill context. The platform text input plugin either
+  /// encourages or discourages the platform from saving the user input based on
+  /// the value of the [shouldSave] parameter. The platform usually shows a
+  /// "Save for autofill?" prompt to ask for confirmation from the user for
+  /// saving the input.
   /// {@endtemplate}
   ///
   /// Typically, this method should be called when the user has finalized their
   /// input and ready to submit. For example, in a [Form], it's typically done
-  /// immediately before or after it is submitted. You should make sure that
-  /// any connected [TextInputClient] is disconnected and no input field is
-  /// focused before calling [finishAutofillContext]. This is to ensure the
-  /// user can't furture interact with the input fields.
+  /// immediately before or after its content is submitted. You should make sure
+  /// that any connected [TextInputClient] is disconnected and no input field is
+  /// focused before calling [finishAutofillContext]. This is to ensure the user
+  /// can't interact with the input fields while it's being processed.
   ///
   /// In many cases you don't have to call [finishAutofillContext] yourself. The
   /// [AutofillContextLifecycleAction] widget provides configurable event hooks
@@ -1240,7 +1241,7 @@ class TextInput {
   /// Calling [finishAutofillContext] may cause the platform to show the "save
   /// for autofill" UI, which should typically only be shown no more than once
   /// for every screen. Consider removing premature [finishAutofillContext] calls
-  /// to prevent showing the "save for autofill" UI too frequently. However,
+  /// to prevent showing the "Save for autofill?" UI too frequently. However,
   /// calling [finishAutofillContext] when there's no existing autofill context
   /// does not do anything.
   ///
