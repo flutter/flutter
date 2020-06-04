@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'runner.dart' as runner;
 import 'src/base/context.dart';
+import 'src/base/logger.dart';
 import 'src/base/template.dart';
 // The build_runner code generation is provided here to make it easier to
 // avoid introducing the dependency into google3. Not all build* packages
@@ -64,8 +65,9 @@ Future<void> main(List<String> args) async {
       (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
   final bool muteCommandLogging = help || doctor;
   final bool verboseHelp = help && verbose;
+  final bool daemon = args.contains('daemon');
 
-  await runner.run(args, <FlutterCommand>[
+  await runner.run(args, () => <FlutterCommand>[
     AnalyzeCommand(
       verboseHelp: verboseHelp,
       fileSystem: globals.fs,
@@ -122,5 +124,14 @@ Future<void> main(List<String> args) async {
        WebRunnerFactory: () => DwdsWebRunnerFactory(),
        // The mustache dependency is different in google3
        TemplateRenderer: () => const MustacheTemplateRenderer(),
+       if (daemon)
+        Logger: () => NotifyingLogger(verbose: verbose)
+       else if (verbose)
+        Logger: () => VerboseLogger(StdoutLogger(
+          timeoutConfiguration: timeoutConfiguration,
+          stdio: globals.stdio,
+          terminal: globals.terminal,
+          outputPreferences: globals.outputPreferences,
+        ))
      });
 }

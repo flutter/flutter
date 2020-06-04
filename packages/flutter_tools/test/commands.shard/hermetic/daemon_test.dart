@@ -24,7 +24,7 @@ void main() {
 
   group('daemon', () {
     setUp(() {
-      notifyingLogger = NotifyingLogger();
+      notifyingLogger = NotifyingLogger(verbose: false);
     });
 
     tearDown(() {
@@ -296,6 +296,42 @@ void main() {
       await output.close();
       await input.close();
     });
+  });
+
+  testUsingContext('notifyingLogger outputs trace messages in verbose mode', () async {
+    final NotifyingLogger logger = NotifyingLogger(verbose: true);
+
+    final Future<LogMessage> messageResult = logger.onMessage.first;
+    logger.printTrace('test');
+
+    final LogMessage message = await messageResult;
+
+    expect(message.level, 'trace');
+    expect(message.message, 'test');
+  });
+
+  testUsingContext('notifyingLogger ignores trace messages in non-verbose mode', () async {
+    final NotifyingLogger logger = NotifyingLogger(verbose: false);
+
+    final Future<LogMessage> messageResult = logger.onMessage.first;
+    logger.printTrace('test');
+    logger.printStatus('hello');
+
+    final LogMessage message = await messageResult;
+
+    expect(message.level, 'status');
+    expect(message.message, 'hello');
+  });
+
+  testUsingContext('notifyingLogger buffers messages sent before a subscription', () async {
+    final NotifyingLogger logger = NotifyingLogger(verbose: false);
+
+    logger.printStatus('hello');
+
+    final LogMessage message = await logger.onMessage.first;
+
+    expect(message.level, 'status');
+    expect(message.message, 'hello');
   });
 
   group('daemon serialization', () {
