@@ -820,7 +820,7 @@ void main() {
     await tester.pump();
 
     // Enter a character into the obscured field and verify that the character
-    // isn't shown to the user and then changed to a bullet.
+    // isn't shown to the user.
     const String newChar = 'X';
     tester.testTextInput.updateEditingValue(const TextEditingValue(
       text: testValue + newChar,
