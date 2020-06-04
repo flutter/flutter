@@ -1179,7 +1179,7 @@ class TabBarView extends StatefulWidget {
   _TabBarViewState createState() => _TabBarViewState();
 }
 
-final PageScrollPhysics _kTabBarViewPhysics = const PageScrollPhysics().applyTo(const ClampingScrollPhysics());
+const PageScrollPhysics _kTabBarViewPhysics = PageScrollPhysics();
 
 class _TabBarViewState extends State<TabBarView> {
   TabController _controller;
@@ -1349,7 +1349,9 @@ class _TabBarViewState extends State<TabBarView> {
       child: PageView(
         dragStartBehavior: widget.dragStartBehavior,
         controller: _pageController,
-        physics: widget.physics == null ? _kTabBarViewPhysics : _kTabBarViewPhysics.applyTo(widget.physics),
+        physics: widget.physics == null
+          ? _kTabBarViewPhysics.applyTo(const ClampingScrollPhysics())
+          : _kTabBarViewPhysics.applyTo(widget.physics),
         children: _childrenWithKey,
       ),
     );
