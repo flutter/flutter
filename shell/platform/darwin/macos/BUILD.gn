@@ -70,7 +70,7 @@ source_set("flutter_framework_source") {
 
   deps = [
     "//flutter/shell/platform/darwin/common:framework_shared",
-    "//flutter/shell/platform/embedder:embedder_with_symbol_prefix",
+    "//flutter/shell/platform/embedder:embedder_as_internal_library",
   ]
 
   public_configs = [ "//flutter:config" ]
@@ -115,7 +115,7 @@ executable("flutter_desktop_darwin_unittests") {
     ":flutter_desktop_darwin_fixtures",
     ":flutter_framework_source",
     "//flutter/shell/platform/darwin/common:framework_shared",
-    "//flutter/shell/platform/embedder:embedder_with_symbol_prefix",
+    "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/testing",
     "//flutter/testing:dart",
     "//flutter/testing:skia",
