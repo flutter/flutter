@@ -22,7 +22,7 @@ void main() {
         buildMode: BuildMode.debug,
         shellPath: '/',
         explicitObservatoryPort: 1234,
-        dartExperiments: <String>[],
+        extraFrontEndOptions: <String>[],
       );
       flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
 
@@ -35,7 +35,7 @@ void main() {
         buildMode: BuildMode.debug,
         shellPath: '/',
         precompiledDillPath: 'example.dill',
-        dartExperiments: <String>[],
+        extraFrontEndOptions: <String>[],
       );
       flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
 
@@ -113,7 +113,7 @@ void main() {
         shellPath: 'abc',
         enableObservatory: false,
         startPaused: true,
-        dartExperiments: <String>[],
+        extraFrontEndOptions: <String>[],
       ), throwsAssertionError);
 
       expect(() => installHook(
@@ -122,7 +122,7 @@ void main() {
         enableObservatory: false,
         startPaused: false,
         observatoryPort: 123,
-        dartExperiments: <String>[],
+        extraFrontEndOptions: <String>[],
       ), throwsAssertionError);
 
       FlutterPlatform capturedPlatform;
@@ -143,7 +143,7 @@ void main() {
         observatoryPort: 200,
         serverType: InternetAddressType.IPv6,
         icudtlPath: 'ghi',
-        dartExperiments: <String>[],
+        extraFrontEndOptions: <String>[],
         platformPluginRegistration: (FlutterPlatform platform) {
           capturedPlatform = platform;
         });
@@ -192,7 +192,7 @@ class TestFlutterPlatform extends FlutterPlatform {
     startPaused: false,
     enableObservatory: false,
     buildTestAssets: false,
-    dartExperiments: <String>[],
+    extraFrontEndOptions: <String>[],
   );
 
   @override

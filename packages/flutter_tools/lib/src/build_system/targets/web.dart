@@ -28,11 +28,6 @@ const String kHasWebPlugins = 'HasWebPlugins';
 /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
 const String kDart2jsOptimization = 'Dart2jsOptimization';
 
-/// Allow specifying experiments for dart2js.
-///
-/// Multiple values should be encoded as a comma-separated list.
-const String kEnableExperiment = 'EnableExperiment';
-
 /// Whether to disable dynamic generation code to satisfy csp policies.
 const String kCspMode = 'cspMode';
 
@@ -164,8 +159,8 @@ class Dart2JSTarget extends Target {
     final String packageFile = globalPackagesPath;
     final File outputKernel = environment.buildDir.childFile('app.dill');
     final File outputFile = environment.buildDir.childFile('main.dart.js');
-    final List<String> dartDefines = decodeDartDefines(environment.defines);
-    final String enabledExperiments = environment.defines[kEnableExperiment];
+    final List<String> dartDefines = decodeDartDefines(environment.defines, kDartDefines);
+    final List<String> extraFrontEndOptions = decodeDartDefines(environment.defines, kExtraFrontEndOptions);
 
     // Run the dart2js compilation in two stages, so that icon tree shaking can
     // parse the kernel file for web builds.
@@ -173,8 +168,7 @@ class Dart2JSTarget extends Target {
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
       globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=$specPath',
-      if (enabledExperiments != null)
-        '--enable-experiment=$enabledExperiments',
+      ...?extraFrontEndOptions,
       '-o',
       outputKernel.path,
       '--packages=$packageFile',
@@ -194,8 +188,7 @@ class Dart2JSTarget extends Target {
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
       globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=$specPath',
-      if (enabledExperiments != null)
-        '--enable-experiment=$enabledExperiments',
+      ...?extraFrontEndOptions,
       if (dart2jsOptimization != null)
         '-$dart2jsOptimization'
       else

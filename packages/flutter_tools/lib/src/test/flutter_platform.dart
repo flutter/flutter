@@ -88,7 +88,7 @@ FlutterPlatform installHook({
   FlutterProject flutterProject,
   String icudtlPath,
   PlatformPluginRegistration platformPluginRegistration,
-  @required List<String> dartExperiments,
+  @required List<String> extraFrontEndOptions,
 }) {
   assert(testWrapper != null);
   assert(enableObservatory || (!startPaused && observatoryPort == null));
@@ -121,7 +121,7 @@ FlutterPlatform installHook({
     projectRootDirectory: projectRootDirectory,
     flutterProject: flutterProject,
     icudtlPath: icudtlPath,
-    dartExperiments: dartExperiments,
+    extraFrontEndOptions: extraFrontEndOptions,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -269,7 +269,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.projectRootDirectory,
     this.flutterProject,
     this.icudtlPath,
-    @required this.dartExperiments,
+    @required this.extraFrontEndOptions,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -290,7 +290,7 @@ class FlutterPlatform extends PlatformPlugin {
   final Uri projectRootDirectory;
   final FlutterProject flutterProject;
   final String icudtlPath;
-  final List<String> dartExperiments;
+  final List<String> extraFrontEndOptions;
 
   Directory fontsDirectory;
 
@@ -459,7 +459,7 @@ class FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= TestCompiler(buildMode, trackWidgetCreation, flutterProject, dartExperiments);
+        compiler ??= TestCompiler(buildMode, trackWidgetCreation, flutterProject, extraFrontEndOptions);
         mainDart = await compiler.compile(globals.fs.file(mainDart).uri);
 
         if (mainDart == null) {
@@ -751,7 +751,7 @@ class FlutterPlatform extends PlatformPlugin {
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl)),
       host: host,
       updateGoldens: updateGoldens,
-      nullSafety: dartExperiments.contains('non-nullable'),
+      nullSafety: extraFrontEndOptions?.contains('--enable-experiment=non-nullable') ?? false,
     );
   }
 
