@@ -40,7 +40,7 @@ Future<void> webOnlyInitializeTestDomRenderer({double devicePixelRatio = 3.0}) {
   engine.window.debugOverrideDevicePixelRatio(devicePixelRatio);
   engine.window.webOnlyDebugPhysicalSizeOverride =
       Size(800 * devicePixelRatio, 600 * devicePixelRatio);
-  webOnlyScheduleFrameCallback = () {};
+  engine.scheduleFrameCallback = () {};
   debugEmulateFlutterTesterEnvironment = true;
 
   if (_platformInitializedFuture != null) {
