@@ -91,6 +91,7 @@ constexpr int32_t kRootNodeId = 0;
                            uid:(int32_t)uid NS_DESIGNATED_INITIALIZER;
 
 - (BOOL)nodeWillCauseScroll:(const flutter::SemanticsNode*)node;
+- (BOOL)nodeShouldTriggerAnnouncement:(const flutter::SemanticsNode*)node;
 - (void)collectRoutes:(NSMutableArray<SemanticsObject*>*)edges;
 - (NSString*)routeName;
 - (BOOL)onCustomAccessibilityAction:(FlutterCustomAccessibilityAction*)action;
