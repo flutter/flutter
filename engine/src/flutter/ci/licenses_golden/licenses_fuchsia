@@ -1,4 +1,4 @@
-Signature: 163fae226fa74ca073a0b648793cd0f8
+Signature: 0ca8fe80f3d534799d9bfbaf97784da9
 
 UNUSED LICENSES:
 
@@ -3137,8 +3137,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/math.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/problem.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/seeking_reader.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/basemgr/base_shell.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/basemgr/user_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module/module_context.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module/module_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/session/focus.fidl
@@ -3271,6 +3269,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/metrics_recorder.fid
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.position/position.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.sensor/sensor.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location/types.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/effects_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/properties.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.target/target_discovery.fidl
