@@ -84,10 +84,16 @@ abstract class ChromiumDevice extends Device {
   }
 
   @override
-  Future<bool> installApp(ApplicationPackage app) async => true;
+  Future<bool> installApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => true;
 
   @override
-  Future<bool> isAppInstalled(ApplicationPackage app) async => true;
+  Future<bool> isAppInstalled(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => true;
 
   @override
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => true;
@@ -113,6 +119,7 @@ abstract class ChromiumDevice extends Device {
     Map<String, Object> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
+    String userIdentifier,
   }) async {
     // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
     // for the web initialization and server logic.
@@ -134,7 +141,10 @@ abstract class ChromiumDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(ApplicationPackage app) async {
+  Future<bool> stopApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async {
     await _chrome?.close();
     return true;
   }
@@ -143,7 +153,10 @@ abstract class ChromiumDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
 
   @override
-  Future<bool> uninstallApp(ApplicationPackage app) async => true;
+  Future<bool> uninstallApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -330,10 +343,16 @@ class WebServerDevice extends Device {
   }
 
   @override
-  Future<bool> installApp(ApplicationPackage app) async => true;
+  Future<bool> installApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => true;
 
   @override
-  Future<bool> isAppInstalled(ApplicationPackage app) async => true;
+  Future<bool> isAppInstalled(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => true;
 
   @override
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => true;
@@ -369,6 +388,7 @@ class WebServerDevice extends Device {
     Map<String, Object> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
+    String userIdentifier,
   }) async {
     final String url = platformArgs['uri'] as String;
     if (debuggingOptions.startPaused) {
@@ -381,7 +401,10 @@ class WebServerDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(ApplicationPackage app) async {
+  Future<bool> stopApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async {
     return true;
   }
 
@@ -389,7 +412,10 @@ class WebServerDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
 
   @override
-  Future<bool> uninstallApp(ApplicationPackage app) async {
+  Future<bool> uninstallApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async {
     return true;
   }
 

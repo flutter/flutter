@@ -87,10 +87,16 @@ class FlutterTesterDevice extends Device {
   }
 
   @override
-  Future<bool> installApp(ApplicationPackage app) async => true;
+  Future<bool> installApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => true;
 
   @override
-  Future<bool> isAppInstalled(ApplicationPackage app) async => false;
+  Future<bool> isAppInstalled(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => false;
 
   @override
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
@@ -106,10 +112,11 @@ class FlutterTesterDevice extends Device {
     ApplicationPackage package, {
     @required String mainPath,
     String route,
-    @required DebuggingOptions debuggingOptions,
+    DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
+    String userIdentifier,
   }) async {
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
 
@@ -215,14 +222,20 @@ class FlutterTesterDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(ApplicationPackage app) async {
+  Future<bool> stopApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async {
     _process?.kill();
     _process = null;
     return true;
   }
 
   @override
-  Future<bool> uninstallApp(ApplicationPackage app) async => true;
+  Future<bool> uninstallApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;

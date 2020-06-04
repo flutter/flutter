@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:meta/meta.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
+import '../android/android_device.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -22,7 +23,7 @@ import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command.dart' show FlutterCommandResult, FlutterOptions;
 import '../vmservice.dart';
 import '../web/web_runner.dart';
 import 'run.dart';
@@ -136,10 +137,22 @@ class DriveCommand extends RunCommandBase {
   bool get shouldBuild => boolArg('build');
 
   bool get verboseSystemLogs => boolArg('verbose-system-logs');
+  String get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
   /// Subscription to log messages printed on the device or simulator.
   // ignore: cancel_subscriptions
   StreamSubscription<String> _deviceLogSubscription;
+
+  @override
+  Future<void> validateCommand() async {
+    if (userIdentifier != null) {
+      final Device device = await findTargetDevice();
+      if (device is! AndroidDevice) {
+        throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
+      }
+    }
+    return super.validateCommand();
+  }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -195,7 +208,7 @@ class DriveCommand extends RunCommandBase {
           device,
           flutterProject: flutterProject,
           target: targetFile,
-          buildInfo: buildInfo
+          buildInfo: buildInfo,
         );
         residentRunner = webRunnerFactory.createWebRunner(
           flutterDevice,
@@ -412,7 +425,11 @@ void restoreAppStarter() {
   appStarter = _startApp;
 }
 
-Future<LaunchResult> _startApp(DriveCommand command, Uri webUri) async {
+Future<LaunchResult> _startApp(
+  DriveCommand command,
+  Uri webUri, {
+  String userIdentifier,
+}) async {
   final String mainPath = findMainDartFile(command.targetFile);
   if (await globals.fs.type(mainPath) != FileSystemEntityType.file) {
     globals.printError('Tried to run $mainPath, but that file does not exist.');
@@ -427,10 +444,10 @@ Future<LaunchResult> _startApp(DriveCommand command, Uri webUri) async {
 
   if (command.shouldBuild) {
     globals.printTrace('Installing application package.');
-    if (await command.device.isAppInstalled(package)) {
-      await command.device.uninstallApp(package);
+    if (await command.device.isAppInstalled(package, userIdentifier: userIdentifier)) {
+      await command.device.uninstallApp(package, userIdentifier: userIdentifier);
     }
-    await command.device.installApp(package);
+    await command.device.installApp(package, userIdentifier: userIdentifier);
   }
 
   final Map<String, dynamic> platformArgs = <String, dynamic>{};
@@ -469,6 +486,7 @@ Future<LaunchResult> _startApp(DriveCommand command, Uri webUri) async {
     ),
     platformArgs: platformArgs,
     prebuiltApplication: !command.shouldBuild,
+    userIdentifier: userIdentifier,
   );
 
   if (!result.started) {
@@ -520,7 +538,7 @@ Future<bool> _stopApp(DriveCommand command) async {
     await command.device.targetPlatform,
     command.getBuildInfo(),
   );
-  final bool stopped = await command.device.stopApp(package);
+  final bool stopped = await command.device.stopApp(package, userIdentifier: command.userIdentifier);
   await command._deviceLogSubscription?.cancel();
   return stopped;
 }
