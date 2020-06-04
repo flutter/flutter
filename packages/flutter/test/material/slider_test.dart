@@ -1397,7 +1397,6 @@ void main() {
                     TestSemantics(
                       id: 3,
                       flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState],
-                      actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
                       value: '50%',
                       increasedValue: '55%',
                       decreasedValue: '45%',
@@ -1506,7 +1505,6 @@ void main() {
                     TestSemantics(
                       id: 4,
                       flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState],
-                      actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
                       value: '50%',
                       increasedValue: '60%',
                       decreasedValue: '40%',

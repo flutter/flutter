@@ -714,7 +714,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
     return Semantics(
       container: true,
-      explicitChildNodes: false,
       child: FocusableActionDetector(
         actions: _actionMap,
         shortcuts: _shortcutMap,
@@ -1491,8 +1490,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     config.isEnabled = isInteractive;
     config.textDirection = textDirection;
-    config.onIncrease = increaseAction;
-    config.onDecrease = decreaseAction;
+    if (isInteractive) {
+      config.onIncrease = increaseAction;
+      config.onDecrease = decreaseAction;
+    }
     config.label = _label ?? '';
     if (semanticFormatterCallback != null) {
       config.value = semanticFormatterCallback(_state._lerp(value));
