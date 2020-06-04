@@ -64,4 +64,42 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
   XCTAssertEqualObjects(parent.children, @[ child2 ]);
 }
 
+- (void)testShouldTriggerAnnouncement {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  SemanticsObject* object = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+
+  // Handle nil with no node set.
+  XCTAssertFalse([object nodeShouldTriggerAnnouncement:nil]);
+
+  // Handle initial setting of node with liveRegion
+  flutter::SemanticsNode node;
+  node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kIsLiveRegion);
+  node.label = "foo";
+  XCTAssertTrue([object nodeShouldTriggerAnnouncement:&node]);
+
+  // Handle nil with node set.
+  [object setSemanticsNode:&node];
+  XCTAssertFalse([object nodeShouldTriggerAnnouncement:nil]);
+
+  // Handle new node, still has live region, same label.
+  XCTAssertFalse([object nodeShouldTriggerAnnouncement:&node]);
+
+  // Handle update node with new label, still has live region.
+  flutter::SemanticsNode updatedNode;
+  updatedNode.flags = static_cast<int32_t>(flutter::SemanticsFlags::kIsLiveRegion);
+  updatedNode.label = "bar";
+  XCTAssertTrue([object nodeShouldTriggerAnnouncement:&updatedNode]);
+
+  // Handle dropping the live region flag.
+  updatedNode.flags = 0;
+  XCTAssertFalse([object nodeShouldTriggerAnnouncement:&updatedNode]);
+
+  // Handle adding the flag when the label has not changed.
+  updatedNode.label = "foo";
+  [object setSemanticsNode:&updatedNode];
+  XCTAssertTrue([object nodeShouldTriggerAnnouncement:&node]);
+}
+
 @end
