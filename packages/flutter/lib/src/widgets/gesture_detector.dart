@@ -179,6 +179,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// Container(
 ///   color: _color,
 ///   height: 200.0,
+///   width: 200.0,
 ///   child: GestureDetector(
 ///     onTap: () {
 ///       setState(() {
