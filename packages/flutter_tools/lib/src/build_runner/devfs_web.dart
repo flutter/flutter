@@ -275,7 +275,10 @@ class WebAssetServer implements AssetReader {
   // handle requests for JavaScript source, dart sources maps, or asset files.
   @visibleForTesting
   Future<shelf.Response> handleRequest(shelf.Request request) async {
-    final String requestPath = request.url.path;
+    String requestPath = request.url.path;
+    while (requestPath.startsWith('/')) {
+      requestPath = requestPath.substring(1);
+    }
     final Map<String, String> headers = <String, String>{};
     // If the response is `/`, then we are requesting the index file.
     if (request.url.path == '/' || request.url.path.isEmpty) {
@@ -339,8 +342,9 @@ class WebAssetServer implements AssetReader {
     }
 
     if (!file.existsSync()) {
-      final String webPath = globals.fs.path.join(
-        globals.fs.currentDirectory.childDirectory('web').path, requestPath);
+      final Uri webPath = globals.fs.currentDirectory
+        .childDirectory('web')
+        .uri.resolve(requestPath);
       file = globals.fs.file(webPath);
     }
 
@@ -524,16 +528,14 @@ class WebAssetServer implements AssetReader {
     final Directory dartSdkParent = globals.fs
       .directory(globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath))
       .parent;
-    final File dartSdkFile = globals.fs.file(globals.fs.path
-      .joinAll(<String>[dartSdkParent.path, ...segments]));
+    final File dartSdkFile = globals.fs.file(dartSdkParent.uri.resolve(path));
     if (dartSdkFile.existsSync()) {
       return dartSdkFile;
     }
 
-    final String flutterWebSdk = globals.artifacts
-      .getArtifactPath(Artifact.flutterWebSdk);
-    final File webSdkFile = globals.fs
-      .file(globals.fs.path.joinAll(<String>[flutterWebSdk, ...segments]));
+    final Directory flutterWebSdk = globals.fs.directory(globals.artifacts
+      .getArtifactPath(Artifact.flutterWebSdk));
+    final File webSdkFile = globals.fs.file(flutterWebSdk.uri.resolve(path));
 
     return webSdkFile;
   }
