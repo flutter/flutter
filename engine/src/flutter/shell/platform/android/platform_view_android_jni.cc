@@ -118,6 +118,19 @@ void FlutterViewOnPreEngineRestart(JNIEnv* env, jobject obj) {
   FML_CHECK(CheckException(env));
 }
 
+static jmethodID g_on_display_platform_view_method = nullptr;
+void FlutterViewOnDisplayPlatformView(JNIEnv* env,
+                                      jobject obj,
+                                      jint view_id,
+                                      jint x,
+                                      jint y,
+                                      jint width,
+                                      jint height) {
+  env->CallVoidMethod(obj, g_on_display_platform_view_method, view_id, x, y,
+                      width, height);
+  FML_CHECK(CheckException(env));
+}
+
 static jmethodID g_attach_to_gl_context_method = nullptr;
 void SurfaceTextureAttachToGLContext(JNIEnv* env, jobject obj, jint textureId) {
   env->CallVoidMethod(obj, g_attach_to_gl_context_method, textureId);
@@ -747,6 +760,14 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
       env, env->FindClass("io/flutter/embedding/engine/FlutterJNI"));
   if (g_flutter_jni_class->is_null()) {
     FML_LOG(ERROR) << "Failed to find FlutterJNI Class.";
+    return false;
+  }
+
+  g_on_display_platform_view_method = env->GetMethodID(
+      g_flutter_jni_class->obj(), "onDisplayPlatformView", "(IIIII)V");
+
+  if (g_on_display_platform_view_method == nullptr) {
+    FML_LOG(ERROR) << "Could not locate onDisplayPlatformView method";
     return false;
   }
 
