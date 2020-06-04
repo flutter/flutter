@@ -74,9 +74,9 @@ G_MODULE_EXPORT FlValue* fl_method_call_get_args(FlMethodCall* self) {
   return self->args;
 }
 
-gboolean fl_method_call_respond(FlMethodCall* self,
-                                FlMethodResponse* response,
-                                GError** error) {
+G_MODULE_EXPORT gboolean fl_method_call_respond(FlMethodCall* self,
+                                                FlMethodResponse* response,
+                                                GError** error) {
   g_return_val_if_fail(FL_IS_METHOD_CALL(self), FALSE);
   g_return_val_if_fail(FL_IS_METHOD_RESPONSE(response), FALSE);
   return fl_method_channel_respond(self->channel, self->response_handle,
