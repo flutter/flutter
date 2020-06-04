@@ -291,15 +291,7 @@ class _WindowsUtils extends OperatingSystemUtils {
     logger: logger,
     platform: platform,
     processManager: processManager,
-  ) {
-    if (processManager.canRun('pwsh.exe')) {
-      _activePowershell = 'pwsh.exe';
-    } else {
-      _activePowershell = 'PowerShell.exe';
-    }
-  }
-
-  String _activePowershell;
+  );
 
   @override
   void makeExecutable(File file) {}
@@ -323,30 +315,36 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   void zip(Directory data, File zipFile) {
-    final RunResult result = _processUtils.runSync(<String>[
-      _activePowershell,
-      '-command',
-      '"Compress-Archive ${data.path} -DestinationPath ${zipFile.path}"',
-    ]);
-    if (result.stderr.isNotEmpty) {
-      throw ProcessException(_activePowershell, <String>['Compress-Archive'], result.stderr);
+    final Archive archive = Archive();
+    for (final FileSystemEntity entity in data.listSync(recursive: true)) {
+      if (entity is! File) {
+        continue;
+      }
+      final File file = entity as File;
+      final String path = file.fileSystem.path.relative(file.path, from: data.path);
+      final List<int> bytes = file.readAsBytesSync();
+      archive.addFile(ArchiveFile(path, bytes.length, bytes));
     }
+    zipFile.writeAsBytesSync(ZipEncoder().encode(archive), flush: true);
   }
 
   @override
   void unzip(File file, Directory targetDirectory) {
-    final RunResult result = _processUtils.runSync(<String>[
-      _activePowershell,
-      '-command',
-      '"Expand-Archive ${file.path} -DestinationPath ${targetDirectory.path}"',
-    ], throwOnError: true);
-    if (result.stderr.isNotEmpty) {
-      throw ProcessException(_activePowershell, <String>['Expand-Archive'], result.stderr);
-    }
+    final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
+    _unpackArchive(archive, targetDirectory);
   }
 
   @override
-  bool verifyZip(File zipFile) => true;
+  bool verifyZip(File zipFile) {
+    try {
+      ZipDecoder().decodeBytes(zipFile.readAsBytesSync(), verify: true);
+    } on FileSystemException catch (_) {
+      return false;
+    } on ArchiveException catch (_) {
+      return false;
+    }
+    return true;
+  }
 
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
