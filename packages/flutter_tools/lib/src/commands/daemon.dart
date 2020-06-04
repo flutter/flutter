@@ -13,6 +13,8 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/process.dart';
+import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -986,7 +988,11 @@ class NotifyingLogger extends Logger {
   }
 
   @override
-  void registerForDisposal(Signals signals) {}
+  void registerForDisposal({
+    @required ShutdownHooks shutdownHooks,
+    @required Signals signals,
+    List<ProcessSignal> fatalSignals,
+  }) {}
 
   @override
   void sendEvent(String name, [Map<String, dynamic> args]) { }

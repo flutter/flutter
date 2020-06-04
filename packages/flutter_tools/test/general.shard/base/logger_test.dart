@@ -978,8 +978,8 @@ void main() {
   });
 
   testUsingContext('Registered Logger is disposed of on a fatal signal', () async {
-    MockIoProcessSignal mockSignal = MockIoProcessSignal();
-    StreamController<ProcessSignal> controller = StreamController<ProcessSignal>();
+    final MockIoProcessSignal mockSignal = MockIoProcessSignal();
+    final StreamController<ProcessSignal> controller = StreamController<ProcessSignal>();
 
     when(mockSignal.watch()).thenAnswer((Invocation invocation) => controller.stream);
 
@@ -991,7 +991,7 @@ void main() {
     testLogger.registerForDisposal(
       shutdownHooks: MockShutdownHooks(),
       signals: signals,
-      fatalSignals: [mockSignal],
+      fatalSignals: <ProcessSignal>[mockSignal],
     );
 
     signals.addHandler(mockSignal, (ProcessSignal s) => completer.complete());
