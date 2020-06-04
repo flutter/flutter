@@ -1507,7 +1507,7 @@ class _TimePickerDialog extends StatefulWidget {
     @required this.initialTime,
     bool useMaterialBorderRadius,
   }) : assert(initialTime != null),
-       useMaterialBorderRadius = useMaterialBorderRadius ?? false,
+       useMaterialBorderRadius = useMaterialBorderRadius ?? true,
        super(key: key);
 
   /// The time initially selected when the dialog is shown.
@@ -1842,7 +1842,7 @@ Future<TimeOfDay> showTimePicker({
 
   final Widget dialog = _TimePickerDialog(
     initialTime: initialTime,
-    useMaterialBorderRadius: useMaterialBorderRadius ?? false,
+    useMaterialBorderRadius: useMaterialBorderRadius ?? true,
   );
   return await showDialog<TimeOfDay>(
     context: context,

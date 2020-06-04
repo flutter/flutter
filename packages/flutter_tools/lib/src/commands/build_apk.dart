@@ -33,6 +33,7 @@ class BuildApkCommand extends BuildSubCommand {
     addBundleSkSLPathOption(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
+    addNullSafetyModeOptions();
     argParser
       ..addFlag('split-per-abi',
         negatable: false,

@@ -109,6 +109,7 @@ class FlutterOptions {
   static const String kDartDefinesOption = 'dart-define';
   static const String kBundleSkSLPathOption = 'bundle-sksl-path';
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
+  static const String kNullSafety = 'sound-null-safety';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -460,6 +461,14 @@ abstract class FlutterCommand extends Command<void> {
       );
   }
 
+  void addNullSafetyModeOptions() {
+    argParser.addFlag(FlutterOptions.kNullSafety,
+      help: 'Whether to override the default null safety setting.',
+      defaultsTo: null,
+      hide: true,
+    );
+  }
+
   void usesExtraFrontendOptions() {
     argParser.addMultiOption(FlutterOptions.kExtraFrontEndOptions,
       splitCommas: true,
@@ -572,15 +581,15 @@ abstract class FlutterCommand extends Command<void> {
 
     final List<String> experiments =
       argParser.options.containsKey(FlutterOptions.kEnableExperiment)
-        ? stringsArg(FlutterOptions.kEnableExperiment)
+        ? stringsArg(FlutterOptions.kEnableExperiment).toList()
         : <String>[];
     final List<String> extraGenSnapshotOptions =
       argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
-        ? stringsArg(FlutterOptions.kExtraGenSnapshotOptions)
+        ? stringsArg(FlutterOptions.kExtraGenSnapshotOptions).toList()
         : <String>[];
     final List<String> extraFrontEndOptions =
       argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
-          ? stringsArg(FlutterOptions.kExtraFrontEndOptions)
+          ? stringsArg(FlutterOptions.kExtraFrontEndOptions).toList()
           : <String>[];
 
     if (experiments.isNotEmpty) {
@@ -588,6 +597,18 @@ abstract class FlutterCommand extends Command<void> {
         final String flag = '--enable-experiment=' + expFlag;
         extraFrontEndOptions.add(flag);
         extraGenSnapshotOptions.add(flag);
+      }
+    }
+
+    if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
+      final bool nullSafety = boolArg(FlutterOptions.kNullSafety);
+      // Explicitly check for `true` and `false` so that `null` results in not
+      // passing a flag. This will use the automatically detected null-safety
+      // value based on the entrypoint
+      if (nullSafety == true) {
+        extraFrontEndOptions.add('--sound-null-safety');
+      } else if (nullSafety == false) {
+        extraFrontEndOptions.add('--no-sound-null-safety');
       }
     }
 
@@ -823,11 +844,28 @@ abstract class FlutterCommand extends Command<void> {
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
       globals.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId));
       return null;
-    } else if (devices.isEmpty && deviceManager.hasSpecifiedAllDevices) {
-      globals.printStatus(userMessages.flutterNoDevicesFound);
-      return null;
     } else if (devices.isEmpty) {
-      globals.printStatus(userMessages.flutterNoSupportedDevices);
+      if (deviceManager.hasSpecifiedAllDevices) {
+        globals.printStatus(userMessages.flutterNoDevicesFound);
+      } else {
+        globals.printStatus(userMessages.flutterNoSupportedDevices);
+      }
+      final List<Device> unsupportedDevices = await deviceManager.getDevices();
+      if (unsupportedDevices.isNotEmpty) {
+        final StringBuffer result = StringBuffer();
+        result.writeln(userMessages.flutterFoundButUnsupportedDevices);
+        result.writeAll(
+          await Device.descriptions(unsupportedDevices)
+              .map((String desc) => desc)
+              .toList(),
+          '\n',
+        );
+        result.writeln('');
+        result.writeln(userMessages.flutterMissPlatformProjects(
+          Device.devicesPlatformTypes(unsupportedDevices),
+        ));
+        globals.printStatus(result.toString());
+      }
       return null;
     } else if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices) {
       if (deviceManager.hasSpecifiedDeviceId) {

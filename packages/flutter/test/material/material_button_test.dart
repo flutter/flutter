@@ -841,4 +841,47 @@ void main() {
     expect(box.size, equals(const Size(76, 36)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
+
+  testWidgets('disabledElevation is passed to RawMaterialButton', (WidgetTester tester) async {
+    const double disabledElevation = 16;
+
+    final Finder rawMaterialButtonFinder = find.descendant(
+        of: find.byType(MaterialButton),
+        matching: find.byType(RawMaterialButton)
+    );
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          disabledElevation: disabledElevation,
+          onPressed: null, // disabled button
+          child: Text('button'),
+        ),
+      ),
+    );
+
+    final RawMaterialButton rawMaterialButton = tester.widget(rawMaterialButtonFinder);
+    expect(rawMaterialButton.disabledElevation, equals(disabledElevation));
+  });
+
+  testWidgets('MaterialButton.disabledElevation defaults to 0.0 when not provided', (WidgetTester tester) async {
+    final Finder rawMaterialButtonFinder = find.descendant(
+        of: find.byType(MaterialButton),
+        matching: find.byType(RawMaterialButton)
+    );
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          onPressed: null, // disabled button
+          child: Text('button'),
+        ),
+      ),
+    );
+
+    final RawMaterialButton rawMaterialButton = tester.widget(rawMaterialButtonFinder);
+    expect(rawMaterialButton.disabledElevation, equals(0.0));
+  });
 }

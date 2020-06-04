@@ -765,6 +765,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  new_gallery_ios__transition_perf:
+    description: >
+      Measures the performance of screen transitions in the new Flutter Gallery on iOS.
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true
+
   fast_scroll_large_images__memory:
     description: >
       Measures memory usage for scrolling through a list of large images.

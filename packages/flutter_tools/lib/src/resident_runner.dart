@@ -47,7 +47,6 @@ class FlutterDevice {
     this.viewFilter,
     TargetModel targetModel = TargetModel.flutter,
     TargetPlatform targetPlatform,
-    List<String> experimentalFlags,
     ResidentCompiler generator,
   }) : assert(buildInfo.trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
@@ -61,9 +60,9 @@ class FlutterDevice {
          fileSystemRoots: fileSystemRoots ?? <String>[],
          fileSystemScheme: fileSystemScheme,
          targetModel: targetModel,
-         experimentalFlags: experimentalFlags,
          dartDefines: buildInfo.dartDefines,
          packagesPath: globalPackagesPath,
+         extraFrontEndOptions: buildInfo.extraFrontEndOptions,
        );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
@@ -106,7 +105,7 @@ class FlutterDevice {
           trackWidgetCreation: buildInfo.trackWidgetCreation,
         ),
         targetModel: TargetModel.dartdevc,
-        experimentalFlags: experimentalFlags,
+        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         platformDill: globals.fs.file(globals.artifacts
           .getArtifactPath(Artifact.webPlatformKernelDill, mode: buildInfo.mode))
           .absolute.uri.toString(),
@@ -127,8 +126,8 @@ class FlutterDevice {
         fileSystemRoots: fileSystemRoots,
         fileSystemScheme: fileSystemScheme,
         targetModel: targetModel,
-        experimentalFlags: experimentalFlags,
         dartDefines: buildInfo.dartDefines,
+        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         initializeFromDill: getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
         ),
@@ -148,7 +147,6 @@ class FlutterDevice {
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme:fileSystemScheme,
       viewFilter: viewFilter,
-      experimentalFlags: experimentalFlags,
       targetModel: targetModel,
       targetPlatform: targetPlatform,
       generator: generator,
@@ -1082,6 +1080,22 @@ abstract class ResidentRunner {
     );
   }
 
+  @protected
+  void cacheInitialDillCompilation() {
+    if (_dillOutputPath != null) {
+      return;
+    }
+    globals.logger.printTrace('Caching compiled dill');
+    final File outputDill = globals.fs.file(dillOutputPath);
+    if (outputDill.existsSync()) {
+      final String copyPath = getDefaultCachedKernelPath(
+        trackWidgetCreation: trackWidgetCreation,
+      );
+      globals.fs.file(copyPath).parent.createSync(recursive: true);
+      outputDill.copySync(copyPath);
+    }
+  }
+
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered.
   //
@@ -1191,14 +1205,9 @@ abstract class ResidentRunner {
 
   @mustCallSuper
   Future<void> preExit() async {
-    // If _dillOutputPath is null, we created a temporary directory for the dill.
+    // If _dillOutputPath is null, the tool created a temporary directory for
+    // the dill.
     if (_dillOutputPath == null && artifactDirectory.existsSync()) {
-      final File outputDill = globals.fs.file(dillOutputPath);
-      if (outputDill.existsSync()) {
-        outputDill.copySync(getDefaultCachedKernelPath(
-          trackWidgetCreation: trackWidgetCreation,
-        ));
-      }
       artifactDirectory.deleteSync(recursive: true);
     }
   }

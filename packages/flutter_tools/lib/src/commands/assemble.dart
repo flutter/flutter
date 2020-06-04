@@ -105,6 +105,7 @@ class AssembleCommand extends FlutterCommand {
         'root of the current Flutter project.',
     );
     argParser.addOption(kExtraGenSnapshotOptions);
+    argParser.addOption(kExtraFrontEndOptions);
     argParser.addOption(kDartDefines);
     argParser.addOption(
       'resource-pool-size',
@@ -204,9 +205,11 @@ class AssembleCommand extends FlutterCommand {
     if (argResults.wasParsed(kExtraGenSnapshotOptions)) {
       results[kExtraGenSnapshotOptions] = argResults[kExtraGenSnapshotOptions] as String;
     }
-    // Workaround for dart-define formatting
     if (argResults.wasParsed(kDartDefines)) {
       results[kDartDefines] = argResults[kDartDefines] as String;
+    }
+    if (argResults.wasParsed(kExtraFrontEndOptions)) {
+      results[kExtraFrontEndOptions] = argResults[kExtraFrontEndOptions] as String;
     }
     return results;
   }
