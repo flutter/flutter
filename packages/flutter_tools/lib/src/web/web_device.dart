@@ -14,7 +14,6 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import 'chrome.dart';
 
@@ -36,7 +35,7 @@ abstract class ChromiumDevice extends Device {
     @required String name,
     @required this.chromeLauncher,
     @required FileSystem fileSystem,
-    Logger logger,
+    @required Logger logger,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        super(
@@ -49,7 +48,7 @@ abstract class ChromiumDevice extends Device {
   final ChromiumLauncher chromeLauncher;
 
   final FileSystem _fileSystem;
-  Logger _logger;
+  final Logger _logger;
 
   /// The active chrome instance.
   Chromium _chrome;
@@ -115,7 +114,6 @@ abstract class ChromiumDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
   }) async {
-    _logger ??= globals.logger;
     // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
     // for the web initialization and server logic.
     final String url = platformArgs['uri'] as String;
@@ -241,10 +239,7 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
 class WebDevices extends PollingDeviceDiscovery {
   WebDevices({
     @required FileSystem fileSystem,
-    // TODO(jonahwilliams): the logger is overriden by the daemon command
-    // to support IDE integration. Accessing the global logger too early
-    // will grab the old stdout logger.
-    Logger logger,
+    @required Logger logger,
     @required Platform platform,
     @required ProcessManager processManager,
     @required FeatureFlags featureFlags,
@@ -307,7 +302,7 @@ String parseVersionForWindows(String input) {
 /// A special device type to allow serving for arbitrary browsers.
 class WebServerDevice extends Device {
   WebServerDevice({
-    Logger logger,
+    @required Logger logger,
   }) : _logger = logger,
        super(
          'web-server',
@@ -316,7 +311,7 @@ class WebServerDevice extends Device {
           ephemeral: false,
        );
 
-  Logger _logger;
+  final Logger _logger;
 
   @override
   void clearLogs() { }
@@ -375,7 +370,6 @@ class WebServerDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
   }) async {
-    _logger ??= globals.logger;
     final String url = platformArgs['uri'] as String;
     if (debuggingOptions.startPaused) {
       _logger.printStatus('Waiting for connection from Dart debug extension at $url', emphasis: true);
