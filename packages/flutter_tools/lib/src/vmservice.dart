@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:meta/meta.dart' show required, visibleForTesting;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -146,6 +147,7 @@ typedef VMServiceConnector = Future<vm_service.VmService> Function(Uri httpUri, 
   CompileExpression compileExpression,
   ReloadMethod reloadMethod,
   GetSkSLMethod getSkSLMethod,
+  PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   io.CompressionOptions compression,
   Device device,
 });
@@ -172,6 +174,7 @@ vm_service.VmService setUpVmService(
   Device device,
   ReloadMethod reloadMethod,
   GetSkSLMethod skSLMethod,
+  PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   vm_service.VmService vmService
 ) {
   if (reloadSources != null) {
@@ -290,6 +293,10 @@ vm_service.VmService setUpVmService(
     });
     vmService.registerService('flutterGetSkSL', 'Flutter Tools');
   }
+  if (printStructuredErrorLogMethod != null) {
+    vmService.streamListen(vm_service.EventStreams.kExtension);
+    vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
+  }
   return vmService;
 }
 
@@ -308,6 +315,7 @@ Future<vm_service.VmService> connectToVmService(
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
+    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
     Device device,
   }) async {
@@ -320,6 +328,7 @@ Future<vm_service.VmService> connectToVmService(
     device: device,
     reloadMethod: reloadMethod,
     getSkSLMethod: getSkSLMethod,
+    printStructuredErrorLogMethod: printStructuredErrorLogMethod,
   );
 }
 
@@ -330,6 +339,7 @@ Future<vm_service.VmService> _connect(
   CompileExpression compileExpression,
   ReloadMethod reloadMethod,
   GetSkSLMethod getSkSLMethod,
+  PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   Device device,
 }) async {
@@ -357,6 +367,7 @@ Future<vm_service.VmService> _connect(
     device,
     reloadMethod,
     getSkSLMethod,
+    printStructuredErrorLogMethod,
     delegateService,
   );
   _httpAddressExpando[service] = httpUri;

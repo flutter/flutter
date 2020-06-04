@@ -8,7 +8,6 @@ import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
-import 'package:vm_service/vm_service.dart';
 
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -208,6 +207,7 @@ class FlutterDevice {
           compileExpression: compileExpression,
           reloadMethod: reloadMethod,
           getSkSLMethod: getSkSLMethod,
+          printStructuredErrorLogMethod: printStructuredErrorLogMethod,
           device: device,
         );
       } on Exception catch (exception) {
@@ -216,10 +216,6 @@ class FlutterDevice {
           completer.completeError('failed to connect to $observatoryUri');
         }
         return;
-      }
-      await service.streamListen(EventStreams.kExtension);
-      if (printStructuredErrorLogMethod != null) {
-        service.onExtensionEvent.listen(printStructuredErrorLogMethod);
       }
       if (completer.isCompleted) {
         return;
