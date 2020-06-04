@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
-@TestOn('vm && linux')
+@TestOn('chrome')
 // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
 
 import 'dart:async';

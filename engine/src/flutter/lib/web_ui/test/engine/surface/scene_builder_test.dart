@@ -3,16 +3,21 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
+import 'dart:async';
 import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 import 'package:ui/src/engine.dart';
-import 'package:ui/ui.dart';
+import 'package:ui/ui.dart' hide window;
 
 import 'package:test/test.dart';
 
 import '../../matchers.dart';
 
 void main() {
+  setUpAll(() async {
+    await webOnlyInitializeEngine();
+  });
+
   group('SceneBuilder', () {
     test('pushOffset implements surface lifecycle', () {
       testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
@@ -342,6 +347,133 @@ void main() {
     // Expect as many layers as we pushed (not popped).
     html.HtmlElement content = builder.build().webOnlyRootElement;
     expect(content.querySelectorAll('flt-offset'), hasLength(5));
+  });
+
+  test('updates child lists efficiently', () async {
+    // Pushes a single child that renders one character.
+    //
+    // If the character is a number, pushes an offset layer. Otherwise, pushes
+    // an offset layer. Test cases use this to control how layers are reused.
+    // Layers of the same type can be reused even if they are not explicitly
+    // updated. Conversely, layers of different types are never reused.
+    EngineLayer pushChild(SurfaceSceneBuilder builder, String char, {EngineLayer oldLayer}) {
+      // Numbers use opacity layers, letters use offset layers. This is used to
+      // control DOM reuse. Layers of the same type can reuse DOM nodes from other
+      // dropped layers.
+      final bool useOffset = int.tryParse(char) == null;
+      final EnginePictureRecorder recorder = PictureRecorder();
+      final RecordingCanvas canvas = recorder.beginRecording(const Rect.fromLTRB(0, 0, 400, 400));
+      final Paragraph paragraph = (ParagraphBuilder(ParagraphStyle())..addText(char)).build();
+      paragraph.layout(ParagraphConstraints(width: 1000));
+      canvas.drawParagraph(paragraph, Offset.zero);
+      final EngineLayer newLayer = useOffset
+        ? builder.pushOffset(0, 0, oldLayer: oldLayer)
+        : builder.pushOpacity(100, oldLayer: oldLayer);
+      builder.addPicture(Offset.zero, recorder.endRecording());
+      builder.pop();
+      return newLayer;
+    }
+
+    // Maps letters to layers used to render them in the last frame, used to
+    // supply `oldLayer` to guarantee update.
+    final Map<String, EngineLayer> renderedLayers = <String, EngineLayer>{};
+
+    // Pump an empty scene to reset it, otherwise the first frame will attempt
+    // to diff left-overs from a previous test, which results in unpredictable
+    // DOM mutations.
+    window.render(SurfaceSceneBuilder().build());
+
+    // Renders a `string` by breaking it up into individual characters and
+    // rendering each character into its own layer.
+    Future<void> testCase(String string, String description, { int deletions = 0, int additions = 0, int moves = 0 }) {
+      print('Testing "$string" - $description');
+      final Set<html.Node> actualDeletions = <html.Node>{};
+      final Set<html.Node> actualAdditions = <html.Node>{};
+
+      // Watches DOM mutations and counts deletions and additions to the child
+      // list of the `<flt-scene>` element.
+      final html.MutationObserver observer = html.MutationObserver((List mutations, _) {
+        for (html.MutationRecord record in mutations.cast<html.MutationRecord>()) {
+          actualDeletions.addAll(record.removedNodes);
+          actualAdditions.addAll(record.addedNodes);
+        }
+      });
+      observer.observe(SurfaceSceneBuilder.debugLastFrameScene.rootElement, childList: true);
+
+      final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+      for (int i = 0; i < string.length; i++) {
+        final String char = string[i];
+        renderedLayers[char] = pushChild(builder, char, oldLayer: renderedLayers[char]);
+      }
+      final SurfaceScene scene = builder.build();
+      final List<html.HtmlElement> pTags = scene.webOnlyRootElement.querySelectorAll('p');
+      expect(pTags, hasLength(string.length));
+      expect(
+        scene.webOnlyRootElement.querySelectorAll('p').map((p) => p.innerText).join(''),
+        string,
+      );
+      renderedLayers.removeWhere((key, value) => !string.contains(key));
+
+      // Inject a zero-duration timer to allow mutation observers to receive notification.
+      return Future<void>.delayed(Duration.zero).then((_) {
+        observer.disconnect();
+
+        // Nodes that are removed then added are classified as "moves".
+        final int actualMoves = actualAdditions.intersection(actualDeletions).length;
+        // Compare all at once instead of one by one because when it fails, it's
+        // much more useful to see all numbers, not just the one that failed to
+        // match.
+        expect(
+          <String, int>{
+            'additions': actualAdditions.length - actualMoves,
+            'deletions': actualDeletions.length - actualMoves,
+            'moves': actualMoves,
+          },
+          <String, int>{
+            'additions': additions,
+            'deletions': deletions,
+            'moves': moves,
+          },
+        );
+      });
+    }
+
+    // Adding
+    await testCase('', 'noop');
+    await testCase('', 'noop');
+    await testCase('be', 'zero-to-many', additions: 2);
+    await testCase('bcde', 'insert in the middle', additions: 2);
+    await testCase('abcde', 'prepend', additions: 1);
+    await testCase('abcdef', 'append', additions: 1);
+
+    // Moving
+    await testCase('fbcdea', 'swap at ends', moves: 2);
+    await testCase('fecdba', 'swap in the middle', moves: 2);
+    await testCase('fedcba', 'swap adjacent in one move', moves: 1);
+    await testCase('fedcba', 'non-empty noop');
+    await testCase('afedcb', 'shift right by 1', moves: 1);
+    await testCase('fedcba', 'shift left by 1', moves: 1);
+    await testCase('abcdef', 'reverse', moves: 5);
+    await testCase('efabcd', 'shift right by 2', moves: 2);
+    await testCase('abcdef', 'shift left by 2', moves: 2);
+
+    // Scrolling without DOM reuse (numbers and letters use different types of layers)
+    await testCase('9abcde', 'scroll right by 1', additions: 1, deletions: 1);
+    await testCase('789abc', 'scroll right by 2', additions: 2, deletions: 2);
+    await testCase('89abcd', 'scroll left by 1', additions: 1, deletions: 1);
+    await testCase('abcdef', 'scroll left by 2', additions: 2, deletions: 2);
+
+    // Scrolling with DOM reuse
+    await testCase('zabcde', 'scroll right by 1', moves: 1);
+    await testCase('xyzabc', 'scroll right by 2', moves: 2);
+    await testCase('yzabcd', 'scroll left by 1', moves: 1);
+    await testCase('abcdef', 'scroll left by 2', moves: 2);
+
+    // Removing
+    await testCase('bcdef', 'remove as start', deletions: 1);
+    await testCase('bcde', 'remove as end', deletions: 1);
+    await testCase('be', 'remove in the middle', deletions: 2);
+    await testCase('', 'remove all', deletions: 2);
   });
 }
 
