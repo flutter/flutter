@@ -441,6 +441,8 @@ class PerfTestWithSkSL extends PerfTest {
       '-t', testTarget,
     ]);
 
+    _deleteOldVmserviceFile();
+
     _runProcess = await startProcess(
       _flutterPath,
       <String>[
@@ -450,8 +452,7 @@ class PerfTestWithSkSL extends PerfTest {
         '-d', _device.deviceId,
         '-t', testTarget,
         '--use-application-binary', '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk',
-        // Getting Observatory URI from --vmservice-out-file is flaky as we're
-        // not sure when the file is written. Hence we
+        '--vmservice-out-file', _vmserviceFileName,
       ],
     );
 
@@ -459,16 +460,28 @@ class PerfTestWithSkSL extends PerfTest {
     _forwardStream(broadcastOut, 'run stdout');
     _forwardStream(_runProcess.stderr, 'run stderr');
 
-    // Getting Observatory URI from --vmservice-out-file is flaky as we're
-    // not sure when the file is written. Hence we just listen for the stdout.
-    final Completer<String> uri = Completer<String>();
-    _transform(broadcastOut).listen((String line) {
-      if (_kObservatoryReadyRegExp.hasMatch(line) && !uri.isCompleted) {
-        uri.complete(_kObservatoryReadyRegExp.firstMatch(line)[1]);
-      }
-    });
+    return await _getObservatoryUriFromVmserviceFile();
+  }
 
-    return uri.future;
+  String get _vmserviceFileName => '$testDirectory/$_kVmserviceOutFileName';
+
+  void _deleteOldVmserviceFile() {
+    if (File(_vmserviceFileName).existsSync()) {
+      File(_vmserviceFileName).deleteSync();
+    }
+  }
+
+  Future<String> _getObservatoryUriFromVmserviceFile() async {
+    const int maxWaitSeconds = 120;
+    const int waitIntervalSeconds = 5;
+    for (int waitSeconds = 0; waitSeconds < maxWaitSeconds; waitSeconds += waitIntervalSeconds) {
+      print('Waiting $waitIntervalSeconds seconds for $_vmserviceFileName to be written...');
+      await Future<void>.delayed(const Duration(seconds: waitIntervalSeconds));
+      if (File(_vmserviceFileName).existsSync()) {
+        return File(_vmserviceFileName).readAsStringSync();
+      }
+    }
+    throw 'Failed to get the Observatory URI after $maxWaitSeconds seconds';
   }
 
   Stream<String> _transform(Stream<List<int>> stream) =>
@@ -484,6 +497,7 @@ class PerfTestWithSkSL extends PerfTest {
   Device _device;
   Process _runProcess;
 
+  static const String _kVmserviceOutFileName = 'vmservice.out';
   static final RegExp _kObservatoryReadyRegExp = RegExp(r'An Observatory debugger and profiler on .+ is available at: ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 }
 
