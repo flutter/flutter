@@ -694,6 +694,9 @@ class TextStyle with Diagnosticable {
   /// One of [backgroundColor] or [background] must be null, and if this has
   /// [background] specified it will be given preference over any
   /// backgroundColor parameter.
+  ///
+  /// [heightIsNull] can be used to make a copy with [height] as null
+  /// (replacing the current value).
   TextStyle copyWith({
     bool inherit,
     Color color,
