@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -221,18 +222,44 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
     @required ChromiumLauncher chromiumLauncher,
     @required Logger logger,
     @required FileSystem fileSystem,
-  }) : super(
+    @required ProcessManager processManager,
+  }) : _processManager = processManager,
+       super(
          name: 'edge',
          chromeLauncher: chromiumLauncher,
          logger: logger,
          fileSystem: fileSystem,
        );
 
+  final ProcessManager _processManager;
+
+  // The first version of Edge with chromium support.
+  static const int _kFirstChromiumEdgeMajorVersion = 79;
+
   @override
   String get name => 'Edge';
 
+  Future<bool> _meetsVersionContraint() async {
+    final String rawVersion = (await sdkNameAndVersion).replaceFirst('Microsoft Edge ', '');
+    final Version version = Version.parse(rawVersion);
+    return version.major >= _kFirstChromiumEdgeMajorVersion;
+  }
+
   @override
-  Future<String> get sdkNameAndVersion async => '<>';
+  Future<String> get sdkNameAndVersion async => _sdkNameAndVersion ??= await _getSdkNameAndVersion();
+  String _sdkNameAndVersion;
+  Future<String> _getSdkNameAndVersion() async {
+    final ProcessResult result = await _processManager.run(<String>[
+      r'reg', 'query', r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon', '/v', 'version',
+    ]);
+    if (result.exitCode == 0) {
+      final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
+      if (parts.length > 2) {
+        return 'Microsoft Edge ' + parts[parts.length - 2];
+      }
+    }
+    return '?';
+  }
 }
 
 class WebDevices extends PollingDeviceDiscovery {
@@ -264,18 +291,21 @@ class WebDevices extends PollingDeviceDiscovery {
         operatingSystemUtils: operatingSystemUtils,
       ),
     );
-    _edgeDevice = MicrosoftEdgeDevice(
-      chromiumLauncher: ChromiumLauncher(
-        browserFinder: findEdgeExecutable,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
+    if (platform.isWindows) {
+      _edgeDevice = MicrosoftEdgeDevice(
+        chromiumLauncher: ChromiumLauncher(
+          browserFinder: findEdgeExecutable,
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+          operatingSystemUtils: operatingSystemUtils,
+        ),
         processManager: processManager,
-        operatingSystemUtils: operatingSystemUtils,
-      ),
-      logger: logger,
-      fileSystem: fileSystem,
-    );
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+    }
     _webServerDevice = WebServerDevice(
       logger: logger,
     );
@@ -298,7 +328,7 @@ class WebDevices extends PollingDeviceDiscovery {
       _webServerDevice,
       if (_chromeDevice.isSupported())
         _chromeDevice,
-      if (_edgeDevice.isSupported())
+      if (await _edgeDevice?._meetsVersionContraint() ?? false)
         _edgeDevice,
     ];
   }

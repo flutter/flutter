@@ -57,6 +57,7 @@ void main() {
       chromiumLauncher: null,
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
     );
 
     expect(chromeDevice.name, 'Edge');
@@ -104,22 +105,6 @@ void main() {
 
     expect(await webDevices.pollingGetDevices(),
       contains(isA<GoogleChromeDevice>()));
-  });
-
-  testWithoutContext('Edge device is listed when Edge can be run', () async {
-    final WebDevices webDevices = WebDevices(
-      featureFlags: TestFeatureFlags(isWebEnabled: true),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
-      platform: FakePlatform(
-        operatingSystem: 'linux',
-        environment: <String, String>{}
-      ),
-      processManager:  FakeProcessManager.any(),
-    );
-
-    expect(await webDevices.pollingGetDevices(),
-      contains(isA<MicrosoftEdgeDevice>()));
   });
 
   testWithoutContext('Chrome device is not listed when Chrome cannot be run', () async {
@@ -207,8 +192,18 @@ void main() {
     expect(processManager.hasRemainingExpectations, false);
   });
 
-  testWithoutContext('Chrome version check invokes registry query on windows.', () async {
+  testWithoutContext('Chrome and Edge version check invokes registry query on windows.', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'reg',
+          'query',
+          r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon',
+          '/v',
+          'version',
+        ],
+        stdout: r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon\ version REG_SZ 83.0.478.44 ',
+      ),
       const FakeCommand(
         command: <String>[
           'reg',
@@ -241,6 +236,61 @@ void main() {
     // Verify caching works correctly.
     expect(await chromeDevice.sdkNameAndVersion, 'Google Chrome 74.0.0');
     expect(processManager.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('Edge is not supported on versions less than 73', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'reg',
+          'query',
+          r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon',
+          '/v',
+          'version',
+        ],
+        stdout: r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon\ version REG_SZ 72.0.478.44 ',
+      ),
+    ]);
+    final WebDevices webDevices = WebDevices(
+      featureFlags: TestFeatureFlags(isWebEnabled: true),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      platform: FakePlatform(
+        operatingSystem: 'windows',
+        environment: <String, String>{}
+      ),
+      processManager: processManager,
+    );
+
+    expect((await webDevices.pollingGetDevices()).whereType<MicrosoftEdgeDevice>(), isEmpty);
+  });
+
+  testWithoutContext('Edge is not support on non-windows platform', () async {
+    final WebDevices webDevices = WebDevices(
+      featureFlags: TestFeatureFlags(isWebEnabled: true),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{}
+      ),
+      processManager: FakeProcessManager.list(<FakeCommand>[]),
+    );
+
+    expect((await webDevices.pollingGetDevices()).whereType<MicrosoftEdgeDevice>(), isEmpty);
+
+    final WebDevices macosWebDevices = WebDevices(
+      featureFlags: TestFeatureFlags(isWebEnabled: true),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      platform: FakePlatform(
+        operatingSystem: 'macos',
+        environment: <String, String>{}
+      ),
+      processManager: FakeProcessManager.list(<FakeCommand>[]),
+    );
+
+    expect((await macosWebDevices.pollingGetDevices()).whereType<MicrosoftEdgeDevice>(), isEmpty);
   });
 }
 
