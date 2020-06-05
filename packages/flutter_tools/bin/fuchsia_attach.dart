@@ -111,6 +111,8 @@ Future<void> main(List<String> args) async {
       DeviceManager: () => _FuchsiaDeviceManager(),
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig, devFinder: devFinder),
       Artifacts: () => OverrideArtifacts(
+        logger: globals.logger,
+        processManager: globals.processManager,
         parent: CachedArtifacts(
           fileSystem: globals.fs,
           cache: globals.cache,

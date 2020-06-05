@@ -6,7 +6,9 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'base/platform.dart';
+import 'base/process.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
@@ -184,10 +186,17 @@ class EngineBuildPaths {
 
 // Manages the engine artifacts of Flutter.
 abstract class Artifacts {
+  Artifacts(
+    //@required ProcessManager processManager,
+    //@required Logger logger,
+  ) : _processUtils = ProcessUtils(processManager: globals.processManager, logger: globals.logger);
+
   /// A test-specific implementation of artifacts that returns stable paths for
   /// all artifacts.
   @visibleForTesting
   factory Artifacts.test() = _TestArtifacts;
+
+  final ProcessUtils _processUtils;
 
   static LocalEngineArtifacts getLocalEngine(EngineBuildPaths engineBuildPaths) {
     return LocalEngineArtifacts(
@@ -202,6 +211,39 @@ abstract class Artifacts {
 
   // Returns the requested [artifact] for the [platform] and [mode] combination.
   String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode });
+
+  Future<int> stream(
+    Artifact artifact,
+    List<String> args, {
+    TargetPlatform platform,
+    BuildMode mode,
+    String workingDirectory,
+    bool allowReentrantFlutter = false,
+    String prefix = '',
+    bool trace = false,
+    RegExp filter,
+    StringConverter mapFunction,
+    Map<String, String> environment,
+  }) async {
+    final String binary = getArtifactPath(
+      artifact,
+      platform: platform,
+      mode: mode,
+    );
+    if (!_processUtils.canRun(binary)) {
+      throw Exception('cannot run $binary');
+    }
+    return _processUtils.stream(
+      <String>[binary, ...args],
+      workingDirectory: workingDirectory,
+      allowReentrantFlutter: allowReentrantFlutter,
+      prefix: prefix,
+      trace: trace,
+      filter: filter,
+      mapFunction: mapFunction,
+      environment: environment,
+    );
+  }
 
   // Returns which set of engine artifacts is currently used for the [platform]
   // and [mode] combination.
@@ -248,6 +290,40 @@ class CachedArtifacts implements Artifacts {
       default: // could be null, but that can't be specified as a case.
         return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform(_platform), mode);
     }
+  }
+
+  @override
+  Future<int> stream(
+    Artifact artifact,
+    List<String> args, {
+    TargetPlatform platform,
+    BuildMode mode,
+    String workingDirectory,
+    bool allowReentrantFlutter = false,
+    String prefix = '',
+    bool trace = false,
+    RegExp filter,
+    StringConverter mapFunction,
+    Map<String, String> environment,
+  }) async {
+    final String binary = getArtifactPath(
+      artifact,
+      platform: platform,
+      mode: mode,
+    );
+    if (!_processUtils.canRun(binary)) {
+      throw Exception('cannot run $binary');
+    }
+    return _processUtils.stream(
+      <String>[binary, ...args],
+      workingDirectory: workingDirectory,
+      allowReentrantFlutter: allowReentrantFlutter,
+      prefix: prefix,
+      trace: trace,
+      filter: filter,
+      mapFunction: mapFunction,
+      environment: environment,
+    );
   }
 
   @override
@@ -674,17 +750,22 @@ class OverrideArtifacts implements Artifacts {
   /// [parent] must be provided.
   OverrideArtifacts({
     @required this.parent,
+    @required Logger logger,
+    @required ProcessManager processManager,
     this.frontendServer,
     this.engineDartBinary,
     this.platformKernelDill,
     this.flutterPatchedSdk,
-  }) : assert(parent != null);
+  }) : assert(parent != null),
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
   final Artifacts parent;
   final File frontendServer;
   final File engineDartBinary;
   final File platformKernelDill;
   final File flutterPatchedSdk;
+  @override
+  final ProcessUtils _processUtils;
 
   @override
   String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {
@@ -701,6 +782,40 @@ class OverrideArtifacts implements Artifacts {
       return flutterPatchedSdk.path;
     }
     return parent.getArtifactPath(artifact, platform: platform, mode: mode);
+  }
+
+  @override
+  Future<int> stream(
+    Artifact artifact,
+    List<String> args, {
+    TargetPlatform platform,
+    BuildMode mode,
+    String workingDirectory,
+    bool allowReentrantFlutter = false,
+    String prefix = '',
+    bool trace = false,
+    RegExp filter,
+    StringConverter mapFunction,
+    Map<String, String> environment,
+  }) async {
+    final String binary = getArtifactPath(
+      artifact,
+      platform: platform,
+      mode: mode,
+    );
+    if (!_processUtils.canRun(binary)) {
+      throw Exception('cannot run $binary');
+    }
+    return _processUtils.stream(
+      <String>[binary, ...args],
+      workingDirectory: workingDirectory,
+      allowReentrantFlutter: allowReentrantFlutter,
+      prefix: prefix,
+      trace: trace,
+      filter: filter,
+      mapFunction: mapFunction,
+      environment: environment,
+    );
   }
 
   @override

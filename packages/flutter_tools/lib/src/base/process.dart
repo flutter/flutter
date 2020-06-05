@@ -227,6 +227,8 @@ abstract class ProcessUtils {
     int timeoutRetries = 0,
   });
 
+  bool canRun(String executable);
+
   /// Run the command and block waiting for its result.
   RunResult runSync(
     List<String> cmd, {
@@ -289,6 +291,14 @@ class _DefaultProcessUtils implements ProcessUtils {
   final ProcessManager _processManager;
 
   final Logger _logger;
+
+  @override
+  bool canRun(String executable, {String workingDirectory}) {
+    return _processManager.canRun(
+      executable,
+      workingDirectory: workingDirectory,
+    );
+  }
 
   @override
   Future<RunResult> run(

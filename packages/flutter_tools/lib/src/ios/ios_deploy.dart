@@ -29,8 +29,9 @@ class IOSDeploy {
     @required Logger logger,
     @required Platform platform,
     @required ProcessManager processManager,
-  }) : _platform = platform,
+  }) : _artifacts = artifacts,
        _cache = cache,
+       _platform = platform,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _logger = logger,
        _binaryPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
@@ -40,6 +41,7 @@ class IOSDeploy {
   final Logger _logger;
   final Platform _platform;
   final ProcessUtils _processUtils;
+  final Artifacts _artifacts;
 
   Map<String, String> get iosDeployEnv {
     // Push /usr/bin to the front of PATH to pick up default system python, package 'six'.
@@ -118,8 +120,11 @@ class IOSDeploy {
     @required List<String> launchArguments,
     @required IOSDeviceInterface interfaceType,
   }) async {
-    final List<String> launchCommand = <String>[
-      _binaryPath,
+    _processUtils.runSync(
+      <String>['rm', _binaryPath],
+    );
+    print('Deleted $_binaryPath!');
+    final List<String> launchArgs = <String>[
       '--id',
       deviceId,
       '--bundle',
@@ -133,8 +138,10 @@ class IOSDeploy {
       ],
     ];
 
-    return _processUtils.stream(
-      launchCommand,
+    return _artifacts.stream(
+      Artifact.iosDeploy,
+      launchArgs,
+      platform: TargetPlatform.ios,
       mapFunction: _monitorFailure,
       trace: true,
       environment: iosDeployEnv,
