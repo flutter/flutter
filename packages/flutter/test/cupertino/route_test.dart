@@ -1181,8 +1181,8 @@ void main() {
     box = tester.renderObject(find.byKey(container)) as RenderBox;
     final double firstPosition = box.localToGlobal(Offset.zero).dx;
     // Checks the hero is in-transit.
-    expect(finalPosition > firstPosition, isTrue);
-    expect(firstPosition > initialPosition, isTrue);
+    expect(finalPosition, greaterThan(firstPosition));
+    expect(firstPosition, greaterThan(initialPosition));
 
     // Goes back to final position.
     await gesture.moveBy(const Offset(-200, 0));
@@ -1190,7 +1190,7 @@ void main() {
     box = tester.renderObject(find.byKey(container)) as RenderBox;
     final double secondPosition = box.localToGlobal(Offset.zero).dx;
     // There will be a small difference.
-    expect(finalPosition - secondPosition < 0.001, isTrue);
+    expect(finalPosition - secondPosition, lessThan(0.001));
 
     await gesture.moveBy(const Offset(400, 0));
     await tester.pump();
@@ -1198,9 +1198,9 @@ void main() {
     final double thirdPosition = box.localToGlobal(Offset.zero).dx;
     // Checks the hero is still in-transit and moves further away from the first
     // position.
-    expect(finalPosition > thirdPosition, isTrue);
-    expect(thirdPosition > initialPosition, isTrue);
-    expect(firstPosition > thirdPosition, isTrue);
+    expect(finalPosition, greaterThan(thirdPosition));
+    expect(thirdPosition, greaterThan(initialPosition));
+    expect(firstPosition, greaterThan(thirdPosition));
   });
 
   testWidgets('showCupertinoModalPopup uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {

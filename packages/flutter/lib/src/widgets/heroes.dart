@@ -533,7 +533,7 @@ class _HeroFlight {
   }
 
   void _handleAnimationUpdate(AnimationStatus status) {
-    // The animation will not finish until the user lift their finger, so we
+    // The animation will not finish until the user lifts their finger, so we
     // should ignore the status update if the gesture is in progress.
     //
     // This also relies on the animation to update its status at the end of the
