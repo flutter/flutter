@@ -24,7 +24,7 @@ import 'text_theme.dart';
 import 'theme.dart';
 
 const double _kLeadingWidth = kToolbarHeight; // So the leading button is square.
-const double _kMaxTitleTextScaleFactor = 1.34;
+const double _kMaxTitleTextScaleFactor = 1.34; // TODO(perc): Add link to Material spec when available, https://github.com/flutter/flutter/issues/58769.
 
 // Bottom justify the kToolbarHeight child which may overflow the top.
 class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
