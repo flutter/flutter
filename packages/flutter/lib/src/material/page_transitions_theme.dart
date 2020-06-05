@@ -303,21 +303,21 @@ class _ZoomPageTransitionIn extends StatelessWidget {
     //
     // When this transition is in the process of [reverseBuilder], the status
     // of the animation will always be completed since the [forwardBuilder]
-    // won't animate at the same time. So [isCompleted] can make sure the color
+    // won't animate at the same time. So [isNotForward] can make sure the color
     // and the scale transition works in purpose.
-    final bool isCompleted = animation.status == AnimationStatus.completed;
+    final bool isNotForward = animation.status == AnimationStatus.completed;
     return Container(
       color: Colors.black.withOpacity(
-        (isCompleted
+        (isNotForward
             ? kAlwaysDismissedAnimation
             : _ZoomPageTransition._forwardScrimOpacityTween.animate(animation)
         ).value,
       ),
       child: ScaleTransition(
         scale: (
-          !isCompleted
-              ? _ZoomPageTransition._forwardEndScreenScaleTween
-              : _ZoomPageTransition._reverseStartScreenScaleTween
+          isNotForward
+              ? _ZoomPageTransition._reverseStartScreenScaleTween
+              : _ZoomPageTransition._forwardEndScreenScaleTween
         ).animate(animation),
         child: FadeTransition(
           opacity: _ZoomPageTransition._forwardEndScreenFadeTween.animate(animation),
@@ -341,15 +341,15 @@ class _ZoomPageTransitionOut extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Same as [isCompleted] in [_ZoomPageTransitionIn].
-    final bool isDismissed = animation.status == AnimationStatus.dismissed;
+    final bool isNotReverse = animation.status == AnimationStatus.dismissed;
     return ScaleTransition(
-      scale: !isDismissed
-          ? _ZoomPageTransition._reverseStartScreenScaleTween.animate(animation)
-          : kAlwaysCompleteAnimation,
+      scale: isNotReverse
+          ? kAlwaysCompleteAnimation
+          : _ZoomPageTransition._reverseStartScreenScaleTween.animate(animation),
       child: FadeTransition(
-        opacity: !isDismissed
-            ? _ZoomPageTransition._reverseEndScreenFadeTween.animate(animation)
-            : kAlwaysCompleteAnimation,
+        opacity: isNotReverse
+            ? kAlwaysCompleteAnimation
+            : _ZoomPageTransition._reverseEndScreenFadeTween.animate(animation),
         child: child,
       ),
     );
