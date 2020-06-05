@@ -10,6 +10,7 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
+#include "flutter/shell/platform/android/android_context.h"
 #include "flutter/shell/platform/android/android_external_texture_gl.h"
 #include "flutter/shell/platform/android/android_surface_gl.h"
 #include "flutter/shell/platform/android/platform_message_response_android.h"
@@ -24,8 +25,18 @@ PlatformViewAndroid::PlatformViewAndroid(
     fml::jni::JavaObjectWeakGlobalRef java_object,
     bool use_software_rendering)
     : PlatformView(delegate, std::move(task_runners)),
-      java_object_(java_object),
-      android_surface_(AndroidSurface::Create(use_software_rendering)) {
+      java_object_(java_object) {
+  std::shared_ptr<AndroidContext> android_context;
+  if (use_software_rendering) {
+    android_context = AndroidContext::Create(AndroidRenderingAPI::kSoftware);
+  } else {
+#if SHELL_ENABLE_VULKAN
+    android_context = AndroidContext::Create(AndroidRenderingAPI::kVulkan);
+#else   // SHELL_ENABLE_VULKAN
+    android_context = AndroidContext::Create(AndroidRenderingAPI::kOpenGLES);
+#endif  // SHELL_ENABLE_VULKAN
+  }
+  android_surface_ = AndroidSurface::Create(android_context);
   FML_CHECK(android_surface_)
       << "Could not create an OpenGL, Vulkan or Software surface to setup "
          "rendering.";

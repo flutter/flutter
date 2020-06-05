@@ -57,7 +57,8 @@ bool AndroidSurfaceSoftware::ResourceContextClearCurrent() {
   return false;
 }
 
-std::unique_ptr<Surface> AndroidSurfaceSoftware::CreateGPUSurface() {
+std::unique_ptr<Surface> AndroidSurfaceSoftware::CreateGPUSurface(
+    GrContext* gr_context) {
   if (!IsValid()) {
     return nullptr;
   }
@@ -143,7 +144,7 @@ ExternalViewEmbedder* AndroidSurfaceSoftware::GetExternalViewEmbedder() {
 
 void AndroidSurfaceSoftware::TeardownOnScreenContext() {}
 
-bool AndroidSurfaceSoftware::OnScreenSurfaceResize(const SkISize& size) const {
+bool AndroidSurfaceSoftware::OnScreenSurfaceResize(const SkISize& size) {
   return true;
 }
 
