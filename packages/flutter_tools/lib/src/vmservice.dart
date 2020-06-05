@@ -338,17 +338,11 @@ Future<vm_service.VmService> _connect(
 }) async {
   final Uri wsUri = httpUri.replace(scheme: 'ws', path: globals.fs.path.join(httpUri.path, 'ws'));
   final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression);
-  // Create an instance of the package:vm_service API in addition to the flutter
-  // tool's to allow gradual migration.
-  final Completer<void> streamClosedCompleter = Completer<void>();
   final vm_service.VmService delegateService = vm_service.VmService(
     channel,
     channel.add,
     log: null,
     disposeHandler: () async {
-      if (!streamClosedCompleter.isCompleted) {
-        streamClosedCompleter.complete();
-      }
       await channel.close();
     },
   );
