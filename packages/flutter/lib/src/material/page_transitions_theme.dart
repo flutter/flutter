@@ -161,12 +161,6 @@ class _ZoomPageTransition extends StatelessWidget {
        assert(secondaryAnimation != null),
        super(key: key);
 
-  // The scrim obscures the old page by becoming increasingly opaque.
-  static final Tween<double> _scrimOpacityTween = Tween<double>(
-    begin: 0.0,
-    end: 0.60,
-  );
-
   // A curve sequence that is similar to the 'fastOutExtraSlowIn' curve used in
   // the native transition.
   static final List<TweenSequenceItem<double>> fastOutExtraSlowInTweenSequenceItems = <TweenSequenceItem<double>>[
@@ -182,7 +176,6 @@ class _ZoomPageTransition extends StatelessWidget {
     ),
   ];
   static final TweenSequence<double> _scaleCurveSequence = TweenSequence<double>(fastOutExtraSlowInTweenSequenceItems);
-  static final FlippedTweenSequence _flippedScaleCurveSequence = FlippedTweenSequence(fastOutExtraSlowInTweenSequenceItems);
 
   /// The animation that drives the [child]'s entrance and exit.
   ///
@@ -261,37 +254,6 @@ class _ZoomPageTransition extends StatelessWidget {
   }
 }
 
-/*
-    final Animation<double> _forwardScrimOpacityAnimation = widget.animation.drive(
-      _ZoomPageTransition._scrimOpacityTween
-        .chain(CurveTween(curve: const Interval(0.2075, 0.4175))));
-
-    final Animation<double> _forwardEndScreenScaleTransition = widget.animation.drive(
-      Tween<double>(begin: 0.85, end: 1.00)
-        .chain(_ZoomPageTransition._scaleCurveSequence));
-
-    final Animation<double> _forwardStartScreenScaleTransition = widget.secondaryAnimation.drive(
-      Tween<double>(begin: 1.00, end: 1.05)
-        .chain(_ZoomPageTransition._scaleCurveSequence));
-
-    final Animation<double> _forwardEndScreenFadeTransition = widget.animation.drive(
-      Tween<double>(begin: 0.0, end: 1.00)
-        .chain(CurveTween(curve: const Interval(0.125, 0.250))));
-
-    final Animation<double> _reverseEndScreenScaleTransition = widget.secondaryAnimation.drive(
-      Tween<double>(begin: 1.00, end: 1.10)
-        .chain(_ZoomPageTransition._flippedScaleCurveSequence));
-
-    final Animation<double> _reverseStartScreenScaleTransition = widget.animation.drive(
-      Tween<double>(begin: 0.9, end: 1.0)
-        .chain(_ZoomPageTransition._flippedScaleCurveSequence));
-
-    final Animation<double> _reverseStartScreenFadeTransition = widget.animation.drive(
-      Tween<double>(begin: 0.0, end: 1.00)
-        .chain(CurveTween(curve: const Interval(1 - 0.2075, 1 - 0.0825))));
-
-*/
-
 class _EnterTransition extends StatelessWidget {
   const _EnterTransition({
     this.animation,
@@ -318,41 +280,39 @@ class _EnterTransition extends StatelessWidget {
     end: 1.00,
   ).chain(_ZoomPageTransition._scaleCurveSequence);
 
+  static final Animatable<double> _scrimOpacityTween = Tween<double>(
+    begin: 0.0,
+    end: 0.60,
+  ).chain(CurveTween(curve: const Interval(0.2075, 0.4175)));
+
   @override
   Widget build(BuildContext context) {
+    double opacity = 0;
+    // Only modify the scrim opacity when running forwards and
+    // when the animation is not completed.
+    if (!reverse && animation.status != AnimationStatus.completed) {
+      opacity = _scrimOpacityTween.evaluate(animation);
+    }
+
     final Animation<double> fadeTransition = reverse
       ? kAlwaysCompleteAnimation
       : _fadeInTransition.animate(animation);
+
     final Animation<double> scaleTransition = reverse
       ? _scaleDownTransition.animate(animation)
       : _scaleUpTransition.animate(animation);
 
-    return FadeTransition(
-      opacity: fadeTransition,
-      child: ScaleTransition(
-        scale: scaleTransition,
-        child: child,
+    return Container(
+      color: Colors.black.withOpacity(opacity),
+      child: FadeTransition(
+        opacity: fadeTransition,
+        child: ScaleTransition(
+          scale: scaleTransition,
+          child: child,
+        ),
       ),
     );
   }
-}
-
-/// Enables creating a flipped [CurveTween].
-///
-/// This creates a [CurveTween] that evaluates to a result that flips the
-/// tween vertically.
-///
-/// This tween sequence assumes that the evaluated result has to be a double
-/// between 0.0 and 1.0.
-class FlippedCurveTween extends CurveTween {
-  /// Creates a vertically flipped [CurveTween].
-  FlippedCurveTween({
-    @required Curve curve,
-  })  : assert(curve != null),
-        super(curve: curve);
-
-  @override
-  double transform(double t) => 1.0 - super.transform(t);
 }
 
 class _ExitTransition extends StatelessWidget {
@@ -392,11 +352,9 @@ class _ExitTransition extends StatelessWidget {
 
     return FadeTransition(
       opacity: fadeTransition,
-      child: Container(
-        child: ScaleTransition(
-          scale: scaleTransition,
-          child: child,
-        ),
+      child: ScaleTransition(
+        scale: scaleTransition,
+        child: child,
       ),
     );
   }
