@@ -30,10 +30,10 @@ class CupertinoActivityIndicator extends StatefulWidget {
     this.progress = 1.0,
   }) : assert(animating != null),
        assert(radius != null),
-       assert(radius > 0),
+       assert(radius > 0.0),
        assert(progress != null),
-       assert(progress >= 0),
-       assert(progress <= 1),
+       assert(progress >= 0.0),
+       assert(progress <= 1.0),
        super(key: key);
 
   /// Whether the activity indicator is running its animation.
@@ -143,8 +143,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     canvas.save();
     canvas.translate(size.width / 2.0, size.height / 2.0);
 
-    // The standard iOS implementation has the top tick appearing first,
-    // so need to rotate so that that is the first one that gets drawn
+    // Rotate so that the top tick is the first to be drawn.
     canvas.rotate(math.pi / 2);
 
     final int activeTick = (_kTickCount * position.value).floor();
