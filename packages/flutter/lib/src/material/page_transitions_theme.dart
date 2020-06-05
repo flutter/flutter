@@ -149,15 +149,13 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
 // Zooms and fades a new page in, zooming out the previous page. This transition
 // is designed to match the Android 10 activity transition.
 class _ZoomPageTransition extends StatelessWidget {
-  /// Creates a [FadeThroughTransition].
-  ///
   /// The [animation] and [secondaryAnimation] argument are required and must
   /// not be null.
   const _ZoomPageTransition({
     @required this.animation,
     @required this.secondaryAnimation,
     this.child,
-  })  : assert(animation != null),
+  }) : assert(animation != null),
         assert(secondaryAnimation != null);
 
   // The scrim obscures the old page by becoming increasingly opaque.
@@ -188,7 +186,7 @@ class _ZoomPageTransition extends StatelessWidget {
 
   static final Animatable<double> _forwardEndScreenScaleTransition = Tween<double>(
     begin: 0.85,
-    end: 1.00,
+    end: 1.0,
   ).chain(_scaleCurveSequence);
 
   static final Animatable<double> _forwardEndScreenFadeTransition = Tween<double>(
@@ -216,7 +214,7 @@ class _ZoomPageTransition extends StatelessWidget {
   /// See also:
   ///
   ///  * [TransitionRoute.animation], which is the value given to this property
-  ///    when the [FadeThroughTransition] is used as a page transition.
+  ///    when the [_ZoomPageTransition] is used as a page transition.
   final Animation<double> animation;
 
   /// The animation that transitions [child] when new content is pushed on top
@@ -225,7 +223,7 @@ class _ZoomPageTransition extends StatelessWidget {
   /// See also:
   ///
   ///  * [TransitionRoute.secondaryAnimation], which is the value given to this
-  //     property when the [FadeThroughTransition] is used as a page transition.
+  //     property when the [_ZoomPageTransition] is used as a page transition.
   final Animation<double> secondaryAnimation;
 
   /// The widget below this widget in the tree.
@@ -329,7 +327,7 @@ class _ZoomPageTransitionOut extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Only change transition when the animation was dismissed.
+    // Only change transitions when the animation was dismissed.
     final bool isDismissed = animation.status == AnimationStatus.dismissed;
     return ScaleTransition(
       scale: !isDismissed

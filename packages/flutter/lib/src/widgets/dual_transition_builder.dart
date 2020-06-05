@@ -1,4 +1,4 @@
-// Copyright 2020 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,10 +11,10 @@ import 'package:flutter/widgets.dart';
 ///
 /// The `animation` provided to the builder always runs forward from 0.0 to 1.0.
 typedef AnimatedTransitionBuilder = Widget Function(
-    BuildContext context,
-    Animation<double> animation,
-    Widget child,
-    );
+  BuildContext context,
+  Animation<double> animation,
+  Widget child,
+);
 
 /// A transition builder that animates its [child] based on the
 /// [AnimationStatus] of the provided [animation].
@@ -40,7 +40,7 @@ class DualTransitionBuilder extends StatefulWidget {
     @required this.forwardBuilder,
     @required this.reverseBuilder,
     this.child,
-  })  : assert(animation != null),
+  }) : assert(animation != null),
         assert(forwardBuilder != null),
         assert(reverseBuilder != null),
         super(key: key);
