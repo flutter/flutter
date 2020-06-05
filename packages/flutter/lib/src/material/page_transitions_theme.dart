@@ -181,33 +181,33 @@ class _ZoomPageTransition extends StatelessWidget {
   static final TweenSequence<double> _scaleCurveSequence = TweenSequence<double>(fastOutExtraSlowInTweenSequenceItems);
   static final FlippedTweenSequence _flippedScaleCurveSequence = FlippedTweenSequence(fastOutExtraSlowInTweenSequenceItems);
 
-  static final Animatable<double> _forwardScrimOpacityAnimation = _ZoomPageTransition._scrimOpacityTween
+  static final Animatable<double> _forwardScrimOpacityTween = _scrimOpacityTween
     .chain(CurveTween(curve: const Interval(0.2075, 0.4175)));
 
-  static final Animatable<double> _forwardEndScreenScaleTransition = Tween<double>(
+  static final Animatable<double> _forwardEndScreenScaleTween = Tween<double>(
     begin: 0.85,
     end: 1.0,
   ).chain(_scaleCurveSequence);
 
-  static final Animatable<double> _forwardEndScreenFadeTransition = Tween<double>(
+  static final Animatable<double> _forwardEndScreenFadeTween = Tween<double>(
     begin: 0.0,
-    end: 1.00,
+    end: 1.0,
   ).chain(CurveTween(curve: const Interval(0.125, 0.250)));
 
-  static final Animatable<double> _reverseEndScreenScaleTransition = Tween<double>(
-    begin: 1.00,
+  static final Animatable<double> _forwardStartScreenFadeTween = Tween<double>(
+    begin: 1.0,
+    end: 0.0,
+  ).chain(_scaleCurveSequence);
+
+  static final Animatable<double> _reverseEndScreenScaleTween = Tween<double>(
+    begin: 1.0,
     end: 0.9,
   ).chain(_scaleCurveSequence);
 
-  static final Animatable<double> _reverseStartScreenScaleTransition = Tween<double>(
+  static final Animatable<double> _reverseStartScreenScaleTween = Tween<double>(
     begin: 0.9,
     end: 1.0,
   ).chain(_flippedScaleCurveSequence);
-
-  static final Animatable<double> _reverseStartScreenFadeTransition = Tween<double>(
-    begin: 1.00,
-    end: 0.0,
-  ).chain(_scaleCurveSequence);
 
   /// The animation that drives the [child]'s entrance and exit.
   ///
@@ -299,16 +299,16 @@ class _ZoomPageTransitionIn extends StatelessWidget {
       color: Colors.black.withOpacity(
         isCompleted
             ? 0.0
-            : _ZoomPageTransition._forwardScrimOpacityAnimation.animate(animation).value,
+            : _ZoomPageTransition._forwardScrimOpacityTween.animate(animation).value,
       ),
       child: ScaleTransition(
         scale: (
           !isCompleted
-              ? _ZoomPageTransition._forwardEndScreenScaleTransition
-              : _ZoomPageTransition._reverseStartScreenScaleTransition
+              ? _ZoomPageTransition._forwardEndScreenScaleTween
+              : _ZoomPageTransition._reverseStartScreenScaleTween
         ).animate(animation),
         child: FadeTransition(
-          opacity: _ZoomPageTransition._forwardEndScreenFadeTransition.animate(animation),
+          opacity: _ZoomPageTransition._forwardEndScreenFadeTween.animate(animation),
           child: child,
         ),
       ),
@@ -331,11 +331,11 @@ class _ZoomPageTransitionOut extends StatelessWidget {
     final bool isDismissed = animation.status == AnimationStatus.dismissed;
     return ScaleTransition(
       scale: !isDismissed
-          ? _ZoomPageTransition._reverseEndScreenScaleTransition.animate(animation)
+          ? _ZoomPageTransition._reverseEndScreenScaleTween.animate(animation)
           : const AlwaysStoppedAnimation<double>(1.0),
       child: FadeTransition(
         opacity: !isDismissed
-            ? _ZoomPageTransition._reverseStartScreenFadeTransition.animate(animation)
+            ? _ZoomPageTransition._forwardStartScreenFadeTween.animate(animation)
             : const AlwaysStoppedAnimation<double>(1.0),
         child: child,
       ),
