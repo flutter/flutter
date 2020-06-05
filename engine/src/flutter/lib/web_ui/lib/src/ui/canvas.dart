@@ -696,11 +696,11 @@ class Canvas {
 
   /// Draws the given [Image] into the canvas with its top-left corner at the
   /// given [Offset]. The image is composited into the canvas using the given [Paint].
-  void drawImage(Image image, Offset p, Paint paint) {
+  void drawImage(Image image, Offset offset, Paint paint) {
     assert(image != null); // image is checked on the engine side
-    assert(engine.offsetIsValid(p));
+    assert(engine.offsetIsValid(offset));
     assert(paint != null);
-    _drawImage(image, p, paint);
+    _drawImage(image, offset, paint);
   }
 
   void _drawImage(Image image, Offset p, Paint paint) {
