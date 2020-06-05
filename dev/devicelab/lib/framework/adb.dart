@@ -12,6 +12,14 @@ import 'package:path/path.dart' as path;
 
 import 'utils.dart';
 
+class DeviceException implements Exception {
+  const DeviceException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message == null ? '$DeviceException' : '$DeviceException: $message';
+}
 
 /// Gets the artifact path relative to the current directory.
 String getArtifactPath() {
@@ -43,7 +51,7 @@ abstract class DeviceDiscovery {
       case DeviceOperatingSystem.fuchsia:
         return FuchsiaDeviceDiscovery();
       default:
-        throw StateError('Unsupported device operating system: {config.deviceOperatingSystem}');
+        throw const DeviceException('Unsupported device operating system: {config.deviceOperatingSystem}');
     }
   }
 
@@ -154,7 +162,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
       .toList();
 
     if (allDevices.isEmpty)
-      throw 'No Android devices detected';
+      throw const DeviceException('No Android devices detected');
 
     // TODO(yjbanov): filter out and warn about those with low battery level
     _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
@@ -184,7 +192,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
           results.add(deviceID);
         }
       } else {
-        throw 'Failed to parse device from adb output: "$line"';
+        throw FormatException('Failed to parse device from adb output: "$line"');
       }
     }
 
@@ -201,7 +209,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
         // TODO(yjbanov): check battery level
         await device._getWakefulness();
         results['android-device-$deviceId'] = HealthCheckResult.success();
-      } catch (e, s) {
+      } on Exception catch (e, s) {
         results['android-device-$deviceId'] = HealthCheckResult.error(e, s);
       }
     }
@@ -255,7 +263,7 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
       .toList();
 
     if (allDevices.isEmpty) {
-      throw Exception('No Fuchsia devices detected');
+      throw const DeviceException('No Fuchsia devices detected');
     }
     _workingDevice = allDevices.first;
     print('Device chosen: $_workingDevice');
@@ -295,7 +303,7 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
         } else {
           results['fuchsia-device-$deviceId'] = HealthCheckResult.failure('Cannot resolve device $deviceId');
         }
-      } catch (error, stacktrace) {
+      } on Exception catch (error, stacktrace) {
         results['fuchsia-device-$deviceId'] = HealthCheckResult.error(error, stacktrace);
       }
     }
@@ -372,15 +380,20 @@ class AndroidDevice extends Device {
   }
 
   Future<void> _updateDeviceInfo() async {
-    final String info = await shellEval(
-      'getprop',
-      <String>[
-        'ro.bootimage.build.fingerprint', ';',
-        'getprop', 'ro.build.version.release', ';',
-        'getprop', 'ro.build.version.sdk',
-      ],
-      silent: true,
-    );
+    String info;
+    try {
+      info = await shellEval(
+        'getprop',
+        <String>[
+          'ro.bootimage.build.fingerprint', ';',
+          'getprop', 'ro.build.version.release', ';',
+          'getprop', 'ro.build.version.sdk',
+        ],
+        silent: true,
+      );
+    } on IOException {
+      info = '';
+    }
     final List<String> list = info.split('\n');
     if (list.length == 3) {
       deviceInfo = 'fingerprint: ${list[0]} os: ${list[1]}  api-level: ${list[2]}';
@@ -400,8 +413,19 @@ class AndroidDevice extends Device {
   }
 
   /// Runs `adb` with the given [arguments], selecting this device.
-  Future<String> adb(List<String> arguments, { Map<String, String> environment, bool silent = false }) {
-    return eval(adbPath, <String>['-s', deviceId, ...arguments], environment: environment, canFail: false, printStdout: !silent, printStderr: !silent);
+  Future<String> adb(
+      List<String> arguments, {
+      Map<String, String> environment,
+      bool silent = false,
+    }) {
+    return eval(
+      adbPath,
+      <String>['-s', deviceId, ...arguments],
+      environment: environment,
+      canFail: false,
+      printStdout: !silent,
+      printStderr: !silent,
+    );
   }
 
   @override
@@ -520,7 +544,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
       .toList();
 
     if (allDevices.isEmpty)
-      throw 'No iOS devices detected';
+      throw const DeviceException('No iOS devices detected');
 
     // TODO(yjbanov): filter out and warn about those with low battery level
     _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
@@ -548,7 +572,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
       .where((String line) => line.isNotEmpty)
       .toList();
     if (iosDeviceIDs.isEmpty)
-      throw 'No connected iOS devices found.';
+      throw const DeviceException('No connected iOS devices found.');
     return iosDeviceIDs;
   }
 
@@ -600,17 +624,17 @@ class IosDevice extends Device {
 
   @override
   Future<void> tap(int x, int y) async {
-    throw 'Not implemented';
+    throw UnimplementedError();
   }
 
   @override
   Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
-    throw 'Not implemented';
+    throw UnimplementedError();
   }
 
   @override
   Stream<String> get logcat {
-    throw 'Not implemented';
+    throw UnimplementedError();
   }
 
   @override
@@ -651,12 +675,12 @@ class FuchsiaDevice extends Device {
 
   @override
   Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
-    throw 'Not implemented';
+    throw UnimplementedError();
   }
 
   @override
   Stream<String> get logcat {
-    throw 'Not implemented';
+    throw UnimplementedError();
   }
 }
 
@@ -664,15 +688,18 @@ class FuchsiaDevice extends Device {
 String get adbPath {
   final String androidHome = Platform.environment['ANDROID_HOME'] ?? Platform.environment['ANDROID_SDK_ROOT'];
 
-  if (androidHome == null)
-    throw 'The ANDROID_SDK_ROOT and ANDROID_HOME environment variables are '
-        'missing. At least one of these variables must point to the Android '
-        'SDK directory containing platform-tools.';
+  if (androidHome == null) {
+    throw const DeviceException(
+      'The ANDROID_SDK_ROOT and ANDROID_HOME environment variables are '
+      'missing. At least one of these variables must point to the Android '
+      'SDK directory containing platform-tools.'
+    );
+  }
 
   final String adbPath = path.join(androidHome, 'platform-tools/adb');
 
   if (!canRun(adbPath))
-    throw 'adb not found at: $adbPath';
+    throw DeviceException('adb not found at: $adbPath');
 
   return path.absolute(adbPath);
 }
