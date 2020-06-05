@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/project.dart';
 /// (`Device.toJson()` and `--machine` flag for `devices` command)
 List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
   FakeDeviceJsonData(
-    FakeDevice('ephemeral', 'ephemeral', true),
+    FakeDevice('ephemeral', 'ephemeral', true, true, PlatformType.android),
     <String, Object>{
       'name': 'ephemeral',
       'id': 'ephemeral',
@@ -56,9 +56,9 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
 
 /// Fake device to test `devices` command
 class FakeDevice extends Device {
-  FakeDevice(this.name, String id, [bool ephemeral = true, this._isSupported = true]) : super(
+  FakeDevice(this.name, String id, [bool ephemeral = true, this._isSupported = true, PlatformType type = PlatformType.web]) : super(
       id,
-      platformType: PlatformType.web,
+      platformType: type,
       category: Category.mobile,
       ephemeral: ephemeral,
   );

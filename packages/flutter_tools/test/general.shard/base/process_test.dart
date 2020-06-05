@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -193,11 +194,16 @@ void main() {
         flakes: 1,
         delay: delay,
       );
-      final RunResult result = await flakyProcessUtils.run(
-        <String>['dummy'],
-        timeout: delay + const Duration(seconds: 1),
-      );
-      expect(result.exitCode, -9);
+
+      FakeAsync().run((FakeAsync time) async {
+        final Duration timeout = delay + const Duration(seconds: 1);
+        final RunResult result = await flakyProcessUtils.run(
+          <String>['dummy'],
+          timeout: timeout,
+        );
+        time.elapse(timeout);
+        expect(result.exitCode, -9);
+      });
     });
 
     testWithoutContext(' flaky process succeeds with retry', () async {
@@ -205,12 +211,16 @@ void main() {
         flakes: 1,
         delay: delay,
       );
-      final RunResult result = await flakyProcessUtils.run(
-        <String>['dummy'],
-        timeout: delay - const Duration(milliseconds: 500),
-        timeoutRetries: 1,
-      );
-      expect(result.exitCode, 0);
+      FakeAsync().run((FakeAsync time) async {
+        final Duration timeout = delay - const Duration(milliseconds: 500);
+        final RunResult result = await flakyProcessUtils.run(
+          <String>['dummy'],
+          timeout: timeout,
+          timeoutRetries: 1,
+        );
+        time.elapse(timeout);
+        expect(result.exitCode, 0);
+      });
     });
 
     testWithoutContext(' flaky process generates ProcessException on timeout', () async {
@@ -230,11 +240,16 @@ void main() {
         flakyStdout.complete(<int>[]);
         return true;
       });
-      expect(() => flakyProcessUtils.run(
-        <String>['dummy'],
-        timeout: delay - const Duration(milliseconds: 500),
-        timeoutRetries: 0,
-      ), throwsA(isA<ProcessException>()));
+      FakeAsync().run((FakeAsync time) async {
+        final Duration timeout = delay - const Duration(milliseconds: 500);
+        expect(() => flakyProcessUtils.run(
+          <String>['dummy'],
+          timeout: timeout,
+          timeoutRetries: 0,
+        ), throwsA(isA<ProcessException>()));
+
+        time.elapse(timeout);
+      });
     });
   });
 

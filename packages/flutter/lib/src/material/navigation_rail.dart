@@ -20,6 +20,10 @@ import 'theme_data.dart';
 /// app to navigate between a small number of views, typically between three and
 /// five.
 ///
+/// The navigation rail is meant for layouts with wide viewports, such as a
+/// desktop web or tablet landscape layout. For smaller layouts, like mobile
+/// portrait, a [BottomNavigationBar] should be used instead.
+///
 /// A navigation rail is usually used as the first or last element of a [Row]
 /// which defines the app's [Scaffold] body.
 ///
@@ -27,10 +31,6 @@ import 'theme_data.dart';
 /// specified with [NavigationRailTheme]. The default values for null theme
 /// properties are based on the [Theme]'s [ThemeData.textTheme],
 /// [ThemeData.iconTheme], and [ThemeData.colorScheme].
-//
-/// The navigation rail is meant for layouts with wide viewports, such as a
-/// desktop web or tablet landscape layout. For smaller layouts, like mobile
-/// portrait, a [BottomNavigationBar] should be used instead.
 ///
 /// Adaptive layouts can build different instances of the [Scaffold] in order to
 /// have a navigation rail for more horizontal layouts and a bottom navigation

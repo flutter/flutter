@@ -55,15 +55,6 @@ Future<void> buildLinux(
 
   createPluginSymlinks(linuxProject.project);
 
-  if (!buildInfo.isDebug) {
-    const String warning = '🚧 ';
-    globals.printStatus(warning * 20);
-    globals.printStatus('Warning: Only debug is currently implemented for Linux. This is effectively a debug build.');
-    globals.printStatus('See https://github.com/flutter/flutter/issues/38478 for details and updates.');
-    globals.printStatus(warning * 20);
-    globals.printStatus('');
-  }
-
   final Status status = globals.logger.startProgress(
     'Building Linux application...',
     timeout: null,
@@ -81,20 +72,20 @@ Future<void> buildLinux(
 Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buildDir) async {
   final Stopwatch sw = Stopwatch()..start();
 
+  await buildDir.create(recursive: true);
+
   final String buildFlag = toTitleCase(buildModeName);
   int result;
   try {
     result = await processUtils.stream(
       <String>[
         'cmake',
-        '-S',
-        sourceDir.path,
-        '-B',
-        buildDir.path,
         '-G',
         'Ninja',
         '-DCMAKE_BUILD_TYPE=$buildFlag',
+        sourceDir.path,
       ],
+      workingDirectory: buildDir.path,
       environment: <String, String>{
         'CC': 'clang',
         'CXX': 'clang++'

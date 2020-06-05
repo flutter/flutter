@@ -565,7 +565,9 @@ class ApkManifestData {
     }
 
     final _Element application = manifest.firstElement('application');
-    assert(application != null);
+    if (application == null) {
+      return null;
+    }
 
     final Iterable<_Element> activities = application.allElements('activity');
 

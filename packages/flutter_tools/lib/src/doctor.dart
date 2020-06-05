@@ -915,19 +915,32 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     }
 
     final List<String> split = version.split('.');
-
     if (split.length < 2) {
       return null;
     }
-
     final String major = split[0];
     final String minor = split[1];
-    _pluginsPath = globals.fs.path.join(
-      globals.fsUtils.homeDirPath,
+
+    final String homeDirPath = globals.fsUtils.homeDirPath;
+    String pluginsPath = globals.fs.path.join(
+      homeDirPath,
       'Library',
       'Application Support',
+      'JetBrains',
       '$id$major.$minor',
+      'plugins',
     );
+    // Fallback to legacy location from < 2020.
+    if (!globals.fs.isDirectorySync(pluginsPath)) {
+      pluginsPath = globals.fs.path.join(
+        homeDirPath,
+        'Library',
+        'Application Support',
+        '$id$major.$minor',
+      );
+    }
+    _pluginsPath = pluginsPath;
+
     return _pluginsPath;
   }
   String _pluginsPath;

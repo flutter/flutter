@@ -407,9 +407,7 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
         final DialogTheme dialogTheme = Theme.of(context).dialogTheme;
         size = orientation == Orientation.portrait ? _inputPortraitDialogSize : _inputLandscapeDialogSize;
         insetPadding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0);
-        // The default dialog shape is radius 2 rounded rect, but the spec has
-        // been updated to 4, so we will use that here for the Input Date Range
-        // Picker, but only if there isn't one provided in the theme.
+        // TODO(Piinks): remove once border radius migration is complete
         shape = dialogTheme.shape ?? const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(4.0))
         );

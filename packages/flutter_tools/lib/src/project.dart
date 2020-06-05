@@ -1006,7 +1006,7 @@ class WindowsProject extends FlutterProjectPlatform {
   String get pluginConfigKey => WindowsPlugin.kConfigKey;
 
   @override
-  bool existsSync() => _editableDirectory.existsSync();
+  bool existsSync() => _editableDirectory.existsSync() && solutionFile.existsSync();
 
   Directory get _editableDirectory => project.directory.childDirectory('windows');
 

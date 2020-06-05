@@ -213,6 +213,7 @@ abstract class MouseCursor with Diagnosticable {
   /// cursor. A given cursor can be displayed by multiple devices at the same
   /// time, in which case this method will be called separately for each device.
   @protected
+  @factory
   MouseCursorSession createSession(int device);
 
   /// A very short description of the mouse cursor.

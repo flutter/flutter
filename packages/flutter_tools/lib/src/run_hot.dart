@@ -7,8 +7,8 @@ import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
-import 'base/async_guard.dart';
 
+import 'base/async_guard.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -63,7 +63,6 @@ class DeviceReloadReport {
   List<vm_service.ReloadReport> reports; // List has one report per Flutter view.
 }
 
-// TODO(mklim): Test this, flutter/flutter#23031.
 class HotRunner extends ResidentRunner {
   HotRunner(
     List<FlutterDevice> devices, {
@@ -225,6 +224,7 @@ class HotRunner extends ResidentRunner {
         restart: _restartService,
         compileExpression: _compileExpressionService,
         reloadMethod: reloadMethod,
+        getSkSLMethod: writeSkSL,
       );
     // Catches all exceptions, non-Exception objects are rethrown.
     } catch (error) { // ignore: avoid_catches_without_on_clauses
@@ -232,20 +232,6 @@ class HotRunner extends ResidentRunner {
         rethrow;
       }
       globals.printError('Error connecting to the service protocol: $error');
-      // https://github.com/flutter/flutter/issues/33050
-      // TODO(blasten): Remove this check once
-      // https://issuetracker.google.com/issues/132325318 has been fixed.
-      if (await hasDeviceRunningAndroidQ(flutterDevices) &&
-          error.toString().contains(kAndroidQHttpConnectionClosedExp)) {
-        globals.printStatus(
-          '🔨 If you are using an emulator running Android Q Beta, '
-          'consider using an emulator running API level 29 or lower.',
-        );
-        globals.printStatus(
-          'Learn more about the status of this issue on '
-          'https://issuetracker.google.com/issues/132325318.',
-        );
-      }
       return 2;
     }
 
@@ -365,11 +351,17 @@ class HotRunner extends ResidentRunner {
       // build, reducing overall initialization time. This is safe because the first
       // invocation of the frontend server produces a full dill file that the
       // subsequent invocation in devfs will not overwrite.
+      await runSourceGenerators();
       if (device.generator != null) {
         startupTasks.add(
           device.generator.recompile(
             globals.fs.file(mainPath).uri,
             <Uri>[],
+            // When running without a provided applicationBinary, the tool will
+            // simultaneously run the initial frontend_server compilation and
+            // the native build step. If there is a Dart compilation error, it
+            // should only be displayed once.
+            suppressErrors: applicationBinary == null,
             outputPath: dillOutputPath ??
               getDefaultApplicationKernelPath(trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation),
             packageConfig: packageConfig,
@@ -386,6 +378,7 @@ class HotRunner extends ResidentRunner {
       if (!results.every((bool passed) => passed)) {
         return 1;
       }
+      cacheInitialDillCompilation();
     } on Exception catch (err) {
       globals.printError(err.toString());
       return 1;
@@ -674,6 +667,10 @@ class HotRunner extends ResidentRunner {
       emulator = false;
     }
     final Stopwatch timer = Stopwatch()..start();
+
+    // Run source generation if needed.
+    await runSourceGenerators();
+
     if (fullRestart) {
       final OperationResult result = await _fullRestartHelper(
         targetPlatform: targetPlatform,
@@ -1190,7 +1187,7 @@ class ProjectFileInvalidator {
   static const String _pubCachePathWindows = 'Pub/Cache';
 
   // As of writing, Dart supports up to 32 asynchronous I/O threads per
-  // isolate.  We also want to avoid hitting platform limits on open file
+  // isolate. We also want to avoid hitting platform limits on open file
   // handles/descriptors.
   //
   // This value was chosen based on empirical tests scanning a set of
@@ -1223,7 +1220,6 @@ class ProjectFileInvalidator {
         if (_isNotInPubCache(uri)) uri,
     ];
     final List<Uri> invalidatedFiles = <Uri>[];
-
     if (asyncScanning) {
       final Pool pool = Pool(_kMaxPendingStats);
       final List<Future<void>> waitList = <Future<void>>[];
