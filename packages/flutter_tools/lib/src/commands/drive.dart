@@ -115,9 +115,10 @@ class DriveCommand extends RunCommandBase {
       ..addOption('chrome-binary',
         help: 'Location of Chrome binary. '
           'Works only if \'browser-name\' is set to \'chrome\'')
-      ..addFlag('write-sksl-on-exit',
-        help: 'Attempts to write an SkSL file when the drive process is finished',
-        hide: true,
+      ..addOption('write-sksl-on-exit',
+        help:
+          'Attempts to write an SkSL file when the drive process is finished '
+          'to the provided file, overwriting it if necessary.',
       );
   }
 
@@ -310,7 +311,8 @@ $ex
     } finally {
       await residentRunner?.exit();
       await driver?.quit();
-      if (boolArg('write-sksl-on-exit')) {
+      if (stringArg('write-sksl-on-exit') != null) {
+        final File outputFile = globals.fs.file(stringArg('write-sksl-on-exit'));
         final vm_service.VmService vmService = await connectToVmService(
           Uri.parse(observatoryUri),
         );
@@ -318,7 +320,7 @@ $ex
         final Map<String, Object> result = await vmService.getSkSLs(
           viewId: flutterView.id
         );
-        await sharedSkSlWriter(_device, result);
+        await sharedSkSlWriter(_device, result, outputFile: outputFile);
       }
       if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
         globals.printStatus('Leaving the application running.');

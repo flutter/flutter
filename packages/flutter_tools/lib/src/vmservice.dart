@@ -806,7 +806,9 @@ bool isPauseEvent(String kind) {
 
 // TODO(jonahwilliams): either refactor drive to use the resident runner
 // or delete it.
-Future<String> sharedSkSlWriter(Device device, Map<String, Object> data) async {
+Future<String> sharedSkSlWriter(Device device, Map<String, Object> data, {
+  File outputFile,
+}) async {
   if (data.isEmpty) {
     globals.logger.printStatus(
       'No data was receieved. To ensure SkSL data can be generated use a '
@@ -816,11 +818,15 @@ Future<String> sharedSkSlWriter(Device device, Map<String, Object> data) async {
     );
     return null;
   }
-  final File outputFile = globals.fsUtils.getUniqueFile(
-    globals.fs.currentDirectory,
-    'flutter',
-    'sksl.json',
-  );
+  if (outputFile == null) {
+    outputFile = globals.fsUtils.getUniqueFile(
+      globals.fs.currentDirectory,
+      'flutter',
+      'sksl.json',
+    );
+  } else if (!outputFile.parent.existsSync()) {
+    outputFile.parent.createSync(recursive: true);
+  }
   // Convert android sub-platforms to single target platform.
   TargetPlatform targetPlatform = await device.targetPlatform;
   switch (targetPlatform) {
