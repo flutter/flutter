@@ -2129,10 +2129,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (widget.obscureText) {
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
-      final int o =
-        _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
-      if (o != null && o >= 0 && o < text.length)
-        text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
+      // Reveal the latest character in an obscured field only on mobile.
+      if ((defaultTargetPlatform == TargetPlatform.android ||
+              defaultTargetPlatform == TargetPlatform.iOS ||
+              defaultTargetPlatform == TargetPlatform.fuchsia) &&
+          !kIsWeb) {
+        final int o =
+            _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
+        if (o != null && o >= 0 && o < text.length)
+          text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
+      }
       return TextSpan(style: widget.style, text: text);
     }
     // Read only mode should not paint text composing.
