@@ -869,21 +869,21 @@ void main() {
 
     final double initialTabBarHeight = tabBarHeight(tester);
 
-    // Scroll the not-pinned appbar partially out of view
+    // Scroll the not-pinned appbar partially out of view.
     controller.jumpTo(50.0);
     await tester.pump();
     expect(find.byType(SliverAppBar), findsOneWidget);
     expect(appBarHeight(tester), expandedAppBarHeight - 50.0);
     expect(tabBarHeight(tester), initialTabBarHeight);
 
-    // Scroll the not-pinned appbar out of view, to its collapsed height
+    // Scroll the not-pinned appbar out of view, to its collapsed height.
     controller.jumpTo(600.0);
     await tester.pump();
     expect(find.byType(SliverAppBar), findsNothing);
-    expect(appBarHeight(tester), collapsedAppBarHeight);
+    expect(appBarHeight(tester), collapsedAppBarHeight + initialTabBarHeight);
     expect(tabBarHeight(tester), initialTabBarHeight);
 
-    // Scroll the not-pinned appbar back into view
+    // Scroll the not-pinned appbar back into view.
     controller.jumpTo(0.0);
     await tester.pump();
     expect(find.byType(SliverAppBar), findsOneWidget);

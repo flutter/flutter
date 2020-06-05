@@ -783,7 +783,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final double _bottomHeight;
 
   @override
-  double get minExtent => collapsedHeight ?? (topPadding + kToolbarHeight + _bottomHeight);
+  double get minExtent => collapsedHeight;
 
   @override
   double get maxExtent => math.max(topPadding + (expandedHeight ?? kToolbarHeight + _bottomHeight), minExtent);
@@ -1155,15 +1155,14 @@ class SliverAppBar extends StatefulWidget {
   /// Defaults to [NavigationToolbar.kMiddleSpacing].
   final double titleSpacing;
 
-
   /// The size of the app bar when it is collapsed.
   ///
-  /// By default, the collapsed height is set to [kToolbarHeight]. If the
-  /// [bottom] widget is set, then its [bottom.preferredSize.height] is added
-  /// to the height. If [primary] is true, any top padding from [MediaQuery]
-  /// is added to the height. If [pinned] and [floating] is true,
-  /// with [bottom] set, the collapsed height is only
-  /// [bottom.preferredSize.height] with any top padding.
+  /// By default, the collapsed height is set to [kToolbarHeight]. If [bottom]
+  /// is set, its [bottom.preferredSize.height] is added to the height. If
+  /// [primary] is true, any top padding from [MediaQuery] is added as well.
+  ///
+  /// If [pinned] and [floating] is true, with [bottom] set, the collapsed
+  /// height is only [bottom.preferredSize.height] with any top padding.
   final double collapsedHeight;
 
   /// The size of the app bar when it is fully expanded.
@@ -1322,9 +1321,11 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
+    final double bottomHeight = widget.bottom?.preferredSize?.height ?? 0.0;
     final double topPadding = widget.primary ? MediaQuery.of(context).padding.top : 0.0;
-    final double floatingPinnedCollapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
-      ? widget.bottom.preferredSize.height + topPadding : null;
+    final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
+        ? bottomHeight + topPadding
+        : (widget.collapsedHeight ?? kToolbarHeight) + bottomHeight + topPadding;
 
     return MediaQuery.removePadding(
       context: context,
@@ -1351,7 +1352,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           excludeHeaderSemantics: widget.excludeHeaderSemantics,
           titleSpacing: widget.titleSpacing,
           expandedHeight: widget.expandedHeight,
-          collapsedHeight: widget.collapsedHeight ?? floatingPinnedCollapsedHeight,
+          collapsedHeight: collapsedHeight,
           topPadding: topPadding,
           floating: widget.floating,
           pinned: widget.pinned,
