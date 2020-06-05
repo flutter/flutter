@@ -38,8 +38,6 @@ import 'run_cold.dart';
 import 'run_hot.dart';
 import 'vmservice.dart';
 
-typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
-
 class FlutterDevice {
   FlutterDevice(
     this.device, {
