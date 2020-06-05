@@ -346,8 +346,9 @@ class _ExitTransition extends StatelessWidget {
       ? _fadeOutTransition.animate(animation)
         : kAlwaysCompleteAnimation;
     final Animation<double> scaleTransition = (!reverse
-    ? _scaleUpTransition
-    : _scaleDownTransition).animate(animation);
+      ? _scaleUpTransition
+      : _scaleDownTransition
+    ).animate(animation);
 
     return FadeTransition(
       opacity: fadeTransition,
