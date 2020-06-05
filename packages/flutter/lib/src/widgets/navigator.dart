@@ -3146,8 +3146,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       previous = index > 0 ? _history[index - 1] : null;
     }
 
-    // Inform navigator observers about route changes.
-    _informObservers();
+    // Informs navigator observers about route changes.
+    _flushObserverNotifications();
 
     // Now that the list is clean, send the didChangeNext/didChangePrevious
     // notifications.
@@ -3172,7 +3172,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       overlay?.rearrange(_allRouteOverlayEntries);
   }
 
-  void _informObservers() {
+  void _flushObserverNotifications() {
     if (widget.observers.isEmpty) {
       _observedRouteDeletions.clear();
       _observedRouteAdditions.clear();
