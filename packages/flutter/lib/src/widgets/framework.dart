@@ -665,7 +665,7 @@ abstract class StatelessWidget extends Widget {
   /// The framework calls this method when this widget is inserted into the tree
   /// in a given [BuildContext] and when the dependencies of this widget change
   /// (e.g., an [InheritedWidget] referenced by this widget changes). This
-  /// method can potentially be called in every frames should not have any side
+  /// method can potentially be called in every frame and should not have any side
   /// effects beyond building a widget.
   ///
   /// The framework replaces the subtree below this widget with the widget
@@ -1328,7 +1328,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///  * After calling [deactivate] and then reinserting the [State] object into
   ///    the tree at another location.
   ///
-  /// This method can potentially be called in every frames and should not have
+  /// This method can potentially be called in every frame and should not have
   /// any side effects beyond building a widget.
   ///
   /// The framework replaces the subtree below this widget with the widget
