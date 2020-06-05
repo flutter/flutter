@@ -62,7 +62,7 @@ ephemeral_dir="${SOURCE_ROOT}/Flutter/ephemeral"
 build_inputs_path="${ephemeral_dir}/FlutterInputs.xcfilelist"
 build_outputs_path="${ephemeral_dir}/FlutterOutputs.xcfilelist"
 
-local performance_measurement_option=""
+performance_measurement_option=""
 if [[ -n "$PERFORMANCE_MEASUREMENT_FILE" ]]; then
   performance_measurement_option="--performance-measurement-file=${PERFORMANCE_MEASUREMENT_FILE}"
 fi
@@ -82,7 +82,7 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \
     -dTrackWidgetCreation="${TRACK_WIDGET_CREATION}"                        \
     --DartDefines="${DART_DEFINES}"                                         \
     --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"               \
-    -dExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                     \
+    --ExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                     \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \
     --output="${ephemeral_dir}"                                             \

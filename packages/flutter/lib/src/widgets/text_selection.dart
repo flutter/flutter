@@ -1524,7 +1524,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
       final ClipboardStatus clipboardStatus = data != null && data.text != null && data.text.isNotEmpty
           ? ClipboardStatus.pasteable
           : ClipboardStatus.notPasteable;
-      if (clipboardStatus == value) {
+      if (_disposed || clipboardStatus == value) {
         return;
       }
       value = clipboardStatus;

@@ -628,6 +628,101 @@ void main() {
     expect(aOffset.dx, lessThan(aOffsetOriginal.dx));
   });
 
+  testWidgets('pushReplacement correctly reports didReplace to the observer', (WidgetTester tester) async {
+    // Regression test for  https://github.com/flutter/flutter/issues/56892.
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/' : (BuildContext context) => const OnTapPage(
+        id: '/',
+      ),
+      '/A': (BuildContext context) => const OnTapPage(
+        id: 'A',
+      ),
+      '/A/B': (BuildContext context) => OnTapPage(
+        id: 'B',
+        onTap: (){
+          Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
+          Navigator.of(context).pushReplacementNamed('/C');
+        },
+      ),
+      '/C': (BuildContext context) => const OnTapPage(id: 'C',
+      ),
+    };
+    final List<NavigatorObservation> observations = <NavigatorObservation>[];
+    final TestObserver observer = TestObserver()
+      ..onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        observations.add(
+          NavigatorObservation(
+            current: route.settings.name,
+            previous: previousRoute.settings.name,
+            operation: 'didPop'
+          )
+        );
+      }
+      ..onReplaced = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        observations.add(
+          NavigatorObservation(
+            current: route.settings.name,
+            previous: previousRoute.settings.name,
+            operation: 'didReplace'
+          )
+        );
+      };
+    await tester.pumpWidget(
+      MaterialApp(
+        routes: routes,
+        navigatorObservers: <NavigatorObserver>[observer],
+        initialRoute: '/A/B',
+      )
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('B'), isOnstage);
+
+    await tester.tap(find.text('B'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(observations.length, 3);
+    expect(observations[0].current, '/A/B');
+    expect(observations[0].previous, '/A');
+    expect(observations[0].operation, 'didPop');
+    expect(observations[1].current, '/A');
+    expect(observations[1].previous, '/');
+    expect(observations[1].operation, 'didPop');
+
+    expect(observations[2].current, '/C');
+    expect(observations[2].previous, '/');
+    expect(observations[2].operation, 'didReplace');
+
+    await tester.pumpAndSettle();
+    expect(find.text('C'), isOnstage);
+  });
+
+  testWidgets('Able to pop all routes', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/' : (BuildContext context) => const OnTapPage(
+        id: '/',
+      ),
+      '/A': (BuildContext context) => const OnTapPage(
+        id: 'A',
+      ),
+      '/A/B': (BuildContext context) => OnTapPage(
+        id: 'B',
+        onTap: (){
+          // Pops all routes with bad predicate.
+          Navigator.of(context).popUntil((Route<dynamic> route) => false);
+        },
+      ),
+    };
+    await tester.pumpWidget(
+      MaterialApp(
+        routes: routes,
+        initialRoute: '/A/B',
+      )
+    );
+    await tester.tap(find.text('B'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('pushAndRemoveUntil triggers secondaryAnimation', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(
@@ -680,6 +775,42 @@ void main() {
     expect(find.text('/'), findsNothing);
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), isOnstage);
+  });
+
+  testWidgets('pushAndRemoveUntil does not remove routes below the first route that pass the predicate', (WidgetTester tester) async {
+    // Regression https://github.com/flutter/flutter/issues/56688
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const Text('home'),
+      '/A': (BuildContext context) => const Text('page A'),
+      '/A/B': (BuildContext context) => OnTapPage(
+        id: 'B',
+        onTap: () {
+          Navigator.of(context).pushNamedAndRemoveUntil('/D', ModalRoute.withName('/A'));
+        },
+      ),
+      '/D': (BuildContext context) => const Text('page D'),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        routes: routes,
+        initialRoute: '/A/B',
+      )
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('B'));
+    await tester.pumpAndSettle();
+    expect(find.text('page D'), isOnstage);
+
+    navigator.currentState.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('page A'), isOnstage);
+
+    navigator.currentState.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('home'), isOnstage);
   });
 
   testWidgets('replaceNamed returned value', (WidgetTester tester) async {
@@ -1709,6 +1840,57 @@ void main() {
     expect(tickCount, 4);
   });
 
+  testWidgets('Route annouce correctly for first route and last route', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/57133.
+    Route<void> previousOfFirst = NotAnnounced();
+    Route<void> nextOfFirst = NotAnnounced();
+    Route<void> popNextOfFirst = NotAnnounced();
+    Route<void> firstRoute;
+
+    Route<void> previousOfSecond = NotAnnounced();
+    Route<void> nextOfSecond = NotAnnounced();
+    Route<void> popNextOfSecond = NotAnnounced();
+    Route<void> secondRoute;
+
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        initialRoute: '/second',
+        onGenerateRoute: (RouteSettings settings) {
+          if (settings.name == '/') {
+            firstRoute = RouteAnnouncementSpy(
+              onDidChangeNext: (Route<void> next) => nextOfFirst = next,
+              onDidChangePrevious: (Route<void> previous) => previousOfFirst = previous,
+              onDidPopNext: (Route<void> next) => popNextOfFirst = next,
+              settings: settings,
+            );
+            return firstRoute;
+          }
+          secondRoute = RouteAnnouncementSpy(
+            onDidChangeNext: (Route<void> next) => nextOfSecond = next,
+            onDidChangePrevious: (Route<void> previous) => previousOfSecond = previous,
+            onDidPopNext: (Route<void> next) => popNextOfSecond = next,
+            settings: settings,
+          );
+          return secondRoute;
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(previousOfFirst, isNull);
+    expect(nextOfFirst, secondRoute);
+    expect(popNextOfFirst, isA<NotAnnounced>());
+
+    expect(previousOfSecond, firstRoute);
+    expect(nextOfSecond, isNull);
+    expect(popNextOfSecond, isA<NotAnnounced>());
+
+    navigator.currentState.pop();
+    expect(popNextOfFirst, secondRoute);
+  });
+
   group('Page api', (){
     Widget buildNavigator(
       List<Page<dynamic>> pages,
@@ -2430,6 +2612,50 @@ void main() {
   });
 }
 
+typedef AnnouncementCallBack = void Function(Route<dynamic>);
+
+class NotAnnounced extends Route<void> {/* A place holder for not announced route*/}
+
+class RouteAnnouncementSpy extends Route<void> {
+  RouteAnnouncementSpy({
+    this.onDidChangePrevious,
+    this.onDidChangeNext,
+    this.onDidPopNext,
+    RouteSettings settings,
+  }) : super(settings: settings);
+  final AnnouncementCallBack onDidChangePrevious;
+  final AnnouncementCallBack onDidChangeNext;
+  final AnnouncementCallBack onDidPopNext;
+
+  @override
+  List<OverlayEntry> get overlayEntries => <OverlayEntry>[
+    OverlayEntry(
+      builder: (BuildContext context) => const Placeholder(),
+    )
+  ];
+
+  @override
+  void didChangeNext(Route<dynamic> nextRoute) {
+    super.didChangeNext(nextRoute);
+    if (onDidChangeNext != null)
+      onDidChangeNext(nextRoute);
+  }
+
+  @override
+  void didChangePrevious(Route<dynamic> previousRoute) {
+    super.didChangePrevious(previousRoute);
+    if (onDidChangePrevious != null)
+      onDidChangePrevious(previousRoute);
+  }
+
+  @override
+  void didPopNext(Route<dynamic> nextRoute) {
+    super.didPopNext(nextRoute);
+    if (onDidPopNext != null)
+      onDidPopNext(nextRoute);
+  }
+}
+
 class _TickingWidget extends StatefulWidget {
   const _TickingWidget({this.onTick});
 
@@ -2546,4 +2772,11 @@ class StatefulTestState extends State<StatefulTestWidget> {
     rebuildCount += 1;
     return Container();
   }
+}
+
+class NavigatorObservation {
+  const NavigatorObservation({this.previous, this.current, this.operation});
+  final String previous;
+  final String current;
+  final String operation;
 }

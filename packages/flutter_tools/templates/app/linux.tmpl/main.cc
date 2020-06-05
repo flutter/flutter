@@ -1,3 +1,4 @@
+#include <flutter/flutter_engine.h>
 #include <flutter/flutter_window_controller.h>
 #include <linux/limits.h>
 #include <unistd.h>
@@ -12,36 +13,28 @@
 
 namespace {
 
-// Returns the path of the directory containing this executable, or an empty
-// string if the directory cannot be found.
-std::string GetExecutableDirectory() {
-  char buffer[PATH_MAX + 1];
-  ssize_t length = readlink("/proc/self/exe", buffer, sizeof(buffer));
-  if (length > PATH_MAX) {
-    std::cerr << "Couldn't locate executable" << std::endl;
-    return "";
+// Runs the application in headless mode, without a window.
+void RunHeadless(const std::string& icu_data_path,
+                 const std::string& assets_path,
+                 const std::vector<std::string>& arguments,
+                 const std::string& aot_library_path) {
+  flutter::FlutterEngine engine;
+  engine.Start(icu_data_path, assets_path, arguments, aot_library_path);
+  RegisterPlugins(&engine);
+  while (true) {
+    engine.RunEventLoopWithTimeout();
   }
-  std::string executable_path(buffer, length);
-  size_t last_separator_position = executable_path.find_last_of('/');
-  if (last_separator_position == std::string::npos) {
-    std::cerr << "Unabled to find parent directory of " << executable_path
-              << std::endl;
-    return "";
-  }
-  return executable_path.substr(0, last_separator_position);
 }
 
 }  // namespace
 
 int main(int argc, char **argv) {
-  // Resources are located relative to the executable.
-  std::string base_directory = GetExecutableDirectory();
-  if (base_directory.empty()) {
-    base_directory = ".";
-  }
-  std::string data_directory = base_directory + "/data";
+  std::string data_directory = "data";
   std::string assets_path = data_directory + "/flutter_assets";
   std::string icu_data_path = data_directory + "/icudtl.dat";
+
+  std::string lib_directory = "lib";
+  std::string aot_library_path = lib_directory + "/libapp.so";
 
   // Arguments for the Flutter Engine.
   std::vector<std::string> arguments;
@@ -54,14 +47,18 @@ int main(int argc, char **argv) {
 
   // Start the engine.
   if (!flutter_controller.CreateWindow(window_properties, assets_path,
-                                       arguments)) {
+                                       arguments, aot_library_path)) {
+    if (getenv("DISPLAY") == nullptr) {
+      std::cout << "No DISPLAY; falling back to headless mode." << std::endl;
+      RunHeadless(icu_data_path, assets_path, arguments, aot_library_path);
+      return EXIT_SUCCESS;
+    }
     return EXIT_FAILURE;
   }
   RegisterPlugins(&flutter_controller);
 
   // Run until the window is closed.
-  while (flutter_controller.RunEventLoopWithTimeout(
-      std::chrono::milliseconds::max())) {
+  while (flutter_controller.RunEventLoopWithTimeout()) {
   }
   return EXIT_SUCCESS;
 }

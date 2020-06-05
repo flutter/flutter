@@ -679,6 +679,63 @@ void main() {
         expect(find.text(errorInvalidText), findsOneWidget);
       });
     });
+
+    testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {
+      BuildContext buttonContext;
+      const InputBorder border = InputBorder.none;
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData.light().copyWith(
+          inputDecorationTheme: const InputDecorationTheme(
+            filled: false,
+            border: border,
+          ),
+        ),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  buttonContext = context;
+                },
+                child: const Text('Go'),
+              );
+            },
+          ),
+        ),
+      ));
+
+      await tester.tap(find.text('Go'));
+      expect(buttonContext, isNotNull);
+
+      showDatePicker(
+        context: buttonContext,
+        initialDate: initialDate,
+        firstDate: firstDate,
+        lastDate: lastDate,
+        currentDate: today,
+        initialEntryMode: DatePickerEntryMode.input,
+      );
+
+      await tester.pumpAndSettle();
+
+      // Get the border and container color from the painter of the _BorderContainer
+      // (this was cribbed from input_decorator_test.dart).
+      final CustomPaint customPaint = tester.widget(find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
+        matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
+      ));
+      final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+      final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
+      final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
+      final InputBorder actualBorder = inputBorderTween.evaluate(animation) as InputBorder;
+      final Color containerColor = inputBorderPainter.blendedColor as Color;
+
+      // Border should match
+      expect(actualBorder, equals(border));
+
+      // It shouldn't be filled, so the color should be transparent
+      expect(containerColor, equals(Colors.transparent));
+    });
   });
 
   group('Haptic feedback', () {

@@ -57,7 +57,7 @@ class TestPointer {
   /// Set when the object is constructed. Defaults to 1.
   final int pointer;
 
-  /// The kind of pointer device to simulate. Defaults to
+  /// The kind of pointing device to simulate. Defaults to
   /// [PointerDeviceKind.touch].
   final PointerDeviceKind kind;
 

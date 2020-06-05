@@ -28,7 +28,6 @@ Future<void> buildWeb(
   BuildInfo buildInfo,
   bool initializePlatform,
   bool csp,
-  List<String> experiments,
 ) async {
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
@@ -50,11 +49,11 @@ Future<void> buildWeb(
         kTargetFile: target,
         kInitializePlatform: initializePlatform.toString(),
         kHasWebPlugins: hasWebPlugins.toString(),
-        kDartDefines: buildInfo.dartDefines.join(','),
+        kDartDefines: encodeDartDefines(buildInfo.dartDefines),
         kCspMode: csp.toString(),
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
-        if (experiments.isNotEmpty)
-          kEnableExperiment: experiments?.join(','),
+        if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false)
+          kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(',')
       },
       artifacts: globals.artifacts,
       fileSystem: globals.fs,

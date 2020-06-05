@@ -174,8 +174,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
     }
     const String fire = '🔥';
     const String rawMessage =
-        '  To hot restart changes while running, press "r". '
-        'To hot restart (and refresh the browser), press "R".';
+        '  To hot restart changes while running, press "r" or "R".';
     final String message = globals.terminal.color(
       fire + globals.terminal.bolden(rawMessage),
       TerminalColor.red,
@@ -370,6 +369,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
     firstBuildTime = DateTime.now();
     final ApplicationPackage package = await ApplicationPackageFactory.instance.getPackageForPlatform(
       TargetPlatform.web_javascript,
+      buildInfo: debuggingOptions.buildInfo,
       applicationBinary: null,
     );
     if (package == null) {
@@ -441,7 +441,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
             debuggingOptions.buildInfo,
             debuggingOptions.initializePlatform,
             false,
-            debuggingOptions.buildInfo.dartExperiments,
           );
         }
         await device.device.startApp(
@@ -504,7 +503,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions.buildInfo,
           debuggingOptions.initializePlatform,
           false,
-          debuggingOptions.buildInfo.dartExperiments,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -524,8 +522,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
         });
       }
     } on Exception catch (err) {
-      return OperationResult(1, err.toString(), fatal: true);
-    } on WipError catch (err) {
       return OperationResult(1, err.toString(), fatal: true);
     } finally {
       status.stop();

@@ -16,6 +16,7 @@ import 'inherited_model.dart';
 export 'dart:ui' show hashValues, hashList;
 
 export 'package:flutter/foundation.dart' show
+  factory,
   immutable,
   mustCallSuper,
   optionalTypeArgs,
@@ -488,6 +489,7 @@ abstract class Widget extends DiagnosticableTree {
   /// widget that is incorporated into the tree multiple times will be inflated
   /// multiple times.
   @protected
+  @factory
   Element createElement();
 
   /// A short, textual description of this widget.
@@ -911,6 +913,7 @@ abstract class StatefulWidget extends Widget {
   /// again to create a fresh [State] object, simplifying the lifecycle of
   /// [State] objects.
   @protected
+  @factory
   State createState();
 }
 
@@ -1730,6 +1733,7 @@ abstract class RenderObjectWidget extends Widget {
 
   /// RenderObjectWidgets always inflate to a [RenderObjectElement] subclass.
   @override
+  @factory
   RenderObjectElement createElement();
 
   /// Creates an instance of the [RenderObject] class that this
@@ -1742,6 +1746,7 @@ abstract class RenderObjectWidget extends Widget {
   /// [createElement] method. See, for example,
   /// [SingleChildRenderObjectElement.mount].
   @protected
+  @factory
   RenderObject createRenderObject(BuildContext context);
 
   /// Copies the configuration described by this [RenderObjectWidget] to the
@@ -2622,7 +2627,34 @@ class BuildOwner {
       while (index < dirtyCount) {
         assert(_dirtyElements[index] != null);
         assert(_dirtyElements[index]._inDirtyList);
-        assert(!_dirtyElements[index]._active || _dirtyElements[index]._debugIsInScope(context));
+        assert(() {
+          if (_dirtyElements[index]._active && !_dirtyElements[index]._debugIsInScope(context)) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Tried to build dirty widget in the wrong build scope.'),
+              ErrorDescription(
+                'A widget which was marked as dirty and is still active was scheduled to be built, '
+                'but the current build scope unexpectedly does not contain that widget.',
+              ),
+              ErrorHint(
+                'Sometimes this is detected when an element is removed from the widget tree, but the '
+                'element somehow did not get marked as inactive. In that case, it might be caused by '
+                'an ancestor element failing to implement visitChildren correctly, thus preventing '
+                'some or all of its descendants from being correctly deactivated.',
+              ),
+              DiagnosticsProperty<Element>(
+                'The root of the build scope was',
+                context,
+                style: DiagnosticsTreeStyle.errorProperty,
+              ),
+              DiagnosticsProperty<Element>(
+                'The offending element (which does not appear to be a descendant of the root of the build scope) was',
+                _dirtyElements[index],
+                style: DiagnosticsTreeStyle.errorProperty,
+              ),
+            ]);
+          }
+          return true;
+        }());
         try {
           _dirtyElements[index].rebuild();
         } catch (e, stack) {

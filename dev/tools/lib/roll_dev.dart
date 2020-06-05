@@ -96,7 +96,7 @@ bool run({
   git.run('fetch $origin', 'fetch $origin');
   git.run('reset $commit --hard', 'reset to the release commit');
 
-  String version = getFullTag(git);
+  String version = getFullTag(git, origin);
 
   version = incrementLevel(version, level);
 
@@ -177,10 +177,10 @@ ArgResults parseArguments(ArgParser argParser, List<String> args) {
 }
 
 /// Obtain the version tag of the previous dev release.
-String getFullTag(Git git) {
+String getFullTag(Git git, String remote) {
   const String glob = '*.*.*-*.*.pre';
   // describe the latest dev release
-  const String ref = 'refs/heads/dev';
+  final String ref = 'refs/remotes/$remote/dev';
   return git.getOutput(
     'describe --match $glob --exact-match --tags $ref',
     'obtain last released version number',

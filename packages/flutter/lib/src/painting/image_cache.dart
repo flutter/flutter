@@ -31,7 +31,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 ///
 /// A caller can determine whether an image is already in the cache by using
 /// [containsKey], which will return true if the image is tracked by the cache
-/// in a pending or compelted state. More fine grained information is available
+/// in a pending or completed state. More fine grained information is available
 /// by using the [statusForKey] method.
 ///
 /// Generally this class is not used directly. The [ImageProvider] class and its
@@ -255,7 +255,7 @@ class ImageCache {
       if (!kReleaseMode) {
         Timeline.instantSync('ImageCache.evict', arguments: <String, dynamic>{
           'type': 'keepAlive',
-          'sizeiInBytes': image.sizeBytes,
+          'sizeInBytes': image.sizeBytes,
         });
       }
       _currentSizeBytes -= image.sizeBytes;

@@ -21,9 +21,20 @@ class GenerateCommand extends FlutterCommand {
   String get name => 'generate';
 
   @override
+  bool get hidden => true;
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
     final FlutterProject flutterProject = FlutterProject.current();
+    globals.printError(<String>[
+      '"flutter generate" is deprecated, use "dart pub run build_runner" instead. ',
+      'The following dependencies must be added to dev_dependencies in pubspec.yaml:',
+      'build_runner: 1.10.0',
+      for (Object dependency in flutterProject.builders?.keys ?? const <Object>[])
+        '$dependency: ${flutterProject.builders[dependency]}'
+    ].join('\n'));
+
     final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
     codegenDaemon.startBuild();
     await for (final CodegenStatus codegenStatus in codegenDaemon.buildResults) {

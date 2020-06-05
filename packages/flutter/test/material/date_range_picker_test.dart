@@ -408,5 +408,67 @@ void main() {
         expect(find.text('End Date'), findsOneWidget);
       });
     });
+
+    testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {
+
+      // Given a custom paint for an input decoration, extract the border and
+      // fill color and test them against the expected values.
+      void _testInputDecorator(CustomPaint decoratorPaint, InputBorder expectedBorder, Color expectedContainerColor) {
+        final dynamic/*_InputBorderPainter*/ inputBorderPainter = decoratorPaint.foregroundPainter;
+        final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
+        final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
+        final InputBorder actualBorder = inputBorderTween.evaluate(animation) as InputBorder;
+        final Color containerColor = inputBorderPainter.blendedColor as Color;
+
+        expect(actualBorder, equals(expectedBorder));
+        expect(containerColor, equals(expectedContainerColor));
+      }
+
+      BuildContext buttonContext;
+      const InputBorder border = InputBorder.none;
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData.light().copyWith(
+          inputDecorationTheme: const InputDecorationTheme(
+            filled: false,
+            border: border,
+          ),
+        ),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  buttonContext = context;
+                },
+                child: const Text('Go'),
+              );
+            },
+          ),
+        ),
+      ));
+
+      await tester.tap(find.text('Go'));
+      expect(buttonContext, isNotNull);
+
+      showDateRangePicker(
+        context: buttonContext,
+        initialDateRange: initialDateRange,
+        firstDate: firstDate,
+        lastDate: lastDate,
+        initialEntryMode: DatePickerEntryMode.input,
+      );
+      await tester.pumpAndSettle();
+
+      final Finder borderContainers = find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
+        matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
+      );
+
+      // Test the start date text field
+      _testInputDecorator(tester.widget(borderContainers.first), border, Colors.transparent);
+
+      // Test the end date text field
+      _testInputDecorator(tester.widget(borderContainers.last), border, Colors.transparent);
+    });
   });
 }

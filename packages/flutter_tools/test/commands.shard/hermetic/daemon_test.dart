@@ -194,7 +194,7 @@ void main() {
         responses.add,
         notifyingLogger: notifyingLogger,
       );
-      final MockPollingDeviceDiscovery discoverer = MockPollingDeviceDiscovery();
+      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(MockAndroidDevice());
       commands.add(<String, dynamic>{'id': 0, 'method': 'device.getDevices'});
@@ -216,7 +216,7 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
 
-      final MockPollingDeviceDiscovery discoverer = MockPollingDeviceDiscovery();
+      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(MockAndroidDevice());
 
