@@ -44,10 +44,10 @@ class Color {
   /// Bits 16-23 are the red value.
   /// Bits 8-15 are the green value.
   /// Bits 0-7 are the blue value.
-  const Color(int value) : this.value = value & 0xFFFFFFFF;
+  const Color(int/*!*/ value) : this.value = value & 0xFFFFFFFF;
 
   /// Construct a color from the lower 8 bits of four integers.
-  const Color.fromARGB(int a, int r, int g, int b)
+  const Color.fromARGB(int/*!*/ a, int/*!*/ r, int/*!*/ g, int/*!*/ b)
       : value = (((a & 0xff) << 24) |
                 ((r & 0xff) << 16) |
                 ((g & 0xff) << 8) |
@@ -65,7 +65,7 @@ class Color {
   /// Out of range values are brought into range using modulo 255.
   ///
   /// See also [fromARGB], which takes the opacity as an integer value.
-  const Color.fromRGBO(int r, int g, int b, double opacity)
+  const Color.fromRGBO(int/*!*/ r, int/*!*/ g, int/*!*/ b, double/*!*/ opacity)
       : value = ((((opacity * 0xff ~/ 1) & 0xff) << 24) |
                 ((r & 0xff) << 16) |
                 ((g & 0xff) << 8) |
@@ -78,51 +78,51 @@ class Color {
   /// Bits 16-23 are the red value.
   /// Bits 8-15 are the green value.
   /// Bits 0-7 are the blue value.
-  final int value;
+  final int/*!*/ value;
 
   /// The alpha channel of this color in an 8 bit value.
-  int get alpha => (0xff000000 & value) >> 24;
+  int/*!*/ get alpha => (0xff000000 & value) >> 24;
 
   /// The alpha channel of this color as a double.
-  double get opacity => alpha / 0xFF;
+  double/*!*/ get opacity => alpha / 0xFF;
 
   /// The red channel of this color in an 8 bit value.
-  int get red => (0x00ff0000 & value) >> 16;
+  int/*!*/ get red => (0x00ff0000 & value) >> 16;
 
   /// The green channel of this color in an 8 bit value.
-  int get green => (0x0000ff00 & value) >> 8;
+  int/*!*/ get green => (0x0000ff00 & value) >> 8;
 
   /// The blue channel of this color in an 8 bit value.
-  int get blue => (0x000000ff & value) >> 0;
+  int/*!*/ get blue => (0x000000ff & value) >> 0;
 
   /// Returns a new color that matches this color with the alpha channel
   /// replaced with a (which ranges from 0 to 255).
-  Color withAlpha(int a) {
+  Color/*!*/ withAlpha(int/*!*/ a) {
     return Color.fromARGB(a, red, green, blue);
   }
 
   /// Returns a new color that matches this color with the alpha channel
   /// replaced with the given opacity (which ranges from 0.0 to 1.0).
-  Color withOpacity(double opacity) {
+  Color/*!*/ withOpacity(double/*!*/ opacity) {
     assert(opacity >= 0.0 && opacity <= 1.0);
     return withAlpha((255.0 * opacity).round());
   }
 
   /// Returns a new color that matches this color with the red channel replaced
   /// with r.
-  Color withRed(int r) {
+  Color/*!*/ withRed(int/*!*/ r) {
     return Color.fromARGB(alpha, r, green, blue);
   }
 
   /// Returns a new color that matches this color with the green channel
   /// replaced with g.
-  Color withGreen(int g) {
+  Color/*!*/ withGreen(int/*!*/ g) {
     return Color.fromARGB(alpha, red, g, blue);
   }
 
   /// Returns a new color that matches this color with the blue channel replaced
   /// with b.
-  Color withBlue(int b) {
+  Color/*!*/ withBlue(int/*!*/ b) {
     return Color.fromARGB(alpha, red, green, b);
   }
 
@@ -140,7 +140,7 @@ class Color {
   /// computationally expensive to calculate.
   ///
   /// See <https://en.wikipedia.org/wiki/Relative_luminance>.
-  double computeLuminance() {
+  double/*!*/ computeLuminance() {
     // See <https://www.w3.org/TR/WCAG20/#relativeluminancedef>
     final double R = _linearizeColorComponent(red / 0xFF);
     final double G = _linearizeColorComponent(green / 0xFF);
@@ -170,7 +170,7 @@ class Color {
   ///
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
-  static Color lerp(Color a, Color b, double t) {
+  static Color/*?*/ lerp(Color/*?*/ a, Color/*?*/ b, double/*!*/ t) {
     assert(t != null);
     if (a == null && b == null) {
       return null;
@@ -197,7 +197,7 @@ class Color {
   /// enhancement when trying to avoid needless alpha blending compositing
   /// operations for two things that are solid colors with the same shape, but
   /// overlay each other: instead, just paint one with the combined color.
-  static Color alphaBlend(Color foreground, Color background) {
+  static Color/*!*/ alphaBlend(Color/*!*/ foreground, Color/*!*/ background) {
     final int alpha = foreground.alpha;
     if (alpha == 0x00) {
       // Foreground completely transparent.
@@ -230,13 +230,13 @@ class Color {
   /// Returns an alpha value representative of the provided [opacity] value.
   ///
   /// The [opacity] value may not be null.
-  static int getAlphaFromOpacity(double opacity) {
+  static int/*!*/ getAlphaFromOpacity(double/*!*/ opacity) {
     assert(opacity != null);
     return (opacity.clamp(0.0, 1.0) * 255).round();
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool/*!*/ operator ==(dynamic other) {
     if (identical(this, other)) {
       return true;
     }
@@ -248,10 +248,10 @@ class Color {
   }
 
   @override
-  int get hashCode => value.hashCode;
+  int/*!*/ get hashCode => value.hashCode;
 
   @override
-  String toString() {
+  String/*!*/ toString() {
     return 'Color(0x${value.toRadixString(16).padLeft(8, '0')})';
   }
 }
@@ -936,14 +936,14 @@ abstract class Paint {
   ///  * [Canvas.saveLayer], which uses its [Paint]'s [blendMode] to composite
   ///    the layer when [restore] is called.
   ///  * [BlendMode], which discusses the user of [saveLayer] with [blendMode].
-  BlendMode get blendMode;
-  set blendMode(BlendMode value);
+  BlendMode/*!*/ get blendMode;
+  set blendMode(BlendMode/*!*/ value);
 
   /// Whether to paint inside shapes, the edges of shapes, or both.
   ///
   /// If null, defaults to [PaintingStyle.fill].
-  PaintingStyle get style;
-  set style(PaintingStyle value);
+  PaintingStyle/*!*/ get style;
+  set style(PaintingStyle/*!*/ value);
 
   /// How wide to make edges drawn when [style] is set to
   /// [PaintingStyle.stroke] or [PaintingStyle.strokeAndFill]. The
@@ -951,43 +951,43 @@ abstract class Paint {
   /// orthogonal to the direction of the path.
   ///
   /// The values null and 0.0 correspond to a hairline width.
-  double get strokeWidth;
-  set strokeWidth(double value);
+  double/*!*/ get strokeWidth;
+  set strokeWidth(double/*!*/ value);
 
   /// The kind of finish to place on the end of lines drawn when
   /// [style] is set to [PaintingStyle.stroke] or
   /// [PaintingStyle.strokeAndFill].
   ///
   /// If null, defaults to [StrokeCap.butt], i.e. no caps.
-  StrokeCap get strokeCap;
-  set strokeCap(StrokeCap value);
+  StrokeCap/*!*/ get strokeCap;
+  set strokeCap(StrokeCap/*!*/ value);
 
   /// The kind of finish to use for line segment joins.
   /// [style] is set to [PaintingStyle.stroke] or
   /// [PaintingStyle.strokeAndFill]. Only applies to drawPath not drawPoints.
   ///
   /// If null, defaults to [StrokeCap.butt], i.e. no caps.
-  StrokeJoin get strokeJoin;
-  set strokeJoin(StrokeJoin value);
+  StrokeJoin/*!*/ get strokeJoin;
+  set strokeJoin(StrokeJoin/*!*/ value);
 
   /// Whether to apply anti-aliasing to lines and images drawn on the
   /// canvas.
   ///
   /// Defaults to true. The value null is treated as false.
-  bool get isAntiAlias;
-  set isAntiAlias(bool value);
+  bool/*!*/ get isAntiAlias;
+  set isAntiAlias(bool/*!*/ value);
 
-  Color get color;
-  set color(Color value);
+  Color/*!*/ get color;
+  set color(Color/*!*/ value);
 
   /// Whether the colors of the image are inverted when drawn.
   ///
   /// Inverting the colors of an image applies a new color filter that will
   /// be composed with any user provided color filters. This is primarily
   /// used for implementing smart invert on iOS.
-  bool get invertColors;
+  bool/*!*/ get invertColors;
 
-  set invertColors(bool value);
+  set invertColors(bool/*!*/ value);
 
   /// The shader to use when stroking or filling a shape.
   ///
@@ -999,15 +999,15 @@ abstract class Paint {
   ///  * [ImageShader], a shader that tiles an [Image].
   ///  * [colorFilter], which overrides [shader].
   ///  * [color], which is used if [shader] and [colorFilter] are null.
-  Shader get shader;
-  set shader(Shader value);
+  Shader/*?*/ get shader;
+  set shader(Shader/*?*/ value);
 
   /// A mask filter (for example, a blur) to apply to a shape after it has been
   /// drawn but before it has been composited into the image.
   ///
   /// See [MaskFilter] for details.
-  MaskFilter get maskFilter;
-  set maskFilter(MaskFilter value);
+  MaskFilter/*?*/ get maskFilter;
+  set maskFilter(MaskFilter/*?*/ value);
 
   /// Controls the performance vs quality trade-off to use when applying
   /// filters, such as [maskFilter], or when drawing images, as with
@@ -1015,8 +1015,8 @@ abstract class Paint {
   ///
   /// Defaults to [FilterQuality.none].
   // TODO(ianh): verify that the image drawing methods actually respect this
-  FilterQuality get filterQuality;
-  set filterQuality(FilterQuality value);
+  FilterQuality/*!*/ get filterQuality;
+  set filterQuality(FilterQuality/*!*/ value);
 
   /// A color filter to apply when a shape is drawn or when a layer is
   /// composited.
@@ -1024,11 +1024,11 @@ abstract class Paint {
   /// See [ColorFilter] for details.
   ///
   /// When a shape is being drawn, [colorFilter] overrides [color] and [shader].
-  ColorFilter get colorFilter;
-  set colorFilter(ColorFilter value);
+  ColorFilter/*?*/ get colorFilter;
+  set colorFilter(ColorFilter/*?*/ value);
 
-  double get strokeMiterLimit;
-  set strokeMiterLimit(double value);
+  double/*!*/ get strokeMiterLimit;
+  set strokeMiterLimit(double/*!*/ value);
 
   /// The [ImageFilter] to use when drawing raster images.
   ///
@@ -1052,8 +1052,8 @@ abstract class Paint {
   /// See also:
   ///
   ///  * [MaskFilter], which is used for drawing geometry.
-  ImageFilter get imageFilter;
-  set imageFilter(ImageFilter value);
+  ImageFilter/*?*/ get imageFilter;
+  set imageFilter(ImageFilter/*?*/ value);
 }
 
 /// Base class for objects such as [Gradient] and [ImageShader] which
@@ -1087,12 +1087,12 @@ abstract class Gradient extends Shader {
   /// `colorStops` contain null values, this constructor will throw a
   /// [NoSuchMethodError].
   factory Gradient.linear(
-    Offset from,
-    Offset to,
-    List<Color> colors, [
-    List<double> colorStops,
-    TileMode tileMode = TileMode.clamp,
-    Float64List matrix4,
+    Offset/*!*/ from,
+    Offset/*!*/ to,
+    List<Color/*!*/>/*!*/ colors, [
+    List<double/*!*/>/*?*/ colorStops,
+    TileMode/*!*/ tileMode = TileMode.clamp,
+    Float64List/*?*/ matrix4,
   ]) =>
       engine.GradientLinear(from, to, colors, colorStops, tileMode, matrix4);
 
@@ -1125,12 +1125,16 @@ abstract class Gradient extends Shader {
   /// circle and `focalRadius` being the radius of that circle. If `focal` is
   /// provided and not equal to `center`, at least one of the two offsets must
   /// not be equal to [Offset.zero].
-  factory Gradient.radial(Offset center, double radius, List<Color> colors,
-      [List<double> colorStops,
-      TileMode tileMode = TileMode.clamp,
-      Float64List matrix4,
-      Offset focal,
-      double focalRadius = 0.0]) {
+  factory Gradient.radial(
+    Offset/*!*/ center,
+    double/*!*/ radius,
+    List<Color/*!*/>/*!*/ colors, [
+    List<double/*!*/>/*?*/ colorStops,
+    TileMode/*!*/ tileMode = TileMode.clamp,
+    Float64List/*?*/ matrix4,
+    Offset/*?*/ focal,
+    double/*!*/ focalRadius = 0.0,
+  ]) {
     focalRadius ??= 0.0;
     _validateColorStops(colors, colorStops);
     // If focal is null or focal radius is null, this should be treated as a regular radial gradient
@@ -1174,13 +1178,13 @@ abstract class Gradient extends Shader {
   /// specified 4x4 matrix relative to the local coordinate system. `matrix4`
   /// must be a column-major matrix packed into a list of 16 values.
   factory Gradient.sweep(
-    Offset center,
-    List<Color> colors, [
-    List<double> colorStops,
+    Offset/*!*/ center,
+    List<Color/*!*/>/*!*/ colors, [
+    List<double/*!*/>/*?*/ colorStops,
     TileMode tileMode = TileMode.clamp,
-    double startAngle = 0.0,
-    double endAngle = math.pi * 2,
-    Float64List matrix4,
+    double startAngle/*?*/ = 0.0,
+    double endAngle/*!*/ = math.pi * 2,
+    Float64List/*?*/ matrix4,
   ]) =>
       engine.GradientSweep(
           center, colors, colorStops, tileMode, startAngle, endAngle, engine.toMatrix32(matrix4));
@@ -1194,10 +1198,10 @@ abstract class Gradient extends Shader {
 /// [Canvas.drawImage].
 abstract class Image {
   /// The number of image pixels along the image's horizontal axis.
-  int get width;
+  int/*!*/ get width;
 
   /// The number of image pixels along the image's vertical axis.
-  int get height;
+  int/*!*/ get height;
 
   /// Converts the [Image] object into a byte array.
   ///
@@ -1206,7 +1210,7 @@ abstract class Image {
   ///
   /// Returns a future that completes with the binary image data or an error
   /// if encoding fails.
-  Future<ByteData> toByteData(
+  Future<ByteData/*?*/>/*!*/ toByteData(
       {ImageByteFormat format = ImageByteFormat.rawRgba});
 
   /// Release the resources used by this object. The object is no longer usable
@@ -1233,7 +1237,7 @@ abstract class ColorFilter {
   /// The output of this filter is then composited into the background according
   /// to the [Paint.blendMode], using the output of this filter as the source
   /// and the background as the destination.
-  const factory ColorFilter.mode(Color color, BlendMode blendMode) =
+  const factory ColorFilter.mode(Color/*!*/ color, BlendMode/*!*/ blendMode) =
       engine.EngineColorFilter.mode;
 
   /// Construct a color filter that transforms a color by a 4x5 matrix.
@@ -1294,7 +1298,7 @@ abstract class ColorFilter {
   ///   0,      0,      0,      1, 0,
   /// ]);
   /// ```
-  const factory ColorFilter.matrix(List<double> matrix) =
+  const factory ColorFilter.matrix(List<double/*!*/>/*!*/ matrix) =
       engine.EngineColorFilter.matrix;
 
   /// Construct a color filter that applies the sRGB gamma curve to the RGB
@@ -1366,17 +1370,17 @@ class MaskFilter {
   )   : assert(_style != null),
         assert(_sigma != null);
 
-  final BlurStyle _style;
-  final double _sigma;
+  final BlurStyle/*!*/ _style;
+  final double/*!*/ _sigma;
 
   /// On the web returns the value of sigma passed to [MaskFilter.blur].
-  double get webOnlySigma => _sigma;
+  double/*!*/ get webOnlySigma => _sigma;
 
   /// On the web returns the value of `style` passed to [MaskFilter.blur].
-  BlurStyle get webOnlyBlurStyle => _style;
+  BlurStyle/*!*/ get webOnlyBlurStyle => _style;
 
   @override
-  bool operator ==(dynamic other) {
+  bool/*!*/ operator ==(dynamic other) {
     if (other is! MaskFilter) {
       return false;
     }
@@ -1385,14 +1389,14 @@ class MaskFilter {
   }
 
   @override
-  int get hashCode => hashValues(_style, _sigma);
+  int/*!*/ get hashCode => hashValues(_style, _sigma);
 
-  List<dynamic> webOnlySerializeToCssPaint() {
+  List<dynamic>/*!*/ webOnlySerializeToCssPaint() {
     return <dynamic>[_style?.index, _sigma];
   }
 
   @override
-  String toString() => 'MaskFilter.blur($_style, ${_sigma.toStringAsFixed(1)})';
+  String/*!*/ toString() => 'MaskFilter.blur($_style, ${_sigma.toStringAsFixed(1)})';
 }
 
 /// Quality levels for image filters.
@@ -1440,8 +1444,8 @@ class ImageFilter {
     return engine.EngineImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY);
   }
 
-  ImageFilter.matrix(Float64List matrix4,
-      {FilterQuality filterQuality = FilterQuality.low}) {
+  ImageFilter.matrix(Float64List/*!*/ matrix4,
+      {FilterQuality/*!*/ filterQuality = FilterQuality.low}) {
     // TODO(flutter_web): add implementation.
     throw UnimplementedError(
         'ImageFilter.matrix not implemented for web platform.');
@@ -1496,13 +1500,12 @@ enum PixelFormat {
 }
 
 class _ImageInfo {
-  _ImageInfo(this.width, this.height, this.format, this.rowBytes) {
-    rowBytes ??= width * 4;
-  }
-  int width;
-  int height;
-  int format;
-  int rowBytes;
+  _ImageInfo(this.width, this.height, this.format, int/*?*/ rowBytes) : this.rowBytes = rowBytes ?? width * 4;
+
+  int/*!*/ width;
+  int/*!*/ height;
+  int/*!*/ format;
+  int/*!*/ rowBytes;
 }
 
 /// Callback signature for [decodeImageFromList].
@@ -1521,7 +1524,7 @@ abstract class FrameInfo {
   FrameInfo._();
 
   /// The duration this frame should be shown.
-  Duration get duration => Duration(milliseconds: _durationMillis);
+  Duration/*!*/ get duration => Duration(milliseconds: _durationMillis);
   int get _durationMillis => 0;
 
   /// The [Image] object for this frame.
@@ -1538,20 +1541,20 @@ class Codec {
   Codec._();
 
   /// Number of frames in this image.
-  int get frameCount => 0;
+  int/*!*/ get frameCount => 0;
 
   /// Number of times to repeat the animation.
   ///
   /// * 0 when the animation should be played once.
   /// * -1 for infinity repetitions.
-  int get repetitionCount => 0;
+  int/*!*/ get repetitionCount => 0;
 
   /// Fetches the next animation frame.
   ///
   /// Wraps back to the first frame after returning the last frame.
   ///
   /// The returned future can complete with an error if the decoding has failed.
-  Future<FrameInfo> getNextFrame() {
+  Future<FrameInfo/*!*/>/*!*/ getNextFrame() {
     return engine.futurize(_getNextFrame);
   }
 
@@ -1572,10 +1575,10 @@ class Codec {
 ///
 /// The returned future can complete with an error if the image decoding has
 /// failed.
-Future<Codec> instantiateImageCodec(
-  Uint8List list, {
-  int targetWidth,
-  int targetHeight,
+Future<Codec/*!*/>/*!*/ instantiateImageCodec(
+  Uint8List/*!*/ list, {
+  int/*?*/ targetWidth,
+  int/*?*/ targetHeight,
 }) {
   return engine.futurize((engine.Callback<Codec> callback) =>
       // TODO: Implement targetWidth and targetHeight support.
@@ -1585,8 +1588,8 @@ Future<Codec> instantiateImageCodec(
 /// Instantiates a [Codec] object for an image binary data.
 ///
 /// Returns an error message if the instantiation has failed, null otherwise.
-String _instantiateImageCodec(
-    Uint8List list, engine.Callback<Codec> callback, _ImageInfo imageInfo) {
+String/*?*/ _instantiateImageCodec(
+    Uint8List list, engine.Callback<Codec/*!*/> callback, _ImageInfo/*?*/ imageInfo) {
   if (engine.experimentalUseSkia) {
     if (imageInfo == null) {
       engine.skiaInstantiateImageCodec(list, callback);
@@ -1601,13 +1604,13 @@ String _instantiateImageCodec(
   return null;
 }
 
-Future<Codec> webOnlyInstantiateImageCodecFromUrl(Uri uri,
-    {engine.WebOnlyImageCodecChunkCallback chunkCallback}) {
+Future<Codec/*?*/> webOnlyInstantiateImageCodecFromUrl(Uri/*!*/ uri,
+    {engine.WebOnlyImageCodecChunkCallback/*?*/ chunkCallback}) {
   return engine.futurize((engine.Callback<Codec> callback) =>
       _instantiateImageCodecFromUrl(uri, chunkCallback, callback));
 }
 
-String _instantiateImageCodecFromUrl(
+String/*?*/ _instantiateImageCodecFromUrl(
     Uri uri,
     engine.WebOnlyImageCodecChunkCallback chunkCallback,
     engine.Callback<Codec> callback) {
@@ -1619,12 +1622,12 @@ String _instantiateImageCodecFromUrl(
 ///
 /// This is a convenience wrapper around [instantiateImageCodec].
 /// Prefer using [instantiateImageCodec] which also supports multi frame images.
-void decodeImageFromList(Uint8List list, ImageDecoderCallback callback) {
+void decodeImageFromList(Uint8List/*!*/ list, ImageDecoderCallback/*!*/ callback) {
   _decodeImageFromListAsync(list, callback);
 }
 
 Future<void> _decodeImageFromListAsync(
-    Uint8List list, ImageDecoderCallback callback) async {
+    Uint8List/*!*/ list, ImageDecoderCallback/*!*/ callback) async {
   final Codec codec = await instantiateImageCodec(list);
   final FrameInfo frameInfo = await codec.getNextFrame();
   callback(frameInfo.image);
@@ -1637,9 +1640,14 @@ Future<void> _decodeImageFromListAsync(
 /// [rowBytes] is the number of bytes consumed by each row of pixels in the
 /// data buffer.  If unspecified, it defaults to [width] multipled by the
 /// number of bytes per pixel in the provided [format].
-void decodeImageFromPixels(Uint8List pixels, int width, int height,
-    PixelFormat format, ImageDecoderCallback callback,
-    {int rowBytes}) {
+void decodeImageFromPixels(
+  Uint8List/*!*/ pixels,
+  int/*!*/ width,
+  int/*!*/ height,
+  PixelFormat/*!*/ format,
+  ImageDecoderCallback/*!*/ callback,
+  {int/*?*/ rowBytes, int/*?*/ targetWidth, int/*?*/ targetHeight}
+) {
   final _ImageInfo imageInfo =
       _ImageInfo(width, height, format.index, rowBytes);
   final Future<Codec> codecFuture = engine.futurize(
@@ -1679,17 +1687,17 @@ class Shadow {
   ///
   /// The shadows are shapes composited directly over the base canvas, and do not
   /// represent optical occlusion.
-  final Color color;
+  final Color/*!*/ color;
 
   /// The displacement of the shadow from the casting element.
   ///
   /// Positive x/y offsets will shift the shadow to the right and down, while
   /// negative offsets shift the shadow to the left and up. The offsets are
   /// relative to the position of the element that is casting it.
-  final Offset offset;
+  final Offset/*!*/ offset;
 
   /// The standard deviation of the Gaussian to convolve with the shadow's shape.
-  final double blurRadius;
+  final double/*!*/ blurRadius;
 
   /// Converts a blur radius in pixels to sigmas.
   ///
@@ -1697,14 +1705,14 @@ class Shadow {
   ///
   // See SkBlurMask::ConvertRadiusToSigma().
   // <https://github.com/google/skia/blob/bb5b77db51d2e149ee66db284903572a5aac09be/src/effects/SkBlurMask.cpp#L23>
-  static double convertRadiusToSigma(double radius) {
+  static double/*!*/ convertRadiusToSigma(double/*!*/ radius) {
     return radius * 0.57735 + 0.5;
   }
 
   /// The [blurRadius] in sigmas instead of logical pixels.
   ///
   /// See the sigma argument to [MaskFilter.blur].
-  double get blurSigma => convertRadiusToSigma(blurRadius);
+  double/*!*/ get blurSigma => convertRadiusToSigma(blurRadius);
 
   /// Create the [Paint] object that corresponds to this shadow description.
   ///
@@ -1715,7 +1723,7 @@ class Shadow {
   /// This class does not provide a way to disable shadows to avoid inconsistencies
   /// in shadow blur rendering, primarily as a method of reducing test flakiness.
   /// [toPaint] should be overriden in subclasses to provide this functionality.
-  Paint toPaint() {
+  Paint/*!*/ toPaint() {
     return Paint()
       ..color = color
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, blurSigma);
@@ -1723,7 +1731,7 @@ class Shadow {
 
   /// Returns a new shadow with its [offset] and [blurRadius] scaled by the given
   /// factor.
-  Shadow scale(double factor) {
+  Shadow/*!*/ scale(double/*!*/ factor) {
     return Shadow(
       color: color,
       offset: offset * factor,
@@ -1750,7 +1758,7 @@ class Shadow {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   /// {@endtemplate}
-  static Shadow lerp(Shadow a, Shadow b, double t) {
+  static Shadow/*?*/ lerp(Shadow/*?*/ a, Shadow/*?*/ b, double/*!*/ t) {
     assert(t != null);
     if (a == null && b == null) {
       return null;
@@ -1773,7 +1781,7 @@ class Shadow {
   /// If the lists differ in length, excess items are lerped with null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static List<Shadow> lerpList(List<Shadow> a, List<Shadow> b, double t) {
+  static List<Shadow/*!*/>/*?*/ lerpList(List<Shadow/*!*/>/*?*/ a, List<Shadow/*!*/>/*?*/ b, double/*!*/ t) {
     assert(t != null);
     if (a == null && b == null) {
       return null;
@@ -1793,7 +1801,7 @@ class Shadow {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool/*!*/ operator ==(dynamic other) {
     if (identical(this, other)) {
       return true;
     }
@@ -1807,10 +1815,10 @@ class Shadow {
   }
 
   @override
-  int get hashCode => hashValues(color, offset, blurRadius);
+  int/*!*/ get hashCode => hashValues(color, offset, blurRadius);
 
   @override
-  String toString() => 'TextShadow($color, $offset, $blurRadius)';
+  String/*!*/ toString() => 'TextShadow($color, $offset, $blurRadius)';
 }
 
 
