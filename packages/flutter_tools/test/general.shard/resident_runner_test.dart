@@ -623,6 +623,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
         '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
       ],
@@ -651,6 +652,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
         '--gen-inputs-and-outputs-list=${dependencies.absolute.path}',
       ],

@@ -119,6 +119,7 @@ class BuildRunner extends CodeGenerator {
       final File buildScript = globals.fs.file(generateResult.stdout.trim());
       final ProcessResult result = await globals.processManager.run(<String>[
         globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         '--snapshot=${buildSnapshot.path}',
         '--snapshot-kind=app-jit',
         '--packages=${globals.fs.path.join(generatedDirectory.path, '.packages')}',
