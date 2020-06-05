@@ -10,9 +10,10 @@ class SkColorFilter {
   js.JsObject skColorFilter;
 
   SkColorFilter.mode(EngineColorFilter filter) {
+    setSharedSkColor1(filter._color);
     skColorFilter =
         canvasKit['SkColorFilter'].callMethod('MakeBlend', <dynamic>[
-      filter._color.value,
+      sharedSkColor1,
       makeSkBlendMode(filter._blendMode),
     ]);
   }
@@ -29,10 +30,12 @@ class SkColorFilter {
   }
 
   SkColorFilter.linearToSrgbGamma(EngineColorFilter filter) {
-    skColorFilter = canvasKit['SkColorFilter'].callMethod('MakeLinearToSRGBGamma');
+    skColorFilter =
+        canvasKit['SkColorFilter'].callMethod('MakeLinearToSRGBGamma');
   }
 
   SkColorFilter.srgbToLinearGamma(EngineColorFilter filter) {
-    skColorFilter = canvasKit['SkColorFilter'].callMethod('MakeSRGBToLinearGamma');
+    skColorFilter =
+        canvasKit['SkColorFilter'].callMethod('MakeSRGBToLinearGamma');
   }
 }

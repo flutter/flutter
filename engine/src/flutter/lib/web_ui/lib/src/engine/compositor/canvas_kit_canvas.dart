@@ -319,10 +319,11 @@ class CanvasKitCanvas implements ui.Canvas {
     if (points.length % 2 != 0) {
       throw ArgumentError('"points" must have an even number of values.');
     }
-    _drawPoints(paint, pointMode, points);
+    _drawPoints(paint, pointMode, encodeRawPointList(points));
   }
 
-  void _drawPoints(ui.Paint paint, ui.PointMode pointMode, Float32List points) {
+  void _drawPoints(
+      ui.Paint paint, ui.PointMode pointMode, List<List<double>> points) {
     _canvas.drawPoints(paint, pointMode, points);
   }
 
@@ -386,8 +387,8 @@ class CanvasKitCanvas implements ui.Canvas {
       rectBuffer[index3] = rect.bottom;
     }
 
-    final Int32List colorBuffer =
-        colors.isEmpty ? null : _encodeColorList(colors);
+    final js.JsArray<Float32List> colorBuffer =
+        colors.isEmpty ? null : makeColorList(colors);
 
     _drawAtlas(
         paint, atlas, rstTransformBuffer, rectBuffer, colorBuffer, blendMode);
@@ -419,7 +420,8 @@ class CanvasKitCanvas implements ui.Canvas {
       throw ArgumentError(
           'If non-null, "colors" length must be one fourth the length of "rstTransforms" and "rects".');
 
-    _drawAtlas(paint, atlas, rstTransforms, rects, colors, blendMode);
+    _drawAtlas(paint, atlas, rstTransforms, rects, _encodeRawColorList(colors),
+        blendMode);
   }
 
   // TODO(hterkelsen): Pass a cull_rect once CanvasKit supports that.
@@ -428,7 +430,7 @@ class CanvasKitCanvas implements ui.Canvas {
     ui.Image atlas,
     Float32List rstTransforms,
     Float32List rects,
-    Int32List colors,
+    js.JsArray<Float32List> colors,
     ui.BlendMode blendMode,
   ) {
     _canvas.drawAtlasRaw(paint, atlas, rstTransforms, rects, colors, blendMode);

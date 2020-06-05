@@ -127,6 +127,7 @@ class Surface {
       grContext,
       size.width,
       size.height,
+      canvasKit['SkColorSpace']['SRGB'],
     ]);
 
     htmlElement = htmlCanvas;
