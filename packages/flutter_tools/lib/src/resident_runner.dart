@@ -27,7 +27,6 @@ import 'bundle.dart';
 import 'cache.dart';
 import 'codegen.dart';
 import 'compile.dart';
-import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -850,43 +849,8 @@ abstract class ResidentRunner {
     final Map<String, Object> data = await flutterDevices.first.vmService.getSkSLs(
       viewId: views.first.id,
     );
-    if (data.isEmpty) {
-      globals.logger.printStatus(
-        'No data was receieved. To ensure SkSL data can be generated use a '
-        'physical device then:\n'
-        '  1. Pass "--cache-sksl" as an argument to flutter run.\n'
-        '  2. Interact with the application to force shaders to be compiled.\n'
-      );
-      return null;
-    }
-    final File outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs.currentDirectory,
-      'flutter',
-      'sksl.json',
-    );
     final Device device = flutterDevices.first.device;
-
-    // Convert android sub-platforms to single target platform.
-    TargetPlatform targetPlatform = await flutterDevices.first.device.targetPlatform;
-    switch (targetPlatform) {
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
-        targetPlatform = TargetPlatform.android;
-        break;
-      default:
-        break;
-    }
-    final Map<String, Object> manifest = <String, Object>{
-      'platform': getNameForTargetPlatform(targetPlatform),
-      'name': device.name,
-      'engineRevision': globals.flutterVersion.engineRevision,
-      'data': data,
-    };
-    outputFile.writeAsStringSync(json.encode(manifest));
-    globals.logger.printStatus('Wrote SkSL data to ${outputFile.path}.');
-    return outputFile.path;
+    return sharedSkSlWriter(device, data);
   }
 
   /// The resident runner API for interaction with the reloadMethod vmservice
