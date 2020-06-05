@@ -75,7 +75,8 @@ class PlatformViewAndroid final : public PlatformView {
 
  private:
   const fml::jni::JavaObjectWeakGlobalRef java_object_;
-  const std::unique_ptr<AndroidSurface> android_surface_;
+
+  std::unique_ptr<AndroidSurface> android_surface_;
   // We use id 0 to mean that no response is expected.
   int next_response_id_ = 1;
   std::unordered_map<int, fml::RefPtr<flutter::PlatformMessageResponse>>
