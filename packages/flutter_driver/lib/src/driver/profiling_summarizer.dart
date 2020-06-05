@@ -32,8 +32,8 @@ enum ProfileType {
 /// ```
 ///     {
 ///      "category": "flutter::profiling",
-///      "name": "SceneDisplayLag",
-///      "ts": CpuUsage,
+///      "name": "CpuUsage",
+///      "ts": 121120,
 ///      "args": {
 ///        "total_cpu_usage": "20.5",
 ///        "num_threads": "6"
