@@ -3179,12 +3179,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       return;
     }
     while (_observedRouteAdditions.isNotEmpty) {
-      _NavigatorObservation observation = _observedRouteAdditions.removeLast();
+      final _NavigatorObservation observation = _observedRouteAdditions.removeLast();
       widget.observers.forEach(observation.notify);
     }
 
     while (_observedRouteDeletions.isNotEmpty) {
-      _NavigatorObservation observation = _observedRouteDeletions.removeFirst();
+      final _NavigatorObservation observation = _observedRouteDeletions.removeFirst();
       widget.observers.forEach(observation.notify);
     }
   }
