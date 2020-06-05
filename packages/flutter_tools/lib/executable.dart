@@ -126,7 +126,7 @@ Future<void> main(List<String> args) async {
        TemplateRenderer: () => const MustacheTemplateRenderer(),
        if (daemon)
         Logger: () => NotifyingLogger(verbose: verbose)
-       else if (verbose)
+       else if (verbose && !muteCommandLogging)
         Logger: () => VerboseLogger(StdoutLogger(
           timeoutConfiguration: timeoutConfiguration,
           stdio: globals.stdio,
