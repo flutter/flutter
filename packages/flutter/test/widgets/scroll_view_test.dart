@@ -128,6 +128,38 @@ void main() {
     expect(textField.focusNode.hasFocus, isFalse);
   });
 
+  testWidgets('GridView dismiss keyboard onDrag test', (WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+
+    await tester.pumpWidget(textFieldBoilerplate(
+        child: GridView.builder(
+      padding: const EdgeInsets.all(0),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),      
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      itemCount: focusNodes.length,
+      itemBuilder: (BuildContext context, int index){
+        return Container(
+          height: 50,
+          color: Colors.green,
+          child: TextField(
+              focusNode: focusNodes[index],
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              )));
+      },
+    )));
+
+    final Finder finder = find.byType(TextField).first;
+    final TextField textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode.hasFocus, isFalse);
+  });
+
   testWidgets('ListView dismiss keyboard manual test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
 
@@ -147,6 +179,38 @@ void main() {
               )),
         );
       }).toList(),
+    )));
+
+    final Finder finder = find.byType(TextField).first;
+    final TextField textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode.hasFocus, isTrue);
+  });
+
+  testWidgets('GridView dismiss keyboard manual test', (WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+
+    await tester.pumpWidget(textFieldBoilerplate(
+        child: GridView.builder(
+      padding: const EdgeInsets.all(0),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
+      itemCount: focusNodes.length,
+      itemBuilder: (BuildContext context, int index){
+        return Container(
+          height: 50,
+          color: Colors.green,
+          child: TextField(
+              focusNode: focusNodes[index],
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              )));
+      },
     )));
 
     final Finder finder = find.byType(TextField).first;

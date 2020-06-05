@@ -1315,7 +1315,7 @@ class ListView extends BoxScrollView {
     double cacheExtent,
     int semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
-    ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,    
+    ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : assert(childrenDelegate != null),
        super(
          key: key,
@@ -1329,7 +1329,7 @@ class ListView extends BoxScrollView {
          cacheExtent: cacheExtent,
          semanticChildCount: semanticChildCount,
          dragStartBehavior: dragStartBehavior,
-         keyboardDismissBehavior: keyboardDismissBehavior,       
+         keyboardDismissBehavior: keyboardDismissBehavior,
        );
 
   /// If non-null, forces the children to have the given extent in the scroll
@@ -1590,7 +1590,7 @@ class GridView extends BoxScrollView {
     List<Widget> children = const <Widget>[],
     int semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
-    ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,       
+    ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : assert(gridDelegate != null),
        childrenDelegate = SliverChildListDelegate(
          children,
@@ -1650,7 +1650,7 @@ class GridView extends BoxScrollView {
     double cacheExtent,
     int semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
-    ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,     
+    ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : assert(gridDelegate != null),
        childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
@@ -1695,7 +1695,7 @@ class GridView extends BoxScrollView {
     double cacheExtent,
     int semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
-    ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,    
+    ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : assert(gridDelegate != null),
        assert(childrenDelegate != null),
        super(
@@ -1747,7 +1747,7 @@ class GridView extends BoxScrollView {
     List<Widget> children = const <Widget>[],
     int semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
-    ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,     
+    ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
          crossAxisCount: crossAxisCount,
          mainAxisSpacing: mainAxisSpacing,
@@ -1808,7 +1808,7 @@ class GridView extends BoxScrollView {
     List<Widget> children = const <Widget>[],
     int semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
-    ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,     
+    ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
          maxCrossAxisExtent: maxCrossAxisExtent,
          mainAxisSpacing: mainAxisSpacing,
