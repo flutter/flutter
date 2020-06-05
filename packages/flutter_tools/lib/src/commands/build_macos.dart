@@ -44,7 +44,7 @@ class BuildMacosCommand extends BuildSubCommand {
   };
 
   @override
-  String get description => 'Build the macOS desktop application.';
+  String get description => 'Build a macOS desktop application.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
