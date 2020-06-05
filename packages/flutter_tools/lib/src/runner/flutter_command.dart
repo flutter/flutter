@@ -377,8 +377,7 @@ abstract class FlutterCommand extends Command<void> {
 
   void usesDeviceUserOption() {
     argParser.addOption(FlutterOptions.kDeviceUser,
-      help: 'Target user identifier on Android.\n'
-        'Run "adb shell pm list users" for available user identifiers.',
+      help: 'Identifier number for a user or work profile on Android only. Run "adb shell pm list users" for available identifiers.',
       valueHelp: '10');
   }
 

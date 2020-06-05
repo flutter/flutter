@@ -411,6 +411,7 @@ abstract class Device {
   bool isSupportedForProject(FlutterProject flutterProject);
 
   /// Check if a version of the given app is already installed.
+  ///
   /// Specify [userIdentifier] to check if installed for a particular user (Android only).
   Future<bool> isAppInstalled(
     covariant ApplicationPackage app, {
@@ -421,6 +422,7 @@ abstract class Device {
   Future<bool> isLatestBuildInstalled(covariant ApplicationPackage app);
 
   /// Install an app package on the current device.
+  ///
   /// Specify [userIdentifier] to install for a particular user (Android only).
   Future<bool> installApp(
     covariant ApplicationPackage app, {
@@ -428,6 +430,7 @@ abstract class Device {
   });
 
   /// Uninstall an app package from the current device.
+  ///
   /// Specify [userIdentifier] to uninstall for a particular user,
   /// defaults to all users (Android only).
   Future<bool> uninstallApp(
@@ -502,6 +505,7 @@ abstract class Device {
   bool get supportsFastStart => false;
 
   /// Stop an app package on the current device.
+  ///
   /// Specify [userIdentifier] to stop app installed to a profile (Android only).
   Future<bool> stopApp(
     covariant ApplicationPackage app, {
