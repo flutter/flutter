@@ -17,6 +17,7 @@ import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'heroes.dart';
 import 'overlay.dart';
 import 'route_notification_messages.dart';
 import 'routes.dart';
@@ -606,6 +607,45 @@ class NavigatorObserver {
   ///
   /// Paired with an earlier call to [didStartUserGesture].
   void didStopUserGesture() { }
+}
+
+/// An inherited widget to host a hero controller.
+///
+/// This class should not be used directly. The [MaterialApp] and [CupertinoApp]
+/// use this class to host the [HeroController], and they should be the only
+/// exception to use this class. If you want to subscribe your own
+/// [HeroController], use the [Navigator.observers] instead.
+///
+/// The hosted hero controller will be picked up by the navigator in the
+/// [child] sub tree. Once a navigator picks up this controller, the navigator
+/// will bar any navigator below its subtree from receiving this controller.
+///
+/// See also:
+///
+///  * [Navigator.observers], which provides the standard way of subscribing
+///    hero controller.
+class InheritedHeroController extends InheritedWidget {
+  /// Creates a widget to host the input [controller].
+  const InheritedHeroController({
+    Key key,
+    this.controller,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  /// The hero controller that is hosted inside this widget.
+  final HeroController controller;
+
+  /// Retrieves the observer from the closest [InheritedNavigatorObserver]
+  /// ancestor.
+  static HeroController of(BuildContext context) {
+    final InheritedHeroController host = context.dependOnInheritedWidgetOfExactType<InheritedHeroController>();
+    return host?.controller;
+  }
+
+  @override
+  bool updateShouldNotify(InheritedHeroController oldWidget) {
+    return oldWidget.controller != controller;
+  }
 }
 
 /// A [Route] wrapper interface that can be staged for [TransitionDelegate] to
@@ -2656,6 +2696,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
+  HeroController _inheritedHeroController;
+
+  List<NavigatorObserver> _effectiveObservers;
+
   @override
   void initState() {
     super.initState();
@@ -2667,6 +2711,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       assert(observer.navigator == null);
       observer._navigator = this;
     }
+
+    // We have to manually extract the inherited widget in initState because
+    // the current context is not fully initialized.
+    final InheritedHeroController inheritedHeroController = context
+      .getElementForInheritedWidgetOfExactType<InheritedHeroController>()
+      ?.widget as InheritedHeroController;
+    _updateHeroController(inheritedHeroController?.controller);
+    _updateEffectiveObservers();
+
     String initialRoute = widget.initialRoute;
     if (widget.pages.isNotEmpty) {
       _history.addAll(
@@ -2700,6 +2753,28 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateHeroController(InheritedHeroController.of(context));
+    _updateEffectiveObservers();
+  }
+
+  void _updateHeroController(HeroController newHeroController) {
+    if (_inheritedHeroController != newHeroController) {
+      _inheritedHeroController?._navigator = null;
+      newHeroController?._navigator = this;
+      _inheritedHeroController = newHeroController;
+    }
+  }
+
+  void _updateEffectiveObservers() {
+    if (_inheritedHeroController != null)
+      _effectiveObservers = widget.observers + <NavigatorObserver>[_inheritedHeroController];
+    else
+      _effectiveObservers = widget.observers;
+  }
+
+  @override
   void didUpdateWidget(Navigator oldWidget) {
     super.didUpdateWidget(oldWidget);
     assert(
@@ -2713,6 +2788,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         assert(observer.navigator == null);
         observer._navigator = this;
       }
+      if (_inheritedHeroController != null)
+        _effectiveObservers = widget.observers + <NavigatorObserver>[_inheritedHeroController];
+      else
+        _effectiveObservers = widget.observers;
     }
     if (oldWidget.pages != widget.pages) {
       assert(
@@ -2746,6 +2825,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       _debugLocked = true;
       return true;
     }());
+    _inheritedHeroController?._navigator = null;
     for (final NavigatorObserver observer in widget.observers)
       observer._navigator = null;
     focusScopeNode.dispose();
@@ -3173,19 +3253,19 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   }
 
   void _flushObserverNotifications() {
-    if (widget.observers.isEmpty) {
+    if (_effectiveObservers.isEmpty) {
       _observedRouteDeletions.clear();
       _observedRouteAdditions.clear();
       return;
     }
     while (_observedRouteAdditions.isNotEmpty) {
       final _NavigatorObservation observation = _observedRouteAdditions.removeLast();
-      widget.observers.forEach(observation.notify);
+      _effectiveObservers.forEach(observation.notify);
     }
 
     while (_observedRouteDeletions.isNotEmpty) {
       final _NavigatorObservation observation = _observedRouteDeletions.removeFirst();
-      widget.observers.forEach(observation.notify);
+      _effectiveObservers.forEach(observation.notify);
     }
   }
 
@@ -3877,7 +3957,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           _RouteEntry.willBePresentPredicate,
         ).route;
       }
-      for (final NavigatorObserver observer in widget.observers)
+      for (final NavigatorObserver observer in _effectiveObservers)
         observer.didStartUserGesture(route, previousRoute);
     }
   }
@@ -3890,7 +3970,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(_userGesturesInProgress > 0);
     _userGesturesInProgress -= 1;
     if (_userGesturesInProgress == 0) {
-      for (final NavigatorObserver observer in widget.observers)
+      for (final NavigatorObserver observer in _effectiveObservers)
         observer.didStopUserGesture();
     }
   }
@@ -3925,21 +4005,26 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     assert(!_debugLocked);
     assert(_history.isNotEmpty);
-    return Listener(
-      onPointerDown: _handlePointerDown,
-      onPointerUp: _handlePointerUpOrCancel,
-      onPointerCancel: _handlePointerUpOrCancel,
-      child: AbsorbPointer(
-        absorbing: false, // it's mutated directly by _cancelActivePointers above
-        child: FocusScope(
-          node: focusScopeNode,
-          autofocus: true,
-          child: Overlay(
-            key: _overlayKey,
-            initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+    // Hides the InheritedHeroController for the widget subtree so that the
+    // other nested navigator underneath will not pick up the navigator observer
+    // above this level.
+    return InheritedHeroController(
+      child: Listener(
+        onPointerDown: _handlePointerDown,
+        onPointerUp: _handlePointerUpOrCancel,
+        onPointerCancel: _handlePointerUpOrCancel,
+        child: AbsorbPointer(
+          absorbing: false, // it's mutated directly by _cancelActivePointers above
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: Overlay(
+              key: _overlayKey,
+              initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+            ),
           ),
         ),
-      ),
+      )
     );
   }
 }
