@@ -20,6 +20,9 @@ class Timeline {
   final Map<String, dynamic> json;
 
   /// List of all timeline events.
+  ///
+  /// This is parsed from json['traceEvents'] and sorted by timestamp. Anything
+  /// without a valid timestamp is put in the beginning.
   final List<TimelineEvent> events;
 }
 
