@@ -96,6 +96,70 @@ class SkiaObjects {
   }
 }
 
+/// Converts a list of [ui.Color] into the 2d array expected by CanvasKit.
+js.JsArray<Float32List> makeColorList(List<ui.Color> colors) {
+  var result = js.JsArray<Float32List>();
+  result.length = colors.length;
+  for (var i = 0; i < colors.length; i++) {
+    var color = colors[i];
+    var jsColor = Float32List(4);
+    jsColor[0] = color.red / 255.0;
+    jsColor[1] = color.green / 255.0;
+    jsColor[2] = color.blue / 255.0;
+    jsColor[3] = color.alpha / 255.0;
+    result[i] = jsColor;
+  }
+  return result;
+}
+
+js.JsObject _mallocColorArray() {
+  return canvasKit
+      .callMethod('Malloc', <dynamic>[js.context['Float32Array'], 4]);
+}
+
+js.JsObject sharedSkColor1;
+js.JsObject sharedSkColor2;
+js.JsObject sharedSkColor3;
+
+void _setSharedColor(js.JsObject sharedColor, ui.Color color) {
+  Float32List array = sharedColor.callMethod('toTypedArray');
+  array[0] = color.red / 255.0;
+  array[1] = color.green / 255.0;
+  array[2] = color.blue / 255.0;
+  array[3] = color.alpha / 255.0;
+}
+
+void setSharedSkColor1(ui.Color color) {
+  if (sharedSkColor1 == null) {
+    sharedSkColor1 = _mallocColorArray();
+  }
+  _setSharedColor(sharedSkColor1, color);
+}
+
+void setSharedSkColor2(ui.Color color) {
+  if (sharedSkColor2 == null) {
+    sharedSkColor2 = _mallocColorArray();
+  }
+  _setSharedColor(sharedSkColor2, color);
+}
+
+void setSharedSkColor3(ui.Color color) {
+  if (sharedSkColor3 == null) {
+    sharedSkColor3 = _mallocColorArray();
+  }
+  _setSharedColor(sharedSkColor3, color);
+}
+
+/// Creates a new color array.
+Float32List makeFreshSkColor(ui.Color color) {
+  final Float32List result = Float32List(4);
+  result[0] = color.red / 255.0;
+  result[1] = color.green / 255.0;
+  result[2] = color.blue / 255.0;
+  result[3] = color.alpha / 255.0;
+  return result;
+}
+
 js.JsObject makeSkRect(ui.Rect rect) {
   return js.JsObject(canvasKit['LTRBRect'],
       <double>[rect.left, rect.top, rect.right, rect.bottom]);
@@ -148,18 +212,47 @@ js.JsArray<double> makeSkPoint(ui.Offset point) {
   return skPoint;
 }
 
-/// Creates a point list using a typed buffer created by CanvasKit.Malloc.
-Float32List encodePointList(List<ui.Offset> points) {
-  assert(points != null);
+// TODO(hterkelsen): https://github.com/flutter/flutter/issues/58824
+/// Creates a point list using a 2D JS array.
+js.JsArray<js.JsArray<double>> encodePointList(List<ui.Offset> points) {
+  if (points == null) {
+    return null;
+  }
   final int pointCount = points.length;
-  final Float32List result = canvasKit.callMethod('Malloc', <dynamic>[js.context['Float32Array'], pointCount * 2]);
+  final js.JsArray<js.JsArray<double>> result =
+      js.JsArray<js.JsArray<double>>();
+  result.length = pointCount;
   for (int i = 0; i < pointCount; ++i) {
-    final int xIndex = i * 2;
-    final int yIndex = xIndex + 1;
     final ui.Offset point = points[i];
     assert(_offsetIsValid(point));
-    result[xIndex] = point.dx;
-    result[yIndex] = point.dy;
+    final js.JsArray<double> skPoint = js.JsArray<double>();
+    skPoint.length = 2;
+    skPoint[0] = point.dx;
+    skPoint[1] = point.dy;
+    result[i] = skPoint;
+  }
+  return result;
+}
+
+// TODO(hterkelsen): https://github.com/flutter/flutter/issues/58824
+/// Creates a point list using a 2D JS array.
+List<List<double>> encodeRawPointList(Float32List points) {
+  if (points == null) {
+    return null;
+  }
+  assert(points.length % 2 == 0);
+  var pointLength = points.length ~/ 2;
+  final js.JsArray<js.JsArray<double>> result =
+      js.JsArray<js.JsArray<double>>();
+  result.length = pointLength;
+  for (var i = 0; i < pointLength; i++) {
+    var x = i * 2;
+    var y = x + 1;
+    final js.JsArray<double> skPoint = js.JsArray<double>();
+    skPoint.length = 2;
+    skPoint[0] = points[x];
+    skPoint[1] = points[y];
+    result[i] = skPoint;
   }
   return result;
 }
@@ -319,9 +412,9 @@ void drawSkShadow(
   ui.Color inAmbient = color.withAlpha((color.alpha * ambientAlpha).round());
   ui.Color inSpot = color.withAlpha((color.alpha * spotAlpha).round());
 
-  final js.JsObject inTonalColors = js.JsObject.jsify(<String, int>{
-    'ambient': inAmbient.value,
-    'spot': inSpot.value,
+  final js.JsObject inTonalColors = js.JsObject.jsify(<String, Float32List>{
+    'ambient': makeFreshSkColor(inAmbient),
+    'spot': makeFreshSkColor(inSpot),
   });
 
   final js.JsObject tonalColors =
