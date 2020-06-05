@@ -19,10 +19,12 @@ import '../src/mocks.dart';
 void main() {
   group('DeviceManager', () {
     testUsingContext('getDevices', () async {
-      // Test that DeviceManager.getDevices() doesn't throw.
-      final DeviceManager deviceManager = DeviceManager();
-      final List<Device> devices = await deviceManager.getDevices();
-      expect(devices, isList);
+      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice device3 = FakeDevice('iPod touch', '82564b38861a9a5');
+      final List<Device> devices = <Device>[device1, device2, device3];
+      final DeviceManager deviceManager = TestDeviceManager(devices);
+      expect(await deviceManager.getDevices(), devices);
     });
 
     testUsingContext('getDeviceById', () async {

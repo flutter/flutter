@@ -300,6 +300,7 @@ class IOSDevice extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
+    @visibleForTesting Duration fallbackPollingDelay,
   }) async {
     String packageId;
 
@@ -416,6 +417,7 @@ class IOSDevice extends Device {
         portForwarder: portForwarder,
         protocolDiscovery: observatoryDiscovery,
         flutterUsage: globals.flutterUsage,
+        pollingDelay: fallbackPollingDelay,
       );
       final Uri localUri = await fallbackDiscovery.discover(
         assumedDevicePort: assumedObservatoryPort,
@@ -653,16 +655,25 @@ class IOSDeviceLogReader extends DeviceLogReader {
       return;
     }
     try {
-      await connectedVmService.streamListen('Stdout');
+      await Future.wait(<Future<void>>[
+        connectedVmService.streamListen(vm_service.EventStreams.kStdout),
+        connectedVmService.streamListen(vm_service.EventStreams.kStderr),
+      ]);
     } on vm_service.RPCError {
       // Do nothing, since the tool is already subscribed.
     }
-    _loggingSubscriptions.add(connectedVmService.onStdoutEvent.listen((vm_service.Event event) {
+
+    void logMessage(vm_service.Event event) {
       final String message = utf8.decode(base64.decode(event.bytes));
       if (message.isNotEmpty) {
         _linesController.add(message);
       }
-    }));
+    }
+
+    _loggingSubscriptions.addAll(<StreamSubscription<void>>[
+      connectedVmService.onStdoutEvent.listen(logMessage),
+      connectedVmService.onStderrEvent.listen(logMessage),
+    ]);
   }
 
   void _listenToSysLog() {

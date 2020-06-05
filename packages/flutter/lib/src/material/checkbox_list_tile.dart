@@ -248,11 +248,12 @@ class CheckboxListTile extends StatelessWidget {
   ///
   /// The following arguments are required:
   ///
-  /// * [value], which determines whether the checkbox is checked, and must not
-  ///   be null.
-  ///
+  /// * [value], which determines whether the checkbox is checked. The [value]
+  ///   can only be null if [tristate] is true.
   /// * [onChanged], which is called when the value of the checkbox should
   ///   change. It can be set to null to disable the checkbox.
+  ///
+  /// The value of [tristate] must not be null.
   const CheckboxListTile({
     Key key,
     @required this.value,
@@ -268,7 +269,9 @@ class CheckboxListTile extends StatelessWidget {
     this.controlAffinity = ListTileControlAffinity.platform,
     this.autofocus = false,
     this.contentPadding,
-  }) : assert(value != null),
+    this.tristate = false,
+  }) : assert(tristate != null),
+       assert(tristate || value != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),
@@ -277,8 +280,6 @@ class CheckboxListTile extends StatelessWidget {
        super(key: key);
 
   /// Whether this checkbox is checked.
-  ///
-  /// This property must not be null.
   final bool value;
 
   /// Called when the value of the checkbox should change.
@@ -365,6 +366,18 @@ class CheckboxListTile extends StatelessWidget {
   /// When the value is null, the `contentPadding` is `EdgeInsets.symmetric(horizontal: 16.0)`.
   final EdgeInsetsGeometry contentPadding;
 
+  /// If true the checkbox's [value] can be true, false, or null.
+  ///
+  /// Checkbox displays a dash when its value is null.
+  ///
+  /// When a tri-state checkbox ([tristate] is true) is tapped, its [onChanged]
+  /// callback will be applied to true if the current value is false, to null if
+  /// value is true, and to false if value is null (i.e. it cycles through false
+  /// => true => null => false when tapped).
+  ///
+  /// If tristate is false (the default), [value] must not be null.
+  final bool tristate;
+
   @override
   Widget build(BuildContext context) {
     final Widget control = Checkbox(
@@ -374,6 +387,7 @@ class CheckboxListTile extends StatelessWidget {
       checkColor: checkColor,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       autofocus: autofocus,
+      tristate: tristate,
     );
     Widget leading, trailing;
     switch (controlAffinity) {

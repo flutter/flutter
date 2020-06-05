@@ -105,6 +105,7 @@ class AssembleCommand extends FlutterCommand {
         'root of the current Flutter project.',
     );
     argParser.addOption(kExtraGenSnapshotOptions);
+    argParser.addOption(kExtraFrontEndOptions);
     argParser.addOption(kDartDefines);
     argParser.addOption(
       'resource-pool-size',
@@ -204,9 +205,11 @@ class AssembleCommand extends FlutterCommand {
     if (argResults.wasParsed(kExtraGenSnapshotOptions)) {
       results[kExtraGenSnapshotOptions] = argResults[kExtraGenSnapshotOptions] as String;
     }
-    // Workaround for dart-define formatting
     if (argResults.wasParsed(kDartDefines)) {
       results[kDartDefines] = argResults[kDartDefines] as String;
+    }
+    if (argResults.wasParsed(kExtraFrontEndOptions)) {
+      results[kExtraFrontEndOptions] = argResults[kExtraFrontEndOptions] as String;
     }
     return results;
   }
@@ -226,13 +229,13 @@ class AssembleCommand extends FlutterCommand {
       );
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
-          stackTrace: measurement.fatal
-            ? measurement.stackTrace
-            : null,
-        );
+        if (measurement.fatal || globals.logger.isVerbose) {
+          globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
+            stackTrace: measurement.stackTrace
+          );
+        }
       }
-      throwToolExit('build failed.');
+      throwToolExit('');
     }
     globals.printTrace('build succeeded.');
     if (argResults.wasParsed('build-inputs')) {

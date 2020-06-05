@@ -13,6 +13,18 @@ import 'package:flutter/widgets.dart';
 
 import 'semantics_tester.dart';
 
+/// Used to test removal of nodes while sorting.
+class SkipAllButFirstAndLastPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
+  @override
+  Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode) {
+    return <FocusNode>[
+      descendants.first,
+      if (currentNode != descendants.first && currentNode != descendants.last) currentNode,
+      descendants.last,
+    ];
+  }
+}
+
 void main() {
   group(WidgetOrderTraversalPolicy, () {
     testWidgets('Find the initial focus if there is none yet.', (WidgetTester tester) async {
@@ -286,6 +298,40 @@ void main() {
       expect(firstFocusNode.hasFocus, isTrue);
       expect(secondFocusNode.hasFocus, isFalse);
       expect(scope.hasFocus, isTrue);
+    });
+
+    testWidgets('Move focus to next/previous node while skipping nodes in policy', (WidgetTester tester) async {
+      final List<FocusNode> nodes =
+      List<FocusNode>.generate(7, (int index) => FocusNode(debugLabel: 'Node $index'));
+      await tester.pumpWidget(
+        FocusTraversalGroup(
+          policy: SkipAllButFirstAndLastPolicy(),
+          child: Column(
+            children: List<Widget>.generate(
+              nodes.length,
+              (int index) => Focus(
+                focusNode: nodes[index],
+                child: const SizedBox(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      nodes[2].requestFocus();
+      await tester.pump();
+
+      expect(nodes[2].hasPrimaryFocus, isTrue);
+
+      primaryFocus.nextFocus();
+      await tester.pump();
+
+      expect(nodes[6].hasPrimaryFocus, isTrue);
+
+      primaryFocus.previousFocus();
+      await tester.pump();
+
+      expect(nodes[0].hasPrimaryFocus, isTrue);
     });
 
     testWidgets('Find the initial focus when a route is pushed or popped.', (WidgetTester tester) async {
@@ -1299,7 +1345,7 @@ void main() {
       expect(scope.hasFocus, isTrue);
     });
 
-    testWidgets('Directional focus avoids hysterisis.', (WidgetTester tester) async {
+    testWidgets('Directional focus avoids hysteresis.', (WidgetTester tester) async {
       final List<GlobalKey> keys = <GlobalKey>[
         GlobalKey(debugLabel: 'row 1:1'),
         GlobalKey(debugLabel: 'row 2:1'),

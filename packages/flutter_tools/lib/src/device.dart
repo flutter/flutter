@@ -103,6 +103,7 @@ class DeviceManager {
       fileSystem: globals.fs,
       platform: globals.platform,
       processManager: globals.processManager,
+      logger: globals.logger,
     ),
   ]);
 
@@ -555,6 +556,13 @@ abstract class Device {
 
   static Future<void> printDevices(List<Device> devices) async {
     await descriptions(devices).forEach(globals.printStatus);
+  }
+
+  static List<String> devicesPlatformTypes(List<Device> devices) {
+    return devices
+        .map(
+          (Device d) => d.platformType.toString(),
+        ).toSet().toList()..sort();
   }
 
   /// Convert the Device object to a JSON representation suitable for serialization.

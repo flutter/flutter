@@ -168,7 +168,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
     -dEnableBitcode="${bitcode_flag}"                                     \
     --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"             \
     --DartDefines="${DART_DEFINES}"                                       \
-    -dExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                   \
+    --ExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                   \
     "${build_mode}_ios_bundle_flutter_assets"
 
   if [[ $? -ne 0 ]]; then

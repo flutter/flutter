@@ -398,7 +398,7 @@ class TextField extends StatefulWidget {
            selectAll: true,
            paste: true,
          )),
-       canAssertMaterialLocalizations = canAssertMaterialLocalizations ?? false,
+       canAssertMaterialLocalizations = canAssertMaterialLocalizations ?? true,
        super(key: key);
 
   /// Controls the text being edited.

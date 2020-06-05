@@ -38,6 +38,16 @@ void main() {
       ProcessManager: () => MockProcessManager(),
     });
 
+    testUsingContext('get devices\' platform types', () async {
+      final List<String> platformTypes = Device.devicesPlatformTypes(
+        await deviceManager.getAllConnectedDevices(),
+      );
+      expect(platformTypes, <String>['android', 'web']);
+    }, overrides: <Type, Generator>{
+      DeviceManager: () => _FakeDeviceManager(),
+      ProcessManager: () => MockProcessManager(),
+    });
+
     testUsingContext('Outputs parsable JSON with --machine flag', () async {
       final DevicesCommand command = DevicesCommand();
       await createTestCommandRunner(command).run(<String>['devices', '--machine']);

@@ -241,6 +241,62 @@ void main() {
         ProcessManager: () => mockProcessManager,
       });
 
+      testUsingContext('shows unsupported devices when no supported devices are found',  () async {
+        final RunCommand command = RunCommand();
+        applyMocksToCommand(command);
+
+        final MockDevice mockDevice = MockDevice(TargetPlatform.android_arm);
+        when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) => Future<bool>.value(true));
+        when(mockDevice.isSupported()).thenAnswer((Invocation invocation) => true);
+        when(mockDevice.supportsFastStart).thenReturn(true);
+        when(mockDevice.id).thenReturn('mock-id');
+        when(mockDevice.name).thenReturn('mock-name');
+        when(mockDevice.platformType).thenReturn(PlatformType.android);
+        when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) => Future<String>.value('api-14'));
+
+        when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
+          return Future<List<Device>>.value(<Device>[
+            mockDevice,
+          ]);
+        });
+
+        when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
+            (Invocation invocation) => Future<List<Device>>.value(<Device>[]),
+        );
+
+        try {
+          await createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--no-hot',
+          ]);
+          fail('Expect exception');
+        } on ToolExit catch (e) {
+          expect(e.message, null);
+        }
+
+        expect(
+          testLogger.statusText,
+          containsIgnoringWhitespace(userMessages.flutterNoSupportedDevices),
+        );
+        expect(
+          testLogger.statusText,
+          containsIgnoringWhitespace(userMessages.flutterFoundButUnsupportedDevices),
+        );
+        expect(
+          testLogger.statusText,
+          containsIgnoringWhitespace(
+            userMessages.flutterMissPlatformProjects(
+              Device.devicesPlatformTypes(<Device>[mockDevice]),
+            ),
+          ),
+        );
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => mockDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
+      });
+
       testUsingContext('updates cache before checking for devices', () async {
         final RunCommand command = RunCommand();
         applyMocksToCommand(command);
