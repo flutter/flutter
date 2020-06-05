@@ -36,7 +36,7 @@ Future<void> main() async {
     ),
   ));
   await SchedulerBinding.instance.endOfFrame;
-  await Future<void>.delayed(const Duration(milliseconds: 500));
+  await Future<void>.delayed(const Duration(milliseconds: 50));
   debugPrint('==== MEMORY BENCHMARK ==== READY ====');
 
   await ready.future;
