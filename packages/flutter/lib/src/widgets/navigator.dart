@@ -2346,7 +2346,7 @@ class _RouteEntry extends RouteTransitionRecord {
     assert(route.overlayEntries.isNotEmpty);
     currentState = _RouteLifecycle.adding;
     navigator._observedRouteAdditions.add(
-      _NavigatorObservation(route, previousPresent, _ObservedAction.push)
+      _NavigatorPushObservation(route, previousPresent)
     );
   }
 
@@ -2382,12 +2382,12 @@ class _RouteEntry extends RouteTransitionRecord {
 
     if (previousState == _RouteLifecycle.replace || previousState == _RouteLifecycle.pushReplace) {
       navigator._observedRouteAdditions.add(
-        _NavigatorObservation(route, previousPresent, _ObservedAction.replace)
+        _NavigatorReplaceObservation(route, previousPresent)
       );
     } else {
       assert(previousState == _RouteLifecycle.push);
       navigator._observedRouteAdditions.add(
-        _NavigatorObservation(route, previousPresent, _ObservedAction.push)
+        _NavigatorPushObservation(route, previousPresent)
       );
     }
   }
@@ -2403,7 +2403,7 @@ class _RouteEntry extends RouteTransitionRecord {
     assert(route._navigator == navigator);
     currentState = _RouteLifecycle.popping;
     navigator._observedRouteDeletions.add(
-      _NavigatorObservation(route, previousPresent, _ObservedAction.pop)
+      _NavigatorPopObservation(route, previousPresent)
     );
   }
 
@@ -2414,7 +2414,7 @@ class _RouteEntry extends RouteTransitionRecord {
     currentState = _RouteLifecycle.removing;
     if (_reportRemovalToObserver) {
       navigator._observedRouteDeletions.add(
-        _NavigatorObservation(route, previousPresent, _ObservedAction.remove)
+        _NavigatorRemoveObservation(route, previousPresent)
       );
     }
   }
@@ -2585,22 +2585,63 @@ class _RouteEntry extends RouteTransitionRecord {
   }
 }
 
-enum _ObservedAction {
-  push,
-  pop,
-  remove,
-  replace,
+abstract class _NavigatorObservation {
+  _NavigatorObservation(
+    this.primaryRoute,
+    this.secondaryRoute,
+  );
+  final Route<dynamic> primaryRoute;
+  final Route<dynamic> secondaryRoute;
+
+  void notify(NavigatorObserver observer);
 }
 
-class _NavigatorObservation {
-  _NavigatorObservation(
-    this.targetRoute,
-    this.previousRoute,
-    this.action,
-  );
-  final Route<dynamic> targetRoute;
-  final Route<dynamic> previousRoute;
-  final _ObservedAction action;
+class _NavigatorPushObservation extends _NavigatorObservation {
+  _NavigatorPushObservation(
+    Route<dynamic> primaryRoute,
+    Route<dynamic> secondaryRoute
+  ) : super(primaryRoute, secondaryRoute);
+
+  @override
+  void notify(NavigatorObserver observer) {
+    observer.didPush(primaryRoute, secondaryRoute);
+  }
+}
+
+class _NavigatorPopObservation extends _NavigatorObservation {
+  _NavigatorPopObservation(
+    Route<dynamic> primaryRoute,
+    Route<dynamic> secondaryRoute
+  ) : super(primaryRoute, secondaryRoute);
+
+  @override
+  void notify(NavigatorObserver observer) {
+    observer.didPop(primaryRoute, secondaryRoute);
+  }
+}
+
+class _NavigatorRemoveObservation extends _NavigatorObservation {
+  _NavigatorRemoveObservation(
+    Route<dynamic> primaryRoute,
+    Route<dynamic> secondaryRoute
+  ) : super(primaryRoute, secondaryRoute);
+
+  @override
+  void notify(NavigatorObserver observer) {
+    observer.didRemove(primaryRoute, secondaryRoute);
+  }
+}
+
+class _NavigatorReplaceObservation extends _NavigatorObservation {
+  _NavigatorReplaceObservation(
+    Route<dynamic> primaryRoute,
+    Route<dynamic> secondaryRoute
+  ) : super(primaryRoute, secondaryRoute);
+
+  @override
+  void notify(NavigatorObserver observer) {
+    observer.didReplace(newRoute: primaryRoute, oldRoute: secondaryRoute);
+  }
 }
 
 /// The state for a [Navigator] widget.
@@ -3137,35 +3178,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       _observedRouteAdditions.clear();
       return;
     }
-    while (_observedRouteAdditions.isNotEmpty)
-      _announceObservation(_observedRouteAdditions.removeLast());
+    while (_observedRouteAdditions.isNotEmpty) {
+      _NavigatorObservation observation = _observedRouteAdditions.removeLast();
+      widget.observers.forEach(observation.notify);
+    }
 
-    while (_observedRouteDeletions.isNotEmpty)
-      _announceObservation(_observedRouteDeletions.removeFirst());
-  }
-
-  void _announceObservation(_NavigatorObservation observation) {
-    switch(observation.action) {
-      case _ObservedAction.push:
-        for (final NavigatorObserver observer in widget.observers) {
-          observer.didPush(observation.targetRoute, observation.previousRoute);
-        }
-        break;
-      case _ObservedAction.pop:
-        for (final NavigatorObserver observer in widget.observers) {
-          observer.didPop(observation.targetRoute, observation.previousRoute);
-        }
-        break;
-      case _ObservedAction.remove:
-        for (final NavigatorObserver observer in widget.observers) {
-          observer.didRemove(observation.targetRoute, observation.previousRoute);
-        }
-        break;
-      case _ObservedAction.replace:
-        for (final NavigatorObserver observer in widget.observers) {
-          observer.didReplace(newRoute: observation.targetRoute, oldRoute: observation.previousRoute);
-        }
-        break;
+    while (_observedRouteDeletions.isNotEmpty) {
+      _NavigatorObservation observation = _observedRouteDeletions.removeFirst();
+      widget.observers.forEach(observation.notify);
     }
   }
 
