@@ -15,19 +15,24 @@
 namespace flutter {
 
 std::unique_ptr<AndroidSurface> AndroidSurface::Create(
-    bool use_software_rendering) {
-  if (use_software_rendering) {
-    auto software_surface = std::make_unique<AndroidSurfaceSoftware>();
-    return software_surface->IsValid() ? std::move(software_surface) : nullptr;
-  }
+    std::shared_ptr<AndroidContext> android_context) {
+  std::unique_ptr<AndroidSurface> surface;
+  switch (android_context->RenderingApi()) {
+    case AndroidRenderingAPI::kSoftware:
+      surface = std::make_unique<AndroidSurfaceSoftware>();
+      break;
+    case AndroidRenderingAPI::kOpenGLES:
+      surface = std::make_unique<AndroidSurfaceGL>(android_context);
+      break;
+    case AndroidRenderingAPI::kVulkan:
 #if SHELL_ENABLE_VULKAN
-  auto vulkan_surface = std::make_unique<AndroidSurfaceVulkan>();
-  return vulkan_surface->IsValid() ? std::move(vulkan_surface) : nullptr;
-#else   // SHELL_ENABLE_VULKAN
-  auto gl_surface = std::make_unique<AndroidSurfaceGL>();
-  return gl_surface->IsOffscreenContextValid() ? std::move(gl_surface)
-                                               : nullptr;
+      surface = std::make_unique<AndroidSurfaceVulkan>();
 #endif  // SHELL_ENABLE_VULKAN
+      break;
+  }
+  FML_CHECK(surface);
+  return surface->IsValid() ? std::move(surface) : nullptr;
+  ;
 }
 
 AndroidSurface::~AndroidSurface() = default;

@@ -27,13 +27,13 @@ class AndroidSurfaceVulkan : public AndroidSurface,
   bool IsValid() const override;
 
   // |AndroidSurface|
-  std::unique_ptr<Surface> CreateGPUSurface() override;
+  std::unique_ptr<Surface> CreateGPUSurface(GrContext* gr_context) override;
 
   // |AndroidSurface|
   void TeardownOnScreenContext() override;
 
   // |AndroidSurface|
-  bool OnScreenSurfaceResize(const SkISize& size) const override;
+  bool OnScreenSurfaceResize(const SkISize& size) override;
 
   // |AndroidSurface|
   bool ResourceContextMakeCurrent() override;

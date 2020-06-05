@@ -12,6 +12,7 @@
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/surface.h"
+#include "flutter/shell/platform/android/android_context.h"
 #include "flutter/shell/platform/android/android_native_window.h"
 #include "third_party/skia/include/core/SkSize.h"
 
@@ -19,7 +20,8 @@ namespace flutter {
 
 class AndroidSurface {
  public:
-  static std::unique_ptr<AndroidSurface> Create(bool use_software_rendering);
+  static std::unique_ptr<AndroidSurface> Create(
+      std::shared_ptr<AndroidContext> android_context);
 
   virtual ~AndroidSurface();
 
@@ -27,9 +29,10 @@ class AndroidSurface {
 
   virtual void TeardownOnScreenContext() = 0;
 
-  virtual std::unique_ptr<Surface> CreateGPUSurface() = 0;
+  virtual std::unique_ptr<Surface> CreateGPUSurface(
+      GrContext* gr_context = nullptr) = 0;
 
-  virtual bool OnScreenSurfaceResize(const SkISize& size) const = 0;
+  virtual bool OnScreenSurfaceResize(const SkISize& size) = 0;
 
   virtual bool ResourceContextMakeCurrent() = 0;
 
