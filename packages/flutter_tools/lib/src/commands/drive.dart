@@ -311,7 +311,9 @@ $ex
       await residentRunner?.exit();
       await driver?.quit();
       if (boolArg('write-sksl-on-exit')) {
-        final vm_service.VmService vmService = await vm_service.vmServiceConnectUri(observatoryUri);
+        final vm_service.VmService vmService = await connectToVmService(
+          Uri.parse(observatoryUri),
+        );
         final FlutterView flutterView = (await vmService.getFlutterViews()).first;
         final Map<String, Object> result = await vmService.getSkSLs(
           viewId: flutterView.id
