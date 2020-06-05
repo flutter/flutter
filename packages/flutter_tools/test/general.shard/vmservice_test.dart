@@ -174,7 +174,7 @@ void main() {
   testUsingContext('VmService registers flutterPrintStructuredErrorLogMethod', () async {
     final MockVMService mockVMService = MockVMService();
     when(mockVMService.onExtensionEvent).thenAnswer((Invocation invocation) {
-      return const Stream.empty();
+      return const Stream<vm_service.Event>.empty();
     });
     setUpVmService(
       null,
