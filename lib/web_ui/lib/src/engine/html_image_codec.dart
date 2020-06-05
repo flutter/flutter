@@ -16,7 +16,7 @@ typedef WebOnlyImageCodecChunkCallback = void Function(
 
 class HtmlCodec implements ui.Codec {
   final String src;
-  final WebOnlyImageCodecChunkCallback chunkCallback;
+  final WebOnlyImageCodecChunkCallback/*?*/ chunkCallback;
 
   HtmlCodec(this.src, {this.chunkCallback});
 
