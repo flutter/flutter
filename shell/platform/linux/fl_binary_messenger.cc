@@ -189,8 +189,9 @@ G_MODULE_EXPORT void fl_binary_messenger_set_message_handler_on_channel(
     g_hash_table_replace(
         self->platform_message_handlers, g_strdup(channel),
         platform_message_handler_new(handler, user_data, destroy_notify));
-  } else
+  } else {
     g_hash_table_remove(self->platform_message_handlers, channel);
+  }
 }
 
 G_MODULE_EXPORT gboolean fl_binary_messenger_send_response(
