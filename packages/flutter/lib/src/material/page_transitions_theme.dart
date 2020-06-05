@@ -268,8 +268,8 @@ class _ZoomedTransitions extends StatelessWidget {
         Widget child,
       ) {
         return _ZoomPageTransitionOut(
+          animation: ReverseAnimation(animation),
           child: child,
-          animation: animation,
         );
       },
       child: child,
