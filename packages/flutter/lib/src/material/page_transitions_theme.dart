@@ -166,7 +166,7 @@ class _ZoomPageTransition extends StatelessWidget {
 
   // A curve sequence that is similar to the 'fastOutExtraSlowIn' curve used in
   // the native transition.
-  static final List<TweenSequenceItem<double>> fastOutExtraSlowInTweenSequenceItems = <TweenSequenceItem<double>>[
+  static final List<TweenSequenceItem<double>> _fastOutExtraSlowInTweenSequenceItems = <TweenSequenceItem<double>>[
     TweenSequenceItem<double>(
       tween: Tween<double>(begin: 0.0, end: 0.4)
         .chain(CurveTween(curve: const Cubic(0.05, 0.0, 0.133333, 0.06))),
@@ -178,8 +178,8 @@ class _ZoomPageTransition extends StatelessWidget {
       weight: 1.0 - 0.166666,
     ),
   ];
-  static final TweenSequence<double> _scaleCurveSequence = TweenSequence<double>(fastOutExtraSlowInTweenSequenceItems);
-  static final FlippedTweenSequence _flippedScaleCurveSequence = FlippedTweenSequence(fastOutExtraSlowInTweenSequenceItems);
+  static final TweenSequence<double> _scaleCurveSequence = TweenSequence<double>(_fastOutExtraSlowInTweenSequenceItems);
+  static final FlippedTweenSequence _flippedScaleCurveSequence = FlippedTweenSequence(_fastOutExtraSlowInTweenSequenceItems);
 
   static final Animatable<double> _forwardScrimOpacityTween = _scrimOpacityTween
     .chain(CurveTween(curve: const Interval(0.2075, 0.4175)));
@@ -194,20 +194,15 @@ class _ZoomPageTransition extends StatelessWidget {
     end: 1.0,
   ).chain(CurveTween(curve: const Interval(0.125, 0.250)));
 
-  static final Animatable<double> _forwardStartScreenFadeTween = Tween<double>(
-    begin: 1.0,
-    end: 0.0,
-  ).chain(_scaleCurveSequence);
-
-  static final Animatable<double> _reverseEndScreenScaleTween = Tween<double>(
-    begin: 1.0,
-    end: 0.9,
-  ).chain(_scaleCurveSequence);
-
   static final Animatable<double> _reverseStartScreenScaleTween = Tween<double>(
     begin: 0.9,
     end: 1.0,
   ).chain(_flippedScaleCurveSequence);
+
+  static final Animatable<double> _reverseEndScreenFadeTween = Tween<double>(
+    begin: 0.0,
+    end: 1.0,
+  ).chain(CurveTween(curve: const Interval(1 - 0.2075, 1 - 0.0825)));
 
   /// The animation that drives the [child]'s entrance and exit.
   ///
@@ -331,11 +326,11 @@ class _ZoomPageTransitionOut extends StatelessWidget {
     final bool isDismissed = animation.status == AnimationStatus.dismissed;
     return ScaleTransition(
       scale: !isDismissed
-          ? _ZoomPageTransition._reverseEndScreenScaleTween.animate(animation)
+          ? _ZoomPageTransition._reverseStartScreenScaleTween.animate(animation)
           : const AlwaysStoppedAnimation<double>(1.0),
       child: FadeTransition(
         opacity: !isDismissed
-            ? _ZoomPageTransition._forwardStartScreenFadeTween.animate(animation)
+            ? _ZoomPageTransition._reverseEndScreenFadeTween.animate(animation)
             : const AlwaysStoppedAnimation<double>(1.0),
         child: child,
       ),
