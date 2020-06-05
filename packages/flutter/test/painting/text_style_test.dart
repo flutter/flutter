@@ -58,7 +58,7 @@ void main() {
       ),
     );
 
-    final TextStyle s1WithoutHeight t= s1.copyWith(heightIsNull: true);
+    final TextStyle s1WithoutHeight = s1.copyWith(heightIsNull: true);
     expect(s1WithoutHeight.height, isNull);
 
     final TextStyle s3 = s1.apply(fontSizeFactor: 2.0, fontSizeDelta: -2.0, fontWeightDelta: -4);
