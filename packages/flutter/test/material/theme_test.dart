@@ -808,6 +808,7 @@ class _TextStyleProxy implements TextStyle {
     double wordSpacing,
     TextBaseline textBaseline,
     double height,
+    bool heightIsNull = false,
     Locale locale,
     ui.Paint foreground,
     ui.Paint background,
