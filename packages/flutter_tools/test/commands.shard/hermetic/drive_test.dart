@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:webdriver/sync_io.dart' as sync_io;
+import 'package:flutter_tools/src/vmservice.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -728,6 +730,28 @@ void main() {
 
       expect(getDesiredCapabilities(Browser.androidChrome, false), expected);
     });
+  });
+
+  testUsingContext('Can write SkSL file with provided output file', () async {
+    final MockDevice device = MockDevice();
+    when(device.name).thenReturn('foo');
+    when(device.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    final File outputFile = globals.fs.file('out/foo');
+
+    final String result = await sharedSkSlWriter(
+      device,
+      <String, Object>{'foo': 'bar'},
+      outputFile: outputFile,
+    );
+
+    expect(result, 'out/foo');
+    expect(outputFile, exists);
+    expect(outputFile.readAsStringSync(), '{"platform":"android","name":"foo","engineRevision":null,"data":{"foo":"bar"}}');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }
 
