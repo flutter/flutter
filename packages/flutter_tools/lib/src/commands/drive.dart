@@ -115,7 +115,7 @@ class DriveCommand extends RunCommandBase {
       ..addOption('chrome-binary',
         help: 'Location of Chrome binary. '
           'Works only if \'browser-name\' is set to \'chrome\'')
-      ..addOption('write-sksl-on-exit',
+      ..addFlag('write-sksl-on-exit',
         help: 'Attempts to write an SkSL file when the drive process is finished',
         hide: true,
       );
