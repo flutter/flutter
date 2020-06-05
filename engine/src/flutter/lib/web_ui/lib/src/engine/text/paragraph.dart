@@ -1034,7 +1034,7 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
     double width,
     double height,
     ui.PlaceholderAlignment alignment, {
-    double scale,
+    double scale = 1.0,
     double baselineOffset,
     ui.TextBaseline baseline,
   }) {
