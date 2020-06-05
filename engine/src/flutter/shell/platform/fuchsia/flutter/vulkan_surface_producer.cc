@@ -209,16 +209,22 @@ bool VulkanSurfaceProducer::TransitionSurfacesToExternal(
     }
 
     VkImageMemoryBarrier image_barrier = {
-        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-        .pNext = nullptr,
-        .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-        .dstAccessMask = 0,
-        .oldLayout = imageInfo.fImageLayout,
-        .newLayout = imageInfo.fImageLayout,
-        .srcQueueFamilyIndex = 0,
-        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL_KHR,
-        .image = vk_surface->GetVkImage(),
-        .subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1}};
+      .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+      .pNext = nullptr,
+      .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+      .dstAccessMask = 0,
+      .oldLayout = imageInfo.fImageLayout,
+    // Understand why this is causing issues on Intel. TODO(fxb/53449)
+#if defined(__aarch64__)
+      .newLayout = imageInfo.fImageLayout,
+#else
+      .newLayout = VK_IMAGE_LAYOUT_GENERAL,
+#endif
+      .srcQueueFamilyIndex = 0,
+      .dstQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL_KHR,
+      .image = vk_surface->GetVkImage(),
+      .subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1}
+    };
 
     if (!command_buffer->InsertPipelineBarrier(
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
