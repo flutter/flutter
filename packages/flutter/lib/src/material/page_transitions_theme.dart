@@ -323,7 +323,7 @@ class _ZoomPageTransitionOut extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Only change transitions when the animation was dismissed.
+    // Only change transitions when the animation was not dismissed.
     final bool isDismissed = animation.status == AnimationStatus.dismissed;
     return ScaleTransition(
       scale: !isDismissed

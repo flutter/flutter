@@ -41,9 +41,9 @@ class DualTransitionBuilder extends StatefulWidget {
     @required this.reverseBuilder,
     this.child,
   }) : assert(animation != null),
-        assert(forwardBuilder != null),
-        assert(reverseBuilder != null),
-        super(key: key);
+       assert(forwardBuilder != null),
+       assert(reverseBuilder != null),
+       super(key: key);
 
   /// The animation that drives the [child]'s transition.
   ///
