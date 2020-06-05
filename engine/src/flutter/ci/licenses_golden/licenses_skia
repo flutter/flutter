@@ -1,4 +1,4 @@
-Signature: 20434416a12cf8be82f9e11d28e78a91
+Signature: c345dd2c67234cb494cee00863ad30a6
 
 UNUSED LICENSES:
 
@@ -5289,6 +5289,7 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrMidpointContourParser.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrResolveLevelCounter.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrVectorXform.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrWangsFormula.h
+FILE: ../../../third_party/skia/src/opts/SkOpts_skx.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google Inc.
 
