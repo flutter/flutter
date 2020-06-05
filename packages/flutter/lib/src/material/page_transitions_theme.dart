@@ -292,9 +292,10 @@ class _ZoomPageTransitionIn extends StatelessWidget {
     final bool isCompleted = animation.status == AnimationStatus.completed;
     return Container(
       color: Colors.black.withOpacity(
-        isCompleted
-            ? 0.0
-            : _ZoomPageTransition._forwardScrimOpacityTween.animate(animation).value,
+        (isCompleted
+            ? kAlwaysDismissedAnimation
+            : _ZoomPageTransition._forwardScrimOpacityTween.animate(animation)
+        ).value,
       ),
       child: ScaleTransition(
         scale: (
@@ -327,11 +328,11 @@ class _ZoomPageTransitionOut extends StatelessWidget {
     return ScaleTransition(
       scale: !isDismissed
           ? _ZoomPageTransition._reverseStartScreenScaleTween.animate(animation)
-          : const AlwaysStoppedAnimation<double>(1.0),
+          : kAlwaysCompleteAnimation,
       child: FadeTransition(
         opacity: !isDismissed
             ? _ZoomPageTransition._reverseEndScreenFadeTween.animate(animation)
-            : const AlwaysStoppedAnimation<double>(1.0),
+            : kAlwaysCompleteAnimation,
         child: child,
       ),
     );
