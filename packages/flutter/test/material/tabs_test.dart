@@ -215,6 +215,11 @@ class TestScrollPhysics extends ScrollPhysics {
     return TestScrollPhysics(parent: buildParent(ancestor));
   }
 
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    return offset == 10 ? 20 : offset;
+  }
+
   static final SpringDescription _kDefaultSpring = SpringDescription.withDampingRatio(
     mass: 0.5,
     stiffness: 500.0,
@@ -1106,6 +1111,34 @@ void main() {
     // Left enough to get to page 0
     pageController.jumpTo(100.0);
     expect(tabController.index, 0);
+  });
+
+  testWidgets('TabBar accepts custom physics', (WidgetTester tester) async {
+    final List<Tab> tabs = List<Tab>.generate(20, (int index) {
+      return Tab(text: 'TAB #$index');
+    });
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: tabs.length - 1,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(
+          isScrollable: true,
+          controller: controller,
+          tabs: tabs,
+          physics: const TestScrollPhysics(),
+        ),
+      ),
+    );
+
+    final TabBar tabBar = tester.widget(find.byType(TabBar));
+    final double position = tabBar.physics.applyPhysicsToUserOffset(null, 10);
+
+    expect(position, equals(20));
   });
 
   testWidgets('Scrollable TabBar with a non-zero TabController initialIndex', (WidgetTester tester) async {
