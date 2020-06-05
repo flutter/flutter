@@ -1880,7 +1880,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
-      if (!_clip.contains(position))
+      if (!size.contains(position) && !_clip.contains(position))
         return false;
     }
     return super.hitTest(result, position: position);
