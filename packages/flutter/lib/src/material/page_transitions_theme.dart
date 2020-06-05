@@ -288,7 +288,16 @@ class _ZoomPageTransitionIn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Only change color when the animation was completed.
+    // The [_ZoomPageTransitionIn] should only animate when this is a forward
+    // animation.
+    //
+    // With the [DualTransitionBuilder], the animation in this transition
+    // will only have three status: forward, reverse, completed.
+    //
+    // When this transition is in the process of [reverseBuilder], the status
+    // of the animation will always be completed since the [forwardBuilder]
+    // won't animate at the same time. So [isCompleted] can make sure the color
+    // and the scale transition works in purpose.
     final bool isCompleted = animation.status == AnimationStatus.completed;
     return Container(
       color: Colors.black.withOpacity(
@@ -323,7 +332,7 @@ class _ZoomPageTransitionOut extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Only change transitions when the animation was not dismissed.
+    // Same as [isCompleted] in [_ZoomPageTransitionIn].
     final bool isDismissed = animation.status == AnimationStatus.dismissed;
     return ScaleTransition(
       scale: !isDismissed
