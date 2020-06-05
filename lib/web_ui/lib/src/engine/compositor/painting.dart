@@ -13,7 +13,8 @@ class SkPaint extends SkiaObject implements ui.Paint {
   SkPaint();
 
   static const ui.Color _defaultPaintColor = ui.Color(0xFF000000);
-  static final js.JsObject _skPaintStyleStroke = canvasKit['PaintStyle']['Stroke'];
+  static final js.JsObject _skPaintStyleStroke =
+      canvasKit['PaintStyle']['Stroke'];
   static final js.JsObject _skPaintStyleFill = canvasKit['PaintStyle']['Fill'];
 
   @override
@@ -23,10 +24,12 @@ class SkPaint extends SkiaObject implements ui.Paint {
     _blendMode = value;
     _syncBlendMode(skiaObject);
   }
+
   void _syncBlendMode(js.JsObject object) {
     final js.JsObject skBlendMode = makeSkBlendMode(_blendMode);
     object.callMethod('setBlendMode', <js.JsObject>[skBlendMode]);
   }
+
   ui.BlendMode _blendMode = ui.BlendMode.srcOver;
 
   @override
@@ -37,6 +40,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
     _style = value;
     _syncStyle(skiaObject);
   }
+
   void _syncStyle(js.JsObject object) {
     js.JsObject skPaintStyle;
     switch (_style) {
@@ -49,6 +53,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
     }
     object.callMethod('setStyle', <js.JsObject>[skPaintStyle]);
   }
+
   ui.PaintingStyle _style = ui.PaintingStyle.fill;
 
   @override
@@ -58,9 +63,11 @@ class SkPaint extends SkiaObject implements ui.Paint {
     _strokeWidth = value;
     _syncStrokeWidth(skiaObject);
   }
+
   void _syncStrokeWidth(js.JsObject object) {
     object.callMethod('setStrokeWidth', <double>[strokeWidth]);
   }
+
   double _strokeWidth = 0.0;
 
   // TODO(yjbanov): implement
@@ -70,6 +77,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
   set strokeCap(ui.StrokeCap value) {
     _strokeCap = value;
   }
+
   ui.StrokeCap _strokeCap = ui.StrokeCap.butt;
 
   // TODO(yjbanov): implement
@@ -79,6 +87,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
   set strokeJoin(ui.StrokeJoin value) {
     _strokeJoin = value;
   }
+
   ui.StrokeJoin _strokeJoin = ui.StrokeJoin.miter;
 
   @override
@@ -88,9 +97,11 @@ class SkPaint extends SkiaObject implements ui.Paint {
     _isAntiAlias = value;
     _syncAntiAlias(skiaObject);
   }
+
   void _syncAntiAlias(js.JsObject object) {
     object.callMethod('setAntiAlias', <bool>[_isAntiAlias]);
   }
+
   bool _isAntiAlias = true;
 
   @override
@@ -100,13 +111,17 @@ class SkPaint extends SkiaObject implements ui.Paint {
     _color = value;
     _syncColor(skiaObject);
   }
+
   void _syncColor(js.JsObject object) {
-    int colorValue = _defaultPaintColor.value;
+    ui.Color colorValue = _defaultPaintColor;
     if (_color != null) {
-      colorValue = _color.value;
+      colorValue = _color;
     }
-    object.callMethod('setColor', <int>[colorValue]);
+    object.callMethod('setColorInt', <int>[
+      colorValue.value,
+    ]);
   }
+
   ui.Color _color = _defaultPaintColor;
 
   // TODO(yjbanov): implement
@@ -116,6 +131,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
   set invertColors(bool value) {
     _invertColors = value;
   }
+
   bool _invertColors = false;
 
   @override
@@ -125,6 +141,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
     _shader = value as EngineShader;
     _syncShader(skiaObject);
   }
+
   void _syncShader(js.JsObject object) {
     js.JsObject skShader;
     if (_shader != null) {
@@ -132,6 +149,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
     }
     object.callMethod('setShader', <js.JsObject>[skShader]);
   }
+
   EngineShader _shader;
 
   @override
@@ -141,6 +159,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
     _maskFilter = value;
     _syncMaskFilter(skiaObject);
   }
+
   void _syncMaskFilter(js.JsObject object) {
     js.JsObject skMaskFilter;
     if (_maskFilter != null) {
@@ -163,11 +182,12 @@ class SkPaint extends SkiaObject implements ui.Paint {
           break;
       }
 
-      skMaskFilter = canvasKit
-          .callMethod('MakeBlurMaskFilter', <dynamic>[skBlurStyle, sigma, true]);
+      skMaskFilter = canvasKit.callMethod(
+          'MakeBlurMaskFilter', <dynamic>[skBlurStyle, sigma, true]);
     }
     object.callMethod('setMaskFilter', <js.JsObject>[skMaskFilter]);
   }
+
   ui.MaskFilter _maskFilter;
 
   // TODO(yjbanov): implement
@@ -177,6 +197,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
   set filterQuality(ui.FilterQuality value) {
     _filterQuality = value;
   }
+
   ui.FilterQuality _filterQuality = ui.FilterQuality.none;
 
   @override
@@ -186,6 +207,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
     _colorFilter = value;
     _syncColorFilter(skiaObject);
   }
+
   void _syncColorFilter(js.JsObject object) {
     js.JsObject skColorFilterJs;
     if (_colorFilter != null) {
@@ -194,6 +216,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
     }
     object.callMethod('setColorFilter', <js.JsObject>[skColorFilterJs]);
   }
+
   EngineColorFilter _colorFilter;
 
   // TODO(yjbanov): implement
@@ -203,6 +226,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
   set strokeMiterLimit(double value) {
     _strokeMiterLimit = value;
   }
+
   double _strokeMiterLimit = 0.0;
 
   @override
@@ -212,6 +236,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
     _imageFilter = value;
     _syncImageFilter(skiaObject);
   }
+
   void _syncImageFilter(js.JsObject object) {
     js.JsObject imageFilterJs;
     if (_imageFilter != null) {
@@ -219,6 +244,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
     }
     object.callMethod('setImageFilter', <js.JsObject>[imageFilterJs]);
   }
+
   SkImageFilter _imageFilter;
 
   @override

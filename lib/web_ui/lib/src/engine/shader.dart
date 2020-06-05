@@ -82,12 +82,12 @@ void _validateColorStops(List<ui.Color> colors, List<double> colorStops) {
 
 class GradientLinear extends EngineGradient {
   GradientLinear(
-  this.from,
-  this.to,
-  this.colors,
-  this.colorStops,
-  this.tileMode,
-  Float64List matrix,
+    this.from,
+    this.to,
+    this.colors,
+    this.colorStops,
+    this.tileMode,
+    Float64List matrix,
   )   : assert(_offsetIsValid(from)),
         assert(_offsetIsValid(to)),
         assert(colors != null),
@@ -157,13 +157,9 @@ class GradientLinear extends EngineGradient {
   js.JsObject createSkiaShader() {
     assert(experimentalUseSkia);
 
-    final js.JsArray<num> jsColors = js.JsArray<num>();
-    jsColors.length = colors.length;
-    for (int i = 0; i < colors.length; i++) {
-      jsColors[i] = colors[i].value;
-    }
+    var jsColors = makeColorList(colors);
 
-    return canvasKit.callMethod('MakeLinearGradientShader', <dynamic>[
+    return canvasKit['SkShader'].callMethod('MakeLinearGradient', <dynamic>[
       makeSkPoint(from),
       makeSkPoint(to),
       jsColors,
@@ -216,13 +212,9 @@ class GradientRadial extends EngineGradient {
   js.JsObject createSkiaShader() {
     assert(experimentalUseSkia);
 
-    final js.JsArray<num> jsColors = js.JsArray<num>();
-    jsColors.length = colors.length;
-    for (int i = 0; i < colors.length; i++) {
-      jsColors[i] = colors[i].value;
-    }
+    var jsColors = makeColorList(colors);
 
-    return canvasKit.callMethod('MakeRadialGradientShader', <dynamic>[
+    return canvasKit['SkShader'].callMethod('MakeRadialGradient', <dynamic>[
       makeSkPoint(center),
       radius,
       jsColors,
@@ -257,13 +249,10 @@ class GradientConical extends EngineGradient {
   js.JsObject createSkiaShader() {
     assert(experimentalUseSkia);
 
-    final js.JsArray<num> jsColors = js.JsArray<num>();
-    jsColors.length = colors.length;
-    for (int i = 0; i < colors.length; i++) {
-      jsColors[i] = colors[i].value;
-    }
+    var jsColors = makeColorList(colors);
 
-    return canvasKit.callMethod('MakeTwoPointConicalGradient', <dynamic>[
+    return canvasKit['SkShader']
+        .callMethod('MakeTwoPointConicalGradient', <dynamic>[
       makeSkPoint(focal),
       focalRadius,
       makeSkPoint(center),
@@ -305,7 +294,7 @@ class EngineImageFilter implements ui.ImageFilter {
 }
 
 js.JsObject _skTileMode(ui.TileMode tileMode) {
-  switch(tileMode) {
+  switch (tileMode) {
     case ui.TileMode.clamp:
       return canvasKit['TileMode']['Clamp'];
     case ui.TileMode.repeated:
@@ -318,14 +307,15 @@ js.JsObject _skTileMode(ui.TileMode tileMode) {
 
 /// Backend implementation of [ui.ImageShader].
 class EngineImageShader implements ui.ImageShader, EngineShader {
-  EngineImageShader(ui.Image image, this.tileModeX, this.tileModeY,
-      this.matrix4) : _skImage = image as SkImage;
+  EngineImageShader(
+      ui.Image image, this.tileModeX, this.tileModeY, this.matrix4)
+      : _skImage = image as SkImage;
 
   final ui.TileMode tileModeX;
   final ui.TileMode tileModeY;
   final Float64List matrix4;
   final SkImage _skImage;
 
-  js.JsObject createSkiaShader() => _skImage.skImage.callMethod('makeShader',
-      <dynamic>[_skTileMode(tileModeX), _skTileMode(tileModeY)]);
+  js.JsObject createSkiaShader() => _skImage.skImage.callMethod(
+      'makeShader', <dynamic>[_skTileMode(tileModeX), _skTileMode(tileModeY)]);
 }

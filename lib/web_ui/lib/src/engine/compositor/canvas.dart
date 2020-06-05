@@ -14,7 +14,8 @@ class SkCanvas {
   int get saveCount => skCanvas.callMethod('getSaveCount');
 
   void clear(ui.Color color) {
-    skCanvas.callMethod('clear', <int>[color.value]);
+    setSharedSkColor1(color);
+    skCanvas.callMethod('clear', <js.JsObject>[sharedSkColor1]);
   }
 
   void clipPath(ui.Path path, bool doAntiAlias) {
@@ -73,7 +74,7 @@ class SkCanvas {
     ui.Image atlas,
     Float32List rstTransforms,
     Float32List rects,
-    Int32List colors,
+    js.JsArray<Float32List> colors,
     ui.BlendMode blendMode,
   ) {
     final SkImage skAtlas = atlas;
@@ -97,7 +98,7 @@ class SkCanvas {
   }
 
   void drawColor(ui.Color color, ui.BlendMode blendMode) {
-    skCanvas.callMethod('drawColor', <dynamic>[
+    skCanvas.callMethod('drawColorInt', <dynamic>[
       color.value,
       makeSkBlendMode(blendMode),
     ]);
@@ -185,7 +186,9 @@ class SkCanvas {
     skCanvas.callMethod('drawPicture', <js.JsObject>[skPicture.skPicture]);
   }
 
-  void drawPoints(SkPaint paint, ui.PointMode pointMode, Float32List points) {
+  // TODO(hterkelsen): https://github.com/flutter/flutter/issues/58824
+  void drawPoints(SkPaint paint, ui.PointMode pointMode,
+      js.JsArray<js.JsArray<double>> points) {
     skCanvas.callMethod('drawPoints', <dynamic>[
       makeSkPointMode(pointMode),
       points,
@@ -273,7 +276,8 @@ class SkCanvas {
   }
 
   void transform(Float32List matrix4) {
-    skCanvas.callMethod('concat', <js.JsArray<double>>[makeSkMatrixFromFloat32(matrix4)]);
+    skCanvas.callMethod(
+        'concat', <js.JsArray<double>>[makeSkMatrixFromFloat32(matrix4)]);
   }
 
   void translate(double dx, double dy) {

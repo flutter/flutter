@@ -172,12 +172,15 @@ class SkiaFontCollection {
     final js.JsObject tmpFontMgr =
         canvasKit['SkFontMgr'].callMethod('FromData', <Uint8List>[bytes]);
     String actualFamily = tmpFontMgr.callMethod('getFamilyName', <int>[0]);
+    tmpFontMgr.callMethod('delete');
     return actualFamily;
   }
 
   Future<ByteBuffer> _getArrayBuffer(dynamic fetchResult) {
     // TODO(yjbanov): fetchResult.arrayBuffer is a dynamic invocation. Clean it up.
-    return fetchResult.arrayBuffer().then<ByteBuffer>((dynamic x) => x as ByteBuffer);
+    return fetchResult
+        .arrayBuffer()
+        .then<ByteBuffer>((dynamic x) => x as ByteBuffer);
   }
 
   js.JsObject skFontMgr;
