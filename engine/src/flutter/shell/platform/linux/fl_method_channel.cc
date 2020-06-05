@@ -229,10 +229,11 @@ gboolean fl_method_channel_respond(
         self->codec, fl_method_error_response_get_code(r),
         fl_method_error_response_get_message(r),
         fl_method_error_response_get_details(r), error);
-  } else if (FL_IS_METHOD_NOT_IMPLEMENTED_RESPONSE(response))
+  } else if (FL_IS_METHOD_NOT_IMPLEMENTED_RESPONSE(response)) {
     message = nullptr;
-  else
+  } else {
     g_assert_not_reached();
+  }
 
   return fl_binary_messenger_send_response(self->messenger, response_handle,
                                            message, error);

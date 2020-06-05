@@ -402,9 +402,9 @@ G_MODULE_EXPORT FlStandardMessageCodec* fl_standard_message_codec_new() {
 void fl_standard_message_codec_write_size(FlStandardMessageCodec* codec,
                                           GByteArray* buffer,
                                           uint32_t size) {
-  if (size < 254)
+  if (size < 254) {
     write_uint8(buffer, size);
-  else if (size <= 0xffff) {
+  } else if (size <= 0xffff) {
     write_uint8(buffer, 254);
     write_uint16(buffer, size);
   } else {
@@ -430,8 +430,9 @@ gboolean fl_standard_message_codec_read_size(FlStandardMessageCodec* codec,
     if (!read_uint16(buffer, offset, &value16, error))
       return FALSE;
     *value = value16;
-  } else
+  } else {
     *value = value8;
+  }
 
   return TRUE;
 }
@@ -560,33 +561,33 @@ FlValue* fl_standard_message_codec_read_value(FlStandardMessageCodec* self,
     return nullptr;
 
   g_autoptr(FlValue) value = nullptr;
-  if (type == kValueNull)
+  if (type == kValueNull) {
     return fl_value_new_null();
-  else if (type == kValueTrue)
+  } else if (type == kValueTrue) {
     return fl_value_new_bool(TRUE);
-  else if (type == kValueFalse)
+  } else if (type == kValueFalse) {
     return fl_value_new_bool(FALSE);
-  else if (type == kValueInt32)
+  } else if (type == kValueInt32) {
     value = read_int32_value(buffer, offset, error);
-  else if (type == kValueInt64)
+  } else if (type == kValueInt64) {
     value = read_int64_value(buffer, offset, error);
-  else if (type == kValueFloat64)
+  } else if (type == kValueFloat64) {
     value = read_float64_value(buffer, offset, error);
-  else if (type == kValueString)
+  } else if (type == kValueString) {
     value = read_string_value(self, buffer, offset, error);
-  else if (type == kValueUint8List)
+  } else if (type == kValueUint8List) {
     value = read_uint8_list_value(self, buffer, offset, error);
-  else if (type == kValueInt32List)
+  } else if (type == kValueInt32List) {
     value = read_int32_list_value(self, buffer, offset, error);
-  else if (type == kValueInt64List)
+  } else if (type == kValueInt64List) {
     value = read_int64_list_value(self, buffer, offset, error);
-  else if (type == kValueFloat64List)
+  } else if (type == kValueFloat64List) {
     value = read_float64_list_value(self, buffer, offset, error);
-  else if (type == kValueList)
+  } else if (type == kValueList) {
     value = read_list_value(self, buffer, offset, error);
-  else if (type == kValueMap)
+  } else if (type == kValueMap) {
     value = read_map_value(self, buffer, offset, error);
-  else {
+  } else {
     g_set_error(error, FL_MESSAGE_CODEC_ERROR,
                 FL_MESSAGE_CODEC_ERROR_UNSUPPORTED_TYPE,
                 "Unexpected standard codec type %02x", type);

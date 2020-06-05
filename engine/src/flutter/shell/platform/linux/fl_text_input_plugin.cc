@@ -191,8 +191,9 @@ static void method_call_cb(FlMethodChannel* channel,
   } else if (strcmp(method, kHideMethod) == 0) {
     gtk_im_context_focus_out(self->im_context);
     fl_method_call_respond_success(method_call, nullptr, nullptr);
-  } else
+  } else {
     fl_method_call_respond_not_implemented(method_call, nullptr);
+  }
 }
 
 static void fl_text_input_plugin_dispose(GObject* object) {

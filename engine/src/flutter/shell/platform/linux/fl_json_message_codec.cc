@@ -149,11 +149,11 @@ struct FlValueHandler {
   bool add(FlValue* value) {
     g_autoptr(FlValue) owned_value = value;
     FlValue* head = get_head();
-    if (head == nullptr)
+    if (head == nullptr) {
       push(owned_value);
-    else if (fl_value_get_type(head) == FL_VALUE_TYPE_LIST)
+    } else if (fl_value_get_type(head) == FL_VALUE_TYPE_LIST) {
       fl_value_append(head, owned_value);
-    else if (fl_value_get_type(head) == FL_VALUE_TYPE_MAP) {
+    } else if (fl_value_get_type(head) == FL_VALUE_TYPE_MAP) {
       fl_value_set_take(head, key, fl_value_ref(owned_value));
       key = nullptr;
     } else {
