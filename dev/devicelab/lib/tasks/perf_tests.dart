@@ -7,8 +7,11 @@ import 'dart:convert' show LineSplitter, json, utf8;
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service_io.dart';
 
 import '../framework/adb.dart';
 import '../framework/framework.dart';
@@ -400,47 +403,18 @@ class PerfTestWithSkSL extends PerfTest {
       }
     }
 
-    await super.internalRun(keepRunning: true, cacheSkSL: true);
-    final Process process = await startProcess(
-      _flutterPath,
-      <String>[
-        'attach',
-        '-d', _device.deviceId,
-      ],
-    );
-    final Stream<List<int>> broadcastOut = process.stdout.asBroadcastStream();
-    _forwardStream(broadcastOut, 'attach stdout');
-    _forwardStream(process.stderr, 'attach stderr');
+    final String uri = await _flutterRun();
+    await super.internalRun(keepRunning: true, cacheSkSL: true, existingApp: uri);
 
-    final Completer<bool> attachReady = Completer<bool>();
-    final Completer<bool> skslWritten = Completer<bool>();
+    final VmService vmService = await vmServiceConnectUri(uri);
+    final Response response = await vmService.callMethod('s0.flutterGetSkSL');
+    assert(response.type == 'Success');
 
-    _transform(broadcastOut).listen((String line) {
-      if (!attachReady.isCompleted && _kObservatoryReadyRegExp.hasMatch(line)) {
-        attachReady.complete(true);
-      }
-      if (!skslWritten.isCompleted && RegExp('Wrote SkSL data to').hasMatch(line)) {
-        skslWritten.complete(true);
-      }
-    });
-
-    await attachReady.future;
-    process.stdin.write('M');
-    await skslWritten.future;
-    process.stdin.write('q');
-    await process.exitCode;
+    await waitForFile(_skslJsonFileName);
   }
 
-  // Return the Observatory URI.
-  Future<String> _buildAndRun() async {
-    await flutter('build', options: <String>[
-      // TODO(liyuqian): also supports iOS once https://github.com/flutter/flutter/issues/53115 is fully closed.
-      'apk',
-      '--profile',
-      '--bundle-sksl-path', '$testDirectory/flutter_01.sksl.json',
-      '-t', testTarget,
-    ]);
-
+  // Return the VMService URI.
+  Future<String> _flutterRun({bool useCustomApk = false}) async {
     _deleteOldVmserviceFile();
 
     _runProcess = await startProcess(
@@ -451,7 +425,10 @@ class PerfTestWithSkSL extends PerfTest {
         '--profile',
         '-d', _device.deviceId,
         '-t', testTarget,
-        '--use-application-binary', '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk',
+        if (useCustomApk) ...<String>[
+          '--use-application-binary',
+          '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk',
+        ],
         '--vmservice-out-file', _vmserviceFileName,
       ],
     );
@@ -460,28 +437,30 @@ class PerfTestWithSkSL extends PerfTest {
     _forwardStream(broadcastOut, 'run stdout');
     _forwardStream(_runProcess.stderr, 'run stderr');
 
-    return await _getObservatoryUriFromVmserviceFile();
+    final File file = await waitForFile(_vmserviceFileName);
+    return file.readAsStringSync();
   }
 
+  // Return the VMService URI.
+  Future<String> _buildAndRun() async {
+    await flutter('build', options: <String>[
+      // TODO(liyuqian): also supports iOS once https://github.com/flutter/flutter/issues/53115 is fully closed.
+      'apk',
+      '--profile',
+      '--bundle-sksl-path', _skslJsonFileName,
+      '-t', testTarget,
+    ]);
+
+    return _flutterRun(useCustomApk: true);
+  }
+
+  String get _skslJsonFileName => '$testDirectory/flutter_01.sksl.json';
   String get _vmserviceFileName => '$testDirectory/$_kVmserviceOutFileName';
 
   void _deleteOldVmserviceFile() {
     if (File(_vmserviceFileName).existsSync()) {
       File(_vmserviceFileName).deleteSync();
     }
-  }
-
-  Future<String> _getObservatoryUriFromVmserviceFile() async {
-    const int maxWaitSeconds = 120;
-    const int waitIntervalSeconds = 5;
-    for (int waitSeconds = 0; waitSeconds < maxWaitSeconds; waitSeconds += waitIntervalSeconds) {
-      print('Waiting $waitIntervalSeconds seconds for $_vmserviceFileName to be written...');
-      await Future<void>.delayed(const Duration(seconds: waitIntervalSeconds));
-      if (File(_vmserviceFileName).existsSync()) {
-        return File(_vmserviceFileName).readAsStringSync();
-      }
-    }
-    throw 'Failed to get the Observatory URI after $maxWaitSeconds seconds';
   }
 
   Stream<String> _transform(Stream<List<int>> stream) =>
@@ -498,7 +477,6 @@ class PerfTestWithSkSL extends PerfTest {
   Process _runProcess;
 
   static const String _kVmserviceOutFileName = 'vmservice.out';
-  static final RegExp _kObservatoryReadyRegExp = RegExp(r'An Observatory debugger and profiler on .+ is available at: ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 }
 
 /// Measures how long it takes to compile a Flutter app to JavaScript and how
