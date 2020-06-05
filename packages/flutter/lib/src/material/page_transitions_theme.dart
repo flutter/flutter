@@ -152,11 +152,13 @@ class _ZoomPageTransition extends StatelessWidget {
   /// The [animation] and [secondaryAnimation] argument are required and must
   /// not be null.
   const _ZoomPageTransition({
+    Key key,
     @required this.animation,
     @required this.secondaryAnimation,
     this.child,
   }) : assert(animation != null),
-        assert(secondaryAnimation != null);
+       assert(secondaryAnimation != null),
+       super(key: key);
 
   // The scrim obscures the old page by becoming increasingly opaque.
   static final Tween<double> _scrimOpacityTween = Tween<double>(
@@ -241,9 +243,12 @@ class _ZoomPageTransition extends StatelessWidget {
 
 class _ZoomedTransitions extends StatelessWidget {
   const _ZoomedTransitions({
+    Key key,
     @required this.animation,
     @required this.child,
-  });
+  }) : assert(animation != null),
+       assert(child != null),
+       super(key: key);
 
   final Animation<double> animation;
   final Widget child;
@@ -279,9 +284,10 @@ class _ZoomedTransitions extends StatelessWidget {
 
 class _ZoomPageTransitionIn extends StatelessWidget {
   const _ZoomPageTransitionIn({
+    Key key,
     this.child,
     this.animation,
-  });
+  }) : super(key: key);
 
   final Widget child;
   final Animation<double> animation;
@@ -323,9 +329,10 @@ class _ZoomPageTransitionIn extends StatelessWidget {
 
 class _ZoomPageTransitionOut extends StatelessWidget {
   const _ZoomPageTransitionOut({
+    Key key,
     this.child,
     this.animation,
-  });
+  }) : super(key: key);
 
   final Widget child;
   final Animation<double> animation;
