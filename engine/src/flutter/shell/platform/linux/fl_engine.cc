@@ -277,6 +277,12 @@ gboolean fl_engine_send_platform_message_response(
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
   g_return_val_if_fail(handle != nullptr, FALSE);
 
+  if (self->engine == nullptr) {
+    g_set_error(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
+                "No engine to send response to");
+    return FALSE;
+  }
+
   gsize data_length = 0;
   const uint8_t* data = nullptr;
   if (response != nullptr) {
@@ -287,7 +293,7 @@ gboolean fl_engine_send_platform_message_response(
       self->engine, handle, data, data_length);
 
   if (result != kSuccess) {
-    g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
+    g_set_error(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
                 "Failed to send platorm message response");
     return FALSE;
   }
@@ -308,6 +314,12 @@ void fl_engine_send_platform_message(FlEngine* self,
   if (callback != nullptr) {
     task = g_task_new(self, cancellable, callback, user_data);
 
+    if (self->engine == nullptr) {
+      g_task_return_new_error(task, fl_engine_error_quark(),
+                              FL_ENGINE_ERROR_FAILED, "No engine to send to");
+      return;
+    }
+
     FlutterEngineResult result = FlutterPlatformMessageCreateResponseHandle(
         self->engine, fl_engine_platform_message_response_cb, task,
         &response_handle);
@@ -318,6 +330,8 @@ void fl_engine_send_platform_message(FlEngine* self,
       g_object_unref(task);
       return;
     }
+  } else if (self->engine == nullptr) {
+    return;
   }
 
   FlutterPlatformMessage fl_message = {};
@@ -358,6 +372,9 @@ void fl_engine_send_window_metrics_event(FlEngine* self,
                                          double pixel_ratio) {
   g_return_if_fail(FL_IS_ENGINE(self));
 
+  if (self->engine == nullptr)
+    return;
+
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(FlutterWindowMetricsEvent);
   event.width = width;
@@ -373,6 +390,9 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
                                         double y,
                                         int64_t buttons) {
   g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->engine == nullptr)
+    return;
 
   FlutterPointerEvent fl_event = {};
   fl_event.struct_size = sizeof(fl_event);
