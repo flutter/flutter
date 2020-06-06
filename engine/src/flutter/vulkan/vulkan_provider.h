@@ -5,7 +5,7 @@
 #ifndef FLUTTER_VULKAN_VULKAN_PROVIDER_H_
 #define FLUTTER_VULKAN_VULKAN_PROVIDER_H_
 
-#include "flutter/vulkan/vulkan_handle.h"
+#include "vulkan_handle.h"
 
 namespace vulkan {
 

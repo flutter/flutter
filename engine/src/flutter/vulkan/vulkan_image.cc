@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/vulkan/vulkan_image.h"
+#include "vulkan_image.h"
 
-#include "flutter/vulkan/vulkan_command_buffer.h"
-#include "flutter/vulkan/vulkan_proc_table.h"
+#include "vulkan_command_buffer.h"
+#include "vulkan_proc_table.h"
 
 namespace vulkan {
 

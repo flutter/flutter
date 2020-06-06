@@ -6,8 +6,8 @@
 #define FLUTTER_VULKAN_VULKAN_SURFACE_H_
 
 #include "flutter/fml/macros.h"
-#include "flutter/vulkan/vulkan_handle.h"
 #include "third_party/skia/include/core/SkSize.h"
+#include "vulkan_handle.h"
 
 namespace vulkan {
 

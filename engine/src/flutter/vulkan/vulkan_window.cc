@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/vulkan/vulkan_window.h"
+#include "vulkan_window.h"
 
 #include <memory>
 #include <string>
 
-#include "flutter/vulkan/vulkan_application.h"
-#include "flutter/vulkan/vulkan_device.h"
-#include "flutter/vulkan/vulkan_native_surface.h"
-#include "flutter/vulkan/vulkan_surface.h"
-#include "flutter/vulkan/vulkan_swapchain.h"
 #include "third_party/skia/include/gpu/GrContext.h"
+#include "vulkan_application.h"
+#include "vulkan_device.h"
+#include "vulkan_native_surface.h"
+#include "vulkan_surface.h"
+#include "vulkan_swapchain.h"
 
 namespace vulkan {
 

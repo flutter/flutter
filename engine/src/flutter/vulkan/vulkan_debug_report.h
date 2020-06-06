@@ -6,9 +6,9 @@
 #define FLUTTER_VULKAN_VULKAN_DEBUG_REPORT_H_
 
 #include "flutter/fml/macros.h"
-#include "flutter/vulkan/vulkan_handle.h"
-#include "flutter/vulkan/vulkan_interface.h"
-#include "flutter/vulkan/vulkan_proc_table.h"
+#include "vulkan_handle.h"
+#include "vulkan_interface.h"
+#include "vulkan_proc_table.h"
 
 namespace vulkan {
 
