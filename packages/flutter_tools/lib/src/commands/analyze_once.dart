@@ -8,6 +8,7 @@ import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -16,7 +17,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
-import '../dart/sdk.dart' as sdk;
+import '../globals.dart' as globals;
 import 'analyze.dart';
 import 'analyze_base.dart';
 
@@ -90,7 +91,8 @@ class AnalyzeOnce extends AnalyzeBase {
     final Completer<void> analysisCompleter = Completer<void>();
     final List<AnalysisError> errors = <AnalysisError>[];
 
-    final String sdkPath = argResults['dart-sdk'] as String ?? sdk.dartSdkPath;
+    final String sdkPath = argResults['dart-sdk'] as String ??
+      globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath);
 
     final AnalysisServer server = AnalysisServer(
       sdkPath,
