@@ -1079,8 +1079,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     super.didUpdateWidget(oldWidget);
     if (_isListeningToStream &&
         (widget.loadingBuilder == null) != (oldWidget.loadingBuilder == null)) {
-      _imageStream.removeListener(_getListener(oldWidget.loadingBuilder));
-      _imageStream.addListener(_getListener());
+      _imageStream.removeListener(_getListener());
+      _imageStream.addListener(_getListener(recreateListener: true));
     }
     if (widget.image != oldWidget.image)
       _resolveImage();
@@ -1119,22 +1119,25 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     _updateSourceStream(newStream);
   }
 
-  ImageStreamListener _getListener([ImageLoadingBuilder loadingBuilder]) {
-    loadingBuilder ??= widget.loadingBuilder;
-    _lastException = null;
-    _lastStack = null;
-    return ImageStreamListener(
-      _handleImageFrame,
-      onChunk: loadingBuilder == null ? null : _handleImageChunk,
-      onError: widget.errorBuilder != null
-        ? (dynamic error, StackTrace stackTrace) {
-            setState(() {
-              _lastException = error;
-              _lastStack = stackTrace;
-            });
-          }
-        : null,
-    );
+  ImageStreamListener _imageStreamListener;
+  ImageStreamListener _getListener({bool recreateListener = false}) {
+    if(_imageStreamListener == null || recreateListener) {
+      _lastException = null;
+      _lastStack = null;
+      _imageStreamListener = ImageStreamListener(
+        _handleImageFrame,
+        onChunk: widget.loadingBuilder == null ? null : _handleImageChunk,
+        onError: widget.errorBuilder != null
+            ? (dynamic error, StackTrace stackTrace) {
+                setState(() {
+                  _lastException = error;
+                  _lastStack = stackTrace;
+                });
+              }
+            : null,
+      );
+    }
+    return _imageStreamListener;
   }
 
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {

@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' hide Platform;
+import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:platform/platform.dart' show LocalPlatform;
 
 /// The location of the Flutter root directory, based on the known location of
 /// this script.
-final Directory flutterRoot = Directory(path.dirname(const LocalPlatform().script.toFilePath())).parent.parent.parent.parent;
+final Directory flutterRoot = Directory(path.dirname(Platform.script.toFilePath())).parent.parent.parent.parent;
 
 /// Converts `FOO_BAR` to `fooBar`.
 String shoutingToLowerCamel(String shouting) {

@@ -111,12 +111,24 @@ abstract class ScrollActivity {
 
   /// Whether the scroll view should ignore pointer events while performing this
   /// activity.
+  ///
+  /// See also:
+  ///
+  ///  * [isScrolling], which describes whether the activity is considered
+  ///    to represent user interaction or not.
   bool get shouldIgnorePointer;
 
   /// Whether performing this activity constitutes scrolling.
   ///
-  /// Used, for example, to determine whether the user scroll direction is
+  /// Used, for example, to determine whether the user scroll
+  /// direction (see [ScrollPosition.userScrollDirection]) is
   /// [ScrollDirection.idle].
+  ///
+  /// See also:
+  ///
+  ///  * [shouldIgnorePointer], which controls whether pointer events
+  ///    are allowed while the activity is live.
+  ///  * [UserScrollNotification], which exposes this status.
   bool get isScrolling;
 
   /// If applicable, the velocity at which the scroll offset is currently
@@ -515,9 +527,6 @@ class BallisticScrollActivity extends ScrollActivity {
        .whenComplete(_end); // won't trigger if we dispose _controller first
   }
 
-  @override
-  double get velocity => _controller.velocity;
-
   AnimationController _controller;
 
   @override
@@ -561,6 +570,9 @@ class BallisticScrollActivity extends ScrollActivity {
 
   @override
   bool get isScrolling => true;
+
+  @override
+  double get velocity => _controller.velocity;
 
   @override
   void dispose() {
@@ -622,9 +634,6 @@ class DrivenScrollActivity extends ScrollActivity {
   /// animation to stop before it reaches the end.
   Future<void> get done => _completer.future;
 
-  @override
-  double get velocity => _controller.velocity;
-
   void _tick() {
     if (delegate.setPixels(_controller.value) != 0.0)
       delegate.goIdle();
@@ -644,6 +653,9 @@ class DrivenScrollActivity extends ScrollActivity {
 
   @override
   bool get isScrolling => true;
+
+  @override
+  double get velocity => _controller.velocity;
 
   @override
   void dispose() {

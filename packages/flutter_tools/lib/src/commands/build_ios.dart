@@ -22,7 +22,7 @@ class BuildIOSCommand extends BuildSubCommand {
   BuildIOSCommand({ @required bool verboseHelp }) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
-    addBuildModeFlags(defaultToRelease: false);
+    addBuildModeFlags(defaultToRelease: true);
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
@@ -35,7 +35,8 @@ class BuildIOSCommand extends BuildSubCommand {
     addBuildPerformanceFile(hide: !verboseHelp);
     argParser
       ..addFlag('simulator',
-        help: 'Build for the iOS simulator instead of the device.',
+        help: 'Build for the iOS simulator instead of the device. This changes '
+          'the default build mode to debug if otherwise unspecified.',
       )
       ..addFlag('codesign',
         defaultsTo: true,
@@ -63,7 +64,11 @@ class BuildIOSCommand extends BuildSubCommand {
       throwToolExit('Building for iOS is only supported on the Mac.');
     }
 
-    final BuildableIOSApp app = await applicationPackages.getPackageForPlatform(TargetPlatform.ios) as BuildableIOSApp;
+    final BuildInfo buildInfo = getBuildInfo();
+    final BuildableIOSApp app = await applicationPackages.getPackageForPlatform(
+      TargetPlatform.ios,
+      buildInfo,
+    ) as BuildableIOSApp;
 
     if (app == null) {
       throwToolExit('Application not configured for iOS');
@@ -75,7 +80,6 @@ class BuildIOSCommand extends BuildSubCommand {
       globals.printStatus('Warning: Building for device with codesigning disabled. You will '
         'have to manually codesign before deploying to device.');
     }
-    final BuildInfo buildInfo = getBuildInfo();
     if (forSimulator && !buildInfo.supportsSimulator) {
       throwToolExit('${toTitleCase(buildInfo.friendlyModeName)} mode is not supported for simulators.');
     }

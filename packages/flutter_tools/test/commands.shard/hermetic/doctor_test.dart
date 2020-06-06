@@ -35,6 +35,7 @@ import '../../src/testbed.dart';
 
 final Generator _kNoColorOutputPlatform = () => FakePlatform(
   localeName: 'en_US.UTF-8',
+  environment: <String, String>{},
   stdoutSupportsAnsi: false,
 );
 
@@ -580,6 +581,24 @@ void main() {
           '    ✗ version error\n\n'
           '! Doctor found issues in 1 category.\n'
       ));
+    }, overrides: <Type, Generator>{
+      Artifacts: () => mockArtifacts,
+      FileSystem: () => memoryFileSystem,
+      OutputPreferences: () => OutputPreferences(wrapText: false),
+      ProcessManager: () => mockProcessManager,
+      Platform: _kNoColorOutputPlatform,
+      FlutterVersion: () => mockFlutterVersion,
+    });
+
+    testUsingContext('shows mirrors', () async {
+      (globals.platform as FakePlatform).environment = <String, String>{
+        'PUB_HOSTED_URL': 'https://example.com/pub',
+        'FLUTTER_STORAGE_BASE_URL': 'https://example.com/flutter',
+      };
+
+      expect(await FlutterValidatorDoctor(logger).diagnose(verbose: true), isTrue);
+      expect(logger.statusText, contains('Pub download mirror https://example.com/pub'));
+      expect(logger.statusText, contains('Flutter download mirror https://example.com/flutter'));
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
       FileSystem: () => memoryFileSystem,

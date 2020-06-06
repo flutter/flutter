@@ -11,8 +11,7 @@ You can read more about
 ## iOS
 
 You can open `ios/Runner.xcworkspace` in Xcode and build the project as
-usual. For this sample you need to run `pod install` from the `ios` folder
-before building the first time.
+usual.
 
 ## Android
 

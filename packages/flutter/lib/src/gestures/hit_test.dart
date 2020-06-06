@@ -142,7 +142,7 @@ class HitTestResult {
       _debugVectorMoreOrLessEquals(transform.getColumn(2), Vector4(0, 0, 1, 0)),
       'The third row and third column of a transform matrix for pointer '
       'events must be Vector4(0, 0, 1, 0) to ensure that a transformed '
-      'point is directly under the pointer device. Did you forget to run the paint '
+      'point is directly under the pointing device. Did you forget to run the paint '
       'matrix through PointerEvent.removePerspectiveTransform? '
       'The provided matrix is:\n$transform'
     );

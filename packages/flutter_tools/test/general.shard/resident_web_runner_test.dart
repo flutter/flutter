@@ -141,7 +141,7 @@ void main() {
       projectRootPath: anyNamed('projectRootPath'),
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
-      trackWidgetCreation: true,
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
       packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation _) async {
       return UpdateFSReport(success: true,  syncedBytes: 0)..invalidatedModules = <String>[];
@@ -583,7 +583,7 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
       packageConfig: anyNamed('packageConfig'),
-      trackWidgetCreation: true,
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
     )).thenAnswer((Invocation _) async {
       return UpdateFSReport(success: false,  syncedBytes: 0)..invalidatedModules = <String>[];
     });
@@ -646,7 +646,7 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
       packageConfig: anyNamed('packageConfig'),
-      trackWidgetCreation: true,
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
     )).thenAnswer((Invocation _) async {
       return UpdateFSReport(success: false,  syncedBytes: 0)..invalidatedModules = <String>[];
     });

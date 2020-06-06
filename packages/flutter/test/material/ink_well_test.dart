@@ -411,4 +411,459 @@ void main() {
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isFalse);
   });
+
+  testWidgets('When ink wells are nested, only the inner one is triggered by tap splash', (WidgetTester tester) async {
+    final GlobalKey middleKey = GlobalKey();
+    final GlobalKey innerKey = GlobalKey();
+    Widget paddedInkWell({Key key, Widget child}) {
+      return InkWell(
+        key: key,
+        onTap: () {},
+        child: Padding(
+          padding: const EdgeInsets.all(50),
+          child: child,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: paddedInkWell(
+              child: paddedInkWell(
+                key: middleKey,
+                child: paddedInkWell(
+                  key: innerKey,
+                  child: Container(width: 50, height: 50),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)));
+
+    // Press
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 1);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Up
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(material, paintsNothing);
+
+    // Press again
+    await gesture.down(tester.getCenter(find.byKey(innerKey)));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Cancel
+    await gesture.cancel();
+    await tester.pumpAndSettle();
+    expect(material, paintsNothing);
+
+    // Press again
+    await gesture.down(tester.getCenter(find.byKey(innerKey)));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Use a second pointer to press
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 2);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+    await gesture2.up();
+  });
+
+  testWidgets('Reparenting parent should allow both inkwells to show splash afterwards', (WidgetTester tester) async {
+    final GlobalKey middleKey = GlobalKey();
+    final GlobalKey innerKey = GlobalKey();
+    Widget paddedInkWell({Key key, Widget child}) {
+      return InkWell(
+        key: key,
+        onTap: () {},
+        child: Padding(
+          padding: const EdgeInsets.all(50),
+          child: child,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Container(
+              width: 200,
+              height: 100,
+              child: Row(
+                children: <Widget>[
+                  paddedInkWell(
+                    key: middleKey,
+                    child: paddedInkWell(
+                      key: innerKey,
+                    ),
+                  ),
+                  Container(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)));
+
+    // Press
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 1);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Reparent parent
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Container(
+              width: 200,
+              height: 100,
+              child: Row(
+                children: <Widget>[
+                  paddedInkWell(
+                    key: innerKey,
+                  ),
+                  paddedInkWell(
+                    key: middleKey,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Up
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(material, paintsNothing);
+
+    // Press the previous parent
+    await gesture.down(tester.getCenter(find.byKey(middleKey)));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Use a second pointer to press the previous child
+    await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 2);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 2));
+  });
+
+  testWidgets('Parent inkwell does not block child inkwells from splashes', (WidgetTester tester) async {
+    final GlobalKey middleKey = GlobalKey();
+    final GlobalKey innerKey = GlobalKey();
+    Widget paddedInkWell({Key key, Widget child}) {
+      return InkWell(
+        key: key,
+        onTap: () {},
+        child: Padding(
+          padding: const EdgeInsets.all(50),
+          child: child,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: paddedInkWell(
+              child: paddedInkWell(
+                key: middleKey,
+                child: paddedInkWell(
+                  key: innerKey,
+                  child: Container(width: 50, height: 50),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)));
+
+    // Press middle
+    await tester.startGesture(tester.getTopLeft(find.byKey(middleKey)) + const Offset(1, 1), pointer: 1);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Press inner
+    await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 2);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 2));
+  });
+
+  testWidgets('Parent inkwell can count the number of pressed children to prevent splash', (WidgetTester tester) async {
+    final GlobalKey parentKey = GlobalKey();
+    final GlobalKey leftKey = GlobalKey();
+    final GlobalKey rightKey = GlobalKey();
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Container(
+              width: 100,
+              height: 100,
+              child: InkWell(
+                key: parentKey,
+                onTap: () {},
+                child: Center(
+                  child: Container(
+                    width: 100,
+                    height: 50,
+                    child: Row(
+                      children: <Widget>[
+                        Container(
+                          width: 50,
+                          height: 50,
+                          child: InkWell(
+                            key: leftKey,
+                            onTap: () {},
+                          ),
+                        ),
+                        Container(
+                          width: 50,
+                          height: 50,
+                          child: InkWell(
+                            key: rightKey,
+                            onTap: () {},
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final MaterialInkController material = Material.of(tester.element(find.byKey(leftKey)));
+
+    final Offset parentPosition = tester.getTopLeft(find.byKey(parentKey)) + const Offset(1, 1);
+
+    // Press left child
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.byKey(leftKey)), pointer: 1);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Press right child
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byKey(rightKey)), pointer: 2);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 2));
+
+    // Press parent
+    final TestGesture gesture3 = await tester.startGesture(parentPosition, pointer: 3);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 2));
+    await gesture3.up();
+
+    // Release left child
+    await gesture1.up();
+    await tester.pumpAndSettle();
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Press parent
+    await gesture3.down(parentPosition);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+    await gesture3.up();
+
+    // Release right child
+    await gesture2.up();
+    await tester.pumpAndSettle();
+    expect(material, paintsExactlyCountTimes(#drawCircle, 0));
+
+    // Press parent
+    await gesture3.down(parentPosition);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+    await gesture3.up();
+  });
+
+  testWidgets('When ink wells are reparented, the old parent can display splash while the new parent can not', (WidgetTester tester) async {
+    final GlobalKey innerKey = GlobalKey();
+    final GlobalKey leftKey = GlobalKey();
+    final GlobalKey rightKey = GlobalKey();
+
+    Widget doubleInkWellRow({
+      double leftWidth,
+      double rightWidth,
+      Widget leftChild,
+      Widget rightChild,
+    }) {
+      return Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Container(
+              width: leftWidth+rightWidth,
+              height: 100,
+              child: Row(
+                children: <Widget>[
+                  Container(
+                    width: leftWidth,
+                    height: 100,
+                    child: InkWell(
+                      key: leftKey,
+                      onTap: () {},
+                      child: Center(
+                        child: Container(
+                          width: leftWidth,
+                          height: 50,
+                          child: leftChild,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: rightWidth,
+                    height: 100,
+                    child: InkWell(
+                      key: rightKey,
+                      onTap: () {},
+                      child: Center(
+                        child: Container(
+                          width: leftWidth,
+                          height: 50,
+                          child: rightChild,
+                        ),
+                      ),
+                    )
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      doubleInkWellRow(
+        leftWidth: 110,
+        rightWidth: 90,
+        leftChild: InkWell(
+          key: innerKey,
+          onTap: () {},
+        ),
+      ),
+    );
+    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)));
+
+    // Press inner
+    final TestGesture gesture = await tester.startGesture(const Offset(100, 50), pointer: 1);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Switch side
+    await tester.pumpWidget(
+      doubleInkWellRow(
+        leftWidth: 90,
+        rightWidth: 110,
+        rightChild: InkWell(
+          key: innerKey,
+          onTap: () {},
+        ),
+      ),
+    );
+    expect(material, paintsExactlyCountTimes(#drawCircle, 0));
+
+    // A second pointer presses inner
+    final TestGesture gesture2 = await tester.startGesture(const Offset(100, 50), pointer: 2);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    await gesture.up();
+    await gesture2.up();
+    await tester.pumpAndSettle();
+
+    // Press inner
+    await gesture.down(const Offset(100, 50));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Press left
+    await gesture2.down(const Offset(50, 50));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 2));
+
+    await gesture.up();
+    await gesture2.up();
+  });
+
+  testWidgets("Ink wells's splash starts before tap is confirmed and disappear after tap is canceled", (WidgetTester tester) async {
+    final GlobalKey innerKey = GlobalKey();
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: GestureDetector(
+            onHorizontalDragStart: (_) {},
+            child: Center(
+              child: Container(
+                width: 100,
+                height: 100,
+                child: InkWell(
+                  onTap: () {},
+                  child: Center(
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      child: InkWell(
+                        key: innerKey,
+                        onTap: () {},
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)));
+
+    // Press
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 1);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+
+    // Scroll upward
+    await gesture.moveBy(const Offset(0, -100));
+    await tester.pumpAndSettle();
+    expect(material, paintsNothing);
+
+    // Up
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(material, paintsNothing);
+
+    // Press again
+    await gesture.down(tester.getCenter(find.byKey(innerKey)));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+  });
 }

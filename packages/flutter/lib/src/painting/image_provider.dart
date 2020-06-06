@@ -347,10 +347,10 @@ abstract class ImageProvider<T> {
           stack: stack,
           context: ErrorDescription('while resolving an image'),
           silent: true, // could be a network error or whatnot
-          informationCollector: collector
-          );
-        },
-      );
+          informationCollector: collector,
+        );
+      },
+    );
     return stream;
   }
 

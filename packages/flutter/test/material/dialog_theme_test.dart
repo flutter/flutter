@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { ThemeData theme }) {
+MaterialApp _appWithDialog(WidgetTester tester, Widget dialog, { ThemeData theme }) {
   return MaterialApp(
     theme: theme,
     home: Material(
@@ -37,8 +37,8 @@ Material _getMaterialFromDialog(WidgetTester tester) {
   return tester.widget<Material>(find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
 }
 
-RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(find.descendant(of: find.byType(AlertDialog), matching: find.text(text))).renderObject as RenderParagraph;
+RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
+  return tester.element<StatelessElement>(find.text(text)).renderObject as RenderParagraph;
 }
 
 void main() {
@@ -70,7 +70,7 @@ void main() {
     );
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(backgroundColor: customColor));
 
-    await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: theme));
+    await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
@@ -87,7 +87,7 @@ void main() {
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(elevation: customElevation));
 
     await tester.pumpWidget(
-        _appWithAlertDialog(tester, dialog, theme: theme)
+        _appWithDialog(tester, dialog, theme: theme)
     );
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -106,7 +106,7 @@ void main() {
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(shape: customBorder));
 
     await tester.pumpWidget(
-      _appWithAlertDialog(tester, dialog, theme: theme)
+      _appWithDialog(tester, dialog, theme: theme)
     );
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -124,7 +124,7 @@ void main() {
     );
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(shape: customBorder));
 
-    await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: theme));
+    await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
@@ -143,11 +143,11 @@ void main() {
       actions: <Widget>[ ],
     );
 
-    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
+    await tester.pumpWidget(_appWithDialog(tester, dialog));
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final RenderParagraph title = _getTextRenderObjectFromDialog(tester, titleText);
+    final RenderParagraph title = _getTextRenderObject(tester, titleText);
     expect(title.text.style, titleTextStyle);
   });
 
@@ -160,11 +160,11 @@ void main() {
     );
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(titleTextStyle: titleTextStyle));
 
-    await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: theme));
+    await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final RenderParagraph title = _getTextRenderObjectFromDialog(tester, titleText);
+    final RenderParagraph title = _getTextRenderObject(tester, titleText);
     expect(title.text.style, titleTextStyle);
   });
 
@@ -177,11 +177,59 @@ void main() {
     );
     final ThemeData theme = ThemeData(textTheme: const TextTheme(headline6: titleTextStyle));
 
-    await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: theme));
+    await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final RenderParagraph title = _getTextRenderObjectFromDialog(tester, titleText);
+    final RenderParagraph title = _getTextRenderObject(tester, titleText);
+    expect(title.text.style.color, titleTextStyle.color);
+  });
+
+  testWidgets('Simple Dialog - Custom Title Text Style - Constructor Param', (WidgetTester tester) async {
+    const String titleText = 'Title';
+    const TextStyle titleTextStyle = TextStyle(color: Colors.pink);
+    const SimpleDialog dialog = SimpleDialog(
+      title: Text(titleText),
+      titleTextStyle: titleTextStyle,
+    );
+
+    await tester.pumpWidget(_appWithDialog(tester, dialog));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph title = _getTextRenderObject(tester, titleText);
+    expect(title.text.style, titleTextStyle);
+  });
+
+  testWidgets('Simple Dialog - Custom Title Text Style - Dialog Theme', (WidgetTester tester) async {
+    const String titleText = 'Title';
+    const TextStyle titleTextStyle = TextStyle(color: Colors.pink);
+    const SimpleDialog dialog = SimpleDialog(
+      title: Text(titleText),
+    );
+    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(titleTextStyle: titleTextStyle));
+
+    await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph title = _getTextRenderObject(tester, titleText);
+    expect(title.text.style, titleTextStyle);
+  });
+
+  testWidgets('Simple Dialog - Custom Title Text Style - Theme', (WidgetTester tester) async {
+    const String titleText = 'Title';
+    const TextStyle titleTextStyle = TextStyle(color: Colors.pink);
+    const SimpleDialog dialog = SimpleDialog(
+      title: Text(titleText),
+    );
+    final ThemeData theme = ThemeData(textTheme: const TextTheme(headline6: titleTextStyle));
+
+    await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph title = _getTextRenderObject(tester, titleText);
     expect(title.text.style.color, titleTextStyle.color);
   });
 
@@ -194,11 +242,11 @@ void main() {
       actions: <Widget>[ ],
     );
 
-    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
+    await tester.pumpWidget(_appWithDialog(tester, dialog));
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    final RenderParagraph content = _getTextRenderObject(tester, contentText);
     expect(content.text.style, contentTextStyle);
   });
 
@@ -211,11 +259,11 @@ void main() {
     );
     final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(contentTextStyle: contentTextStyle));
 
-    await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: theme));
+    await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    final RenderParagraph content = _getTextRenderObject(tester, contentText);
     expect(content.text.style, contentTextStyle);
   });
 
@@ -228,11 +276,11 @@ void main() {
     );
     final ThemeData theme = ThemeData(textTheme: const TextTheme(subtitle1: contentTextStyle));
 
-    await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: theme));
+    await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    final RenderParagraph content = _getTextRenderObject(tester, contentText);
     expect(content.text.style.color, contentTextStyle.color);
   });
 }

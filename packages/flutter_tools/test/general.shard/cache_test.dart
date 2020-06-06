@@ -370,12 +370,15 @@ void main() {
     });
 
     test('development artifact', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts();
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(mockCache);
       expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
     });
 
     testUsingContext('update', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts();
+      final Directory cacheRoot = globals.fs.directory('/bin/cache')
+        ..createSync(recursive: true);
+      when(mockCache.getRoot()).thenReturn(cacheRoot);
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(mockCache);
       expect(mavenArtifacts.isUpToDate(), isFalse);
 
       final Directory gradleWrapperDir = globals.fs.systemTempDirectory.createTempSync('flutter_cache_test_gradle_wrapper.');

@@ -13,6 +13,11 @@ import '../../src/context.dart';
 const int kLollipopVersionCode = 21;
 const String kLastLogcatTimestamp = '11-27 15:39:04.506';
 
+/// By default the android log reader accepts lines that match no patterns
+/// if the previous line was a match. Include an intentionally non-matching
+/// line as the first input to disable this behavior.
+const String kDummyLine = 'Contents are not important\n';
+
 void main() {
   testWithoutContext('AdbLogReader calls adb logcat with expected flags apiVersion 21', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
@@ -127,6 +132,40 @@ void main() {
 
     logReader.dispose();
     await onDone.future;
+  });
+
+  testWithoutContext('AdbLogReader does not filter output from AndroidRuntime crashes', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>[
+          'adb',
+          '-s',
+          '1234',
+          'logcat',
+          '-v',
+          'time',
+        ],
+        completer: Completer<void>.sync(),
+        // Example stack trace from an incorrectly named application:name in the AndroidManfiest.xml
+        stdout:
+          kDummyLine +
+          '05-11 12:54:46.665 E/AndroidRuntime(11787): FATAL EXCEPTION: main\n'
+          '05-11 12:54:46.665 E/AndroidRuntime(11787): Process: com.example.foobar, PID: 11787\n'
+          '05-11 12:54:46.665 java.lang.RuntimeException: Unable to instantiate application '
+          'io.flutter.app.FlutterApplication2: java.lang.ClassNotFoundException:\n',
+      )
+    ]);
+    final AdbLogReader logReader = await AdbLogReader.createLogReader(
+      createMockDevice(null),
+      processManager,
+    );
+    await expectLater(logReader.logLines, emitsInOrder(<String>[
+      'E/AndroidRuntime(11787): FATAL EXCEPTION: main',
+      'E/AndroidRuntime(11787): Process: com.example.foobar, PID: 11787',
+      'java.lang.RuntimeException: Unable to instantiate application io.flutter.app.FlutterApplication2: java.lang.ClassNotFoundException:',
+    ]));
+
+    logReader.dispose();
   });
 }
 

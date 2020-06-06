@@ -2475,4 +2475,69 @@ void main() {
 
     expect(tabBarWithText.preferredSize, tabBarWithTextChild.preferredSize);
    });
+
+  testWidgets('Setting TabController index should make TabBar indicator immediately pop into the position', (WidgetTester tester) async {
+    const List<Tab> tabs = <Tab>[
+      Tab(text: 'A'), Tab(text: 'B'), Tab(text: 'C')
+    ];
+    const Color indicatorColor = Color(0xFFFF0000);
+    TabController tabController;
+
+    Widget buildTabControllerFrame(BuildContext context, TabController controller) {
+      tabController = controller;
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              controller: controller,
+              tabs: tabs,
+              indicatorColor: indicatorColor,
+            ),
+          ),
+          body: TabBarView(
+            controller: controller,
+            children: tabs.map((Tab tab) {
+              return Center(child: Text(tab.text));
+            }).toList(),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(TabControllerFrame(
+      builder: buildTabControllerFrame,
+      length: tabs.length,
+      initialIndex: 0,
+    ));
+
+    final RenderBox box = tester.renderObject(find.byType(TabBar));
+    final TabIndicatorRecordingCanvas canvas = TabIndicatorRecordingCanvas(indicatorColor);
+    final TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
+
+    box.paint(context, Offset.zero);
+    double expectedIndicatorLeft = canvas.indicatorRect.left;
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    void pageControllerListener() {
+      // Whenever TabBarView scrolls due to changing TabController's index,
+      // check if indicator stays idle in its expectedIndicatorLeft
+      box.paint(context, Offset.zero);
+      expect(canvas.indicatorRect.left, expectedIndicatorLeft);
+    }
+
+    // Moving from index 0 to 2 (distanced tabs)
+    tabController.index = 2;
+    box.paint(context, Offset.zero);
+    expectedIndicatorLeft = canvas.indicatorRect.left;
+    pageController.addListener(pageControllerListener);
+    await tester.pumpAndSettle();
+
+    // Moving from index 2 to 1 (neighboring tabs)
+    tabController.index = 1;
+    box.paint(context, Offset.zero);
+    expectedIndicatorLeft = canvas.indicatorRect.left;
+    await tester.pumpAndSettle();
+    pageController.removeListener(pageControllerListener);
+  });
 }

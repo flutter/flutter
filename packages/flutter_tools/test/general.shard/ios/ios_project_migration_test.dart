@@ -322,6 +322,8 @@ keep this 2
 <dict>
 	<key>BuildSystemType</key>
 	<string>Original</string>
+	<key>PreviewsEnabled</key>
+	<false/>
 </dict>
 </plist>''';
         xcodeWorkspaceSharedSettings.writeAsStringSync(contents);

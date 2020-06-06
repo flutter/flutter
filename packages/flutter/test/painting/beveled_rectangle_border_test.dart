@@ -8,6 +8,23 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
+  test('BeveledRectangleBorder defaults', () {
+    const BeveledRectangleBorder border = BeveledRectangleBorder();
+    expect(border.side, BorderSide.none);
+    expect(border.borderRadius, BorderRadius.zero);
+  });
+
+  test('BeveledRectangleBorder copyWith, ==, hashCode', () {
+    expect(const BeveledRectangleBorder(), const BeveledRectangleBorder().copyWith());
+    expect(const BeveledRectangleBorder().hashCode, const BeveledRectangleBorder().copyWith().hashCode);
+    const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
+    const BorderRadius radius = BorderRadius.all(Radius.circular(16.0));
+    expect(
+      const BeveledRectangleBorder().copyWith(side: side, borderRadius: radius),
+      const BeveledRectangleBorder(side: side, borderRadius: radius),
+    );
+  });
+
   test('BeveledRectangleBorder scale and lerp', () {
     final BeveledRectangleBorder c10 = BeveledRectangleBorder(side: const BorderSide(width: 10.0), borderRadius: BorderRadius.circular(100.0));
     final BeveledRectangleBorder c15 = BeveledRectangleBorder(side: const BorderSide(width: 15.0), borderRadius: BorderRadius.circular(150.0));

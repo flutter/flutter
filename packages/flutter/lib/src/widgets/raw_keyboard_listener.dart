@@ -39,10 +39,12 @@ class RawKeyboardListener extends StatefulWidget {
     Key key,
     @required this.focusNode,
     this.autofocus = false,
+    this.includeSemantics = true,
     this.onKey,
     @required this.child,
   }) : assert(focusNode != null),
        assert(autofocus != null),
+       assert(includeSemantics != null),
        assert(child != null),
        super(key: key);
 
@@ -51,6 +53,9 @@ class RawKeyboardListener extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
+
+  /// {@macro flutter.widgets.Focus.includeSemantics}
+  final bool includeSemantics;
 
   /// Called whenever this widget receives a raw keyboard event.
   final ValueChanged<RawKeyEvent> onKey;
@@ -126,6 +131,7 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
     return Focus(
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
+      includeSemantics: widget.includeSemantics,
       child: widget.child,
     );
   }

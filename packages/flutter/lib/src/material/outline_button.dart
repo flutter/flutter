@@ -175,6 +175,7 @@ class OutlineButton extends MaterialButton {
   Widget build(BuildContext context) {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     return _OutlineButton(
+      autofocus: autofocus,
       onPressed: onPressed,
       onLongPress: onLongPress,
       brightness: buttonTheme.getBrightness(this),
@@ -450,6 +451,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
       animation: _controller,
       builder: (BuildContext context, Widget child) {
         return RaisedButton(
+          autofocus: widget.autofocus,
           textColor: widget.textColor,
           disabledTextColor: widget.disabledTextColor,
           color: _getFillColor(),

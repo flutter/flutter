@@ -34,6 +34,13 @@ String getDefaultApplicationKernelPath({ @required bool trackWidgetCreation }) {
   );
 }
 
+String getDefaultCachedKernelPath({ @required bool trackWidgetCreation }) {
+  return getKernelPathForTransformerOptions(
+    globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
+    trackWidgetCreation: trackWidgetCreation,
+  );
+}
+
 String getKernelPathForTransformerOptions(
   String path, {
   @required bool trackWidgetCreation,

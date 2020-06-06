@@ -22,6 +22,9 @@ import 'object.dart';
 /// Trees of Flutter diagnostics can be very large so filtering the diagnostics
 /// shown matters. Typically filtering to only show diagnostics with at least
 /// level [debug] is appropriate.
+///
+/// In release mode, this level may not have any effect, as diagnostics in
+/// release mode are compacted or truncated to reduce binary size.
 enum DiagnosticLevel {
   /// Diagnostics that should not be shown.
   ///
@@ -84,7 +87,11 @@ enum DiagnosticLevel {
   /// filter which diagnostics are shown.
   off,
 }
+
 /// Styles for displaying a node in a [DiagnosticsNode] tree.
+///
+/// In release mode, these styles may be ignored, as diagnostics are compacted
+/// or truncated to save on binary size.
 ///
 /// See also:
 ///
@@ -179,6 +186,9 @@ enum DiagnosticsTreeStyle {
 
 /// Configuration specifying how a particular [DiagnosticsTreeStyle] should be
 /// rendered as text art.
+///
+/// In release mode, these configurations may be ignored, as diagnostics are
+/// compacted or truncated to save on binary size.
 ///
 /// See also:
 ///
@@ -1633,6 +1643,9 @@ abstract class DiagnosticsNode {
   ///
   /// `minLevel` specifies the minimum [DiagnosticLevel] for properties included
   /// in the output.
+  ///
+  /// In release mode, far less information is retained and some information may
+  /// not print at all.
   @override
   String toString({
     TextTreeConfiguration parentConfiguration,
@@ -1710,6 +1723,9 @@ abstract class DiagnosticsNode {
   ///
   /// The [toStringDeep] method takes other arguments, but those are intended
   /// for internal use when recursing to the descendants, and so can be ignored.
+  ///
+  /// In release mode, far less information is retained and some information may
+  /// not print at all.
   ///
   /// See also:
   ///

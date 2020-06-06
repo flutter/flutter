@@ -9,6 +9,23 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
+  test('ContinuousRectangleBorder defaults', () {
+    const ContinuousRectangleBorder border = ContinuousRectangleBorder();
+    expect(border.side, BorderSide.none);
+    expect(border.borderRadius, BorderRadius.zero);
+  });
+
+  test('ContinuousRectangleBorder copyWith, ==, hashCode', () {
+    expect(const ContinuousRectangleBorder(), const ContinuousRectangleBorder().copyWith());
+    expect(const ContinuousRectangleBorder().hashCode, const ContinuousRectangleBorder().copyWith().hashCode);
+    const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
+    const BorderRadius radius = BorderRadius.all(Radius.circular(16.0));
+    expect(
+      const ContinuousRectangleBorder().copyWith(side: side, borderRadius: radius),
+      const ContinuousRectangleBorder(side: side, borderRadius: radius),
+    );
+  });
+
   test('ContinuousRectangleBorder scale and lerp', () {
     final ContinuousRectangleBorder c10 = ContinuousRectangleBorder(side: const BorderSide(width: 10.0), borderRadius: BorderRadius.circular(100.0));
     final ContinuousRectangleBorder c15 = ContinuousRectangleBorder(side: const BorderSide(width: 15.0), borderRadius: BorderRadius.circular(150.0));

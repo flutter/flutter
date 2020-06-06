@@ -524,6 +524,7 @@ abstract class Page<T> extends RouteSettings {
   /// Creates the [Route] that corresponds to this page.
   ///
   /// The created [Route] must have its [Route.settings] property set to this [Page].
+  @factory
   Route<T> createRoute(BuildContext context);
 
   @override
@@ -2151,9 +2152,10 @@ class Navigator extends StatefulWidget {
   /// This is the default value of [onGenerateInitialRoutes], which is used if
   /// [initialRoute] is not null.
   ///
-  /// If this string contains any `/` characters, then the string is split on
-  /// those characters and substrings from the start of the string up to each
-  /// such character are, in turn, used as routes to push.
+  /// If this string starts with a `/` character and has multiple `/` characters
+  /// in it, then the string is split on those characters and substrings from
+  /// the start of the string up to each such character are, in turn, used as
+  /// routes to push.
   ///
   /// For example, if the route `/stocks/HOOLI` was used as the [initialRoute],
   /// then the [Navigator] would push the following routes on startup: `/`,
@@ -2368,7 +2370,7 @@ class _RouteEntry extends RouteTransitionRecord {
 
     if (previousState == _RouteLifecycle.replace || previousState == _RouteLifecycle.pushReplace) {
       for (final NavigatorObserver observer in navigator.widget.observers)
-        observer.didReplace(newRoute: route, oldRoute: previous);
+        observer.didReplace(newRoute: route, oldRoute: previousPresent);
     } else {
       assert(previousState == _RouteLifecycle.push);
       for (final NavigatorObserver observer in navigator.widget.observers)
@@ -3435,9 +3437,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(predicate != null);
     int index = _history.length - 1;
     _history.add(_RouteEntry(newRoute, initialState: _RouteLifecycle.push));
-    while (index >= 0) {
-      final _RouteEntry entry = _history[index];
-      if (entry.isPresent && !predicate(entry.route))
+    while (index >= 0 && !predicate(_history[index].route)) {
+      if (_history[index].isPresent)
         _history[index].remove();
       index -= 1;
     }
