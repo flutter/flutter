@@ -99,10 +99,7 @@ class ProfilingSummarizer {
   /// Computes the average of the `profileType` over the recorded events.
   double computeAverage(ProfileType profileType) {
     final List<TimelineEvent> events = eventByType[profileType];
-    if (events.isEmpty) {
-      return 0;
-    }
-
+    assert(events.isNotEmpty);
     final double total = events
         .map((TimelineEvent e) => _getProfileValue(profileType, e))
         .reduce((double a, double b) => a + b);
@@ -112,10 +109,7 @@ class ProfilingSummarizer {
   /// The [percentile]-th percentile `profileType` over the recorded events.
   double computePercentile(ProfileType profileType, double percentile) {
     final List<TimelineEvent> events = eventByType[profileType];
-    if (events.isEmpty) {
-      return 0;
-    }
-
+    assert(events.isNotEmpty);
     final List<double> doubles = events
         .map((TimelineEvent e) => _getProfileValue(profileType, e))
         .toList();
