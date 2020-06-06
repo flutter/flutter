@@ -31,6 +31,7 @@ const String kBundleSkSLPath = 'BundleSkSLPath';
 /// Returns a [Depfile] containing all assets used in the build.
 Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   Map<String, DevFSContent> additionalContent,
+  @required TargetPlatform targetPlatform,
 }) async {
   // Check for an SkSL bundle.
   final String shaderBundlePath = environment.inputs[kBundleSkSLPath];
@@ -39,7 +40,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
     engineVersion: environment.engineVersion,
     fileSystem: environment.fileSystem,
     logger: environment.logger,
-    targetPlatform: TargetPlatform.android,
+    targetPlatform: targetPlatform,
   );
 
   final File pubspecFile =  environment.projectDir.childFile('pubspec.yaml');
@@ -215,7 +216,11 @@ class CopyAssets extends Target {
       .buildDir
       .childDirectory('flutter_assets');
     output.createSync(recursive: true);
-    final Depfile depfile = await copyAssets(environment, output);
+    final Depfile depfile = await copyAssets(
+      environment,
+      output,
+      targetPlatform: TargetPlatform.android,
+    );
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,

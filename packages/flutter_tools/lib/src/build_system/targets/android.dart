@@ -62,7 +62,11 @@ abstract class AndroidAssetBundle extends Target {
           .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
     }
     if (_copyAssets) {
-      final Depfile assetDepfile = await copyAssets(environment, outputDirectory);
+      final Depfile assetDepfile = await copyAssets(
+        environment,
+        outputDirectory,
+        targetPlatform: TargetPlatform.android,
+      );
       final DepfileService depfileService = DepfileService(
         fileSystem: globals.fs,
         logger: globals.logger,
