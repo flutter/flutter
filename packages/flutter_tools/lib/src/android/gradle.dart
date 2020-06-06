@@ -310,10 +310,10 @@ Future<void> buildGradleApp({
   command.add('-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}');
 
   if (buildInfo.extraFrontEndOptions != null) {
-    command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions.join(',')}');
+    command.add('-Pextra-front-end-options=${encodeDartDefines(buildInfo.extraFrontEndOptions)}');
   }
   if (buildInfo.extraGenSnapshotOptions != null) {
-    command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions.join(',')}');
+    command.add('-Pextra-gen-snapshot-options=${encodeDartDefines(buildInfo.extraGenSnapshotOptions)}');
   }
   if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty) {
     command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
@@ -328,7 +328,7 @@ Future<void> buildGradleApp({
     command.add('-Pshrink=true');
   }
   if (androidBuildInfo.buildInfo.dartDefines?.isNotEmpty ?? false) {
-    command.add('-Pdart-defines=${androidBuildInfo.buildInfo.dartDefines.join(',')}');
+    command.add('-Pdart-defines=${encodeDartDefines(androidBuildInfo.buildInfo.dartDefines)}');
   }
   if (shouldBuildPluginAsAar) {
     // Pass a system flag instead of a project flag, so this flag can be

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -212,6 +213,11 @@ class TestScrollPhysics extends ScrollPhysics {
   @override
   TestScrollPhysics applyTo(ScrollPhysics ancestor) {
     return TestScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    return offset == 10 ? 20 : offset;
   }
 
   static final SpringDescription _kDefaultSpring = SpringDescription.withDampingRatio(
@@ -1105,6 +1111,34 @@ void main() {
     // Left enough to get to page 0
     pageController.jumpTo(100.0);
     expect(tabController.index, 0);
+  });
+
+  testWidgets('TabBar accepts custom physics', (WidgetTester tester) async {
+    final List<Tab> tabs = List<Tab>.generate(20, (int index) {
+      return Tab(text: 'TAB #$index');
+    });
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: tabs.length - 1,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(
+          isScrollable: true,
+          controller: controller,
+          tabs: tabs,
+          physics: const TestScrollPhysics(),
+        ),
+      ),
+    );
+
+    final TabBar tabBar = tester.widget(find.byType(TabBar));
+    final double position = tabBar.physics.applyPhysicsToUserOffset(null, 10);
+
+    expect(position, equals(20));
   });
 
   testWidgets('Scrollable TabBar with a non-zero TabController initialIndex', (WidgetTester tester) async {
@@ -2028,6 +2062,45 @@ void main() {
     expect(() => Tab(text: 'foo', child: Container()), throwsAssertionError);
   });
 
+  testWidgets('Tabs changes mouse cursor when a tab is hovered', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B'];
+    await tester.pumpWidget(MaterialApp(home: DefaultTabController(
+        length: tabs.length,
+        child: Scaffold(
+          body: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TabBar(
+              mouseCursor: SystemMouseCursors.text,
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Tab).first));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(MaterialApp(home: DefaultTabController(
+        length: tabs.length,
+        child: Scaffold(
+          body: MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            ),
+          ),
+        ),
+      ),
+    ));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
 
   testWidgets('TabController changes', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/14812
@@ -2539,5 +2612,23 @@ void main() {
     expectedIndicatorLeft = canvas.indicatorRect.left;
     await tester.pumpAndSettle();
     pageController.removeListener(pageControllerListener);
+  });
+
+  testWidgets('Setting BouncingScrollPhysics on TabBarView does not include ClampingScrollPhysics', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/57708
+    await tester.pumpWidget(MaterialApp(
+      home: DefaultTabController(
+        length: 10,
+        child: Scaffold(
+          body: TabBarView(
+            physics: const BouncingScrollPhysics(),
+            children: List<Widget>.generate(10, (int i) => Center(child: Text('index $i'))),
+          ),
+        ),
+      )
+    ));
+
+    final PageView pageView = tester.widget<PageView>(find.byType(PageView));
+    expect(pageView.physics.toString().contains('ClampingScrollPhysics'), isFalse);
   });
 }

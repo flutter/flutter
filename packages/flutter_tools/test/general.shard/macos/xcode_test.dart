@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
@@ -19,7 +21,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-  Logger logger;
+  BufferLogger logger;
 
   setUp(() {
     logger = BufferLogger.test();
@@ -99,7 +101,7 @@ void main() {
         when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
           .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '2']));
 
-        expect(await xcdevice.getAvailableTetheredIOSDevices(), isEmpty);
+        expect(await xcdevice.getAvailableIOSDevices(), isEmpty);
       });
 
       testWithoutContext('diagnostics xcdevice fails', () async {
@@ -353,13 +355,66 @@ void main() {
         });
       });
 
+      group('observe device events', () {
+        testWithoutContext('Xcode not installed', () async {
+          when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
+
+          expect(xcdevice.observedDeviceEvents(), isNull);
+          expect(logger.traceText, contains("Xcode not found. Run 'flutter doctor' for more information."));
+        });
+
+        testUsingContext('relays events', () async {
+          when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>['xcrun', '--find', 'xcdevice'],
+            stdout: '/path/to/xcdevice',
+          ));
+
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>[
+              'script',
+              '-t',
+              '0',
+              '/dev/null',
+              'xcrun',
+              'xcdevice',
+              'observe',
+              '--both',
+            ], stdout: 'Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418\n'
+            'Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418',
+            stderr: 'Some error',
+          ));
+
+          final Completer<void> attach = Completer<void>();
+          final Completer<void> detach = Completer<void>();
+
+          // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+          // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+          xcdevice.observedDeviceEvents().listen((Map<XCDeviceEvent, String> event) {
+            expect(event.length, 1);
+            if (event.containsKey(XCDeviceEvent.attach)) {
+              expect(event[XCDeviceEvent.attach], 'd83d5bc53967baa0ee18626ba87b6254b2ab5418');
+              attach.complete();
+            } else if (event.containsKey(XCDeviceEvent.detach)) {
+              expect(event[XCDeviceEvent.detach], 'd83d5bc53967baa0ee18626ba87b6254b2ab5418');
+              detach.complete();
+            } else {
+              fail('Unexpected event');
+            }
+          });
+          await attach.future;
+          await detach.future;
+          expect(logger.traceText, contains('xcdevice observe error: Some error'));
+        });
+      });
+
       group('available devices', () {
         final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
 
         testWithoutContext('Xcode not installed', () async {
           when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
 
-          expect(await xcdevice.getAvailableTetheredIOSDevices(), isEmpty);
+          expect(await xcdevice.getAvailableIOSDevices(), isEmpty);
         });
 
         testUsingContext('returns devices', () async {
@@ -466,7 +521,7 @@ void main() {
             command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
             stdout: devicesOutput,
           ));
-          final List<IOSDevice> devices = await xcdevice.getAvailableTetheredIOSDevices();
+          final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
           expect(devices, hasLength(3));
           expect(devices[0].id, 'd83d5bc53967baa0ee18626ba87b6254b2ab5418');
           expect(devices[0].name, 'An iPhone (Space Gray)');
@@ -496,7 +551,7 @@ void main() {
             command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '20'],
             stdout: '[]',
           ));
-          await xcdevice.getAvailableTetheredIOSDevices(timeout: const Duration(seconds: 20));
+          await xcdevice.getAvailableIOSDevices(timeout: const Duration(seconds: 20));
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
         });
 
@@ -535,7 +590,7 @@ void main() {
             command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
             stdout: devicesOutput,
           ));
-          final List<IOSDevice> devices = await xcdevice.getAvailableTetheredIOSDevices();
+          final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
           expect(devices, hasLength(1));
           expect(devices[0].id, '43ad2fda7991b34fe1acbda82f9e2fd3d6ddc9f7');
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
@@ -583,7 +638,7 @@ void main() {
             command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
             stdout: devicesOutput,
           ));
-          final List<IOSDevice> devices = await xcdevice.getAvailableTetheredIOSDevices();
+          final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
           expect(devices[0].cpuArchitecture, DarwinArch.armv7);
           expect(devices[1].cpuArchitecture, DarwinArch.arm64);
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);
@@ -634,7 +689,7 @@ void main() {
             stdout: devicesOutput,
           ));
 
-          await xcdevice.getAvailableTetheredIOSDevices();
+          await xcdevice.getAvailableIOSDevices();
           final List<String> errors = await xcdevice.getDiagnostics();
           expect(errors, hasLength(1));
           expect(fakeProcessManager.hasRemainingExpectations, isFalse);

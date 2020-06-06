@@ -98,7 +98,7 @@ class UserMessages {
       'Android license status unknown.\n'
       'Try re-installing or updating your Android SDK Manager.\n'
       'See https://developer.android.com/studio/#downloads or visit '
-      'visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
+      '${_androidSdkInstallUrl(platform)} for detailed instructions.';
   String androidSdkManagerOutdated(String managerPath) =>
       'A newer version of the Android SDK is required. To update, run:\n'
       '$managerPath --update\n';
@@ -194,18 +194,22 @@ class UserMessages {
   // Messages used in VisualStudioValidator
   String visualStudioVersion(String name, String version) => '$name version $version';
   String visualStudioLocation(String location) => 'Visual Studio at $location';
+  String windows10SdkVersion(String version) => 'Windows 10 SDK version $version';
   String visualStudioMissingComponents(String workload, List<String> components) =>
       'Visual Studio is missing necessary components. Please re-run the '
       'Visual Studio installer for the "$workload" workload, and include these components:\n'
-      '  ${components.join('\n  ')}';
-  String visualStudioMissing(String workload, List<String> components) =>
+      '  ${components.join('\n  ')}\n'
+      '  Windows 10 SDK';
+  String get windows10SdkNotFound =>
+      'Unable to locate a Windows 10 SDK. If building fails, install the Windows 10 SDK in Visual Studio.';
+  String visualStudioMissing(String workload) =>
       'Visual Studio not installed; this is necessary for Windows development.\n'
       'Download at https://visualstudio.microsoft.com/downloads/.\n'
-      'Please install the "$workload" workload, including the following components:\n  ${components.join('\n  ')}';
-  String visualStudioTooOld(String minimumVersion, String workload, List<String> components) =>
+      'Please install the "$workload" workload, including all of its default components';
+  String visualStudioTooOld(String minimumVersion, String workload) =>
       'Visual Studio $minimumVersion or later is required.\n'
       'Download at https://visualstudio.microsoft.com/downloads/.\n'
-      'Please install the "$workload" workload, including the following components:\n  ${components.join('\n  ')}';
+      'Please install the "$workload" workload, including all of its default components';
   String get visualStudioIsPrerelease => 'The current Visual Studio installation is a pre-release version. It may not be '
       'supported by Flutter yet.';
   String get visualStudioNotLaunchable =>
@@ -237,6 +241,9 @@ class UserMessages {
       "matching '$deviceId'";
   String get flutterNoDevicesFound => 'No devices found';
   String get flutterNoSupportedDevices => 'No supported devices connected.';
+  String flutterMissPlatformProjects(List<String> unsupportedDevicesType) =>
+      'If you would like your app to run on ${unsupportedDevicesType.join(' or ')}, consider running `flutter create .` to generate projects for these platforms.';
+  String get flutterFoundButUnsupportedDevices => 'The following devices were found, but are not supported by this project:';
   String flutterFoundSpecifiedDevices(int count, String deviceId) =>
       'Found $count devices with name or id matching $deviceId:';
   String get flutterSpecifyDeviceWithAllOption =>

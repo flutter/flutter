@@ -103,9 +103,20 @@ class RawMaterialButton extends StatefulWidget {
   /// [State.setState] is not allowed).
   final ValueChanged<bool> onHighlightChanged;
 
-  /// {@macro flutter.material.inkwell.mousecursor}
+  /// {@template flutter.material.button.mouseCursor}
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// button.
   ///
-  /// If the property is null, [SystemMouseCursor.click] is used.
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.pressed].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// {@endtemplate flutter.material.button.mouseCursor}
   final MouseCursor mouseCursor;
 
   /// Defines the default text style, with [Material.textStyle], for the
@@ -373,6 +384,10 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     final ShapeBorder effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder>(widget.shape, _states);
     final Offset densityAdjustment = widget.visualDensity.baseSizeAdjustment;
     final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(widget.constraints);
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+      _states,
+    );
     final EdgeInsetsGeometry padding = widget.padding.add(
       EdgeInsets.only(
         left: densityAdjustment.dx,
@@ -381,6 +396,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         bottom: densityAdjustment.dy,
       ),
     ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
+
 
     final Widget result = ConstrainedBox(
       constraints: effectiveConstraints,
@@ -407,7 +423,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
           onLongPress: widget.onLongPress,
           enableFeedback: widget.enableFeedback,
           customBorder: effectiveShape,
-          mouseCursor: widget.mouseCursor,
+          mouseCursor: effectiveMouseCursor,
           child: IconTheme.merge(
             data: IconThemeData(color: effectiveTextColor),
             child: Container(

@@ -374,6 +374,30 @@ void main() {
     expect(textBox.size, const Size(633.0, 28.0));
   });
 
+  testWidgets('can switch between textHeightBehavior', (WidgetTester tester) async {
+    const String text = 'selectable text';
+    const TextHeightBehavior textHeightBehavior = TextHeightBehavior(
+      applyHeightToFirstAscent: false,
+      applyHeightToLastDescent: false,
+    );
+    await tester.pumpWidget(
+      boilerplate(
+        child: const SelectableText(text),
+      ),
+    );
+    expect(findRenderEditable(tester).textHeightBehavior, isNull);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: const SelectableText(
+          text,
+          textHeightBehavior: textHeightBehavior,
+        ),
+      ),
+    );
+    expect(findRenderEditable(tester).textHeightBehavior, textHeightBehavior);
+  });
+
   testWidgets('Cursor blinks when showCursor is true', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
@@ -3843,5 +3867,25 @@ void main() {
     );
     // Long press triggers gesture recognizer.
     expect(spyLongPress, 1);
+  });
+
+  testWidgets('SelectableText changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: SelectableText('test'),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.text('test')));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 }

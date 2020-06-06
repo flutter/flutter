@@ -354,10 +354,10 @@ void main() {
     expect(configLines, containsAll(<String>[
       'set(FLUTTER_ROOT "$_kTestFlutterRoot")',
       'set(PROJECT_DIR "${fileSystem.currentDirectory.path}")',
-      '  "DART_DEFINES=\\"foo.bar=2,fizz.far=3\\""',
+      '  "DART_DEFINES=\\"foo.bar%3D2,fizz.far%3D3\\""',
       '  "DART_OBFUSCATION=\\"true\\""',
-      '  "EXTRA_FRONT_END_OPTIONS=\\"--enable-experiment=non-nullable\\""',
-      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=\\"--enable-experiment=non-nullable\\""',
+      '  "EXTRA_FRONT_END_OPTIONS=\\"--enable-experiment%3Dnon-nullable\\""',
+      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=\\"--enable-experiment%3Dnon-nullable\\""',
       '  "SPLIT_DEBUG_INFO=\\"foo/\\""',
       '  "TRACK_WIDGET_CREATION=\\"true\\""',
       '  "TREE_SHAKE_ICONS=\\"true\\""',
@@ -399,25 +399,6 @@ set(BINARY_NAME "fizz_bar")
       throwsToolExit());
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
-  });
-
-  testUsingContext('Release build prints an under-construction warning', () async {
-    final BuildCommand command = BuildCommand();
-    setUpMockProjectFilesForBuild();
-    processManager = FakeProcessManager.list(<FakeCommand>[
-      cmakeCommand('release'),
-      ninjaCommand('release'),
-    ]);
-
-    await createTestCommandRunner(command).run(
-      const <String>['build', 'linux', '--no-pub']
-    );
-    expect(testLogger.statusText, contains('🚧'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Platform: () => linuxPlatform,
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
   testUsingContext('hidden when not enabled on Linux host', () {

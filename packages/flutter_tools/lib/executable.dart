@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'runner.dart' as runner;
 import 'src/base/context.dart';
+import 'src/base/logger.dart';
 import 'src/base/template.dart';
 // The build_runner code generation is provided here to make it easier to
 // avoid introducing the dependency into google3. Not all build* packages
@@ -64,8 +65,9 @@ Future<void> main(List<String> args) async {
       (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
   final bool muteCommandLogging = help || doctor;
   final bool verboseHelp = help && verbose;
+  final bool daemon = args.contains('daemon');
 
-  await runner.run(args, <FlutterCommand>[
+  await runner.run(args, () => <FlutterCommand>[
     AnalyzeCommand(
       verboseHelp: verboseHelp,
       fileSystem: globals.fs,
@@ -89,8 +91,6 @@ Future<void> main(List<String> args) async {
     EmulatorsCommand(),
     FormatCommand(),
     GenerateCommand(),
-    IdeConfigCommand(hidden: !verboseHelp),
-    InjectPluginsCommand(hidden: !verboseHelp),
     InstallCommand(),
     LogsCommand(),
     MakeHostAppEditableCommand(),
@@ -100,14 +100,17 @@ Future<void> main(List<String> args) async {
     ScreenshotCommand(),
     ShellCompletionCommand(),
     TestCommand(verboseHelp: verboseHelp),
-    TrainingCommand(),
-    UpdatePackagesCommand(hidden: !verboseHelp),
     UpgradeCommand(),
     VersionCommand(),
     SymbolizeCommand(
       stdio: globals.stdio,
       fileSystem: globals.fs,
     ),
+    // Development-only commands. These are always hidden,
+    IdeConfigCommand(),
+    InjectPluginsCommand(),
+    TrainingCommand(),
+    UpdatePackagesCommand(),
   ], verbose: verbose,
      muteCommandLogging: muteCommandLogging,
      verboseHelp: verboseHelp,
@@ -121,5 +124,14 @@ Future<void> main(List<String> args) async {
        WebRunnerFactory: () => DwdsWebRunnerFactory(),
        // The mustache dependency is different in google3
        TemplateRenderer: () => const MustacheTemplateRenderer(),
+       if (daemon)
+        Logger: () => NotifyingLogger(verbose: verbose)
+       else if (verbose && !muteCommandLogging)
+        Logger: () => VerboseLogger(StdoutLogger(
+          timeoutConfiguration: timeoutConfiguration,
+          stdio: globals.stdio,
+          terminal: globals.terminal,
+          outputPreferences: globals.outputPreferences,
+        ))
      });
 }

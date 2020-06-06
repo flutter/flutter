@@ -212,6 +212,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     this.ignorePointer = false,
     bool readOnly = false,
     bool forceLine = true,
+    TextHeightBehavior textHeightBehavior,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     String obscuringCharacter = '•',
     bool obscureText = false,
@@ -264,6 +265,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
          textScaleFactor: textScaleFactor,
          locale: locale,
          strutStyle: strutStyle,
+         textHeightBehavior: textHeightBehavior,
          textWidthBasis: textWidthBasis,
        ),
        _cursorColor = cursorColor,
@@ -321,6 +323,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ///
   /// The default value of this property is false.
   bool ignorePointer;
+
+  /// {@macro flutter.dart:ui.textHeightBehavior}
+  TextHeightBehavior get textHeightBehavior => _textPainter.textHeightBehavior;
+  set textHeightBehavior(TextHeightBehavior value) {
+    if (_textPainter.textHeightBehavior == value)
+      return;
+    _textPainter.textHeightBehavior = value;
+    markNeedsTextLayout();
+  }
 
   /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
   TextWidthBasis get textWidthBasis => _textPainter.textWidthBasis;

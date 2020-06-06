@@ -50,19 +50,23 @@ void main() {
       int count = 0;
       globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
+      final FlutterCommand command = FakeFlutterCommand();
+      final CommandRunner<void>runner = createTestCommandRunner(command);
+
       globals.flutterUsage.enabled = false;
-      await createProject(tempDir);
+      await runner.run(<String>['fake']);
       expect(count, 0);
 
       globals.flutterUsage.enabled = true;
-      await createProject(tempDir);
-      expect(count, globals.flutterUsage.isFirstRun ? 0 : 4);
+      await runner.run(<String>['fake']);
+      // LogToFileAnalytics isFirstRun is hardcoded to false
+      // so this usage will never act like the first run
+      // (which would not send usage).
+      expect(count, 4);
 
       count = 0;
       globals.flutterUsage.enabled = false;
-      final DoctorCommand doctorCommand = DoctorCommand();
-      final CommandRunner<void>runner = createTestCommandRunner(doctorCommand);
-      await runner.run(<String>['doctor']);
+      await runner.run(<String>['fake']);
 
       expect(count, 0);
     }, overrides: <Type, Generator>{
@@ -361,6 +365,19 @@ Analytics throwingAnalyticsIOFactory(
   Directory documentDirectory,
 }) {
   throw const FileSystemException('Could not create file');
+}
+
+class FakeFlutterCommand extends FlutterCommand {
+  @override
+  String get description => 'A fake command';
+
+  @override
+  String get name => 'fake';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
 }
 
 class MockUsage extends Mock implements Usage {}

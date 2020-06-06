@@ -4,11 +4,14 @@
 
 import 'dart:async';
 
+import 'package:file/file.dart';
 import 'package:meta/meta.dart' show required, visibleForTesting;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/context.dart';
 import 'base/io.dart' as io;
+import 'build_info.dart';
+import 'convert.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
 import 'version.dart';
@@ -27,6 +30,8 @@ const int kIsolateReloadBarred = 1005;
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [WebSocket]s (used by tests).
 typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression});
+
+typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
 WebSocketConnector _openChannel = _defaultOpenChannel;
 
@@ -80,6 +85,12 @@ typedef ReloadMethod = Future<void> Function({
   String classId,
   String libraryId,
 });
+
+
+/// A method that pulls an SkSL shader from the device and writes it to a file.
+///
+/// The name of the file returned as a result.
+typedef GetSkSLMethod = Future<String> Function();
 
 Future<io.WebSocket> _defaultOpenChannel(String url, {
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault
@@ -139,6 +150,8 @@ typedef VMServiceConnector = Future<vm_service.VmService> Function(Uri httpUri, 
   Restart restart,
   CompileExpression compileExpression,
   ReloadMethod reloadMethod,
+  GetSkSLMethod getSkSLMethod,
+  PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   io.CompressionOptions compression,
   Device device,
 });
@@ -164,6 +177,8 @@ vm_service.VmService setUpVmService(
   CompileExpression compileExpression,
   Device device,
   ReloadMethod reloadMethod,
+  GetSkSLMethod skSLMethod,
+  PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   vm_service.VmService vmService
 ) {
   if (reloadSources != null) {
@@ -270,6 +285,22 @@ vm_service.VmService setUpVmService(
     });
     vmService.registerService('flutterMemoryInfo', 'Flutter Tools');
   }
+  if (skSLMethod != null) {
+    vmService.registerServiceCallback('flutterGetSkSL', (Map<String, dynamic> params) async {
+      final String filename = await skSLMethod();
+      return <String, dynamic>{
+        'result': <String, Object>{
+          'type': 'Success',
+          'filename': filename,
+        }
+      };
+    });
+    vmService.registerService('flutterGetSkSL', 'Flutter Tools');
+  }
+  if (printStructuredErrorLogMethod != null) {
+    vmService.streamListen(vm_service.EventStreams.kExtension);
+    vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
+  }
   return vmService;
 }
 
@@ -287,6 +318,8 @@ Future<vm_service.VmService> connectToVmService(
     Restart restart,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
+    GetSkSLMethod getSkSLMethod,
+    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
     io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
     Device device,
   }) async {
@@ -298,6 +331,8 @@ Future<vm_service.VmService> connectToVmService(
     compression: compression,
     device: device,
     reloadMethod: reloadMethod,
+    getSkSLMethod: getSkSLMethod,
+    printStructuredErrorLogMethod: printStructuredErrorLogMethod,
   );
 }
 
@@ -307,22 +342,18 @@ Future<vm_service.VmService> _connect(
   Restart restart,
   CompileExpression compileExpression,
   ReloadMethod reloadMethod,
+  GetSkSLMethod getSkSLMethod,
+  PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   Device device,
 }) async {
   final Uri wsUri = httpUri.replace(scheme: 'ws', path: globals.fs.path.join(httpUri.path, 'ws'));
   final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression);
-  // Create an instance of the package:vm_service API in addition to the flutter
-  // tool's to allow gradual migration.
-  final Completer<void> streamClosedCompleter = Completer<void>();
   final vm_service.VmService delegateService = vm_service.VmService(
     channel,
     channel.add,
     log: null,
     disposeHandler: () async {
-      if (!streamClosedCompleter.isCompleted) {
-        streamClosedCompleter.complete();
-      }
       await channel.close();
     },
   );
@@ -333,6 +364,8 @@ Future<vm_service.VmService> _connect(
     compileExpression,
     device,
     reloadMethod,
+    getSkSLMethod,
+    printStructuredErrorLogMethod,
     delegateService,
   );
   _httpAddressExpando[service] = httpUri;
@@ -775,4 +808,50 @@ bool isPauseEvent(String kind) {
          kind == vm_service.EventKind.kPauseException ||
          kind == vm_service.EventKind.kPausePostRequest ||
          kind == vm_service.EventKind.kNone;
+}
+
+// TODO(jonahwilliams): either refactor drive to use the resident runner
+// or delete it.
+Future<String> sharedSkSlWriter(Device device, Map<String, Object> data, {
+  File outputFile,
+}) async {
+  if (data.isEmpty) {
+    globals.logger.printStatus(
+      'No data was receieved. To ensure SkSL data can be generated use a '
+      'physical device then:\n'
+      '  1. Pass "--cache-sksl" as an argument to flutter run.\n'
+      '  2. Interact with the application to force shaders to be compiled.\n'
+    );
+    return null;
+  }
+  if (outputFile == null) {
+    outputFile = globals.fsUtils.getUniqueFile(
+      globals.fs.currentDirectory,
+      'flutter',
+      'sksl.json',
+    );
+  } else if (!outputFile.parent.existsSync()) {
+    outputFile.parent.createSync(recursive: true);
+  }
+  // Convert android sub-platforms to single target platform.
+  TargetPlatform targetPlatform = await device.targetPlatform;
+  switch (targetPlatform) {
+    case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
+    case TargetPlatform.android_x64:
+    case TargetPlatform.android_x86:
+      targetPlatform = TargetPlatform.android;
+      break;
+    default:
+      break;
+  }
+  final Map<String, Object> manifest = <String, Object>{
+    'platform': getNameForTargetPlatform(targetPlatform),
+    'name': device.name,
+    'engineRevision': globals.flutterVersion.engineRevision,
+    'data': data,
+  };
+  outputFile.writeAsStringSync(json.encode(manifest));
+  globals.logger.printStatus('Wrote SkSL data to ${outputFile.path}.');
+  return outputFile.path;
 }

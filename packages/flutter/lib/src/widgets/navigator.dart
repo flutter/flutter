@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer' as developer;
 
@@ -2293,6 +2294,12 @@ enum _RouteLifecycle {
 
 typedef _RouteEntryPredicate = bool Function(_RouteEntry entry);
 
+class _NotAnnounced extends Route<void> {
+  // A placeholder for the lastAnnouncedPreviousRoute, the
+  // lastAnnouncedPoppedNextRoute, and the lastAnnouncedNextRoute before any
+  // change has been announced.
+}
+
 class _RouteEntry extends RouteTransitionRecord {
   _RouteEntry(
     this.route, {
@@ -2311,10 +2318,12 @@ class _RouteEntry extends RouteTransitionRecord {
   @override
   final Route<dynamic> route;
 
+  static Route<dynamic> notAnnounced = _NotAnnounced();
+
   _RouteLifecycle currentState;
-  Route<dynamic> lastAnnouncedPreviousRoute; // last argument to Route.didChangePrevious
-  Route<dynamic> lastAnnouncedPoppedNextRoute; // last argument to Route.didPopNext
-  Route<dynamic> lastAnnouncedNextRoute; // last argument to Route.didChangeNext
+  Route<dynamic> lastAnnouncedPreviousRoute = notAnnounced; // last argument to Route.didChangePrevious
+  Route<dynamic> lastAnnouncedPoppedNextRoute = notAnnounced; // last argument to Route.didPopNext
+  Route<dynamic> lastAnnouncedNextRoute = notAnnounced; // last argument to Route.didChangeNext
 
   bool get hasPage => route.settings is Page;
 
@@ -2327,7 +2336,7 @@ class _RouteEntry extends RouteTransitionRecord {
     return page.canUpdate(routePage);
   }
 
-  void handleAdd({ @required NavigatorState navigator}) {
+  void handleAdd({ @required NavigatorState navigator, @required Route<dynamic> previousPresent }) {
     assert(currentState == _RouteLifecycle.add);
     assert(navigator != null);
     assert(navigator._debugLocked);
@@ -2336,6 +2345,9 @@ class _RouteEntry extends RouteTransitionRecord {
     route.install();
     assert(route.overlayEntries.isNotEmpty);
     currentState = _RouteLifecycle.adding;
+    navigator._observedRouteAdditions.add(
+      _NavigatorPushObservation(route, previousPresent)
+    );
   }
 
   void handlePush({ @required NavigatorState navigator, @required bool isNewFirst, @required Route<dynamic> previous, @required Route<dynamic> previousPresent }) {
@@ -2369,12 +2381,14 @@ class _RouteEntry extends RouteTransitionRecord {
     }
 
     if (previousState == _RouteLifecycle.replace || previousState == _RouteLifecycle.pushReplace) {
-      for (final NavigatorObserver observer in navigator.widget.observers)
-        observer.didReplace(newRoute: route, oldRoute: previousPresent);
+      navigator._observedRouteAdditions.add(
+        _NavigatorReplaceObservation(route, previousPresent)
+      );
     } else {
       assert(previousState == _RouteLifecycle.push);
-      for (final NavigatorObserver observer in navigator.widget.observers)
-        observer.didPush(route, previousPresent);
+      navigator._observedRouteAdditions.add(
+        _NavigatorPushObservation(route, previousPresent)
+      );
     }
   }
 
@@ -2388,8 +2402,9 @@ class _RouteEntry extends RouteTransitionRecord {
     assert(navigator._debugLocked);
     assert(route._navigator == navigator);
     currentState = _RouteLifecycle.popping;
-    for (final NavigatorObserver observer in navigator.widget.observers)
-      observer.didPop(route, previousPresent);
+    navigator._observedRouteDeletions.add(
+      _NavigatorPopObservation(route, previousPresent)
+    );
   }
 
   void handleRemoval({ @required NavigatorState navigator, @required Route<dynamic> previousPresent }) {
@@ -2398,21 +2413,20 @@ class _RouteEntry extends RouteTransitionRecord {
     assert(route._navigator == navigator);
     currentState = _RouteLifecycle.removing;
     if (_reportRemovalToObserver) {
-      for (final NavigatorObserver observer in navigator.widget.observers)
-        observer.didRemove(route, previousPresent);
+      navigator._observedRouteDeletions.add(
+        _NavigatorRemoveObservation(route, previousPresent)
+      );
     }
   }
 
   bool doingPop = false;
 
-  void didAdd({ @required NavigatorState navigator, @required bool isNewFirst, @required Route<dynamic> previous, @required Route<dynamic> previousPresent }) {
+  void didAdd({ @required NavigatorState navigator, @required bool isNewFirst}) {
     route.didAdd();
     currentState = _RouteLifecycle.idle;
     if (isNewFirst) {
       route.didChangeNext(null);
     }
-    for (final NavigatorObserver observer in navigator.widget.observers)
-      observer.didPush(route, previousPresent);
   }
 
   void pop<T>(T result) {
@@ -2571,10 +2585,71 @@ class _RouteEntry extends RouteTransitionRecord {
   }
 }
 
+abstract class _NavigatorObservation {
+  _NavigatorObservation(
+    this.primaryRoute,
+    this.secondaryRoute,
+  );
+  final Route<dynamic> primaryRoute;
+  final Route<dynamic> secondaryRoute;
+
+  void notify(NavigatorObserver observer);
+}
+
+class _NavigatorPushObservation extends _NavigatorObservation {
+  _NavigatorPushObservation(
+    Route<dynamic> primaryRoute,
+    Route<dynamic> secondaryRoute
+  ) : super(primaryRoute, secondaryRoute);
+
+  @override
+  void notify(NavigatorObserver observer) {
+    observer.didPush(primaryRoute, secondaryRoute);
+  }
+}
+
+class _NavigatorPopObservation extends _NavigatorObservation {
+  _NavigatorPopObservation(
+    Route<dynamic> primaryRoute,
+    Route<dynamic> secondaryRoute
+  ) : super(primaryRoute, secondaryRoute);
+
+  @override
+  void notify(NavigatorObserver observer) {
+    observer.didPop(primaryRoute, secondaryRoute);
+  }
+}
+
+class _NavigatorRemoveObservation extends _NavigatorObservation {
+  _NavigatorRemoveObservation(
+    Route<dynamic> primaryRoute,
+    Route<dynamic> secondaryRoute
+  ) : super(primaryRoute, secondaryRoute);
+
+  @override
+  void notify(NavigatorObserver observer) {
+    observer.didRemove(primaryRoute, secondaryRoute);
+  }
+}
+
+class _NavigatorReplaceObservation extends _NavigatorObservation {
+  _NavigatorReplaceObservation(
+    Route<dynamic> primaryRoute,
+    Route<dynamic> secondaryRoute
+  ) : super(primaryRoute, secondaryRoute);
+
+  @override
+  void notify(NavigatorObserver observer) {
+    observer.didReplace(newRoute: primaryRoute, oldRoute: secondaryRoute);
+  }
+}
+
 /// The state for a [Navigator] widget.
 class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   final GlobalKey<OverlayState> _overlayKey = GlobalKey<OverlayState>();
   List<_RouteEntry> _history = <_RouteEntry>[];
+  final Queue<_NavigatorObservation> _observedRouteAdditions = Queue<_NavigatorObservation>();
+  final Queue<_NavigatorObservation> _observedRouteDeletions = Queue<_NavigatorObservation>();
 
   /// The [FocusScopeNode] for the [FocusScope] that encloses the routes.
   final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'Navigator Scope');
@@ -2976,6 +3051,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           assert(rearrangeOverlay);
           entry.handleAdd(
             navigator: this,
+            previousPresent: _getRouteBefore(index - 1, _RouteEntry.isPresentPredicate)?.route,
           );
           assert(entry.currentState == _RouteLifecycle.adding);
           continue;
@@ -2983,8 +3059,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           if (canRemoveOrAdd || next == null) {
             entry.didAdd(
               navigator: this,
-              previous: previous?.route,
-              previousPresent: _getRouteBefore(index - 1, _RouteEntry.isPresentPredicate)?.route,
               isNewFirst: next == null
             );
             assert(entry.currentState == _RouteLifecycle.idle);
@@ -3071,6 +3145,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       entry = previous;
       previous = index > 0 ? _history[index - 1] : null;
     }
+
+    // Informs navigator observers about route changes.
+    _flushObserverNotifications();
+
     // Now that the list is clean, send the didChangeNext/didChangePrevious
     // notifications.
     _flushRouteAnnouncement();
@@ -3092,6 +3170,23 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }
     if (rearrangeOverlay)
       overlay?.rearrange(_allRouteOverlayEntries);
+  }
+
+  void _flushObserverNotifications() {
+    if (widget.observers.isEmpty) {
+      _observedRouteDeletions.clear();
+      _observedRouteAdditions.clear();
+      return;
+    }
+    while (_observedRouteAdditions.isNotEmpty) {
+      final _NavigatorObservation observation = _observedRouteAdditions.removeLast();
+      widget.observers.forEach(observation.notify);
+    }
+
+    while (_observedRouteDeletions.isNotEmpty) {
+      final _NavigatorObservation observation = _observedRouteDeletions.removeFirst();
+      widget.observers.forEach(observation.notify);
+    }
   }
 
   void _flushRouteAnnouncement() {
@@ -3642,8 +3737,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   void popUntil(RoutePredicate predicate) {
-    while (!predicate(_history.lastWhere(_RouteEntry.isPresentPredicate).route)) {
+    _RouteEntry candidate = _history.lastWhere(_RouteEntry.isPresentPredicate, orElse: () => null);
+    while(candidate != null) {
+      if (predicate(candidate.route))
+        return;
       pop();
+      candidate = _history.lastWhere(_RouteEntry.isPresentPredicate, orElse: () => null);
     }
   }
 
