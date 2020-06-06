@@ -406,7 +406,7 @@ void main() {
     await null;
 
     expect(testLogger.statusText, contains('\nerror text'));
-    expect(testLogger.statusText.contains('other stuff'), false);
+    expect(testLogger.statusText, isNot(contains('other stuff')));
   }));
 
   test('Does not run main with --start-paused', () => testbed.run(() async {
