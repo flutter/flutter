@@ -1355,7 +1355,6 @@ void main() {
       CompileExpression compileExpression,
       ReloadMethod reloadMethod,
       GetSkSLMethod getSkSLMethod,
-      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
       io.CompressionOptions compression,
       Device device,
     }) async => mockVMService,
