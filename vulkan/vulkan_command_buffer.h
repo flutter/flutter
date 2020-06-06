@@ -7,7 +7,7 @@
 
 #include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/macros.h"
-#include "flutter/vulkan/vulkan_handle.h"
+#include "vulkan_handle.h"
 
 namespace vulkan {
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "runtime/dart/utils/vmo.h"
+#include "vmo.h"
 
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -14,7 +14,7 @@
 #include <lib/syslog/global.h>
 #include <zircon/status.h>
 
-#include "runtime/dart/utils/logging.h"
+#include "logging.h"
 
 namespace {
 

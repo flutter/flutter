@@ -12,12 +12,12 @@
 
 #include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/macros.h"
-#include "flutter/vulkan/vulkan_proc_table.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
+#include "vulkan_proc_table.h"
 
 namespace vulkan {
 

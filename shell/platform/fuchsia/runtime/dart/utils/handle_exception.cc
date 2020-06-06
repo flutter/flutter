@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "runtime/dart/utils/handle_exception.h"
+#include "handle_exception.h"
 
 #include <fuchsia/feedback/cpp/fidl.h>
 #include <fuchsia/mem/cpp/fidl.h>
@@ -14,7 +14,7 @@
 
 #include <string>
 
-#include "runtime/dart/utils/logging.h"
+#include "logging.h"
 
 namespace {
 static bool SetStackTrace(const std::string& data,

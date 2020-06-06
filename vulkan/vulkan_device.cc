@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/vulkan/vulkan_device.h"
+#include "vulkan_device.h"
 
 #include <limits>
 #include <map>
 #include <vector>
 
-#include "flutter/vulkan/vulkan_proc_table.h"
-#include "flutter/vulkan/vulkan_surface.h"
-#include "flutter/vulkan/vulkan_utilities.h"
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
+#include "vulkan_proc_table.h"
+#include "vulkan_surface.h"
+#include "vulkan_utilities.h"
 
 namespace vulkan {
 

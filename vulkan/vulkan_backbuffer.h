@@ -9,10 +9,10 @@
 
 #include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/macros.h"
-#include "flutter/vulkan/vulkan_command_buffer.h"
-#include "flutter/vulkan/vulkan_handle.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "vulkan_command_buffer.h"
+#include "vulkan_handle.h"
 
 namespace vulkan {
 

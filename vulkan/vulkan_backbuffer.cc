@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/vulkan/vulkan_backbuffer.h"
+#include "vulkan_backbuffer.h"
 
 #include <limits>
 
-#include "flutter/vulkan/vulkan_proc_table.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
 #include "vulkan/vulkan.h"
+#include "vulkan_proc_table.h"
 
 namespace vulkan {
 
