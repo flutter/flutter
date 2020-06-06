@@ -1830,10 +1830,10 @@ class ImageShader extends Shader {
   /// matrix to apply to the effect. All the arguments are required and must not
   /// be null.
   factory ImageShader(
-    Image image,
-    TileMode tmx,
-    TileMode tmy,
-    Float64List matrix4) {
+    Image/*!*/ image,
+    TileMode/*!*/ tmx,
+    TileMode/*!*/ tmy,
+    Float64List/*!*/ matrix4) {
     if (engine.experimentalUseSkia) {
       return engine.EngineImageShader(image, tmx, tmy, matrix4);
     }
