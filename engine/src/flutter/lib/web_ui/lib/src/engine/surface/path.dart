@@ -37,7 +37,7 @@ class SurfacePath implements ui.Path {
   double get _currentY => _currentSubpath?.currentY ?? 0.0;
 
   /// Recorder used for hit testing paths.
-  static ui.RawRecordingCanvas _rawRecorder;
+  static RawRecordingCanvas _rawRecorder;
 
   SurfacePath() : subpaths = <Subpath>[];
 
@@ -595,7 +595,7 @@ class SurfacePath implements ui.Path {
   ///
   /// Note: Not very efficient, it creates a canvas, plays path and calls
   /// Context2D isPointInPath. If performance becomes issue, retaining
-  /// RawRecordingCanvas can remove create/remove rootElement cost.
+  /// [RawRecordingCanvas] can remove create/remove rootElement cost.
   @override
   bool contains(ui.Offset point) {
     assert(offsetIsValid(point));
@@ -674,7 +674,7 @@ class SurfacePath implements ui.Path {
     }
     final double dpr = window.devicePixelRatio;
     _rawRecorder ??=
-        ui.RawRecordingCanvas(ui.Size(size.width / dpr, size.height / dpr));
+        RawRecordingCanvas(ui.Size(size.width / dpr, size.height / dpr));
     // Account for the shift due to padding.
     _rawRecorder.translate(-BitmapCanvas.kPaddingPixels.toDouble(),
         -BitmapCanvas.kPaddingPixels.toDouble());

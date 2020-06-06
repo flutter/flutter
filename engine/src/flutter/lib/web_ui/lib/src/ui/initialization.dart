@@ -6,8 +6,8 @@
 part of ui;
 
 /// Initializes the platform.
-Future<void> webOnlyInitializePlatform({
-  engine.AssetManager assetManager,
+Future<void>/*!*/ webOnlyInitializePlatform({
+  engine.AssetManager/*?*/ assetManager,
 }) {
   final Future<void> initializationFuture = _initializePlatform(assetManager: assetManager);
   scheduleMicrotask(() {
@@ -45,17 +45,17 @@ Future<void> _initializePlatform({
   _webOnlyIsInitialized = true;
 }
 
-engine.AssetManager _assetManager;
+/*late*/ engine.AssetManager/*!*/ _assetManager;
 engine.FontCollection _fontCollection;
 
 bool _webOnlyIsInitialized = false;
-bool get webOnlyIsInitialized => _webOnlyIsInitialized;
+bool/*!*/ get webOnlyIsInitialized => _webOnlyIsInitialized;
 
 /// Specifies that the platform should use the given [AssetManager] to load
 /// assets.
 ///
 /// The given asset manager is used to initialize the font collection.
-Future<void> webOnlySetAssetManager(engine.AssetManager assetManager) async {
+Future<void>/*!*/ webOnlySetAssetManager(engine.AssetManager/*!*/ assetManager) async {
   assert(assetManager != null, 'Cannot set assetManager to null');
   if (assetManager == _assetManager) {
     return;
@@ -91,10 +91,10 @@ Future<void> webOnlySetAssetManager(engine.AssetManager assetManager) async {
 ///
 /// For example in these tests we use a predictable-size font which makes widget
 /// tests less flaky.
-bool get debugEmulateFlutterTesterEnvironment =>
+bool/*!*/ get debugEmulateFlutterTesterEnvironment =>
     _debugEmulateFlutterTesterEnvironment;
 
-set debugEmulateFlutterTesterEnvironment(bool value) {
+set debugEmulateFlutterTesterEnvironment(bool/*!*/ value) {
   _debugEmulateFlutterTesterEnvironment = value;
   if (_debugEmulateFlutterTesterEnvironment) {
     const Size logicalSize = Size(800.0, 600.0);

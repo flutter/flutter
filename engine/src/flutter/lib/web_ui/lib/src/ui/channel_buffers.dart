@@ -14,12 +14,12 @@ class _StoredMessage {
   _StoredMessage(this._data, this._callback);
 
   /// Representation of the message's payload.
-  final ByteData _data;
-  ByteData get data => _data;
+  final ByteData/*?*/ _data;
+  ByteData/*?*/ get data => _data;
 
   /// Callback to be called when the message is received.
-  final PlatformMessageResponseCallback _callback;
-  PlatformMessageResponseCallback get callback => _callback;
+  final PlatformMessageResponseCallback/*!*/ _callback;
+  PlatformMessageResponseCallback/*!*/ get callback => _callback;
 }
 
 /// A fixed-size circular queue.
@@ -86,7 +86,7 @@ class _RingBuffer<T> {
 }
 
 /// Signature for [ChannelBuffers.drain].
-typedef DrainChannelCallback = Future<void> Function(ByteData, PlatformMessageResponseCallback);
+typedef DrainChannelCallback = Future<void>/*!*/ Function(ByteData/*?*/, PlatformMessageResponseCallback/*!*/);
 
 /// Storage of channel messages until the channels are completely routed,
 /// i.e. when a message handler is attached to the channel on the framework side.
@@ -130,7 +130,7 @@ class ChannelBuffers {
   }
 
   /// Returns true on overflow.
-  bool push(String/*!*/ channel, ByteData/*!*/ data, PlatformMessageResponseCallback/*!*/ callback) {
+  bool/*!*/ push(String/*!*/ channel, ByteData/*?*/ data, PlatformMessageResponseCallback/*!*/ callback) {
     _RingBuffer<_StoredMessage> queue = _messages[channel];
     if (queue == null) {
       queue = _makeRingBuffer(kDefaultBufferSize);
@@ -182,7 +182,7 @@ class ChannelBuffers {
   ///
   /// This should be called once a channel is prepared to handle messages
   /// (i.e. when a message handler is setup in the framework).
-  Future<void> drain(String/*!*/ channel, DrainChannelCallback/*!*/ callback) async {
+  Future<void>/*!*/ drain(String/*!*/ channel, DrainChannelCallback/*!*/ callback) async {
     while (!_isEmpty(channel)) {
       final _StoredMessage message = _pop(channel);
       await callback(message.data, message.callback);

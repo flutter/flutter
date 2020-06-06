@@ -13,8 +13,8 @@ Future<void> _testPlatformInitializedFuture;
 
 /// If the platform is already initialized (by a previous test), then run the test
 /// body immediately. Otherwise, initialize the platform then run the test.
-Future<dynamic> ensureTestPlatformInitializedThenRunTest(
-    dynamic Function() body) {
+Future<dynamic>/*!*/ ensureTestPlatformInitializedThenRunTest(
+    dynamic Function()/*!*/ body) {
   if (_testPlatformInitializedFuture == null) {
     debugEmulateFlutterTesterEnvironment = true;
 
@@ -27,10 +27,10 @@ Future<dynamic> ensureTestPlatformInitializedThenRunTest(
 
 /// Used to track when the platform is initialized. This ensures the test fonts
 /// are available.
-Future<void> _platformInitializedFuture;
+/*late*/ Future<void>/*!*/ _platformInitializedFuture;
 
 /// Initializes domRenderer with specific devicePixelRatio and physicalSize.
-Future<void> webOnlyInitializeTestDomRenderer({double devicePixelRatio = 3.0}) {
+Future<void>/*!*/ webOnlyInitializeTestDomRenderer({double/*!*/ devicePixelRatio = 3.0}) {
   // Force-initialize DomRenderer so it doesn't overwrite test pixel ratio.
   engine.domRenderer;
 
