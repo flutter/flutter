@@ -405,9 +405,8 @@ abstract class Device {
   FutureOr<bool> supportsRuntimeMode(BuildMode buildMode) => true;
 
   /// Whether the device is a simulator on a platform which supports hardware rendering.
-  @deprecated
+  // This is soft-deprecated since the logic is not correct expect for iOS simulators.
   Future<bool> get supportsHardwareRendering async {
-    assert(await isLocalEmulator);
     return true;
   }
 
@@ -585,7 +584,7 @@ abstract class Device {
         'screenshot': supportsScreenshot,
         'fastStart': supportsFastStart,
         'flutterExit': supportsFlutterExit,
-        'hardwareRendering': true,
+        'hardwareRendering': isLocalEmu && await supportsHardwareRendering,
         'startPaused': supportsStartPaused,
       }
     };

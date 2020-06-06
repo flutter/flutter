@@ -459,6 +459,19 @@ class RunCommand extends RunCommandBase {
           throwToolExit('Hot reload is not supported by ${device.name}. Run with --no-hot.');
         }
       }
+      if (await device.isLocalEmulator && await device.supportsHardwareRendering) {
+        if (boolArg('enable-software-rendering')) {
+           globals.printStatus(
+            'Using software rendering with device ${device.name}. You may get better performance '
+            'with hardware mode by configuring hardware rendering for your device.'
+           );
+        } else {
+          globals.printStatus(
+            'Using hardware rendering with device ${device.name}. If you notice graphics artifacts, '
+            'consider enabling software rendering with "--enable-software-rendering".'
+          );
+        }
+      }
     }
 
     List<String> expFlags;
