@@ -18,11 +18,10 @@
 #include <zircon/dlfcn.h>
 #include <zircon/status.h>
 
+#include "inlines.h"
 #include "logging.h"
-#include "runtime/dart/utils/inlines.h"
-#include "runtime/dart/utils/logging.h"
-#include "runtime/dart/utils/vmo.h"
 #include "third_party/dart/runtime/include/dart_api.h"
+#include "vmo.h"
 
 namespace dart_utils {
 

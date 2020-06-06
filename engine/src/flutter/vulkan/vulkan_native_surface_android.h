@@ -6,7 +6,7 @@
 #define FLUTTER_VULKAN_VULKAN_NATIVE_SURFACE_ANDROID_H_
 
 #include "flutter/fml/macros.h"
-#include "flutter/vulkan/vulkan_native_surface.h"
+#include "vulkan_native_surface.h"
 
 struct ANativeWindow;
 typedef struct ANativeWindow ANativeWindow;
