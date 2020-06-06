@@ -184,7 +184,6 @@ class FlutterDevice {
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
-    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   }) {
     final Completer<void> completer = Completer<void>();
     StreamSubscription<void> subscription;
@@ -204,7 +203,6 @@ class FlutterDevice {
           compileExpression: compileExpression,
           reloadMethod: reloadMethod,
           getSkSLMethod: getSkSLMethod,
-          printStructuredErrorLogMethod: printStructuredErrorLogMethod,
           device: device,
         );
       } on Exception catch (exception) {
@@ -1057,20 +1055,8 @@ abstract class ResidentRunner {
       final String copyPath = getDefaultCachedKernelPath(
         trackWidgetCreation: trackWidgetCreation,
       );
-      globals.fs
-          .file(copyPath)
-          .parent
-          .createSync(recursive: true);
+      globals.fs.file(copyPath).parent.createSync(recursive: true);
       outputDill.copySync(copyPath);
-    }
-  }
-
-  void printStructuredErrorLog(vm_service.Event event) {
-    if (event.extensionKind == 'Flutter.Error') {
-      final Map<dynamic, dynamic> json = event.extensionData?.data;
-      if (json != null && json.containsKey('renderedErrorText')) {
-        globals.printStatus('\n${json['renderedErrorText']}');
-      }
     }
   }
 
@@ -1098,8 +1084,7 @@ abstract class ResidentRunner {
         restart: restart,
         compileExpression: compileExpression,
         reloadMethod: reloadMethod,
-        getSkSLMethod: getSkSLMethod,
-        printStructuredErrorLogMethod: printStructuredErrorLog,
+        getSkSLMethod: getSkSLMethod
       );
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(
