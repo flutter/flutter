@@ -32,6 +32,16 @@ const String kBundleSkSLPath = 'BundleSkSLPath';
 Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   Map<String, DevFSContent> additionalContent,
 }) async {
+  // Check for an SkSL bundle.
+  final String shaderBundlePath = environment.inputs[kBundleSkSLPath];
+  final DevFSContent skslBundle = processSkSLBundle(
+    shaderBundlePath,
+    engineVersion: environment.engineVersion,
+    fileSystem: environment.fileSystem,
+    logger: environment.logger,
+    targetPlatform: TargetPlatform.android,
+  );
+
   final File pubspecFile =  environment.projectDir.childFile('pubspec.yaml');
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int resultCode = await assetBundle.build(
@@ -61,6 +71,8 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   final Map<String, DevFSContent> assetEntries = <String, DevFSContent>{
     ...assetBundle.entries,
     ...?additionalContent,
+    if (skslBundle != null)
+      kSkSLShaderBundlePath: skslBundle,
   };
 
   await Future.wait<void>(
@@ -92,7 +104,13 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
         resource.release();
       }
   }));
-  return Depfile(inputs + assetBundle.additionalDependencies, outputs);
+  final Depfile depfile = Depfile(inputs + assetBundle.additionalDependencies, outputs);
+  if (shaderBundlePath != null) {
+    final File skSLBundleFile = environment.fileSystem
+      .file(shaderBundlePath).absolute;
+    depfile.inputs.add(skSLBundleFile);
+  }
+  return depfile;
 }
 
 /// The path of the SkSL JSON bundle included in flutter_assets.
