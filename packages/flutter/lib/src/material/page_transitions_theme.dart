@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import '../widgets/dual_transition_builder.dart';
 import 'colors.dart';
 import 'theme.dart';
 
@@ -161,15 +160,9 @@ class _ZoomPageTransition extends StatelessWidget {
        assert(secondaryAnimation != null),
        super(key: key);
 
-  // The scrim obscures the old page by becoming increasingly opaque.
-  static final Tween<double> _scrimOpacityTween = Tween<double>(
-    begin: 0.0,
-    end: 0.60,
-  );
-
   // A curve sequence that is similar to the 'fastOutExtraSlowIn' curve used in
   // the native transition.
-  static final List<TweenSequenceItem<double>> _fastOutExtraSlowInTweenSequenceItems = <TweenSequenceItem<double>>[
+  static final List<TweenSequenceItem<double>> fastOutExtraSlowInTweenSequenceItems = <TweenSequenceItem<double>>[
     TweenSequenceItem<double>(
       tween: Tween<double>(begin: 0.0, end: 0.4)
         .chain(CurveTween(curve: const Cubic(0.05, 0.0, 0.133333, 0.06))),
@@ -181,31 +174,7 @@ class _ZoomPageTransition extends StatelessWidget {
       weight: 1.0 - 0.166666,
     ),
   ];
-  static final TweenSequence<double> _scaleCurveSequence = TweenSequence<double>(_fastOutExtraSlowInTweenSequenceItems);
-  static final FlippedTweenSequence _flippedScaleCurveSequence = FlippedTweenSequence(_fastOutExtraSlowInTweenSequenceItems);
-
-  static final Animatable<double> _forwardScrimOpacityTween = _scrimOpacityTween
-    .chain(CurveTween(curve: const Interval(0.2075, 0.4175)));
-
-  static final Animatable<double> _forwardEndScreenScaleTween = Tween<double>(
-    begin: 0.85,
-    end: 1.0,
-  ).chain(_scaleCurveSequence);
-
-  static final Animatable<double> _forwardEndScreenFadeTween = Tween<double>(
-    begin: 0.0,
-    end: 1.0,
-  ).chain(CurveTween(curve: const Interval(0.125, 0.250)));
-
-  static final Animatable<double> _reverseStartScreenScaleTween = Tween<double>(
-    begin: 0.9,
-    end: 1.0,
-  ).chain(_flippedScaleCurveSequence);
-
-  static final Animatable<double> _reverseEndScreenFadeTween = Tween<double>(
-    begin: 0.0,
-    end: 1.0,
-  ).chain(CurveTween(curve: const Interval(1 - 0.2075, 1 - 0.0825)));
+  static final TweenSequence<double> _scaleCurveSequence = TweenSequence<double>(fastOutExtraSlowInTweenSequenceItems);
 
   /// The animation that drives the [child]'s entrance and exit.
   ///
@@ -232,30 +201,6 @@ class _ZoomPageTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _ZoomedTransitions(
-      animation: animation,
-      child: _ZoomedTransitions(
-        animation: ReverseAnimation(secondaryAnimation),
-        child: child,
-      ),
-    );
-  }
-}
-
-class _ZoomedTransitions extends StatelessWidget {
-  const _ZoomedTransitions({
-    Key key,
-    @required this.animation,
-    @required this.child,
-  }) : assert(animation != null),
-       assert(child != null),
-       super(key: key);
-
-  final Animation<double> animation;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
     return DualTransitionBuilder(
       animation: animation,
       forwardBuilder: (
@@ -263,7 +208,7 @@ class _ZoomedTransitions extends StatelessWidget {
         Animation<double> animation,
         Widget child,
       ) {
-        return _ZoomPageTransitionIn(
+        return _EnterTransition(
           animation: animation,
           child: child,
         );
@@ -273,54 +218,95 @@ class _ZoomedTransitions extends StatelessWidget {
         Animation<double> animation,
         Widget child,
       ) {
-        return _ZoomPageTransitionOut(
-          animation: ReverseAnimation(animation),
+        return _ExitTransition(
+          animation: animation,
+          reverse: true,
           child: child,
         );
       },
-      child: child,
+      child: DualTransitionBuilder(
+        animation: ReverseAnimation(secondaryAnimation),
+        forwardBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Widget child,
+        ) {
+          return _EnterTransition(
+            animation: animation,
+            reverse: true,
+            child: child,
+          );
+        },
+        reverseBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Widget child,
+        ) {
+          return _ExitTransition(
+            animation: animation,
+            child: child,
+          );
+        },
+        child: child,
+      ),
     );
   }
 }
 
-class _ZoomPageTransitionIn extends StatelessWidget {
-  const _ZoomPageTransitionIn({
-    Key key,
-    this.child,
+class _EnterTransition extends StatelessWidget {
+  const _EnterTransition({
     this.animation,
-  }) : super(key: key);
+    this.reverse = false,
+    this.child,
+  });
 
-  final Widget child;
   final Animation<double> animation;
+  final Widget child;
+  final bool reverse;
+
+  static final Animatable<double> _fadeInTransition = Tween<double>(
+    begin: 0.0,
+    end: 1.00,
+  ).chain(CurveTween(curve: const Interval(0.125, 0.250)));
+
+  static final Animatable<double> _scaleDownTransition = Tween<double>(
+    begin: 1.10,
+    end: 1.00,
+  ).chain(_ZoomPageTransition._scaleCurveSequence);
+
+  static final Animatable<double> _scaleUpTransition = Tween<double>(
+    begin: 0.85,
+    end: 1.00,
+  ).chain(_ZoomPageTransition._scaleCurveSequence);
+
+  static final Animatable<double> _scrimOpacityTween = Tween<double>(
+    begin: 0.0,
+    end: 0.60,
+  ).chain(CurveTween(curve: const Interval(0.2075, 0.4175)));
 
   @override
   Widget build(BuildContext context) {
-    // The [_ZoomPageTransitionIn] should only animate when this is a forward
-    // animation.
-    //
-    // With the [DualTransitionBuilder], the animation in this transition
-    // will only have three status: forward, reverse, completed.
-    //
-    // When this transition is in the process of [reverseBuilder], the status
-    // of the animation will always be completed since the [forwardBuilder]
-    // won't animate at the same time. So [isNotForward] can make sure the color
-    // and the scale transition works in purpose.
-    final bool isNotForward = animation.status == AnimationStatus.completed;
+    double opacity = 0;
+    // Only modify the scrim opacity when running forwards and
+    // when the animation is not completed.
+    if (!reverse && animation.status != AnimationStatus.completed) {
+      opacity = _scrimOpacityTween.evaluate(animation);
+    }
+
+    final Animation<double> fadeTransition = reverse
+      ? kAlwaysCompleteAnimation
+      : _fadeInTransition.animate(animation);
+
+    final Animation<double> scaleTransition = reverse
+      ? _scaleDownTransition.animate(animation)
+      : _scaleUpTransition.animate(animation);
+
     return Container(
-      color: Colors.black.withOpacity(
-        (isNotForward
-            ? kAlwaysDismissedAnimation
-            : _ZoomPageTransition._forwardScrimOpacityTween.animate(animation)
-        ).value,
-      ),
-      child: ScaleTransition(
-        scale: (
-          isNotForward
-              ? _ZoomPageTransition._reverseStartScreenScaleTween
-              : _ZoomPageTransition._forwardEndScreenScaleTween
-        ).animate(animation),
-        child: FadeTransition(
-          opacity: _ZoomPageTransition._forwardEndScreenFadeTween.animate(animation),
+      color: Colors.black.withOpacity(opacity),
+      child: FadeTransition(
+        opacity: fadeTransition,
+        child: ScaleTransition(
+          scale: scaleTransition,
           child: child,
         ),
       ),
@@ -328,28 +314,46 @@ class _ZoomPageTransitionIn extends StatelessWidget {
   }
 }
 
-class _ZoomPageTransitionOut extends StatelessWidget {
-  const _ZoomPageTransitionOut({
-    Key key,
-    this.child,
+class _ExitTransition extends StatelessWidget {
+  const _ExitTransition({
     this.animation,
-  }) : super(key: key);
+    this.reverse = false,
+    this.child,
+  });
 
-  final Widget child;
   final Animation<double> animation;
+  final bool reverse;
+  final Widget child;
+
+  static final Animatable<double> _fadeOutTransition = Tween<double>(
+    begin: 1.0,
+    end: 0.0,
+  ).chain(CurveTween(curve: const Interval(0.0825, 0.2075)));
+
+  static final Animatable<double> _scaleUpTransition = Tween<double>(
+    begin: 1.00,
+    end: 1.05,
+  ).chain(_ZoomPageTransition._scaleCurveSequence);
+
+  static final Animatable<double> _scaleDownTransition = Tween<double>(
+    begin: 1.00,
+    end: 0.90,
+  ).chain(_ZoomPageTransition._scaleCurveSequence);
 
   @override
   Widget build(BuildContext context) {
-    // Same as [isCompleted] in [_ZoomPageTransitionIn].
-    final bool isNotReverse = animation.status == AnimationStatus.dismissed;
-    return ScaleTransition(
-      scale: isNotReverse
-          ? kAlwaysCompleteAnimation
-          : _ZoomPageTransition._reverseStartScreenScaleTween.animate(animation),
-      child: FadeTransition(
-        opacity: isNotReverse
-            ? kAlwaysCompleteAnimation
-            : _ZoomPageTransition._reverseEndScreenFadeTween.animate(animation),
+    final Animation<double> fadeTransition = reverse
+      ? _fadeOutTransition.animate(animation)
+        : kAlwaysCompleteAnimation;
+    final Animation<double> scaleTransition = (!reverse
+      ? _scaleUpTransition
+      : _scaleDownTransition
+    ).animate(animation);
+
+    return FadeTransition(
+      opacity: fadeTransition,
+      child: ScaleTransition(
+        scale: scaleTransition,
         child: child,
       ),
     );
