@@ -85,7 +85,7 @@ class SystemChannels {
   ///    the green channel, the next eight bits being the red channel, and the
   ///    high eight bits being set, as from [Color.value] for an opaque color).
   ///    The `primaryColor` can also be zero to indicate that the system default
-  ///    should be used. See [SystemChrome.setPreferredOrientations].
+  ///    should be used. See [SystemChrome.setApplicationSwitcherDescription].
   ///
   ///  * `SystemChrome.setEnabledSystemUIOverlays`: Specifies the set of system
   ///    overlays to have visible when the application is running. The argument
@@ -269,5 +269,19 @@ class SystemChannels {
   static const MethodChannel skia = MethodChannel(
     'flutter/skia',
     JSONMethodCodec(),
+  );
+
+  /// A [MethodChannel] for configuring mouse cursors.
+  ///
+  /// All outgoing methods defined for this channel uses a `Map<String, dynamic>`
+  /// to contain multiple parameters, including the following methods (invoked
+  /// using [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `activateSystemCursor`: Request to set the cursor of a pointer
+  ///    device to a system cursor. The parameters are
+  ///    integer `device`, and string `kind`.
+  static const MethodChannel mouseCursor = OptionalMethodChannel(
+    'flutter/mousecursor',
+    StandardMethodCodec(),
   );
 }

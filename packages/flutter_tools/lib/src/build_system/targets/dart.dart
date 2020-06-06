@@ -17,6 +17,7 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'icon_tree_shaker.dart';
+import 'localizations.dart';
 
 /// The define to pass a [BuildMode].
 const String kBuildMode = 'BuildMode';
@@ -56,9 +57,6 @@ const String kFileSystemScheme = 'FileSystemScheme';
 ///
 /// If provided, must be used along with [kFileSystemScheme].
 const String kFileSystemRoots = 'FileSystemRoots';
-
-/// Defines specified via the `--dart-define` command-line option.
-const String kDartDefines = 'DartDefines';
 
 /// The define to control what iOS architectures are built for.
 ///
@@ -183,7 +181,9 @@ class KernelSnapshot extends Target {
   ];
 
   @override
-  List<Target> get dependencies => <Target>[];
+  List<Target> get dependencies => const <Target>[
+    GenerateLocalizationsTarget(),
+  ];
 
   @override
   Future<void> build(Environment environment) async {
@@ -205,10 +205,7 @@ class KernelSnapshot extends Target {
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
 
     // This configuration is all optional.
-    final String rawFrontEndOption = environment.defines[kExtraFrontEndOptions];
-    final List<String> extraFrontEndOptions = (rawFrontEndOption?.isNotEmpty ?? false)
-      ? rawFrontEndOption?.split(',')
-      : null;
+    final List<String> extraFrontEndOptions = decodeDartDefines(environment.defines, kExtraFrontEndOptions);
     final List<String> fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String fileSystemScheme = environment.defines[kFileSystemScheme];
 
@@ -254,11 +251,11 @@ class KernelSnapshot extends Target {
       extraFrontEndOptions: extraFrontEndOptions,
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme: fileSystemScheme,
-      dartDefines: parseDartDefines(environment),
+      dartDefines: decodeDartDefines(environment.defines, kDartDefines),
       packageConfig: packageConfig,
     );
     if (output == null || output.errorCount != 0) {
-      throw Exception('Errors during snapshot creation: $output');
+      throw Exception();
     }
   }
 }
@@ -287,8 +284,7 @@ abstract class AotElfBase extends Target {
     if (environment.defines[kTargetPlatform] == null) {
       throw MissingDefineException(kTargetPlatform, 'aot_elf');
     }
-    final List<String> extraGenSnapshotOptions = environment.defines[kExtraGenSnapshotOptions]?.split(',')
-      ?? const <String>[];
+    final List<String> extraGenSnapshotOptions = decodeDartDefines(environment.defines, kExtraGenSnapshotOptions);
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
@@ -312,20 +308,20 @@ abstract class AotElfBase extends Target {
 
 /// Generate an ELF binary from a dart kernel file in profile mode.
 class AotElfProfile extends AotElfBase {
-  const AotElfProfile();
+  const AotElfProfile(this.targetPlatform);
 
   @override
   String get name => 'aot_elf_profile';
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
-    Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.pattern('{PROJECT_DIR}/.packages'),
-    Source.artifact(Artifact.engineDartBinary),
-    Source.artifact(Artifact.skyEnginePath),
+  List<Source> get inputs => <Source>[
+    const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
+    const Source.pattern('{BUILD_DIR}/app.dill'),
+    const Source.pattern('{PROJECT_DIR}/.packages'),
+    const Source.artifact(Artifact.engineDartBinary),
+    const Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot,
-      platform: TargetPlatform.android_arm,
+      platform: targetPlatform,
       mode: BuildMode.profile,
     ),
   ];
@@ -339,24 +335,26 @@ class AotElfProfile extends AotElfBase {
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
   ];
+
+  final TargetPlatform targetPlatform;
 }
 
 /// Generate an ELF binary from a dart kernel file in release mode.
 class AotElfRelease extends AotElfBase {
-  const AotElfRelease();
+  const AotElfRelease(this.targetPlatform);
 
   @override
   String get name => 'aot_elf_release';
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
-    Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.pattern('{PROJECT_DIR}/.packages'),
-    Source.artifact(Artifact.engineDartBinary),
-    Source.artifact(Artifact.skyEnginePath),
+  List<Source> get inputs => <Source>[
+    const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
+    const Source.pattern('{BUILD_DIR}/app.dill'),
+    const Source.pattern('{PROJECT_DIR}/.packages'),
+    const Source.artifact(Artifact.engineDartBinary),
+    const Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot,
-      platform: TargetPlatform.android_arm,
+      platform: targetPlatform,
       mode: BuildMode.release,
     ),
   ];
@@ -370,6 +368,8 @@ class AotElfRelease extends AotElfBase {
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
   ];
+
+  final TargetPlatform targetPlatform;
 }
 
 /// Copies the pre-built flutter aot bundle.
@@ -395,12 +395,4 @@ abstract class CopyFlutterAotBundle extends Target {
     }
     environment.buildDir.childFile('app.so').copySync(outputFile.path);
   }
-}
-
-/// Dart defines are encoded inside [Environment] as a comma-separated list.
-List<String> parseDartDefines(Environment environment) {
-  if (!environment.defines.containsKey(kDartDefines) || environment.defines[kDartDefines].isEmpty) {
-    return const <String>[];
-  }
-  return environment.defines[kDartDefines].split(',');
 }

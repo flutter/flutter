@@ -98,6 +98,9 @@ class BasicMessageChannel<T> {
   }
 }
 
+Expando<Object> _methodChannelHandlers = Expando<Object>();
+Expando<Object> _methodChannelMockHandlers = Expando<Object>();
+
 /// A named channel for communicating with platform plugins using asynchronous
 /// method calls.
 ///
@@ -372,11 +375,21 @@ class MethodChannel {
   /// similarly to what happens if no method call handler has been set.
   /// Any other exception results in an error envelope being sent.
   void setMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
+    _methodChannelHandlers[this] = handler;
     binaryMessenger.setMessageHandler(
       name,
-      handler == null ? null : (ByteData message) => _handleAsMethodCall(message, handler),
+      handler == null
+        ? null
+        : (ByteData message) => _handleAsMethodCall(message, handler),
     );
   }
+
+  /// Returns true if the `handler` argument matches the `handler` previously
+  /// passed to [setMethodCallHandler].
+  ///
+  /// This method is useful for tests or test harnesses that want to assert the
+  /// handler for the specified channel has not been altered by a previous test.
+  bool checkMethodCallHandler(Future<dynamic> handler(MethodCall call)) => _methodChannelHandlers[this] == handler;
 
   /// Sets a mock callback for intercepting method invocations on this channel.
   ///
@@ -397,11 +410,19 @@ class MethodChannel {
   /// [MethodCodec.encodeSuccessEnvelope], to act as if platform plugin had
   /// returned that value.
   void setMockMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
+    _methodChannelMockHandlers[this] = handler;
     binaryMessenger.setMockMessageHandler(
       name,
       handler == null ? null : (ByteData message) => _handleAsMethodCall(message, handler),
     );
   }
+
+  /// Returns true if the `handler` argument matches the `handler` previously
+  /// passed to [setMockMethodCallHandler].
+  ///
+  /// This method is useful for tests or test harnesses that want to assert the
+  /// handler for the specified channel has not been altered by a previous test.
+  bool checkMockMethodCallHandler(Future<dynamic> handler(MethodCall call)) => _methodChannelMockHandlers[this] == handler;
 
   Future<ByteData> _handleAsMethodCall(ByteData message, Future<dynamic> handler(MethodCall call)) async {
     final MethodCall call = codec.decodeMethodCall(message);

@@ -102,6 +102,7 @@ class MediaQueryData {
     this.highContrast = false,
     this.disableAnimations = false,
     this.boldText = false,
+    this.navigationMode = NavigationMode.traditional,
   }) : assert(size != null),
        assert(devicePixelRatio != null),
        assert(textScaleFactor != null),
@@ -116,7 +117,8 @@ class MediaQueryData {
        assert(invertColors != null),
        assert(highContrast != null),
        assert(disableAnimations != null),
-       assert(boldText != null);
+       assert(boldText != null),
+       assert(navigationMode != null);
 
   /// Creates data for a media query based on the given window.
   ///
@@ -139,7 +141,8 @@ class MediaQueryData {
       disableAnimations = window.accessibilityFeatures.disableAnimations,
       boldText = window.accessibilityFeatures.boldText,
       highContrast = window.accessibilityFeatures.highContrast,
-      alwaysUse24HourFormat = window.alwaysUse24HourFormat;
+      alwaysUse24HourFormat = window.alwaysUse24HourFormat,
+      navigationMode = NavigationMode.traditional;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
@@ -355,6 +358,23 @@ class MediaQueryData {
   ///  * [Window.AccessibilityFeatures], where the setting originates.
   final bool boldText;
 
+  /// Describes the navigation mode requested by the platform.
+  ///
+  /// Some user interfaces are better navigated using a directional pad (DPAD)
+  /// or arrow keys, and for those interfaces, some widgets need to handle these
+  /// directional events differently. In order to know when to do that, these
+  /// widgets will look for the navigation mode in effect for their context.
+  ///
+  /// For instance, in a television interface, [NavigationMode.directional]
+  /// should be set, so that directional navigation is used to navigate away
+  /// from a text field using the DPAD. In contrast, on a regular desktop
+  /// application with the `navigationMode` set to [NavigationMode.traditional],
+  /// the arrow keys are used to move the cursor instead of navigating away.
+  ///
+  /// The [NavigationMode] values indicate the type of navigation to be used in
+  /// a widget subtree for those widgets sensitive to it.
+  final NavigationMode navigationMode;
+
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
   Orientation get orientation {
@@ -379,6 +399,7 @@ class MediaQueryData {
     bool invertColors,
     bool accessibleNavigation,
     bool boldText,
+    NavigationMode navigationMode,
   }) {
     return MediaQueryData(
       size: size ?? this.size,
@@ -396,6 +417,7 @@ class MediaQueryData {
       disableAnimations: disableAnimations ?? this.disableAnimations,
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
+      navigationMode: navigationMode ?? this.navigationMode,
     );
   }
 
@@ -563,7 +585,8 @@ class MediaQueryData {
         && other.disableAnimations == disableAnimations
         && other.invertColors == invertColors
         && other.accessibleNavigation == accessibleNavigation
-        && other.boldText == boldText;
+        && other.boldText == boldText
+        && other.navigationMode == navigationMode;
   }
 
   @override
@@ -583,6 +606,7 @@ class MediaQueryData {
       invertColors,
       accessibleNavigation,
       boldText,
+      navigationMode,
     );
   }
 
@@ -603,6 +627,7 @@ class MediaQueryData {
       'disableAnimations: $disableAnimations',
       'invertColors: $invertColors',
       'boldText: $boldText',
+      'navigationMode: ${describeEnum(navigationMode)}',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
@@ -851,4 +876,32 @@ class MediaQuery extends InheritedWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
   }
+}
+
+/// Describes the navigation mode to be set by a [MediaQuery] widget
+///
+/// The different modes indicate the type of navigation to be used in a widget
+/// subtree for those widgets sensitive to it.
+///
+/// Use `MediaQuery.of(context).navigationMode` to determine the navigation mode
+/// in effect for the given context. Use a [MediaQuery] widget to set the
+/// navigation mode for its descendant widgets.
+enum NavigationMode {
+  /// This indicates a traditional keyboard-and-mouse navigation modality.
+  ///
+  /// This navigation mode is where the arrow keys can be used for secondary
+  /// modification operations, like moving sliders or cursors, and disabled
+  /// controls will lose focus and not be traversable.
+  traditional,
+
+  /// This indicates a directional-based navigation mode.
+  ///
+  /// This navigation mode indicates that arrow keys should be reserved for
+  /// navigation operations, and secondary modifications operations, like moving
+  /// sliders or cursors, will use alternative bindings or be disabled.
+  ///
+  /// Some behaviors are also affected by this mode. For instance, disabled
+  /// controls will retain focus when disabled, and will be able to receive
+  /// focus (although they remain disabled) when traversed.
+  directional,
 }

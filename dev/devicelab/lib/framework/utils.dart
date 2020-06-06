@@ -437,6 +437,9 @@ Future<String> evalFlutter(String command, {
 String get dartBin =>
     path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
 
+String get pubBin =>
+    path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'pub');
+
 Future<int> dart(List<String> args) => exec(dartBin, args);
 
 /// Returns a future that completes with a path suitable for JAVA_HOME
@@ -472,11 +475,11 @@ void cd(dynamic directory) {
     cwd = directory.path;
     d = directory;
   } else {
-    throw 'Unsupported type ${directory.runtimeType} of $directory';
+    throw FileSystemException('Unsupported directory type ${directory.runtimeType}', directory.toString());
   }
 
   if (!d.existsSync())
-    throw 'Cannot cd into directory that does not exist: $directory';
+    throw FileSystemException('Cannot cd into directory that does not exist', d.toString());
 }
 
 Directory get flutterDirectory => Directory.current.parent.parent;

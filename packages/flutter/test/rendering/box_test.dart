@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -28,6 +29,11 @@ class FakeMissingSizeRenderBox extends RenderBox {
   bool get hasSize => !fakeMissingSize && super.hasSize;
 
   bool fakeMissingSize = false;
+}
+
+class MissingSetSizeRenderBox extends RenderBox {
+  @override
+  void performLayout() { }
 }
 
 void main() {
@@ -1013,6 +1019,34 @@ void main() {
     expect(() => BoxConstraints(maxWidth: null), throwsAssertionError);
     expect(() => BoxConstraints(minHeight: null), throwsAssertionError);
     expect(() => BoxConstraints(maxHeight: null), throwsAssertionError);
+  });
+
+  test('Error message when size has not been set in RenderBox performLayout should be well versed', () {
+    FlutterErrorDetails errorDetails;
+    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorDetails = details;
+    };
+    try {
+      MissingSetSizeRenderBox().layout(const BoxConstraints());
+    } finally {
+      FlutterError.onError = oldHandler;
+    }
+
+    expect(errorDetails, isNotNull);
+
+    // Check the ErrorDetails without the stack trace.
+    final List<String> lines =  errorDetails.toString().split('\n');
+    expect(
+      lines.take(5).join('\n'),
+      equalsIgnoringHashCodes(
+        '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞══════════════════════\n'
+          'The following assertion was thrown during performLayout():\n'
+          'RenderBox did not set its size during layout.\n'
+          'Because this RenderBox has sizedByParent set to false, it must\n'
+          'set its size in performLayout().'
+      ),
+    );
   });
 }
 

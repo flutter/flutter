@@ -263,6 +263,7 @@ void main() {
       bool enabled = true,
       bool dense = false,
       bool selected = false,
+      ShapeBorder shape,
       Color selectedColor,
       Color iconColor,
       Color textColor,
@@ -272,6 +273,7 @@ void main() {
           child: Center(
             child: ListTileTheme(
               dense: dense,
+              shape: shape,
               selectedColor: selectedColor,
               iconColor: iconColor,
               textColor: textColor,
@@ -296,9 +298,13 @@ void main() {
 
     const Color green = Color(0xFF00FF00);
     const Color red = Color(0xFFFF0000);
+    const ShapeBorder roundedShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(4.0)),
+    );
 
     Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color;
     Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color;
+    ShapeBorder inkWellBorder() => tester.widget<InkWell>(find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell))).customBorder;
 
     // A selected ListTile's leading, trailing, and text get the primary color by default
     await tester.pumpWidget(buildFrame(selected: true));
@@ -341,6 +347,10 @@ void main() {
     expect(iconColor(trailingKey), theme.disabledColor);
     expect(textColor(titleKey), theme.disabledColor);
     expect(textColor(subtitleKey), theme.disabledColor);
+
+    // A selected ListTile's InkWell gets the ListTileTheme's shape
+    await tester.pumpWidget(buildFrame(selected: true, shape: roundedShape));
+    expect(inkWellBorder(), roundedShape);
   });
 
   testWidgets('ListTile semantics', (WidgetTester tester) async {
@@ -1442,5 +1452,68 @@ void main() {
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: -3.0));
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(800, 44)));
+  });
+
+  testWidgets('ListTile changes mouse cursor when hovered', (WidgetTester tester) async {
+    // Test ListTile() constructor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: ListTile(
+                onTap: () {},
+                mouseCursor: SystemMouseCursors.text,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(ListTile)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: ListTile(
+                onTap: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: ListTile(
+                enabled: false,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 }

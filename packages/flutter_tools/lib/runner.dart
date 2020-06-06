@@ -23,9 +23,12 @@ import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 
 /// Runs the Flutter tool with support for the specified list of [commands].
+///
+/// [commands] must be either `List<FlutterCommand>` or `List<FlutterCommand> Function()`.
+// TODO(jonahwilliams): update command type once g3 has rolled.
 Future<int> run(
   List<String> args,
-  List<FlutterCommand> commands, {
+  dynamic commands, {
     bool muteCommandLogging = false,
     bool verbose = false,
     bool verboseHelp = false,
@@ -39,12 +42,17 @@ Future<int> run(
     args = List<String>.of(args);
     args.removeWhere((String option) => option == '-v' || option == '--verbose');
   }
-
-  final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: verboseHelp);
-  commands.forEach(runner.addCommand);
+  List<FlutterCommand> Function() commandGenerator;
+  if (commands is List<FlutterCommand>) {
+    commandGenerator = () => commands;
+  } else {
+    commandGenerator = commands as List<FlutterCommand> Function();
+  }
 
   return runInContext<int>(() async {
     reportCrashes ??= !await globals.isRunningOnBot;
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: verboseHelp);
+    commandGenerator().forEach(runner.addCommand);
 
     // Initialize the system locale.
     final String systemLocale = await intl_standalone.findSystemLocale();

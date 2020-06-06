@@ -8,7 +8,7 @@ import 'common.dart';
 
 void main() {
   test('ABTest', () {
-    final ABTest ab = ABTest();
+    final ABTest ab = ABTest('engine', 'test');
 
     for (int i = 0; i < 5; i++) {
       ab.addAResult(<String, dynamic>{
@@ -28,6 +28,7 @@ void main() {
         'benchmarkScoreKeys': <String>['i', 'k'],
       });
     }
+    ab.finalize();
 
     expect(
       ab.rawResults(),

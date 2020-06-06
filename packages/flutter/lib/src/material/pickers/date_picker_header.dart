@@ -25,6 +25,7 @@ const double _headerPaddingLandscape = 16.0;
 ///
 /// * Single Date picker with calendar mode.
 /// * Single Date picker with manual input mode.
+/// * Date Range picker with manual input mode.
 ///
 /// [helpText], [orientation], [icon], [onIconPressed] are required and must be
 /// non-null.
@@ -112,7 +113,7 @@ class DatePickerHeader extends StatelessWidget {
       titleText,
       semanticsLabel: titleSemanticsLabel ?? titleText,
       style: titleStyle,
-      maxLines: (isShort || orientation == Orientation.portrait) ? 1 : 2,
+      maxLines: orientation == Orientation.portrait ? 1 : 2,
       overflow: TextOverflow.ellipsis,
     );
     final IconButton icon = IconButton(
@@ -169,13 +170,14 @@ class DatePickerHeader extends StatelessWidget {
                     child: help,
                   ),
                   SizedBox(height: isShort ? 16 : 56),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: _headerPaddingLandscape,
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: _headerPaddingLandscape,
+                      ),
+                      child: title,
                     ),
-                    child: title,
                   ),
-                  const Spacer(),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 4,

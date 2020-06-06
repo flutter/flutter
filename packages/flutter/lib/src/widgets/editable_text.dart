@@ -375,6 +375,7 @@ class EditableText extends StatefulWidget {
     this.minLines,
     this.expands = false,
     this.forceLine = true,
+    this.textHeightBehavior,
     this.textWidthBasis = TextWidthBasis.parent,
     this.autofocus = false,
     bool showCursor,
@@ -390,6 +391,7 @@ class EditableText extends StatefulWidget {
     this.onSelectionChanged,
     this.onSelectionHandleTapped,
     List<TextInputFormatter> inputFormatters,
+    this.mouseCursor,
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 2.0,
     this.cursorRadius,
@@ -484,6 +486,9 @@ class EditableText extends StatefulWidget {
   /// Defaults to false. Cannot be null.
   /// {@endtemplate}
   final bool obscureText;
+
+  /// {@macro flutter.dart:ui.textHeightBehavior},
+  final TextHeightBehavior textHeightBehavior;
 
   /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
   final TextWidthBasis textWidthBasis;
@@ -979,6 +984,16 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final List<TextInputFormatter> inputFormatters;
 
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If this property is null, [SystemMouseCursors.text] will be used.
+  ///
+  /// The [mouseCursor] is the only property of [EditableText] that controls the
+  /// mouse pointer. All other properties related to "cursor" stands for the text
+  /// cursor, which is usually a blinking vertical line at the editing position.
+  final MouseCursor mouseCursor;
+
   /// If true, the [RenderEditable] created by this widget will not handle
   /// pointer events, see [renderEditable] and [RenderEditable.ignorePointer].
   ///
@@ -1135,6 +1150,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     properties.add(DiagnosticsProperty<Iterable<String>>('autofillHints', autofillHints, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
   }
 }
 
@@ -1144,6 +1160,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
   final GlobalKey _editableKey = GlobalKey();
+  final ClipboardStatusNotifier _clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
 
   TextInputConnection _textInputConnection;
   TextSelectionOverlay _selectionOverlay;
@@ -1190,11 +1207,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool get selectAllEnabled => widget.toolbarOptions.selectAll;
 
+  void _onChangedClipboardStatus() {
+    setState(() {
+      // Inform the widget that the value of clipboardStatus has changed.
+    });
+  }
+
   // State lifecycle:
 
   @override
   void initState() {
     super.initState();
+    _clipboardStatus?.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     _focusAttachment = widget.focusNode.attach(context);
     widget.focusNode.addListener(_handleFocusChanged);
@@ -1268,6 +1292,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         );
       }
     }
+    if (widget.selectionEnabled && pasteEnabled && widget.selectionControls?.canPaste(this) == true) {
+      _clipboardStatus?.update();
+    }
   }
 
   @override
@@ -1284,6 +1311,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay = null;
     _focusAttachment.detach();
     widget.focusNode.removeListener(_handleFocusChanged);
+    WidgetsBinding.instance.removeObserver(this);
+    _clipboardStatus?.removeListener(_onChangedClipboardStatus);
+    _clipboardStatus?.dispose();
     super.dispose();
   }
 
@@ -1462,45 +1492,57 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool get _hasFocus => widget.focusNode.hasFocus;
   bool get _isMultiline => widget.maxLines != 1;
 
-  // Calculate the new scroll offset so the cursor remains visible.
-  double _getScrollOffsetForCaret(Rect caretRect) {
-    double caretStart;
-    double caretEnd;
-    if (_isMultiline) {
-      // The caret is vertically centered within the line. Expand the caret's
-      // height so that it spans the line because we're going to ensure that the entire
-      // expanded caret is scrolled into view.
-      final double lineHeight = renderEditable.preferredLineHeight;
-      final double caretOffset = (lineHeight - caretRect.height) / 2;
-      caretStart = caretRect.top - caretOffset;
-      caretEnd = caretRect.bottom + caretOffset;
+  // Finds the closest scroll offset to the current scroll offset that fully
+  // reveals the given caret rect. If the given rect's main axis extent is too
+  // large to be fully revealed in `renderEditable`, it will be centered along
+  // the main axis.
+  //
+  // If this is a multiline EditableText (which means the Editable can only
+  // scroll vertically), the given rect's height will first be extended to match
+  // `renderEditable.preferredLineHeight`, before the target scroll offset is
+  // calculated.
+  RevealedOffset _getOffsetToRevealCaret(Rect rect) {
+    if (!_scrollController.position.allowImplicitScrolling)
+      return RevealedOffset(offset: _scrollController.offset, rect: rect);
+
+    final Size editableSize = renderEditable.size;
+    double additionalOffset;
+    Offset unitOffset;
+
+    if (!_isMultiline) {
+      additionalOffset = rect.width >= editableSize.width
+        // Center `rect` if it's oversized.
+        ? editableSize.width / 2 - rect.center.dx
+        // Valid additional offsets range from (rect.right - size.width)
+        // to (rect.left). Pick the closest one if out of range.
+        : 0.0.clamp(rect.right - editableSize.width, rect.left) as double;
+      unitOffset = const Offset(1, 0);
     } else {
-      // Scrolls horizontally for single-line fields.
-      caretStart = caretRect.left;
-      caretEnd = caretRect.right;
+      // The caret is vertically centered within the line. Expand the caret's
+      // height so that it spans the line because we're going to ensure that the
+      // entire expanded caret is scrolled into view.
+      final Rect expandedRect = Rect.fromCenter(
+        center: rect.center,
+        width: rect.width,
+        height: math.max(rect.height, renderEditable.preferredLineHeight),
+      );
+
+      additionalOffset = expandedRect.height >= editableSize.height
+        ? editableSize.height / 2 - expandedRect.center.dy
+        : 0.0.clamp(expandedRect.bottom - editableSize.height, expandedRect.top) as double;
+      unitOffset = const Offset(0, 1);
     }
 
-    double scrollOffset = _scrollController.offset;
-    final double viewportExtent = _scrollController.position.viewportDimension;
-    if (caretStart < 0.0) { // cursor before start of bounds
-      scrollOffset += caretStart;
-    } else if (caretEnd >= viewportExtent) { // cursor after end of bounds
-      scrollOffset += caretEnd - viewportExtent;
-    }
+    // No overscrolling when encountering tall fonts/scripts that extend past
+    // the ascent.
+    final double targetOffset = (additionalOffset + _scrollController.offset)
+      .clamp(
+        _scrollController.position.minScrollExtent,
+        _scrollController.position.maxScrollExtent,
+      ) as double;
 
-    if (_isMultiline) {
-      // Clamp the final results to prevent programmatically scrolling to
-      // out-of-paragraph-bounds positions when encountering tall fonts/scripts that
-      // extend past the ascent.
-      scrollOffset = scrollOffset.clamp(0.0, renderEditable.maxScrollExtent) as double;
-    }
-    return scrollOffset;
-  }
-
-  // Calculates where the `caretRect` would be if `_scrollController.offset` is set to `scrollOffset`.
-  Rect _getCaretRectAtScrollOffset(Rect caretRect, double scrollOffset) {
-    final double offsetDiff = _scrollController.offset - scrollOffset;
-    return _isMultiline ? caretRect.translate(0.0, offsetDiff) : caretRect.translate(offsetDiff, 0.0);
+    final double offsetDelta = _scrollController.offset - targetOffset;
+    return RevealedOffset(rect: rect.shift(unitOffset * offsetDelta), offset: targetOffset);
   }
 
   bool get _hasInputConnection => _textInputConnection != null && _textInputConnection.attached;
@@ -1610,6 +1652,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (widget.selectionControls != null) {
       _selectionOverlay = TextSelectionOverlay(
+        clipboardStatus: _clipboardStatus,
         context: context,
         value: _value,
         debugRequiredFor: widget,
@@ -1658,19 +1701,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (_currentCaretRect == null || !_scrollController.hasClients) {
         return;
       }
-      final double scrollOffsetForCaret = _getScrollOffsetForCaret(_currentCaretRect);
-      _scrollController.animateTo(
-        scrollOffsetForCaret,
-        duration: _caretAnimationDuration,
-        curve: _caretAnimationCurve,
-      );
-      final Rect newCaretRect = _getCaretRectAtScrollOffset(_currentCaretRect, scrollOffsetForCaret);
-      // Enlarge newCaretRect by scrollPadding to ensure that caret is not
+
+      final double lineHeight = renderEditable.preferredLineHeight;
+
+      // Enlarge the target rect by scrollPadding to ensure that caret is not
       // positioned directly at the edge after scrolling.
       double bottomSpacing = widget.scrollPadding.bottom;
       if (_selectionOverlay?.selectionControls != null) {
         final double handleHeight = _selectionOverlay.selectionControls
-          .getHandleSize(renderEditable.preferredLineHeight).height;
+          .getHandleSize(lineHeight).height;
         final double interactiveHandleHeight = math.max(
           handleHeight,
           kMinInteractiveDimension,
@@ -1678,7 +1717,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         final Offset anchor = _selectionOverlay.selectionControls
           .getHandleAnchor(
             TextSelectionHandleType.collapsed,
-            renderEditable.preferredLineHeight,
+            lineHeight,
           );
         final double handleCenter = handleHeight / 2 - anchor.dy;
         bottomSpacing = math.max(
@@ -1686,14 +1725,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           bottomSpacing,
         );
       }
-      final Rect inflatedRect = Rect.fromLTRB(
-          newCaretRect.left - widget.scrollPadding.left,
-          newCaretRect.top - widget.scrollPadding.top,
-          newCaretRect.right + widget.scrollPadding.right,
-          newCaretRect.bottom + bottomSpacing,
+
+      final EdgeInsets caretPadding = widget.scrollPadding
+        .copyWith(bottom: bottomSpacing);
+
+      final RevealedOffset targetOffset = _getOffsetToRevealCaret(_currentCaretRect);
+
+      _scrollController.animateTo(
+        targetOffset.offset,
+        duration: _caretAnimationDuration,
+        curve: _caretAnimationCurve,
       );
-      _editableKey.currentContext.findRenderObject().showOnScreen(
-        rect: inflatedRect,
+
+      renderEditable.showOnScreen(
+        rect: caretPadding.inflateRect(targetOffset.rect),
         duration: _caretAnimationDuration,
         curve: _caretAnimationCurve,
       );
@@ -1902,7 +1947,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void bringIntoView(TextPosition position) {
-    _scrollController.jumpTo(_getScrollOffsetForCaret(renderEditable.getLocalRectForCaret(position)));
+    final Rect localRect = renderEditable.getLocalRectForCaret(position);
+    final RevealedOffset targetOffset = _getOffsetToRevealCaret(localRect);
+
+    _scrollController.jumpTo(targetOffset.offset);
+    renderEditable.showOnScreen(rect: targetOffset.rect);
   }
 
   /// Shows the selection toolbar at the location of the current cursor.
@@ -1980,7 +2029,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   VoidCallback _semanticsOnCopy(TextSelectionControls controls) {
     return widget.selectionEnabled && copyEnabled && _hasFocus && controls?.canCopy(this) == true
-      ? () => controls.handleCopy(this)
+      ? () => controls.handleCopy(this, _clipboardStatus)
       : null;
   }
 
@@ -1991,7 +2040,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   VoidCallback _semanticsOnPaste(TextSelectionControls controls) {
-    return widget.selectionEnabled && pasteEnabled &&_hasFocus && controls?.canPaste(this) == true
+    return widget.selectionEnabled && pasteEnabled && _hasFocus && controls?.canPaste(this) == true && (_clipboardStatus == null || _clipboardStatus.value == ClipboardStatus.pasteable)
       ? () => controls.handlePaste(this)
       : null;
   }
@@ -2003,68 +2052,72 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls controls = widget.selectionControls;
-    return Scrollable(
-      excludeFromSemantics: true,
-      axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
-      controller: _scrollController,
-      physics: widget.scrollPhysics,
-      dragStartBehavior: widget.dragStartBehavior,
-      viewportBuilder: (BuildContext context, ViewportOffset offset) {
-        return CompositedTransformTarget(
-          link: _toolbarLayerLink,
-          child: Semantics(
-            onCopy: _semanticsOnCopy(controls),
-            onCut: _semanticsOnCut(controls),
-            onPaste: _semanticsOnPaste(controls),
-            child: _Editable(
-              key: _editableKey,
-              startHandleLayerLink: _startHandleLayerLink,
-              endHandleLayerLink: _endHandleLayerLink,
-              textSpan: buildTextSpan(),
-              value: _value,
-              cursorColor: _cursorColor,
-              backgroundCursorColor: widget.backgroundCursorColor,
-              showCursor: EditableText.debugDeterministicCursor
-                  ? ValueNotifier<bool>(widget.showCursor)
-                  : _cursorVisibilityNotifier,
-              forceLine: widget.forceLine,
-              readOnly: widget.readOnly,
-              hasFocus: _hasFocus,
-              maxLines: widget.maxLines,
-              minLines: widget.minLines,
-              expands: widget.expands,
-              strutStyle: widget.strutStyle,
-              selectionColor: widget.selectionColor,
-              textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
-              textAlign: widget.textAlign,
-              textDirection: _textDirection,
-              locale: widget.locale,
-              textWidthBasis: widget.textWidthBasis,
-              obscuringCharacter: widget.obscuringCharacter,
-              obscureText: widget.obscureText,
-              autocorrect: widget.autocorrect,
-              smartDashesType: widget.smartDashesType,
-              smartQuotesType: widget.smartQuotesType,
-              enableSuggestions: widget.enableSuggestions,
-              offset: offset,
-              onSelectionChanged: _handleSelectionChanged,
-              onCaretChanged: _handleCaretChanged,
-              rendererIgnoresPointer: widget.rendererIgnoresPointer,
-              cursorWidth: widget.cursorWidth,
-              cursorRadius: widget.cursorRadius,
-              cursorOffset: widget.cursorOffset,
-              selectionHeightStyle: widget.selectionHeightStyle,
-              selectionWidthStyle: widget.selectionWidthStyle,
-              paintCursorAboveText: widget.paintCursorAboveText,
-              enableInteractiveSelection: widget.enableInteractiveSelection,
-              textSelectionDelegate: this,
-              devicePixelRatio: _devicePixelRatio,
-              promptRectRange: _currentPromptRectRange,
-              promptRectColor: widget.autocorrectionTextRectColor,
+    return MouseRegion(
+      cursor: widget.mouseCursor ?? SystemMouseCursors.text,
+      child: Scrollable(
+        excludeFromSemantics: true,
+        axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
+        controller: _scrollController,
+        physics: widget.scrollPhysics,
+        dragStartBehavior: widget.dragStartBehavior,
+        viewportBuilder: (BuildContext context, ViewportOffset offset) {
+          return CompositedTransformTarget(
+            link: _toolbarLayerLink,
+            child: Semantics(
+              onCopy: _semanticsOnCopy(controls),
+              onCut: _semanticsOnCut(controls),
+              onPaste: _semanticsOnPaste(controls),
+              child: _Editable(
+                key: _editableKey,
+                startHandleLayerLink: _startHandleLayerLink,
+                endHandleLayerLink: _endHandleLayerLink,
+                textSpan: buildTextSpan(),
+                value: _value,
+                cursorColor: _cursorColor,
+                backgroundCursorColor: widget.backgroundCursorColor,
+                showCursor: EditableText.debugDeterministicCursor
+                    ? ValueNotifier<bool>(widget.showCursor)
+                    : _cursorVisibilityNotifier,
+                forceLine: widget.forceLine,
+                readOnly: widget.readOnly,
+                hasFocus: _hasFocus,
+                maxLines: widget.maxLines,
+                minLines: widget.minLines,
+                expands: widget.expands,
+                strutStyle: widget.strutStyle,
+                selectionColor: widget.selectionColor,
+                textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
+                textAlign: widget.textAlign,
+                textDirection: _textDirection,
+                locale: widget.locale,
+                textHeightBehavior: widget.textHeightBehavior,
+                textWidthBasis: widget.textWidthBasis,
+                obscuringCharacter: widget.obscuringCharacter,
+                obscureText: widget.obscureText,
+                autocorrect: widget.autocorrect,
+                smartDashesType: widget.smartDashesType,
+                smartQuotesType: widget.smartQuotesType,
+                enableSuggestions: widget.enableSuggestions,
+                offset: offset,
+                onSelectionChanged: _handleSelectionChanged,
+                onCaretChanged: _handleCaretChanged,
+                rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                cursorWidth: widget.cursorWidth,
+                cursorRadius: widget.cursorRadius,
+                cursorOffset: widget.cursorOffset,
+                selectionHeightStyle: widget.selectionHeightStyle,
+                selectionWidthStyle: widget.selectionWidthStyle,
+                paintCursorAboveText: widget.paintCursorAboveText,
+                enableInteractiveSelection: widget.enableInteractiveSelection,
+                textSelectionDelegate: this,
+                devicePixelRatio: _devicePixelRatio,
+                promptRectRange: _currentPromptRectRange,
+                promptRectColor: widget.autocorrectionTextRectColor,
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -2076,10 +2129,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (widget.obscureText) {
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
-      final int o =
-        _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
-      if (o != null && o >= 0 && o < text.length)
-        text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
+      // Reveal the latest character in an obscured field only on mobile.
+      if ((defaultTargetPlatform == TargetPlatform.android ||
+              defaultTargetPlatform == TargetPlatform.iOS ||
+              defaultTargetPlatform == TargetPlatform.fuchsia) &&
+          !kIsWeb) {
+        final int o =
+            _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
+        if (o != null && o >= 0 && o < text.length)
+          text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
+      }
       return TextSpan(style: widget.style, text: text);
     }
     // Read only mode should not paint text composing.
@@ -2102,6 +2161,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.showCursor,
     this.forceLine,
     this.readOnly,
+    this.textHeightBehavior,
     this.textWidthBasis,
     this.hasFocus,
     this.maxLines,
@@ -2159,6 +2219,7 @@ class _Editable extends LeafRenderObjectWidget {
   final Locale locale;
   final String obscuringCharacter;
   final bool obscureText;
+  final TextHeightBehavior textHeightBehavior;
   final TextWidthBasis textWidthBasis;
   final bool autocorrect;
   final SmartDashesType smartDashesType;
@@ -2208,6 +2269,7 @@ class _Editable extends LeafRenderObjectWidget {
       ignorePointer: rendererIgnoresPointer,
       obscuringCharacter: obscuringCharacter,
       obscureText: obscureText,
+      textHeightBehavior: textHeightBehavior,
       textWidthBasis: textWidthBasis,
       cursorWidth: cursorWidth,
       cursorRadius: cursorRadius,
@@ -2248,6 +2310,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..onSelectionChanged = onSelectionChanged
       ..onCaretChanged = onCaretChanged
       ..ignorePointer = rendererIgnoresPointer
+      ..textHeightBehavior = textHeightBehavior
       ..textWidthBasis = textWidthBasis
       ..obscuringCharacter = obscuringCharacter
       ..obscureText = obscureText

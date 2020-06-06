@@ -36,6 +36,20 @@ export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, T
 ///
 /// Instead of creating your own subclasses, [parent] can be used to combine
 /// [ScrollPhysics] objects of different types to get the desired scroll physics.
+/// For example:
+///
+/// ```dart
+/// const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
+/// ```
+///
+/// You can also use `applyTo`, which is useful when you already have
+/// an instance of `ScrollPhysics`:
+///
+/// ```dart
+/// ScrollPhysics physics = const BouncingScrollPhysics();
+/// // ...
+/// physics.applyTo(const AlwaysScrollableScrollPhysics())
+/// ```
 @immutable
 class ScrollPhysics {
   /// Creates an object with the default scroll physics.
@@ -49,9 +63,9 @@ class ScrollPhysics {
   /// [ScrollPhysics] subclasses at runtime. For example:
   ///
   /// ```dart
-  /// BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
-  ///
+  /// const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
   /// ```
+  ///
   /// will result in a [ScrollPhysics] that has the combined behavior
   /// of [BouncingScrollPhysics] and [AlwaysScrollableScrollPhysics]:
   /// behaviors that are not specified in [BouncingScrollPhysics]
@@ -228,6 +242,61 @@ class ScrollPhysics {
     return parent.applyBoundaryConditions(position, value);
   }
 
+  /// Describes what the scroll position should be given new viewport dimensions.
+  ///
+  /// This is called by [ScrollPosition.correctForNewDimensions].
+  ///
+  /// The arguments consist of the scroll metrics as they stood in the previous
+  /// frame and the scroll metrics as they now stand after the last layout,
+  /// including the position and minimum and maximum scroll extents; a flag
+  /// indicating if the current [ScrollActivity] considers that the user is
+  /// actively scrolling (see [ScrollActivity.isScrolling]); and the current
+  /// velocity of the scroll position, if it is being driven by the scroll
+  /// activity (this is 0.0 during a user gesture) (see
+  /// [ScrollActivity.velocity]).
+  ///
+  /// The scroll metrics will be identical except for the
+  /// [ScrollMetrics.minScrollExtent] and [ScrollMetrics.maxScrollExtent]. They
+  /// are referred to as the `oldPosition` and `newPosition` (even though they
+  /// both technically have the same "position", in the form of
+  /// [ScrollMetrics.pixels]) because they are generated from the
+  /// [ScrollPosition] before and after updating the scroll extents.
+  ///
+  /// If the returned value does not exactly match the scroll offset given by
+  /// the `newPosition` argument (see [ScrollMetrics.pixels]), then the
+  /// [ScrollPosition] will call [ScrollPosition.correctPixels] to update the
+  /// new scroll position to the returned value, and layout will be re-run. This
+  /// is expensive. The new value is subject to further manipulation by
+  /// [applyBoundaryConditions].
+  ///
+  /// If the returned value _does_ match the `newPosition.pixels` scroll offset
+  /// exactly, then [ScrollPosition.applyNewDimensions] will be called next. In
+  /// that case, [applyBoundaryConditions] is not applied to the return value.
+  ///
+  /// The given [ScrollMetrics] are only valid during this method call. Do not
+  /// keep references to them to use later, as the values may update, may not
+  /// update, or may update to reflect an entirely unrelated scrollable.
+  ///
+  /// The default implementation returns the [ScrollMetrics.pixels] of the
+  /// `newPosition`, which indicates that the current scroll offset is
+  /// acceptable.
+  ///
+  /// See also:
+  ///
+  ///  * [RangeMaintainingScrollPhysics], which is enabled by default, and
+  ///    which prevents unexpected changes to the content dimensions from
+  ///    causing the scroll position to get any further out of bounds.
+  double adjustPositionForNewDimensions({
+    @required ScrollMetrics oldPosition,
+    @required ScrollMetrics newPosition,
+    @required bool isScrolling,
+    @required double velocity,
+  }) {
+    if (parent == null)
+      return newPosition.pixels;
+    return parent.adjustPositionForNewDimensions(oldPosition: oldPosition, newPosition: newPosition, isScrolling: isScrolling, velocity: velocity);
+  }
+
   /// Returns a simulation for ballistic scrolling starting from the given
   /// position with the given velocity.
   ///
@@ -325,6 +394,49 @@ class ScrollPhysics {
     if (parent == null)
       return objectRuntimeType(this, 'ScrollPhsyics');
     return '${objectRuntimeType(this, 'ScrollPhysics')} -> $parent';
+  }
+}
+
+/// Scroll physics that attempt to keep the scroll position in range when the
+/// contents change dimensions suddenly.
+///
+/// If the scroll position is already out of range, this attempts to maintain
+/// the amount of overscroll or underscroll already present.
+///
+/// If the scroll activity is animating the scroll position, sudden changes to
+/// the scroll dimensions are allowed to happen (so as to prevent animations
+/// from jumping back and forth between in-range and out-of-range values).
+///
+/// These physics should be combined with other scroll physics, e.g.
+/// [BouncingScrollPhysics] or [ClampingScrollPhysics], to obtain a complete
+/// description of typical scroll physics. See [applyTo].
+class RangeMaintainingScrollPhysics extends ScrollPhysics {
+  /// Creates scroll physics that maintain the scroll position in range.
+  const RangeMaintainingScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
+
+  @override
+  RangeMaintainingScrollPhysics applyTo(ScrollPhysics ancestor) {
+    return RangeMaintainingScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  double adjustPositionForNewDimensions({
+    @required ScrollMetrics oldPosition,
+    @required ScrollMetrics newPosition,
+    @required bool isScrolling,
+    @required double velocity,
+  }) {
+    if (velocity != 0.0 || ((oldPosition.minScrollExtent == newPosition.minScrollExtent) && (oldPosition.maxScrollExtent == newPosition.maxScrollExtent)))
+      return super.adjustPositionForNewDimensions(oldPosition: oldPosition, newPosition: newPosition, isScrolling: isScrolling, velocity: velocity);
+    if (oldPosition.pixels < oldPosition.minScrollExtent) {
+      final double oldDelta = oldPosition.minScrollExtent - oldPosition.pixels;
+      return newPosition.minScrollExtent - oldDelta;
+    }
+    if (oldPosition.pixels > oldPosition.maxScrollExtent) {
+      final double oldDelta = oldPosition.pixels - oldPosition.maxScrollExtent;
+      return newPosition.maxScrollExtent + oldDelta;
+    }
+    return newPosition.pixels.clamp(newPosition.minScrollExtent, newPosition.maxScrollExtent) as double;
   }
 }
 
@@ -534,9 +646,13 @@ class ClampingScrollPhysics extends ScrollPhysics {
 
 /// Scroll physics that always lets the user scroll.
 ///
+/// This overrides the default behavior which is to disable scrolling
+/// when there is no content to scroll. It does not override the
+/// handling of overscrolling.
+///
 /// On Android, overscrolls will be clamped by default and result in an
-/// overscroll glow. On iOS, overscrolls will load a spring that will return
-/// the scroll view to its normal range when released.
+/// overscroll glow. On iOS, overscrolls will load a spring that will return the
+/// scroll view to its normal range when released.
 ///
 /// See also:
 ///

@@ -102,7 +102,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   @override
   void handleMemoryPressure() {
     super.handleMemoryPressure();
-    imageCache.clear();
+    imageCache?.clear();
   }
 
   /// Listenable that notifies when the available fonts on the system have

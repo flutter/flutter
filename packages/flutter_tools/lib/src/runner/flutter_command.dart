@@ -15,7 +15,6 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
 import '../base/signals.dart';
-import '../base/time.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -110,6 +109,7 @@ class FlutterOptions {
   static const String kDartDefinesOption = 'dart-define';
   static const String kBundleSkSLPathOption = 'bundle-sksl-path';
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
+  static const String kNullSafety = 'sound-null-safety';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -461,6 +461,14 @@ abstract class FlutterCommand extends Command<void> {
       );
   }
 
+  void addNullSafetyModeOptions() {
+    argParser.addFlag(FlutterOptions.kNullSafety,
+      help: 'Whether to override the default null safety setting.',
+      defaultsTo: null,
+      hide: true,
+    );
+  }
+
   void usesExtraFrontendOptions() {
     argParser.addMultiOption(FlutterOptions.kExtraFrontEndOptions,
       splitCommas: true,
@@ -558,10 +566,12 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// Compute the [BuildInfo] for the current flutter command.
+  /// Commands that build multiple build modes can pass in a [forcedBuildMode]
+  /// to be used instead of parsing flags.
   ///
   /// Throws a [ToolExit] if the current set of options is not compatible with
-  /// eachother.
-  BuildInfo getBuildInfo() {
+  /// each other.
+  BuildInfo getBuildInfo({ BuildMode forcedBuildMode }) {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
 
@@ -571,15 +581,15 @@ abstract class FlutterCommand extends Command<void> {
 
     final List<String> experiments =
       argParser.options.containsKey(FlutterOptions.kEnableExperiment)
-        ? stringsArg(FlutterOptions.kEnableExperiment)
+        ? stringsArg(FlutterOptions.kEnableExperiment).toList()
         : <String>[];
     final List<String> extraGenSnapshotOptions =
       argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
-        ? stringsArg(FlutterOptions.kExtraGenSnapshotOptions)
+        ? stringsArg(FlutterOptions.kExtraGenSnapshotOptions).toList()
         : <String>[];
     final List<String> extraFrontEndOptions =
       argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
-          ? stringsArg(FlutterOptions.kExtraFrontEndOptions)
+          ? stringsArg(FlutterOptions.kExtraFrontEndOptions).toList()
           : <String>[];
 
     if (experiments.isNotEmpty) {
@@ -587,6 +597,18 @@ abstract class FlutterCommand extends Command<void> {
         final String flag = '--enable-experiment=' + expFlag;
         extraFrontEndOptions.add(flag);
         extraGenSnapshotOptions.add(flag);
+      }
+    }
+
+    if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
+      final bool nullSafety = boolArg(FlutterOptions.kNullSafety);
+      // Explicitly check for `true` and `false` so that `null` results in not
+      // passing a flag. This will use the automatically detected null-safety
+      // value based on the entrypoint
+      if (nullSafety == true) {
+        extraFrontEndOptions.add('--sound-null-safety');
+      } else if (nullSafety == false) {
+        extraFrontEndOptions.add('--no-sound-null-safety');
       }
     }
 
@@ -603,7 +625,7 @@ abstract class FlutterCommand extends Command<void> {
         'combination with "--${FlutterOptions.kSplitDebugInfoOption}"',
       );
     }
-    final BuildMode buildMode = getBuildMode();
+    final BuildMode buildMode = forcedBuildMode ?? getBuildMode();
     final bool treeShakeIcons = argParser.options.containsKey('tree-shake-icons')
       && buildMode.isPrecompiled
       && boolArg('tree-shake-icons');
@@ -678,7 +700,7 @@ abstract class FlutterCommand extends Command<void> {
   /// so that this method can record and report the overall time to analytics.
   @override
   Future<void> run() {
-    final DateTime startTime = systemClock.now();
+    final DateTime startTime = globals.systemClock.now();
 
     return context.run<void>(
       name: 'command',
@@ -692,7 +714,7 @@ abstract class FlutterCommand extends Command<void> {
         try {
           commandResult = await verifyThenRunCommand(commandPath);
         } finally {
-          final DateTime endTime = systemClock.now();
+          final DateTime endTime = globals.systemClock.now();
           globals.printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
           _sendPostUsage(commandPath, commandResult, startTime, endTime);
         }
@@ -707,11 +729,11 @@ abstract class FlutterCommand extends Command<void> {
         commandPath,
         const FlutterCommandResult(ExitStatus.killed),
         startTime,
-        systemClock.now(),
+        globals.systemClock.now(),
       );
     };
-    signals.addHandler(io.ProcessSignal.SIGTERM, handler);
-    signals.addHandler(io.ProcessSignal.SIGINT, handler);
+    globals.signals.addHandler(io.ProcessSignal.SIGTERM, handler);
+    globals.signals.addHandler(io.ProcessSignal.SIGINT, handler);
   }
 
   /// Logs data about this command.
@@ -822,11 +844,28 @@ abstract class FlutterCommand extends Command<void> {
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
       globals.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId));
       return null;
-    } else if (devices.isEmpty && deviceManager.hasSpecifiedAllDevices) {
-      globals.printStatus(userMessages.flutterNoDevicesFound);
-      return null;
     } else if (devices.isEmpty) {
-      globals.printStatus(userMessages.flutterNoSupportedDevices);
+      if (deviceManager.hasSpecifiedAllDevices) {
+        globals.printStatus(userMessages.flutterNoDevicesFound);
+      } else {
+        globals.printStatus(userMessages.flutterNoSupportedDevices);
+      }
+      final List<Device> unsupportedDevices = await deviceManager.getDevices();
+      if (unsupportedDevices.isNotEmpty) {
+        final StringBuffer result = StringBuffer();
+        result.writeln(userMessages.flutterFoundButUnsupportedDevices);
+        result.writeAll(
+          await Device.descriptions(unsupportedDevices)
+              .map((String desc) => desc)
+              .toList(),
+          '\n',
+        );
+        result.writeln('');
+        result.writeln(userMessages.flutterMissPlatformProjects(
+          Device.devicesPlatformTypes(unsupportedDevices),
+        ));
+        globals.printStatus(result.toString());
+      }
       return null;
     } else if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices) {
       if (deviceManager.hasSpecifiedDeviceId) {

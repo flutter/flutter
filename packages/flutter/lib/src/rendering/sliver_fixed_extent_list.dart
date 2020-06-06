@@ -214,7 +214,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
           ) {
             possibleFirstIndex -= 1;
           }
-          max = possibleFirstIndex * itemExtent;
+          max = (possibleFirstIndex + 1) * itemExtent;
         }
         geometry = SliverGeometry(
           scrollExtent: max,

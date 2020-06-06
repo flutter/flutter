@@ -82,6 +82,7 @@ class DeviceManager {
       platform: globals.platform,
       xcdevice: globals.xcdevice,
       iosWorkflow: globals.iosWorkflow,
+      logger: globals.logger,
     ),
     IOSSimulators(iosSimulatorUtils: globals.iosSimulatorUtils),
     FuchsiaDevices(
@@ -102,6 +103,7 @@ class DeviceManager {
       fileSystem: globals.fs,
       platform: globals.platform,
       processManager: globals.processManager,
+      logger: globals.logger,
     ),
   ]);
 
@@ -289,31 +291,37 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   static const Duration _pollingTimeout = Duration(seconds: 30);
 
   final String name;
-  ItemListNotifier<Device> _items;
+
+  @protected
+  @visibleForTesting
+  ItemListNotifier<Device> deviceNotifier;
+
   Timer _timer;
 
   Future<List<Device>> pollingGetDevices({ Duration timeout });
 
-  void startPolling() {
+  Future<void> startPolling() async {
     if (_timer == null) {
-      _items ??= ItemListNotifier<Device>();
-      _timer = _initTimer();
+      deviceNotifier ??= ItemListNotifier<Device>();
+      // Make initial population the default, fast polling timeout.
+      _timer = _initTimer(null);
     }
   }
 
-  Timer _initTimer() {
+  Timer _initTimer(Duration pollingTimeout) {
     return Timer(_pollingInterval, () async {
       try {
-        final List<Device> devices = await pollingGetDevices(timeout: _pollingTimeout);
-        _items.updateWithNewList(devices);
+        final List<Device> devices = await pollingGetDevices(timeout: pollingTimeout);
+        deviceNotifier.updateWithNewList(devices);
       } on TimeoutException {
         globals.printTrace('Device poll timed out. Will retry.');
       }
-      _timer = _initTimer();
+      // Subsequent timeouts after initial population should wait longer.
+      _timer = _initTimer(_pollingTimeout);
     });
   }
 
-  void stopPolling() {
+  Future<void> stopPolling() async {
     _timer?.cancel();
     _timer = null;
   }
@@ -325,23 +333,23 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   @override
   Future<List<Device>> discoverDevices({ Duration timeout }) async {
-    _items = null;
+    deviceNotifier = null;
     return _populateDevices(timeout: timeout);
   }
 
   Future<List<Device>> _populateDevices({ Duration timeout }) async {
-    _items ??= ItemListNotifier<Device>.from(await pollingGetDevices(timeout: timeout));
-    return _items.items;
+    deviceNotifier ??= ItemListNotifier<Device>.from(await pollingGetDevices(timeout: timeout));
+    return deviceNotifier.items;
   }
 
   Stream<Device> get onAdded {
-    _items ??= ItemListNotifier<Device>();
-    return _items.onAdded;
+    deviceNotifier ??= ItemListNotifier<Device>();
+    return deviceNotifier.onAdded;
   }
 
   Stream<Device> get onRemoved {
-    _items ??= ItemListNotifier<Device>();
-    return _items.onRemoved;
+    deviceNotifier ??= ItemListNotifier<Device>();
+    return deviceNotifier.onRemoved;
   }
 
   void dispose() => stopPolling();
@@ -548,6 +556,13 @@ abstract class Device {
 
   static Future<void> printDevices(List<Device> devices) async {
     await descriptions(devices).forEach(globals.printStatus);
+  }
+
+  static List<String> devicesPlatformTypes(List<Device> devices) {
+    return devices
+        .map(
+          (Device d) => d.platformType.toString(),
+        ).toSet().toList()..sort();
   }
 
   /// Convert the Device object to a JSON representation suitable for serialization.

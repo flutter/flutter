@@ -370,12 +370,15 @@ void main() {
     });
 
     test('development artifact', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts();
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(mockCache);
       expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
     });
 
     testUsingContext('update', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts();
+      final Directory cacheRoot = globals.fs.directory('/bin/cache')
+        ..createSync(recursive: true);
+      when(mockCache.getRoot()).thenReturn(cacheRoot);
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(mockCache);
       expect(mavenArtifacts.isUpToDate(), isFalse);
 
       final Directory gradleWrapperDir = globals.fs.systemTempDirectory.createTempSync('flutter_cache_test_gradle_wrapper.');
@@ -607,6 +610,19 @@ void main() {
     when(mockCache.platformOverrideArtifacts).thenReturn(<String>{'linux'});
 
     expect(artifacts.getBinaryDirs(), isNotEmpty);
+  });
+
+  testWithoutContext('Linux desktop artifacts include profile and release artifacts', () {
+    final MockCache mockCache = MockCache();
+    final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
+      mockCache,
+      platform: FakePlatform(operatingSystem: 'linux'),
+    );
+
+    expect(artifacts.getBinaryDirs(), containsAll(<Matcher>[
+      contains(contains('profile')),
+      contains(contains('release')),
+    ]));
   });
 }
 

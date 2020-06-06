@@ -6,6 +6,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
@@ -254,7 +255,7 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with expected args with enabled experiment', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
-    environment.defines[kEnableExperiment] = 'non-nullable';
+    environment.defines[kExtraFrontEndOptions] = '--enable-experiment=non-nullable';
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
@@ -463,9 +464,15 @@ void main() {
   }));
 
   test('Generated service worker correctly inlines file hashes', () {
-    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'});
+    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>[]);
 
     expect(result, contains('{\n  "/foo": "abcd"\n};'));
+  });
+
+  test('Generated service worker includes core files', () {
+    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>['foo', 'bar']);
+
+    expect(result, contains('"foo",\n"bar"'));
   });
 
   test('WebServiceWorker generates a service_worker for a web resource folder', () => testbed.run(() async {
@@ -496,6 +503,23 @@ void main() {
     expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
       contains('"index.html": "d41d8cd98f00b204e9800998ecf8427e"'));
     expect(environment.buildDir.childFile('service_worker.d'), exists);
+  }));
+
+  test('WebServiceWorker does not cache source maps', () => testbed.run(() async {
+    environment.outputDir
+      .childFile('main.dart.js')
+      .createSync(recursive: true);
+    environment.outputDir
+      .childFile('main.dart.js.map')
+      .createSync(recursive: true);
+    await const WebServiceWorker().build(environment);
+
+    // No caching of source maps.
+    expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
+      isNot(contains('"main.dart.js.map"')));
+    // Expected twice, once for RESOURCES and once for CORE.
+    expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
+      contains('"main.dart.js"'));
   }));
 }
 

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
+import '../android/android_workflow.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -51,27 +52,16 @@ class DaemonCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     globals.printStatus('Starting device daemon...');
     isRunningFromDaemon = true;
-
-    final NotifyingLogger notifyingLogger = NotifyingLogger();
-
     Cache.releaseLockEarly();
 
-    await context.run<void>(
-      body: () async {
-        final Daemon daemon = Daemon(
-          stdinCommandStream, stdoutCommandResponse,
-          notifyingLogger: notifyingLogger,
-        );
-
-        final int code = await daemon.onExit;
-        if (code != 0) {
-          throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
-        }
-      },
-      overrides: <Type, Generator>{
-        Logger: () => notifyingLogger,
-      },
+    final Daemon daemon = Daemon(
+      stdinCommandStream, stdoutCommandResponse,
+      notifyingLogger: globals.logger as NotifyingLogger,
     );
+    final int code = await daemon.onExit;
+    if (code != 0) {
+      throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
+    }
     return FlutterCommandResult.success();
   }
 }
@@ -789,18 +779,20 @@ class DeviceDomain extends Domain {
 
   /// Enable device events.
   Future<void> enable(Map<String, dynamic> args) {
+    final List<Future<void>> calls = <Future<void>>[];
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      discoverer.startPolling();
+      calls.add(discoverer.startPolling());
     }
-    return Future<void>.value();
+    return Future.wait<void>(calls);
   }
 
   /// Disable device events.
-  Future<void> disable(Map<String, dynamic> args) {
+  Future<void> disable(Map<String, dynamic> args) async {
+    final List<Future<void>> calls = <Future<void>>[];
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      discoverer.stopPolling();
+      calls.add(discoverer.stopPolling());
     }
-    return Future<void>.value();
+    return Future.wait<void>(calls);
   }
 
   /// Forward a host port to a device port.
@@ -924,7 +916,22 @@ dynamic _toJsonable(dynamic obj) {
 }
 
 class NotifyingLogger extends Logger {
-  final StreamController<LogMessage> _messageController = StreamController<LogMessage>.broadcast();
+  NotifyingLogger({ @required this.verbose }) {
+    _messageController = StreamController<LogMessage>.broadcast(
+      onListen: _onListen,
+    );
+  }
+
+  final bool verbose;
+  final List<LogMessage> messageBuffer = <LogMessage>[];
+  StreamController<LogMessage> _messageController;
+
+  void _onListen() {
+    if (messageBuffer.isNotEmpty) {
+      messageBuffer.forEach(_messageController.add);
+      messageBuffer.clear();
+    }
+  }
 
   Stream<LogMessage> get onMessage => _messageController.stream;
 
@@ -938,7 +945,7 @@ class NotifyingLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
-    _messageController.add(LogMessage('error', message, stackTrace));
+    _sendMessage(LogMessage('error', message, stackTrace));
   }
 
   @override
@@ -951,12 +958,15 @@ class NotifyingLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
-    _messageController.add(LogMessage('status', message));
+    _sendMessage(LogMessage('status', message));
   }
 
   @override
   void printTrace(String message) {
-    // This is a lot of traffic to send over the wire.
+    if (!verbose) {
+      return;
+    }
+    _sendMessage(LogMessage('trace', message));
   }
 
   @override
@@ -974,6 +984,13 @@ class NotifyingLogger extends Logger {
       timeoutConfiguration: timeoutConfiguration,
       stopwatch: Stopwatch(),
     );
+  }
+
+  void _sendMessage(LogMessage logMessage) {
+    if (_messageController.hasListener) {
+      return _messageController.add(logMessage);
+    }
+    messageBuffer.add(logMessage);
   }
 
   void dispose() {
@@ -1039,7 +1056,13 @@ class EmulatorDomain extends Domain {
     registerHandler('create', create);
   }
 
-  EmulatorManager emulators = EmulatorManager();
+  EmulatorManager emulators = EmulatorManager(
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    androidSdk: globals.androidSdk,
+    processManager: globals.processManager,
+    androidWorkflow: androidWorkflow,
+  );
 
   Future<List<Map<String, dynamic>>> getEmulators([ Map<String, dynamic> args ]) async {
     final List<Emulator> list = await emulators.getAllAvailableEmulators();

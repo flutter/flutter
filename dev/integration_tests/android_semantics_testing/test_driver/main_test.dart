@@ -63,6 +63,38 @@ void main() {
         await driver.tap(find.text(textFieldRoute));
         // Delay for TalkBack to update focus as of November 2019 with Pixel 3 and Android API 28
         await Future<void>.delayed(const Duration(milliseconds: 500));
+
+        // The text selection menu and related semantics vary depending on if
+        // the clipboard contents are pasteable. Copy some text into the
+        // clipboard to make sure these tests always run with pasteable content
+        // in the clipboard.
+        // Ideally this should test the case where there is nothing on the
+        // clipboard as well, but there is no reliable way to clear the
+        // clipboard on Android devices.
+        final SerializableFinder normalTextField = find.descendant(
+          of: find.byValueKey(normalTextFieldKeyValue),
+          matching: find.byType('Semantics'),
+          firstMatchOnly: true,
+        );
+        await driver.tap(normalTextField);
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await driver.enterText('hello world');
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await driver.tap(normalTextField);
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await driver.tap(normalTextField);
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await driver.tap(find.text('SELECT ALL'));
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await driver.tap(find.text('COPY'));
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await driver.enterText('');
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        // Go back to previous page and forward again to unfocus the field.
+        await driver.tap(find.byValueKey(backButtonKeyValue));
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await driver.tap(find.text(textFieldRoute));
+        await Future<void>.delayed(const Duration(milliseconds: 500));
       });
 
       test('TextField has correct Android semantics', () async {

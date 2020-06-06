@@ -9,7 +9,6 @@ import 'package:args/command_runner.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -67,6 +66,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     usesIsolateFilterOption(hide: !verboseHelp);
+    addNullSafetyModeOptions();
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -407,7 +407,7 @@ class RunCommand extends RunCommandBase {
       final Daemon daemon = Daemon(
         stdinCommandStream,
         stdoutCommandResponse,
-        notifyingLogger: NotifyingLogger(),
+        notifyingLogger: NotifyingLogger(verbose: globals.logger.isVerbose),
         logToStdout: true,
       );
       AppInstance app;
@@ -428,7 +428,7 @@ class RunCommand extends RunCommandBase {
       } on Exception catch (error) {
         throwToolExit(error.toString());
       }
-      final DateTime appStartedTime = systemClock.now();
+      final DateTime appStartedTime = globals.systemClock.now();
       final int result = await app.runner.waitForAppToFinish();
       if (result != 0) {
         throwToolExit(null, exitCode: result);
@@ -553,7 +553,7 @@ class RunCommand extends RunCommandBase {
     // This callback can't throw.
     unawaited(appStartedTimeRecorder.future.then<void>(
       (_) {
-        appStartedTime = systemClock.now();
+        appStartedTime = globals.systemClock.now();
         if (stayResident) {
           TerminalHandler(runner)
             ..setupTerminal()

@@ -402,7 +402,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// If the button is in the focused, hovering, or highlighted state, then the
   /// [focusColor], [hoverColor], or [highlightColor] will take precedence over
-  /// the [focusColor].
+  /// the [buttonColor].
   ///
   /// See also:
   ///
