@@ -307,6 +307,9 @@ class IOSSimulator extends Device {
   @override
   bool get supportsHotRestart => true;
 
+  @override
+  bool supportsRuntimeMode(BuildMode buildMode) => buildMode == BuildMode.debug;
+
   Map<ApplicationPackage, _IOSSimulatorLogReader> _logReaders;
   _IOSSimulatorDevicePortForwarder _portForwarder;
 

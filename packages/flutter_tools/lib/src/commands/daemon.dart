@@ -449,9 +449,13 @@ class AppDomain extends Domain {
     bool ipv6 = false,
     String isolateFilter,
   }) async {
-    if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
-      throw Exception('${toTitleCase(options.buildInfo.friendlyModeName)} mode is not supported for emulators.');
+    if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
+      throw Exception(
+        '${toTitleCase(options.buildInfo.friendlyModeName)} '
+        'mode is not supported for ${device.name}.',
+      );
     }
+
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = globals.fs.currentDirectory;
     globals.fs.currentDirectory = globals.fs.directory(projectDirectory);

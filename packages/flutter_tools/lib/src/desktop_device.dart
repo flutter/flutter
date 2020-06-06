@@ -63,6 +63,9 @@ abstract class DesktopDevice extends Device {
   Future<String> get sdkNameAndVersion async => globals.os.name;
 
   @override
+  bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
+
+  @override
   DeviceLogReader getLogReader({
     ApplicationPackage app,
     bool includePastLogs = false,

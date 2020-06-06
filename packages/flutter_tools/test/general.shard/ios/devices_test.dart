@@ -145,6 +145,27 @@ void main() {
       ).majorSdkVersion, 0);
     });
 
+    testWithoutContext('Supports debug, profile, and release modes', () {
+      final IOSDevice device = IOSDevice(
+        'device-123',
+        artifacts: mockArtifacts,
+        fileSystem: mockFileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        sdkVersion: '13.3',
+        cpuArchitecture: DarwinArch.arm64,
+        interfaceType: IOSDeviceInterface.usb,
+      );
+
+      expect(device.supportsRuntimeMode(BuildMode.debug), true);
+      expect(device.supportsRuntimeMode(BuildMode.profile), true);
+      expect(device.supportsRuntimeMode(BuildMode.release), true);
+      expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
+    });
+
     for (final Platform platform in unsupportedPlatforms) {
       testWithoutContext('throws UnsupportedError exception if instantiated on ${platform.operatingSystem}', () {
         expect(
