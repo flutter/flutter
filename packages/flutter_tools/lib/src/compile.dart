@@ -226,6 +226,7 @@ class KernelCompiler {
     }
     final List<String> command = <String>[
       engineDartPath,
+      '--disable-dart-dev',
       frontendServer,
       '--sdk-root',
       sdkRoot,
@@ -627,6 +628,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     );
     final List<String> command = <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--disable-dart-dev',
       frontendServer,
       '--sdk-root',
       sdkRoot,
