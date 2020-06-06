@@ -10,8 +10,6 @@ import 'dart:math' as math;
 import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'package:vm_service/vm_service.dart';
-import 'package:vm_service/vm_service_io.dart';
 
 import '../framework/adb.dart';
 import '../framework/framework.dart';
@@ -297,7 +295,12 @@ class PerfTest {
   }
 
   @protected
-  Future<TaskResult> internalRun({bool keepRunning = false, bool cacheSkSL = false, String existingApp}) {
+  Future<TaskResult> internalRun({
+      bool keepRunning = false,
+      bool cacheSkSL = false,
+      String existingApp,
+      String writeSkslFileName,
+  }) {
     return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
@@ -314,6 +317,8 @@ class PerfTest {
           ...<String>['--driver', testDriver],
         if (existingApp != null)
           ...<String>['--use-existing-app', existingApp],
+        if (writeSkslFileName != null)
+          ...<String>['--write-sksl-on-exit', writeSkslFileName],
         if (cacheSkSL) '--cache-sksl',
         if (keepRunning) '--keep-app-running',
         '-d',
@@ -396,49 +401,11 @@ class PerfTestWithSkSL extends PerfTest {
   }
 
   Future<void> _generateSkSL() async {
-    // First, clear all old sksl.json file so they won't affect the test.
-    for (final FileSystemEntity file in Directory(testDirectory).listSync()) {
-      if (file.path.endsWith('.sksl.json')) {
-        file.deleteSync();
-      }
-    }
-
-    final String uri = await _flutterRun();
-    await super.internalRun(keepRunning: true, cacheSkSL: true, existingApp: uri);
-
-    final VmService vmService = await vmServiceConnectUri(uri);
-    final Response response = await vmService.callMethod('s0.flutterGetSkSL');
-    assert(response.type == 'Success');
-
-    await waitForFile(_skslJsonFileName);
-  }
-
-  // Return the VMService URI.
-  Future<String> _flutterRun({bool useCustomApk = false}) async {
-    _deleteOldVmserviceFile();
-
-    _runProcess = await startProcess(
-      _flutterPath,
-      <String>[
-        'run',
-        '--verbose',
-        '--profile',
-        '-d', _device.deviceId,
-        '-t', testTarget,
-        if (useCustomApk) ...<String>[
-          '--use-application-binary',
-          '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk',
-        ],
-        '--vmservice-out-file', _vmserviceFileName,
-      ],
+    await super.internalRun(
+      keepRunning: true,
+      cacheSkSL: true,
+      writeSkslFileName: _skslJsonFileName,
     );
-
-    final Stream<List<int>> broadcastOut = _runProcess.stdout.asBroadcastStream();
-    _forwardStream(broadcastOut, 'run stdout');
-    _forwardStream(_runProcess.stderr, 'run stderr');
-
-    final File file = await waitForFile(_vmserviceFileName);
-    return file.readAsStringSync();
   }
 
   // Return the VMService URI.
@@ -451,17 +418,35 @@ class PerfTestWithSkSL extends PerfTest {
       '-t', testTarget,
     ]);
 
-    return _flutterRun(useCustomApk: true);
+    if (File(_vmserviceFileName).existsSync()) {
+      File(_vmserviceFileName).deleteSync();
+    }
+
+    _runProcess = await startProcess(
+      _flutterPath,
+      <String>[
+        'run',
+        '--verbose',
+        '--profile',
+        '-d', _device.deviceId,
+        '-t', testTarget,
+        '--endless-trace-buffer',
+        '--use-application-binary',
+        '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk',
+        '--vmservice-out-file', _vmserviceFileName,
+      ],
+    );
+
+    final Stream<List<int>> broadcastOut = _runProcess.stdout.asBroadcastStream();
+    _forwardStream(broadcastOut, 'run stdout');
+    _forwardStream(_runProcess.stderr, 'run stderr');
+
+    final File file = await waitForFile(_vmserviceFileName);
+    return file.readAsStringSync();
   }
 
   String get _skslJsonFileName => '$testDirectory/flutter_01.sksl.json';
   String get _vmserviceFileName => '$testDirectory/$_kVmserviceOutFileName';
-
-  void _deleteOldVmserviceFile() {
-    if (File(_vmserviceFileName).existsSync()) {
-      File(_vmserviceFileName).deleteSync();
-    }
-  }
 
   Stream<String> _transform(Stream<List<int>> stream) =>
       stream.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
