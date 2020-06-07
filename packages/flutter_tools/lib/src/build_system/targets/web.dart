@@ -378,7 +378,7 @@ class WebServiceWorker extends Target {
       '/',
       'main.dart.js',
       'index.html',
-      'assets/LICENSE',
+      'assets/NOTICES',
       if (urlToHash.containsKey('assets/AssetManifest.json'))
         'assets/AssetManifest.json',
       if (urlToHash.containsKey('assets/FontManifest.json'))
@@ -543,7 +543,7 @@ async function downloadOffline() {
   }
   for (var resourceKey in Object.keys(RESOURCES)) {
     if (!currentContent[resourceKey]) {
-      resources.add(resourceKey);
+      resources.push(resourceKey);
     }
   }
   return Cache.addAll(resources);
