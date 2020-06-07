@@ -209,7 +209,7 @@ class _ZoomPageTransition extends StatelessWidget {
         Animation<double> animation,
         Widget child,
       ) {
-        return _EnterTransition(
+        return _ZoomEnterTransition(
           animation: animation,
           child: child,
         );
@@ -219,7 +219,7 @@ class _ZoomPageTransition extends StatelessWidget {
         Animation<double> animation,
         Widget child,
       ) {
-        return _ExitTransition(
+        return _ZoomExitTransition(
           animation: animation,
           reverse: true,
           child: child,
@@ -232,7 +232,7 @@ class _ZoomPageTransition extends StatelessWidget {
           Animation<double> animation,
           Widget child,
         ) {
-          return _EnterTransition(
+          return _ZoomEnterTransition(
             animation: animation,
             reverse: true,
             child: child,
@@ -243,7 +243,7 @@ class _ZoomPageTransition extends StatelessWidget {
           Animation<double> animation,
           Widget child,
         ) {
-          return _ExitTransition(
+          return _ZoomExitTransition(
             animation: animation,
             child: child,
           );
@@ -254,8 +254,8 @@ class _ZoomPageTransition extends StatelessWidget {
   }
 }
 
-class _EnterTransition extends StatelessWidget {
-  const _EnterTransition({
+class _ZoomEnterTransition extends StatelessWidget {
+  const _ZoomEnterTransition({
     this.animation,
     this.reverse = false,
     this.child,
@@ -315,8 +315,8 @@ class _EnterTransition extends StatelessWidget {
   }
 }
 
-class _ExitTransition extends StatelessWidget {
-  const _ExitTransition({
+class _ZoomExitTransition extends StatelessWidget {
+  const _ZoomExitTransition({
     this.animation,
     this.reverse = false,
     this.child,
