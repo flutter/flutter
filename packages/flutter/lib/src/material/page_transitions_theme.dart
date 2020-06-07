@@ -256,10 +256,11 @@ class _ZoomPageTransition extends StatelessWidget {
 
 class _ZoomEnterTransition extends StatelessWidget {
   const _ZoomEnterTransition({
+    Key key,
     this.animation,
     this.reverse = false,
     this.child,
-  });
+  }) : super(key: key);
 
   final Animation<double> animation;
   final Widget child;
@@ -317,10 +318,11 @@ class _ZoomEnterTransition extends StatelessWidget {
 
 class _ZoomExitTransition extends StatelessWidget {
   const _ZoomExitTransition({
+    Key key,
     this.animation,
     this.reverse = false,
     this.child,
-  });
+  }) : super(key: key);
 
   final Animation<double> animation;
   final bool reverse;
