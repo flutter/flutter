@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/net.dart';
@@ -42,7 +41,6 @@ void main() {
     MockDeviceManager mockDeviceManager;
     MockFlutterVersion mockStableFlutterVersion;
     MockFlutterVersion mockUnstableFlutterVersion;
-    MockStdio mockStdio;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -50,10 +48,6 @@ void main() {
       mockDeviceManager = MockDeviceManager();
       mockStableFlutterVersion = MockFlutterVersion(isStable: true);
       mockUnstableFlutterVersion = MockFlutterVersion(isStable: false);
-    });
-
-    setUp((){
-      mockStdio = MockStdio()..stdout.terminalColumns = 80;
     });
 
     testUsingContext('fails when target not found', () async {
