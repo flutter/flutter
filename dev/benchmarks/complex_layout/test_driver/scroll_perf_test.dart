@@ -59,6 +59,7 @@ void main() {
     });
 
     test('tiles_scroll_perf', () async {
+      // 'Open navigation menu' is the default value of openAppDrawerTooltip
       await driver.tap(find.byTooltip('Open navigation menu'));
       await driver.tap(find.byValueKey('scroll-switcher'));
       await testScrollPerf('tiles-scroll', 'tiles_scroll_perf');
