@@ -546,7 +546,7 @@ async function downloadOffline() {
       resources.push(resourceKey);
     }
   }
-  return Cache.addAll(resources);
+  return contentCache.addAll(resources);
 }
 ''';
 }
