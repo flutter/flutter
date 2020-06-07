@@ -683,7 +683,8 @@ void main() {
       );
     }
 
-    // The issue only happens on the second build so we need to rebuild the three.
+    // Makes sure the Form widget won't autovalidate the form fields
+    // after rebuilds if there is not user interaction.
     await tester.pumpWidget(builder());
     await tester.pumpWidget(builder());
 
@@ -691,7 +692,7 @@ void main() {
     expect(find.text(errorText(initialValue)), findsNothing);
 
     // Set a empty string into the first form field to
-    // trigger the Fields validators.
+    // trigger the fields validators.
     await tester.enterText(find.byType(TextFormField).first, '');
     await tester.pump();
 
