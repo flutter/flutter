@@ -689,6 +689,9 @@ class FakeDevice extends Fake implements Device {
   Future<bool> get isLocalEmulator => Future<bool>.value(_isLocalEmulator);
 
   @override
+  bool supportsRuntimeMode(BuildMode mode) => true;
+
+  @override
   bool get supportsHotReload => false;
 
   @override
