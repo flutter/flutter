@@ -207,6 +207,8 @@ void main() {
         'adb',
         '-s',
         '1234',
+        'shell',
+        '-x',
         'logcat',
         '-v',
         'time',
