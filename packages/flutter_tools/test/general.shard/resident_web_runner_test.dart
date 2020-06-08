@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -56,12 +55,6 @@ const List<VmServiceExpectation> kAttachIsolateExpectations = <VmServiceExpectat
     args: <String, Object>{
       'streamId': 'Isolate'
     }
-  ),
-  FakeVmServiceRequest(
-    method: 'streamListen',
-    args: <String, Object>{
-      'streamId': 'Extension',
-    },
   ),
   FakeVmServiceRequest(
     method: 'registerService',
@@ -345,68 +338,6 @@ void main() {
 
     expect(testLogger.statusText, contains('THIS MESSAGE IS IMPORTANT'));
     expect(testLogger.statusText, contains('SO IS THIS'));
-  }));
-
-  test('Listens to extension events with structured errors', () => testbed.run(() async {
-    final Map<String, String> extensionData = <String, String>{
-      'test': 'data',
-      'renderedErrorText': 'error text',
-    };
-    final Map<String, String> emptyExtensionData = <String, String>{
-      'test': 'data',
-      'renderedErrorText': '',
-    };
-    final Map<String, String> nonStructuredErrorData = <String, String>{
-      'other': 'other stuff',
-    };
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      ...kAttachExpectations,
-      FakeVmServiceStreamResponse(
-        streamId: 'Extension',
-        event: vm_service.Event(
-          timestamp: 0,
-          extensionKind: 'Flutter.Error',
-          extensionData: vm_service.ExtensionData.parse(extensionData),
-          kind: vm_service.EventStreams.kExtension,
-        ),
-      ),
-      // Empty error text should not break anything.
-      FakeVmServiceStreamResponse(
-        streamId: 'Extension',
-        event: vm_service.Event(
-          timestamp: 0,
-          extensionKind: 'Flutter.Error',
-          extensionData: vm_service.ExtensionData.parse(emptyExtensionData),
-          kind: vm_service.EventStreams.kExtension,
-        ),
-      ),
-      // This is not Flutter.Error kind data, so it should not be logged.
-      FakeVmServiceStreamResponse(
-        streamId: 'Extension',
-        event: vm_service.Event(
-          timestamp: 0,
-          extensionKind: 'Other',
-          extensionData: vm_service.ExtensionData.parse(nonStructuredErrorData),
-          kind: vm_service.EventStreams.kExtension,
-        ),
-      ),
-    ]);
-
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    // Need these to run events, otherwise expect statements below run before
-    // structured errors are processed.
-    await null;
-    await null;
-    await null;
-
-    expect(testLogger.statusText, contains('\nerror text'));
-    expect(testLogger.statusText, isNot(contains('other stuff')));
   }));
 
   test('Does not run main with --start-paused', () => testbed.run(() async {
@@ -1142,7 +1073,19 @@ void main() {
   test('Sends launched app.webLaunchUrl event for Chrome device', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachLogExpectations,
-      ...kAttachIsolateExpectations,
+      const FakeVmServiceRequest(
+        method: 'streamListen',
+        args: <String, Object>{
+          'streamId': 'Isolate'
+        }
+      ),
+      const FakeVmServiceRequest(
+        method: 'registerService',
+        args: <String, Object>{
+          'service': 'reloadSources',
+          'alias': 'FlutterTools',
+        }
+      )
     ]);
     _setupMocks();
     final ChromiumLauncher chromiumLauncher = MockChromeLauncher();
