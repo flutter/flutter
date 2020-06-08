@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:process/process.dart';
@@ -80,7 +79,9 @@ void main() {
       );
       await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
 
-      server = AnalysisServer(dartSdkPath, <String>[tempDir.path],
+      server = AnalysisServer(
+        globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        <String>[tempDir.path],
         fileSystem: fileSystem,
         platform: platform,
         processManager: processManager,
@@ -113,14 +114,16 @@ void main() {
     );
     await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
 
-    server = AnalysisServer(dartSdkPath, <String>[tempDir.path],
-      fileSystem: fileSystem,
-      platform: platform,
-      processManager: processManager,
-      logger: logger,
-      terminal: terminal,
-      experiments: <String>[],
-    );
+      server = AnalysisServer(
+        globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        <String>[tempDir.path],
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        logger: logger,
+        terminal: terminal,
+        experiments: <String>[],
+      );
 
     int errorCount = 0;
     final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
@@ -137,7 +140,9 @@ void main() {
   testUsingContext('Returns no errors when source is error-free', () async {
     const String contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
-    server = AnalysisServer(dartSdkPath, <String>[tempDir.path],
+    server = AnalysisServer(
+      globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+      <String>[tempDir.path],
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
