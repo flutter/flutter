@@ -764,7 +764,7 @@ void main() {
     expect(formFieldState.hasError, isTrue);
   });
 
-  testWidgets('Form.reset() reset form fields and auto validation will only happen on the next user interaction if autoValidateMode is onUserInteraction', (WidgetTester tester) async {
+  testWidgets('Form.reset() resets form fields, and auto validation will only happen on the next user interaction if autoValidateMode is onUserInteraction', (WidgetTester tester) async {
     final GlobalKey<FormState> formState = GlobalKey<FormState>();
     String errorText(String value) => '$value/error';
 
