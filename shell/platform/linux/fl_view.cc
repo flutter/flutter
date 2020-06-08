@@ -86,10 +86,21 @@ static gboolean fl_view_send_pointer_button_event(FlView* self,
   if (self->engine == nullptr)
     return FALSE;
 
-  fl_engine_send_mouse_pointer_event(self->engine, phase,
-                                     event->time * kMicrosecondsPerMillisecond,
-                                     event->x, event->y, self->button_state);
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  fl_engine_send_mouse_pointer_event(
+      self->engine, phase, event->time * kMicrosecondsPerMillisecond,
+      event->x * scale_factor, event->y * scale_factor, self->button_state);
   return TRUE;
+}
+
+// Updates the engine with the current window metrics.
+static void fl_view_send_window_metrics(FlView* self) {
+  GtkAllocation allocation;
+  gtk_widget_get_allocation(GTK_WIDGET(self), &allocation);
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  fl_engine_send_window_metrics_event(
+      self->engine, allocation.width * scale_factor,
+      allocation.height * scale_factor, scale_factor);
 }
 
 // Implements FlPluginRegistry::get_registrar_for_plugin.
@@ -150,6 +161,17 @@ static void fl_view_get_property(GObject* object,
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
       break;
   }
+}
+
+static void fl_view_notify(GObject* object, GParamSpec* pspec) {
+  FlView* self = FL_VIEW(object);
+
+  if (strcmp(pspec->name, "scale-factor") == 0) {
+    fl_view_send_window_metrics(self);
+  }
+
+  if (G_OBJECT_CLASS(fl_view_parent_class)->notify != nullptr)
+    G_OBJECT_CLASS(fl_view_parent_class)->notify(object, pspec);
 }
 
 static void fl_view_dispose(GObject* object) {
@@ -215,9 +237,7 @@ static void fl_view_size_allocate(GtkWidget* widget,
                            allocation->height);
   }
 
-  // TODO(robert-ancell): This pixel ratio won't work on hidpi displays.
-  fl_engine_send_window_metrics_event(self->engine, allocation->width,
-                                      allocation->height, 1);
+  fl_view_send_window_metrics(self);
 }
 
 // Implements GtkWidget::button_press_event.
@@ -249,10 +269,11 @@ static gboolean fl_view_motion_notify_event(GtkWidget* widget,
   if (self->engine == nullptr)
     return FALSE;
 
-  fl_engine_send_mouse_pointer_event(self->engine,
-                                     self->button_state != 0 ? kMove : kHover,
-                                     event->time * kMicrosecondsPerMillisecond,
-                                     event->x, event->y, self->button_state);
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  fl_engine_send_mouse_pointer_event(
+      self->engine, self->button_state != 0 ? kMove : kHover,
+      event->time * kMicrosecondsPerMillisecond, event->x * scale_factor,
+      event->y * scale_factor, self->button_state);
 
   return TRUE;
 }
@@ -286,6 +307,7 @@ static void fl_view_class_init(FlViewClass* klass) {
   G_OBJECT_CLASS(klass)->constructed = fl_view_constructed;
   G_OBJECT_CLASS(klass)->set_property = fl_view_set_property;
   G_OBJECT_CLASS(klass)->get_property = fl_view_get_property;
+  G_OBJECT_CLASS(klass)->notify = fl_view_notify;
   G_OBJECT_CLASS(klass)->dispose = fl_view_dispose;
   GTK_WIDGET_CLASS(klass)->realize = fl_view_realize;
   GTK_WIDGET_CLASS(klass)->size_allocate = fl_view_size_allocate;
