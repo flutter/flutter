@@ -585,6 +585,7 @@ class TextureLayer extends Layer {
     @required this.rect,
     @required this.textureId,
     this.freeze = false,
+    this.filterQuality = ui.FilterQuality.low,
   }) : assert(rect != null),
        assert(textureId != null);
 
@@ -603,6 +604,12 @@ class TextureLayer extends Layer {
   /// un-freezes it when it is certain that a frame with the new size is ready.
   final bool freeze;
 
+  /// Used to set the filterQuality of the texture
+  /// Use the "low" quality setting to scale the texture, which corresponds to
+  /// bilinear interpolation, rather than the default "none" which corresponds
+  /// to nearest-neighbor.
+  final ui.FilterQuality filterQuality;
+
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     final Rect shiftedRect = layerOffset == Offset.zero ? rect : rect.shift(layerOffset);
@@ -612,6 +619,7 @@ class TextureLayer extends Layer {
       width: shiftedRect.width,
       height: shiftedRect.height,
       freeze: freeze,
+      filterQuality: filterQuality,
     );
   }
 

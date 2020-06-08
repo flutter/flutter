@@ -36,9 +36,12 @@ import 'object.dart';
 ///    for how to create and manage backend textures on iOS.
 class TextureBox extends RenderBox {
   /// Creates a box backed by the texture identified by [textureId].
-  TextureBox({ @required int textureId })
-    : assert(textureId != null),
-      _textureId = textureId;
+  TextureBox({
+    @required int textureId,
+    FilterQuality filterQuality = FilterQuality.low,
+  }) : assert(textureId != null),
+      _textureId = textureId,
+      _filterQuality = filterQuality;
 
   /// The identity of the backend texture.
   int get textureId => _textureId;
@@ -49,6 +52,20 @@ class TextureBox extends RenderBox {
       _textureId = value;
       markNeedsPaint();
     }
+  }
+
+  /// Used to set the filterQuality of the texture
+  /// Use the [FilterQuality.low] quality setting to scale the texture, which corresponds to
+  /// bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
+  /// to nearest-neighbor.
+  FilterQuality get filterQuality => _filterQuality;
+  FilterQuality _filterQuality;
+  set filterQuality(FilterQuality value) {
+    assert(value != null);
+    if (value == _filterQuality)
+      return;
+    _filterQuality = value;
+    markNeedsPaint();
   }
 
   @override
@@ -75,6 +92,7 @@ class TextureBox extends RenderBox {
     context.addLayer(TextureLayer(
       rect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       textureId: _textureId,
+      filterQuality: _filterQuality,
     ));
   }
 }

@@ -37,17 +37,25 @@ class Texture extends LeafRenderObjectWidget {
   const Texture({
     Key key,
     @required this.textureId,
+    this.filterQuality = FilterQuality.low,
   }) : assert(textureId != null),
        super(key: key);
 
   /// The identity of the backend texture.
   final int textureId;
 
+  /// Used to set the filterQuality of the texture
+  /// Use the "low" quality setting to scale the texture, which corresponds to
+  /// bilinear interpolation, rather than the default "none" which corresponds
+  /// to nearest-neighbor.
+  final FilterQuality filterQuality;
+
   @override
-  TextureBox createRenderObject(BuildContext context) => TextureBox(textureId: textureId);
+  TextureBox createRenderObject(BuildContext context) => TextureBox(textureId: textureId, filterQuality: filterQuality);
 
   @override
   void updateRenderObject(BuildContext context, TextureBox renderObject) {
     renderObject.textureId = textureId;
+    renderObject.filterQuality = filterQuality;
   }
 }
