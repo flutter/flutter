@@ -797,21 +797,11 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final double visibleMainHeight = maxExtent - shrinkOffset - topPadding;
-    final double extraToolbarHeight = math.max(minExtent - _bottomHeight - topPadding - kToolbarHeight, 0);
+    final double extraToolbarHeight = math.max(minExtent - _bottomHeight - topPadding - kToolbarHeight, 0.0);
     final double visibleToolbarHeight = visibleMainHeight - _bottomHeight - extraToolbarHeight;
 
-    // Truth table for `toolbarOpacity`:
-    // pinned | floating | bottom != null || opacity
-    // ----------------------------------------------
-    //    0   |    0     |        0       ||  fade
-    //    0   |    0     |        1       ||  fade
-    //    0   |    1     |        0       ||  fade
-    //    0   |    1     |        1       ||  fade
-    //    1   |    0     |        0       ||  1.0
-    //    1   |    0     |        1       ||  1.0
-    //    1   |    1     |        0       ||  1.0
-    //    1   |    1     |        1       ||  fade
-    final double toolbarOpacity = !pinned || (floating && bottom != null)
+    final bool isPinnedWithOpacityFade = pinned && floating && bottom != null && extraToolbarHeight == 0.0;
+    final double toolbarOpacity = !pinned || isPinnedWithOpacityFade
       ? (visibleToolbarHeight / kToolbarHeight).clamp(0.0, 1.0) as double
       : 1.0;
 
@@ -1158,14 +1148,16 @@ class SliverAppBar extends StatefulWidget {
   /// Defaults to [NavigationToolbar.kMiddleSpacing].
   final double titleSpacing;
 
-  /// The size of the app bar when it is collapsed.
+  /// Defines the height of the app bar when it is collapsed.
   ///
-  /// By default, the collapsed height is set to [kToolbarHeight]. If [bottom]
-  /// is set, its [bottom.preferredSize.height] is added to the height. If
-  /// [primary] is true, any top padding from [MediaQuery] is added as well.
+  /// By default, the collapsed height is [kToolbarHeight]. If [bottom] widget
+  /// is specified, then its [bottom.preferredSize.height] is added to the
+  /// height. If [primary] is true, then the [MediaQuery] top padding,
+  /// [MediaQueryData.padding.top], is added as well.
   ///
-  /// If [pinned] and [floating] is true, with [bottom] set, the collapsed
-  /// height is only [bottom.preferredSize.height] with any top padding.
+  /// If [pinned] and [floating] are true, with [bottom] set, the default
+  /// collapsed height is only [bottom.preferredSize.height] with the
+  /// [MediaQuery] top padding.
   final double collapsedHeight;
 
   /// The size of the app bar when it is fully expanded.
@@ -1327,7 +1319,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     final double bottomHeight = widget.bottom?.preferredSize?.height ?? 0.0;
     final double topPadding = widget.primary ? MediaQuery.of(context).padding.top : 0.0;
     final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
-      ? bottomHeight + topPadding
+      ? (widget.collapsedHeight ?? 0.0) + bottomHeight + topPadding
       : (widget.collapsedHeight ?? kToolbarHeight) + bottomHeight + topPadding;
 
     return MediaQuery.removePadding(
