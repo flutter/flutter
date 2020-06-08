@@ -298,7 +298,12 @@ vm_service.VmService setUpVmService(
     vmService.registerService('flutterGetSkSL', 'Flutter Tools');
   }
   if (printStructuredErrorLogMethod != null) {
-    vmService.streamListen(vm_service.EventStreams.kExtension);
+    try {
+      vmService.streamListen(vm_service.EventStreams.kExtension);
+    } on vm_service.RPCError {
+      // It is safe to ignore this error because we expect an error to be
+      // thrown if we're already subscribed.
+    }
     vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
   }
   return vmService;
