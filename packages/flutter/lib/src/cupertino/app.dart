@@ -289,7 +289,6 @@ class _CupertinoAppState extends State<CupertinoApp> {
   void initState() {
     super.initState();
     _heroController = CupertinoApp.createCupertinoHeroController();
-    _updateNavigator();
   }
 
   @override
@@ -301,21 +300,6 @@ class _CupertinoAppState extends State<CupertinoApp> {
       // observers) until after the new one has been created (because the
       // Navigator has a GlobalKey).
       _heroController = CupertinoApp.createCupertinoHeroController();
-    }
-    _updateNavigator();
-  }
-
-  List<NavigatorObserver> _navigatorObservers;
-
-  void _updateNavigator() {
-    if (widget.home != null ||
-        widget.routes.isNotEmpty ||
-        widget.onGenerateRoute != null ||
-        widget.onUnknownRoute != null) {
-      _navigatorObservers = List<NavigatorObserver>.from(widget.navigatorObservers)
-        ..add(_heroController);
-    } else {
-      _navigatorObservers = const <NavigatorObserver>[];
     }
   }
 
@@ -342,46 +326,50 @@ class _CupertinoAppState extends State<CupertinoApp> {
           data: effectiveThemeData,
           child: Builder(
             builder: (BuildContext context) {
-              return WidgetsApp(
-                key: GlobalObjectKey(this),
-                navigatorKey: widget.navigatorKey,
-                navigatorObservers: _navigatorObservers,
-                pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
-                  CupertinoPageRoute<T>(settings: settings, builder: builder),
-                home: widget.home,
-                routes: widget.routes,
-                initialRoute: widget.initialRoute,
-                onGenerateRoute: widget.onGenerateRoute,
-                onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
-                onUnknownRoute: widget.onUnknownRoute,
-                builder: widget.builder,
-                title: widget.title,
-                onGenerateTitle: widget.onGenerateTitle,
-                textStyle: CupertinoTheme.of(context).textTheme.textStyle,
-                color: CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context),
-                locale: widget.locale,
-                localizationsDelegates: _localizationsDelegates,
-                localeResolutionCallback: widget.localeResolutionCallback,
-                localeListResolutionCallback: widget.localeListResolutionCallback,
-                supportedLocales: widget.supportedLocales,
-                showPerformanceOverlay: widget.showPerformanceOverlay,
-                checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-                checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-                showSemanticsDebugger: widget.showSemanticsDebugger,
-                debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-                inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
-                  return CupertinoButton.filled(
-                    child: const Icon(
-                      CupertinoIcons.search,
-                      size: 28.0,
-                      color: CupertinoColors.white,
-                    ),
-                    padding: EdgeInsets.zero,
-                    onPressed: onPressed,
-                  );
-                },
-                shortcuts: widget.shortcuts,
-                actions: widget.actions,
+              return HeroControllerScope(
+                controller: _heroController,
+                child: WidgetsApp(
+                  key: GlobalObjectKey(this),
+                  navigatorKey: widget.navigatorKey,
+                  navigatorObservers: widget.navigatorObservers,
+                  pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
+                    CupertinoPageRoute<T>(settings: settings, builder: builder),
+                  home: widget.home,
+                  routes: widget.routes,
+                  initialRoute: widget.initialRoute,
+                  onGenerateRoute: widget.onGenerateRoute,
+                  onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
+                  onUnknownRoute: widget.onUnknownRoute,
+                  builder: widget.builder,
+                  title: widget.title,
+                  onGenerateTitle: widget.onGenerateTitle,
+                  textStyle: CupertinoTheme.of(context).textTheme.textStyle,
+                  color: CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context),
+                  locale: widget.locale,
+                  localizationsDelegates: _localizationsDelegates,
+                  localeResolutionCallback: widget.localeResolutionCallback,
+                  localeListResolutionCallback: widget.localeListResolutionCallback,
+                  supportedLocales: widget.supportedLocales,
+                  showPerformanceOverlay: widget.showPerformanceOverlay,
+                  checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+                  checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+                  showSemanticsDebugger: widget.showSemanticsDebugger,
+                  debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+                  inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
+                    return CupertinoButton.filled(
+                      child: const Icon(
+                        CupertinoIcons.search,
+                        size: 28.0,
+                        color: CupertinoColors.white,
+                      ),
+                      padding: EdgeInsets.zero,
+                      onPressed: onPressed,
+                    );
+                  },
+                  shortcuts: widget.shortcuts,
+                  actions: widget.actions,
+
+                ),
               );
             },
           ),
