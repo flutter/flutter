@@ -454,7 +454,6 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/plugins.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/pointer_binding.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/pointer_converter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/profiler.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/render_vertices.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/rrect_renderer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/semantics/accessibility.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/semantics/checkable.dart
@@ -474,6 +473,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/services/serialization.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/shader.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/shadow.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/backdrop_filter.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/clip.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/debug_canvas_reuse_overlay.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/image_filter.dart
@@ -485,6 +485,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/path_metrics.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/picture.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/platform_view.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/recording_canvas.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/render_vertices.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/scene.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/scene_builder.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/surface.dart

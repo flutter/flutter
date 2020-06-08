@@ -35,7 +35,7 @@ typedef Callbacker<T> = String Function(Callback<T> callback);
 ///   return _futurize(_doSomethingAndCallback);
 /// }
 /// ```
-Future<T> futurize<T>(Callbacker<T> callbacker) {
+Future<T>/*!*/ futurize<T>(Callbacker<T> callbacker) {
   final Completer<T> completer = Completer<T>.sync();
   final String error = callbacker((T t) {
     if (t == null) {

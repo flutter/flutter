@@ -45,7 +45,8 @@ Future<void> _initializePlatform({
   _webOnlyIsInitialized = true;
 }
 
-/*late*/ engine.AssetManager/*!*/ _assetManager;
+// TODO(yjbanov): can we make this late non-null? See https://github.com/dart-lang/sdk/issues/42214
+engine.AssetManager/*?*/ _assetManager;
 engine.FontCollection _fontCollection;
 
 bool _webOnlyIsInitialized = false;
@@ -106,7 +107,7 @@ set debugEmulateFlutterTesterEnvironment(bool/*!*/ value) {
 bool _debugEmulateFlutterTesterEnvironment = false;
 
 /// This class handles downloading assets over the network.
-engine.AssetManager get webOnlyAssetManager => _assetManager;
+engine.AssetManager/*!*/ get webOnlyAssetManager => _assetManager;
 
 /// A collection of fonts that may be used by the platform.
-engine.FontCollection get webOnlyFontCollection => _fontCollection;
+engine.FontCollection/*!*/ get webOnlyFontCollection => _fontCollection;

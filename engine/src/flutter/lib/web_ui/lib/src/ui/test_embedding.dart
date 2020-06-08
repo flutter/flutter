@@ -27,7 +27,8 @@ Future<dynamic>/*!*/ ensureTestPlatformInitializedThenRunTest(
 
 /// Used to track when the platform is initialized. This ensures the test fonts
 /// are available.
-/*late*/ Future<void>/*!*/ _platformInitializedFuture;
+// TODO(yjbanov): can we make this late non-null? See https://github.com/dart-lang/sdk/issues/42214
+Future<void>/*?*/ _platformInitializedFuture;
 
 /// Initializes domRenderer with specific devicePixelRatio and physicalSize.
 Future<void>/*!*/ webOnlyInitializeTestDomRenderer({double/*!*/ devicePixelRatio = 3.0}) {

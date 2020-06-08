@@ -33,7 +33,7 @@ void _validateColorStops(List<Color> colors, List<double> colorStops) {
 }
 
 Color _scaleAlpha(Color a, double factor) {
-  return a.withAlpha((a.alpha * factor).round().clamp(0, 255));
+  return a.withAlpha(_clampInt((a.alpha * factor).round(), 0, 255));
 }
 
 /// An immutable 32 bit color value in ARGB
@@ -172,21 +172,24 @@ class Color {
   /// an [AnimationController].
   static Color/*?*/ lerp(Color/*?*/ a, Color/*?*/ b, double/*!*/ t) {
     assert(t != null);
-    if (a == null && b == null) {
-      return null;
-    }
-    if (a == null) {
-      return _scaleAlpha(b, t);
-    }
     if (b == null) {
-      return _scaleAlpha(a, 1.0 - t);
+      if (a == null) {
+        return null;
+      } else {
+        return _scaleAlpha(a, 1.0 - t);
+      }
+    } else {
+      if (a == null) {
+        return _scaleAlpha(b, t);
+      } else {
+        return Color.fromARGB(
+          _clampInt(_lerpInt(a.alpha, b.alpha, t).toInt(), 0, 255),
+          _clampInt(_lerpInt(a.red, b.red, t).toInt(), 0, 255),
+          _clampInt(_lerpInt(a.green, b.green, t).toInt(), 0, 255),
+          _clampInt(_lerpInt(a.blue, b.blue, t).toInt(), 0, 255),
+        );
+      }
     }
-    return Color.fromARGB(
-      lerpDouble(a.alpha, b.alpha, t).toInt().clamp(0, 255),
-      lerpDouble(a.red, b.red, t).toInt().clamp(0, 255),
-      lerpDouble(a.green, b.green, t).toInt().clamp(0, 255),
-      lerpDouble(a.blue, b.blue, t).toInt().clamp(0, 255),
-    );
   }
 
   /// Combine the foreground color as a transparent color over top
@@ -1187,7 +1190,7 @@ abstract class Gradient extends Shader {
     Float64List/*?*/ matrix4,
   ]) =>
       engine.GradientSweep(
-          center, colors, colorStops, tileMode, startAngle, endAngle, engine.toMatrix32(matrix4));
+          center, colors, colorStops, tileMode, startAngle, endAngle, matrix4 != null ? engine.toMatrix32(matrix4) : null);
 }
 
 /// Opaque handle to raw decoded image data (pixels).
@@ -1528,7 +1531,7 @@ abstract class FrameInfo {
   int get _durationMillis => 0;
 
   /// The [Image] object for this frame.
-  Image get image => null;
+  Image/*!*/ get image;
 }
 
 /// A handle to an image codec.
@@ -1555,7 +1558,7 @@ class Codec {
   ///
   /// The returned future can complete with an error if the decoding has failed.
   Future<FrameInfo/*!*/>/*!*/ getNextFrame() {
-    return engine.futurize(_getNextFrame);
+    return engine.futurize<FrameInfo/*!*/>(_getNextFrame);
   }
 
   /// Returns an error message on failure, null on success.
@@ -1580,7 +1583,7 @@ Future<Codec/*!*/>/*!*/ instantiateImageCodec(
   int/*?*/ targetWidth,
   int/*?*/ targetHeight,
 }) {
-  return engine.futurize((engine.Callback<Codec> callback) =>
+  return engine.futurize<Codec/*!*/>((engine.Callback<Codec> callback) =>
       // TODO: Implement targetWidth and targetHeight support.
       _instantiateImageCodec(list, callback, null));
 }
@@ -1604,9 +1607,9 @@ String/*?*/ _instantiateImageCodec(
   return null;
 }
 
-Future<Codec/*?*/> webOnlyInstantiateImageCodecFromUrl(Uri/*!*/ uri,
+Future<Codec/*?*/>/*!*/ webOnlyInstantiateImageCodecFromUrl(Uri/*!*/ uri,
     {engine.WebOnlyImageCodecChunkCallback/*?*/ chunkCallback}) {
-  return engine.futurize((engine.Callback<Codec> callback) =>
+  return engine.futurize<Codec/*?*/>((engine.Callback<Codec> callback) =>
       _instantiateImageCodecFromUrl(uri, chunkCallback, callback));
 }
 
@@ -1760,20 +1763,23 @@ class Shadow {
   /// {@endtemplate}
   static Shadow/*?*/ lerp(Shadow/*?*/ a, Shadow/*?*/ b, double/*!*/ t) {
     assert(t != null);
-    if (a == null && b == null) {
-      return null;
-    }
-    if (a == null) {
-      return b.scale(t);
-    }
     if (b == null) {
-      return a.scale(1.0 - t);
+      if (a == null) {
+        return null;
+      } else {
+        return a.scale(1.0 - t);
+      }
+    } else {
+      if (a == null) {
+        return b.scale(t);
+      } else {
+        return Shadow(
+          color: Color.lerp(a.color, b.color, t),
+          offset: Offset.lerp(a.offset, b.offset, t),
+          blurRadius: _lerpDouble(a.blurRadius, b.blurRadius, t),
+        );
+      }
     }
-    return Shadow(
-      color: Color.lerp(a.color, b.color, t),
-      offset: Offset.lerp(a.offset, b.offset, t),
-      blurRadius: lerpDouble(a.blurRadius, b.blurRadius, t),
-    );
   }
 
   /// Linearly interpolate between two lists of shadows.
@@ -1788,7 +1794,7 @@ class Shadow {
     }
     a ??= <Shadow>[];
     b ??= <Shadow>[];
-    final List<Shadow> result = <Shadow>[];
+    final List<Shadow/*!*/> result = <Shadow/*!*/>[];
     final int commonLength = math.min(a.length, b.length);
     for (int i = 0; i < commonLength; i += 1)
       result.add(Shadow.lerp(a[i], b[i], t));

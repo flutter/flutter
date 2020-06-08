@@ -761,20 +761,20 @@ class BitmapCanvas extends EngineCanvas {
   /// and use a SkTriColorShader to render.
   @override
   void drawVertices(
-      ui.Vertices vertices, ui.BlendMode blendMode, SurfacePaintData paint) {
+      SurfaceVertices vertices, ui.BlendMode blendMode, SurfacePaintData paint) {
     // TODO(flutter_web): Implement shaders for [Paint.shader] and
     // blendMode. https://github.com/flutter/flutter/issues/40096
     // Move rendering to OffscreenCanvas so that transform is preserved
     // as well.
     assert(paint.shader == null,
         'Linear/Radial/SweepGradient and ImageShader not supported yet');
-    final Int32List colors = vertices.colors;
-    final ui.VertexMode mode = vertices.mode;
+    final Int32List colors = vertices._colors;
+    final ui.VertexMode mode = vertices._mode;
     html.CanvasRenderingContext2D ctx = _canvasPool.context;
     if (colors == null) {
       final Float32List positions = mode == ui.VertexMode.triangles
-          ? vertices.positions
-          : _convertVertexPositions(mode, vertices.positions);
+          ? vertices._positions
+          : _convertVertexPositions(mode, vertices._positions);
       // Draw hairline for vertices if no vertex colors are specified.
       save();
       final ui.Color color = paint.color ?? ui.Color(0xFF000000);
