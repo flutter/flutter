@@ -245,7 +245,7 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
     if (version == null) {
       return false;
     }
-    return version.major >= _kFirstChromiumEdgefVersion;
+    return version.major >= _kFirstChromiumEdgeMajorVersion;
   }
 
   @override
