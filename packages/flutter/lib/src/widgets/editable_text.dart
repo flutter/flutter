@@ -338,9 +338,10 @@ class EditableText extends StatefulWidget {
   /// the number of lines. By default, it is one, meaning this is a single-line
   /// text field. [maxLines] must be null or greater than zero.
   ///
-  /// If [keyboardType] is not set or is null, it will default to
-  /// [TextInputType.text] unless [maxLines] is greater than one, when it will
-  /// default to [TextInputType.multiline].
+  /// If [keyboardType] is not set or is null, its value will be inferred from
+  /// [autofillHints], if [autofillHints] is not empty. Otherwise it defaults to
+  /// [TextInputType.text] if [maxLines] is exactly one, and
+  /// [TextInputType.multiline] if [maxLines] is null or greater than one.
   ///
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
@@ -452,7 +453,7 @@ class EditableText extends StatefulWidget {
        assert(dragStartBehavior != null),
        assert(toolbarOptions != null),
        _strutStyle = strutStyle,
-       keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+       keyboardType = keyboardType ?? _inferKeyboardType(autofillHints: autofillHints, maxLines: maxLines),
        inputFormatters = maxLines == 1
            ? <TextInputFormatter>[
                BlacklistingTextInputFormatter.singleLineFormatter,
@@ -1120,9 +1121,161 @@ class EditableText extends StatefulWidget {
   /// The minimum platform SDK version that supports Autofill is API level 26
   /// for Android, and iOS 10.0 for iOS.
   ///
-  /// {@macro flutter.services.autofill.autofillHints}
+  /// ### iOS-specific Concerns:
+  ///
+  /// To provide the best user experience and ensure your app fully supports
+  /// password autofill on iOS, follow these steps:
+  ///
+  /// * Set up your iOS app's
+  ///   [associated domains](https://developer.apple.com/documentation/safariservices/supporting_associated_domains_in_your_app).
+  /// * Some autofill hints only work with specific [keyboardType]s. For example,
+  ///   [AutofillHints.name] requires [TextInputType.name] and [AutofillHints.email]
+  ///   works only with [TextInputType.email]. Make sure the input field has a
+  ///   compatible [keyboardType]. Empirically, [TextInputType.name] works well
+  ///   with many autofill hints that are predefined on iOS.
   /// {@endtemplate}
+  /// {@macro flutter.services.autofill.autofillHints}
   final Iterable<String> autofillHints;
+
+  // Infer the keyboard type of an `EditableText` if it's not specified.
+  static TextInputType _inferKeyboardType({
+    @required Iterable<String> autofillHints,
+    @required int maxLines,
+  }) {
+    if (autofillHints?.isEmpty ?? true) {
+      return maxLines == 1 ? TextInputType.text : TextInputType.multiline;
+    }
+
+    TextInputType returnValue;
+    final String effectiveHint = autofillHints.first;
+
+    // On iOS oftentimes specifying a text content type is not enough to qualify
+    // the input field for autofill. The keyboard type also needs to be compatible
+    // with the content type. To get autofill to work by default on EditableText,
+    // the keyboard type inference on iOS is done differently from other platforms.
+    //
+    // The entries with "autofill not working" comments are the iOS text content
+    // types that should work with the specified keyboard type but won't trigger
+    // (even within a native app). Tested on iOS 13.5.
+    if (!kIsWeb) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          const Map<String, TextInputType> iOSKeyboardType = <String, TextInputType> {
+            AutofillHints.addressCity : TextInputType.name,
+            AutofillHints.addressCityAndState : TextInputType.name, // Autofill not working.
+            AutofillHints.addressState : TextInputType.name,
+            AutofillHints.countryName : TextInputType.name,
+            AutofillHints.creditCardNumber : TextInputType.number,  // Couldn't test.
+            AutofillHints.email : TextInputType.emailAddress,
+            AutofillHints.familyName : TextInputType.name,
+            AutofillHints.fullStreetAddress : TextInputType.name,
+            AutofillHints.givenName : TextInputType.name,
+            AutofillHints.jobTitle : TextInputType.name,            // Autofill not working.
+            AutofillHints.location : TextInputType.name,            // Autofill not working.
+            AutofillHints.middleName : TextInputType.name,          // Autofill not working.
+            AutofillHints.name : TextInputType.name,
+            AutofillHints.namePrefix : TextInputType.name,          // Autofill not working.
+            AutofillHints.nameSuffix : TextInputType.name,          // Autofill not working.
+            AutofillHints.newPassword : TextInputType.text,
+            AutofillHints.newUsername : TextInputType.text,
+            AutofillHints.nickname : TextInputType.name,            // Autofill not working.
+            AutofillHints.oneTimeCode : TextInputType.number,
+            AutofillHints.organizationName : TextInputType.text,    // Autofill not working.
+            AutofillHints.password : TextInputType.text,
+            AutofillHints.postalCode : TextInputType.name,
+            AutofillHints.streetAddressLine1 : TextInputType.name,
+            AutofillHints.streetAddressLine2 : TextInputType.name,  // Autofill not working.
+            AutofillHints.sublocality : TextInputType.name,         // Autofill not working.
+            AutofillHints.telephoneNumber : TextInputType.name,
+            AutofillHints.url : TextInputType.url,                  // Autofill not working.
+            AutofillHints.username : TextInputType.text,
+          };
+
+          returnValue = iOSKeyboardType[effectiveHint];
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          break;
+      }
+    }
+
+    if (returnValue != null || maxLines != 1)
+      return returnValue ?? TextInputType.multiline;
+
+    const Map<String, TextInputType> inferKeyboardType = <String, TextInputType> {
+      AutofillHints.addressCity : TextInputType.streetAddress,
+      AutofillHints.addressCityAndState : TextInputType.streetAddress,
+      AutofillHints.addressState : TextInputType.streetAddress,
+      AutofillHints.birthday : TextInputType.datetime,
+      AutofillHints.birthdayDay : TextInputType.datetime,
+      AutofillHints.birthdayMonth : TextInputType.datetime,
+      AutofillHints.birthdayYear : TextInputType.datetime,
+      AutofillHints.countryCode : TextInputType.number,
+      AutofillHints.countryName : TextInputType.text,
+      AutofillHints.creditCardExpirationDate : TextInputType.datetime,
+      AutofillHints.creditCardExpirationDay : TextInputType.datetime,
+      AutofillHints.creditCardExpirationMonth : TextInputType.datetime,
+      AutofillHints.creditCardExpirationYear : TextInputType.datetime,
+      AutofillHints.creditCardFamilyName : TextInputType.name,
+      AutofillHints.creditCardGivenName : TextInputType.name,
+      AutofillHints.creditCardMiddleName : TextInputType.name,
+      AutofillHints.creditCardName : TextInputType.name,
+      AutofillHints.creditCardNumber : TextInputType.number,
+      AutofillHints.creditCardSecurityCode : TextInputType.number,
+      AutofillHints.creditCardType : TextInputType.text,
+      AutofillHints.email : TextInputType.emailAddress,
+      AutofillHints.familyName : TextInputType.name,
+      AutofillHints.fullStreetAddress : TextInputType.streetAddress,
+      AutofillHints.gender : TextInputType.text,
+      AutofillHints.givenName : TextInputType.name,
+      AutofillHints.impp : TextInputType.url,
+      AutofillHints.jobTitle : TextInputType.text,
+      AutofillHints.language : TextInputType.text,
+      AutofillHints.location : TextInputType.streetAddress,
+      AutofillHints.middleInitial : TextInputType.name,
+      AutofillHints.middleName : TextInputType.name,
+      AutofillHints.name : TextInputType.name,
+      AutofillHints.namePrefix : TextInputType.name,
+      AutofillHints.nameSuffix : TextInputType.name,
+      AutofillHints.newPassword : TextInputType.text,
+      AutofillHints.newUsername : TextInputType.text,
+      AutofillHints.nickname : TextInputType.text,
+      AutofillHints.oneTimeCode : TextInputType.text,
+      AutofillHints.organizationName : TextInputType.text,
+      AutofillHints.password : TextInputType.text,
+      AutofillHints.photo : TextInputType.text,
+      AutofillHints.postalAddress : TextInputType.streetAddress,
+      AutofillHints.postalAddressExtended : TextInputType.streetAddress,
+      AutofillHints.postalAddressExtendedPostalCode : TextInputType.number,
+      AutofillHints.postalCode : TextInputType.number,
+      AutofillHints.streetAddressLevel1 : TextInputType.streetAddress,
+      AutofillHints.streetAddressLevel2 : TextInputType.streetAddress,
+      AutofillHints.streetAddressLevel3 : TextInputType.streetAddress,
+      AutofillHints.streetAddressLevel4 : TextInputType.streetAddress,
+      AutofillHints.streetAddressLine1 : TextInputType.streetAddress,
+      AutofillHints.streetAddressLine2 : TextInputType.streetAddress,
+      AutofillHints.streetAddressLine3 : TextInputType.streetAddress,
+      AutofillHints.sublocality : TextInputType.streetAddress,
+      AutofillHints.telephoneNumber : TextInputType.phone,
+      AutofillHints.telephoneNumberAreaCode : TextInputType.phone,
+      AutofillHints.telephoneNumberCountryCode : TextInputType.phone,
+      AutofillHints.telephoneNumberDevice : TextInputType.phone,
+      AutofillHints.telephoneNumberExtension : TextInputType.phone,
+      AutofillHints.telephoneNumberLocal : TextInputType.phone,
+      AutofillHints.telephoneNumberLocalPrefix : TextInputType.phone,
+      AutofillHints.telephoneNumberLocalSuffix : TextInputType.phone,
+      AutofillHints.telephoneNumberNational : TextInputType.phone,
+      AutofillHints.transactionAmount : TextInputType.numberWithOptions(decimal: true),
+      AutofillHints.transactionCurrency : TextInputType.text,
+      AutofillHints.url : TextInputType.url,
+      AutofillHints.username : TextInputType.text,
+    };
+
+    return inferKeyboardType[effectiveHint] ?? TextInputType.text;
+  }
 
   @override
   EditableTextState createState() => EditableTextState();
