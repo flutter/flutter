@@ -122,6 +122,17 @@ static void invoke_method(FLUTTER_API_SYMBOL(FlutterEngine) engine,
   engine->platform_post_task_callback(task, 0, engine->user_data);
 }
 
+FlutterEngineResult FlutterEngineCreateAOTData(
+    const FlutterEngineAOTDataSource* source,
+    FlutterEngineAOTData* data_out) {
+  *data_out = nullptr;
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineCollectAOTData(FlutterEngineAOTData data) {
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineRun(size_t version,
                                      const FlutterRendererConfig* config,
                                      const FlutterProjectArgs* args,
@@ -366,4 +377,8 @@ FlutterEngineResult FlutterEngineRunTask(FLUTTER_API_SYMBOL(FlutterEngine)
   delete runner;
 
   return kSuccess;
+}
+
+bool FlutterEngineRunsAOTCompiledDartCode() {
+  return false;
 }

@@ -13,7 +13,7 @@
 
 // Creates a mock engine that responds to platform messages.
 static FlEngine* make_mock_engine() {
-  g_autoptr(FlDartProject) project = fl_dart_project_new("data");
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project, FL_RENDERER(renderer));
   g_autoptr(GError) error = nullptr;
