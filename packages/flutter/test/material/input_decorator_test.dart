@@ -4069,36 +4069,56 @@ void main() {
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
   });
 
-  testWidgets('InputDecorator floating label width scales', (WidgetTester tester) async {
+  testWidgets('InputDecorator floating label width scales when focused', (WidgetTester tester) async {
+    final String longStringA = String.fromCharCodes(List<int>.generate(200, (_) => 65));
+    final String longStringB = String.fromCharCodes(List<int>.generate(200, (_) => 66));
+
     await tester.pumpWidget(
-      buildInputDecorator(
-        // isFocused: false (default)
-        isEmpty: true,
-        decoration: const InputDecoration(
-          labelText: 'label',
+      Center(
+        child: Container(
+          width: 100,
+          height: 100,
+          child: buildInputDecorator(
+            // isFocused: false (default)
+            isEmpty: true,
+            decoration: InputDecoration(
+              labelText: longStringA,
+            ),
+          ),
         ),
       ),
     );
 
     await tester.pumpAndSettle();
 
-    final double labelWidth = tester.getSize(find.text('label')).width;
+    expect(
+      find.text(longStringA),
+      paints..clipRect(rect: const Rect.fromLTWH(0, 0, 100.0, 16.0)),
+    );
 
     await tester.pumpWidget(
-      buildInputDecorator(
-        isFocused: true,
-        isEmpty: true,
-        decoration: const InputDecoration(
-          labelText: 'focusedLabel',
+      Center(
+        child: Container(
+          width: 100,
+          height: 100,
+          child: buildInputDecorator(
+            isFocused: true,
+            isEmpty: true,
+            decoration: InputDecoration(
+              labelText: longStringB,
+            ),
+          ),
         ),
       ),
     );
 
     await tester.pumpAndSettle();
 
-    final double focusedLabelWidth = tester.getSize(find.text('focusedLabel')).width;
-
-    expect(labelWidth, focusedLabelWidth);
+    expect(
+      find.text(longStringB),
+      // 133.3 is approximately 100 / 0.75 (_kFinalLabelScale)
+      paints..clipRect(rect: const Rect.fromLTWH(0, 0, 133.0, 16.0)),
+    );
   });
 
   testWidgets('textAlignVertical can be updated', (WidgetTester tester) async {
