@@ -183,6 +183,14 @@ class Cache {
     _lockEnabled = true;
   }
 
+  /// Check if lock acquired, skipping FLUTTER_ALREADY_LOCKED reentrant checks.
+  ///
+  /// This is used by the tests.
+  @visibleForTesting
+  static bool isLocked() {
+    return _lock != null;
+  }
+
   /// Lock the cache directory.
   ///
   /// This happens while required artifacts are updated
