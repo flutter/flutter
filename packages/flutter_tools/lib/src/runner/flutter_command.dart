@@ -806,11 +806,14 @@ abstract class FlutterCommand extends Command<void> {
 
     if (shouldRunPub) {
       await pub.get(context: PubContext.getVerifyContext(name));
+      // All done updating dependencies. Release the cache lock.
+      Cache.releaseLock();
       final FlutterProject project = FlutterProject.current();
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: true);
+    } else {
+      Cache.releaseLock();
     }
 
-    Cache.releaseLock();
     setupApplicationPackages();
 
     if (commandPath != null) {
