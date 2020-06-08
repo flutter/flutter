@@ -4069,6 +4069,38 @@ void main() {
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
   });
 
+  testWidgets('InputDecorator floating label width scales', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isFocused: false (default)
+        isEmpty: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final double labelWidth = tester.getSize(find.text('label')).width;
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isFocused: true,
+        isEmpty: true,
+        decoration: const InputDecoration(
+          labelText: 'focusedLabel',
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final double focusedLabelWidth = tester.getSize(find.text('focusedLabel')).width;
+
+    expect(labelWidth, focusedLabelWidth);
+  });
+
   testWidgets('textAlignVertical can be updated', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/56933
     const String hintText = 'hint';
