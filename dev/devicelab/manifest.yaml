@@ -174,7 +174,6 @@ tasks:
       with SkSL shader warm-up.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    flaky: true
 
   backdrop_filter_perf__timeline_summary:
     description: >
@@ -776,7 +775,6 @@ tasks:
       Measures the performance of screen transitions in the new Flutter Gallery on iOS.
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   fast_scroll_large_images__memory:
     description: >
