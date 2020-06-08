@@ -546,49 +546,7 @@ void main() {
           handle.dispose();
         });
 
-        testWidgets('ReorderableListView still scrolls when physics property is set', (WidgetTester tester) async {
-          final List<Widget> widgetList = <Widget>[
-            Container(key: const Key('1'), child: const Icon(Icons.account_circle)),
-          ];
-
-          final ScrollConfiguration configuration = ScrollConfiguration(
-           behavior: const ScrollBehavior(),
-           child: ReorderableListView(
-                key: const Key('list'),
-                physics: const AlwaysScrollableScrollPhysics(),
-                onReorder: (int oldIndex, int newIndex) {},
-                children: widgetList,
-                scrollController: ScrollController(),
-          ));
-
-          await tester.pumpWidget(MaterialApp(
-          home: SizedBox(
-            height: 100,
-            width: 100,
-            child: configuration,
-          ),
-        ));
-
-          final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ReorderableListView)));
-          await gesture.moveBy(_kGestureOffset);
-          // Move back to position before offset.
-          await gesture.moveBy(Offset(0, -_kGestureOffset.dy));
-          await tester.pump();
-          await tester.pumpAndSettle();
-
-          ScrollPhysics physics;
-          await tester.pumpWidget(
-            Builder(
-              builder: (BuildContext context) {
-                physics = configuration.behavior.getScrollPhysics(context);
-                return Container();
-              },
-            ),
-          );
-          expect(physics, isNotNull);
-        });
-
-        testWidgets('Default ReorderableListViews are not always scrollable', (WidgetTester tester) async {
+        testWidgets('Default scroll physics for macOS/iOS', (WidgetTester tester) async {
           final ScrollConfiguration configuration = ScrollConfiguration(
            behavior: const ScrollBehavior(),
            child: ReorderableListView(
@@ -606,8 +564,35 @@ void main() {
               },
             ),
           );
-          expect(physics, isNotNull);
-        });
+          expect(physics, isInstanceOf<BouncingScrollPhysics>());
+        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+        testWidgets('Default scroll physics for android/fuchsia/linux/windows', (WidgetTester tester) async {
+          final ScrollConfiguration configuration = ScrollConfiguration(
+           behavior: const ScrollBehavior(),
+           child: ReorderableListView(
+            scrollDirection: Axis.horizontal,
+            children: const <Widget>[],
+            onReorder: (int oldIndex, int newIndex) {},
+          ));
+
+          ScrollPhysics physics;
+          await tester.pumpWidget(
+            Builder(
+              builder: (BuildContext context) {
+                physics = configuration.behavior.getScrollPhysics(context);
+                return Container();
+              },
+            ),
+          );
+          expect(physics, isInstanceOf<ClampingScrollPhysics>());
+        }, variant: const TargetPlatformVariant(<TargetPlatform>{
+            TargetPlatform.android,
+            TargetPlatform.fuchsia,
+            TargetPlatform.linux,
+            TargetPlatform.windows,
+          }),
+        );
 
         testWidgets('physics:AlwaysScrollableScrollPhysics overrides default behavior', (WidgetTester tester) async {
           bool scrolled = false;
