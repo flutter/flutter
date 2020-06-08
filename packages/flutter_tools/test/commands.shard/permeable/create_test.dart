@@ -833,7 +833,7 @@ void main() {
           globals.fs.path.join(
             globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
             'bin',
-            'dartfmt',
+            globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
           ),
           <String>[file.path],
           workingDirectory: projectDir.path,
@@ -935,7 +935,7 @@ void main() {
           globals.fs.path.join(
             globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
             'bin',
-            'dartfmt',
+            globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
           ),
           <String>[file.path],
           workingDirectory: projectDir.path,
