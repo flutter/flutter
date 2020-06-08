@@ -4,6 +4,7 @@
 
 #include "flutter/fml/platform/android/jni_util.h"
 
+#include <sys/prctl.h>
 #include <codecvt>
 #include <string>
 
@@ -25,7 +26,18 @@ JNIEnv* AttachCurrentThread() {
   FML_DCHECK(g_jvm != nullptr)
       << "Trying to attach to current thread without calling InitJavaVM first.";
   JNIEnv* env = nullptr;
-  jint ret = g_jvm->AttachCurrentThread(&env, nullptr);
+  JavaVMAttachArgs args;
+  args.version = JNI_VERSION_1_4;
+  args.group = nullptr;
+  // 16 is the maximum size for thread names on Android.
+  char thread_name[16];
+  int err = prctl(PR_GET_NAME, thread_name);
+  if (err < 0) {
+    args.name = nullptr;
+  } else {
+    args.name = thread_name;
+  }
+  jint ret = g_jvm->AttachCurrentThread(&env, &args);
   FML_DCHECK(JNI_OK == ret);
   return env;
 }
