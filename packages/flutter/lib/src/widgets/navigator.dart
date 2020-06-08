@@ -4019,9 +4019,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     );
 
     if (_heroControllerFromScope != null) {
-      // Hides the HeroControllerScope for the widget subtree so that the
-      // other nested navigator underneath will not pick up the navigator observer
-      // above this level.
+      // Hides the HeroControllerScope for the widget subtree so that the other
+      // nested navigator underneath will not pick up the hero controller above
+      // this level.
       subtree = HeroControllerScope(
         child: subtree
       );
