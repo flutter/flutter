@@ -63,6 +63,7 @@ class AttachCommand extends FlutterCommand {
     usesFilesystemOptions(hide: !verboseHelp);
     usesFuchsiaOptions(hide: !verboseHelp);
     usesDartDefineOption();
+    usesDeviceUserOption();
     argParser
       ..addOption(
         'debug-port',
@@ -136,6 +137,8 @@ class AttachCommand extends FlutterCommand {
     return stringArg('app-id');
   }
 
+  String get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
+
   @override
   Future<void> validateCommand() async {
     await super.validateCommand();
@@ -158,6 +161,13 @@ class AttachCommand extends FlutterCommand {
     if (debugPort != null && debugUri != null) {
       throwToolExit(
         'Either --debugPort or --debugUri can be provided, not both.');
+    }
+
+    if (userIdentifier != null) {
+      final Device device = await findTargetDevice();
+      if (device is! AndroidDevice) {
+        throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
+      }
     }
   }
 
@@ -356,6 +366,7 @@ class AttachCommand extends FlutterCommand {
       target: stringArg('target'),
       targetModel: TargetModel(stringArg('target-model')),
       buildInfo: getBuildInfo(),
+      userIdentifier: userIdentifier,
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];

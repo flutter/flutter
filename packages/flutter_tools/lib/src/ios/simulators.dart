@@ -319,7 +319,10 @@ class IOSSimulator extends Device {
   String get xcrunPath => globals.fs.path.join('/usr', 'bin', 'xcrun');
 
   @override
-  Future<bool> isAppInstalled(ApplicationPackage app) {
+  Future<bool> isAppInstalled(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) {
     return _simControl.isInstalled(id, app.id);
   }
 
@@ -327,7 +330,10 @@ class IOSSimulator extends Device {
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
-  Future<bool> installApp(covariant IOSApp app) async {
+  Future<bool> installApp(
+    covariant IOSApp app, {
+    String userIdentifier,
+  }) async {
     try {
       final IOSApp iosApp = app;
       await _simControl.install(id, iosApp.simulatorBundlePath);
@@ -338,7 +344,10 @@ class IOSSimulator extends Device {
   }
 
   @override
-  Future<bool> uninstallApp(ApplicationPackage app) async {
+  Future<bool> uninstallApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async {
     try {
       await _simControl.uninstall(id, app.id);
       return true;
@@ -384,6 +393,7 @@ class IOSSimulator extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
+    String userIdentifier,
   }) async {
     if (!prebuiltApplication && package is BuildableIOSApp) {
       globals.printTrace('Building ${package.name} for $id.');
@@ -495,7 +505,10 @@ class IOSSimulator extends Device {
   }
 
   @override
-  Future<bool> stopApp(ApplicationPackage app) async {
+  Future<bool> stopApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async {
     // Currently we don't have a way to stop an app running on iOS.
     return false;
   }
