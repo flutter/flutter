@@ -48,18 +48,15 @@ class ProfilingSummarizer {
 
   /// Creates a ProfilingSummarizer given the timeline events.
   static ProfilingSummarizer fromEvents(List<TimelineEvent> profilingEvents) {
-    final Map<ProfileType, List<TimelineEvent>> eventByType =
+    final Map<ProfileType, List<TimelineEvent>> eventsByType =
         <ProfileType, List<TimelineEvent>>{};
     for (final TimelineEvent event in profilingEvents) {
       assert(event.category == kProfilingCategory);
       final ProfileType type = _getProfileType(event.name);
-      if (eventByType.containsKey(type)) {
-        eventByType[type].add(event);
-      } else {
-        eventByType[type] = <TimelineEvent>[event];
-      }
+      eventsByType[type] ??= <TimelineEvent>[];
+      eventsByType[type].add(event);
     }
-    return ProfilingSummarizer._(eventByType);
+    return ProfilingSummarizer._(eventsByType);
   }
 
   /// Key is the type of profiling event, for e.g. CPU, GPU, Memory.
@@ -76,8 +73,8 @@ class ProfilingSummarizer {
     return summary;
   }
 
-  Map<String, dynamic> _summarize(ProfileType profileType, String name) {
-    final Map<String, dynamic> summary = <String, dynamic>{};
+  Map<String, double> _summarize(ProfileType profileType, String name) {
+    final Map<String, double> summary = <String, double>{};
     if (!hasProfilingInfo(profileType)) {
       return summary;
     }
@@ -142,7 +139,7 @@ class ProfilingSummarizer {
         return dirtyMem + ownedSharedMem;
     }
 
-    return 0; // unreachable.
+    throw Exception('Invalid $profileType.');
   }
 
   double _getArgValue(String argKey, TimelineEvent e) {

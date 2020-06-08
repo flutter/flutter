@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// Returns the [p]-th percentile element from the [doubles].
-/// Note: [doubles] will be sorted.
+/// `List<doubles>` will be sorted.
 double findPercentile(List<double> doubles, double p) {
   assert(doubles.isNotEmpty);
   doubles.sort();
