@@ -95,8 +95,8 @@ class TimelineSummary {
 
   /// Encodes this summary as JSON.
   ///
-  /// Time statistic results are in milliseconds and time numbers in the
-  /// "frame_build_times", "frame_rasterizer_times", "frame_begin_times" and
+  /// Data ends with "_time_millis" means time in milliseconds and numbers in
+  /// the "frame_build_times", "frame_rasterizer_times", "frame_begin_times" and
   /// "frame_rasterizer_begin_times" lists are in microseconds.
   ///
   /// * "average_frame_build_time_millis": Average amount of time spent per
@@ -187,7 +187,7 @@ class TimelineSummary {
   ///
   /// See also:
   ///
-  /// * [Timeline.fromJson], which explains detail about the timeline data
+  /// * [Timeline.fromJson], which explains detail about the timeline data.
   Future<void> writeTimelineToFile(
     String traceName, {
     String destinationDirectory,
@@ -249,10 +249,11 @@ class TimelineSummary {
 
   /// Extracts Duration list that are reported as a pair of begin/end events.
   ///
-  /// Require the events with same name always show with phase 'B'(begin)
-  /// and than phase 'E'(end), without any other phase in between.
-  /// Note: "SceneDisplayLag" event is an exception, with phase ("ph") labeled
-  /// 'b' and 'e'. See [SceneDisplayLagSummarizer]
+  /// Extracts Duration of events by looking for events with the name and phase
+  /// begin ("ph": "B"). Assuming the next event with same name is phase end
+  /// ("ph": "E"), but it's not examined in the routine.
+  /// "SceneDisplayLag" event is an exception, with phase ("ph") labeled
+  /// 'b' and 'e'. See [SceneDisplayLagSummarizer].
   /// See: https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU
   List<Duration> _extractBeginEndEvents(String name) {
     return _extractDurations(
