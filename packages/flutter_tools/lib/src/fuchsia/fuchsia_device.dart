@@ -252,6 +252,9 @@ class FuchsiaDevice extends Device {
   bool isSupported() => true;
 
   @override
+  bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
+
+  @override
   Future<LaunchResult> startApp(
     covariant FuchsiaApp package, {
     String mainPath,

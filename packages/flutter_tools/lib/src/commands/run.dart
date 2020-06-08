@@ -446,33 +446,30 @@ class RunCommand extends RunCommandBase {
                            'channel.', null);
     }
 
+    final BuildMode buildMode = getBuildMode();
     for (final Device device in devices) {
-      if (await device.isLocalEmulator) {
-        if (await device.supportsHardwareRendering) {
-          final bool enableSoftwareRendering = boolArg('enable-software-rendering') == true;
-          if (enableSoftwareRendering) {
-            globals.printStatus(
-              'Using software rendering with device ${device.name}. You may get better performance '
-              'with hardware mode by configuring hardware rendering for your device.'
-            );
-          } else {
-            globals.printStatus(
-              'Using hardware rendering with device ${device.name}. If you get graphics artifacts, '
-              'consider enabling software rendering with "--enable-software-rendering".'
-            );
-          }
-        }
-
-        if (!isEmulatorBuildMode(getBuildMode())) {
-          throwToolExit('${toTitleCase(getFriendlyModeName(getBuildMode()))} mode is not supported for emulators.');
-        }
+      if (!await device.supportsRuntimeMode(buildMode)) {
+        throwToolExit(
+          '${toTitleCase(getFriendlyModeName(buildMode))} '
+          'mode is not supported by ${device.name}.',
+        );
       }
-    }
-
-    if (hotMode) {
-      for (final Device device in devices) {
+      if (hotMode) {
         if (!device.supportsHotReload) {
           throwToolExit('Hot reload is not supported by ${device.name}. Run with --no-hot.');
+        }
+      }
+      if (await device.isLocalEmulator && await device.supportsHardwareRendering) {
+        if (boolArg('enable-software-rendering')) {
+           globals.printStatus(
+            'Using software rendering with device ${device.name}. You may get better performance '
+            'with hardware mode by configuring hardware rendering for your device.'
+           );
+        } else {
+          globals.printStatus(
+            'Using hardware rendering with device ${device.name}. If you notice graphics artifacts, '
+            'consider enabling software rendering with "--enable-software-rendering".'
+          );
         }
       }
     }

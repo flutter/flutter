@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
@@ -50,6 +51,11 @@ void main() {
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(await chromeDevice.portForwarder.forward(1), 1);
+
+    expect(chromeDevice.supportsRuntimeMode(BuildMode.debug), true);
+    expect(chromeDevice.supportsRuntimeMode(BuildMode.profile), true);
+    expect(chromeDevice.supportsRuntimeMode(BuildMode.release), true);
+    expect(chromeDevice.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
   testWithoutContext('MicrosoftEdge defaults', () async {
@@ -70,6 +76,11 @@ void main() {
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(await chromeDevice.portForwarder.forward(1), 1);
+
+    expect(chromeDevice.supportsRuntimeMode(BuildMode.debug), true);
+    expect(chromeDevice.supportsRuntimeMode(BuildMode.profile), true);
+    expect(chromeDevice.supportsRuntimeMode(BuildMode.release), true);
+    expect(chromeDevice.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
   testWithoutContext('Server defaults', () async {
@@ -88,7 +99,12 @@ void main() {
     expect(device.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(device.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(await device.portForwarder.forward(1), 1);
-  });
+
+    expect(device.supportsRuntimeMode(BuildMode.debug), true);
+    expect(device.supportsRuntimeMode(BuildMode.profile), true);
+    expect(device.supportsRuntimeMode(BuildMode.release), true);
+    expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
+});
 
   testWithoutContext('Chrome device is listed when Chrome can be run', () async {
     final WebDevices webDevices = WebDevices(

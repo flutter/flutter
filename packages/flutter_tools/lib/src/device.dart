@@ -358,8 +358,16 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   String toString() => '$name device discovery';
 }
 
+/// A device is a physical hardware that can run a flutter application.
+///
+/// This may correspond to a connected iOS or Android device, or represent
+/// the host operating system in the case of Flutter Desktop.
 abstract class Device {
-  Device(this.id, {@required this.category, @required this.platformType, @required this.ephemeral});
+  Device(this.id, {
+    @required this.category,
+    @required this.platformType,
+    @required this.ephemeral,
+  });
 
   final String id;
 
@@ -377,6 +385,9 @@ abstract class Device {
   bool get supportsStartPaused => true;
 
   /// Whether it is an emulated device running on localhost.
+  ///
+  /// This may return `true` for certain physical Android devices, and is
+  /// generally only a best effort guess.
   Future<bool> get isLocalEmulator;
 
   /// The unique identifier for the emulator that corresponds to this device, or
@@ -387,24 +398,16 @@ abstract class Device {
   /// will be returned.
   Future<String> get emulatorId;
 
+  /// Whether this device can run the provided [buildMode].
+  ///
+  /// For example, some emulator architectures cannot run profile or
+  /// release builds.
+  FutureOr<bool> supportsRuntimeMode(BuildMode buildMode) => true;
+
   /// Whether the device is a simulator on a platform which supports hardware rendering.
+  // This is soft-deprecated since the logic is not correct expect for iOS simulators.
   Future<bool> get supportsHardwareRendering async {
-    assert(await isLocalEmulator);
-    switch (await targetPlatform) {
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
-        return true;
-      case TargetPlatform.ios:
-      case TargetPlatform.darwin_x64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      default:
-        return false;
-    }
+    return true;
   }
 
   /// Whether the device is supported for the current project directory.

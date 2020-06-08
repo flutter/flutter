@@ -204,6 +204,9 @@ class IOSDevice extends Device {
   @override
   final String name;
 
+  @override
+  bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
+
   final DarwinArch cpuArchitecture;
 
   final IOSDeviceInterface interfaceType;

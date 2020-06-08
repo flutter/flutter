@@ -98,6 +98,38 @@ void main() {
     }
   });
 
+  testWithoutContext('AndroidDevice supports profile/release mode on arm and x64 targets '
+    'abi and abiList', () async {
+      // The format is [ABI, ABI list]: expected release mode support.
+    final Map<List<String>, bool> values = <List<String>, bool>{
+      <String>['x86_64', 'unknown']: true,
+      <String>['x86', 'unknown']: false,
+      // The default ABI is arm32
+      <String>['???', 'unknown']: true,
+      <String>['arm64-v8a', 'arm64-v8a,']: true,
+      // The Kindle Fire runs 32 bit apps on 64 bit hardware.
+      <String>['arm64-v8a', 'arm']: true,
+    };
+
+    for (final MapEntry<List<String>, bool> entry in values.entries) {
+      final AndroidDevice device = setUpAndroidDevice(
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>['adb', '-s', '1234', 'shell', 'getprop'],
+            stdout: '[ro.product.cpu.abi]: [${entry.key.first}]\n'
+              '[ro.product.cpu.abilist]: [${entry.key.last}]'
+          )
+        ]),
+      );
+
+      expect(await device.supportsRuntimeMode(BuildMode.release), entry.value);
+      // Debug is always supported.
+      expect(await device.supportsRuntimeMode(BuildMode.debug), true);
+      // jitRelease is never supported.
+      expect(await device.supportsRuntimeMode(BuildMode.jitRelease), false);
+    }
+  });
+
   testWithoutContext('AndroidDevice can detect local emulator for known types', () async {
     final Set<String> knownPhyiscal = <String>{
       'qcom',
@@ -162,7 +194,6 @@ void main() {
     );
 
     expect(await device.isLocalEmulator, true);
-    expect(await device.supportsHardwareRendering, true);
   });
 
   testWithoutContext('isSupportedForProject is true on module project', () async {

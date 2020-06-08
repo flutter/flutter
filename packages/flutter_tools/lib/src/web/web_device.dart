@@ -71,6 +71,9 @@ abstract class ChromiumDevice extends Device {
   bool get supportsScreenshot => false;
 
   @override
+  bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
+
+  @override
   void clearLogs() { }
 
   DeviceLogReader _logReader;
@@ -340,6 +343,9 @@ class WebServerDevice extends Device {
 
   @override
   bool get supportsFlutterExit => false;
+
+  @override
+  bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
   @override
   Future<bool> get isLocalEmulator async => false;

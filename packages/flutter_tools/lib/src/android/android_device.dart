@@ -228,6 +228,20 @@ class AndroidDevice extends Device {
   }
 
   @override
+  Future<bool> supportsRuntimeMode(BuildMode buildMode) async {
+    switch (await targetPlatform) {
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+        return buildMode != BuildMode.jitRelease;
+      case TargetPlatform.android_x86:
+        return buildMode == BuildMode.debug;
+      default:
+        throw UnsupportedError('Invalid target platform for Android');
+    }
+  }
+
+  @override
   Future<String> get sdkNameAndVersion async =>
       'Android ${await _sdkVersion} (API ${await apiVersion})';
 
