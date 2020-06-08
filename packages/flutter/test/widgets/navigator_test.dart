@@ -1753,6 +1753,41 @@ void main() {
     expect(find.text('World'), findsNothing);
   });
 
+  testWidgets('Navigator.of able to handle input context is a navigator context', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> g = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: g,
+        home: const Text('home'),
+      )
+    );
+
+    final NavigatorState state = Navigator.of(g.currentContext);
+    expect(state, g.currentState);
+  });
+
+  testWidgets('Navigator.of able to handle input context is a navigator context - root navigator', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> root = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> sub = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: root,
+        home: Navigator(
+          key: sub,
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<void>(
+              settings: settings,
+              builder: (BuildContext context) => const Text('dummy'),
+            );
+          },
+        ),
+      )
+    );
+
+    final NavigatorState state = Navigator.of(sub.currentContext, rootNavigator: true);
+    expect(state, root.currentState);
+  });
+
   testWidgets('pushAndRemove until animates the push', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/25080.
 
