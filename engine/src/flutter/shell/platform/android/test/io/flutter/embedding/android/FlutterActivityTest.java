@@ -175,4 +175,16 @@ public class FlutterActivityTest {
           context, mock(FlutterLoader.class), flutterJNI, new String[] {}, false);
     }
   }
+
+  // This is just a compile time check to ensure that it's possible for FlutterActivity subclasses
+  // to provide their own intent builders which builds their own runtime types.
+  static class FlutterActivityWithIntentBuilders extends FlutterActivity {
+    public static NewEngineIntentBuilder withNewEngine() {
+      return new NewEngineIntentBuilder(FlutterActivityWithIntentBuilders.class);
+    }
+
+    public static CachedEngineIntentBuilder withCachedEngine(@NonNull String cachedEngineId) {
+      return new CachedEngineIntentBuilder(FlutterActivityWithIntentBuilders.class, cachedEngineId);
+    }
+  }
 }
