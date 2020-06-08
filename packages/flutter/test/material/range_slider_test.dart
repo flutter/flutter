@@ -1340,6 +1340,7 @@ void main() {
 
   testWidgets('Range Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.5, 0.75);
+    const Color fillColor = Color(0xf55f5f5f);
 
     Widget buildApp({
       Color activeColor,
@@ -1352,14 +1353,19 @@ void main() {
       };
       return MaterialApp(
         home: Scaffold(
+          // The builder is used to pass the context from the MaterialApp widget
+          // to the [Navigator]. This context is required in order for the
+          // Navigator to work.
           body: Builder(
             builder: (BuildContext context) {
               return Column(
                 children: <Widget>[
                   RangeSlider(
                     values: values,
-                    labels: RangeLabels(values.start.toStringAsFixed(2),
-                        values.end.toStringAsFixed(2)),
+                    labels: RangeLabels(
+                      values.start.toStringAsFixed(2),
+                      values.end.toStringAsFixed(2),
+                    ),
                     divisions: divisions,
                     onChanged: onChanged,
                   ),
@@ -1371,7 +1377,7 @@ void main() {
                           builder: (BuildContext context) {
                             return RaisedButton(
                               child: const Text('Inner page'),
-                              onPressed: () => Navigator.of(context).pop(),
+                              onPressed: () { Navigator.of(context).pop(); },
                             );
                           },
                         ),
@@ -1394,17 +1400,22 @@ void main() {
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
 
-    expect(find.byType(RangeSlider), isNotNull);
     expect(
-      valueIndicatorBox,
+      find.byType(Overlay),
       paints
-        ..rrect(color: const Color(0x3d2196f3))
-        ..rect(color: const Color(0xff2196f3))
-        ..rrect(color: const Color(0x3d2196f3)),
+      // Represents the raised button wth next text.
+      ..path(color: Colors.black)
+      ..paragraph()
+      // Represents the range slider.
+      ..path(color: fillColor)
+      ..paragraph()
+      ..path(color: fillColor)
+      ..paragraph(),
     );
 
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawRect, 1));
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawRRect, 2));
+    // Represents the Raised Button and Range Slider.
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 3));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 3));
 
     await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();
@@ -1414,14 +1425,16 @@ void main() {
       valueIndicatorBox,
       isNot(
          paints
-           ..rrect(color: const Color(0x3d2196f3))
-           ..rect(color: const Color(0xff2196f3))
-           ..rrect(color: const Color(0x3d2196f3)),
+           ..path(color: fillColor)
+           ..paragraph()
+           ..path(color: fillColor)
+           ..paragraph(),
       ),
     );
 
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawRect, 0));
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawRRect, 0));
+    // Represents the raised button with inner page text.
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 1));
 
     // Don't stop holding the value indicator.
     await gesture.up();

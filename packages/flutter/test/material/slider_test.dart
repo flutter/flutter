@@ -1951,6 +1951,7 @@ void main() {
 
   testWidgets('Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
+    const Color fillColor = Color(0xf55f5f5f);
     double value = 0.0;
 
     Widget buildApp({
@@ -1962,6 +1963,9 @@ void main() {
       return MaterialApp(
         home: Scaffold(
           body: Builder(
+            // The builder is used to pass the context from the MaterialApp widget
+            // to the [Navigator]. This context is required in order for the
+            // Navigator to work.
             builder: (BuildContext context) {
               return Column(
                 children: <Widget>[
@@ -1984,7 +1988,7 @@ void main() {
                           builder: (BuildContext context) {
                             return RaisedButton(
                               child: const Text('Inner page'),
-                              onPressed: () => Navigator.of(context).pop(),
+                              onPressed: () { Navigator.of(context).pop(); },
                             );
                           },
                         ),
@@ -2011,9 +2015,16 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
-        ..rrect(color: const Color(0xff2196f3)) // Active track.
-        ..rrect(color: const Color(0x3d2196f3)), // Inactive track.
+        // Represents the raised button with text, next.
+        ..path(color: Colors.black)
+        ..paragraph()
+        // Represents the Slider.
+        ..path(color: fillColor)
+        ..paragraph()
     );
+
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 2));
 
     await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();
@@ -2023,10 +2034,14 @@ void main() {
       valueIndicatorBox,
       isNot(
           paints
-            ..rrect(color: const Color(0xff2196f3)) // Active track.
-            ..rrect(color: const Color(0x3d2196f3)) // Inactive track.
+            ..path(color: fillColor)
+            ..paragraph(),
       ),
     );
+
+    // Represents the RaisedButton with inner Text, inner page.
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 1));
 
     // Don't stop holding the value indicator.
     await gesture.up();
