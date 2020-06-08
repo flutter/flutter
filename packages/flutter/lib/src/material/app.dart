@@ -603,7 +603,7 @@ class _MaterialAppState extends State<MaterialApp> {
 
   @override
   Widget build(BuildContext context) {
-    Widget result = InheritedHeroController(
+    Widget result = HeroControllerScope(
       controller: _heroController,
       child: WidgetsApp(
         key: GlobalObjectKey(this),

@@ -1930,7 +1930,7 @@ void main() {
     expect(popNextOfFirst, secondRoute);
   });
 
-  testWidgets('inherited hero controller works', (WidgetTester tester) async {
+  testWidgets('hero controller scope works', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> top = GlobalKey<NavigatorState>();
     final GlobalKey<NavigatorState> sub = GlobalKey<NavigatorState>();
 
@@ -1946,7 +1946,7 @@ void main() {
         );
       };
     await tester.pumpWidget(
-      InheritedHeroController(
+      HeroControllerScope(
         controller: spy,
         child: Directionality(
           textDirection: TextDirection.ltr,

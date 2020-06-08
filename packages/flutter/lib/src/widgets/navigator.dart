@@ -617,16 +617,16 @@ class NavigatorObserver {
 /// [HeroController], use the [Navigator.observers] instead.
 ///
 /// The hosted hero controller will be picked up by the navigator in the
-/// [child] sub tree. Once a navigator picks up this controller, the navigator
+/// [child] subtree. Once a navigator picks up this controller, the navigator
 /// will bar any navigator below its subtree from receiving this controller.
 ///
 /// See also:
 ///
-///  * [Navigator.observers], which provides the standard way of subscribing
-///    hero controller.
-class InheritedHeroController extends InheritedWidget {
+///  * [Navigator.observers], which is the standard way of providing a
+///    [HeroController].
+class HeroControllerScope extends InheritedWidget {
   /// Creates a widget to host the input [controller].
-  const InheritedHeroController({
+  const HeroControllerScope({
     Key key,
     this.controller,
     Widget child,
@@ -635,15 +635,15 @@ class InheritedHeroController extends InheritedWidget {
   /// The hero controller that is hosted inside this widget.
   final HeroController controller;
 
-  /// Retrieves the observer from the closest [InheritedNavigatorObserver]
+  /// Retrieves the [HeroController] from the closest [HeroControllerScope]
   /// ancestor.
   static HeroController of(BuildContext context) {
-    final InheritedHeroController host = context.dependOnInheritedWidgetOfExactType<InheritedHeroController>();
+    final HeroControllerScope host = context.dependOnInheritedWidgetOfExactType<HeroControllerScope>();
     return host?.controller;
   }
 
   @override
-  bool updateShouldNotify(InheritedHeroController oldWidget) {
+  bool updateShouldNotify(HeroControllerScope oldWidget) {
     return oldWidget.controller != controller;
   }
 }
@@ -2696,7 +2696,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
-  HeroController _inheritedHeroController;
+  HeroController _heroControllerFromScope;
 
   List<NavigatorObserver> _effectiveObservers;
 
@@ -2711,14 +2711,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       assert(observer.navigator == null);
       observer._navigator = this;
     }
+    _effectiveObservers = widget.observers;
 
     // We have to manually extract the inherited widget in initState because
     // the current context is not fully initialized.
-    final InheritedHeroController inheritedHeroController = context
-      .getElementForInheritedWidgetOfExactType<InheritedHeroController>()
-      ?.widget as InheritedHeroController;
-    _updateHeroController(inheritedHeroController?.controller);
-    _updateEffectiveObservers();
+    final HeroControllerScope heroControllerScope = context
+      .getElementForInheritedWidgetOfExactType<HeroControllerScope>()
+      ?.widget as HeroControllerScope;
+    _updateHeroController(heroControllerScope?.controller);
 
     String initialRoute = widget.initialRoute;
     if (widget.pages.isNotEmpty) {
@@ -2755,21 +2755,21 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _updateHeroController(InheritedHeroController.of(context));
-    _updateEffectiveObservers();
+    _updateHeroController(HeroControllerScope.of(context));
   }
 
   void _updateHeroController(HeroController newHeroController) {
-    if (_inheritedHeroController != newHeroController) {
-      _inheritedHeroController?._navigator = null;
+    if (_heroControllerFromScope != newHeroController) {
+      _heroControllerFromScope?._navigator = null;
       newHeroController?._navigator = this;
-      _inheritedHeroController = newHeroController;
+      _heroControllerFromScope = newHeroController;
+      _updateEffectiveObservers();
     }
   }
 
   void _updateEffectiveObservers() {
-    if (_inheritedHeroController != null)
-      _effectiveObservers = widget.observers + <NavigatorObserver>[_inheritedHeroController];
+    if (_heroControllerFromScope != null)
+      _effectiveObservers = widget.observers + <NavigatorObserver>[_heroControllerFromScope];
     else
       _effectiveObservers = widget.observers;
   }
@@ -2788,10 +2788,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         assert(observer.navigator == null);
         observer._navigator = this;
       }
-      if (_inheritedHeroController != null)
-        _effectiveObservers = widget.observers + <NavigatorObserver>[_inheritedHeroController];
-      else
-        _effectiveObservers = widget.observers;
+      _updateEffectiveObservers();
     }
     if (oldWidget.pages != widget.pages) {
       assert(
@@ -2825,8 +2822,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       _debugLocked = true;
       return true;
     }());
-    _inheritedHeroController?._navigator = null;
-    for (final NavigatorObserver observer in widget.observers)
+    for (final NavigatorObserver observer in _effectiveObservers)
       observer._navigator = null;
     focusScopeNode.dispose();
     for (final _RouteEntry entry in _history)
@@ -4008,7 +4004,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     // Hides the InheritedHeroController for the widget subtree so that the
     // other nested navigator underneath will not pick up the navigator observer
     // above this level.
-    return InheritedHeroController(
+    return HeroControllerScope(
       child: Listener(
         onPointerDown: _handlePointerDown,
         onPointerUp: _handlePointerUpOrCancel,

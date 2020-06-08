@@ -326,7 +326,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
           data: effectiveThemeData,
           child: Builder(
             builder: (BuildContext context) {
-              return InheritedHeroController(
+              return HeroControllerScope(
                 controller: _heroController,
                 child: WidgetsApp(
                   key: GlobalObjectKey(this),
