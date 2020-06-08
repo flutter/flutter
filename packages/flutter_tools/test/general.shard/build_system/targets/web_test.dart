@@ -488,7 +488,11 @@ void main() {
       contains('"a/a.txt": "7fc56270e7a70fa81a5935b72eacbe29"'));
     expect(environment.buildDir.childFile('service_worker.d'), exists);
     // Depends on resource file.
-    expect(environment.buildDir.childFile('service_worker.d').readAsStringSync(), contains('a/a.txt'));
+    expect(environment.buildDir.childFile('service_worker.d').readAsStringSync(),
+      contains('a/a.txt'));
+    // Contains NOTICES
+    expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
+      contains('NOTICES'));
   }));
 
   test('WebServiceWorker contains baseUrl cache', () => testbed.run(() async {
