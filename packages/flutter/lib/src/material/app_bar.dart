@@ -797,6 +797,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final double visibleMainHeight = maxExtent - shrinkOffset - topPadding;
+    final double extraToolbarHeight = math.max(minExtent - _bottomHeight - topPadding - kToolbarHeight, 0);
+    final double visibleToolbarHeight = visibleMainHeight - _bottomHeight - extraToolbarHeight;
 
     // Truth table for `toolbarOpacity`:
     // pinned | floating | bottom != null || opacity
@@ -810,7 +812,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     //    1   |    1     |        0       ||  1.0
     //    1   |    1     |        1       ||  fade
     final double toolbarOpacity = !pinned || (floating && bottom != null)
-      ? ((visibleMainHeight - _bottomHeight) / kToolbarHeight).clamp(0.0, 1.0) as double
+      ? (visibleToolbarHeight / kToolbarHeight).clamp(0.0, 1.0) as double
       : 1.0;
 
     final Widget appBar = FlexibleSpaceBar.createSettings(
@@ -998,6 +1000,7 @@ class SliverAppBar extends StatefulWidget {
        assert(stretch != null),
        assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
        assert(stretchTriggerOffset > 0.0),
+       assert(collapsedHeight == null || collapsedHeight > kToolbarHeight, 'The "collapsedHeight" argument has to be larger than [kToolbarHeight].'),
        super(key: key);
 
   /// A widget to display before the [title].
