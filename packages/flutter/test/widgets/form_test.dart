@@ -702,7 +702,7 @@ void main() {
     expect(find.text(errorText(initialValue)), findsNWidgets(2));
   });
 
-  testWidgets('Form auto-validate form fields even before none of them changes if autovalidateMode is always', (WidgetTester tester) async {
+  testWidgets('Form auto-validates form fields even before any have changed if autovalidateMode is set to always', (WidgetTester tester) async {
     String errorText(String value) => 'error/$value';
 
     Widget builder() {
