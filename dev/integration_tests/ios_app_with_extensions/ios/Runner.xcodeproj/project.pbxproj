@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 50;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -22,7 +22,6 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
-		F735C5C42485E50A002BE868 /* PlayingCard in Frameworks */ = {isa = PBXBuildFile; productRef = F735C5C32485E50A002BE868 /* PlayingCard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -116,7 +115,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F735C5C42485E50A002BE868 /* PlayingCard in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -264,9 +262,6 @@
 				49C15B68243E340F0025F804 /* PBXTargetDependency */,
 			);
 			name = Runner;
-			packageProductDependencies = (
-				F735C5C32485E50A002BE868 /* PlayingCard */,
-			);
 			productName = Runner;
 			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
 			productType = "com.apple.product-type.application";
@@ -302,9 +297,6 @@
 				Base,
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
-			packageReferences = (
-				F735C5C22485E50A002BE868 /* XCRemoteSwiftPackageReference "example-package-playingcard" */,
-			);
 			productRefGroup = 97C146EF1CF9000F007C117D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -915,25 +907,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		F735C5C22485E50A002BE868 /* XCRemoteSwiftPackageReference "example-package-playingcard" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/apple/example-package-playingcard.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.0.5;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		F735C5C32485E50A002BE868 /* PlayingCard */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F735C5C22485E50A002BE868 /* XCRemoteSwiftPackageReference "example-package-playingcard" */;
-			productName = PlayingCard;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 97C146E61CF9000F007C117D /* Project object */;
 }

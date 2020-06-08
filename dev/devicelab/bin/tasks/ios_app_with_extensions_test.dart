@@ -12,7 +12,7 @@ import 'package:path/path.dart' as path;
 
 Future<void> main() async {
   await task(() async {
-    section('Copy app with watchOS companion and Swift Package');
+    section('Copy test Flutter App with WatchOS Companion');
 
     String watchDeviceID;
     String phoneDeviceID;
@@ -47,7 +47,7 @@ Future<void> main() async {
 
       if (!appReleaseBuilt) {
         return TaskResult.failure(
-            'Failed to build flutter iOS app with watchOS companion and Swift Package in release mode.');
+            'Failed to build flutter iOS app with WatchOS companion in release mode.');
       }
 
       section('Create debug build');
@@ -69,7 +69,7 @@ Future<void> main() async {
 
       if (!appDebugBuilt) {
         return TaskResult.failure(
-            'Failed to build flutter iOS app with watchOS companion and Swift Package in debug mode.');
+            'Failed to build flutter iOS app with WatchOS companion in debug mode.');
       }
 
       section('Create build for a simulator device');
@@ -183,7 +183,7 @@ Future<void> main() async {
 
       if (!appSimulatorBuilt) {
         return TaskResult.failure(
-            'Failed to build flutter iOS app with watchOS companion and Swift Package in debug mode for simulated device.');
+            'Failed to build flutter iOS app with WatchOS companion in debug mode for simulated device.');
       }
 
       section('Run app on simulator device');
@@ -229,7 +229,7 @@ Future<void> main() async {
 
       if (exitCode != 0)
         return TaskResult.failure(
-            'Failed to start flutter iOS app with watchOS companion and Swift Package on simulated device.');
+            'Failed to start flutter iOS app with WatchOS companion on simulated device.');
 
       return TaskResult.success(null);
     } catch (e) {
