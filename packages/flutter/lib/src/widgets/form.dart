@@ -506,7 +506,7 @@ enum AutoValidateMode {
   /// Used to auto-validate [Form] and [FormField] even without user interaction.
   always,
 
-  /// used to auto-validate [Form] and [FormField] only after each user
+  /// Used to auto-validate [Form] and [FormField] only after each user
   /// interaction.
   onUserInteraction,
 }
