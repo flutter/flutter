@@ -746,7 +746,7 @@ void main() {
               child: Material(
                 child: FormField<String>(
                   initialValue: 'foo',
-                  autoValidateMode: AutoValidateMode.always,
+                  autovalidate: true,
                   builder: (FormFieldState<String> state) {
                     formFieldState = state;
                     return Container();
