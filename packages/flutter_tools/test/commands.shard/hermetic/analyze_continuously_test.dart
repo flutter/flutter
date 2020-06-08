@@ -194,18 +194,21 @@ void main() {
   testUsingContext('Can run AnalysisService with customized cache location', () async {
     final Completer<void> completer = Completer<void>();
     final StreamController<List<int>> stdin = StreamController<List<int>>();
-    final FakeCommand fakeCommand = FakeCommand(
-      command: const <String>[
-        'custom-dart-sdk/bin/dart',
-        'custom-dart-sdk/bin/snapshots/analysis_server.dart.snapshot',
-        '--disable-server-feature-completion',
-        '--disable-server-feature-search',
-        '--sdk',
-        'custom-dart-sdk',
-      ],
-      completer: completer,
-      stdin: IOSink(stdin.sink),
-    );
+    final FakeProcessManager processManager = FakeProcessManager.list(
+      <FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'custom-dart-sdk/bin/dart',
+            'custom-dart-sdk/bin/snapshots/analysis_server.dart.snapshot',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--sdk',
+            'custom-dart-sdk',
+          ],
+          completer: completer,
+          stdin: IOSink(stdin.sink),
+        ),
+      ]);
 
     final Artifacts artifacts = MockArtifacts();
     when(artifacts.getArtifactPath(Artifact.engineDartSdkPath))
@@ -217,38 +220,35 @@ void main() {
       logger: BufferLogger.test(),
       platform: FakePlatform(operatingSystem: 'linux'),
       fileSystem: MemoryFileSystem.test(),
-      processManager: FakeProcessManager.list(<FakeCommand>[fakeCommand])
+      processManager: processManager,
     );
 
     final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
     commandRunner.addCommand(command);
+    unawaited(commandRunner.run(<String>['analyze', '--watch']));
+    await stdin.stream.first;
 
-    unawaited(commandRunner.run(<String>['analyze']));
-
-    stdin.stream.listen((List<int> chunk) {
-      if (!completer.isCompleted) {
-        completer.complete();
-      }
-    });
-
-    await completer.future;
+    expect(processManager.hasRemainingExpectations, false);
   });
 
   testUsingContext('Can run AnalysisService with customized cache location --watch', () async {
     final Completer<void> completer = Completer<void>();
     final StreamController<List<int>> stdin = StreamController<List<int>>();
-    final FakeCommand fakeCommand = FakeCommand(
-      command: const <String>[
-        'custom-dart-sdk/bin/dart',
-        'custom-dart-sdk/bin/snapshots/analysis_server.dart.snapshot',
-        '--disable-server-feature-completion',
-        '--disable-server-feature-search',
-        '--sdk',
-        'custom-dart-sdk',
-      ],
-      completer: completer,
-      stdin: IOSink(stdin.sink),
-    );
+    final FakeProcessManager processManager = FakeProcessManager.list(
+      <FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'custom-dart-sdk/bin/dart',
+            'custom-dart-sdk/bin/snapshots/analysis_server.dart.snapshot',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--sdk',
+            'custom-dart-sdk',
+          ],
+          completer: completer,
+          stdin: IOSink(stdin.sink),
+        ),
+      ]);
 
     final Artifacts artifacts = MockArtifacts();
     when(artifacts.getArtifactPath(Artifact.engineDartSdkPath))
@@ -260,21 +260,15 @@ void main() {
       logger: BufferLogger.test(),
       platform: FakePlatform(operatingSystem: 'linux'),
       fileSystem: MemoryFileSystem.test(),
-      processManager: FakeProcessManager.list(<FakeCommand>[fakeCommand])
+      processManager: processManager,
     );
 
     final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
     commandRunner.addCommand(command);
-
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
+    await stdin.stream.first;
 
-    stdin.stream.listen((List<int> chunk) {
-      if (!completer.isCompleted) {
-        completer.complete();
-      }
-    });
-
-    await completer.future;
+    expect(processManager.hasRemainingExpectations, false);
   });
 
   testWithoutContext('Can forward null-safety experiments to the AnalysisServer', () async {
