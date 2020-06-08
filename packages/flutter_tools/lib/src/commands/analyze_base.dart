@@ -5,11 +5,11 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:yaml/yaml.dart' as yaml;
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
