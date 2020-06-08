@@ -1327,8 +1327,8 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     final double bottomHeight = widget.bottom?.preferredSize?.height ?? 0.0;
     final double topPadding = widget.primary ? MediaQuery.of(context).padding.top : 0.0;
     final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
-        ? bottomHeight + topPadding
-        : (widget.collapsedHeight ?? kToolbarHeight) + bottomHeight + topPadding;
+      ? bottomHeight + topPadding
+      : (widget.collapsedHeight ?? kToolbarHeight) + bottomHeight + topPadding;
 
     return MediaQuery.removePadding(
       context: context,
