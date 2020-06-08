@@ -60,7 +60,7 @@ class TimelineSummary {
     .where((Duration duration) => duration > kBuildBudget)
     .length;
 
-  /// Average amount of time spent per frame in the GPU rasterizer.
+  /// Average amount of time spent per frame in the engine rasterizer.
   ///
   /// Returns null if no frames were recorded.
   double computeAverageFrameRasterizerTimeMillis() {
@@ -115,7 +115,7 @@ class TimelineSummary {
   ///   the [kBuildBudget] and therefore are in the danger of missing frames.
   ///   See [computeMissedFrameBuildBudgetCount].
   /// * "average_frame_rasterizer_time_millis": Average amount of time spent
-  ///   per frame in the GPU rasterizer.
+  ///   per frame in the engine rasterizer.
   ///   See [computeAverageFrameRasterizerTimeMillis].
   /// * "90th_percentile_frame_rasterizer_time_millis" and
   ///   "99th_percentile_frame_rasterizer_time_millis": The 90/99-th percentile
@@ -250,8 +250,8 @@ class TimelineSummary {
   /// Extracts Duration list that are reported as a pair of begin/end events.
   ///
   /// Extracts Duration of events by looking for events with the name and phase
-  /// begin ("ph": "B"). Assuming the next event with same name is phase end
-  /// ("ph": "E"), but it's not examined in the routine.
+  /// begin ("ph": "B"). This routine assumes that the next event with the same
+  /// name is phase end ("ph": "E"), but it's not examined.
   /// "SceneDisplayLag" event is an exception, with phase ("ph") labeled
   /// 'b' and 'e'. See [SceneDisplayLagSummarizer].
   /// See: https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU
