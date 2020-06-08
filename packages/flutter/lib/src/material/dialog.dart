@@ -550,11 +550,14 @@ class AlertDialog extends StatelessWidget {
 
 
     if (actions != null) {
-      actionsWidget = ButtonBar(
-        buttonPadding: buttonPadding,
-        overflowDirection: actionsOverflowDirection,
-        overflowButtonSpacing: actionsOverflowButtonSpacing,
-        children: actions,
+      actionsWidget = Padding(
+        padding: actionsPadding,
+        child: ButtonBar(
+          buttonPadding: buttonPadding,
+          overflowDirection: actionsOverflowDirection,
+          overflowButtonSpacing: actionsOverflowButtonSpacing,
+          children: actions,
+        ),
       );
     }
 
