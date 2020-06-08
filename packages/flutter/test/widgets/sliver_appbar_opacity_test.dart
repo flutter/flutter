@@ -183,7 +183,7 @@ void main() {
     expect(render.text.style.color.opacity, 1.0);
   });
 
-  testWidgets('!pinned && !floating && !bottom && extraToolbarHeight != 0.0 ==> fade opactiy', (WidgetTester tester) async {
+  testWidgets('!pinned && !floating && !bottom && extraToolbarHeight != 0.0 ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     const double collapsedHeight = 100.0;
     await tester.pumpWidget(
