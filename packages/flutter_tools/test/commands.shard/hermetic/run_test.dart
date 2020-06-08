@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/net.dart';
@@ -232,7 +233,7 @@ void main() {
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
         DeviceManager: () => MockDeviceManager(),
-        Stdio: () => mockStdio,
+        Stdio: () => MockStdio(),
       });
 
       testUsingContext('shows unsupported devices when no supported devices are found',  () async {
