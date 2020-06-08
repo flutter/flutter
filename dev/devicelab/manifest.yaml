@@ -168,6 +168,14 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  cubic_bezier_perf_sksl_warmup__timeline_summary:
+    description: >
+      Measures the runtime performance of cubic bezier animations on Android
+      with SkSL shader warm-up.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+    flaky: true
+
   backdrop_filter_perf__timeline_summary:
     description: >
       Measures the runtime performance of backdrop filter blurs on Android.

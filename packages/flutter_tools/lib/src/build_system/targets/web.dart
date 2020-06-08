@@ -166,6 +166,7 @@ class Dart2JSTarget extends Target {
     // parse the kernel file for web builds.
     final ProcessResult kernelResult = await globals.processManager.run(<String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--disable-dart-dev',
       globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=$specPath',
       ...?extraFrontEndOptions,
@@ -186,6 +187,7 @@ class Dart2JSTarget extends Target {
     }
     final ProcessResult javaScriptResult = await globals.processManager.run(<String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--disable-dart-dev',
       globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=$specPath',
       ...?extraFrontEndOptions,
