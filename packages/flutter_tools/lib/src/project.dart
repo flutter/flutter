@@ -398,6 +398,11 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   @override
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
+  File get xcodeProjectWorkspaceData =>
+    xcodeProject
+    .childDirectory('project.xcworkspace')
+    .childFile('contents.xcworkspacedata');
+
   @override
   Directory get xcodeWorkspace => hostAppRoot.childDirectory('$_hostAppProjectName.xcworkspace');
 
