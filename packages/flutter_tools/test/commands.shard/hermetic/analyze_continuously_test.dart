@@ -159,6 +159,7 @@ void main() {
     final FakeCommand fakeCommand = FakeCommand(
       command: const <String>[
         'dart-sdk/bin/dart',
+        '--disable-dart-dev',
         'dart-sdk/bin/snapshots/analysis_server.dart.snapshot',
         '--enable-experiment',
         'non-nullable',

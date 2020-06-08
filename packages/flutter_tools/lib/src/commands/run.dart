@@ -66,6 +66,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     usesIsolateFilterOption(hide: !verboseHelp);
+    addNullSafetyModeOptions();
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -406,7 +407,7 @@ class RunCommand extends RunCommandBase {
       final Daemon daemon = Daemon(
         stdinCommandStream,
         stdoutCommandResponse,
-        notifyingLogger: NotifyingLogger(),
+        notifyingLogger: NotifyingLogger(verbose: globals.logger.isVerbose),
         logToStdout: true,
       );
       AppInstance app;

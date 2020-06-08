@@ -291,8 +291,8 @@ void main() {
     expect(props.findAllElements('FLUTTER_ROOT').first.text, flutterRoot);
     expect(props.findAllElements('TRACK_WIDGET_CREATION').first.text, 'true');
     expect(props.findAllElements('TREE_SHAKE_ICONS').first.text, 'true');
-    expect(props.findAllElements('EXTRA_GEN_SNAPSHOT_OPTIONS').first.text, '--enable-experiment=non-nullable');
-    expect(props.findAllElements('EXTRA_FRONT_END_OPTIONS').first.text, '--enable-experiment=non-nullable');
+    expect(props.findAllElements('EXTRA_GEN_SNAPSHOT_OPTIONS').first.text, '--enable-experiment%3Dnon-nullable');
+    expect(props.findAllElements('EXTRA_FRONT_END_OPTIONS').first.text, '--enable-experiment%3Dnon-nullable');
     expect(props.findAllElements('DART_DEFINES').first.text, 'foo%3Da,bar%3Db');
     expect(props.findAllElements('DART_OBFUSCATION').first.text, 'true');
     expect(props.findAllElements('SPLIT_DEBUG_INFO').first.text, r'C:\foo\');

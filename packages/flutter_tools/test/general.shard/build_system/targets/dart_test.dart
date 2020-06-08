@@ -87,7 +87,6 @@ void main() {
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
-        '--old_gen_heap_size=2000',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -118,7 +117,6 @@ void main() {
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
-        '--old_gen_heap_size=2000',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -149,7 +147,6 @@ void main() {
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
-        '--old_gen_heap_size=2000',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -181,7 +178,6 @@ void main() {
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
-        '--old_gen_heap_size=2000',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -215,7 +211,6 @@ void main() {
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
-        '--old_gen_heap_size=2000',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -247,7 +242,6 @@ void main() {
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
-        '--old_gen_heap_size=2000',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -291,7 +285,6 @@ void main() {
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
-        '--old_gen_heap_size=2000',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',

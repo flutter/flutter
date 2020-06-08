@@ -475,11 +475,11 @@ void cd(dynamic directory) {
     cwd = directory.path;
     d = directory;
   } else {
-    throw 'Unsupported type ${directory.runtimeType} of $directory';
+    throw FileSystemException('Unsupported directory type ${directory.runtimeType}', directory.toString());
   }
 
   if (!d.existsSync())
-    throw 'Cannot cd into directory that does not exist: $directory';
+    throw FileSystemException('Cannot cd into directory that does not exist', d.toString());
 }
 
 Directory get flutterDirectory => Directory.current.parent.parent;

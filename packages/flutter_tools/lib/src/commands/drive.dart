@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:vm_service/vm_service_io.dart' as vm_service;
+import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:meta/meta.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
@@ -21,6 +23,7 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../vmservice.dart';
 import '../web/web_runner.dart';
 import 'run.dart';
 
@@ -111,7 +114,12 @@ class DriveCommand extends RunCommandBase {
           'Works only if \'browser-name\' is set to \'android-chrome\'')
       ..addOption('chrome-binary',
         help: 'Location of Chrome binary. '
-          'Works only if \'browser-name\' is set to \'chrome\'');
+          'Works only if \'browser-name\' is set to \'chrome\'')
+      ..addOption('write-sksl-on-exit',
+        help:
+          'Attempts to write an SkSL file when the drive process is finished '
+          'to the provided file, overwriting it if necessary.',
+      );
   }
 
   @override
@@ -303,6 +311,17 @@ $ex
     } finally {
       await residentRunner?.exit();
       await driver?.quit();
+      if (stringArg('write-sksl-on-exit') != null) {
+        final File outputFile = globals.fs.file(stringArg('write-sksl-on-exit'));
+        final vm_service.VmService vmService = await connectToVmService(
+          Uri.parse(observatoryUri),
+        );
+        final FlutterView flutterView = (await vmService.getFlutterViews()).first;
+        final Map<String, Object> result = await vmService.getSkSLs(
+          viewId: flutterView.id
+        );
+        await sharedSkSlWriter(_device, result, outputFile: outputFile);
+      }
       if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
         globals.printStatus('Leaving the application running.');
       } else {

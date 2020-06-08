@@ -191,18 +191,24 @@ void main() {
         LogicalKeyboardKey.keyB,
       ).debugFillProperties(builder);
 
-      final List<String> description = builder.properties
-          .where((DiagnosticsNode node) {
-            return !node.isFiltered(DiagnosticLevel.info);
-          })
-          .map((DiagnosticsNode node) => node.toString())
-          .toList();
+      final List<String> description = builder.properties.where((DiagnosticsNode node) {
+        return !node.isFiltered(DiagnosticLevel.info);
+      }).map((DiagnosticsNode node) => node.toString()).toList();
 
       expect(description.length, equals(1));
       expect(description[0], equals('keys: Key A + Key B'));
     });
   });
   group(Shortcuts, () {
+    testWidgets('Default constructed Shortcuts has empty shortcuts', (WidgetTester tester) async {
+      final ShortcutManager manager = ShortcutManager();
+      expect(manager.shortcuts, isNotNull);
+      expect(manager.shortcuts, isEmpty);
+      const Shortcuts shortcuts = Shortcuts(shortcuts: <LogicalKeySet, Intent>{}, child: SizedBox());
+      await tester.pumpWidget(shortcuts);
+      expect(shortcuts.shortcuts, isNotNull);
+      expect(shortcuts.shortcuts, isEmpty);
+    });
     testWidgets('ShortcutManager handles shortcuts', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
@@ -317,21 +323,23 @@ void main() {
     test('Shortcuts diagnostics work.', () {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-      Shortcuts(shortcuts: <LogicalKeySet, Intent>{LogicalKeySet(
-        LogicalKeyboardKey.shift,
-        LogicalKeyboardKey.keyA,
-      ) : const ActivateIntent(),
-        LogicalKeySet(
-        LogicalKeyboardKey.shift,
-        LogicalKeyboardKey.arrowRight,
-      ) : const DirectionalFocusIntent(TraversalDirection.right)}).debugFillProperties(builder);
+      Shortcuts(
+        shortcuts: <LogicalKeySet, Intent>{
+          LogicalKeySet(
+            LogicalKeyboardKey.shift,
+            LogicalKeyboardKey.keyA,
+          ): const ActivateIntent(),
+          LogicalKeySet(
+            LogicalKeyboardKey.shift,
+            LogicalKeyboardKey.arrowRight,
+          ): const DirectionalFocusIntent(TraversalDirection.right)
+        },
+        child: const SizedBox(),
+      ).debugFillProperties(builder);
 
-      final List<String> description = builder.properties
-          .where((DiagnosticsNode node) {
+      final List<String> description = builder.properties.where((DiagnosticsNode node) {
         return !node.isFiltered(DiagnosticLevel.info);
-      })
-          .map((DiagnosticsNode node) => node.toString())
-          .toList();
+      }).map((DiagnosticsNode node) => node.toString()).toList();
 
       expect(description.length, equals(1));
       expect(
@@ -350,14 +358,12 @@ void main() {
             LogicalKeyboardKey.keyB,
           ): const ActivateIntent(),
         },
+        child: const SizedBox(),
       ).debugFillProperties(builder);
 
-      final List<String> description = builder.properties
-          .where((DiagnosticsNode node) {
+      final List<String> description = builder.properties.where((DiagnosticsNode node) {
         return !node.isFiltered(DiagnosticLevel.info);
-      })
-          .map((DiagnosticsNode node) => node.toString())
-          .toList();
+      }).map((DiagnosticsNode node) => node.toString()).toList();
 
       expect(description.length, equals(1));
       expect(description[0], equals('shortcuts: <Debug Label>'));
@@ -373,14 +379,12 @@ void main() {
             LogicalKeyboardKey.keyB,
           ): const ActivateIntent(),
         },
+        child: const SizedBox(),
       ).debugFillProperties(builder);
 
-      final List<String> description = builder.properties
-          .where((DiagnosticsNode node) {
+      final List<String> description = builder.properties.where((DiagnosticsNode node) {
         return !node.isFiltered(DiagnosticLevel.info);
-      })
-          .map((DiagnosticsNode node) => node.toString())
-          .toList();
+      }).map((DiagnosticsNode node) => node.toString()).toList();
 
       expect(description.length, equals(2));
       expect(description[0], equalsIgnoringHashCodes('manager: ShortcutManager#00000(shortcuts: {})'));
