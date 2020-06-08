@@ -579,7 +579,7 @@ void main() {
     expect(formKey.currentState.validate(), isTrue);
   });
 
-  testWidgets('Do not auto-validate before value changes autoValidateMode was set to onUserInteraction', (WidgetTester tester) async {
+  testWidgets('Does not auto-validate before value changes when autoValidateMode is set to onUserInteraction', (WidgetTester tester) async {
     FormFieldState<String> formFieldState;
 
     String errorText(String value) => '$value/error';
