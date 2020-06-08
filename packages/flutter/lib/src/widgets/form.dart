@@ -500,7 +500,7 @@ class FormFieldState<T> extends State<FormField<T>> {
 
 /// Used to configure the auto validation of [TextFormField] and [Fom] widgets.
 enum AutoValidateMode {
-  /// no auto validation will occur.
+  /// No auto validation will occur.
   disabled,
 
   /// Used to auto-validate [Form] and [FormField] even without user interaction.
