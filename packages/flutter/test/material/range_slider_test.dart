@@ -1330,12 +1330,11 @@ void main() {
       valueIndicatorBox,
       paints
         ..path(color: sliderTheme.valueIndicatorColor)
-        ..path(color: sliderTheme.valueIndicatorColor),
+        ..paragraph()
     );
     await gesture.up();
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
-
   });
 
   testWidgets('Range Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
@@ -1424,11 +1423,11 @@ void main() {
     expect(
       valueIndicatorBox,
       isNot(
-         paints
-           ..path(color: fillColor)
-           ..paragraph()
-           ..path(color: fillColor)
-           ..paragraph(),
+       paints
+         ..path(color: fillColor)
+         ..paragraph()
+         ..path(color: fillColor)
+         ..paragraph(),
       ),
     );
 
@@ -1580,8 +1579,7 @@ void main() {
       valueIndicatorBox,
       paints
         ..path(color: sliderTheme.valueIndicatorColor)
-        ..path(color: sliderTheme.overlappingShapeStrokeColor)
-        ..path(color: sliderTheme.valueIndicatorColor),
+        ..paragraph()
     );
 
     await gesture.up();
@@ -1656,8 +1654,7 @@ void main() {
       valueIndicatorBox,
       paints
         ..path(color: sliderTheme.valueIndicatorColor)
-        ..path(color: sliderTheme.overlappingShapeStrokeColor)
-        ..path(color: sliderTheme.valueIndicatorColor),
+        ..paragraph()
     );
 
     await gesture.up();

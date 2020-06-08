@@ -769,16 +769,8 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
-        ..rrect(color: sliderTheme.activeTrackColor)
-        ..rrect(color: sliderTheme.inactiveTrackColor)
-        ..circle(color: sliderTheme.overlayColor)
-        ..circle(color: sliderTheme.activeTickMarkColor)
-        ..circle(color: sliderTheme.activeTickMarkColor)
-        ..circle(color: sliderTheme.inactiveTickMarkColor)
-        ..circle(color: sliderTheme.inactiveTickMarkColor)
-        ..shadow(color: Colors.black)
-        ..circle(color: sliderTheme.thumbColor)
-        ..path(color: sliderTheme.valueIndicatorColor),
+        ..path(color: sliderTheme.valueIndicatorColor)
+        ..paragraph(),
     );
     await gesture.up();
     // Wait for value indicator animation to finish.
@@ -1047,7 +1039,8 @@ void main() {
             Offset(-216.0, -16.0),
           ],
           color: const Color(0xf55f5f5f),
-        ),
+        )
+        ..paragraph(),
     );
 
     await gesture.up();
@@ -1069,7 +1062,8 @@ void main() {
             Offset(-216.0, -16.0),
           ],
           color: const Color(0xf55f5f5f),
-        ),
+        )
+        ..paragraph(),
     );
 
     await gesture.up();
@@ -1095,7 +1089,8 @@ void main() {
             Offset(-216.0, -16.0),
           ],
           color: const Color(0xf55f5f5f),
-        ),
+        )
+        ..paragraph(),
     );
 
     await gesture.up();
@@ -1121,7 +1116,8 @@ void main() {
             Offset(-216.0, -16.0),
           ],
           color: const Color(0xf55f5f5f),
-        ),
+        )
+        ..paragraph(),
     );
 
     await gesture.up();
@@ -1872,8 +1868,8 @@ void main() {
       expect(
         valueIndicatorBox,
         isVisible
-            ? (paints..path(color: theme.valueIndicatorColor))
-            : isNot(paints..path(color: theme.valueIndicatorColor)),
+            ? (paints..path(color: theme.valueIndicatorColor)..paragraph())
+            : isNot(paints..path(color: theme.valueIndicatorColor)..paragraph()),
       );
       await gesture.up();
     }
@@ -2033,9 +2029,9 @@ void main() {
     expect(
       valueIndicatorBox,
       isNot(
-          paints
-            ..path(color: fillColor)
-            ..paragraph(),
+        paints
+          ..path(color: fillColor)
+          ..paragraph(),
       ),
     );
 
