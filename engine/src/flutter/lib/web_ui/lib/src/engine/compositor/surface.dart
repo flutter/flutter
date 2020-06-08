@@ -158,7 +158,7 @@ class SkSurface {
   SkSurface(this._surface, this._glContext);
 
   SkCanvas getCanvas() {
-    final js.JsObject skCanvas = _surface.callMethod('getCanvas');
+    final js.JsObject/*!*/ skCanvas = _surface.callMethod('getCanvas');
     return SkCanvas(skCanvas);
   }
 

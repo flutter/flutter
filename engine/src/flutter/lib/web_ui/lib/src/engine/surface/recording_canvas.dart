@@ -542,12 +542,12 @@ class RecordingCanvas {
   }
 
   void drawVertices(
-      ui.Vertices vertices, ui.BlendMode blendMode, SurfacePaint paint) {
+      SurfaceVertices vertices, ui.BlendMode blendMode, SurfacePaint paint) {
     assert(!_debugRecordingEnded);
     _hasArbitraryPaint = true;
     _didDraw = true;
     final PaintDrawVertices command = PaintDrawVertices(vertices, blendMode, paint.paintData);
-    _growPaintBoundsByPoints(vertices.positions, 0, paint, command);
+    _growPaintBoundsByPoints(vertices._positions, 0, paint, command);
     _commands.add(command);
   }
 

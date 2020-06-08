@@ -7,6 +7,49 @@ part of engine;
 
 _GlRenderer _glRenderer;
 
+class SurfaceVertices implements ui.Vertices {
+  final ui.VertexMode _mode;
+  final Float32List _positions;
+  final Int32List/*?*/ _colors;
+  final Uint16List _indices; // ignore: unused_field
+
+  SurfaceVertices(
+    ui.VertexMode mode,
+    List<ui.Offset> positions, {
+    List<ui.Color> colors,
+    List<int> indices,
+  })  : assert(mode != null),
+        assert(positions != null),
+        _mode = mode,
+        _colors = colors != null ? _int32ListFromColors(colors) : null,
+        _indices = indices != null ? Uint16List.fromList(indices) : null,
+        _positions = offsetListToFloat32List(positions) {
+    initWebGl();
+  }
+
+  SurfaceVertices.raw(
+    ui.VertexMode mode,
+    Float32List positions, {
+    Int32List colors,
+    Uint16List indices,
+  })  : assert(mode != null),
+        assert(positions != null),
+        _mode = mode,
+        _positions = positions,
+        _colors = colors,
+        _indices = indices {
+    initWebGl();
+  }
+
+  static Int32List _int32ListFromColors(List<ui.Color> colors) {
+    Int32List list = Int32List(colors.length);
+    for (int i = 0, len = colors.length; i < len; i++) {
+      list[i] = colors[i].value;
+    }
+    return list;
+  }
+}
+
 void initWebGl() {
   _glRenderer ??= _WebGlRenderer();
 }
@@ -22,7 +65,7 @@ abstract class _GlRenderer {
       int canvasWidthInPixels,
       int canvasHeightInPixels,
       Matrix4 transform,
-      ui.Vertices vertices,
+      SurfaceVertices vertices,
       ui.BlendMode blendMode,
       SurfacePaintData paint);
 
@@ -85,11 +128,11 @@ class _WebGlRenderer implements _GlRenderer {
       int canvasWidthInPixels,
       int canvasHeightInPixels,
       Matrix4 transform,
-      ui.Vertices vertices,
+      SurfaceVertices vertices,
       ui.BlendMode blendMode,
       SurfacePaintData paint) {
     // Compute bounds of vertices.
-    final Float32List positions = vertices.positions;
+    final Float32List positions = vertices._positions;
     ui.Rect bounds = _computeVerticesBounds(positions, transform);
     double minValueX = bounds.left;
     double minValueY = bounds.top;
@@ -152,14 +195,14 @@ class _WebGlRenderer implements _GlRenderer {
     Object colorsBuffer = gl.createBuffer();
     gl.bindArrayBuffer(colorsBuffer);
     // Buffer kBGRA_8888.
-    gl.bufferData(vertices.colors, gl.kStaticDraw);
+    gl.bufferData(vertices._colors, gl.kStaticDraw);
 
     js_util.callMethod(gl.glContext, 'vertexAttribPointer',
         <dynamic>[1, 4, gl.kUnsignedByte, true, 0, 0]);
     gl.enableVertexAttribArray(1);
     gl.clear();
     final int vertexCount = positions.length ~/ 2;
-    gl.drawTriangles(vertexCount, vertices.mode);
+    gl.drawTriangles(vertexCount, vertices._mode);
 
     context.save();
     context.resetTransform();
