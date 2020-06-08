@@ -241,7 +241,7 @@ public class FlutterActivity extends Activity
      *
      * <p>{@code return new NewEngineIntentBuilder(MyFlutterActivity.class); }
      */
-    protected NewEngineIntentBuilder(@NonNull Class<? extends FlutterActivity> activityClass) {
+    public NewEngineIntentBuilder(@NonNull Class<? extends FlutterActivity> activityClass) {
       this.activityClass = activityClass;
     }
 
@@ -314,12 +314,12 @@ public class FlutterActivity extends Activity
      * {@code FlutterActivity}.
      *
      * <p>Subclasses of {@code FlutterActivity} should provide their own static version of {@link
-     * #withNewEngine()}, which returns an instance of {@code CachedEngineIntentBuilder} constructed
-     * with a {@code Class} reference to the {@code FlutterActivity} subclass, e.g.:
+     * #withCachedEngine()}, which returns an instance of {@code CachedEngineIntentBuilder}
+     * constructed with a {@code Class} reference to the {@code FlutterActivity} subclass, e.g.:
      *
      * <p>{@code return new CachedEngineIntentBuilder(MyFlutterActivity.class, engineId); }
      */
-    protected CachedEngineIntentBuilder(
+    public CachedEngineIntentBuilder(
         @NonNull Class<? extends FlutterActivity> activityClass, @NonNull String engineId) {
       this.activityClass = activityClass;
       this.cachedEngineId = engineId;

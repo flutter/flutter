@@ -7,6 +7,7 @@ package io.flutter;
 import io.flutter.embedding.android.FlutterActivityAndFragmentDelegateTest;
 import io.flutter.embedding.android.FlutterActivityTest;
 import io.flutter.embedding.android.FlutterAndroidComponentTest;
+import io.flutter.embedding.android.FlutterFragmentActivityTest;
 import io.flutter.embedding.android.FlutterFragmentTest;
 import io.flutter.embedding.android.FlutterViewTest;
 import io.flutter.embedding.engine.FlutterEngineCacheTest;
@@ -42,6 +43,7 @@ import test.io.flutter.embedding.engine.dart.DartExecutorTest;
   FlutterEngineCacheTest.class,
   FlutterEnginePluginRegistryTest.class,
   FlutterEngineTest.class,
+  FlutterFragmentActivityTest.class,
   FlutterFragmentTest.class,
   FlutterJNITest.class,
   FlutterLaunchTests.class,
