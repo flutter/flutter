@@ -242,7 +242,10 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
   Future<bool> _meetsVersionContraint() async {
     final String rawVersion = (await sdkNameAndVersion).replaceFirst('Microsoft Edge ', '');
     final Version version = Version.parse(rawVersion);
-    return version.major >= _kFirstChromiumEdgeMajorVersion;
+    if (version == null) {
+      return false;
+    }
+    return version.major >= _kFirstChromiumEdgefVersion;
   }
 
   @override
