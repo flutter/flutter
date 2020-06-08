@@ -2512,24 +2512,36 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     // FloatingActionButtonLocation
     // [FloatingActionButtonLocation]s that should adhere to the provided
     // padding.
-    final List<FloatingActionButtonLocation> _maintainLeftPadding = <FloatingActionButtonLocation>[
+    final List<FloatingActionButtonLocation> _maintainLeadPadding = <FloatingActionButtonLocation>[
       FloatingActionButtonLocation.startFloat,
       FloatingActionButtonLocation.miniStartFloat,
     ];
-    final List<FloatingActionButtonLocation> _maintainRightPadding = <FloatingActionButtonLocation>[
+    final List<FloatingActionButtonLocation> _maintainTrailingPadding = <FloatingActionButtonLocation>[
       FloatingActionButtonLocation.endFloat,
       FloatingActionButtonLocation.miniEndFloat,
     ];
     final List<FloatingActionButtonLocation> _maintainBottomPadding = <FloatingActionButtonLocation>[
-      ..._maintainLeftPadding,
-      ..._maintainRightPadding,
+      ..._maintainLeadPadding,
+      ..._maintainTrailingPadding,
       FloatingActionButtonLocation.centerFloat,
       FloatingActionButtonLocation.miniCenterFloat,
     ];
+
+    double left, right;
+
+    switch (textDirection) {
+      case TextDirection.ltr: left = _maintainLeadPadding.contains(_floatingActionButtonLocation) ? null : 0.0;
+        right = _maintainTrailingPadding.contains(_floatingActionButtonLocation) ? null : 0.0;
+        break;
+      case TextDirection.rtl: right = _maintainLeadPadding.contains(_floatingActionButtonLocation) ? null : 0.0;
+        left = _maintainTrailingPadding.contains(_floatingActionButtonLocation) ? null : 0.0;
+        break;
+    }
+
     final EdgeInsets floatingActionButtonPadding = mediaQuery.padding.copyWith(
-      left: _maintainLeftPadding.contains(_floatingActionButtonLocation) ? null : 0.0,
+      left: left,
       top: 0.0,
-      right: _maintainRightPadding.contains(_floatingActionButtonLocation) ? null : 0.0,
+      right: right,
       bottom: _maintainBottomPadding.contains(_floatingActionButtonLocation) ? null : 0.0,
     );
 

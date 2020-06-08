@@ -950,13 +950,13 @@ void main() {
 
     expect(tester.getRect(find.byKey(appBar)), const Rect.fromLTRB(0.0, 0.0, 800.0, 43.0));
     expect(tester.getRect(find.byKey(body)), const Rect.fromLTRB(0.0, 43.0, 800.0, 348.0));
-    expect(tester.getRect(find.byKey(floatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 255.0, 113.0, 332.0)));
+    expect(tester.getRect(find.byKey(floatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(56.0, 195.0, 133.0, 272.0)));
     expect(tester.getRect(find.byKey(persistentFooterButton)),const  Rect.fromLTRB(28.0, 357.0, 128.0, 447.0)); // Note: has 8px each top/bottom padding.
     expect(tester.getRect(find.byKey(drawer)), const Rect.fromLTRB(596.0, 0.0, 800.0, 600.0));
     expect(tester.getRect(find.byKey(bottomNavigationBar)), const Rect.fromLTRB(0.0, 515.0, 800.0, 600.0));
     expect(tester.getRect(find.byKey(insideAppBar)), const Rect.fromLTRB(20.0, 30.0, 750.0, 43.0));
     expect(tester.getRect(find.byKey(insideBody)), const Rect.fromLTRB(20.0, 43.0, 750.0, 348.0));
-    expect(tester.getRect(find.byKey(insideFloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 255.0, 113.0, 332.0)));
+    expect(tester.getRect(find.byKey(insideFloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(56.0, 195.0, 133.0, 272.0)));
     expect(tester.getRect(find.byKey(insidePersistentFooterButton)), const Rect.fromLTRB(28.0, 357.0, 128.0, 447.0));
     expect(tester.getRect(find.byKey(insideDrawer)), const Rect.fromLTRB(596.0, 30.0, 750.0, 540.0));
     expect(tester.getRect(find.byKey(insideBottomNavigationBar)), const Rect.fromLTRB(20.0, 515.0, 750.0, 540.0));
@@ -1045,12 +1045,12 @@ void main() {
 
     expect(tester.getRect(find.byKey(appBar)), const Rect.fromLTRB(0.0, 0.0, 800.0, 43.0));
     expect(tester.getRect(find.byKey(body)), const Rect.fromLTRB(0.0, 43.0, 800.0, 400.0));
-    expect(tester.getRect(find.byKey(floatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 307.0, 113.0, 384.0)));
+    expect(tester.getRect(find.byKey(floatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(56.0, 247.0, 133.0, 324.0)));
     expect(tester.getRect(find.byKey(persistentFooterButton)), const Rect.fromLTRB(28.0, 442.0, 128.0, 532.0)); // Note: has 8px each top/bottom padding.
     expect(tester.getRect(find.byKey(drawer)), const Rect.fromLTRB(596.0, 0.0, 800.0, 600.0));
     expect(tester.getRect(find.byKey(insideAppBar)), const Rect.fromLTRB(20.0, 30.0, 750.0, 43.0));
     expect(tester.getRect(find.byKey(insideBody)), const Rect.fromLTRB(20.0, 43.0, 750.0, 400.0));
-    expect(tester.getRect(find.byKey(insideFloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 307.0, 113.0, 384.0)));
+    expect(tester.getRect(find.byKey(insideFloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(56.0, 247.0, 133.0, 324.0)));
     expect(tester.getRect(find.byKey(insidePersistentFooterButton)), const Rect.fromLTRB(28.0, 442.0, 128.0, 532.0));
     expect(tester.getRect(find.byKey(insideDrawer)), const Rect.fromLTRB(596.0, 30.0, 750.0, 540.0));
   });
@@ -2022,6 +2022,259 @@ void main() {
         '     Builder\n'
       );
       await tester.pumpAndSettle();
+    });
+  });
+
+  group('Applies padding based on FloatingActionButtonLocations', () {
+    Widget _buildTest(
+      FloatingActionButtonLocation location,
+      Key key, {
+        bool mini = false,
+      }) {
+      return MaterialApp(home: MediaQuery(
+        data: const MediaQueryData(padding: EdgeInsets.all(50.0)),
+        child: Scaffold(
+          appBar: AppBar(),
+          body: SafeArea(child: Container()),
+          floatingActionButtonLocation: location,
+          floatingActionButton: FloatingActionButton(
+            key: key,
+            mini: mini,
+            onPressed: () {},
+            child: const Placeholder(),
+          ),
+        )
+      )
+      );
+    }
+
+    group('receives padding', () {
+      testWidgets('startFloat', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.startFloat,
+          floatingActionButton,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(116.0, 478.0, 172.0, 534.0)),
+        );
+      });
+
+      testWidgets('miniStartFloat', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniStartFloat,
+          floatingActionButton,
+          mini: true,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(112.0, 490.0, 160.0, 538.0)),
+        );
+      });
+
+      testWidgets('centerFloat', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.centerFloat,
+          floatingActionButton,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(372.0, 478.0, 428.0, 534.0)),
+        );
+      });
+
+      testWidgets('miniCenterFloat', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniCenterFloat,
+          floatingActionButton,
+          mini: true,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(376.0, 490.0, 424.0, 538.0)),
+        );
+      });
+
+      testWidgets('endFloat', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.endFloat,
+          floatingActionButton,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(628.0, 478.0, 684.0, 534.0)),
+        );
+      });
+
+      testWidgets('miniEndFloat', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniEndFloat,
+          floatingActionButton,
+          mini: true,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(640.0, 490.0, 688.0, 538.0)),
+        );
+      });
+    });
+
+    group('Does not receive padding', () {
+      testWidgets('startTop', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.startTop,
+          floatingActionButton,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 78.0, 122.0, 134.0)),
+        );
+      });
+
+      testWidgets('miniStartTop', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniStartTop,
+          floatingActionButton,
+          mini: true,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(62.0, 82.0, 110.0, 130.0)),
+        );
+      });
+
+      testWidgets('centerTop', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.centerTop,
+          floatingActionButton,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(372.0, 78.0, 428.0, 134.0)),
+        );
+      });
+
+      testWidgets('miniCenterTop', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniCenterTop,
+          floatingActionButton,
+          mini: true,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(376.0, 82.0, 424.0, 130.0)),
+        );
+      });
+
+      testWidgets('endTop', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.endTop,
+          floatingActionButton,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(678.0, 78.0, 734.0, 134.0)),
+        );
+      });
+
+      testWidgets('miniEndTop', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniEndTop,
+          floatingActionButton,
+          mini: true,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(690.0, 82.0, 738.0, 130.0)),
+        );
+      });
+
+      testWidgets('startDocked', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.startDocked,
+          floatingActionButton,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 544.0, 122.0, 600.0)),
+        );
+      });
+
+      testWidgets('miniStartDocked', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniStartDocked,
+          floatingActionButton,
+          mini: true,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(62.0, 552.0, 110.0, 600.0)),
+        );
+      });
+
+      testWidgets('centerDocked', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.centerDocked,
+          floatingActionButton,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(372.0, 544.0, 428.0, 600.0)),
+        );
+      });
+
+      testWidgets('miniCenterDocked', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniCenterDocked,
+          floatingActionButton,
+          mini: true,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(376.0, 552.0, 424.0, 600.0)),
+        );
+      });
+
+      testWidgets('endDocked', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.endDocked,
+          floatingActionButton,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(678.0, 544.0, 734.0, 600.0)),
+        );
+      });
+
+      testWidgets('miniEndDocked', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniEndDocked,
+          floatingActionButton,
+          mini: true,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(690.0, 552.0, 738.0, 600.0)),
+        );
+      });
     });
   });
 }
