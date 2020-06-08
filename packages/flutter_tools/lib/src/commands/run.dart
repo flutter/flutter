@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 
+import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -67,6 +68,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     usesIsolateFilterOption(hide: !verboseHelp);
     addNullSafetyModeOptions();
+    usesDeviceUserOption();
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -221,6 +223,8 @@ class RunCommand extends RunCommandBase {
 
   List<Device> devices;
 
+  String get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
+
   @override
   Future<String> get usagePath async {
     final String command = await super.usagePath;
@@ -335,6 +339,13 @@ class RunCommand extends RunCommandBase {
     }
     if (deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit('Using -d all with --use-application-binary is not supported');
+    }
+
+    if (userIdentifier != null
+      && devices.every((Device device) => device is! AndroidDevice)) {
+      throwToolExit(
+        '--${FlutterOptions.kDeviceUser} is only supported for Android. At least one Android device is required.'
+      );
     }
   }
 
@@ -491,6 +502,7 @@ class RunCommand extends RunCommandBase {
           experimentalFlags: expFlags,
           target: stringArg('target'),
           buildInfo: getBuildInfo(),
+          userIdentifier: userIdentifier,
         ),
     ];
     // Only support "web mode" with a single web device due to resident runner

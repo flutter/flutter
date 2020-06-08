@@ -389,10 +389,21 @@ class AndroidDevice extends Device {
   String get name => modelID;
 
   @override
-  Future<bool> isAppInstalled(AndroidApk app) async {
+  Future<bool> isAppInstalled(
+    AndroidApk app, {
+    String userIdentifier,
+  }) async {
     // This call takes 400ms - 600ms.
     try {
-      final RunResult listOut = await runAdbCheckedAsync(<String>['shell', 'pm', 'list', 'packages', app.id]);
+      final RunResult listOut = await runAdbCheckedAsync(<String>[
+        'shell',
+        'pm',
+        'list',
+        'packages',
+        if (userIdentifier != null)
+          ...<String>['--user', userIdentifier],
+        app.id
+      ]);
       return LineSplitter.split(listOut.stdout).contains('package:${app.id}');
     } on Exception catch (error) {
       _logger.printTrace('$error');
@@ -407,7 +418,10 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<bool> installApp(AndroidApk app) async {
+  Future<bool> installApp(
+    AndroidApk app, {
+    String userIdentifier,
+  }) async {
     if (!app.file.existsSync()) {
       _logger.printError('"${_fileSystem.path.relative(app.file.path)}" does not exist.');
       return false;
@@ -423,7 +437,14 @@ class AndroidDevice extends Device {
       timeout: _timeoutConfiguration.slowOperation,
     );
     final RunResult installResult = await _processUtils.run(
-      adbCommandForDevice(<String>['install', '-t', '-r', app.file.path]));
+      adbCommandForDevice(<String>[
+        'install',
+        '-t',
+        '-r',
+        if (userIdentifier != null)
+          ...<String>['--user', userIdentifier],
+        app.file.path
+      ]));
     status.stop();
     // Some versions of adb exit with exit code 0 even on failure :(
     // Parsing the output to check for failures.
@@ -434,8 +455,12 @@ class AndroidDevice extends Device {
       return false;
     }
     if (installResult.exitCode != 0) {
-      _logger.printError('Error: ADB exited with exit code ${installResult.exitCode}');
-      _logger.printError('$installResult');
+      if (installResult.stderr.contains('Bad user number')) {
+        _logger.printError('Error: User "$userIdentifier" not found. Run "adb shell pm list users" to see list of available identifiers.');
+      } else {
+        _logger.printError('Error: ADB exited with exit code ${installResult.exitCode}');
+        _logger.printError('$installResult');
+      }
       return false;
     }
     try {
@@ -450,7 +475,10 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<bool> uninstallApp(AndroidApk app) async {
+  Future<bool> uninstallApp(
+    AndroidApk app, {
+    String userIdentifier,
+  }) async {
     if (!await _checkForSupportedAdbVersion() ||
         !await _checkForSupportedAndroidVersion()) {
       return false;
@@ -459,7 +487,11 @@ class AndroidDevice extends Device {
     String uninstallOut;
     try {
       final RunResult uninstallResult = await _processUtils.run(
-        adbCommandForDevice(<String>['uninstall', app.id]),
+        adbCommandForDevice(<String>[
+          'uninstall',
+          if (userIdentifier != null)
+            ...<String>['--user', userIdentifier],
+          app.id]),
         throwOnError: true,
       );
       uninstallOut = uninstallResult.stdout;
@@ -477,8 +509,8 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  Future<bool> _installLatestApp(AndroidApk package) async {
-    final bool wasInstalled = await isAppInstalled(package);
+  Future<bool> _installLatestApp(AndroidApk package, String userIdentifier) async {
+    final bool wasInstalled = await isAppInstalled(package, userIdentifier: userIdentifier);
     if (wasInstalled) {
       if (await isLatestBuildInstalled(package)) {
         _logger.printTrace('Latest build already installed.');
@@ -486,15 +518,15 @@ class AndroidDevice extends Device {
       }
     }
     _logger.printTrace('Installing APK.');
-    if (!await installApp(package)) {
+    if (!await installApp(package, userIdentifier: userIdentifier)) {
       _logger.printTrace('Warning: Failed to install APK.');
       if (wasInstalled) {
         _logger.printStatus('Uninstalling old version...');
-        if (!await uninstallApp(package)) {
+        if (!await uninstallApp(package, userIdentifier: userIdentifier)) {
           _logger.printError('Error: Uninstalling old version failed.');
           return false;
         }
-        if (!await installApp(package)) {
+        if (!await installApp(package, userIdentifier: userIdentifier)) {
           _logger.printError('Error: Failed to install APK again.');
           return false;
         }
@@ -516,6 +548,7 @@ class AndroidDevice extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
+    String userIdentifier,
   }) async {
     if (!await _checkForSupportedAdbVersion() ||
         !await _checkForSupportedAndroidVersion()) {
@@ -570,9 +603,9 @@ class AndroidDevice extends Device {
     }
 
     _logger.printTrace("Stopping app '${package.name}' on $name.");
-    await stopApp(package);
+    await stopApp(package, userIdentifier: userIdentifier);
 
-    if (!await _installLatestApp(package)) {
+    if (!await _installLatestApp(package, userIdentifier)) {
       return LaunchResult.failed();
     }
 
@@ -636,6 +669,8 @@ class AndroidDevice extends Device {
           ...<String>['--ez', 'use-test-fonts', 'true'],
         if (debuggingOptions.verboseSystemLogs)
           ...<String>['--ez', 'verbose-logging', 'true'],
+        if (userIdentifier != null)
+          ...<String>['--user', userIdentifier],
       ],
       package.launchActivity,
     ];
@@ -687,11 +722,21 @@ class AndroidDevice extends Device {
   bool get supportsFastStart => true;
 
   @override
-  Future<bool> stopApp(AndroidApk app) {
+  Future<bool> stopApp(
+    AndroidApk app, {
+    String userIdentifier,
+  }) {
     if (app == null) {
       return Future<bool>.value(false);
     }
-    final List<String> command = adbCommandForDevice(<String>['shell', 'am', 'force-stop', app.id]);
+    final List<String> command = adbCommandForDevice(<String>[
+      'shell',
+      'am',
+      'force-stop',
+      if (userIdentifier != null)
+        ...<String>['--user', userIdentifier],
+      app.id,
+    ]);
     return _processUtils.stream(command).then<bool>(
         (int exitCode) => exitCode == 0 || allowHeapCorruptionOnWindows(exitCode, _platform));
   }

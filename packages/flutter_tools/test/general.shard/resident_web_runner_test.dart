@@ -1080,7 +1080,7 @@ void main() {
     ]);
     _setupMocks();
     bool debugClosed = false;
-    when(mockDevice.stopApp(any)).thenAnswer((Invocation invocation) async {
+    when(mockDevice.stopApp(any, userIdentifier: anyNamed('userIdentifier'))).thenAnswer((Invocation invocation) async {
       if (debugClosed) {
         throw StateError('debug connection closed twice');
       }

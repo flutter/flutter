@@ -326,16 +326,29 @@ void main() {
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).deleteSync();
 
       final AttachCommand command = AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
-      await createTestCommandRunner(command).run(<String>['attach', '-t', foo.path, '-v']);
+      await createTestCommandRunner(command).run(<String>[
+        'attach',
+        '-t',
+        foo.path,
+        '-v',
+        '--device-user',
+        '10',
+      ]);
+      final VerificationResult verificationResult = verify(
+        mockHotRunnerFactory.build(
+          captureAny,
+          target: foo.path,
+          debuggingOptions: anyNamed('debuggingOptions'),
+          packagesFilePath: anyNamed('packagesFilePath'),
+          flutterProject: anyNamed('flutterProject'),
+          ipv6: false,
+        ),
+      )..called(1);
 
-      verify(mockHotRunnerFactory.build(
-        any,
-        target: foo.path,
-        debuggingOptions: anyNamed('debuggingOptions'),
-        packagesFilePath: anyNamed('packagesFilePath'),
-        flutterProject: anyNamed('flutterProject'),
-        ipv6: false,
-      )).called(1);
+      final List<FlutterDevice> flutterDevices = verificationResult.captured.first as List<FlutterDevice>;
+      expect(flutterDevices, hasLength(1));
+      final FlutterDevice flutterDevice = flutterDevices.first;
+      expect(flutterDevice.userIdentifier, '10');
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -533,6 +546,19 @@ void main() {
         throwsToolExit(),
       );
       expect(testLogger.statusText, containsIgnoringWhitespace('No supported devices connected'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('fails when targeted device is not Android with --device-user', () async {
+      final MockIOSDevice device = MockIOSDevice();
+      testDeviceManager.addDevice(device);
+      expect(createTestCommandRunner(AttachCommand()).run(<String>[
+        'attach',
+        '--device-user',
+        '10',
+      ]), throwsToolExit(message: '--device-user is only supported for Android'));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),

@@ -203,6 +203,38 @@ void main() {
         ProcessManager: () => mockProcessManager,
       });
 
+      testUsingContext('fails when targeted device is not Android with --device-user', () async {
+        globals.fs.file('pubspec.yaml').createSync();
+        globals.fs.file('.packages').writeAsStringSync('\n');
+        globals.fs.file('lib/main.dart').createSync(recursive: true);
+        final FakeDevice device = FakeDevice(isLocalEmulator: true);
+        when(deviceManager.getAllConnectedDevices()).thenAnswer((Invocation invocation) async {
+          return <Device>[device];
+        });
+        when(deviceManager.getDevices()).thenAnswer((Invocation invocation) async {
+          return <Device>[device];
+        });
+        when(deviceManager.findTargetDevices(any)).thenAnswer((Invocation invocation) async {
+          return <Device>[device];
+        });
+        when(deviceManager.hasSpecifiedAllDevices).thenReturn(false);
+        when(deviceManager.deviceDiscoverers).thenReturn(<DeviceDiscovery>[]);
+
+        final RunCommand command = RunCommand();
+        applyMocksToCommand(command);
+        await expectLater(createTestCommandRunner(command).run(<String>[
+          'run',
+          '--no-pub',
+          '--device-user',
+          '10',
+        ]), throwsToolExit(message: '--device-user is only supported for Android. At least one Android device is required.'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => MockDeviceManager(),
+        Stdio: () => mockStdio,
+      });
+
       testUsingContext('shows unsupported devices when no supported devices are found',  () async {
         final RunCommand command = RunCommand();
         applyMocksToCommand(command);
@@ -320,6 +352,7 @@ void main() {
           route: anyNamed('route'),
           prebuiltApplication: anyNamed('prebuiltApplication'),
           ipv6: anyNamed('ipv6'),
+          userIdentifier: anyNamed('userIdentifier'),
         )).thenAnswer((Invocation invocation) => Future<LaunchResult>.value(LaunchResult.failed()));
 
         when(mockArtifacts.getArtifactPath(
@@ -690,6 +723,7 @@ class FakeDevice extends Fake implements Device {
     bool prebuiltApplication = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
+    String userIdentifier,
   }) async {
     final String dartFlags = debuggingOptions.dartFlags;
     // In release mode, --dart-flags should be set to the empty string and
