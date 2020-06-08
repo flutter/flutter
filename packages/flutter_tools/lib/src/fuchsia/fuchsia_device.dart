@@ -237,16 +237,25 @@ class FuchsiaDevice extends Device {
   bool get supportsStartPaused => false;
 
   @override
-  Future<bool> isAppInstalled(ApplicationPackage app) async => false;
+  Future<bool> isAppInstalled(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => false;
 
   @override
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
-  Future<bool> installApp(ApplicationPackage app) => Future<bool>.value(false);
+  Future<bool> installApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) => Future<bool>.value(false);
 
   @override
-  Future<bool> uninstallApp(ApplicationPackage app) async => false;
+  Future<bool> uninstallApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => false;
 
   @override
   bool isSupported() => true;
@@ -263,6 +272,7 @@ class FuchsiaDevice extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
+    String userIdentifier,
   }) async {
     if (!prebuiltApplication) {
       await buildFuchsia(fuchsiaProject: FlutterProject.current().fuchsia,
@@ -434,7 +444,10 @@ class FuchsiaDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(covariant FuchsiaApp app) async {
+  Future<bool> stopApp(
+    covariant FuchsiaApp app, {
+    String userIdentifier,
+  }) async {
     final int appKey = await FuchsiaTilesCtl.findAppKey(this, app.id);
     if (appKey != -1) {
       if (!await fuchsiaDeviceTools.tilesCtl.remove(this, appKey)) {
