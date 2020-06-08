@@ -15,6 +15,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_bar.dart';
+import 'button_theme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'dialog_theme.dart';
@@ -518,7 +519,7 @@ class AlertDialog extends StatelessWidget {
           left: defaultTitlePadding.left * paddingScaleFactor,
           right: defaultTitlePadding.right * paddingScaleFactor,
           top: defaultTitlePadding.top * paddingScaleFactor,
-          bottom: actions == null && content == null ? defaultTitlePadding.bottom * paddingScaleFactor : defaultTitlePadding.bottom,
+          bottom: content == null ? defaultTitlePadding.bottom * paddingScaleFactor : defaultTitlePadding.bottom,
         ),
         child: DefaultTextStyle(
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6,
@@ -538,7 +539,7 @@ class AlertDialog extends StatelessWidget {
           left: defaultContentPadding.left * paddingScaleFactor,
           right: defaultContentPadding.right * paddingScaleFactor,
           top: title == null ? defaultContentPadding.top * paddingScaleFactor : defaultContentPadding.top,
-          bottom: actions == null ? defaultContentPadding.bottom * paddingScaleFactor : defaultContentPadding.bottom,
+          bottom: defaultContentPadding.bottom,
         ),
         child: DefaultTextStyle(
           style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subtitle1,
@@ -547,24 +548,13 @@ class AlertDialog extends StatelessWidget {
       );
     }
 
+
     if (actions != null) {
-      final EdgeInsets defaultActionsPadding = actionsPadding.resolve(textDirection);
-      actionsWidget = Padding(
-        padding: EdgeInsets.only(
-          left: defaultActionsPadding.left * paddingScaleFactor,
-          right: defaultActionsPadding.right * paddingScaleFactor,
-          top: title == null && content == null ? defaultActionsPadding.top * paddingScaleFactor : defaultActionsPadding.top,
-          bottom: defaultActionsPadding.bottom * paddingScaleFactor,
-        ),
-        child: DefaultTextStyle.merge(
-          textAlign: TextAlign.end,
-          child: ButtonBar(
-            buttonPadding: buttonPadding,
-            overflowDirection: actionsOverflowDirection,
-            overflowButtonSpacing: actionsOverflowButtonSpacing,
-            children: actions.map((Widget action) => DefaultTextStyle.merge(textAlign: TextAlign.end, child: action)).toList(),
-          ),
-        ),
+      actionsWidget = ButtonBar(
+        buttonPadding: buttonPadding,
+        overflowDirection: actionsOverflowDirection,
+        overflowButtonSpacing: actionsOverflowButtonSpacing,
+        children: actions,
       );
     }
 
