@@ -571,15 +571,10 @@ void main() {
 
           final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ReorderableListView)));
           await gesture.moveBy(_kGestureOffset);
-          // Move back to original position.
+          // Move back to position before offset.
           await gesture.moveBy(Offset(0, -_kGestureOffset.dy));
           await tester.pump();
-          await tester.pump(const Duration(milliseconds: 500));
-
-          final TestGesture overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ReorderableListView)));
-          await overscrollGesture.moveBy(_kGestureOffset);
-          await tester.pump();
-          await tester.pump(const Duration(milliseconds: 500));
+          await tester.pumpAndSettle();
 
           ScrollPhysics physics;
           await tester.pumpWidget(
@@ -627,6 +622,7 @@ void main() {
             onReorder: (int oldIndex, int newIndex) {},
           );
 
+          // Physics is not set to always scroll - onNotification should not be called
           await tester.pumpWidget(
             MaterialApp(
               home: Directionality(
@@ -641,6 +637,7 @@ void main() {
           await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 100.0));
           expect(scrolled, isFalse);
 
+          // Physics is set to always scroll - onNotification should be called
           await tester.pumpWidget(
             MaterialApp(
               home: Directionality(
@@ -655,27 +652,6 @@ void main() {
 
           await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 100.0));
           expect(scrolled, isTrue);
-        });
-
-        testWidgets('physics:ScrollPhysics displayed no overscrolling in ReorderableListView', (WidgetTester tester) async {
-          bool wasOverscrolled = false;
-          await tester.pumpWidget(
-            MaterialApp(
-              home: Directionality(
-              textDirection: TextDirection.ltr,
-              child: NotificationListener<OverscrollNotification>(
-                onNotification: (OverscrollNotification message) { wasOverscrolled = true; return false; },
-                child: ReorderableListView(
-                  physics: const ScrollPhysics(),
-                  children: const <Widget>[],
-                  onReorder: (int oldIndex, int newIndex) {},
-                ),
-              ),
-            ),
-            )
-          );
-          await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 100.0));
-          expect(wasOverscrolled, isFalse);
         });
       });
     });
