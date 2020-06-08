@@ -26,13 +26,6 @@ abstract class IOSMigrator {
   }
 
   @protected
-  String migrateFileContents(String fileContents) {
-    return fileContents;
-  }
-
-  @protected
-  /// Calls [migrateLine] per line, then [migrateFileContents]
-  /// including the line migrations.
   void processFileLines(File file) {
     final List<String> lines = file.readAsLinesSync();
 
@@ -58,16 +51,9 @@ abstract class IOSMigrator {
       newProjectContents.writeln(newProjectLine);
     }
 
-    final String projectContentsWithMigratedLines = newProjectContents.toString();
-    final String projectContentsWithMigratedContents = migrateFileContents(projectContentsWithMigratedLines);
-    if (projectContentsWithMigratedLines != projectContentsWithMigratedContents) {
-      logger.printTrace('Migrating $basename contents');
-      migrationRequired = true;
-    }
-
     if (migrationRequired) {
       logger.printStatus('Upgrading $basename');
-      file.writeAsStringSync(projectContentsWithMigratedContents);
+      file.writeAsStringSync(newProjectContents.toString());
     }
   }
 }
