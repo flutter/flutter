@@ -53,7 +53,7 @@ class BuildWebCommand extends BuildSubCommand {
   bool get hidden => !featureFlags.isWebEnabled;
 
   @override
-  final String description = 'build a web application bundle.';
+  final String description = 'Build a web application bundle.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {

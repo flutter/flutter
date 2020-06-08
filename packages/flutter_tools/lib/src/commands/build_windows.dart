@@ -45,7 +45,7 @@ class BuildWindowsCommand extends BuildSubCommand {
   };
 
   @override
-  String get description => 'build the desktop Windows target.';
+  String get description => 'Build a Windows desktop application.';
 
   @visibleForTesting
   VisualStudio visualStudioOverride;
