@@ -153,6 +153,61 @@ static gboolean im_delete_surrounding_cb(FlTextInputPlugin* self,
   return TRUE;
 }
 
+// Called when the input method client is set up.
+static FlMethodResponse* set_client(FlTextInputPlugin* self, FlValue* args) {
+  if (fl_value_get_type(args) != FL_VALUE_TYPE_LIST ||
+      fl_value_get_length(args) < 2) {
+    return FL_METHOD_RESPONSE(fl_method_error_response_new(
+        "Bad Arguments", "Expected 2-element list", nullptr));
+  }
+
+  self->client_id = fl_value_get_int(fl_value_get_list_value(args, 0));
+  FlValue* config_value = fl_value_get_list_value(args, 1);
+  g_free(self->input_action);
+  FlValue* input_action_value =
+      fl_value_lookup_string(config_value, kInputActionKey);
+  if (fl_value_get_type(input_action_value) == FL_VALUE_TYPE_STRING)
+    self->input_action = g_strdup(fl_value_get_string(input_action_value));
+
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+}
+
+// Shows the input method.
+static FlMethodResponse* show(FlTextInputPlugin* self) {
+  gtk_im_context_focus_in(self->im_context);
+
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+}
+
+// Updates the editing state from Flutter.
+static FlMethodResponse* set_editing_state(FlTextInputPlugin* self,
+                                           FlValue* args) {
+  const gchar* text =
+      fl_value_get_string(fl_value_lookup_string(args, kTextKey));
+  int64_t selection_base =
+      fl_value_get_int(fl_value_lookup_string(args, kSelectionBaseKey));
+  int64_t selection_extent =
+      fl_value_get_int(fl_value_lookup_string(args, kSelectionExtentKey));
+
+  self->text_model->SetEditingState(selection_base, selection_extent, text);
+
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+}
+
+// Called when the input method client is complete.
+static FlMethodResponse* clear_client(FlTextInputPlugin* self) {
+  self->client_id = kClientIdUnset;
+
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+}
+
+// Hides the input method.
+static FlMethodResponse* hide(FlTextInputPlugin* self) {
+  gtk_im_context_focus_out(self->im_context);
+
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+}
+
 // Called when a method call is received from Flutter.
 static void method_call_cb(FlMethodChannel* channel,
                            FlMethodCall* method_call,
@@ -162,38 +217,23 @@ static void method_call_cb(FlMethodChannel* channel,
   const gchar* method = fl_method_call_get_name(method_call);
   FlValue* args = fl_method_call_get_args(method_call);
 
-  if (strcmp(method, kSetClientMethod) == 0) {
-    self->client_id = fl_value_get_int(fl_value_get_list_value(args, 0));
-    FlValue* config_value = fl_value_get_list_value(args, 1);
-    g_free(self->input_action);
-    FlValue* input_action_value =
-        fl_value_lookup_string(config_value, kInputActionKey);
-    if (fl_value_get_type(input_action_value) == FL_VALUE_TYPE_STRING)
-      self->input_action = g_strdup(fl_value_get_string(input_action_value));
-    fl_method_call_respond_success(method_call, nullptr, nullptr);
-  } else if (strcmp(method, kShowMethod) == 0) {
-    gtk_im_context_focus_in(self->im_context);
-    fl_method_call_respond_success(method_call, nullptr, nullptr);
-  } else if (strcmp(method, kSetEditingStateMethod) == 0) {
-    const gchar* text =
-        fl_value_get_string(fl_value_lookup_string(args, kTextKey));
-    int64_t selection_base =
-        fl_value_get_int(fl_value_lookup_string(args, kSelectionBaseKey));
-    int64_t selection_extent =
-        fl_value_get_int(fl_value_lookup_string(args, kSelectionExtentKey));
+  g_autoptr(FlMethodResponse) response = nullptr;
+  if (strcmp(method, kSetClientMethod) == 0)
+    response = set_client(self, args);
+  else if (strcmp(method, kShowMethod) == 0)
+    response = show(self);
+  else if (strcmp(method, kSetEditingStateMethod) == 0)
+    response = set_editing_state(self, args);
+  else if (strcmp(method, kClearClientMethod) == 0)
+    response = clear_client(self);
+  else if (strcmp(method, kHideMethod) == 0)
+    response = hide(self);
+  else
+    response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
 
-    self->text_model->SetEditingState(selection_base, selection_extent, text);
-
-    fl_method_call_respond_success(method_call, nullptr, nullptr);
-  } else if (strcmp(method, kClearClientMethod) == 0) {
-    self->client_id = kClientIdUnset;
-    fl_method_call_respond_success(method_call, nullptr, nullptr);
-  } else if (strcmp(method, kHideMethod) == 0) {
-    gtk_im_context_focus_out(self->im_context);
-    fl_method_call_respond_success(method_call, nullptr, nullptr);
-  } else {
-    fl_method_call_respond_not_implemented(method_call, nullptr);
-  }
+  g_autoptr(GError) error = nullptr;
+  if (!fl_method_call_respond(method_call, response, &error))
+    g_warning("Failed to send method call response: %s", error->message);
 }
 
 static void fl_text_input_plugin_dispose(GObject* object) {
