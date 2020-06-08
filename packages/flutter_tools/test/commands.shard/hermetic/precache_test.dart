@@ -24,7 +24,7 @@ void main() {
   setUp(() {
     cache = MockCache();
     // Release lock between test cases.
-    Cache.releaseLockEarly();
+    Cache.releaseLock();
 
     when(cache.isUpToDate()).thenReturn(false);
     when(cache.updateAll(any)).thenAnswer((Invocation invocation) {
