@@ -81,12 +81,16 @@ class ScaffoldPrelayoutGeometry {
     @required this.scaffoldSize,
     @required this.snackBarSize,
     @required this.textDirection,
+    this.floatingActionButtonPadding,
   });
 
   /// The [Size] of [Scaffold.floatingActionButton].
   ///
   /// If [Scaffold.floatingActionButton] is null, this will be [Size.zero].
   final Size floatingActionButtonSize;
+
+  /// Doc
+  final EdgeInsets floatingActionButtonPadding;
 
   /// The [Size] of the [Scaffold]'s [BottomSheet].
   ///
@@ -392,6 +396,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // for floating action button
     @required this.previousFloatingActionButtonLocation,
     @required this.currentFloatingActionButtonLocation,
+    this.floatingActionButtonPadding,
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
     @required this.isSnackBarFloating,
@@ -414,6 +419,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final FloatingActionButtonLocation previousFloatingActionButtonLocation;
   final FloatingActionButtonLocation currentFloatingActionButtonLocation;
   final double floatingActionButtonMoveAnimationProgress;
+  final EdgeInsets floatingActionButtonPadding;
   final FloatingActionButtonAnimator floatingActionButtonMotionAnimator;
 
   final bool isSnackBarFloating;
@@ -534,7 +540,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         scaffoldSize: size,
         snackBarSize: snackBarSize,
         textDirection: textDirection,
+        floatingActionButtonPadding: floatingActionButtonPadding,
       );
+
       final Offset currentFabOffset = currentFloatingActionButtonLocation.getOffset(currentGeometry);
       final Offset previousFabOffset = previousFloatingActionButtonLocation.getOffset(currentGeometry);
       final Offset fabOffset = floatingActionButtonMotionAnimator.getOffset(
@@ -542,6 +550,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         end: currentFabOffset,
         progress: floatingActionButtonMoveAnimationProgress,
       );
+
       positionChild(_ScaffoldSlot.floatingActionButton, fabOffset);
       floatingActionButtonRect = fabOffset & fabSize;
     }
@@ -2499,6 +2508,31 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     // extendBody locked when keyboard is open
     final bool _extendBody = minInsets.bottom <= 0 && widget.extendBody;
 
+    // FloatingActionButtons that 'float' should adhere to padding based on the
+    // FloatingActionButtonLocation
+    // [FloatingActionButtonLocation]s that should adhere to the provided
+    // padding.
+    final List<FloatingActionButtonLocation> _maintainLeftPadding = <FloatingActionButtonLocation>[
+      FloatingActionButtonLocation.startFloat,
+      FloatingActionButtonLocation.miniStartFloat,
+    ];
+    final List<FloatingActionButtonLocation> _maintainRightPadding = <FloatingActionButtonLocation>[
+      FloatingActionButtonLocation.endFloat,
+      FloatingActionButtonLocation.miniEndFloat,
+    ];
+    final List<FloatingActionButtonLocation> _maintainBottomPadding = <FloatingActionButtonLocation>[
+      ..._maintainLeftPadding,
+      ..._maintainRightPadding,
+      FloatingActionButtonLocation.centerFloat,
+      FloatingActionButtonLocation.miniCenterFloat,
+    ];
+    final EdgeInsets floatingActionButtonPadding = mediaQuery.padding.copyWith(
+      left: _maintainLeftPadding.contains(_floatingActionButtonLocation) ? null : 0.0,
+      top: 0.0,
+      right: _maintainRightPadding.contains(_floatingActionButtonLocation) ? null : 0.0,
+      bottom: _maintainBottomPadding.contains(_floatingActionButtonLocation) ? null : 0.0,
+    );
+
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
       geometryNotifier: _geometryNotifier,
@@ -2520,6 +2554,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
                 isSnackBarFloating: isSnackBarFloating,
+                floatingActionButtonPadding: floatingActionButtonPadding,
               ),
             );
           }),
