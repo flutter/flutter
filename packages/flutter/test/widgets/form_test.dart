@@ -724,7 +724,7 @@ void main() {
     }
 
     // The issue only happens on the second build so we
-    // need to rebuild the three twice.
+    // need to rebuild the tree twice.
     await tester.pumpWidget(builder());
     await tester.pumpWidget(builder());
 
