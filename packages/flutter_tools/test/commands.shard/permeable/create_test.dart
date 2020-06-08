@@ -830,8 +830,12 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          'flutter',
-          <String>['format', file.path],
+          globals.fs.path.join(
+            globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+            'bin',
+            'dartfmt',
+          ),
+          <String>[file.path],
           workingDirectory: projectDir.path,
         );
         final String formatted = await process.stdout.transform(utf8.decoder).join();
@@ -928,8 +932,12 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          'flutter',
-          <String>['format', file.path],
+          globals.fs.path.join(
+            globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+            'bin',
+            'dartfmt',
+          ),
+          <String>[file.path],
           workingDirectory: projectDir.path,
         );
         final String formatted = await process.stdout.transform(utf8.decoder).join();
