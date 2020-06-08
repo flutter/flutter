@@ -69,7 +69,7 @@ or
       if (extraGenSnapshotOptions != null)
         '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
       if (extraFrontEndOptions != null)
-        '-dExtraFrontEndOptions=$extraFrontEndOptions',
+        '--ExtraFrontEndOptions=$extraFrontEndOptions',
       target,
     ],
   );

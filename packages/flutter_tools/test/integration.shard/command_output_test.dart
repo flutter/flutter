@@ -9,16 +9,30 @@ import 'package:process/process.dart';
 import '../src/common.dart';
 
 void main() {
-  test('All development tools are hidden', () async {
-      final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-      final ProcessResult result = await const LocalProcessManager().run(<String>[
-        flutterBin,
-        '-h',
-        '-v',
-      ]);
+  test('All development tools are hidden and help text is not verbose', () async {
+    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await const LocalProcessManager().run(<String>[
+      flutterBin,
+      '-h',
+      '-v',
+    ]);
 
-      expect(result.stdout, isNot(contains('ide-config')));
-      expect(result.stdout, isNot(contains('update-packages')));
-      expect(result.stdout, isNot(contains('inject-plugins')));
+    expect(result.stdout, isNot(contains('ide-config')));
+    expect(result.stdout, isNot(contains('update-packages')));
+    expect(result.stdout, isNot(contains('inject-plugins')));
+    // Only printed by verbose tool.
+    expect(result.stdout, isNot(contains('exiting with code 0')));
+  });
+
+  test('flutter doctor is not verbose', () async {
+    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await const LocalProcessManager().run(<String>[
+      flutterBin,
+      'doctor',
+      '-v',
+    ]);
+
+    // Only printed by verbose tool.
+    expect(result.stdout, isNot(contains('exiting with code 0')));
   });
 }

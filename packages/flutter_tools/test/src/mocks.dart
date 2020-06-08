@@ -638,7 +638,11 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   }
 
   @override
-  Future<CompilerOutput> recompile(Uri mainPath, List<Uri> invalidatedFiles, { String outputPath, PackageConfig packageConfig }) async {
+  Future<CompilerOutput> recompile(Uri mainPath, List<Uri> invalidatedFiles, {
+    String outputPath,
+    PackageConfig packageConfig,
+    bool suppressErrors = false,
+  }) async {
     globals.fs.file(outputPath).createSync(recursive: true);
     globals.fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
     return CompilerOutput(outputPath, 0, <Uri>[]);

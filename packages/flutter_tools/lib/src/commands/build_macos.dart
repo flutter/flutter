@@ -29,6 +29,7 @@ class BuildMacosCommand extends BuildSubCommand {
     usesBuildNameOption();
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
+    addNullSafetyModeOptions();
   }
 
   @override
@@ -43,7 +44,7 @@ class BuildMacosCommand extends BuildSubCommand {
   };
 
   @override
-  String get description => 'build the macOS desktop target.';
+  String get description => 'Build a macOS desktop application.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {

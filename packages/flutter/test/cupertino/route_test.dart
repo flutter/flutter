@@ -1133,6 +1133,76 @@ void main() {
     expect(nestedObserver.popupCount, 0);
   });
 
+  testWidgets('back swipe to screen edges does not dismiss the hero animation', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    final UniqueKey container = UniqueKey();
+    await tester.pumpWidget(CupertinoApp(
+      navigatorKey: navigator,
+      routes: <String, WidgetBuilder>{
+        '/': (BuildContext context) {
+          return CupertinoPageScaffold(
+            child: Center(
+              child: Hero(
+                tag: 'tag',
+                transitionOnUserGestures: true,
+                child: Container(key: container, height: 150.0, width: 150.0)
+              ),
+            )
+          );
+        },
+        '/page2': (BuildContext context) {
+          return CupertinoPageScaffold(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(100.0, 0.0, 0.0, 0.0),
+                child: Hero(
+                  tag: 'tag',
+                  transitionOnUserGestures: true,
+                  child: Container(key: container, height: 150.0, width: 150.0)
+                )
+              ),
+            )
+          );
+        }
+      },
+    ));
+
+    RenderBox box = tester.renderObject(find.byKey(container)) as RenderBox;
+    final double initialPosition = box.localToGlobal(Offset.zero).dx;
+
+    navigator.currentState.pushNamed('/page2');
+    await tester.pumpAndSettle();
+    box = tester.renderObject(find.byKey(container)) as RenderBox;
+    final double finalPosition = box.localToGlobal(Offset.zero).dx;
+
+    final TestGesture gesture = await tester.startGesture(const Offset(5, 300));
+    await gesture.moveBy(const Offset(200, 0));
+    await tester.pump();
+    box = tester.renderObject(find.byKey(container)) as RenderBox;
+    final double firstPosition = box.localToGlobal(Offset.zero).dx;
+    // Checks the hero is in-transit.
+    expect(finalPosition, greaterThan(firstPosition));
+    expect(firstPosition, greaterThan(initialPosition));
+
+    // Goes back to final position.
+    await gesture.moveBy(const Offset(-200, 0));
+    await tester.pump();
+    box = tester.renderObject(find.byKey(container)) as RenderBox;
+    final double secondPosition = box.localToGlobal(Offset.zero).dx;
+    // There will be a small difference.
+    expect(finalPosition - secondPosition, lessThan(0.001));
+
+    await gesture.moveBy(const Offset(400, 0));
+    await tester.pump();
+    box = tester.renderObject(find.byKey(container)) as RenderBox;
+    final double thirdPosition = box.localToGlobal(Offset.zero).dx;
+    // Checks the hero is still in-transit and moves further away from the first
+    // position.
+    expect(finalPosition, greaterThan(thirdPosition));
+    expect(thirdPosition, greaterThan(initialPosition));
+    expect(firstPosition, greaterThan(thirdPosition));
+  });
+
   testWidgets('showCupertinoModalPopup uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
     final PopupObserver rootObserver = PopupObserver();
     final PopupObserver nestedObserver = PopupObserver();

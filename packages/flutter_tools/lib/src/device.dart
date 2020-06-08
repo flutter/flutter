@@ -103,6 +103,7 @@ class DeviceManager {
       fileSystem: globals.fs,
       platform: globals.platform,
       processManager: globals.processManager,
+      logger: globals.logger,
     ),
   ]);
 
@@ -357,8 +358,16 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   String toString() => '$name device discovery';
 }
 
+/// A device is a physical hardware that can run a flutter application.
+///
+/// This may correspond to a connected iOS or Android device, or represent
+/// the host operating system in the case of Flutter Desktop.
 abstract class Device {
-  Device(this.id, {@required this.category, @required this.platformType, @required this.ephemeral});
+  Device(this.id, {
+    @required this.category,
+    @required this.platformType,
+    @required this.ephemeral,
+  });
 
   final String id;
 
@@ -376,6 +385,9 @@ abstract class Device {
   bool get supportsStartPaused => true;
 
   /// Whether it is an emulated device running on localhost.
+  ///
+  /// This may return `true` for certain physical Android devices, and is
+  /// generally only a best effort guess.
   Future<bool> get isLocalEmulator;
 
   /// The unique identifier for the emulator that corresponds to this device, or
@@ -386,40 +398,48 @@ abstract class Device {
   /// will be returned.
   Future<String> get emulatorId;
 
+  /// Whether this device can run the provided [buildMode].
+  ///
+  /// For example, some emulator architectures cannot run profile or
+  /// release builds.
+  FutureOr<bool> supportsRuntimeMode(BuildMode buildMode) => true;
+
   /// Whether the device is a simulator on a platform which supports hardware rendering.
+  // This is soft-deprecated since the logic is not correct expect for iOS simulators.
   Future<bool> get supportsHardwareRendering async {
-    assert(await isLocalEmulator);
-    switch (await targetPlatform) {
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
-        return true;
-      case TargetPlatform.ios:
-      case TargetPlatform.darwin_x64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      default:
-        return false;
-    }
+    return true;
   }
 
   /// Whether the device is supported for the current project directory.
   bool isSupportedForProject(FlutterProject flutterProject);
 
-  /// Check if a version of the given app is already installed
-  Future<bool> isAppInstalled(covariant ApplicationPackage app);
+  /// Check if a version of the given app is already installed.
+  ///
+  /// Specify [userIdentifier] to check if installed for a particular user (Android only).
+  Future<bool> isAppInstalled(
+    covariant ApplicationPackage app, {
+    String userIdentifier,
+  });
 
   /// Check if the latest build of the [app] is already installed.
   Future<bool> isLatestBuildInstalled(covariant ApplicationPackage app);
 
-  /// Install an app package on the current device
-  Future<bool> installApp(covariant ApplicationPackage app);
+  /// Install an app package on the current device.
+  ///
+  /// Specify [userIdentifier] to install for a particular user (Android only).
+  Future<bool> installApp(
+    covariant ApplicationPackage app, {
+    String userIdentifier,
+  });
 
-  /// Uninstall an app package from the current device
-  Future<bool> uninstallApp(covariant ApplicationPackage app);
+  /// Uninstall an app package from the current device.
+  ///
+  /// Specify [userIdentifier] to uninstall for a particular user,
+  /// defaults to all users (Android only).
+  Future<bool> uninstallApp(
+    covariant ApplicationPackage app, {
+    String userIdentifier,
+  });
 
   /// Check if the device is supported by Flutter
   bool isSupported();
@@ -467,6 +487,7 @@ abstract class Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
+    String userIdentifier,
   });
 
   /// Whether this device implements support for hot reload.
@@ -487,7 +508,12 @@ abstract class Device {
   bool get supportsFastStart => false;
 
   /// Stop an app package on the current device.
-  Future<bool> stopApp(covariant ApplicationPackage app);
+  ///
+  /// Specify [userIdentifier] to stop app installed to a profile (Android only).
+  Future<bool> stopApp(
+    covariant ApplicationPackage app, {
+    String userIdentifier,
+  });
 
   /// Query the current application memory usage..
   ///
@@ -555,6 +581,13 @@ abstract class Device {
 
   static Future<void> printDevices(List<Device> devices) async {
     await descriptions(devices).forEach(globals.printStatus);
+  }
+
+  static List<String> devicesPlatformTypes(List<Device> devices) {
+    return devices
+        .map(
+          (Device d) => d.platformType.toString(),
+        ).toSet().toList()..sort();
   }
 
   /// Convert the Device object to a JSON representation suitable for serialization.

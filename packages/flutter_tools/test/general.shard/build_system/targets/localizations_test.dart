@@ -21,6 +21,7 @@ void main() {
       const FakeCommand(
         command: <String>[
           'dart',
+          '--disable-dart-dev',
           'dev/tools/localization/bin/gen_l10n.dart',
           '--gen-inputs-and-outputs-list=/',
           '--arb-dir=arb',

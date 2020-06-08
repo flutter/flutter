@@ -12,6 +12,7 @@ import 'package:macrobenchmarks/src/web/bench_text_out_of_picture_bounds.dart';
 
 import 'src/web/bench_build_material_checkbox.dart';
 import 'src/web/bench_card_infinite_scroll.dart';
+import 'src/web/bench_child_layers.dart';
 import 'src/web/bench_clipped_out_pictures.dart';
 import 'src/web/bench_draw_rect.dart';
 import 'src/web/bench_dynamic_clip_on_static_picture.dart';
@@ -40,6 +41,7 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchBuildMaterialCheckbox.benchmarkName: () => BenchBuildMaterialCheckbox(),
   BenchDynamicClipOnStaticPicture.benchmarkName: () => BenchDynamicClipOnStaticPicture(),
   BenchPictureRecording.benchmarkName: () => BenchPictureRecording(),
+  BenchUpdateManyChildLayers.benchmarkName: () => BenchUpdateManyChildLayers(),
   if (isCanvasKit)
     BenchBuildColorsGrid.canvasKitBenchmarkName: () => BenchBuildColorsGrid.canvasKit(),
 

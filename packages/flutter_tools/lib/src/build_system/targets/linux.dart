@@ -9,7 +9,7 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
-import 'dart.dart';
+import 'common.dart';
 import 'desktop.dart';
 import 'icon_tree_shaker.dart';
 

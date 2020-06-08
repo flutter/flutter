@@ -60,7 +60,7 @@ class Dialog extends StatelessWidget {
     this.child,
     bool useMaterialBorderRadius,
   }) : assert(clipBehavior != null),
-       useMaterialBorderRadius = useMaterialBorderRadius ?? false,
+       useMaterialBorderRadius = useMaterialBorderRadius ?? true,
        super(key: key);
 
   /// {@template flutter.material.dialog.backgroundColor}
@@ -284,7 +284,7 @@ class AlertDialog extends StatelessWidget {
     bool useMaterialBorderRadius,
   }) : assert(contentPadding != null),
        assert(clipBehavior != null),
-       useMaterialBorderRadius = useMaterialBorderRadius ?? false,
+       useMaterialBorderRadius = useMaterialBorderRadius ?? true,
        super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
@@ -775,7 +775,7 @@ class SimpleDialog extends StatelessWidget {
     bool useMaterialBorderRadius,
   }) : assert(titlePadding != null),
        assert(contentPadding != null),
-       useMaterialBorderRadius = useMaterialBorderRadius ?? false,
+       useMaterialBorderRadius = useMaterialBorderRadius ?? true,
        super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top

@@ -398,7 +398,7 @@ class TextField extends StatefulWidget {
            selectAll: true,
            paste: true,
          )),
-       canAssertMaterialLocalizations = canAssertMaterialLocalizations ?? false,
+       canAssertMaterialLocalizations = canAssertMaterialLocalizations ?? true,
        super(key: key);
 
   /// Controls the text being edited.
@@ -728,6 +728,7 @@ class TextField extends StatefulWidget {
   final ScrollController scrollController;
 
   /// {@macro flutter.widgets.editableText.autofillHints}
+  /// {@macro flutter.services.autofill.autofillHints}
   final Iterable<String> autofillHints;
 
   /// Indicates whether [debugCheckHasMaterialLocalizations] can be called
