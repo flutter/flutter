@@ -2132,9 +2132,17 @@ class Navigator extends StatefulWidget {
     bool rootNavigator = false,
     bool nullOk = false,
   }) {
-    final NavigatorState navigator = rootNavigator
-        ? context.findRootAncestorStateOfType<NavigatorState>()
-        : context.findAncestorStateOfType<NavigatorState>();
+    // Handles the case where the input context is a navigator element.
+    NavigatorState navigator;
+    if (context is StatefulElement && context.state is NavigatorState) {
+        navigator = context.state as NavigatorState;
+    }
+    if (rootNavigator) {
+      navigator = context.findRootAncestorStateOfType<NavigatorState>() ?? navigator;
+    } else {
+      navigator = navigator ?? context.findAncestorStateOfType<NavigatorState>();
+    }
+
     assert(() {
       if (navigator == null && !nullOk) {
         throw FlutterError(
