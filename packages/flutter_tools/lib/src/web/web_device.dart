@@ -239,7 +239,7 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
   @override
   String get name => 'Edge';
 
-  Future<bool> _meetsVersionContraint() async {
+  Future<bool> _meetsVersionConstraint() async {
     final String rawVersion = (await sdkNameAndVersion).replaceFirst('Microsoft Edge ', '');
     final Version version = Version.parse(rawVersion);
     if (version == null) {
@@ -261,7 +261,9 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
         return 'Microsoft Edge ' + parts[parts.length - 2];
       }
     }
-    return '?';
+    // Return a non-null string so that the tool can validate the version
+    // does not meet the constraint above in _meetsVersionConstraint.
+    return '';
   }
 }
 
@@ -331,7 +333,7 @@ class WebDevices extends PollingDeviceDiscovery {
       _webServerDevice,
       if (_chromeDevice.isSupported())
         _chromeDevice,
-      if (await _edgeDevice?._meetsVersionContraint() ?? false)
+      if (await _edgeDevice?._meetsVersionConstraint() ?? false)
         _edgeDevice,
     ];
   }
