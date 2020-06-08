@@ -25,7 +25,7 @@ G_DECLARE_FINAL_TYPE(FlView, fl_view, FL, VIEW, GtkWidget)
  *
  * The following example shows how to set up a view in a GTK application:
  * |[<!-- language="C" -->
- *   FlDartProject *project = fl_dart_project_new ("data");
+ *   FlDartProject *project = fl_dart_project_new ();
  *   FlView *view = fl_view_new (project);
  *   gtk_widget_show (GTK_WIDGET (view));
  *   gtk_container_add (GTK_CONTAINER (parent), view);
