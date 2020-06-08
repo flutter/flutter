@@ -712,32 +712,35 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // in range_slider.dart.
     Size _screenSize() => MediaQuery.of(context).size;
 
-    return FocusableActionDetector(
-      actions: _actionMap,
-      shortcuts: _shortcutMap,
-      focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
-      enabled: _enabled,
-      onShowFocusHighlight: _handleFocusHighlightChanged,
-      onShowHoverHighlight: _handleHoverChanged,
-      mouseCursor: effectiveMouseCursor,
-      child: CompositedTransformTarget(
-        link: _layerLink,
-        child: _SliderRenderObjectWidget(
-          key: _renderObjectKey,
-          value: _unlerp(widget.value),
-          divisions: widget.divisions,
-          label: widget.label,
-          sliderTheme: sliderTheme,
-          textScaleFactor: MediaQuery.of(context).textScaleFactor,
-          screenSize: _screenSize(),
-          onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
-          onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
-          onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
-          state: this,
-          semanticFormatterCallback: widget.semanticFormatterCallback,
-          hasFocus: _focused,
-          hovering: _hovering,
+    return Semantics(
+      container: true,
+      child: FocusableActionDetector(
+        actions: _actionMap,
+        shortcuts: _shortcutMap,
+        focusNode: widget.focusNode,
+        autofocus: widget.autofocus,
+        enabled: _enabled,
+        onShowFocusHighlight: _handleFocusHighlightChanged,
+        onShowHoverHighlight: _handleHoverChanged,
+        mouseCursor: effectiveMouseCursor,
+        child: CompositedTransformTarget(
+          link: _layerLink,
+          child: _SliderRenderObjectWidget(
+            key: _renderObjectKey,
+            value: _unlerp(widget.value),
+            divisions: widget.divisions,
+            label: widget.label,
+            sliderTheme: sliderTheme,
+            textScaleFactor: MediaQuery.of(context).textScaleFactor,
+            screenSize: _screenSize(),
+            onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
+            onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
+            onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
+            state: this,
+            semanticFormatterCallback: widget.semanticFormatterCallback,
+            hasFocus: _focused,
+            hovering: _hovering,
+          ),
         ),
       ),
     );
@@ -1110,6 +1113,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     _hasFocus = value;
     _updateForFocusOrHover(_hasFocus);
+    markNeedsSemanticsUpdate();
   }
 
   /// True if this slider is being hovered over by a pointer.
@@ -1136,6 +1140,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
     }
   }
+
   bool get showValueIndicator {
     bool showValueIndicator;
     switch (_sliderTheme.showValueIndicator) {
@@ -1472,20 +1477,32 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    config.isSemanticBoundary = isInteractive;
+    // The Slider widget has its own Focus widget with semantics information,
+    // and we want that semantics node to collect the semantics information here
+    // so that it's all in the same node: otherwise Talkback sees that the node
+    // has focusable children, and it won't focus the Slider's Focus widget
+    // because it thinks the Focus widget's node doesn't have anything to say
+    // (which it doesn't, but this child does). Aggregating the semantic
+    // information into one node means that Talkback will recognize that it has
+    // something to say and focus it when it receives keyboard focus.
+    // (See https://github.com/flutter/flutter/issues/57038 for context).
+    config.isSemanticBoundary = false;
+
+    config.isEnabled = isInteractive;
+    config.textDirection = textDirection;
     if (isInteractive) {
-      config.textDirection = textDirection;
       config.onIncrease = increaseAction;
       config.onDecrease = decreaseAction;
-      if (semanticFormatterCallback != null) {
-        config.value = semanticFormatterCallback(_state._lerp(value));
-        config.increasedValue = semanticFormatterCallback(_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0) as double));
-        config.decreasedValue = semanticFormatterCallback(_state._lerp((value - _semanticActionUnit).clamp(0.0, 1.0) as double));
-      } else {
-        config.value = '${(value * 100).round()}%';
-        config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
-        config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
-      }
+    }
+    config.label = _label ?? '';
+    if (semanticFormatterCallback != null) {
+      config.value = semanticFormatterCallback(_state._lerp(value));
+      config.increasedValue = semanticFormatterCallback(_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0) as double));
+      config.decreasedValue = semanticFormatterCallback(_state._lerp((value - _semanticActionUnit).clamp(0.0, 1.0) as double));
+    } else {
+      config.value = '${(value * 100).round()}%';
+      config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+      config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
     }
   }
 
