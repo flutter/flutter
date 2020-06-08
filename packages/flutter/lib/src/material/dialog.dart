@@ -519,7 +519,7 @@ class AlertDialog extends StatelessWidget {
           left: defaultTitlePadding.left * paddingScaleFactor,
           right: defaultTitlePadding.right * paddingScaleFactor,
           top: defaultTitlePadding.top * paddingScaleFactor,
-          bottom: content == null ? defaultTitlePadding.bottom * paddingScaleFactor : defaultTitlePadding.bottom,
+          bottom: defaultTitlePadding.bottom,
         ),
         child: DefaultTextStyle(
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6,
