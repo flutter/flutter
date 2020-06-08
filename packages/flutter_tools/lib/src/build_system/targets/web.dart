@@ -14,7 +14,7 @@ import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
 import 'assets.dart';
-import 'dart.dart';
+import 'common.dart';
 import 'localizations.dart';
 
 /// Whether web builds should call the platform initialization logic.
