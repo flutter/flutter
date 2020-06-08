@@ -112,7 +112,7 @@ int/*!*/ hashValues(
 /// Combine the [Object.hashCode] values of an arbitrary number of objects from
 /// an [Iterable] into one value. This function will return the same value if
 /// given null as if given an empty list.
-int/*!*/ hashList(Iterable<Object/*?*/>/*!*/ arguments) {
+int/*!*/ hashList(Iterable<Object/*?*/>/*?*/ arguments) {
   int result = 0;
   if (arguments != null) {
     for (Object argument in arguments)

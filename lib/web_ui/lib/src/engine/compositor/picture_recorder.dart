@@ -15,7 +15,7 @@ class SkPictureRecorder implements ui.PictureRecorder {
     _recorder = js.JsObject(canvasKit['SkPictureRecorder']);
     final js.JsObject skRect = js.JsObject(canvasKit['LTRBRect'],
         <double>[bounds.left, bounds.top, bounds.right, bounds.bottom]);
-    final js.JsObject skCanvas =
+    final js.JsObject/*!*/ skCanvas =
         _recorder.callMethod('beginRecording', <js.JsObject>[skRect]);
     _recordingCanvas = SkCanvas(skCanvas);
     return _recordingCanvas;

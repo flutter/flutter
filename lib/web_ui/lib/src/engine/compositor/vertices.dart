@@ -110,17 +110,4 @@ class SkVertices implements ui.Vertices {
       return false;
     }
   }
-
-  @override
-  Int32List get colors => null;
-
-  @override
-  Float32List get positions => null;
-
-  @override
-  ui.VertexMode get mode => null;
-
-  Float32List get textureCoordinates => null;
-
-  Uint16List get indices => null;
 }
