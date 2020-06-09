@@ -415,7 +415,9 @@ class RunCommand extends RunCommandBase {
       final Daemon daemon = Daemon(
         stdinCommandStream,
         stdoutCommandResponse,
-        notifyingLogger: NotifyingLogger(verbose: globals.logger.isVerbose),
+        notifyingLogger: (globals.logger is NotifyingLogger)
+          ? globals.logger as NotifyingLogger
+          : NotifyingLogger(verbose: globals.logger.isVerbose),
         logToStdout: true,
       );
       AppInstance app;
