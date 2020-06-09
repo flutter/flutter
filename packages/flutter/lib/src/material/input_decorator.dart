@@ -17,6 +17,7 @@ import 'theme_data.dart';
 
 const Duration _kTransitionDuration = Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
+const double _kFinalLabelScale = 0.75;
 
 // Defines the gap in the InputDecorator's outline border where the
 // floating label will appear.
@@ -981,9 +982,11 @@ class _RenderDecoration extends RenderBox {
       + _boxSize(suffix).width
       + _boxSize(suffixIcon).width
       + contentPadding.right));
+    // Increase the available width for the label when it is scaled down.
+    final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress);
     boxToBaseline[label] = _layoutLineBox(
       label,
-      boxConstraints.copyWith(maxWidth: inputWidth),
+      boxConstraints.copyWith(maxWidth: inputWidth * invertedLabelScale),
     );
     boxToBaseline[hint] = _layoutLineBox(
       hint,
@@ -1452,11 +1455,10 @@ class _RenderDecoration extends RenderBox {
       final bool isOutlineBorder = decoration.border != null && decoration.border.isOutline;
       // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
       // Center the scaled label relative to the border.
-      const double finalLabelScale = 0.75;
       final double floatingY = decoration.fixTextFieldOutlineLabel
-        ? isOutlineBorder ? (-labelHeight * finalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top
+        ? isOutlineBorder ? (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top
         : isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
-      final double scale = lerpDouble(1.0, finalLabelScale, t);
+      final double scale = lerpDouble(1.0, _kFinalLabelScale, t);
       double dx;
       switch (textDirection) {
         case TextDirection.rtl:
