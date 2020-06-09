@@ -14,9 +14,6 @@ void main() {
     List<String> listItems;
 
     void onReorder(int oldIndex, int newIndex) {
-      if (oldIndex < newIndex) {
-        newIndex -= 1;
-      }
       final String element = listItems.removeAt(oldIndex);
       listItems.insert(newIndex, element);
     }

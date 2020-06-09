@@ -381,8 +381,15 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     // Places the value from startIndex one space before the element at endIndex.
     void reorder(int startIndex, int endIndex) {
       setState(() {
-        if (startIndex != endIndex)
-          widget.onReorder(startIndex, endIndex);
+        if (startIndex != endIndex) {
+          // the endindex is the index of the dragtarget
+          if(endIndex > startIndex) {
+            widget.onReorder(startIndex, endIndex -= 1);
+          } else {
+            widget.onReorder(startIndex, endIndex);
+          }
+
+        }
         // Animates leftover space in the drop area closed.
         _ghostController.reverse(from: 0.1);
         _entranceController.reverse(from: 0.1);
