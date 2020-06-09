@@ -116,7 +116,11 @@ class CopyFlutterBundle extends Target {
       globals.fs.file(isolateSnapshotData)
           .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
     }
-    final Depfile assetDepfile = await copyAssets(environment, environment.outputDir);
+    final Depfile assetDepfile = await copyAssets(
+      environment,
+      environment.outputDir,
+      targetPlatform: TargetPlatform.android,
+    );
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,

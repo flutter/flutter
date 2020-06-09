@@ -281,7 +281,11 @@ class WebReleaseBundle extends Target {
     }
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
-    final Depfile depfile = await copyAssets(environment, environment.outputDir.childDirectory('assets'));
+    final Depfile depfile = await copyAssets(
+      environment,
+      environment.outputDir.childDirectory('assets'),
+      targetPlatform: TargetPlatform.web_javascript,
+    );
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,

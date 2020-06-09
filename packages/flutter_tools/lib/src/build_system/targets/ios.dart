@@ -308,7 +308,11 @@ abstract class IosAssetBundle extends Target {
     }
 
     // Copy the assets.
-    final Depfile assetDepfile = await copyAssets(environment, assetDirectory);
+    final Depfile assetDepfile = await copyAssets(
+      environment,
+      assetDirectory,
+      targetPlatform: TargetPlatform.ios,
+    );
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,

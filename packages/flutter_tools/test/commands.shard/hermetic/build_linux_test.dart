@@ -338,6 +338,7 @@ void main() {
         '--dart-define=foo.bar=2',
         '--dart-define=fizz.far=3',
         '--tree-shake-icons',
+        '--bundle-sksl-path=foo/bar.sksl.json',
       ]
     );
 
@@ -364,6 +365,7 @@ void main() {
       '  "FLUTTER_ROOT=\\"\${FLUTTER_ROOT}\\""',
       '  "PROJECT_DIR=\\"\${PROJECT_DIR}\\""',
       '  "FLUTTER_TARGET=\\"lib/other.dart\\""',
+      '  "BUNDLE_SKSL_PATH=\\"foo/bar.sksl.json\\""',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

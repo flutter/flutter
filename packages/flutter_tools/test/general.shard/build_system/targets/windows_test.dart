@@ -11,8 +11,10 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
+import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/windows.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../../src/common.dart';
@@ -50,7 +52,7 @@ void main() {
       logger: BufferLogger.test(),
       defines: <String, String>{
         kBuildMode: 'debug',
-      }
+      },
     );
     final DepfileService depfileService = DepfileService(
       logger: BufferLogger.test(),
@@ -149,10 +151,24 @@ void main() {
       logger: BufferLogger.test(),
       defines: <String, String>{
         kBuildMode: 'debug',
-      }
+      },
+      inputs: <String, String>{
+        kBundleSkSLPath: 'bundle.sksl',
+      },
+      engineVersion: '2',
     );
 
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
+    // sksl bundle
+    fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
+      <String, Object>{
+        'engineRevision': '2',
+        'platform': 'ios',
+        'data': <String, Object>{
+          'A': 'B',
+        }
+      }
+    ));
 
     await const DebugBundleWindowsAssets().build(environment);
 
@@ -160,6 +176,8 @@ void main() {
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
     expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin'), exists);
     expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\io.flutter.shaders.json'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\io.flutter.shaders.json').readAsStringSync(), '{"data":{"A":"B"}}');
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),

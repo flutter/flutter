@@ -31,7 +31,18 @@ const String kBundleSkSLPath = 'BundleSkSLPath';
 /// Returns a [Depfile] containing all assets used in the build.
 Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   Map<String, DevFSContent> additionalContent,
+  @required TargetPlatform targetPlatform,
 }) async {
+  // Check for an SkSL bundle.
+  final String shaderBundlePath = environment.inputs[kBundleSkSLPath];
+  final DevFSContent skslBundle = processSkSLBundle(
+    shaderBundlePath,
+    engineVersion: environment.engineVersion,
+    fileSystem: environment.fileSystem,
+    logger: environment.logger,
+    targetPlatform: targetPlatform,
+  );
+
   final File pubspecFile =  environment.projectDir.childFile('pubspec.yaml');
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int resultCode = await assetBundle.build(
@@ -61,6 +72,8 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   final Map<String, DevFSContent> assetEntries = <String, DevFSContent>{
     ...assetBundle.entries,
     ...?additionalContent,
+    if (skslBundle != null)
+      kSkSLShaderBundlePath: skslBundle,
   };
 
   await Future.wait<void>(
@@ -92,7 +105,13 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
         resource.release();
       }
   }));
-  return Depfile(inputs + assetBundle.additionalDependencies, outputs);
+  final Depfile depfile = Depfile(inputs + assetBundle.additionalDependencies, outputs);
+  if (shaderBundlePath != null) {
+    final File skSLBundleFile = environment.fileSystem
+      .file(shaderBundlePath).absolute;
+    depfile.inputs.add(skSLBundleFile);
+  }
+  return depfile;
 }
 
 /// The path of the SkSL JSON bundle included in flutter_assets.
@@ -197,7 +216,11 @@ class CopyAssets extends Target {
       .buildDir
       .childDirectory('flutter_assets');
     output.createSync(recursive: true);
-    final Depfile depfile = await copyAssets(environment, output);
+    final Depfile depfile = await copyAssets(
+      environment,
+      output,
+      targetPlatform: TargetPlatform.android,
+    );
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,

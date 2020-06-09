@@ -28,6 +28,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     addEnableExperimentation(hide: !verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
+    addBundleSkSLPathOption(hide: !verboseHelp);
     addNullSafetyModeOptions();
   }
 
