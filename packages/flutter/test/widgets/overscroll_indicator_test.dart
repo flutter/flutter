@@ -321,6 +321,45 @@ void main() {
     expect(painter, isNot(paints..circle()..circle()));
   });
 
+  testWidgets('CustomScrollView overscroll indicator works if there is sliver before center', (WidgetTester tester) async {
+    final Key centerKey = UniqueKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ScrollConfiguration(
+          behavior: TestScrollBehavior2(),
+          child: CustomScrollView(
+            center: centerKey,
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) => Text('First sliver $index',),
+                  childCount: 2,
+                ),
+              ),
+              SliverList(
+                key: centerKey,
+                delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) => Text('Second sliver $index',),
+                  childCount: 5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('First sliver 1'), findsNothing);
+
+    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 300.0));
+    expect(find.text('First sliver 1'), findsOneWidget);
+    final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+    // The scroll offset and paint extend should cancel out each other.
+    expect(painter, paints..save()..translate(y: 0.0)..scale()..circle());
+  });
+
   group('Modify glow position', () {
     testWidgets('Leading', (WidgetTester tester) async {
       await tester.pumpWidget(

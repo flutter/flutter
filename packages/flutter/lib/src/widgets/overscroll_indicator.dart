@@ -267,6 +267,9 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
       final bool isLeading = controller == _leadingController;
       if (_lastNotificationType != OverscrollNotification) {
         final OverscrollIndicatorNotification confirmationNotification = OverscrollIndicatorNotification(leading: isLeading);
+        // It is possible that the scroll extent starts at non-zero.
+        if (isLeading)
+          confirmationNotification.paintOffset = notification.metrics.minScrollExtent;
         confirmationNotification.dispatch(context);
         _accepted[isLeading] = confirmationNotification._accepted;
         if (_accepted[isLeading]) {
