@@ -976,7 +976,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void ensureFrameCallbacksRegistered() {
-    // Leave FlutterWindow alone, do nothing.
+    // Leave window alone, do nothing.
     assert(window.onDrawFrame == null);
     assert(window.onBeginFrame == null);
   }
@@ -1219,7 +1219,7 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// pipeline directly. It tells the binding to entirely ignore requests for a
   /// frame to be scheduled, while still allowing frames that are pumped
   /// directly to run (either by using [WidgetTester.pumpBenchmark] or invoking
-  /// [FlutterWindow.onBeginFrame] and [FlutterWindow.onDrawFrame]).
+  /// [PlatformDispatcher.onBeginFrame] and [PlatformDispatcher.onDrawFrame]).
   ///
   /// The [SchedulerBinding.hasScheduledFrame] property will never be true in
   /// this mode. This can cause unexpected effects. For instance,

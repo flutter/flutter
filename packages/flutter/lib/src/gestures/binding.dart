@@ -23,7 +23,7 @@ import 'pointer_signal_resolver.dart';
 /// ### [PointerDownEvent]
 ///
 /// When a [PointerDownEvent] is received by the [GestureBinding] (from
-/// [FlutterWindow.onPointerDataPacket], as interpreted by the
+/// [PlatformDispatcher.onPointerDataPacket], as interpreted by the
 /// [PointerEventConverter]), a [hitTest] is performed to determine which
 /// [HitTestTarget] nodes are affected. (Other bindings are expected to
 /// implement [hitTest] to defer to [HitTestable] objects. For example, the

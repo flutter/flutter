@@ -42,7 +42,7 @@ class BinaryMessages {
   /// Calls the handler registered for the given channel.
   ///
   /// Typically called by [ServicesBinding] to handle platform messages received
-  /// from [FlutterWindow.onPlatformMessage].
+  /// from [PlatformDispatcher.onPlatformMessage].
   ///
   /// To register a handler for a given message channel, see [setMessageHandler].
   @Deprecated(

@@ -511,7 +511,8 @@ void main() {
   });
 
   testWidgets('MaterialApp uses regular theme when themeMode is light', (WidgetTester tester) async {
-    // Mock the FlutterWindow to explicitly report a light platformBrightness.
+    // Mock the SingletonFlutterWindow to explicitly report a light
+    // platformBrightness.
     tester.binding.window.platformBrightnessTestValue = Brightness.light;
 
     ThemeData appliedTheme;
@@ -534,7 +535,8 @@ void main() {
     );
     expect(appliedTheme.brightness, Brightness.light);
 
-    // Mock the FlutterWindow to explicitly report a dark platformBrightness.
+    // Mock the SingletonFlutterWindow to explicitly report a dark
+    // platformBrightness.
     tester.binding.window.platformBrightnessTestValue = Brightness.dark;
     await tester.pumpWidget(
       MaterialApp(
@@ -557,7 +559,8 @@ void main() {
   });
 
   testWidgets('MaterialApp uses darkTheme when themeMode is dark', (WidgetTester tester) async {
-    // Mock the FlutterWindow to explicitly report a light platformBrightness.
+    // Mock the SingletonFlutterWindow to explicitly report a light
+    // platformBrightness.
     tester.binding.window.platformBrightnessTestValue = Brightness.light;
 
     ThemeData appliedTheme;
@@ -580,7 +583,8 @@ void main() {
     );
     expect(appliedTheme.brightness, Brightness.dark);
 
-    // Mock the FlutterWindow to explicitly report a dark platformBrightness.
+    // Mock the SingletonFlutterWindow to explicitly report a dark
+    // platformBrightness.
     tester.binding.window.platformBrightnessTestValue = Brightness.dark;
     await tester.pumpWidget(
       MaterialApp(
@@ -603,7 +607,8 @@ void main() {
   });
 
   testWidgets('MaterialApp uses regular theme when themeMode is system and platformBrightness is light', (WidgetTester tester) async {
-    // Mock the FlutterWindow to explicitly report a light platformBrightness.
+    // Mock the SingletonFlutterWindow to explicitly report a light
+    // platformBrightness.
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.light;
 
@@ -631,7 +636,8 @@ void main() {
   });
 
   testWidgets('MaterialApp uses darkTheme when themeMode is system and platformBrightness is dark', (WidgetTester tester) async {
-    // Mock the FlutterWindow to explicitly report a dark platformBrightness.
+    // Mock the SingletonFlutterWindow to explicitly report a dark
+    // platformBrightness.
     tester.binding.window.platformBrightnessTestValue = Brightness.dark;
 
     ThemeData appliedTheme;
@@ -656,7 +662,8 @@ void main() {
   });
 
   testWidgets('MaterialApp uses light theme when platformBrightness is dark but no dark theme is provided', (WidgetTester tester) async {
-    // Mock the FlutterWindow to explicitly report a dark platformBrightness.
+    // Mock the SingletonFlutterWindow to explicitly report a dark
+    // platformBrightness.
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.dark;
 
@@ -680,7 +687,8 @@ void main() {
   });
 
   testWidgets('MaterialApp uses fallback light theme when platformBrightness is dark but no theme is provided at all', (WidgetTester tester) async {
-    // Mock the FlutterWindow to explicitly report a dark platformBrightness.
+    // Mock the SingletonFlutterWindow to explicitly report a dark
+    // platformBrightness.
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.dark;
 
@@ -701,7 +709,8 @@ void main() {
   });
 
   testWidgets('MaterialApp uses fallback light theme when platformBrightness is light and a dark theme is provided', (WidgetTester tester) async {
-    // Mock the FlutterWindow to explicitly report a dark platformBrightness.
+    // Mock the SingletonFlutterWindow to explicitly report a dark
+    // platformBrightness.
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.light;
 
@@ -725,7 +734,8 @@ void main() {
   });
 
   testWidgets('MaterialApp uses dark theme when platformBrightness is dark', (WidgetTester tester) async {
-    // Mock the FlutterWindow to explicitly report a dark platformBrightness.
+    // Mock the SingletonFlutterWindow to explicitly report a dark
+    // platformBrightness.
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.dark;
 
@@ -752,7 +762,8 @@ void main() {
   });
 
   testWidgets('MaterialApp switches themes when the FlutterWindow platformBrightness changes.', (WidgetTester tester) async {
-    // Mock the FlutterWindow to explicitly report a light platformBrightness.
+    // Mock the SingletonFlutterWindow to explicitly report a light
+    // platformBrightness.
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.light;
 

@@ -71,20 +71,14 @@ abstract class BindingBase {
 
   /// The window to which this binding is bound.
   ///
-  /// A number of additional bindings are defined as extensions of [BindingBase],
-  /// e.g., [ServicesBinding], [RendererBinding], and [WidgetsBinding]. Each of
-  /// these bindings define behaviors that interact with a [ui.FlutterWindow], e.g.,
-  /// [ServicesBinding] registers a [ui.FlutterWindow.onPlatformMessage] handler, and
-  /// [RendererBinding] registers [ui.FlutterWindow.onMetricsChanged],
-  /// [ui.FlutterWindow.onTextScaleFactorChanged], [ui.FlutterWindow.onSemanticsEnabledChanged],
-  /// and [ui.FlutterWindow.onSemanticsAction] handlers.
+  /// This is the [SingletonFlutterWindow] representing the "only" window on
+  /// platforms where there is only one window, such as single-display mobile
+  /// devices.
   ///
-  /// Each of these other bindings could individually access a [FlutterWindow] statically,
-  /// but that would preclude the ability to test these behaviors with a fake
-  /// window for verification purposes.  Therefore, [BindingBase] exposes this
-  /// [FlutterWindow] for use by other bindings.  A subclass of [BindingBase], such as
-  /// [TestWidgetsFlutterBinding], can override this accessor to return a
-  /// different [FlutterWindow] implementation, such as a [TestWindow].
+  /// This is a legacy binding for code that was written before Flutter
+  /// supported multiple windows. New code should use the API on
+  /// [WidgetsBinding.platformDispatcher], or, where that is not available, on
+  /// [PlatformDispatcher.instance].
   ui.SingletonFlutterWindow get window => ui.window;
 
   /// The platform dispatcher to which this binding is bound.

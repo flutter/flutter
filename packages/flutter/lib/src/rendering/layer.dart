@@ -86,10 +86,9 @@ class AnnotationResult<T> {
 /// different parents. The scene must be explicitly recomposited after such
 /// changes are made; the layer tree does not maintain its own dirty state.
 ///
-/// To composite the tree, create a [SceneBuilder] object, pass it to the
-/// root [Layer] object's [addToScene] method, and then call
-/// [SceneBuilder.build] to obtain a [Scene]. A [Scene] can then be painted
-/// using [FlutterWindow.render].
+/// To composite the tree, create a [SceneBuilder] object, pass it to the root
+/// [Layer] object's [addToScene] method, and then call [SceneBuilder.build] to
+/// obtain a [Scene]. A [Scene] can then be painted using [FlutterView.render].
 ///
 /// See also:
 ///

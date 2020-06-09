@@ -31,8 +31,8 @@ import 'media_query.dart';
 ///    intrusions.
 ///  * [Padding], for insetting widgets in general.
 ///  * [MediaQuery], from which the window padding is obtained.
-///  * [dart:ui.FlutterWindow.padding], which reports the padding from the operating
-///    system.
+///  * [dart:ui.FlutterView.padding], which reports the padding from the
+///    operating system.
 class SafeArea extends StatelessWidget {
   /// Creates a widget that avoids operating system interfaces.
   ///
@@ -146,8 +146,8 @@ class SafeArea extends StatelessWidget {
 ///  * [SafeArea], for insetting widgets to avoid operating system intrusions.
 ///  * [SliverPadding], for insetting slivers in general.
 ///  * [MediaQuery], from which the window padding is obtained.
-///  * [dart:ui.FlutterWindow.padding], which reports the padding from the operating
-///    system.
+///  * [dart:ui.FlutterView.padding], which reports the padding from the
+///    operating system.
 class SliverSafeArea extends StatelessWidget {
   /// Creates a sliver that avoids operating system interfaces.
   ///

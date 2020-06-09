@@ -7,14 +7,15 @@ import 'dart:ui' hide window;
 
 import 'package:meta/meta.dart';
 
-/// [FlutterWindow] that wraps another [FlutterWindow] and allows faking of some properties
-/// for testing purposes.
+/// [SingletonFlutterWindow] that wraps another [SingletonFlutterWindow] and
+/// allows faking of some properties for testing purposes.
 ///
 /// Tests for certain widgets, e.g., [MaterialApp], might require faking certain
-/// properties of a [FlutterWindow]. [TestWindow] facilitates the faking of these
-/// properties by overriding the properties of a real [FlutterWindow] with desired fake
-/// values. The binding used within tests, [TestWidgetsFlutterBinding], contains
-/// a [TestWindow] that is used by all tests.
+/// properties of a [SingletonFlutterWindow]. [TestWindow] facilitates the
+/// faking of these properties by overriding the properties of a real
+/// [SingletonFlutterWindow] with desired fake values. The binding used within
+/// tests, [TestWidgetsFlutterBinding], contains a [TestWindow] that is used by
+/// all tests.
 ///
 /// ## Sample Code
 ///
@@ -38,9 +39,10 @@ import 'package:meta/meta.dart';
 /// therefore any fake values defined in one test will not persist
 /// to the next.
 ///
-/// If a test needs to override a real [FlutterWindow] property and then later
-/// return to using the real [FlutterWindow] property, [TestWindow] provides
-/// methods to clear each individual test value, e.g., [clearLocaleTestValue()].
+/// If a test needs to override a real [SingletonFlutterWindow] property and
+/// then later return to using the real [SingletonFlutterWindow] property,
+/// [TestWindow] provides methods to clear each individual test value, e.g.,
+/// [clearLocaleTestValue()].
 ///
 /// To clear all fake test values in a [TestWindow], consider using
 /// [clearAllTestValues()].
@@ -398,8 +400,8 @@ class TestWindow implements SingletonFlutterWindow {
   }
 
   /// Delete any test value properties that have been set on this [TestWindow]
-  /// and return to reporting the real [FlutterWindow] values for all [FlutterWindow]
-  /// properties.
+  /// and return to reporting the real [SingletonFlutterWindow] values for all
+  /// [SingletonFlutterWindow] properties.
   ///
   /// If desired, clearing of properties can be done on an individual basis,
   /// e.g., [clearLocaleTestValue()].
@@ -420,8 +422,8 @@ class TestWindow implements SingletonFlutterWindow {
   }
 
   /// This gives us some grace time when the dart:ui side adds something to
-  /// FlutterWindow, and makes things easier when we do rolls to give us time to catch
-  /// up.
+  /// SingletonFlutterWindow, and makes things easier when we do rolls to give
+  /// us time to catch up.
   @override
   dynamic noSuchMethod(Invocation invocation) {
     return null;

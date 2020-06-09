@@ -10,7 +10,7 @@ void main() {
     // The lifecycleState is null initially in tests as there is no
     // initialLifecycleState.
     expect(ServicesBinding.instance.lifecycleState, equals(null));
-    // Mock the FlutterWindow to provide paused as the AppLifecycleState
+    // Mock the binding to provide paused as the AppLifecycleState
     final TestWidgetsFlutterBinding binding = tester.binding;
     // Use paused as the initial state.
     binding.window.initialLifecycleStateTestValue = 'AppLifecycleState.paused';

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
@@ -218,7 +219,7 @@ abstract class FlutterDriver {
     await sendCommand(WaitForCondition(const NoTransientCallbacks(), timeout: timeout));
   }
 
-  /// Waits until the next [FlutterWindow.onReportTimings] is called.
+  /// Waits until the next [PlatformDispatcher.onReportTimings] is called.
   ///
   /// Use this method to wait for the first frame to be rasterized during the
   /// app launch.
@@ -236,40 +237,40 @@ abstract class FlutterDriver {
 
   /// Returns the point at the top left of the widget identified by `finder`.
   ///
-  /// The offset is expressed in logical pixels and can be translated to
-  /// device pixels via [FlutterWindow.devicePixelRatio].
+  /// The offset is expressed in logical pixels and can be translated to device
+  /// pixels via [FlutterView.devicePixelRatio].
   Future<DriverOffset> getTopLeft(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.topLeft, timeout: timeout);
   }
 
   /// Returns the point at the top right of the widget identified by `finder`.
   ///
-  /// The offset is expressed in logical pixels and can be translated to
-  /// device pixels via [FlutterWindow.devicePixelRatio].
+  /// The offset is expressed in logical pixels and can be translated to device
+  /// pixels via [FlutterView.devicePixelRatio].
   Future<DriverOffset> getTopRight(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.topRight, timeout: timeout);
   }
 
   /// Returns the point at the bottom left of the widget identified by `finder`.
   ///
-  /// The offset is expressed in logical pixels and can be translated to
-  /// device pixels via [FlutterWindow.devicePixelRatio].
+  /// The offset is expressed in logical pixels and can be translated to device
+  /// pixels via [FlutterView.devicePixelRatio].
   Future<DriverOffset> getBottomLeft(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.bottomLeft, timeout: timeout);
   }
 
   /// Returns the point at the bottom right of the widget identified by `finder`.
   ///
-  /// The offset is expressed in logical pixels and can be translated to
-  /// device pixels via [FlutterWindow.devicePixelRatio].
+  /// The offset is expressed in logical pixels and can be translated to device
+  /// pixels via [FlutterView.devicePixelRatio].
   Future<DriverOffset> getBottomRight(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.bottomRight, timeout: timeout);
   }
 
   /// Returns the point at the center of the widget identified by `finder`.
   ///
-  /// The offset is expressed in logical pixels and can be translated to
-  /// device pixels via [FlutterWindow.devicePixelRatio].
+  /// The offset is expressed in logical pixels and can be translated to device
+  /// pixels via [FlutterView.devicePixelRatio].
   Future<DriverOffset> getCenter(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.center, timeout: timeout);
   }

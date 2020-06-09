@@ -2604,7 +2604,7 @@ class SemanticsOwner extends ChangeNotifier {
     super.dispose();
   }
 
-  /// Update the semantics using [FlutterWindow.updateSemantics].
+  /// Update the semantics using [PlatformDispatcher.updateSemantics].
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty)
       return;

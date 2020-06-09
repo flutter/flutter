@@ -74,26 +74,6 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     _platformDispatcher.onPlatformConfigurationChanged = callback;
   }
 
-  /// Is called when [openWindow] is called.
-  ///
-  /// Sends the opaque ID of the newly opened window.
-  @override
-  ViewCreatedCallback get onViewCreated => _platformDispatcher.onViewCreated;
-  @override
-  set onViewCreated(ViewCreatedCallback callback) {
-    _platformDispatcher.onViewCreated = callback;
-  }
-
-  /// Is called when a window closure is requested by the platform.
-  ///
-  /// Sends the opaque ID of the window to be closed.
-  @override
-  ViewDisposedCallback get onViewDisposed => _platformDispatcher.onViewDisposed;
-  @override
-  set onViewDisposed(ViewDisposedCallback callback) {
-    _platformDispatcher.onViewDisposed = callback;
-  }
-
   /// A callback invoked when any window begins a frame.
   ///
   /// {@template flutter.foundation.PlatformDispatcher.onBeginFrame}

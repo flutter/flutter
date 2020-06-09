@@ -40,9 +40,9 @@ void main() {
 
 Future<String> run(String name) async {
   // The platform-specific component will call [setInitialRoute] on the Flutter
-  // view (or view controller for iOS) to set [ui.window.initialRouteName].
-  // We then dispatch based on the route names to show different Flutter
-  // widgets.
+  // view (or view controller for iOS) to set [ui.window.initialRouteName]. We
+  // then dispatch based on the route names to show different Flutter widgets.
+  //
   // Since we don't really care about Flutter-side navigation in this app, we're
   // not using a regular routes map.
   switch (name) {

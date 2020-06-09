@@ -1481,8 +1481,8 @@ class Navigator extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [dart:ui.FlutterWindow.initialRouteName], which reflects the route that the
-  ///    application was started with.
+  ///  * [dart:ui.PlatformDispatcher.initialRouteName], which reflects the route
+  ///    that the application was started with.
   static const String defaultRouteName = '/';
 
   /// Called when the widget is created to generate the initial list of [Route]

@@ -26,7 +26,7 @@ mixin SemanticsBinding on BindingBase {
 
   /// Called when the platform accessibility features change.
   ///
-  /// See [FlutterWindow.onAccessibilityFeaturesChanged].
+  /// See [PlatformDispatcher.onAccessibilityFeaturesChanged].
   @protected
   void handleAccessibilityFeaturesChanged() {
     _accessibilityFeatures = platformDispatcher.accessibilityFeatures;

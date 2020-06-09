@@ -401,8 +401,8 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.initialRoute}
   /// The name of the first route to show, if a [Navigator] is built.
   ///
-  /// Defaults to [FlutterWindow.initialRouteName], which may be overridden by the code
-  /// that launched the application.
+  /// Defaults to [PlatformDispatcher.initialRouteName], which may be overridden
+  /// by the code that launched the application.
   ///
   /// If the route name starts with a slash and has multiple slashes in it, then
   /// it is treated as a "deep link", and before this route is pushed, the
@@ -1282,9 +1282,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     if (_navigator != null) {
       navigator = Navigator(
         key: _navigator,
-        // If platformDispatcher.initialRouteName isn't '/', we should assume it was set
-        // intentionally via `setInitialRoute`, and should override whatever
-        // is in [platformDispatcher.initialRoute].
+        // If platformDispatcher.initialRouteName isn't '/', we should assume it
+        // was set intentionally via `setInitialRoute`, and should override
+        // whatever is in [platformDispatcher.initialRoute].
         initialRoute: WidgetsBinding.instance.platformDispatcher.initialRouteName != Navigator.defaultRouteName
             ? WidgetsBinding.instance.platformDispatcher.initialRouteName
             : widget.initialRoute ?? WidgetsBinding.instance.platformDispatcher.initialRouteName,

@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -42,8 +41,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsAction = _handleSemanticsAction
-      ..onViewCreated = handleViewCreated
-      ..onViewDisposed = handleViewDisposed
       ..onMetricsChanged = handleMetricsChanged;
 
     initRenderView();
@@ -177,15 +174,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     _pipelineOwner.rootNode = value;
   }
 
-  @protected
-  void handleViewCreated(ui.FlutterView view) { }
-
-  @protected
-  void handleViewDisposed(ui.FlutterView view) { }
-
   /// Called when the system metrics change.
   ///
-  /// See [ui.PlatformDispatcher.onMetricsChanged].
+  /// See [PlatformDispatcher.onMetricsChanged].
   @protected
   void handleMetricsChanged() {
     assert(renderView != null);
@@ -195,7 +186,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   /// Called when the platform text scale factor changes.
   ///
-  /// See [FlutterWindow.onTextScaleFactorChanged].
+  /// See [PlatformDispatcher.onTextScaleFactorChanged].
   @protected
   void handleTextScaleFactorChanged() { }
 
@@ -207,7 +198,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// changes.
   ///
   /// {@tool snippet}
-  /// Querying [FlutterWindow.platformBrightness].
+  /// Querying [PlatformDispatcher.platformBrightness].
   ///
   /// ```dart
   /// final Brightness brightness = WidgetsBinding.instance.window.platformBrightness;
@@ -231,7 +222,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// ```
   /// {@end-tool}
   ///
-  /// See [FlutterWindow.onPlatformBrightnessChanged].
+  /// See [PlatformDispatcher.onPlatformBrightnessChanged].
   @protected
   void handlePlatformBrightnessChanged() { }
 
@@ -366,11 +357,11 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// Each frame consists of the following phases:
   ///
   /// 1. The animation phase: The [handleBeginFrame] method, which is registered
-  /// with [FlutterWindow.onBeginFrame], invokes all the transient frame callbacks
-  /// registered with [scheduleFrameCallback], in registration order. This
-  /// includes all the [Ticker] instances that are driving [AnimationController]
-  /// objects, which means all of the active [Animation] objects tick at this
-  /// point.
+  /// with [PlatformDispatcher.onBeginFrame], invokes all the transient frame
+  /// callbacks registered with [scheduleFrameCallback], in registration order.
+  /// This includes all the [Ticker] instances that are driving
+  /// [AnimationController] objects, which means all of the active [Animation]
+  /// objects tick at this point.
   ///
   /// 2. Microtasks: After [handleBeginFrame] returns, any microtasks that got
   /// scheduled by transient frame callbacks get to run. This typically includes
@@ -378,9 +369,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// completed this frame.
   ///
   /// After [handleBeginFrame], [handleDrawFrame], which is registered with
-  /// [FlutterWindow.onDrawFrame], is called, which invokes all the persistent frame
-  /// callbacks, of which the most notable is this method, [drawFrame], which
-  /// proceeds as follows:
+  /// [PlatformDispatcher.onDrawFrame], is called, which invokes all the
+  /// persistent frame callbacks, of which the most notable is this method,
+  /// [drawFrame], which proceeds as follows:
   ///
   /// 3. The layout phase: All the dirty [RenderObject]s in the system are laid
   /// out (see [RenderObject.performLayout]). See [RenderObject.markNeedsLayout]
