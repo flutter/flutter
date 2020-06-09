@@ -15,7 +15,7 @@ import 'macos_workflow.dart';
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
   MacOSDevice() : super(
-      'macos-embedding',
+      'macos',
       platformType: PlatformType.macos,
       ephemeral: false,
   );
