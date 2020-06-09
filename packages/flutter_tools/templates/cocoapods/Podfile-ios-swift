@@ -10,14 +10,8 @@ project 'Runner', {
   'Release' => :release,
 }
 
-def ios_application_path
-  ios_application_path = File.dirname(defined_in_file.realpath) if self.respond_to?(:defined_in_file)
-  ios_application_path ||= File.dirname(File.realpath(__FILE__))
-  ios_application_path
-end
-
 def flutter_root
-  generated_xcode_build_settings_path = File.expand_path(File.join('Flutter', 'Generated.xcconfig'), ios_application_path)
+  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__))
   unless File.exist?(generated_xcode_build_settings_path)
     raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
   end
@@ -31,11 +25,13 @@ end
 
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
 
+flutter_ios_podfile_setup
+
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  flutter_install_all_ios_pods ios_application_path
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 post_install do |installer|

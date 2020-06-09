@@ -2,6 +2,16 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Hook for Podfile setup, installation settings.
+#
+# @example
+# flutter_ios_podfile_setup
+# target 'Runner' do
+# ...
+# end
+def flutter_ios_podfile_setup
+end
+
 # Add iOS build settings to pod targets.
 #
 # @example
@@ -41,7 +51,7 @@ end
 def flutter_install_ios_engine_pod(ios_application_path = nil)
   # defined_in_file is set by CocoaPods and is a Pathname to the Podfile.
   ios_application_path ||= File.dirname(defined_in_file.realpath) if self.respond_to?(:defined_in_file)
-  raise 'Could not find iOS application path.' unless ios_application_path
+  raise 'Could not find iOS application path' unless ios_application_path
 
   copied_flutter_dir = File.join(ios_application_path, 'Flutter')
   copied_framework_path = File.join(copied_flutter_dir, 'Flutter.framework')
@@ -81,7 +91,7 @@ end
 def flutter_install_ios_plugin_pods(ios_application_path = nil)
   # defined_in_file is set by CocoaPods and is a Pathname to the Podfile.
   ios_application_path ||= File.dirname(defined_in_file.realpath) if self.respond_to?(:defined_in_file)
-  raise 'Could not find iOS application path.' unless ios_application_path
+  raise 'Could not find iOS application path' unless ios_application_path
 
   # Prepare symlinks folder. We use symlinks to avoid having Podfile.lock
   # referring to absolute paths on developers' machines.
