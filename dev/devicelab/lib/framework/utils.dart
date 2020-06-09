@@ -324,13 +324,39 @@ Future<int> exec(
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   String workingDirectory,
 }) async {
+  return _execute(
+    executable,
+    arguments,
+    environment: environment,
+    canFail : canFail,
+    workingDirectory: workingDirectory,
+  );
+}
+
+Future<int> _execute(
+  String executable,
+  List<String> arguments, {
+  Map<String, String> environment,
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
+  String workingDirectory,
+  StringBuffer output, // if not null, the stdout will be written here
+  StringBuffer stderr, // if not null, the stderr will be written here
+  bool printStdout = true,
+  bool printStderr = true,
+}) async {
   final Process process = await startProcess(
     executable,
     arguments,
     environment: environment,
-    workingDirectory: workingDirectory
+    workingDirectory: workingDirectory,
   );
-  await forwardStandardStreams(process);
+  await forwardStandardStreams(
+    process,
+    output: output,
+    stderr: stderr,
+    printStdout: printStdout,
+    printStderr: printStderr,
+    );
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
@@ -340,12 +366,14 @@ Future<int> exec(
 }
 
 /// Forwards standard out and standard error from [process] to this process'
-/// respective outputs.
+/// respective outputs. Also writes stdout to [output] and stderr to [stderr]
+/// if they are not null.
 ///
 /// Returns a future that completes when both out and error streams a closed.
 Future<void> forwardStandardStreams(
   Process process, {
-  StringBuffer output, 
+  StringBuffer output,
+  StringBuffer stderr,
   bool printStdout = true,
   bool printStderr = true,
   }) {
@@ -358,7 +386,7 @@ Future<void> forwardStandardStreams(
         if (printStdout) {
           print('stdout: $line');
         }
-        output?.write(line);
+        output?.writeln(line);
       }, onDone: () { stdoutDone.complete(); });
   process.stderr
       .transform<String>(utf8.decoder)
@@ -367,7 +395,7 @@ Future<void> forwardStandardStreams(
         if (printStderr) {
           print('stderr: $line');
         }
-        stderr?.write(line);
+        stderr?.writeln(line);
       }, onDone: () { stderrDone.complete(); });
 
   return Future.wait<void>(<Future<void>>[
@@ -389,24 +417,18 @@ Future<String> eval(
   bool printStdout = true,
   bool printStderr = true,
 }) async {
-  final Process process = await startProcess(
+  final StringBuffer output = StringBuffer();
+  await _execute(
     executable,
     arguments,
     environment: environment,
+    canFail: canFail,
     workingDirectory: workingDirectory,
-  );
-  final StringBuffer output = StringBuffer();
-  await forwardStandardStreams(
-    process,
     output: output,
+    stderr: stderr,
     printStdout: printStdout,
     printStderr: printStderr,
-    );
-  final int exitCode = await process.exitCode;
-
-  if (exitCode != 0 && !canFail)
-    fail('Executable "$executable" failed with exit code $exitCode.');
-
+  );
   return output.toString().trimRight();
 }
 
