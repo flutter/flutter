@@ -257,6 +257,46 @@ void main() {
     expect(await result, equals(42));
   });
 
+  testWidgets('Can show dialog using navigator global key', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        home: const Material(
+          child: Center(
+            child: Text('Go'),
+          ),
+        ),
+      ),
+    );
+
+    final Future<int> result = showDialog<int>(
+      context: navigator.currentContext,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: const Text('Title'),
+          children: <Widget>[
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context, 42);
+              },
+              child: const Text('First option'),
+            ),
+            const SimpleDialogOption(
+              child: Text('Second option'),
+            ),
+          ],
+        );
+      },
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Title'), findsOneWidget);
+    await tester.tap(find.text('First option'));
+
+    expect(await result, equals(42));
+  });
+
   testWidgets('Custom padding on SimpleDialogOption', (WidgetTester tester) async {
     const EdgeInsets customPadding = EdgeInsets.fromLTRB(4, 10, 8, 6);
     final SimpleDialog dialog = SimpleDialog(

@@ -60,6 +60,7 @@ class AnalysisServer {
     );
     final List<String> command = <String>[
       _fileSystem.path.join(sdkPath, 'bin', 'dart'),
+      '--disable-dart-dev',
       snapshot,
       for (String experiment in _experiments)
         ...<String>[

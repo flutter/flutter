@@ -83,6 +83,23 @@ void main() {
     }, testOn: 'posix');
   });
 
+  testUsingContext('simulators only support debug mode', () async {
+    final IOSSimulator simulator = IOSSimulator(
+      '123',
+      simControl: MockSimControl(),
+      xcode: MockXcode(),
+    );
+
+    expect(simulator.supportsRuntimeMode(BuildMode.debug), true);
+    expect(simulator.supportsRuntimeMode(BuildMode.profile), false);
+    expect(simulator.supportsRuntimeMode(BuildMode.release), false);
+    expect(simulator.supportsRuntimeMode(BuildMode.jitRelease), false);
+  }, overrides: <Type, Generator>{
+    Platform: () => osx,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
   group('logFilePath', () {
     MockSimControl mockSimControl;
     MockXcode mockXcode;

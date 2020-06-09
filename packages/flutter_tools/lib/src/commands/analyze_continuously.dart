@@ -16,7 +16,6 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
-import '../cache.dart';
 import '../dart/analysis.dart';
 import '../globals.dart' as globals;
 import 'analyze_base.dart';
@@ -82,8 +81,6 @@ class AnalyzeContinuously extends AnalyzeBase {
     );
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
-
-    Cache.releaseLockEarly();
 
     await server.start();
     final int exitCode = await server.onExit;

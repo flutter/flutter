@@ -7,9 +7,9 @@ import 'text_input.dart';
 
 /// A collection of commonly used autofill hint strings on different platforms.
 ///
-/// Each hint may not be supported on every platform, and may get translated to
-/// different strings on different platforms. Please refer to their documentation
-/// for what each value corresponds to on different platforms.
+/// Each hint is pre-defined on at least one supported platform. See their
+/// documentation for their availability on each platform, and the platform
+/// values each autofill hint corresponds to.
 class AutofillHints {
   AutofillHints._();
 
@@ -350,7 +350,7 @@ class AutofillHints {
   /// * Otherwise, the hint string will be used as-is.
   static const String nickname = 'nickname';
 
-  /// The input field expects a single-factor SMS login code.
+  /// The input field expects a SMS one-time code.
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
@@ -649,9 +649,9 @@ class AutofillConfiguration {
   /// {@template flutter.services.autofill.autofillHints}
   /// For the best results, hint strings need to be understood by the platform's
   /// autofill service. The common values of hint strings can be found in
-  /// [AutofillHints], as well as the platforms that understand each of them.
+  /// [AutofillHints], as well as their availability on different platforms.
   ///
-  /// If an autofillable input field needs to use a custom hint that translate to
+  /// If an autofillable input field needs to use a custom hint that translates to
   /// different strings on different platforms, the easiest way to achieve that
   /// is to return different hint strings based on the value of
   /// [defaultTargetPlatform].
@@ -667,6 +667,12 @@ class AutofillConfiguration {
   ///
   /// * On web, only the first hint is accounted for and will be translated to
   ///   an "autocomplete" string.
+  ///
+  /// Providing an autofill hint that is predefined on the platform does not
+  /// automatically grant the input field eligibility for autofill. Ultimately,
+  /// it comes down to the autofill service currently in charge to determine
+  /// whether an input field is suitable for autofill and what the autofill
+  /// candidates are.
   ///
   /// See also:
   ///
