@@ -109,7 +109,6 @@ class PersistentHeaderShowOnScreenConfiguration {
   /// Defaults to null, in which case no additional constraints are applied.
   /// Must be greater than or equal to [minShowOnScreenExtent] if it is also not
   /// null. Has no effect unless the persistent header is a floating header.
-  /// {@endtemplate}
   final double maxShowOnScreenExtent;
 }
 
