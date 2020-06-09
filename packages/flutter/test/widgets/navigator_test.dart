@@ -1753,6 +1753,41 @@ void main() {
     expect(find.text('World'), findsNothing);
   });
 
+  testWidgets('Navigator.of able to handle input context is a navigator context', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> g = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: g,
+        home: const Text('home'),
+      )
+    );
+
+    final NavigatorState state = Navigator.of(g.currentContext);
+    expect(state, g.currentState);
+  });
+
+  testWidgets('Navigator.of able to handle input context is a navigator context - root navigator', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> root = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> sub = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: root,
+        home: Navigator(
+          key: sub,
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<void>(
+              settings: settings,
+              builder: (BuildContext context) => const Text('dummy'),
+            );
+          },
+        ),
+      )
+    );
+
+    final NavigatorState state = Navigator.of(sub.currentContext, rootNavigator: true);
+    expect(state, root.currentState);
+  });
+
   testWidgets('pushAndRemove until animates the push', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/25080.
 
@@ -1928,6 +1963,77 @@ void main() {
 
     navigator.currentState.pop();
     expect(popNextOfFirst, secondRoute);
+  });
+
+  testWidgets('hero controller scope works', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> top = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> sub = GlobalKey<NavigatorState>();
+
+    final List<NavigatorObservation> observations = <NavigatorObservation>[];
+    final HeroControllerSpy spy = HeroControllerSpy()
+      ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        observations.add(
+          NavigatorObservation(
+            current: route?.settings?.name,
+            previous: previousRoute?.settings?.name,
+            operation: 'didPush'
+          )
+        );
+      };
+    await tester.pumpWidget(
+      HeroControllerScope(
+        controller: spy,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            key: top,
+            initialRoute: 'top1',
+            onGenerateRoute: (RouteSettings s) {
+              return MaterialPageRoute<void>(
+                builder: (BuildContext c) {
+                  return Navigator(
+                    key: sub,
+                    initialRoute: 'sub1',
+                    onGenerateRoute: (RouteSettings s) {
+                      return MaterialPageRoute<void>(
+                        builder: (BuildContext c) {
+                          return const Placeholder();
+                        },
+                        settings: s,
+                      );
+                    },
+                  );
+                },
+                settings: s,
+              );
+            },
+          ),
+        )
+      )
+    );
+    // It should only observe the top navigator.
+    expect(observations.length, 1);
+    expect(observations[0].current, 'top1');
+    expect(observations[0].previous, isNull);
+
+    sub.currentState.push(MaterialPageRoute<void>(
+      settings: const RouteSettings(name:'sub2'),
+      builder: (BuildContext context) => const Text('sub2')
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('sub2'), findsOneWidget);
+    // It should not record sub navigator.
+    expect(observations.length, 1);
+
+    top.currentState.push(MaterialPageRoute<void>(
+      settings: const RouteSettings(name:'top2'),
+      builder: (BuildContext context) => const Text('top2')
+    ));
+    await tester.pumpAndSettle();
+    expect(observations.length, 2);
+    expect(observations[1].current, 'top2');
+    expect(observations[1].previous, 'top1');
   });
 
   group('Page api', (){
@@ -2986,6 +3092,16 @@ class StatefulTestState extends State<StatefulTestWidget> {
   Widget build(BuildContext context) {
     rebuildCount += 1;
     return Container();
+  }
+}
+
+class HeroControllerSpy extends HeroController {
+  OnObservation onPushed;
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (onPushed != null) {
+      onPushed(route, previousRoute);
+    }
   }
 }
 

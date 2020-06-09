@@ -14,7 +14,6 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
-import '../cache.dart';
 import '../dart/analysis.dart';
 import '../dart/sdk.dart' as sdk;
 import 'analyze.dart';
@@ -126,8 +125,6 @@ class AnalyzeOnce extends AnalyzeBase {
           analysisCompleter.completeError('analysis server exited: $exitCode');
         }
       }));
-
-      Cache.releaseLockEarly();
 
       // collect results
       timer = Stopwatch()..start();

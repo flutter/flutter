@@ -110,6 +110,7 @@ class FlutterOptions {
   static const String kBundleSkSLPathOption = 'bundle-sksl-path';
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
   static const String kNullSafety = 'sound-null-safety';
+  static const String kDeviceUser = 'device-user';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -372,6 +373,12 @@ abstract class FlutterCommand extends Command<void> {
       hide: hide,
       help: 'Restricts commands to a subset of the available isolates (running instances of Flutter).\n'
             "Normally there's only one, but when adding Flutter to a pre-existing app it's possible to create multiple.");
+  }
+
+  void usesDeviceUserOption() {
+    argParser.addOption(FlutterOptions.kDeviceUser,
+      help: 'Identifier number for a user or work profile on Android only. Run "adb shell pm list users" for available identifiers.',
+      valueHelp: '10');
   }
 
   void addBuildModeFlags({ bool defaultToRelease = true, bool verboseHelp = false, bool excludeDebug = false }) {
@@ -724,7 +731,7 @@ abstract class FlutterCommand extends Command<void> {
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
     final SignalHandler handler = (io.ProcessSignal s) {
-      Cache.releaseLockEarly();
+      Cache.releaseLock();
       _sendPostUsage(
         commandPath,
         const FlutterCommandResult(ExitStatus.killed),
@@ -799,8 +806,12 @@ abstract class FlutterCommand extends Command<void> {
 
     if (shouldRunPub) {
       await pub.get(context: PubContext.getVerifyContext(name));
+      // All done updating dependencies. Release the cache lock.
+      Cache.releaseLock();
       final FlutterProject project = FlutterProject.current();
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: true);
+    } else {
+      Cache.releaseLock();
     }
 
     setupApplicationPackages();
