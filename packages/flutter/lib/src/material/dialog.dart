@@ -505,6 +505,8 @@ class AlertDialog extends StatelessWidget {
       }
     }
 
+    // The paddingScaleFactor is used to adjust the edge padding of Dialog
+    // children.
     final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
     final TextDirection textDirection = Directionality.of(context);
 
@@ -876,6 +878,8 @@ class SimpleDialog extends StatelessWidget {
       }
     }
 
+    // The paddingScaleFactor is used to adjust the edge padding of Dialog
+    // children.
     final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
     final TextDirection textDirection = Directionality.of(context);
 
@@ -1059,7 +1063,7 @@ Future<T> showDialog<T>({
 
 double _paddingScaleFactor(double textScaleFactor) {
   final double clampedTextScaleFactor = textScaleFactor.clamp(1.0, 2.0).toDouble();
-  // Since the default edge padding is 24, a padding scale factor between
-  // 1 and 1/3 will produce a padding between 24 and 8.
+  // The final padding scale factor is clamped between 1/3 and 1. For example,
+  // a non-scaled padding of 24 will a padding between 24 and 8.
   return lerpDouble(1.0, 1.0 / 3.0, clampedTextScaleFactor - 1.0);
 }
