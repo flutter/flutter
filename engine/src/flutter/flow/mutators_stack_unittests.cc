@@ -115,7 +115,7 @@ TEST(MutatorsStack, Traversal) {
 
 TEST(MutatorsStack, Equality) {
   MutatorsStack stack;
-  SkMatrix matrix = SkMatrix::MakeScale(1, 1);
+  SkMatrix matrix = SkMatrix::Scale(1, 1);
   stack.PushTransform(matrix);
   SkRect rect = SkRect::MakeEmpty();
   stack.PushClipRect(rect);
@@ -127,7 +127,7 @@ TEST(MutatorsStack, Equality) {
   stack.PushOpacity(alpha);
 
   MutatorsStack stackOther;
-  SkMatrix matrixOther = SkMatrix::MakeScale(1, 1);
+  SkMatrix matrixOther = SkMatrix::Scale(1, 1);
   stackOther.PushTransform(matrixOther);
   SkRect rectOther = SkRect::MakeEmpty();
   stackOther.PushClipRect(rectOther);

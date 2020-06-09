@@ -52,7 +52,7 @@ TEST_F(ContainerLayerTest, Simple) {
   SkPath child_path;
   child_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
   SkPaint child_paint(SkColors::kGreen);
-  SkMatrix initial_transform = SkMatrix::MakeTrans(-0.5f, -0.5f);
+  SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
 
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ContainerLayer>();
@@ -82,7 +82,7 @@ TEST_F(ContainerLayerTest, Multiple) {
   child_path2.addRect(8.0f, 2.0f, 16.5f, 14.5f);
   SkPaint child_paint1(SkColors::kGray);
   SkPaint child_paint2(SkColors::kGreen);
-  SkMatrix initial_transform = SkMatrix::MakeTrans(-0.5f, -0.5f);
+  SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
 
   auto mock_layer1 = std::make_shared<MockLayer>(
       child_path1, child_paint1, true /* fake_has_platform_view */);
@@ -124,7 +124,7 @@ TEST_F(ContainerLayerTest, MultipleWithEmpty) {
   child_path1.addRect(5.0f, 6.0f, 20.5f, 21.5f);
   SkPaint child_paint1(SkColors::kGray);
   SkPaint child_paint2(SkColors::kGreen);
-  SkMatrix initial_transform = SkMatrix::MakeTrans(-0.5f, -0.5f);
+  SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
 
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   auto mock_layer2 = std::make_shared<MockLayer>(SkPath(), child_paint2);
@@ -161,7 +161,7 @@ TEST_F(ContainerLayerTest, NeedsSystemComposite) {
   child_path2.addRect(8.0f, 2.0f, 16.5f, 14.5f);
   SkPaint child_paint1(SkColors::kGray);
   SkPaint child_paint2(SkColors::kGreen);
-  SkMatrix initial_transform = SkMatrix::MakeTrans(-0.5f, -0.5f);
+  SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
 
   auto mock_layer1 = std::make_shared<MockLayer>(
       child_path1, child_paint1, false /* fake_has_platform_view */,

@@ -3258,7 +3258,7 @@ TEST_F(EmbedderTest, PlatformViewMutatorsAreValidWithPixelRatio) {
               case kFlutterPlatformViewMutationTypeTransformation:
                 mutation.type = kFlutterPlatformViewMutationTypeTransformation;
                 mutation.transformation =
-                    FlutterTransformationMake(SkMatrix::MakeScale(2.0));
+                    FlutterTransformationMake(SkMatrix::Scale(2.0, 2.0));
                 break;
             }
 
@@ -3643,7 +3643,7 @@ TEST_F(EmbedderTest, ComplexClipsAreCorrectlyCalculated) {
           ASSERT_EQ(mutations[2]->type,
                     kFlutterPlatformViewMutationTypeTransformation);
           ASSERT_EQ(SkMatrixMake(mutations[2]->transformation),
-                    SkMatrix::MakeTrans(512.0, 0.0));
+                    SkMatrix::Translate(512.0, 0.0));
 
           ASSERT_EQ(mutations[3]->type,
                     kFlutterPlatformViewMutationTypeClipRect);
@@ -3653,7 +3653,7 @@ TEST_F(EmbedderTest, ComplexClipsAreCorrectlyCalculated) {
           ASSERT_EQ(mutations[4]->type,
                     kFlutterPlatformViewMutationTypeTransformation);
           ASSERT_EQ(SkMatrixMake(mutations[4]->transformation),
-                    SkMatrix::MakeTrans(-256.0, 0.0));
+                    SkMatrix::Translate(-256.0, 0.0));
 
           ASSERT_EQ(mutations[5]->type,
                     kFlutterPlatformViewMutationTypeClipRect);
