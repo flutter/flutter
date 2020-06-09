@@ -113,7 +113,8 @@ const int _kTickCount = 12;
 
 // Alpha values extracted from the native component (for both dark and light mode).
 // The list has a length of 12.
-const List<int> _alphaValues = <int>[147, 131, 114, 97, 81, 64, 47, 47, 47, 47, 47, 47];
+const List<int> _alphaValues = <int>[47, 47, 47, 47, 47, 47, 147, 131, 114, 97, 81, 64];
+const int _progressiveRevealAlpha = 131;
 
 class _CupertinoActivityIndicatorPainter extends CustomPainter {
   _CupertinoActivityIndicatorPainter({
@@ -122,10 +123,10 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     double radius,
     @required this.progress,
   }) : tickFundamentalRRect = RRect.fromLTRBXY(
-         -radius,
-         radius / _kDefaultIndicatorRadius,
-         -radius / 2.0,
          -radius / _kDefaultIndicatorRadius,
+         -radius / 2.0,
+         radius / _kDefaultIndicatorRadius,
+         -radius,
          radius / _kDefaultIndicatorRadius,
          radius / _kDefaultIndicatorRadius,
        ),
@@ -143,14 +144,11 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     canvas.save();
     canvas.translate(size.width / 2.0, size.height / 2.0);
 
-    // Rotate so that the top tick is the first to be drawn.
-    canvas.rotate(math.pi / 2);
-
     final int activeTick = (_kTickCount * position.value).floor();
 
     for (int i = ((_kTickCount - 1) * progress).toInt(); i >= 0; --i) {
       final int t = (i + activeTick) % _kTickCount;
-      paint.color = activeColor.withAlpha(progress < 1 ? _alphaValues[0] : _alphaValues[t]);
+      paint.color = activeColor.withAlpha(progress < 1 ? _progressiveRevealAlpha : _alphaValues[t]);
       canvas.drawRRect(tickFundamentalRRect, paint);
       canvas.rotate(_kTwoPI / _kTickCount);
     }
@@ -160,6 +158,6 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_CupertinoActivityIndicatorPainter oldPainter) {
-    return oldPainter.position != position || oldPainter.activeColor != activeColor;
+    return oldPainter.position != position || oldPainter.activeColor != activeColor || oldPainter.progress != progress;
   }
 }
