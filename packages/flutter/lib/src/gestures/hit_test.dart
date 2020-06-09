@@ -83,7 +83,7 @@ class HitTestResult {
   HitTestResult()
      : _path = <HitTestEntry>[],
        _transforms = <Matrix4>[],
-       _updatedTransforms = _Ref<int>(1);
+       _globalizedTransforms = _Ref<int>(1);
 
   /// Wraps `result` (usually a subtype of [HitTestResult]) to create a
   /// generic [HitTestResult].
@@ -94,7 +94,7 @@ class HitTestResult {
   HitTestResult.wrap(HitTestResult result)
      : _path = result._path,
        _transforms = result._transforms,
-       _updatedTransforms = result._updatedTransforms;
+       _globalizedTransforms = result._globalizedTransforms;
 
   /// An unmodifiable list of [HitTestEntry] objects recorded during the hit test.
   ///
@@ -105,24 +105,34 @@ class HitTestResult {
   final List<HitTestEntry> _path;
 
   final List<Matrix4> _transforms;
-  final _Ref<int> _updatedTransforms;
+  // The number of elements (from the head) in `_transforms` that has been
+  // globalized.
+  //
+  // An globalized matrix has been multiplied by the ancesters and is thus a
+  // global transform matrix, while a matrix that has not been globalized is
+  // only the local transform matrix to its parent.
+  //
+  // The `_globalizedTransforms` is a reference of int, instead of a direct int,
+  // because a new instance created by [HitTestResult.wrap] needs to have
+  // up-to-date properties automatically.
+  final _Ref<int> _globalizedTransforms;
 
-  void _updateTransforms() {
+  void _globalizeTransforms() {
     assert(_transforms.isNotEmpty);
-    int updatedTransforms = max(_updatedTransforms.value, 1);
-    if (updatedTransforms >= _transforms.length) {
-      assert(updatedTransforms == _transforms.length);
+    int globalizedTransforms = max(_globalizedTransforms.value, 1);
+    if (globalizedTransforms >= _transforms.length) {
+      assert(globalizedTransforms == _transforms.length);
       return;
     }
-    for (Matrix4 last = _transforms[updatedTransforms - 1]; updatedTransforms < _transforms.length; updatedTransforms += 1) {
-      last = _transforms[updatedTransforms] * last as Matrix4;
-      _transforms[updatedTransforms] = last;
+    for (Matrix4 last = _transforms[globalizedTransforms - 1]; globalizedTransforms < _transforms.length; globalizedTransforms += 1) {
+      last = _transforms[globalizedTransforms] * last as Matrix4;
+      _transforms[globalizedTransforms] = last;
     }
-    _updatedTransforms.value = updatedTransforms;
+    _globalizedTransforms.value = globalizedTransforms;
   }
 
   Matrix4 get _lastTransform {
-    _updateTransforms();
+    _globalizeTransforms();
     return _transforms.last;
   }
 
@@ -193,9 +203,9 @@ class HitTestResult {
   @protected
   void popTransform() {
     assert(_transforms.isNotEmpty);
-    assert(_updatedTransforms.value <= _transforms.length);
+    assert(_globalizedTransforms.value <= _transforms.length);
     _transforms.removeLast();
-    _updatedTransforms.value = min(_transforms.length, _updatedTransforms.value);
+    _globalizedTransforms.value = min(_transforms.length, _globalizedTransforms.value);
   }
 
   bool _debugVectorMoreOrLessEquals(Vector4 a, Vector4 b, { double epsilon = precisionErrorTolerance }) {
