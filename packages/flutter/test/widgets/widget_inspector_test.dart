@@ -2254,6 +2254,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
         // Validate that we received an error count.
         expect(error['errorsSinceReload'], 0);
+        expect(
+            error['renderedErrorText'],
+            startsWith(
+                '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞════════════'));
 
         // Send a second error.
         FlutterError.reportError(FlutterErrorDetailsForRendering(
@@ -2267,6 +2271,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(flutterErrorEvents, hasLength(2));
         error = flutterErrorEvents.last;
         expect(error['errorsSinceReload'], 1);
+        expect(error['renderedErrorText'], startsWith('Another exception was thrown:'));
 
         // Reloads the app.
         final FlutterExceptionHandler oldHandler = FlutterError.onError;
