@@ -177,6 +177,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
         // API 28.
         duration: const Duration(milliseconds: 140),
         child: Material(
+          borderRadius: const BorderRadius.all(Radius.circular(6.0)),
           elevation: 1.0,
           child: _TextSelectionToolbarItems(
             isAbove: widget.isAbove,
