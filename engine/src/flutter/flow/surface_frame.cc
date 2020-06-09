@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/common/surface_frame.h"
+#include "flutter/flow/surface_frame.h"
 #include "flutter/fml/logging.h"
 
 namespace flutter {

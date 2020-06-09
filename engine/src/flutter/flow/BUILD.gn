@@ -14,6 +14,8 @@ source_set("flow") {
     "compositor_context.h",
     "embedded_views.cc",
     "embedded_views.h",
+    "gl_context_switch.cc",
+    "gl_context_switch.h",
     "instrumentation.cc",
     "instrumentation.h",
     "layers/backdrop_filter_layer.cc",
@@ -62,6 +64,10 @@ source_set("flow") {
     "rtree.h",
     "skia_gpu_object.cc",
     "skia_gpu_object.h",
+    "surface.cc",
+    "surface.h",
+    "surface_frame.cc",
+    "surface_frame.h",
     "texture.cc",
     "texture.h",
   ]
@@ -73,7 +79,6 @@ source_set("flow") {
   deps = [
     "//flutter/common",
     "//flutter/fml",
-    "//flutter/shell/common:common_standalone",
     "//third_party/skia",
   ]
 
@@ -103,6 +108,8 @@ source_set("flow_testing") {
   testonly = true
 
   sources = [
+    "testing/gl_context_switch_test.cc",
+    "testing/gl_context_switch_test.h",
     "testing/layer_test.h",
     "testing/mock_layer.cc",
     "testing/mock_layer.h",
@@ -126,6 +133,7 @@ executable("flow_unittests") {
     "flow_run_all_unittests.cc",
     "flow_test_utils.cc",
     "flow_test_utils.h",
+    "gl_context_switch_unittests.cc",
     "layers/backdrop_filter_layer_unittests.cc",
     "layers/clip_path_layer_unittests.cc",
     "layers/clip_rect_layer_unittests.cc",

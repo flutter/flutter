@@ -5,7 +5,7 @@
 #ifndef FLUTTER_SHELL_RENDERER_CONTEXT_TEST_H_
 #define FLUTTER_SHELL_RENDERER_CONTEXT_TEST_H_
 
-#include "gl_context_switch.h"
+#include "flutter/flow/gl_context_switch.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -43,6 +43,8 @@ class TestSwitchableGLContext : public SwitchableGLContext {
 
   FML_DISALLOW_COPY_AND_ASSIGN(TestSwitchableGLContext);
 };
+
 }  // namespace testing
 }  // namespace flutter
+
 #endif  // FLUTTER_SHELL_RENDERER_CONTEXT_TEST_H_

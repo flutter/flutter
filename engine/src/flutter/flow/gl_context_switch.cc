@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gl_context_switch.h"
+#include "flutter/flow/gl_context_switch.h"
 
 namespace flutter {
 
@@ -11,15 +11,19 @@ SwitchableGLContext::SwitchableGLContext() = default;
 SwitchableGLContext::~SwitchableGLContext() = default;
 
 GLContextResult::GLContextResult() = default;
+
 GLContextResult::~GLContextResult() = default;
+
 GLContextResult::GLContextResult(bool static_result) : result_(static_result){};
+
 bool GLContextResult::GetResult() {
   return result_;
 };
 
-GLContextDefaultResult::~GLContextDefaultResult() = default;
 GLContextDefaultResult::GLContextDefaultResult(bool static_result)
     : GLContextResult(static_result){};
+
+GLContextDefaultResult::~GLContextDefaultResult() = default;
 
 GLContextSwitch::GLContextSwitch(std::unique_ptr<SwitchableGLContext> context)
     : context_(std::move(context)) {

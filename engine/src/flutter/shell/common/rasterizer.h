@@ -12,6 +12,7 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/layers/layer_tree.h"
+#include "flutter/flow/surface.h"
 #include "flutter/fml/closure.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/raster_thread_merger.h"
@@ -21,7 +22,6 @@
 #include "flutter/fml/time/time_point.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/shell/common/layer_tree_holder.h"
-#include "flutter/shell/common/surface.h"
 
 namespace flutter {
 

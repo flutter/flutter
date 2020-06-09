@@ -5,10 +5,10 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SWITCHABLE_GL_CONTEXT_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SWITCHABLE_GL_CONTEXT_H_
 
+#include "flutter/flow/gl_context_switch.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/thread_checker.h"
 #include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/shell/common/gl_context_switch.h"
 
 @class EAGLContext;
 

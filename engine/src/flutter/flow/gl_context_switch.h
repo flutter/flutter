@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_COMMON_GL_CONTEXT_SWITCH_H_
-#define FLUTTER_SHELL_COMMON_GL_CONTEXT_SWITCH_H_
+#ifndef FLUTTER_FLOW_GL_CONTEXT_SWITCH_H_
+#define FLUTTER_FLOW_GL_CONTEXT_SWITCH_H_
 
 #include <functional>
 #include <memory>
@@ -14,42 +14,39 @@
 
 namespace flutter {
 
-//------------------------------------------------------------------------------
-/// An abstract class represents a gl context that can be switched by
-/// GLContextSwitch
-///
-/// The subclass should wrap a "Context" object inside this class. For example,
-/// in iOS while using GL rendering surface, the subclass should wrap an
-/// |EAGLContext|.
+// This interface represents a gl context that can be switched by
+// |GLContextSwitch|.
+//
+// The implementation should wrap a "Context" object inside this class. For
+// example, in iOS while using a GL rendering surface, the implementation should
+// wrap an |EAGLContext|.
 class SwitchableGLContext {
  public:
-  //------------------------------------------------------------------------------
-  /// Implement this to set the context wrapped by this |SwitchableGLContext|
-  /// object to the current context.
-  virtual bool SetCurrent() = 0;
-
-  //------------------------------------------------------------------------------
-  /// Implement this to remove the context wrapped by this |SwitchableGLContext|
-  /// object from current context;
-  virtual bool RemoveCurrent() = 0;
-
   SwitchableGLContext();
 
   virtual ~SwitchableGLContext();
 
+  // Implement this to set the context wrapped by this |SwitchableGLContext|
+  // object to the current context.
+  virtual bool SetCurrent() = 0;
+
+  // Implement this to remove the context wrapped by this |SwitchableGLContext|
+  // object from current context;
+  virtual bool RemoveCurrent() = 0;
+
   FML_DISALLOW_COPY_AND_ASSIGN(SwitchableGLContext);
 };
 
-//------------------------------------------------------------------------------
-/// Represents the result of setting a gl context.
-/// This class exists because context results are used in places applies to all
-/// the platforms. On certain platforms(for example lower end iOS devices that
-/// uses gl), a |GLContextSwitch| is required to protect flutter's gl contect
-/// from being polluted by other programs(embedded platform views). A
-/// |GLContextSwitch| is a subclass of |GLContextResult|, which can be returned
-/// on platforms that requires context switching. A |GLContextDefaultResult| is
-/// also a subclass of |GLContextResult|, which can be returned on platforms
-/// that doesn't require context switching.
+// Represents the result of setting a gl context.
+//
+// This class exists because context results are used in places applies to all
+// the platforms. On certain platforms(for example lower end iOS devices that
+// uses gl), a |GLContextSwitch| is required to protect flutter's gl contect
+// from being polluted by other programs(embedded platform views). A
+// |GLContextSwitch| is a subclass of |GLContextResult|, which can be returned
+// on platforms that requires context switching. A |GLContextDefaultResult| is
+// also a subclass of |GLContextResult|, which can be returned on platforms
+// that doesn't require context switching.
 class GLContextResult {
  public:
   GLContextResult();
@@ -114,4 +111,4 @@ class GLContextSwitch final : public GLContextResult {
 
 }  // namespace flutter
 
-#endif
+#endif  // FLUTTER_FLOW_GL_CONTEXT_SWITCH_H_
