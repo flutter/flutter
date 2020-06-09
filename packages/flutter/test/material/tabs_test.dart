@@ -1000,18 +1000,22 @@ void main() {
 
     // Not close enough to switch to page 2
     pageController.jumpTo(500.0);
+    await tester.pumpAndSettle();
     expect(tabController.index, 1);
 
     // Close enough to switch to page 2
     pageController.jumpTo(700.0);
+    await tester.pumpAndSettle();
     expect(tabController.index, 2);
 
     // Same behavior going left: not left enough to get to page 0
     pageController.jumpTo(300.0);
+    await tester.pumpAndSettle();
     expect(tabController.index, 1);
 
     // Left enough to get to page 0
     pageController.jumpTo(100.0);
+    await tester.pumpAndSettle();
     expect(tabController.index, 0);
   });
 
@@ -1137,18 +1141,22 @@ void main() {
 
     // Not close enough to switch to page 2
     pageController.jumpTo(500.0);
+    await tester.pumpAndSettle();
     expect(tabController.index, 1);
 
     // Close enough to switch to page 2
     pageController.jumpTo(700.0);
+    await tester.pumpAndSettle();
     expect(tabController.index, 2);
 
     // Same behavior going left: not left enough to get to page 0
     pageController.jumpTo(300.0);
+    await tester.pumpAndSettle();
     expect(tabController.index, 1);
 
     // Left enough to get to page 0
     pageController.jumpTo(100.0);
+    await tester.pumpAndSettle();
     expect(tabController.index, 0);
   });
 
@@ -2723,6 +2731,95 @@ void main() {
     await gesture.moveBy(const Offset(1.0, 0.0));
     expect(tabController.animation.value, pageController.page);
     expect(tabController.indexIsChanging, false);
+
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('TabBar and TabBarView should follow TabController\'s animation duration and curve', (WidgetTester tester) async {
+    final List<Widget> tabs = List<Widget>.filled(20,
+      // For convenience padded width of each tab will equal 100:
+      // 68 + kTabLabelPadding.horizontal(32)
+      const SizedBox(width: 68.0, height: 40.0),
+    );
+
+    final TabController tabController = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    const double indicatorWeight = 2.0; // the default
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: Column(
+            children: <Widget>[
+              TabBar(
+                isScrollable: true,
+                controller: tabController,
+                tabs: tabs,
+              ),
+              Expanded(
+                child: TabBarView(
+                  controller: tabController,
+                  children: tabs.map((Widget tab) {
+                    return Container();
+                  }).toList(),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Ensure indicator position is at the initial position.
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    const double firstTabIndicatorLeft = 0.0 * 100.0 + indicatorWeight / 2.0;
+    const double firstTabIndicatorRight = 1.0 * 100.0 - indicatorWeight / 2.0;
+    const double lastTabIndicatorLeft = 19.0 * 100.0 + indicatorWeight / 2.0;
+    const double lastTabIndicatorRight = 20.0 * 100.0 - indicatorWeight / 2.0;
+    const double indicatorY = 40.0 + indicatorWeight / 2.0;
+    expect(tabBarBox, paints..line(
+      strokeWidth: indicatorWeight,
+      p1: const Offset(firstTabIndicatorLeft, indicatorY),
+      p2: const Offset(firstTabIndicatorRight, indicatorY),
+    ));
+
+    // Ensure TabBarView's page is at the initial position.
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    expect(pageController.page, 0.0);
+
+    // Ensure TabBar's scroll position is at the beginning.
+    final SingleChildScrollView singleChildScrollView = tester.widget(find.byType(SingleChildScrollView));
+    final ScrollController scrollController = singleChildScrollView.controller;
+    expect(scrollController.offset, 0);
+
+    expect(tabController.index, 0);
+
+    // Animate to the last tab with 2 seconds of duration with linear curve.
+    tabController.animateTo(19, duration: const Duration(seconds: 2), curve: Curves.linear);
+    await tester.pump();
+    // Stop in halfway.
+    await tester.pump(const Duration(seconds: 1));
+
+    // Ensure indicator is positioned right in the middle of the first tab and the last tab.
+    const double expectedIndicatorLeft = (firstTabIndicatorLeft + lastTabIndicatorLeft) / 2.0;
+    const double expectedIndicatorRight = (firstTabIndicatorRight + lastTabIndicatorRight) / 2.0;
+    expect(tabBarBox, paints..line(
+      strokeWidth: indicatorWeight,
+      p1: const Offset(expectedIndicatorLeft, indicatorY),
+      p2: const Offset(expectedIndicatorRight, indicatorY),
+    ));
+
+    // Ensure TabBarView is paging through index 18 and 19,
+    // and it is right in the middle of that progress.
+    expect(pageController.page, 18.5);
+
+    // Ensure TabBar's scroll position is right in the middle.
+    expect(scrollController.offset, scrollController.position.maxScrollExtent / 2.0);
 
     await tester.pumpAndSettle();
   });

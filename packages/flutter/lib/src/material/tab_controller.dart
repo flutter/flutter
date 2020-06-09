@@ -205,6 +205,18 @@ class TabController extends ChangeNotifier {
   /// [TabBarView.children]'s length.
   final int length;
 
+  /// The last duration used to change index.
+  ///
+  /// Defaults to [kTabScrollDuration].
+  Duration get lastDuration => _lastDuration;
+  Duration _lastDuration = kTabScrollDuration;
+
+  /// The last curve used to change index.
+  ///
+  /// Defaults to [Curves.ease].
+  Curve get lastCurve => _lastCurve;
+  Curve _lastCurve = Curves.ease;
+
   void _changeIndex(int value, { Duration duration, Curve curve }) {
     assert(value != null);
     assert(value >= 0 && (value < length || length == 0));
@@ -214,6 +226,8 @@ class TabController extends ChangeNotifier {
       return;
     _previousIndex = index;
     _index = value;
+    _lastDuration = duration ?? kTabScrollDuration;
+    _lastCurve = curve ?? Curves.ease;
     if (duration != null) {
       _indexIsChangingCount += 1;
       notifyListeners(); // Because the value of indexIsChanging may have changed.

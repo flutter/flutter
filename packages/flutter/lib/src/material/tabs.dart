@@ -946,7 +946,7 @@ class _TabBarState extends State<TabBar> {
 
   void _scrollToCurrentIndex() {
     final double offset = _tabCenteredScrollOffset(_currentIndex);
-    _scrollController.animateTo(offset, duration: kTabScrollDuration, curve: Curves.ease);
+    _scrollController.animateTo(offset, duration: _controller.lastDuration, curve: _controller.lastCurve);
   }
 
   void _scrollToControllerValue() {
@@ -1202,6 +1202,7 @@ class _TabBarViewState extends State<TabBarView> {
   TabController _controller;
   PageController _pageController;
   List<Widget> _children;
+  List<Widget> _originalChildrenWithKey;
   List<Widget> _childrenWithKey;
   int _currentIndex;
   int _warpUnderwayCount = 0;
@@ -1270,11 +1271,12 @@ class _TabBarViewState extends State<TabBarView> {
 
   void _updateChildren() {
     _children = widget.children;
-    _childrenWithKey = KeyedSubtree.ensureUniqueKeysForList(widget.children);
+    _originalChildrenWithKey = KeyedSubtree.ensureUniqueKeysForList(widget.children);
+    _childrenWithKey = _originalChildrenWithKey;
   }
 
   void _handleTabControllerAnimationTick() {
-    if (_warpUnderwayCount > 0 || !_controller.indexIsChanging)
+    if (_warpUnderwayCount > 0 && _controller.index == _currentIndex)
       return; // This widget is driving the controller's animation.
 
     if (_controller.index != _currentIndex) {
@@ -1293,7 +1295,7 @@ class _TabBarViewState extends State<TabBarView> {
     final int previousIndex = _controller.previousIndex;
     if ((_currentIndex - previousIndex).abs() == 1) {
       _warpUnderwayCount += 1;
-      await _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
+      await _pageController.animateToPage(_currentIndex, duration: _controller.lastDuration, curve: _controller.lastCurve);
       _warpUnderwayCount -= 1;
       return Future<void>.value();
     }
@@ -1302,18 +1304,17 @@ class _TabBarViewState extends State<TabBarView> {
     final int initialPage = _currentIndex > previousIndex
         ? _currentIndex - 1
         : _currentIndex + 1;
-    final List<Widget> originalChildren = _childrenWithKey;
     setState(() {
       _warpUnderwayCount += 1;
 
-      _childrenWithKey = List<Widget>.from(_childrenWithKey, growable: false);
+      _childrenWithKey = List<Widget>.from(_originalChildrenWithKey, growable: false);
       final Widget temp = _childrenWithKey[initialPage];
       _childrenWithKey[initialPage] = _childrenWithKey[previousIndex];
       _childrenWithKey[previousIndex] = temp;
     });
     _pageController.jumpToPage(initialPage);
 
-    await _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
+    await _pageController.animateToPage(_currentIndex, duration: _controller.lastDuration, curve: _controller.lastCurve);
     if (!mounted)
       return Future<void>.value();
     setState(() {
@@ -1321,7 +1322,7 @@ class _TabBarViewState extends State<TabBarView> {
       if (widget.children != _children) {
         _updateChildren();
       } else {
-        _childrenWithKey = originalChildren;
+        _childrenWithKey = _originalChildrenWithKey;
       }
     });
   }
@@ -1335,9 +1336,9 @@ class _TabBarViewState extends State<TabBarView> {
       return false;
 
     _warpUnderwayCount += 1;
-    if (notification is ScrollUpdateNotification) {
+    if (notification is ScrollUpdateNotification && _controller.index == _currentIndex) {
       if ((_pageController.page - _controller.index).abs() > 1.0) {
-        _controller.index = _pageController.page.floor();
+        _controller.index = _pageController.page.round();
         _currentIndex =_controller.index;
       }
       _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0) as double;
