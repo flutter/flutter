@@ -140,8 +140,14 @@ void VsyncWaiter::AwaitVSync() {
   fml::TimePoint now = fml::TimePoint::Now();
   fml::TimePoint last_presentation_time =
       VsyncRecorder::GetInstance().GetLastPresentationTime();
-  fml::TimePoint next_vsync = SnapToNextPhase(now, last_presentation_time,
-                                              vsync_info.presentation_interval);
+
+  fml::TimePoint next_vsync =
+      VsyncRecorder::GetInstance().GetCurrentVsyncInfo().presentation_time;
+
+  if (next_vsync <= now) {
+    next_vsync = SnapToNextPhase(now, last_presentation_time,
+                                 vsync_info.presentation_interval);
+  }
 
   auto next_vsync_start_time = next_vsync - vsync_offset_;
 
@@ -182,8 +188,13 @@ void VsyncWaiter::FireCallbackNow() {
   fml::TimePoint now = fml::TimePoint::Now();
   fml::TimePoint last_presentation_time =
       VsyncRecorder::GetInstance().GetLastPresentationTime();
-  fml::TimePoint next_vsync = SnapToNextPhase(now, last_presentation_time,
-                                              vsync_info.presentation_interval);
+  fml::TimePoint next_vsync =
+      VsyncRecorder::GetInstance().GetCurrentVsyncInfo().presentation_time;
+
+  if (next_vsync <= now) {
+    next_vsync = SnapToNextPhase(now, last_presentation_time,
+                                 vsync_info.presentation_interval);
+  }
   fml::TimePoint previous_vsync = next_vsync - vsync_info.presentation_interval;
 
   FireCallback(previous_vsync, next_vsync);
