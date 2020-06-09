@@ -14,7 +14,7 @@ import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
 import 'assets.dart';
-import 'dart.dart';
+import 'common.dart';
 import 'localizations.dart';
 
 /// Whether web builds should call the platform initialization logic.
@@ -166,6 +166,7 @@ class Dart2JSTarget extends Target {
     // parse the kernel file for web builds.
     final ProcessResult kernelResult = await globals.processManager.run(<String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--disable-dart-dev',
       globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=$specPath',
       ...?extraFrontEndOptions,
@@ -186,6 +187,7 @@ class Dart2JSTarget extends Target {
     }
     final ProcessResult javaScriptResult = await globals.processManager.run(<String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--disable-dart-dev',
       globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=$specPath',
       ...?extraFrontEndOptions,
@@ -380,7 +382,7 @@ class WebServiceWorker extends Target {
       '/',
       'main.dart.js',
       'index.html',
-      'assets/LICENSE',
+      'assets/NOTICES',
       if (urlToHash.containsKey('assets/AssetManifest.json'))
         'assets/AssetManifest.json',
       if (urlToHash.containsKey('assets/FontManifest.json'))
@@ -545,10 +547,10 @@ async function downloadOffline() {
   }
   for (var resourceKey in Object.keys(RESOURCES)) {
     if (!currentContent[resourceKey]) {
-      resources.add(resourceKey);
+      resources.push(resourceKey);
     }
   }
-  return Cache.addAll(resources);
+  return contentCache.addAll(resources);
 }
 ''';
 }

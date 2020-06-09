@@ -14,7 +14,7 @@ import '../../devfs.dart';
 import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
-import 'dart.dart';
+import 'common.dart';
 import 'icon_tree_shaker.dart';
 
 /// The input key for an SkSL bundle path.
