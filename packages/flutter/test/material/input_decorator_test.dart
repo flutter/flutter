@@ -4119,7 +4119,7 @@ void main() {
       // 133.3 is approximately 100 / 0.75 (_kFinalLabelScale)
       paints..clipRect(rect: const Rect.fromLTWH(0, 0, 133.0, 16.0)),
     );
-  }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020);
+  }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
 
   testWidgets('textAlignVertical can be updated', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/56933
