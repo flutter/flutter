@@ -24,7 +24,7 @@ def flutter_root
 
   File.foreach(generated_xcode_build_settings_path) do |line|
     matches = line.match(/FLUTTER_ROOT\=(.*)/)
-    return matches[1] if matches
+    return matches[1].strip if matches
   end
   raise 'FLUTTER_ROOT not found in Generated.xcconfig. Try deleting Generated.xcconfig, then run flutter pub get'
 end

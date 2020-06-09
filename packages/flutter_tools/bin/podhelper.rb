@@ -103,7 +103,7 @@ def flutter_install_ios_plugin_pods(ios_application_path = nil)
   end
 end
 
-def flutter_parse_plugins_file(file, separator='=')
+def flutter_parse_plugins_file(file)
   file_path = File.expand_path(file)
   unless File.exists? file_path
     return [];
@@ -112,10 +112,10 @@ def flutter_parse_plugins_file(file, separator='=')
   skip_line_start_symbols = ["#", "/"]
   File.foreach(file_path) do |line|
     next if skip_line_start_symbols.any? { |symbol| line =~ /^\s*#{symbol}/ }
-    plugin = line.split(pattern=separator)
+    plugin = line.split('=')
     if plugin.length == 2
-      podname = plugin[0].strip()
-      path = plugin[1].strip()
+      podname = plugin[0].strip
+      path = plugin[1].strip
       podpath = File.expand_path(path, file_path)
       generated_key_values[podname] = File.expand_path(path, file_path)
     else
