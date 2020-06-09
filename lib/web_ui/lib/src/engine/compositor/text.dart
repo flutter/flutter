@@ -163,16 +163,14 @@ class SkTextStyle implements ui.TextStyle {
     List<ui.Shadow> shadows,
     List<ui.FontFeature> fontFeatures,
   }) {
-    final Map<String, dynamic> style = <String, dynamic>{};
+    final js.JsObject style = js.JsObject(js.context['Object']);
 
     if (background != null) {
-      setSharedSkColor2(background.color);
-      style['backgroundColor'] = sharedSkColor2;
+      style['backgroundColor'] = makeFreshSkColor(background.color);
     }
 
     if (color != null) {
-      setSharedSkColor1(color);
-      style['color'] = sharedSkColor1;
+      style['color'] = makeFreshSkColor(color);
     }
 
     if (decoration != null) {
@@ -211,15 +209,14 @@ class SkTextStyle implements ui.TextStyle {
       fontFamilies.addAll(fontFamilyFallback);
     }
 
-    style['fontFamilies'] = fontFamilies;
+    style['fontFamilies'] = js.JsArray.from(fontFamilies);
 
     if (fontWeight != null || fontStyle != null) {
       style['fontStyle'] = toSkFontStyle(fontWeight, fontStyle);
     }
 
     if (foreground != null) {
-      setSharedSkColor3(foreground.color);
-      style['foregroundColor'] = sharedSkColor3;
+      style['foregroundColor'] = makeFreshSkColor(foreground.color);
     }
 
     // TODO(hterkelsen): Add support for
@@ -232,8 +229,7 @@ class SkTextStyle implements ui.TextStyle {
     //   - locale
     //   - shadows
     //   - fontFeatures
-    skTextStyle = canvasKit
-        .callMethod('TextStyle', <js.JsObject>[js.JsObject.jsify(style)]);
+    skTextStyle = canvasKit.callMethod('TextStyle', <js.JsObject>[style]);
     assert(skTextStyle != null);
   }
 }
