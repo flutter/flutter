@@ -108,6 +108,8 @@ void fl_engine_send_window_metrics_event(FlEngine* engine,
  * @timestamp: time when event occurred in microseconds.
  * @x: x location of mouse cursor.
  * @y: y location of mouse cursor.
+ * @scroll_delta_x: x offset of scroll.
+ * @scroll_delta_y: y offset of scroll.
  * @buttons: buttons that are pressed.
  *
  * Sends a mouse pointer event to the engine.
@@ -117,6 +119,8 @@ void fl_engine_send_mouse_pointer_event(FlEngine* engine,
                                         size_t timestamp,
                                         double x,
                                         double y,
+                                        double scroll_delta_x,
+                                        double scroll_delta_y,
                                         int64_t buttons);
 
 /**
