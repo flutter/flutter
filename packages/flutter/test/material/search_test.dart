@@ -32,7 +32,8 @@ void main() {
   setUp(() async {
     // Fill the clipboard so that the PASTE option is available in the text
     // selection menu.
-    SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+    SystemChannels.platform
+        .setMockMethodCallHandler(mockClipboard.handleMethodCall);
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
@@ -76,7 +77,8 @@ void main() {
     expect(selectedResults, <String>['Result']);
   });
 
-  testWidgets('Can close search with system back button to return null', (WidgetTester tester) async {
+  testWidgets('Can close search with system back button to return null',
+      (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/18145
 
     final _TestSearchDelegate delegate = _TestSearchDelegate();
@@ -101,8 +103,10 @@ void main() {
     expect(find.text('Suggestions'), findsOneWidget);
 
     // Simulate system back button
-    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    final ByteData message =
+        const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await ServicesBinding.instance.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/navigation', message, (_) {});
     await tester.pumpAndSettle();
 
     expect(selectedResults, <void>[null]);
@@ -130,9 +134,12 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+    final TextField textField =
+        tester.widget<TextField>(find.byType(TextField));
     final Color hintColor = textField.decoration.hintStyle.color;
     expect(hintColor, delegate.hintTextColor);
+  });
+
   testWidgets('focused border overridden', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     await tester.pumpWidget(TestHomePage(
@@ -145,6 +152,7 @@ void main() {
     final InputBorder border = textField.decoration.focusedBorder;
     expect(border, delegate.focusedBorder);
   });
+  
   testWidgets('enabled border overridden', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     await tester.pumpWidget(TestHomePage(
@@ -223,7 +231,8 @@ void main() {
     expect(selectedResults, <String>['Result']);
   });
 
-  testWidgets('Can switch between results and suggestions', (WidgetTester tester) async {
+  testWidgets('Can switch between results and suggestions',
+      (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
     await tester.pumpWidget(TestHomePage(
@@ -293,7 +302,8 @@ void main() {
     expect(textField.focusNode.hasFocus, isFalse);
   });
 
-  testWidgets('Fresh search allways starts with empty query', (WidgetTester tester) async {
+  testWidgets('Fresh search allways starts with empty query',
+      (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
     await tester.pumpWidget(TestHomePage(
@@ -329,7 +339,8 @@ void main() {
     expect(delegate.query, 'Foo');
   });
 
-  testWidgets('Initial query null re-used previous query', (WidgetTester tester) async {
+  testWidgets('Initial query null re-used previous query',
+      (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
     delegate.query = 'Foo';
@@ -345,7 +356,8 @@ void main() {
     expect(delegate.query, 'Foo');
   });
 
-  testWidgets('Changing query shows up in search field', (WidgetTester tester) async {
+  testWidgets('Changing query shows up in search field',
+      (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
     await tester.pumpWidget(TestHomePage(
@@ -367,7 +379,8 @@ void main() {
     expect(find.text('Bar'), findsOneWidget);
   });
 
-  testWidgets('transitionAnimation runs while search fades in/out', (WidgetTester tester) async {
+  testWidgets('transitionAnimation runs while search fades in/out',
+      (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
     await tester.pumpWidget(TestHomePage(
@@ -396,7 +409,8 @@ void main() {
     expect(delegate.transitionAnimation.status, AnimationStatus.dismissed);
   });
 
-  testWidgets('Closing nested search returns to search', (WidgetTester tester) async {
+  testWidgets('Closing nested search returns to search',
+      (WidgetTester tester) async {
     final List<String> nestedSearchResults = <String>[];
     final _TestSearchDelegate nestedSearchDelegate = _TestSearchDelegate(
       suggestions: 'Nested Suggestions',
@@ -460,7 +474,9 @@ void main() {
     expect(selectedResults, <String>['Result']);
   });
 
-  testWidgets('Closing search with nested search shown goes back to underlying route', (WidgetTester tester) async {
+  testWidgets(
+      'Closing search with nested search shown goes back to underlying route',
+      (WidgetTester tester) async {
     _TestSearchDelegate delegate;
     final List<String> nestedSearchResults = <String>[];
     final _TestSearchDelegate nestedSearchDelegate = _TestSearchDelegate(
@@ -534,9 +550,11 @@ void main() {
 
   testWidgets('Custom searchFieldLabel value', (WidgetTester tester) async {
     const String searchHint = 'custom search hint';
-    final String defaultSearchHint = const DefaultMaterialLocalizations().searchFieldLabel;
+    final String defaultSearchHint =
+        const DefaultMaterialLocalizations().searchFieldLabel;
 
-    final _TestSearchDelegate delegate = _TestSearchDelegate(searchHint: searchHint);
+    final _TestSearchDelegate delegate =
+        _TestSearchDelegate(searchHint: searchHint);
 
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
@@ -548,8 +566,10 @@ void main() {
     expect(find.text(defaultSearchHint), findsNothing);
   });
 
-  testWidgets('Default searchFieldLabel is used when it is set to null', (WidgetTester tester) async {
-    final String searchHint = const DefaultMaterialLocalizations().searchFieldLabel;
+  testWidgets('Default searchFieldLabel is used when it is set to null',
+      (WidgetTester tester) async {
+    final String searchHint =
+        const DefaultMaterialLocalizations().searchFieldLabel;
 
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
@@ -565,21 +585,23 @@ void main() {
   testWidgets('Custom searchFieldStyle value', (WidgetTester tester) async {
     const TextStyle searchStyle = TextStyle(color: Colors.red, fontSize: 3);
 
-    final _TestSearchDelegate delegate = _TestSearchDelegate(searchFieldStyle: searchStyle);
+    final _TestSearchDelegate delegate =
+        _TestSearchDelegate(searchFieldStyle: searchStyle);
 
-    await tester.pumpWidget(
-      TestHomePage(
+    await tester.pumpWidget(TestHomePage(
       delegate: delegate,
     ));
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+    final TextField textField =
+        tester.widget<TextField>(find.byType(TextField));
     final TextStyle hintStyle = textField.decoration.hintStyle;
     expect(hintStyle, delegate.searchFieldStyle);
   });
 
-  testWidgets('keyboard show search button by default', (WidgetTester tester) async {
+  testWidgets('keyboard show search button by default',
+      (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
     await tester.pumpWidget(TestHomePage(
@@ -590,11 +612,15 @@ void main() {
 
     await tester.showKeyboard(find.byType(TextField));
 
-    expect(tester.testTextInput.setClientArgs['inputAction'], TextInputAction.search.toString());
+    expect(tester.testTextInput.setClientArgs['inputAction'],
+        TextInputAction.search.toString());
   });
 
-  testWidgets('Custom textInputAction results in keyboard with corresponding button', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate(textInputAction: TextInputAction.done);
+  testWidgets(
+      'Custom textInputAction results in keyboard with corresponding button',
+      (WidgetTester tester) async {
+    final _TestSearchDelegate delegate =
+        _TestSearchDelegate(textInputAction: TextInputAction.done);
 
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
@@ -602,11 +628,12 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
     await tester.showKeyboard(find.byType(TextField));
-    expect(tester.testTextInput.setClientArgs['inputAction'], TextInputAction.done.toString());
+    expect(tester.testTextInput.setClientArgs['inputAction'],
+        TextInputAction.done.toString());
   });
 
   group('contributes semantics', () {
-    TestSemantics buildExpected({ String routeName }) {
+    TestSemantics buildExpected({String routeName}) {
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
@@ -643,8 +670,11 @@ void main() {
                           SemanticsFlag.isTextField,
                           SemanticsFlag.isFocused,
                           SemanticsFlag.isHeader,
-                          if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
-                              debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
+                          if (debugDefaultTargetPlatformOverride !=
+                                  TargetPlatform.iOS &&
+                              debugDefaultTargetPlatformOverride !=
+                                  TargetPlatform.macOS)
+                            SemanticsFlag.namesRoute,
                         ],
                         actions: <SemanticsAction>[
                           SemanticsAction.tap,
@@ -653,7 +683,8 @@ void main() {
                         ],
                         label: 'Search',
                         textDirection: TextDirection.ltr,
-                        textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                        textSelection:
+                            const TextSelection(baseOffset: 0, extentOffset: 0),
                       ),
                     ],
                   ),
@@ -687,8 +718,10 @@ void main() {
       await tester.tap(find.byTooltip('Search'));
       await tester.pumpAndSettle();
 
-      expect(semantics, hasSemantics(buildExpected(routeName: 'Search'),
-          ignoreId: true, ignoreRect: true, ignoreTransform: true));
+      expect(
+          semantics,
+          hasSemantics(buildExpected(routeName: 'Search'),
+              ignoreId: true, ignoreRect: true, ignoreTransform: true));
 
       semantics.dispose();
     });
@@ -703,11 +736,15 @@ void main() {
       await tester.tap(find.byTooltip('Search'));
       await tester.pumpAndSettle();
 
-      expect(semantics, hasSemantics(buildExpected(routeName: ''),
-          ignoreId: true, ignoreRect: true, ignoreTransform: true));
+      expect(
+          semantics,
+          hasSemantics(buildExpected(routeName: ''),
+              ignoreId: true, ignoreRect: true, ignoreTransform: true));
 
       semantics.dispose();
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    },
+        variant: const TargetPlatformVariant(
+            <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
   });
 }
 
@@ -770,7 +807,10 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     TextStyle searchFieldStyle,
     String searchHint,
     TextInputAction textInputAction = TextInputAction.search,
-  }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction, searchFieldStyle: searchFieldStyle);
+  }) : super(
+            searchFieldLabel: searchHint,
+            textInputAction: textInputAction,
+            searchFieldStyle: searchFieldStyle);
 
   final String suggestions;
   final String result;
