@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -302,8 +303,10 @@ IOSDevice setUpIOSDevice({
     ),
     artifacts: artifacts,
     interfaceType: interfaceType,
+    vmServiceConnectUri: (String string, {Log log}) async => MockVmService(),
   );
 }
 
 class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
+class MockVmService extends Mock implements VmService {}
