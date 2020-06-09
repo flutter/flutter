@@ -12,6 +12,8 @@
 
 static constexpr char kChannelName[] = "flutter/textinput";
 
+static constexpr char kBadArgumentsError[] = "Bad Arguments";
+
 static constexpr char kSetClientMethod[] = "TextInput.setClient";
 static constexpr char kShowMethod[] = "TextInput.show";
 static constexpr char kSetEditingStateMethod[] = "TextInput.setEditingState";
@@ -158,7 +160,7 @@ static FlMethodResponse* set_client(FlTextInputPlugin* self, FlValue* args) {
   if (fl_value_get_type(args) != FL_VALUE_TYPE_LIST ||
       fl_value_get_length(args) < 2) {
     return FL_METHOD_RESPONSE(fl_method_error_response_new(
-        "Bad Arguments", "Expected 2-element list", nullptr));
+        kBadArgumentsError, "Expected 2-element list", nullptr));
   }
 
   self->client_id = fl_value_get_int(fl_value_get_list_value(args, 0));
