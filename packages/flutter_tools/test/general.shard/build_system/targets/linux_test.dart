@@ -9,8 +9,10 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/linux.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../../src/common.dart';
@@ -83,16 +85,29 @@ void main() {
       defines: <String, String>{
         kBuildMode: 'debug',
       },
+      inputs: <String, String>{
+        kBundleSkSLPath: 'bundle.sksl',
+      },
       artifacts: MockArtifacts(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
+      engineVersion: '2',
     );
 
     testEnvironment.buildDir.createSync(recursive: true);
 
     // Create input files.
     testEnvironment.buildDir.childFile('app.dill').createSync();
+    fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
+      <String, Object>{
+        'engineRevision': '2',
+        'platform': 'ios',
+        'data': <String, Object>{
+          'A': 'B',
+        }
+      }
+    ));
 
     await const DebugBundleLinuxAssets().build(testEnvironment);
     final Directory output = testEnvironment.outputDir
@@ -100,6 +115,10 @@ void main() {
 
     expect(output.childFile('kernel_blob.bin'), exists);
     expect(output.childFile('AssetManifest.json'), exists);
+    // SkSL
+    expect(output.childFile('io.flutter.shaders.json'), exists);
+    expect(output.childFile('io.flutter.shaders.json').readAsStringSync(), '{"data":{"A":"B"}}');
+
     // No bundled fonts
     expect(output.childFile('FontManifest.json'), isNot(exists));
   }, overrides: <Type, Generator>{

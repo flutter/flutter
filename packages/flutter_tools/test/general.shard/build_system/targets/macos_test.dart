@@ -9,9 +9,11 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
@@ -49,7 +51,7 @@ final List<File> inputs = <File>[
 void main() {
   Testbed testbed;
   Environment environment;
-  MockPlatform mockPlatform;
+  Platform platform;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -57,32 +59,25 @@ void main() {
   });
 
   setUp(() {
-    mockPlatform = MockPlatform();
-    when(mockPlatform.isWindows).thenReturn(false);
-    when(mockPlatform.isMacOS).thenReturn(true);
-    when(mockPlatform.isLinux).thenReturn(false);
-    when(mockPlatform.environment).thenReturn(const <String, String>{});
+    platform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
     testbed = Testbed(setup: () {
-      globals.fs.file(globals.fs.path.join('bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui',
-          'ui.dart')).createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join('bin', 'cache', 'pkg', 'sky_engine', 'sdk_ext',
-          'vmservice_io.dart')).createSync(recursive: true);
-
       environment = Environment.test(
         globals.fs.currentDirectory,
         defines: <String, String>{
             kBuildMode: 'debug',
             kTargetPlatform: 'darwin-x64',
         },
+        inputs: <String, String>{},
         artifacts: MockArtifacts(),
         processManager: FakeProcessManager.any(),
         logger: globals.logger,
         fileSystem: globals.fs,
+        engineVersion: '2'
       );
       environment.buildDir.createSync(recursive: true);
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
-      Platform: () => mockPlatform,
+      Platform: () => platform,
     });
   });
 
@@ -132,56 +127,86 @@ void main() {
   }));
 
   test('debug macOS application creates correctly structured framework', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
-        'vm_isolate_snapshot.bin')).createSync(recursive: true);
-    globals.fs.file(globals.fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
-        'isolate_snapshot.bin')).createSync(recursive: true);
-    globals.fs.file(globals.fs.path.join(environment.buildDir.path, 'App.framework', 'App'))
-        .createSync(recursive: true);
+    environment.inputs[kBundleSkSLPath] = 'bundle.sksl';
+    globals.fs.file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
+      .createSync(recursive: true);
+    globals.fs.file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
+      .createSync(recursive: true);
+    globals.fs.file('${environment.buildDir.path}/App.framework/App')
+      .createSync(recursive: true);
+    // sksl bundle
+    globals.fs.file('bundle.sksl').writeAsStringSync(json.encode(
+      <String, Object>{
+        'engineRevision': '2',
+        'platform': 'ios',
+        'data': <String, Object>{
+          'A': 'B',
+        }
+      }
+    ));
 
-    final String inputKernel = globals.fs.path.join(environment.buildDir.path, 'app.dill');
-    final String outputKernel = globals.fs.path.join('App.framework', 'Versions', 'A', 'Resources',
-        'flutter_assets', 'kernel_blob.bin');
-    final String outputPlist = globals.fs.path.join('App.framework', 'Versions', 'A', 'Resources',
-        'Info.plist');
+    final String inputKernel = '${environment.buildDir.path}/app.dill';
     globals.fs.file(inputKernel)
       ..createSync(recursive: true)
       ..writeAsStringSync('testing');
 
     await const DebugMacOSBundleFlutterAssets().build(environment);
 
-    expect(globals.fs.file(outputKernel).readAsStringSync(), 'testing');
-    expect(globals.fs.file(outputPlist).readAsStringSync(), contains('io.flutter.flutter.app'));
+    expect(globals.fs.file(
+      'App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin').readAsStringSync(),
+      'testing',
+    );
+    expect(globals.fs.file(
+      'App.framework/Versions/A/Resources/Info.plist').readAsStringSync(),
+      contains('io.flutter.flutter.app'),
+    );
+    expect(globals.fs.file(
+      'App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
+      exists,
+    );
+    expect(globals.fs.file(
+      'App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
+      exists,
+    );
+
+    final File skslFile = globals.fs.file('App.framework/Versions/A/Resources/flutter_assets/io.flutter.shaders.json');
+
+    expect(skslFile, exists);
+    expect(skslFile.readAsStringSync(), '{"data":{"A":"B"}}');
   }));
 
   test('release/profile macOS application has no blob or precompiled runtime', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
-        'vm_isolate_snapshot.bin')).createSync(recursive: true);
-    globals.fs.file(globals.fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
-        'isolate_snapshot.bin')).createSync(recursive: true);
-    globals.fs.file(globals.fs.path.join(environment.buildDir.path, 'App.framework', 'App'))
-        .createSync(recursive: true);
-    final String outputKernel = globals.fs.path.join('App.framework', 'Resources',
-        'flutter_assets', 'kernel_blob.bin');
-    final String precompiledVm = globals.fs.path.join('App.framework', 'Resources',
-        'flutter_assets', 'vm_snapshot_data');
-    final String precompiledIsolate = globals.fs.path.join('App.framework', 'Resources',
-        'flutter_assets', 'isolate_snapshot_data');
+    globals.fs.file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
+      .createSync(recursive: true);
+    globals.fs.file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
+      .createSync(recursive: true);
+    globals.fs.file('${environment.buildDir.path}/App.framework/App')
+      .createSync(recursive: true);
+
     await const ProfileMacOSBundleFlutterAssets().build(environment..defines[kBuildMode] = 'profile');
 
-    expect(globals.fs.file(outputKernel), isNot(exists));
-    expect(globals.fs.file(precompiledVm), isNot(exists));
-    expect(globals.fs.file(precompiledIsolate), isNot(exists));
+    expect(globals.fs.file(
+      'App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin'),
+      isNot(exists),
+    );
+    expect(globals.fs.file(
+      'App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
+      isNot(exists),
+    );
+    expect(globals.fs.file(
+      'App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
+      isNot(exists),
+    );
   }));
 
   test('release/profile macOS application updates when App.framework updates', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
-        'vm_isolate_snapshot.bin')).createSync(recursive: true);
-    globals.fs.file(globals.fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
-        'isolate_snapshot.bin')).createSync(recursive: true);
+    globals.fs.file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
+      .createSync(recursive: true);
+    globals.fs.file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
+      .createSync(recursive: true);
     final File inputFramework = globals.fs.file(globals.fs.path.join(environment.buildDir.path, 'App.framework', 'App'))
-        ..createSync(recursive: true)
-        ..writeAsStringSync('ABC');
+      ..createSync(recursive: true)
+      ..writeAsStringSync('ABC');
 
     await const ProfileMacOSBundleFlutterAssets().build(environment..defines[kBuildMode] = 'profile');
     final File outputFramework = globals.fs.file(globals.fs.path.join(environment.outputDir.path, 'App.framework', 'App'));
@@ -195,7 +220,6 @@ void main() {
   }));
 }
 
-class MockPlatform extends Mock implements Platform {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockGenSnapshot extends Mock implements GenSnapshot {}
 class MockXcode extends Mock implements Xcode {}

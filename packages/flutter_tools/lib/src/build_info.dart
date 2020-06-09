@@ -154,6 +154,8 @@ class BuildInfo {
         'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
       if (performanceMeasurementFile != null)
         'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile,
+      if (bundleSkSLPath != null)
+        'BUNDLE_SKSL_PATH': bundleSkSLPath,
     };
   }
 }
