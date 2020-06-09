@@ -1,9 +1,9 @@
-Signature: e4de14ce217bf9946b185f17274b3cd0
+Signature: 0a77e2c67c7778c8361d2fd070492fad
 
 UNUSED LICENSES:
 
 ====================================================================================================
-ORIGIN: ../../../third_party/skia/third_party/etc1/LICENSE
+ORIGIN: ../../../third_party/skia/third_party/aosp/LICENSE
 TYPE: LicenseType.apache
 ----------------------------------------------------------------------------------------------------
 Apache License
@@ -197,6 +197,7 @@ THE SOFTWARE.
 USED LICENSES:
 
 ====================================================================================================
+LIBRARY: aosp
 LIBRARY: etc1
 LIBRARY: vulkan
 ORIGIN: ../../../flutter/third_party/txt/LICENSE
@@ -209,6 +210,8 @@ FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_ios.h
 FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_macos.h
 FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_win32.h
 FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_xcb.h
+FILE: ../../../third_party/skia/third_party/aosp/JavaInputStreamAdaptor.cpp
+FILE: ../../../third_party/skia/third_party/aosp/JavaInputStreamAdaptor.h
 FILE: ../../../third_party/skia/third_party/etc1/etc1.cpp
 FILE: ../../../third_party/skia/third_party/etc1/etc1.h
 ----------------------------------------------------------------------------------------------------
