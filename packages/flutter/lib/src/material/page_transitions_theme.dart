@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import '../widgets/dual_transition_builder.dart';
 import 'colors.dart';
 import 'theme.dart';
 
