@@ -71,12 +71,19 @@ class HitTestEntry {
   Matrix4 _transform;
 }
 
+class _Ref<T> {
+  _Ref(this.value);
+
+  T value;
+}
+
 /// The result of performing a hit test.
 class HitTestResult {
   /// Creates an empty hit test result.
   HitTestResult()
      : _path = <HitTestEntry>[],
-       _transforms = <Matrix4>[];
+       _transforms = <Matrix4>[],
+       _updatedTransforms = _Ref<int>(1);
 
   /// Wraps `result` (usually a subtype of [HitTestResult]) to create a
   /// generic [HitTestResult].
@@ -86,7 +93,8 @@ class HitTestResult {
   /// structure to store [HitTestEntry]s).
   HitTestResult.wrap(HitTestResult result)
      : _path = result._path,
-       _transforms = result._transforms;
+       _transforms = result._transforms,
+       _updatedTransforms = result._updatedTransforms;
 
   /// An unmodifiable list of [HitTestEntry] objects recorded during the hit test.
   ///
@@ -97,6 +105,26 @@ class HitTestResult {
   final List<HitTestEntry> _path;
 
   final List<Matrix4> _transforms;
+  final _Ref<int> _updatedTransforms;
+
+  void _updateTransforms() {
+    assert(_transforms.isNotEmpty);
+    int updatedTransforms = _updatedTransforms.value;
+    if (updatedTransforms >= _transforms.length) {
+      assert(updatedTransforms == _transforms.length);
+      return;
+    }
+    for (Matrix4 last = _transforms[updatedTransforms - 1]; updatedTransforms < _transforms.length; updatedTransforms += 1) {
+      last = _transforms[updatedTransforms] * last as Matrix4;
+      _transforms[updatedTransforms] = last;
+    }
+    _updatedTransforms.value = updatedTransforms;
+  }
+
+  Matrix4 get _lastTransform {
+    _updateTransforms();
+    return _transforms.last;
+  }
 
   /// Add a [HitTestEntry] to the path.
   ///
@@ -105,7 +133,7 @@ class HitTestResult {
   /// upward walk of the tree being hit tested.
   void add(HitTestEntry entry) {
     assert(entry._transform == null);
-    entry._transform = _transforms.isEmpty ? null : _transforms.last;
+    entry._transform = _transforms.isEmpty ? null : _lastTransform;
     _path.add(entry);
   }
 
@@ -146,7 +174,7 @@ class HitTestResult {
       'matrix through PointerEvent.removePerspectiveTransform? '
       'The provided matrix is:\n$transform'
     );
-    _transforms.add(_transforms.isEmpty ? transform : (transform * _transforms.last as Matrix4));
+    _transforms.add(transform);
   }
 
   /// Removes the last transform added via [pushTransform].
@@ -166,6 +194,10 @@ class HitTestResult {
   void popTransform() {
     assert(_transforms.isNotEmpty);
     _transforms.removeLast();
+    if (_transforms.length < _updatedTransforms.value && _updatedTransforms.value > 1) {
+      _updatedTransforms.value -= 1;
+      assert(_transforms.length == _updatedTransforms.value);
+    }
   }
 
   bool _debugVectorMoreOrLessEquals(Vector4 a, Vector4 b, { double epsilon = precisionErrorTolerance }) {
