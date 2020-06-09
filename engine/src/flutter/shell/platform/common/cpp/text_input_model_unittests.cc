@@ -12,14 +12,8 @@
 
 namespace flutter {
 
-TEST(TextInputModel, InputTypeAndAction) {
-  auto model = std::make_unique<TextInputModel>("INPUT_TYPE", "INPUT_ACTION");
-  EXPECT_STREQ(model->input_type().c_str(), "INPUT_TYPE");
-  EXPECT_STREQ(model->input_action().c_str(), "INPUT_ACTION");
-}
-
 TEST(TextInputModel, SetEditingStateStart) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(0, 0, "ABCDE"));
   EXPECT_EQ(model->selection_base(), 0);
   EXPECT_EQ(model->selection_extent(), 0);
@@ -27,7 +21,7 @@ TEST(TextInputModel, SetEditingStateStart) {
 }
 
 TEST(TextInputModel, SetEditingMiddle) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(2, 2, "ABCDE"));
   EXPECT_EQ(model->selection_base(), 2);
   EXPECT_EQ(model->selection_extent(), 2);
@@ -35,7 +29,7 @@ TEST(TextInputModel, SetEditingMiddle) {
 }
 
 TEST(TextInputModel, SetEditingStateEnd) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(5, 5, "ABCDE"));
   EXPECT_EQ(model->selection_base(), 5);
   EXPECT_EQ(model->selection_extent(), 5);
@@ -43,7 +37,7 @@ TEST(TextInputModel, SetEditingStateEnd) {
 }
 
 TEST(TextInputModel, SetEditingStateSelection) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(1, 4, "ABCDE"));
   EXPECT_EQ(model->selection_base(), 1);
   EXPECT_EQ(model->selection_extent(), 4);
@@ -51,19 +45,19 @@ TEST(TextInputModel, SetEditingStateSelection) {
 }
 
 TEST(TextInputModel, SetEditingStateReverseSelection) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_FALSE(model->SetEditingState(3, 1, "ABCDE"));
 }
 
 TEST(TextInputModel, SetEditingStateOutsideString) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_FALSE(model->SetEditingState(4, 6, "ABCDE"));
   EXPECT_FALSE(model->SetEditingState(5, 6, "ABCDE"));
   EXPECT_FALSE(model->SetEditingState(6, 6, "ABCDE"));
 }
 
 TEST(TextInputModel, SetEditingStateWideCharacters) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(0, 0, "😄🙃🤪🧐"));
   EXPECT_EQ(model->selection_base(), 0);
   EXPECT_EQ(model->selection_extent(), 0);
@@ -71,7 +65,7 @@ TEST(TextInputModel, SetEditingStateWideCharacters) {
 }
 
 TEST(TextInputModel, AddCodePoint) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->AddCodePoint('A');
   model->AddCodePoint('B');
   model->AddCodePoint(0x1f604);
@@ -83,7 +77,7 @@ TEST(TextInputModel, AddCodePoint) {
 }
 
 TEST(TextInputModel, AddCodePointSelection) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(1, 4, "ABCDE"));
   model->AddCodePoint('x');
   EXPECT_EQ(model->selection_base(), 2);
@@ -92,7 +86,7 @@ TEST(TextInputModel, AddCodePointSelection) {
 }
 
 TEST(TextInputModel, AddCodePointSelectionWideCharacter) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(1, 4, "ABCDE"));
   model->AddCodePoint(0x1f604);
   EXPECT_EQ(model->selection_base(), 3);
@@ -101,7 +95,7 @@ TEST(TextInputModel, AddCodePointSelectionWideCharacter) {
 }
 
 TEST(TextInputModel, AddText) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->AddText(u"ABCDE");
   model->AddText("😄");
   model->AddText("FGHIJ");
@@ -111,7 +105,7 @@ TEST(TextInputModel, AddText) {
 }
 
 TEST(TextInputModel, AddTextSelection) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(1, 4, "ABCDE"));
   model->AddText("xy");
   EXPECT_EQ(model->selection_base(), 3);
@@ -120,7 +114,7 @@ TEST(TextInputModel, AddTextSelection) {
 }
 
 TEST(TextInputModel, AddTextSelectionWideCharacter) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(1, 4, "ABCDE"));
   model->AddText(u"😄🙃");
   EXPECT_EQ(model->selection_base(), 5);
@@ -129,7 +123,7 @@ TEST(TextInputModel, AddTextSelectionWideCharacter) {
 }
 
 TEST(TextInputModel, DeleteStart) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(0, 0, "ABCDE"));
   ASSERT_TRUE(model->Delete());
   EXPECT_EQ(model->selection_base(), 0);
@@ -138,7 +132,7 @@ TEST(TextInputModel, DeleteStart) {
 }
 
 TEST(TextInputModel, DeleteMiddle) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(2, 2, "ABCDE"));
   ASSERT_TRUE(model->Delete());
   EXPECT_EQ(model->selection_base(), 2);
@@ -147,7 +141,7 @@ TEST(TextInputModel, DeleteMiddle) {
 }
 
 TEST(TextInputModel, DeleteEnd) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(5, 5, "ABCDE"));
   ASSERT_FALSE(model->Delete());
   EXPECT_EQ(model->selection_base(), 5);
@@ -156,7 +150,7 @@ TEST(TextInputModel, DeleteEnd) {
 }
 
 TEST(TextInputModel, DeleteWideCharacters) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(4, 4, "😄🙃🤪🧐"));
   ASSERT_TRUE(model->Delete());
   EXPECT_EQ(model->selection_base(), 4);
@@ -165,7 +159,7 @@ TEST(TextInputModel, DeleteWideCharacters) {
 }
 
 TEST(TextInputModel, DeleteSelection) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(1, 4, "ABCDE"));
   ASSERT_TRUE(model->Delete());
   EXPECT_EQ(model->selection_base(), 1);
@@ -174,7 +168,7 @@ TEST(TextInputModel, DeleteSelection) {
 }
 
 TEST(TextInputModel, DeleteSurroundingAtCursor) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(2, 2, "ABCDE");
   EXPECT_TRUE(model->DeleteSurrounding(0, 1));
   EXPECT_EQ(model->selection_base(), 2);
@@ -183,7 +177,7 @@ TEST(TextInputModel, DeleteSurroundingAtCursor) {
 }
 
 TEST(TextInputModel, DeleteSurroundingAtCursorAll) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(2, 2, "ABCDE");
   EXPECT_TRUE(model->DeleteSurrounding(0, 3));
   EXPECT_EQ(model->selection_base(), 2);
@@ -192,7 +186,7 @@ TEST(TextInputModel, DeleteSurroundingAtCursorAll) {
 }
 
 TEST(TextInputModel, DeleteSurroundingAtCursorGreedy) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(2, 2, "ABCDE");
   EXPECT_TRUE(model->DeleteSurrounding(0, 4));
   EXPECT_EQ(model->selection_base(), 2);
@@ -201,7 +195,7 @@ TEST(TextInputModel, DeleteSurroundingAtCursorGreedy) {
 }
 
 TEST(TextInputModel, DeleteSurroundingBeforeCursor) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(2, 2, "ABCDE");
   EXPECT_TRUE(model->DeleteSurrounding(-1, 1));
   EXPECT_EQ(model->selection_base(), 1);
@@ -210,7 +204,7 @@ TEST(TextInputModel, DeleteSurroundingBeforeCursor) {
 }
 
 TEST(TextInputModel, DeleteSurroundingBeforeCursorAll) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(2, 2, "ABCDE");
   EXPECT_TRUE(model->DeleteSurrounding(-2, 2));
   EXPECT_EQ(model->selection_base(), 0);
@@ -219,7 +213,7 @@ TEST(TextInputModel, DeleteSurroundingBeforeCursorAll) {
 }
 
 TEST(TextInputModel, DeleteSurroundingBeforeCursorGreedy) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(2, 2, "ABCDE");
   EXPECT_TRUE(model->DeleteSurrounding(-3, 3));
   EXPECT_EQ(model->selection_base(), 0);
@@ -228,7 +222,7 @@ TEST(TextInputModel, DeleteSurroundingBeforeCursorGreedy) {
 }
 
 TEST(TextInputModel, DeleteSurroundingAfterCursor) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(2, 2, "ABCDE");
   EXPECT_TRUE(model->DeleteSurrounding(1, 1));
   EXPECT_EQ(model->selection_base(), 2);
@@ -237,7 +231,7 @@ TEST(TextInputModel, DeleteSurroundingAfterCursor) {
 }
 
 TEST(TextInputModel, DeleteSurroundingAfterCursorAll) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(2, 2, "ABCDE");
   EXPECT_TRUE(model->DeleteSurrounding(1, 2));
   EXPECT_EQ(model->selection_base(), 2);
@@ -246,7 +240,7 @@ TEST(TextInputModel, DeleteSurroundingAfterCursorAll) {
 }
 
 TEST(TextInputModel, DeleteSurroundingAfterCursorGreedy) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(2, 2, "ABCDE");
   EXPECT_TRUE(model->DeleteSurrounding(1, 3));
   EXPECT_EQ(model->selection_base(), 2);
@@ -255,7 +249,7 @@ TEST(TextInputModel, DeleteSurroundingAfterCursorGreedy) {
 }
 
 TEST(TextInputModel, DeleteSurroundingSelection) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(2, 3, "ABCDE");
   EXPECT_TRUE(model->DeleteSurrounding(0, 1));
   EXPECT_EQ(model->selection_base(), 3);
@@ -264,7 +258,7 @@ TEST(TextInputModel, DeleteSurroundingSelection) {
 }
 
 TEST(TextInputModel, BackspaceStart) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(0, 0, "ABCDE"));
   ASSERT_FALSE(model->Backspace());
   EXPECT_EQ(model->selection_base(), 0);
@@ -273,7 +267,7 @@ TEST(TextInputModel, BackspaceStart) {
 }
 
 TEST(TextInputModel, BackspaceMiddle) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(2, 2, "ABCDE"));
   ASSERT_TRUE(model->Backspace());
   EXPECT_EQ(model->selection_base(), 1);
@@ -282,7 +276,7 @@ TEST(TextInputModel, BackspaceMiddle) {
 }
 
 TEST(TextInputModel, BackspaceEnd) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(5, 5, "ABCDE"));
   ASSERT_TRUE(model->Backspace());
   EXPECT_EQ(model->selection_base(), 4);
@@ -291,7 +285,7 @@ TEST(TextInputModel, BackspaceEnd) {
 }
 
 TEST(TextInputModel, BackspaceWideCharacters) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(4, 4, "😄🙃🤪🧐"));
   ASSERT_TRUE(model->Backspace());
   EXPECT_EQ(model->selection_base(), 2);
@@ -300,7 +294,7 @@ TEST(TextInputModel, BackspaceWideCharacters) {
 }
 
 TEST(TextInputModel, BackspaceSelection) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(1, 4, "ABCDE"));
   ASSERT_TRUE(model->Delete());
   EXPECT_EQ(model->selection_base(), 1);
@@ -309,7 +303,7 @@ TEST(TextInputModel, BackspaceSelection) {
 }
 
 TEST(TextInputModel, MoveCursorForwardStart) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(0, 0, "ABCDE"));
   EXPECT_TRUE(model->MoveCursorForward());
   EXPECT_EQ(model->selection_base(), 1);
@@ -318,7 +312,7 @@ TEST(TextInputModel, MoveCursorForwardStart) {
 }
 
 TEST(TextInputModel, MoveCursorForwardMiddle) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(2, 2, "ABCDE"));
   EXPECT_TRUE(model->MoveCursorForward());
   EXPECT_EQ(model->selection_base(), 3);
@@ -327,7 +321,7 @@ TEST(TextInputModel, MoveCursorForwardMiddle) {
 }
 
 TEST(TextInputModel, MoveCursorForwardEnd) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(5, 5, "ABCDE"));
   EXPECT_FALSE(model->MoveCursorForward());
   EXPECT_EQ(model->selection_base(), 5);
@@ -336,7 +330,7 @@ TEST(TextInputModel, MoveCursorForwardEnd) {
 }
 
 TEST(TextInputModel, MoveCursorForwardWideCharacters) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(4, 4, "😄🙃🤪🧐"));
   ASSERT_TRUE(model->MoveCursorForward());
   EXPECT_EQ(model->selection_base(), 6);
@@ -345,7 +339,7 @@ TEST(TextInputModel, MoveCursorForwardWideCharacters) {
 }
 
 TEST(TextInputModel, MoveCursorForwardSelection) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(1, 4, "ABCDE"));
   EXPECT_TRUE(model->MoveCursorForward());
   EXPECT_EQ(model->selection_base(), 4);
@@ -354,7 +348,7 @@ TEST(TextInputModel, MoveCursorForwardSelection) {
 }
 
 TEST(TextInputModel, MoveCursorBackStart) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(0, 0, "ABCDE"));
   EXPECT_FALSE(model->MoveCursorBack());
   EXPECT_EQ(model->selection_base(), 0);
@@ -363,7 +357,7 @@ TEST(TextInputModel, MoveCursorBackStart) {
 }
 
 TEST(TextInputModel, MoveCursorBackMiddle) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(2, 2, "ABCDE");
   EXPECT_TRUE(model->MoveCursorBack());
   EXPECT_EQ(model->selection_base(), 1);
@@ -372,7 +366,7 @@ TEST(TextInputModel, MoveCursorBackMiddle) {
 }
 
 TEST(TextInputModel, MoveCursorBackEnd) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(5, 5, "ABCDE");
   EXPECT_TRUE(model->MoveCursorBack());
   EXPECT_EQ(model->selection_base(), 4);
@@ -381,7 +375,7 @@ TEST(TextInputModel, MoveCursorBackEnd) {
 }
 
 TEST(TextInputModel, MoveCursorBackWideCharacters) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(4, 4, "😄🙃🤪🧐"));
   ASSERT_TRUE(model->MoveCursorBack());
   EXPECT_EQ(model->selection_base(), 2);
@@ -390,7 +384,7 @@ TEST(TextInputModel, MoveCursorBackWideCharacters) {
 }
 
 TEST(TextInputModel, MoveCursorBackSelection) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(1, 4, "ABCDE");
   EXPECT_TRUE(model->MoveCursorBack());
   EXPECT_EQ(model->selection_base(), 1);
@@ -399,7 +393,7 @@ TEST(TextInputModel, MoveCursorBackSelection) {
 }
 
 TEST(TextInputModel, MoveCursorToBeginningStart) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(0, 0, "ABCDE");
   EXPECT_FALSE(model->MoveCursorToBeginning());
   EXPECT_EQ(model->selection_base(), 0);
@@ -408,7 +402,7 @@ TEST(TextInputModel, MoveCursorToBeginningStart) {
 }
 
 TEST(TextInputModel, MoveCursorToBeginningMiddle) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(2, 2, "ABCDE");
   EXPECT_TRUE(model->MoveCursorToBeginning());
   EXPECT_EQ(model->selection_base(), 0);
@@ -417,7 +411,7 @@ TEST(TextInputModel, MoveCursorToBeginningMiddle) {
 }
 
 TEST(TextInputModel, MoveCursorToBeginningEnd) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(5, 5, "ABCDE");
   EXPECT_TRUE(model->MoveCursorToBeginning());
   EXPECT_EQ(model->selection_base(), 0);
@@ -426,7 +420,7 @@ TEST(TextInputModel, MoveCursorToBeginningEnd) {
 }
 
 TEST(TextInputModel, MoveCursorToBeginningSelection) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(1, 4, "ABCDE");
   EXPECT_TRUE(model->MoveCursorToBeginning());
   EXPECT_EQ(model->selection_base(), 0);
@@ -435,7 +429,7 @@ TEST(TextInputModel, MoveCursorToBeginningSelection) {
 }
 
 TEST(TextInputModel, MoveCursorToEndStart) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(0, 0, "ABCDE");
   EXPECT_TRUE(model->MoveCursorToEnd());
   EXPECT_EQ(model->selection_base(), 5);
@@ -444,7 +438,7 @@ TEST(TextInputModel, MoveCursorToEndStart) {
 }
 
 TEST(TextInputModel, MoveCursorToEndMiddle) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(2, 2, "ABCDE");
   EXPECT_TRUE(model->MoveCursorToEnd());
   EXPECT_EQ(model->selection_base(), 5);
@@ -453,7 +447,7 @@ TEST(TextInputModel, MoveCursorToEndMiddle) {
 }
 
 TEST(TextInputModel, MoveCursorToEndEnd) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(5, 5, "ABCDE");
   EXPECT_FALSE(model->MoveCursorToEnd());
   EXPECT_EQ(model->selection_base(), 5);
@@ -462,7 +456,7 @@ TEST(TextInputModel, MoveCursorToEndEnd) {
 }
 
 TEST(TextInputModel, MoveCursorToEndSelection) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(1, 4, "ABCDE");
   EXPECT_TRUE(model->MoveCursorToEnd());
   EXPECT_EQ(model->selection_base(), 5);
@@ -471,7 +465,7 @@ TEST(TextInputModel, MoveCursorToEndSelection) {
 }
 
 TEST(TextInputModel, GetCursorOffset) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   // These characters take 1, 2, 3 and 4 bytes in UTF-8.
   model->SetEditingState(0, 0, "$¢€𐍈");
   EXPECT_EQ(model->GetCursorOffset(), 0);
@@ -486,7 +480,7 @@ TEST(TextInputModel, GetCursorOffset) {
 }
 
 TEST(TextInputModel, GetCursorOffsetSelection) {
-  auto model = std::make_unique<TextInputModel>("", "");
+  auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(1, 4, "ABCDE");
   EXPECT_EQ(model->GetCursorOffset(), 4);
 }

@@ -29,12 +29,8 @@ bool IsTrailingSurrogate(char32_t code_point) {
 
 }  // namespace
 
-TextInputModel::TextInputModel(const std::string& input_type,
-                               const std::string& input_action)
-    : input_type_(input_type),
-      input_action_(input_action),
-      selection_base_(text_.begin()),
-      selection_extent_(text_.begin()) {}
+TextInputModel::TextInputModel()
+    : selection_base_(text_.begin()), selection_extent_(text_.begin()) {}
 
 TextInputModel::~TextInputModel() = default;
 

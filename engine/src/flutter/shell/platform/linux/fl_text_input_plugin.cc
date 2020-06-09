@@ -267,7 +267,7 @@ static void fl_text_input_plugin_init(FlTextInputPlugin* self) {
   g_signal_connect_object(self->im_context, "delete-surrounding",
                           G_CALLBACK(im_delete_surrounding_cb), self,
                           G_CONNECT_SWAPPED);
-  self->text_model = new flutter::TextInputModel("", "");
+  self->text_model = new flutter::TextInputModel();
 }
 
 FlTextInputPlugin* fl_text_input_plugin_new(FlBinaryMessenger* messenger) {
