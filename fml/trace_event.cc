@@ -12,16 +12,10 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 
-#if (FLUTTER_RELEASE && !defined(OS_FUCHSIA))
-#define TIMELINE_ENABLED 0
-#else
-#define TIMELINE_ENABLED 1
-#endif
-
 namespace fml {
 namespace tracing {
 
-#if TIMELINE_ENABLED
+#if FLUTTER_TIMELINE_ENABLED
 
 namespace {
 AsciiTrie gWhitelist;
@@ -290,7 +284,7 @@ void TraceEventFlowEnd0(TraceArg category_group, TraceArg name, TraceIDArg id) {
   );
 }
 
-#else  // TIMELINE_ENABLED
+#else  // FLUTTER_TIMELINE_ENABLED
 
 void TraceSetWhitelist(const std::vector<std::string>& whitelist) {}
 
@@ -379,7 +373,7 @@ void TraceEventFlowStep0(TraceArg category_group,
 void TraceEventFlowEnd0(TraceArg category_group, TraceArg name, TraceIDArg id) {
 }
 
-#endif  // TIMELINE_ENABLED
+#endif  // FLUTTER_TIMELINE_ENABLED
 
 }  // namespace tracing
 }  // namespace fml
