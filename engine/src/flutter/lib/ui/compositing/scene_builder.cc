@@ -100,7 +100,7 @@ void SceneBuilder::pushTransform(Dart_Handle layer_handle,
 }
 
 void SceneBuilder::pushOffset(Dart_Handle layer_handle, double dx, double dy) {
-  SkMatrix sk_matrix = SkMatrix::MakeTrans(dx, dy);
+  SkMatrix sk_matrix = SkMatrix::Translate(dx, dy);
   auto layer = std::make_shared<flutter::TransformLayer>(sk_matrix);
   PushLayer(layer);
   EngineLayer::MakeRetained(layer_handle, layer);

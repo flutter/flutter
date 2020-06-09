@@ -43,7 +43,7 @@ TEST_F(ColorFilterLayerTest, PaintBeforePrerollDies) {
 #endif
 
 TEST_F(ColorFilterLayerTest, EmptyFilter) {
-  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const SkPaint child_paint = SkPaint(SkColors::kYellow);
@@ -70,7 +70,7 @@ TEST_F(ColorFilterLayerTest, EmptyFilter) {
 }
 
 TEST_F(ColorFilterLayerTest, SimpleFilter) {
-  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const SkPaint child_paint = SkPaint(SkColors::kYellow);
@@ -99,7 +99,7 @@ TEST_F(ColorFilterLayerTest, SimpleFilter) {
 }
 
 TEST_F(ColorFilterLayerTest, MultipleChildren) {
-  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 2.5f, 3.5f);
   const SkPath child_path1 = SkPath().addRect(child_bounds);
   const SkPath child_path2 =
@@ -142,7 +142,7 @@ TEST_F(ColorFilterLayerTest, MultipleChildren) {
 }
 
 TEST_F(ColorFilterLayerTest, Nested) {
-  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 2.5f, 3.5f);
   const SkPath child_path1 = SkPath().addRect(child_bounds);
   const SkPath child_path2 =

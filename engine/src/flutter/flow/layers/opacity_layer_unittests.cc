@@ -55,8 +55,8 @@ TEST_F(OpacityLayerTest, PaintBeforePreollDies) {
 
 TEST_F(OpacityLayerTest, ChildIsCached) {
   const SkAlpha alpha_half = 255 / 2;
-  auto initial_transform = SkMatrix::MakeTrans(50.0, 25.5);
-  auto other_transform = SkMatrix::MakeScale(1.0, 2.0);
+  auto initial_transform = SkMatrix::Translate(50.0, 25.5);
+  auto other_transform = SkMatrix::Scale(1.0, 2.0);
   const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
   auto mock_layer = std::make_shared<MockLayer>(child_path);
   auto layer =
@@ -84,8 +84,8 @@ TEST_F(OpacityLayerTest, ChildIsCached) {
 
 TEST_F(OpacityLayerTest, ChildrenNotCached) {
   const SkAlpha alpha_half = 255 / 2;
-  auto initial_transform = SkMatrix::MakeTrans(50.0, 25.5);
-  auto other_transform = SkMatrix::MakeScale(1.0, 2.0);
+  auto initial_transform = SkMatrix::Translate(50.0, 25.5);
+  auto other_transform = SkMatrix::Scale(1.0, 2.0);
   const SkPath child_path1 = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
   const SkPath child_path2 = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1);
@@ -121,9 +121,9 @@ TEST_F(OpacityLayerTest, ChildrenNotCached) {
 TEST_F(OpacityLayerTest, FullyOpaque) {
   const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
   const SkPoint layer_offset = SkPoint::Make(0.5f, 1.5f);
-  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 0.5f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 0.5f);
   const SkMatrix layer_transform =
-      SkMatrix::MakeTrans(layer_offset.fX, layer_offset.fY);
+      SkMatrix::Translate(layer_offset.fX, layer_offset.fY);
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
   const SkMatrix integral_layer_transform = RasterCache::GetIntegralTransCTM(
       SkMatrix::Concat(initial_transform, layer_transform));
@@ -170,9 +170,9 @@ TEST_F(OpacityLayerTest, FullyOpaque) {
 TEST_F(OpacityLayerTest, FullyTransparent) {
   const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
   const SkPoint layer_offset = SkPoint::Make(0.5f, 1.5f);
-  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 0.5f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 0.5f);
   const SkMatrix layer_transform =
-      SkMatrix::MakeTrans(layer_offset.fX, layer_offset.fY);
+      SkMatrix::Translate(layer_offset.fX, layer_offset.fY);
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
   const SkMatrix integral_layer_transform = RasterCache::GetIntegralTransCTM(
       SkMatrix::Concat(initial_transform, layer_transform));
@@ -218,9 +218,9 @@ TEST_F(OpacityLayerTest, FullyTransparent) {
 TEST_F(OpacityLayerTest, HalfTransparent) {
   const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
   const SkPoint layer_offset = SkPoint::Make(0.5f, 1.5f);
-  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 0.5f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 0.5f);
   const SkMatrix layer_transform =
-      SkMatrix::MakeTrans(layer_offset.fX, layer_offset.fY);
+      SkMatrix::Translate(layer_offset.fX, layer_offset.fY);
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
   const SkMatrix integral_layer_transform = RasterCache::GetIntegralTransCTM(
       SkMatrix::Concat(initial_transform, layer_transform));
@@ -272,11 +272,11 @@ TEST_F(OpacityLayerTest, Nested) {
   const SkPath child3_path = SkPath().addRect(SkRect::MakeWH(6.0f, 6.0f));
   const SkPoint layer1_offset = SkPoint::Make(0.5f, 1.5f);
   const SkPoint layer2_offset = SkPoint::Make(2.5f, 0.5f);
-  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 0.5f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 0.5f);
   const SkMatrix layer1_transform =
-      SkMatrix::MakeTrans(layer1_offset.fX, layer1_offset.fY);
+      SkMatrix::Translate(layer1_offset.fX, layer1_offset.fY);
   const SkMatrix layer2_transform =
-      SkMatrix::MakeTrans(layer2_offset.fX, layer2_offset.fY);
+      SkMatrix::Translate(layer2_offset.fX, layer2_offset.fY);
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
   const SkMatrix integral_layer1_transform = RasterCache::GetIntegralTransCTM(
       SkMatrix::Concat(initial_transform, layer1_transform));

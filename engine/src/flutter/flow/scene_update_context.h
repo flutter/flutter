@@ -180,7 +180,7 @@ class SceneUpdateContext {
 
   // The transformation matrix of the current context. It's used to construct
   // the LayerRasterCacheKey for a given layer.
-  SkMatrix Matrix() const { return SkMatrix::MakeScale(ScaleX(), ScaleY()); }
+  SkMatrix Matrix() const { return SkMatrix::Scale(ScaleX(), ScaleY()); }
 
   bool HasRetainedNode(const LayerRasterCacheKey& key) const {
     return surface_producer_->HasRetainedNode(key);

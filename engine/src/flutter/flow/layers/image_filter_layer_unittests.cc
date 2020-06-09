@@ -42,7 +42,7 @@ TEST_F(ImageFilterLayerTest, PaintBeforePrerollDies) {
 #endif
 
 TEST_F(ImageFilterLayerTest, EmptyFilter) {
-  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const SkPaint child_paint = SkPaint(SkColors::kYellow);
@@ -70,7 +70,7 @@ TEST_F(ImageFilterLayerTest, EmptyFilter) {
 }
 
 TEST_F(ImageFilterLayerTest, SimpleFilter) {
-  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const SkPaint child_paint = SkPaint(SkColors::kYellow);
@@ -103,11 +103,11 @@ TEST_F(ImageFilterLayerTest, SimpleFilter) {
 }
 
 TEST_F(ImageFilterLayerTest, SimpleFilterBounds) {
-  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const SkPaint child_paint = SkPaint(SkColors::kYellow);
-  const SkMatrix filter_transform = SkMatrix::MakeScale(2.0, 2.0);
+  const SkMatrix filter_transform = SkMatrix::Scale(2.0, 2.0);
   auto layer_filter = SkImageFilter::MakeMatrixFilter(
       filter_transform, SkFilterQuality::kMedium_SkFilterQuality, nullptr);
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
@@ -136,7 +136,7 @@ TEST_F(ImageFilterLayerTest, SimpleFilterBounds) {
 }
 
 TEST_F(ImageFilterLayerTest, MultipleChildren) {
-  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 2.5f, 3.5f);
   const SkPath child_path1 = SkPath().addRect(child_bounds);
   const SkPath child_path2 =
@@ -181,7 +181,7 @@ TEST_F(ImageFilterLayerTest, MultipleChildren) {
 }
 
 TEST_F(ImageFilterLayerTest, Nested) {
-  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 2.5f, 3.5f);
   const SkPath child_path1 = SkPath().addRect(child_bounds);
   const SkPath child_path2 =

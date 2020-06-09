@@ -36,8 +36,8 @@ TEST_F(MockLayerTest, PaintingEmptyLayerDies) {
 TEST_F(MockLayerTest, SimpleParams) {
   const SkPath path = SkPath().addRect(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPaint paint = SkPaint(SkColors::kBlue);
-  const SkMatrix start_matrix = SkMatrix::MakeTrans(1.0f, 2.0f);
-  const SkMatrix scale_matrix = SkMatrix::MakeScale(0.5f, 0.5f);
+  const SkMatrix start_matrix = SkMatrix::Translate(1.0f, 2.0f);
+  const SkMatrix scale_matrix = SkMatrix::Scale(0.5f, 0.5f);
   const SkRect cull_rect = SkRect::MakeWH(5.0f, 5.0f);
   const float parent_elevation = 5.0f;
   const bool parent_has_platform_view = true;
