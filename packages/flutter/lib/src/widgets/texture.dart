@@ -33,7 +33,8 @@ import 'framework.dart';
 ///  * <https://api.flutter.dev/objcdoc/Protocols/FlutterTextureRegistry.html>
 ///    for how to create and manage backend textures on iOS.
 class Texture extends LeafRenderObjectWidget {
-  /// Creates a widget backed by the texture identified by [textureId].
+  /// Creates a widget backed by the texture identified by [textureId], and use
+  /// [filterQuality] to set texture's [FilterQuality].
   const Texture({
     Key key,
     @required this.textureId,
@@ -44,9 +45,11 @@ class Texture extends LeafRenderObjectWidget {
   /// The identity of the backend texture.
   final int textureId;
 
-  /// Used to set the filterQuality of the texture
-  /// Use the "low" quality setting to scale the texture, which corresponds to
-  /// bilinear interpolation, rather than the default "none" which corresponds
+
+  /// Used to set the filterQuality of the texture.
+  ///
+  /// Use the [FilterQuality.low] quality setting to scale the texture, which corresponds to
+  /// bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
   /// to nearest-neighbor.
   final FilterQuality filterQuality;
 

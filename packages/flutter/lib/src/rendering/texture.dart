@@ -35,7 +35,8 @@ import 'object.dart';
 ///  * <https://api.flutter.dev/objcdoc/Protocols/FlutterTextureRegistry.html>
 ///    for how to create and manage backend textures on iOS.
 class TextureBox extends RenderBox {
-  /// Creates a box backed by the texture identified by [textureId].
+  /// Creates a box backed by the texture identified by [textureId], and use
+  /// [filterQuality] to set texture's [FilterQuality].
   TextureBox({
     @required int textureId,
     FilterQuality filterQuality = FilterQuality.low,
@@ -54,7 +55,8 @@ class TextureBox extends RenderBox {
     }
   }
 
-  /// Used to set the filterQuality of the texture
+  /// Used to set the filterQuality of the texture.
+  ///
   /// Use the [FilterQuality.low] quality setting to scale the texture, which corresponds to
   /// bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
   /// to nearest-neighbor.

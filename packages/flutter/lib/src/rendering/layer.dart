@@ -580,7 +580,7 @@ class PictureLayer extends Layer {
 class TextureLayer extends Layer {
   /// Creates a texture layer bounded by [rect] and with backend texture
   /// identified by [textureId], if [freeze] is true new texture frames will not be
-  /// populated to the texture.
+  /// populated to the texture, and use [filterQuality] to set layer's [FilterQuality].
   TextureLayer({
     @required this.rect,
     @required this.textureId,
@@ -604,9 +604,10 @@ class TextureLayer extends Layer {
   /// un-freezes it when it is certain that a frame with the new size is ready.
   final bool freeze;
 
-  /// Used to set the filterQuality of the texture
-  /// Use the "low" quality setting to scale the texture, which corresponds to
-  /// bilinear interpolation, rather than the default "none" which corresponds
+  /// Used to set the filterQuality of the texture.
+  ///
+  /// Use the [FilterQuality.low] quality setting to scale the texture, which corresponds to
+  /// bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
   /// to nearest-neighbor.
   final ui.FilterQuality filterQuality;
 
