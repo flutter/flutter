@@ -28,6 +28,9 @@ FILE: ../../../flutter/flow/compositor_context.cc
 FILE: ../../../flutter/flow/compositor_context.h
 FILE: ../../../flutter/flow/embedded_views.cc
 FILE: ../../../flutter/flow/embedded_views.h
+FILE: ../../../flutter/flow/gl_context_switch.cc
+FILE: ../../../flutter/flow/gl_context_switch.h
+FILE: ../../../flutter/flow/gl_context_switch_unittests.cc
 FILE: ../../../flutter/flow/instrumentation.cc
 FILE: ../../../flutter/flow/instrumentation.h
 FILE: ../../../flutter/flow/layers/backdrop_filter_layer.cc
@@ -102,6 +105,10 @@ FILE: ../../../flutter/flow/scene_update_context.h
 FILE: ../../../flutter/flow/skia_gpu_object.cc
 FILE: ../../../flutter/flow/skia_gpu_object.h
 FILE: ../../../flutter/flow/skia_gpu_object_unittests.cc
+FILE: ../../../flutter/flow/surface.cc
+FILE: ../../../flutter/flow/surface.h
+FILE: ../../../flutter/flow/surface_frame.cc
+FILE: ../../../flutter/flow/surface_frame.h
 FILE: ../../../flutter/flow/texture.cc
 FILE: ../../../flutter/flow/texture.h
 FILE: ../../../flutter/flow/texture_unittests.cc
@@ -576,11 +583,6 @@ FILE: ../../../flutter/shell/common/engine.cc
 FILE: ../../../flutter/shell/common/engine.h
 FILE: ../../../flutter/shell/common/fixtures/shell_test.dart
 FILE: ../../../flutter/shell/common/fixtures/shelltest_screenshot.png
-FILE: ../../../flutter/shell/common/gl_context_switch.cc
-FILE: ../../../flutter/shell/common/gl_context_switch.h
-FILE: ../../../flutter/shell/common/gl_context_switch_test.cc
-FILE: ../../../flutter/shell/common/gl_context_switch_test.h
-FILE: ../../../flutter/shell/common/gl_context_switch_unittests.cc
 FILE: ../../../flutter/shell/common/input_events_unittests.cc
 FILE: ../../../flutter/shell/common/isolate_configuration.cc
 FILE: ../../../flutter/shell/common/isolate_configuration.h
@@ -616,10 +618,6 @@ FILE: ../../../flutter/shell/common/shell_test_platform_view_vulkan.h
 FILE: ../../../flutter/shell/common/shell_unittests.cc
 FILE: ../../../flutter/shell/common/skia_event_tracer_impl.cc
 FILE: ../../../flutter/shell/common/skia_event_tracer_impl.h
-FILE: ../../../flutter/shell/common/surface.cc
-FILE: ../../../flutter/shell/common/surface.h
-FILE: ../../../flutter/shell/common/surface_frame.cc
-FILE: ../../../flutter/shell/common/surface_frame.h
 FILE: ../../../flutter/shell/common/switches.cc
 FILE: ../../../flutter/shell/common/switches.h
 FILE: ../../../flutter/shell/common/thread_host.cc

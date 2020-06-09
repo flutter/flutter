@@ -7,14 +7,14 @@
 #include <future>
 #include <memory>
 
-#include "flutter/shell/common/gl_context_switch.h"
-#include "gl_context_switch_test.h"
+#include "flutter/flow/gl_context_switch.h"
+#include "flutter/flow/testing/gl_context_switch_test.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
 namespace testing {
 
-TEST_F(GLContextSwitchTest, SwitchKeepsContextCurrentWhileInScope) {
+TEST(GLContextSwitchTest, SwitchKeepsContextCurrentWhileInScope) {
   {
     auto test_gl_context = std::make_unique<TestSwitchableGLContext>(0);
     auto context_switch = GLContextSwitch(std::move(test_gl_context));
