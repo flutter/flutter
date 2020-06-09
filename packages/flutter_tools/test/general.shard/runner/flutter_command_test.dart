@@ -321,7 +321,7 @@ void main() {
         await completer.future;
 
         await Cache.lock();
-        Cache.releaseLockEarly();
+        Cache.releaseLock();
       }, overrides: <Type, Generator>{
         ProcessInfo: () => mockProcessInfo,
         Signals: () => FakeSignals(

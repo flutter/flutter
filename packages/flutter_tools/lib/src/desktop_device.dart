@@ -10,7 +10,6 @@ import 'application_package.dart';
 import 'base/common.dart';
 import 'base/io.dart';
 import 'build_info.dart';
-import 'cache.dart';
 import 'convert.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
@@ -98,7 +97,6 @@ abstract class DesktopDevice extends Device {
     String userIdentifier,
   }) async {
     if (!prebuiltApplication) {
-      Cache.releaseLockEarly();
       await buildForDevice(
         package,
         buildInfo: debuggingOptions?.buildInfo,

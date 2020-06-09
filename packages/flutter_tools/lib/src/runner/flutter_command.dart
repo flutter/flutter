@@ -731,7 +731,7 @@ abstract class FlutterCommand extends Command<void> {
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
     final SignalHandler handler = (io.ProcessSignal s) {
-      Cache.releaseLockEarly();
+      Cache.releaseLock();
       _sendPostUsage(
         commandPath,
         const FlutterCommandResult(ExitStatus.killed),
@@ -806,8 +806,12 @@ abstract class FlutterCommand extends Command<void> {
 
     if (shouldRunPub) {
       await pub.get(context: PubContext.getVerifyContext(name));
+      // All done updating dependencies. Release the cache lock.
+      Cache.releaseLock();
       final FlutterProject project = FlutterProject.current();
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: true);
+    } else {
+      Cache.releaseLock();
     }
 
     setupApplicationPackages();

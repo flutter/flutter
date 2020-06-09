@@ -12,7 +12,6 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../cache.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
 import '../device.dart';
@@ -173,8 +172,6 @@ class AttachCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
-
     await _validateArguments();
 
     writePidFile(stringArg('pid-file'));

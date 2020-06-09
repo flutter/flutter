@@ -16,7 +16,6 @@ import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
@@ -52,7 +51,6 @@ class DaemonCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     globals.printStatus('Starting device daemon...');
     isRunningFromDaemon = true;
-    Cache.releaseLockEarly();
 
     final Daemon daemon = Daemon(
       stdinCommandStream, stdoutCommandResponse,
