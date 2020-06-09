@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/net.dart';
@@ -15,7 +16,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
@@ -830,7 +830,11 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          sdkBinaryName('dartfmt'),
+          globals.fs.path.join(
+            globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+            'bin',
+            globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
+          ),
           <String>[file.path],
           workingDirectory: projectDir.path,
         );
@@ -928,7 +932,11 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          sdkBinaryName('dartfmt'),
+          globals.fs.path.join(
+            globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+            'bin',
+            globals.platform.isWindows ? 'dartfmt.bat' : 'dartfmt',
+          ),
           <String>[file.path],
           workingDirectory: projectDir.path,
         );
@@ -1532,7 +1540,6 @@ Future<void> _ensureFlutterToolsSnapshot() async {
   }
 
   final List<String> snapshotArgs = <String>[
-    ...dartVmFlags,
     '--snapshot=$flutterToolsSnapshotPath',
     '--packages=$dotPackages',
     flutterToolsPath,
@@ -1576,13 +1583,12 @@ Future<void> _analyzeProject(String workingDir) async {
   ));
 
   final List<String> args = <String>[
-    ...dartVmFlags,
     flutterToolsSnapshotPath,
     'analyze',
   ];
 
   final ProcessResult exec = await Process.run(
-    '$dartSdkPath/bin/dart',
+    globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
     args,
     workingDirectory: workingDir,
   );
@@ -1605,9 +1611,8 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   // While flutter test does get packages, it doesn't write version
   // files anymore.
   await Process.run(
-    '$dartSdkPath/bin/dart',
+    globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
     <String>[
-      ...dartVmFlags,
       flutterToolsSnapshotPath,
       'packages',
       'get',
@@ -1616,7 +1621,6 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   );
 
   final List<String> args = <String>[
-    ...dartVmFlags,
     flutterToolsSnapshotPath,
     'test',
     '--no-color',
@@ -1624,7 +1628,7 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   ];
 
   final ProcessResult exec = await Process.run(
-    '$dartSdkPath/bin/dart',
+    globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
     args,
     workingDirectory: workingDir.path,
   );

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -21,10 +22,12 @@ class AnalyzeCommand extends FlutterCommand {
     this.workingDirectory,
     @required FileSystem fileSystem,
     @required Platform platform,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     @required Logger logger,
     @required ProcessManager processManager,
-  }) : _fileSystem = fileSystem,
+    @required Artifacts artifacts,
+  }) : _artifacts = artifacts,
+       _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
        _terminal = terminal,
@@ -77,9 +80,10 @@ class AnalyzeCommand extends FlutterCommand {
   /// The working directory for testing analysis using dartanalyzer.
   final Directory workingDirectory;
 
+  final Artifacts _artifacts;
   final FileSystem _fileSystem;
   final Logger _logger;
-  final AnsiTerminal _terminal;
+  final Terminal _terminal;
   final ProcessManager _processManager;
   final Platform _platform;
 
@@ -117,6 +121,7 @@ class AnalyzeCommand extends FlutterCommand {
         processManager: _processManager,
         terminal: _terminal,
         experiments: stringsArg('enable-experiment'),
+        artifacts: _artifacts,
       ).analyze();
     } else {
       await AnalyzeOnce(
@@ -130,6 +135,7 @@ class AnalyzeCommand extends FlutterCommand {
         processManager: _processManager,
         terminal: _terminal,
         experiments: stringsArg('enable-experiment'),
+        artifacts: _artifacts,
       ).analyze();
     }
     return FlutterCommandResult.success();
