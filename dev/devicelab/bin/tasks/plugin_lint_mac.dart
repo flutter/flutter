@@ -204,6 +204,8 @@ Future<void> main() async {
 
       section('Remove iOS support from plugin');
 
+      Directory(path.join(objcPluginPath, 'ios')).deleteSync(recursive: true);
+
       const String iosPlatformMap = '''
       ios:
         pluginClass: TestPluginObjcPlugin''';
