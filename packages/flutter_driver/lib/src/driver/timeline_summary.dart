@@ -10,6 +10,8 @@ import 'package:file/file.dart';
 import 'package:path/path.dart' as path;
 
 import 'common.dart';
+import 'percentile_utils.dart';
+import 'profiling_summarizer.dart';
 import 'scene_display_lag_summarizer.dart';
 import 'timeline.dart';
 
@@ -96,8 +98,9 @@ class TimelineSummary {
   /// Encodes this summary as JSON.
   Map<String, dynamic> get summaryJson {
     final SceneDisplayLagSummarizer sceneDisplayLagSummarizer = _sceneDisplayLagSummarizer();
+    final Map<String, dynamic> profilingSummary = _profilingSummarizer().summarize();
 
-    return <String, dynamic>{
+    final Map<String, dynamic> timelineSummary = <String, dynamic>{
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
       '90th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(90.0),
       '99th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(99.0),
@@ -126,6 +129,9 @@ class TimelineSummary {
       '90th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(90.0),
       '99th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(99.0),
     };
+
+    timelineSummary.addAll(profilingSummary);
+    return timelineSummary;
   }
 
   /// Writes all of the recorded timeline data to a file.
@@ -161,6 +167,12 @@ class TimelineSummary {
   List<TimelineEvent> _extractNamedEvents(String name) {
     return _timeline.events
       .where((TimelineEvent event) => event.name == name)
+      .toList();
+  }
+
+  List<TimelineEvent> _extractCategorizedEvents(String category) {
+    return _timeline.events
+      .where((TimelineEvent event) => event.category == category)
       .toList();
   }
 
@@ -241,6 +253,8 @@ class TimelineSummary {
   SceneDisplayLagSummarizer _sceneDisplayLagSummarizer() => SceneDisplayLagSummarizer(_extractNamedEvents(kSceneDisplayLagEvent));
 
   List<Duration> _extractGpuRasterizerDrawDurations() => _extractBeginEndEvents(kRasterizeFrameEventName);
+
+  ProfilingSummarizer _profilingSummarizer() => ProfilingSummarizer.fromEvents(_extractCategorizedEvents(kProfilingCategory));
 
   List<Duration> _extractFrameDurations() => _extractBeginEndEvents(kBuildFrameEventName);
 }
