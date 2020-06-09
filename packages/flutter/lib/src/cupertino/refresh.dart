@@ -326,9 +326,6 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
   /// A builder that's called as this sliver's size changes, and as the state
   /// changes.
   ///
-  /// A default simple Twitter-style pull-to-refresh indicator is provided if
-  /// not specified.
-  ///
   /// Can be set to null, in which case nothing will be drawn in the overscrolled
   /// space.
   ///
@@ -384,12 +381,12 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
   static Widget _buildIndicatorForRefreshState(RefreshIndicatorMode refreshState, double radius, double percentageComplete) {
     switch (refreshState) {
       case RefreshIndicatorMode.drag:
-        // While we're dragging, we draw individual segments of the spinner while simultaneously
+        // While we're dragging, we draw individual ticks of the spinner while simultaneously
         // easing the opacity in.
         const Curve opacityCurve = Interval(0.0, 0.2, curve: Curves.easeInOut);
         return Opacity(
           opacity: opacityCurve.transform(percentageComplete),
-          child: CupertinoActivityIndicator(radius: radius, animating: false, progress: percentageComplete),
+          child: CupertinoActivityIndicator.partiallyRevealed(radius: radius, progress: percentageComplete),
         );
       case RefreshIndicatorMode.armed:
       case RefreshIndicatorMode.refresh:

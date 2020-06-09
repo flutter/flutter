@@ -27,13 +27,28 @@ class CupertinoActivityIndicator extends StatefulWidget {
     Key key,
     this.animating = true,
     this.radius = _kDefaultIndicatorRadius,
-    this.progress = 1.0,
   }) : assert(animating != null),
        assert(radius != null),
+       assert(radius > 0.0),
+       progress = 1.0,
+       super(key: key);
+
+  /// Creates a non-animated iOS-style activity indicator that displays
+  /// a partial count of ticks based on the value of [progress].
+  ///
+  /// When provided, the value of [progress] must be between 0.0 (zero ticks
+  /// will be shown) and 1.0 (all ticks will be shown) inclusive. Defaults 
+  /// to 1.0.
+  const CupertinoActivityIndicator.partiallyRevealed({
+    Key key,
+    this.radius = _kDefaultIndicatorRadius,
+    this.progress = 1.0,
+  }) : assert(radius != null),
        assert(radius > 0.0),
        assert(progress != null),
        assert(progress >= 0.0),
        assert(progress <= 1.0),
+       animating = false,
        super(key: key);
 
   /// Whether the activity indicator is running its animation.
@@ -46,9 +61,9 @@ class CupertinoActivityIndicator extends StatefulWidget {
   /// Defaults to 10px. Must be positive and cannot be null.
   final double radius;
 
-  /// Determines the number of spinner segments that will be show. Typical usage would
-  /// display all segments, however, this allows for more fine-grained control such as
-  /// during pull-to-refresh when the drag-down action shows one segment at a time as
+  /// Determines the percentage of spinner ticks that will be shown. Typical usage would
+  /// display all ticks, however, this allows for more fine-grained control such as
+  /// during pull-to-refresh when the drag-down action shows one tick at a time as
   /// the user continues to drag down.
   ///
   /// Defaults to 1.0. Must be between 0.0 and 1.0 inclusive, and cannot be null.
@@ -111,10 +126,12 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
 const double _kTwoPI = math.pi * 2.0;
 const int _kTickCount = 12;
 
-// Alpha values extracted from the native component (for both dark and light mode).
-// The list has a length of 12.
-const List<int> _alphaValues = <int>[47, 47, 47, 47, 47, 47, 147, 131, 114, 97, 81, 64];
-const int _progressiveRevealAlpha = 131;
+// Alpha values extracted from the native component (for both dark and light mode) to
+// draw the spinning ticks. The list must have a length of _kTickCount.
+const List<int> _alphaValues = <int>[47, 47, 47, 47, 47, 47, 64, 81, 97, 114, 131, 147];
+
+// The alpha value that is used to draw the partially revealed ticks.
+const int _partiallyRevealedAlpha = 147;
 
 class _CupertinoActivityIndicatorPainter extends CustomPainter {
   _CupertinoActivityIndicatorPainter({
@@ -146,9 +163,9 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
 
     final int activeTick = (_kTickCount * position.value).floor();
 
-    for (int i = ((_kTickCount - 1) * progress).toInt(); i >= 0; --i) {
-      final int t = (i + activeTick) % _kTickCount;
-      paint.color = activeColor.withAlpha(progress < 1 ? _progressiveRevealAlpha : _alphaValues[t]);
+    for (int i = 0; i < _kTickCount * progress; ++i) {
+      final int t = (i - activeTick) % _kTickCount;
+      paint.color = activeColor.withAlpha(progress < 1 ? _partiallyRevealedAlpha : _alphaValues[t]);
       canvas.drawRRect(tickFundamentalRRect, paint);
       canvas.rotate(_kTwoPI / _kTickCount);
     }
