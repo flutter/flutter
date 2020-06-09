@@ -262,8 +262,6 @@ class CreateCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     if (argResults['list-samples'] != null) {
       // _writeSamplesJson can potentially be long-lived.
-      Cache.releaseLockEarly();
-
       await _writeSamplesJson(stringArg('list-samples'));
       return FlutterCommandResult.success();
     }
