@@ -1061,9 +1061,8 @@ void main() {
       await tester.pumpAndSettle();
 
       final Finder pinnedHeaderContent = find.descendant(
-        of: find.byWidget(children[10], skipOffstage: false),
-        matching: find.byKey(headerKey, skipOffstage: false),
-        skipOffstage: false,
+        of: find.byWidget(children[10]),
+        matching: find.byKey(headerKey),
       );
 
       // The persistent header is pinned to the leading edge thus still visible,

@@ -17,10 +17,6 @@ import 'sliver.dart';
 import 'viewport.dart';
 import 'viewport_offset.dart';
 
-// Eventually we'll get rid of the deprecated members, but for now, we have to use them
-// in order to implement them.
-// ignore_for_file: deprecated_member_use_from_same_package
-
 // Trims the specified edges of the given `Rect` [original], so that they do not
 // exceed the given values.
 Rect _trim(Rect original, {
@@ -534,7 +530,7 @@ class FloatingHeaderSnapConfiguration {
       'Specify SliverPersistentHeaderDelegate.vsync instead. '
       'This feature was deprecated after v1.19.0.'
     )
-    this.vsync,
+    this.vsync,  // ignore: deprecated_member_use_from_same_package
     this.curve = Curves.ease,
     this.duration = const Duration(milliseconds: 300),
   }) : assert(curve != null),
@@ -785,7 +781,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         showOnScreenConfiguration.maxShowOnScreenExtent ?? double.infinity,
       )
       // Clamp the value back to the valid range after applying additional
-      // constriants. Shrinking is not allowed.
+      // constriants. Contracting is not allowed.
       .clamp(childExtent, effectiveMaxExtent) as double;
 
     // Expands the header if needed, with animation.
