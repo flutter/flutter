@@ -324,7 +324,12 @@ Future<int> exec(
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   String workingDirectory,
 }) async {
-  final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
+  final Process process = await startProcess(
+    executable,
+    arguments,
+    environment: environment,
+    workingDirectory: workingDirectory
+  );
   await forwardStandardStreams(process);
   final int exitCode = await process.exitCode;
 
@@ -338,23 +343,37 @@ Future<int> exec(
 /// respective outputs.
 ///
 /// Returns a future that completes when both out and error streams a closed.
-Future<void> forwardStandardStreams(Process process) {
+Future<void> forwardStandardStreams(
+  Process process, {
+  StringBuffer output, 
+  bool printStdout = true,
+  bool printStderr = true,
+  }) {
   final Completer<void> stdoutDone = Completer<void>();
   final Completer<void> stderrDone = Completer<void>();
   process.stdout
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen((String line) {
-        print('stdout: $line');
+        if (printStdout) {
+          print('stdout: $line');
+        }
+        output?.write(line);
       }, onDone: () { stdoutDone.complete(); });
   process.stderr
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen((String line) {
-        print('stderr: $line');
+        if (printStderr) {
+          print('stderr: $line');
+        }
+        stderr?.write(line);
       }, onDone: () { stderrDone.complete(); });
 
-  return Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
+  return Future.wait<void>(<Future<void>>[
+    stdoutDone.future,
+    stderrDone.future,
+    ]);
 }
 
 /// Executes a command and returns its standard output as a String.
@@ -370,31 +389,19 @@ Future<String> eval(
   bool printStdout = true,
   bool printStderr = true,
 }) async {
-  final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
-
+  final Process process = await startProcess(
+    executable,
+    arguments,
+    environment: environment,
+    workingDirectory: workingDirectory,
+  );
   final StringBuffer output = StringBuffer();
-  final Completer<void> stdoutDone = Completer<void>();
-  final Completer<void> stderrDone = Completer<void>();
-  process.stdout
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen((String line) {
-        if (printStdout) {
-          print('stdout: $line');
-        }
-        output.writeln(line);
-      }, onDone: () { stdoutDone.complete(); });
-  process.stderr
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen((String line) {
-        if (printStderr) {
-          print('stderr: $line');
-        }
-        stderr?.writeln(line);
-      }, onDone: () { stderrDone.complete(); });
-
-  await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
+  await forwardStandardStreams(
+    process,
+    output: output,
+    printStdout: printStdout,
+    printStderr: printStderr,
+    );
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
