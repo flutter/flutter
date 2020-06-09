@@ -410,6 +410,8 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
                                         size_t timestamp,
                                         double x,
                                         double y,
+                                        double scroll_delta_x,
+                                        double scroll_delta_y,
                                         int64_t buttons) {
   g_return_if_fail(FL_IS_ENGINE(self));
 
@@ -422,6 +424,10 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
   fl_event.timestamp = timestamp;
   fl_event.x = x;
   fl_event.y = y;
+  if (scroll_delta_x != 0 || scroll_delta_y != 0)
+    fl_event.signal_kind = kFlutterPointerSignalKindScroll;
+  fl_event.scroll_delta_x = scroll_delta_x;
+  fl_event.scroll_delta_y = scroll_delta_y;
   fl_event.device_kind = kFlutterPointerDeviceKindMouse;
   fl_event.buttons = buttons;
   FlutterEngineSendPointerEvent(self->engine, &fl_event, 1);
