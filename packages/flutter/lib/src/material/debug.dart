@@ -76,8 +76,8 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
           'to be provided by a Localizations widget ancestor.'
         ),
         ErrorDescription(
-          'The Material library uses Localizations to generate messages, labels,'
-          'and abbreviations.'
+          'The material library uses Localizations to generate messages, '
+          'labels, and abbreviations.'
         ),
         ErrorHint(
           'To introduce a MaterialLocalizations, either use a '
