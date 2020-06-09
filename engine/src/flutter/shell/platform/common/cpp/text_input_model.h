@@ -14,8 +14,7 @@ namespace flutter {
 // Ignores special states like "insert mode" for now.
 class TextInputModel {
  public:
-  TextInputModel(const std::string& input_type,
-                 const std::string& input_action);
+  TextInputModel();
   virtual ~TextInputModel();
 
   // Attempts to set the text state.
@@ -111,20 +110,10 @@ class TextInputModel {
     return static_cast<int>(selection_extent_ - text_.begin());
   }
 
-  // Keyboard type of the client. See available options:
-  // https://docs.flutter.io/flutter/services/TextInputType-class.html
-  std::string input_type() const { return input_type_; }
-
-  // An action requested by the user on the input client. See available options:
-  // https://docs.flutter.io/flutter/services/TextInputAction-class.html
-  std::string input_action() const { return input_action_; }
-
  private:
   void DeleteSelected();
 
   std::u16string text_;
-  std::string input_type_;
-  std::string input_action_;
   std::u16string::iterator selection_base_;
   std::u16string::iterator selection_extent_;
 };

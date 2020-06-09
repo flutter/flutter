@@ -59,6 +59,14 @@ class TextInputPlugin : public KeyboardHookHandler {
 
   // The active model. nullptr if not set.
   std::unique_ptr<TextInputModel> active_model_;
+
+  // Keyboard type of the client. See available options:
+  // https://docs.flutter.io/flutter/services/TextInputType-class.html
+  std::string input_type_;
+
+  // An action requested by the user on the input client. See available options:
+  // https://docs.flutter.io/flutter/services/TextInputAction-class.html
+  std::string input_action_;
 };
 
 }  // namespace flutter
