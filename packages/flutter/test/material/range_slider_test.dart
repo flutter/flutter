@@ -1400,7 +1400,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.byType(Overlay),
+      valueIndicatorBox,
       paints
       // Represents the raised button wth next text.
       ..path(color: Colors.black)
