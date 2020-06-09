@@ -29,6 +29,7 @@ import '../template.dart';
 
 class CreateCommand extends FlutterCommand {
   CreateCommand() {
+    addEnableExperimentation();
     argParser.addFlag('pub',
       defaultsTo: true,
       help: 'Whether to run "flutter pub get" after the project has been created.',
@@ -479,6 +480,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         context: PubContext.create,
         directory: directory.path,
         offline: boolArg('offline'),
+        enabledExperiments: stringsArg(FlutterOptions.kEnableExperiment),
       );
       final FlutterProject project = FlutterProject.fromDirectory(directory);
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
@@ -498,6 +500,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         context: PubContext.createPackage,
         directory: directory.path,
         offline: boolArg('offline'),
+        enabledExperiments: stringsArg(FlutterOptions.kEnableExperiment),
       );
     }
     return generatedCount;
@@ -515,6 +518,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         context: PubContext.createPlugin,
         directory: directory.path,
         offline: boolArg('offline'),
+        enabledExperiments: stringsArg(FlutterOptions.kEnableExperiment),
       );
     }
     final FlutterProject project = FlutterProject.fromDirectory(directory);
@@ -547,7 +551,12 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     }
 
     if (boolArg('pub')) {
-      await pub.get(context: PubContext.create, directory: directory.path, offline: boolArg('offline'));
+      await pub.get(
+        context: PubContext.create,
+        directory: directory.path,
+        offline: boolArg('offline'),
+        enabledExperiments: stringsArg(FlutterOptions.kEnableExperiment),
+      );
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
     }
 

@@ -205,6 +205,28 @@ void main() {
       ),
     });
 
+    testUsingContext('get fetches packages with --enable-experiment', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub', '--template=module']);
+      removeGeneratedFiles(projectPath);
+
+      await runCommandIn(projectPath, 'get', args: <String>[
+        '--enable-experiment=non-nullable',
+      ]);
+
+      expectDependenciesResolved(projectPath);
+      expectZeroPluginsInjected(projectPath);
+    }, overrides: <Type, Generator>{
+      Pub: () => Pub(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+      ),
+    });
+
     testUsingContext('get --offline fetches packages', () async {
       final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);

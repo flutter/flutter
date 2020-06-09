@@ -151,6 +151,7 @@ class VersionCommand extends FlutterCommand {
         directory: projectRoot,
         upgrade: true,
         checkLastModified: false,
+        enabledExperiments: <String>[],
       );
     }
 

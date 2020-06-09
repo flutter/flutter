@@ -77,7 +77,11 @@ void main() {
         botDetector: globals.botDetector,
         usage: globals.flutterUsage,
       );
-      await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
+      await pub.get(
+        context: PubContext.flutterTests,
+        directory: tempDir.path,
+        enabledExperiments: <String>[],
+      );
 
       server = AnalysisServer(
         globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
@@ -112,7 +116,11 @@ void main() {
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
     );
-    await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
+    await pub.get(
+      context: PubContext.flutterTests,
+      directory: tempDir.path,
+      enabledExperiments: <String>[],
+    );
 
       server = AnalysisServer(
         globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),

@@ -258,7 +258,8 @@ void main() {
     verify(status.stop()).called(1);
     verify(pub.get(
       context: PubContext.pubGet,
-      directory: globals.fs.path.join('packages', 'flutter_tools')
+      directory: globals.fs.path.join('packages', 'flutter_tools'),
+      enabledExperiments: anyNamed('enabledExperiments'),
     )).called(1);
 
     expect(bufferLogger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));

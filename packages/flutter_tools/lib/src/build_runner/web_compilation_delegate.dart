@@ -211,6 +211,7 @@ class BuildDaemonCreator {
       await pub.get(
         context: PubContext.pubGet,
         directory: globals.fs.file(buildScriptPackages).parent.path,
+        enabledExperiments: <String>[],
       );
     }
     final String flutterWebSdk = globals.artifacts.getArtifactPath(Artifact.flutterWebSdk);

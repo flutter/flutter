@@ -805,7 +805,12 @@ abstract class FlutterCommand extends Command<void> {
     await validateCommand();
 
     if (shouldRunPub) {
-      await pub.get(context: PubContext.getVerifyContext(name));
+      await pub.get(
+        context: PubContext.getVerifyContext(name),
+        enabledExperiments: argResults.wasParsed(FlutterOptions.kEnableExperiment)
+          ? stringsArg(FlutterOptions.kEnableExperiment)
+          : <String>[],
+      );
       // All done updating dependencies. Release the cache lock.
       Cache.releaseLock();
       final FlutterProject project = FlutterProject.current();

@@ -164,7 +164,11 @@ class TestCommand extends FlutterCommand {
         'directory (or one of its subdirectories).');
     }
     if (shouldRunPub) {
-      await pub.get(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
+      await pub.get(
+        context: PubContext.getVerifyContext(name),
+        skipPubspecYamlCheck: true,
+        enabledExperiments: stringsArg(FlutterOptions.kEnableExperiment),
+      );
     }
     final bool buildTestAssets = boolArg('test-assets');
     final List<String> names = stringsArg('name');

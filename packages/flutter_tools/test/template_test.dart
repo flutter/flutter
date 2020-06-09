@@ -83,6 +83,7 @@ void main() {
     when(pub.get(
       context: PubContext.pubGet,
       directory: anyNamed('directory'),
+      enabledExperiments: anyNamed('enabledExperiments'),
     )).thenAnswer((Invocation invocation) async {
       // Create valid package entry.
       packagesFile.writeAsStringSync('flutter_template_images:file:///flutter_template_images');

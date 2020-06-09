@@ -45,6 +45,7 @@ class PackagesCommand extends FlutterCommand {
 class PackagesGetCommand extends FlutterCommand {
   PackagesGetCommand(this.name, this.upgrade) {
     requiresPubspecYaml();
+    addEnableExperimentation();
     argParser.addFlag('offline',
       negatable: false,
       help: 'Use cached packages instead of accessing the network.',
@@ -96,6 +97,7 @@ class PackagesGetCommand extends FlutterCommand {
         upgrade: upgrade ,
         offline: boolArg('offline'),
         checkLastModified: false,
+        enabledExperiments: stringsArg(FlutterOptions.kEnableExperiment),
       );
       pubGetTimer.stop();
       globals.flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'success');
@@ -139,6 +141,7 @@ class PackagesGetCommand extends FlutterCommand {
 
 class PackagesTestCommand extends FlutterCommand {
   PackagesTestCommand() {
+    addEnableExperimentation();
     requiresPubspecYaml();
   }
 
@@ -162,13 +165,19 @@ class PackagesTestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pub.batch(<String>['run', 'test', ...argResults.rest], context: PubContext.runTest, retry: false);
+    await pub.batch(
+      <String>['run', 'test', ...argResults.rest],
+      context: PubContext.runTest,
+      retry: false,
+      enabledExperiments: stringsArg(FlutterOptions.kEnableExperiment),
+    );
     return FlutterCommandResult.success();
   }
 }
 
 class PackagesPublishCommand extends FlutterCommand {
   PackagesPublishCommand() {
+    addEnableExperimentation();
     requiresPubspecYaml();
     argParser.addFlag('dry-run',
       abbr: 'n',
@@ -202,14 +211,17 @@ class PackagesPublishCommand extends FlutterCommand {
       if (boolArg('dry-run')) '--dry-run',
       if (boolArg('force')) '--force',
     ];
-    await pub.interactively(<String>['publish', ...args], stdio: globals.stdio);
+    await pub.interactively(
+      <String>['publish', ...args],
+      stdio: globals.stdio,
+    );
     return FlutterCommandResult.success();
   }
 }
 
 class PackagesForwardCommand extends FlutterCommand {
   PackagesForwardCommand(this._commandName, this._description, {bool requiresPubspec = false}) {
-    if (requiresPubspec) {
+   if (requiresPubspec) {
       requiresPubspecYaml();
     }
   }
@@ -232,7 +244,10 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pub.interactively(<String>[_commandName, ...argResults.rest], stdio: globals.stdio);
+    await pub.interactively(
+      <String>[_commandName, ...argResults.rest],
+      stdio: globals.stdio,
+    );
     return FlutterCommandResult.success();
   }
 
@@ -259,7 +274,10 @@ class PackagesPassthroughCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pub.interactively(argResults.rest, stdio: globals.stdio);
+    await pub.interactively(
+      argResults.rest,
+      stdio: globals.stdio,
+    );
     return FlutterCommandResult.success();
   }
 }

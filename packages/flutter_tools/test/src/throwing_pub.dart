@@ -11,6 +11,7 @@ import 'package:meta/meta.dart';
 class ThrowingPub implements Pub {
   @override
   Future<void> batch(List<String> arguments, {
+    @required List<String> enabledExperiments,
     PubContext context,
     String directory,
     MessageFilter filter,
@@ -23,6 +24,7 @@ class ThrowingPub implements Pub {
 
   @override
   Future<void> get({
+    @required List<String> enabledExperiments,
     PubContext context,
     String directory,
     bool skipIfAbsent = false,
@@ -36,7 +38,11 @@ class ThrowingPub implements Pub {
   }
 
   @override
-  Future<void> interactively(List<String> arguments, {String directory, @required Stdio stdio,}) {
+  Future<void> interactively(List<String> arguments, {
+     @required List<String> enabledExperiments,
+    String directory,
+    @required Stdio stdio,
+  }) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }
 }

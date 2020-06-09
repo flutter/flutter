@@ -298,6 +298,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           upgrade: true,
           checkLastModified: false,
           offline: offline,
+          enabledExperiments: <String>[],
           flutterRootOverride: upgrade
             ? temporaryFlutterSdk.path
             : null,
@@ -319,6 +320,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           context: PubContext.updatePackages,
           directory: tempDir.path,
           filter: tree.fill,
+          enabledExperiments: <String>[],
           retry: false, // errors here are usually fatal since we're not hitting the network
         );
       } finally {
@@ -380,6 +382,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         directory: dir.path,
         checkLastModified: false,
         offline: offline,
+        enabledExperiments: <String>[],
       );
       count += 1;
     }

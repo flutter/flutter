@@ -88,6 +88,7 @@ abstract class Pub {
   /// understand usage.
   Future<void> get({
     @required PubContext context,
+    List<String> enabledExperiments = const <String>[],
     String directory,
     bool skipIfAbsent = false,
     bool upgrade = false,
@@ -111,6 +112,7 @@ abstract class Pub {
   /// understand usage.
   Future<void> batch(
     List<String> arguments, {
+    List<String> enabledExperiments = const <String>[],
     @required PubContext context,
     String directory,
     MessageFilter filter,
@@ -159,6 +161,7 @@ class _DefaultPub implements Pub {
   @override
   Future<void> get({
     @required PubContext context,
+    List<String> enabledExperiments = const <String>[],
     String directory,
     bool skipIfAbsent = false,
     bool upgrade = false,
@@ -208,6 +211,7 @@ class _DefaultPub implements Pub {
       try {
         await batch(
           args,
+          enabledExperiments: enabledExperiments,
           context: context,
           directory: directory,
           failureMessage: 'pub $command failed',
@@ -247,6 +251,7 @@ class _DefaultPub implements Pub {
   @override
   Future<void> batch(
     List<String> arguments, {
+    List<String> enabledExperiments = const <String>[],
     @required PubContext context,
     String directory,
     MessageFilter filter,
@@ -279,7 +284,7 @@ class _DefaultPub implements Pub {
     loop: while (true) {
       attempts += 1;
       code = await _processUtils.stream(
-        _pubCommand(arguments),
+        _pubCommand(<String>[...arguments, ...enabledExperiments]),
         workingDirectory: directory,
         mapFunction: filterWrapper, // may set versionSolvingFailed, lastPubMessage
         environment: await _createPubEnvironment(context, flutterRootOverride),
