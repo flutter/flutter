@@ -45,6 +45,12 @@
 #include "flutter/fml/time/time_point.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 
+#if (FLUTTER_RELEASE && !defined(OS_FUCHSIA))
+#define FLUTTER_TIMELINE_ENABLED 0
+#else
+#define FLUTTER_TIMELINE_ENABLED 1
+#endif
+
 #if !defined(OS_FUCHSIA)
 #ifndef TRACE_EVENT_HIDE_MACROS
 
@@ -193,9 +199,11 @@ void TraceCounter(TraceArg category,
                   TraceArg name,
                   TraceIDArg identifier,
                   Args... args) {
+#if FLUTTER_TIMELINE_ENABLED
   auto split = SplitArguments(args...);
   TraceTimelineEvent(category, name, identifier, Dart_Timeline_Event_Counter,
                      split.first, split.second);
+#endif  // FLUTTER_TIMELINE_ENABLED
 }
 
 // HACK: Used to NOP FML_TRACE_COUNTER macro without triggering unused var
@@ -208,9 +216,11 @@ void TraceCounterNopHACK(TraceArg category,
 
 template <typename... Args>
 void TraceEvent(TraceArg category, TraceArg name, Args... args) {
+#if FLUTTER_TIMELINE_ENABLED
   auto split = SplitArguments(args...);
   TraceTimelineEvent(category, name, 0, Dart_Timeline_Event_Begin, split.first,
                      split.second);
+#endif  // FLUTTER_TIMELINE_ENABLED
 }
 
 void TraceEvent0(TraceArg category_group, TraceArg name);
@@ -235,6 +245,7 @@ void TraceEventAsyncComplete(TraceArg category_group,
                              TimePoint begin,
                              TimePoint end,
                              Args... args) {
+#if FLUTTER_TIMELINE_ENABLED
   auto identifier = TraceNonce();
   const auto split = SplitArguments(args...);
 
@@ -262,6 +273,7 @@ void TraceEventAsyncComplete(TraceArg category_group,
                      split.first,                    // names
                      split.second                    // values
   );
+#endif  // FLUTTER_TIMELINE_ENABLED
 }
 
 void TraceEventAsyncBegin0(TraceArg category_group,
