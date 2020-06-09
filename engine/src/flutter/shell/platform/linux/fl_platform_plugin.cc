@@ -18,11 +18,15 @@ static constexpr char kFailedError[] = "Failed";
 static constexpr char kGetClipboardDataMethod[] = "Clipboard.getData";
 static constexpr char kSetClipboardDataMethod[] = "Clipboard.setData";
 static constexpr char kClipboardHasStringsMethod[] = "Clipboard.hasStrings";
+static constexpr char kPlaySoundMethod[] = "SystemSound.play";
 static constexpr char kSystemNavigatorPopMethod[] = "SystemNavigator.pop";
 static constexpr char kTextKey[] = "text";
 static constexpr char kValueKey[] = "value";
 
 static constexpr char kTextPlainFormat[] = "text/plain";
+
+static constexpr char kSoundTypeAlert[] = "SystemSoundType.alert";
+static constexpr char kSoundTypeClick[] = "SystemSoundType.click";
 
 struct _FlPlatformPlugin {
   GObject parent_instance;
@@ -136,6 +140,29 @@ static FlMethodResponse* clipboard_has_strings_async(
   return nullptr;
 }
 
+// Called when Flutter wants to play a sound.
+static FlMethodResponse* system_sound_play(FlPlatformPlugin* self,
+                                           FlValue* args) {
+  if (fl_value_get_type(args) != FL_VALUE_TYPE_STRING) {
+    return FL_METHOD_RESPONSE(fl_method_error_response_new(
+        kBadArgumentsError, "Expected string", nullptr));
+  }
+
+  const gchar* type = fl_value_get_string(args);
+  if (strcmp(type, kSoundTypeAlert) == 0) {
+    GdkDisplay* display = gdk_display_get_default();
+    if (display != nullptr) {
+      gdk_display_beep(display);
+    }
+  } else if (strcmp(type, kSoundTypeClick) == 0) {
+    // We don't make sounds for keyboard on desktops.
+  } else {
+    g_warning("Ignoring unknown sound type %s in SystemSound.play.\n", type);
+  }
+
+  return FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
+}
+
 // Called when Flutter wants to quit the application.
 static FlMethodResponse* system_navigator_pop(FlPlatformPlugin* self) {
   GApplication* app = g_application_get_default();
@@ -165,6 +192,8 @@ static void method_call_cb(FlMethodChannel* channel,
     response = clipboard_get_data_async(self, method_call);
   } else if (strcmp(method, kClipboardHasStringsMethod) == 0) {
     response = clipboard_has_strings_async(self, method_call);
+  } else if (strcmp(method, kPlaySoundMethod) == 0) {
+    response = system_sound_play(self, args);
   } else if (strcmp(method, kSystemNavigatorPopMethod) == 0) {
     response = system_navigator_pop(self);
   } else {
