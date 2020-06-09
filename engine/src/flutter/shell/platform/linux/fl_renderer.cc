@@ -16,6 +16,45 @@ typedef struct {
 
 G_DEFINE_TYPE_WITH_PRIVATE(FlRenderer, fl_renderer, G_TYPE_OBJECT)
 
+// Gets a string representation of the last EGL error.
+static const gchar* get_egl_error() {
+  EGLint error = eglGetError();
+  switch (error) {
+    case EGL_SUCCESS:
+      return "Success";
+    case EGL_NOT_INITIALIZED:
+      return "Not Initialized";
+    case EGL_BAD_ACCESS:
+      return "Bad Access";
+    case EGL_BAD_ALLOC:
+      return "Bad Allocation";
+    case EGL_BAD_ATTRIBUTE:
+      return "Bad Attribute";
+    case EGL_BAD_CONTEXT:
+      return "Bad Context";
+    case EGL_BAD_CONFIG:
+      return "Bad Configuration";
+    case EGL_BAD_CURRENT_SURFACE:
+      return "Bad Current Surface";
+    case EGL_BAD_DISPLAY:
+      return "Bad Display";
+    case EGL_BAD_SURFACE:
+      return "Bad Surface";
+    case EGL_BAD_MATCH:
+      return "Bad Match";
+    case EGL_BAD_PARAMETER:
+      return "Bad Parameter";
+    case EGL_BAD_NATIVE_PIXMAP:
+      return "Bad Native Pixmap";
+    case EGL_BAD_NATIVE_WINDOW:
+      return "Bad Native Window";
+    case EGL_CONTEXT_LOST:
+      return "Context Lost";
+    default:
+      return "Unknown Error";
+  }
+}
+
 // Default implementation for the start virtual method.
 // Provided so subclasses can chain up to here.
 static gboolean fl_renderer_real_start(FlRenderer* self, GError** error) {
@@ -52,25 +91,35 @@ static gboolean fl_renderer_real_start(FlRenderer* self, GError** error) {
   if (!eglChooseConfig(priv->egl_display, attributes, &egl_config, 1,
                        &n_config)) {
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
-                "Failed to choose EGL config");
+                "Failed to choose EGL config: %s", get_egl_error());
     return FALSE;
   }
   if (n_config == 0) {
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
-                "Failed to find appropriate EGL config");
+                "Failed to find appropriate EGL config: %s", get_egl_error());
     return FALSE;
   }
   if (!eglBindAPI(EGL_OPENGL_ES_API)) {
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
-                "Failed to bind EGL OpenGL ES API");
+                "Failed to bind EGL OpenGL ES API: %s", get_egl_error());
     return FALSE;
   }
 
   priv->egl_surface = FL_RENDERER_GET_CLASS(self)->create_surface(
       self, priv->egl_display, egl_config);
+  if (priv->egl_surface == nullptr) {
+    g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
+                "Failed to create EGL surface: %s", get_egl_error());
+    return FALSE;
+  }
   EGLint context_attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
   priv->egl_context = eglCreateContext(priv->egl_display, egl_config,
                                        EGL_NO_CONTEXT, context_attributes);
+  if (priv->egl_context == nullptr) {
+    g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
+                "Failed to create EGL context: %s", get_egl_error());
+    return FALSE;
+  }
   EGLint value;
   eglQueryContext(priv->egl_display, priv->egl_context,
                   EGL_CONTEXT_CLIENT_VERSION, &value);
@@ -99,7 +148,7 @@ gboolean fl_renderer_make_current(FlRenderer* self, GError** error) {
   if (!eglMakeCurrent(priv->egl_display, priv->egl_surface, priv->egl_surface,
                       priv->egl_context)) {
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
-                "Failed to make EGL context current");
+                "Failed to make EGL context current: %s", get_egl_error());
     return FALSE;
   }
 
@@ -113,7 +162,7 @@ gboolean fl_renderer_clear_current(FlRenderer* self, GError** error) {
   if (!eglMakeCurrent(priv->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
                       EGL_NO_CONTEXT)) {
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
-                "Failed to clear EGL context");
+                "Failed to clear EGL context: %s", get_egl_error());
     return FALSE;
   }
 
@@ -131,7 +180,7 @@ gboolean fl_renderer_present(FlRenderer* self, GError** error) {
 
   if (!eglSwapBuffers(priv->egl_display, priv->egl_surface)) {
     g_set_error(error, fl_renderer_error_quark(), FL_RENDERER_ERROR_FAILED,
-                "Failed to swap EGL buffers");
+                "Failed to swap EGL buffers: %s", get_egl_error());
     return FALSE;
   }
 
