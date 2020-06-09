@@ -75,7 +75,6 @@ Future<void> main(List<String> args) async {
       processManager: globals.processManager,
       logger: globals.logger,
       terminal: globals.terminal,
-      artifacts: globals.artifacts,
     ),
     AssembleCommand(),
     AttachCommand(verboseHelp: verboseHelp),

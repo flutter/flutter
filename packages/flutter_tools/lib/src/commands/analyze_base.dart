@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:yaml/yaml.dart' as yaml;
 
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -30,7 +29,6 @@ abstract class AnalyzeBase {
     @required this.processManager,
     @required this.terminal,
     @required this.experiments,
-    @required this.artifacts,
   });
 
   /// The parsed argument results for execution.
@@ -48,11 +46,9 @@ abstract class AnalyzeBase {
   @protected
   final Platform platform;
   @protected
-  final Terminal terminal;
+  final AnsiTerminal terminal;
   @protected
   final List<String> experiments;
-  @protected
-  final Artifacts artifacts;
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();
