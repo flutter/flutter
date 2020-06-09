@@ -34,6 +34,10 @@ EGLDisplay eglGetDisplay(EGLNativeDisplayType display_id) {
   return nullptr;
 }
 
+EGLint eglGetError() {
+  return EGL_SUCCESS;
+}
+
 void (*eglGetProcAddress(const char* procname))(void) {
   return nullptr;
 }
