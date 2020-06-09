@@ -65,7 +65,9 @@ Future<void> main(List<String> args) async {
       (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
   final bool muteCommandLogging = help || doctor;
   final bool verboseHelp = help && verbose;
-  final bool daemon = args.contains('daemon');
+  final bool daemon = args.contains('daemon') ||
+    (args.contains('--machine') && args.contains('run')) ||
+    (args.contains('--machine') && args.contains('attach'));
 
   await runner.run(args, () => <FlutterCommand>[
     AnalyzeCommand(

@@ -207,7 +207,7 @@ class AttachCommand extends FlutterCommand {
       ? Daemon(
           stdinCommandStream,
           stdoutCommandResponse,
-          notifyingLogger: NotifyingLogger(verbose: globals.logger.isVerbose),
+          notifyingLogger: globals.logger as NotifyingLogger,
           logToStdout: true,
         )
       : null;
