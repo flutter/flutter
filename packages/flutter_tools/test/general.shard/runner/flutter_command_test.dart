@@ -321,7 +321,7 @@ void main() {
         await completer.future;
 
         await Cache.lock();
-        Cache.releaseLockEarly();
+        Cache.releaseLock();
       }, overrides: <Type, Generator>{
         ProcessInfo: () => mockProcessInfo,
         Signals: () => FakeSignals(
@@ -450,7 +450,7 @@ class FakeSignals implements Signals {
   FakeSignals({
     this.subForSigTerm,
     List<ProcessSignal> exitSignals,
-  }) : delegate = Signals(exitSignals: exitSignals);
+  }) : delegate = Signals.test(exitSignals: exitSignals);
 
   final ProcessSignal subForSigTerm;
   final Signals delegate;

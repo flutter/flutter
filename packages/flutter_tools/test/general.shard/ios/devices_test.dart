@@ -72,7 +72,8 @@ void main() {
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         sdkVersion: '13.3',
-        cpuArchitecture: DarwinArch.arm64
+        cpuArchitecture: DarwinArch.arm64,
+        interfaceType: IOSDeviceInterface.usb,
       );
     });
 
@@ -87,7 +88,8 @@ void main() {
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
-        sdkVersion: '1.0.0'
+        sdkVersion: '1.0.0',
+        interfaceType: IOSDeviceInterface.usb,
       ).majorSdkVersion, 1);
       expect(IOSDevice(
         'device-123',
@@ -99,7 +101,8 @@ void main() {
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
-        sdkVersion: '13.1.1'
+        sdkVersion: '13.1.1',
+        interfaceType: IOSDeviceInterface.usb,
       ).majorSdkVersion, 13);
       expect(IOSDevice(
         'device-123',
@@ -111,7 +114,8 @@ void main() {
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
-        sdkVersion: '10'
+        sdkVersion: '10',
+        interfaceType: IOSDeviceInterface.usb,
       ).majorSdkVersion, 10);
       expect(IOSDevice(
         'device-123',
@@ -123,7 +127,8 @@ void main() {
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
-        sdkVersion: '0'
+        sdkVersion: '0',
+        interfaceType: IOSDeviceInterface.usb,
       ).majorSdkVersion, 0);
       expect(IOSDevice(
         'device-123',
@@ -135,8 +140,30 @@ void main() {
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
-        sdkVersion: 'bogus'
+        sdkVersion: 'bogus',
+        interfaceType: IOSDeviceInterface.usb,
       ).majorSdkVersion, 0);
+    });
+
+    testWithoutContext('Supports debug, profile, and release modes', () {
+      final IOSDevice device = IOSDevice(
+        'device-123',
+        artifacts: mockArtifacts,
+        fileSystem: mockFileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        sdkVersion: '13.3',
+        cpuArchitecture: DarwinArch.arm64,
+        interfaceType: IOSDeviceInterface.usb,
+      );
+
+      expect(device.supportsRuntimeMode(BuildMode.debug), true);
+      expect(device.supportsRuntimeMode(BuildMode.profile), true);
+      expect(device.supportsRuntimeMode(BuildMode.release), true);
+      expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
     });
 
     for (final Platform platform in unsupportedPlatforms) {
@@ -154,6 +181,7 @@ void main() {
               name: 'iPhone 1',
               sdkVersion: '13.3',
               cpuArchitecture: DarwinArch.arm64,
+              interfaceType: IOSDeviceInterface.usb,
             );
           },
           throwsAssertionError,
@@ -237,6 +265,7 @@ void main() {
           name: 'iPhone 1',
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
+          interfaceType: IOSDeviceInterface.usb,
         );
         logReader1 = createLogReader(device, appPackage1, mockProcess1);
         logReader2 = createLogReader(device, appPackage2, mockProcess2);
@@ -254,15 +283,17 @@ void main() {
     });
   });
 
-  group('pollingGetDevices', () {
+  group('polling', () {
     MockXcdevice mockXcdevice;
     MockArtifacts mockArtifacts;
     MockCache mockCache;
     FakeProcessManager fakeProcessManager;
-    Logger logger;
+    BufferLogger logger;
     IOSDeploy iosDeploy;
     IMobileDevice iMobileDevice;
     IOSWorkflow mockIosWorkflow;
+    IOSDevice device1;
+    IOSDevice device2;
 
     setUp(() {
       mockXcdevice = MockXcdevice();
@@ -284,33 +315,8 @@ void main() {
         processManager: fakeProcessManager,
         logger: logger,
       );
-    });
 
-    final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
-    for (final Platform unsupportedPlatform in unsupportedPlatforms) {
-      testWithoutContext('throws Unsupported Operation exception on ${unsupportedPlatform.operatingSystem}', () async {
-        final IOSDevices iosDevices = IOSDevices(
-          platform: unsupportedPlatform,
-          xcdevice: mockXcdevice,
-          iosWorkflow: mockIosWorkflow,
-        );
-        when(mockXcdevice.isInstalled).thenReturn(false);
-        expect(
-            () async { await iosDevices.pollingGetDevices(); },
-            throwsA(isA<UnsupportedError>()),
-        );
-      });
-    }
-
-    testWithoutContext('returns attached devices', () async {
-      final IOSDevices iosDevices = IOSDevices(
-        platform: macPlatform,
-        xcdevice: mockXcdevice,
-        iosWorkflow: mockIosWorkflow,
-      );
-      when(mockXcdevice.isInstalled).thenReturn(true);
-
-      final IOSDevice device = IOSDevice(
+      device1 = IOSDevice(
         'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
         name: 'Paired iPhone',
         sdkVersion: '13.3',
@@ -321,23 +327,187 @@ void main() {
         logger: logger,
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
+        interfaceType: IOSDeviceInterface.usb,
       );
-      when(mockXcdevice.getAvailableTetheredIOSDevices())
-          .thenAnswer((Invocation invocation) => Future<List<IOSDevice>>.value(<IOSDevice>[device]));
+
+      device2 = IOSDevice(
+        '43ad2fda7991b34fe1acbda82f9e2fd3d6ddc9f7',
+        name: 'iPhone 6s',
+        sdkVersion: '13.3',
+        cpuArchitecture: DarwinArch.arm64,
+        artifacts: mockArtifacts,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        logger: logger,
+        platform: macPlatform,
+        fileSystem: MemoryFileSystem.test(),
+        interfaceType: IOSDeviceInterface.usb,
+      );
+    });
+
+    testWithoutContext('start polling', () async {
+      final IOSDevices iosDevices = IOSDevices(
+        platform: macPlatform,
+        xcdevice: mockXcdevice,
+        iosWorkflow: mockIosWorkflow,
+        logger: logger,
+      );
+      when(mockXcdevice.isInstalled).thenReturn(true);
+
+      int fetchDevicesCount = 0;
+      when(mockXcdevice.getAvailableIOSDevices())
+        .thenAnswer((Invocation invocation) {
+          if (fetchDevicesCount == 0) {
+            // Initial time, no devices.
+            fetchDevicesCount++;
+            return Future<List<IOSDevice>>.value(<IOSDevice>[]);
+          } else if (fetchDevicesCount == 1) {
+            // Simulate 2 devices added later.
+            fetchDevicesCount++;
+            return Future<List<IOSDevice>>.value(<IOSDevice>[device1, device2]);
+          }
+          fail('Too many calls to getAvailableTetheredIOSDevices');
+      });
+
+      int addedCount = 0;
+      final Completer<void> added = Completer<void>();
+      iosDevices.onAdded.listen((Device device) {
+        addedCount++;
+        // 2 devices will be added.
+        // Will throw over-completion if called more than twice.
+        if (addedCount >= 2) {
+          added.complete();
+        }
+      });
+
+      final Completer<void> removed = Completer<void>();
+      iosDevices.onRemoved.listen((Device device) {
+        // Will throw over-completion if called more than once.
+        removed.complete();
+      });
+
+      final StreamController<Map<XCDeviceEvent, String>> eventStream = StreamController<Map<XCDeviceEvent, String>>();
+      when(mockXcdevice.observedDeviceEvents()).thenAnswer((_) => eventStream.stream);
+
+      await iosDevices.startPolling();
+      verify(mockXcdevice.getAvailableIOSDevices()).called(1);
+
+      expect(iosDevices.deviceNotifier.items, isEmpty);
+      expect(eventStream.hasListener, isTrue);
+
+      eventStream.add(<XCDeviceEvent, String>{
+        XCDeviceEvent.attach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+      });
+      await added.future;
+      expect(iosDevices.deviceNotifier.items.length, 2);
+      expect(iosDevices.deviceNotifier.items, contains(device1));
+      expect(iosDevices.deviceNotifier.items, contains(device2));
+
+      eventStream.add(<XCDeviceEvent, String>{
+        XCDeviceEvent.detach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+      });
+      await removed.future;
+      expect(iosDevices.deviceNotifier.items, <Device>[device2]);
+
+      // Remove stream will throw over-completion if called more than once
+      // which proves this is ignored.
+      eventStream.add(<XCDeviceEvent, String>{
+        XCDeviceEvent.detach: 'bogus'
+      });
+
+      expect(addedCount, 2);
+
+      await iosDevices.stopPolling();
+
+      expect(eventStream.hasListener, isFalse);
+    });
+
+    testWithoutContext('polling can be restarted if stream is closed', () async {
+      final IOSDevices iosDevices = IOSDevices(
+        platform: macPlatform,
+        xcdevice: mockXcdevice,
+        iosWorkflow: mockIosWorkflow,
+        logger: logger,
+      );
+      when(mockXcdevice.isInstalled).thenReturn(true);
+
+      when(mockXcdevice.getAvailableIOSDevices())
+        .thenAnswer((Invocation invocation) => Future<List<IOSDevice>>.value(<IOSDevice>[]));
+
+      final StreamController<Map<XCDeviceEvent, String>> eventStream = StreamController<Map<XCDeviceEvent, String>>();
+      final StreamController<Map<XCDeviceEvent, String>> rescheduledStream = StreamController<Map<XCDeviceEvent, String>>();
+
+      bool reschedule = false;
+      when(mockXcdevice.observedDeviceEvents()).thenAnswer((Invocation invocation) {
+        if (!reschedule) {
+          reschedule = true;
+          return eventStream.stream;
+        }
+        return rescheduledStream.stream;
+      });
+
+      await iosDevices.startPolling();
+      expect(eventStream.hasListener, isTrue);
+      verify(mockXcdevice.getAvailableIOSDevices()).called(1);
+
+      // Pretend xcdevice crashed.
+      await eventStream.close();
+      expect(logger.traceText, contains('xcdevice observe stopped'));
+
+      // Confirm a restart still gets streamed events.
+      await iosDevices.startPolling();
+
+      expect(eventStream.hasListener, isFalse);
+      expect(rescheduledStream.hasListener, isTrue);
+
+      await iosDevices.stopPolling();
+      expect(rescheduledStream.hasListener, isFalse);
+    });
+
+    final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
+    for (final Platform unsupportedPlatform in unsupportedPlatforms) {
+      testWithoutContext('pollingGetDevices throws Unsupported Operation exception on ${unsupportedPlatform.operatingSystem}', () async {
+        final IOSDevices iosDevices = IOSDevices(
+          platform: unsupportedPlatform,
+          xcdevice: mockXcdevice,
+          iosWorkflow: mockIosWorkflow,
+          logger: logger,
+        );
+        when(mockXcdevice.isInstalled).thenReturn(false);
+        expect(
+            () async { await iosDevices.pollingGetDevices(); },
+            throwsA(isA<UnsupportedError>()),
+        );
+      });
+    }
+
+    testWithoutContext('pollingGetDevices returns attached devices', () async {
+      final IOSDevices iosDevices = IOSDevices(
+        platform: macPlatform,
+        xcdevice: mockXcdevice,
+        iosWorkflow: mockIosWorkflow,
+        logger: logger,
+      );
+      when(mockXcdevice.isInstalled).thenReturn(true);
+
+      when(mockXcdevice.getAvailableIOSDevices())
+          .thenAnswer((Invocation invocation) => Future<List<IOSDevice>>.value(<IOSDevice>[device1]));
 
       final List<Device> devices = await iosDevices.pollingGetDevices();
       expect(devices, hasLength(1));
-      expect(identical(devices.first, device), isTrue);
+      expect(identical(devices.first, device1), isTrue);
     });
   });
 
   group('getDiagnostics', () {
     MockXcdevice mockXcdevice;
     IOSWorkflow mockIosWorkflow;
+    Logger logger;
 
     setUp(() {
       mockXcdevice = MockXcdevice();
       mockIosWorkflow = MockIOSWorkflow();
+      logger = BufferLogger.test();
     });
 
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
@@ -347,6 +517,7 @@ void main() {
           platform: unsupportedPlatform,
           xcdevice: mockXcdevice,
           iosWorkflow: mockIosWorkflow,
+          logger: logger,
         );
         when(mockXcdevice.isInstalled).thenReturn(false);
         expect((await iosDevices.getDiagnostics()).first, 'Control of iOS devices or simulators only supported on macOS.');
@@ -358,6 +529,7 @@ void main() {
         platform: macPlatform,
         xcdevice: mockXcdevice,
         iosWorkflow: mockIosWorkflow,
+        logger: logger,
       );
       when(mockXcdevice.isInstalled).thenReturn(true);
       when(mockXcdevice.getDiagnostics())

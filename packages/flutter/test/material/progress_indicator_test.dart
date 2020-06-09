@@ -530,4 +530,28 @@ void main() {
 
     handle.dispose();
   });
+
+  testWidgets('Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
+    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
+
+    await tester.pumpFrames(animationSheet.record(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Padding(
+          padding: EdgeInsets.all(4),
+          child: CircularProgressIndicator(),
+        ),
+      ),
+    ), const Duration(seconds: 2));
+
+    tester.binding.setSurfaceSize(animationSheet.sheetSize());
+
+    final Widget display = await animationSheet.display();
+    await tester.pumpWidget(display);
+
+    await expectLater(
+      find.byWidget(display),
+      matchesGoldenFile('material.circular_progress_indicator.indeterminate.png'),
+    );
+  }, skip: isBrowser);
 }

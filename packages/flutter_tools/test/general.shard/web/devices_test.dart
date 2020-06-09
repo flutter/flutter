@@ -16,37 +16,6 @@ import '../../src/context.dart';
 import '../../src/testbed.dart';
 
 void main() {
-  testUsingContext('Grabs context logger if no constructor logger is provided', () async {
-    final WebDevices webDevices = WebDevices(
-      featureFlags: TestFeatureFlags(isWebEnabled: true),
-      fileSystem: MemoryFileSystem.test(),
-      platform: FakePlatform(
-        operatingSystem: 'linux',
-        environment: <String, String>{}
-      ),
-      processManager:  FakeProcessManager.any(),
-    );
-
-    final List<Device> devices = await webDevices.pollingGetDevices();
-    final WebServerDevice serverDevice = devices.firstWhere((Device device) => device is WebServerDevice)
-      as WebServerDevice;
-
-    await serverDevice.startApp(
-      null,
-      debuggingOptions: DebuggingOptions.enabled(
-        BuildInfo.debug,
-        startPaused: true,
-      ),
-      platformArgs: <String, String>{
-        'uri': 'foo',
-      }
-    );
-
-    // Verify that the injected testLogger is used.
-    expect(testLogger.statusText, contains(
-      'Waiting for connection from Dart debug extension at foo'
-    ));
-  });
   testWithoutContext('No web devices listed if feature is disabled', () async {
     final WebDevices webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: false),
@@ -82,6 +51,11 @@ void main() {
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(await chromeDevice.portForwarder.forward(1), 1);
+
+    expect(chromeDevice.supportsRuntimeMode(BuildMode.debug), true);
+    expect(chromeDevice.supportsRuntimeMode(BuildMode.profile), true);
+    expect(chromeDevice.supportsRuntimeMode(BuildMode.release), true);
+    expect(chromeDevice.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
   testWithoutContext('MicrosoftEdge defaults', () async {
@@ -102,6 +76,11 @@ void main() {
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(await chromeDevice.portForwarder.forward(1), 1);
+
+    expect(chromeDevice.supportsRuntimeMode(BuildMode.debug), true);
+    expect(chromeDevice.supportsRuntimeMode(BuildMode.profile), true);
+    expect(chromeDevice.supportsRuntimeMode(BuildMode.release), true);
+    expect(chromeDevice.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
   testWithoutContext('Server defaults', () async {
@@ -120,7 +99,12 @@ void main() {
     expect(device.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(device.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(await device.portForwarder.forward(1), 1);
-  });
+
+    expect(device.supportsRuntimeMode(BuildMode.debug), true);
+    expect(device.supportsRuntimeMode(BuildMode.profile), true);
+    expect(device.supportsRuntimeMode(BuildMode.release), true);
+    expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
+});
 
   testWithoutContext('Chrome device is listed when Chrome can be run', () async {
     final WebDevices webDevices = WebDevices(

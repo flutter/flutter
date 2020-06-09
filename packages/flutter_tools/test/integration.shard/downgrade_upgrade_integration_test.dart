@@ -14,7 +14,7 @@ import '../src/common.dart';
 
 const String _kInitialVersion = 'v1.9.1';
 const String _kBranch = 'dev';
-const FileSystem fileSystem = LocalFileSystem();
+final FileSystem fileSystem = LocalFileSystem.instance;
 const ProcessManager processManager = LocalProcessManager();
 final Stdio stdio = Stdio();
 final ProcessUtils processUtils = ProcessUtils(processManager: processManager, logger: StdoutLogger(

@@ -1042,9 +1042,9 @@ void main() {
         ..path(
           includes: const <Offset>[
             Offset(0.0, 0.0),
-            Offset(0.0, -38.0),
-            Offset(-30.0, -16.0),
-            Offset(30.0, -16.0),
+            Offset(0.0, -8.0),
+            Offset(-276.0, -16.0),
+            Offset(-216.0, -16.0),
           ],
           color: const Color(0xf55f5f5f),
         ),
@@ -1064,9 +1064,9 @@ void main() {
         ..path(
           includes: const <Offset>[
             Offset(0.0, 0.0),
-            Offset(0.0, -52.0),
-            Offset(-44.0, -16.0),
-            Offset(44.0, -16.0),
+            Offset(0.0, -8.0),
+            Offset(-304.0, -16.0),
+            Offset(-216.0, -16.0),
           ],
           color: const Color(0xf55f5f5f),
         ),
@@ -1090,9 +1090,9 @@ void main() {
         ..path(
           includes: const <Offset>[
             Offset(0.0, 0.0),
-            Offset(0.0, -38.0),
-            Offset(-30.0, -16.0),
-            Offset(30.0, -16.0),
+            Offset(0.0, -8.0),
+            Offset(-276.0, -16.0),
+            Offset(-216.0, -16.0),
           ],
           color: const Color(0xf55f5f5f),
         ),
@@ -1116,9 +1116,9 @@ void main() {
         ..path(
           includes: const <Offset>[
             Offset(0.0, 0.0),
-            Offset(0.0, -52.0),
-            Offset(-44.0, -16.0),
-            Offset(44.0, -16.0),
+            Offset(0.0, -8.0),
+            Offset(-276.0, -16.0),
+            Offset(-216.0, -16.0),
           ],
           color: const Color(0xf55f5f5f),
         ),
@@ -1347,17 +1347,12 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
-                          actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
-                        ),
-                      ],
+                      flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
+                      actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                      value: '50%',
+                      increasedValue: '55%',
+                      decreasedValue: '45%',
+                      textDirection: TextDirection.ltr,
                     ),
                   ],
                 ),
@@ -1400,7 +1395,12 @@ void main() {
                   flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      id: 5,
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState],
+                      value: '50%',
+                      increasedValue: '55%',
+                      decreasedValue: '45%',
+                      textDirection: TextDirection.ltr,
                     ),
                   ],
                 ),
@@ -1455,17 +1455,60 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          value: '50%',
-                          increasedValue: '60%',
-                          decreasedValue: '40%',
-                          textDirection: TextDirection.ltr,
-                          actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
-                        ),
-                      ],
+                      flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
+                      actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                      value: '50%',
+                      increasedValue: '60%',
+                      decreasedValue: '40%',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    // Disable slider
+    await tester.pumpWidget(MaterialApp(
+      home: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(window),
+          child: const Material(
+            child: Slider(
+              value: 0.5,
+              onChanged: null,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 4,
+                      flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState],
+                      value: '50%',
+                      increasedValue: '60%',
+                      decreasedValue: '40%',
+                      textDirection: TextDirection.ltr,
                     ),
                   ],
                 ),
@@ -1517,17 +1560,12 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          value: '40',
-                          increasedValue: '60',
-                          decreasedValue: '20',
-                          textDirection: TextDirection.ltr,
-                          actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
-                        ),
-                      ],
+                      flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
+                      actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                      value: '40',
+                      increasedValue: '60',
+                      decreasedValue: '20',
+                      textDirection: TextDirection.ltr,
                     ),
                   ],
                 ),
@@ -1949,6 +1987,96 @@ void main() {
     await gesture.up();
   });
 
+  testWidgets('Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
+    final Key sliderKey = UniqueKey();
+    double value = 0.0;
+
+    Widget buildApp({
+      Color activeColor,
+      Color inactiveColor,
+      int divisions,
+      bool enabled = true,
+    }) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Navigator(onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(builder: (BuildContext context) {
+                return Column(
+                  children: <Widget>[
+                    Slider(
+                      key: sliderKey,
+                      min: 0.0,
+                      max: 100.0,
+                      divisions: divisions,
+                      label: '${value.round()}',
+                      value: value,
+                      onChanged: (double newValue) {
+                        value = newValue;
+                      },
+                    ),
+                    RaisedButton(
+                      child: const Text('Next'),
+                      onPressed: () {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute<void>(
+                            builder: (BuildContext context) {
+                              return RaisedButton(
+                                child: const Text('Inner page'),
+                                onPressed: () => Navigator.of(context).pop(),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                );
+              });
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(divisions: 3));
+
+    /// The value indicator is added to the overlay when it is clicked or dragged.
+    /// Because both of these gestures are occurring then it adds same value indicator
+    /// twice into the overlay.
+    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final Offset topRight = tester.getTopRight(find.byType(Slider)).translate(-24, 0);
+    final TestGesture gesture = await tester.startGesture(topRight);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Slider), isNotNull);
+    expect(
+      valueIndicatorBox,
+      paints
+        ..rrect(color: const Color(0xff2196f3)) // Active track.
+        ..rrect(color: const Color(0x3d2196f3)), // Inactive track.
+    );
+
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Slider), findsNothing);
+    expect(
+      valueIndicatorBox,
+      isNot(
+          paints
+            ..rrect(color: const Color(0xff2196f3)) // Active track.
+            ..rrect(color: const Color(0x3d2196f3)) // Inactive track.
+      ),
+    );
+
+    // Don't stop holding the value indicator.
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('Slider.adaptive', (WidgetTester tester) async {
     double value = 0.5;
 
@@ -2044,6 +2172,82 @@ void main() {
 
     final RenderBox renderObject = tester.renderObject<RenderBox>(find.byType(Slider));
     expect(renderObject.size.height, 200);
+  });
+
+  testWidgets('Slider changes mouse cursor when hovered', (WidgetTester tester) async {
+    // Test Slider() constructor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Slider(
+                  mouseCursor: SystemMouseCursors.text,
+                  value: 0.5,
+                  onChanged: (double newValue) { },
+                ),
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Slider)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test Slider.adaptive() constructor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Slider.adaptive(
+                  mouseCursor: SystemMouseCursors.text,
+                  value: 0.5,
+                  onChanged: (double newValue) { },
+                ),
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: Slider(
+                  value: 0.5,
+                  onChanged: (double newValue) { },
+                ),
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
   testWidgets('Slider implements debugFillProperties', (WidgetTester tester) async {

@@ -19,6 +19,12 @@ const TextStyle textStyle = TextStyle();
 const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
 
 void main() {
+  setUp(() async {
+    // Fill the clipboard so that the PASTE option is available in the text
+    // selection menu.
+    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+  });
+
   testWidgets('cursor has expected width and radius', (WidgetTester tester) async {
     await tester.pumpWidget(
         MediaQuery(data: const MediaQueryData(devicePixelRatio: 1.0),
@@ -38,7 +44,6 @@ void main() {
     expect(editableText.cursorWidth, 10.0);
     expect(editableText.cursorRadius.x, 2.0);
   });
-
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
@@ -132,7 +137,7 @@ void main() {
     final Finder textFinder = find.byKey(editableTextKey);
     await tester.longPress(textFinder);
     tester.state<EditableTextState>(textFinder).showToolbar();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('PASTE'));
     await tester.pump();

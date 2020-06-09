@@ -14,7 +14,7 @@ import 'base/logger.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
-import 'build_system/targets/dart.dart';
+import 'build_system/targets/common.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
@@ -139,7 +139,7 @@ Future<void> buildWithAssemble({
       kTrackWidgetCreation: trackWidgetCreation?.toString(),
       kIconTreeShakerFlag: treeShakeIcons ? 'true' : null,
       if (dartDefines != null && dartDefines.isNotEmpty)
-        kDartDefines: dartDefines.join(','),
+        kDartDefines: encodeDartDefines(dartDefines),
     },
     artifacts: globals.artifacts,
     fileSystem: globals.fs,

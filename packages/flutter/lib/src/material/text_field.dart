@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(Piinks): Remove ignoring deprecated member use analysis
+// when TextField.canAssertMaterialLocalizations parameter is removed.
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/cupertino.dart';
@@ -348,6 +352,7 @@ class TextField extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autofillHints,
+    bool canAssertMaterialLocalizations,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -393,6 +398,7 @@ class TextField extends StatefulWidget {
            selectAll: true,
            paste: true,
          )),
+       canAssertMaterialLocalizations = canAssertMaterialLocalizations ?? true,
        super(key: key);
 
   /// Controls the text being edited.
@@ -722,7 +728,18 @@ class TextField extends StatefulWidget {
   final ScrollController scrollController;
 
   /// {@macro flutter.widgets.editableText.autofillHints}
+  /// {@macro flutter.services.autofill.autofillHints}
   final Iterable<String> autofillHints;
+
+  /// Indicates whether [debugCheckHasMaterialLocalizations] can be called
+  /// during build.
+  @Deprecated(
+    'Set canAssertMaterialLocalizations to `true`. This parameter will be '
+    'removed and was introduced to migrate TextField to assert '
+    'debugCheckHasMaterialLocalizations by default. '
+    'This feature was deprecated after v1.18.0.'
+  )
+  final bool canAssertMaterialLocalizations;
 
   @override
   _TextFieldState createState() => _TextFieldState();
@@ -875,6 +892,24 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     _effectiveFocusNode.canRequestFocus = _isEnabled;
   }
 
+  bool get _canRequestFocus {
+    final NavigationMode mode = MediaQuery.of(context, nullOk: true)?.navigationMode ?? NavigationMode.traditional;
+    switch (mode) {
+      case NavigationMode.traditional:
+        return _isEnabled;
+      case NavigationMode.directional:
+        return true;
+    }
+    assert(false, 'Navigation mode $mode not handled');
+    return null;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _effectiveFocusNode.canRequestFocus = _canRequestFocus;
+  }
+
   @override
   void didUpdateWidget(TextField oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -882,8 +917,8 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
       _controller = TextEditingController.fromValue(oldWidget.controller.value);
     else if (widget.controller != null && oldWidget.controller == null)
       _controller = null;
-    _effectiveFocusNode.canRequestFocus = _isEnabled;
-    if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly) {
+    _effectiveFocusNode.canRequestFocus = _canRequestFocus;
+    if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly && _isEnabled) {
       if(_effectiveController.selection.isCollapsed) {
         _showSelectionHandles = !widget.readOnly;
       }
@@ -912,6 +947,9 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
       return false;
 
     if (widget.readOnly && _effectiveController.selection.isCollapsed)
+      return false;
+
+    if (!_isEnabled)
       return false;
 
     if (cause == SelectionChangedCause.longPress)
@@ -964,8 +1002,8 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    // TODO(jonahwilliams): uncomment out this check once we have migrated tests.
-    // assert(debugCheckHasMaterialLocalizations(context));
+    if (widget.canAssertMaterialLocalizations)
+      assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
     assert(
       !(widget.style != null && widget.style.inherit == false &&
@@ -1018,7 +1056,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     Widget child = RepaintBoundary(
       child: EditableText(
         key: editableTextKey,
-        readOnly: widget.readOnly,
+        readOnly: widget.readOnly || !_isEnabled,
         toolbarOptions: widget.toolbarOptions,
         showCursor: widget.showCursor,
         showSelectionHandles: _showSelectionHandles,
@@ -1050,6 +1088,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         onSelectionHandleTapped: _handleSelectionHandleTapped,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
+        mouseCursor: MouseCursor.defer, // TextField will handle the cursor
         cursorWidth: widget.cursorWidth,
         cursorRadius: cursorRadius,
         cursorColor: cursorColor,
@@ -1092,6 +1131,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     return IgnorePointer(
       ignoring: !_isEnabled,
       child: MouseRegion(
+        cursor: SystemMouseCursors.text,
         onEnter: (PointerEnterEvent event) => _handleHover(true),
         onExit: (PointerExitEvent event) => _handleHover(false),
         child: AnimatedBuilder(

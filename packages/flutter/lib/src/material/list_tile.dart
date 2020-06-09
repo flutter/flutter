@@ -13,6 +13,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
 import 'ink_well.dart';
+import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -43,6 +44,7 @@ class ListTileTheme extends InheritedTheme {
   const ListTileTheme({
     Key key,
     this.dense = false,
+    this.shape,
     this.style = ListTileStyle.list,
     this.selectedColor,
     this.iconColor,
@@ -58,6 +60,7 @@ class ListTileTheme extends InheritedTheme {
   static Widget merge({
     Key key,
     bool dense,
+    ShapeBorder shape,
     ListTileStyle style,
     Color selectedColor,
     Color iconColor,
@@ -72,6 +75,7 @@ class ListTileTheme extends InheritedTheme {
         return ListTileTheme(
           key: key,
           dense: dense ?? parent.dense,
+          shape: shape ?? parent.shape,
           style: style ?? parent.style,
           selectedColor: selectedColor ?? parent.selectedColor,
           iconColor: iconColor ?? parent.iconColor,
@@ -85,6 +89,9 @@ class ListTileTheme extends InheritedTheme {
 
   /// If true then [ListTile]s will have the vertically dense layout.
   final bool dense;
+
+  /// If specified, [shape] defines the shape of the [ListTile]'s [InkWell] border.
+  final ShapeBorder shape;
 
   /// If specified, [style] defines the font used for [ListTile] titles.
   final ListTileStyle style;
@@ -121,6 +128,7 @@ class ListTileTheme extends InheritedTheme {
     final ListTileTheme ancestorTheme = context.findAncestorWidgetOfExactType<ListTileTheme>();
     return identical(this, ancestorTheme) ? child : ListTileTheme(
       dense: dense,
+      shape: shape,
       style: style,
       selectedColor: selectedColor,
       iconColor: iconColor,
@@ -133,6 +141,7 @@ class ListTileTheme extends InheritedTheme {
   @override
   bool updateShouldNotify(ListTileTheme oldWidget) {
     return dense != oldWidget.dense
+        || shape != oldWidget.shape
         || style != oldWidget.style
         || selectedColor != oldWidget.selectedColor
         || iconColor != oldWidget.iconColor
@@ -148,6 +157,7 @@ class ListTileTheme extends InheritedTheme {
 ///
 ///  * [CheckboxListTile], which combines a [ListTile] with a [Checkbox].
 ///  * [RadioListTile], which combines a [ListTile] with a [Radio] button.
+///  * [SwitchListTile], which combines a [ListTile] with a [Switch].
 enum ListTileControlAffinity {
   /// Position the control on the leading edge, and the secondary widget, if
   /// any, on the trailing edge.
@@ -635,10 +645,12 @@ class ListTile extends StatelessWidget {
     this.isThreeLine = false,
     this.dense,
     this.visualDensity,
+    this.shape,
     this.contentPadding,
     this.enabled = true,
     this.onTap,
     this.onLongPress,
+    this.mouseCursor,
     this.selected = false,
     this.focusColor,
     this.hoverColor,
@@ -710,6 +722,15 @@ class ListTile extends StatelessWidget {
   ///    within a [Theme].
   final VisualDensity visualDensity;
 
+  /// The shape of the tile's [InkWell].
+  ///
+  /// Defines the tile's [InkWell.customBorder].
+  ///
+  /// If this property is null then [ThemeData.cardTheme.shape] is used.
+  /// If that's null then the shape will be a [RoundedRectangleBorder] with a
+  /// circular corner radius of 4.0.
+  final ShapeBorder shape;
+
   /// The tile's internal padding.
   ///
   /// Insets a [ListTile]'s contents: its [leading], [title], [subtitle],
@@ -734,6 +755,18 @@ class ListTile extends StatelessWidget {
   ///
   /// Inoperative if [enabled] is false.
   final GestureLongPressCallback onLongPress;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  final MouseCursor mouseCursor;
 
   /// If this tile is also [enabled] then icons and text are rendered with the same color.
   ///
@@ -908,9 +941,19 @@ class ListTile extends StatelessWidget {
       ?? tileTheme?.contentPadding?.resolve(textDirection)
       ?? _defaultContentPadding;
 
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+      mouseCursor ?? MaterialStateMouseCursor.clickable,
+      <MaterialState>{
+        if (!enabled) MaterialState.disabled,
+        if (selected) MaterialState.selected,
+      },
+    );
+
     return InkWell(
+      customBorder: shape ?? tileTheme.shape,
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
+      mouseCursor: effectiveMouseCursor,
       canRequestFocus: enabled,
       focusNode: focusNode,
       focusColor: focusColor,

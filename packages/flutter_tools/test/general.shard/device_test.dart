@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
+import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -18,10 +19,12 @@ import '../src/mocks.dart';
 void main() {
   group('DeviceManager', () {
     testUsingContext('getDevices', () async {
-      // Test that DeviceManager.getDevices() doesn't throw.
-      final DeviceManager deviceManager = DeviceManager();
-      final List<Device> devices = await deviceManager.getDevices();
-      expect(devices, isList);
+      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice device3 = FakeDevice('iPod touch', '82564b38861a9a5');
+      final List<Device> devices = <Device>[device1, device2, device3];
+      final DeviceManager deviceManager = TestDeviceManager(devices);
+      expect(await deviceManager.getDevices(), devices);
     });
 
     testUsingContext('getDeviceById', () async {
@@ -60,6 +63,26 @@ void main() {
       final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
       deviceManager.resetDevices(<Device>[device2]);
       expect(await deviceManager.refreshAllConnectedDevices(), <Device>[device2]);
+    });
+  });
+
+  group('PollingDeviceDiscovery', () {
+    testUsingContext('startPolling', () async {
+      FakeAsync().run((FakeAsync time) async {
+        final FakePollingDeviceDiscovery pollingDeviceDiscovery = FakePollingDeviceDiscovery();
+        await pollingDeviceDiscovery.startPolling();
+        time.elapse(const Duration(milliseconds: 4001));
+        time.flushMicrotasks();
+        // First check should use the default polling timeout
+        // to quickly populate the list.
+        expect(pollingDeviceDiscovery.lastPollingTimeout, isNull);
+
+        time.elapse(const Duration(milliseconds: 4001));
+        time.flushMicrotasks();
+        // Subsequent polling should be much longer.
+        expect(pollingDeviceDiscovery.lastPollingTimeout, const Duration(seconds: 30));
+        await pollingDeviceDiscovery.stopPolling();
+      });
     });
   });
 
@@ -198,12 +221,12 @@ void main() {
 
 class TestDeviceManager extends DeviceManager {
   TestDeviceManager(List<Device> allDevices) {
-    _deviceDiscoverer = MockPollingDeviceDiscovery();
+    _deviceDiscoverer = FakePollingDeviceDiscovery();
     resetDevices(allDevices);
   }
   @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[_deviceDiscoverer];
-  MockPollingDeviceDiscovery _deviceDiscoverer;
+  FakePollingDeviceDiscovery _deviceDiscoverer;
 
   void resetDevices(List<Device> allDevices) {
     _deviceDiscoverer.setDevices(allDevices);

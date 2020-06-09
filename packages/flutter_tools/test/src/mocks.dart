@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
-import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
@@ -482,8 +481,8 @@ class MockStdio extends Stdio {
   List<String> get writtenToStderr => _stderr.writes.map<String>(_stderr.encoding.decode).toList();
 }
 
-class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
-  MockPollingDeviceDiscovery() : super('mock');
+class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
+  FakePollingDeviceDiscovery() : super('mock');
 
   final List<Device> _devices = <Device>[];
   final StreamController<Device> _onAddedController = StreamController<Device>.broadcast();
@@ -600,31 +599,6 @@ class BasicMock {
   }
 }
 
-class MockDevFSOperations extends BasicMock implements DevFSOperations {
-  Map<Uri, DevFSContent> devicePathToContent = <Uri, DevFSContent>{};
-
-  @override
-  Future<Uri> create(String fsName) async {
-    messages.add('create $fsName');
-    return Uri.parse('file:///$fsName');
-  }
-
-  @override
-  Future<dynamic> destroy(String fsName) async {
-    messages.add('destroy $fsName');
-  }
-
-  @override
-  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
-    String message = 'writeFile $fsName $deviceUri';
-    if (content is DevFSFileContent) {
-      message += ' ${content.file.path}';
-    }
-    messages.add(message);
-    devicePathToContent[deviceUri] = content;
-  }
-}
-
 class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   @override
   void accept() { }
@@ -664,7 +638,11 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   }
 
   @override
-  Future<CompilerOutput> recompile(Uri mainPath, List<Uri> invalidatedFiles, { String outputPath, PackageConfig packageConfig }) async {
+  Future<CompilerOutput> recompile(Uri mainPath, List<Uri> invalidatedFiles, {
+    String outputPath,
+    PackageConfig packageConfig,
+    bool suppressErrors = false,
+  }) async {
     globals.fs.file(outputPath).createSync(recursive: true);
     globals.fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
     return CompilerOutput(outputPath, 0, <Uri>[]);

@@ -34,7 +34,7 @@ Did any tests fail when you ran them? Please read [Handling breaking changes].
 - [ ] Yes, this is a breaking change. *If not, delete the remainder of this section.*
    - [ ] I wrote a design doc: https://flutter.dev/go/template *Replace this with a link to your design doc's short link*
    - [ ] I got input from the developer relations team, specifically from: *Replace with the names of who gave advice*
-   - [ ] I wrote a migration guide: *Replace with a link to your migration guide*
+   - [ ] I wrote a migration guide: https://flutter.dev/go/breaking-changes-template *Replace this with a link to a pull request that adds the migration guide to https://flutter.dev/docs/release/breaking-changes*
 
 <!-- Links -->
 [issue database]: https://github.com/flutter/flutter/issues

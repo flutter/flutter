@@ -28,6 +28,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     addEnableExperimentation(hide: !verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
+    addNullSafetyModeOptions();
   }
 
   @override
@@ -42,11 +43,10 @@ class BuildLinuxCommand extends BuildSubCommand {
   };
 
   @override
-  String get description => 'build the Linux desktop target.';
+  String get description => 'Build a Linux desktop application.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
     final BuildInfo buildInfo = getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
     if (!featureFlags.isLinuxEnabled) {

@@ -321,7 +321,7 @@ Command: /home/android/gradlew assembleRelease
       expect(testLogger.statusText,
         contains(
           'AndroidX incompatibilities may have caused this build to fail. '
-          'Please migrate your app to AndroidX. See https://goo.gl/CP92wY.'
+          'Please migrate your app to AndroidX. See https://goo.gl/CP92wY .'
         )
       );
       verify(mockUsage.sendEvent(

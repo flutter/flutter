@@ -66,11 +66,11 @@ const Map<String, dynamic> _missingStatusResponse = <String, dynamic>{
   },
 };
 
-// Arguments for a vswhere query to search for an installation with the required components.
-const List<String> _requiredComponents = <String>[
-  'Microsoft.Component.MSBuild',
+// Arguments for a vswhere query to search for an installation with the
+// requirements.
+const List<String> _requirements = <String>[
+  'Microsoft.VisualStudio.Workload.NativeDesktop',
   'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
-  'Microsoft.VisualStudio.Component.Windows10SDK.17763',
 ];
 
 // Sets up the mock environment so that searching for Visual Studio with
@@ -116,7 +116,7 @@ void setMockCompatibleVisualStudioInstallation(
   setMockVswhereResponse(
     fileSystem,
     processManager,
-    _requiredComponents,
+    _requirements,
     <String>['-version', '16'],
     response,
   );
@@ -132,7 +132,7 @@ void setMockPrereleaseVisualStudioInstallation(
   setMockVswhereResponse(
     fileSystem,
     processManager,
-    _requiredComponents,
+    _requirements,
     <String>['-version', '16', '-prerelease'],
     response,
   );
@@ -168,6 +168,50 @@ void setMockEncodedAnyVisualStudioInstallation(
     null,
     response,
   );
+}
+
+// Sets up the mock environment for a Windows 10 SDK query.
+//
+// registryPresent controls whether or not the registry key is found.
+// filesPresent controles where or not there are any SDK folders at the location
+// returned by the registry query.
+void setMockSdkRegResponse(
+  FileSystem fileSystem,
+  FakeProcessManager processManager, {
+  bool registryPresent = true,
+  bool filesPresent = true,
+}) {
+  const String registryPath = r'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0';
+  const String registryKey = r'InstallationFolder';
+  const String installationPath = r'C:\Program Files (x86)\Windows Kits\10\';
+  final String stdout = registryPresent
+    ? '''
+$registryPath
+    $registryKey    REG_SZ    $installationPath
+'''
+    : '''
+
+ERROR: The system was unable to find the specified registry key or value.
+''';
+
+  if (filesPresent) {
+    final Directory includeDirectory =  fileSystem.directory(installationPath).childDirectory('Include');
+    includeDirectory.childDirectory('10.0.17763.0').createSync(recursive: true);
+    includeDirectory.childDirectory('10.0.18362.0').createSync(recursive: true);
+    // Not an actual version; added to ensure that version comparison is number, not string-based.
+    includeDirectory.childDirectory('10.0.184.0').createSync(recursive: true);
+  }
+
+  processManager.addCommand(FakeCommand(
+    command: const <String>[
+      'reg',
+      'query',
+      registryPath,
+      '/v',
+      registryKey,
+    ],
+    stdout: stdout,
+  ));
 }
 
 // Create a visual studio instance with a FakeProcessManager.
@@ -283,7 +327,7 @@ void main() {
         fixture.processManager,
       );
 
-      final String toolsString = visualStudio.necessaryComponentDescriptions()[1];
+      final String toolsString = visualStudio.necessaryComponentDescriptions()[0];
 
       expect(toolsString.contains('v142'), true);
     });
@@ -308,7 +352,7 @@ void main() {
         fixture.processManager,
       );
 
-      final String toolsString = visualStudio.necessaryComponentDescriptions()[1];
+      final String toolsString = visualStudio.necessaryComponentDescriptions()[0];
 
       expect(toolsString.contains('v142'), true);
     });
@@ -716,6 +760,44 @@ void main() {
 
       expect(visualStudio.displayName, equals('Visual Studio Community 2017'));
       expect(visualStudio.displayVersion, equals('15.9.12'));
+    });
+
+    testWithoutContext('SDK version returns the latest version when present', () {
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
+
+      setMockSdkRegResponse(
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+
+      expect(visualStudio.getWindows10SDKVersion(), '10.0.18362.0');
+    });
+
+    testWithoutContext('SDK version returns null when the registry key is not present', () {
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
+
+      setMockSdkRegResponse(
+        fixture.fileSystem,
+        fixture.processManager,
+        registryPresent: false,
+      );
+
+      expect(visualStudio.getWindows10SDKVersion(), null);
+    });
+
+    testWithoutContext('SDK version returns null when there are no SDK files present', () {
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
+
+      setMockSdkRegResponse(
+        fixture.fileSystem,
+        fixture.processManager,
+        filesPresent: false,
+      );
+
+      expect(visualStudio.getWindows10SDKVersion(), null);
     });
   });
 }

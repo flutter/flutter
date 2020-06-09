@@ -31,7 +31,7 @@ void main() {
 
   setUp(() {
     platform = const LocalPlatform();
-    fileSystem = const LocalFileSystem();
+    fileSystem = LocalFileSystem.instance;
     platform = const LocalPlatform();
     processManager = const LocalProcessManager();
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());
@@ -159,6 +159,7 @@ void main() {
     final FakeCommand fakeCommand = FakeCommand(
       command: const <String>[
         'dart-sdk/bin/dart',
+        '--disable-dart-dev',
         'dart-sdk/bin/snapshots/analysis_server.dart.snapshot',
         '--enable-experiment',
         'non-nullable',
