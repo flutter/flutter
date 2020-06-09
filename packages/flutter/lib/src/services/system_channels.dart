@@ -223,11 +223,6 @@ class SystemChannels {
       StringCodec(),
   );
 
-  static const BasicMessageChannel<dynamic> localization = BasicMessageChannel<dynamic>(
-      'flutter/localization',
-      JSONMessageCodec(),
-  );
-
   /// A JSON [BasicMessageChannel] for system events.
   ///
   /// Events are exposed as [Map]s with string keys. The `type` key specifies
