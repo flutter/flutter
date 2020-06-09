@@ -16,7 +16,6 @@ import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../dart/analysis.dart';
-import '../globals.dart' as globals;
 import 'analyze.dart';
 import 'analyze_base.dart';
 
@@ -30,8 +29,9 @@ class AnalyzeOnce extends AnalyzeBase {
     @required Logger logger,
     @required Platform platform,
     @required ProcessManager processManager,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     @required List<String> experiments,
+    @required Artifacts artifacts,
     this.workingDirectory,
   }) : super(
         argResults,
@@ -43,6 +43,7 @@ class AnalyzeOnce extends AnalyzeBase {
         processManager: processManager,
         terminal: terminal,
         experiments: experiments,
+        artifacts: artifacts,
       );
 
   /// The working directory for testing analysis using dartanalyzer.
@@ -91,7 +92,7 @@ class AnalyzeOnce extends AnalyzeBase {
     final List<AnalysisError> errors = <AnalysisError>[];
 
     final String sdkPath = argResults['dart-sdk'] as String ??
-      globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath);
+      artifacts.getArtifactPath(Artifact.engineDartSdkPath);
 
     final AnalysisServer server = AnalysisServer(
       sdkPath,

@@ -17,17 +17,17 @@ import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../dart/analysis.dart';
-import '../globals.dart' as globals;
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
   AnalyzeContinuously(ArgResults argResults, List<String> repoRoots, List<Directory> repoPackages, {
     @required FileSystem fileSystem,
     @required Logger logger,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     @required Platform platform,
     @required ProcessManager processManager,
     @required List<String> experiments,
+    @required Artifacts artifacts,
   }) : super(
         argResults,
         repoPackages: repoPackages,
@@ -38,6 +38,7 @@ class AnalyzeContinuously extends AnalyzeBase {
         terminal: terminal,
         processManager: processManager,
         experiments: experiments,
+        artifacts: artifacts,
       );
 
   String analysisTarget;
@@ -69,7 +70,7 @@ class AnalyzeContinuously extends AnalyzeBase {
     }
 
     final String sdkPath = argResults['dart-sdk'] as String ??
-      globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath);
+      artifacts.getArtifactPath(Artifact.engineDartSdkPath);
 
     final AnalysisServer server = AnalysisServer(sdkPath, directories,
       fileSystem: fileSystem,

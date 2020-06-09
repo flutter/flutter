@@ -4,15 +4,18 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
+import 'package:mockito/mockito.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:process/process.dart';
@@ -76,7 +79,9 @@ void main() {
       );
       await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
 
-      server = AnalysisServer(dartSdkPath, <String>[tempDir.path],
+      server = AnalysisServer(
+        globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        <String>[tempDir.path],
         fileSystem: fileSystem,
         platform: platform,
         processManager: processManager,
@@ -109,14 +114,16 @@ void main() {
     );
     await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
 
-    server = AnalysisServer(dartSdkPath, <String>[tempDir.path],
-      fileSystem: fileSystem,
-      platform: platform,
-      processManager: processManager,
-      logger: logger,
-      terminal: terminal,
-      experiments: <String>[],
-    );
+      server = AnalysisServer(
+        globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        <String>[tempDir.path],
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        logger: logger,
+        terminal: terminal,
+        experiments: <String>[],
+      );
 
     int errorCount = 0;
     final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
@@ -133,7 +140,9 @@ void main() {
   testUsingContext('Returns no errors when source is error-free', () async {
     const String contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
-    server = AnalysisServer(dartSdkPath, <String>[tempDir.path],
+    server = AnalysisServer(
+      globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+      <String>[tempDir.path],
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
@@ -187,4 +196,121 @@ void main() {
 
     await server.start();
   });
+
+  testUsingContext('Can run AnalysisService with customized cache location', () async {
+    final Completer<void> completer = Completer<void>();
+    final StreamController<List<int>> stdin = StreamController<List<int>>();
+    final FakeProcessManager processManager = FakeProcessManager.list(
+      <FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'custom-dart-sdk/bin/dart',
+            'custom-dart-sdk/bin/snapshots/analysis_server.dart.snapshot',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--sdk',
+            'custom-dart-sdk',
+          ],
+          completer: completer,
+          stdin: IOSink(stdin.sink),
+        ),
+      ]);
+
+    final Artifacts artifacts = MockArtifacts();
+    when(artifacts.getArtifactPath(Artifact.engineDartSdkPath))
+      .thenReturn('custom-dart-sdk');
+
+    final AnalyzeCommand command = AnalyzeCommand(
+      terminal: Terminal.test(),
+      artifacts: artifacts,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'linux'),
+      fileSystem: MemoryFileSystem.test(),
+      processManager: processManager,
+    );
+
+    final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
+    commandRunner.addCommand(command);
+    unawaited(commandRunner.run(<String>['analyze', '--watch']));
+    await stdin.stream.first;
+
+    expect(processManager.hasRemainingExpectations, false);
+  });
+
+  testUsingContext('Can run AnalysisService with customized cache location --watch', () async {
+    final Completer<void> completer = Completer<void>();
+    final StreamController<List<int>> stdin = StreamController<List<int>>();
+    final FakeProcessManager processManager = FakeProcessManager.list(
+      <FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'custom-dart-sdk/bin/dart',
+            'custom-dart-sdk/bin/snapshots/analysis_server.dart.snapshot',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--sdk',
+            'custom-dart-sdk',
+          ],
+          completer: completer,
+          stdin: IOSink(stdin.sink),
+        ),
+      ]);
+
+    final Artifacts artifacts = MockArtifacts();
+    when(artifacts.getArtifactPath(Artifact.engineDartSdkPath))
+      .thenReturn('custom-dart-sdk');
+
+    final AnalyzeCommand command = AnalyzeCommand(
+      terminal: Terminal.test(),
+      artifacts: artifacts,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'linux'),
+      fileSystem: MemoryFileSystem.test(),
+      processManager: processManager,
+    );
+
+    final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
+    commandRunner.addCommand(command);
+    unawaited(commandRunner.run(<String>['analyze', '--watch']));
+    await stdin.stream.first;
+
+    expect(processManager.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('Can forward null-safety experiments to the AnalysisServer', () async {
+    final Completer<void> completer = Completer<void>();
+    final StreamController<List<int>> stdin = StreamController<List<int>>();
+    const String fakeSdkPath = 'dart-sdk';
+    final FakeCommand fakeCommand = FakeCommand(
+      command: const <String>[
+        'dart-sdk/bin/dart',
+        'dart-sdk/bin/snapshots/analysis_server.dart.snapshot',
+        '--enable-experiment',
+        'non-nullable',
+        '--disable-server-feature-completion',
+        '--disable-server-feature-search',
+        '--sdk',
+        'dart-sdk',
+      ],
+      completer: completer,
+      stdin: IOSink(stdin.sink),
+    );
+
+    server = AnalysisServer(fakeSdkPath, <String>[''],
+      fileSystem: MemoryFileSystem.test(),
+      platform: FakePlatform(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        fakeCommand,
+      ]),
+      logger: BufferLogger.test(),
+      terminal: Terminal.test(),
+      experiments: <String>[
+        'non-nullable'
+      ],
+    );
+
+    await server.start();
+  });
 }
+
+class MockArtifacts extends Mock implements Artifacts {}
