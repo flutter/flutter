@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:convert/convert.dart';
+import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
@@ -17,6 +19,7 @@ import 'build_system/depfile.dart';
 import 'build_system/targets/common.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
 import 'cache.dart';
+import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'globals.dart' as globals;
@@ -34,9 +37,20 @@ String getDefaultApplicationKernelPath({ @required bool trackWidgetCreation }) {
   );
 }
 
-String getDefaultCachedKernelPath({ @required bool trackWidgetCreation }) {
+String getDefaultCachedKernelPath({
+  @required bool trackWidgetCreation,
+  @required List<String> dartDefines,
+}) {
+  final StringBuffer buffer = StringBuffer();
+  buffer.writeAll(dartDefines);
+  String buildPrefix = '';
+  if (buffer.isNotEmpty) {
+    final String output = buffer.toString();
+    final Digest digest = md5.convert(utf8.encode(output));
+    buildPrefix = '${hex.encode(digest.bytes)}.';
+  }
   return getKernelPathForTransformerOptions(
-    globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
+    globals.fs.path.join(getBuildDirectory(), '${buildPrefix}cache.dill'),
     trackWidgetCreation: trackWidgetCreation,
   );
 }
