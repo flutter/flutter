@@ -23,10 +23,6 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'time.dart';
 
-// TODO(Piinks): remove ignoring deprecated member use analysis
-//   * when Dialog.useMaterialBorderRadius parameter is removed.
-// ignore_for_file: deprecated_member_use_from_same_package
-
 // Examples can assume:
 // BuildContext context;
 
@@ -1505,23 +1501,11 @@ class _TimePickerDialog extends StatefulWidget {
   const _TimePickerDialog({
     Key key,
     @required this.initialTime,
-    bool useMaterialBorderRadius,
   }) : assert(initialTime != null),
-       useMaterialBorderRadius = useMaterialBorderRadius ?? true,
        super(key: key);
 
   /// The time initially selected when the dialog is shown.
   final TimeOfDay initialTime;
-
-  /// Indicates whether the [Dialog.shape]'s default [RoundedRectangleBorder]
-  /// should have a radius of 4.0 pixels to match Material Design, or use the
-  /// prior default of 2.0 pixels.
-  @Deprecated(
-    'Set useMaterialBorderRadius to `true`. This parameter will be removed and '
-    'was introduced to migrate Dialog to the correct border radius by default. '
-    'This feature was deprecated after v1.18.0.'
-  )
-  final bool useMaterialBorderRadius;
 
   @override
   _TimePickerDialogState createState() => _TimePickerDialogState();
@@ -1666,7 +1650,6 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     );
 
     final Dialog dialog = Dialog(
-      useMaterialBorderRadius: widget.useMaterialBorderRadius,
       child: OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
           final Widget header = _TimePickerHeader(
@@ -1761,11 +1744,6 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// The returned Future resolves to the time selected by the user when the user
 /// closes the dialog. If the user cancels the dialog, null is returned.
 ///
-/// The [useMaterialBorderRadius] parameter specifies whether th default
-/// [Dialog.shape] of the time picker, a [RoundedRectangleBorder], should have a
-/// radius of 4.0 pixels to match Material Design, or use the prior default of
-/// 2.0 pixels.
-///
 /// {@tool snippet}
 /// Show a dialog with [initialTime] equal to the current time.
 ///
@@ -1828,22 +1806,13 @@ Future<TimeOfDay> showTimePicker({
   TransitionBuilder builder,
   bool useRootNavigator = true,
   RouteSettings routeSettings,
-  @Deprecated(
-    'Set useMaterialBorderRadius to `true`. This parameter will be removed and '
-    'was introduced to migrate Dialog to the correct border radius by default. '
-    'This feature was deprecated after v1.18.0.'
-  )
-  bool useMaterialBorderRadius,
 }) async {
   assert(context != null);
   assert(initialTime != null);
   assert(useRootNavigator != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
-  final Widget dialog = _TimePickerDialog(
-    initialTime: initialTime,
-    useMaterialBorderRadius: useMaterialBorderRadius ?? true,
-  );
+  final Widget dialog = _TimePickerDialog(initialTime: initialTime);
   return await showDialog<TimeOfDay>(
     context: context,
     useRootNavigator: useRootNavigator,
