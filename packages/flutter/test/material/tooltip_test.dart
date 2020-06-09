@@ -519,7 +519,7 @@ void main() {
     (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style;
+    final TextStyle textStyle = tester.renderObject<RenderParagraph>(find.text(tooltipText)).text.style;
     expect(textStyle.color, Colors.white);
     expect(textStyle.fontFamily, 'Roboto');
     expect(textStyle.decoration, TextDecoration.none);
@@ -545,7 +545,7 @@ void main() {
     (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style;
+    final TextStyle textStyle = tester.renderObject<RenderParagraph>(find.text(tooltipText)).text.style;
     expect(textStyle.color, Colors.black);
     expect(textStyle.fontFamily, 'Roboto');
     expect(textStyle.decoration, TextDecoration.none);
@@ -572,9 +572,9 @@ void main() {
     (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style;
+    final TextStyle textStyle = tester.renderObject<RenderParagraph>(find.text(tooltipText)).text.style;
     expect(textStyle.color, Colors.orange);
-    expect(textStyle.fontFamily, null);
+    expect(textStyle.fontFamily, 'Roboto');
     expect(textStyle.decoration, TextDecoration.underline);
   });
 

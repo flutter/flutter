@@ -19,6 +19,7 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'text_theme.dart';
 import 'theme.dart';
+import 'tooltip.dart';
 
 /// Defines the layout and behavior of a [BottomNavigationBar].
 ///
@@ -177,6 +178,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.currentIndex = 0,
     this.elevation,
     this.type,
+    this.showTooltips = true,
     Color fixedColor,
     this.backgroundColor,
     this.iconSize = 24.0,
@@ -197,6 +199,7 @@ class BottomNavigationBar extends StatefulWidget {
         items.every((BottomNavigationBarItem item) => item.title != null) == true,
         'Every item must have a non-null title',
        ),
+       assert(showTooltips != null),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(elevation == null || elevation >= 0.0),
        assert(iconSize != null && iconSize >= 0.0),
@@ -236,6 +239,10 @@ class BottomNavigationBar extends StatefulWidget {
   /// See documentation for [BottomNavigationBarType] for information on the
   /// meaning of different types.
   final BottomNavigationBarType type;
+
+  /// If true, the items in this [BottomNavigationBar] will show a tooltip of
+  /// the [BottomNavigationBarItem.label] on long press.
+  final bool showTooltips;
 
   /// The value of [selectedItemColor].
   ///
@@ -348,6 +355,7 @@ class _BottomNavigationTile extends StatelessWidget {
     @required this.unselectedIconTheme,
     this.showSelectedLabels,
     this.showUnselectedLabels,
+    @required this.showToolTips,
     this.indexLabel,
     @required this.mouseCursor,
     }) : assert(type != null),
@@ -373,6 +381,7 @@ class _BottomNavigationTile extends StatelessWidget {
   final String indexLabel;
   final bool showSelectedLabels;
   final bool showUnselectedLabels;
+  final bool showToolTips;
   final MouseCursor mouseCursor;
 
   @override
@@ -458,51 +467,62 @@ class _BottomNavigationTile extends StatelessWidget {
         break;
     }
 
-    return Expanded(
-      flex: size,
-      child: Semantics(
-        container: true,
-        selected: selected,
-        child: Stack(
-          children: <Widget>[
-            InkResponse(
-              onTap: onTap,
-              mouseCursor: mouseCursor,
-              child: Padding(
-                padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    _TileIcon(
-                      colorTween: colorTween,
-                      animation: animation,
-                      iconSize: iconSize,
-                      selected: selected,
-                      item: item,
-                      selectedIconTheme: selectedIconTheme ?? bottomTheme.selectedIconTheme,
-                      unselectedIconTheme: unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
-                    ),
-                    _Label(
-                      colorTween: colorTween,
-                      animation: animation,
-                      item: item,
-                      selectedLabelStyle: selectedLabelStyle ?? bottomTheme.selectedLabelStyle,
-                      unselectedLabelStyle: unselectedLabelStyle ?? bottomTheme.unselectedLabelStyle,
-                      showSelectedLabels: showSelectedLabels ?? bottomTheme.showUnselectedLabels,
-                      showUnselectedLabels: showUnselectedLabels ?? bottomTheme.showUnselectedLabels,
-                    ),
-                  ],
-                ),
+    Widget result = Semantics(
+      container: true,
+      selected: selected,
+      child: Stack(
+        children: <Widget>[
+          InkResponse(
+            onTap: onTap,
+            mouseCursor: mouseCursor,
+            child: Padding(
+              padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  _TileIcon(
+                    colorTween: colorTween,
+                    animation: animation,
+                    iconSize: iconSize,
+                    selected: selected,
+                    item: item,
+                    selectedIconTheme: selectedIconTheme ?? bottomTheme.selectedIconTheme,
+                    unselectedIconTheme: unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
+                  ),
+                  _Label(
+                    colorTween: colorTween,
+                    animation: animation,
+                    item: item,
+                    selectedLabelStyle: selectedLabelStyle ?? bottomTheme.selectedLabelStyle,
+                    unselectedLabelStyle: unselectedLabelStyle ?? bottomTheme.unselectedLabelStyle,
+                    showSelectedLabels: showSelectedLabels ?? bottomTheme.showUnselectedLabels,
+                    showUnselectedLabels: showUnselectedLabels ?? bottomTheme.showUnselectedLabels,
+                  ),
+                ],
               ),
             ),
-            Semantics(
-              label: indexLabel,
-            ),
-          ],
-        ),
+          ),
+          Semantics(
+            label: indexLabel,
+          ),
+        ],
       ),
+    );
+
+    if (showToolTips) {
+      result = Tooltip.fromWidget(
+        preferBelow: false,
+        verticalOffset: selectedIconSize + selectedFontSize,
+        message: item.title,
+        child: result,
+      );
+    }
+
+    return Expanded(
+      flex: size,
+      child: result,
     );
   }
 }
@@ -638,10 +658,18 @@ class _Label extends StatelessWidget {
       );
     }
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      heightFactor: 1.0,
-      child: Container(child: text),
+    final double currentTextScaleFactor = MediaQuery.of(context).textScaleFactor;
+    return MediaQuery(
+      // Do not grow text in bottom navigation bar because there is no room,
+      // instead, properly scaled tooltips will show on long press.
+      data: MediaQuery.of(context).copyWith(
+        textScaleFactor: math.min(1.0, currentTextScaleFactor),
+      ),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        heightFactor: 1.0,
+        child: Container(child: text),
+      ),
     );
   }
 }
@@ -871,6 +899,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         selected: i == widget.currentIndex,
         showSelectedLabels: widget.showSelectedLabels ?? bottomTheme.showSelectedLabels,
         showUnselectedLabels: widget.showUnselectedLabels ?? bottomTheme.showUnselectedLabels ?? _defaultShowUnselected,
+        showToolTips: widget.showTooltips,
         indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
         mouseCursor: effectiveMouseCursor,
       ));
@@ -893,6 +922,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasMediaQuery(context));
+    assert(Overlay.of(context, debugRequiredFor: widget) != null);
 
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
 

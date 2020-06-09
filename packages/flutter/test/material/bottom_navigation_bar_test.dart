@@ -953,7 +953,7 @@ void main() {
   });
 
 
-  testWidgets('BottomNavigationBar responds to textScaleFactor', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar does not grow with textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1023,7 +1023,7 @@ void main() {
     );
 
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
-    expect(box.size.height, equals(66.0));
+    expect(box.size.height, equals(kBottomNavigationBarHeight));
   });
 
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
@@ -1639,7 +1639,7 @@ void main() {
     await gesture.addPointer(location: tester.getCenter(find.text('AC')));
     addTearDown(gesture.removePointer);
 
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
@@ -1666,19 +1666,21 @@ void main() {
 
 Widget boilerplate({ Widget bottomNavigationBar, @required TextDirection textDirection }) {
   assert(textDirection != null);
-  return Localizations(
-    locale: const Locale('en', 'US'),
-    delegates: const <LocalizationsDelegate<dynamic>>[
-      DefaultMaterialLocalizations.delegate,
-      DefaultWidgetsLocalizations.delegate,
-    ],
-    child: Directionality(
-      textDirection: textDirection,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: Material(
-          child: Scaffold(
-            bottomNavigationBar: bottomNavigationBar,
+  return MaterialApp(
+    home: Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      child: Directionality(
+        textDirection: textDirection,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Material(
+            child: Scaffold(
+              bottomNavigationBar: bottomNavigationBar,
+            ),
           ),
         ),
       ),

@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -63,7 +64,32 @@ class Tooltip extends StatefulWidget {
     this.showDuration,
     this.child,
   }) : assert(message != null),
+       _customMessageWidget = null,
        super(key: key);
+
+  /// Creates a tooltip that will display the [message] widget inside of the
+  /// tooltip.
+  ///
+  /// Prefer using the [Tooltip] constructor, this should only be used if you do
+  /// not have access to the String that will be rendered in the tooltip.
+  const Tooltip.fromWidget({
+    Key key,
+    @required Widget message,
+    this.height,
+    this.padding,
+    this.margin,
+    this.verticalOffset,
+    this.preferBelow,
+    this.excludeFromSemantics,
+    this.decoration,
+    this.textStyle,
+    this.waitDuration,
+    this.showDuration,
+    this.child,
+  }) : message = null,
+       _customMessageWidget = message,
+       super(key: key);
+
 
   /// The text to display in the tooltip.
   final String message;
@@ -152,6 +178,8 @@ class Tooltip extends StatefulWidget {
   ///
   /// Defaults to 1.5 seconds.
   final Duration showDuration;
+
+  final Widget _customMessageWidget;
 
   @override
   _TooltipState createState() => _TooltipState();
@@ -287,13 +315,21 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     final RenderBox box = context.findRenderObject() as RenderBox;
     final Offset target = box.localToGlobal(box.size.center(Offset.zero));
 
+    final MediaQueryData mediaQueryData = MediaQuery.of(context, nullOk: true) ?? const MediaQueryData();
+    final Widget label = widget.message != null ? Text(widget.message) : widget._customMessageWidget;
+
     // We create this widget outside of the overlay entry's builder to prevent
     // updated values from happening to leak into the overlay when the overlay
     // rebuilds.
     final Widget overlay = Directionality(
       textDirection: Directionality.of(context),
       child: _TooltipOverlay(
-        message: widget.message,
+        message: MediaQuery(
+          data: mediaQueryData.copyWith(
+            textScaleFactor: math.max(mediaQueryData.textScaleFactor, 1.0),
+          ),
+          child: label,
+        ),
         height: height,
         padding: padding,
         margin: margin,
@@ -310,7 +346,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     );
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
     Overlay.of(context, debugRequiredFor: widget).insert(_entry);
-    SemanticsService.tooltip(widget.message);
+    if (widget.message != null) {
+      SemanticsService.tooltip(widget.message);
+    }
   }
 
   void _removeEntry() {
@@ -483,7 +521,7 @@ class _TooltipOverlay extends StatelessWidget {
     this.preferBelow,
   }) : super(key: key);
 
-  final String message;
+  final Widget message;
   final double height;
   final EdgeInsetsGeometry padding;
   final EdgeInsetsGeometry margin;
@@ -509,7 +547,7 @@ class _TooltipOverlay extends StatelessWidget {
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: height),
               child: DefaultTextStyle(
-                style: Theme.of(context).textTheme.bodyText2,
+                style: Theme.of(context).textTheme.bodyText2.merge(textStyle),
                 child: Container(
                   decoration: decoration,
                   padding: padding,
@@ -517,10 +555,7 @@ class _TooltipOverlay extends StatelessWidget {
                   child: Center(
                     widthFactor: 1.0,
                     heightFactor: 1.0,
-                    child: Text(
-                      message,
-                      style: textStyle,
-                    ),
+                    child: message,
                   ),
                 ),
               ),
