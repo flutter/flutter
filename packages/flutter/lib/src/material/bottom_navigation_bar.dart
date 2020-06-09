@@ -178,7 +178,6 @@ class BottomNavigationBar extends StatefulWidget {
     this.currentIndex = 0,
     this.elevation,
     this.type,
-    this.showTooltips = true,
     Color fixedColor,
     this.backgroundColor,
     this.iconSize = 24.0,
@@ -199,7 +198,6 @@ class BottomNavigationBar extends StatefulWidget {
         items.every((BottomNavigationBarItem item) => item.title != null) == true,
         'Every item must have a non-null title',
        ),
-       assert(showTooltips != null),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(elevation == null || elevation >= 0.0),
        assert(iconSize != null && iconSize >= 0.0),
@@ -239,10 +237,6 @@ class BottomNavigationBar extends StatefulWidget {
   /// See documentation for [BottomNavigationBarType] for information on the
   /// meaning of different types.
   final BottomNavigationBarType type;
-
-  /// If true, the items in this [BottomNavigationBar] will show a tooltip of
-  /// the [BottomNavigationBarItem.label] on long press.
-  final bool showTooltips;
 
   /// The value of [selectedItemColor].
   ///
@@ -355,7 +349,6 @@ class _BottomNavigationTile extends StatelessWidget {
     @required this.unselectedIconTheme,
     this.showSelectedLabels,
     this.showUnselectedLabels,
-    @required this.showToolTips,
     this.indexLabel,
     @required this.mouseCursor,
     }) : assert(type != null),
@@ -381,7 +374,6 @@ class _BottomNavigationTile extends StatelessWidget {
   final String indexLabel;
   final bool showSelectedLabels;
   final bool showUnselectedLabels;
-  final bool showToolTips;
   final MouseCursor mouseCursor;
 
   @override
@@ -511,14 +503,12 @@ class _BottomNavigationTile extends StatelessWidget {
       ),
     );
 
-    if (showToolTips) {
-      result = Tooltip.fromWidget(
-        preferBelow: false,
-        verticalOffset: selectedIconSize + selectedFontSize,
-        message: item.title,
-        child: result,
-      );
-    }
+    result = Tooltip.fromWidget(
+      preferBelow: false,
+      verticalOffset: selectedIconSize + selectedFontSize,
+      message: item.title,
+      child: result,
+    );
 
     return Expanded(
       flex: size,
@@ -899,7 +889,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         selected: i == widget.currentIndex,
         showSelectedLabels: widget.showSelectedLabels ?? bottomTheme.showSelectedLabels,
         showUnselectedLabels: widget.showUnselectedLabels ?? bottomTheme.showUnselectedLabels ?? _defaultShowUnselected,
-        showToolTips: widget.showTooltips,
         indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
         mouseCursor: effectiveMouseCursor,
       ));
