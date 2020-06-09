@@ -750,7 +750,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.showOnScreenConfiguration,
     @required this.shape,
   }) : assert(primary || topPadding == 0.0),
-       assert(!floating || (snapConfiguration == null && showOnScreenConfiguration == null) || vsync != null),
+       assert(
+         !floating || (snapConfiguration == null && showOnScreenConfiguration == null) || vsync != null,
+         'vsync cannot be null when snapConfiguration or showOnScreenConfiguration is not null, and floating is true',
+       ),
        _bottomHeight = bottom?.preferredSize?.height ?? 0.0;
 
   final Widget leading;
@@ -992,9 +995,6 @@ class SliverAppBar extends StatefulWidget {
     this.stretchTriggerOffset = 100.0,
     this.onStretchTrigger,
     this.shape,
-    this.preventShowOnScreenUnpinning = true,
-    this.minShowOnScreenExtent,
-    this.maxShowOnScreenExtent,
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
        assert(primary != null),
@@ -1005,7 +1005,6 @@ class SliverAppBar extends StatefulWidget {
        assert(stretch != null),
        assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
        assert(stretchTriggerOffset > 0.0),
-       assert(preventShowOnScreenUnpinning != null),
        super(key: key);
 
   /// A widget to display before the [title].
@@ -1229,9 +1228,14 @@ class SliverAppBar extends StatefulWidget {
   /// into view.
   ///
   /// If [snap] is true then a scroll that exposes the floating app bar will
-  /// trigger an animation that slides the entire app bar into view. Similarly if
-  /// a scroll dismisses the app bar, the animation will slide the app bar
-  /// completely out of view.
+  /// trigger an animation that slides the entire app bar into view. Similarly
+  /// if a scroll dismisses the app bar, the animation will slide the app bar
+  /// completely out of view. Additionally, setting [snap] to true will fully
+  /// expand the floating app bar when the framework tries to reveal the
+  /// contents of the app bar by calling [RenderObject.showOnScreen]. For
+  /// example, when a [TextField] in the floating app bar gains focus, if [snap]
+  /// is true, the framework will always fully expand the floating app bar, in
+  /// order to reveal the focused [TextField].
   ///
   /// Snapping only applies when the app bar is floating, not when the app bar
   /// appears at the top of its scroll view.
@@ -1267,16 +1271,18 @@ class SliverAppBar extends StatefulWidget {
   /// offset specified by [stretchTriggerOffset].
   final AsyncCallback onStretchTrigger;
 
-  /// {@macro flutter.rendering.persistentHeader.ignoreLeading}
+  /// The smallest the app bar can expand to in the main axis direction, when
+  /// told to reveal a descendant widget or this app bar itself in the viewport,
+  /// if [floating] is true.
   ///
-  /// Defaults to true and must not be null.
-  final bool preventShowOnScreenUnpinning;
-
+  /// Unlike [expandedHeight], this parameter does not affect size of the app
+  /// bar when the user drags to expand it. Instead, it puts constraints on
+  /// controls when
+  /// in response to a [RenderObject.showOnScreen] call, in addition to its
+  /// [RenderSliverPersistentHeader.minExtent].
   /// {@macro flutter.rendering.persistentHeader.minShowOnScreenExtent}
-  final double minShowOnScreenExtent;
+  // final double minShowOnScreenExtent;
 
-  /// {@macro flutter.rendering.persistentHeader.maxShowOnScreenExtent}
-  final double maxShowOnScreenExtent;
 
   @override
   _SliverAppBarState createState() => _SliverAppBarState();
@@ -1298,6 +1304,10 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     } else {
       _snapConfiguration = null;
     }
+
+    _showOnScreenConfiguration = widget.floating & widget.snap
+      ? const PersistentHeaderShowOnScreenConfiguration(minShowOnScreenExtent: double.infinity)
+      : null;
   }
 
   void _updateStretchConfiguration() {
@@ -1311,22 +1321,11 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     }
   }
 
-  void _updateShowOnScreenConfiguration() {
-    _showOnScreenConfiguration = widget.floating || widget.pinned
-      ? PersistentHeaderShowOnScreenConfiguration(
-        ignoreLeading: widget.preventShowOnScreenUnpinning,
-        minShowOnScreenExtent: widget.minShowOnScreenExtent,
-        maxShowOnScreenExtent: widget.maxShowOnScreenExtent,
-      )
-      : null;
-  }
-
   @override
   void initState() {
     super.initState();
     _updateSnapConfiguration();
     _updateStretchConfiguration();
-    _updateShowOnScreenConfiguration();
   }
 
   @override
@@ -1336,13 +1335,6 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
       _updateSnapConfiguration();
     if (widget.stretch != oldWidget.stretch)
       _updateStretchConfiguration();
-    if (widget.floating || widget.pinned) {
-      if (widget.preventShowOnScreenUnpinning != oldWidget.preventShowOnScreenUnpinning ||
-        widget.minShowOnScreenExtent != oldWidget.minShowOnScreenExtent ||
-        widget.maxShowOnScreenExtent != oldWidget.maxShowOnScreenExtent) {
-        _updateShowOnScreenConfiguration();
-      }
-    }
   }
 
   @override

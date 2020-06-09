@@ -71,73 +71,48 @@ class PersistentHeaderShowOnScreenConfiguration {
   /// Creates an object that specifies how a pinned or floating persistent header
   /// should behave in response to [RenderObject.showOnScreen] calls.
   const PersistentHeaderShowOnScreenConfiguration({
-    this.ignoreLeading = true,
     this.minShowOnScreenExtent,
     this.maxShowOnScreenExtent,
-  }) : assert(ignoreLeading != null),
-       assert(minShowOnScreenExtent == null || maxShowOnScreenExtent == null || minShowOnScreenExtent <= maxShowOnScreenExtent);
+  }) : assert(minShowOnScreenExtent == null || maxShowOnScreenExtent == null || minShowOnScreenExtent <= maxShowOnScreenExtent);
 
-  /// {@template flutter.rendering.persistentHeader.ignoreLeading}
-  /// Whether to ignore the part of the `rect` specified in [RenderObject.showOnScreen]
-  /// that exceeds the leading edge of the sliver's child [RenderBox], to prevent
-  /// `showOnScreen` from significantly reduce the viewport's scroll offset in
-  /// an attempt to reveal to original `rect`.
-  ///
-  /// When this parameter is set to false, the framework will try to reveal the
-  /// entire `rect` specified in [RenderObject.showOnScreen], even if it exceeds
-  /// the leading edge of the persistent header. As a result, the viewport will
-  /// attempt to reveal the part of the preceeding sliver(s) that intersects with
-  /// `rect`. This could potentially lead to unintended overscrolling if there's
-  /// no preceeding slivers. Additionally, if the sliver is initially pinned
-  /// (or floating) at the leading edge, this could also reduce the scroll
-  /// offset of the viewport significantly, revealing the slivers that are
-  /// immediately after the pinned header.
-  ///
-  /// Setting the parameter to true will cause the framework to trim the incoming
-  /// `rect` in `showOnScreen` if it exceeds the leading edge of the `child`
-  /// [RenderBox]. The new `rect` will have the same leading edge as the `child`
-  /// [RenderBox], or that of the persistent header when `child` is null.
-  /// {@endtemplate}
-  ///
-  /// Defaults to true and must not be null.
-  final bool ignoreLeading;
-
-  /// {@template flutter.rendering.persistentHeader.minShowOnScreenExtent}
   /// The smallest the floating header can expand to in the main axis direction,
-  /// when `showOnScreen` is called, in addition to the persistent header's
-  /// `minExtent`.
+  /// in response to a [RenderObject.showOnScreen] call, in addition to its
+  /// [RenderSliverPersistentHeader.minExtent].
   ///
-  /// This parameter has no effect if set to null or a value smaller than or
-  /// equal to the persistent header's `minExtent`. Setting this to a value
-  /// larger than `maxExtent` is equivalent to setting this to `maxExtent`.
+  /// When a floating persistent header is told to show a [Rect] on screen, it
+  /// may expand itself to accomodate the [Rect]. The minimum extent that is
+  /// allowed for such expansion is either
+  /// [RenderSliverPersistentHeader.minExtent] or [minShowOnScreenExtent],
+  /// whichever is larger. If the persistent header's current extent is already
+  /// larger than that maximum extent, it will remain unchanged.
   ///
-  /// This parameter can be set to the persistent header's `maxExtent` so the
-  /// persistent header always expands to its `maxExtent` when `showOnScreen` is
-  /// called, if its main axis extent is not already greater than or equal to
-  /// `maxExtent`.
+  /// This parameter can be set to the persistent header's `maxExtent` (or
+  /// `double.infinity`) so the persistent header will always try to expand when
+  /// [RenderObject.showOnScreen] is called on it.
   ///
-  /// Defaults to null. Must be less than or equal to [maxShowOnScreenExtent] if
-  /// it is also not null. Has no effect unless the persistent header is a
-  /// floating header.
-  /// {@endtemplate}
+  /// Defaults to null, in which case no additional constraints are applied.
+  /// Must be less than or equal to [maxShowOnScreenExtent] if it is also not
+  /// null. Has no effect unless the persistent header is a floating header.
   final double minShowOnScreenExtent;
 
-  /// {@template flutter.rendering.persistentHeader.maxShowOnScreenExtent}
   /// The biggest the floating header can expand to in the main axis direction,
-  /// when `showOnScreen` is called, in addition to the persistent header's
-  /// `maxExtent`.
+  /// in response to a [RenderObject.showOnScreen] call, in addition to its
+  /// [RenderSliverPersistentHeader.maxExtent].
   ///
-  /// This parameter has no effect if set to null or a value bigger than or equal
-  /// to the persistent header's `maxExtent`. Setting this to a value smaller
-  /// than `minExtent` is equivalent to setting this to `minExtent`.
+  /// When a floating persistent header is told to show a [Rect] on screen, it
+  /// may expand itself to accomodate the [Rect]. The maximum extent that is
+  /// allowed for such expansion is either
+  /// [RenderSliverPersistentHeader.maxExtent] or [maxShowOnScreenExtent],
+  /// whichever is smaller. If the persistent header's current extent is already
+  /// larger than that maximum extent, it will remain unchanged.
   ///
-  /// This parameter can be set to the persistent header's `minExtent` so the
-  /// persistent header will try not to expand when `showOnScreen` is called, if
-  /// its main axis extent is not already greater than or equal to `minExtent`.
+  /// This parameter can be set to the persistent header's `minExtent` (or
+  /// `double.negativeInfinity`) so the persistent header will never try to
+  /// expand when [RenderObject.showOnScreen] is called on it.
   ///
-  /// Defaults to null. Must be greater than or equal to [minShowOnScreenExtent]
-  /// if it is also not null. Has no effect unless the persistent header is a
-  /// floating header.
+  /// Defaults to null, in which case no additional constraints are applied.
+  /// Must be greater than or equal to [minShowOnScreenExtent] if it is also not
+  /// null. Has no effect unless the persistent header is a floating header.
   /// {@endtemplate}
   final double maxShowOnScreenExtent;
 }
@@ -512,9 +487,6 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
   }) {
-    if (showOnScreenConfiguration?.ignoreLeading != true)
-      return super.showOnScreen(descendant: descendant, rect: rect, duration: duration, curve: curve);
-
     final Rect localBounds = descendant != null
       ? MatrixUtils.transformRect(descendant.getTransformTo(this), rect ?? descendant.paintBounds)
       : rect;
@@ -784,43 +756,41 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       ? MatrixUtils.transformRect(descendant.getTransformTo(child), rect ?? descendant.paintBounds)
       : rect;
 
-    // A stretch header can have a bigger childExtent than maxExtent.
-    final double effectiveMaxExtent = math.max(childExtent, maxExtent);
-    double minTargetExtent;
+    double targetExtent;
     Rect targetRect;
     switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
       case AxisDirection.up:
-        minTargetExtent = childExtent - (childBounds?.top ?? 0);
-        targetRect = showOnScreenConfiguration.ignoreLeading
-          ? _trim(childBounds, bottom: childExtent) : childBounds;
+        targetExtent = childExtent - (childBounds?.top ?? 0);
+        targetRect = _trim(childBounds, bottom: childExtent);
         break;
       case AxisDirection.right:
-        minTargetExtent = childBounds?.right ?? childExtent;
-        targetRect = showOnScreenConfiguration.ignoreLeading
-          ? _trim(childBounds, left: 0) : childBounds;
+        targetExtent = childBounds?.right ?? childExtent;
+        targetRect = _trim(childBounds, left: 0);
         break;
       case AxisDirection.down:
-        minTargetExtent = childBounds?.bottom ?? childExtent;
-        targetRect = showOnScreenConfiguration.ignoreLeading
-          ? _trim(childBounds, top: 0) : childBounds;
+        targetExtent = childBounds?.bottom ?? childExtent;
+        targetRect = _trim(childBounds, top: 0);
         break;
       case AxisDirection.left:
-        minTargetExtent = childExtent - (childBounds?.left ?? 0);
-        targetRect = showOnScreenConfiguration.ignoreLeading
-          ? _trim(childBounds, right: childExtent) : childBounds;
+        targetExtent = childExtent - (childBounds?.left ?? 0);
+        targetRect = _trim(childBounds, right: childExtent);
         break;
     }
 
-    minTargetExtent = minTargetExtent
-      .clamp(
-        showOnScreenConfiguration.minShowOnScreenExtent ?? childExtent,
-        math.max(showOnScreenConfiguration.maxShowOnScreenExtent ?? effectiveMaxExtent, childExtent),
+    // A stretch header can have a bigger childExtent than maxExtent.
+    final double effectiveMaxExtent = math.max(childExtent, maxExtent);
+
+    targetExtent = targetExtent.clamp(
+        showOnScreenConfiguration.minShowOnScreenExtent ?? double.negativeInfinity,
+        showOnScreenConfiguration.maxShowOnScreenExtent ?? double.infinity,
       )
+      // Clamp the value back to the valid range after applying additional
+      // constriants. Shrinking is not allowed.
       .clamp(childExtent, effectiveMaxExtent) as double;
 
-    // Expands the header if needed, with animation if possible.
-    if (minTargetExtent > childExtent) {
-      final double targetScrollOffset = maxExtent - minTargetExtent;
+    // Expands the header if needed, with animation.
+    if (targetExtent > childExtent) {
+      final double targetScrollOffset = maxExtent - targetExtent;
       assert(
         vsync != null,
         'vsync must not be null if the floating header changes size animatedly.',

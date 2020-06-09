@@ -1347,42 +1347,6 @@ void main() {
       });
 
       testWidgets(
-        'RenderViewportBase.showOnScreen with ignoreLeading == false',
-        (WidgetTester tester) async {
-          await tester.pumpWidget(
-            buildList(
-              floatingHeader: SliverPersistentHeader(
-                pinned: true,
-                floating: true,
-                delegate: _TestSliverPersistentHeaderDelegate(
-                  minExtent: 100,
-                  maxExtent: 300,
-                  key: headerKey,
-                  vsync: vsync,
-                  showOnScreenConfiguration: const PersistentHeaderShowOnScreenConfiguration(ignoreLeading: false),
-                ),
-              ),
-            )
-          );
-
-          final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
-
-          controller.jumpTo(300.0 * 15);
-          await tester.pumpAndSettle();
-          expect(mainAxisExtent(tester, pinnedHeaderContent), lessThan(300));
-
-          tester.renderObject(pinnedHeaderContent).showOnScreen(
-            descendant: tester.renderObject(pinnedHeaderContent),
-            rect: const Offset(-1, -1) & const Size(300, 300),
-          );
-
-          await tester.pumpAndSettle();
-          // 1px away from the viewport's leading edge.
-          expect(controller.offset, 300.0 * 10 - 1.0);
-          expect(mainAxisExtent(tester, pinnedHeaderContent), 300);
-      });
-
-      testWidgets(
         'RenderViewportBase.showOnScreen should not scroll if the rect is already visible, '
         'even if it does not scroll linearly (reversed order version)',
         (WidgetTester tester) async {
