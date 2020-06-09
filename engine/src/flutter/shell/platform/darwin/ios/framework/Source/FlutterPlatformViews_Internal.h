@@ -209,12 +209,11 @@ class FlutterPlatformViewsController {
   std::map<int64_t, int64_t> clip_count_;
   SkISize frame_size_;
 
-  // This is the number of frames the task runners will stay
-  // merged after a frame where we see a mutation to the embedded views.
-  // Note: This number was arbitrarily picked. The rationale being
-  // merge-unmerge are not zero cost operations. To account for cases
-  // like animating platform views, we picked it to be > 2, as we would
-  // want to avoid merge-unmerge during each frame with a mutation.
+  // The number of frames the rasterizer task runner will continue
+  // to run on the platform thread after no platform view is rendered.
+  //
+  // Note: this is an arbitrary number that attempts to account for cases
+  // where the platform view might be momentarily off the screen.
   static const int kDefaultMergedLeaseDuration = 10;
 
   // Method channel `OnDispose` calls adds the views to be disposed to this set to be disposed on
