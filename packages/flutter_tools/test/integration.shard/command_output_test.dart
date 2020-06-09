@@ -35,4 +35,26 @@ void main() {
     // Only printed by verbose tool.
     expect(result.stdout, isNot(contains('exiting with code 0')));
   });
+
+  test('flutter run --machine uses NotifyingLogger', () async {
+    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await const LocalProcessManager().run(<String>[
+      flutterBin,
+      'run',
+      '--machine',
+    ]);
+
+    expect(result.stdout, isEmpty);
+  });
+
+  test('flutter attach --machine uses NotifyingLogger', () async {
+    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await const LocalProcessManager().run(<String>[
+      flutterBin,
+      'attach',
+      '--machine',
+    ]);
+
+    expect(result.stdout, isEmpty);
+  });
 }
