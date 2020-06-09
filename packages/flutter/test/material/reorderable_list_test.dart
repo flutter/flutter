@@ -7,10 +7,6 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
-// The `y` offset has to be larger than `ScrollDragController._bigThresholdBreakDistance`
-// to prevent [motionStartDistanceThreshold] from affecting the actual drag distance.
-const Offset _kGestureOffset = Offset(0, -25);
-
 void main() {
   group('$ReorderableListView', () {
     const double itemHeight = 48.0;
