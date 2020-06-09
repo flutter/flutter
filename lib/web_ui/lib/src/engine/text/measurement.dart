@@ -16,10 +16,19 @@ const double _baselineRatioHack = 1.1662499904632568;
 /// Signature of a function that takes a character and returns true or false.
 typedef CharPredicate = bool Function(int char);
 
-bool _whitespacePredicate(int char) =>
-    char == CharCode.space || char == CharCode.tab || _newlinePredicate(char);
-bool _newlinePredicate(int char) =>
-    char == CharCode.cr || char == CharCode.lf || char == CharCode.nl;
+bool _whitespacePredicate(int char) {
+  final LineCharProperty prop =
+      _normalizeLineProperty(lineLookup.findForChar(char));
+  return prop == LineCharProperty.SP ||
+      prop == LineCharProperty.BK ||
+      prop == LineCharProperty.CR;
+}
+
+bool _newlinePredicate(int char) {
+  final LineCharProperty prop =
+      _normalizeLineProperty(lineLookup.findForChar(char));
+  return prop == LineCharProperty.BK || prop == LineCharProperty.CR;
+}
 
 /// Manages [ParagraphRuler] instances and caches them per unique
 /// [ParagraphGeometricStyle].
