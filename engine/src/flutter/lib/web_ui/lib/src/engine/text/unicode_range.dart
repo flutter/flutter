@@ -92,7 +92,15 @@ class UnicodePropertyLookup<P> {
     if (index < 0 || index >= text.length) {
       return null;
     }
-    final int rangeIndex = _binarySearch(text.codeUnitAt(index));
+    return findForChar(text.codeUnitAt(index));
+  }
+
+  /// Takes one character as an integer code unit and returns its property.
+  ///
+  /// If a property can't be found for the given character, null will be
+  /// returned.
+  P findForChar(int char) {
+    final int rangeIndex = _binarySearch(char);
     return rangeIndex == -1 ? null : ranges[rangeIndex].property;
   }
 
