@@ -2,6 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Minimum CocoaPods Ruby version is 2.0.
+# Don't depend on features newer than that.
+
 # Hook for Podfile setup, installation settings.
 #
 # @example
@@ -116,7 +119,7 @@ end
 def flutter_parse_plugins_file(file)
   file_path = File.expand_path(file)
   unless File.exists? file_path
-    return [];
+    return {};
   end
   generated_key_values = {}
   skip_line_start_symbols = ["#", "/"]
