@@ -5,9 +5,9 @@
 #ifndef FLUTTER_SHELL_GPU_GPU_SURFACE_SOFTWARE_H_
 #define FLUTTER_SHELL_GPU_GPU_SURFACE_SOFTWARE_H_
 
+#include "flutter/flow/surface.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/shell/common/surface.h"
 #include "flutter/shell/gpu/gpu_surface_software_delegate.h"
 
 namespace flutter {

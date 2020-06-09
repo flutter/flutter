@@ -12,6 +12,7 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
+#include "flutter/flow/surface.h"
 #include "flutter/flow/texture.h"
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
@@ -34,7 +35,6 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell_io_manager.h"
-#include "flutter/shell/common/surface.h"
 
 namespace flutter {
 
