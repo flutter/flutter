@@ -72,6 +72,15 @@ class SessionConnection final {
     return surface_producer_.get();
   }
 
+  static fml::TimePoint CalculateNextLatchPoint(
+      fml::TimePoint present_requested_time,
+      fml::TimePoint now,
+      fml::TimePoint last_latch_point_targeted,
+      fml::TimeDelta flutter_frame_build_time,
+      fml::TimeDelta vsync_interval,
+      std::deque<std::pair<fml::TimePoint, fml::TimePoint>>&
+          future_presentation_infos);
+
  private:
   const std::string debug_label_;
   scenic::Session session_wrapper_;
@@ -84,6 +93,14 @@ class SessionConnection final {
   on_frame_presented_event on_frame_presented_callback_;
 
   zx_handle_t vsync_event_handle_;
+
+  fml::TimePoint last_latch_point_targeted_ =
+      fml::TimePoint::FromEpochDelta(fml::TimeDelta::Zero());
+  fml::TimePoint present_requested_time_ =
+      fml::TimePoint::FromEpochDelta(fml::TimeDelta::Zero());
+
+  std::deque<std::pair<fml::TimePoint, fml::TimePoint>>
+      future_presentation_infos_ = {};
 
   bool initialized_ = false;
 

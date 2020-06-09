@@ -99,6 +99,8 @@ void SessionConnection::Present(
                    next_present_session_trace_id_);
   next_present_session_trace_id_++;
 
+  present_requested_time_ = fml::TimePoint::Now();
+
   // Throttle frame submission to Scenic if we already have the maximum amount
   // of frames in flight. This allows the paint tasks for this frame to execute
   // in parallel with the presentation of previous frame but still provides
@@ -127,6 +129,35 @@ void SessionConnection::OnSessionSizeChangeHint(float width_change_factor,
                                                 float height_change_factor) {
   surface_producer_->OnSessionSizeChangeHint(width_change_factor,
                                              height_change_factor);
+}
+
+fml::TimePoint SessionConnection::CalculateNextLatchPoint(
+    fml::TimePoint present_requested_time,
+    fml::TimePoint now,
+    fml::TimePoint last_latch_point_targeted,
+    fml::TimeDelta flutter_frame_build_time,
+    fml::TimeDelta vsync_interval,
+    std::deque<std::pair<fml::TimePoint, fml::TimePoint>>&
+        future_presentation_infos) {
+  // The minimum latch point is the largest of:
+  // Now
+  // When we expect the Flutter work for the frame to be completed
+  // The last latch point targeted
+  fml::TimePoint minimum_latch_point_to_target =
+      std::max(std::max(now, present_requested_time + flutter_frame_build_time),
+               last_latch_point_targeted);
+
+  for (auto& info : future_presentation_infos) {
+    fml::TimePoint latch_point = info.first;
+
+    if (latch_point >= minimum_latch_point_to_target) {
+      return latch_point;
+    }
+  }
+
+  // We could not find a suitable latch point in the list given to us from
+  // Scenic, so aim for the smallest safe value.
+  return minimum_latch_point_to_target;
 }
 
 void SessionConnection::set_enable_wireframe(bool enable) {
@@ -166,10 +197,37 @@ void SessionConnection::PresentSession() {
   // Flush all session ops. Paint tasks may not yet have executed but those are
   // fenced. The compositor can start processing ops while we finalize paint
   // tasks.
+
+  fml::TimeDelta presentation_interval =
+      VsyncRecorder::GetInstance().GetCurrentVsyncInfo().presentation_interval;
+
+  fml::TimePoint next_latch_point = CalculateNextLatchPoint(
+      fml::TimePoint::Now(), present_requested_time_,
+      last_latch_point_targeted_,
+      fml::TimeDelta::FromMicroseconds(0),  // flutter_frame_build_time
+      presentation_interval, future_presentation_infos_);
+
+  last_latch_point_targeted_ = next_latch_point;
+
   session_wrapper_.Present2(
-      /*requested_presentation_time=*/0,
-      /*requested_prediction_span=*/0,
+      /*requested_presentation_time=*/next_latch_point.ToEpochDelta()
+          .ToNanoseconds(),
+      /*requested_prediction_span=*/presentation_interval.ToNanoseconds() * 10,
       [this](fuchsia::scenic::scheduling::FuturePresentationTimes info) {
+        // Clear |future_presentation_infos_| and replace it with the updated
+        // information.
+        std::deque<std::pair<fml::TimePoint, fml::TimePoint>>().swap(
+            future_presentation_infos_);
+
+        for (fuchsia::scenic::scheduling::PresentationInfo& presentation_info :
+             info.future_presentations) {
+          future_presentation_infos_.push_back(
+              {fml::TimePoint::FromEpochDelta(fml::TimeDelta::FromNanoseconds(
+                   presentation_info.latch_point())),
+               fml::TimePoint::FromEpochDelta(fml::TimeDelta::FromNanoseconds(
+                   presentation_info.presentation_time()))});
+        }
+
         frames_in_flight_allowed_ = info.remaining_presents_in_flight_allowed;
         VsyncRecorder::GetInstance().UpdateNextPresentationInfo(
             std::move(info));
