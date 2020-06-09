@@ -946,7 +946,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   Locale computePlatformResolvedLocale(List<Locale> supportedLocales) {
-    window.computePlatformResolvedLocale(supportedLocales);
+    return window.computePlatformResolvedLocale(supportedLocales);
   }
 }
 
