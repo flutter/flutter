@@ -24,7 +24,7 @@ void main() {
   setUp(() {
     cache = MockCache();
     // Release lock between test cases.
-    Cache.releaseLockEarly();
+    Cache.releaseLock();
 
     when(cache.isUpToDate()).thenReturn(false);
     when(cache.updateAll(any)).thenAnswer((Invocation invocation) {
@@ -35,6 +35,37 @@ void main() {
     when(flutterVersion.isMaster).thenReturn(false);
     masterFlutterVersion = MockFlutterVersion();
     when(masterFlutterVersion.isMaster).thenReturn(true);
+  });
+
+  testUsingContext('precache should acquire lock', () async {
+    final PrecacheCommand command = PrecacheCommand();
+    applyMocksToCommand(command);
+    await createTestCommandRunner(command).run(const <String>['precache']);
+
+    expect(Cache.isLocked(), isTrue);
+    // Do not throw StateError, lock is acquired.
+    Cache.checkLockAcquired();
+  }, overrides: <Type, Generator>{
+    Cache: () => cache,
+  });
+
+  testUsingContext('precache should not re-entrantly acquire lock', () async {
+    final PrecacheCommand command = PrecacheCommand();
+    applyMocksToCommand(command);
+    await createTestCommandRunner(command).run(const <String>['precache']);
+
+    expect(Cache.isLocked(), isFalse);
+    // Do not throw StateError, acquired reentrantly with FLUTTER_ALREADY_LOCKED.
+    Cache.checkLockAcquired();
+  }, overrides: <Type, Generator>{
+    Cache: () => cache,
+    Platform: () => FakePlatform(
+      operatingSystem: 'windows',
+      environment: <String, String>{
+        'FLUTTER_ROOT': 'flutter',
+        'FLUTTER_ALREADY_LOCKED': 'true',
+      },
+    ),
   });
 
   testUsingContext('precache downloads web artifacts on dev branch when feature is enabled.', () async {

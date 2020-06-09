@@ -16,7 +16,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../dart/package_map.dart';
 import '../dart/sdk.dart';
 import '../device.dart';
@@ -249,8 +248,6 @@ class DriveCommand extends RunCommandBase {
       globals.printStatus('Will connect to already running application instance.');
       observatoryUri = stringArg('use-existing-app');
     }
-
-    Cache.releaseLockEarly();
 
     final Map<String, String> environment = <String, String>{
       'VM_SERVICE_URL': observatoryUri,

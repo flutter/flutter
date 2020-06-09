@@ -8,7 +8,6 @@ import '../android/android_device.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
-import '../cache.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
@@ -53,8 +52,6 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
       await device.targetPlatform,
       null, // Build info isn't relevant for install, will use whatever bundle was built last.
     );
-
-    Cache.releaseLockEarly();
 
     if (uninstallOnly) {
       await _uninstallApp(package);
