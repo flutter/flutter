@@ -257,10 +257,12 @@ class _ZoomPageTransition extends StatelessWidget {
 class _ZoomEnterTransition extends StatelessWidget {
   const _ZoomEnterTransition({
     Key key,
-    this.animation,
+    @required this.animation,
     this.reverse = false,
     this.child,
-  }) : super(key: key);
+  }) : assert(animation != null),
+       assert(reverse != null),
+       super(key: key);
 
   final Animation<double> animation;
   final Widget child;
@@ -319,10 +321,12 @@ class _ZoomEnterTransition extends StatelessWidget {
 class _ZoomExitTransition extends StatelessWidget {
   const _ZoomExitTransition({
     Key key,
-    this.animation,
+    @required this.animation,
     this.reverse = false,
     this.child,
-  }) : super(key: key);
+  }) : assert(animation != null),
+       assert(reverse != null),
+       super(key: key);
 
   final Animation<double> animation;
   final bool reverse;
@@ -347,10 +351,10 @@ class _ZoomExitTransition extends StatelessWidget {
   Widget build(BuildContext context) {
     final Animation<double> fadeTransition = reverse
       ? _fadeOutTransition.animate(animation)
-        : kAlwaysCompleteAnimation;
-    final Animation<double> scaleTransition = (!reverse
-      ? _scaleUpTransition
-      : _scaleDownTransition
+      : kAlwaysCompleteAnimation;
+    final Animation<double> scaleTransition = (reverse
+      ? _scaleDownTransition
+      : _scaleUpTransition
     ).animate(animation);
 
     return FadeTransition(
