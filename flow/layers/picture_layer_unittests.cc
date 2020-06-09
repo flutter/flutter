@@ -71,7 +71,7 @@ TEST_F(PictureLayerTest, InvalidPictureDies) {
 TEST_F(PictureLayerTest, SimplePicture) {
   const SkPoint layer_offset = SkPoint::Make(1.5f, -0.5f);
   const SkMatrix layer_offset_matrix =
-      SkMatrix::MakeTrans(layer_offset.fX, layer_offset.fY);
+      SkMatrix::Translate(layer_offset.fX, layer_offset.fY);
   const SkRect picture_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   auto mock_picture = SkPicture::MakePlaceholder(picture_bounds);
   auto layer = std::make_shared<PictureLayer>(

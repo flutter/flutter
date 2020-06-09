@@ -43,7 +43,7 @@ TEST_F(BackdropFilterLayerTest, PaintBeforePrerollDies) {
 #endif
 
 TEST_F(BackdropFilterLayerTest, EmptyFilter) {
-  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const SkPaint child_paint = SkPaint(SkColors::kYellow);
@@ -68,7 +68,7 @@ TEST_F(BackdropFilterLayerTest, EmptyFilter) {
 }
 
 TEST_F(BackdropFilterLayerTest, SimpleFilter) {
-  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const SkPaint child_paint = SkPaint(SkColors::kYellow);
@@ -94,7 +94,7 @@ TEST_F(BackdropFilterLayerTest, SimpleFilter) {
 }
 
 TEST_F(BackdropFilterLayerTest, MultipleChildren) {
-  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 2.5f, 3.5f);
   const SkPath child_path1 = SkPath().addRect(child_bounds);
   const SkPath child_path2 =
@@ -134,7 +134,7 @@ TEST_F(BackdropFilterLayerTest, MultipleChildren) {
 }
 
 TEST_F(BackdropFilterLayerTest, Nested) {
-  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 2.5f, 3.5f);
   const SkPath child_path1 = SkPath().addRect(child_bounds);
   const SkPath child_path2 =

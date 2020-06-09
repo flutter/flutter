@@ -45,7 +45,7 @@ TEST_F(ClipRectLayerTest, PaintBeforePrerollDies) {
 }
 
 TEST_F(ClipRectLayerTest, PaintingCulledLayerDies) {
-  const SkMatrix initial_matrix = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_matrix = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeXYWH(1.0, 2.0, 2.0, 2.0);
   const SkRect layer_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
   const SkPath child_path = SkPath().addRect(child_bounds);
@@ -72,7 +72,7 @@ TEST_F(ClipRectLayerTest, PaintingCulledLayerDies) {
 #endif
 
 TEST_F(ClipRectLayerTest, ChildOutsideBounds) {
-  const SkMatrix initial_matrix = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_matrix = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect cull_bounds = SkRect::MakeXYWH(0.0, 0.0, 2.0, 4.0);
   const SkRect child_bounds = SkRect::MakeXYWH(2.5, 5.0, 4.5, 4.0);
   const SkRect layer_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
@@ -114,7 +114,7 @@ TEST_F(ClipRectLayerTest, ChildOutsideBounds) {
 }
 
 TEST_F(ClipRectLayerTest, FullyContainedChild) {
-  const SkMatrix initial_matrix = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_matrix = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeXYWH(1.0, 2.0, 2.0, 2.0);
   const SkRect layer_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
   const SkPath child_path = SkPath().addRect(child_bounds);
@@ -149,7 +149,7 @@ TEST_F(ClipRectLayerTest, FullyContainedChild) {
 }
 
 TEST_F(ClipRectLayerTest, PartiallyContainedChild) {
-  const SkMatrix initial_matrix = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkMatrix initial_matrix = SkMatrix::Translate(0.5f, 1.0f);
   const SkRect cull_bounds = SkRect::MakeXYWH(0.0, 0.0, 4.0, 5.5);
   const SkRect child_bounds = SkRect::MakeXYWH(2.5, 5.0, 4.5, 4.0);
   const SkRect layer_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);

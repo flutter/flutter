@@ -66,8 +66,8 @@ TEST_F(TransformLayerTest, Simple) {
   SkPath child_path;
   child_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
   SkRect cull_rect = SkRect::MakeXYWH(2.0f, 2.0f, 14.0f, 14.0f);
-  SkMatrix initial_transform = SkMatrix::MakeTrans(-0.5f, -0.5f);
-  SkMatrix layer_transform = SkMatrix::MakeTrans(2.5f, 2.5f);
+  SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
+  SkMatrix layer_transform = SkMatrix::Translate(2.5f, 2.5f);
   SkMatrix inverse_layer_transform;
   EXPECT_TRUE(layer_transform.invert(&inverse_layer_transform));
 
@@ -104,9 +104,9 @@ TEST_F(TransformLayerTest, Nested) {
   SkPath child_path;
   child_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
   SkRect cull_rect = SkRect::MakeXYWH(2.0f, 2.0f, 14.0f, 14.0f);
-  SkMatrix initial_transform = SkMatrix::MakeTrans(-0.5f, -0.5f);
-  SkMatrix layer1_transform = SkMatrix::MakeTrans(2.5f, 2.5f);
-  SkMatrix layer2_transform = SkMatrix::MakeTrans(2.5f, 2.5f);
+  SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
+  SkMatrix layer1_transform = SkMatrix::Translate(2.5f, 2.5f);
+  SkMatrix layer2_transform = SkMatrix::Translate(2.5f, 2.5f);
   SkMatrix inverse_layer1_transform, inverse_layer2_transform;
   EXPECT_TRUE(layer1_transform.invert(&inverse_layer1_transform));
   EXPECT_TRUE(layer2_transform.invert(&inverse_layer2_transform));
@@ -157,9 +157,9 @@ TEST_F(TransformLayerTest, NestedSeparated) {
   SkPath child_path;
   child_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
   SkRect cull_rect = SkRect::MakeXYWH(2.0f, 2.0f, 14.0f, 14.0f);
-  SkMatrix initial_transform = SkMatrix::MakeTrans(-0.5f, -0.5f);
-  SkMatrix layer1_transform = SkMatrix::MakeTrans(2.5f, 2.5f);
-  SkMatrix layer2_transform = SkMatrix::MakeTrans(2.5f, 2.5f);
+  SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
+  SkMatrix layer1_transform = SkMatrix::Translate(2.5f, 2.5f);
+  SkMatrix layer2_transform = SkMatrix::Translate(2.5f, 2.5f);
   SkMatrix inverse_layer1_transform, inverse_layer2_transform;
   EXPECT_TRUE(layer1_transform.invert(&inverse_layer1_transform));
   EXPECT_TRUE(layer2_transform.invert(&inverse_layer2_transform));

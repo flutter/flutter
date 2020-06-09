@@ -202,7 +202,7 @@ class VulkanSurface final
   size_t age_ = 0;
   bool valid_ = false;
 
-  flutter::LayerRasterCacheKey retained_key_ = {0, SkMatrix::MakeScale(1, 1)};
+  flutter::LayerRasterCacheKey retained_key_ = {0, SkMatrix::Scale(1, 1)};
   std::unique_ptr<scenic::EntityNode> retained_node_ = nullptr;
 
   std::atomic<bool> used_in_retained_rendering_ = {false};
