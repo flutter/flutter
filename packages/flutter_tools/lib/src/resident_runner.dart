@@ -104,6 +104,7 @@ class FlutterDevice {
             globals.printTrace(message),
         initializeFromDill: getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
+          dartDefines: buildInfo.dartDefines,
         ),
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: buildInfo.extraFrontEndOptions,
@@ -131,6 +132,7 @@ class FlutterDevice {
         extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         initializeFromDill: getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
+          dartDefines: buildInfo.dartDefines,
         ),
         packagesPath: globalPackagesPath,
       );
@@ -1060,6 +1062,7 @@ abstract class ResidentRunner {
     if (outputDill.existsSync()) {
       final String copyPath = getDefaultCachedKernelPath(
         trackWidgetCreation: trackWidgetCreation,
+        dartDefines: debuggingOptions.buildInfo.dartDefines,
       );
       globals.fs.file(copyPath).parent.createSync(recursive: true);
       outputDill.copySync(copyPath);
