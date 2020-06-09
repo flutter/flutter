@@ -132,7 +132,7 @@ void main() {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
-        child: GridView.builder(
+      child: GridView.builder(
       padding: const EdgeInsets.all(0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -146,9 +146,12 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )));
-      },
-    )));
+              ),
+            ),
+          );
+        },
+      ),
+    ));
 
     final Finder finder = find.byType(TextField).first;
     final TextField textField = tester.widget(finder);
@@ -195,7 +198,7 @@ void main() {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
-        child: GridView.builder(
+      child: GridView.builder(
       padding: const EdgeInsets.all(0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
@@ -209,9 +212,12 @@ void main() {
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              )));
-      },
-    )));
+              ),
+            ),
+          );
+        },
+      ),
+    ));
 
     final Finder finder = find.byType(TextField).first;
     final TextField textField = tester.widget(finder);
