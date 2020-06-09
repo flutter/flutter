@@ -305,8 +305,14 @@ class _ZoomEnterTransition extends StatelessWidget {
       ? _scaleDownTransition.animate(animation)
       : _scaleUpTransition.animate(animation);
 
-    return Container(
-      color: Colors.black.withOpacity(opacity),
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget child) {
+        return Container(
+          color: Colors.black.withOpacity(opacity),
+          child: child,
+        );
+      },
       child: FadeTransition(
         opacity: fadeTransition,
         child: ScaleTransition(
