@@ -47,10 +47,10 @@ String getDefaultCachedKernelPath({
   if (buffer.isNotEmpty) {
     final String output = buffer.toString();
     final Digest digest = md5.convert(utf8.encode(output));
-    buildPrefix = hex.encode(digest.bytes);
+    buildPrefix = '${hex.encode(digest.bytes)}.';
   }
   return getKernelPathForTransformerOptions(
-    globals.fs.path.join(getBuildDirectory(), '$buildPrefix.cache.dill'),
+    globals.fs.path.join(getBuildDirectory(), '${buildPrefix}cache.dill'),
     trackWidgetCreation: trackWidgetCreation,
   );
 }
