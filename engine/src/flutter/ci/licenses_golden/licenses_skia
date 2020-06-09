@@ -1,9 +1,9 @@
-Signature: a9f3c55a8d98e5d2a50dd6631e1ffae6
+Signature: 0892d34712a66928b9b8f4d681bfb2ed
 
 UNUSED LICENSES:
 
 ====================================================================================================
-ORIGIN: ../../../third_party/skia/third_party/etc1/LICENSE
+ORIGIN: ../../../third_party/skia/third_party/aosp/LICENSE
 TYPE: LicenseType.apache
 ----------------------------------------------------------------------------------------------------
 Apache License
@@ -197,6 +197,7 @@ THE SOFTWARE.
 USED LICENSES:
 
 ====================================================================================================
+LIBRARY: aosp
 LIBRARY: etc1
 LIBRARY: vulkan
 ORIGIN: ../../../flutter/third_party/txt/LICENSE
@@ -209,6 +210,8 @@ FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_ios.h
 FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_macos.h
 FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_win32.h
 FILE: ../../../third_party/skia/include/third_party/vulkan/vulkan/vulkan_xcb.h
+FILE: ../../../third_party/skia/third_party/aosp/JavaInputStreamAdaptor.cpp
+FILE: ../../../third_party/skia/third_party/aosp/JavaInputStreamAdaptor.h
 FILE: ../../../third_party/skia/third_party/etc1/etc1.cpp
 FILE: ../../../third_party/skia/third_party/etc1/etc1.h
 ----------------------------------------------------------------------------------------------------
@@ -668,7 +671,6 @@ FILE: ../../../third_party/skia/src/gpu/gl/GrGLOpsRenderPass.h
 FILE: ../../../third_party/skia/src/gpu/gl/glfw/GrGLMakeNativeInterface_glfw.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLColorSpaceXformHelper.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLProgramDataManager.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrClearStencilClipOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrPathStencilSettings.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrRegionOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrRegionOp.h
@@ -2207,7 +2209,6 @@ FILE: ../../../third_party/skia/src/shaders/gradients/SkTwoPointConicalGradient.
 FILE: ../../../third_party/skia/src/shaders/gradients/SkTwoPointConicalGradient.h
 FILE: ../../../third_party/skia/src/utils/SkFloatUtils.h
 FILE: ../../../third_party/skia/src/utils/SkNullCanvas.cpp
-FILE: ../../../third_party/skia/src/utils/mac/SkStream_mac.cpp
 FILE: ../../../third_party/skia/src/utils/win/SkDWriteFontFileStream.cpp
 FILE: ../../../third_party/skia/src/utils/win/SkDWriteFontFileStream.h
 FILE: ../../../third_party/skia/src/utils/win/SkDWriteGeometrySink.cpp
@@ -3403,7 +3404,6 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConstColorProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrMagnifierEffect.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrPremulInputFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrRRectBlurEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrRectBlurEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.cpp
@@ -3424,8 +3424,6 @@ FILE: ../../../third_party/skia/src/gpu/effects/generated/GrLumaColorFilterEffec
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrLumaColorFilterEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrMagnifierEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrMagnifierEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrPremulInputFragmentProcessor.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrPremulInputFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRRectBlurEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRRectBlurEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRectBlurEffect.cpp
@@ -3489,7 +3487,6 @@ FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUniformHandler.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUniformHandler.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlVaryingHandler.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlVaryingHandler.mm
-FILE: ../../../third_party/skia/src/gpu/ops/GrClearStencilClipOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawableOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawableOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrFillRRectOp.cpp
@@ -5217,6 +5214,12 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/bench/TessellatePathBench.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/TessellatePathBench.cpp
+FILE: ../../../third_party/skia/experimental/skrive/include/SkRive.h
+FILE: ../../../third_party/skia/experimental/skrive/src/SkRive.cpp
+FILE: ../../../third_party/skia/experimental/skrive/src/reader/BinaryReader.cpp
+FILE: ../../../third_party/skia/experimental/skrive/src/reader/JsonReader.cpp
+FILE: ../../../third_party/skia/experimental/skrive/src/reader/StreamReader.cpp
+FILE: ../../../third_party/skia/experimental/skrive/src/reader/StreamReader.h
 FILE: ../../../third_party/skia/gm/3d.cpp
 FILE: ../../../third_party/skia/gm/bc1_transparency.cpp
 FILE: ../../../third_party/skia/gm/bicubic.cpp
@@ -5291,7 +5294,6 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrResolveLevelCounter.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrVectorXform.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrWangsFormula.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_skx.cpp
-FILE: ../../../third_party/skia/src/ports/SkFontHost_mac.cpp
 FILE: ../../../third_party/skia/src/ports/SkScalerContext_mac_ct.h
 FILE: ../../../third_party/skia/src/ports/SkTypeface_mac_ct.h
 FILE: ../../../third_party/skia/src/utils/mac/SkCGBase.h
