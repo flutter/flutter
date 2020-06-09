@@ -57,6 +57,10 @@ BrowserEngine _detectBrowserEngine() {
     return BrowserEngine.webkit;
   } else if (agent.contains('edge/')) {
     return BrowserEngine.edge;
+  } else if (agent.contains('Edg/')) {
+    // Chromium based Microsoft Edge has `Edg` in the user-agent.
+    // https://docs.microsoft.com/en-us/microsoft-edge/web-platform/user-agent-string
+    return BrowserEngine.blink;
   } else if (agent.contains('trident/7.0')) {
     return BrowserEngine.ie11;
   } else if (vendor == '' && agent.contains('firefox')) {
@@ -65,7 +69,7 @@ BrowserEngine _detectBrowserEngine() {
     return BrowserEngine.firefox;
   }
 
-  // Assume blink otherwise, but issue a warning.
+  // Assume unknown otherwise, but issue a warning.
   print('WARNING: failed to detect current browser engine.');
   return BrowserEngine.unknown;
 }
