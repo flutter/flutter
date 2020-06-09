@@ -143,13 +143,13 @@ void TextInputPlugin::HandleMethodCall(
       return;
     }
     client_id_ = client_id_json.GetInt();
-    std::string input_action;
+    input_action_ = "";
     auto input_action_json = client_config.FindMember(kTextInputAction);
     if (input_action_json != client_config.MemberEnd() &&
         input_action_json->value.IsString()) {
-      input_action = input_action_json->value.GetString();
+      input_action_ = input_action_json->value.GetString();
     }
-    std::string input_type;
+    input_type_ = "";
     auto input_type_info_json = client_config.FindMember(kTextInputType);
     if (input_type_info_json != client_config.MemberEnd() &&
         input_type_info_json->value.IsObject()) {
@@ -157,10 +157,10 @@ void TextInputPlugin::HandleMethodCall(
           input_type_info_json->value.FindMember(kTextInputTypeName);
       if (input_type_json != input_type_info_json->value.MemberEnd() &&
           input_type_json->value.IsString()) {
-        input_type = input_type_json->value.GetString();
+        input_type_ = input_type_json->value.GetString();
       }
     }
-    active_model_ = std::make_unique<TextInputModel>(input_type, input_action);
+    active_model_ = std::make_unique<TextInputModel>();
   } else if (method.compare(kSetEditingStateMethod) == 0) {
     if (!method_call.arguments() || method_call.arguments()->IsNull()) {
       result->Error(kBadArgumentError, "Method invoked without args");
@@ -223,15 +223,14 @@ void TextInputPlugin::SendStateUpdate(const TextInputModel& model) {
 }
 
 void TextInputPlugin::EnterPressed(TextInputModel* model) {
-  if (model->input_type() == kMultilineInputType) {
+  if (input_type_ == kMultilineInputType) {
     model->AddText(std::u16string({u'\n'}));
     SendStateUpdate(*model);
   }
   auto args = std::make_unique<rapidjson::Document>(rapidjson::kArrayType);
   auto& allocator = args->GetAllocator();
   args->PushBack(client_id_, allocator);
-  args->PushBack(rapidjson::Value(model->input_action(), allocator).Move(),
-                 allocator);
+  args->PushBack(rapidjson::Value(input_action_, allocator).Move(), allocator);
 
   channel_->InvokeMethod(kPerformActionMethod, std::move(args));
 }
