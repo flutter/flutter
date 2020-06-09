@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
+import 'dart:math' show max, min;
 
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -109,7 +109,7 @@ class HitTestResult {
 
   void _updateTransforms() {
     assert(_transforms.isNotEmpty);
-    int updatedTransforms = _updatedTransforms.value;
+    int updatedTransforms = max(_updatedTransforms.value, 1);
     if (updatedTransforms >= _transforms.length) {
       assert(updatedTransforms == _transforms.length);
       return;
@@ -193,11 +193,9 @@ class HitTestResult {
   @protected
   void popTransform() {
     assert(_transforms.isNotEmpty);
+    assert(_updatedTransforms.value <= _transforms.length);
     _transforms.removeLast();
-    if (_transforms.length < _updatedTransforms.value && _updatedTransforms.value > 1) {
-      _updatedTransforms.value -= 1;
-      assert(_transforms.length == _updatedTransforms.value);
-    }
+    _updatedTransforms.value = min(_transforms.length, _updatedTransforms.value);
   }
 
   bool _debugVectorMoreOrLessEquals(Vector4 a, Vector4 b, { double epsilon = precisionErrorTolerance }) {
