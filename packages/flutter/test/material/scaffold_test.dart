@@ -2025,7 +2025,7 @@ void main() {
     });
   });
 
-  group('Applies padding based on FloatingActionButtonLocations', () {
+  group('FloatingActionButtonLocation alignment', () {
     Widget _buildTest(
       FloatingActionButtonLocation location,
       Key key, {
