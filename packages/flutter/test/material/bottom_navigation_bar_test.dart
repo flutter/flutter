@@ -12,7 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import '../rendering/mock_canvas.dart';
-import '../widgets/scroll_view_test.dart';
 
 void main() {
   testWidgets('BottomNavigationBar callback test', (WidgetTester tester) async {
@@ -1034,10 +1033,10 @@ void main() {
       return MediaQuery(
         data: MediaQueryData(textScaleFactor: textScaleFactor),
         child: Localizations(
-          locale: const Locale('fr', 'CA'),
-          delegates: <LocalizationsDelegate<dynamic>>[
-            WidgetsLocalizationsDelegate(),
-            MaterialLocalizationsDelegate(),
+          locale: const Locale('en', 'US'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
           ],
           child: Directionality(
             textDirection: TextDirection.ltr,
