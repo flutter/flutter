@@ -468,7 +468,7 @@ static sk_sp<SkSurface> CreateSnapshotSurface(GrContext* surface_context,
   return SkSurface::MakeRaster(image_info);
 }
 
-static sk_sp<SkData> ScreenshotLayerTreeAsImage(
+sk_sp<SkData> Rasterizer::ScreenshotLayerTreeAsImage(
     flutter::LayerTree* tree,
     flutter::CompositorContext& compositor_context,
     GrContext* surface_context,
@@ -502,6 +502,15 @@ static sk_sp<SkData> ScreenshotLayerTreeAsImage(
   frame->Raster(*tree, true);
   canvas->flush();
 
+  // snapshot_surface->makeImageSnapshot needs the GL context to be set if the
+  // render context is GL. frame->Raster() pops the gl context in platforms that
+  // gl context switching are used. (For example, older iOS that uses GL) We
+  // reset the GL context using the context switch.
+  auto context_switch = surface_->MakeRenderContextCurrent();
+  if (!context_switch->GetResult()) {
+    FML_LOG(ERROR) << "Screenshot: unable to make image screenshot";
+    return nullptr;
+  }
   // Prepare an image from the surface, this image may potentially be on th GPU.
   auto potentially_gpu_snapshot = snapshot_surface->makeImageSnapshot();
   if (!potentially_gpu_snapshot) {
@@ -528,7 +537,6 @@ static sk_sp<SkData> ScreenshotLayerTreeAsImage(
     FML_LOG(ERROR) << "Screenshot: unable to obtain bitmap pixels";
     return nullptr;
   }
-
   return SkData::MakeWithCopy(pixmap.addr32(), pixmap.computeByteSize());
 }
 

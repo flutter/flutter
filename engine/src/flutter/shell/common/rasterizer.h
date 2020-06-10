@@ -448,6 +448,12 @@ class Rasterizer final : public SnapshotDelegate {
   // |SnapshotDelegate|
   sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) override;
 
+  sk_sp<SkData> ScreenshotLayerTreeAsImage(
+      flutter::LayerTree* tree,
+      flutter::CompositorContext& compositor_context,
+      GrContext* surface_context,
+      bool compressed);
+
   sk_sp<SkImage> DoMakeRasterSnapshot(
       SkISize size,
       std::function<void(SkCanvas*)> draw_callback);
