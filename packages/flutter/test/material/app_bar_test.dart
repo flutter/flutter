@@ -891,6 +891,31 @@ void main() {
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
 
+  testWidgets('SliverAppBar rebuilds when forceElevated changes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/59158.
+    Widget buildSliverAppBar(bool forceElevated) {
+      return MaterialApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              title: const Text('Title'),
+              forceElevated: forceElevated,
+            ),
+          ],
+        ),
+      );
+    }
+
+    final Finder appBarFinder = find.byType(AppBar);
+    AppBar getAppBarWidget(Finder finder) => tester.widget<AppBar>(finder);
+
+    await tester.pumpWidget(buildSliverAppBar(false));
+    expect(getAppBarWidget(appBarFinder).elevation, 0.0);
+
+    await tester.pumpWidget(buildSliverAppBar(true));
+    expect(getAppBarWidget(appBarFinder).elevation, 4.0);
+  });
+
   testWidgets('AppBar dimensions, with and without bottom, primary', (WidgetTester tester) async {
     const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0));
 
