@@ -214,6 +214,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   EdgeInsetsGeometry padding;
   EdgeInsetsGeometry margin;
   Decoration decoration;
+  TextStyle textStyle;
   double verticalOffset;
   bool preferBelow;
   bool excludeFromSemantics;
@@ -387,26 +388,25 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       Feedback.forLongPress(context);
   }
 
-  TextStyle get textStyle {
-    final ThemeData theme = Theme.of(context);
-    final TextStyle defaultTextStyle = theme.textTheme.bodyText2.copyWith(
-      color: theme.brightness == Brightness.dark ? Colors.black : Colors.white,
-    );
-    return widget.textStyle ?? theme.tooltipTheme.textStyle ?? defaultTextStyle;
-  }
-
   @override
   Widget build(BuildContext context) {
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
     final ThemeData theme = Theme.of(context);
     final TooltipThemeData tooltipTheme = TooltipTheme.of(context);
+    TextStyle defaultTextStyle;
     BoxDecoration defaultDecoration;
     if (theme.brightness == Brightness.dark) {
+      defaultTextStyle = theme.textTheme.bodyText2.copyWith(
+        color: Colors.black,
+      );
       defaultDecoration = BoxDecoration(
         color: Colors.white.withOpacity(0.9),
         borderRadius: const BorderRadius.all(Radius.circular(4)),
       );
     } else {
+      defaultTextStyle = theme.textTheme.bodyText2.copyWith(
+        color: Colors.white,
+      );
       defaultDecoration = BoxDecoration(
         color: Colors.grey[700].withOpacity(0.9),
         borderRadius: const BorderRadius.all(Radius.circular(4)),
@@ -420,6 +420,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     preferBelow = widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow;
     excludeFromSemantics = widget.excludeFromSemantics ?? tooltipTheme.excludeFromSemantics ?? _defaultExcludeFromSemantics;
     decoration = widget.decoration ?? tooltipTheme.decoration ?? defaultDecoration;
+    textStyle = widget.textStyle ?? tooltipTheme.textStyle ?? defaultTextStyle;
     waitDuration = widget.waitDuration ?? tooltipTheme.waitDuration ?? _defaultWaitDuration;
     showDuration = widget.showDuration ?? tooltipTheme.showDuration ?? _defaultShowDuration;
 
