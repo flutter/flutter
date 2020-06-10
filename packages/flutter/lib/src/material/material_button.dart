@@ -415,6 +415,7 @@ class MaterialButton extends StatelessWidget {
       animationDuration: buttonTheme.getAnimationDuration(this),
       child: child,
       materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
+      disabledElevation: disabledElevation ?? 0.0,
     );
   }
 

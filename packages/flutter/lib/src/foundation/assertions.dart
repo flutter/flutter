@@ -12,6 +12,9 @@ import 'stack_frame.dart';
 
 // Examples can assume:
 // String runtimeType;
+// bool draconisAlive;
+// bool draconisAmulet;
+// Diagnosticable draconis;
 
 /// Signature for [FlutterError.onError] handler.
 typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
@@ -170,7 +173,7 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
        );
 
   /// In debug builds, a kernel transformer rewrites calls to the default
-  /// constructors for [ErrorSummary], [ErrorDetails], and [ErrorHint] to use
+  /// constructors for [ErrorSummary], [ErrorDescription], and [ErrorHint] to use
   /// this constructor.
   //
   // ```dart
@@ -221,6 +224,10 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
 /// Use [ErrorDescription] for any part of an error message where neither
 /// [ErrorSummary] or [ErrorHint] is appropriate.
 ///
+/// In debug builds, values interpolated into the `message` are
+/// expanded and placed into [value], which is of type [List<Object>].
+/// This allows IDEs to examine values interpolated into error messages.
+///
 /// See also:
 ///
 ///  * [ErrorSummary], which provides a short (one line) description of the
@@ -256,6 +263,10 @@ class ErrorDescription extends _ErrorDiagnostic {
 /// A [FlutterError] must start with an [ErrorSummary] and may not contain
 /// multiple summaries.
 ///
+/// In debug builds, values interpolated into the `message` are
+/// expanded and placed into [value], which is of type [List<Object>].
+/// This allows IDEs to examine values interpolated into error messages.
+///
 /// See also:
 ///
 ///  * [ErrorDescription], which provides an explanation of the problem and its
@@ -286,6 +297,10 @@ class ErrorSummary extends _ErrorDiagnostic {
 ///
 /// If your message provides obvious advice that is always applicable, it is an
 /// [ErrorDescription] not a hint.
+///
+/// In debug builds, values interpolated into the `message` are
+/// expanded and placed into [value], which is of type [List<Object>].
+/// This allows IDEs to examine values interpolated into error messages.
 ///
 /// See also:
 ///
@@ -328,7 +343,7 @@ class ErrorSpacer extends DiagnosticsProperty<void> {
 
 /// Class for information provided to [FlutterExceptionHandler] callbacks.
 ///
-///  {@tool snippet}
+/// {@tool snippet}
 /// This is an example of using [FlutterErrorDetails] when calling
 /// [FlutterError.reportError].
 ///
@@ -674,7 +689,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// substantial additional information, ideally sufficient to develop a
   /// correct solution to the problem.
   ///
-  /// In some cases, when a FlutterError is reported to the user, only the first
+  /// In some cases, when a [FlutterError] is reported to the user, only the first
   /// line is included. For example, Flutter will typically only fully report
   /// the first exception at runtime, displaying only the first line of
   /// subsequent errors.
@@ -705,6 +720,45 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// be sometimes useful, but may not always apply). Other [DiagnosticsNode]
   /// subclasses, such as [DiagnosticsStackTrace], may
   /// also be used.
+  ///
+  /// When using an [ErrorSummary], [ErrorDescription]s, and [ErrorHint]s, in
+  /// debug builds, values interpolated into the `message` arguments of those
+  /// classes' constructors are expanded and placed into the
+  /// [DiagnosticsProperty.value] property of those objects (which is of type
+  /// [List<Object>]). This allows IDEs to examine values interpolated into
+  /// error messages.
+  ///
+  /// Alternatively, to include a specific [Diagnosticable] object into the
+  /// error message and have the object describe itself in detail (see
+  /// [DiagnosticsNode.toStringDeep]), consider calling
+  /// [Diagnosticable.toDiagnosticsNode] on that object and using that as one of
+  /// the values passed to this constructor.
+  ///
+  /// {@tool snippet}
+  /// In this example, an error is thrown in debug mode if certain conditions
+  /// are not met. The error message includes a description of an object that
+  /// implements the [Diagnosticable] interface, `draconis`.
+  ///
+  /// ```dart
+  /// void controlDraconis() {
+  ///   assert(() {
+  ///     if (!draconisAlive || !draconisAmulet) {
+  ///       throw FlutterError.fromParts(<DiagnosticsNode>[
+  ///         ErrorSummary('Cannot control Draconis in current state.'),
+  ///         ErrorDescription('Draconis can only be controlled while alive and while the amulet is wielded.'),
+  ///         if (!draconisAlive)
+  ///           ErrorHint('Draconis is currently not alive.'),
+  ///         if (!draconisAmulet)
+  ///           ErrorHint('The Amulet of Draconis is currently not wielded.'),
+  ///         draconis.toDiagnosticsNode(name: 'Draconis'),
+  ///       ]);
+  ///     }
+  ///     return true;
+  ///   }());
+  ///   // ...
+  /// }
+  /// ```
+  /// {@end-tool}
   FlutterError.fromParts(this.diagnostics) : assert(diagnostics.isNotEmpty, FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Empty FlutterError')])) {
     assert(
       diagnostics.first.level == DiagnosticLevel.summary,

@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:process/process.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
 import '../artifacts.dart';
@@ -154,6 +154,7 @@ class IOSDevice extends Device {
     @required IOSDeploy iosDeploy,
     @required IMobileDevice iMobileDevice,
     @required Logger logger,
+    @required VmServiceConnector vmServiceConnectUri,
   })
     : _sdkVersion = sdkVersion,
       _iosDeploy = iosDeploy,
@@ -161,6 +162,7 @@ class IOSDevice extends Device {
       _fileSystem = fileSystem,
       _logger = logger,
       _platform = platform,
+      _vmServiceConnectUri = vmServiceConnectUri,
         super(
           id,
           category: Category.mobile,
@@ -185,6 +187,7 @@ class IOSDevice extends Device {
   final Logger _logger;
   final Platform _platform;
   final IMobileDevice _iMobileDevice;
+  final VmServiceConnector _vmServiceConnectUri;
 
   /// May be 0 if version cannot be parsed.
   int get majorSdkVersion {
@@ -204,6 +207,9 @@ class IOSDevice extends Device {
   @override
   final String name;
 
+  @override
+  bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
+
   final DarwinArch cpuArchitecture;
 
   final IOSDeviceInterface interfaceType;
@@ -222,7 +228,10 @@ class IOSDevice extends Device {
   bool get supportsStartPaused => false;
 
   @override
-  Future<bool> isAppInstalled(IOSApp app) async {
+  Future<bool> isAppInstalled(
+    IOSApp app, {
+    String userIdentifier,
+  }) async {
     bool result;
     try {
       result = await _iosDeploy.isAppInstalled(
@@ -240,7 +249,10 @@ class IOSDevice extends Device {
   Future<bool> isLatestBuildInstalled(IOSApp app) async => false;
 
   @override
-  Future<bool> installApp(IOSApp app) async {
+  Future<bool> installApp(
+    IOSApp app, {
+    String userIdentifier,
+  }) async {
     final Directory bundle = _fileSystem.directory(app.deviceBundlePath);
     if (!bundle.existsSync()) {
       _logger.printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
@@ -270,7 +282,10 @@ class IOSDevice extends Device {
   }
 
   @override
-  Future<bool> uninstallApp(IOSApp app) async {
+  Future<bool> uninstallApp(
+    IOSApp app, {
+    String userIdentifier,
+  }) async {
     int uninstallationResult;
     try {
       uninstallationResult = await _iosDeploy.uninstallApp(
@@ -300,6 +315,8 @@ class IOSDevice extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
+    @visibleForTesting Duration fallbackPollingDelay,
+    String userIdentifier,
   }) async {
     String packageId;
 
@@ -416,6 +433,8 @@ class IOSDevice extends Device {
         portForwarder: portForwarder,
         protocolDiscovery: observatoryDiscovery,
         flutterUsage: globals.flutterUsage,
+        pollingDelay: fallbackPollingDelay,
+        vmServiceConnectUri: _vmServiceConnectUri,
       );
       final Uri localUri = await fallbackDiscovery.discover(
         assumedDevicePort: assumedObservatoryPort,
@@ -438,7 +457,10 @@ class IOSDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(IOSApp app) async {
+  Future<bool> stopApp(
+    IOSApp app, {
+    String userIdentifier,
+  }) async {
     // Currently we don't have a way to stop an app running on iOS.
     return false;
   }
@@ -653,16 +675,25 @@ class IOSDeviceLogReader extends DeviceLogReader {
       return;
     }
     try {
-      await connectedVmService.streamListen('Stdout');
+      await Future.wait(<Future<void>>[
+        connectedVmService.streamListen(vm_service.EventStreams.kStdout),
+        connectedVmService.streamListen(vm_service.EventStreams.kStderr),
+      ]);
     } on vm_service.RPCError {
       // Do nothing, since the tool is already subscribed.
     }
-    _loggingSubscriptions.add(connectedVmService.onStdoutEvent.listen((vm_service.Event event) {
+
+    void logMessage(vm_service.Event event) {
       final String message = utf8.decode(base64.decode(event.bytes));
       if (message.isNotEmpty) {
         _linesController.add(message);
       }
-    }));
+    }
+
+    _loggingSubscriptions.addAll(<StreamSubscription<void>>[
+      connectedVmService.onStdoutEvent.listen(logMessage),
+      connectedVmService.onStderrEvent.listen(logMessage),
+    ]);
   }
 
   void _listenToSysLog() {

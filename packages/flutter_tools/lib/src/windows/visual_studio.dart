@@ -10,6 +10,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/version.dart';
 import '../convert.dart';
 
 /// Encapsulates information about the installed copy of Visual Studio, if any.
@@ -99,6 +100,37 @@ class VisualStudio {
   /// The name of the recommended Visual Studio installer workload.
   String get workloadDescription => 'Desktop development with C++';
 
+  /// Returns the highest installed Windows 10 SDK version, or null if none is
+  /// found.
+  ///
+  /// For instance: 10.0.18362.0
+  String getWindows10SDKVersion() {
+    final String sdkLocation = _getWindows10SdkLocation();
+    if (sdkLocation == null) {
+      return null;
+    }
+    final Directory sdkIncludeDirectory = _fileSystem.directory(sdkLocation).childDirectory('Include');
+    if (!sdkIncludeDirectory.existsSync()) {
+      return null;
+    }
+    // The directories in this folder are named by the SDK version.
+    Version highestVersion;
+    for (final FileSystemEntity versionEntry in sdkIncludeDirectory.listSync()) {
+      if (versionEntry.basename.startsWith('10.')) {
+        // Version only handles 3 components; strip off the '10.' to leave three
+        // components, since they all start with that.
+        final Version version = Version.parse(versionEntry.basename.substring(3));
+        if (highestVersion == null || version > highestVersion) {
+          highestVersion = version;
+        }
+      }
+    }
+    if (highestVersion == null) {
+      return null;
+    }
+    return '10.$highestVersion';
+  }
+
   /// The names of the components within the workload that must be installed.
   ///
   /// The descriptions of some components differ from version to version. When
@@ -147,6 +179,11 @@ class VisualStudio {
     'vswhere.exe',
   );
 
+  /// Workload ID for use with vswhere requirements.
+  ///
+  /// See https://docs.microsoft.com/en-us/visualstudio/install/workload-and-component-ids
+  static const String _requiredWorkload = 'Microsoft.VisualStudio.Workload.NativeDesktop';
+
   /// Components for use with vswhere requirements.
   ///
   /// Maps from component IDs to description in the installer UI.
@@ -170,14 +207,11 @@ class VisualStudio {
     // wrong after each VC++ toolchain update, so just instruct people to install the
     // latest version.
     cppToolchainDescription += '\n   - If there are multiple build tool versions available, install the latest';
+    // Things which are required by the workload (e.g., MSBuild) don't need to
+    // be included here.
     return <String, String>{
-      // The MSBuild tool and related command-line toolchain.
-      'Microsoft.Component.MSBuild': 'MSBuild',
       // The C++ toolchain required by the template.
       'Microsoft.VisualStudio.Component.VC.Tools.x86.x64': cppToolchainDescription,
-      // The Windows SDK version used by the template.
-      'Microsoft.VisualStudio.Component.Windows10SDK.17763':
-          'Windows 10 SDK (10.0.17763.0)',
     };
   }
 
@@ -217,13 +251,27 @@ class VisualStudio {
   /// This key is under the 'catalog' entry.
   static const String _catalogDisplayVersionKey = 'productDisplayVersion';
 
-  /// Returns the details dictionary for the newest version of Visual Studio
-  /// that includes all of [requiredComponents], if there is one.
-  Map<String, dynamic> _visualStudioDetails(
-      {Iterable<String> requiredComponents, List<String> additionalArguments}) {
-    final List<String> requirementArguments = requiredComponents == null
-        ? <String>[]
-        : <String>['-requires', ...requiredComponents];
+  /// The registry path for Windows 10 SDK installation details.
+  static const String _windows10SdkRegistryPath = r'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0';
+
+  /// The registry key in _windows10SdkRegistryPath for the folder where the
+  /// SDKs are installed.
+  static const String _windows10SdkRegistryKey = 'InstallationFolder';
+
+  /// Returns the details dictionary for the newest version of Visual Studio.
+  /// If [validateRequirements] is set, the search will be limited to versions
+  /// that have all of the required workloads and components.
+  Map<String, dynamic> _visualStudioDetails({
+      bool validateRequirements = false,
+      List<String> additionalArguments,
+    }) {
+    final List<String> requirementArguments = validateRequirements
+        ? <String>[
+            '-requires',
+            _requiredWorkload,
+            ..._requiredComponents(_minimumSupportedVersion).keys
+          ]
+        : <String>[];
     try {
       final List<String> defaultArguments = <String>[
         '-format', 'json',
@@ -290,11 +338,11 @@ class VisualStudio {
       _minimumSupportedVersion.toString(),
     ];
     Map<String, dynamic> visualStudioDetails = _visualStudioDetails(
-        requiredComponents: _requiredComponents(_minimumSupportedVersion).keys,
+        validateRequirements: true,
         additionalArguments: minimumVersionArguments);
     // If a stable version is not found, try searching for a pre-release version.
     visualStudioDetails ??= _visualStudioDetails(
-        requiredComponents: _requiredComponents(_minimumSupportedVersion).keys,
+        validateRequirements: true,
         additionalArguments: <String>[...minimumVersionArguments, _vswherePrereleaseArgument]);
 
     if (visualStudioDetails != null) {
@@ -335,5 +383,57 @@ class VisualStudio {
       return _usableVisualStudioDetails;
     }
     return _anyVisualStudioDetails;
+  }
+
+  /// Returns the installation location of the Windows 10 SDKs, or null if the
+  /// registry doesn't contain that information.
+  String _getWindows10SdkLocation() {
+    try {
+      final RunResult result = _processUtils.runSync(<String>[
+        'reg',
+        'query',
+        _windows10SdkRegistryPath,
+        '/v',
+        _windows10SdkRegistryKey,
+      ]);
+      if (result.exitCode == 0) {
+        final RegExp pattern = RegExp(r'InstallationFolder\s+REG_SZ\s+(.+)');
+        final RegExpMatch match = pattern.firstMatch(result.stdout);
+        if (match != null) {
+          return match.group(1).trim();
+        }
+      }
+    } on ArgumentError {
+      // Thrown if reg somehow doesn't exist; ignore and return null below.
+    } on ProcessException {
+      // Ignored, return null below.
+    }
+    return null;
+  }
+
+  /// Returns the highest-numbered SDK version in [dir], which should be the
+  /// Windows 10 SDK installation directory.
+  ///
+  /// Returns null if no Windows 10 SDKs are found.
+  String findHighestVersionInSdkDirectory(Directory dir) {
+    // This contains subfolders that are named by the SDK version.
+    final Directory includeDir = dir.childDirectory('Includes');
+    if (!includeDir.existsSync()) {
+      return null;
+    }
+    Version highestVersion;
+    for (final FileSystemEntity versionEntry in includeDir.listSync()) {
+      if (!versionEntry.basename.startsWith('10.')) {
+        continue;
+      }
+      // Version only handles 3 components; strip off the '10.' to leave three
+      // components, since they all start with that.
+      final Version version = Version.parse(versionEntry.basename.substring(3));
+      if (highestVersion == null || version > highestVersion) {
+        highestVersion = version;
+      }
+    }
+    // Re-add the leading '10.' that was removed for comparison.
+    return highestVersion == null ? null : '10.$highestVersion';
   }
 }

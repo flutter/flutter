@@ -94,7 +94,6 @@ void main() {
       title: Text('Title'),
       content: Text('Y'),
       actions: <Widget>[ ],
-      useMaterialBorderRadius: true,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog, theme: ThemeData(brightness: Brightness.dark)));
 
@@ -190,7 +189,6 @@ void main() {
     const AlertDialog dialog = AlertDialog(
       actions: <Widget>[ ],
       shape: null,
-      useMaterialBorderRadius: true,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
@@ -234,6 +232,46 @@ void main() {
 
     final Future<int> result = showDialog<int>(
       context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: const Text('Title'),
+          children: <Widget>[
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context, 42);
+              },
+              child: const Text('First option'),
+            ),
+            const SimpleDialogOption(
+              child: Text('Second option'),
+            ),
+          ],
+        );
+      },
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Title'), findsOneWidget);
+    await tester.tap(find.text('First option'));
+
+    expect(await result, equals(42));
+  });
+
+  testWidgets('Can show dialog using navigator global key', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        home: const Material(
+          child: Center(
+            child: Text('Go'),
+          ),
+        ),
+      ),
+    );
+
+    final Future<int> result = showDialog<int>(
+      context: navigator.currentContext,
       builder: (BuildContext context) {
         return SimpleDialog(
           title: const Text('Title'),

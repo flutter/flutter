@@ -471,6 +471,9 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
        super(key: key, stream: stream);
 
   /// The build strategy currently used by this builder.
+  ///
+  /// This builder must only return a widget and should not have any side
+  /// effects as it may be called multiple times.
   final AsyncWidgetBuilder<T> builder;
 
   /// The data that will be used to create the initial snapshot.
@@ -686,6 +689,9 @@ class FutureBuilder<T> extends StatefulWidget {
   ///    the value to which the future completed. If it completed with an error,
   ///    [AsyncSnapshot.hasError] will be true and [AsyncSnapshot.error] will be
   ///    set to the error object.
+  ///
+  /// This builder must only return a widget and should not have any side
+  /// effects as it may be called multiple times.
   final AsyncWidgetBuilder<T> builder;
 
   /// The data that will be used to create the snapshots provided until a

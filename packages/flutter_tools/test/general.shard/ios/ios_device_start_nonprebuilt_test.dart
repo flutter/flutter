@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -261,16 +262,19 @@ void main() {
         ])
       );
 
-      final LaunchResult launchResult = await iosDevice.startApp(
-        buildableIOSApp,
-        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-        platformArgs: <String, Object>{},
-      );
+      FakeAsync().run((FakeAsync time) async {
+        final LaunchResult launchResult = await iosDevice.startApp(
+          buildableIOSApp,
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+          platformArgs: <String, Object>{},
+        );
+        time.elapse(const Duration(seconds: 2));
 
-      expect(logger.statusText,
-        contains('Xcode build failed due to concurrent builds, will retry in 2 seconds'));
-      expect(launchResult.started, true);
-      expect(processManager.hasRemainingExpectations, false);
+        expect(logger.statusText,
+          contains('Xcode build failed due to concurrent builds, will retry in 2 seconds'));
+        expect(launchResult.started, true);
+        expect(processManager.hasRemainingExpectations, false);
+      });
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FileSystem: () => fileSystem,
@@ -330,6 +334,7 @@ IOSDevice setUpIOSDevice({
     ),
     cpuArchitecture: DarwinArch.arm64,
     interfaceType: IOSDeviceInterface.usb,
+    vmServiceConnectUri: (String string, {Log log}) async => MockVmService(),
   );
 }
 
@@ -337,3 +342,4 @@ class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
 class MockXcode extends Mock implements Xcode {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
+class MockVmService extends Mock implements VmService {}

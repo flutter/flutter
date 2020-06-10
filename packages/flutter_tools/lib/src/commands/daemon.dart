@@ -16,7 +16,6 @@ import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
@@ -53,26 +52,14 @@ class DaemonCommand extends FlutterCommand {
     globals.printStatus('Starting device daemon...');
     isRunningFromDaemon = true;
 
-    final NotifyingLogger notifyingLogger = NotifyingLogger();
-
-    Cache.releaseLockEarly();
-
-    await context.run<void>(
-      body: () async {
-        final Daemon daemon = Daemon(
-          stdinCommandStream, stdoutCommandResponse,
-          notifyingLogger: notifyingLogger,
-        );
-
-        final int code = await daemon.onExit;
-        if (code != 0) {
-          throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
-        }
-      },
-      overrides: <Type, Generator>{
-        Logger: () => notifyingLogger,
-      },
+    final Daemon daemon = Daemon(
+      stdinCommandStream, stdoutCommandResponse,
+      notifyingLogger: globals.logger as NotifyingLogger,
     );
+    final int code = await daemon.onExit;
+    if (code != 0) {
+      throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
+    }
     return FlutterCommandResult.success();
   }
 }
@@ -460,9 +447,13 @@ class AppDomain extends Domain {
     bool ipv6 = false,
     String isolateFilter,
   }) async {
-    if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
-      throw Exception('${toTitleCase(options.buildInfo.friendlyModeName)} mode is not supported for emulators.');
+    if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
+      throw Exception(
+        '${toTitleCase(options.buildInfo.friendlyModeName)} '
+        'mode is not supported for ${device.name}.',
+      );
     }
+
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = globals.fs.currentDirectory;
     globals.fs.currentDirectory = globals.fs.directory(projectDirectory);
@@ -927,7 +918,22 @@ dynamic _toJsonable(dynamic obj) {
 }
 
 class NotifyingLogger extends Logger {
-  final StreamController<LogMessage> _messageController = StreamController<LogMessage>.broadcast();
+  NotifyingLogger({ @required this.verbose }) {
+    _messageController = StreamController<LogMessage>.broadcast(
+      onListen: _onListen,
+    );
+  }
+
+  final bool verbose;
+  final List<LogMessage> messageBuffer = <LogMessage>[];
+  StreamController<LogMessage> _messageController;
+
+  void _onListen() {
+    if (messageBuffer.isNotEmpty) {
+      messageBuffer.forEach(_messageController.add);
+      messageBuffer.clear();
+    }
+  }
 
   Stream<LogMessage> get onMessage => _messageController.stream;
 
@@ -941,7 +947,7 @@ class NotifyingLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
-    _messageController.add(LogMessage('error', message, stackTrace));
+    _sendMessage(LogMessage('error', message, stackTrace));
   }
 
   @override
@@ -954,12 +960,15 @@ class NotifyingLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
-    _messageController.add(LogMessage('status', message));
+    _sendMessage(LogMessage('status', message));
   }
 
   @override
   void printTrace(String message) {
-    // This is a lot of traffic to send over the wire.
+    if (!verbose) {
+      return;
+    }
+    _sendMessage(LogMessage('trace', message));
   }
 
   @override
@@ -977,6 +986,13 @@ class NotifyingLogger extends Logger {
       timeoutConfiguration: timeoutConfiguration,
       stopwatch: Stopwatch(),
     );
+  }
+
+  void _sendMessage(LogMessage logMessage) {
+    if (_messageController.hasListener) {
+      return _messageController.add(logMessage);
+    }
+    messageBuffer.add(logMessage);
   }
 
   void dispose() {

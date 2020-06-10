@@ -2732,12 +2732,14 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 class AspectRatio extends SingleChildRenderObjectWidget {
   /// Creates a widget with a specific aspect ratio.
   ///
-  /// The [aspectRatio] argument must not be null.
+  /// The [aspectRatio] argument must be a finite number greater than zero.
   const AspectRatio({
     Key key,
     @required this.aspectRatio,
     Widget child,
   }) : assert(aspectRatio != null),
+       assert(aspectRatio > 0.0),
+       // can't test isFinite because that's not a constant expression
        super(key: key, child: child);
 
   /// The aspect ratio to attempt to use.
