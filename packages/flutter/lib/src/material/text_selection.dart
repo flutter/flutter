@@ -212,6 +212,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
           borderRadius: const BorderRadius.all(Radius.circular(7.0)),
           clipBehavior: Clip.antiAlias,
           elevation: 1.0,
+          type: MaterialType.card,
           child: _TextSelectionToolbarItems(
             isAbove: widget.isAbove,
             overflowOpen: _overflowOpen,
