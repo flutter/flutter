@@ -578,6 +578,32 @@ void main() {
     expect(textStyle.decoration, TextDecoration.underline);
   });
 
+  testWidgets('Tooltip.fromWidget - custom tooltip message textStyle', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Tooltip.fromWidget(
+        key: key,
+        textStyle: const TextStyle(
+          color: Colors.orange,
+          decoration: TextDecoration.underline,
+        ),
+        message: const Text(tooltipText),
+        child: Container(
+          width: 100.0,
+          height: 100.0,
+          color: Colors.green[500],
+        ),
+      ),
+    ));
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+    final TextStyle textStyle = tester.renderObject<RenderParagraph>(find.text(tooltipText)).text.style;
+    expect(textStyle.color, Colors.orange);
+    expect(textStyle.fontFamily, 'Roboto');
+    expect(textStyle.decoration, TextDecoration.underline);
+  });
+
   testWidgets('Tooltip overlay respects ambient Directionality', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/40702.
     Widget buildApp(String text, TextDirection textDirection) {
