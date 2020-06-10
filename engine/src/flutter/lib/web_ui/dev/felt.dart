@@ -9,6 +9,7 @@ import 'package:args/command_runner.dart';
 
 import 'build.dart';
 import 'clean.dart';
+import 'create_simulator.dart';
 import 'licenses.dart';
 import 'exceptions.dart';
 import 'test_runner.dart';
@@ -19,6 +20,7 @@ CommandRunner runner = CommandRunner<bool>(
   'Command-line utility for building and testing Flutter web engine.',
 )
   ..addCommand(CleanCommand())
+  ..addCommand(CreateSimulatorCommand())
   ..addCommand(LicensesCommand())
   ..addCommand(TestCommand())
   ..addCommand(BuildCommand());
