@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // This is the test for the private implementation of animated icons.
 // To make the private API accessible from the test we do not import the
 // material material_animated_icons library, but instead, this test file is an

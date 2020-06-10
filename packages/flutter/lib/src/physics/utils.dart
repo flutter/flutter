@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 /// Whether two doubles are within a given distance of each other.
 ///
 /// The `epsilon` argument must be positive and not null.
