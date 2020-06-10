@@ -313,6 +313,23 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     )
   ),
 
+  // Chromium's zlib extensions.
+  LicenseFileReferencePattern(
+    firstPrefixIndex: 1,
+    indentPrefixIndex: 2,
+    copyrightIndex: 3,
+    authorIndex: 4,
+    fileIndex: 5,
+    pattern: RegExp(
+      kIndent +
+      r'(Copyright .+(The .+ Authors)\. +All rights reserved\. *\n)' +
+      r'\1\2Use of this source code is governed by a BSD-style license that can be *\n'
+      r'\1\2found in the Chromium source repository ([^ ]+) file.',
+      multiLine: true,
+      caseSensitive: false,
+    )
+  ),
+
   // Mojo code
   LicenseFileReferencePattern(
     firstPrefixIndex: 1,
