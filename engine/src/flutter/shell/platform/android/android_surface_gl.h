@@ -64,8 +64,8 @@ class AndroidSurfaceGL final : public GPUSurfaceGLDelegate,
   fml::RefPtr<AndroidNativeWindow> native_window_;
   std::unique_ptr<AndroidExternalViewEmbedder> external_view_embedder_;
   std::shared_ptr<AndroidContextGL> android_context_;
-  std::unique_ptr<AndroidEGLSurface> onscreen_surface_;
-  std::unique_ptr<AndroidEGLSurface> offscreen_surface_;
+  EGLSurface onscreen_surface_;
+  EGLSurface offscreen_surface_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceGL);
 };
