@@ -81,8 +81,8 @@ bool run({
   );
   if (remote != kUpstreamRemote) {
     throw Exception(
-      'The current directory is not a Flutter repository checkout with a '
-      'correctly configured upstream remote.\nFor more details see: '
+      'The remote named $origin is set to $remote, when $kUpstreamRemote was '
+      'expected.\nFor more details see: '
       'https://github.com/flutter/flutter/wiki/Release-process'
     );
   }
@@ -98,7 +98,9 @@ bool run({
 
   final String lastVersion = getFullTag(git, origin);
 
-  final String version = incrementLevel(lastVersion, level);
+  final String version = skipTagging
+    ? lastVersion
+    : incrementLevel(lastVersion, level);
 
   if (!force) {
     git.run(
@@ -117,8 +119,6 @@ bool run({
 
   final String hash = git.getOutput('rev-parse HEAD', 'Get git hash for $commit');
 
-  git.run('tag $version', 'tag the commit with the version label');
-
   // PROMPT
 
   if (autoApprove) {
@@ -128,13 +128,18 @@ bool run({
       'to the "dev" channel.');
     stdout.write('Are you? [yes/no] ');
     if (stdin.readLineSync() != 'yes') {
-      git.run('tag -d $version', 'remove the tag you did not want to publish');
       print('The dev roll has been aborted.');
       return false;
     }
   }
 
-  git.run('push $origin $version', 'publish the version');
+  if (skipTagging) {
+    // ensure tag already exist
+    // TODO
+  } else {
+    git.run('tag $version', 'tag the commit with the version label');
+    git.run('push $origin $version', 'publish the version');
+  }
   git.run(
     'push ${force ? "--force " : ""}$origin HEAD:dev',
     'land the new version on the "dev" branch',
