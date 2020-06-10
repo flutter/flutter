@@ -173,8 +173,8 @@ class IntegrationTestsManager {
         .toList();
 
     final List<String> e2eTestsToRun = List<String>();
-    final List<String> blackList =
-        blackListsMap[getBlackListMapKey(_browser)] ?? <String>[];
+    final List<String> blockedTests =
+        blockedTestsListsMap[getBlockedTestsListMapKey(_browser)] ?? <String>[];
 
     // The following loops over the contents of the directory and saves an
     // expected driver file name for each e2e test assuming any dart file
@@ -184,12 +184,12 @@ class IntegrationTestsManager {
     for (io.File f in entities) {
       final String basename = pathlib.basename(f.path);
       if (!basename.contains('_test.dart') && basename.endsWith('.dart')) {
-        // Do not add the basename if it is in the blacklist.
-        if (!blackList.contains(basename)) {
+        // Do not add the basename if it is in the `blockedTests`.
+        if (!blockedTests.contains(basename)) {
           e2eTestsToRun.add(basename);
         } else {
-          print('INFO: Test $basename is skipped since it is blacklisted for '
-              '${getBlackListMapKey(_browser)}');
+          print('INFO: Test $basename is skipped since it is blocked for '
+              '${getBlockedTestsListMapKey(_browser)}');
         }
       }
     }
@@ -356,10 +356,10 @@ class IntegrationTestsManager {
   }
 }
 
-/// Prepares a key for the [blackList] map.
+/// Prepares a key for the [blockedTests] map.
 ///
 /// Uses the browser name and the operating system name.
-String getBlackListMapKey(String browser) =>
+String getBlockedTestsListMapKey(String browser) =>
     '${browser}-${io.Platform.operatingSystem}';
 
 /// Tests that should be skipped run for a specific platform-browser
@@ -368,11 +368,12 @@ String getBlackListMapKey(String browser) =>
 /// These tests might be failing or might have been implemented for a specific
 /// configuration.
 ///
-/// For example a mobile browser only tests will be added to blacklist for
-/// `chrome-linux`, `safari-macos` and `chrome-macos`.
+/// For example when adding a tests only intended for mobile browsers, it should
+/// be added to [blockedTests] for `chrome-linux`, `safari-macos` and
+/// `chrome-macos`. It will work on `chrome-android`, `safari-ios`.
 ///
 /// Note that integration tests are only running on chrome for now.
-const Map<String, List<String>> blackListsMap = <String, List<String>>{
+const Map<String, List<String>> blockedTestsListsMap = <String, List<String>>{
   'chrome-linux': [
     'target_platform_ios_e2e.dart',
     'target_platform_macos_e2e.dart',
