@@ -401,7 +401,7 @@ void main() {
 
     await tester.pumpWidget(buildApp('1'));
 
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     Offset center = tester.getCenter(find.byType(Slider));
     TestGesture gesture = await tester.startGesture(center);
@@ -578,7 +578,7 @@ void main() {
 
     await tester.pumpWidget(buildApp('1'));
 
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     Offset center = tester.getCenter(find.byType(Slider));
     TestGesture gesture = await tester.startGesture(center);
@@ -989,7 +989,7 @@ void main() {
     ));
 
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     // Tap the center of the track and wait for animations to finish.
     final Offset center = tester.getCenter(find.byType(Slider));
@@ -1020,7 +1020,7 @@ void main() {
     ));
 
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     // Tap the center of the track to kick off the animation of the value indicator.
     final Offset center = tester.getCenter(find.byType(Slider));
@@ -1053,7 +1053,7 @@ void main() {
       divisions: 4,
     ));
 
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     // Tap the center of the track to kick off the animation of the value indicator.
     final Offset center = tester.getCenter(find.byType(Slider));
@@ -1084,7 +1084,7 @@ void main() {
 
     await tester.pumpWidget(_buildRangeApp(sliderTheme));
 
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     final Offset center = tester.getCenter(find.byType(RangeSlider));
     final TestGesture gesture = await tester.startGesture(center);
@@ -1131,7 +1131,7 @@ void main() {
     ));
 
 //    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     // Tap the center of the track to kick off the animation of the value indicator.
     final Offset center = tester.getCenter(find.byType(RangeSlider));
@@ -1162,7 +1162,7 @@ void main() {
       divisions: 4,
     ));
 
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     // Tap the center of the track to kick off the animation of the value indicator.
     final Offset center = tester.getCenter(find.byType(RangeSlider));

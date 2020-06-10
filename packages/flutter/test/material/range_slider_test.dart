@@ -1319,7 +1319,7 @@ void main() {
 
     await tester.pumpWidget(buildApp(divisions: 3));
 
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     final Offset topRight = tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
     final TestGesture gesture = await tester.startGesture(topRight);
@@ -1330,18 +1330,16 @@ void main() {
       valueIndicatorBox,
       paints
         ..path(color: sliderTheme.valueIndicatorColor)
-        ..path(color: sliderTheme.valueIndicatorColor),
+        ..paragraph()
     );
     await gesture.up();
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
-
   });
 
   testWidgets('Range Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
-    final ThemeData theme = _buildTheme();
-    final SliderThemeData sliderTheme = theme.sliderTheme;
     RangeValues values = const RangeValues(0.5, 0.75);
+    const Color fillColor = Color(0xf55f5f5f);
 
     Widget buildApp({
       Color activeColor,
@@ -1353,42 +1351,41 @@ void main() {
         values = newValues;
       };
       return MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(
-            child: Navigator(onGenerateRoute: (RouteSettings settings) {
-              return MaterialPageRoute<void>(builder: (BuildContext context) {
-                return Column(
-                  children: <Widget>[
-                    Theme(
-                      data: theme,
-                      child: RangeSlider(
-                        values: values,
-                        labels: RangeLabels(values.start.toStringAsFixed(2),
-                            values.end.toStringAsFixed(2)),
-                        divisions: divisions,
-                        onChanged: onChanged,
-                      ),
+        home: Scaffold(
+          // The builder is used to pass the context from the MaterialApp widget
+          // to the [Navigator]. This context is required in order for the
+          // Navigator to work.
+          body: Builder(
+            builder: (BuildContext context) {
+              return Column(
+                children: <Widget>[
+                  RangeSlider(
+                    values: values,
+                    labels: RangeLabels(
+                      values.start.toStringAsFixed(2),
+                      values.end.toStringAsFixed(2),
                     ),
-                    RaisedButton(
-                      child: const Text('Next'),
-                      onPressed: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute<void>(
-                            builder: (BuildContext context) {
-                              return RaisedButton(
-                                child: const Text('Inner page'),
-                                onPressed: () => Navigator.of(context).pop(),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                );
-              });
-            }),
+                    divisions: divisions,
+                    onChanged: onChanged,
+                  ),
+                  RaisedButton(
+                    child: const Text('Next'),
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) {
+                            return RaisedButton(
+                              child: const Text('Inner page'),
+                              onPressed: () { Navigator.of(context).pop(); },
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
           ),
         ),
       );
@@ -1396,23 +1393,28 @@ void main() {
 
     await tester.pumpWidget(buildApp(divisions: 3));
 
-    /// The value indicator is added to the overlay when it is clicked or dragged.
-    /// Because both of these gestures are occurring then it adds same value indicator
-    /// twice into the overlay.
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderObject valueIndicatorBox = tester.renderObject(find.byType(Overlay));
     final Offset topRight = tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
     final TestGesture gesture = await tester.startGesture(topRight);
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
 
-    expect(find.byType(RangeSlider), isNotNull);
     expect(
       valueIndicatorBox,
       paints
-        ..rrect(color: sliderTheme.inactiveTrackColor)
-        ..rect(color: sliderTheme.activeTrackColor)
-        ..rrect(color: sliderTheme.inactiveTrackColor),
+      // Represents the raised button wth next text.
+      ..path(color: Colors.black)
+      ..paragraph()
+      // Represents the range slider.
+      ..path(color: fillColor)
+      ..paragraph()
+      ..path(color: fillColor)
+      ..paragraph(),
     );
+
+    // Represents the Raised Button and Range Slider.
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 3));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 3));
 
     await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();
@@ -1421,12 +1423,17 @@ void main() {
     expect(
       valueIndicatorBox,
       isNot(
-         paints
-           ..rrect(color: sliderTheme.inactiveTrackColor)
-           ..rect(color: sliderTheme.activeTrackColor)
-           ..rrect(color: sliderTheme.inactiveTrackColor)
+       paints
+         ..path(color: fillColor)
+         ..paragraph()
+         ..path(color: fillColor)
+         ..paragraph(),
       ),
     );
+
+    // Represents the raised button with inner page text.
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 1));
 
     // Don't stop holding the value indicator.
     await gesture.up();
@@ -1548,7 +1555,7 @@ void main() {
       ),
     );
 
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
@@ -1572,8 +1579,7 @@ void main() {
       valueIndicatorBox,
       paints
         ..path(color: sliderTheme.valueIndicatorColor)
-        ..path(color: sliderTheme.overlappingShapeStrokeColor)
-        ..path(color: sliderTheme.valueIndicatorColor),
+        ..paragraph()
     );
 
     await gesture.up();
@@ -1624,7 +1630,7 @@ void main() {
       ),
     );
 
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
@@ -1648,8 +1654,7 @@ void main() {
       valueIndicatorBox,
       paints
         ..path(color: sliderTheme.valueIndicatorColor)
-        ..path(color: sliderTheme.overlappingShapeStrokeColor)
-        ..path(color: sliderTheme.valueIndicatorColor),
+        ..paragraph()
     );
 
     await gesture.up();
