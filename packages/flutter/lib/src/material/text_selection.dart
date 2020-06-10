@@ -55,6 +55,18 @@ class _TextSelectionToolbar extends StatefulWidget {
   _TextSelectionToolbarState createState() => _TextSelectionToolbarState();
 }
 
+// Intermediate data used for building menu items with the _getItems method.
+class _ItemData {
+  const _ItemData(
+    this.onPressed,
+    this.label,
+  ) : assert(onPressed != null),
+      assert(label != null);
+
+  final VoidCallback onPressed;
+  final String label;
+}
+
 class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with TickerProviderStateMixin {
   ClipboardStatusNotifier _clipboardStatus;
 
@@ -66,18 +78,24 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
   // The key for _TextSelectionToolbarContainer.
   UniqueKey _containerKey = UniqueKey();
 
-  Widget _getItem(VoidCallback onPressed, String label) {
-    assert(onPressed != null);
+  Widget _getItem(_ItemData itemData, bool isFirst, bool isLast) {
+    assert(isFirst != null);
+    assert(isLast != null);
     return ButtonTheme.fromButtonThemeData(
       data: ButtonTheme.of(context).copyWith(
         height: kMinInteractiveDimension,
         minWidth: kMinInteractiveDimension,
       ),
       child: FlatButton(
-        onPressed: onPressed,
-        padding: const EdgeInsets.symmetric(horizontal: 9.5),
+        onPressed: itemData.onPressed,
+        padding: EdgeInsets.only(
+          // These values were eyeballed to match the native text selection menu
+          // on a Pixel 2 running Android 10.
+          left: 9.5 + (isFirst ? 5.0 : 0.0),
+          right: 9.5 + (isLast ? 5.0 : 0.0),
+        ),
         shape: Border.all(width: 0.0, color: Colors.transparent),
-        child: Text(label),
+        child: Text(itemData.label),
       ),
     );
   }
@@ -162,23 +180,24 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
     }
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final List<Widget> items = <Widget>[
+    final List<_ItemData> itemDatas = <_ItemData>[
       if (widget.handleCut != null)
-        _getItem(widget.handleCut, localizations.cutButtonLabel),
+        _ItemData(widget.handleCut, localizations.cutButtonLabel),
       if (widget.handleCopy != null)
-        _getItem(widget.handleCopy, localizations.copyButtonLabel),
+        _ItemData(widget.handleCopy, localizations.copyButtonLabel),
       if (widget.handlePaste != null
           && _clipboardStatus.value == ClipboardStatus.pasteable)
-        _getItem(widget.handlePaste, localizations.pasteButtonLabel),
+        _ItemData(widget.handlePaste, localizations.pasteButtonLabel),
       if (widget.handleSelectAll != null)
-        _getItem(widget.handleSelectAll, localizations.selectAllButtonLabel),
+        _ItemData(widget.handleSelectAll, localizations.selectAllButtonLabel),
     ];
 
     // If there is no option available, build an empty widget.
-    if (items.isEmpty) {
+    if (itemDatas.isEmpty) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
+    int itemIndex = -1;
     return _TextSelectionToolbarContainer(
       key: _containerKey,
       overflowOpen: _overflowOpen,
@@ -188,7 +207,9 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
         // API 28.
         duration: const Duration(milliseconds: 140),
         child: Material(
-          borderRadius: const BorderRadius.all(Radius.circular(6.0)),
+          // This value was eyeballed to match the native text selection menu on
+          // a Pixel 2 running Android 10.
+          borderRadius: const BorderRadius.all(Radius.circular(7.0)),
           clipBehavior: Clip.antiAlias,
           elevation: 1.0,
           child: _TextSelectionToolbarItems(
@@ -213,7 +234,10 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
                       : localizations.moreButtonTooltip,
                 ),
               ),
-              ...items,
+              ...itemDatas.map((_ItemData itemData) {
+                itemIndex++;
+                return _getItem(itemData, itemIndex == 0, itemIndex == itemDatas.length - 1);
+              }).toList(),
             ],
           ),
         ),
