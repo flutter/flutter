@@ -17,6 +17,23 @@
 namespace flutter {
 
 //------------------------------------------------------------------------------
+/// Holds an `EGLSurface` reference.
+///
+///
+/// This can be used in conjuction to unique_ptr to provide better guarantees
+/// about the lifespam of the `EGLSurface` object.
+///
+struct AndroidEGLSurface {
+  AndroidEGLSurface(EGLSurface surface, EGLDisplay display);
+  ~AndroidEGLSurface();
+
+  const EGLSurface surface;
+
+ private:
+  const EGLDisplay display_;
+};
+
+//------------------------------------------------------------------------------
 /// The Android context is used by `AndroidSurfaceGL` to create and manage
 /// EGL surfaces.
 ///
@@ -34,24 +51,18 @@ class AndroidContextGL : public AndroidContext {
   /// @brief      Allocates an new EGL window surface that is used for on-screen
   ///             pixels.
   ///
-  /// @attention  Consumers must tear down the surface by calling
-  ///             `AndroidContextGL::TeardownSurface`.
-  ///
   /// @return     The window surface.
   ///
-  EGLSurface CreateOnscreenSurface(
+  std::unique_ptr<AndroidEGLSurface> CreateOnscreenSurface(
       fml::RefPtr<AndroidNativeWindow> window) const;
 
   //----------------------------------------------------------------------------
   /// @brief      Allocates an 1x1 pbuffer surface that is used for making the
   ///             offscreen current for texture uploads.
   ///
-  /// @attention  Consumers must tear down the surface by calling
-  ///             `AndroidContextGL::TeardownSurface`.
-  ///
   /// @return     The pbuffer surface.
   ///
-  EGLSurface CreateOffscreenSurface() const;
+  std::unique_ptr<AndroidEGLSurface> CreateOffscreenSurface() const;
 
   //----------------------------------------------------------------------------
   /// @return     The Android environment that contains a reference to the
@@ -77,7 +88,7 @@ class AndroidContextGL : public AndroidContext {
   ///
   /// @return     Whether the surface was made current.
   ///
-  bool MakeCurrent(EGLSurface& surface);
+  bool MakeCurrent(std::unique_ptr<AndroidEGLSurface> surface_wrapper);
 
   //----------------------------------------------------------------------------
   /// @brief      Binds the resource EGLContext context to the current rendering
@@ -85,7 +96,7 @@ class AndroidContextGL : public AndroidContext {
   ///
   /// @return     Whether the surface was made current.
   ///
-  bool ResourceMakeCurrent(EGLSurface& surface);
+  bool ResourceMakeCurrent(std::unique_ptr<AndroidEGLSurface> surface_wrapper);
 
   //----------------------------------------------------------------------------
   /// @brief      This only applies to on-screen surfaces such as those created
@@ -93,19 +104,12 @@ class AndroidContextGL : public AndroidContext {
   ///
   /// @return     Whether the EGL surface color buffer was swapped.
   ///
-  bool SwapBuffers(EGLSurface& surface);
+  bool SwapBuffers(std::unique_ptr<AndroidEGLSurface> surface_wrapper);
 
   //----------------------------------------------------------------------------
   /// @return     The size of an `EGLSurface`.
   ///
-  SkISize GetSize(EGLSurface& surface);
-
-  //----------------------------------------------------------------------------
-  /// @brief      Destroys an `EGLSurface`.
-  ///
-  /// @return     Whether the surface was destroyed.
-  ///
-  bool TeardownSurface(EGLSurface& surface);
+  SkISize GetSize(std::unique_ptr<AndroidEGLSurface> surface_wrapper);
 
  private:
   fml::RefPtr<AndroidEnvironmentGL> environment_;
