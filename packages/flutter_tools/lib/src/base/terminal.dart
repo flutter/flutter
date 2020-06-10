@@ -8,9 +8,12 @@ import 'package:meta/meta.dart';
 
 import '../convert.dart';
 import '../globals.dart' as globals;
+import 'common.dart';
 import 'io.dart' as io;
+import 'io.dart';
 import 'logger.dart';
 import 'platform.dart';
+import 'user_messages.dart';
 
 enum TerminalColor {
   red,
@@ -46,6 +49,43 @@ class OutputPreferences {
   /// A version of this class for use in tests.
   OutputPreferences.test({this.wrapText = false, int wrapColumn = kDefaultTerminalColumns, this.showColor = false})
     : _overrideWrapColumn = wrapColumn;
+
+  /// Create an [OutputPreferences] from a list of command line arguments.
+  static OutputPreferences fromArguments(List<String> topLevelResults, {
+    @required UserMessages userMessages,
+    @required Stdio stdio,
+  }) {
+    // Don't set wrapColumns unless the user said to: if it's set, then all
+    // wrapping will occur at this width explicitly, and won't adapt if the
+    // terminal size changes during a run.
+    int wrapColumn;
+    final String rawWrapColumn = topLevelResults
+      .firstWhere((String line) => line.startsWith('--wrap-column='), orElse: () => null);
+    if (rawWrapColumn != null) {
+      final List<String> parts = rawWrapColumn.split('=');
+      if (parts.length > 1) {
+        wrapColumn = int.tryParse(parts[1]);
+      }
+      if (wrapColumn == null) {
+        throwToolExit(userMessages.runnerWrapColumnInvalid(rawWrapColumn));
+      }
+    }
+
+    // If we're not writing to a terminal with a defined width, then don't wrap
+    // anything, unless the user explicitly said to.
+    final bool useWrapping = !topLevelResults.contains('--no-wrap');
+
+    // If no default width was provided, first default to the terminal width. If
+    // that is null, use `kDefaultTerminalColumns`.
+    if (useWrapping && wrapColumn == null) {
+      wrapColumn = stdio.terminalColumns ?? kDefaultTerminalColumns;
+    }
+    return OutputPreferences(
+      wrapText: useWrapping,
+      showColor: !topLevelResults.contains('--no-color'),
+      wrapColumn: wrapColumn,
+    );
+  }
 
   /// If [wrapText] is true, then any text sent to the context's [Logger]
   /// instance (e.g. from the [printError] or [printStatus] functions) will be
