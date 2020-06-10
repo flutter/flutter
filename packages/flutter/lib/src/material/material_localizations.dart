@@ -882,7 +882,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get pasteButtonLabel => 'Paste';
 
   @override
-  String get selectAllButtonLabel => 'Select All';
+  String get selectAllButtonLabel => 'Select all';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENSES';
