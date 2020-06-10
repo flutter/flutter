@@ -332,6 +332,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// ### Snapping and Floating [SliverAppBar]s
 ///
+// See https://github.com/flutter/flutter/issues/59189
 /// Currently, [NestedScrollView] does not support simultaneously floating and
 /// snapping the outer scrollable, e.g. when using [SliverAppBar.floating] &
 /// [SliverAppBar.snap] at the same time.
