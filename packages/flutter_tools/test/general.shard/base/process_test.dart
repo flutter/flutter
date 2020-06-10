@@ -247,7 +247,6 @@ void main() {
           timeout: timeout,
           timeoutRetries: 0,
         ), throwsA(isA<ProcessException>()));
-
         time.elapse(timeout);
       });
     });

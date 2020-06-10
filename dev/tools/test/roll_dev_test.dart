@@ -165,8 +165,12 @@ void main() {
         'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
         any,
       )).thenReturn(lastRelease);
-      //when(mockGit.run('merge-base --is-ancestor $lastRelease $commit'))
-      //  .thenThrow();
+      when(mockGit.run('merge-base --is-ancestor $lastRelease $commit', any))
+        .thenThrow(Exception(
+          'Failed to verify $lastRelease is a direct ancestor of $commit. The '
+          'flag `--force` is required to force push a new release past a '
+          'cherry-pick',
+        ));
       fakeArgResults = FakeArgResults(
         level: level,
         commit: commit,
@@ -175,11 +179,15 @@ void main() {
         autoApprove: true,
         help: false,
       );
-      expect(run(
+      expect(() => run(
         argResults: fakeArgResults,
         git: mockGit,
         usage: usage,
-      ), false);
+      ), throwsA(isA<Exception>()));
+      verify(mockGit.run('fetch $origin', any));
+      verifyNever(mockGit.run('reset $commit --hard', any));
+      verifyNever(mockGit.run('push $origin HEAD:dev', any));
+      verifyNever(mockGit.run('tag 1.2.3-1.0.pre', any));
     });
 
     test('successfully tags and publishes release', () {
@@ -188,7 +196,7 @@ void main() {
       when(mockGit.getOutput(
         'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
         any,
-      )).thenReturn('1.2.3-0.0.pre');
+      )).thenReturn('1.2.0-0.0.pre');
       when(mockGit.getOutput('rev-parse HEAD', any)).thenReturn(commit);
       fakeArgResults = FakeArgResults(
         level: level,
