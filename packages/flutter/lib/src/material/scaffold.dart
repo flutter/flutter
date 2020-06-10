@@ -2500,9 +2500,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _buildDrawer(children, textDirection);
     }
 
+    print('Scaffold mediaQuery: $mediaQuery');
     // The minimum insets for contents of the Scaffold to keep visible.
     final EdgeInsets minInsets = mediaQuery.padding.copyWith(
-      bottom: _resizeToAvoidBottomInset ? mediaQuery.viewInsets.bottom : 0.0,
+      bottom: _resizeToAvoidBottomInset
+        ? mediaQuery.viewInsets.bottom
+        : math.min(mediaQuery.viewPadding.bottom, mediaQuery.viewInsets.bottom),
     );
 
     // extendBody locked when keyboard is open
@@ -2538,12 +2541,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         break;
     }
 
-    final EdgeInsets floatingActionButtonPadding = mediaQuery.padding.copyWith(
+    final EdgeInsets _floatingActionButtonPadding = mediaQuery.padding.copyWith(
       left: left,
       top: 0.0,
       right: right,
       bottom: _maintainBottomPadding.contains(_floatingActionButtonLocation) ? null : 0.0,
     );
+    
+    print('FABPadding: $_floatingActionButtonPadding');
 
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
@@ -2566,7 +2571,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
                 isSnackBarFloating: isSnackBarFloating,
-                floatingActionButtonPadding: floatingActionButtonPadding,
+                floatingActionButtonPadding: _floatingActionButtonPadding,
               ),
             );
           }),
