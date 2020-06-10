@@ -167,8 +167,7 @@ void main() {
     expect(theme.button.fontFamily, 'Roboto');
     expect(theme.button.fontWeight, medium);
     expect(theme.button.fontSize, 14);
-    // TODO(hansmuller): restore after englishLike2018 has been updated, per #38904.
-    //expect(theme.button.letterSpacing, 1.25);
+    expect(theme.button.letterSpacing, 1.25);
 
     // Caption Roboto regular 12 0.4
     expect(theme.caption.fontFamily, 'Roboto');

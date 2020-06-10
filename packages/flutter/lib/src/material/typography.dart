@@ -526,7 +526,7 @@ class Typography with Diagnosticable {
     bodyText2 : TextStyle(debugLabel: 'englishLike bodyText2 2018', fontSize: 14.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.25),
     subtitle1 : TextStyle(debugLabel: 'englishLike subtitle1 2018', fontSize: 16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.15),
     subtitle2 : TextStyle(debugLabel: 'englishLike subtitle2 2018', fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.1),
-    button    : TextStyle(debugLabel: 'englishLike button 2018',    fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.75),
+    button    : TextStyle(debugLabel: 'englishLike button 2018',    fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.25),
     caption   : TextStyle(debugLabel: 'englishLike caption 2018',   fontSize: 12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.4),
     overline  : TextStyle(debugLabel: 'englishLike overline 2018',  fontSize: 10.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.5),
   );
