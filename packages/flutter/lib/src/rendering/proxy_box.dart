@@ -2830,25 +2830,6 @@ class RenderMouseRegion extends RenderProxyBox implements MouseTrackerAnnotation
   }
 
   @override
-  bool get needsCompositing => super.needsCompositing || _annotationIsActive;
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (_annotationIsActive) {
-      // Annotated region layers are not retained because they do not create engine layers.
-      final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
-        this,
-        size: size,
-        offset: offset,
-        opaque: opaque,
-      );
-      context.pushLayer(layer, super.paint, offset);
-    } else {
-      super.paint(context, offset);
-    }
-  }
-
-  @override
   void performResize() {
     size = constraints.biggest;
   }
