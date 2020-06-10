@@ -73,14 +73,14 @@ class TextInputModel {
 
   // Attempts to move the cursor backward.
   //
-  // Returns true if the cursor could be moved. Changes base and extent to be
-  // equal to either the extent (if extent is at the end of the string), or
-  // for extent to be equal to
+  // Returns true if the cursor could be moved. If a selection is active, moves
+  // to the start of the selection.
   bool MoveCursorBack();
 
   // Attempts to move the cursor forward.
   //
-  // Returns true if the cursor could be moved.
+  // Returns true if the cursor could be moved. If a selection is active, moves
+  // to the end of the selection.
   bool MoveCursorForward();
 
   // Attempts to move the cursor to the beginning.
@@ -100,12 +100,12 @@ class TextInputModel {
   // GetText().
   int GetCursorOffset() const;
 
-  // The position of the cursor
+  // The position where the selection starts.
   int selection_base() const {
     return static_cast<int>(selection_base_ - text_.begin());
   }
 
-  // The end of the selection
+  // The position of the cursor.
   int selection_extent() const {
     return static_cast<int>(selection_extent_ - text_.begin());
   }
@@ -116,6 +116,18 @@ class TextInputModel {
   std::u16string text_;
   std::u16string::iterator selection_base_;
   std::u16string::iterator selection_extent_;
+
+  // Returns the left hand side of the selection.
+  std::u16string::iterator selection_start() {
+    return selection_base_ < selection_extent_ ? selection_base_
+                                               : selection_extent_;
+  }
+
+  // Returns the right hand side of the selection.
+  std::u16string::iterator selection_end() {
+    return selection_base_ > selection_extent_ ? selection_base_
+                                               : selection_extent_;
+  }
 };
 
 }  // namespace flutter
