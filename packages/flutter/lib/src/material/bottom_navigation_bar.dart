@@ -648,12 +648,12 @@ class _Label extends StatelessWidget {
       );
     }
 
-    final double currentTextScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final MediaQueryData mediaQueryData = MediaQuery.of(context);
     return MediaQuery(
       // Do not grow text in bottom navigation bar because there is no room,
       // instead, properly scaled tooltips will show on long press.
-      data: MediaQuery.of(context).copyWith(
-        textScaleFactor: math.min(1.0, currentTextScaleFactor),
+      data: mediaQueryData.copyWith(
+        textScaleFactor: math.min(1.0, mediaQueryData.textScaleFactor),
       ),
       child: Align(
         alignment: Alignment.bottomCenter,
