@@ -710,7 +710,7 @@ mixin WidgetInspectorService {
 
   /// The current [WidgetInspectorService].
   static WidgetInspectorService get instance => _instance;
-  static WidgetInspectorService _instance = _WidgetInspectorService();
+  static WidgetInspectorService _instance = const _WidgetInspectorService();
   @protected
   static set instance(WidgetInspectorService instance) {
     _instance = instance;
