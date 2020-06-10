@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -90,7 +91,9 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     cpuArchitecture: DarwinArch.arm64,
     artifacts: artifacts,
     interfaceType: IOSDeviceInterface.usb,
+    vmServiceConnectUri: (String string, {Log log}) async => MockVmService(),
   );
 }
 
 class MockArtifacts extends Mock implements Artifacts {}
+class MockVmService extends Mock implements VmService {}

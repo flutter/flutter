@@ -9,8 +9,10 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
@@ -46,10 +48,12 @@ void main() {
         defines: <String, String>{
           kTargetPlatform: 'ios',
         },
+        inputs: <String, String>{},
         processManager: processManager,
         artifacts: MockArtifacts(),
         logger: globals.logger,
         fileSystem: globals.fs,
+        engineVersion: '2',
       );
     });
   });
@@ -112,6 +116,7 @@ void main() {
   }));
 
   test('DebugIosApplicationBundle', () => testbed.run(() async {
+    environment.inputs[kBundleSkSLPath] = 'bundle.sksl';
     environment.defines[kBuildMode] = 'debug';
     // Precompiled dart data
     when(globals.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
@@ -133,6 +138,16 @@ void main() {
       .childDirectory('App.framework')
       .childFile('App')
       .createSync(recursive: true);
+    // sksl bundle
+    globals.fs.file('bundle.sksl').writeAsStringSync(json.encode(
+      <String, Object>{
+        'engineRevision': '2',
+        'platform': 'ios',
+        'data': <String, Object>{
+          'A': 'B',
+        }
+      }
+    ));
 
     await const DebugIosApplicationBundle().build(environment);
 
@@ -145,6 +160,8 @@ void main() {
     expect(assetDirectory.childFile('AssetManifest.json'), exists);
     expect(assetDirectory.childFile('vm_snapshot_data'), exists);
     expect(assetDirectory.childFile('isolate_snapshot_data'), exists);
+    expect(assetDirectory.childFile('io.flutter.shaders.json'), exists);
+    expect(assetDirectory.childFile('io.flutter.shaders.json').readAsStringSync(), '{"data":{"A":"B"}}');
   }, overrides: <Type, Generator>{
     Artifacts: () => MockArtifacts(),
   }));
