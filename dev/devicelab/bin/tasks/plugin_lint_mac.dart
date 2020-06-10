@@ -109,7 +109,7 @@ Future<void> main() async {
       String podspecContent = objcPubspec.readAsStringSync();
       podspecContent = podspecContent.replaceFirst(
         '\ndependencies:\n',
-        '\ndependencies:\n  $objcPluginName:\n    path: $objcPluginPath\n  $swiftPluginName:\n    path: $swiftPluginPath\n',
+        '\ndependencies:\n  $objcPluginName:\n    path: $objcPluginPath\n  $swiftPluginName:\n    path: $swiftPluginPath\n  device_info:\n',
       );
       objcPubspec.writeAsStringSync(podspecContent, flush: true);
 
@@ -130,6 +130,7 @@ Future<void> main() async {
       if (objcPodfileContent.contains('use_frameworks!')) {
         return TaskResult.failure('Expected default Objective-C Podfile to not contain use_frameworks');
       }
+      _validatePodfile(objcAppPath);
 
       section('Build Objective-C application with Swift and Objective-C plugins as frameworks');
 
@@ -199,6 +200,8 @@ Future<void> main() async {
         );
       });
 
+      _validatePodfile(swiftAppPath);
+
       return TaskResult.success(null);
     } catch (e) {
       return TaskResult.failure(e.toString());
@@ -206,4 +209,57 @@ Future<void> main() async {
       rmTree(tempDir);
     }
   });
+}
+
+void _validatePodfile(String appPath) {
+  section('Validate Podfile');
+
+  final File podfileLockFile = File(path.join(appPath, 'ios', 'Podfile.lock'));
+  final String podfileLockOutput = podfileLockFile.readAsStringSync();
+  if (!podfileLockOutput.contains(':path: ".symlinks/plugins/device_info/ios"')
+    || !podfileLockOutput.contains(':path: Flutter')
+    || !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_objc/ios"')
+    || !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_swift/ios"')) {
+    throw TaskResult.failure('Podfile.lock does not contain expected pods');
+  }
+
+  checkFileExists(path.join(
+    appPath,
+    'ios',
+    'Flutter',
+    'Flutter.framework',
+    'Flutter',
+  ));
+
+  checkFileExists(path.join(
+    appPath,
+    'ios',
+    'Flutter',
+    'Flutter.podspec',
+  ));
+
+  final String pluginSymlinks = path.join(
+    appPath,
+    'ios',
+    '.symlinks',
+    'plugins',
+  );
+
+  checkDirectoryExists(path.join(
+    pluginSymlinks,
+    'device_info',
+    'ios',
+  ));
+
+  checkDirectoryExists(path.join(
+    pluginSymlinks,
+    'test_plugin_objc',
+    'ios',
+  ));
+
+  checkDirectoryExists(path.join(
+    pluginSymlinks,
+    'test_plugin_swift',
+    'ios',
+  ));
 }
