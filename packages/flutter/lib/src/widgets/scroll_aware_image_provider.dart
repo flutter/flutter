@@ -12,7 +12,7 @@ import 'framework.dart';
 import 'scrollable.dart';
 
 /// An [ImageProvider] that makes use of
-/// [Scollable.recommendDeferredLoadingForContext] to avoid loading images when
+/// [Scrollable.recommendDeferredLoadingForContext] to avoid loading images when
 /// rapidly scrolling.
 ///
 /// This provider assumes that its wrapped [imageProvider] correctly uses the
