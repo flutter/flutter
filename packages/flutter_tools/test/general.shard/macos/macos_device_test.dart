@@ -46,6 +46,11 @@ void main() {
       expect(await device.isLatestBuildInstalled(mockMacOSApp), true);
       expect(await device.isAppInstalled(mockMacOSApp), true);
       expect(device.category, Category.desktop);
+
+      expect(device.supportsRuntimeMode(BuildMode.debug), true);
+      expect(device.supportsRuntimeMode(BuildMode.profile), true);
+      expect(device.supportsRuntimeMode(BuildMode.release), true);
+      expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
     });
 
     testUsingContext('No devices listed if platform unsupported', () async {

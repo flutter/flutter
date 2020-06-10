@@ -65,6 +65,7 @@ class FuchsiaKernelCompiler {
 
     final List<String> command = <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--disable-dart-dev',
       kernelCompiler,
       ...flags,
     ];

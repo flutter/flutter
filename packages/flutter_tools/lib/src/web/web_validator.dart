@@ -67,7 +67,6 @@ class ChromeValidator extends ChromiumValidator {
 }
 
 /// A validator that checks whethere Edge is installed and can run.
-// This is not currently used, see https://github.com/flutter/flutter/issues/55322
 class EdgeValidator extends ChromiumValidator {
   const EdgeValidator({
     @required Platform platform,

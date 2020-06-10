@@ -47,6 +47,7 @@ class FlutterDevice {
     TargetModel targetModel = TargetModel.flutter,
     TargetPlatform targetPlatform,
     ResidentCompiler generator,
+    this.userIdentifier,
   }) : assert(buildInfo.trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          globals.artifacts.getArtifactPath(
@@ -76,6 +77,7 @@ class FlutterDevice {
     TargetModel targetModel = TargetModel.flutter,
     List<String> experimentalFlags,
     ResidentCompiler generator,
+    String userIdentifier,
   }) async {
     ResidentCompiler generator;
     final TargetPlatform targetPlatform = await device.targetPlatform;
@@ -102,6 +104,7 @@ class FlutterDevice {
             globals.printTrace(message),
         initializeFromDill: getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
+          dartDefines: buildInfo.dartDefines,
         ),
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: buildInfo.extraFrontEndOptions,
@@ -129,6 +132,7 @@ class FlutterDevice {
         extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         initializeFromDill: getDefaultCachedKernelPath(
           trackWidgetCreation: buildInfo.trackWidgetCreation,
+          dartDefines: buildInfo.dartDefines,
         ),
         packagesPath: globalPackagesPath,
       );
@@ -150,12 +154,14 @@ class FlutterDevice {
       targetPlatform: targetPlatform,
       generator: generator,
       buildInfo: buildInfo,
+      userIdentifier: userIdentifier,
     );
   }
 
   final Device device;
   final ResidentCompiler generator;
   final BuildInfo buildInfo;
+  final String userIdentifier;
   Stream<Uri> observatoryUris;
   vm_service.VmService vmService;
   DevFS devFS;
@@ -184,6 +190,7 @@ class FlutterDevice {
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
     GetSkSLMethod getSkSLMethod,
+    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   }) {
     final Completer<void> completer = Completer<void>();
     StreamSubscription<void> subscription;
@@ -203,6 +210,7 @@ class FlutterDevice {
           compileExpression: compileExpression,
           reloadMethod: reloadMethod,
           getSkSLMethod: getSkSLMethod,
+          printStructuredErrorLogMethod: printStructuredErrorLogMethod,
           device: device,
         );
       } on Exception catch (exception) {
@@ -237,11 +245,11 @@ class FlutterDevice {
     @visibleForTesting Duration timeoutDelay = const Duration(seconds: 10),
   }) async {
     if (!device.supportsFlutterExit || vmService == null) {
-      return device.stopApp(package);
+      return device.stopApp(package, userIdentifier: userIdentifier);
     }
     final List<FlutterView> views = await vmService.getFlutterViews();
     if (views == null || views.isEmpty) {
-      return device.stopApp(package);
+      return device.stopApp(package, userIdentifier: userIdentifier);
     }
     // If any of the flutter views are paused, we might not be able to
     // cleanly exit since the service extension may not have been registered.
@@ -252,7 +260,7 @@ class FlutterDevice {
         continue;
       }
       if (isPauseEvent(isolate.pauseEvent.kind)) {
-        return device.stopApp(package);
+        return device.stopApp(package, userIdentifier: userIdentifier);
       }
     }
     for (final FlutterView view in views) {
@@ -275,7 +283,7 @@ class FlutterDevice {
         // flutter_attach_android_test. This log should help verify this
         // is where the tool is getting stuck.
         globals.logger.printTrace('error: vm service shutdown failed');
-        return device.stopApp(package);
+        return device.stopApp(package, userIdentifier: userIdentifier);
       });
   }
 
@@ -500,6 +508,7 @@ class FlutterDevice {
       route: route,
       prebuiltApplication: prebuiltMode,
       ipv6: hotRunner.ipv6,
+      userIdentifier: userIdentifier,
     );
 
     final LaunchResult result = await futureResult;
@@ -573,6 +582,7 @@ class FlutterDevice {
       route: route,
       prebuiltApplication: prebuiltMode,
       ipv6: coldRunner.ipv6,
+      userIdentifier: userIdentifier,
     );
 
     if (!result.started) {
@@ -1054,9 +1064,22 @@ abstract class ResidentRunner {
     if (outputDill.existsSync()) {
       final String copyPath = getDefaultCachedKernelPath(
         trackWidgetCreation: trackWidgetCreation,
+        dartDefines: debuggingOptions.buildInfo.dartDefines,
       );
-      globals.fs.file(copyPath).parent.createSync(recursive: true);
+      globals.fs
+          .file(copyPath)
+          .parent
+          .createSync(recursive: true);
       outputDill.copySync(copyPath);
+    }
+  }
+
+  void printStructuredErrorLog(vm_service.Event event) {
+    if (event.extensionKind == 'Flutter.Error') {
+      final Map<dynamic, dynamic> json = event.extensionData?.data;
+      if (json != null && json.containsKey('renderedErrorText')) {
+        globals.printStatus('\n${json['renderedErrorText']}');
+      }
     }
   }
 
@@ -1084,7 +1107,8 @@ abstract class ResidentRunner {
         restart: restart,
         compileExpression: compileExpression,
         reloadMethod: reloadMethod,
-        getSkSLMethod: getSkSLMethod
+        getSkSLMethod: getSkSLMethod,
+        printStructuredErrorLogMethod: printStructuredErrorLog,
       );
       // This will wait for at least one flutter view before returning.
       final Status status = globals.logger.startProgress(

@@ -1462,13 +1462,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     final Offset paintOffset = _paintOffset;
 
-    if (selection.isCollapsed) {
+
+    final List<ui.TextBox> boxes = selection.isCollapsed ?
+        <ui.TextBox>[] : _textPainter.getBoxesForSelection(selection);
+    if (boxes.isEmpty) {
       // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
       final Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
       final Offset start = Offset(0.0, preferredLineHeight) + caretOffset + paintOffset;
       return <TextSelectionPoint>[TextSelectionPoint(start, null)];
     } else {
-      final List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(selection);
       final Offset start = Offset(boxes.first.start, boxes.first.bottom) + paintOffset;
       final Offset end = Offset(boxes.last.end, boxes.last.bottom) + paintOffset;
       return <TextSelectionPoint>[
