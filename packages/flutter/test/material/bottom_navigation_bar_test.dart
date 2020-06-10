@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/scroll_view_test.dart';
 
 void main() {
   testWidgets('BottomNavigationBar callback test', (WidgetTester tester) async {
@@ -1025,6 +1026,61 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
     expect(box.size.height, equals(kBottomNavigationBarHeight));
   });
+
+  testWidgets('BottomNavigationBar shows tool tips with text scaling on long press', (WidgetTester tester) async {
+    const String label = 'Foo';
+
+    Widget buildApp({ double textScaleFactor }) {
+      return MediaQuery(
+        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        child: Localizations(
+          locale: const Locale('fr', 'CA'),
+          delegates: <LocalizationsDelegate<dynamic>>[
+            WidgetsLocalizationsDelegate(),
+            MaterialLocalizationsDelegate(),
+          ],
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<void>(
+                    builder: (BuildContext context) {
+                      return Scaffold(
+                        bottomNavigationBar: BottomNavigationBar(
+                          items: const <BottomNavigationBarItem>[
+                            BottomNavigationBarItem(
+                              title: Text(label),
+                              icon: Icon(Icons.ac_unit),
+                            ),
+                            BottomNavigationBarItem(
+                              title: Text('B'),
+                              icon: Icon(Icons.battery_alert),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(textScaleFactor: 1.0));
+    expect(find.text(label), findsOneWidget);
+    await tester.longPress(find.text(label));
+    expect(find.text(label), findsNWidgets(2));
+    expect(tester.getSize(find.text(label).last), equals(const Size(42.0, 14.0)));
+    await tester.pumpAndSettle(const Duration(seconds: 5));
+
+    await tester.pumpWidget(buildApp(textScaleFactor: 4.0));
+    expect(find.text(label), findsOneWidget);
+    await tester.longPress(find.text(label));
+    expect(tester.getSize(find.text(label).last), equals(const Size(168.0, 56.0)));
+  });
+
 
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
     final Text longTextA = Text(''.padLeft(100, 'A'));
