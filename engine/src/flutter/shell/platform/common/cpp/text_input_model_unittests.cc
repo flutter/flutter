@@ -46,7 +46,10 @@ TEST(TextInputModel, SetEditingStateSelection) {
 
 TEST(TextInputModel, SetEditingStateReverseSelection) {
   auto model = std::make_unique<TextInputModel>();
-  EXPECT_FALSE(model->SetEditingState(3, 1, "ABCDE"));
+  EXPECT_TRUE(model->SetEditingState(4, 1, "ABCDE"));
+  EXPECT_EQ(model->selection_base(), 4);
+  EXPECT_EQ(model->selection_extent(), 1);
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
 
 TEST(TextInputModel, SetEditingStateOutsideString) {
@@ -85,9 +88,27 @@ TEST(TextInputModel, AddCodePointSelection) {
   EXPECT_STREQ(model->GetText().c_str(), "AxE");
 }
 
+TEST(TextInputModel, AddCodePointReverseSelection) {
+  auto model = std::make_unique<TextInputModel>();
+  EXPECT_TRUE(model->SetEditingState(4, 1, "ABCDE"));
+  model->AddCodePoint('x');
+  EXPECT_EQ(model->selection_base(), 2);
+  EXPECT_EQ(model->selection_extent(), 2);
+  EXPECT_STREQ(model->GetText().c_str(), "AxE");
+}
+
 TEST(TextInputModel, AddCodePointSelectionWideCharacter) {
   auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(1, 4, "ABCDE"));
+  model->AddCodePoint(0x1f604);
+  EXPECT_EQ(model->selection_base(), 3);
+  EXPECT_EQ(model->selection_extent(), 3);
+  EXPECT_STREQ(model->GetText().c_str(), "A😄E");
+}
+
+TEST(TextInputModel, AddCodePointReverseSelectionWideCharacter) {
+  auto model = std::make_unique<TextInputModel>();
+  EXPECT_TRUE(model->SetEditingState(4, 1, "ABCDE"));
   model->AddCodePoint(0x1f604);
   EXPECT_EQ(model->selection_base(), 3);
   EXPECT_EQ(model->selection_extent(), 3);
@@ -113,9 +134,27 @@ TEST(TextInputModel, AddTextSelection) {
   EXPECT_STREQ(model->GetText().c_str(), "AxyE");
 }
 
+TEST(TextInputModel, AddTextReverseSelection) {
+  auto model = std::make_unique<TextInputModel>();
+  EXPECT_TRUE(model->SetEditingState(4, 1, "ABCDE"));
+  model->AddText("xy");
+  EXPECT_EQ(model->selection_base(), 3);
+  EXPECT_EQ(model->selection_extent(), 3);
+  EXPECT_STREQ(model->GetText().c_str(), "AxyE");
+}
+
 TEST(TextInputModel, AddTextSelectionWideCharacter) {
   auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(1, 4, "ABCDE"));
+  model->AddText(u"😄🙃");
+  EXPECT_EQ(model->selection_base(), 5);
+  EXPECT_EQ(model->selection_extent(), 5);
+  EXPECT_STREQ(model->GetText().c_str(), "A😄🙃E");
+}
+
+TEST(TextInputModel, AddTextReverseSelectionWideCharacter) {
+  auto model = std::make_unique<TextInputModel>();
+  EXPECT_TRUE(model->SetEditingState(4, 1, "ABCDE"));
   model->AddText(u"😄🙃");
   EXPECT_EQ(model->selection_base(), 5);
   EXPECT_EQ(model->selection_extent(), 5);
@@ -161,6 +200,15 @@ TEST(TextInputModel, DeleteWideCharacters) {
 TEST(TextInputModel, DeleteSelection) {
   auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(1, 4, "ABCDE"));
+  ASSERT_TRUE(model->Delete());
+  EXPECT_EQ(model->selection_base(), 1);
+  EXPECT_EQ(model->selection_extent(), 1);
+  EXPECT_STREQ(model->GetText().c_str(), "AE");
+}
+
+TEST(TextInputModel, DeleteReverseSelection) {
+  auto model = std::make_unique<TextInputModel>();
+  EXPECT_TRUE(model->SetEditingState(4, 1, "ABCDE"));
   ASSERT_TRUE(model->Delete());
   EXPECT_EQ(model->selection_base(), 1);
   EXPECT_EQ(model->selection_extent(), 1);
@@ -257,6 +305,15 @@ TEST(TextInputModel, DeleteSurroundingSelection) {
   EXPECT_STREQ(model->GetText().c_str(), "ABCE");
 }
 
+TEST(TextInputModel, DeleteSurroundingReverseSelection) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetEditingState(4, 3, "ABCDE");
+  EXPECT_TRUE(model->DeleteSurrounding(0, 1));
+  EXPECT_EQ(model->selection_base(), 3);
+  EXPECT_EQ(model->selection_extent(), 3);
+  EXPECT_STREQ(model->GetText().c_str(), "ABCE");
+}
+
 TEST(TextInputModel, BackspaceStart) {
   auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(0, 0, "ABCDE"));
@@ -296,6 +353,15 @@ TEST(TextInputModel, BackspaceWideCharacters) {
 TEST(TextInputModel, BackspaceSelection) {
   auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(1, 4, "ABCDE"));
+  ASSERT_TRUE(model->Delete());
+  EXPECT_EQ(model->selection_base(), 1);
+  EXPECT_EQ(model->selection_extent(), 1);
+  EXPECT_STREQ(model->GetText().c_str(), "AE");
+}
+
+TEST(TextInputModel, BackspaceReverseSelection) {
+  auto model = std::make_unique<TextInputModel>();
+  EXPECT_TRUE(model->SetEditingState(4, 1, "ABCDE"));
   ASSERT_TRUE(model->Delete());
   EXPECT_EQ(model->selection_base(), 1);
   EXPECT_EQ(model->selection_extent(), 1);
@@ -347,6 +413,15 @@ TEST(TextInputModel, MoveCursorForwardSelection) {
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
 
+TEST(TextInputModel, MoveCursorForwardReverseSelection) {
+  auto model = std::make_unique<TextInputModel>();
+  EXPECT_TRUE(model->SetEditingState(4, 1, "ABCDE"));
+  EXPECT_TRUE(model->MoveCursorForward());
+  EXPECT_EQ(model->selection_base(), 4);
+  EXPECT_EQ(model->selection_extent(), 4);
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
 TEST(TextInputModel, MoveCursorBackStart) {
   auto model = std::make_unique<TextInputModel>();
   EXPECT_TRUE(model->SetEditingState(0, 0, "ABCDE"));
@@ -392,6 +467,15 @@ TEST(TextInputModel, MoveCursorBackSelection) {
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
 
+TEST(TextInputModel, MoveCursorBackReverseSelection) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetEditingState(4, 1, "ABCDE");
+  EXPECT_TRUE(model->MoveCursorBack());
+  EXPECT_EQ(model->selection_base(), 1);
+  EXPECT_EQ(model->selection_extent(), 1);
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
 TEST(TextInputModel, MoveCursorToBeginningStart) {
   auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(0, 0, "ABCDE");
@@ -422,6 +506,15 @@ TEST(TextInputModel, MoveCursorToBeginningEnd) {
 TEST(TextInputModel, MoveCursorToBeginningSelection) {
   auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(1, 4, "ABCDE");
+  EXPECT_TRUE(model->MoveCursorToBeginning());
+  EXPECT_EQ(model->selection_base(), 0);
+  EXPECT_EQ(model->selection_extent(), 0);
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
+TEST(TextInputModel, MoveCursorToBeginningReverseSelection) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetEditingState(4, 1, "ABCDE");
   EXPECT_TRUE(model->MoveCursorToBeginning());
   EXPECT_EQ(model->selection_base(), 0);
   EXPECT_EQ(model->selection_extent(), 0);
@@ -464,6 +557,15 @@ TEST(TextInputModel, MoveCursorToEndSelection) {
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
 }
 
+TEST(TextInputModel, MoveCursorToEndReverseSelection) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetEditingState(4, 1, "ABCDE");
+  EXPECT_TRUE(model->MoveCursorToEnd());
+  EXPECT_EQ(model->selection_base(), 5);
+  EXPECT_EQ(model->selection_extent(), 5);
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
 TEST(TextInputModel, GetCursorOffset) {
   auto model = std::make_unique<TextInputModel>();
   // These characters take 1, 2, 3 and 4 bytes in UTF-8.
@@ -483,6 +585,12 @@ TEST(TextInputModel, GetCursorOffsetSelection) {
   auto model = std::make_unique<TextInputModel>();
   model->SetEditingState(1, 4, "ABCDE");
   EXPECT_EQ(model->GetCursorOffset(), 4);
+}
+
+TEST(TextInputModel, GetCursorOffsetReverseSelection) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetEditingState(4, 1, "ABCDE");
+  EXPECT_EQ(model->GetCursorOffset(), 1);
 }
 
 }  // namespace flutter
