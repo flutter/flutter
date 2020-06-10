@@ -1080,7 +1080,6 @@ void main() {
     expect(tester.getSize(find.text(label).last), equals(const Size(168.0, 56.0)));
   });
 
-
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
     final Text longTextA = Text(''.padLeft(100, 'A'));
     final Text longTextB = Text(''.padLeft(100, 'B'));
