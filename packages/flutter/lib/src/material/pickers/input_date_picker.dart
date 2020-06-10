@@ -244,10 +244,10 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
 }
 
 /// A `TextInputFormatter` set up to format dates.
-///
-/// Note: this is not publicly exported (see pickers.dart), as it is
-/// just meant for internal use by `InputDatePickerFormField` and
-/// `InputDateRangePicker`.
+//
+// This is not publicly exported (see pickers.dart), as it is
+// just meant for internal use by `InputDatePickerFormField` and
+// `InputDateRangePicker`.
 class DateTextInputFormatter extends TextInputFormatter {
 
   /// Creates a date formatter with the given separator.

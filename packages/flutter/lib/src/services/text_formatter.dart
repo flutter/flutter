@@ -188,7 +188,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// sequence of characters not matching the pattern is replaced by
   /// its own single copy of the replacement string, regardless of how
   /// many characters are in that sequence.
-  /// 
+  ///
   /// If [allow] is false, then the result will be "Int* the W**ds".
   /// Every matching sequence is replaced, and each "o" matches the
   /// pattern separately.
