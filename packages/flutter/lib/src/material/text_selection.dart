@@ -220,6 +220,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
               // The navButton that shows and hides the overflow menu is the
               // first child.
               Material(
+                type: MaterialType.card,
                 child: IconButton(
                   // TODO(justinmc): This should be an AnimatedIcon, but
                   // AnimatedIcons doesn't yet support arrow_back to more_vert.
