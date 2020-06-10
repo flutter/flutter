@@ -31,6 +31,9 @@ class TestCommand extends FlutterCommand {
   }) : assert(testWrapper != null) {
     requiresPubspecYaml();
     usesPubOption();
+    addNullSafetyModeOptions();
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
+    addEnableExperimentation(hide: !verboseHelp);
     argParser
       ..addMultiOption('name',
         help: 'A regular expression matching substrings of the names of tests to run.',
@@ -128,8 +131,6 @@ class TestCommand extends FlutterCommand {
               'This flag is ignored if --start-paused or coverage are requested. '
               'The vmservice will be enabled no matter what in those cases.'
       );
-    usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    addEnableExperimentation(hide: !verboseHelp);
   }
 
   /// The interface for starting and configuring the tester.
@@ -155,7 +156,6 @@ class TestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await globals.cache.updateAll(await requiredArtifacts);
     if (!globals.fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
         'Error: No pubspec.yaml file found in the current working directory.\n'
@@ -172,7 +172,6 @@ class TestCommand extends FlutterCommand {
     final String tags = stringArg('tags');
     final String excludeTags = stringArg('exclude-tags');
     final FlutterProject flutterProject = FlutterProject.current();
-    final List<String> dartExperiments = stringsArg(FlutterOptions.kEnableExperiment);
 
     if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
       await _buildTestAsset();
@@ -237,8 +236,6 @@ class TestCommand extends FlutterCommand {
       watcher = collector;
     }
 
-    Cache.releaseLockEarly();
-
     // Run builders once before all tests.
     if (flutterProject.hasBuilders) {
       final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
@@ -278,7 +275,7 @@ class TestCommand extends FlutterCommand {
       flutterProject: flutterProject,
       web: stringArg('platform') == 'chrome',
       randomSeed: stringArg('test-randomize-ordering-seed'),
-      dartExperiments: dartExperiments,
+      extraFrontEndOptions: getBuildInfo(forcedBuildMode: BuildMode.debug).extraFrontEndOptions,
     );
 
     if (collector != null) {

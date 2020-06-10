@@ -38,6 +38,7 @@ Future<void> generateLocalizations({
   );
   final ProcessResult result = await processManager.run(<String>[
     dartBinaryPath,
+    '--disable-dart-dev',
     genL10nPath,
     '--gen-inputs-and-outputs-list=${dependenciesDir.path}',
     if (options.arbDirectory != null)

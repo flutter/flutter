@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -35,6 +36,7 @@ void main() {
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
     Artifacts mockArtifacts;
     MockCache mockCache;
+    MockVmService mockVmService;
     Logger logger;
     IOSDeploy iosDeploy;
     IMobileDevice iMobileDevice;
@@ -43,6 +45,7 @@ void main() {
     setUp(() {
       mockArtifacts = MockArtifacts();
       mockCache = MockCache();
+      mockVmService = MockVmService();
       const MapEntry<String, String> dyLdLibEntry = MapEntry<String, String>('DYLD_LIBRARY_PATH', '/path/to/libs');
       when(mockCache.dyLdLibEntry).thenReturn(dyLdLibEntry);
       logger = BufferLogger.test();
@@ -74,6 +77,7 @@ void main() {
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
         interfaceType: IOSDeviceInterface.usb,
+        vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       );
     });
 
@@ -90,6 +94,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '1.0.0',
         interfaceType: IOSDeviceInterface.usb,
+        vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       ).majorSdkVersion, 1);
       expect(IOSDevice(
         'device-123',
@@ -103,6 +108,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '13.1.1',
         interfaceType: IOSDeviceInterface.usb,
+        vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       ).majorSdkVersion, 13);
       expect(IOSDevice(
         'device-123',
@@ -116,6 +122,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '10',
         interfaceType: IOSDeviceInterface.usb,
+        vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       ).majorSdkVersion, 10);
       expect(IOSDevice(
         'device-123',
@@ -129,6 +136,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '0',
         interfaceType: IOSDeviceInterface.usb,
+        vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       ).majorSdkVersion, 0);
       expect(IOSDevice(
         'device-123',
@@ -142,7 +150,30 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: 'bogus',
         interfaceType: IOSDeviceInterface.usb,
+        vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
       ).majorSdkVersion, 0);
+    });
+
+    testWithoutContext('Supports debug, profile, and release modes', () {
+      final IOSDevice device = IOSDevice(
+        'device-123',
+        artifacts: mockArtifacts,
+        fileSystem: mockFileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        sdkVersion: '13.3',
+        cpuArchitecture: DarwinArch.arm64,
+        interfaceType: IOSDeviceInterface.usb,
+        vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
+      );
+
+      expect(device.supportsRuntimeMode(BuildMode.debug), true);
+      expect(device.supportsRuntimeMode(BuildMode.profile), true);
+      expect(device.supportsRuntimeMode(BuildMode.release), true);
+      expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
     });
 
     for (final Platform platform in unsupportedPlatforms) {
@@ -161,6 +192,7 @@ void main() {
               sdkVersion: '13.3',
               cpuArchitecture: DarwinArch.arm64,
               interfaceType: IOSDeviceInterface.usb,
+              vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
             );
           },
           throwsAssertionError,
@@ -245,6 +277,7 @@ void main() {
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
           interfaceType: IOSDeviceInterface.usb,
+          vmServiceConnectUri: (String string, {Log log}) async => mockVmService,
         );
         logReader1 = createLogReader(device, appPackage1, mockProcess1);
         logReader2 = createLogReader(device, appPackage2, mockProcess2);
@@ -266,6 +299,8 @@ void main() {
     MockXcdevice mockXcdevice;
     MockArtifacts mockArtifacts;
     MockCache mockCache;
+    MockVmService mockVmService1;
+    MockVmService mockVmService2;
     FakeProcessManager fakeProcessManager;
     BufferLogger logger;
     IOSDeploy iosDeploy;
@@ -278,6 +313,8 @@ void main() {
       mockXcdevice = MockXcdevice();
       mockArtifacts = MockArtifacts();
       mockCache = MockCache();
+      mockVmService1 = MockVmService();
+      mockVmService2 = MockVmService();
       logger = BufferLogger.test();
       mockIosWorkflow = MockIOSWorkflow();
       fakeProcessManager = FakeProcessManager.any();
@@ -307,6 +344,7 @@ void main() {
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
         interfaceType: IOSDeviceInterface.usb,
+        vmServiceConnectUri: (String string, {Log log}) async => mockVmService1,
       );
 
       device2 = IOSDevice(
@@ -321,6 +359,7 @@ void main() {
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
         interfaceType: IOSDeviceInterface.usb,
+        vmServiceConnectUri: (String string, {Log log}) async => mockVmService2,
       );
     });
 
@@ -528,3 +567,4 @@ class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockIOSDeploy extends Mock implements IOSDeploy {}
 class MockIOSWorkflow extends Mock implements IOSWorkflow {}
 class MockXcdevice extends Mock implements XCDevice {}
+class MockVmService extends Mock implements VmService {}

@@ -796,4 +796,23 @@ void main() {
     await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
     expect(delegate.textEditingValue.text, '');
   }, skip: kIsWeb); // Key simulation doesn't work on web.
+
+  test('getEndpointsForSelection handles empty characters', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final RenderEditable editable = RenderEditable(
+      // This is a Unicode left-to-right mark character that will not render
+      // any glyphs.
+      text: const TextSpan(text: '\u200e'),
+      textAlign: TextAlign.start,
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+    );
+    editable.layout(BoxConstraints.loose(const Size(100, 100)));
+    final List<TextSelectionPoint> endpoints = editable.getEndpointsForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: 1));
+    expect(endpoints[0].point.dx, 0);
+  });
 }

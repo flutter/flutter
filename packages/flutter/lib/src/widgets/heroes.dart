@@ -533,6 +533,14 @@ class _HeroFlight {
   }
 
   void _handleAnimationUpdate(AnimationStatus status) {
+    // The animation will not finish until the user lifts their finger, so we
+    // should ignore the status update if the gesture is in progress.
+    //
+    // This also relies on the animation to update its status at the end of the
+    // gesture. See the _CupertinoBackGestureController.dragEnd for how
+    // cupertino page route achieves that.
+    if (manifest.fromRoute?.navigator?.userGestureInProgress == true)
+      return;
     if (status == AnimationStatus.completed || status == AnimationStatus.dismissed) {
       _proxyAnimation.parent = null;
 

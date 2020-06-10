@@ -44,6 +44,7 @@ class ListTileTheme extends InheritedTheme {
   const ListTileTheme({
     Key key,
     this.dense = false,
+    this.shape,
     this.style = ListTileStyle.list,
     this.selectedColor,
     this.iconColor,
@@ -59,6 +60,7 @@ class ListTileTheme extends InheritedTheme {
   static Widget merge({
     Key key,
     bool dense,
+    ShapeBorder shape,
     ListTileStyle style,
     Color selectedColor,
     Color iconColor,
@@ -73,6 +75,7 @@ class ListTileTheme extends InheritedTheme {
         return ListTileTheme(
           key: key,
           dense: dense ?? parent.dense,
+          shape: shape ?? parent.shape,
           style: style ?? parent.style,
           selectedColor: selectedColor ?? parent.selectedColor,
           iconColor: iconColor ?? parent.iconColor,
@@ -86,6 +89,9 @@ class ListTileTheme extends InheritedTheme {
 
   /// If true then [ListTile]s will have the vertically dense layout.
   final bool dense;
+
+  /// If specified, [shape] defines the shape of the [ListTile]'s [InkWell] border.
+  final ShapeBorder shape;
 
   /// If specified, [style] defines the font used for [ListTile] titles.
   final ListTileStyle style;
@@ -122,6 +128,7 @@ class ListTileTheme extends InheritedTheme {
     final ListTileTheme ancestorTheme = context.findAncestorWidgetOfExactType<ListTileTheme>();
     return identical(this, ancestorTheme) ? child : ListTileTheme(
       dense: dense,
+      shape: shape,
       style: style,
       selectedColor: selectedColor,
       iconColor: iconColor,
@@ -134,6 +141,7 @@ class ListTileTheme extends InheritedTheme {
   @override
   bool updateShouldNotify(ListTileTheme oldWidget) {
     return dense != oldWidget.dense
+        || shape != oldWidget.shape
         || style != oldWidget.style
         || selectedColor != oldWidget.selectedColor
         || iconColor != oldWidget.iconColor
@@ -637,6 +645,7 @@ class ListTile extends StatelessWidget {
     this.isThreeLine = false,
     this.dense,
     this.visualDensity,
+    this.shape,
     this.contentPadding,
     this.enabled = true,
     this.onTap,
@@ -712,6 +721,15 @@ class ListTile extends StatelessWidget {
   ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
   ///    within a [Theme].
   final VisualDensity visualDensity;
+
+  /// The shape of the tile's [InkWell].
+  ///
+  /// Defines the tile's [InkWell.customBorder].
+  ///
+  /// If this property is null then [ThemeData.cardTheme.shape] is used.
+  /// If that's null then the shape will be a [RoundedRectangleBorder] with a
+  /// circular corner radius of 4.0.
+  final ShapeBorder shape;
 
   /// The tile's internal padding.
   ///
@@ -932,6 +950,7 @@ class ListTile extends StatelessWidget {
     );
 
     return InkWell(
+      customBorder: shape ?? tileTheme.shape,
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
       mouseCursor: effectiveMouseCursor,

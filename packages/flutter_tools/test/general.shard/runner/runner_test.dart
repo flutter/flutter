@@ -58,7 +58,7 @@ void main() {
         () {
           unawaited(runner.run(
             <String>['crash'],
-            <FlutterCommand>[
+            () => <FlutterCommand>[
               CrashingFlutterCommand(),
             ],
             // This flutterVersion disables crash reporting.
@@ -137,7 +137,7 @@ void main() {
         () {
         unawaited(runner.run(
           <String>['crash'],
-          <FlutterCommand>[
+          () => <FlutterCommand>[
             CrashingFlutterCommand(),
           ],
           // This flutterVersion disables crash reporting.
