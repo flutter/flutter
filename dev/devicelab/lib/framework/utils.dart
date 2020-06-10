@@ -401,7 +401,7 @@ Future<void> forwardStandardStreams(
   return Future.wait<void>(<Future<void>>[
     stdoutDone.future,
     stderrDone.future,
-    ]);
+  ]);
 }
 
 /// Executes a command and returns its standard output as a String.
