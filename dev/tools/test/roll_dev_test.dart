@@ -132,7 +132,7 @@ void main() {
       expect(exception?.toString(), contains(pattern));
     });
 
-    test('does not tag if --just-print is specified', () {
+    test('does not reset or tag if --just-print is specified', () {
       when(mockGit.getOutput('remote get-url $origin', any)).thenReturn(kUpstreamRemote);
       when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
       when(mockGit.getOutput(
@@ -153,8 +153,33 @@ void main() {
         git: mockGit,
       ), false);
       verify(mockGit.run('fetch $origin', any));
-      verify(mockGit.run('reset $commit --hard', any));
+      verifyNever(mockGit.run('reset $commit --hard', any));
       verifyNever(mockGit.getOutput('rev-parse HEAD', any));
+    });
+
+    test('does not tag if last release is not direct ancestor of desired commit', () {
+      const String lastRelease = '1.2.3-0.0.pre';
+      when(mockGit.getOutput('remote get-url $origin', any)).thenReturn(kUpstreamRemote);
+      when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
+      when(mockGit.getOutput(
+        'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
+        any,
+      )).thenReturn(lastRelease);
+      //when(mockGit.run('merge-base --is-ancestor $lastRelease $commit'))
+      //  .thenThrow();
+      fakeArgResults = FakeArgResults(
+        level: level,
+        commit: commit,
+        origin: origin,
+        justPrint: false,
+        autoApprove: true,
+        help: false,
+      );
+      expect(run(
+        argResults: fakeArgResults,
+        git: mockGit,
+        usage: usage,
+      ), false);
     });
 
     test('successfully tags and publishes release', () {
