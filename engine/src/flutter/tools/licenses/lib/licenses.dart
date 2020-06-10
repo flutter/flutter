@@ -738,8 +738,18 @@ Iterable<_PartialLicenseMatch> _findLicenseBlocks(String body, RegExp pattern, i
       // examined closer.
       final _SplitLicense sanityCheck = _splitLicense(undecoratedCopyrights, verifyResults: false);
       final String conditions = sanityCheck.getConditions();
-      if (conditions != '')
-        throw 'potential license text caught in _findLicenseBlocks copyright dragnet:\n---\n$conditions\n---\nundecorated copyrights was:\n---\n$undecoratedCopyrights\n---\ncopyrights was:\n---\n$copyrights\n---\nblock was:\n---\n${body.substring(start, match.end)}\n---';
+      if (conditions != '') {
+        // Copyright lines long enough to spill to a second line can create
+        // false positives; try to weed those out.
+        final String resplitCopyright = sanityCheck.getCopyright();
+        if (resplitCopyright.trim().contains('\n') ||
+            conditions.trim().contains('\n') ||
+            resplitCopyright.length < 70 ||
+            conditions.length > 15) {
+          throw 'potential license text caught in _findLicenseBlocks copyright dragnet:\n---\n$conditions\n---\nundecorated copyrights was:\n---\n$undecoratedCopyrights\n---\ncopyrights was:\n---\n$copyrights\n---\nblock was:\n---\n${body.substring(start, match.end)}\n---';
+        }
+      }
+
       if (!copyrights.contains(copyrightMentionPattern))
         throw 'could not find copyright before license block:\n---\ncopyrights was:\n---\n$copyrights\n---\nblock was:\n---\n${body.substring(start, match.end)}\n---';
       if (body[match.start - 1] != '\n')

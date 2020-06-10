@@ -1304,6 +1304,44 @@ class _RepositoryExcludeSubpathDirectory extends _RepositoryDirectory {
 
 // WHAT TO CRAWL AND WHAT NOT TO CRAWL
 
+class _RepositoryAngleDirectory extends _RepositoryDirectory {
+  _RepositoryAngleDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  _RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'src')
+      return _RepositoryAngleSrcDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'tools' // These are build-time tools, and aren't shipped.
+        && super.shouldRecurse(entry);
+  }
+}
+
+class _RepositoryAngleSrcDirectory extends _RepositoryDirectory {
+  _RepositoryAngleSrcDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  _RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'third_party')
+      return _RepositoryAngleSrcThirdPartyDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+}
+
+class _RepositoryAngleSrcThirdPartyDirectory extends _RepositoryDirectory {
+  _RepositoryAngleSrcThirdPartyDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'volk' // We don't use Vulkan in our ANGLE build.
+        && super.shouldRecurse(entry);
+  }
+}
+
 class _RepositoryAndroidPlatformDirectory extends _RepositoryDirectory {
   _RepositoryAndroidPlatformDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
@@ -1763,6 +1801,8 @@ class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
   _RepositoryDirectory createSubdirectory(fs.Directory entry) {
     if (entry.name == 'android_platform')
       return _RepositoryAndroidPlatformDirectory(this, entry);
+    if (entry.name == 'angle')
+      return _RepositoryAngleDirectory(this, entry);
     if (entry.name == 'boringssl')
       return _RepositoryBoringSSLDirectory(this, entry);
     if (entry.name == 'catapult')
