@@ -132,7 +132,6 @@ source_set("flutter_framework_source") {
     "//flutter/runtime",
     "//flutter/runtime:libdart",
     "//flutter/shell/common",
-    "//flutter/shell/common:common_standalone",
     "//flutter/shell/platform/darwin/common",
     "//flutter/shell/platform/darwin/common:framework_shared",
     "//flutter/shell/profiling:profiling",
