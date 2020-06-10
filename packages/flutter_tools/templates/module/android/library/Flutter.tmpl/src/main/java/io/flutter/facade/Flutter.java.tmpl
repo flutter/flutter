@@ -41,8 +41,8 @@ public final class Flutter {
   /**
    * Creates a {@link FlutterFragment} managing a {@link FlutterView}. The optional
    * initial route string will be made available to the Dart code
-   * (via {@code window.defaultRouteName}) and may be used to determine which widget
-   * should be displayed in the view. The default initialRoute is "/".
+   * (via {@code PlatformDispatcher.instance.initialRouteName}) and may be used to
+   * determine which widget should be displayed in the view. The default initialRoute is "/".
    *
    * @param initialRoute an initial route {@link String}, or null
    * @return a {@link FlutterFragment}
@@ -59,8 +59,8 @@ public final class Flutter {
   /**
    * Creates a {@link FlutterView} linked to the specified {@link Activity} and {@link Lifecycle}.
    * The optional initial route string will be made available to the Dart code (via
-   * {@code window.defaultRouteName}) and may be used to determine which widget should be displayed
-   * in the view. The default initialRoute is "/".
+   * {@code PlatformDispatcher.instance.initialRouteName}) and may be used to determine which
+   * widget should be displayed in the view. The default initialRoute is "/".
    *
    * @param activity an {@link Activity}
    * @param lifecycle a {@link Lifecycle}

@@ -15,6 +15,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart' show TestWindow;
+import 'package:flutter_test/src/platform_dispatcher.dart';
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
@@ -177,7 +178,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This constructor overrides the [debugPrint] global hook to point to
   /// [debugPrintOverride], which can be overridden by subclasses.
-  TestWidgetsFlutterBinding() : _window = TestWindow(window: ui.window) {
+  TestWidgetsFlutterBinding() : _window = TestWindow(window: ui.window), _platformDispatcher = TestPlatformDispatcher(platformDispatcher: ui.PlatformDispatcher.instance) {
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
     debugCheckIntrinsicSizes = checkIntrinsicSizes;
@@ -186,6 +187,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @override
   TestWindow get window => _window;
   final TestWindow _window;
+
+  @override
+  TestPlatformDispatcher get platformDispatcher => _platformDispatcher;
+  final TestPlatformDispatcher _platformDispatcher;
 
   /// The value to set [debugPrint] to while tests are running.
   ///

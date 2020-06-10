@@ -151,6 +151,13 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
+  VoidCallback get onMetricsChanged => _platformDispatcher.onMetricsChanged;
+  @override
+  set onMetricsChanged(VoidCallback callback) {
+    _platformDispatcher.onMetricsChanged = callback;
+  }
+
+  @override
   VoidCallback get onLocaleChanged => _platformDispatcher.onLocaleChanged;
   @override
   set onLocaleChanged(VoidCallback callback) {
@@ -241,7 +248,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
   /// Deletes any existing test default route name and returns to using the real
   /// default route name.
-  void clearDefaultRouteNameTestValue() {
+  void clearInitialRouteNameTestValue() {
     _initialRouteNameTestValue = null;
   }
 
@@ -343,7 +350,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   void clearAllTestValues() {
     clearAccessibilityFeaturesTestValue();
     clearAlwaysUse24HourTestValue();
-    clearDefaultRouteNameTestValue();
+    clearInitialRouteNameTestValue();
     clearPlatformBrightnessTestValue();
     clearLocaleTestValue();
     clearLocalesTestValue();

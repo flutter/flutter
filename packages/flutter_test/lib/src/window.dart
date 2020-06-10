@@ -47,8 +47,8 @@ import 'package:meta/meta.dart';
 /// To clear all fake test values in a [TestWindow], consider using
 /// [clearAllTestValues()].
 class TestWindow implements SingletonFlutterWindow {
-  /// Constructs a [TestWindow] that defers all behavior to the given [SingletonFlutterWindow]
-  /// unless explicitly overridden for test purposes.
+  /// Constructs a [TestWindow] that defers all behavior to the given
+  /// [SingletonFlutterWindow] unless explicitly overridden for test purposes.
   TestWindow({
     @required SingletonFlutterWindow window,
   }) : _window = window;
@@ -302,7 +302,7 @@ class TestWindow implements SingletonFlutterWindow {
   }
 
   @override
-  String get initialRouteName => _initialRouteNameTestValue ?? _window.initialRouteName;
+  String get defaultRouteName => _initialRouteNameTestValue ?? _window.defaultRouteName;
   String _initialRouteNameTestValue;
   /// Hides the real default route name and reports the given
   /// [initialRouteNameTestValue] instead.
@@ -311,7 +311,7 @@ class TestWindow implements SingletonFlutterWindow {
   }
   /// Deletes any existing test default route name and returns to using the real
   /// default route name.
-  void clearDefaultRouteNameTestValue() {
+  void clearInitialRouteNameTestValue() {
     _initialRouteNameTestValue = null;
   }
 
@@ -408,7 +408,7 @@ class TestWindow implements SingletonFlutterWindow {
   void clearAllTestValues() {
     clearAccessibilityFeaturesTestValue();
     clearAlwaysUse24HourTestValue();
-    clearDefaultRouteNameTestValue();
+    clearInitialRouteNameTestValue();
     clearDevicePixelRatioTestValue();
     clearPlatformBrightnessTestValue();
     clearLocaleTestValue();

@@ -194,7 +194,7 @@ bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == 
 ///
 /// See also:
 ///
-///  * [SingletonFlutterWindow.devicePixelRatio], which defines the device's
+///  * [FlutterView.devicePixelRatio], which defines the view's
 ///    current resolution.
 @immutable
 abstract class PointerEvent with Diagnosticable {
