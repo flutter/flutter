@@ -92,18 +92,21 @@ bool run({
     );
   }
 
-  // TODO(fujino): move this after `justPrint`
   git.run('fetch $origin', 'fetch $origin');
-  git.run('reset $commit --hard', 'reset to the release commit');
 
   String version = getFullTag(git, origin);
 
   version = incrementLevel(version, level);
 
+  // Do force check
+  throw Exception('Oops!');
+
   if (justPrint) {
     print(version);
     return false;
   }
+
+  git.run('reset $commit --hard', 'reset to the release commit');
 
   final String hash = git.getOutput('rev-parse HEAD', 'Get git hash for $commit');
 
