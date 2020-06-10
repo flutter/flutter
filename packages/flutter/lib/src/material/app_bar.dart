@@ -675,10 +675,9 @@ class _AppBarState extends State<AppBar> {
 }
 
 class _FloatingAppBar extends StatefulWidget {
-  const _FloatingAppBar({ Key key, this.child, this.snapConfiguration }) : super(key: key);
+  const _FloatingAppBar({ Key key, this.child }) : super(key: key);
 
   final Widget child;
-  final FloatingHeaderSnapConfiguration snapConfiguration;
 
   @override
   _FloatingAppBarState createState() => _FloatingAppBarState();
@@ -688,8 +687,6 @@ class _FloatingAppBar extends StatefulWidget {
 // stops the floating app bar's snap-into-view or snap-out-of-view animation.
 class _FloatingAppBarState extends State<_FloatingAppBar> {
   ScrollPosition _position;
-  AnimationController _controller;
-  Animation<double> _animation;
 
   @override
   void didChangeDependencies() {
@@ -705,8 +702,6 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   void dispose() {
     if (_position != null)
       _position.isScrollingNotifier.removeListener(_isScrollingListener);
-    _controller?.dispose();
-    _controller = null; // lazily recreated if we're reattached.
     super.dispose();
   }
 
@@ -720,61 +715,11 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
 
     // When a scroll stops, then maybe snap the appbar into view.
     // Similarly, when a scroll starts, then maybe stop the snap animation.
-
-    // This animation is typically driven by the RenderSliverFloatingPersistentHeader,
-    // which mocks a change in the scroll position (the _effectiveScrollOffset)
-    // to float the header in and out.
-    // When used in a NestedScrollView however, the header is not within the
-    // same scroll view, so the scroll position must be changed to achieve the
-    // same effect. In this case, indicated by
-    // FloatingHeaderSnapConfiguration.nestedSnap, we drive the animation on the
-    // scroll position here instead.
-    if (widget.snapConfiguration?.nestedSnap == true) {
-      _nestedAnimation();
-    } else {
-      _defaultAnimation();
-    }
-  }
-
-  void _defaultAnimation() {
     final RenderSliverFloatingPersistentHeader header = _headerRenderer();
     if (_position.isScrollingNotifier.value)
       header?.maybeStopSnapAnimation(_position.userScrollDirection);
     else
       header?.maybeStartSnapAnimation(_position.userScrollDirection);
-  }
-
-  void _nestedAnimation() {
-    final RenderSliverFloatingPersistentHeader header = _headerRenderer();
-    if (_position.isScrollingNotifier.value) {
-      _controller?.stop();
-    } else {
-      if (header?.canStartSnap(_position.userScrollDirection) == true) {
-        final FloatingHeaderSnapConfiguration snapConfiguration = widget.snapConfiguration;
-
-        _controller ??= AnimationController(
-          vsync: snapConfiguration.vsync,
-          duration: snapConfiguration.duration,
-        )..addListener(() {
-          if (_position.pixels == _animation.value)
-            return;
-          _position.setPixels(_animation.value);
-        });
-
-        _animation = _controller.drive(
-          Tween<double>(
-            begin: _position.pixels,
-            end: _position.userScrollDirection == ScrollDirection.forward
-              ? 0.0
-              : _position.maxScrollExtent,
-          ).chain(CurveTween(
-            curve: snapConfiguration.curve,
-          )),
-        );
-
-        _controller.forward(from: 0.0);
-      }
-    }
   }
 
   @override
@@ -838,7 +783,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final double _bottomHeight;
 
   @override
-  double get minExtent => collapsedHeight ?? (topPadding + kToolbarHeight + _bottomHeight);
+  double get minExtent => collapsedHeight;
 
   @override
   double get maxExtent => math.max(topPadding + (expandedHeight ?? kToolbarHeight + _bottomHeight), minExtent);
@@ -852,20 +797,12 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final double visibleMainHeight = maxExtent - shrinkOffset - topPadding;
+    final double extraToolbarHeight = math.max(minExtent - _bottomHeight - topPadding - kToolbarHeight, 0.0);
+    final double visibleToolbarHeight = visibleMainHeight - _bottomHeight - extraToolbarHeight;
 
-    // Truth table for `toolbarOpacity`:
-    // pinned | floating | bottom != null || opacity
-    // ----------------------------------------------
-    //    0   |    0     |        0       ||  fade
-    //    0   |    0     |        1       ||  fade
-    //    0   |    1     |        0       ||  fade
-    //    0   |    1     |        1       ||  fade
-    //    1   |    0     |        0       ||  1.0
-    //    1   |    0     |        1       ||  1.0
-    //    1   |    1     |        0       ||  1.0
-    //    1   |    1     |        1       ||  fade
-    final double toolbarOpacity = !pinned || (floating && bottom != null)
-      ? ((visibleMainHeight - _bottomHeight) / kToolbarHeight).clamp(0.0, 1.0) as double
+    final bool isPinnedWithOpacityFade = pinned && floating && bottom != null && extraToolbarHeight == 0.0;
+    final double toolbarOpacity = !pinned || isPinnedWithOpacityFade
+      ? (visibleToolbarHeight / kToolbarHeight).clamp(0.0, 1.0) as double
       : 1.0;
 
     final Widget appBar = FlexibleSpaceBar.createSettings(
@@ -897,9 +834,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         bottomOpacity: pinned ? 1.0 : ((visibleMainHeight / _bottomHeight).clamp(0.0, 1.0) as double),
       ),
     );
-    return floating
-      ? _FloatingAppBar(child: appBar, snapConfiguration: snapConfiguration)
-      : appBar;
+    return floating ? _FloatingAppBar(child: appBar) : appBar;
   }
 
   @override
@@ -1015,8 +950,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 class SliverAppBar extends StatefulWidget {
   /// Creates a material design app bar that can be placed in a [CustomScrollView].
   ///
-  /// The arguments [forceElevated], [primary], [floating], [pinned], [snap],
-  /// [nestedSnap], and [automaticallyImplyLeading] must not be null.
+  /// The arguments [forceElevated], [primary], [floating], [pinned], [snap]
+  /// and [automaticallyImplyLeading] must not be null.
   const SliverAppBar({
     Key key,
     this.leading,
@@ -1036,11 +971,11 @@ class SliverAppBar extends StatefulWidget {
     this.centerTitle,
     this.excludeHeaderSemantics = false,
     this.titleSpacing = NavigationToolbar.kMiddleSpacing,
+    this.collapsedHeight,
     this.expandedHeight,
     this.floating = false,
     this.pinned = false,
     this.snap = false,
-    this.nestedSnap = false,
     this.stretch = false,
     this.stretchTriggerOffset = 100.0,
     this.onStretchTrigger,
@@ -1052,11 +987,10 @@ class SliverAppBar extends StatefulWidget {
        assert(floating != null),
        assert(pinned != null),
        assert(snap != null),
-       assert(nestedSnap != null),
        assert(stretch != null),
        assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
-       assert(snap || !nestedSnap, 'The "snap" argument must be true for nestedSnap to be true.'),
        assert(stretchTriggerOffset > 0.0),
+       assert(collapsedHeight == null || collapsedHeight > kToolbarHeight, 'The "collapsedHeight" argument has to be larger than [kToolbarHeight].'),
        super(key: key);
 
   /// A widget to display before the [title].
@@ -1214,6 +1148,18 @@ class SliverAppBar extends StatefulWidget {
   /// Defaults to [NavigationToolbar.kMiddleSpacing].
   final double titleSpacing;
 
+  /// Defines the height of the app bar when it is collapsed.
+  ///
+  /// By default, the collapsed height is [kToolbarHeight]. If [bottom] widget
+  /// is specified, then its [bottom.preferredSize.height] is added to the
+  /// height. If [primary] is true, then the [MediaQuery] top padding,
+  /// [MediaQueryData.padding.top], is added as well.
+  ///
+  /// If [pinned] and [floating] are true, with [bottom] set, the default
+  /// collapsed height is only [bottom.preferredSize.height] with the
+  /// [MediaQuery] top padding.
+  final double collapsedHeight;
+
   /// The size of the app bar when it is fully expanded.
   ///
   /// By default, the total height of the toolbar and the bottom widget (if
@@ -1301,30 +1247,7 @@ class SliverAppBar extends StatefulWidget {
   ///
   ///  * [SliverAppBar] for more animated examples of how this property changes the
   ///    behavior of the app bar in combination with [pinned] and [floating].
-  ///  * [nestedSnap] for snapping the app bar from the outer, or header,
-  ///    scroll view of a [NestedScrollView] while also floating.
-  ///  * [NestedScrollView] for more details and examples of how to use
-  ///    [SliverAppBar]s with nested scrolling.
   final bool snap;
-
-  /// Specifies whether the [snap] animation is influenced by another
-  /// [ScrollPosition], such as the inner body of a [NestedScrollView].
-  ///
-  /// When true, the actual [ScrollPosition] of the current context, e.g. the
-  /// outer scroll view, will be animated to properly coordinate with the inner
-  /// scrollable.
-  ///
-  /// In order for the [SliverAppBar] to float and snap together, this flag and
-  /// [NestedScrollView.floatHeaderSlivers] must both be true. If only the snap
-  /// animation is desired, leave both flags false.
-  ///
-  /// Defaults to false, cannot be null. Cannot be true if [snap] is not true.
-  ///
-  /// See also:
-  ///
-  ///  * [NestedScrollView] for more details and examples of how to use
-  ///    [SliverAppBar]s with nested scrolling.
-  final bool nestedSnap;
 
   /// Whether the app bar should stretch to fill the over-scroll area.
   ///
@@ -1357,7 +1280,6 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
         vsync: this,
         curve: Curves.easeOut,
         duration: const Duration(milliseconds: 200),
-        nestedSnap: widget.nestedSnap,
       );
     } else {
       _snapConfiguration = null;
@@ -1394,9 +1316,11 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
+    final double bottomHeight = widget.bottom?.preferredSize?.height ?? 0.0;
     final double topPadding = widget.primary ? MediaQuery.of(context).padding.top : 0.0;
     final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
-      ? widget.bottom.preferredSize.height + topPadding : null;
+      ? (widget.collapsedHeight ?? 0.0) + bottomHeight + topPadding
+      : (widget.collapsedHeight ?? kToolbarHeight) + bottomHeight + topPadding;
 
     return MediaQuery.removePadding(
       context: context,

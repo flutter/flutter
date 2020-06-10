@@ -332,86 +332,13 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// ### Snapping and Floating [SliverAppBar]s
 ///
-/// In order to snap and float a [SliverAppBar] in the header of a
-/// [NestedScrollView], use the [NestedScrollView.floatHeaderSlivers] and
-/// [SliverAppBar.nestedSnap] properties.
-///
-/// When true, [NestedScrollView.floatHeaderSlivers] will result in the nested
-/// scrolling coordinator prioritizing floating in the header slivers before
-/// applying the remaining drag to the body. When [SliverAppBar.nestedSnap] is
-/// also true, the scroll offset of the outer scroll view will be animated to
-/// snap in the app bar.
-///
-/// The [SliverAppBar.snap] animation should be used in conjunction with the
-/// [SliverOverlapAbsorber] and  [SliverOverlapInjector] widgets when
-/// implemented in a [NestedScrollView]. These widgets take any overlapping
-/// behavior of the [SliverAppBar] in the header and redirect it to the
-/// [SliverOverlapInjector] in the body. If it is missing, then it is possible
-/// for the nested "inner" scroll view below to end up under the [SliverAppBar]
-/// even when the inner scroll view thinks it has not been scrolled.
-///
-/// {@tool sample --template=stateless_widget_material}
-///
-/// This simple example shows a [NestedScrollView] whose header contains a
-/// snapping, floating [SliverAppBar]. By setting the
-/// [NestedScrollView.floatHeaderSlivers] and [SliverAppBar.nestedSnap] flags to
-/// true, theSliverAppBar will animate in and out while floating at the same
-/// time.
-///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: NestedScrollView(
-///       // Setting floatHeaderSlivers to true is required in order to float
-///       // the outer slivers over the inner scrollable.
-///       floatHeaderSlivers: true,
-///       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-///         return <Widget>[
-///           SliverOverlapAbsorber(
-///             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-///             sliver: SliverAppBar(
-///               title: const Text('Snap & Float Nested SliverAppBar'),
-///               floating: true,
-///               snap: true,
-///               // This flag informs the SliverAppBar that it will need to
-///               // correct the outer positioning after animating in order to
-///               // continue floating from the inner scrollable's movement.
-///               nestedSnap: true,
-///               expandedHeight: 200.0,
-///               forceElevated: innerBoxIsScrolled,
-///             ),
-///           )
-///         ];
-///       },
-///       body: Builder(
-///         builder: (BuildContext context) {
-///           // The "controller" and "primary" members should be left
-///           // unset, so that the NestedScrollView can control this
-///           // inner scroll view.
-///           // If the "controller" property is set, then this scroll
-///           // view will not be associated with the NestedScrollView.
-///           return CustomScrollView(
-///             slivers: <Widget>[
-///               SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
-///               SliverFixedExtentList(
-///                 itemExtent: 48.0,
-///                 delegate: SliverChildBuilderDelegate(
-///                     (BuildContext context, int index) => ListTile(title: Text('Item $index')),
-///                   childCount: 30,
-///                 ),
-///               ),
-///             ],
-///           );
-///         }
-///       )
-///     )
-///   );
-/// }
-/// ```
-/// {@end-tool}
+/// Currently, [NestedScrollView] does not support simultaneously floating and
+/// snapping the outer scrollable, e.g. when using [SliverAppBar.floating] &
+/// [SliverAppBar.snap] at the same time.
 ///
 /// ### Stretching [SliverAppBar]s
 ///
+// TODO(Piinks): Support stretching,https://github.com/flutter/flutter/issues/54059
 /// Currently, [NestedScrollView] does not support stretching the outer
 /// scrollable, e.g. when using [SliverAppBar.stretch].
 ///

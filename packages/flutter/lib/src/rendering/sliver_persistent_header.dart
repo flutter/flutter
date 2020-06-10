@@ -413,11 +413,9 @@ class FloatingHeaderSnapConfiguration {
     @required this.vsync,
     this.curve = Curves.ease,
     this.duration = const Duration(milliseconds: 300),
-    this.nestedSnap = false,
   }) : assert(vsync != null),
        assert(curve != null),
-       assert(duration != null),
-       assert(nestedSnap != null);
+       assert(duration != null);
 
   /// The [TickerProvider] for the [AnimationController] that causes a
   /// floating header to snap in or out of view.
@@ -428,23 +426,6 @@ class FloatingHeaderSnapConfiguration {
 
   /// The snap animation's duration.
   final Duration duration;
-
-  /// Specifies whether the [snap] animation is influenced by another
-  /// [ScrollPosition], such as the inner body of a [NestedScrollView].
-  ///
-  /// When true, the actual [ScrollPosition] of the current context, e.g. the
-  /// outer scroll view, will be animated to properly coordinate with the inner
-  /// scrollable.
-  ///
-  /// Defaults to false, cannot be null.
-  ///
-  /// See also:
-  ///
-  ///   * [SliverAppBar.nestedSnap], the flag which sets this property by
-  ///     default.
-  ///   * [NestedScrollView] for more details and examples of how to use
-  ///     [SliverAppBar]s with nested scrolling.
-  final bool nestedSnap;
 }
 
 /// A sliver with a [RenderBox] child which shrinks and scrolls like a
@@ -535,15 +516,13 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     return stretchOffset > 0 ? 0.0 : math.min(0.0, paintExtent - childExtent);
   }
 
-  /// If the header isn't already fully exposed, then animate it into view, if
-  /// it is exposed, animate it out of view.
-  ///
-  /// Returns a bool to indicate if the [ScrollPosition] needs
-  /// to be animated from the _FloatingAppBarState instead. This is relevant if
-  /// [FloatingHeaderSnapConfiguration.nestedSnap] is true, indicating we are
-  /// snapping an outer scrollable over a nested inner scrollable.
+  /// If the header isn't already fully exposed, then scroll it into view.
   void maybeStartSnapAnimation(ScrollDirection direction) {
-    if (!canStartSnap(direction))
+    if (snapConfiguration == null)
+      return;
+    if (direction == ScrollDirection.forward && _effectiveScrollOffset <= 0.0)
+      return;
+    if (direction == ScrollDirection.reverse && _effectiveScrollOffset >= maxExtent)
       return;
 
     final TickerProvider vsync = snapConfiguration.vsync;
@@ -571,18 +550,6 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   /// If a header snap animation is underway then stop it.
   void maybeStopSnapAnimation(ScrollDirection direction) {
     _controller?.stop();
-  }
-
-  /// Returns true if the conditions are right to execute the snap animation,
-  /// either through animating the _effectiveScrollOffset or the scroll position.
-  bool canStartSnap(ScrollDirection direction) {
-    if (snapConfiguration == null)
-      return false;
-    if (direction == ScrollDirection.forward && _effectiveScrollOffset <= 0.0)
-      return false;
-    if (direction == ScrollDirection.reverse && _effectiveScrollOffset >= maxExtent)
-      return false;
-    return true;
   }
 
   @override
