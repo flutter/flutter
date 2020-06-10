@@ -37,7 +37,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
   /// a partial count of ticks based on the value of [progress].
   ///
   /// When provided, the value of [progress] must be between 0.0 (zero ticks
-  /// will be shown) and 1.0 (all ticks will be shown) inclusive. Defaults 
+  /// will be shown) and 1.0 (all ticks will be shown) inclusive. Defaults
   /// to 1.0.
   const CupertinoActivityIndicator.partiallyRevealed({
     Key key,
