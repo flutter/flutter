@@ -60,6 +60,22 @@ void main() {
     expect(preferences.wrapColumn, 123);
   });
 
+  testWithoutContext('Will wrap to 100 when there is no terminal columns available', () {
+    final MockUserMessage userMessages = MockUserMessage();
+    final MockStdio stdio = MockStdio();
+    when(stdio.terminalColumns).thenReturn(null);
+
+    final OutputPreferences preferences = OutputPreferences.fromArguments(
+      <String>['--wrap'],
+      userMessages: userMessages,
+      stdio: stdio,
+    );
+
+    expect(preferences.showColor, true);
+    expect(preferences.wrapText, true);
+    expect(preferences.wrapColumn, 100);
+  });
+
   testWithoutContext('Can be configured to disable wrapping', () {
     final MockUserMessage userMessages = MockUserMessage();
     final MockStdio stdio = MockStdio();
@@ -73,8 +89,6 @@ void main() {
 
     expect(preferences.showColor, true);
     expect(preferences.wrapText, false);
-    // this calls context
-    // expect(preferences.wrapColumn, 80);
   });
 
   testWithoutContext('Throws a tool exit when an invalid wrap number is given', () {

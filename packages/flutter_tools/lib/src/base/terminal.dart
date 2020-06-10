@@ -73,10 +73,12 @@ class OutputPreferences {
 
     // If we're not writing to a terminal with a defined width, then don't wrap
     // anything, unless the user explicitly said to.
-    final bool useWrapping = !topLevelResults.contains('--no-wrap')
-      && stdio.terminalColumns != null;
+    final bool useWrapping = !topLevelResults.contains('--no-wrap');
+
+    // If no default width was provided, first default to the terminal width. If
+    // that is null, use `kDefaultTerminalColumns`.
     if (useWrapping && wrapColumn == null) {
-      wrapColumn = stdio.terminalColumns;
+      wrapColumn = stdio.terminalColumns ?? kDefaultTerminalColumns;
     }
     return OutputPreferences(
       wrapText: useWrapping,
