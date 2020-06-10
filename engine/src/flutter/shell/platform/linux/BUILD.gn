@@ -89,6 +89,7 @@ source_set("flutter_linux_sources") {
     "fl_method_channel.cc",
     "fl_method_codec.cc",
     "fl_method_response.cc",
+    "fl_platform_plugin.cc",
     "fl_plugin_registrar.cc",
     "fl_plugin_registry.cc",
     "fl_renderer.cc",
