@@ -77,7 +77,7 @@ void main() {
           key: key,
           child: Container(
             color: CupertinoColors.white,
-            child: const CupertinoActivityIndicator(animating: false, progress: 0),
+            child: const CupertinoActivityIndicator.partiallyRevealed(progress: 0),
           ),
         ),
       ),
@@ -97,7 +97,7 @@ void main() {
           key: key,
           child: Container(
             color: CupertinoColors.white,
-            child: const CupertinoActivityIndicator(animating: false, progress: 0.5),
+            child: const CupertinoActivityIndicator.partiallyRevealed(progress: 0.5),
           ),
         ),
       ),
@@ -117,7 +117,7 @@ void main() {
           key: key,
           child: Container(
             color: CupertinoColors.white,
-            child: const CupertinoActivityIndicator(animating: false, progress: 1),
+            child: const CupertinoActivityIndicator.partiallyRevealed(progress: 1),
           ),
         ),
       ),
@@ -135,9 +135,13 @@ void main() {
       const CupertinoActivityIndicator(animating: false, radius: 100),
     );
 
+    // An early implementation for the activity indicator starting drawing
+    // the ticks at 9 o'clock, however, in order to support partially revealed
+    // indicator (https://github.com/flutter/flutter/issues/29159), the
+    // first tick was changed to be at 12 o'clock.
     expect(
       find.byType(CupertinoActivityIndicator),
-      paints..rrect(rrect: const RRect.fromLTRBXY(-100, 10, -50, -10, 10, 10)),
+      paints..rrect(rrect: const RRect.fromLTRBXY(-10, -50, 10, -100, 10, 10)),
     );
   });
 }
