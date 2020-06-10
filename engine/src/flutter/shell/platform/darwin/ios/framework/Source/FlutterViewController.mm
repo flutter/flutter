@@ -553,9 +553,11 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
 
 - (void)viewDidDisappear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewDidDisappear");
-  [self surfaceUpdated:NO];
-  [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.paused"];
-  [self flushOngoingTouches];
+  if ([_engine.get() viewController] == self) {
+    [self surfaceUpdated:NO];
+    [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.paused"];
+    [self flushOngoingTouches];
+  }
 
   [super viewDidDisappear:animated];
 }
