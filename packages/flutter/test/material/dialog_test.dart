@@ -11,7 +11,7 @@ import 'package:matcher/matcher.dart';
 
 import '../widgets/semantics_tester.dart';
 
-MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData theme, double textScaleFactor = 1.0}) {
+MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData theme, double textScaleFactor = 1.0 }) {
   return MaterialApp(
     theme: theme,
     home: Material(
