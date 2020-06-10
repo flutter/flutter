@@ -59,7 +59,7 @@ user_pref("dom.max_script_run_time", 0);
       // https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#Browser
       //
       if (temporaryProfileDirectory.existsSync()) {
-        temporaryProfileDirectory.deleteSync();
+        temporaryProfileDirectory.deleteSync(recursive: true);
       }
       temporaryProfileDirectory.createSync(recursive: true);
 
