@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
+import '../rendering/mock_canvas.dart';
 
 Widget buildSliverAppBarApp({
   bool floating,
@@ -1072,6 +1073,47 @@ void main() {
       ),
     );
     expect(find.byIcon(Icons.menu), findsNothing);
+  });
+
+  testWidgets('AppBar ink slash draw on the correct canvas', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: AppBar(
+            title: const Text('Abc'),
+            actions: <Widget>[
+              IconButton(
+                key: key,
+                icon: const Icon(Icons.add_circle),
+                tooltip: 'First button',
+                onPressed: () {},
+              ),
+            ],
+            flexibleSpace: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: const Alignment(0.0, -1.0),
+                  end: const Alignment(-0.04, 1.0),
+                  colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderObject painter = tester.renderObject(
+      find.descendant(
+        of: find.descendant(
+          of: find.byType(AppBar),
+          matching: find.byType(Stack),
+        ),
+        matching: find.byType(Material)
+      )
+    );
+    await tester.tap(find.byKey(key));
+    expect(painter, paints..save()..translate()..save()..translate()..circle(x: 24.0, y: 28.0));
   });
 
   testWidgets('AppBar handles loose children 0', (WidgetTester tester) async {
