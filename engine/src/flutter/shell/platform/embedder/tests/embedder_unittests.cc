@@ -2841,6 +2841,16 @@ TEST_F(EmbedderTest, CanUpdateLocales) {
       CREATE_NATIVE_ENTRY(
           [&latch](Dart_NativeArguments args) { latch.Signal(); }));
 
+  fml::AutoResetWaitableEvent check_latch;
+  context.AddNativeCallback(
+      "SignalNativeCount",
+      CREATE_NATIVE_ENTRY([&check_latch](Dart_NativeArguments args) {
+        ASSERT_EQ(tonic::DartConverter<int>::FromDart(
+                      Dart_GetNativeArgument(args, 0)),
+                  2);
+        check_latch.Signal();
+      }));
+
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
 
@@ -2876,15 +2886,6 @@ TEST_F(EmbedderTest, CanUpdateLocales) {
       FlutterEngineUpdateLocales(engine.get(), locales.data(), locales.size()),
       kSuccess);
 
-  fml::AutoResetWaitableEvent check_latch;
-  context.AddNativeCallback(
-      "SignalNativeCount",
-      CREATE_NATIVE_ENTRY([&check_latch](Dart_NativeArguments args) {
-        ASSERT_EQ(tonic::DartConverter<int>::FromDart(
-                      Dart_GetNativeArgument(args, 0)),
-                  2);
-        check_latch.Signal();
-      }));
   check_latch.Wait();
 }
 
