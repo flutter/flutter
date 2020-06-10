@@ -12,7 +12,6 @@ import '../button_theme.dart';
 import '../color_scheme.dart';
 import '../debug.dart';
 import '../dialog.dart';
-import '../dialog_theme.dart';
 import '../flat_button.dart';
 import '../icons.dart';
 import '../material_localizations.dart';
@@ -456,7 +455,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     );
 
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
-    final DialogTheme dialogTheme = Theme.of(context).dialogTheme;
     return Dialog(
       child: AnimatedContainer(
         width: dialogSize.width,
@@ -503,7 +501,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         ),
       ),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-      shape: dialogTheme.shape,
       clipBehavior: Clip.antiAlias,
     );
   }
