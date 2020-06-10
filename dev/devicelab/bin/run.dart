@@ -229,8 +229,11 @@ final ArgParser _argParser = ArgParser()
     abbr: 't',
     splitCommas: true,
     help: 'Either:\n'
-        ' - the name of a task defined in manifest.yaml. Example: complex_layout__start_up.\n'
-        ' - the path to a Dart file corresponding to a task, which resides in bin/tasks. Example: bin/tasks/complex_layout__start_up.dart.\n'
+        ' - the name of a task defined in manifest.yaml.\n'
+        '   Example: complex_layout__start_up.\n'
+        ' - the path to a Dart file corresponding to a task,\n'
+        '   which resides in bin/tasks.\n'
+        '   Example: bin/tasks/complex_layout__start_up.dart.\n'
         '\n'
         'This option may be repeated to specify multiple tasks.',
     callback: (List<String> value) {
