@@ -12,7 +12,6 @@ import '../button_theme.dart';
 import '../color_scheme.dart';
 import '../debug.dart';
 import '../dialog.dart';
-import '../dialog_theme.dart';
 import '../flat_button.dart';
 import '../icons.dart';
 import '../material_localizations.dart';
@@ -456,7 +455,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     );
 
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
-    final DialogTheme dialogTheme = Theme.of(context).dialogTheme;
     return Dialog(
       child: AnimatedContainer(
         width: dialogSize.width,
@@ -503,13 +501,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         ),
       ),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-      // TODO(Piinks): remove once border radius migration is complete
-      // The default dialog shape is radius 2 rounded rect, but the spec has
-      // been updated to 4, so we will use that here for the Date Picker, but
-      // only if there isn't one provided in the theme.
-      shape: dialogTheme.shape ?? const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(4.0))
-      ),
       clipBehavior: Clip.antiAlias,
     );
   }
