@@ -51,8 +51,6 @@ enum Artifact {
   linuxDesktopPath,
   // The root of the cpp headers for Linux desktop.
   linuxHeaders,
-  // The root of the cpp client code for Linux desktop.
-  linuxCppClientWrapper,
   /// The root of the Windows desktop sources.
   windowsDesktopPath,
   /// The root of the cpp client code for Windows desktop.
@@ -128,8 +126,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return '';
     case Artifact.windowsCppClientWrapper:
       return 'cpp_client_wrapper';
-    case Artifact.linuxCppClientWrapper:
-      return 'cpp_client_wrapper_glfw';
     case Artifact.skyEnginePath:
       return 'sky_engine';
     case Artifact.flutterMacOSPodspec:
@@ -376,9 +372,6 @@ class CachedArtifacts extends Artifacts {
       case Artifact.windowsCppClientWrapper:
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
         return _fileSystem.path.join(engineArtifactsPath, 'windows-x64', _artifactToFileName(artifact, platform, mode));
-      case Artifact.linuxCppClientWrapper:
-        final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
-        return _fileSystem.path.join(engineArtifactsPath, 'linux-x64', _artifactToFileName(artifact, platform, mode));
       case Artifact.skyEnginePath:
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         return _fileSystem.path.join(dartPackageDirectory.path,  _artifactToFileName(artifact));
@@ -541,8 +534,6 @@ class LocalEngineArtifacts extends Artifacts {
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
       case Artifact.linuxDesktopPath:
       case Artifact.linuxHeaders:
-        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
-      case Artifact.linuxCppClientWrapper:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.windowsDesktopPath:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
