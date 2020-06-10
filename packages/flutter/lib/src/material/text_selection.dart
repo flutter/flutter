@@ -75,7 +75,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       ),
       child: FlatButton(
         onPressed: onPressed,
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 9.5),
         shape: Border.all(width: 0.0, color: Colors.transparent),
         child: Text(label),
       ),
