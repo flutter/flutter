@@ -840,6 +840,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           referenceBox: referenceBox,
           color: getHighlightColorForType(type),
           shape: widget.highlightShape,
+          radius: widget.radius,
           borderRadius: widget.borderRadius,
           customBorder: widget.customBorder,
           rectCallback: widget.getRectCallback(referenceBox),
