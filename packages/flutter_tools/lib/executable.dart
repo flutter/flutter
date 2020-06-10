@@ -11,7 +11,6 @@ import 'src/base/template.dart';
 // The build_runner code generation is provided here to make it easier to
 // avoid introducing the dependency into google3. Not all build* packages
 // are synced internally.
-import 'src/base/terminal.dart';
 import 'src/build_runner/build_runner.dart';
 import 'src/build_runner/mustache_template.dart';
 import 'src/build_runner/resident_web_runner.dart';
@@ -136,11 +135,6 @@ Future<void> main(List<String> args) async {
           stdio: globals.stdio,
           terminal: globals.terminal,
           outputPreferences: globals.outputPreferences,
-        )),
-        OutputPreferences: () => OutputPreferences.fromArguments(
-          args,
-          stdio: globals.stdio,
-          userMessages: globals.userMessages,
-        ),
+        ))
      });
 }

@@ -15,6 +15,7 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
@@ -233,6 +234,32 @@ class FlutterCommandRunner extends CommandRunner<void> {
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
     final Map<Type, dynamic> contextOverrides = <Type, dynamic>{};
+
+    // Don't set wrapColumns unless the user said to: if it's set, then all
+    // wrapping will occur at this width explicitly, and won't adapt if the
+    // terminal size changes during a run.
+    int wrapColumn;
+    if (topLevelResults.wasParsed('wrap-column')) {
+      try {
+        wrapColumn = int.parse(topLevelResults['wrap-column'] as String);
+        if (wrapColumn < 0) {
+          throwToolExit(userMessages.runnerWrapColumnInvalid(topLevelResults['wrap-column']));
+        }
+      } on FormatException {
+        throwToolExit(userMessages.runnerWrapColumnParseError(topLevelResults['wrap-column']));
+      }
+    }
+
+    // If we're not writing to a terminal with a defined width, then don't wrap
+    // anything, unless the user explicitly said to.
+    final bool useWrapping = topLevelResults.wasParsed('wrap')
+        ? topLevelResults['wrap'] as bool
+        : globals.stdio.terminalColumns != null && topLevelResults['wrap'] as bool;
+    contextOverrides[OutputPreferences] = OutputPreferences(
+      wrapText: useWrapping,
+      showColor: topLevelResults['color'] as bool,
+      wrapColumn: wrapColumn,
+    );
 
     if (topLevelResults['show-test-device'] as bool ||
         topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
