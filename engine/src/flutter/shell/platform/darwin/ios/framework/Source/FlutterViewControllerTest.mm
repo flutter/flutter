@@ -54,10 +54,44 @@ typedef enum UIAccessibilityContrast : NSInteger {
 #endif
 
 @interface FlutterViewController (Tests)
+- (void)surfaceUpdated:(BOOL)appeared;
 - (void)performOrientationUpdate:(UIInterfaceOrientationMask)new_preferences;
 @end
 
 @implementation FlutterViewControllerTest
+
+- (void)testViewDidDisappearDoesntPauseEngine {
+  id engine = OCMClassMock([FlutterEngine class]);
+  id lifecycleChannel = OCMClassMock([FlutterBasicMessageChannel class]);
+  OCMStub([engine lifecycleChannel]).andReturn(lifecycleChannel);
+  FlutterViewController* viewControllerA = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                 nibName:nil
+                                                                                  bundle:nil];
+  FlutterViewController* viewControllerB = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                 nibName:nil
+                                                                                  bundle:nil];
+  id viewControllerMock = OCMPartialMock(viewControllerA);
+  OCMStub([viewControllerMock surfaceUpdated:NO]);
+  OCMStub([engine viewController]).andReturn(viewControllerB);
+  [viewControllerA viewDidDisappear:NO];
+  OCMReject([lifecycleChannel sendMessage:@"AppLifecycleState.paused"]);
+  OCMReject([viewControllerMock surfaceUpdated:[OCMArg any]]);
+}
+
+- (void)testViewDidDisappearDoesPauseEngine {
+  id engine = OCMClassMock([FlutterEngine class]);
+  id lifecycleChannel = OCMClassMock([FlutterBasicMessageChannel class]);
+  OCMStub([engine lifecycleChannel]).andReturn(lifecycleChannel);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  id viewControllerMock = OCMPartialMock(viewController);
+  OCMStub([viewControllerMock surfaceUpdated:NO]);
+  OCMStub([engine viewController]).andReturn(viewController);
+  [viewController viewDidDisappear:NO];
+  OCMVerify([lifecycleChannel sendMessage:@"AppLifecycleState.paused"]);
+  OCMVerify([viewControllerMock surfaceUpdated:NO]);
+}
 
 - (void)testBinaryMessenger {
   id engine = OCMClassMock([FlutterEngine class]);
