@@ -41,6 +41,7 @@ class InkHighlight extends InteractiveInkFeature {
     @required Color color,
     @required TextDirection textDirection,
     BoxShape shape = BoxShape.rectangle,
+    double radius,
     BorderRadius borderRadius,
     ShapeBorder customBorder,
     RectCallback rectCallback,
@@ -51,6 +52,7 @@ class InkHighlight extends InteractiveInkFeature {
        assert(textDirection != null),
        assert(fadeDuration != null),
        _shape = shape,
+       _radius = radius,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _customBorder = customBorder,
        _textDirection = textDirection,
@@ -69,6 +71,7 @@ class InkHighlight extends InteractiveInkFeature {
   }
 
   final BoxShape _shape;
+  final double _radius;
   final BorderRadius _borderRadius;
   final ShapeBorder _customBorder;
   final RectCallback _rectCallback;
@@ -112,7 +115,7 @@ class InkHighlight extends InteractiveInkFeature {
     }
     switch (_shape) {
       case BoxShape.circle:
-        canvas.drawCircle(rect.center, Material.defaultSplashRadius, paint);
+        canvas.drawCircle(rect.center, _radius ?? Material.defaultSplashRadius, paint);
         break;
       case BoxShape.rectangle:
         if (_borderRadius != BorderRadius.zero) {
