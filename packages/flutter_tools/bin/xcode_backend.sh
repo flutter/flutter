@@ -54,6 +54,11 @@ BuildApp() {
     derived_dir="${project_path}/.ios/Flutter"
   fi
 
+  local bundle_sksl_path=""
+  if [[ -n "$BUNDLE_SKSL_PATH" ]]; then
+    bundle_sksl_path="-iBundleSkSLPath=${BUNDLE_SKSL_PATH}"
+  fi
+
   # Default value of assets_path is flutter_assets
   local assets_path="flutter_assets"
   # The value of assets_path can set by add FLTAssetsPath to
@@ -166,6 +171,7 @@ is set to release or run \"flutter build ios --release\", then re-run Archive fr
     -dTrackWidgetCreation="${TRACK_WIDGET_CREATION}"                      \
     -dDartObfuscation="${DART_OBFUSCATION}"                               \
     -dEnableBitcode="${bitcode_flag}"                                     \
+    ${bundle_sksl_path}                                                   \
     --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"             \
     --DartDefines="${DART_DEFINES}"                                       \
     --ExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                   \

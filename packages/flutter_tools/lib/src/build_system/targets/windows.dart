@@ -132,7 +132,11 @@ abstract class BundleWindowsAssets extends Target {
       environment.buildDir.childFile('app.dill')
         .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
-    final Depfile depfile = await copyAssets(environment, outputDirectory);
+    final Depfile depfile = await copyAssets(
+      environment,
+      outputDirectory,
+      targetPlatform: TargetPlatform.windows_x64,
+    );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
