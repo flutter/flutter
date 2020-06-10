@@ -20,14 +20,14 @@ end
 # @example
 # post_install do |installer|
 #   installer.pods_project.targets.each do |target|
-#     target.build_configurations.each do |config|
-#       flutter_additional_ios_build_settings(config)
-#     end
+#     flutter_additional_ios_build_settings(target)
 #   end
 # end
-# @param [XCBuildConfiguration] build_configuration Build configuration for Pod target.
-def flutter_additional_ios_build_settings(build_configuration)
-  build_configuration.build_settings['ENABLE_BITCODE'] = 'NO'
+# @param [PBXAggregateTarget] target Pod target.
+def flutter_additional_ios_build_settings(target)
+  target.build_configurations.each do |build_configuration|
+     build_configuration.build_settings['ENABLE_BITCODE'] = 'NO'
+  end
 end
 
 # Install pods needed to embed Flutter iOS engine and plugins.
