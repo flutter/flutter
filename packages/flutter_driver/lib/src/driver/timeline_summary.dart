@@ -10,6 +10,8 @@ import 'package:file/file.dart';
 import 'package:path/path.dart' as path;
 
 import 'common.dart';
+import 'percentile_utils.dart';
+import 'profiling_summarizer.dart';
 import 'scene_display_lag_summarizer.dart';
 import 'timeline.dart';
 
@@ -18,6 +20,12 @@ const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
 /// The maximum amount of time considered safe to spend for a frame's build
 /// phase. Anything past that is in the danger of missing the frame as 60FPS.
 const Duration kBuildBudget = Duration(milliseconds: 16);
+
+/// The name of the framework frame build events we need to filter or extract.
+const String kBuildFrameEventName = 'Frame';
+
+/// The name of the engine frame rasterization events we need to filter or extract.
+const String kRasterizeFrameEventName = 'GPURasterizer::Draw';
 
 /// Extracts statistics from a [Timeline].
 class TimelineSummary {
@@ -84,11 +92,15 @@ class TimelineSummary {
   /// The total number of frames recorded in the timeline.
   int countFrames() => _extractFrameDurations().length;
 
+  /// The total number of rasterizer cycles recorded in the timeline.
+  int countRasterizations() => _extractGpuRasterizerDrawDurations().length;
+
   /// Encodes this summary as JSON.
   Map<String, dynamic> get summaryJson {
     final SceneDisplayLagSummarizer sceneDisplayLagSummarizer = _sceneDisplayLagSummarizer();
+    final Map<String, dynamic> profilingSummary = _profilingSummarizer().summarize();
 
-    return <String, dynamic>{
+    final Map<String, dynamic> timelineSummary = <String, dynamic>{
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
       '90th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(90.0),
       '99th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(99.0),
@@ -100,19 +112,26 @@ class TimelineSummary {
       'worst_frame_rasterizer_time_millis': computeWorstFrameRasterizerTimeMillis(),
       'missed_frame_rasterizer_budget_count': computeMissedFrameRasterizerBudgetCount(),
       'frame_count': countFrames(),
+      'frame_rasterizer_count': countRasterizations(),
       'frame_build_times': _extractFrameDurations()
-        .map<int>((Duration duration) => duration.inMicroseconds)
-        .toList(),
+          .map<int>((Duration duration) => duration.inMicroseconds)
+          .toList(),
       'frame_rasterizer_times': _extractGpuRasterizerDrawDurations()
-        .map<int>((Duration duration) => duration.inMicroseconds)
-        .toList(),
-      'frame_begin_times': _extractBeginTimestamps('Frame')
-        .map<int>((Duration duration) => duration.inMicroseconds)
-        .toList(),
+          .map<int>((Duration duration) => duration.inMicroseconds)
+          .toList(),
+      'frame_begin_times': _extractBeginTimestamps(kBuildFrameEventName)
+          .map<int>((Duration duration) => duration.inMicroseconds)
+          .toList(),
+      'frame_rasterizer_begin_times': _extractBeginTimestamps(kRasterizeFrameEventName)
+          .map<int>((Duration duration) => duration.inMicroseconds)
+          .toList(),
       'average_vsync_transitions_missed': sceneDisplayLagSummarizer.computeAverageVsyncTransitionsMissed(),
       '90th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(90.0),
-      '99th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(99.0)
+      '99th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(99.0),
     };
+
+    timelineSummary.addAll(profilingSummary);
+    return timelineSummary;
   }
 
   /// Writes all of the recorded timeline data to a file.
@@ -148,6 +167,12 @@ class TimelineSummary {
   List<TimelineEvent> _extractNamedEvents(String name) {
     return _timeline.events
       .where((TimelineEvent event) => event.name == name)
+      .toList();
+  }
+
+  List<TimelineEvent> _extractCategorizedEvents(String category) {
+    return _timeline.events
+      .where((TimelineEvent event) => event.category == category)
       .toList();
   }
 
@@ -227,7 +252,9 @@ class TimelineSummary {
 
   SceneDisplayLagSummarizer _sceneDisplayLagSummarizer() => SceneDisplayLagSummarizer(_extractNamedEvents(kSceneDisplayLagEvent));
 
-  List<Duration> _extractGpuRasterizerDrawDurations() => _extractBeginEndEvents('GPURasterizer::Draw');
+  List<Duration> _extractGpuRasterizerDrawDurations() => _extractBeginEndEvents(kRasterizeFrameEventName);
 
-  List<Duration> _extractFrameDurations() => _extractBeginEndEvents('Frame');
+  ProfilingSummarizer _profilingSummarizer() => ProfilingSummarizer.fromEvents(_extractCategorizedEvents(kProfilingCategory));
+
+  List<Duration> _extractFrameDurations() => _extractBeginEndEvents(kBuildFrameEventName);
 }

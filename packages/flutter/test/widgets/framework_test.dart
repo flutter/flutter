@@ -1427,6 +1427,74 @@ void main() {
       expect(debugDoingBuildOnDidUnmountRenderObject, isFalse);
     });
   });
+
+  testWidgets('A widget whose element has an invalid visitChildren implementation triggers a useful error message', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(Container(child: _WidgetWithNoVisitChildren(_StatefulLeaf(key: key))));
+    (key.currentState as _StatefulLeafState).markNeedsBuild();
+    await tester.pumpWidget(Container());
+    final dynamic exception = tester.takeException();
+    expect(
+      exception.message,
+      equalsIgnoringHashCodes(
+        'Tried to build dirty widget in the wrong build scope.\n'
+        'A widget which was marked as dirty and is still active was scheduled to be built, '
+        'but the current build scope unexpectedly does not contain that widget.\n'
+        'Sometimes this is detected when an element is removed from the widget tree, but '
+        'the element somehow did not get marked as inactive. In that case, it might be '
+        'caused by an ancestor element failing to implement visitChildren correctly, thus '
+        'preventing some or all of its descendants from being correctly deactivated.\n'
+        'The root of the build scope was:\n'
+        '  [root]\n'
+        'The offending element (which does not appear to be a descendant of the root of '
+        'the build scope) was:\n'
+        '  _StatefulLeaf-[GlobalKey#00000]'
+      )
+    );
+  });
+}
+
+class _WidgetWithNoVisitChildren extends StatelessWidget {
+  const _WidgetWithNoVisitChildren(this.child, { Key key }) :
+    super(key: key);
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => child;
+
+  @override
+  _WidgetWithNoVisitChildrenElement createElement() => _WidgetWithNoVisitChildrenElement(this);
+}
+
+class _WidgetWithNoVisitChildrenElement extends StatelessElement {
+  _WidgetWithNoVisitChildrenElement(_WidgetWithNoVisitChildren widget): super(widget);
+
+  @override
+  void visitChildren(ElementVisitor visitor) {
+    // This implementation is intentionally buggy, to test that an error message is
+    // shown when this situation occurs.
+    // The superclass has the correct implementation (calling `visitor(_child)`), so
+    // we don't call it here.
+  }
+}
+
+class _StatefulLeaf extends StatefulWidget {
+  const _StatefulLeaf({ Key key }) : super(key: key);
+
+  @override
+  State<_StatefulLeaf> createState() => _StatefulLeafState();
+}
+
+class _StatefulLeafState extends State<_StatefulLeaf> {
+  void markNeedsBuild() {
+    setState(() { });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox.shrink();
+  }
 }
 
 class Decorate extends StatefulWidget {
@@ -1502,7 +1570,6 @@ class NullChildElement extends Element {
   @override
   bool get debugDoingBuild => throw UnimplementedError();
 }
-
 
 class DirtyElementWithCustomBuildOwner extends Element {
   DirtyElementWithCustomBuildOwner(BuildOwner buildOwner, Widget widget)

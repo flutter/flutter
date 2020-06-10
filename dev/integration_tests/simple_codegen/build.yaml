@@ -1,9 +1,0 @@
-# Read about `build.yaml` at https://pub.dev/packages/build_config
-builders:
-  simple:
-    import: "package:simple_codegen/builders.dart"
-    builder_factories:
-      - simpleBuilder
-    build_extensions: {'.spec':['.dart']}
-    auto_apply: all_packages
-    build_to: source
