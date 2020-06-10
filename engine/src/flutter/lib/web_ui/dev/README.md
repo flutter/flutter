@@ -83,10 +83,32 @@ For Chrome and Firefox, the tests run on a version locked on the [browser_lock.y
 felt test --browser=firefox --firefox-version=70.0.1
 ```
 
-To run tests on Safari use the following command. It works on MacOS devices and it uses the Safari installed on the OS. Currently there is no option for using another Safari version.
+To run tests on Safari use the following command. It works on macOS devices and it uses the Safari installed on the OS. Currently there is no option for using another Safari version.
 
 ```
 felt test --browser=safari
+```
+
+One can also use Safari running in iOS Simulator for running unit tests. There are few prerequisite steps:
+
+1. Please make sure that you installed Xcode.
+
+2. The default version used in the tests are in browser_lock.yaml file. Install the ios version to use for simulators: Xcode > Preferences > Components
+
+3. run `xcrun simctl list devices`. If the simulator you want is not installed use step 4.
+
+4. Use felt to create a simulator:
+
+```
+felt create_simulator --type='iOS' --version='13.1' --device='iPhone.11.Pro'
+```
+
+To run tests on ios-safari use the one of the following commands:
+
+```
+felt test --browser=ios-safari
+felt test --browser=ios-safari --version='13.1' --device='iPhone.11.Pro'
+felt test --browser=ios-safari test/alarm_clock_test.dart
 ```
 
 To run tests on Windows Edge use the following command. It works on Windows devices and it uses the Edge installed on the OS.

@@ -14,10 +14,12 @@ import 'package:test_core/src/runner/hack_register_platform.dart'
 import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
 import 'package:test_core/src/executable.dart'
     as test; // ignore: implementation_imports
+import 'package:simulators/simulator_manager.dart';
 
 import 'environment.dart';
 import 'exceptions.dart';
 import 'integration_tests_manager.dart';
+import 'safari_installation.dart';
 import 'supported_browsers.dart';
 import 'test_platform.dart';
 import 'utils.dart';
@@ -159,23 +161,30 @@ class TestCommand extends Command<bool> with ArgUtils {
       await _runPubGet();
     }
 
-    // Many tabs will be left open after Safari runs, quit Safari during
-    // cleanup.
-    if (browser == 'safari') {
-      cleanupCallbacks.add(() async {
-        // Only close Safari if felt is running in CI environments. Do not close
-        // Safari for the local testing.
-        if (io.Platform.environment['LUCI_CONTEXT'] != null || isCirrus) {
-          print('INFO: Safari tests ran. Quit Safari.');
-          await runProcess(
-            'sudo',
-            ['pkill', '-lf', 'Safari'],
-            workingDirectory: environment.webUiRootDir.path,
-          );
-        } else {
-          print('INFO: Safari tests ran. Please quit Safari tabs.');
-        }
-      });
+    // In order to run iOS Safari unit tests we need to make sure iOS Simulator
+    // is booted.
+    if (browser == 'ios-safari') {
+      final IosSimulatorManager iosSimulatorManager = IosSimulatorManager();
+      IosSimulator iosSimulator;
+      try {
+        iosSimulator = await iosSimulatorManager.getSimulator(
+            IosSafariArgParser.instance.iosMajorVersion,
+            IosSafariArgParser.instance.iosMinorVersion,
+            IosSafariArgParser.instance.iosDevice);
+      } catch (e) {
+        throw Exception('Error getting requested simulator. Try running '
+            '`felt create` command first before running the tests. exception: '
+            '$e');
+      }
+
+      if (!iosSimulator.booted) {
+        await iosSimulator.boot();
+        print('INFO: Simulator ${iosSimulator.id} booted.');
+        cleanupCallbacks.add(() async {
+          await iosSimulator.shutdown();
+          print('INFO: Simulator ${iosSimulator.id} shutdown.');
+        });
+      }
     }
 
     await _buildTargets();
