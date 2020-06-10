@@ -9,6 +9,9 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button_theme.dart';
+import 'colors.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'flat_button.dart';
 import 'icon_button.dart';
@@ -63,11 +66,19 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
   // The key for _TextSelectionToolbarContainer.
   UniqueKey _containerKey = UniqueKey();
 
-  FlatButton _getItem(VoidCallback onPressed, String label) {
+  Widget _getItem(VoidCallback onPressed, String label) {
     assert(onPressed != null);
-    return FlatButton(
-      child: Text(label),
-      onPressed: onPressed,
+    return ButtonTheme.fromButtonThemeData(
+      data: ButtonTheme.of(context).copyWith(
+        height: kMinInteractiveDimension,
+        minWidth: kMinInteractiveDimension,
+      ),
+      child: FlatButton(
+        onPressed: onPressed,
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        shape: Border.all(width: 0.0, color: Colors.transparent),
+        child: Text(label),
+      ),
     );
   }
 
@@ -178,6 +189,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
         duration: const Duration(milliseconds: 140),
         child: Material(
           borderRadius: const BorderRadius.all(Radius.circular(6.0)),
+          clipBehavior: Clip.antiAlias,
           elevation: 1.0,
           child: _TextSelectionToolbarItems(
             isAbove: widget.isAbove,
