@@ -39,6 +39,17 @@ void main() {
       tryToDelete(tempDir);
     });
 
+    test('getSupportedProtocols includes DDS', () async {
+      // TODO(bkonyi): replace with actual VmService.getSupportedProtocols when
+      // package:dwds adds support.
+      final Response response =
+          await vmService.callMethod('getSupportedProtocols');
+      expect(response.json['protocols'].length == 2, true);
+      for (final Map<String, dynamic> protocol in response.json['protocols'].cast<Map<String, dynamic>>()) {
+        expect(<String>{'VM Service', 'DDS'}.contains(protocol['protocolName']), isTrue);
+      }
+    });
+
     test('flutterVersion can be called', () async {
       final Response response =
           await vmService.callServiceExtension('s0.flutterVersion');

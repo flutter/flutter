@@ -222,6 +222,11 @@ class FlutterDevice {
       isWaitingForVm = true;
       vm_service.VmService service;
 
+      await device.dds.startDartDevelopmentService(
+        observatoryUri,
+        false, // TODO(bkonyi): ipv6 support?
+      );
+
       try {
         service = await connectToVmService(
           observatoryUri,
