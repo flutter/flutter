@@ -327,13 +327,8 @@ void main() {
               child: InkResponse(
                 focusNode: focusNode,
                 radius: 20,
-                hoverColor: const Color(0xff00ff00),
-                splashColor: const Color(0xffff0000),
                 focusColor: const Color(0xff0000ff),
-                highlightColor: const Color(0xf00fffff),
                 onTap: () { },
-                onLongPress: () { },
-                onHover: (bool hover) { },
               ),
             ),
           ),
@@ -345,9 +340,7 @@ void main() {
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 1));
-    expect(inkFeatures, paints
-      ..circle(radius: 20, color: const Color(0xff0000ff)));
+    expect(inkFeatures, paints..circle(radius: 20, color: const Color(0xff0000ff)));
   });
 
   testWidgets("ink response doesn't change color on focus when on touch device", (WidgetTester tester) async {
