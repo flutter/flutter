@@ -4,10 +4,10 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -26,13 +26,21 @@ void main() {
   MockStdIn mockFrontendServerStdIn;
   MockStream mockFrontendServerStdErr;
   StreamController<String> stdErrStreamController;
+  BufferLogger testLogger;
 
   setUp(() {
-    generator = ResidentCompiler('sdkroot', buildMode: BuildMode.debug);
+    testLogger = BufferLogger.test();
     mockProcessManager = MockProcessManager();
     mockFrontendServer = MockProcess();
     mockFrontendServerStdIn = MockStdIn();
     mockFrontendServerStdErr = MockStream();
+    generator = ResidentCompiler(
+      'sdkroot',
+      buildMode: BuildMode.debug,
+      logger: testLogger,
+      processManager: mockProcessManager,
+      artifacts: Artifacts.test(),
+    );
 
     when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
     when(mockFrontendServer.stderr)
@@ -68,10 +76,6 @@ void main() {
     verifyNoMoreInteractions(mockFrontendServerStdIn);
     expect(testLogger.errorText, equals('line1\nline2\n'));
     expect(output.outputFilename, equals('/path/to/main.dart.dill'));
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => mockProcessManager,
-    OutputPreferences: () => OutputPreferences(showColor: false),
-    Platform: kNoColorTerminalPlatform,
   });
 
   testUsingContext('incremental compile single dart compile abnormally terminates', () async {
@@ -85,10 +89,6 @@ void main() {
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
     )), throwsToolExit());
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => mockProcessManager,
-    OutputPreferences: () => OutputPreferences(showColor: false),
-    Platform: kNoColorTerminalPlatform,
   });
 
   testUsingContext('incremental compile single dart compile abnormally terminates via exitCode', () async {
@@ -104,10 +104,6 @@ void main() {
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,
     )), throwsToolExit());
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => mockProcessManager,
-    OutputPreferences: () => OutputPreferences(showColor: false),
-    Platform: kNoColorTerminalPlatform,
   });
 
   testUsingContext('incremental compile and recompile', () async {
@@ -145,10 +141,6 @@ void main() {
       'line1\nline2\n'
       'line1\nline2\n'
     ));
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => mockProcessManager,
-    OutputPreferences: () => OutputPreferences(showColor: false),
-    Platform: kNoColorTerminalPlatform,
   });
 
   testUsingContext('incremental compile can suppress errors', () async {
@@ -183,10 +175,6 @@ void main() {
       'line1\nline2\n'
       'line1\nline2\n'
     )));
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => mockProcessManager,
-    OutputPreferences: () => OutputPreferences(showColor: false),
-    Platform: kNoColorTerminalPlatform,
   });
 
   testUsingContext('incremental compile and recompile twice', () async {
@@ -216,10 +204,6 @@ void main() {
       'line1\nline2\n'
       'line2\nline3\n'
     ));
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => mockProcessManager,
-    OutputPreferences: () => OutputPreferences(showColor: false),
-    Platform: kNoColorTerminalPlatform,
   });
 }
 

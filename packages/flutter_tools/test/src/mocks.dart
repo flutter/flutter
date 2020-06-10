@@ -244,11 +244,11 @@ class FakeProcess implements Process {
   FakeProcess({
     this.pid = 1,
     Future<int> exitCode,
-    Stream<List<int>> stdin,
+    IOSink stdin,
     this.stdout = const Stream<List<int>>.empty(),
     this.stderr = const Stream<List<int>>.empty(),
   }) : exitCode = exitCode ?? Future<int>.value(0),
-       stdin = stdin as IOSink ?? MemoryIOSink();
+       stdin = stdin ?? MemoryIOSink();
 
   @override
   final int pid;

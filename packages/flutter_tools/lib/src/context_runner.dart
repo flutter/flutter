@@ -148,7 +148,12 @@ Future<T> runInContext<T>(
         xcode: globals.xcode,
       ),
       IOSWorkflow: () => const IOSWorkflow(),
-      KernelCompilerFactory: () => const KernelCompilerFactory(),
+      KernelCompilerFactory: () => KernelCompilerFactory(
+        logger: globals.logger,
+        processManager: globals.processManager,
+        artifacts: globals.artifacts,
+        fileSystem: globals.fs,
+      ),
       Logger: () => globals.platform.isWindows
         ? WindowsStdoutLogger(
             terminal: globals.terminal,
