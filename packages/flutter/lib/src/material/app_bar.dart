@@ -860,7 +860,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || pinned != oldDelegate.pinned
         || floating != oldDelegate.floating
         || snapConfiguration != oldDelegate.snapConfiguration
-        || stretchConfiguration != oldDelegate.stretchConfiguration;
+        || stretchConfiguration != oldDelegate.stretchConfiguration
+        || forceElevated != oldDelegate.forceElevated;
   }
 
   @override
