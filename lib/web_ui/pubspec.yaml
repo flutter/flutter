@@ -23,6 +23,11 @@ dev_dependencies:
   watcher: 0.9.7+12
   web_engine_tester:
     path: ../../web_sdk/web_engine_tester
+  simulators:
+    git:
+      url: git://github.com/flutter/web_installers.git
+      path: packages/simulators/
+      ref: 9ede7e3c069180b28322bb3f0d0307c824071fb5
   web_driver_installer:
     git:
       url: git://github.com/flutter/web_installers.git
