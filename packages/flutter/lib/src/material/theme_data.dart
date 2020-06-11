@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:ui' show Color, hashList, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
@@ -35,6 +33,7 @@ import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
 import 'tab_bar_theme.dart';
 import 'text_theme.dart';
+import 'time_picker_theme.dart';
 import 'toggle_buttons_theme.dart';
 import 'tooltip_theme.dart';
 import 'typography.dart';
@@ -269,6 +268,7 @@ class ThemeData with Diagnosticable {
     DividerThemeData dividerTheme,
     ButtonBarThemeData buttonBarTheme,
     BottomNavigationBarThemeData bottomNavigationBarTheme,
+    TimePickerThemeData timePickerTheme,
     bool fixTextFieldOutlineLabel,
   }) {
     assert(colorScheme?.brightness == null || brightness == null || colorScheme.brightness == brightness);
@@ -380,6 +380,7 @@ class ThemeData with Diagnosticable {
     dividerTheme ??= const DividerThemeData();
     buttonBarTheme ??= const ButtonBarThemeData();
     bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
+    timePickerTheme ??= const TimePickerThemeData();
 
     fixTextFieldOutlineLabel ??= false;
 
@@ -448,6 +449,7 @@ class ThemeData with Diagnosticable {
       dividerTheme: dividerTheme,
       buttonBarTheme: buttonBarTheme,
       bottomNavigationBarTheme: bottomNavigationBarTheme,
+      timePickerTheme: timePickerTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
     );
   }
@@ -527,69 +529,71 @@ class ThemeData with Diagnosticable {
     @required this.dividerTheme,
     @required this.buttonBarTheme,
     @required this.bottomNavigationBarTheme,
+    @required this.timePickerTheme,
     @required this.fixTextFieldOutlineLabel,
   }) : assert(visualDensity != null),
-       assert(primaryColor != null),
-       assert(primaryColorBrightness != null),
-       assert(primaryColorLight != null),
-       assert(primaryColorDark != null),
-       assert(accentColor != null),
-       assert(accentColorBrightness != null),
-       assert(canvasColor != null),
-       assert(scaffoldBackgroundColor != null),
-       assert(bottomAppBarColor != null),
-       assert(cardColor != null),
-       assert(dividerColor != null),
-       assert(focusColor != null),
-       assert(hoverColor != null),
-       assert(highlightColor != null),
-       assert(splashColor != null),
-       assert(splashFactory != null),
-       assert(selectedRowColor != null),
-       assert(unselectedWidgetColor != null),
-       assert(disabledColor != null),
-       assert(toggleableActiveColor != null),
-       assert(buttonTheme != null),
-       assert(toggleButtonsTheme != null),
-       assert(secondaryHeaderColor != null),
-       assert(textSelectionColor != null),
-       assert(cursorColor != null),
-       assert(textSelectionHandleColor != null),
-       assert(backgroundColor != null),
-       assert(dialogBackgroundColor != null),
-       assert(indicatorColor != null),
-       assert(hintColor != null),
-       assert(errorColor != null),
-       assert(textTheme != null),
-       assert(primaryTextTheme != null),
-       assert(accentTextTheme != null),
-       assert(inputDecorationTheme != null),
-       assert(iconTheme != null),
-       assert(primaryIconTheme != null),
-       assert(accentIconTheme != null),
-       assert(sliderTheme != null),
-       assert(tabBarTheme != null),
-       assert(tooltipTheme != null),
-       assert(cardTheme != null),
-       assert(chipTheme != null),
-       assert(platform != null),
-       assert(materialTapTargetSize != null),
-       assert(pageTransitionsTheme != null),
-       assert(appBarTheme != null),
-       assert(bottomAppBarTheme != null),
-       assert(colorScheme != null),
-       assert(dialogTheme != null),
-       assert(floatingActionButtonTheme != null),
-       assert(navigationRailTheme != null),
-       assert(typography != null),
-       assert(snackBarTheme != null),
-       assert(bottomSheetTheme != null),
-       assert(popupMenuTheme != null),
-       assert(bannerTheme != null),
-       assert(dividerTheme != null),
-       assert(buttonBarTheme != null),
-       assert(bottomNavigationBarTheme != null),
-       assert(fixTextFieldOutlineLabel != null);
+        assert(primaryColor != null),
+        assert(primaryColorBrightness != null),
+        assert(primaryColorLight != null),
+        assert(primaryColorDark != null),
+        assert(accentColor != null),
+        assert(accentColorBrightness != null),
+        assert(canvasColor != null),
+        assert(scaffoldBackgroundColor != null),
+        assert(bottomAppBarColor != null),
+        assert(cardColor != null),
+        assert(dividerColor != null),
+        assert(focusColor != null),
+        assert(hoverColor != null),
+        assert(highlightColor != null),
+        assert(splashColor != null),
+        assert(splashFactory != null),
+        assert(selectedRowColor != null),
+        assert(unselectedWidgetColor != null),
+        assert(disabledColor != null),
+        assert(toggleableActiveColor != null),
+        assert(buttonTheme != null),
+        assert(toggleButtonsTheme != null),
+        assert(secondaryHeaderColor != null),
+        assert(textSelectionColor != null),
+        assert(cursorColor != null),
+        assert(textSelectionHandleColor != null),
+        assert(backgroundColor != null),
+        assert(dialogBackgroundColor != null),
+        assert(indicatorColor != null),
+        assert(hintColor != null),
+        assert(errorColor != null),
+        assert(textTheme != null),
+        assert(primaryTextTheme != null),
+        assert(accentTextTheme != null),
+        assert(inputDecorationTheme != null),
+        assert(iconTheme != null),
+        assert(primaryIconTheme != null),
+        assert(accentIconTheme != null),
+        assert(sliderTheme != null),
+        assert(tabBarTheme != null),
+        assert(tooltipTheme != null),
+        assert(cardTheme != null),
+        assert(chipTheme != null),
+        assert(platform != null),
+        assert(materialTapTargetSize != null),
+        assert(pageTransitionsTheme != null),
+        assert(appBarTheme != null),
+        assert(bottomAppBarTheme != null),
+        assert(colorScheme != null),
+        assert(dialogTheme != null),
+        assert(floatingActionButtonTheme != null),
+        assert(navigationRailTheme != null),
+        assert(typography != null),
+        assert(snackBarTheme != null),
+        assert(bottomSheetTheme != null),
+        assert(popupMenuTheme != null),
+        assert(bannerTheme != null),
+        assert(dividerTheme != null),
+        assert(buttonBarTheme != null),
+        assert(bottomNavigationBarTheme != null),
+        assert(timePickerTheme != null),
+        assert(fixTextFieldOutlineLabel != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -1036,6 +1040,9 @@ class ThemeData with Diagnosticable {
   /// widgets.
   final BottomNavigationBarThemeData bottomNavigationBarTheme;
 
+  /// A theme for customizing the appearance and layout of time picker widgets.
+  final TimePickerThemeData timePickerTheme;
+
   /// A temporary flag to allow apps to opt-in to a
   /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
   /// coordinate of the floating label in a [TextField] [OutlineInputBorder].
@@ -1117,6 +1124,7 @@ class ThemeData with Diagnosticable {
     DividerThemeData dividerTheme,
     ButtonBarThemeData buttonBarTheme,
     BottomNavigationBarThemeData bottomNavigationBarTheme,
+    TimePickerThemeData timePickerTheme,
     bool fixTextFieldOutlineLabel,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -1185,6 +1193,7 @@ class ThemeData with Diagnosticable {
       dividerTheme: dividerTheme ?? this.dividerTheme,
       buttonBarTheme: buttonBarTheme ?? this.buttonBarTheme,
       bottomNavigationBarTheme: bottomNavigationBarTheme ?? this.bottomNavigationBarTheme,
+      timePickerTheme: timePickerTheme ?? this.timePickerTheme,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
     );
   }
@@ -1197,7 +1206,7 @@ class ThemeData with Diagnosticable {
 
   /// Caches localized themes to speed up the [localize] method.
   static final _FifoCache<_IdentityThemeDataCacheKey, ThemeData> _localizedThemeDataCache =
-      _FifoCache<_IdentityThemeDataCacheKey, ThemeData>(_localizedThemeDataCacheSize);
+  _FifoCache<_IdentityThemeDataCacheKey, ThemeData>(_localizedThemeDataCacheSize);
 
   /// Returns a new theme built by merging the text geometry provided by the
   /// [localTextGeometry] theme with the [baseTheme].
@@ -1224,7 +1233,7 @@ class ThemeData with Diagnosticable {
 
     return _localizedThemeDataCache.putIfAbsent(
       _IdentityThemeDataCacheKey(baseTheme, localTextGeometry),
-      () {
+          () {
         return baseTheme.copyWith(
           primaryTextTheme: localTextGeometry.merge(baseTheme.primaryTextTheme),
           accentTextTheme: localTextGeometry.merge(baseTheme.accentTextTheme),
@@ -1331,6 +1340,7 @@ class ThemeData with Diagnosticable {
       dividerTheme: DividerThemeData.lerp(a.dividerTheme, b.dividerTheme, t),
       buttonBarTheme: ButtonBarThemeData.lerp(a.buttonBarTheme, b.buttonBarTheme, t),
       bottomNavigationBarTheme: BottomNavigationBarThemeData.lerp(a.bottomNavigationBarTheme, b.bottomNavigationBarTheme, t),
+      timePickerTheme: TimePickerThemeData.lerp(a.timePickerTheme, b.timePickerTheme, t),
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
     );
   }
@@ -1405,6 +1415,7 @@ class ThemeData with Diagnosticable {
         && other.dividerTheme == dividerTheme
         && other.buttonBarTheme == buttonBarTheme
         && other.bottomNavigationBarTheme == bottomNavigationBarTheme
+        && other.timePickerTheme == timePickerTheme
         && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel;
   }
 
@@ -1478,6 +1489,7 @@ class ThemeData with Diagnosticable {
       dividerTheme,
       buttonBarTheme,
       bottomNavigationBarTheme,
+      timePickerTheme,
       fixTextFieldOutlineLabel,
     ];
     return hashList(values);
@@ -1547,6 +1559,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialBannerThemeData>('bannerTheme', bannerTheme, defaultValue: defaultData.bannerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DividerThemeData>('dividerTheme', dividerTheme, defaultValue: defaultData.dividerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ButtonBarThemeData>('buttonBarTheme', buttonBarTheme, defaultValue: defaultData.buttonBarTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<TimePickerThemeData>('timePickerTheme', timePickerTheme, defaultValue: defaultData.timePickerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomNavigationBarThemeData>('bottomNavigationBarTheme', bottomNavigationBarTheme, defaultValue: defaultData.bottomNavigationBarTheme, level: DiagnosticLevel.debug));
   }
 }
@@ -1593,14 +1606,14 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   );
 
   MaterialBasedCupertinoThemeData._(
-    this._materialTheme,
-    this._cupertinoOverrideTheme,
-  ) : assert(_materialTheme != null),
-      assert(_cupertinoOverrideTheme != null),
-      // Pass all values to the superclass so Material-agnostic properties
-      // like barBackgroundColor can still behave like a normal
-      // CupertinoThemeData.
-      super.raw(
+      this._materialTheme,
+      this._cupertinoOverrideTheme,
+      ) : assert(_materialTheme != null),
+        assert(_cupertinoOverrideTheme != null),
+  // Pass all values to the superclass so Material-agnostic properties
+  // like barBackgroundColor can still behave like a normal
+  // CupertinoThemeData.
+        super.raw(
         _cupertinoOverrideTheme.brightness,
         _cupertinoOverrideTheme.primaryColor,
         _cupertinoOverrideTheme.primaryContrastingColor,
@@ -1757,11 +1770,11 @@ class VisualDensity with Diagnosticable {
     this.horizontal = 0.0,
     this.vertical = 0.0,
   }) : assert(horizontal != null),
-       assert(vertical != null),
-       assert(vertical <= maximumDensity),
-       assert(vertical >= minimumDensity),
-       assert(horizontal <= maximumDensity),
-       assert(horizontal >= minimumDensity);
+        assert(vertical != null),
+        assert(vertical <= maximumDensity),
+        assert(vertical >= minimumDensity),
+        assert(horizontal <= maximumDensity),
+        assert(horizontal >= minimumDensity);
 
   /// The minimum allowed density.
   static const double minimumDensity = -4.0;

@@ -22,17 +22,17 @@ class _TimePickerLauncher extends StatelessWidget {
       home: Material(
         child: Center(
           child: Builder(
-            builder: (BuildContext context) {
-              return RaisedButton(
-                child: const Text('X'),
-                onPressed: () async {
-                  onChanged(await showTimePicker(
-                    context: context,
-                    initialTime: const TimeOfDay(hour: 7, minute: 0),
-                  ));
-                },
-              );
-            }
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  child: const Text('X'),
+                  onPressed: () async {
+                    onChanged(await showTimePicker(
+                      context: context,
+                      initialTime: const TimeOfDay(hour: 7, minute: 0),
+                    ));
+                  },
+                );
+              }
           ),
         ),
       ),
@@ -41,10 +41,10 @@ class _TimePickerLauncher extends StatelessWidget {
 }
 
 Future<Offset> startPicker(
-  WidgetTester tester,
-  ValueChanged<TimeOfDay> onChanged, {
-  Locale locale = const Locale('en', 'US'),
-}) async {
+    WidgetTester tester,
+    ValueChanged<TimeOfDay> onChanged, {
+      Locale locale = const Locale('en', 'US'),
+    }) async {
   await tester.pumpWidget(_TimePickerLauncher(onChanged: onChanged, locale: locale,));
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -174,14 +174,14 @@ void main() {
 
     final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final dynamic dialPainter = dialPaint.painter;
-    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels as List<dynamic>;
+    final List<dynamic> primaryOuterLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
       primaryOuterLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
       labels12To11,
     );
     expect(dialPainter.primaryInnerLabels, null);
 
-    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels as List<dynamic>;
+    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryLabels as List<dynamic>;
     expect(
       secondaryOuterLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
       labels12To11,
@@ -194,7 +194,7 @@ void main() {
 
     final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final dynamic dialPainter = dialPaint.painter;
-    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels as List<dynamic>;
+    final List<dynamic> primaryOuterLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
       primaryOuterLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
       labels00To23,
@@ -205,7 +205,7 @@ void main() {
       labels12To11TwoDigit,
     );
 
-    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels as List<dynamic>;
+    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryLabels as List<dynamic>;
     expect(
       secondaryOuterLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
       labels00To23,
