@@ -208,7 +208,7 @@ void main() {
         padding: const EdgeInsets.all(0),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         itemCount: focusNodes.length,
-        separatorBuilder: (BuildContext context, int index) => Divider(),
+        separatorBuilder: (BuildContext context, int index) => const Divider(),
         itemBuilder: (BuildContext context,int index) {
           return Container(
             height: 50,
@@ -518,7 +518,7 @@ void main() {
         padding: const EdgeInsets.all(0),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         itemCount: focusNodes.length,
-        separatorBuilder: (BuildContext context, int index) => Divider(),
+        separatorBuilder: (BuildContext context, int index) => const Divider(),
         itemBuilder: (BuildContext context,int index) {
           return Container(
             height: 50,
