@@ -152,7 +152,6 @@ void main() {
     final InputBorder border = textField.decoration.focusedBorder;
     expect(border, delegate.focusedBorder);
   });
-  
   testWidgets('enabled border overridden', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     await tester.pumpWidget(TestHomePage(
