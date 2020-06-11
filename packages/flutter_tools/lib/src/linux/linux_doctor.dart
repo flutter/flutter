@@ -17,7 +17,7 @@ class _VersionInfo {
   /// This should contain a version number. For example:
   ///     "clang version 9.0.1-6+build1"
   _VersionInfo(this.description) {
-    final String versionString = RegExp(r'[0-9]+\.[0-9]+\.[0-9]+').firstMatch(description).group(0);
+    final String versionString = RegExp(r'[0-9]+\.[0-9]+(?:\.[0-9]+)?').firstMatch(description).group(0);
     number = Version.parse(versionString);
   }
 

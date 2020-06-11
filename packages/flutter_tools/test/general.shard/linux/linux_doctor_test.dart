@@ -90,7 +90,7 @@ void main() {
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('1.10.0'),
-      _pkgConfigPresentCommand('0.29.1'),
+      _pkgConfigPresentCommand('0.29'),
       ..._librariesPresentCommands(),
     ]);
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
@@ -104,7 +104,7 @@ void main() {
       ValidationMessage('clang version 4.0.1-6+build1'),
       ValidationMessage('cmake version 3.16.3'),
       ValidationMessage('ninja version 1.10.0'),
-      ValidationMessage('pkg-config version 0.29.1'),
+      ValidationMessage('pkg-config version 0.29'),
     ]);
   });
 
@@ -113,7 +113,7 @@ void main() {
       _clangPresentCommand('2.0.1'),
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('1.10.0'),
-      _pkgConfigPresentCommand('0.29.1'),
+      _pkgConfigPresentCommand('0.29'),
       ..._librariesPresentCommands(),
     ]);
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
@@ -128,7 +128,7 @@ void main() {
       ValidationMessage.error('clang++ 3.4.0 or later is required.'),
       ValidationMessage('cmake version 3.16.3'),
       ValidationMessage('ninja version 1.10.0'),
-      ValidationMessage('pkg-config version 0.29.1'),
+      ValidationMessage('pkg-config version 0.29'),
     ]);
   });
 
@@ -137,7 +137,7 @@ void main() {
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.2.0'),
       _ninjaPresentCommand('1.10.0'),
-      _pkgConfigPresentCommand('0.29.1'),
+      _pkgConfigPresentCommand('0.29'),
       ..._librariesPresentCommands(),
     ]);
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
@@ -152,7 +152,7 @@ void main() {
       ValidationMessage('cmake version 3.2.0'),
       ValidationMessage.error('cmake 3.10.0 or later is required.'),
       ValidationMessage('ninja version 1.10.0'),
-      ValidationMessage('pkg-config version 0.29.1'),
+      ValidationMessage('pkg-config version 0.29'),
     ]);
   });
 
@@ -161,7 +161,7 @@ void main() {
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('0.8.1'),
-      _pkgConfigPresentCommand('0.29.1'),
+      _pkgConfigPresentCommand('0.29'),
       ..._librariesPresentCommands(),
     ]);
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
@@ -176,7 +176,7 @@ void main() {
       ValidationMessage('cmake version 3.16.3'),
       ValidationMessage('ninja version 0.8.1'),
       ValidationMessage.error('ninja 1.8.0 or later is required.'),
-      ValidationMessage('pkg-config version 0.29.1'),
+      ValidationMessage('pkg-config version 0.29'),
     ]);
   });
 
@@ -209,7 +209,7 @@ void main() {
       _clangPresentCommand('4.0.1'),
       _missingBinaryCommand('cmake'),
       _ninjaPresentCommand('1.10.0'),
-      _pkgConfigPresentCommand('0.29.1'),
+      _pkgConfigPresentCommand('0.29'),
       ..._librariesPresentCommands(),
     ]);
     final UserMessages userMessages = UserMessages();
@@ -224,7 +224,7 @@ void main() {
       const ValidationMessage('clang version 4.0.1-6+build1'),
       ValidationMessage.error(userMessages.cmakeMissing),
       const ValidationMessage('ninja version 1.10.0'),
-      const ValidationMessage('pkg-config version 0.29.1'),
+      const ValidationMessage('pkg-config version 0.29'),
     ]);
   });
 
@@ -233,7 +233,7 @@ void main() {
       _missingBinaryCommand('clang++'),
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('1.10.0'),
-      _pkgConfigPresentCommand('0.29.1'),
+      _pkgConfigPresentCommand('0.29'),
       ..._librariesPresentCommands(),
     ]);
     final UserMessages userMessages = UserMessages();
@@ -248,7 +248,7 @@ void main() {
       ValidationMessage.error(userMessages.clangMissing),
       const ValidationMessage('cmake version 3.16.3'),
       const ValidationMessage('ninja version 1.10.0'),
-      const ValidationMessage('pkg-config version 0.29.1'),
+      const ValidationMessage('pkg-config version 0.29'),
     ]);
   });
 
@@ -257,7 +257,7 @@ void main() {
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
       _missingBinaryCommand('ninja'),
-      _pkgConfigPresentCommand('0.29.1'),
+      _pkgConfigPresentCommand('0.29'),
       ..._librariesPresentCommands(),
     ]);
     final UserMessages userMessages = UserMessages();
@@ -272,7 +272,7 @@ void main() {
       const ValidationMessage('clang version 4.0.1-6+build1'),
       const ValidationMessage('cmake version 3.16.3'),
       ValidationMessage.error(userMessages.ninjaMissing),
-      const ValidationMessage('pkg-config version 0.29.1'),
+      const ValidationMessage('pkg-config version 0.29'),
     ]);
   });
 
@@ -305,7 +305,7 @@ void main() {
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
       _ninjaPresentCommand('1.10.0'),
-      _pkgConfigPresentCommand('0.29.1'),
+      _pkgConfigPresentCommand('0.29'),
       ..._librariesMissingCommands(),
     ]);
     final UserMessages userMessages = UserMessages();
@@ -320,7 +320,7 @@ void main() {
       const ValidationMessage('clang version 4.0.1-6+build1'),
       const ValidationMessage('cmake version 3.16.3'),
       const ValidationMessage('ninja version 1.10.0'),
-      const ValidationMessage('pkg-config version 0.29.1'),
+      const ValidationMessage('pkg-config version 0.29'),
       ValidationMessage.error(userMessages.gtkLibrariesMissing),
     ]);
   });
@@ -330,7 +330,7 @@ void main() {
       _missingBinaryCommand('clang++'),
       _missingBinaryCommand('cmake'),
       _ninjaPresentCommand('1.10.0'),
-      _pkgConfigPresentCommand('0.29.1'),
+      _pkgConfigPresentCommand('0.29'),
       ..._librariesPresentCommands(),
     ]);
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
