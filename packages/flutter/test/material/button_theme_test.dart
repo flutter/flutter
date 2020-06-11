@@ -314,7 +314,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(menu, findsNothing);
 
-    // Same test as above execpt RTL
+    // Same test as above except RTL
     await tester.pumpWidget(
       buildFrame(
         alignedDropdown: true,

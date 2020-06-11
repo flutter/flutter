@@ -869,7 +869,7 @@ abstract class TextSelectionGestureDetectorBuilderDelegate {
 ///
 /// The class implements sensible defaults for many user interactions
 /// with an [EditableText] (see the documentation of the various gesture handler
-/// methods, e.g. [onTapDown], [onFrocePress], etc.). Subclasses of
+/// methods, e.g. [onTapDown], [onForcePress], etc.). Subclasses of
 /// [EditableTextSelectionHandlesProvider] can change the behavior performed in
 /// responds to these gesture events by overriding the corresponding handler
 /// methods of this class.

@@ -603,7 +603,7 @@ void main() {
     // Make sure the clipboard is empty to start.
     await Clipboard.setData(const ClipboardData(text: ''));
 
-    // Double tap to selet the first word.
+    // Double tap to select the first word.
     const int index = 4;
     await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pump(const Duration(milliseconds: 50));

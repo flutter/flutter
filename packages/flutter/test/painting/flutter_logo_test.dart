@@ -54,7 +54,7 @@ void main() {
     expect(logo.margin, EdgeInsets.lerp(start.margin, end.margin, 0.5));
   });
 
-  test('FlutterLogoDecorationl.lerpFrom and FlutterLogoDecorationl.lerpTo', () {
+  test('FlutterLogoDecoration.lerpFrom and FlutterLogoDecoration.lerpTo', () {
     expect(Decoration.lerp(start, const BoxDecoration(), 0.0), start);
     expect(Decoration.lerp(start, const BoxDecoration(), 1.0), const BoxDecoration());
     expect(Decoration.lerp(const BoxDecoration(), end, 0.0), const BoxDecoration());

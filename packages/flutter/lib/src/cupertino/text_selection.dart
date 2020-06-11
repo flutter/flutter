@@ -478,7 +478,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
     ) as double;
 
-    // The y-coordinate has to be calculated instead of directly quoting postion.dy,
+    // The y-coordinate has to be calculated instead of directly quoting position.dy,
     // since the caller (TextSelectionOverlay._buildToolbar) does not know whether
     // the toolbar is going to be facing up or down.
     final double localBarTopY = isArrowPointingDown

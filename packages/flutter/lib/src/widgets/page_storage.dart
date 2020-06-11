@@ -177,7 +177,7 @@ class PageStorageBucket {
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       appBar: AppBar(
-///         title: Text("Persistance Example"),
+///         title: Text("Persistence Example"),
 ///       ),
 ///       body: PageStorage(
 ///         child: pages[currentTab],

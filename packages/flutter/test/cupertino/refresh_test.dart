@@ -1410,7 +1410,7 @@ void main() {
       );
 
       // Drag the content down far enough so that
-      // geometry.paintExent > constraints.maxPaintExtent
+      // geometry.paintExtent > constraints.maxPaintExtent
       await tester.dragFrom(const Offset(10, 10), const Offset(0, 500));
       await tester.pump();
 

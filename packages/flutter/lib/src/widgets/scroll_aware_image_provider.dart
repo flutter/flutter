@@ -101,7 +101,7 @@ class ScrollAwareImageProvider<T> extends ImageProvider<T> {
         });
         return;
     }
-    // We are in the tree, we're not scrolling too fast, the cache doens't
+    // We are in the tree, we're not scrolling too fast, the cache doesn't
     // have our image, and no one has otherwise completed the stream.  Go.
     imageProvider.resolveStreamForKey(configuration, stream, key, handleError);
   }
