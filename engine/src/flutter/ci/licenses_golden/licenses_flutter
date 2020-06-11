@@ -388,6 +388,7 @@ FILE: ../../../flutter/lib/ui/text/paragraph_builder.cc
 FILE: ../../../flutter/lib/ui/text/paragraph_builder.h
 FILE: ../../../flutter/lib/ui/text/text_box.h
 FILE: ../../../flutter/lib/ui/ui.dart
+FILE: ../../../flutter/lib/ui/ui_benchmarks.cc
 FILE: ../../../flutter/lib/ui/ui_dart_state.cc
 FILE: ../../../flutter/lib/ui/ui_dart_state.h
 FILE: ../../../flutter/lib/ui/window.dart
