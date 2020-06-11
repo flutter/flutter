@@ -392,7 +392,10 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     switch (refreshState) {
       case RefreshIndicatorMode.drag:
         // While we're dragging, we draw individual ticks of the spinner while simultaneously
-        // easing the opacity in.
+        // easing the opacity in. Note that the opacity curve values here were derived from
+        // visual inspection of a screen recording of Mail.app on iOS 13.4.1. It seems that the 1st
+        // and 2nd ticks slowly fade in and by the time the third tick is shown, the ticks should
+        // all be at their final constant opacity level.
         const Curve opacityCurve = Interval(0.0, 0.2, curve: Curves.easeInOut);
         return Opacity(
           opacity: opacityCurve.transform(percentageComplete),

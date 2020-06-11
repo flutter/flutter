@@ -135,7 +135,7 @@ void main() {
       const CupertinoActivityIndicator(animating: false, radius: 100),
     );
 
-    // An early implementation for the activity indicator starting drawing
+    // An earlier implementation for the activity indicator started drawing
     // the ticks at 9 o'clock, however, in order to support partially revealed
     // indicator (https://github.com/flutter/flutter/issues/29159), the
     // first tick was changed to be at 12 o'clock.

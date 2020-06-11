@@ -127,8 +127,10 @@ const double _kTwoPI = math.pi * 2.0;
 const int _kTickCount = 12;
 
 // Alpha values extracted from the native component (for both dark and light mode) to
-// draw the spinning ticks. The list must have a length of _kTickCount.
-const List<int> _alphaValues = <int>[47, 47, 47, 47, 47, 47, 64, 81, 97, 114, 131, 147];
+// draw the spinning ticks. The list must have a length of _kTickCount. The order of
+// these values is designed to match the first frame of the iOS activity indicator which
+// has the most prominent tick at 9 o'clock.
+const List<int> _alphaValues = <int>[47, 47, 47, 47, 64, 81, 97, 114, 131, 147, 47, 47];
 
 // The alpha value that is used to draw the partially revealed ticks.
 const int _partiallyRevealedAlpha = 147;
