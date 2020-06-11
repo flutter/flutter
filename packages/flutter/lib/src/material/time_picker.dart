@@ -155,10 +155,18 @@ class _TimePickerHeader extends StatelessWidget {
               height: kMinInteractiveDimension * 2,
               child: Row(
                 children: <Widget>[
+                  if (!use24HourDials && timeOfDayFormat == TimeOfDayFormat.a_space_h_colon_mm) ...<Widget>[
+                    _DayPeriodControl(
+                      selectedTime: selectedTime,
+                      orientation: orientation,
+                      onChanged: onChanged,
+                    ),
+                    const SizedBox(width: 12.0),
+                  ],
                   Expanded(child: _HourControl(fragmentContext: fragmentContext)),
                   _StringFragment(timeOfDayFormat: timeOfDayFormat),
                   Expanded(child: _MinuteControl(fragmentContext: fragmentContext)),
-                  if (!use24HourDials) ...<Widget>[
+                  if (!use24HourDials && timeOfDayFormat != TimeOfDayFormat.a_space_h_colon_mm) ...<Widget>[
                     const SizedBox(width: 12.0),
                     _DayPeriodControl(
                       selectedTime: selectedTime,
@@ -179,6 +187,12 @@ class _TimePickerHeader extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              if (!use24HourDials && timeOfDayFormat == TimeOfDayFormat.a_space_h_colon_mm)
+                _DayPeriodControl(
+                  selectedTime: selectedTime,
+                  orientation: orientation,
+                  onChanged: onChanged,
+                ),
               Container(
                 height: kMinInteractiveDimension * 2,
                 child: Row(
@@ -189,7 +203,7 @@ class _TimePickerHeader extends StatelessWidget {
                   ],
                 ),
               ),
-              if (!use24HourDials)
+              if (!use24HourDials && timeOfDayFormat != TimeOfDayFormat.a_space_h_colon_mm)
                 _DayPeriodControl(
                   selectedTime: selectedTime,
                   orientation: orientation,
