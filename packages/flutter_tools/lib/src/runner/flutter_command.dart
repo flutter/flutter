@@ -738,7 +738,8 @@ abstract class FlutterCommand extends Command<void> {
 
   void _printDeprecationWarning() {
     if (deprecated) {
-      globals.printStatus('$warningMark The "$name" command is deprecated and will be removed in a future version of Flutter.');
+      globals.printStatus('$warningMark The "$name" command is deprecated and '
+          'will be removed in a future version of Flutter.');
       globals.printStatus('');
     }
   }

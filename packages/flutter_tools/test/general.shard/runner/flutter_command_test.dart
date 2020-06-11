@@ -82,9 +82,11 @@ void main() {
       await runner.run(<String>['deprecated']);
 
       expect(testLogger.statusText,
-        contains('The "deprecated" command is deprecated and will be removed in a future version of Flutter.'));
+        contains('The "deprecated" command is deprecated and will be removed in '
+            'a future version of Flutter.'));
       expect(flutterCommand.usage,
-        contains('Deprecated. This command will be removed in a future version of Flutter.'));
+        contains('Deprecated. This command will be removed in a future version '
+            'of Flutter.'));
       expect(flutterCommand.deprecated, isTrue);
       expect(flutterCommand.hidden, isTrue);
     });
