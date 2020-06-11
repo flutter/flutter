@@ -368,11 +368,21 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     double refreshTriggerPullDistance,
     double refreshIndicatorExtent,
   ) {
-    final double percentageComplete = min(pulledExtent / refreshTriggerPullDistance, 1.0);
+    // The activity indicator only appears once the user has dragged further than
+    // dragThreshold. The percentage complete calculations are made after discounting
+    // the dragThreshold from both the distance the user has dragged and the distance
+    // required to trigger the refresh.
+    const double dragThreshold = 16.0;
+    
+    if (pulledExtent < dragThreshold) {
+      return Container();
+    }
+
+    final double percentageComplete = min((pulledExtent - dragThreshold) / (refreshTriggerPullDistance - dragThreshold), 1.0);
     return Align(
       alignment: Alignment.topCenter,
       child: Padding(
-        padding: const EdgeInsets.only(top: 16.0),
+        padding: const EdgeInsets.only(top: dragThreshold),
         child: _buildIndicatorForRefreshState(refreshState, 14.0, percentageComplete),
       ),
     );
