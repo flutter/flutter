@@ -5,6 +5,7 @@
 #ifndef FLUTTER_FML_ASCIITRIE_H_
 #define FLUTTER_FML_ASCIITRIE_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 
