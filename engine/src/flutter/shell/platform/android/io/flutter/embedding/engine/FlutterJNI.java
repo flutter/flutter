@@ -823,6 +823,22 @@ public class FlutterJNI {
   // TODO(mattcarroll): determine if this is nonull or nullable
   private native Bitmap nativeGetBitmap(long nativePlatformViewId);
 
+  /**
+   * Notifies the Dart VM of a low memory event, or that the application is in a state such that now
+   * is an appropriate time to free resources, such as going to the background.
+   *
+   * <p>This is distinct from sending a SystemChannel message about low memory, which only notifies
+   * the running Flutter application.
+   */
+  @UiThread
+  public void notifyLowMemoryWarning() {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeNotifyLowMemoryWarning();
+  }
+
+  private native void nativeNotifyLowMemoryWarning();
+
   private void ensureRunningOnMainThread() {
     if (Looper.myLooper() != mainLooper) {
       throw new RuntimeException(
