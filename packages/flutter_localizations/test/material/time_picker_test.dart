@@ -205,7 +205,7 @@ void main() {
       // tap the time will be the same.
       for (int i = 1; i < 10; i++) {
         TimeOfDay result;
-        final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
+        final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; }, locale: locale);
         final Size size = tester.getSize(find.byKey(const Key('time-picker-dial')));
         final double dy = (size.height / 2.0 / 10) * i;
         await tester.tapAt(Offset(center.dx, center.dy - dy));
