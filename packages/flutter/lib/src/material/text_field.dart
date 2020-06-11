@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // TODO(Piinks): Remove ignoring deprecated member use analysis
 // when TextField.canAssertMaterialLocalizations parameter is removed.
 // ignore_for_file: deprecated_member_use_from_same_package
