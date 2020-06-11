@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import '../base/common.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart';
 
 class MakeHostAppEditableCommand extends FlutterCommand {
