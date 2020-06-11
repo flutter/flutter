@@ -9,7 +9,7 @@ import 'package:process/process.dart';
 import '../src/common.dart';
 
 void main() {
-  test('All development tools are hidden and help text is not verbose', () async {
+  test('All development tools and deprecated commands are hidden and help text is not verbose', () async {
     final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await const LocalProcessManager().run(<String>[
       flutterBin,
@@ -17,9 +17,14 @@ void main() {
       '-v',
     ]);
 
+    // Development tools.
     expect(result.stdout, isNot(contains('ide-config')));
     expect(result.stdout, isNot(contains('update-packages')));
     expect(result.stdout, isNot(contains('inject-plugins')));
+
+    // Deprecated.
+    expect(result.stdout, isNot(contains('make-host-app-editable')));
+
     // Only printed by verbose tool.
     expect(result.stdout, isNot(contains('exiting with code 0')));
   });
