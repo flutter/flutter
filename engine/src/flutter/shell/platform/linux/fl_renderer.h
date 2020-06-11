@@ -81,6 +81,19 @@ void* fl_renderer_get_proc_address(FlRenderer* renderer, const char* name);
 gboolean fl_renderer_make_current(FlRenderer* renderer, GError** error);
 
 /**
+ * fl_renderer_make_resource_current:
+ * @renderer: an #FlRenderer.
+ * @error: (allow-none): #GError location to store the error occurring, or %NULL
+ * to ignore.
+ *
+ * Makes the resource rendering context current.
+ *
+ * Returns %TRUE if successful.
+ */
+gboolean fl_renderer_make_resource_current(FlRenderer* renderer,
+                                           GError** error);
+
+/**
  * fl_renderer_clear_current:
  * @renderer: an #FlRenderer.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
