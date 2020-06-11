@@ -260,7 +260,7 @@ final ArgParser _argParser = ArgParser()
   ..addOption(
     'device-id',
     abbr: 'd', 
-    help: 'Target device id (prefixes is allowed, names are not supported).\n'
+    help: 'Target device id (prefixes are allowed, names are not supported).\n'
           'The option will be ignored if the test target does not run on a\n'
           'mobile device. This still respects the device operating system\n'
           'settings in the test case, and will results in error if no device\n'
