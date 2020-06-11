@@ -204,14 +204,16 @@ class DefaultTextStyle extends InheritedTheme {
 /// The [TextHeightBehavior] that will apply to descendant [Text] widgets which
 /// have not explicitly set [Text.textHeightBehavior].
 ///
+/// If there is a [DefaultTextStyle] with a non-null [DefaultTextStyle.textHeightBehavior]
+/// in the same tree as this widget, the [DefaultTextStyle.textHeightBehavior]
+/// will be used over this widget's [TextHeightBehavior].
+///
 /// See also:
 ///
 ///  * [DefaultTextStyle], which defines a [TextStyle] to apply to descendant
 ///    [Text] widgets.
 class DefaultTextHeightBehavior extends InheritedTheme {
   /// Creates a default text height behavior for the given subtree.
-  ///
-  /// This will take precedence over [DefaultTextStyle.textHeightBehavior].
   ///
   /// The [textHeightBehavior] and [child] arguments are required and must not be null.
   const DefaultTextHeightBehavior({
@@ -239,16 +241,15 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If no such instance exists, returns an instance created by
-  /// [DefaultTextHeightBehavior.fallback], which contains fallback values.
+  /// If no such instance exists, this method will return `null`.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
   /// DefaultTextHeightBehavior defaultTextHeightBehavior = DefaultTextHeightBehavior.of(context);
   /// ```
-  static DefaultTextHeightBehavior of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<DefaultTextHeightBehavior>() ?? const DefaultTextHeightBehavior.fallback();
+  static TextHeightBehavior of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<DefaultTextHeightBehavior>()?.textHeightBehavior;
   }
 
   @override
@@ -505,7 +506,6 @@ class Text extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
-    final DefaultTextHeightBehavior defaultTextHeightBehavior = DefaultTextHeightBehavior.of(context);
     TextStyle effectiveTextStyle = style;
     if (style == null || style.inherit)
       effectiveTextStyle = defaultTextStyle.style.merge(style);
@@ -521,7 +521,7 @@ class Text extends StatelessWidget {
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
-      textHeightBehavior: textHeightBehavior ?? defaultTextHeightBehavior.textHeightBehavior ?? defaultTextStyle.textHeightBehavior,
+      textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,

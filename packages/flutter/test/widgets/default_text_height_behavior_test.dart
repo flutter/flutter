@@ -35,7 +35,7 @@ void main() {
     expect(text.textHeightBehavior, behavior1);
   });
 
-  testWidgets('DefaultTextHeightBehavior takes precedence over DefaultTextStyle.textHeightBehavior', (WidgetTester tester) async {
+  testWidgets('DefaultTextStyle.textHeightBehavior takes precedence over DefaultTextHeightBehavior ', (WidgetTester tester) async {
     const TextHeightBehavior behavior1 = TextHeightBehavior(
       applyHeightToLastDescent: false,
       applyHeightToFirstAscent: false,
@@ -61,7 +61,7 @@ void main() {
 
     RichText text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
-    expect(text.textHeightBehavior, behavior2);
+    expect(text.textHeightBehavior, behavior1);
 
     await tester.pumpWidget(
       const DefaultTextHeightBehavior(
@@ -79,7 +79,7 @@ void main() {
 
     text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
-    expect(text.textHeightBehavior, behavior2);
+    expect(text.textHeightBehavior, behavior1);
   });
 
   testWidgets('DefaultTextHeightBehavior changes propagate to Text', (WidgetTester tester) async {
@@ -110,5 +110,23 @@ void main() {
     text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
     expect(text.textHeightBehavior, behavior2);
+  });
+
+  testWidgets('DefaultTextHeightBehavior.of(context) returns null if no '
+      'DefaultTextHeightBehavior widget in tree', (WidgetTester tester) async {
+    const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
+    TextHeightBehavior textHeightBehavior;
+
+    await tester.pumpWidget(Builder(
+      builder: (BuildContext context) {
+        textHeightBehavior = DefaultTextHeightBehavior.of(context);
+        return textWidget;
+      },
+    ));
+
+    expect(textHeightBehavior, isNull);
+    RichText text = tester.firstWidget(find.byType(RichText));
+    expect(text, isNotNull);
+    expect(text.textHeightBehavior, isNull);
   });
 }
