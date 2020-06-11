@@ -53,6 +53,10 @@ class BrowserHistory {
     }
   }
 
+  /// Returns the currently active location strategy.
+  @visibleForTesting
+  LocationStrategy get locationStrategy => _locationStrategy;
+
   /// The path of the current location of the user's browser.
   String get currentPath => _locationStrategy?.path ?? '/';
 
