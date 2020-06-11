@@ -156,7 +156,6 @@ class TestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await globals.cache.updateAll(await requiredArtifacts);
     if (!globals.fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
         'Error: No pubspec.yaml file found in the current working directory.\n'
@@ -236,8 +235,6 @@ class TestCommand extends FlutterCommand {
     } else if (collector != null) {
       watcher = collector;
     }
-
-    Cache.releaseLockEarly();
 
     // Run builders once before all tests.
     if (flutterProject.hasBuilders) {

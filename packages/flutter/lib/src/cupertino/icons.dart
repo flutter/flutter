@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/widgets.dart';
 
 /// Identifiers for the supported Cupertino icons.
@@ -26,7 +28,7 @@ import 'package:flutter/widgets.dart';
 ///  * [Icon], used to show these icons.
 ///  * <https://github.com/flutter/cupertino_icons/blob/master/map.png>, a map of the icons in this icons font.
 class CupertinoIcons {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   CupertinoIcons._();

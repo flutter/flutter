@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -150,6 +152,7 @@ void main() {
       '     AbsorbPointer\n'
       '     _PointerListener\n'
       '     Listener\n'
+      '     HeroControllerScope\n'
       '     Navigator-[GlobalObjectKey<NavigatorState> _WidgetsAppState#00000]\n'
       '     IconTheme\n'
       '     IconTheme\n'
@@ -182,6 +185,7 @@ void main() {
       '     Focus\n'
       '     Shortcuts\n'
       '     WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]\n'
+      '     HeroControllerScope\n'
       '     ScrollConfiguration\n'
       '     MaterialApp\n'
       '     [root]\n'

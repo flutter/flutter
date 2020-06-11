@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:ui' as ui show Image, Codec, FrameInfo;
 import 'dart:ui' show hashValues;
@@ -416,7 +418,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _onLastListenerRemovedCallbacks.add(callback);
   }
 
-  /// Removes a callback previously suppplied to
+  /// Removes a callback previously supplied to
   /// [addOnLastListenerRemovedCallback].
   void removeOnLastListenerRemovedCallback(VoidCallback callback) {
     assert(callback != null);

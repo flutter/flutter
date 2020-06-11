@@ -16,7 +16,6 @@ import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
@@ -52,7 +51,6 @@ class DaemonCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     globals.printStatus('Starting device daemon...');
     isRunningFromDaemon = true;
-    Cache.releaseLockEarly();
 
     final Daemon daemon = Daemon(
       stdinCommandStream, stdoutCommandResponse,
@@ -449,9 +447,13 @@ class AppDomain extends Domain {
     bool ipv6 = false,
     String isolateFilter,
   }) async {
-    if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
-      throw Exception('${toTitleCase(options.buildInfo.friendlyModeName)} mode is not supported for emulators.');
+    if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
+      throw Exception(
+        '${toTitleCase(options.buildInfo.friendlyModeName)} '
+        'mode is not supported for ${device.name}.',
+      );
     }
+
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = globals.fs.currentDirectory;
     globals.fs.currentDirectory = globals.fs.directory(projectDirectory);

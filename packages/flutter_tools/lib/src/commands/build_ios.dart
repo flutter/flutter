@@ -33,6 +33,7 @@ class BuildIOSCommand extends BuildSubCommand {
     usesExtraFrontendOptions();
     addEnableExperimentation(hide: !verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
+    addBundleSkSLPathOption(hide: !verboseHelp);
     addNullSafetyModeOptions();
     argParser
       ..addFlag('simulator',

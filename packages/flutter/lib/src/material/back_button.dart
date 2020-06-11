@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -88,7 +90,7 @@ class BackButton extends StatelessWidget {
   /// to pop the [Navigator].
   ///
   /// It can, for instance, be used to pop the platform's navigation stack
-  /// via [SytemNavigator] instead of Flutter's [Navigator] in add-to-app
+  /// via [SystemNavigator] instead of Flutter's [Navigator] in add-to-app
   /// situations.
   ///
   /// Defaults to null.
@@ -142,7 +144,7 @@ class CloseButton extends StatelessWidget {
   /// to pop the [Navigator].
   ///
   /// It can, for instance, be used to pop the platform's navigation stack
-  /// via [SytemNavigator] instead of Flutter's [Navigator] in add-to-app
+  /// via [SystemNavigator] instead of Flutter's [Navigator] in add-to-app
   /// situations.
   ///
   /// Defaults to null.

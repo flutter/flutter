@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -201,7 +203,7 @@ class __ZoomPageTransitionState extends State<_ZoomPageTransition> {
   }
 
   // This check ensures that the animation reverses the original animation if
-  // the transition were interruped midway. This prevents a disjointed
+  // the transition were interrupted midway. This prevents a disjointed
   // experience since the reverse animation uses different fade and scaling
   // curves.
   bool get _transitionWasInterrupted {

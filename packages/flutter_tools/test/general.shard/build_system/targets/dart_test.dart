@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
-import 'package:flutter_tools/src/build_system/targets/dart.dart';
+import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
@@ -86,6 +86,7 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -115,6 +116,7 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -144,6 +146,7 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -174,6 +177,7 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -206,6 +210,7 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -236,6 +241,7 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -278,6 +284,7 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',

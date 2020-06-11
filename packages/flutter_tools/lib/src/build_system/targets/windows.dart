@@ -9,7 +9,7 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
-import 'dart.dart';
+import 'common.dart';
 import 'desktop.dart';
 import 'icon_tree_shaker.dart';
 
@@ -132,7 +132,11 @@ abstract class BundleWindowsAssets extends Target {
       environment.buildDir.childFile('app.dill')
         .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
-    final Depfile depfile = await copyAssets(environment, outputDirectory);
+    final Depfile depfile = await copyAssets(
+      environment,
+      outputDirectory,
+      targetPlatform: TargetPlatform.windows_x64,
+    );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
       logger: environment.logger,

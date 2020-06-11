@@ -105,6 +105,7 @@ void main() {
       splitDebugInfoPath: 'foo/',
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
+      bundleSkSLPath: 'foo/bar/baz.sksl.json',
     );
 
     expect(buildInfo.toEnvironmentConfig(), <String, String>{
@@ -115,6 +116,7 @@ void main() {
       'SPLIT_DEBUG_INFO': 'foo/',
       'EXTRA_FRONT_END_OPTIONS': '--enable-experiment%3Dnon-nullable,bar',
       'EXTRA_GEN_SNAPSHOT_OPTIONS': '--enable-experiment%3Dnon-nullable,fizz',
+      'BUNDLE_SKSL_PATH': 'foo/bar/baz.sksl.json',
     });
   });
 
