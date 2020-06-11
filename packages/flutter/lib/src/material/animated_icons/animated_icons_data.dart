@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // This file serves as the interface between the public and private APIs for
 // animated icons.
 // The AnimatedIcons class is public and is used to specify available icons,

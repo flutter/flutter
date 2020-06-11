@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // TODO(yjbanov): enable Web when https://github.com/flutter/engine/pull/12747 rolls into the framework.
 @TestOn('!chrome')
 
