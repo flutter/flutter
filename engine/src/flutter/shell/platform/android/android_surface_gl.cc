@@ -57,8 +57,11 @@ bool AndroidSurfaceGL::OnScreenSurfaceResize(const SkISize& size) {
 
   android_context_->ClearCurrent();
 
+  // Ensure the destructor is called since it destroys the `EGLSurface` before
+  // creating a new onscreen surface.
+  onscreen_surface_ = nullptr;
   onscreen_surface_ = android_context_->CreateOnscreenSurface(native_window_);
-  if (onscreen_surface_->IsValid()) {
+  if (!onscreen_surface_->IsValid()) {
     FML_LOG(ERROR) << "Unable to create EGL window surface on resize.";
     return false;
   }
