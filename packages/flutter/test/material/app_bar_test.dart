@@ -8,8 +8,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/semantics_tester.dart';
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
 
 Widget buildSliverAppBarApp({
   bool floating,
