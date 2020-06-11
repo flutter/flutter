@@ -7,6 +7,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../button_bar.dart';
@@ -290,6 +291,10 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   bool _autoValidate;
   final GlobalKey _calendarPickerKey = GlobalKey();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey _okButtonKey = GlobalKey();
+  final GlobalKey _cancelButtonKey = GlobalKey();
+  Map<LogicalKeySet, Intent> _shortcutMap;
+  Map<Type, Action<Intent>> _actionMap;
 
   @override
   void initState() {
@@ -297,6 +302,17 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     _entryMode = widget.initialEntryMode;
     _selectedDate = widget.initialDate;
     _autoValidate = false;
+    _shortcutMap = <LogicalKeySet, Intent>{
+      LogicalKeySet(LogicalKeyboardKey.enter): _WidgetActivateIntent(widgetKey: _okButtonKey),
+      LogicalKeySet(LogicalKeyboardKey.escape): _WidgetActivateIntent(widgetKey: _cancelButtonKey),
+    };
+    _actionMap = <Type, Action<Intent>>{
+      _WidgetActivateIntent: CallbackAction<_WidgetActivateIntent>(
+        onInvoke: (_WidgetActivateIntent intent) {
+          return Actions.invoke(intent.widgetKey.currentContext, const ActivateIntent());
+        },
+      ),
+    };
   }
 
   void _handleOk() {
@@ -383,11 +399,15 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       layoutBehavior: ButtonBarLayoutBehavior.constrained,
       children: <Widget>[
         FlatButton(
-          child: Text(widget.cancelText ?? localizations.cancelButtonLabel),
+          child: Text(widget.cancelText ?? localizations.cancelButtonLabel,
+            key: _cancelButtonKey
+          ),
           onPressed: _handleCancel,
         ),
         FlatButton(
-          child: Text(widget.confirmText ?? localizations.okButtonLabel),
+          child: Text(widget.confirmText ?? localizations.okButtonLabel,
+            key: _okButtonKey
+          ),
           onPressed: _handleOk,
         ),
       ],
@@ -396,6 +416,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     Widget picker;
     IconData entryModeIcon;
     String entryModeTooltip;
+    bool dialogAutoFocus;
     switch (_entryMode) {
       case DatePickerEntryMode.calendar:
         picker = CalendarDatePicker(
@@ -410,6 +431,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         );
         entryModeIcon = Icons.edit;
         entryModeTooltip = localizations.inputDateModeButtonLabel;
+        dialogAutoFocus = true;
         break;
 
       case DatePickerEntryMode.input:
@@ -442,6 +464,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         );
         entryModeIcon = Icons.calendar_today;
         entryModeTooltip = localizations.calendarModeButtonLabel;
+        dialogAutoFocus = false; // let the input field take it
         break;
     }
 
@@ -458,52 +481,70 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
     return Dialog(
-      child: AnimatedContainer(
-        width: dialogSize.width,
-        height: dialogSize.height,
-        duration: _dialogSizeAnimationDuration,
-        curve: Curves.easeIn,
-        child: MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaleFactor: textScaleFactor,
-          ),
-          child: Builder(builder: (BuildContext context) {
-            switch (orientation) {
-              case Orientation.portrait:
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    header,
-                    Expanded(child: picker),
-                    actions,
-                  ],
-                );
-              case Orientation.landscape:
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    header,
-                    Flexible(
-                      child: Column(
+      child: Shortcuts(
+        shortcuts: _shortcutMap,
+        child: Actions(
+          actions: _actionMap,
+          child: Focus(
+            autofocus: dialogAutoFocus,
+            includeSemantics: false,
+            child: AnimatedContainer(
+              width: dialogSize.width,
+              height: dialogSize.height,
+              duration: _dialogSizeAnimationDuration,
+              curve: Curves.easeIn,
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaleFactor: textScaleFactor,
+                ),
+                child: Builder(builder: (BuildContext context) {
+                  switch (orientation) {
+                    case Orientation.portrait:
+                      return Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
+                          header,
                           Expanded(child: picker),
                           actions,
                         ],
-                      ),
-                    ),
-                  ],
-                );
-            }
-            return null;
-          }),
+                      );
+                    case Orientation.landscape:
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          header,
+                          Flexible(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                Expanded(child: picker),
+                                actions,
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                  }
+                  return null;
+                }),
+              ),
+            ),
+          ),
         ),
       ),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
       clipBehavior: Clip.antiAlias,
     );
   }
+}
+
+class _WidgetActivateIntent extends Intent {
+  const _WidgetActivateIntent({
+    @required this.widgetKey,
+  });
+
+  final GlobalKey widgetKey;
 }
