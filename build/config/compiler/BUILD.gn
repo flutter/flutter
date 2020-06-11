@@ -642,6 +642,15 @@ if (is_win) {
     "/wd4311",  # Pointer truncation from PVOID to DWORD.
     "/wd4477",  # Format string requires wchar_t*
   ]
+  import("//build/toolchain/goma.gni")
+  if (is_clang && use_goma) {
+    # goma compilation doesn't preserve file case, so don't warn about
+    # case-mismatches.
+    default_warning_flags += [
+      "-Wno-nonportable-include-path",
+      "-Wno-nonportable-system-include-path",
+    ]
+  }
 } else {
   # Common GCC warning setup.
   default_warning_flags += [
