@@ -53,7 +53,7 @@ Future<vm_service.VmService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) 
 }
 
 Future<void> _kDefaultDartDevelopmentServiceStarter(
-  Device device, 
+  Device device,
   Uri observatoryUri,
 ) async {
   await device.dds.startDartDevelopmentService(observatoryUri, true);
