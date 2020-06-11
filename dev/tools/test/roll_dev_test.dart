@@ -14,6 +14,8 @@ void main() {
     const String level = 'z';
     const String commit = 'abcde012345';
     const String origin = 'upstream';
+    const String lastVersion = '1.2.0-0.0.pre';
+    const String nextVersion = '1.2.0-1.0.pre';
     FakeArgResults fakeArgResults;
     MockGit mockGit;
 
@@ -85,13 +87,7 @@ void main() {
           argResults: fakeArgResults,
           git: mockGit,
         ),
-        throwsA(
-          isA<Exception>().having(
-            (Exception e) => e.toString(),
-            'description',
-            contains(errorMessage),
-          ),
-        ),
+        throwsExceptionWith(errorMessage),
       );
     });
 
@@ -127,7 +123,11 @@ void main() {
       when(mockGit.getOutput(
         'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
         any,
-      )).thenReturn('1.2.3-0.0.pre');
+      )).thenReturn(lastVersion);
+      when(mockGit.getOutput(
+        'rev-parse $lastVersion',
+        any,
+      )).thenReturn('zxy321');
       fakeArgResults = FakeArgResults(
         level: level,
         commit: commit,
@@ -144,9 +144,38 @@ void main() {
       verifyNever(mockGit.getOutput('rev-parse HEAD', any));
     });
 
+    test('throws exception if desired commit is already tip of dev branch', () {
+      when(mockGit.getOutput('remote get-url $origin', any)).thenReturn(kUpstreamRemote);
+      when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
+      when(mockGit.getOutput(
+        'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
+        any,
+      )).thenReturn(lastVersion);
+      when(mockGit.getOutput(
+        'rev-parse $lastVersion',
+        any,
+      )).thenReturn(commit);
+      fakeArgResults = FakeArgResults(
+        level: level,
+        commit: commit,
+        origin: origin,
+        justPrint: true,
+      );
+      expect(
+        () => run(
+          usage: usage,
+          argResults: fakeArgResults,
+          git: mockGit,
+        ),
+        throwsExceptionWith('is already on the dev branch as'),
+      );
+      verify(mockGit.run('fetch $origin', any));
+      verifyNever(mockGit.run('reset $commit --hard', any));
+      verifyNever(mockGit.getOutput('rev-parse HEAD', any));
+    });
+
     test('does not tag if last release is not direct ancestor of desired '
         'commit and --force not supplied', () {
-      const String lastRelease = '1.2.3-0.0.pre';
       when(mockGit.getOutput('remote get-url $origin', any))
         .thenReturn(kUpstreamRemote);
       when(mockGit.getOutput('status --porcelain', any))
@@ -154,10 +183,14 @@ void main() {
       when(mockGit.getOutput(
         'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
         any,
-      )).thenReturn(lastRelease);
-      when(mockGit.run('merge-base --is-ancestor $lastRelease $commit', any))
+      )).thenReturn(lastVersion);
+      when(mockGit.getOutput(
+        'rev-parse $lastVersion',
+        any,
+      )).thenReturn('zxy321');
+      when(mockGit.run('merge-base --is-ancestor $lastVersion $commit', any))
         .thenThrow(Exception(
-          'Failed to verify $lastRelease is a direct ancestor of $commit. The '
+          'Failed to verify $lastVersion is a direct ancestor of $commit. The '
           'flag `--force` is required to force push a new release past a '
           'cherry-pick',
         ));
@@ -166,7 +199,7 @@ void main() {
         commit: commit,
         origin: origin,
       );
-      const String errorMessage = 'Failed to verify $lastRelease is a direct '
+      const String errorMessage = 'Failed to verify $lastVersion is a direct '
         'ancestor of $commit. The flag `--force` is required to force push a '
         'new release past a cherry-pick';
       expect(
@@ -175,19 +208,13 @@ void main() {
           git: mockGit,
           usage: usage,
         ),
-        throwsA(
-          isA<Exception>().having(
-            (Exception e) => e.toString(),
-            'description',
-            contains(errorMessage),
-          ),
-        ),
+        throwsExceptionWith(errorMessage),
       );
 
       verify(mockGit.run('fetch $origin', any));
       verifyNever(mockGit.run('reset $commit --hard', any));
       verifyNever(mockGit.run('push $origin HEAD:dev', any));
-      verifyNever(mockGit.run('tag 1.2.3-1.0.pre', any));
+      verifyNever(mockGit.run('tag $nextVersion', any));
     });
 
     test('does not tag but updates branch if --skip-tagging provided', () {
@@ -198,7 +225,11 @@ void main() {
       when(mockGit.getOutput(
         'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
         any,
-      )).thenReturn('1.2.0-0.0.pre');
+      )).thenReturn(lastVersion);
+      when(mockGit.getOutput(
+        'rev-parse $lastVersion',
+        any,
+      )).thenReturn('zxy321');
       when(mockGit.getOutput('rev-parse HEAD', any)).thenReturn(commit);
       fakeArgResults = FakeArgResults(
         level: level,
@@ -213,8 +244,8 @@ void main() {
       ), true);
       verify(mockGit.run('fetch $origin', any));
       verify(mockGit.run('reset $commit --hard', any));
-      verifyNever(mockGit.run('tag 1.2.0-1.0.pre', any));
-      verifyNever(mockGit.run('push $origin 1.2.0-1.0.pre', any));
+      verifyNever(mockGit.run('tag $nextVersion', any));
+      verifyNever(mockGit.run('push $origin $nextVersion', any));
       verify(mockGit.run('push $origin HEAD:dev', any));
     });
 
@@ -227,6 +258,10 @@ void main() {
         'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
         any,
       )).thenReturn('1.2.0-0.0.pre');
+      when(mockGit.getOutput(
+        'rev-parse $lastVersion',
+        any,
+      )).thenReturn('zxy321');
       when(mockGit.getOutput('rev-parse HEAD', any)).thenReturn(commit);
       fakeArgResults = FakeArgResults(
         level: level,
@@ -240,8 +275,8 @@ void main() {
       ), true);
       verify(mockGit.run('fetch $origin', any));
       verify(mockGit.run('reset $commit --hard', any));
-      verify(mockGit.run('tag 1.2.0-1.0.pre', any));
-      verify(mockGit.run('push $origin 1.2.0-1.0.pre', any));
+      verify(mockGit.run('tag $nextVersion', any));
+      verify(mockGit.run('push $origin $nextVersion', any));
       verify(mockGit.run('push $origin HEAD:dev', any));
     });
 
@@ -251,7 +286,11 @@ void main() {
       when(mockGit.getOutput(
         'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
         any,
-      )).thenReturn('1.2.3-0.0.pre');
+      )).thenReturn(lastVersion);
+      when(mockGit.getOutput(
+        'rev-parse $lastVersion',
+        any,
+      )).thenReturn('zxy321');
       when(mockGit.getOutput('rev-parse HEAD', any)).thenReturn(commit);
       fakeArgResults = FakeArgResults(
         level: level,
@@ -266,7 +305,7 @@ void main() {
       ), true);
       verify(mockGit.run('fetch $origin', any));
       verify(mockGit.run('reset $commit --hard', any));
-      verify(mockGit.run('tag 1.2.0-1.0.pre', any));
+      verify(mockGit.run('tag $nextVersion', any));
       verify(mockGit.run('push --force $origin HEAD:dev', any));
     });
   });
@@ -326,14 +365,14 @@ void main() {
       String version = '1.0.0-0.0.pre-1-g$hash';
       expect(
         () => incrementLevel(version, level),
-        throwsException,
+        throwsExceptionWith('Git reported the latest version as "$version"'),
         reason: 'should throw because $version should be an exact tag',
       );
 
       version = '1.2.3';
       expect(
         () => incrementLevel(version, level),
-        throwsException,
+        throwsExceptionWith('Git reported the latest version as "$version"'),
         reason: 'should throw because $version should be a dev tag, not stable.'
       );
 
@@ -341,7 +380,7 @@ void main() {
       level = 'q';
       expect(
         () => incrementLevel(version, level),
-        throwsException,
+        throwsExceptionWith('Git reported the latest version as "$version"'),
         reason: 'should throw because $level is unsupported',
       );
     });
@@ -385,6 +424,16 @@ void main() {
       expect(incrementLevel(version, level), '1.18.0-4.0.pre');
     });
   });
+}
+
+Matcher throwsExceptionWith(String messageSubString) {
+  return throwsA(
+      isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'description',
+          contains(messageSubString),
+      ),
+  );
 }
 
 class FakeArgResults implements ArgResults {

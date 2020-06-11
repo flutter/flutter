@@ -102,6 +102,13 @@ bool run({
     ? lastVersion
     : incrementLevel(lastVersion, level);
 
+  if (git.getOutput(
+    'rev-parse $lastVersion',
+    'check if commit is already on dev',
+  ).contains(commit.trim())) {
+    throw Exception('Commit $commit is already on the dev branch as $lastVersion.');
+  }
+
   if (!force) {
     git.run(
       'merge-base --is-ancestor $lastVersion $commit',
