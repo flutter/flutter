@@ -61,13 +61,7 @@ import 'typography.dart';
 // 2. Update the flutter_localizations package. Modify the out-of-date English
 //    strings in lib/src/l10n/material_en.arb.
 //
-//    Then you need to copy the English strings to all of the other locales as
-//    placeholders until they can be re-translated by running:
-//    ```
-//    dart dev/tools/localization/bin/gen_missing_localizations.dart
-//    ```
-//
-//    Finally you need to re-generate lib/src/l10n/localizations.dart by running:
+//    You also need to re-generate lib/src/l10n/localizations.dart by running:
 //    ```
 //    dart dev/tools/localization/bin/gen_localizations.dart --overwrite
 //    ```
