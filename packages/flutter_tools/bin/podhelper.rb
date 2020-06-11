@@ -122,6 +122,8 @@ def flutter_install_ios_plugin_pods(ios_application_path = nil)
   end
 end
 
+# .flutter-plugins-dependencies format documented at
+# https://flutter.dev/go/plugins-list-migration
 def flutter_parse_plugins_file(file)
   file_path = File.expand_path(file)
   return [] unless File.exists? file_path
