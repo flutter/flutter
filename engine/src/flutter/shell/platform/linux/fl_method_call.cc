@@ -79,8 +79,22 @@ G_MODULE_EXPORT gboolean fl_method_call_respond(FlMethodCall* self,
                                                 GError** error) {
   g_return_val_if_fail(FL_IS_METHOD_CALL(self), FALSE);
   g_return_val_if_fail(FL_IS_METHOD_RESPONSE(response), FALSE);
-  return fl_method_channel_respond(self->channel, self->response_handle,
-                                   response, error);
+
+  g_autoptr(GError) local_error = nullptr;
+  if (!fl_method_channel_respond(self->channel, self->response_handle, response,
+                                 &local_error)) {
+    // If the developer chose not to handle the error then log it so it's not
+    // missed.
+    if (error == nullptr) {
+      g_warning("Failed to send method call response: %s",
+                local_error->message);
+    }
+
+    g_propagate_error(error, local_error);
+    return FALSE;
+  }
+
+  return TRUE;
 }
 
 G_MODULE_EXPORT gboolean fl_method_call_respond_success(FlMethodCall* self,
