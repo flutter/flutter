@@ -782,13 +782,15 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterRunArgument
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/TextureRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/VsyncWaiter.java
+FILE: ../../../flutter/shell/platform/android/jni/platform_view_android_jni.cc
+FILE: ../../../flutter/shell/platform/android/jni/platform_view_android_jni.h
 FILE: ../../../flutter/shell/platform/android/library_loader.cc
 FILE: ../../../flutter/shell/platform/android/platform_message_response_android.cc
 FILE: ../../../flutter/shell/platform/android/platform_message_response_android.h
 FILE: ../../../flutter/shell/platform/android/platform_view_android.cc
 FILE: ../../../flutter/shell/platform/android/platform_view_android.h
-FILE: ../../../flutter/shell/platform/android/platform_view_android_jni.cc
-FILE: ../../../flutter/shell/platform/android/platform_view_android_jni.h
+FILE: ../../../flutter/shell/platform/android/platform_view_android_jni_impl.cc
+FILE: ../../../flutter/shell/platform/android/platform_view_android_jni_impl.h
 FILE: ../../../flutter/shell/platform/android/robolectric.properties
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.cc
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.h

@@ -8,6 +8,10 @@
 
 namespace flutter {
 
+AndroidExternalViewEmbedder::AndroidExternalViewEmbedder(
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
+    : ExternalViewEmbedder(), jni_facade_(jni_facade) {}
+
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::PrerollCompositeEmbeddedView(
     int view_id,
