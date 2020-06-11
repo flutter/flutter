@@ -52,7 +52,7 @@ String _findMatchId(List<String> idList, String idPattern) {
 DeviceDiscovery get devices => DeviceDiscovery();
 
 /// Device operating system the test is configured to test.
-enum DeviceOperatingSystem { android, ios, fuchsia }
+enum DeviceOperatingSystem { android, ios, fuchsia, mock }
 
 /// Device OS to test on.
 DeviceOperatingSystem deviceOperatingSystem = DeviceOperatingSystem.android;
@@ -60,25 +60,20 @@ DeviceOperatingSystem deviceOperatingSystem = DeviceOperatingSystem.android;
 /// Discovers available devices and chooses one to work with.
 abstract class DeviceDiscovery {
   factory DeviceDiscovery() {
-    DeviceDiscovery resultDevices;
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.android:
-        resultDevices = AndroidDeviceDiscovery();
-        break;
+        return AndroidDeviceDiscovery();
       case DeviceOperatingSystem.ios:
-        resultDevices = IosDeviceDiscovery();
-        break;
+        return IosDeviceDiscovery();
       case DeviceOperatingSystem.fuchsia:
-        resultDevices = FuchsiaDeviceDiscovery();
-        break;
+        return FuchsiaDeviceDiscovery();
+      case DeviceOperatingSystem.mock:
+        print('Looking for mock devices!'
+              'You should not see this in release builds.');
+        return MockDeviceDiscovery();
       default:
-        throw const DeviceException('Unsupported device operating system: {config.deviceOperatingSystem}');
+        throw DeviceException('Unsupported device operating system: $deviceOperatingSystem');
     }
-    if (Platform.environment.containsKey(DeviceIdEnvName)) {
-      resultDevices.chooseWorkingDeviceById(
-        Platform.environment[DeviceIdEnvName]);
-    }
-    return resultDevices;
   }
 
   /// Selects a device to work with, load-balancing between devices if more than
@@ -89,7 +84,7 @@ abstract class DeviceDiscovery {
   Future<void> chooseWorkingDevice();
 
   /// Select the device with ID strati with deviceId, return the device.
-  Future<Device> chooseWorkingDeviceById(String deviceId);
+  Future<void> chooseWorkingDeviceById(String deviceId);
 
   /// A device to work with.
   ///
@@ -158,6 +153,8 @@ abstract class Device {
 }
 
 class AndroidDeviceDiscovery implements DeviceDiscovery {
+  // implements DeviceDIscovery not extends to avoid calling constructor of 
+  // DeviceDiscovery
   factory AndroidDeviceDiscovery() {
     return _instance ??= AndroidDeviceDiscovery._();
   }
@@ -176,6 +173,11 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<AndroidDevice> get workingDevice async {
     if (_workingDevice == null) {
+      if (Platform.environment.containsKey(DeviceIdEnvName)) {
+        final String deviceId = Platform.environment[DeviceIdEnvName];
+        await chooseWorkingDeviceById(deviceId);
+        return _workingDevice;
+      }
       await chooseWorkingDevice();
     }
 
@@ -199,19 +201,18 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   }
 
   @override
-  Future<Device> chooseWorkingDeviceById(String deviceId) async {
+  Future<void> chooseWorkingDeviceById(String deviceId) async {
     deviceId = _findMatchId(await discoverDevices(), deviceId);
     if (deviceId != null) {
       _workingDevice = AndroidDevice(deviceId: deviceId);
       print('Choose device by ID: ' + _workingDevice.toString());
     }
     else {
-      throw const DeviceException(
-        'Device with ID {deviceId} is not found for operating system: '
-        '{config.deviceOperatingSystem}'
+      throw DeviceException(
+        'Device with ID $deviceId is not found for operating system: '
+        '$deviceOperatingSystem'
         );
     }
-    return workingDevice;
   }
 
   @override
@@ -295,6 +296,11 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<FuchsiaDevice> get workingDevice async {
     if (_workingDevice == null) {
+      if (Platform.environment.containsKey(DeviceIdEnvName)) {
+        final String deviceId = Platform.environment[DeviceIdEnvName];
+        await chooseWorkingDeviceById(deviceId);
+        return _workingDevice;
+      }
       await chooseWorkingDevice();
     }
     return _workingDevice;
@@ -315,16 +321,16 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
   }
 
   @override
-  Future<Device> chooseWorkingDeviceById(String deviceId) async {
+  Future<void> chooseWorkingDeviceById(String deviceId) async {
     deviceId = _findMatchId(await discoverDevices(), deviceId);
     if (deviceId != null) {
       _workingDevice = FuchsiaDevice(deviceId: deviceId);
       print('Choose device by ID: ' + _workingDevice.toString());
     }
     else {
-      throw const DeviceException(
-        'Device with ID {deviceId} is not found for operating system: '
-        '{config.deviceOperatingSystem}'
+      throw DeviceException(
+        'Device with ID $deviceId is not found for operating system: '
+        '$deviceOperatingSystem'
         );
     }
     return workingDevice;
@@ -590,6 +596,11 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<IosDevice> get workingDevice async {
     if (_workingDevice == null) {
+      if (Platform.environment.containsKey(DeviceIdEnvName)) {
+        final String deviceId = Platform.environment[DeviceIdEnvName];
+        await chooseWorkingDeviceById(deviceId);
+        return _workingDevice;
+      }
       await chooseWorkingDevice();
     }
 
@@ -613,16 +624,16 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   }
 
   @override
-  Future<Device> chooseWorkingDeviceById(String deviceId) async {
+  Future<void> chooseWorkingDeviceById(String deviceId) async {
     deviceId = _findMatchId(await discoverDevices(), deviceId);
     if (deviceId != null) {
       _workingDevice = IosDevice(deviceId: deviceId);
       print('Choose device by ID: ' + _workingDevice.toString());
     }
     else {
-      throw const DeviceException(
-        'Device with ID {deviceId} is not found for operating system: '
-        '{config.deviceOperatingSystem}'
+      throw DeviceException(
+        'Device with ID $deviceId is not found for operating system: '
+        '$deviceOperatingSystem'
         );
     }
     return workingDevice;
@@ -799,4 +810,113 @@ String get adbPath {
     throw DeviceException('adb not found at: $adbPath');
 
   return path.absolute(adbPath);
+}
+
+class MockDevice extends Device {
+  const MockDevice({ @required this.deviceId });
+
+  @override
+  final String deviceId;
+
+  @override
+  Future<bool> isAwake() async => true;
+
+  @override
+  Future<bool> isAsleep() async => false;
+
+  @override
+  Future<void> wakeUp() async {}
+
+  @override
+  Future<void> sendToSleep() async {}
+
+  @override
+  Future<void> togglePower() async {}
+
+  @override
+  Future<void> unlock() async {}
+
+  @override
+  Future<void> tap(int x, int y) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Stream<String> get logcat {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> stop(String packageName) async {}
+}
+
+class MockDeviceDiscovery implements DeviceDiscovery {
+  factory MockDeviceDiscovery() {
+    return _instance ??= MockDeviceDiscovery._();
+  }
+
+  MockDeviceDiscovery._();
+
+  static MockDeviceDiscovery _instance;
+
+  MockDevice _workingDevice;
+
+  @override
+  Future<MockDevice> get workingDevice async {
+    if (_workingDevice == null) {
+      if (Platform.environment.containsKey(DeviceIdEnvName)) {
+        final String deviceId = Platform.environment[DeviceIdEnvName];
+        await chooseWorkingDeviceById(deviceId);
+        return _workingDevice;
+      }
+      await chooseWorkingDevice();
+    }
+
+    return _workingDevice;
+  }
+
+  /// The Mock is only available for by ID device discovery.
+  @override
+  Future<void> chooseWorkingDevice() async {
+    throw const DeviceException('No Mock devices detected');
+  }
+
+  @override
+  Future<void> chooseWorkingDeviceById(String deviceId) async {
+    deviceId = _findMatchId(await discoverDevices(), deviceId);
+    if (deviceId != null) {
+      _workingDevice = MockDevice(deviceId: deviceId);
+      print('Choose device by ID: ' + _workingDevice.toString());
+    }
+    else {
+      throw DeviceException(
+        'Device with ID $deviceId is not found for operating system: '
+        '$deviceOperatingSystem'
+        );
+    }
+    return workingDevice;
+  }
+
+  @override
+  Future<List<String>> discoverDevices() async {
+    return <String>['MOCK_SUCCESS', 'THIS_IS_A_MOCK'];
+  }
+
+  @override
+  Future<Map<String, HealthCheckResult>> checkDevices() async {
+    final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
+    for (final String deviceId in await discoverDevices()) {
+      results['mock-device-$deviceId'] = HealthCheckResult.success();
+    }
+    return results;
+  }
+
+  @override
+  Future<void> performPreflightTasks() async {
+  }
 }

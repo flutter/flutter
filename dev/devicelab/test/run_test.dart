@@ -76,6 +76,17 @@ void main() {
       );
     });
 
+    test('exits with code 0 when provided a valid device ID', () async {
+      await expectScriptResult(<String>['smoke_test_device'], 0,
+        deviceId: 'MOCK');
+    });
+
+    test('exits with code 1 when provided a bad device ID', () async {
+      await expectScriptResult(<String>['smoke_test_device'], 1,
+        deviceId: 'THIS_IS_NOT_VALID');
+    });
+
+
     test('runs A/B test', () async {
       final ProcessResult result = await runScript(
         <String>['smoke_test_success'],
