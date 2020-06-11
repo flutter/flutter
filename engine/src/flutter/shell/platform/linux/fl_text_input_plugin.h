@@ -20,7 +20,7 @@ G_DECLARE_FINAL_TYPE(FlTextInputPlugin,
 /**
  * FlTextInputPlugin:
  *
- * #FlTextInputPlugin is a text_input channel that implements the shell side
+ * #FlTextInputPlugin is a plugin that implements the shell side
  * of SystemChannels.textInput from the Flutter services library.
  */
 
