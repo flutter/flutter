@@ -93,46 +93,30 @@ void main() {
     }
   });
 
-  testWidgets('uses single-ring 12-hour dial for h hour format', (WidgetTester tester) async {
-    // Tap along the segment stretching from the center to the edge at
-    // 12:00 AM position. Because there's only one ring, no matter where you
-    // tap the time will be the same. See the 24-hour dial test that behaves
-    // differently.
-    for (int i = 1; i < 10; i++) {
-      TimeOfDay result;
-      final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
-      final Size size = tester.getSize(find.byKey(const Key('time-picker-dial')));
-      final double dy = (size.height / 2.0 / 10) * i;
-      await tester.tapAt(Offset(center.dx, center.dy - dy));
-      await finishPicker(tester);
-      expect(result, equals(const TimeOfDay(hour: 0, minute: 0)));
-    }
-  });
-
-  testWidgets('uses two-ring 24-hour dial for H and HH hour formats', (WidgetTester tester) async {
+  testWidgets('uses single-ring 24-hour dial for all formats', (WidgetTester tester) async {
     const List<Locale> locales = <Locale>[
+      Locale('en', 'US'), // h
       Locale('en', 'GB'), // HH
       Locale('es', 'ES'), // H
     ];
     for (final Locale locale in locales) {
       // Tap along the segment stretching from the center to the edge at
-      // 12:00 AM position. There are two rings. At ~70% mark, the ring
-      // switches between inner ring and outer ring.
+      // 12:00 AM position. Because there's only one ring, no matter where you
+      // tap the time will be the same.
       for (int i = 1; i < 10; i++) {
         TimeOfDay result;
-        final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; }, locale: locale);
+        final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
         final Size size = tester.getSize(find.byKey(const Key('time-picker-dial')));
         final double dy = (size.height / 2.0 / 10) * i;
         await tester.tapAt(Offset(center.dx, center.dy - dy));
         await finishPicker(tester);
-        expect(result, equals(TimeOfDay(hour: i < 7 ? 12 : 0, minute: 0)));
+        expect(result, equals(const TimeOfDay(hour: 0, minute: 0)));
       }
     }
   });
 
   const List<String> labels12To11 = <String>['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
-  const List<String> labels12To11TwoDigit = <String>['12', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11'];
-  const List<String> labels00To23 = <String>['00', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
+  const List<String> labels00To22TwoDigit = <String>['00', '02', '04', '06', '08', '10', '12', '14', '16', '18', '20', '22'];
 
   Future<void> mediaQueryBoilerplate(WidgetTester tester, bool alwaysUse24HourFormat) async {
     await tester.pumpWidget(
@@ -174,19 +158,17 @@ void main() {
 
     final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final dynamic dialPainter = dialPaint.painter;
-    final List<dynamic> primaryOuterLabels = dialPainter.primaryLabels as List<dynamic>;
+    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
-      primaryOuterLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
+      primaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
       labels12To11,
     );
-    expect(dialPainter.primaryInnerLabels, null);
 
-    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryLabels as List<dynamic>;
+    final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
     expect(
-      secondaryOuterLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
+      secondaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
       labels12To11,
     );
-    expect(dialPainter.secondaryInnerLabels, null);
   });
 
   testWidgets('respects MediaQueryData.alwaysUse24HourFormat == true', (WidgetTester tester) async {
@@ -194,26 +176,16 @@ void main() {
 
     final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final dynamic dialPainter = dialPaint.painter;
-    final List<dynamic> primaryOuterLabels = dialPainter.primaryLabels as List<dynamic>;
+    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
-      primaryOuterLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
-      labels00To23,
-    );
-    final List<dynamic> primaryInnerLabels = dialPainter.primaryInnerLabels as List<dynamic>;
-    expect(
-      primaryInnerLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
-      labels12To11TwoDigit,
+      primaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
+      labels00To22TwoDigit,
     );
 
-    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryLabels as List<dynamic>;
+    final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
     expect(
-      secondaryOuterLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
-      labels00To23,
-    );
-    final List<dynamic> secondaryInnerLabels = dialPainter.secondaryInnerLabels as List<dynamic>;
-    expect(
-      secondaryInnerLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
-      labels12To11TwoDigit,
+      secondaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
+      labels00To22TwoDigit,
     );
   });
 }

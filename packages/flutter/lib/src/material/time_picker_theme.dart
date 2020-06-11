@@ -5,9 +5,9 @@
 // @dart = 2.8
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import 'input_decorator.dart';
 import 'theme.dart';
 
 /// Defines the visual properties of the widget displayed with [showTimePicker].
