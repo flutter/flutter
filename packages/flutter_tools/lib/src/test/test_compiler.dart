@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
@@ -73,6 +74,9 @@ class TestCompiler {
 
   Future<String> compile(Uri mainDart) {
     final Completer<String> completer = Completer<String>();
+    if (compilerController.isClosed) {
+      return null;
+    }
     compilerController.add(_CompilationRequest(mainDart, completer));
     return completer.future;
   }
@@ -128,10 +132,28 @@ class TestCompiler {
     if (!isEmpty) {
       return;
     }
-    _packageConfig ??= await loadPackageConfigWithLogging(
-      globals.fs.file(globalPackagesPath),
-      logger: globals.logger,
-    );
+    if (_packageConfig == null) {
+      _packageConfig ??= await loadPackageConfigWithLogging(
+        globals.fs.file(globalPackagesPath),
+        logger: globals.logger,
+      );
+      // Compilation will fail if there is no flutter_test dependency, since
+      // this library is imported by the generated entrypoint script.
+      if (_packageConfig['flutter_test'] == null) {
+        globals.printError(
+          '\n'
+          'Error: cannot run without a dependency on "package:flutter_test". '
+          'Ensure the following lines are present in your pubspec.yaml:'
+          '\n\n'
+          'dev_dependencies:\n'
+          '  flutter_test:\n'
+          '    sdk: flutter\n',
+        );
+        request.result.complete(null);
+        await compilerController.close();
+        return;
+      }
+    }
     while (compilationQueue.isNotEmpty) {
       final _CompilationRequest request = compilationQueue.first;
       globals.printTrace('Compiling ${request.mainUri}');
