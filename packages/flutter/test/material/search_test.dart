@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -301,8 +303,7 @@ void main() {
     expect(textField.focusNode.hasFocus, isFalse);
   });
 
-  testWidgets('Fresh search allways starts with empty query',
-      (WidgetTester tester) async {
+  testWidgets('Fresh search always starts with empty query', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
     await tester.pumpWidget(TestHomePage(

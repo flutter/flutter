@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui hide TextStyle;
@@ -2486,7 +2488,7 @@ class _Editable extends LeafRenderObjectWidget {
 //
 // When typing in a direction that opposes the base direction
 // of the paragraph, un-enclosed whitespace gets the directionality
-// of the paragraph. This is often at odds with what is immeditely
+// of the paragraph. This is often at odds with what is immediately
 // being typed causing the caret to jump to the wrong side of the text.
 // This formatter makes use of the RLM and LRM to cause the text
 // shaper to inherently treat the whitespace as being surrounded
@@ -2604,7 +2606,7 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
           previousWasDirectionalityMarker = true;
         } else {
           // If the whitespace was already enclosed by the same directionality,
-          // we can remove the artifically added marker.
+          // we can remove the artificially added marker.
           if (!previousWasDirectionalityMarker &&
               previousWasWhitespace &&
               getDirection(codepoint) == _previousNonWhitespaceDirection) {

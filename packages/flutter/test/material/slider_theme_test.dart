@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show window;
 
 import 'package:flutter/material.dart';
@@ -859,7 +861,7 @@ void main() {
   //
   // The value indicator can be skipped by passing the appropriate
   // [ShowValueIndicator].
-  testWidgets('The slider can skip all of its comoponent painting', (WidgetTester tester) async {
+  testWidgets('The slider can skip all of its component painting', (WidgetTester tester) async {
     // Pump a slider with all shapes skipped.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
