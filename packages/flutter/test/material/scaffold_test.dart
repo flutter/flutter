@@ -2026,14 +2026,37 @@ void main() {
   });
 
   group('FloatingActionButtonLocation alignment receives correct viewPadding', () {
-    // TODO(Piinks): Group by position and then test each config
+    // TODO(Piinks): Group by position and then test each config, move to FABLocation test file
+    // also, test here for the scaffold view padding layout geometry
     //
-    // Tops
+    // Top locations, with keyboard up and down, for each (6):
     //  - Default
-    //  - Default with resizeToAvoidBottomInsets
-    //  - with an appbar
-    //  - with an appbar and resizeToAvoidBottomInsets
-    //  - check that left and right with textDirection works
+    //  - Default with resizeToAvoidBottomInsets: false
+    //  - with an AppBar
+    //  - with an AppBar and resizeToAvoidBottomInsets:false
+    //  - check that left and right padding WAI with textDirection
+    //      total for group: 30
+    // Float locations, with keyboard up and down, for each (6):
+    //  - Default
+    //  - Default with resizeToAvoidBottomInsets: false
+    //  - with BottomSheet
+    //  - with BottomSheet and resizeToAvoidBottomInsets: false
+    //  - with SnackBar
+    //  - with SnackBar and resizeToAvoidBottomInsets: false
+    //  - check that left and right with textDirection WAI
+    //      total for group: 42
+    // Docked locations, with keyboard up and down, for each (6):
+    //  - Default
+    //  - Default with resizeToAvoidBottomInsets: false
+    //  - with BottomNavigationBar
+    //  - with BottomNavigationBar and resizeToAvoidBottomInsets: false
+    //  - with BottomSheet
+    //  - with BottomSheet and resizeToAvoidBottomInsets: false
+    //  - with SnackBar
+    //  - with SnackBar and resizeToAvoidBottomInsets: false
+    //  - check that left and right with textDirection WAI
+    //      total for group 54
+
 
     Widget _buildTest(
       FloatingActionButtonLocation location,
