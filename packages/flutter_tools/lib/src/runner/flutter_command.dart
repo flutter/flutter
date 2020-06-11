@@ -153,6 +153,9 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get deprecated => false;
 
+  @override
+  bool get hidden => deprecated;
+
   bool _excludeDebug = false;
 
   BuildMode _defaultBuildMode;

@@ -53,6 +53,8 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: false);
       await flutterCommand.run();
       verifyZeroInteractions(cache);
+      expect(flutterCommand.deprecated, isFalse);
+      expect(flutterCommand.hidden, isFalse);
     },
     overrides: <Type, Generator>{
       Cache: () => cache,
@@ -83,6 +85,8 @@ void main() {
         contains('The "deprecated" command is deprecated and will be removed in a future version of Flutter.'));
       expect(flutterCommand.usage,
         contains('Deprecated. This command will be removed in a future version of Flutter.'));
+      expect(flutterCommand.deprecated, isTrue);
+      expect(flutterCommand.hidden, isTrue);
     });
 
     testUsingContext('uses the error handling file system', () async {
