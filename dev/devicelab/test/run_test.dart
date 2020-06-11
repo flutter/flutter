@@ -28,8 +28,13 @@ void main() {
     }
 
     Future<void> expectScriptResult(
-        List<String> testNames, int expectedExitCode) async {
-      final ProcessResult result = await runScript(testNames);
+        List<String> testNames,
+        int expectedExitCode,
+        {String deviceId}
+      ) async {
+      final ProcessResult result = await runScript(testNames, <String>[
+        if (deviceId != null) ...<String>['-d', deviceId],
+      ]);
       expect(result.exitCode, expectedExitCode,
           reason:
               '[ stderr from test process ]\n\n${result.stderr}\n\n[ end of stderr ]'
