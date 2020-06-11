@@ -396,7 +396,7 @@ abstract class StandardFabLocation extends FloatingActionButtonLocation {
   static double _leftOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
     return kFloatingActionButtonMargin
         + scaffoldGeometry.minInsets.left
-        + scaffoldGeometry.floatingActionButtonPadding.left
+        + scaffoldGeometry.minViewPadding.left
         - adjustment;
   }
 
@@ -405,7 +405,7 @@ abstract class StandardFabLocation extends FloatingActionButtonLocation {
     return scaffoldGeometry.scaffoldSize.width
         - kFloatingActionButtonMargin
         - scaffoldGeometry.minInsets.right
-        - scaffoldGeometry.floatingActionButtonPadding.right
+        - scaffoldGeometry.minViewPadding.right
         - scaffoldGeometry.floatingActionButtonSize.width
         + adjustment;
   }
@@ -434,7 +434,7 @@ mixin FabFloatOffsetY on StandardFabLocation {
     final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
     final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
     final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
-    final double paddingBottom = scaffoldGeometry.floatingActionButtonPadding.bottom;
+    final double paddingBottom = scaffoldGeometry.minViewPadding.bottom;
 
     double fabY = contentBottom - fabHeight - kFloatingActionButtonMargin - paddingBottom;
     if (snackBarHeight > 0.0)

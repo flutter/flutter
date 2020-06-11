@@ -45,7 +45,7 @@ class SafeArea extends StatelessWidget {
     this.right = true,
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
-    this.maintainBottomViewPadding = false,
+    this.maintainBottomViewPadding = true,
     @required this.child,
   }) : assert(left != null),
        assert(top != null),
@@ -95,6 +95,7 @@ class SafeArea extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final MediaQueryData data = MediaQuery.of(context);
+//    print('SafeArea MediaQuery: $data');
     EdgeInsets padding = data.padding;
     // Bottom padding has been consumed - i.e. by the keyboard
     if (data.padding.bottom == 0.0 && data.viewInsets.bottom != 0.0 && maintainBottomViewPadding)

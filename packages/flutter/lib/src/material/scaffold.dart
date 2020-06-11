@@ -78,19 +78,16 @@ class ScaffoldPrelayoutGeometry {
     @required this.contentTop,
     @required this.floatingActionButtonSize,
     @required this.minInsets,
+    @required this.minViewPadding,
     @required this.scaffoldSize,
     @required this.snackBarSize,
     @required this.textDirection,
-    this.floatingActionButtonPadding,
   });
 
   /// The [Size] of [Scaffold.floatingActionButton].
   ///
   /// If [Scaffold.floatingActionButton] is null, this will be [Size.zero].
   final Size floatingActionButtonSize;
-
-  /// Doc
-  final EdgeInsets floatingActionButtonPadding;
 
   /// The [Size] of the [Scaffold]'s [BottomSheet].
   ///
@@ -135,6 +132,16 @@ class ScaffoldPrelayoutGeometry {
   /// If [Scaffold.resizeToAvoidBottomInset] is set to false, [minInsets.bottom]
   /// will be 0.0.
   final EdgeInsets minInsets;
+
+  /// The minimum padding to inset interactive elements to be within a safe,
+  /// un-obscured space.
+  ///
+  /// This value is the result of calling [MediaQuery.viewPadding] in the
+  /// [Scaffold]'s [BuildContext], this helps distinguish different types of
+  /// obstructions. For example, by using the viewPadding property, padding
+  /// would defer to the iPhone "safe area" regardless of whether a keyboard is
+  /// showing.
+  final EdgeInsets minViewPadding;
 
   /// The [Size] of the whole [Scaffold].
   ///
@@ -391,12 +398,12 @@ class _BodyBuilder extends StatelessWidget {
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({
     @required this.minInsets,
+    @required this.minViewPadding,
     @required this.textDirection,
     @required this.geometryNotifier,
     // for floating action button
     @required this.previousFloatingActionButtonLocation,
     @required this.currentFloatingActionButtonLocation,
-    this.floatingActionButtonPadding,
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
     @required this.isSnackBarFloating,
@@ -413,13 +420,13 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final bool extendBody;
   final bool extendBodyBehindAppBar;
   final EdgeInsets minInsets;
+  final EdgeInsets minViewPadding;
   final TextDirection textDirection;
   final _ScaffoldGeometryNotifier geometryNotifier;
 
   final FloatingActionButtonLocation previousFloatingActionButtonLocation;
   final FloatingActionButtonLocation currentFloatingActionButtonLocation;
   final double floatingActionButtonMoveAnimationProgress;
-  final EdgeInsets floatingActionButtonPadding;
   final FloatingActionButtonAnimator floatingActionButtonMotionAnimator;
 
   final bool isSnackBarFloating;
@@ -540,7 +547,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         scaffoldSize: size,
         snackBarSize: snackBarSize,
         textDirection: textDirection,
-        floatingActionButtonPadding: floatingActionButtonPadding,
+        minViewPadding: minViewPadding,
       );
 
       final Offset currentFabOffset = currentFloatingActionButtonLocation.getOffset(currentGeometry);
@@ -566,7 +573,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       } else {
         snackBarYOffsetBase = contentBottom;
       }
-
+      print('snackBarYOffsetBase: $snackBarYOffsetBase');
       positionChild(_ScaffoldSlot.snackBar, Offset(0.0, snackBarYOffsetBase - snackBarSize.height));
     }
 
@@ -2500,55 +2507,24 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _buildDrawer(children, textDirection);
     }
 
-    print('Scaffold mediaQuery: $mediaQuery');
+//    print('Scaffold mediaQuery: $mediaQuery');
     // The minimum insets for contents of the Scaffold to keep visible.
     final EdgeInsets minInsets = mediaQuery.padding.copyWith(
       bottom: _resizeToAvoidBottomInset
         ? mediaQuery.viewInsets.bottom
-        : math.min(mediaQuery.viewPadding.bottom, mediaQuery.viewInsets.bottom),
+        : 0.0
+    );
+
+    // The minimum viewPadding for interactive elements positioned by the
+    // Scaffold to keep within safe interactive areas.
+    final EdgeInsets minViewPadding = mediaQuery.viewPadding.copyWith(
+      bottom: _resizeToAvoidBottomInset &&  mediaQuery.viewInsets.bottom != 0.0 ? 0.0 : null,
     );
 
     // extendBody locked when keyboard is open
     final bool _extendBody = minInsets.bottom <= 0 && widget.extendBody;
-
-    // FloatingActionButtons that 'float' should adhere to padding based on the
-    // FloatingActionButtonLocation
-    // [FloatingActionButtonLocation]s that should adhere to the provided
-    // padding.
-    final List<FloatingActionButtonLocation> _maintainLeadPadding = <FloatingActionButtonLocation>[
-      FloatingActionButtonLocation.startFloat,
-      FloatingActionButtonLocation.miniStartFloat,
-    ];
-    final List<FloatingActionButtonLocation> _maintainTrailingPadding = <FloatingActionButtonLocation>[
-      FloatingActionButtonLocation.endFloat,
-      FloatingActionButtonLocation.miniEndFloat,
-    ];
-    final List<FloatingActionButtonLocation> _maintainBottomPadding = <FloatingActionButtonLocation>[
-      ..._maintainLeadPadding,
-      ..._maintainTrailingPadding,
-      FloatingActionButtonLocation.centerFloat,
-      FloatingActionButtonLocation.miniCenterFloat,
-    ];
-
-    double left, right;
-
-    switch (textDirection) {
-      case TextDirection.ltr: left = _maintainLeadPadding.contains(_floatingActionButtonLocation) ? null : 0.0;
-        right = _maintainTrailingPadding.contains(_floatingActionButtonLocation) ? null : 0.0;
-        break;
-      case TextDirection.rtl: right = _maintainLeadPadding.contains(_floatingActionButtonLocation) ? null : 0.0;
-        left = _maintainTrailingPadding.contains(_floatingActionButtonLocation) ? null : 0.0;
-        break;
-    }
-
-    final EdgeInsets _floatingActionButtonPadding = mediaQuery.padding.copyWith(
-      left: left,
-      top: 0.0,
-      right: right,
-      bottom: _maintainBottomPadding.contains(_floatingActionButtonLocation) ? null : 0.0,
-    );
     
-    print('FABPadding: $_floatingActionButtonPadding');
+    print('minViewPadding: $minViewPadding, minInsets: $minInsets');
 
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
@@ -2571,7 +2547,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
                 isSnackBarFloating: isSnackBarFloating,
-                floatingActionButtonPadding: _floatingActionButtonPadding,
+                minViewPadding: minViewPadding,
               ),
             );
           }),
