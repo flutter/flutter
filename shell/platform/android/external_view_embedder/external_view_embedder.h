@@ -7,12 +7,16 @@
 
 #include "flutter/flow/embedded_views.h"
 
+#include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace flutter {
 
-class AndroidExternalViewEmbedder : public ExternalViewEmbedder {
+class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
  public:
+  AndroidExternalViewEmbedder(
+      std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
+
   // |ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(
       int view_id,
@@ -48,6 +52,9 @@ class AndroidExternalViewEmbedder : public ExternalViewEmbedder {
       fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
 
  private:
+  // Allows to call methods in Java.
+  const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
+
   // The number of frames the rasterizer task runner will continue
   // to run on the platform thread after no platform view is rendered.
   //

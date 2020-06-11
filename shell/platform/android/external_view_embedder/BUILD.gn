@@ -22,6 +22,7 @@ source_set("external_view_embedder") {
     "//flutter/common",
     "//flutter/flow",
     "//flutter/fml",
+    "//flutter/shell/platform/android/jni",
     "//third_party/skia",
   ]
 }

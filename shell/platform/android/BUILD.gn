@@ -50,8 +50,8 @@ shared_library("flutter_shell_native") {
     "platform_message_response_android.h",
     "platform_view_android.cc",
     "platform_view_android.h",
-    "platform_view_android_jni.cc",
-    "platform_view_android_jni.h",
+    "platform_view_android_jni_impl.cc",
+    "platform_view_android_jni_impl.h",
     "vsync_waiter_android.cc",
     "vsync_waiter_android.h",
   ]
@@ -68,6 +68,7 @@ shared_library("flutter_shell_native") {
     "//flutter/runtime:libdart",
     "//flutter/shell/common",
     "//flutter/shell/platform/android/external_view_embedder",
+    "//flutter/shell/platform/android/jni",
     "//third_party/skia",
   ]
 
