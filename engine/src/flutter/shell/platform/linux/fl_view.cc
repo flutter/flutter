@@ -330,10 +330,8 @@ static gboolean fl_view_motion_notify_event(GtkWidget* widget,
 static gboolean fl_view_key_press_event(GtkWidget* widget, GdkEventKey* event) {
   FlView* self = FL_VIEW(widget);
 
-  if (fl_text_input_plugin_filter_keypress(self->text_input_plugin, event))
-    return TRUE;
-
   fl_key_event_plugin_send_key_event(self->key_event_plugin, event);
+  fl_text_input_plugin_filter_keypress(self->text_input_plugin, event);
 
   return TRUE;
 }
@@ -343,10 +341,8 @@ static gboolean fl_view_key_release_event(GtkWidget* widget,
                                           GdkEventKey* event) {
   FlView* self = FL_VIEW(widget);
 
-  if (fl_text_input_plugin_filter_keypress(self->text_input_plugin, event))
-    return TRUE;
-
   fl_key_event_plugin_send_key_event(self->key_event_plugin, event);
+  fl_text_input_plugin_filter_keypress(self->text_input_plugin, event);
 
   return TRUE;
 }
