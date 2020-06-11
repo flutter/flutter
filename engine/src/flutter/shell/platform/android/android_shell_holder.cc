@@ -29,9 +29,9 @@ static WindowData GetDefaultWindowData() {
 
 AndroidShellHolder::AndroidShellHolder(
     flutter::Settings settings,
-    fml::jni::JavaObjectWeakGlobalRef java_object,
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     bool is_background_view)
-    : settings_(std::move(settings)), java_object_(java_object) {
+    : settings_(std::move(settings)), jni_facade_(jni_facade) {
   static size_t shell_count = 1;
   auto thread_label = std::to_string(shell_count++);
 
@@ -56,20 +56,19 @@ AndroidShellHolder::AndroidShellHolder(
 
   fml::WeakPtr<PlatformViewAndroid> weak_platform_view;
   Shell::CreateCallback<PlatformView> on_create_platform_view =
-      [is_background_view, java_object, &weak_platform_view](Shell& shell) {
+      [is_background_view, &jni_facade, &weak_platform_view](Shell& shell) {
         std::unique_ptr<PlatformViewAndroid> platform_view_android;
         if (is_background_view) {
           platform_view_android = std::make_unique<PlatformViewAndroid>(
               shell,                   // delegate
               shell.GetTaskRunners(),  // task runners
-              java_object              // java object handle for JNI interop
+              jni_facade               // JNI interop
           );
-
         } else {
           platform_view_android = std::make_unique<PlatformViewAndroid>(
               shell,                   // delegate
               shell.GetTaskRunners(),  // task runners
-              java_object,             // java object handle for JNI interop
+              jni_facade,              // JNI interop
               shell.GetSettings()
                   .enable_software_rendering  // use software rendering
           );

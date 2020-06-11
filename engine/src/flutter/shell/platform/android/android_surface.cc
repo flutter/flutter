@@ -15,18 +15,19 @@
 namespace flutter {
 
 std::unique_ptr<AndroidSurface> AndroidSurface::Create(
-    std::shared_ptr<AndroidContext> android_context) {
+    std::shared_ptr<AndroidContext> android_context,
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade) {
   std::unique_ptr<AndroidSurface> surface;
   switch (android_context->RenderingApi()) {
     case AndroidRenderingAPI::kSoftware:
-      surface = std::make_unique<AndroidSurfaceSoftware>();
+      surface = std::make_unique<AndroidSurfaceSoftware>(jni_facade);
       break;
     case AndroidRenderingAPI::kOpenGLES:
-      surface = std::make_unique<AndroidSurfaceGL>(android_context);
+      surface = std::make_unique<AndroidSurfaceGL>(android_context, jni_facade);
       break;
     case AndroidRenderingAPI::kVulkan:
 #if SHELL_ENABLE_VULKAN
-      surface = std::make_unique<AndroidSurfaceVulkan>();
+      surface = std::make_unique<AndroidSurfaceVulkan>(jni_facade);
 #endif  // SHELL_ENABLE_VULKAN
       break;
   }

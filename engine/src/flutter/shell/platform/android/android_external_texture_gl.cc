@@ -6,15 +6,18 @@
 
 #include <GLES/glext.h>
 
-#include "flutter/shell/platform/android/platform_view_android_jni.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 
 namespace flutter {
 
 AndroidExternalTextureGL::AndroidExternalTextureGL(
     int64_t id,
-    const fml::jni::JavaObjectWeakGlobalRef& surfaceTexture)
-    : Texture(id), surface_texture_(surfaceTexture), transform(SkMatrix::I()) {}
+    const fml::jni::JavaObjectWeakGlobalRef& surface_texture,
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
+    : Texture(id),
+      jni_facade_(jni_facade),
+      surface_texture_(surface_texture),
+      transform(SkMatrix::I()) {}
 
 AndroidExternalTextureGL::~AndroidExternalTextureGL() {
   if (state_ == AttachmentState::attached) {
@@ -68,36 +71,8 @@ void AndroidExternalTextureGL::Paint(SkCanvas& canvas,
   }
 }
 
-// The bounds we set for the canvas are post composition.
-// To fill the canvas we need to ensure that the transformation matrix
-// on the `SurfaceTexture` will be scaled to fill. We rescale and preseve
-// the scaled aspect ratio.
-SkSize ScaleToFill(float scaleX, float scaleY) {
-  const double epsilon = std::numeric_limits<double>::epsilon();
-  // scaleY is negative.
-  const double minScale = fmin(scaleX, fabs(scaleY));
-  const double rescale = 1.0f / (minScale + epsilon);
-  return SkSize::Make(scaleX * rescale, scaleY * rescale);
-}
-
 void AndroidExternalTextureGL::UpdateTransform() {
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  fml::jni::ScopedJavaLocalRef<jobject> surfaceTexture =
-      surface_texture_.get(env);
-  fml::jni::ScopedJavaLocalRef<jfloatArray> transformMatrix(
-      env, env->NewFloatArray(16));
-  SurfaceTextureGetTransformMatrix(env, surfaceTexture.obj(),
-                                   transformMatrix.obj());
-  float* m = env->GetFloatArrayElements(transformMatrix.obj(), nullptr);
-  float scaleX = m[0], scaleY = m[5];
-  const SkSize scaled = ScaleToFill(scaleX, scaleY);
-  SkScalar matrix3[] = {
-      scaled.fWidth, m[1],           m[2],   //
-      m[4],          scaled.fHeight, m[6],   //
-      m[8],          m[9],           m[10],  //
-  };
-  env->ReleaseFloatArrayElements(transformMatrix.obj(), m, JNI_ABORT);
-  transform.set9(matrix3);
+  jni_facade_->SurfaceTextureGetTransformMatrix(surface_texture_, transform);
 }
 
 void AndroidExternalTextureGL::OnGrContextDestroyed() {
@@ -108,31 +83,16 @@ void AndroidExternalTextureGL::OnGrContextDestroyed() {
 }
 
 void AndroidExternalTextureGL::Attach(jint textureName) {
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  fml::jni::ScopedJavaLocalRef<jobject> surfaceTexture =
-      surface_texture_.get(env);
-  if (!surfaceTexture.is_null()) {
-    SurfaceTextureAttachToGLContext(env, surfaceTexture.obj(), textureName);
-  }
+  jni_facade_->SurfaceTextureAttachToGLContext(surface_texture_, textureName);
 }
 
 void AndroidExternalTextureGL::Update() {
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  fml::jni::ScopedJavaLocalRef<jobject> surfaceTexture =
-      surface_texture_.get(env);
-  if (!surfaceTexture.is_null()) {
-    SurfaceTextureUpdateTexImage(env, surfaceTexture.obj());
-    UpdateTransform();
-  }
+  jni_facade_->SurfaceTextureUpdateTexImage(surface_texture_);
+  UpdateTransform();
 }
 
 void AndroidExternalTextureGL::Detach() {
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  fml::jni::ScopedJavaLocalRef<jobject> surfaceTexture =
-      surface_texture_.get(env);
-  if (!surfaceTexture.is_null()) {
-    SurfaceTextureDetachFromGLContext(env, surfaceTexture.obj());
-  }
+  jni_facade_->SurfaceTextureDetachFromGLContext(surface_texture_);
 }
 
 void AndroidExternalTextureGL::OnTextureUnregistered() {}

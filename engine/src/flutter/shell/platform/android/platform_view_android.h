@@ -17,6 +17,7 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/android/android_native_window.h"
 #include "flutter/shell/platform/android/android_surface.h"
+#include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 
 namespace flutter {
 
@@ -28,12 +29,12 @@ class PlatformViewAndroid final : public PlatformView {
   // background execution.
   PlatformViewAndroid(PlatformView::Delegate& delegate,
                       flutter::TaskRunners task_runners,
-                      fml::jni::JavaObjectWeakGlobalRef java_object);
+                      std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
 
   // Creates a PlatformViewAndroid with a rendering surface.
   PlatformViewAndroid(PlatformView::Delegate& delegate,
                       flutter::TaskRunners task_runners,
-                      fml::jni::JavaObjectWeakGlobalRef java_object,
+                      std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
                       bool use_software_rendering);
 
   ~PlatformViewAndroid() override;
@@ -74,7 +75,7 @@ class PlatformViewAndroid final : public PlatformView {
       const fml::jni::JavaObjectWeakGlobalRef& surface_texture);
 
  private:
-  const fml::jni::JavaObjectWeakGlobalRef java_object_;
+  const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
 
   std::unique_ptr<AndroidSurface> android_surface_;
   // We use id 0 to mean that no response is expected.

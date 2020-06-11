@@ -11,7 +11,7 @@ namespace flutter {
 namespace testing {
 
 TEST(AndroidExternalViewEmbedder, GetCurrentCanvases) {
-  auto embedder = new AndroidExternalViewEmbedder();
+  auto embedder = new AndroidExternalViewEmbedder(nullptr);
 
   embedder->BeginFrame(SkISize::Make(10, 20), nullptr, 1.0);
 
@@ -27,7 +27,7 @@ TEST(AndroidExternalViewEmbedder, GetCurrentCanvases) {
 }
 
 TEST(AndroidExternalViewEmbedder, CompositeEmbeddedView) {
-  auto embedder = new AndroidExternalViewEmbedder();
+  auto embedder = new AndroidExternalViewEmbedder(nullptr);
 
   embedder->PrerollCompositeEmbeddedView(
       0, std::make_unique<EmbeddedViewParams>());
@@ -39,7 +39,7 @@ TEST(AndroidExternalViewEmbedder, CompositeEmbeddedView) {
 }
 
 TEST(AndroidExternalViewEmbedder, CancelFrame) {
-  auto embedder = new AndroidExternalViewEmbedder();
+  auto embedder = new AndroidExternalViewEmbedder(nullptr);
 
   embedder->PrerollCompositeEmbeddedView(
       0, std::make_unique<EmbeddedViewParams>());
@@ -50,7 +50,7 @@ TEST(AndroidExternalViewEmbedder, CancelFrame) {
 }
 
 TEST(AndroidExternalViewEmbedder, RasterizerRunsOnPlatformThread) {
-  auto embedder = new AndroidExternalViewEmbedder();
+  auto embedder = new AndroidExternalViewEmbedder(nullptr);
   auto platform_thread = new fml::Thread("platform");
   auto rasterizer_thread = new fml::Thread("rasterizer");
   auto platform_queue_id = platform_thread->GetTaskRunner()->GetTaskQueueId();
@@ -82,7 +82,7 @@ TEST(AndroidExternalViewEmbedder, RasterizerRunsOnPlatformThread) {
 }
 
 TEST(AndroidExternalViewEmbedder, RasterizerRunsOnRasterizerThread) {
-  auto embedder = new AndroidExternalViewEmbedder();
+  auto embedder = new AndroidExternalViewEmbedder(nullptr);
   auto platform_thread = new fml::Thread("platform");
   auto rasterizer_thread = new fml::Thread("rasterizer");
   auto platform_queue_id = platform_thread->GetTaskRunner()->GetTaskQueueId();
