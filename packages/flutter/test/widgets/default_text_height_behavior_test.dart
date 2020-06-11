@@ -125,7 +125,7 @@ void main() {
     ));
 
     expect(textHeightBehavior, isNull);
-    RichText text = tester.firstWidget(find.byType(RichText));
+    final RichText text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
     expect(text.textHeightBehavior, isNull);
   });
