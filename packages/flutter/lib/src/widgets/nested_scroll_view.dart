@@ -179,13 +179,20 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// ```
 /// {@end-tool}
 ///
-/// ## More on using [SliverAppBar]s with [NestedScrollView]s
+/// ## [SliverAppBar]s with [NestedScrollView]s
+///
+/// Using a [SliverAppBar] in the outer scroll view, or [headerSliverBuilder],
+/// of a [NestedScrollView] may require special configurations in order to work
+/// as it would if the outer and inner were one single scroll view, like a
+/// [CustomScrollView].
 ///
 /// ### Pinned [SliverAppBar]s
 ///
-/// When using [SliverAppBar.pinned], the app bar remains visible at the top
-/// of the scroll view. The app bar can still expand and contract as the user
-/// scrolls, but it will remain visible rather than being scrolled out of view.
+/// A pinned [SliverAppBar] works in a [NestedScrollView] exactly as it would in
+/// another scroll view, like [CustomScrollView]. When using
+/// [SliverAppBar.pinned], the app bar remains visible at the top of the scroll
+/// view. The app bar can still expand and contract as the user scrolls, but it
+/// will remain visible rather than being scrolled out of view.
 ///
 /// This works naturally in a [NestedScroll] view, as the pinned [SliverAppBar]
 /// is not expected to move in or out of the visible portion of the viewport.
@@ -199,7 +206,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// When placed in the outer scrollable, or the [headerSliverBuilder],
 /// a [SliverAppBar] that floats, using [SliverAppBar.floating] will not be
-/// triggered to float over the inner, [body], scrollable automatically.
+/// triggered to float over the inner scroll view, or [body], automatically.
 ///
 /// This is because a floating app bar uses the scroll offset of its own
 /// [Scrollable] to dictate the floating action. Being two separate inner and
@@ -212,7 +219,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// Furthermore, the `floatHeaderSlivers` flag should also be used when using an
 /// app bar that is floating, pinned, and has an expanded height. In this
-/// configuration, the flexible space of the app bar should open and collapse,
+/// configuration, the flexible space of the app bar will open and collapse,
 /// while the primary portion of the app bar remains pinned.
 ///
 /// {@tool sample --template=stateless_widget_material}
@@ -338,7 +345,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// ### Stretching [SliverAppBar]s
 ///
-// TODO(Piinks): Support stretching,https://github.com/flutter/flutter/issues/54059
+// TODO(Piinks): Support stretching, https://github.com/flutter/flutter/issues/54059
 /// Currently, [NestedScrollView] does not support stretching the outer
 /// scrollable, e.g. when using [SliverAppBar.stretch].
 ///
