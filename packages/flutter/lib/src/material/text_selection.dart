@@ -197,7 +197,6 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
-    int itemIndex = -1;
     return _TextSelectionToolbarContainer(
       key: _containerKey,
       overflowOpen: _overflowOpen,
@@ -236,10 +235,8 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
                       : localizations.moreButtonTooltip,
                 ),
               ),
-              ...itemDatas.map((_ItemData itemData) {
-                itemIndex++;
-                return _getItem(itemData, itemIndex == 0, itemIndex == itemDatas.length - 1);
-              }).toList(),
+              for (int i = 0; i < itemDatas.length; i++)
+                _getItem(itemDatas[i], i == 0, i == itemDatas.length - 1)
             ],
           ),
         ),
