@@ -9,7 +9,7 @@ import 'package:flutter_devicelab/framework/adb.dart';
 
 /// Smoke test of a successful task.
 Future<void> main() async {
-  deviceOperatingSystem = DeviceOperatingSystem.mock;
+  deviceOperatingSystem = DeviceOperatingSystem.fake;
   await task(() async {
     final Device device = await devices.workingDevice;
     if (device.deviceId == 'MOCK_SUCCESS')

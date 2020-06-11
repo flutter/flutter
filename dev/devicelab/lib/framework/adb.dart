@@ -52,7 +52,7 @@ String _findMatchId(List<String> idList, String idPattern) {
 DeviceDiscovery get devices => DeviceDiscovery();
 
 /// Device operating system the test is configured to test.
-enum DeviceOperatingSystem { android, ios, fuchsia, mock }
+enum DeviceOperatingSystem { android, ios, fuchsia, fake }
 
 /// Device OS to test on.
 DeviceOperatingSystem deviceOperatingSystem = DeviceOperatingSystem.android;
@@ -67,7 +67,7 @@ abstract class DeviceDiscovery {
         return IosDeviceDiscovery();
       case DeviceOperatingSystem.fuchsia:
         return FuchsiaDeviceDiscovery();
-      case DeviceOperatingSystem.mock:
+      case DeviceOperatingSystem.fake:
         print('Looking for mock devices!'
               'You should not see this in release builds.');
         return FakeDeviceDiscovery();
