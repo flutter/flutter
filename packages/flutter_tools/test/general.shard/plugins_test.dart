@@ -1033,6 +1033,8 @@ flutter:
         final String contents = pluginMakefile.readAsStringSync();
         expect(contents, contains('apackage'));
         expect(contents, contains('target_link_libraries(\${BINARY_NAME} PRIVATE \${plugin}_plugin)'));
+        expect(contents, contains('list(APPEND PLUGIN_BUNDLED_LIBRARIES \$<TARGET_FILE:\${plugin}_plugin>)'));
+        expect(contents, contains('list(APPEND PLUGIN_BUNDLED_LIBRARIES \${\${plugin}_bundled_libraries})'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
