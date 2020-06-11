@@ -212,8 +212,8 @@ void main() {
         .addListener(ImageStreamListener(
           (ImageInfo image, bool synchronousCall) { },
           onError: (dynamic exception, StackTrace stackTrace) {
-            final bool evicationResult = imageCache.evict(1);
-            expect(evicationResult, isTrue);
+            final bool evictionResult = imageCache.evict(1);
+            expect(evictionResult, isTrue);
           },
         ));
   });

@@ -376,7 +376,7 @@ void main() {
 
     // The fling below must be such that the velocity estimation examines an
     // offset greater than the kTouchSlop. Too slow or too short a distance, and
-    // it won't trigger. Also, it musn't be so much that it drags the bottom
+    // it won't trigger. Also, it must not be so much that it drags the bottom
     // sheet off the screen, or we won't see it after we pump!
     await tester.fling(find.text('BottomSheet'), const Offset(0.0, 50.0), 2000.0);
     await tester.pump(); // drain the microtask queue (Future completion callback)

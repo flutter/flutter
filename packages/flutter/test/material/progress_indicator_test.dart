@@ -344,7 +344,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
-  testWidgets('LinearProgressIndicator with a height less than the minumum', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator with a height less than the minimum', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,

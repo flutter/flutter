@@ -125,7 +125,7 @@ class AutofillGroup extends StatefulWidget {
   ///
   /// See also:
   ///
-  /// * [EditableTextState], where this method is used to retrive the closest
+  /// * [EditableTextState], where this method is used to retrieve the closest
   ///   [AutofillGroupState].
   static AutofillGroupState of(BuildContext context) {
     final _AutofillScope scope = context.dependOnInheritedWidgetOfExactType<_AutofillScope>();

@@ -31,7 +31,7 @@ import 'platform_channel.dart';
   'This feature was deprecated after v1.6.5.'
 )
 class BinaryMessages {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   BinaryMessages._();

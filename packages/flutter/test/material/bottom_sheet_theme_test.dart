@@ -168,7 +168,7 @@ void main() {
     expect(material.color, modalBackgroundColor);
   });
 
-  testWidgets('General bottom sheet parameters take priority over modal bottom sheet-specific parameters for peristent bottom sheets', (WidgetTester tester) async {
+  testWidgets('General bottom sheet parameters take priority over modal bottom sheet-specific parameters for persistent bottom sheets', (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const Color modalBackgroundColor = Colors.yellow;

@@ -87,7 +87,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 ///
 /// Callers should be cautious about pinning large images or a large number of
 /// images in memory, as this can result in running out of memory and being
-/// killed by the operating system. The lower the avilable physical memory, the
+/// killed by the operating system. The lower the available physical memory, the
 /// more susceptible callers will be to running into OOM issues. These issues
 /// manifest as immediate process death, sometimes with no other error messages.
 ///

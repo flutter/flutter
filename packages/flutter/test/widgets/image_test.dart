@@ -1553,7 +1553,7 @@ void main() {
     expect(provider.loadCallCount, 1);
   });
 
-  testWidgets('precacheImage allows time to take over weak refernce', (WidgetTester tester) async {
+  testWidgets('precacheImage allows time to take over weak reference', (WidgetTester tester) async {
     final TestImageProvider provider = TestImageProvider();
     Future<void> precache;
     await tester.pumpWidget(

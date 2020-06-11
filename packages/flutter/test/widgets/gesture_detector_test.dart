@@ -665,7 +665,7 @@ void main() {
         }
       });
 
-      test('constructur duplicate drag recognizer', () {
+      test('constructor duplicate drag recognizer', () {
         FlutterError error;
         try {
           GestureDetector(

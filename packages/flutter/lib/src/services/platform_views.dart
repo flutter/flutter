@@ -99,7 +99,7 @@ class PlatformViewsService {
   /// first time.
   ///
   /// The `id, `viewType, and `layoutDirection` parameters must not be null.
-  /// If `creationParams` is non null then `cretaionParamsCodec` must not be null.
+  /// If `creationParams` is non null then `creationParamsCodec` must not be null.
   static AndroidViewController initAndroidView({
     @required int id,
     @required String viewType,

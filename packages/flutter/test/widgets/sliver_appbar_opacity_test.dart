@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  testWidgets('!pinned && !floating && !bottom ==> fade opactiy', (WidgetTester tester) async {
+  testWidgets('!pinned && !floating && !bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
         _TestWidget(
@@ -26,7 +26,7 @@ void main() {
     expect(render.text.style.color.opacity, 0.0);
   });
 
-  testWidgets('!pinned && !floating && bottom ==> fade opactiy', (WidgetTester tester) async {
+  testWidgets('!pinned && !floating && bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
         _TestWidget(
@@ -45,7 +45,7 @@ void main() {
     expect(render.text.style.color.opacity, 0.0);
   });
 
-  testWidgets('!pinned && floating && !bottom ==> fade opactiy', (WidgetTester tester) async {
+  testWidgets('!pinned && floating && !bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
         _TestWidget(
@@ -64,7 +64,7 @@ void main() {
     expect(render.text.style.color.opacity, 0.0);
   });
 
-  testWidgets('!pinned && floating && bottom ==> fade opactiy', (WidgetTester tester) async {
+  testWidgets('!pinned && floating && bottom ==> fade opacity', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
         _TestWidget(
@@ -142,7 +142,7 @@ void main() {
     expect(render.text.style.color.opacity, 1.0);
   });
 
-  testWidgets('pinned && floating && bottom && extraToolbarHeight == 0.0 ==> fade opactiy', (WidgetTester tester) async {
+  testWidgets('pinned && floating && bottom && extraToolbarHeight == 0.0 ==> fade opacity', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/25993.
 
     final ScrollController controller = ScrollController();

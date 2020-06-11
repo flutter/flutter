@@ -275,7 +275,7 @@ void main() {
     expect(count, 0x010101);
   });
 
-  testWidgets('Theme active color can be overriden', (WidgetTester tester) async {
+  testWidgets('Theme active color can be overridden', (WidgetTester tester) async {
     count = 0x000000;
     await tester.pumpWidget(
       CupertinoApp(

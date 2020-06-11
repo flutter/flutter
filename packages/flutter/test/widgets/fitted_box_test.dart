@@ -77,7 +77,7 @@ void main() {
     expect(insidePoint, equals(outsidePoint));
   });
 
-  testWidgets('Child can conver', (WidgetTester tester) async {
+  testWidgets('Child can cover', (WidgetTester tester) async {
     final Key outside = UniqueKey();
     final Key inside = UniqueKey();
 

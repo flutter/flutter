@@ -1882,7 +1882,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       state.updateTime(); // Triggers a rebuild.
       await tester.pump();
-      // Verify that rapint events are not fired once the extension is disabled.
+      // Verify that repaint events are not fired once the extension is disabled.
       expect(repaintEvents, isEmpty);
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 

@@ -193,7 +193,7 @@ void main() {
     expect(singleLongTapStartCount, 0);
   });
 
-  testWidgets('a force press intiates a force press', (WidgetTester tester) async {
+  testWidgets('a force press initiates a force press', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     const int pointerValue = 1;
@@ -259,7 +259,7 @@ void main() {
     expect(forcePressStartCount, 4);
   });
 
-  testWidgets('a tap and then force press intiates a force press and not a double tap', (WidgetTester tester) async {
+  testWidgets('a tap and then force press initiates a force press and not a double tap', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     const int pointerValue = 1;
