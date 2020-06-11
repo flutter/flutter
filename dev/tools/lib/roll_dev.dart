@@ -133,10 +133,7 @@ bool run({
     }
   }
 
-  if (skipTagging) {
-    // ensure tag already exist
-    // TODO
-  } else {
+  if (!skipTagging) {
     git.run('tag $version', 'tag the commit with the version label');
     git.run('push $origin $version', 'publish the version');
   }

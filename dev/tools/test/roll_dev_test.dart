@@ -78,7 +78,7 @@ void main() {
         commit: commit,
         origin: origin,
       );
-      final String errorMessage = 'The remote named $origin is set to $remote, when $kUpstreamRemote was expected.';
+      const String errorMessage = 'The remote named $origin is set to $remote, when $kUpstreamRemote was expected.';
       expect(
         () => run(
           usage: usage,
