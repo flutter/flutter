@@ -237,7 +237,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
         super(key: key, child: null);
 
   /// {@macro flutter.dart:ui.textHeightBehavior}
-  final ui.TextHeightBehavior textHeightBehavior;
+  final TextHeightBehavior textHeightBehavior;
 
   /// The closest instance of this class that encloses the given context.
   ///
