@@ -70,56 +70,82 @@ static int gdk_keyval_to_glfw_key_code(guint keyval) {
     case GDK_KEY_equal:
       return 61;
     case GDK_KEY_a:
+    case GDK_KEY_A:
       return 65;
     case GDK_KEY_b:
+    case GDK_KEY_B:
       return 66;
     case GDK_KEY_c:
+    case GDK_KEY_C:
       return 67;
     case GDK_KEY_d:
+    case GDK_KEY_D:
       return 68;
     case GDK_KEY_e:
+    case GDK_KEY_E:
       return 69;
     case GDK_KEY_f:
+    case GDK_KEY_F:
       return 70;
     case GDK_KEY_g:
+    case GDK_KEY_G:
       return 71;
     case GDK_KEY_h:
+    case GDK_KEY_H:
       return 72;
     case GDK_KEY_i:
+    case GDK_KEY_I:
       return 73;
     case GDK_KEY_j:
+    case GDK_KEY_J:
       return 74;
     case GDK_KEY_k:
+    case GDK_KEY_K:
       return 75;
     case GDK_KEY_l:
+    case GDK_KEY_L:
       return 76;
     case GDK_KEY_m:
+    case GDK_KEY_M:
       return 77;
     case GDK_KEY_n:
+    case GDK_KEY_N:
       return 78;
     case GDK_KEY_o:
+    case GDK_KEY_O:
       return 79;
     case GDK_KEY_p:
+    case GDK_KEY_P:
       return 80;
     case GDK_KEY_q:
+    case GDK_KEY_Q:
       return 81;
     case GDK_KEY_r:
+    case GDK_KEY_R:
       return 82;
     case GDK_KEY_s:
+    case GDK_KEY_S:
       return 83;
     case GDK_KEY_t:
+    case GDK_KEY_T:
       return 84;
     case GDK_KEY_u:
+    case GDK_KEY_U:
       return 85;
     case GDK_KEY_v:
+    case GDK_KEY_V:
       return 86;
     case GDK_KEY_w:
+    case GDK_KEY_W:
       return 87;
     case GDK_KEY_x:
+    case GDK_KEY_X:
       return 88;
     case GDK_KEY_y:
+    case GDK_KEY_Y:
       return 89;
     case GDK_KEY_z:
+    case GDK_KEY_Z:
       return 90;
     case GDK_KEY_bracketleft:
       return 91;
@@ -132,6 +158,7 @@ static int gdk_keyval_to_glfw_key_code(guint keyval) {
     case GDK_KEY_Return:
       return 257;
     case GDK_KEY_Tab:
+    case GDK_KEY_ISO_Left_Tab:
       return 258;
     case GDK_KEY_BackSpace:
       return 259;
