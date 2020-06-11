@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/test/test_compiler.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 import '../src/testbed.dart';
 
 final Platform linuxPlatform = FakePlatform(
@@ -32,7 +33,7 @@ void main() {
         },
         setup: () async {
           globals.fs.file('pubspec.yaml').createSync();
-          globals.fs.file('.packages').createSync();
+          globals.fs.file('.packages').writeAsStringSync('flutter_test:flutter_test/');
           globals.fs.file('test/foo.dart').createSync(recursive: true);
           residentCompiler = MockResidentCompiler();
           testCompiler = FakeTestCompiler(
@@ -85,6 +86,19 @@ void main() {
 
       expect(testCompiler.compilerController.isClosed, true);
       verify(residentCompiler.shutdown()).called(1);
+    }));
+
+    test('Reports an error when there is no dependency on flutter_test', () => testbed.run(() async {
+      globals.fs.file('.packages').writeAsStringSync('\n');
+
+      expect(await testCompiler.compile(Uri.parse('test/foo.dart')), null);
+      expect(testLogger.errorText, contains('Error: cannot run without a dependency on "package:flutter_test"'));
+      verifyNever(residentCompiler.recompile(
+        any,
+        <Uri>[Uri.parse('test/foo.dart')],
+        outputPath: testCompiler.outputDill.path,
+        packageConfig: anyNamed('packageConfig'),
+      ));
     }));
   });
 }
