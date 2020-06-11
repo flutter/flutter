@@ -288,6 +288,10 @@ FlTextInputPlugin* fl_text_input_plugin_new(FlBinaryMessenger* messenger) {
 gboolean fl_text_input_plugin_filter_keypress(FlTextInputPlugin* self,
                                               GdkEventKey* event) {
   g_return_val_if_fail(FL_IS_TEXT_INPUT_PLUGIN(self), FALSE);
+
+  if (self->client_id == kClientIdUnset)
+    return FALSE;
+
   if (gtk_im_context_filter_keypress(self->im_context, event))
     return TRUE;
 
