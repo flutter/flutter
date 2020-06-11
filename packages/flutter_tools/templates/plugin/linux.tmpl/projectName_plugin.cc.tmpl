@@ -43,12 +43,6 @@ static void {{pluginClassSnakeCase}}_class_init({{pluginClass}}Class* klass) {
   G_OBJECT_CLASS(klass)->dispose = {{pluginClassSnakeCase}}_dispose;
 }
 
-{{pluginClass}}* {{pluginClassSnakeCase}}_new() {
-  {{pluginClass}}* self = {{pluginClassCapitalSnakeCase}}(
-      g_object_new({{pluginClassSnakeCase}}_get_type(), nullptr));
-  return self;
-}
-
 static void {{pluginClassSnakeCase}}_init({{pluginClass}}* self) {}
 
 static void method_call_cb(FlMethodChannel* channel, FlMethodCall* method_call,
@@ -58,7 +52,8 @@ static void method_call_cb(FlMethodChannel* channel, FlMethodCall* method_call,
 }
 
 void {{pluginClassSnakeCase}}_register_with_registrar(FlPluginRegistrar* registrar) {
-  {{pluginClass}}* plugin = {{pluginClassSnakeCase}}_new();
+  {{pluginClass}}* plugin = {{pluginClassCapitalSnakeCase}}(
+      g_object_new({{pluginClassSnakeCase}}_get_type(), nullptr));
 
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   g_autoptr(FlMethodChannel) channel =
