@@ -233,6 +233,19 @@ public class DartExecutor implements BinaryMessenger {
   }
 
   /**
+   * Notify the Dart VM of a low memory event, or that the application is in a state such that now
+   * is an appropriate time to free resources, such as going to the background.
+   *
+   * <p>This does not notify a Flutter application about memory pressure. For that, use the {@link
+   * SystemChannel#sendMemoryPressureWarning}.
+   */
+  public void notifyLowMemoryWarning() {
+    if (flutterJNI.isAttached()) {
+      flutterJNI.notifyLowMemoryWarning();
+    }
+  }
+
+  /**
    * Configuration options that specify which Dart entrypoint function is executed and where to find
    * that entrypoint and other assets required for Dart execution.
    */
