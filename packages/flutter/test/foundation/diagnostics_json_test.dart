@@ -16,7 +16,7 @@ void main() {
     expect(json['stateful'], isFalse);
   });
 
-  test('StatefulElement diganostics are stateful', () {
+  test('StatefulElement diagnostics are stateful', () {
     final Element element = StatefulElement(const Tooltip(message: 'foo'));
 
     final Map<String, Object> json = element.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate());

@@ -329,7 +329,7 @@ class _SearchPageRoute<T> extends PageRoute<T> {
       delegate._route == null,
       'The ${delegate.runtimeType} instance is currently used by another active '
       'search. Please close that search by calling close() on the SearchDelegate '
-      'before openening another search with the same delegate instance.',
+      'before opening another search with the same delegate instance.',
     );
     delegate._route = this;
   }

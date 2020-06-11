@@ -190,7 +190,7 @@ void main() {
     expect(find.text('a: 2 b: 2 c: 3'), findsOneWidget);
   });
 
-  testWidgets('Looking up an non existent InherintedModel ancestor returns null', (WidgetTester tester) async {
+  testWidgets('Looking up an non existent InheritedModel ancestor returns null', (WidgetTester tester) async {
     ABCModel inheritedModel;
 
     await tester.pumpWidget(

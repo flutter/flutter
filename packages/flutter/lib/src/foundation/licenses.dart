@@ -288,7 +288,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
 ///  * [AboutListTile], which is a widget that can be added to a [Drawer]. When
 ///    tapped it calls [showAboutDialog].
 class LicenseRegistry {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   LicenseRegistry._();

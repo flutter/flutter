@@ -43,7 +43,7 @@ void main() {
     expect(find.byType(Scrollbar), paints..rect(rect: const Rect.fromLTRB(0.0, 1.5, 6.0, 91.5)));
   });
 
-  testWidgets('workds with MaterialApp and Scaffold', (WidgetTester tester) async {
+  testWidgets('works with MaterialApp and Scaffold', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(
         data: const MediaQueryData(

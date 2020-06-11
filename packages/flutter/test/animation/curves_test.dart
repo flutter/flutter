@@ -125,7 +125,7 @@ void main() {
     ];
   }
 
-  test('Ellastic overshoots its bounds', () {
+  test('Elastic overshoots its bounds', () {
     expect(Curves.elasticIn, hasOneLineDescription);
     expect(Curves.elasticOut, hasOneLineDescription);
     expect(Curves.elasticInOut, hasOneLineDescription);

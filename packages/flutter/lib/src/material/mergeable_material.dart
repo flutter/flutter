@@ -436,7 +436,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
         }
       } else {
         // Check whether the items are the same type. If they are, it means that
-        // their places have been swaped.
+        // their places have been swapped.
         if ((_children[j] is MaterialGap) == (newChildren[i] is MaterialGap)) {
           _children[j] = newChildren[i];
 

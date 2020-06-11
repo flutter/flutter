@@ -93,7 +93,7 @@ class MouseTrackerAnnotation with Diagnosticable {
   ///
   ///  * [onEnter], which is triggered when a mouse pointer enters the region.
   ///  * [MouseRegion.onExit], which uses this callback, but is not triggered in
-  ///    certain cases and does not always match its earier [MouseRegion.onEnter].
+  ///    certain cases and does not always match its earlier [MouseRegion.onEnter].
   final PointerExitEventListener onExit;
 
   /// The mouse cursor for mouse pointers that are hovering over the region.
@@ -103,7 +103,7 @@ class MouseTrackerAnnotation with Diagnosticable {
   /// found at the new location.
   ///
   /// Defaults to [MouseCursor.defer], deferring the choice of cursor to the next
-  /// region behing it in hit-test order.
+  /// region behind it in hit-test order.
   ///
   /// See also:
   ///
@@ -582,10 +582,10 @@ mixin _MouseTrackerEventMixin on BaseMouseTracker {
   }
 }
 
-/// Trackes the relationship between mouse devices and annotations, and
+/// Tracks the relationship between mouse devices and annotations, and
 /// triggers mouse events and cursor changes accordingly.
 ///
-/// The [MouseTracker] trackes the relationship between mouse devices and
+/// The [MouseTracker] tracks the relationship between mouse devices and
 /// [MouseTrackerAnnotation]s, and when such relationship changes, triggers
 /// the following changes if applicable:
 ///

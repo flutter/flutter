@@ -8,7 +8,7 @@ import 'system_channels.dart';
 
 /// Controls specific aspects of the system navigation stack.
 class SystemNavigator {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   SystemNavigator._();

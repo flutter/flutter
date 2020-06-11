@@ -947,7 +947,7 @@ TextInputAction _toTextInputAction(String action) {
       return TextInputAction.send;
     case 'TextInputAction.next':
       return TextInputAction.next;
-    case 'TextInputAction.previuos':
+    case 'TextInputAction.previous':
       return TextInputAction.previous;
     case 'TextInputAction.continue_action':
       return TextInputAction.continueAction;

@@ -922,7 +922,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Dismissable.confirmDismiss defers to an AlertDialog', (WidgetTester tester) async {
+  testWidgets('Dismissible.confirmDismiss defers to an AlertDialog', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     final List<int> dismissedItems = <int>[];
 

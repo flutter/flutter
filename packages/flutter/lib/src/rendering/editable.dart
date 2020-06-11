@@ -794,7 +794,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _textLayoutLastMinWidth = null;
   }
 
-  // Retuns a cached plain text version of the text in the painter.
+  // Returns a cached plain text version of the text in the painter.
   String _cachedPlainText;
   String get _plainText {
     _cachedPlainText ??= _textPainter.text.toPlainText();

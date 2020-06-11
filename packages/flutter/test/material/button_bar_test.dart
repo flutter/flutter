@@ -111,7 +111,7 @@ void main() {
       expect(buttonBarRect.size.width, equals(800.0));
       expect(buttonBarRect.size.height, equals(100.0));
 
-      // The children of [ButtonBar] are aligned by [MainAxisAligment.end] by
+      // The children of [ButtonBar] are aligned by [MainAxisAlignment.end] by
       // default.
       Rect childRect;
       childRect = tester.getRect(find.byKey(child0Key));
@@ -218,7 +218,7 @@ void main() {
       expect(buttonBarRect.size.width, equals(800.0));
       expect(buttonBarRect.size.height, equals(100.0));
 
-      // The children of [ButtonBar] are aligned by [MainAxisAligment.end] by
+      // The children of [ButtonBar] are aligned by [MainAxisAlignment.end] by
       // default.
       Rect childRect;
       childRect = tester.getRect(find.byKey(child0Key));
@@ -238,7 +238,7 @@ void main() {
     });
   });
 
-  group('button properies override ButtonTheme', () {
+  group('button properties override ButtonTheme', () {
 
     testWidgets('default button properties override ButtonTheme properties', (WidgetTester tester) async {
       BuildContext capturedContext;
