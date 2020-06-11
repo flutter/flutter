@@ -22,17 +22,17 @@ class _TimePickerLauncher extends StatelessWidget {
       home: Material(
         child: Center(
           child: Builder(
-              builder: (BuildContext context) {
-                return RaisedButton(
-                  child: const Text('X'),
-                  onPressed: () async {
-                    onChanged(await showTimePicker(
-                      context: context,
-                      initialTime: const TimeOfDay(hour: 7, minute: 0),
-                    ));
-                  },
-                );
-              }
+            builder: (BuildContext context) {
+              return RaisedButton(
+                child: const Text('X'),
+                onPressed: () async {
+                  onChanged(await showTimePicker(
+                    context: context,
+                    initialTime: const TimeOfDay(hour: 7, minute: 0),
+                  ));
+                },
+              );
+            }
           ),
         ),
       ),
@@ -41,10 +41,10 @@ class _TimePickerLauncher extends StatelessWidget {
 }
 
 Future<Offset> startPicker(
-    WidgetTester tester,
-    ValueChanged<TimeOfDay> onChanged, {
-      Locale locale = const Locale('en', 'US'),
-    }) async {
+  WidgetTester tester,
+  ValueChanged<TimeOfDay> onChanged, {
+    Locale locale = const Locale('en', 'US'),
+}) async {
   await tester.pumpWidget(_TimePickerLauncher(onChanged: onChanged, locale: locale,));
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));

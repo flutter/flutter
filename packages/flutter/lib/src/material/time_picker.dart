@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -84,10 +86,10 @@ class _TimePickerFragmentContext {
     @required this.onModeChange,
     @required this.use24HourDials,
   }) : assert(selectedTime != null),
-        assert(mode != null),
-        assert(onTimeChange != null),
-        assert(onModeChange != null),
-        assert(use24HourDials != null);
+       assert(mode != null),
+       assert(onTimeChange != null),
+       assert(onModeChange != null),
+       assert(use24HourDials != null);
 
   final TimeOfDay selectedTime;
   final _TimePickerMode mode;
@@ -106,9 +108,9 @@ class _TimePickerHeader extends StatelessWidget {
     @required this.use24HourDials,
     @required this.helpText,
   }) : assert(selectedTime != null),
-        assert(mode != null),
-        assert(orientation != null),
-        assert(use24HourDials != null);
+       assert(mode != null),
+       assert(orientation != null),
+       assert(use24HourDials != null);
 
   final TimeOfDay selectedTime;
   final _TimePickerMode mode;
@@ -832,8 +834,8 @@ class _Dial extends StatefulWidget {
     @required this.onChanged,
     @required this.onHourSelected,
   }) : assert(selectedTime != null),
-        assert(mode != null),
-        assert(use24HourDials != null);
+       assert(mode != null),
+       assert(use24HourDials != null);
 
   final TimeOfDay selectedTime;
   final _TimePickerMode mode;
@@ -855,8 +857,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     );
     _thetaTween = Tween<double>(begin: _getThetaForTime(widget.selectedTime));
     _theta = _thetaController
-        .drive(CurveTween(curve: standardEasing))
-        .drive(_thetaTween)
+      .drive(CurveTween(curve: standardEasing))
+      .drive(_thetaTween)
       ..addListener(() => setState(() { /* _theta.value has changed */ }));
   }
 
@@ -934,9 +936,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         // Round the minutes to nearest 5 minute interval.
         minute = ((minute + 2) ~/ 5) * 5 % TimeOfDay.minutesPerHour;
       }
-      return widget.selectedTime.replacing(
-          minute: minute
-      );
+      return widget.selectedTime.replacing(minute: minute);
     }
   }
 
@@ -1100,7 +1100,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         textTheme,
         timeOfDay.hour,
         localizations.formatHour(timeOfDay, alwaysUse24HourFormat: media.alwaysUse24HourFormat),
-            () {
+        () {
           _selectHour(timeOfDay.hour);
         },
       ),
@@ -1112,7 +1112,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         textTheme,
         timeOfDay.hour,
         localizations.formatHour(timeOfDay, alwaysUse24HourFormat: media.alwaysUse24HourFormat),
-            () {
+        () {
           _selectHour(timeOfDay.hour);
         },
       ),
@@ -1140,7 +1140,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
           textTheme,
           timeOfDay.minute,
           localizations.formatMinute(timeOfDay),
-              () {
+          () {
             _selectMinute(timeOfDay.minute);
           },
         ),
@@ -1205,7 +1205,7 @@ class _TimePickerInput extends StatefulWidget {
     @required this.helpText,
     @required this.onChanged,
   }) : assert(initialSelectedTime != null),
-        super(key: key);
+       super(key: key);
 
   /// The time initially selected when the dialog is shown.
   final TimeOfDay initialSelectedTime;
@@ -1549,7 +1549,7 @@ class _TimePickerDialog extends StatefulWidget {
     @required this.helpText,
     this.initialEntryMode = TimePickerEntryMode.dial,
   }) : assert(initialTime != null),
-        super(key: key);
+       super(key: key);
 
   /// The time initially selected when the dialog is shown.
   final TimeOfDay initialTime;
@@ -1924,15 +1924,12 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// to add inherited widgets like [Localizations.override],
 /// [Directionality], or [MediaQuery].
 ///
-/// The [helpText] parameter can be used to
-/// customize the help text in the header of the picker.
-///
 /// The [entryMode] parameter can be used to
 /// determine the initial time entry selection of the picker (either a clock
 /// dial or text input).
 ///
-/// Optional strings for the [cancelText] and [confirmText] can be provided to
-/// override the default values.
+/// Optional strings for the [helpText], [cancelText], and [confirmText] can be
+/// provided to override the default values.
 ///
 /// {@tool snippet}
 /// Show a dialog with the text direction overridden to be [TextDirection.rtl].

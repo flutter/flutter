@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show Color, hashList, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
@@ -532,68 +534,68 @@ class ThemeData with Diagnosticable {
     @required this.timePickerTheme,
     @required this.fixTextFieldOutlineLabel,
   }) : assert(visualDensity != null),
-        assert(primaryColor != null),
-        assert(primaryColorBrightness != null),
-        assert(primaryColorLight != null),
-        assert(primaryColorDark != null),
-        assert(accentColor != null),
-        assert(accentColorBrightness != null),
-        assert(canvasColor != null),
-        assert(scaffoldBackgroundColor != null),
-        assert(bottomAppBarColor != null),
-        assert(cardColor != null),
-        assert(dividerColor != null),
-        assert(focusColor != null),
-        assert(hoverColor != null),
-        assert(highlightColor != null),
-        assert(splashColor != null),
-        assert(splashFactory != null),
-        assert(selectedRowColor != null),
-        assert(unselectedWidgetColor != null),
-        assert(disabledColor != null),
-        assert(toggleableActiveColor != null),
-        assert(buttonTheme != null),
-        assert(toggleButtonsTheme != null),
-        assert(secondaryHeaderColor != null),
-        assert(textSelectionColor != null),
-        assert(cursorColor != null),
-        assert(textSelectionHandleColor != null),
-        assert(backgroundColor != null),
-        assert(dialogBackgroundColor != null),
-        assert(indicatorColor != null),
-        assert(hintColor != null),
-        assert(errorColor != null),
-        assert(textTheme != null),
-        assert(primaryTextTheme != null),
-        assert(accentTextTheme != null),
-        assert(inputDecorationTheme != null),
-        assert(iconTheme != null),
-        assert(primaryIconTheme != null),
-        assert(accentIconTheme != null),
-        assert(sliderTheme != null),
-        assert(tabBarTheme != null),
-        assert(tooltipTheme != null),
-        assert(cardTheme != null),
-        assert(chipTheme != null),
-        assert(platform != null),
-        assert(materialTapTargetSize != null),
-        assert(pageTransitionsTheme != null),
-        assert(appBarTheme != null),
-        assert(bottomAppBarTheme != null),
-        assert(colorScheme != null),
-        assert(dialogTheme != null),
-        assert(floatingActionButtonTheme != null),
-        assert(navigationRailTheme != null),
-        assert(typography != null),
-        assert(snackBarTheme != null),
-        assert(bottomSheetTheme != null),
-        assert(popupMenuTheme != null),
-        assert(bannerTheme != null),
-        assert(dividerTheme != null),
-        assert(buttonBarTheme != null),
-        assert(bottomNavigationBarTheme != null),
-        assert(timePickerTheme != null),
-        assert(fixTextFieldOutlineLabel != null);
+       assert(primaryColor != null),
+       assert(primaryColorBrightness != null),
+       assert(primaryColorLight != null),
+       assert(primaryColorDark != null),
+       assert(accentColor != null),
+       assert(accentColorBrightness != null),
+       assert(canvasColor != null),
+       assert(scaffoldBackgroundColor != null),
+       assert(bottomAppBarColor != null),
+       assert(cardColor != null),
+       assert(dividerColor != null),
+       assert(focusColor != null),
+       assert(hoverColor != null),
+       assert(highlightColor != null),
+       assert(splashColor != null),
+       assert(splashFactory != null),
+       assert(selectedRowColor != null),
+       assert(unselectedWidgetColor != null),
+       assert(disabledColor != null),
+       assert(toggleableActiveColor != null),
+       assert(buttonTheme != null),
+       assert(toggleButtonsTheme != null),
+       assert(secondaryHeaderColor != null),
+       assert(textSelectionColor != null),
+       assert(cursorColor != null),
+       assert(textSelectionHandleColor != null),
+       assert(backgroundColor != null),
+       assert(dialogBackgroundColor != null),
+       assert(indicatorColor != null),
+       assert(hintColor != null),
+       assert(errorColor != null),
+       assert(textTheme != null),
+       assert(primaryTextTheme != null),
+       assert(accentTextTheme != null),
+       assert(inputDecorationTheme != null),
+       assert(iconTheme != null),
+       assert(primaryIconTheme != null),
+       assert(accentIconTheme != null),
+       assert(sliderTheme != null),
+       assert(tabBarTheme != null),
+       assert(tooltipTheme != null),
+       assert(cardTheme != null),
+       assert(chipTheme != null),
+       assert(platform != null),
+       assert(materialTapTargetSize != null),
+       assert(pageTransitionsTheme != null),
+       assert(appBarTheme != null),
+       assert(bottomAppBarTheme != null),
+       assert(colorScheme != null),
+       assert(dialogTheme != null),
+       assert(floatingActionButtonTheme != null),
+       assert(navigationRailTheme != null),
+       assert(typography != null),
+       assert(snackBarTheme != null),
+       assert(bottomSheetTheme != null),
+       assert(popupMenuTheme != null),
+       assert(bannerTheme != null),
+       assert(dividerTheme != null),
+       assert(buttonBarTheme != null),
+       assert(bottomNavigationBarTheme != null),
+       assert(timePickerTheme != null),
+       assert(fixTextFieldOutlineLabel != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -1206,7 +1208,7 @@ class ThemeData with Diagnosticable {
 
   /// Caches localized themes to speed up the [localize] method.
   static final _FifoCache<_IdentityThemeDataCacheKey, ThemeData> _localizedThemeDataCache =
-  _FifoCache<_IdentityThemeDataCacheKey, ThemeData>(_localizedThemeDataCacheSize);
+      _FifoCache<_IdentityThemeDataCacheKey, ThemeData>(_localizedThemeDataCacheSize);
 
   /// Returns a new theme built by merging the text geometry provided by the
   /// [localTextGeometry] theme with the [baseTheme].
@@ -1233,7 +1235,7 @@ class ThemeData with Diagnosticable {
 
     return _localizedThemeDataCache.putIfAbsent(
       _IdentityThemeDataCacheKey(baseTheme, localTextGeometry),
-          () {
+      () {
         return baseTheme.copyWith(
           primaryTextTheme: localTextGeometry.merge(baseTheme.primaryTextTheme),
           accentTextTheme: localTextGeometry.merge(baseTheme.accentTextTheme),
@@ -1606,14 +1608,14 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   );
 
   MaterialBasedCupertinoThemeData._(
-      this._materialTheme,
-      this._cupertinoOverrideTheme,
-      ) : assert(_materialTheme != null),
-        assert(_cupertinoOverrideTheme != null),
-  // Pass all values to the superclass so Material-agnostic properties
-  // like barBackgroundColor can still behave like a normal
-  // CupertinoThemeData.
-        super.raw(
+    this._materialTheme,
+    this._cupertinoOverrideTheme,
+  ) : assert(_materialTheme != null),
+      assert(_cupertinoOverrideTheme != null),
+      // Pass all values to the superclass so Material-agnostic properties
+      // like barBackgroundColor can still behave like a normal
+      // CupertinoThemeData.
+      super.raw(
         _cupertinoOverrideTheme.brightness,
         _cupertinoOverrideTheme.primaryColor,
         _cupertinoOverrideTheme.primaryContrastingColor,
@@ -1770,11 +1772,11 @@ class VisualDensity with Diagnosticable {
     this.horizontal = 0.0,
     this.vertical = 0.0,
   }) : assert(horizontal != null),
-        assert(vertical != null),
-        assert(vertical <= maximumDensity),
-        assert(vertical >= minimumDensity),
-        assert(horizontal <= maximumDensity),
-        assert(horizontal >= minimumDensity);
+       assert(vertical != null),
+       assert(vertical <= maximumDensity),
+       assert(vertical >= minimumDensity),
+       assert(horizontal <= maximumDensity),
+       assert(horizontal >= minimumDensity);
 
   /// The minimum allowed density.
   static const double minimumDensity = -4.0;
