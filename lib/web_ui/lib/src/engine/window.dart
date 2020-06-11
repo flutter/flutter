@@ -17,6 +17,12 @@ ui.VoidCallback scheduleFrameCallback;
 class EngineWindow extends ui.Window {
   EngineWindow() {
     _addBrightnessMediaQueryListener();
+    js.context['_flutter_web_set_location_strategy'] = (LocationStrategy strategy) {
+      locationStrategy = strategy;
+    };
+    registerHotRestartListener(() {
+      js.context['_flutter_web_set_location_strategy'] = null;
+    });
   }
 
   @override
@@ -177,6 +183,10 @@ class EngineWindow extends ui.Window {
   set locationStrategy(LocationStrategy strategy) {
     _browserHistory.locationStrategy = strategy;
   }
+
+  /// Returns the currently active location strategy.
+  @visibleForTesting
+  LocationStrategy get locationStrategy => _browserHistory.locationStrategy;
 
   @override
   ui.VoidCallback get onTextScaleFactorChanged => _onTextScaleFactorChanged;
