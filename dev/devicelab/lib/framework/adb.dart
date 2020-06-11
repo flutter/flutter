@@ -70,7 +70,7 @@ abstract class DeviceDiscovery {
       case DeviceOperatingSystem.mock:
         print('Looking for mock devices!'
               'You should not see this in release builds.');
-        return MockDeviceDiscovery();
+        return FakeDeviceDiscovery();
       default:
         throw DeviceException('Unsupported device operating system: $deviceOperatingSystem');
     }
@@ -153,8 +153,6 @@ abstract class Device {
 }
 
 class AndroidDeviceDiscovery implements DeviceDiscovery {
-  // implements DeviceDIscovery not extends to avoid calling constructor of 
-  // DeviceDiscovery
   factory AndroidDeviceDiscovery() {
     return _instance ??= AndroidDeviceDiscovery._();
   }
@@ -206,13 +204,12 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     if (deviceId != null) {
       _workingDevice = AndroidDevice(deviceId: deviceId);
       print('Choose device by ID: ' + _workingDevice.toString());
+      return;
     }
-    else {
-      throw DeviceException(
-        'Device with ID $deviceId is not found for operating system: '
-        '$deviceOperatingSystem'
-        );
-    }
+    throw DeviceException(
+      'Device with ID $deviceId is not found for operating system: '
+      '$deviceOperatingSystem'
+      );
   }
 
   @override
@@ -326,14 +323,12 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
     if (deviceId != null) {
       _workingDevice = FuchsiaDevice(deviceId: deviceId);
       print('Choose device by ID: ' + _workingDevice.toString());
+      return;
     }
-    else {
-      throw DeviceException(
-        'Device with ID $deviceId is not found for operating system: '
-        '$deviceOperatingSystem'
-        );
-    }
-    return workingDevice;
+    throw DeviceException(
+      'Device with ID $deviceId is not found for operating system: '
+      '$deviceOperatingSystem'
+      );
   }
 
   @override
@@ -629,14 +624,12 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     if (deviceId != null) {
       _workingDevice = IosDevice(deviceId: deviceId);
       print('Choose device by ID: ' + _workingDevice.toString());
+      return;
     }
-    else {
-      throw DeviceException(
-        'Device with ID $deviceId is not found for operating system: '
-        '$deviceOperatingSystem'
-        );
-    }
-    return workingDevice;
+    throw DeviceException(
+      'Device with ID $deviceId is not found for operating system: '
+      '$deviceOperatingSystem'
+      );
   }
 
   @override
@@ -812,8 +805,8 @@ String get adbPath {
   return path.absolute(adbPath);
 }
 
-class MockDevice extends Device {
-  const MockDevice({ @required this.deviceId });
+class FakeDevice extends Device {
+  const FakeDevice({ @required this.deviceId });
 
   @override
   final String deviceId;
@@ -855,19 +848,19 @@ class MockDevice extends Device {
   Future<void> stop(String packageName) async {}
 }
 
-class MockDeviceDiscovery implements DeviceDiscovery {
-  factory MockDeviceDiscovery() {
-    return _instance ??= MockDeviceDiscovery._();
+class FakeDeviceDiscovery implements DeviceDiscovery {
+  factory FakeDeviceDiscovery() {
+    return _instance ??= FakeDeviceDiscovery._();
   }
 
-  MockDeviceDiscovery._();
+  FakeDeviceDiscovery._();
 
-  static MockDeviceDiscovery _instance;
+  static FakeDeviceDiscovery _instance;
 
-  MockDevice _workingDevice;
+  FakeDevice _workingDevice;
 
   @override
-  Future<MockDevice> get workingDevice async {
+  Future<FakeDevice> get workingDevice async {
     if (_workingDevice == null) {
       if (Platform.environment.containsKey(DeviceIdEnvName)) {
         final String deviceId = Platform.environment[DeviceIdEnvName];
@@ -890,16 +883,14 @@ class MockDeviceDiscovery implements DeviceDiscovery {
   Future<void> chooseWorkingDeviceById(String deviceId) async {
     deviceId = _findMatchId(await discoverDevices(), deviceId);
     if (deviceId != null) {
-      _workingDevice = MockDevice(deviceId: deviceId);
+      _workingDevice = FakeDevice(deviceId: deviceId);
       print('Choose device by ID: ' + _workingDevice.toString());
+      return;
     }
-    else {
-      throw DeviceException(
-        'Device with ID $deviceId is not found for operating system: '
-        '$deviceOperatingSystem'
-        );
-    }
-    return workingDevice;
+    throw DeviceException(
+      'Device with ID $deviceId is not found for operating system: '
+      '$deviceOperatingSystem'
+      );
   }
 
   @override

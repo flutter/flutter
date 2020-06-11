@@ -32,10 +32,6 @@ Future<Map<String, dynamic>> runTask(
   if (!file(taskExecutable).existsSync())
     throw 'Executable Dart file not found: $taskExecutable';
 
-  Map<String, String> environment;
-  if (deviceId != null) {
-    environment ??= <String, String>{DeviceIdEnvName: deviceId};
-  }
   final Process runner = await startProcess(
     dartBin,
     <String>[
@@ -45,7 +41,10 @@ Future<Map<String, dynamic>> runTask(
       if (localEngineSrcPath != null) '-DlocalEngineSrcPath=$localEngineSrcPath',
       taskExecutable,
     ],
-    environment: environment,
+    environment: <String, String>{
+      if (deviceId != null)
+        DeviceIdEnvName: deviceId,
+    },
   );
 
   bool runnerFinished = false;
