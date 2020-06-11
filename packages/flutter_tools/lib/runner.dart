@@ -23,10 +23,6 @@ import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 
-// Used to test for regressions of https://github.com/flutter/flutter/issues/56406.
-@visibleForTesting
-Completer<void> runCompleted = Completer<void>();
-
 /// Runs the Flutter tool with support for the specified list of [commands].
 ///
 /// [commands] must be either `List<FlutterCommand>` or `List<FlutterCommand> Function()`.
@@ -72,7 +68,6 @@ Future<int> run(
     return await runZoned<Future<int>>(() async {
       try {
         await runner.run(args);
-        runCompleted.complete();
 
         // Triggering [runZoned]'s error callback does not necessarily mean that
         // we stopped executing the body.  See https://github.com/dart-lang/sdk/issues/42150.

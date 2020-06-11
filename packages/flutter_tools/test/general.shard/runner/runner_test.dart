@@ -94,6 +94,12 @@ void main() {
       Usage: () => CrashingUsage(),
     });
 
+    // This Completer completes when CrashingFlutterCommand.runCommand
+    // completes, but ideally we'd want it to complete when execution resumes
+    // runner.run.  Currently the distinction does not matter, but if it ever
+    // does, this test might fail to catch a regression of
+    // https://github.com/flutter/flutter/issues/56406.
+    final Completer<void> commandCompleter = Completer<void>();
     testUsingContext('error handling crash report (asynchronous crash)', () async {
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
@@ -103,7 +109,7 @@ void main() {
           unawaited(runner.run(
             <String>['crash'],
             <FlutterCommand>[
-              CrashingFlutterCommand(asyncCrash: true),
+              CrashingFlutterCommand(asyncCrash: true, completer: commandCompleter),
             ],
             // This flutterVersion disables crash reporting.
             flutterVersion: '[user-branch]/',
@@ -126,7 +132,8 @@ void main() {
       }),
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
-      CrashReporter: () => WaitingCrashReporter(runner.runCompleted.future),
+
+      CrashReporter: () => WaitingCrashReporter(commandCompleter.future),
     });
 
     testUsingContext('create local report', () async {
@@ -191,9 +198,14 @@ void main() {
 }
 
 class CrashingFlutterCommand extends FlutterCommand {
-  CrashingFlutterCommand({this.asyncCrash = false});
+  CrashingFlutterCommand({
+    bool asyncCrash = false,
+    Completer<void> completer,
+  }) :  _asyncCrash = asyncCrash,
+        _completer = completer;
 
-  final bool asyncCrash;
+  final bool _asyncCrash;
+  final Completer<void> _completer;
 
   @override
   String get description => null;
@@ -204,7 +216,7 @@ class CrashingFlutterCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     const String error = 'an exception % --'; // Test URL encoding.
-    if (!asyncCrash) {
+    if (!_asyncCrash) {
       throw error;
     }
 
@@ -215,6 +227,8 @@ class CrashingFlutterCommand extends FlutterCommand {
     });
 
     await completer.future;
+    _completer.complete();
+
     return FlutterCommandResult.success();
   }
 }
