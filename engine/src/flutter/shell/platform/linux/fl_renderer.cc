@@ -68,7 +68,7 @@ static void create_resource_surface(FlRenderer* self, EGLConfig config) {
                                              EGL_NONE};
   priv->resource_surface = eglCreatePbufferSurface(priv->egl_display, config,
                                                    resource_context_attribs);
-  if (priv->resource_surface != nullptr) {
+  if (priv->resource_surface == nullptr) {
     g_warning("Failed to create EGL resource surface: %s", get_egl_error());
     return;
   }
