@@ -62,11 +62,13 @@ task:
         ./txt_benchmarks --benchmark_format=json > txt_benchmarks.json
         ./fml_benchmarks --benchmark_format=json > fml_benchmarks.json
         ./shell_benchmarks --benchmark_format=json > shell_benchmarks.json
+        ./ui_benchmarks --benchmark_format=json > ui_benchmarks.json
         cd $ENGINE_PATH/src/flutter/testing/benchmark
         pub get
         dart bin/parse_and_send.dart ../../../out/host_release/txt_benchmarks.json
         dart bin/parse_and_send.dart ../../../out/host_release/fml_benchmarks.json
         dart bin/parse_and_send.dart ../../../out/host_release/shell_benchmarks.json
+        dart bin/parse_and_send.dart ../../../out/host_release/ui_benchmarks.json
     - name: build_and_test_linux_release
       compile_host_script: |
         cd $ENGINE_PATH/src

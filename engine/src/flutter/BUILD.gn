@@ -83,6 +83,7 @@ group("flutter") {
     if (!is_win) {
       public_deps += [
         "//flutter/fml:fml_benchmarks",
+        "//flutter/lib/ui:ui_benchmarks",
         "//flutter/shell/common:shell_benchmarks",
         "//flutter/third_party/txt:txt_benchmarks",
       ]

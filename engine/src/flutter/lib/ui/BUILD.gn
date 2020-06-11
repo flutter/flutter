@@ -180,4 +180,22 @@ if (current_toolchain == host_toolchain) {
       "//third_party/dart/runtime/bin:elf_loader",
     ]
   }
+
+  executable("ui_benchmarks") {
+    testonly = true
+
+    configs += [ "//flutter:export_dynamic_symbols" ]
+
+    sources = [
+      "ui_benchmarks.cc",
+    ]
+
+    deps = [
+      ":ui",
+      ":ui_unittests_fixtures",
+      "//flutter/benchmarking",
+      "//flutter/shell/common:common",
+      "//flutter/testing:fixture_test",
+    ]
+  }
 }

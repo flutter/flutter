@@ -160,6 +160,8 @@ def RunEngineBenchmarks(build_dir, filter):
 
   RunEngineExecutable(build_dir, 'fml_benchmarks', filter)
 
+  RunEngineExecutable(build_dir, 'ui_benchmarks', filter)
+
   if IsLinux():
     RunEngineExecutable(build_dir, 'txt_benchmarks', filter)
 

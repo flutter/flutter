@@ -40,3 +40,7 @@ void _validateVertices(Vertices vertices) native 'ValidateVertices';
 void frameCallback(FrameInfo info) {
   print('called back');
 }
+
+@pragma('vm:entry-point')
+void messageCallback(dynamic data) {
+}
