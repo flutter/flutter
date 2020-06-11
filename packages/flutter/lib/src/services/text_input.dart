@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:ui' show
@@ -947,7 +949,7 @@ TextInputAction _toTextInputAction(String action) {
       return TextInputAction.send;
     case 'TextInputAction.next':
       return TextInputAction.next;
-    case 'TextInputAction.previuos':
+    case 'TextInputAction.previous':
       return TextInputAction.previous;
     case 'TextInputAction.continue_action':
       return TextInputAction.continueAction;

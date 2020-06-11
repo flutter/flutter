@@ -53,7 +53,7 @@ class WaitFor extends CommandWithTarget {
   /// Creates a command that waits for the widget identified by [finder] to
   /// appear within the [timeout] amount of time.
   ///
-  /// If [timeout] is not specified the command times out after 5 seconds.
+  /// If [timeout] is not specified, the command defaults to no timeout.
   WaitFor(SerializableFinder finder, {Duration timeout})
     : super(finder, timeout: timeout);
 
@@ -83,7 +83,7 @@ class WaitForAbsent extends CommandWithTarget {
   /// Creates a command that waits for the widget identified by [finder] to
   /// disappear within the [timeout] amount of time.
   ///
-  /// If [timeout] is not specified the command times out after 5 seconds.
+  /// If [timeout] is not specified, the command defaults to no timeout.
   WaitForAbsent(SerializableFinder finder, {Duration timeout})
     : super(finder, timeout: timeout);
 

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -167,8 +169,7 @@ void main() {
     expect(theme.button.fontFamily, 'Roboto');
     expect(theme.button.fontWeight, medium);
     expect(theme.button.fontSize, 14);
-    // TODO(hansmuller): restore after englishLike2018 has been updated, per #38904.
-    //expect(theme.button.letterSpacing, 1.25);
+    expect(theme.button.letterSpacing, 1.25);
 
     // Caption Roboto regular 12 0.4
     expect(theme.caption.fontFamily, 'Roboto');

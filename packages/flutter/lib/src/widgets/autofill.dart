@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/services.dart';
 import 'framework.dart';
 
@@ -125,7 +127,7 @@ class AutofillGroup extends StatefulWidget {
   ///
   /// See also:
   ///
-  /// * [EditableTextState], where this method is used to retrive the closest
+  /// * [EditableTextState], where this method is used to retrieve the closest
   ///   [AutofillGroupState].
   static AutofillGroupState of(BuildContext context) {
     final _AutofillScope scope = context.dependOnInheritedWidgetOfExactType<_AutofillScope>();

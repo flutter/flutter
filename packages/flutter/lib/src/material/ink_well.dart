@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
@@ -840,6 +842,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           referenceBox: referenceBox,
           color: getHighlightColorForType(type),
           shape: widget.highlightShape,
+          radius: widget.radius,
           borderRadius: widget.borderRadius,
           customBorder: widget.customBorder,
           rectCallback: widget.getRectCallback(referenceBox),

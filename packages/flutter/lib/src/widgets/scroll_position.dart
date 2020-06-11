@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -309,7 +311,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   void correctBy(double correction) {
     assert(
       _pixels != null,
-      'An initial pixels value must exist by caling correctPixels on the ScrollPosition',
+      'An initial pixels value must exist by calling correctPixels on the ScrollPosition',
     );
     _pixels += correction;
     _didChangeViewportDimensionOrReceiveCorrection = true;
