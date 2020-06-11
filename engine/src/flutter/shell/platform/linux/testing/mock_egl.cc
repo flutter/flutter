@@ -23,6 +23,12 @@ EGLContext eglCreateContext(EGLDisplay dpy,
   return nullptr;
 }
 
+EGLSurface eglCreatePbufferSurface(EGLDisplay dpy,
+                                   EGLConfig config,
+                                   const EGLint* attrib_list) {
+  return nullptr;
+}
+
 EGLSurface eglCreateWindowSurface(EGLDisplay dpy,
                                   EGLConfig config,
                                   EGLNativeWindowType win,
