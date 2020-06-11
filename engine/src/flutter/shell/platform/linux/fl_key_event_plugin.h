@@ -28,7 +28,8 @@ G_DECLARE_FINAL_TYPE(FlKeyEventPlugin,
  * fl_key_event_plugin_new:
  * @messenger: an #FlBinaryMessenger.
  *
- * Creates a #FlKeyEventPlugin.
+ * Creates a new plugin that implements SystemChannels.keyEvent from the
+ * Flutter services library.
  *
  * Returns: a new #FlKeyEventPlugin.
  */
