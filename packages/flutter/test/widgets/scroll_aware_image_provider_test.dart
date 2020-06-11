@@ -315,7 +315,7 @@ void main() {
     expect(imageCache.containsKey(testImageProvider), false);
     expect(imageCache.currentSize, 0);
 
-    // Simulate a case where somone else has managed to complete this stream -
+    // Simulate a case where someone else has managed to complete this stream -
     // so it can land in the cache right before we stop scrolling fast.
     // If we miss the early return, we will fail.
     testImageProvider.complete();
@@ -378,7 +378,7 @@ void main() {
     testImageProvider.complete();
     stream.setCompleter(testImageProvider.load(testImageProvider, PaintingBinding.instance.instantiateImageCodec));
 
-    // Verify that this hasn't chagned the cache state yet
+    // Verify that this hasn't changed the cache state yet
     expect(imageCache.containsKey(testImageProvider), false);
     expect(imageCache.containsKey(testImageProvider2), true);
     expect(imageCache.currentSize, 1);

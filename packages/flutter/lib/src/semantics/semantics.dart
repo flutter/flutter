@@ -4060,7 +4060,7 @@ abstract class SemanticsSortKey with Diagnosticable implements Comparable<Semant
 ///
 /// [OrdinalSortKey]s are sorted by the optional [name], then by their [order].
 /// If [SemanticsProperties.sortKey] is a [OrdinalSortKey], then all the other
-/// speficied sort keys in the same semantics group must also be
+/// specified sort keys in the same semantics group must also be
 /// [OrdinalSortKey]s.
 ///
 /// Keys with no [name] are compared to other keys with no [name], and will

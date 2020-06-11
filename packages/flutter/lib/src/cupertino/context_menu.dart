@@ -1091,7 +1091,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     );
   }
 
-  // Build the animation for the overall draggable dismissable content.
+  // Build the animation for the overall draggable dismissible content.
   Widget _buildAnimation(BuildContext context, Widget child) {
     return Transform.translate(
       offset: _moveAnimation.value,

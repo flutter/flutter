@@ -819,7 +819,7 @@ void main() {
       debugSemanticsDisableAnimations = null;
     });
 
-    test('AnimationBehavior.normal runs "faster" whan AnimationBehavior.preserve', () {
+    test('AnimationBehavior.normal runs "faster" than AnimationBehavior.preserve', () {
       debugSemanticsDisableAnimations = true;
       final AnimationController controller = AnimationController(
         vsync: const TestVSync(),

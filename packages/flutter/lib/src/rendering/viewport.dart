@@ -927,7 +927,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   ///
   /// The `parentMainAxisPosition` is a distance from the top edge (for vertical
   /// viewports) or left edge (for horizontal viewports) of the viewport bounds.
-  /// This describes a line, perpendicular to the viewport's main axis, heretofor
+  /// This describes a line, perpendicular to the viewport's main axis, heretofore
   /// known as the target line.
   ///
   /// The child's coordinate system's origin in the main axis is at the leading

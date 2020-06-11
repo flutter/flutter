@@ -913,7 +913,7 @@ void main() {
                     value: '0',
                     child: Text('Item 0'),
                   ),
-                  // This menu item's height parameter specifies its minium height. The
+                  // This menu item's height parameter specifies its minimum height. The
                   // overall height of the menu item will be 50 because the child's
                   // height 40, is less than 50.
                   const PopupMenuItem<String>(
@@ -924,7 +924,7 @@ void main() {
                       child: Text('Item 1'),
                     ),
                   ),
-                  // This menu item's height parameter specifies its minium height, so the
+                  // This menu item's height parameter specifies its minimum height, so the
                   // overall height of the menu item will be 75.
                   const PopupMenuItem<String>(
                     height: 75,

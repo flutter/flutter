@@ -93,7 +93,7 @@ void main() {
     expect(description[10], 'type: BottomNavigationBarType.fixed');
   });
 
-  testWidgets('BottomNavigationBar is themable', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar is themeable', (WidgetTester tester) async {
     const Color backgroundColor = Color(0xFF000001);
     const Color selectedItemColor = Color(0xFF000002);
     const Color unselectedItemColor = Color(0xFF000003);

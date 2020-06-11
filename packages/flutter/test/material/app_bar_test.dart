@@ -376,7 +376,7 @@ void main() {
 
     // Centering a title with width 700 within the 800 pixel wide test widget
     // would mean that its start edge would have to be 50. The material spec says
-    // that the start edge of the title must be atleast 72.
+    // that the start edge of the title must be at least 72.
     await tester.pumpWidget(buildApp());
 
     final Finder title = find.byKey(titleKey);
@@ -431,7 +431,7 @@ void main() {
 
     // Centering a title with width 700 within the 800 pixel wide test widget
     // would mean that its start edge would have to be 50. The material spec says
-    // that the start edge of the title must be atleast 72.
+    // that the start edge of the title must be at least 72.
     await tester.pumpWidget(buildApp());
 
     final Finder title = find.byKey(titleKey);
@@ -1257,7 +1257,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100));
 
     // Because the topPadding eliminates the vertical space for the
-    // NavigtationToolbar within the AppBar, the toolbar is constrained
+    // NavigationToolbar within the AppBar, the toolbar is constrained
     // with minHeight=maxHeight=0. The _AppBarTitle widget vertically centers
     // the title, so its Y coordinate relative to the toolbar is -kToolbarHeight / 2
     // (-28). The top of the toolbar is at (screen coordinates) y=100, so the

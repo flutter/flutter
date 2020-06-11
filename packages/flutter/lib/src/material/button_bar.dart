@@ -231,7 +231,7 @@ class ButtonBar extends StatelessWidget {
 /// the widget, it then aligns its buttons in a column. The key difference here
 /// is that the [MainAxisAlignment] will then be treated as a
 /// cross-axis/horizontal alignment. For example, if the buttons overflow and
-/// [ButtonBar.alignment] was set to [MainAxisAligment.start], the column of
+/// [ButtonBar.alignment] was set to [MainAxisAlignment.start], the column of
 /// buttons would align to the horizontal start of the button bar.
 class _ButtonBarRow extends Flex {
   /// Creates a button bar that attempts to display in a row, but displays in
@@ -299,7 +299,7 @@ class _ButtonBarRow extends Flex {
 /// the widget, it then aligns its buttons in a column. The key difference here
 /// is that the [MainAxisAlignment] will then be treated as a
 /// cross-axis/horizontal alignment. For example, if the buttons overflow and
-/// [ButtonBar.alignment] was set to [MainAxisAligment.start], the buttons would
+/// [ButtonBar.alignment] was set to [MainAxisAlignment.start], the buttons would
 /// align to the horizontal start of the button bar.
 class _RenderButtonBarRow extends RenderFlex {
   /// Creates a button bar that attempts to display in a row, but displays in
@@ -376,9 +376,9 @@ class _RenderButtonBarRow extends RenderFlex {
         child.layout(childConstraints, parentUsesSize: true);
 
         // Set the cross axis alignment for the column to match the main axis
-        // alignment for a row. For [MainAxisAligment.spaceAround],
-        // [MainAxisAligment.spaceBetween] and [MainAxisAlignment.spaceEvenly]
-        // cases, use [MainAxisAligmnent.start].
+        // alignment for a row. For [MainAxisAlignment.spaceAround],
+        // [MainAxisAlignment.spaceBetween] and [MainAxisAlignment.spaceEvenly]
+        // cases, use [MainAxisAlignment.start].
         switch (textDirection) {
           case TextDirection.ltr:
             switch (mainAxisAlignment) {

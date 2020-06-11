@@ -1086,7 +1086,7 @@ class TextStyle with Diagnosticable {
     return ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,
-      // Here, we stablish the contents of this TextStyle as the paragraph's default font
+      // Here, we establish the contents of this TextStyle as the paragraph's default font
       // unless an override is passed in.
       fontWeight: fontWeight ?? this.fontWeight,
       fontStyle: fontStyle ?? this.fontStyle,

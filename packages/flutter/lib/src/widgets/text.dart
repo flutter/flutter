@@ -55,7 +55,7 @@ class DefaultTextStyle extends InheritedTheme {
        assert(textWidthBasis != null),
        super(key: key, child: child);
 
-  /// A const-constructible default text style that provides fallback values.
+  /// A const-constructable default text style that provides fallback values.
   ///
   /// Returned from [of] when the given [BuildContext] doesn't have an enclosing default text style.
   ///

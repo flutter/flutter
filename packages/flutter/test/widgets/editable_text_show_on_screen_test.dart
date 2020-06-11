@@ -195,7 +195,7 @@ void main() {
     expect(find.byType(EditableText), findsNothing);
   });
 
-  testWidgets('entering text does not scroll a sourrounding PageView', (WidgetTester tester) async {
+  testWidgets('entering text does not scroll a surrounding PageView', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/19523
 
     final TextEditingController textController = TextEditingController();

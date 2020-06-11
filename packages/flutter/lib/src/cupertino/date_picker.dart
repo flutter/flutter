@@ -36,7 +36,7 @@ const double _kTimerPickerHalfColumnPadding = 2;
 const double _kTimerPickerLabelPadSize = 4.5;
 const double _kTimerPickerLabelFontSize = 17.0;
 
-// The width of each colmn of the countdown time picker.
+// The width of each column of the countdown time picker.
 const double _kTimerPickerColumnIntrinsicWidth = 106;
 // Unfortunately turning on magnification for the timer picker messes up the label
 // alignment. So we'll have to hard code the font size and turn magnification off
@@ -265,7 +265,7 @@ class CupertinoDatePicker extends StatefulWidget {
     );
     assert(
       mode != CupertinoDatePickerMode.date || (minimumYear >= 1 && this.initialDateTime.year >= minimumYear),
-      'initial year is not greater than minimum year, or mininum year is not positive',
+      'initial year is not greater than minimum year, or minimum year is not positive',
     );
     assert(
       mode != CupertinoDatePickerMode.date || maximumYear == null || this.initialDateTime.year <= maximumYear,
@@ -713,7 +713,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     );
   }
 
-  // With the meridem picker set to `meridiemIndex`, and the hour picker set to
+  // With the meridiem picker set to `meridiemIndex`, and the hour picker set to
   // `hourIndex`, is it possible to change the value of the minute picker, so
   // that the resulting date stays in the valid range.
   bool _isValidHour(int meridiemIndex, int hourIndex) {

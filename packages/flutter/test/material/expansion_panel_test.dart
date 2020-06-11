@@ -936,7 +936,7 @@ void main() {
       ),
     );
 
-    // Check the semantics of [ExpanIcon] for expanded panel.
+    // Check the semantics of [ExpandIcon] for expanded panel.
     final Finder expandedIcon = find.descendant(
       of: find.ancestor(
         of: find.byKey(expandedKey),
@@ -960,7 +960,7 @@ void main() {
       label: 'Expanded',
     ));
 
-    // Check the semantics of [ExpanIcon] for collapsed panel.
+    // Check the semantics of [ExpandIcon] for collapsed panel.
     final Finder collapsedIcon = find.descendant(
       of: find.ancestor(
         of: find.byKey(collapsedKey),

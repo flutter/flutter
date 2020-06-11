@@ -1378,7 +1378,7 @@ void main() {
     );
   });
 
-  testWidgets('ListTile can be triggerd by keyboard shortcuts', (WidgetTester tester) async {
+  testWidgets('ListTile can be triggered by keyboard shortcuts', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Key tileKey = Key('ListTile');
     bool tapped = false;

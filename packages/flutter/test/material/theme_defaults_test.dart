@@ -155,7 +155,7 @@ void main() {
       expect(raw.disabledElevation, 0.0);
       expect(raw.constraints, defaultButtonConstraints);
       expect(raw.padding, defaultButtonPadding);
-      // animationDuration can't be configed by the theme/constructor
+      // animationDuration can't be configured by the theme/constructor
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });
 
@@ -182,7 +182,7 @@ void main() {
       expect(raw.disabledElevation, 0.0);
       expect(raw.constraints, defaultButtonConstraints);
       expect(raw.padding, defaultButtonPadding);
-      // animationDuration can't be configed by the theme/constructor
+      // animationDuration can't be configured by the theme/constructor
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });
 
@@ -209,7 +209,7 @@ void main() {
       expect(raw.disabledElevation, 0.0);
       expect(raw.constraints, defaultButtonConstraints);
       expect(raw.padding, defaultButtonPadding);
-      // animationDuration can't be configed by the theme/constructor
+      // animationDuration can't be configured by the theme/constructor
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });
   });

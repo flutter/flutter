@@ -201,7 +201,7 @@ class __ZoomPageTransitionState extends State<_ZoomPageTransition> {
   }
 
   // This check ensures that the animation reverses the original animation if
-  // the transition were interruped midway. This prevents a disjointed
+  // the transition were interrupted midway. This prevents a disjointed
   // experience since the reverse animation uses different fade and scaling
   // curves.
   bool get _transitionWasInterrupted {

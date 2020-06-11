@@ -1197,7 +1197,7 @@ void main() {
       expect(modalBarrierAnimation.value, Colors.black);
     });
 
-    testWidgets('focus traverse correct when pop mutiple page simultaneously', (WidgetTester tester) async {
+    testWidgets('focus traverse correct when pop multiple page simultaneously', (WidgetTester tester) async {
       // Regression test: https://github.com/flutter/flutter/issues/48903
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(MaterialApp(
@@ -1243,7 +1243,7 @@ void main() {
       expect(focusNodeOnPageOne.hasFocus, isTrue);
     });
 
-    testWidgets('focus traversal is correct when popping mutiple pages simultaneously - with focused children', (WidgetTester tester) async {
+    testWidgets('focus traversal is correct when popping multiple pages simultaneously - with focused children', (WidgetTester tester) async {
       // Regression test: https://github.com/flutter/flutter/issues/48903
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(MaterialApp(

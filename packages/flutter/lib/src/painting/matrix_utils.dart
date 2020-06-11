@@ -11,7 +11,7 @@ import 'basic_types.dart';
 
 /// Utility functions for working with matrices.
 class MatrixUtils {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   MatrixUtils._();

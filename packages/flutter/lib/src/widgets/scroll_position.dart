@@ -309,7 +309,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   void correctBy(double correction) {
     assert(
       _pixels != null,
-      'An initial pixels value must exist by caling correctPixels on the ScrollPosition',
+      'An initial pixels value must exist by calling correctPixels on the ScrollPosition',
     );
     _pixels += correction;
     _didChangeViewportDimensionOrReceiveCorrection = true;

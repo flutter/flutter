@@ -859,7 +859,7 @@ void main() {
   //
   // The value indicator can be skipped by passing the appropriate
   // [ShowValueIndicator].
-  testWidgets('The slider can skip all of its comoponent painting', (WidgetTester tester) async {
+  testWidgets('The slider can skip all of its component painting', (WidgetTester tester) async {
     // Pump a slider with all shapes skipped.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(

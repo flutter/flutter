@@ -49,7 +49,7 @@ const double _kSegmentMinPadding = 9.25;
 
 // The threshold value used in hasDraggedTooFar, for checking against the square
 // L2 distance from the location of the current drag pointer, to the closest
-// vertice of the CupertinoSlidingSegmentedControl's Rect.
+// vertex of the CupertinoSlidingSegmentedControl's Rect.
 //
 // Both the mechanism and the value are speculated.
 const double _kTouchYDistanceThreshold = 50.0 * 50.0;
@@ -64,7 +64,7 @@ final SpringSimulation _kThumbSpringAnimationSimulation = SpringSimulation(
   const SpringDescription(mass: 1, stiffness: 503.551, damping: 44.8799),
   0,
   1,
-  0, // Everytime a new spring animation starts the previous animation stops.
+  0, // Every time a new spring animation starts the previous animation stops.
 );
 
 const Duration _kSpringAnimationDuration = Duration(milliseconds: 412);

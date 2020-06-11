@@ -338,7 +338,7 @@ class _HeroState extends State<Hero> {
   // needs to be built to replace the original hero widget. When
   // `shouldIncludeChildInPlaceholder` is set to true and `widget.placeholderBuilder`
   // is null, the placeholder widget will include the original hero's child
-  // widget as a descendant, allowing the orignal element tree to be preserved.
+  // widget as a descendant, allowing the original element tree to be preserved.
   //
   // It is typically set to true for the *from* hero in a push transition,
   // and false otherwise.

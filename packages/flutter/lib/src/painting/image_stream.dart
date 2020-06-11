@@ -416,7 +416,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _onLastListenerRemovedCallbacks.add(callback);
   }
 
-  /// Removes a callback previously suppplied to
+  /// Removes a callback previously supplied to
   /// [addOnLastListenerRemovedCallback].
   void removeOnLastListenerRemovedCallback(VoidCallback callback) {
     assert(callback != null);

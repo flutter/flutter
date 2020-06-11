@@ -4049,7 +4049,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // floatingLabelGeight = 12 (ahem font size 16dps * 0.75 = 12)
+    // floatingLabelHeight = 12 (ahem font size 16dps * 0.75 = 12)
     // labelY = -floatingLabelHeight/2 + borderWidth/2
     expect(tester.getTopLeft(find.text('label')).dy, -4.0);
   });

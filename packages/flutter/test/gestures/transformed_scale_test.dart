@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 
 void main() {
-  testWidgets('gets local corrdinates', (WidgetTester tester) async {
+  testWidgets('gets local coordinates', (WidgetTester tester) async {
     final List<ScaleStartDetails> startDetails = <ScaleStartDetails>[];
     final List<ScaleUpdateDetails> updateDetails = <ScaleUpdateDetails>[];
 

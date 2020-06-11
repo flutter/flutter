@@ -15,7 +15,7 @@ enum SystemSoundType {
 /// Provides access to the library of short system specific sounds for common
 /// tasks.
 class SystemSound {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   SystemSound._();

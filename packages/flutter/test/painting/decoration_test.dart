@@ -534,7 +534,7 @@ void main() {
     // sourceRect should contain all pixels of the source image
     expect(call.positionalArguments[1], Offset.zero & imageSize);
 
-    // Image should be scaled down to fit in hejght
+    // Image should be scaled down to fit in height
     // and be positioned in the bottom right of the outputRect
     const Size expectedTileSize = Size(20.0, 20.0);
     final Rect expectedTileRect = Rect.fromPoints(

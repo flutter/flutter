@@ -930,7 +930,7 @@ class FocusableActionDetector extends StatefulWidget {
   /// widget.
   ///
   /// The [cursor] defaults to [MouseCursor.defer], deferring the choice of
-  /// cursor to the next region behing it in hit-test order.
+  /// cursor to the next region behind it in hit-test order.
   final MouseCursor mouseCursor;
 
   /// The child widget for this [FocusableActionDetector] widget.

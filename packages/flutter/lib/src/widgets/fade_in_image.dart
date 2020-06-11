@@ -474,7 +474,7 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
       ),
     ]))..addStatusListener((AnimationStatus status) {
       if (_placeholderOpacityAnimation.isCompleted) {
-        // Need to rebuild to remove placeholder now that it is invisibile.
+        // Need to rebuild to remove placeholder now that it is invisible.
         setState(() {});
       }
     });

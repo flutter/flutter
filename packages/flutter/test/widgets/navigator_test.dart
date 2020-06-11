@@ -572,7 +572,7 @@ void main() {
     expect(routes['/A'].secondaryAnimation.value, equals(routes['/C'].animation.value));
   });
 
-  testWidgets('new route removed from navigator history druing pushReplacement transition', (WidgetTester tester) async {
+  testWidgets('new route removed from navigator history during pushReplacement transition', (WidgetTester tester) async {
     final Map<String, SlideInOutPageRoute<dynamic>> routes = <String, SlideInOutPageRoute<dynamic>>{};
     final Map<String, WidgetBuilder> builders = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(
@@ -1914,7 +1914,7 @@ void main() {
     expect(tickCount, 4);
   });
 
-  testWidgets('Route annouce correctly for first route and last route', (WidgetTester tester) async {
+  testWidgets('Route announce correctly for first route and last route', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/57133.
     Route<void> previousOfFirst = NotAnnounced();
     Route<void> nextOfFirst = NotAnnounced();

@@ -24,7 +24,7 @@ typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstrain
 /// * The first time the widget is laid out.
 /// * When the parent widget passes different layout constraints.
 /// * When the parent widget updates this widget.
-/// * When the depedencies that the [builder] function subscribes to change.
+/// * When the dependencies that the [builder] function subscribes to change.
 ///
 /// The [builder] function is _not_ called during layout if the parent passes
 /// the same constraints repeatedly.

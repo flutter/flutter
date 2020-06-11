@@ -14,7 +14,7 @@ void main() {
     final TestWidgetsFlutterBinding binding = tester.binding;
     // Use paused as the initial state.
     binding.window.initialLifecycleStateTestValue = 'AppLifecycleState.paused';
-    binding.readTestInitialLifecycleStateFromNativeWindow(); // Re-attempt the initializaiton.
+    binding.readTestInitialLifecycleStateFromNativeWindow(); // Re-attempt the initialization.
 
     // The lifecycleState should now be the state we passed above,
     // even though no lifecycle event was fired from the platform.

@@ -115,7 +115,7 @@ void main() {
     expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('CheckoxListTile contentPadding test', (WidgetTester tester) async {
+  testWidgets('CheckboxListTile contentPadding test', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: const Center(

@@ -9,7 +9,7 @@ import 'platform_channel.dart';
 
 /// Platform channels used by the Flutter system.
 class SystemChannels {
-  // This class is not meant to be instatiated or extended; this constructor
+  // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
   // ignore: unused_element
   SystemChannels._();

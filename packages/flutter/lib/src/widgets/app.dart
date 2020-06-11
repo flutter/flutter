@@ -200,7 +200,7 @@ class WidgetsApp extends StatefulWidget {
        assert(
          home == null ||
          onGenerateInitialRoutes == null,
-         'If onGenerateInitialRoutes is specifiied, the home argument will be '
+         'If onGenerateInitialRoutes is specified, the home argument will be '
          'redundant.'
        ),
        assert(
@@ -1190,7 +1190,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         }
       }
       // countryCode-only match. When all else except default supported locale fails,
-      // attempt to match by country only, as a user is likely to be familar with a
+      // attempt to match by country only, as a user is likely to be familiar with a
       // language from their listed country.
       if (matchesCountryCode == null && userLocale.countryCode != null) {
         match = countryLocales[userLocale.countryCode];
@@ -1201,7 +1201,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     }
     // When there is no languageCode-only match. Fallback to matching countryCode only. Country
     // fallback only applies on iOS. When there is no countryCode-only match, we return first
-    // suported locale.
+    // supported locale.
     final Locale resolvedLocale = matchesLanguageCode ?? matchesCountryCode ?? supportedLocales.first;
     return resolvedLocale;
   }
