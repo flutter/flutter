@@ -106,12 +106,12 @@ Future<void> main() async {
 
       final String swiftPluginPath = path.join(tempDir.path, swiftPluginName);
       final File objcPubspec = File(path.join(objcAppPath, 'pubspec.yaml'));
-      String podspecContent = objcPubspec.readAsStringSync();
-      podspecContent = podspecContent.replaceFirst(
+      String pubspecContent = objcPubspec.readAsStringSync();
+      pubspecContent = pubspecContent.replaceFirst(
         '\ndependencies:\n',
         '\ndependencies:\n  $objcPluginName:\n    path: $objcPluginPath\n  $swiftPluginName:\n    path: $swiftPluginPath\n  device_info:\n',
       );
-      objcPubspec.writeAsStringSync(podspecContent, flush: true);
+      objcPubspec.writeAsStringSync(pubspecContent, flush: true);
 
       await inDirectory(objcAppPath, () async {
         await flutter(
@@ -167,7 +167,7 @@ Future<void> main() async {
       final String swiftAppPath = path.join(tempDir.path, swiftAppName);
 
       final File swiftPubspec = File(path.join(swiftAppPath, 'pubspec.yaml'));
-      swiftPubspec.writeAsStringSync(podspecContent, flush: true);
+      swiftPubspec.writeAsStringSync(pubspecContent, flush: true);
 
       await inDirectory(swiftAppPath, () async {
         await flutter(
@@ -201,6 +201,71 @@ Future<void> main() async {
       });
 
       _validatePodfile(swiftAppPath);
+
+      section('Remove iOS support from plugin');
+
+      Directory(path.join(objcPluginPath, 'ios')).deleteSync(recursive: true);
+
+      const String iosPlatformMap = '''
+      ios:
+        pluginClass: TestPluginObjcPlugin''';
+
+      final File pluginPubspec = File(path.join(objcPluginPath, 'pubspec.yaml'));
+      String pluginPubspecContent = pluginPubspec.readAsStringSync();
+      if (!pluginPubspecContent.contains(iosPlatformMap)) {
+        return TaskResult.failure('Plugin pubspec.yaml missing iOS platform map');
+      }
+
+      pluginPubspecContent = pluginPubspecContent.replaceFirst(iosPlatformMap, '');
+      pluginPubspec.writeAsStringSync(pluginPubspecContent, flush: true);
+
+      await inDirectory(swiftAppPath, () async {
+        await flutter('clean');
+        await flutter(
+          'build',
+          options: <String>[
+            'ios',
+            '--no-codesign'
+          ],
+        );
+      });
+
+      section('Validate plugin without iOS platform');
+
+      final File podfileLockFile = File(path.join(swiftAppPath, 'ios', 'Podfile.lock'));
+      final String podfileLockOutput = podfileLockFile.readAsStringSync();
+      if (!podfileLockOutput.contains(':path: ".symlinks/plugins/device_info/ios"')
+        || !podfileLockOutput.contains(':path: Flutter')
+          // test_plugin_objc no longer supports iOS, shouldn't be present.
+        || podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_objc/ios"')
+        || !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_swift/ios"')) {
+        return TaskResult.failure('Podfile.lock does not contain expected pods');
+      }
+
+      final String pluginSymlinks = path.join(
+        swiftAppPath,
+        'ios',
+        '.symlinks',
+        'plugins',
+      );
+
+      checkDirectoryExists(path.join(
+        pluginSymlinks,
+        'device_info',
+        'ios',
+      ));
+
+      checkDirectoryExists(path.join(
+        pluginSymlinks,
+        'test_plugin_swift',
+        'ios',
+      ));
+
+      // test_plugin_objc no longer supports iOS, shouldn't exist!
+      checkDirectoryNotExists(path.join(
+        pluginSymlinks,
+        'test_plugin_objc',
+      ));
 
       return TaskResult.success(null);
     } catch (e) {
