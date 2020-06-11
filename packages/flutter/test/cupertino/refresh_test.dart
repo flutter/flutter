@@ -1363,7 +1363,7 @@ void main() {
       );
 
       // The calculations here are subtle. Because the default drag threshold before showing
-      // the indicator is 16.0, this distance gets subtracted from both the dragged distance (26.0) 
+      // the indicator is 16.0, this distance gets subtracted from both the dragged distance (26.0)
       // and the expected distance (100.0) in order to perform the percentage calculation.
       expect(tester.widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator)).progress, 10.0 / 84.0);
 

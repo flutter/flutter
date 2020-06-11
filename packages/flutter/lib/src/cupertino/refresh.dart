@@ -373,7 +373,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     // the dragThreshold from both the distance the user has dragged and the distance
     // required to trigger the refresh.
     const double dragThreshold = 16.0;
-    
+
     if (pulledExtent < dragThreshold) {
       return Container();
     }
