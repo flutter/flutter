@@ -419,6 +419,7 @@ class Container extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget current = child;
+
     if (child == null && (constraints == null || !constraints.isTight)) {
       current = LimitedBox(
         maxWidth: 0.0,

@@ -396,7 +396,6 @@ abstract class StandardFabLocation extends FloatingActionButtonLocation {
   static double _leftOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
     return kFloatingActionButtonMargin
         + scaffoldGeometry.minInsets.left
-        + scaffoldGeometry.minViewPadding.left
         - adjustment;
   }
 
@@ -405,7 +404,6 @@ abstract class StandardFabLocation extends FloatingActionButtonLocation {
     return scaffoldGeometry.scaffoldSize.width
         - kFloatingActionButtonMargin
         - scaffoldGeometry.minInsets.right
-        - scaffoldGeometry.minViewPadding.right
         - scaffoldGeometry.floatingActionButtonSize.width
         + adjustment;
   }
@@ -419,8 +417,12 @@ mixin FabTopOffsetY on StandardFabLocation {
   /// the transition between the [Scaffold.appBar] and the [Scaffold.body].
   @override
   double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-    final double fabHalfHeight = scaffoldGeometry.floatingActionButtonSize.height / 2.0;
-    return scaffoldGeometry.contentTop - fabHalfHeight;
+    if (scaffoldGeometry.contentTop > scaffoldGeometry.minViewPadding.top) {
+      final double fabHalfHeight = scaffoldGeometry.floatingActionButtonSize.height / 2.0;
+      return scaffoldGeometry.contentTop - fabHalfHeight;
+    }
+    // Ensure we are placed within the bounds of a safe area.
+    return scaffoldGeometry.minViewPadding.top;
   }
 }
 
@@ -434,11 +436,14 @@ mixin FabFloatOffsetY on StandardFabLocation {
     final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
     final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
     final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
-    final double paddingBottom = scaffoldGeometry.minViewPadding.bottom;
+    final double bottomMargin = math.max(
+      kFloatingActionButtonMargin,
+      scaffoldGeometry.minViewPadding.bottom,
+    );
 
-    double fabY = contentBottom - fabHeight - kFloatingActionButtonMargin - paddingBottom;
+    double fabY = contentBottom - fabHeight - bottomMargin;
     if (snackBarHeight > 0.0)
-      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - kFloatingActionButtonMargin);
+      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - bottomMargin);
     if (bottomSheetHeight > 0.0)
       fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
 
@@ -454,19 +459,22 @@ mixin FabDockedOffsetY on StandardFabLocation {
   @override
   double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
     final double contentBottom = scaffoldGeometry.contentBottom;
+    final double contentMargin = scaffoldGeometry.scaffoldSize.height - contentBottom;
+    final double bottomViewPadding = scaffoldGeometry.minViewPadding.bottom;
     final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
     final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
     final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
+    final double safeMargin = bottomViewPadding > contentMargin ? bottomViewPadding : 0.0;
 
-    double fabY = contentBottom - fabHeight / 2.0;
+    double fabY = contentBottom - fabHeight / 2.0 - safeMargin;
     // The FAB should sit with a margin between it and the snack bar.
     if (snackBarHeight > 0.0)
-      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - kFloatingActionButtonMargin);
+      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - math.max(kFloatingActionButtonMargin, safeMargin));
     // The FAB should sit with its center in front of the top of the bottom sheet.
     if (bottomSheetHeight > 0.0)
       fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
 
-    final double maxFabY = scaffoldGeometry.scaffoldSize.height - fabHeight;
+    final double maxFabY = scaffoldGeometry.scaffoldSize.height - fabHeight - safeMargin;
     return math.min(maxFabY, fabY);
   }
 }

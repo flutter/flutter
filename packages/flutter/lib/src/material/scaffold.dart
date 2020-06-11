@@ -573,7 +573,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       } else {
         snackBarYOffsetBase = contentBottom;
       }
-      print('snackBarYOffsetBase: $snackBarYOffsetBase');
+//      print('snackBarYOffsetBase: $snackBarYOffsetBase');
       positionChild(_ScaffoldSlot.snackBar, Offset(0.0, snackBarYOffsetBase - snackBarSize.height));
     }
 
@@ -2524,7 +2524,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     // extendBody locked when keyboard is open
     final bool _extendBody = minInsets.bottom <= 0 && widget.extendBody;
     
-    print('minViewPadding: $minViewPadding, minInsets: $minInsets');
+//    print('minViewPadding: $minViewPadding, minInsets: $minInsets');
 
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
@@ -2540,6 +2540,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 extendBody: _extendBody,
                 extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
                 minInsets: minInsets,
+                minViewPadding: minViewPadding,
                 currentFloatingActionButtonLocation: _floatingActionButtonLocation,
                 floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
                 floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
@@ -2547,7 +2548,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
                 isSnackBarFloating: isSnackBarFloating,
-                minViewPadding: minViewPadding,
               ),
             );
           }),
