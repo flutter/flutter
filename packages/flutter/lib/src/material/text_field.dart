@@ -22,6 +22,7 @@ import 'feedback.dart';
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
 import 'text_selection.dart';
 import 'theme.dart';
@@ -350,6 +351,7 @@ class TextField extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection = true,
     this.onTap,
+    this.mouseCursor,
     this.buildCounter,
     this.scrollController,
     this.scrollPhysics,
@@ -690,6 +692,24 @@ class TextField extends StatefulWidget {
   /// text field's internal gesture detector, use a [Listener].
   /// {@endtemplate}
   final GestureTapCallback onTap;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.error].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.textable] will be used.
+  ///
+  /// The [mouseCursor] is the only property of [TextField] that controls the
+  /// mouse pointer. All other properties related to "cursor" stands for the text
+  /// cursor, which is usually a blinking vertical line at the editing position.
+  final MouseCursor mouseCursor;
 
   /// Callback that generates a custom [InputDecorator.counter] widget.
   ///
@@ -1111,12 +1131,15 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
       ),
     );
 
+    bool hasError = false;
     if (widget.decoration != null) {
+      final InputDecoration effectiveDecoration = _getEffectiveDecoration();
+      hasError = effectiveDecoration.errorText != null;
       child = AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[ focusNode, controller ]),
         builder: (BuildContext context, Widget child) {
           return InputDecorator(
-            decoration: _getEffectiveDecoration(),
+            decoration: effectiveDecoration,
             baseStyle: widget.style,
             textAlign: widget.textAlign,
             textAlignVertical: widget.textAlignVertical,
@@ -1130,10 +1153,20 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         child: child,
       );
     }
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+      widget.mouseCursor ?? MaterialStateMouseCursor.textable,
+      <MaterialState>{
+        if (!_isEnabled) MaterialState.disabled,
+        if (_isHovering) MaterialState.hovered,
+        if (focusNode.hasFocus) MaterialState.focused,
+        if (hasError) MaterialState.error,
+      },
+    );
+
     return IgnorePointer(
       ignoring: !_isEnabled,
       child: MouseRegion(
-        cursor: SystemMouseCursors.text,
+        cursor: effectiveMouseCursor,
         onEnter: (PointerEnterEvent event) => _handleHover(true),
         onExit: (PointerExitEvent event) => _handleHover(false),
         child: AnimatedBuilder(
