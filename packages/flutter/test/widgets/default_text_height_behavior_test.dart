@@ -115,7 +115,7 @@ void main() {
   testWidgets('DefaultTextHeightBehavior.of(context) returns null if no '
       'DefaultTextHeightBehavior widget in tree', (WidgetTester tester) async {
     const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
-    TextHeightBehavior textHeightBehavior;
+    TextHeightBehavior? textHeightBehavior;
 
     await tester.pumpWidget(Builder(
       builder: (BuildContext context) {
