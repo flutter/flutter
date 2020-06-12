@@ -72,13 +72,21 @@ Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
 /// Argument passed to [Timeline] events in order to cause those events to be
 /// shown in the developer-centric version of the Observatory Timeline.
 ///
+/// Generally these indicate landmark events such as the build phase or layout.
+///
 /// See also:
 ///
 ///  * [Timeline.startSync], which typically takes this value as its `arguments`
 ///    argument.
-const Map<String, String> timelineWhitelistArguments = <String, String>{
+const Map<String, String> timelineArgumentsIndicatingLandmarkEvent = <String, String>{
   'mode': 'basic',
 };
+
+@Deprecated(
+  'Use timelineArgumentsIndicatingLandmarkEvent instead. '
+  'This feature was deprecated after 1.20.0-1.0.pre.'
+)
+const Map<String, String> timelineWhitelistArguments = timelineArgumentsIndicatingLandmarkEvent;
 
 /// Configure [debugFormatDouble] using [num.toStringAsPrecision].
 ///

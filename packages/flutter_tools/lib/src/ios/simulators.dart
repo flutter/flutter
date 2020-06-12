@@ -363,10 +363,9 @@ class IOSSimulator extends Device {
       return false;
     }
 
-    // Check if the device is part of a blacklisted category.
-    // We do not yet support WatchOS or tvOS devices.
-    final RegExp blacklist = RegExp(r'Apple (TV|Watch)', caseSensitive: false);
-    if (blacklist.hasMatch(name)) {
+    // We do not support WatchOS and tvOS devices.
+    final RegExp unsupportedTypes = RegExp(r'Apple (TV|Watch)', caseSensitive: false);
+    if (unsupportedTypes.hasMatch(name)) {
       _supportMessage = 'Flutter does not support Apple TV or Apple Watch.';
       return false;
     }
