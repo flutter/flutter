@@ -51,9 +51,33 @@ constexpr uint32_t OPEN_RIGHT_EXECUTABLE = 8u;
 namespace flutter_runner {
 
 constexpr char kDataKey[] = "data";
+constexpr char kAssetsKey[] = "assets";
 constexpr char kTmpPath[] = "/tmp";
 constexpr char kServiceRootPath[] = "/svc";
 
+// static
+void Application::ParseProgramMetadata(
+    const fidl::VectorPtr<fuchsia::sys::ProgramMetadata>& program_metadata,
+    std::string* data_path,
+    std::string* assets_path) {
+  if (!program_metadata.has_value()) {
+    return;
+  }
+  for (const auto& pg : *program_metadata) {
+    if (pg.key.compare(kDataKey) == 0) {
+      *data_path = "pkg/" + pg.value;
+    } else if (pg.key.compare(kAssetsKey) == 0) {
+      *assets_path = "pkg/" + pg.value;
+    }
+  }
+
+  // assets_path defaults to the same as data_path if omitted.
+  if (assets_path->empty()) {
+    *assets_path = *data_path;
+  }
+}
+
+// static
 ActiveApplication Application::Create(
     TerminationCallback termination_callback,
     fuchsia::sys::Package package,
@@ -149,14 +173,11 @@ Application::Application(
     settings_.dart_entrypoint_args = arguments.value();
   }
 
-  // Determine /pkg/data directory from StartupInfo.
+  // Determine where data and assets are stored within /pkg.
   std::string data_path;
-  for (size_t i = 0; i < startup_info.program_metadata->size(); ++i) {
-    auto pg = startup_info.program_metadata->at(i);
-    if (pg.key.compare(kDataKey) == 0) {
-      data_path = "pkg/" + pg.value;
-    }
-  }
+  std::string assets_path;
+  ParseProgramMetadata(startup_info.program_metadata, &data_path, &assets_path);
+
   if (data_path.empty()) {
     FML_DLOG(ERROR) << "Could not find a /pkg/data directory for "
                     << package.resolved_url;
@@ -189,11 +210,20 @@ Application::Application(
     }
   }
 
-  application_directory_.reset(fdio_ns_opendir(fdio_ns_.get()));
-  FML_DCHECK(application_directory_.is_valid());
+  {
+    fml::UniqueFD ns_fd(fdio_ns_opendir(fdio_ns_.get()));
+    FML_DCHECK(ns_fd.is_valid());
 
-  application_assets_directory_.reset(openat(
-      application_directory_.get(), data_path.c_str(), O_RDONLY | O_DIRECTORY));
+    constexpr mode_t mode = O_RDONLY | O_DIRECTORY;
+
+    application_assets_directory_.reset(
+        openat(ns_fd.get(), assets_path.c_str(), mode));
+    FML_DCHECK(application_assets_directory_.is_valid());
+
+    application_data_directory_.reset(
+        openat(ns_fd.get(), data_path.c_str(), mode));
+    FML_DCHECK(application_data_directory_.is_valid());
+  }
 
   // TODO: LaunchInfo::out.
 
@@ -294,7 +324,7 @@ Application::Application(
     std::string app_framework;
     if (dart_utils::ReadFileToString("pkg/data/runner.frameworkversion",
                                      &runner_framework) &&
-        dart_utils::ReadFileToStringAt(application_assets_directory_.get(),
+        dart_utils::ReadFileToStringAt(application_data_directory_.get(),
                                        "app.frameworkversion",
                                        &app_framework) &&
         (runner_framework.compare(app_framework) == 0)) {
@@ -509,7 +539,7 @@ void Application::AttemptVMLaunchWithCurrentSettings(
 
   std::shared_ptr<dart_utils::ElfSnapshot> snapshot =
       std::make_shared<dart_utils::ElfSnapshot>();
-  if (snapshot->Load(application_assets_directory_.get(),
+  if (snapshot->Load(application_data_directory_.get(),
                      "app_aot_snapshot.so")) {
     const uint8_t* isolate_data = snapshot->IsolateData();
     const uint8_t* isolate_instructions = snapshot->IsolateInstrs();
@@ -531,20 +561,16 @@ void Application::AttemptVMLaunchWithCurrentSettings(
                                                hold_snapshot));
   } else {
     vm_snapshot = fml::MakeRefCounted<flutter::DartSnapshot>(
-        CreateWithContentsOfFile(
-            application_assets_directory_.get() /* /pkg/data */,
-            "vm_snapshot_data.bin", false),
-        CreateWithContentsOfFile(
-            application_assets_directory_.get() /* /pkg/data */,
-            "vm_snapshot_instructions.bin", true));
+        CreateWithContentsOfFile(application_data_directory_.get(),
+                                 "vm_snapshot_data.bin", false),
+        CreateWithContentsOfFile(application_data_directory_.get(),
+                                 "vm_snapshot_instructions.bin", true));
 
     isolate_snapshot_ = fml::MakeRefCounted<flutter::DartSnapshot>(
-        CreateWithContentsOfFile(
-            application_assets_directory_.get() /* /pkg/data */,
-            "isolate_snapshot_data.bin", false),
-        CreateWithContentsOfFile(
-            application_assets_directory_.get() /* /pkg/data */,
-            "isolate_snapshot_instructions.bin", true));
+        CreateWithContentsOfFile(application_data_directory_.get(),
+                                 "isolate_snapshot_data.bin", false),
+        CreateWithContentsOfFile(application_data_directory_.get(),
+                                 "isolate_snapshot_instructions.bin", true));
   }
 
   auto vm = flutter::DartVMRef::Create(settings_,               //
