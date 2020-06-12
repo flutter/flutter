@@ -541,4 +541,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   public void onDisplayOverlaySurface(int id, int x, int y, int width, int height) {
     // TODO: Implement this method. https://github.com/flutter/flutter/issues/58288
   }
+
+  public void onBeginFrame() {
+    // TODO: Implement this method. https://github.com/flutter/flutter/issues/58288
+  }
 }
