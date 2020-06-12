@@ -155,45 +155,38 @@ class DatePickerHeader extends StatelessWidget {
            ),
          );
       case Orientation.landscape:
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Material(
-              child: SizedBox(
-                width: _datePickerHeaderLandscapeWidth,
-                child: Material(
-                  color: primarySurfaceColor,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const SizedBox(height: 16),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: _headerPaddingLandscape,
-                        ),
-                        child: help,
-                      ),
-                      SizedBox(height: isShort ? 16 : 56),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: _headerPaddingLandscape,
-                          ),
-                          child: title,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                        ),
-                        child: icon,
-                      ),
-                    ],
+        return SizedBox(
+          width: _datePickerHeaderLandscapeWidth,
+          child: Material(
+            color: primarySurfaceColor,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: _headerPaddingLandscape,
+                  ),
+                  child: help,
+                ),
+                SizedBox(height: isShort ? 16 : 56),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: _headerPaddingLandscape,
+                    ),
+                    child: title,
                   ),
                 ),
-              ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                  ),
+                  child: icon,
+                ),
+              ],
             ),
-          ],
+          ),
         );
     }
     return null;
