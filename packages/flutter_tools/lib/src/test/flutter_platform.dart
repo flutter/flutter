@@ -405,7 +405,7 @@ class FlutterPlatform extends PlatformPlugin {
     StreamChannel<dynamic> controller,
     int ourTestCount,
   ) async {
-    _packageConfig = await loadPackageConfigWithLogging(
+    _packageConfig ??= await loadPackageConfigWithLogging(
       globals.fs.file(globalPackagesPath),
       logger: globals.logger,
     );
