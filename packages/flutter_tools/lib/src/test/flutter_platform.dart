@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -151,7 +152,7 @@ String generateTestBootstrap({
   @required InternetAddress host,
   File testConfigFile,
   bool updateGoldens = false,
-  bool nullSafety = false,
+  @required String languageVersionHeader,
 }) {
   assert(testUrl != null);
   assert(host != null);
@@ -164,6 +165,7 @@ String generateTestBootstrap({
 
   final StringBuffer buffer = StringBuffer();
   buffer.write('''
+$languageVersionHeader
 import 'dart:async';
 import 'dart:convert';  // ignore: dart_convert_import
 import 'dart:io';  // ignore: dart_io_import
@@ -181,17 +183,11 @@ import '$testUrl' as test;
 import '${Uri.file(testConfigFile.path)}' as test_config;
 ''');
   }
-  // This type is sensitive to the non-nullable experiment.
-  final String beforeLoadTypedef = nullSafety
-    ? 'Future<dynamic> Function()?'
-    : 'Future<dynamic> Function()';
   buffer.write('''
 
 /// Returns a serialized test suite.
-StreamChannel<dynamic> serializeSuite(Function getMain(),
-    {bool hidePrints = true, $beforeLoadTypedef beforeLoad}) {
-  return RemoteListener.start(getMain,
-      hidePrints: hidePrints, beforeLoad: beforeLoad);
+StreamChannel<dynamic> serializeSuite(Function getMain()) {
+  return RemoteListener.start(getMain);
 }
 
 /// Capture any top-level errors (mostly lazy syntax errors, since other are
@@ -402,11 +398,17 @@ class FlutterPlatform extends PlatformPlugin {
   @visibleForTesting
   Future<HttpServer> bind(InternetAddress host, int port) => HttpServer.bind(host, port);
 
+  PackageConfig _packageConfig;
+
   Future<_AsyncError> _startTest(
     String testPath,
     StreamChannel<dynamic> controller,
     int ourTestCount,
   ) async {
+    _packageConfig = await loadPackageConfigWithLogging(
+      globals.fs.file(globalPackagesPath),
+      logger: globals.logger,
+    );
     globals.printTrace('test $ourTestCount: starting test $testPath');
 
     _AsyncError outOfBandError; // error that we couldn't send to the harness that we need to send via our future
@@ -748,13 +750,33 @@ class FlutterPlatform extends PlatformPlugin {
     Uri testUrl,
   }) {
     assert(testUrl.scheme == 'file');
+    final File file = globals.fs.file(testUrl);
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl)),
       host: host,
       updateGoldens: updateGoldens,
-      nullSafety: extraFrontEndOptions?.contains('--enable-experiment=non-nullable') ?? false,
+      // nullSafety: extraFrontEndOptions?.contains('--enable-experiment=non-nullable') ?? false,
+      languageVersionHeader: _findLanguageVersionCommentHeader(file),
     );
+  }
+
+  /// Instead of attempting to extract the exact language header,
+  /// just grab every line that starts with a comment.
+  String _findLanguageVersionCommentHeader(File file) {
+    for (final String line in file.readAsLinesSync()) {
+      if (line.startsWith('// @dart =')) {
+        return line;
+      }
+      if (line.startsWith('import')) {
+        break;
+      }
+    }
+    final Package package = _packageConfig[flutterProject?.manifest?.appName];
+    if (package != null) {
+      return '// @dart = ${package.languageVersion}';
+    }
+    return '';
   }
 
   File _cachedFontConfig;
