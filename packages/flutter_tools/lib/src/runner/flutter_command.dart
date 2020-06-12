@@ -526,6 +526,15 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addBuildSizeAnalysisOption() {
+    argParser.addOption(
+      'analyze',
+      help:
+        'Whether to also print out the size breakdown of the output artifact '
+        'after building.',
+    );
+  }
+
   set defaultBuildMode(BuildMode value) {
     _defaultBuildMode = value;
   }
