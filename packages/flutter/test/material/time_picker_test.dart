@@ -201,11 +201,11 @@ void _tests() {
 
     final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
     final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
-    final Offset min46 = Offset(center.dx - 50.0, center.dy - 15); // 48 mins
+    final Offset min48 = Offset(center.dx - 50.0, center.dy - 15); // 48 mins
 
     await tester.tapAt(hour6);
     await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(min46);
+    await tester.tapAt(min48);
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 6, minute: 50)));
   });
@@ -749,7 +749,7 @@ void _testsInput() {
     await finishPicker(tester);
     expect(result, null);
 
-    // Invalid hour.
+    // Invalid minute.
     await tester.enterText(find.byType(TextField).first, '8');
     await tester.enterText(find.byType(TextField).last, '150');
     await finishPicker(tester);

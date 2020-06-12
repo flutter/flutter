@@ -129,8 +129,9 @@ class _TimePickerHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final ThemeData themeData = Theme.of(context);
-    final TimeOfDayFormat timeOfDayFormat = MaterialLocalizations.of(context)
-        .timeOfDayFormat(alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat);
+    final TimeOfDayFormat timeOfDayFormat = MaterialLocalizations.of(context).timeOfDayFormat(
+      alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat,
+    );
 
     final _TimePickerFragmentContext fragmentContext = _TimePickerFragmentContext(
       selectedTime: selectedTime,
@@ -144,9 +145,9 @@ class _TimePickerHeader extends StatelessWidget {
     double width;
     Widget controls;
 
-    assert(orientation != null);
     switch (orientation) {
       case Orientation.portrait:
+        // Keep width null because in portrait we don't cap the width.
         padding = const EdgeInsets.symmetric(horizontal: 24.0);
         controls = Column(
           children: <Widget>[
@@ -505,12 +506,13 @@ class _DayPeriodControl extends StatelessWidget {
     final Color unselectedColor = timePickerTheme.dayPeriodUnselectedColor ?? Colors.transparent;
 
     final bool amSelected = selectedTime.period == DayPeriod.am;
+    final bool pmSelexted = !amSelected;
     final TextStyle textStyle = TimePickerTheme.of(context).dayPeriodTextStyle ?? Theme.of(context).textTheme.subtitle1;
     final TextStyle amStyle = textStyle.copyWith(
       color: amSelected ? selectedTextColor: unselectedTextColor,
     );
     final TextStyle pmStyle = textStyle.copyWith(
-      color: !amSelected ? selectedTextColor: unselectedTextColor,
+      color: pmSelexted ? selectedTextColor: unselectedTextColor,
     );
     final Color borderColor = TimePickerTheme.of(context).dayPeriodBorderColor
         ?? Color.alphaBlend(colorScheme.onBackground.withOpacity(0.38), colorScheme.surface);
@@ -540,11 +542,11 @@ class _DayPeriodControl extends StatelessWidget {
     );
 
     final Widget pmButton = Material(
-      color: !amSelected ? selectedColor : unselectedColor,
+      color: pmSelexted ? selectedColor : unselectedColor,
       child: InkWell(
         onTap: Feedback.wrapForTap(() => _setPm(context), context),
         child: Semantics(
-          selected: !amSelected,
+          selected: pmSelexted,
           child: Center(
             child: Text(
               materialLocalizations.postMeridiemAbbreviation,
@@ -707,16 +709,16 @@ class _RenderInputPadding extends RenderShiftedBox {
     switch (orientation) {
       case Orientation.portrait:
         if (position.dy > newPosition.dy) {
-          newPosition = newPosition + const Offset(0.0, 1.0);
+          newPosition += const Offset(0.0, 1.0);
         } else {
-          newPosition = newPosition + const Offset(0.0, -1.0);
+          newPosition += const Offset(0.0, -1.0);
         }
         break;
       case Orientation.landscape:
         if (position.dx > newPosition.dx) {
-          newPosition = newPosition + const Offset(1.0, 0.0);
+          newPosition += const Offset(1.0, 0.0);
         } else {
-          newPosition = newPosition + const Offset(-1.0, 0.0);
+          newPosition += const Offset(-1.0, 0.0);
         }
         break;
     }
@@ -782,8 +784,7 @@ class _DialPainter extends CustomPainter {
 
     final double labelRadius = radius - _labelPadding;
     Offset getOffsetForTheta(double theta) {
-      return center + Offset(labelRadius * math.cos(theta),
-          -labelRadius * math.sin(theta));
+      return center + Offset(labelRadius * math.cos(theta), -labelRadius * math.sin(theta));
     }
 
     void paintLabels(List<_TappableLabel> labels) {
@@ -1245,7 +1246,7 @@ class _TimePickerInputState extends State<_TimePickerInput> {
   }
 
   int _parseHour(String value) {
-    if (value == null || value.isEmpty) {
+    if (value == null) {
       return null;
     }
 
@@ -1271,7 +1272,7 @@ class _TimePickerInputState extends State<_TimePickerInput> {
   }
 
   int _parseMinute(String value) {
-    if (value == null || value.isEmpty) {
+    if (value == null) {
       return null;
     }
 
@@ -1323,10 +1324,7 @@ class _TimePickerInputState extends State<_TimePickerInput> {
     // This is used as the validator for the [TextFormField].
     // Returning an empty string allows the field to go into an error state.
     // Returning null means no error in the validation of the entered text.
-    if (newHour == null) {
-      return '';
-    }
-    return null;
+    return newHour == null ? '' : null;
   }
 
   String _validateMinute(String value) {
@@ -1337,10 +1335,7 @@ class _TimePickerInputState extends State<_TimePickerInput> {
     // This is used as the validator for the [TextFormField].
     // Returning an empty string allows the field to go into an error state.
     // Returning null means no error in the validation of the entered text.
-    if (newMinute == null) {
-      return '';
-    }
-    return null;
+    return newMinute == null ? '' : null;
   }
 
   @override
@@ -1452,10 +1447,10 @@ class _HourMinuteTextField extends StatefulWidget {
   final ValueChanged<String> onChanged;
 
   @override
-  __HourMinuteTextFieldState createState() => __HourMinuteTextFieldState();
+  _HourMinuteTextFieldState createState() => _HourMinuteTextFieldState();
 }
 
-class __HourMinuteTextFieldState extends State<_HourMinuteTextField> {
+class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
   TextEditingController controller;
   FocusNode focusNode;
 

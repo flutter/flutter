@@ -68,8 +68,8 @@ void main() {
       matching: find.byType(Text),
     ).first;
     final Finder hourControlFinder = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourControl');
-    final Finder minuteControlFinder = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_MinuteControl');
-    final Finder dayPeriodControlFinder = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_DayPeriodControl');
+    final Finder minuteControlFinder = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MinuteControl');
+    final Finder dayPeriodControlFinder = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl');
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
     final List<Locale> locales = <Locale>[
@@ -133,8 +133,8 @@ void main() {
       matching: find.byType(Text),
     ).first;
     final Finder hourControlFinder = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourControl');
-    final Finder minuteControlFinder = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_MinuteControl');
-    final Finder dayPeriodControlFinder = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_DayPeriodControl');
+    final Finder minuteControlFinder = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MinuteControl');
+    final Finder dayPeriodControlFinder = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl');
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
     final List<Locale> locales = <Locale>[
