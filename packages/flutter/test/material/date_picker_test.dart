@@ -1159,35 +1159,6 @@ void main() {
         expect(find.text('March 2016'), findsOneWidget);
       });
     });
-
-    testWidgets('Can confirm dialog with Enter key', (WidgetTester tester) async {
-      await prepareDatePicker(tester, (Future<DateTime> date) async {
-        await tester.tap(find.text('12'));
-        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-        await tester.pumpAndSettle();
-        expect(await date, equals(DateTime(2016, DateTime.january, 12)));
-      });
-
-      // Same thing should work even if the focus is on a widget that can activate
-      await prepareDatePicker(tester, (Future<DateTime> date) async {
-        await tester.tap(find.text('12'));
-        // Navigate to the year selector
-        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-        await tester.pumpAndSettle();
-        expect(await date, equals(DateTime(2016, DateTime.january, 12)));
-      });
-    });
-
-    testWidgets('Can cancel dialog with Escape key', (WidgetTester tester) async {
-      await prepareDatePicker(tester, (Future<DateTime> date) async {
-        await tester.tap(find.text('12'));
-        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-        await tester.pumpAndSettle();
-        // We shouldn't get a date back
-        expect(await date, isNull);
-      });
-    });
   });
 
   group('Screen configurations', () {
