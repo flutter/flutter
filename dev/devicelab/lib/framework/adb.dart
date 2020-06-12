@@ -68,7 +68,7 @@ abstract class DeviceDiscovery {
       case DeviceOperatingSystem.fuchsia:
         return FuchsiaDeviceDiscovery();
       case DeviceOperatingSystem.fake:
-        print('Looking for mock devices!'
+        print('Looking for fake devices!'
               'You should not see this in release builds.');
         return FakeDeviceDiscovery();
       default:
@@ -873,10 +873,10 @@ class FakeDeviceDiscovery implements DeviceDiscovery {
     return _workingDevice;
   }
 
-  /// The Mock is only available for by ID device discovery.
+  /// The Fake is only available for by ID device discovery.
   @override
   Future<void> chooseWorkingDevice() async {
-    throw const DeviceException('No Mock devices detected');
+    throw const DeviceException('No fake devices detected');
   }
 
   @override
@@ -895,14 +895,14 @@ class FakeDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<List<String>> discoverDevices() async {
-    return <String>['MOCK_SUCCESS', 'THIS_IS_A_MOCK'];
+    return <String>['FAKE_SUCCESS', 'THIS_IS_A_FAKE'];
   }
 
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
     final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
     for (final String deviceId in await discoverDevices()) {
-      results['mock-device-$deviceId'] = HealthCheckResult.success();
+      results['fake-device-$deviceId'] = HealthCheckResult.success();
     }
     return results;
   }

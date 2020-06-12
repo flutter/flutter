@@ -12,7 +12,7 @@ Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.fake;
   await task(() async {
     final Device device = await devices.workingDevice;
-    if (device.deviceId == 'MOCK_SUCCESS')
+    if (device.deviceId == 'FAKE_SUCCESS')
       return TaskResult.success(<String, dynamic>{
         'metric1': 42,
         'metric2': 123,

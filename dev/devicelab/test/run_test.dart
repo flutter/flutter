@@ -78,7 +78,7 @@ void main() {
 
     test('exits with code 0 when provided a valid device ID', () async {
       await expectScriptResult(<String>['smoke_test_device'], 0,
-        deviceId: 'MOCK');
+        deviceId: 'FAKE');
     });
 
     test('exits with code 1 when provided a bad device ID', () async {
