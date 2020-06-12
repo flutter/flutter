@@ -445,4 +445,16 @@ class SystemMouseCursors {
   ///
   /// Typically the shape of a closed hand.
   static const SystemMouseCursor grabbing = SystemMouseCursor._(kind: 'grabbing');
+
+  /// A cursor in the shape of a horizontal double-arrow.
+  ///
+  /// This cursor is typically used when moving or resizing an object, and the
+  /// object can be moved left or right.
+  static const SystemMouseCursor horizontalDoubleArrow = SystemMouseCursor._(kind: 'horizontalDoubleArrow');
+
+  /// A cursor in the shape of a vertical double-arrow.
+  ///
+  /// This cursor is typically used when moving or resizing an object, and the
+  /// object can be moved up or down.
+  static const SystemMouseCursor verticalDoubleArrow = SystemMouseCursor._(kind: 'verticalDoubleArrow');
 }
