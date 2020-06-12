@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+require 'json'
+
 # Minimum CocoaPods Ruby version is 2.0.
 # Don't depend on features newer than that.
 
@@ -105,35 +107,32 @@ def flutter_install_ios_plugin_pods(ios_application_path = nil)
   symlink_plugins_dir = File.expand_path('plugins', symlink_dir)
   system('mkdir', '-p', symlink_plugins_dir)
 
-  plugins_file = File.join(ios_application_path, '..', '.flutter-plugins')
+  plugins_file = File.join(ios_application_path, '..', '.flutter-plugins-dependencies')
   plugin_pods = flutter_parse_plugins_file(plugins_file)
-  plugin_pods.each do |name, path|
-    symlink = File.join(symlink_plugins_dir, name)
-    File.symlink(path, symlink)
+  plugin_pods.each do |plugin_hash|
+    plugin_name = plugin_hash['name']
+    plugin_path = plugin_hash['path']
+    if (plugin_name && plugin_path)
+      symlink = File.join(symlink_plugins_dir, plugin_name)
+      File.symlink(plugin_path, symlink)
 
-    # Keep pod path relative so it can be checked into Podfile.lock.
-    pod name, :path => File.join('.symlinks', 'plugins', name, 'ios')
+      # Keep pod path relative so it can be checked into Podfile.lock.
+      pod plugin_name, :path => File.join('.symlinks', 'plugins', plugin_name, 'ios')
+    end
   end
 end
 
+# .flutter-plugins-dependencies format documented at
+# https://flutter.dev/go/plugins-list-migration
 def flutter_parse_plugins_file(file)
   file_path = File.expand_path(file)
-  unless File.exists? file_path
-    return {};
-  end
-  generated_key_values = {}
-  skip_line_start_symbols = ["#", "/"]
-  File.foreach(file_path) do |line|
-    next if skip_line_start_symbols.any? { |symbol| line =~ /^\s*#{symbol}/ }
-    plugin = line.split('=')
-    if plugin.length == 2
-      podname = plugin[0].strip
-      path = plugin[1].strip
-      podpath = File.expand_path(path, file_path)
-      generated_key_values[podname] = File.expand_path(path, file_path)
-    else
-      puts "Invalid plugin specification: #{line}"
-    end
-  end
-  generated_key_values
+  return [] unless File.exists? file_path
+
+  dependencies_file = File.read(file)
+  dependencies_hash = JSON.parse(dependencies_file)
+
+  # dependencies_hash.dig('plugins', 'ios') not available until Ruby 2.3
+  return [] unless dependencies_hash.has_key?('plugins')
+  return [] unless dependencies_hash['plugins'].has_key?('ios')
+  dependencies_hash['plugins']['ios'] || []
 end

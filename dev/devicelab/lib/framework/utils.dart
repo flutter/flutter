@@ -693,6 +693,13 @@ void checkDirectoryExists(String directory) {
   }
 }
 
+/// Checks that the directory does not exist, otherwise throws a [FileSystemException].
+void checkDirectoryNotExists(String directory) {
+  if (exists(Directory(directory))) {
+    throw FileSystemException('Expected directory to not exist.', directory);
+  }
+}
+
 /// Check that `collection` contains all entries in `values`.
 void checkCollectionContains<T>(Iterable<T> values, Iterable<T> collection) {
   for (final T value in values) {
