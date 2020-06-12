@@ -223,21 +223,21 @@ if (enable_unittests) {
 
         defines += [ "SHELL_ENABLE_GL" ]
       }
+    }
 
-      if (test_enable_vulkan) {
-        sources += [
-          "shell_test_platform_view_vulkan.cc",
-          "shell_test_platform_view_vulkan.h",
-        ]
+    if (test_enable_vulkan) {
+      sources += [
+        "shell_test_platform_view_vulkan.cc",
+        "shell_test_platform_view_vulkan.h",
+      ]
 
-        public_deps += [
-          "//flutter/shell/gpu:gpu_surface_vulkan",
-          "//flutter/testing:vulkan",
-          "//flutter/vulkan",
-        ]
+      public_deps += [
+        "//flutter/shell/gpu:gpu_surface_vulkan",
+        "//flutter/testing:vulkan",
+        "//flutter/vulkan",
+      ]
 
-        defines += [ "SHELL_ENABLE_VULKAN" ]
-      }
+      defines += [ "SHELL_ENABLE_VULKAN" ]
     }
   }
 
@@ -262,6 +262,10 @@ if (enable_unittests) {
 
     if (!defined(defines)) {
       defines = []
+    }
+
+    if (test_enable_vulkan) {
+      defines += [ "SHELL_ENABLE_VULKAN" ]
     }
   }
 
