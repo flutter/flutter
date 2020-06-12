@@ -667,32 +667,32 @@ class SemanticsUpdateBuilder {
   /// The `transform` is a matrix that maps this node's coordinate system into
   /// its parent's coordinate system.
   void updateNode({
-    /*required*/ int/*!*/ id,
-    /*required*/ int/*!*/ flags,
-    /*required*/ int/*!*/ actions,
-    /*required*/ int/*!*/ maxValueLength,
-    /*required*/ int/*!*/ currentValueLength,
-    /*required*/ int/*!*/ textSelectionBase,
-    /*required*/ int/*!*/ textSelectionExtent,
-    /*required*/ int/*!*/ platformViewId,
-    /*required*/ int/*!*/ scrollChildren,
-    /*required*/ int/*!*/ scrollIndex,
-    /*required*/ double/*!*/ scrollPosition,
-    /*required*/ double/*!*/ scrollExtentMax,
-    /*required*/ double/*!*/ scrollExtentMin,
-    /*required*/ double/*!*/ elevation,
-    /*required*/ double/*!*/ thickness,
-    /*required*/ Rect/*!*/ rect,
-    /*required*/ String/*!*/ label,
-    /*required*/ String/*!*/ hint,
-    /*required*/ String/*!*/ value,
-    /*required*/ String/*!*/ increasedValue,
-    /*required*/ String/*!*/ decreasedValue,
+    int/*!*/ id,
+    int/*!*/ flags,
+    int/*!*/ actions,
+    int/*!*/ maxValueLength,
+    int/*!*/ currentValueLength,
+    int/*!*/ textSelectionBase,
+    int/*!*/ textSelectionExtent,
+    int/*!*/ platformViewId,
+    int/*!*/ scrollChildren,
+    int/*!*/ scrollIndex,
+    double/*!*/ scrollPosition,
+    double/*!*/ scrollExtentMax,
+    double/*!*/ scrollExtentMin,
+    double/*!*/ elevation,
+    double/*!*/ thickness,
+    Rect/*!*/ rect,
+    String/*!*/ label,
+    String/*!*/ hint,
+    String/*!*/ value,
+    String/*!*/ increasedValue,
+    String/*!*/ decreasedValue,
     TextDirection/*?*/ textDirection,
-    /*required*/ Float64List/*!*/ transform,
-    /*required*/ Int32List/*!*/ childrenInTraversalOrder,
-    /*required*/ Int32List/*!*/ childrenInHitTestOrder,
-    /*required*/ Int32List/*!*/ additionalActions,
+    Float64List/*!*/ transform,
+    Int32List/*!*/ childrenInTraversalOrder,
+    Int32List/*!*/ childrenInHitTestOrder,
+    Int32List/*!*/ additionalActions,
   }) {
     if (transform.length != 16)
       throw ArgumentError('transform argument must have 16 entries.');
@@ -727,7 +727,7 @@ class SemanticsUpdateBuilder {
   }
 
   void updateCustomAction(
-      {/*required*/ int/*!*/ id, String/*?*/ label, String/*?*/ hint, int/*!*/ overrideId = -1}) {
+      {int/*!*/ id, String/*?*/ label, String/*?*/ hint, int/*!*/ overrideId = -1}) {
     // TODO(yjbanov): implement.
   }
 

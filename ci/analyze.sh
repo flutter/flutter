@@ -7,6 +7,7 @@ dartanalyzer --version
 
 RESULTS=`dartanalyzer                                                          \
   --options flutter/analysis_options.yaml                                      \
+  --enable-experiment=non-nullable                                             \
   "$1out/host_debug_unopt/gen/sky/bindings/dart_ui/ui.dart"                    \
   2>&1                                                                         \
   | grep -Ev "No issues found!"                                                \

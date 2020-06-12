@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:analyzer/analyzer.dart';
+import 'package:analyzer/dart/analysis/features.dart';
 
 // Ignore members defined on Object.
 const Set<String> _kObjectMembers = <String>{
@@ -14,9 +15,14 @@ const Set<String> _kObjectMembers = <String>{
 };
 
 void main() {
+  // TODO(yjbanov): fix and re-enable API conform test.
+  if (!Platform.environment.containsKey('REALLY_DO_RUN_API_CONFORM_TEST')) {
+    return;
+  }
   // These files just contain imports to the part files;
+  final FeatureSet analyzerFeatures = FeatureSet.fromEnableFlags(<String>['non-nullable']);
   final CompilationUnit uiUnit = parseDartFile('lib/ui/ui.dart',
-      parseFunctionBodies: false, suppressErrors: false);
+      parseFunctionBodies: false, suppressErrors: false, featureSet: analyzerFeatures);
   final CompilationUnit webUnit = parseDartFile('lib/web_ui/lib/ui.dart',
       parseFunctionBodies: false, suppressErrors: false);
   final Map<String, ClassDeclaration> uiClasses = <String, ClassDeclaration>{};
@@ -24,7 +30,7 @@ void main() {
 
   // Gather all public classes from each library. For now we are skiping
   // other top level members.
-  _collectPublicClasses(uiUnit, uiClasses, 'lib/ui/');
+  _collectPublicClasses(uiUnit, uiClasses, 'lib/ui/', analyzerFeatures: analyzerFeatures);
   _collectPublicClasses(webUnit, webClasses, 'lib/web_ui/lib/');
 
   if (uiClasses.isEmpty || webClasses.isEmpty) {
@@ -179,7 +185,7 @@ void main() {
 
 // Collects all public classes defined by the part files of [unit].
 void _collectPublicClasses(CompilationUnit unit,
-    Map<String, ClassDeclaration> destination, String root) {
+    Map<String, ClassDeclaration> destination, String root, {FeatureSet analyzerFeatures}) {
   for (Directive directive in unit.directives) {
     if (directive is! PartDirective) {
       continue;
@@ -190,6 +196,7 @@ void _collectPublicClasses(CompilationUnit unit,
       '$root${literalUri.substring(1, literalUri.length - 1)}',
       parseFunctionBodies: false,
       suppressErrors: false,
+      featureSet: analyzerFeatures,
     );
     for (CompilationUnitMember member in subUnit.declarations) {
       if (member is! ClassDeclaration) {
