@@ -86,13 +86,6 @@ void main() {
     checkEquality(B, B);
   });
 
-  test('ImageFilter - nulls', () async {
-    final Paint paint = Paint()..imageFilter = ImageFilter.blur(sigmaX: null, sigmaY: null);
-    expect(paint.imageFilter, equals(ImageFilter.blur()));
-
-    expect(() => ImageFilter.matrix(null), throwsNoSuchMethodError);
-  });
-
   void checkBytes(Uint32List bytes, int center, int side, int corner) {
     expect(bytes[0], equals(corner));
     expect(bytes[1], equals(side));

@@ -183,6 +183,8 @@ def SnapshotTest(build_dir, dart_file, kernel_file_output, verbose_dart_snapshot
   snapshot_command = [
     dart,
     frontend_server,
+    '--enable-experiment=non-nullable',
+    '--no-null-safety',
     '--sdk-root',
     flutter_patched_sdk,
     '--incremental',
