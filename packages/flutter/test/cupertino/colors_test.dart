@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -238,7 +240,7 @@ void main() {
       expect(find.byType(DependentWidget), paints..rect(color: color0));
       expect(find.byType(DependentWidget), isNot(paints..rect(color: color1)));
 
-      // CupertinoTheme should take percedence over MediaQuery.
+      // CupertinoTheme should take precedence over MediaQuery.
       await tester.pumpWidget(
         const CupertinoTheme(
           data: CupertinoThemeData(brightness: Brightness.light),
@@ -318,7 +320,7 @@ void main() {
       expect(tester.takeException()?.toString(), contains('does not contain a CupertinoUserInterfaceLevel'));
   });
 
-  testWidgets('Dynamic color with all 3 depedencies works', (WidgetTester tester) async {
+  testWidgets('Dynamic color with all 3 dependencies works', (WidgetTester tester) async {
     const Color dynamicRainbowColor1 = CupertinoDynamicColor(
       color: color0,
       darkColor: color1,
