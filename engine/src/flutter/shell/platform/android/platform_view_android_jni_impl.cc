@@ -438,6 +438,12 @@ static void InvokePlatformMessageEmptyResponseCallback(JNIEnv* env,
       );
 }
 
+static void NotifyLowMemoryWarning(JNIEnv* env,
+                                   jobject obj,
+                                   jlong shell_holder) {
+  ANDROID_SHELL_HOLDER->NotifyLowMemoryWarning();
+}
+
 static jboolean FlutterTextUtilsIsEmoji(JNIEnv* env,
                                         jobject obj,
                                         jint codePoint) {
@@ -507,6 +513,11 @@ bool RegisterApi(JNIEnv* env) {
           .signature = "(JI)V",
           .fnPtr = reinterpret_cast<void*>(
               &InvokePlatformMessageEmptyResponseCallback),
+      },
+      {
+          .name = "nativeNotifyLowMemoryWarning",
+          .signature = "(J)V",
+          .fnPtr = reinterpret_cast<void*>(&NotifyLowMemoryWarning),
       },
 
       // Start of methods from FlutterView

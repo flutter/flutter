@@ -40,6 +40,8 @@ class AndroidShellHolder {
 
   void UpdateAssetManager(fml::RefPtr<flutter::AssetManager> asset_manager);
 
+  void NotifyLowMemoryWarning();
+
  private:
   const flutter::Settings settings_;
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;

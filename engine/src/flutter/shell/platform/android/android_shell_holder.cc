@@ -181,4 +181,8 @@ fml::WeakPtr<PlatformViewAndroid> AndroidShellHolder::GetPlatformView() {
   return platform_view_;
 }
 
+void AndroidShellHolder::NotifyLowMemoryWarning() {
+  FML_DCHECK(shell_);
+  shell_->NotifyLowMemoryWarning();
+}
 }  // namespace flutter

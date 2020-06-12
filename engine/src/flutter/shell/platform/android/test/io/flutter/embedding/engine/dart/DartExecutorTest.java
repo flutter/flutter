@@ -6,6 +6,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.res.AssetManager;
 import io.flutter.embedding.engine.FlutterJNI;
@@ -37,5 +38,15 @@ public class DartExecutorTest {
     // Verify that DartExecutor sent our message to FlutterJNI.
     verify(fakeFlutterJni, times(1))
         .dispatchPlatformMessage(eq("fake_channel"), eq(fakeMessage), anyInt(), anyInt());
+  }
+
+  @Test
+  public void itNotifiesLowMemoryWarning() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    when(mockFlutterJNI.isAttached()).thenReturn(true);
+
+    DartExecutor dartExecutor = new DartExecutor(mockFlutterJNI, mock(AssetManager.class));
+    dartExecutor.notifyLowMemoryWarning();
+    verify(mockFlutterJNI, times(1)).notifyLowMemoryWarning();
   }
 }
