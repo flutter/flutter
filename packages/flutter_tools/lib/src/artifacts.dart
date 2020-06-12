@@ -671,7 +671,6 @@ String _dartSdkPath(FileSystem fileSystem) {
   return fileSystem.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk');
 }
 
-
 class _TestArtifacts implements Artifacts {
   @override
   String getArtifactPath(Artifact artifact, {TargetPlatform platform, BuildMode mode}) {
