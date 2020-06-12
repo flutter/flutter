@@ -1,6 +1,6 @@
 package io.flutter.embedding.android;
 
-import static android.content.ComponentCallbacks2.*;
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
@@ -442,7 +442,7 @@ public class FlutterActivityAndFragmentDelegateTest {
   }
 
   @Test
-  public void itNotifiesDartExecutorAndSendsMessageOverSystemChannelWhenToldToTrimMemory() {
+  public void itSendsMessageOverSystemChannelWhenToldToTrimMemory() {
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
@@ -451,21 +451,14 @@ public class FlutterActivityAndFragmentDelegateTest {
     delegate.onAttach(RuntimeEnvironment.application);
 
     // Emulate the host and call the method that we expect to be forwarded.
-    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_MODERATE);
     delegate.onTrimMemory(TRIM_MEMORY_RUNNING_LOW);
-    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_CRITICAL);
-    delegate.onTrimMemory(TRIM_MEMORY_BACKGROUND);
-    delegate.onTrimMemory(TRIM_MEMORY_COMPLETE);
-    delegate.onTrimMemory(TRIM_MEMORY_MODERATE);
-    delegate.onTrimMemory(TRIM_MEMORY_UI_HIDDEN);
 
     // Verify that the call was forwarded to the engine.
-    verify(mockFlutterEngine.getDartExecutor(), times(7)).notifyLowMemoryWarning();
     verify(mockFlutterEngine.getSystemChannel(), times(1)).sendMemoryPressureWarning();
   }
 
   @Test
-  public void itNotifiesDartExecutorAndSendsMessageOverSystemChannelWhenInformedOfLowMemory() {
+  public void itSendsMessageOverSystemChannelWhenInformedOfLowMemory() {
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
@@ -477,7 +470,6 @@ public class FlutterActivityAndFragmentDelegateTest {
     delegate.onLowMemory();
 
     // Verify that the call was forwarded to the engine.
-    verify(mockFlutterEngine.getDartExecutor(), times(1)).notifyLowMemoryWarning();
     verify(mockFlutterEngine.getSystemChannel(), times(1)).sendMemoryPressureWarning();
   }
 
