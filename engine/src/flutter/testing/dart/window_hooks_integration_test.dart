@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.9
+
 // HACK: pretend to be dart.ui in order to access its internals
-// @dart = 2.6
 library dart.ui;
 
 import 'dart:async';
@@ -15,8 +16,6 @@ import 'dart:math' as math;
 import 'dart:nativewrappers'; // ignore: unused_import
 import 'dart:typed_data';
 
-
-import 'package:test/test.dart';
 
 // HACK: these parts are to get access to private functions tested here.
 part '../../lib/ui/annotations.dart';
@@ -34,362 +33,395 @@ part '../../lib/ui/text.dart';
 part '../../lib/ui/window.dart';
 
 void main() {
-  group('window callback zones', () {
-    VoidCallback originalOnMetricsChanged;
-    VoidCallback originalOnLocaleChanged;
-    FrameCallback originalOnBeginFrame;
-    VoidCallback originalOnDrawFrame;
-    TimingsCallback originalOnReportTimings;
-    PointerDataPacketCallback originalOnPointerDataPacket;
-    VoidCallback originalOnSemanticsEnabledChanged;
-    SemanticsActionCallback originalOnSemanticsAction;
-    PlatformMessageCallback originalOnPlatformMessage;
-    VoidCallback originalOnTextScaleFactorChanged;
+  VoidCallback? originalOnMetricsChanged;
+  VoidCallback? originalOnLocaleChanged;
+  FrameCallback? originalOnBeginFrame;
+  VoidCallback? originalOnDrawFrame;
+  TimingsCallback? originalOnReportTimings;
+  PointerDataPacketCallback? originalOnPointerDataPacket;
+  VoidCallback? originalOnSemanticsEnabledChanged;
+  SemanticsActionCallback? originalOnSemanticsAction;
+  PlatformMessageCallback? originalOnPlatformMessage;
+  VoidCallback? originalOnTextScaleFactorChanged;
 
-    double oldDPR;
-    Size oldSize;
-    double oldDepth;
-    WindowPadding oldPadding;
-    WindowPadding oldInsets;
-    WindowPadding oldSystemGestureInsets;
+  double? oldDPR;
+  Size? oldSize;
+  double? oldDepth;
+  WindowPadding? oldPadding;
+  WindowPadding? oldInsets;
+  WindowPadding? oldSystemGestureInsets;
 
-    setUp(() {
-      oldDPR = window.devicePixelRatio;
-      oldSize = window.physicalSize;
-      oldDepth = window.physicalDepth;
-      oldPadding = window.viewPadding;
-      oldInsets = window.viewInsets;
-      oldSystemGestureInsets = window.systemGestureInsets;
+  void setUp() {
+    oldDPR = window.devicePixelRatio;
+    oldSize = window.physicalSize;
+    oldDepth = window.physicalDepth;
+    oldPadding = window.viewPadding;
+    oldInsets = window.viewInsets;
+    oldSystemGestureInsets = window.systemGestureInsets;
 
-      originalOnMetricsChanged = window.onMetricsChanged;
-      originalOnLocaleChanged = window.onLocaleChanged;
-      originalOnBeginFrame = window.onBeginFrame;
-      originalOnDrawFrame = window.onDrawFrame;
-      originalOnReportTimings = window.onReportTimings;
-      originalOnPointerDataPacket = window.onPointerDataPacket;
-      originalOnSemanticsEnabledChanged = window.onSemanticsEnabledChanged;
-      originalOnSemanticsAction = window.onSemanticsAction;
-      originalOnPlatformMessage = window.onPlatformMessage;
-      originalOnTextScaleFactorChanged = window.onTextScaleFactorChanged;
+    originalOnMetricsChanged = window.onMetricsChanged;
+    originalOnLocaleChanged = window.onLocaleChanged;
+    originalOnBeginFrame = window.onBeginFrame;
+    originalOnDrawFrame = window.onDrawFrame;
+    originalOnReportTimings = window.onReportTimings;
+    originalOnPointerDataPacket = window.onPointerDataPacket;
+    originalOnSemanticsEnabledChanged = window.onSemanticsEnabledChanged;
+    originalOnSemanticsAction = window.onSemanticsAction;
+    originalOnPlatformMessage = window.onPlatformMessage;
+    originalOnTextScaleFactorChanged = window.onTextScaleFactorChanged;
+  }
+
+  void tearDown() {
+    _updateWindowMetrics(
+      oldDPR!,                         // DPR
+      oldSize!.width,                  // width
+      oldSize!.height,                 // height
+      oldDepth!,                       // depth
+      oldPadding!.top,                 // padding top
+      oldPadding!.right,               // padding right
+      oldPadding!.bottom,              // padding bottom
+      oldPadding!.left,                // padding left
+      oldInsets!.top,                  // inset top
+      oldInsets!.right,                // inset right
+      oldInsets!.bottom,               // inset bottom
+      oldInsets!.left,                 // inset left
+      oldSystemGestureInsets!.top,     // system gesture inset top
+      oldSystemGestureInsets!.right,   // system gesture inset right
+      oldSystemGestureInsets!.bottom,  // system gesture inset bottom
+      oldSystemGestureInsets!.left,    // system gesture inset left
+    );
+    window.onMetricsChanged = originalOnMetricsChanged;
+    window.onLocaleChanged = originalOnLocaleChanged;
+    window.onBeginFrame = originalOnBeginFrame;
+    window.onDrawFrame = originalOnDrawFrame;
+    window.onReportTimings = originalOnReportTimings;
+    window.onPointerDataPacket = originalOnPointerDataPacket;
+    window.onSemanticsEnabledChanged = originalOnSemanticsEnabledChanged;
+    window.onSemanticsAction = originalOnSemanticsAction;
+    window.onPlatformMessage = originalOnPlatformMessage;
+    window.onTextScaleFactorChanged = originalOnTextScaleFactorChanged;
+  }
+
+  void test(String description, void Function() testFunction) {
+    print(description);
+    setUp();
+    testFunction();
+    tearDown();
+  }
+
+  void expectEquals(dynamic actual, dynamic expected) {
+    if (actual != expected) {
+      throw Exception('Equality check failed:\n  Expected: $expected\n  Actual: $actual');
+    }
+  }
+
+  void expectIterablesEqual(Iterable<dynamic> actual, Iterable<dynamic> expected) {
+    expectEquals(actual.length, expected.length);
+    final Iterator<dynamic> actualIter = actual.iterator;
+    final Iterator<dynamic> expectedIter = expected.iterator;
+    while (expectedIter.moveNext()) {
+      expectEquals(actualIter.moveNext(), true);
+      expectEquals(actualIter.current, expectedIter.current);
+    }
+    expectEquals(actualIter.moveNext(), false);
+  }
+
+  void expectNotEquals(dynamic actual, dynamic expected) {
+    if (actual == expected) {
+      throw Exception('Inequality check failed:\n  Expected: $expected\n  Actual: $actual');
+    }
+  }
+
+  void expectIdentical(dynamic actual, dynamic expected) {
+    if (!identical(actual, expected)) {
+      throw Exception('Identity check failed:\n  Expected: $expected\n  Actual: $actual');
+    }
+  }
+
+  test('updateUserSettings can handle an empty object', () {
+    // this should not throw.
+    _updateUserSettingsData('{}');
+  });
+
+  test('onMetricsChanged preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    late double devicePixelRatio;
+
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onMetricsChanged = () {
+        runZone = Zone.current;
+        devicePixelRatio = window.devicePixelRatio;
+      };
     });
 
-    tearDown(() {
-      _updateWindowMetrics(
-        oldDPR,                         // DPR
-        oldSize.width,                  // width
-        oldSize.height,                 // height
-        oldDepth,                       // depth
-        oldPadding.top,                 // padding top
-        oldPadding.right,               // padding right
-        oldPadding.bottom,              // padding bottom
-        oldPadding.left,                // padding left
-        oldInsets.top,                  // inset top
-        oldInsets.right,                // inset right
-        oldInsets.bottom,               // inset bottom
-        oldInsets.left,                 // inset left
-        oldSystemGestureInsets.top,     // system gesture inset top
-        oldSystemGestureInsets.right,   // system gesture inset right
-        oldSystemGestureInsets.bottom,  // system gesture inset bottom
-        oldSystemGestureInsets.left,    // system gesture inset left
-      );
-      window.onMetricsChanged = originalOnMetricsChanged;
-      window.onLocaleChanged = originalOnLocaleChanged;
-      window.onBeginFrame = originalOnBeginFrame;
-      window.onDrawFrame = originalOnDrawFrame;
-      window.onReportTimings = originalOnReportTimings;
-      window.onPointerDataPacket = originalOnPointerDataPacket;
-      window.onSemanticsEnabledChanged = originalOnSemanticsEnabledChanged;
-      window.onSemanticsAction = originalOnSemanticsAction;
-      window.onPlatformMessage = originalOnPlatformMessage;
-      window.onTextScaleFactorChanged = originalOnTextScaleFactorChanged;
+    window.onMetricsChanged!();
+    _updateWindowMetrics(
+      0.1234, // DPR
+      0.0,    // width
+      0.0,    // height
+      0.0,    // depth
+      0.0,    // padding top
+      0.0,    // padding right
+      0.0,    // padding bottom
+      0.0,    // padding left
+      0.0,    // inset top
+      0.0,    // inset right
+      0.0,    // inset bottom
+      0.0,    // inset left
+      0.0,    // system gesture inset top
+      0.0,    // system gesture inset right
+      0.0,    // system gesture inset bottom
+      0.0,    // system gesture inset left
+    );
+    expectNotEquals(runZone, null);
+    expectIdentical(runZone, innerZone);
+    expectEquals(devicePixelRatio, 0.1234);
+  });
+
+  test('onLocaleChanged preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    Locale? locale;
+
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onLocaleChanged = () {
+        runZone = Zone.current;
+        locale = window.locale;
+      };
     });
 
-    test('updateUserSettings can handle an empty object', () {
-      // this should now throw.
-      _updateUserSettingsData('{}');
-      expect(true, equals(true));
+    _updateLocales(<String>['en', 'US', '', '']);
+    expectNotEquals(runZone, null);
+    expectIdentical(runZone, innerZone);
+    expectEquals(locale, const Locale('en', 'US'));
+  });
+
+  test('onBeginFrame preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    late Duration start;
+
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onBeginFrame = (Duration value) {
+        runZone = Zone.current;
+        start = value;
+      };
     });
 
-    test('onMetricsChanged preserves callback zone', () {
-      Zone innerZone;
-      Zone runZone;
-      double devicePixelRatio;
+    _beginFrame(1234);
+    expectNotEquals(runZone, null);
+    expectIdentical(runZone, innerZone);
+    expectEquals(start, const Duration(microseconds: 1234));
+  });
 
-      runZoned(() {
-        innerZone = Zone.current;
-        window.onMetricsChanged = () {
-          runZone = Zone.current;
-          devicePixelRatio = window.devicePixelRatio;
-        };
-      });
+  test('onDrawFrame preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
 
-      window.onMetricsChanged();
-      _updateWindowMetrics(
-        0.1234, // DPR
-        0.0,    // width
-        0.0,    // height
-        0.0,    // depth
-        0.0,    // padding top
-        0.0,    // padding right
-        0.0,    // padding bottom
-        0.0,    // padding left
-        0.0,    // inset top
-        0.0,    // inset right
-        0.0,    // inset bottom
-        0.0,    // inset left
-        0.0,    // system gesture inset top
-        0.0,    // system gesture inset right
-        0.0,    // system gesture inset bottom
-        0.0,    // system gesture inset left
-      );
-      expect(runZone, isNotNull);
-      expect(runZone, same(innerZone));
-      expect(devicePixelRatio, equals(0.1234));
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onDrawFrame = () {
+        runZone = Zone.current;
+      };
     });
 
-    test('onLocaleChanged preserves callback zone', () {
-      Zone innerZone;
-      Zone runZone;
-      Locale locale;
+    _drawFrame();
+    expectNotEquals(runZone, null);
+    expectIdentical(runZone, innerZone);
+  });
 
-      runZoned(() {
-        innerZone = Zone.current;
-        window.onLocaleChanged = () {
-          runZone = Zone.current;
-          locale = window.locale;
-        };
-      });
+  test('onReportTimings preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
 
-      _updateLocales(<String>['en', 'US', '', '']);
-      expect(runZone, isNotNull);
-      expect(runZone, same(innerZone));
-      expect(locale, equals(const Locale('en', 'US')));
+    window._setNeedsReportTimings = (bool _) {};
+
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onReportTimings = (List<FrameTiming> timings) {
+        runZone = Zone.current;
+      };
     });
 
-    test('onBeginFrame preserves callback zone', () {
-      Zone innerZone;
-      Zone runZone;
-      Duration start;
+    _reportTimings(<int>[]);
+    expectNotEquals(runZone, null);
+    expectIdentical(runZone, innerZone);
+  });
 
-      runZoned(() {
-        innerZone = Zone.current;
-        window.onBeginFrame = (Duration value) {
-          runZone = Zone.current;
-          start = value;
-        };
-      });
+  test('onPointerDataPacket preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    late PointerDataPacket data;
 
-      _beginFrame(1234);
-      expect(runZone, isNotNull);
-      expect(runZone, same(innerZone));
-      expect(start, equals(const Duration(microseconds: 1234)));
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onPointerDataPacket = (PointerDataPacket value) {
+        runZone = Zone.current;
+        data = value;
+      };
     });
 
-    test('onDrawFrame preserves callback zone', () {
-      Zone innerZone;
-      Zone runZone;
+    final ByteData testData = ByteData.view(Uint8List(0).buffer);
+    _dispatchPointerDataPacket(testData);
+    expectNotEquals(runZone, null);
+    expectIdentical(runZone, innerZone);
+    expectIterablesEqual(data.data, _unpackPointerDataPacket(testData).data);
+  });
 
-      runZoned(() {
-        innerZone = Zone.current;
-        window.onDrawFrame = () {
-          runZone = Zone.current;
-        };
-      });
+  test('onSemanticsEnabledChanged preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    late bool enabled;
 
-      _drawFrame();
-      expect(runZone, isNotNull);
-      expect(runZone, same(innerZone));
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onSemanticsEnabledChanged = () {
+        runZone = Zone.current;
+        enabled = window.semanticsEnabled;
+      };
     });
 
-    test('onReportTimings preserves callback zone', () {
-      Zone innerZone;
-      Zone runZone;
+    _updateSemanticsEnabled(window._semanticsEnabled);
+    expectNotEquals(runZone, null);
+    expectIdentical(runZone, innerZone);
+    expectNotEquals(enabled, null);
+    expectEquals(enabled, window._semanticsEnabled);
+  });
 
-      window._setNeedsReportTimings = (bool _) {};
+  test('onSemanticsAction preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    late int id;
+    late int action;
 
-      runZoned(() {
-        innerZone = Zone.current;
-        window.onReportTimings = (List<FrameTiming> timings) {
-          runZone = Zone.current;
-        };
-      });
-
-      _reportTimings(<int>[]);
-      expect(runZone, isNotNull);
-      expect(runZone, same(innerZone));
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onSemanticsAction = (int i, SemanticsAction a, ByteData? _) {
+        runZone = Zone.current;
+        action = a.index;
+        id = i;
+      };
     });
 
-    test('onPointerDataPacket preserves callback zone', () {
-      Zone innerZone;
-      Zone runZone;
-      PointerDataPacket data;
+    _dispatchSemanticsAction(1234, 4, null);
+    expectNotEquals(runZone, null);
+    expectIdentical(runZone, innerZone);
+    expectEquals(id, 1234);
+    expectEquals(action, 4);
+  });
 
-      runZoned(() {
-        innerZone = Zone.current;
-        window.onPointerDataPacket = (PointerDataPacket value) {
-          runZone = Zone.current;
-          data = value;
-        };
-      });
+  test('onPlatformMessage preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    late String name;
 
-      final ByteData testData = ByteData.view(Uint8List(0).buffer);
-      _dispatchPointerDataPacket(testData);
-      expect(runZone, isNotNull);
-      expect(runZone, same(innerZone));
-      expect(data.data, equals(_unpackPointerDataPacket(testData).data));
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onPlatformMessage = (String value, _, __) {
+        runZone = Zone.current;
+        name = value;
+      };
     });
 
-    test('onSemanticsEnabledChanged preserves callback zone', () {
-      Zone innerZone;
-      Zone runZone;
-      bool enabled;
+    _dispatchPlatformMessage('testName', null, 123456789);
+    expectNotEquals(runZone, null);
+    expectIdentical(runZone, innerZone);
+    expectEquals(name, 'testName');
+  });
 
-      runZoned(() {
-        innerZone = Zone.current;
-        window.onSemanticsEnabledChanged = () {
-          runZone = Zone.current;
-          enabled = window.semanticsEnabled;
-        };
-      });
+  test('onTextScaleFactorChanged preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    late double textScaleFactor;
 
-      _updateSemanticsEnabled(window._semanticsEnabled);
-      expect(runZone, isNotNull);
-      expect(runZone, same(innerZone));
-      expect(enabled, isNotNull);
-      expect(enabled, equals(window._semanticsEnabled));
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onTextScaleFactorChanged = () {
+        runZone = Zone.current;
+        textScaleFactor = window.textScaleFactor;
+      };
     });
 
-    test('onSemanticsAction preserves callback zone', () {
-      Zone innerZone;
-      Zone runZone;
-      int id;
-      int action;
+    window.onTextScaleFactorChanged!();
+    _updateTextScaleFactor(0.5);
+    expectNotEquals(runZone, null);
+    expectIdentical(runZone, innerZone);
+    expectEquals(textScaleFactor, 0.5);
+  });
 
-      runZoned(() {
-        innerZone = Zone.current;
-        window.onSemanticsAction = (int i, SemanticsAction a, ByteData _) {
-          runZone = Zone.current;
-          action = a.index;
-          id = i;
-        };
-      });
+  test('onThemeBrightnessMode preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    late Brightness platformBrightness;
 
-      _dispatchSemanticsAction(1234, 4, null);
-      expect(runZone, isNotNull);
-      expect(runZone, same(innerZone));
-      expect(id, equals(1234));
-      expect(action, equals(4));
+    runZoned(() {
+      innerZone = Zone.current;
+      window.onPlatformBrightnessChanged = () {
+        runZone = Zone.current;
+        platformBrightness = window.platformBrightness;
+      };
     });
 
-    test('onPlatformMessage preserves callback zone', () {
-      Zone innerZone;
-      Zone runZone;
-      String name;
+    window.onPlatformBrightnessChanged!();
+    _updatePlatformBrightness('dark');
+    expectNotEquals(runZone, null);
+    expectIdentical(runZone, innerZone);
+    expectEquals(platformBrightness, Brightness.dark);
+  });
 
-      runZoned(() {
-        innerZone = Zone.current;
-        window.onPlatformMessage = (String value, _, __) {
-          runZone = Zone.current;
-          name = value;
-        };
-      });
+  test('Window padding/insets/viewPadding/systemGestureInsets', () {
+    _updateWindowMetrics(
+      1.0,   // DPR
+      800.0, // width
+      600.0, // height
+      100.0, // depth
+      50.0,  // padding top
+      0.0,   // padding right
+      40.0,  // padding bottom
+      0.0,   // padding left
+      0.0,   // inset top
+      0.0,   // inset right
+      0.0,   // inset bottom
+      0.0,   // inset left
+      0.0,   // system gesture inset top
+      0.0,   // system gesture inset right
+      0.0,   // system gesture inset bottom
+      0.0,   // system gesture inset left
+    );
 
-      _dispatchPlatformMessage('testName', null, null);
-      expect(runZone, isNotNull);
-      expect(runZone, same(innerZone));
-      expect(name, equals('testName'));
-    });
+    expectEquals(window.viewInsets.bottom, 0.0);
+    expectEquals(window.viewPadding.bottom, 40.0);
+    expectEquals(window.padding.bottom, 40.0);
+    expectEquals(window.physicalDepth, 100.0);
+    expectEquals(window.systemGestureInsets.bottom, 0.0);
 
-    test('onTextScaleFactorChanged preserves callback zone', () {
-      Zone innerZone;
-      Zone runZone;
-      double textScaleFactor;
+    _updateWindowMetrics(
+      1.0,   // DPR
+      800.0, // width
+      600.0, // height
+      100.0, // depth
+      50.0,  // padding top
+      0.0,   // padding right
+      40.0,  // padding bottom
+      0.0,   // padding left
+      0.0,   // inset top
+      0.0,   // inset right
+      400.0, // inset bottom
+      0.0,   // inset left
+      0.0,   // system gesture insets top
+      0.0,   // system gesture insets right
+      44.0,  // system gesture insets bottom
+      0.0,   // system gesture insets left
+    );
 
-      runZoned(() {
-        innerZone = Zone.current;
-        window.onTextScaleFactorChanged = () {
-          runZone = Zone.current;
-          textScaleFactor = window.textScaleFactor;
-        };
-      });
-
-      window.onTextScaleFactorChanged();
-      _updateTextScaleFactor(0.5);
-      expect(runZone, isNotNull);
-      expect(runZone, same(innerZone));
-      expect(textScaleFactor, equals(0.5));
-    });
-
-    test('onThemeBrightnessMode preserves callback zone', () {
-      Zone innerZone;
-      Zone runZone;
-      Brightness platformBrightness;
-
-      runZoned(() {
-        innerZone = Zone.current;
-        window.onPlatformBrightnessChanged = () {
-          runZone = Zone.current;
-          platformBrightness = window.platformBrightness;
-        };
-      });
-
-      window.onPlatformBrightnessChanged();
-      _updatePlatformBrightness('dark');
-      expect(runZone, isNotNull);
-      expect(runZone, same(innerZone));
-      expect(platformBrightness, equals(Brightness.dark));
-    });
-
-    test('Window padding/insets/viewPadding/systemGestureInsets', () {
-      _updateWindowMetrics(
-        1.0,   // DPR
-        800.0, // width
-        600.0, // height
-        100.0, // depth
-        50.0,  // padding top
-        0.0,   // padding right
-        40.0,  // padding bottom
-        0.0,   // padding left
-        0.0,   // inset top
-        0.0,   // inset right
-        0.0,   // inset bottom
-        0.0,   // inset left
-        0.0,   // system gesture inset top
-        0.0,   // system gesture inset right
-        0.0,   // system gesture inset bottom
-        0.0,   // system gesture inset left
-      );
-
-      expect(window.viewInsets.bottom, 0.0);
-      expect(window.viewPadding.bottom, 40.0);
-      expect(window.padding.bottom, 40.0);
-      expect(window.physicalDepth, 100.0);
-      expect(window.systemGestureInsets.bottom, 0.0);
-
-      _updateWindowMetrics(
-        1.0,   // DPR
-        800.0, // width
-        600.0, // height
-        100.0, // depth
-        50.0,  // padding top
-        0.0,   // padding right
-        40.0,  // padding bottom
-        0.0,   // padding left
-        0.0,   // inset top
-        0.0,   // inset right
-        400.0, // inset bottom
-        0.0,   // inset left
-        0.0,   // system gesture insets top
-        0.0,   // system gesture insets right
-        44.0,  // system gesture insets bottom
-        0.0,   // system gesture insets left
-      );
-
-      expect(window.viewInsets.bottom, 400.0);
-      expect(window.viewPadding.bottom, 40.0);
-      expect(window.padding.bottom, 0.0);
-      expect(window.physicalDepth, 100.0);
-      expect(window.systemGestureInsets.bottom, 44.0);
-    });
+    expectEquals(window.viewInsets.bottom, 400.0);
+    expectEquals(window.viewPadding.bottom, 40.0);
+    expectEquals(window.padding.bottom, 0.0);
+    expectEquals(window.physicalDepth, 100.0);
+    expectEquals(window.systemGestureInsets.bottom, 44.0);
   });
 }
