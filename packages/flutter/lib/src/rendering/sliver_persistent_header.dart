@@ -644,7 +644,7 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
       paintExtent: clampedPaintExtent,
       layoutExtent: layoutExtent.clamp(0.0, clampedPaintExtent) as double,
       maxPaintExtent: maxExtent + stretchOffset,
-      maxScrollObstructionExtent: maxExtent,
+      maxScrollObstructionExtent: minExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
     return 0.0;
