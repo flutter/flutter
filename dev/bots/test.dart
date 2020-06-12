@@ -378,7 +378,7 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
   final String examplePath = exampleDirectory.path;
   final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
   final List<String> additionalArgs = hasNullSafety
-    ? <String>['--enable-experiment', 'non-nullable', '--no-sound-null-safety']
+    ? <String>['--enable-experiment', 'non-nullable']
     : <String>[];
   if (Directory(path.join(examplePath, 'android')).existsSync()) {
     await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);

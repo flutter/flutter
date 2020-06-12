@@ -152,7 +152,7 @@ String generateTestBootstrap({
   @required InternetAddress host,
   File testConfigFile,
   bool updateGoldens = false,
-  @required String languageVersionHeader,
+  String languageVersionHeader = '',
 }) {
   assert(testUrl != null);
   assert(host != null);
@@ -756,16 +756,17 @@ class FlutterPlatform extends PlatformPlugin {
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl)),
       host: host,
       updateGoldens: updateGoldens,
-      // nullSafety: extraFrontEndOptions?.contains('--enable-experiment=non-nullable') ?? false,
       languageVersionHeader: _findLanguageVersionCommentHeader(file),
     );
   }
+
+  static final RegExp _languageVersion = RegExp('\/\/\s+@dart');
 
   /// Instead of attempting to extract the exact language header,
   /// just grab every line that starts with a comment.
   String _findLanguageVersionCommentHeader(File file) {
     for (final String line in file.readAsLinesSync()) {
-      if (line.startsWith('// @dart =')) {
+      if (line.startsWith(_languageVersion)) {
         return line;
       }
       if (line.startsWith('import')) {
