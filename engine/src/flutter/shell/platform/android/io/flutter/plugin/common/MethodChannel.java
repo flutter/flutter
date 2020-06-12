@@ -26,7 +26,7 @@ import java.nio.ByteBuffer;
  * <p>The logical identity of the channel is given by its name. Identically named channels will
  * interfere with each other's communication.
  */
-public final class MethodChannel {
+public class MethodChannel {
   private static final String TAG = "MethodChannel#";
 
   private final BinaryMessenger messenger;

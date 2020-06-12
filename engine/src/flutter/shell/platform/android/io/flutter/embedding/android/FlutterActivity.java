@@ -11,6 +11,7 @@ import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.DEFAULT_
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_BACKGROUND_MODE;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_ID;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_DESTROY_ENGINE_WITH_ACTIVITY;
+import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_ENABLE_STATE_RESTORATION;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.INITIAL_ROUTE_META_DATA_KEY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.NORMAL_THEME_META_DATA_KEY;
@@ -63,6 +64,7 @@ import java.lang.reflect.Method;
  *   <li>Chooses Flutter's initial route.
  *   <li>Renders {@code Activity} transparently, if desired.
  *   <li>Offers hooks for subclasses to provide and configure a {@link FlutterEngine}.
+ *   <li>Save and restore instance state, see {@code #shouldRestoreAndSaveState()};
  * </ul>
  *
  * <p><strong>Dart entrypoint, initial route, and app bundle path</strong>
@@ -947,6 +949,18 @@ public class FlutterActivity extends Activity
   @Override
   public void onFlutterUiNoLongerDisplayed() {
     // no-op
+  }
+
+  @Override
+  public boolean shouldRestoreAndSaveState() {
+    if (getIntent().hasExtra(EXTRA_ENABLE_STATE_RESTORATION)) {
+      return getIntent().getBooleanExtra(EXTRA_ENABLE_STATE_RESTORATION, false);
+    }
+    if (getCachedEngineId() != null) {
+      // Prevent overwriting the existing state in a cached engine with restoration state.
+      return false;
+    }
+    return true;
   }
 
   /**
