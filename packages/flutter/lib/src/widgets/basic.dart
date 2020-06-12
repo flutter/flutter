@@ -43,6 +43,7 @@ export 'package:flutter/rendering.dart' show
   LayerLink,
   MainAxisAlignment,
   MainAxisSize,
+  Overflow,
   MultiChildLayoutDelegate,
   PaintingContext,
   PointerCancelEvent,
@@ -3312,7 +3313,7 @@ class Stack extends MultiChildRenderObjectWidget {
       alignment: alignment,
       textDirection: textDirection ?? Directionality.of(context),
       fit: fit,
-      clipBehavior: overflow == Overflow.clip ? Clip.hardEdge : clipBehavior,
+      clipBehavior: overflow == Overflow.visible ? Clip.none : clipBehavior,
     );
   }
 
@@ -3323,7 +3324,7 @@ class Stack extends MultiChildRenderObjectWidget {
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.of(context)
       ..fit = fit
-      ..clipBehavior = overflow == Overflow.clip ? Clip.hardEdge : clipBehavior;
+      ..clipBehavior = overflow == Overflow.visible ? Clip.none : clipBehavior;
   }
 
   @override
