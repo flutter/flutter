@@ -629,9 +629,6 @@ import java.util.Arrays;
   void onTrimMemory(int level) {
     ensureAlive();
     if (flutterEngine != null) {
-      // This is always an indication that the Dart VM should collect memory
-      // and free any unneeded resources.
-      flutterEngine.getDartExecutor().notifyLowMemoryWarning();
       // Use a trim level delivered while the application is running so the
       // framework has a chance to react to the notification.
       if (level == TRIM_MEMORY_RUNNING_LOW) {
@@ -654,7 +651,6 @@ import java.util.Arrays;
   void onLowMemory() {
     Log.v(TAG, "Forwarding onLowMemory() to FlutterEngine.");
     ensureAlive();
-    flutterEngine.getDartExecutor().notifyLowMemoryWarning();
     flutterEngine.getSystemChannel().sendMemoryPressureWarning();
   }
 
