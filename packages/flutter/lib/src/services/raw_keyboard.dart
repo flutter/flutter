@@ -574,9 +574,6 @@ class RawKeyboard {
     // Make sure that the modifiers reflect reality, in case a modifier key was
     // pressed/released while the app didn't have focus.
     _synchronizeModifiers(event);
-    if (_listeners.isEmpty) {
-      return;
-    }
     // Send the event to passive listeners.
     for (final ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners)) {
       if (_listeners.contains(listener)) {
