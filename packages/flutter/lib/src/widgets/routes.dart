@@ -1449,14 +1449,18 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         child: barrier,
       );
     }
-    return Semantics(
-      sortKey: const OrdinalSortKey(1.0),
-      child: IgnorePointer(
-        ignoring: animation.status == AnimationStatus.reverse || // changedInternalState is called when animation.status updates
-          animation.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
-        child: barrier,
-      )
+    barrier = IgnorePointer(
+      ignoring: animation.status == AnimationStatus.reverse || // changedInternalState is called when animation.status updates
+        animation.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
+      child: barrier,
     );
+    if (barrierDismissible) {
+      barrier = Semantics(
+        sortKey: const OrdinalSortKey(1.0),
+        child: barrier,
+      );
+    }
+    return barrier;
   }
 
   // We cache the part of the modal scope that doesn't change from frame to
@@ -1465,14 +1469,20 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // one of the builders
   Widget _buildModalScope(BuildContext context) {
-    return _modalScopeCache ??= Semantics(
-      sortKey: const OrdinalSortKey(0.0),
-      child: _ModalScope<T>(
-        key: _scopeKey,
-        route: this,
-        // _ModalScope calls buildTransitions() and buildChild(), defined above
-      )
+    if (_modalScopeCache != null)
+      return _modalScopeCache;
+    _modalScopeCache = _ModalScope<T>(
+      key: _scopeKey,
+      route: this,
+      // _ModalScope calls buildTransitions() and buildChild(), defined above
     );
+    if (barrierDismissible) {
+      _modalScopeCache = Semantics(
+        sortKey: const OrdinalSortKey(0.0),
+        child: _modalScopeCache
+      );
+    }
+    return _modalScopeCache;
   }
 
   @override

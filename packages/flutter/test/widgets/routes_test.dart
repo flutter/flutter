@@ -1237,16 +1237,16 @@ void main() {
             rect: TestSemantics.fullScreen,
             children: <TestSemantics>[
               TestSemantics(
-                id: 7,
+                id: 5,
                 rect: TestSemantics.fullScreen,
                 children: <TestSemantics>[
                   TestSemantics(
-                    id: 8,
+                    id: 6,
                     rect: TestSemantics.fullScreen,
                     flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
-                        id: 9,
+                        id: 7,
                         label: 'Hello World',
                         rect: TestSemantics.fullScreen,
                         textDirection: TextDirection.ltr,
@@ -1257,7 +1257,7 @@ void main() {
               ),
               // Modal barrier is put after modal scope
               TestSemantics(
-                id: 6,
+                id: 4,
                 rect: TestSemantics.fullScreen,
               ),
             ],
