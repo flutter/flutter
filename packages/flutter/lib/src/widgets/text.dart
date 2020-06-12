@@ -224,18 +224,6 @@ class DefaultTextHeightBehavior extends InheritedTheme {
         assert(child != null),
         super(key: key, child: child);
 
-  /// A const-constructible default text height behavior that provides a
-  /// [TextHeightBehavior] of null.
-  ///
-  /// Returned from [of] when the given [BuildContext] doesn't have an enclosing
-  /// [DefaultTextHeightBehavior].
-  ///
-  /// This constructor creates a [DefaultTextStyle] that lacks a [child], which
-  /// means the constructed value cannot be incorporated into the tree.
-  const DefaultTextHeightBehavior.fallback({ Key key })
-      : textHeightBehavior = null,
-        super(key: key, child: null);
-
   /// {@macro flutter.dart:ui.textHeightBehavior}
   final TextHeightBehavior textHeightBehavior;
 
