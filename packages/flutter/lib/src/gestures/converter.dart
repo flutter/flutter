@@ -46,7 +46,8 @@ class PointerEventConverter {
   /// [dart:ui.Window.devicePixelRatio]) is used to convert the incoming data
   /// from physical coordinates to logical pixels. See the discussion at
   /// [PointerEvent] for more details on the [PointerEvent] coordinate space.
-  static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) sync* {
+  static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) {
+    final List<PointerEvent> result = <PointerEvent>[];
     for (final ui.PointerData datum in data) {
       final Offset position = Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
       final Offset delta = Offset(datum.physicalDeltaX, datum.physicalDeltaY) / devicePixelRatio;
@@ -60,7 +61,7 @@ class PointerEventConverter {
       if (datum.signalKind == null || datum.signalKind == ui.PointerSignalKind.none) {
         switch (datum.change) {
           case ui.PointerChange.add:
-            yield PointerAddedEvent(
+            result.add(PointerAddedEvent(
               timeStamp: timeStamp,
               kind: kind,
               device: datum.device,
@@ -74,10 +75,10 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
-            );
+            ));
             break;
           case ui.PointerChange.hover:
-            yield PointerHoverEvent(
+            result.add(PointerHoverEvent(
               timeStamp: timeStamp,
               kind: kind,
               device: datum.device,
@@ -97,10 +98,10 @@ class PointerEventConverter {
               orientation: datum.orientation,
               tilt: datum.tilt,
               synthesized: datum.synthesized,
-            );
+            ));
             break;
           case ui.PointerChange.down:
-            yield PointerDownEvent(
+            result.add(PointerDownEvent(
               timeStamp: timeStamp,
               pointer: datum.pointerIdentifier,
               kind: kind,
@@ -119,10 +120,10 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
-            );
+            ));
             break;
           case ui.PointerChange.move:
-            yield PointerMoveEvent(
+            result.add(PointerMoveEvent(
               timeStamp: timeStamp,
               pointer: datum.pointerIdentifier,
               kind: kind,
@@ -144,10 +145,10 @@ class PointerEventConverter {
               tilt: datum.tilt,
               platformData: datum.platformData,
               synthesized: datum.synthesized,
-            );
+            ));
             break;
           case ui.PointerChange.up:
-            yield PointerUpEvent(
+            result.add(PointerUpEvent(
               timeStamp: timeStamp,
               pointer: datum.pointerIdentifier,
               kind: kind,
@@ -167,10 +168,10 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
-            );
+            ));
             break;
           case ui.PointerChange.cancel:
-            yield PointerCancelEvent(
+            result.add(PointerCancelEvent(
               timeStamp: timeStamp,
               pointer: datum.pointerIdentifier,
               kind: kind,
@@ -189,10 +190,10 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
-            );
+            ));
             break;
           case ui.PointerChange.remove:
-            yield PointerRemovedEvent(
+            result.add(PointerRemovedEvent(
               timeStamp: timeStamp,
               kind: kind,
               device: datum.device,
@@ -203,7 +204,7 @@ class PointerEventConverter {
               distanceMax: datum.distanceMax,
               radiusMin: radiusMin,
               radiusMax: radiusMax,
-            );
+            ));
             break;
         }
       } else {
@@ -211,13 +212,13 @@ class PointerEventConverter {
           case ui.PointerSignalKind.scroll:
             final Offset scrollDelta =
                 Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
-            yield PointerScrollEvent(
+            result.add(PointerScrollEvent(
               timeStamp: timeStamp,
               kind: kind,
               device: datum.device,
               position: position,
               scrollDelta: scrollDelta,
-            );
+            ));
             break;
           case ui.PointerSignalKind.none:
             assert(false); // This branch should already have 'none' filtered out.
@@ -228,6 +229,7 @@ class PointerEventConverter {
         }
       }
     }
+    return result;
   }
 
   static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) =>
