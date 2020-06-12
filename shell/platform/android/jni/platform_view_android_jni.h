@@ -130,6 +130,13 @@ class PlatformViewAndroidJNI {
                                                 int y,
                                                 int width,
                                                 int height) = 0;
+  //----------------------------------------------------------------------------
+  /// @brief      Initiates a frame if using hybrid composition.
+  ///
+  ///
+  /// @note       Must be called from the platform thread.
+  ///
+  virtual void FlutterViewBeginFrame() = 0;
 };
 
 }  // namespace flutter
