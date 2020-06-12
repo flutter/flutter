@@ -165,7 +165,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// former is preferred, [fixedColor] only exists for the sake of
   /// backwards compatibility.
   ///
-  /// The [showSelectedLabels] argument must not be non-null.
+  /// The [showSelectedLabels] argument must be non-null.
   ///
   /// The [showUnselectedLabels] argument defaults to `true` if [type] is
   /// [BottomNavigationBarType.fixed] and `false` if [type] is
