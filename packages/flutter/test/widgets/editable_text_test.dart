@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/rendering.dart';
@@ -265,6 +267,134 @@ void main() {
       action: TextInputAction.emergencyCall,
       serializedActionName: 'TextInputAction.emergencyCall',
     );
+  });
+
+  group('Infer keyboardType from autofillHints', () {
+    testWidgets('infer keyboard types from autofillHints: ios',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: FocusScope(
+                node: focusScopeNode,
+                autofocus: true,
+                child: EditableText(
+                  controller: controller,
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                  autofillHints: const <String>[AutofillHints.streetAddressLine1],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.byType(EditableText));
+        await tester.showKeyboard(find.byType(EditableText));
+        controller.text = 'test';
+        await tester.idle();
+        expect(tester.testTextInput.editingState['text'], equals('test'));
+        expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.name'));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+    testWidgets('infer keyboard types from autofillHints: non-ios',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: FocusScope(
+                node: focusScopeNode,
+                autofocus: true,
+                child: EditableText(
+                  controller: controller,
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                  autofillHints: const <String>[AutofillHints.streetAddressLine1],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.byType(EditableText));
+        await tester.showKeyboard(find.byType(EditableText));
+        controller.text = 'test';
+        await tester.idle();
+        expect(tester.testTextInput.editingState['text'], equals('test'));
+        expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.address'));
+      });
+
+    testWidgets('inferred keyboard types can be overridden: ios',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: FocusScope(
+                node: focusScopeNode,
+                autofocus: true,
+                child: EditableText(
+                  controller: controller,
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                  keyboardType: TextInputType.text,
+                  autofillHints: const <String>[AutofillHints.streetAddressLine1],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.byType(EditableText));
+        await tester.showKeyboard(find.byType(EditableText));
+        controller.text = 'test';
+        await tester.idle();
+        expect(tester.testTextInput.editingState['text'], equals('test'));
+        expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.text'));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+    testWidgets('inferred keyboard types can be overridden: non-ios',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: FocusScope(
+                node: focusScopeNode,
+                autofocus: true,
+                child: EditableText(
+                  controller: controller,
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                  keyboardType: TextInputType.text,
+                  autofillHints: const <String>[AutofillHints.streetAddressLine1],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.byType(EditableText));
+        await tester.showKeyboard(find.byType(EditableText));
+        controller.text = 'test';
+        await tester.idle();
+        expect(tester.testTextInput.editingState['text'], equals('test'));
+        expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.text'));
+    });
   });
 
   testWidgets('multiline keyboard is requested when set explicitly', (WidgetTester tester) async {

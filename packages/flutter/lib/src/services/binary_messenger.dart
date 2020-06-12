@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -47,7 +49,7 @@ abstract class BinaryMessenger {
   /// passed to [setMessageHandler].
   ///
   /// This method is useful for tests or test harnesses that want to assert the
-  /// handler for the vspecified channel has not been altered by a previous test.
+  /// handler for the specified channel has not been altered by a previous test.
   bool checkMessageHandler(String channel, MessageHandler handler);
 
   /// Set a mock callback for intercepting messages from the [send] method on

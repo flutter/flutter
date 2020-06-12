@@ -226,6 +226,7 @@ class KernelCompiler {
     }
     final List<String> command = <String>[
       engineDartPath,
+      '--disable-dart-dev',
       frontendServer,
       '--sdk-root',
       sdkRoot,
@@ -409,6 +410,8 @@ abstract class ResidentCompiler {
     String platformDill,
     List<String> dartDefines,
     String librariesSpec,
+    // Deprecated
+    List<String> experimentalFlags,
   }) = DefaultResidentCompiler;
 
   // TODO(jonahwilliams): find a better way to configure additional file system
@@ -505,6 +508,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.platformDill,
     List<String> dartDefines,
     this.librariesSpec,
+    // Deprecated
+    List<String> experimentalFlags, // ignore: avoid_unused_constructor_parameters
   }) : assert(sdkRoot != null),
        _stdoutHandler = StdoutHandler(consumer: compilerMessageConsumer),
        dartDefines = dartDefines ?? const <String>[],
@@ -623,6 +628,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     );
     final List<String> command = <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--disable-dart-dev',
       frontendServer,
       '--sdk-root',
       sdkRoot,

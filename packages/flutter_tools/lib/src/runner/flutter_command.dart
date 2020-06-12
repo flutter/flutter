@@ -15,6 +15,7 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
 import '../base/signals.dart';
+import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -110,6 +111,7 @@ class FlutterOptions {
   static const String kBundleSkSLPathOption = 'bundle-sksl-path';
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
   static const String kNullSafety = 'sound-null-safety';
+  static const String kDeviceUser = 'device-user';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -148,6 +150,11 @@ abstract class FlutterCommand extends Command<void> {
   bool get shouldRunPub => _usesPubOption && boolArg('pub');
 
   bool get shouldUpdateCache => true;
+
+  bool get deprecated => false;
+
+  @override
+  bool get hidden => deprecated;
 
   bool _excludeDebug = false;
 
@@ -372,6 +379,12 @@ abstract class FlutterCommand extends Command<void> {
       hide: hide,
       help: 'Restricts commands to a subset of the available isolates (running instances of Flutter).\n'
             "Normally there's only one, but when adding Flutter to a pre-existing app it's possible to create multiple.");
+  }
+
+  void usesDeviceUserOption() {
+    argParser.addOption(FlutterOptions.kDeviceUser,
+      help: 'Identifier number for a user or work profile on Android only. Run "adb shell pm list users" for available identifiers.',
+      valueHelp: '10');
   }
 
   void addBuildModeFlags({ bool defaultToRelease = true, bool verboseHelp = false, bool excludeDebug = false }) {
@@ -708,6 +721,7 @@ abstract class FlutterCommand extends Command<void> {
       body: () async {
         // Prints the welcome message if needed.
         globals.flutterUsage.printWelcome();
+        _printDeprecationWarning();
         final String commandPath = await usagePath;
         _registerSignalHandlers(commandPath, startTime);
         FlutterCommandResult commandResult = FlutterCommandResult.fail();
@@ -722,9 +736,17 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void _printDeprecationWarning() {
+    if (deprecated) {
+      globals.printStatus('$warningMark The "$name" command is deprecated and '
+          'will be removed in a future version of Flutter.');
+      globals.printStatus('');
+    }
+  }
+
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
     final SignalHandler handler = (io.ProcessSignal s) {
-      Cache.releaseLockEarly();
+      Cache.releaseLock();
       _sendPostUsage(
         commandPath,
         const FlutterCommandResult(ExitStatus.killed),
@@ -799,8 +821,12 @@ abstract class FlutterCommand extends Command<void> {
 
     if (shouldRunPub) {
       await pub.get(context: PubContext.getVerifyContext(name));
+      // All done updating dependencies. Release the cache lock.
+      Cache.releaseLock();
       final FlutterProject project = FlutterProject.current();
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: true);
+    } else {
+      Cache.releaseLock();
     }
 
     setupApplicationPackages();
@@ -937,6 +963,8 @@ abstract class FlutterCommand extends Command<void> {
       description.length + 2,
     );
     final String help = <String>[
+      if (deprecated)
+        '$warningMark Deprecated. This command will be removed in a future version of Flutter.',
       description,
       '',
       'Global options:',

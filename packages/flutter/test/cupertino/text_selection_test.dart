@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
@@ -193,7 +195,7 @@ void main() {
     // Make sure the clipboard is empty to start.
     await Clipboard.setData(const ClipboardData(text: ''));
 
-    // Double tap to selet the first word.
+    // Double tap to select the first word.
     const int index = 4;
     await tester.tapAt(textOffsetToPosition(tester, index));
     await tester.pump(const Duration(milliseconds: 50));

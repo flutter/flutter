@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -154,7 +156,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(transformationController.value, equals(Matrix4.identity()));
 
-      // Attempting to pinch to zoom doens't work because it's disabled.
+      // Attempting to pinch to zoom doesn't work because it's disabled.
       final Offset scaleStart1 = childInterior;
       final Offset scaleStart2 = Offset(childInterior.dx + 10.0, childInterior.dy);
       final Offset scaleEnd1 = Offset(childInterior.dx - 10.0, childInterior.dy);

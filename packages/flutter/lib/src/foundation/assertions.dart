@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:meta/meta.dart';
 
 import 'basic_types.dart';
@@ -88,7 +90,7 @@ abstract class StackFilter {
   /// A const constructor to allow subclasses to be const.
   const StackFilter();
 
-  /// Filters the list of [StackFrame]s by updating corrresponding indices in
+  /// Filters the list of [StackFrame]s by updating corresponding indices in
   /// `reasons`.
   ///
   /// To elide a frame or number of frames, set the string
@@ -115,7 +117,7 @@ class RepetitiveStackFrameFilter extends StackFilter {
   }) : assert(frames != null),
        assert(replacement != null);
 
-  /// The shape of this repetative stack pattern.
+  /// The shape of this repetitive stack pattern.
   final List<PartialStackFrame> frames;
 
   /// The number of frames in this pattern.

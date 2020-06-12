@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // TODO(Piinks): Remove ignoring deprecated member use analysis
 // when TextField.canAssertMaterialLocalizations parameter is removed.
 // ignore_for_file: deprecated_member_use_from_same_package
@@ -398,7 +400,7 @@ class TextField extends StatefulWidget {
            selectAll: true,
            paste: true,
          )),
-       canAssertMaterialLocalizations = canAssertMaterialLocalizations ?? false,
+       canAssertMaterialLocalizations = canAssertMaterialLocalizations ?? true,
        super(key: key);
 
   /// Controls the text being edited.
@@ -728,6 +730,7 @@ class TextField extends StatefulWidget {
   final ScrollController scrollController;
 
   /// {@macro flutter.widgets.editableText.autofillHints}
+  /// {@macro flutter.services.autofill.autofillHints}
   final Iterable<String> autofillHints;
 
   /// Indicates whether [debugCheckHasMaterialLocalizations] can be called

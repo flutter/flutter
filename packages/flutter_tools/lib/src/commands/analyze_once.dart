@@ -8,15 +8,14 @@ import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
-import '../cache.dart';
 import '../dart/analysis.dart';
-import '../dart/sdk.dart' as sdk;
 import 'analyze.dart';
 import 'analyze_base.dart';
 
@@ -30,8 +29,9 @@ class AnalyzeOnce extends AnalyzeBase {
     @required Logger logger,
     @required Platform platform,
     @required ProcessManager processManager,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     @required List<String> experiments,
+    @required Artifacts artifacts,
     this.workingDirectory,
   }) : super(
         argResults,
@@ -43,6 +43,7 @@ class AnalyzeOnce extends AnalyzeBase {
         processManager: processManager,
         terminal: terminal,
         experiments: experiments,
+        artifacts: artifacts,
       );
 
   /// The working directory for testing analysis using dartanalyzer.
@@ -90,7 +91,8 @@ class AnalyzeOnce extends AnalyzeBase {
     final Completer<void> analysisCompleter = Completer<void>();
     final List<AnalysisError> errors = <AnalysisError>[];
 
-    final String sdkPath = argResults['dart-sdk'] as String ?? sdk.dartSdkPath;
+    final String sdkPath = argResults['dart-sdk'] as String ??
+      artifacts.getArtifactPath(Artifact.engineDartSdkPath);
 
     final AnalysisServer server = AnalysisServer(
       sdkPath,
@@ -126,8 +128,6 @@ class AnalyzeOnce extends AnalyzeBase {
           analysisCompleter.completeError('analysis server exited: $exitCode');
         }
       }));
-
-      Cache.releaseLockEarly();
 
       // collect results
       timer = Stopwatch()..start();

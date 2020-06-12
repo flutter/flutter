@@ -76,6 +76,17 @@ void main() {
       expect(device.name, name);
     });
 
+    testWithoutContext('supports all runtime modes besides jitRelease', () {
+      const String deviceId = 'e80::0000:a00a:f00f:2002/3';
+      const String name = 'halfbaked';
+      final FuchsiaDevice device = FuchsiaDevice(deviceId, name: name);
+
+      expect(device.supportsRuntimeMode(BuildMode.debug), true);
+      expect(device.supportsRuntimeMode(BuildMode.profile), true);
+      expect(device.supportsRuntimeMode(BuildMode.release), true);
+      expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
+    });
+
     testWithoutContext('lists nothing when workflow cannot list devices', () async {
       final MockFuchsiaWorkflow fuchsiaWorkflow = MockFuchsiaWorkflow();
       final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
