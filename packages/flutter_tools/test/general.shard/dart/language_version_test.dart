@@ -89,7 +89,7 @@ void main() {
 // Some license
 
 /*
-@dart = 2.9
+// @dart = 2.9
 */
 ''');
 
@@ -104,7 +104,7 @@ void main() {
 
 /*
 /*
-@dart = 2.9
+// @dart = 2.9
 */
 */
 ''');
@@ -136,7 +136,7 @@ void main() {
 /*
 /*
 */
-@dart = 2.9
+// @dart = 2.9
 ''');
 
     expect(determineLanguageVersion(file, null), null);
@@ -151,7 +151,7 @@ void main() {
 /*
 */
 */
-@dart = 2.9
+// @dart = 2.9
 ''');
 
     expect(determineLanguageVersion(file, null), null);
@@ -163,7 +163,7 @@ void main() {
       ..writeAsStringSync('''
 // Some license
 
-/* @dart = 2.9 */
+/* // @dart = 2.9 */
 ''');
 
     expect(determineLanguageVersion(file, null), null);
