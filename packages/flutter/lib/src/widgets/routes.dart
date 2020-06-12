@@ -1469,20 +1469,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // one of the builders
   Widget _buildModalScope(BuildContext context) {
-    if (_modalScopeCache != null)
-      return _modalScopeCache;
-    _modalScopeCache = _ModalScope<T>(
-      key: _scopeKey,
-      route: this,
-      // _ModalScope calls buildTransitions() and buildChild(), defined above
+    return _modalScopeCache ??= Semantics(
+      sortKey: const OrdinalSortKey(0.0),
+      child: _ModalScope<T>(
+        key: _scopeKey,
+        route: this,
+        // _ModalScope calls buildTransitions() and buildChild(), defined above
+      )
     );
-    if (barrierDismissible) {
-      _modalScopeCache = Semantics(
-        sortKey: const OrdinalSortKey(0.0),
-        child: _modalScopeCache
-      );
-    }
-    return _modalScopeCache;
   }
 
   @override
