@@ -1101,6 +1101,7 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/accessibility_bridge_unitt
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/collect_traces.dart
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/compositor_context.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/compositor_context.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.cc
