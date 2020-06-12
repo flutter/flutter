@@ -7,13 +7,12 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
-
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/suite.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -21,6 +20,7 @@ import '../base/io.dart';
 import '../build_info.dart';
 import '../compile.dart';
 import '../convert.dart';
+import '../dart/language_version.dart';
 import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -756,29 +756,13 @@ class FlutterPlatform extends PlatformPlugin {
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl)),
       host: host,
       updateGoldens: updateGoldens,
-      languageVersionHeader: _findLanguageVersionCommentHeader(file),
+      languageVersionHeader: determineLanguageVersion(
+        file,
+        _packageConfig[flutterProject?.manifest?.appName],
+      ),
     );
   }
 
-  static final RegExp _languageVersion = RegExp('\/\/\s+@dart');
-
-  /// Instead of attempting to extract the exact language header,
-  /// just grab every line that starts with a comment.
-  String _findLanguageVersionCommentHeader(File file) {
-    for (final String line in file.readAsLinesSync()) {
-      if (line.startsWith(_languageVersion)) {
-        return line;
-      }
-      if (line.startsWith('import')) {
-        break;
-      }
-    }
-    final Package package = _packageConfig[flutterProject?.manifest?.appName];
-    if (package != null) {
-      return '// @dart = ${package.languageVersion}';
-    }
-    return '';
-  }
 
   File _cachedFontConfig;
 
