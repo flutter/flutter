@@ -34,6 +34,30 @@ void main() {
     expect(determineLanguageVersion(file, null), '// @dart');
   });
 
+  testWithoutContext('detects language version with leading whitespace', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
+// Some license
+
+    // @dart = 2.9
+''');
+
+    expect(determineLanguageVersion(file, null), '// @dart = 2.9');
+  });
+
+  testWithoutContext('detects language version with tabs', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
+// Some license
+
+//\t@dart = 2.9
+''');
+
+    expect(determineLanguageVersion(file, null), '//\t@dart = 2.9');
+  });
+
   testWithoutContext('detects language version with tons of whitespace', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('example.dart')
@@ -58,14 +82,81 @@ void main() {
     expect(determineLanguageVersion(file, null), null);
   });
 
+  testWithoutContext('does not detect language version in block comment', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
+// Some license
 
-  testWithoutContext('does not detect language version after import', () {
+/*
+@dart = 2.9
+*/
+''');
+
+    expect(determineLanguageVersion(file, null), null);
+  });
+
+  testWithoutContext('does not detect language version in nested block comment', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
+// Some license
+
+/* /*
+@dart = 2.9
+*/ */
+''');
+
+    expect(determineLanguageVersion(file, null), null);
+  });
+
+  testWithoutContext('does not detect language version in single line block comment', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
+// Some license
+
+/* @dart = 2.9 */
+''');
+
+    expect(determineLanguageVersion(file, null), null);
+  });
+
+  testWithoutContext('does not detect language version after import declaration', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('example.dart')
       ..writeAsStringSync('''
 // Some license
 
 import 'dart:ui' as ui;
+
+// @dart = 2.9
+''');
+
+    expect(determineLanguageVersion(file, null), null);
+  });
+
+  testWithoutContext('does not detect language version after part declaration', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
+// Some license
+
+part of 'foo.dart';
+
+// @dart = 2.9
+''');
+
+    expect(determineLanguageVersion(file, null), null);
+  });
+
+  testWithoutContext('does not detect language version after library declaration', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
+// Some license
+
+library funstuff;
 
 // @dart = 2.9
 ''');
