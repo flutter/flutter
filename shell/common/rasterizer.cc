@@ -120,6 +120,11 @@ void Rasterizer::DrawLastLayerTree() {
 }
 
 void Rasterizer::Draw(std::shared_ptr<LayerTreeHolder> layer_tree_holder) {
+  if (layer_tree_holder->IsEmpty()) {
+    // We do not have any frame to raster.
+    FML_LOG(ERROR) << "empty frame!!!!!";
+    return;
+  }
   TRACE_EVENT0("flutter", "GPURasterizer::Draw");
   if (raster_thread_merger_ &&
       !raster_thread_merger_->IsOnRasterizingThread()) {
