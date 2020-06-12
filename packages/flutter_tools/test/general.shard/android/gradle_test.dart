@@ -2487,7 +2487,7 @@ plugin1=${plugin1.path}
 
   test('Current settings.gradle is in our legacy settings.gradle file set', () {
     // If this test fails, you probably edited templates/app/android.tmpl.
-    // That's fine, but you now need to add a copy of that file to grad/esettings.gradle.legacy_versions, separated
+    // That's fine, but you now need to add a copy of that file to gradle/settings.gradle.legacy_versions, separated
     // from the previous versions by a line that just says ";EOF".
     final File templateSettingsDotGradle = globals.fs.file(globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'app', 'android.tmpl', 'settings.gradle'));
     final File legacySettingsDotGradleFiles = globals.fs.file(globals.fs.path.join(Cache.flutterRoot, 'packages','flutter_tools', 'gradle', 'settings.gradle.legacy_versions'));
