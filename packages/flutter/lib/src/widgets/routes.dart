@@ -9,6 +9,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 
 import 'actions.dart';
 import 'basic.dart';
@@ -1448,10 +1449,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         child: barrier,
       );
     }
-    return IgnorePointer(
-      ignoring: animation.status == AnimationStatus.reverse || // changedInternalState is called when animation.status updates
-                animation.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
-      child: barrier,
+    return Semantics(
+      sortKey: const OrdinalSortKey(1.0),
+      child: IgnorePointer(
+        ignoring: animation.status == AnimationStatus.reverse || // changedInternalState is called when animation.status updates
+          animation.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
+        child: barrier,
+      )
     );
   }
 
@@ -1461,10 +1465,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // one of the builders
   Widget _buildModalScope(BuildContext context) {
-    return _modalScopeCache ??= _ModalScope<T>(
-      key: _scopeKey,
-      route: this,
-      // _ModalScope calls buildTransitions() and buildChild(), defined above
+    return _modalScopeCache ??= Semantics(
+      sortKey: const OrdinalSortKey(0.0),
+      child: _ModalScope<T>(
+        key: _scopeKey,
+        route: this,
+        // _ModalScope calls buildTransitions() and buildChild(), defined above
+      )
     );
   }
 
