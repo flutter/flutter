@@ -137,6 +137,14 @@ class PlatformViewAndroidJNI {
   /// @note       Must be called from the platform thread.
   ///
   virtual void FlutterViewBeginFrame() = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Indicates that the current frame ended.
+  ///             It's used to clean up state.
+  ///
+  /// @note       Must be called from the platform thread.
+  ///
+  virtual void FlutterViewEndFrame() = 0;
 };
 
 }  // namespace flutter

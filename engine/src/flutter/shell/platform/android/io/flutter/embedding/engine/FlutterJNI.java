@@ -810,6 +810,17 @@ public class FlutterJNI {
     }
     platformViewsController.onBeginFrame();
   }
+
+  @SuppressWarnings("unused")
+  @UiThread
+  public void onEndFrame() {
+    ensureRunningOnMainThread();
+    if (platformViewsController == null) {
+      throw new RuntimeException(
+          "platformViewsController must be set before attempting to end the frame");
+    }
+    platformViewsController.onEndFrame();
+  }
   // ----- End Engine Lifecycle Support ----
 
   // @SuppressWarnings("unused")

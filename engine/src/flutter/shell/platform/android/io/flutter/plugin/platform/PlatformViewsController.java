@@ -545,4 +545,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   public void onBeginFrame() {
     // TODO: Implement this method. https://github.com/flutter/flutter/issues/58288
   }
+
+  public void onEndFrame() {
+    // TODO: Implement this method. https://github.com/flutter/flutter/issues/58288
+  }
 }
