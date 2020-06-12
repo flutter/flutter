@@ -517,10 +517,13 @@ class WebAssetServer implements AssetReader {
     // The file might have been a package file which is signaled by a
     // `/packages/<package>/<path>` request.
     if (segments.first == 'packages') {
-      final File packageFile = globals.fs.file(_packages.resolve(Uri(
-        scheme: 'package', pathSegments: segments.skip(1))));
-      if (packageFile.existsSync()) {
-        return packageFile;
+      final Uri filePath = _packages.resolve(Uri(
+        scheme: 'package', pathSegments: segments.skip(1)));
+      if (filePath != null) {
+        final File packageFile = globals.fs.file(filePath);
+        if (packageFile.existsSync()) {
+          return packageFile;
+        }
       }
     }
 
