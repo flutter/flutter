@@ -273,6 +273,11 @@ public class FlutterAndroidComponentTest {
     }
 
     @Override
+    public boolean shouldRestoreAndSaveState() {
+      return true;
+    }
+
+    @Override
     public void onFlutterSurfaceViewCreated(@NonNull FlutterSurfaceView flutterSurfaceView) {}
 
     @Override

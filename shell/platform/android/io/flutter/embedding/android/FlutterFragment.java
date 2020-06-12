@@ -113,6 +113,11 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
    * outlive the {@code FlutterFragment}.
    */
   protected static final String ARG_DESTROY_ENGINE_WITH_FRAGMENT = "destroy_engine_with_fragment";
+  /**
+   * True if the framework state in the engine attached to this engine should be stored and restored
+   * when this fragment is created and destroyed.
+   */
+  protected static final String ARG_ENABLE_STATE_RESTORATION = "enable_state_restoration";
 
   /**
    * Creates a {@code FlutterFragment} with a default configuration.
@@ -1016,6 +1021,17 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     if (attachedActivity instanceof FlutterUiDisplayListener) {
       ((FlutterUiDisplayListener) attachedActivity).onFlutterUiNoLongerDisplayed();
     }
+  }
+
+  @Override
+  public boolean shouldRestoreAndSaveState() {
+    if (getArguments().containsKey(ARG_ENABLE_STATE_RESTORATION)) {
+      return getArguments().getBoolean(ARG_ENABLE_STATE_RESTORATION);
+    }
+    if (getCachedEngineId() != null) {
+      return false;
+    }
+    return true;
   }
 
   /**
