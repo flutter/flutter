@@ -11,7 +11,7 @@ import '../build_system/build_system.dart';
 import '../build_system/depfile.dart';
 import '../build_system/targets/android.dart';
 import '../build_system/targets/assets.dart';
-import '../build_system/targets/dart.dart';
+import '../build_system/targets/common.dart';
 import '../build_system/targets/ios.dart';
 import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
@@ -105,6 +105,7 @@ class AssembleCommand extends FlutterCommand {
         'root of the current Flutter project.',
     );
     argParser.addOption(kExtraGenSnapshotOptions);
+    argParser.addOption(kExtraFrontEndOptions);
     argParser.addOption(kDartDefines);
     argParser.addOption(
       'resource-pool-size',
@@ -204,9 +205,11 @@ class AssembleCommand extends FlutterCommand {
     if (argResults.wasParsed(kExtraGenSnapshotOptions)) {
       results[kExtraGenSnapshotOptions] = argResults[kExtraGenSnapshotOptions] as String;
     }
-    // Workaround for dart-define formatting
     if (argResults.wasParsed(kDartDefines)) {
       results[kDartDefines] = argResults[kDartDefines] as String;
+    }
+    if (argResults.wasParsed(kExtraFrontEndOptions)) {
+      results[kExtraFrontEndOptions] = argResults[kExtraFrontEndOptions] as String;
     }
     return results;
   }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
@@ -187,11 +189,11 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   static void _debugVerifyGlobalKeyReservation() {
     assert(() {
       final Map<GlobalKey, Element> keyToParent = <GlobalKey, Element>{};
-      _debugReservations.forEach((Element parent, Map<Element, GlobalKey> chidToKey) {
+      _debugReservations.forEach((Element parent, Map<Element, GlobalKey> childToKey) {
         // We ignore parent that are detached.
         if (parent.renderObject?.attached == false)
           return;
-        chidToKey.forEach((Element child, GlobalKey key) {
+        childToKey.forEach((Element child, GlobalKey key) {
           // If parent = null, the node is deactivated by its parent and is
           // not re-attached to other part of the tree. We should ignore this
           // node.
@@ -662,9 +664,11 @@ abstract class StatelessWidget extends Widget {
 
   /// Describes the part of the user interface represented by this widget.
   ///
-  /// The framework calls this method when this widget is inserted into the
-  /// tree in a given [BuildContext] and when the dependencies of this widget
-  /// change (e.g., an [InheritedWidget] referenced by this widget changes).
+  /// The framework calls this method when this widget is inserted into the tree
+  /// in a given [BuildContext] and when the dependencies of this widget change
+  /// (e.g., an [InheritedWidget] referenced by this widget changes). This
+  /// method can potentially be called in every frame and should not have any side
+  /// effects beyond building a widget.
   ///
   /// The framework replaces the subtree below this widget with the widget
   /// returned by this method, either by updating the existing subtree or by
@@ -1315,7 +1319,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
 
   /// Describes the part of the user interface represented by this widget.
   ///
-  /// The framework calls this method in a number of different situations:
+  /// The framework calls this method in a number of different situations. For
+  /// example:
   ///
   ///  * After calling [initState].
   ///  * After calling [didUpdateWidget].
@@ -1324,6 +1329,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///    [InheritedWidget] referenced by the previous [build] changes).
   ///  * After calling [deactivate] and then reinserting the [State] object into
   ///    the tree at another location.
+  ///
+  /// This method can potentially be called in every frame and should not have
+  /// any side effects beyond building a widget.
   ///
   /// The framework replaces the subtree below this widget with the widget
   /// returned by this method, either by updating the existing subtree or by

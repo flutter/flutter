@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -4049,7 +4051,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // floatingLabelGeight = 12 (ahem font size 16dps * 0.75 = 12)
+    // floatingLabelHeight = 12 (ahem font size 16dps * 0.75 = 12)
     // labelY = -floatingLabelHeight/2 + borderWidth/2
     expect(tester.getTopLeft(find.text('label')).dy, -4.0);
   });
@@ -4068,6 +4070,58 @@ void main() {
     // because the label is not initially floating.
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
   });
+
+  testWidgets('InputDecorator floating label width scales when focused', (WidgetTester tester) async {
+    final String longStringA = String.fromCharCodes(List<int>.generate(200, (_) => 65));
+    final String longStringB = String.fromCharCodes(List<int>.generate(200, (_) => 66));
+
+    await tester.pumpWidget(
+      Center(
+        child: Container(
+          width: 100,
+          height: 100,
+          child: buildInputDecorator(
+            // isFocused: false (default)
+            isEmpty: true,
+            decoration: InputDecoration(
+              labelText: longStringA,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(longStringA),
+      paints..clipRect(rect: const Rect.fromLTWH(0, 0, 100.0, 16.0)),
+    );
+
+    await tester.pumpWidget(
+      Center(
+        child: Container(
+          width: 100,
+          height: 100,
+          child: buildInputDecorator(
+            isFocused: true,
+            isEmpty: true,
+            decoration: InputDecoration(
+              labelText: longStringB,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(longStringB),
+      // 133.3 is approximately 100 / 0.75 (_kFinalLabelScale)
+      paints..clipRect(rect: const Rect.fromLTWH(0, 0, 133.0, 16.0)),
+    );
+  }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
 
   testWidgets('textAlignVertical can be updated', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/56933

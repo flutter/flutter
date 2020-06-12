@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -98,7 +100,7 @@ void main() {
       // The new value is always the oldValue plus a non-digit character (user press @)
       expect(newValue.text, equals('12345@'));
       // we expect that the formatted value returns the oldValue only since the newValue does not
-      // satisfy the formatter condition (wich is, in this case digitsOnly)
+      // satisfy the formatter condition (which is, in this case digitsOnly)
       expect(formatted.text, equals('12345'));
     });
 

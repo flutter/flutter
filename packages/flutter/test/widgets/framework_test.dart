@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -1024,7 +1026,7 @@ void main() {
     );
   });
 
-  testWidgets('GlobalKey - dettach and re-attach child to different parents', (WidgetTester tester) async {
+  testWidgets('GlobalKey - detach and re-attach child to different parents', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
@@ -1345,10 +1347,10 @@ void main() {
             onBuild: (BuildContext context) {
               debugDoingBuildOnBuild = context.debugDoingBuild;
             },
-            onDispose: (BuildContext contex) {
+            onDispose: (BuildContext context) {
               debugDoingBuildOnDispose = context.debugDoingBuild;
             },
-            onDeactivate: (BuildContext contex) {
+            onDeactivate: (BuildContext context) {
               debugDoingBuildOnDeactivate = context.debugDoingBuild;
             },
           ),
@@ -1383,7 +1385,7 @@ void main() {
             return Inherited(value, child: child);
           },
           child: RenderObjectWidgetSpy(
-            onCreateRenderObjet: (BuildContext context) {
+            onCreateRenderObject: (BuildContext context) {
               spyContext = context;
               context.dependOnInheritedWidgetOfExactType<Inherited>();
               debugDoingBuildOnCreateRenderObject = context.debugDoingBuild;
@@ -1391,7 +1393,7 @@ void main() {
             onUpdateRenderObject: (BuildContext context) {
               debugDoingBuildOnUpdateRenderObject = context.debugDoingBuild;
             },
-            onDidUmountRenderObject: () {
+            onDidUnmountRenderObject: () {
               debugDoingBuildOnDidUnmountRenderObject = spyContext.debugDoingBuild;
             },
           ),
@@ -1771,18 +1773,18 @@ class _StatefulWidgetSpyState extends State<StatefulWidgetSpy> {
 class RenderObjectWidgetSpy extends LeafRenderObjectWidget {
   const RenderObjectWidgetSpy({
     Key key,
-    this.onCreateRenderObjet,
+    this.onCreateRenderObject,
     this.onUpdateRenderObject,
-    this.onDidUmountRenderObject,
+    this.onDidUnmountRenderObject,
   })  : super(key: key);
 
-  final void Function(BuildContext) onCreateRenderObjet;
+  final void Function(BuildContext) onCreateRenderObject;
   final void Function(BuildContext) onUpdateRenderObject;
-  final void Function() onDidUmountRenderObject;
+  final void Function() onDidUnmountRenderObject;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    onCreateRenderObjet?.call(context);
+    onCreateRenderObject?.call(context);
     return FakeLeafRenderObject();
   }
 
@@ -1794,7 +1796,7 @@ class RenderObjectWidgetSpy extends LeafRenderObjectWidget {
   @override
   void didUnmountRenderObject(RenderObject renderObject) {
     super.didUnmountRenderObject(renderObject);
-    onDidUmountRenderObject?.call();
+    onDidUnmountRenderObject?.call();
   }
 }
 

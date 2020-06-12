@@ -194,18 +194,22 @@ class UserMessages {
   // Messages used in VisualStudioValidator
   String visualStudioVersion(String name, String version) => '$name version $version';
   String visualStudioLocation(String location) => 'Visual Studio at $location';
+  String windows10SdkVersion(String version) => 'Windows 10 SDK version $version';
   String visualStudioMissingComponents(String workload, List<String> components) =>
       'Visual Studio is missing necessary components. Please re-run the '
       'Visual Studio installer for the "$workload" workload, and include these components:\n'
-      '  ${components.join('\n  ')}';
-  String visualStudioMissing(String workload, List<String> components) =>
+      '  ${components.join('\n  ')}\n'
+      '  Windows 10 SDK';
+  String get windows10SdkNotFound =>
+      'Unable to locate a Windows 10 SDK. If building fails, install the Windows 10 SDK in Visual Studio.';
+  String visualStudioMissing(String workload) =>
       'Visual Studio not installed; this is necessary for Windows development.\n'
       'Download at https://visualstudio.microsoft.com/downloads/.\n'
-      'Please install the "$workload" workload, including the following components:\n  ${components.join('\n  ')}';
-  String visualStudioTooOld(String minimumVersion, String workload, List<String> components) =>
+      'Please install the "$workload" workload, including all of its default components';
+  String visualStudioTooOld(String minimumVersion, String workload) =>
       'Visual Studio $minimumVersion or later is required.\n'
       'Download at https://visualstudio.microsoft.com/downloads/.\n'
-      'Please install the "$workload" workload, including the following components:\n  ${components.join('\n  ')}';
+      'Please install the "$workload" workload, including all of its default components';
   String get visualStudioIsPrerelease => 'The current Visual Studio installation is a pre-release version. It may not be '
       'supported by Flutter yet.';
   String get visualStudioNotLaunchable =>

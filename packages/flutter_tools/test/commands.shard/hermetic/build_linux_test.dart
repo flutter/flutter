@@ -338,6 +338,7 @@ void main() {
         '--dart-define=foo.bar=2',
         '--dart-define=fizz.far=3',
         '--tree-shake-icons',
+        '--bundle-sksl-path=foo/bar.sksl.json',
       ]
     );
 
@@ -356,14 +357,15 @@ void main() {
       'set(PROJECT_DIR "${fileSystem.currentDirectory.path}")',
       '  "DART_DEFINES=\\"foo.bar%3D2,fizz.far%3D3\\""',
       '  "DART_OBFUSCATION=\\"true\\""',
-      '  "EXTRA_FRONT_END_OPTIONS=\\"--enable-experiment=non-nullable\\""',
-      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=\\"--enable-experiment=non-nullable\\""',
+      '  "EXTRA_FRONT_END_OPTIONS=\\"--enable-experiment%3Dnon-nullable\\""',
+      '  "EXTRA_GEN_SNAPSHOT_OPTIONS=\\"--enable-experiment%3Dnon-nullable\\""',
       '  "SPLIT_DEBUG_INFO=\\"foo/\\""',
       '  "TRACK_WIDGET_CREATION=\\"true\\""',
       '  "TREE_SHAKE_ICONS=\\"true\\""',
       '  "FLUTTER_ROOT=\\"\${FLUTTER_ROOT}\\""',
       '  "PROJECT_DIR=\\"\${PROJECT_DIR}\\""',
       '  "FLUTTER_TARGET=\\"lib/other.dart\\""',
+      '  "BUNDLE_SKSL_PATH=\\"foo/bar.sksl.json\\""',
     ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

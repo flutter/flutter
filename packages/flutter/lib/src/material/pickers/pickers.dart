@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // Date Picker public API
 export 'calendar_date_picker.dart' show CalendarDatePicker;
 export 'date_picker_common.dart' show

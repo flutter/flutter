@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
@@ -55,7 +57,7 @@ class DefaultTextStyle extends InheritedTheme {
        assert(textWidthBasis != null),
        super(key: key, child: child);
 
-  /// A const-constructible default text style that provides fallback values.
+  /// A const-constructable default text style that provides fallback values.
   ///
   /// Returned from [of] when the given [BuildContext] doesn't have an enclosing default text style.
   ///

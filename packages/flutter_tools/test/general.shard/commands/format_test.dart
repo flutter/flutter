@@ -19,7 +19,6 @@ void main() {
       ..addCommand(FormatCommand());
     await runner.run(<String>['format', 'a', 'b', 'c']);
 
-    expect(testLogger.errorText, contains('"flutter format" is deprecated'));
     expect((globals.processManager as FakeProcessManager).hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),

@@ -71,6 +71,7 @@ class CoverageCollector extends TestWatcher {
       packagesPath: globalPackagesPath,
       checkIgnoredLines: true,
     ));
+    _addHitmap(await coverage.createHitmap(data['coverage'] as List<Map<String, dynamic>>));
     _logMessage('($observatoryUri): done merging coverage data into global coverage map.');
   }
 
@@ -107,6 +108,7 @@ class CoverageCollector extends TestWatcher {
       packagesPath: globalPackagesPath,
       checkIgnoredLines: true,
     ));
+    _addHitmap(await coverage.createHitmap(data['coverage'] as List<Map<String, dynamic>>));
     _logMessage('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
   }
 

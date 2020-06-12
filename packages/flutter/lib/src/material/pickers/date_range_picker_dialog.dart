@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -407,10 +409,7 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
         final DialogTheme dialogTheme = Theme.of(context).dialogTheme;
         size = orientation == Orientation.portrait ? _inputPortraitDialogSize : _inputLandscapeDialogSize;
         insetPadding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0);
-        // TODO(Piinks): remove once border radius migration is complete
-        shape = dialogTheme.shape ?? const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(4.0))
-        );
+        shape = dialogTheme.shape;
         elevation = dialogTheme.elevation ?? 24;
         break;
     }

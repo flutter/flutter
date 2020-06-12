@@ -326,6 +326,8 @@ Future<void> _runToolTests() async {
         testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
         tableData: bigqueryApi?.tabledata,
         enableFlutterToolAsserts: true,
+        // Detect unit test time regressions (poor time delay handling, etc).
+        perTestTimeout: (subshard == 'general') ? const Duration(seconds: 2) : null,
       );
     },
   );
@@ -340,8 +342,7 @@ Future<void> _runToolTests() async {
 /// target app.
 Future<void> _runBuildTests() async {
   final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
-    // TODO(jonahwilliams): re-enable once https://github.com/flutter/flutter/issues/57234 is done.
-    // ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')));
 
   final String branch = Platform.environment['CIRRUS_BRANCH'];
@@ -377,7 +378,7 @@ Future<void> _runExampleProjectBuildTests(FileSystemEntity exampleDirectory) asy
   final String examplePath = exampleDirectory.path;
   final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
   final List<String> additionalArgs = hasNullSafety
-    ? <String>['--enable-experiment', 'non-nullable']
+    ? <String>['--enable-experiment', 'non-nullable', '--no-sound-null-safety']
     : <String>[];
   if (Directory(path.join(examplePath, 'android')).existsSync()) {
     await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs, verifyCaching: verifyCaching);
@@ -543,24 +544,27 @@ Future<void> _runAddToAppLifeCycleTests() async {
 
 Future<void> _runFrameworkTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
+  final List<String> nullSafetyOptions = <String>['--enable-experiment=non-nullable', '--no-sound-null-safety'];
+  final List<String> trackWidgetCreationAlternatives = <String>['--track-widget-creation', '--no-track-widget-creation'];
 
   Future<void> runWidgets() async {
     print('${green}Running packages/flutter tests for$reset: ${cyan}test/widgets/$reset');
-    await _runFlutterTest(
-      path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--track-widget-creation'],
-      tableData: bigqueryApi?.tabledata,
-      tests: <String>[ path.join('test', 'widgets') + path.separator ],
-    );
-    await _runFlutterTest(
-      path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--no-track-widget-creation'],
-      tableData: bigqueryApi?.tabledata,
-      tests: <String>[ path.join('test', 'widgets') + path.separator ],
-    );
+    for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
+      await _runFlutterTest(
+        path.join(flutterRoot, 'packages', 'flutter'),
+        options: <String>[trackWidgetCreationOption, ...nullSafetyOptions],
+        tableData: bigqueryApi?.tabledata,
+        tests: <String>[ path.join('test', 'widgets') + path.separator ],
+      );
+    }
     // Try compiling code outside of the packages/flutter directory with and without --track-widget-creation
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'), options: <String>['--track-widget-creation'], tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'), options: <String>['--no-track-widget-creation'], tableData: bigqueryApi?.tabledata);
+    for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
+      await _runFlutterTest(
+        path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'),
+        options: <String>[trackWidgetCreationOption],
+        tableData: bigqueryApi?.tabledata,
+      );
+    }
   }
 
   Future<void> runLibraries() async {
@@ -571,18 +575,14 @@ Future<void> _runFrameworkTests() async {
       .map<String>((Directory dir) => path.join('test', path.basename(dir.path)) + path.separator)
       .toList();
     print('${green}Running packages/flutter tests$reset for: $cyan${tests.join(", ")}$reset');
-    await _runFlutterTest(
-      path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--track-widget-creation'],
-      tableData: bigqueryApi?.tabledata,
-      tests: tests,
-    );
-    await _runFlutterTest(
-      path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--no-track-widget-creation'],
-      tableData: bigqueryApi?.tabledata,
-      tests: tests,
-    );
+    for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
+      await _runFlutterTest(
+        path.join(flutterRoot, 'packages', 'flutter'),
+        options: <String>[trackWidgetCreationOption, ...nullSafetyOptions],
+        tableData: bigqueryApi?.tabledata,
+        tests: tests,
+      );
+    }
   }
 
   Future<void> runMisc() async {
@@ -603,10 +603,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
-    // TODO(jonahwilliams): re-enable once https://github.com/flutter/flutter/issues/57234 is done.
-    // await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'),
-    //   options: <String>['--enable-experiment=non-nullable'],
-    // );
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: nullSafetyOptions);
     await _runFlutterTest(
       path.join(flutterRoot, 'dev', 'tracing_tests'),
       options: <String>['--enable-vmservice'],
@@ -756,8 +753,7 @@ Future<void> _runWebIntegrationTests() async {
   await _runWebDebugTest('lib/stack_trace.dart');
   await _runWebDebugTest('lib/web_directory_loading.dart');
   await _runWebDebugTest('test/test.dart');
-  // TODO(jonahwilliams): re-enable once https://github.com/flutter/flutter/issues/57234 is done.
-  // await _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true);
+  await _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true);
   await _runWebDebugTest('lib/web_define_loading.dart',
     additionalArguments: <String>[
       '--dart-define=test.valueA=Example',
@@ -875,6 +871,7 @@ Future<void> _runWebDebugTest(String target, {
         ...<String>[
           '--enable-experiment',
           'non-nullable',
+          '--no-sound-null-safety'
         ],
       '-d',
       'chrome',
@@ -935,6 +932,7 @@ Future<void> _pubRunTest(String workingDirectory, {
   String coverage,
   bq.TabledataResourceApi tableData,
   bool forceSingleCore = false,
+  Duration perTestTimeout,
 }) async {
   int cpus;
   final String cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -966,6 +964,8 @@ Future<void> _pubRunTest(String workingDirectory, {
       '--no-color',
     if (coverage != null)
       '--coverage=$coverage',
+    if (perTestTimeout != null)
+      '--timeout=${perTestTimeout.inMilliseconds.toString()}ms',
     if (testPaths != null)
       for (final String testPath in testPaths)
         testPath,

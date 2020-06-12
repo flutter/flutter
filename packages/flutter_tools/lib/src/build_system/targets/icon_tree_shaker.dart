@@ -14,7 +14,7 @@ import '../../base/logger.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
 import '../build_system.dart';
-import 'dart.dart';
+import 'common.dart';
 
 /// The build define controlling whether icon fonts should be stripped down to
 /// only the glyphs used by the application.
