@@ -652,10 +652,19 @@ mixin LocalHistoryRoute<T> on Route<T> {
   }
 }
 
+/// An [Intent] that requests dismissing the modal route containing the
+/// focused widget.
 class DismissIntent extends Intent {
+  /// Creates a const [DismissIntent].
   const DismissIntent();
 }
 
+/// An action that dismisses the modal route containing the
+/// focused widget.
+///
+/// By default, this action is bound to [LogicalKeyboardKey.escape],
+/// and [LogicalKeyboardKey.gameButtonB] in the
+/// default keyboard map in [WidgetsApp].
 class DismissAction extends Action<DismissIntent> {
   @override
   Object invoke(DismissIntent intent) {

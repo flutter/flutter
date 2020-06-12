@@ -853,6 +853,10 @@ class WidgetsApp extends StatefulWidget {
     LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
     LogicalKeySet(LogicalKeyboardKey.gameButtonA): const ActivateIntent(),
 
+    // Dismissal
+    LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
+    LogicalKeySet(LogicalKeyboardKey.gameButtonB): const ActivateIntent(),
+
     // Keyboard traversal.
     LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const PreviousFocusIntent(),
@@ -874,6 +878,9 @@ class WidgetsApp extends StatefulWidget {
   static final Map<LogicalKeySet, Intent> _defaultWebShortcuts = <LogicalKeySet, Intent>{
     // Activation
     LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
+
+    // Dismissal
+    LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
 
     // Keyboard traversal.
     LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),

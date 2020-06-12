@@ -137,6 +137,8 @@ void main() {
       '     _FocusMarker\n'
       '     Semantics\n'
       '     FocusScope\n'
+      '     _ActionsMarker\n'
+      '     Actions\n'
       '     PageStorage\n'
       '     Offstage\n'
       '     _ModalScopeStatus\n'
