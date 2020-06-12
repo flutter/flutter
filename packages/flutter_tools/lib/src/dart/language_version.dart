@@ -29,17 +29,21 @@ String determineLanguageVersion(File file, Package package) {
     // Check for the start or end of a block comment. Within a block
     // comment, all language version declarations are ignored. Block
     // comments can be nested, and the start or end may occur on
-    // the same line.
+    // the same line. This does not handle the case of invalid
+    // block comment combinations like `*/ /*` since that will cause
+    // a compilation error anyway.
     bool sawBlockComment = false;
-    if (trimmedLine.startsWith(_blockCommentStart)) {
-      blockCommentDepth += 1;
+    final int startMatches = _blockCommentStart.allMatches(trimmedLine).length;
+    final int endMatches = _blockCommentEnd.allMatches(trimmedLine).length;
+    if (startMatches > 0) {
+      blockCommentDepth += startMatches;
       sawBlockComment = true;
     }
-    if (trimmedLine.endsWith(_blockCommentEnd)) {
-      blockCommentDepth -= 1;
+    if (endMatches > 0) {
+      blockCommentDepth -= endMatches;
       sawBlockComment = true;
     }
-    if (blockCommentDepth > 0 || sawBlockComment) {
+    if (blockCommentDepth != 0 || sawBlockComment) {
       continue;
     }
     // Check for a match with the language version.

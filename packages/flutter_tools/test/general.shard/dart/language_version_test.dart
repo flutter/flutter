@@ -102,9 +102,56 @@ void main() {
       ..writeAsStringSync('''
 // Some license
 
-/* /*
+/*
+/*
 @dart = 2.9
-*/ */
+*/
+*/
+''');
+
+    expect(determineLanguageVersion(file, null), null);
+  });
+
+  testWithoutContext('detects language version after nested block comment', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
+// Some license
+
+/* /*
+*/
+*/
+// @dart = 2.9
+''');
+
+    expect(determineLanguageVersion(file, null), '// @dart = 2.9');
+  });
+
+  testWithoutContext('does not crash with unbalanced opening block comments', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
+// Some license
+
+/*
+/*
+*/
+@dart = 2.9
+''');
+
+    expect(determineLanguageVersion(file, null), null);
+  });
+
+  testWithoutContext('does not crash with unbalanced closing block comments', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File file = fileSystem.file('example.dart')
+      ..writeAsStringSync('''
+// Some license
+
+/*
+*/
+*/
+@dart = 2.9
 ''');
 
     expect(determineLanguageVersion(file, null), null);
