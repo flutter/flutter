@@ -26,6 +26,44 @@ class FakeEditableTextState with TextSelectionDelegate {
 }
 
 void main() {
+  test('RenderEditable respects clipBehavior', () {
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    final TestClipPaintingContext context = TestClipPaintingContext();
+
+    final String longString = 'a' * 10000;
+
+    // By default, clipBehavior should be Clip.none
+    final RenderEditable defaultEditable = RenderEditable(
+      text: TextSpan(text: longString),
+      textDirection: TextDirection.ltr,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: FakeEditableTextState(),
+      selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+    );
+    layout(defaultEditable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+    defaultEditable.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.hardEdge));
+
+    context.clipBehavior = Clip.none; // Reset as Clip.none won't write into clipBehavior.
+    for (final Clip clip in Clip.values) {
+      final RenderEditable editable = RenderEditable(
+        text: TextSpan(text: longString),
+        textDirection: TextDirection.ltr,
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        offset: ViewportOffset.zero(),
+        textSelectionDelegate: FakeEditableTextState(),
+        selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+        clipBehavior: clip,
+      );
+      layout(editable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+      editable.paint(context, Offset.zero);
+      expect(context.clipBehavior, equals(clip));
+    }
+  });
+
   test('editable intrinsics', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final RenderEditable editable = RenderEditable(

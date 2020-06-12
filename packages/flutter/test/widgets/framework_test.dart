@@ -721,7 +721,7 @@ void main() {
       equalsIgnoringHashCodes(
         'Duplicate keys found.\n'
         'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
-        'Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose, overflow: clip) has multiple children with key [GlobalKey#00000 problematic].'
+        'Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose) has multiple children with key [GlobalKey#00000 problematic].'
       ),
     );
   });
@@ -891,7 +891,7 @@ void main() {
         'The specific parent that did not update after having one or more children forcibly '
         'removed due to GlobalKey reparenting is:\n'
         '- Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose, '
-        'overflow: clip, renderObject: RenderStack#00000)\n'
+        'renderObject: RenderStack#00000)\n'
         'A GlobalKey can only be specified on one widget at a time in the widget tree.'
       ),
     );
