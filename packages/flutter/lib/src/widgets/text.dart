@@ -203,6 +203,66 @@ class DefaultTextStyle extends InheritedTheme {
   }
 }
 
+/// The [TextHeightBehavior] that will apply to descendant [Text] widgets which
+/// have not explicitly set [Text.textHeightBehavior].
+///
+/// If there is a [DefaultTextStyle] with a non-null [DefaultTextStyle.textHeightBehavior]
+/// below this widget, the [DefaultTextStyle.textHeightBehavior] will be used
+/// over this widget's [TextHeightBehavior].
+///
+/// See also:
+///
+///  * [DefaultTextStyle], which defines a [TextStyle] to apply to descendant
+///    [Text] widgets.
+class DefaultTextHeightBehavior extends InheritedTheme {
+  /// Creates a default text height behavior for the given subtree.
+  ///
+  /// The [textHeightBehavior] and [child] arguments are required and must not be null.
+  const DefaultTextHeightBehavior({
+    Key key,
+    @required this.textHeightBehavior,
+    @required Widget child,
+  }) :  assert(textHeightBehavior != null),
+        assert(child != null),
+        super(key: key, child: child);
+
+  /// {@macro flutter.dart:ui.textHeightBehavior}
+  final TextHeightBehavior textHeightBehavior;
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// If no such instance exists, this method will return `null`.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// DefaultTextHeightBehavior defaultTextHeightBehavior = DefaultTextHeightBehavior.of(context);
+  /// ```
+  static TextHeightBehavior of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<DefaultTextHeightBehavior>()?.textHeightBehavior;
+  }
+
+  @override
+  bool updateShouldNotify(DefaultTextHeightBehavior oldWidget) {
+    return textHeightBehavior != oldWidget.textHeightBehavior;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final DefaultTextHeightBehavior defaultTextHeightBehavior = context.findAncestorWidgetOfExactType<DefaultTextHeightBehavior>();
+    return identical(this, defaultTextHeightBehavior) ? child : DefaultTextHeightBehavior(
+      textHeightBehavior: textHeightBehavior,
+      child: child,
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
+  }
+}
+
 /// A run of text with a single style.
 ///
 /// The [Text] widget displays a string of text with single style. The string
@@ -451,7 +511,7 @@ class Text extends StatelessWidget {
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
-      textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior,
+      textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
