@@ -2571,7 +2571,7 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
         composingEnd -= outputCodepoints.length < composingEnd ? 1 : 0;
       }
 
-     final bool shorter = oldValue.text.runes.length > newValue.text.runes.length;
+     final bool isBackspace = oldValue.text.runes.length - newValue.text.runes.length == 1 && isDirectionalityMarker(oldValue.text.runes.last);
 
       bool previousWasWhitespace = false;
       bool previousWasDirectionalityMarker = false;
@@ -2591,7 +2591,7 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
             outputCodepoints.removeLast();
           }
           // Handle trailing whitespace deleting the directionality char instead of the whitespace.
-          if (shorter && index == newValue.text.runes.length - 1) {
+          if (isBackspace && index == newValue.text.runes.length - 1) {
             // Do not append the whitespace to the outputCodepoints.
             subtractFromLength();
           } else {
