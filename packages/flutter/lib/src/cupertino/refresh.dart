@@ -12,6 +12,8 @@ import 'package:flutter/widgets.dart';
 
 import 'activity_indicator.dart';
 
+const double _activityIndicatorRadius = 14.0;
+
 class _CupertinoSliverRefresh extends SingleChildRenderObjectWidget {
   const _CupertinoSliverRefresh({
     Key key,
@@ -141,9 +143,22 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
       parentUsesSize: true,
     );
     if (active) {
+      // The _CupertinoActivityIndicatorPainter performs an internal translation so that
+      // its painting is always vertically centered based on its height. However, the
+      // requirement here is that the top of the activity indicator (not the center) is
+      // pinned to the top of the sliver, so we need to account for the internal adjustment
+      // here taking into account that the child's height will change as the user drags down.
+      final double internalPainterDelta = _activityIndicatorRadius - (min(child.size.height / 2.0, _activityIndicatorRadius));
+
+      // The standard iOS pull-to-refresh layout includes a margin above the activity indicator.
+      // A subtle consequence of that is that in the very early stages of the drag, a portion
+      // the first tick is actually drawn over the top of the content being dragged down. To
+      // achieve the same effect, we apply the margin to the paintOrigin.
+      const double topMargin = 16.0;
+
       geometry = SliverGeometry(
         scrollExtent: layoutExtent,
-        paintOrigin: -overscrolledExtent - constraints.scrollOffset,
+        paintOrigin: topMargin + internalPainterDelta - overscrolledExtent - constraints.scrollOffset,
         paintExtent: max(
           // Check child size (which can come from overscroll) because
           // layoutExtent may be zero. Check layoutExtent also since even
@@ -381,10 +396,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     final double percentageComplete = min((pulledExtent - dragThreshold) / (refreshTriggerPullDistance - dragThreshold), 1.0);
     return Align(
       alignment: Alignment.topCenter,
-      child: Padding(
-        padding: const EdgeInsets.only(top: dragThreshold),
-        child: _buildIndicatorForRefreshState(refreshState, 14.0, percentageComplete),
-      ),
+      child: _buildIndicatorForRefreshState(refreshState, _activityIndicatorRadius, percentageComplete),
     );
   }
 

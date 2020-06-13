@@ -466,9 +466,11 @@ void main() {
       ));
 
       // Given a box constraint of 150, the Center will occupy all that height.
+      // Note: vertical boundaries include an additional 16 margin pixels due to
+      // paintOrigin manipulation in the sliver.
       expect(
         tester.getRect(find.widgetWithText(Center, '-1')),
-        const Rect.fromLTRB(0.0, 0.0, 800.0, 150.0),
+        const Rect.fromLTRB(0.0, 16.0, 800.0, 166.0),
       );
 
       await tester.drag(find.text('0'), const Offset(0.0, -300.0), touchSlopY: 0);
@@ -484,13 +486,15 @@ void main() {
       ));
 
       // Now the sliver is scrolled off screen.
+      // Note: vertical boundaries include an additional 16 margin pixels due to
+      // paintOrigin manipulation in the sliver.
       expect(
         tester.getTopLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
-        moreOrLessEquals(-175.38461538461536),
+        moreOrLessEquals(-159.38461538461536),
       );
       expect(
         tester.getBottomLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
-        moreOrLessEquals(-115.38461538461536),
+        moreOrLessEquals(-99.38461538461536),
       );
       expect(
         tester.getTopLeft(find.widgetWithText(Center, '0')).dy,
@@ -502,9 +506,11 @@ void main() {
       await tester.drag(find.text('1'), const Offset(0.0, 200.0));
       await tester.pump();
       await tester.pump(const Duration(seconds: 2));
+      // Note: vertical boundaries include an additional 16 margin pixels due to
+      // paintOrigin manipulation in the sliver.
       expect(
         tester.getRect(find.widgetWithText(Center, '-1')),
-        const Rect.fromLTRB(0.0, 0.0, 800.0, 60.0),
+        const Rect.fromLTRB(0.0, 16.0, 800.0, 76.0),
       );
       expect(
         tester.getRect(find.widgetWithText(Center, '0')),
@@ -539,9 +545,11 @@ void main() {
         100.0, // Default value.
         60.0, // Default value.
       ));
+      // Note: vertical boundaries include an additional 16 margin pixels due to
+      // paintOrigin manipulation in the sliver.
       expect(
         tester.getRect(find.widgetWithText(Center, '-1')),
-        const Rect.fromLTRB(0.0, 0.0, 800.0, 150.0),
+        const Rect.fromLTRB(0.0, 16.0, 800.0, 166.0),
       );
       verify(mockHelper.refreshTask());
 
@@ -556,9 +564,11 @@ void main() {
         100.0, // Default value.
         60.0, // Default value.
       ));
+      // Note: vertical boundaries include an additional 16 margin pixels due to
+      // paintOrigin manipulation in the sliver.
       expect(
         tester.getRect(find.widgetWithText(Center, '-1')),
-        const Rect.fromLTRB(0.0, 0.0, 800.0, 60.0),
+        const Rect.fromLTRB(0.0, 16.0, 800.0, 76.0),
       );
       expect(
         tester.getRect(find.widgetWithText(Center, '0')),
@@ -610,9 +620,11 @@ void main() {
         100.0, // Default value.
         60.0, // Default value.
       ));
+      // Note: vertical boundaries include an additional 16 margin pixels due to
+      // paintOrigin manipulation in the sliver.
       expect(
         tester.getRect(find.widgetWithText(Center, '-1')),
-        const Rect.fromLTRB(0.0, 0.0, 800.0, 150.0),
+        const Rect.fromLTRB(0.0, 16.0, 800.0, 166.0),
       );
       verify(mockHelper.refreshTask());
 
@@ -627,9 +639,11 @@ void main() {
         100.0, // Default value.
         60.0, // Default value.
       ));
+      // Note: vertical boundaries include an additional 16 margin pixels due to
+      // paintOrigin manipulation in the sliver.
       expect(
         tester.getRect(find.widgetWithText(Center, '-1')),
-        const Rect.fromLTRB(0.0, 0.0, 800.0, 60.0),
+        const Rect.fromLTRB(0.0, 16.0, 800.0, 76.0),
       );
       expect(
         tester.getRect(find.widgetWithText(Center, '0')),
@@ -711,9 +725,11 @@ void main() {
           100.0, // Default value.
           60.0, // Default value.
         ));
+        // Note: vertical boundaries include an additional 16 margin pixels due to
+        // paintOrigin manipulation in the sliver.
         expect(
           tester.getBottomLeft(find.widgetWithText(Center, '-1')).dy,
-          moreOrLessEquals(91.311809131992776),
+          moreOrLessEquals(107.311809131992776),
         );
 
         // Start another drag by an amount that would have been enough to
