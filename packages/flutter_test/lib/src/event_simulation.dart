@@ -157,6 +157,7 @@ class KeyEventSimulator {
     String platform,
     bool isDown = true,
     PhysicalKeyboardKey physicalKey,
+    Object eventId,
   }) {
     assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
 
@@ -183,6 +184,7 @@ class KeyEventSimulator {
         result['codePoint'] = key.keyLabel?.codeUnitAt(0);
         result['scanCode'] = scanCode;
         result['metaState'] = _getAndroidModifierFlags(key, isDown);
+        result['eventId'] = eventId;
         break;
       case 'fuchsia':
         result['hidUsage'] = physicalKey?.usbHidUsage ?? (key.keyId & LogicalKeyboardKey.hidPlane != 0 ? key.keyId & LogicalKeyboardKey.valueMask : null);

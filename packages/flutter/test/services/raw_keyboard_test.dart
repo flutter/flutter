@@ -6,6 +6,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _ModifierCheck {
@@ -507,6 +508,49 @@ void main() {
       });
       final RawKeyEventDataAndroid data = repeatCountEvent.data as RawKeyEventDataAndroid;
       expect(data.repeatCount, equals(42));
+    });
+    testWidgets('Key events are responded to correctly.', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      // Generate the data for a regular key down event.
+      final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'android',
+        isDown: true,
+        eventId: 1,
+      );
+      Map<String, dynamic> message;
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(SystemChannels.keyEvent.name, (ByteData data) {
+        message = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
+        return Future<ByteData>.value();
+      });
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+        (ByteData data) {},
+      );
+      expect(message, equals(<String, dynamic>{'type': 'keyNotHandled', 'data': <String, dynamic>{'eventId': 1}}));
+
+      // Set up a widget that will receive focused text events.
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      await tester.pumpWidget(
+        Focus(
+          focusNode: focusNode,
+          onKey: (FocusNode node, RawKeyEvent event) {
+            return true; // handle all events.
+          },
+          child: const SizedBox(),
+        ),
+      );
+      focusNode.requestFocus();
+      await tester.pump();
+
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+            (ByteData data) {},
+      );
+      expect(message, equals(<String, dynamic>{'type': 'keyHandled', 'data': <String, dynamic>{'eventId': 1}}));
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(SystemChannels.keyEvent.name, null);
     });
   });
   group('RawKeyEventDataFuchsia', () {
