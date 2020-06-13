@@ -17,6 +17,12 @@ void validateBuild(AndroidBuildInfo androidBuildInfo) {
       'For more information see $kSupportedAbis .'
     );
   }
+  if (!buildInfo.mode.isPrecompiled && buildInfo.createAotSizeJson) {
+    throwToolExit(
+      'AOT size analysis can only be done on AOT builds such as '
+      'profile or release'
+    );
+  }
   if (buildInfo.buildNumber != null) {
     final int result = int.tryParse(buildInfo.buildNumber);
     if (result == null) {

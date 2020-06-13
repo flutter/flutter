@@ -526,9 +526,10 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addBuildSizeAnalysisOption() {
-    argParser.addOption(
+  void addBuildSizeAnalysisFlag() {
+    argParser.addFlag(
       'analyze',
+      negatable: false,
       help:
         'Whether to also print out the size breakdown of the output artifact '
         'after building.',
@@ -622,6 +623,9 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
+    final bool createAotSizeJson = argParser.options.containsKey('analyze') &&
+      boolArg('analyze');
+
     if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
       final bool nullSafety = boolArg(FlutterOptions.kNullSafety);
       // Explicitly check for `true` and `false` so that `null` results in not
@@ -690,6 +694,7 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
+      createAotSizeJson: createAotSizeJson,
     );
   }
 

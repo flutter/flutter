@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter_tools/src/base/analyze_size.dart';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart' as xml;
 
@@ -312,9 +313,16 @@ Future<void> buildGradleApp({
   if (buildInfo.extraFrontEndOptions != null) {
     command.add('-Pextra-front-end-options=${encodeDartDefines(buildInfo.extraFrontEndOptions)}');
   }
-  if (buildInfo.extraGenSnapshotOptions != null) {
-    command.add('-Pextra-gen-snapshot-options=${encodeDartDefines(buildInfo.extraGenSnapshotOptions)}');
+
+  if (buildInfo.createAotSizeJson || buildInfo.extraGenSnapshotOptions != null) {
+    final List<String> extraGenSnapShotOptions = <String> [
+      if (buildInfo.createAotSizeJson)
+        SizeAnalyzer.getAotSizeAnalysisExtraGenSnapshotOption(getApkDirectory(project).absolute.path),
+      ...?buildInfo.extraGenSnapshotOptions,
+    ];
+    command.add('-Pextra-gen-snapshot-options=${encodeDartDefines(extraGenSnapShotOptions)}');
   }
+
   if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty) {
     command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
   }

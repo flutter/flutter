@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'base/analyze_size.dart';
 import 'base/common.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
@@ -75,6 +76,14 @@ class AotBuilder {
       );
     }
 
+    List<String> extraGenSnapshotOptions;
+    if (buildInfo?.createAotSizeJson ?? false) {
+      extraGenSnapshotOptions = <String>[SizeAnalyzer.getAotSizeAnalysisExtraGenSnapshotOption(outputPath)];
+    }
+    if (buildInfo?.extraGenSnapshotOptions?.isNotEmpty ?? false) {
+      extraGenSnapshotOptions?.addAll(buildInfo.extraGenSnapshotOptions);
+    }
+
     final Environment environment = Environment(
       projectDir: globals.fs.currentDirectory,
       outputDir: globals.fs.directory(outputPath),
@@ -91,8 +100,8 @@ class AotBuilder {
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
         kDartDefines: buildInfo.dartDefines.join(','),
         kBitcodeFlag: bitcode.toString(),
-        if (buildInfo?.extraGenSnapshotOptions?.isNotEmpty ?? false)
-          kExtraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions.join(','),
+        if (extraGenSnapshotOptions?.isNotEmpty ?? false)
+          kExtraGenSnapshotOptions: extraGenSnapshotOptions.join(','),
         if (buildInfo?.extraFrontEndOptions?.isNotEmpty ?? false)
           kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
         if (platform == TargetPlatform.ios)

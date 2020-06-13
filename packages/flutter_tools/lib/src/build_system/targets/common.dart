@@ -69,6 +69,8 @@ const String kIosArchs = 'IosArchs';
 /// Whether to enable Dart obfuscation and where to save the symbol map.
 const String kDartObfuscation = 'DartObfuscation';
 
+const String kCreateAotSizeJson = 'CreateAotSizeJson';
+
 /// Copies the pre-built flutter bundle.
 // This is a one-off rule for implementing build bundle in terms of assemble.
 class CopyFlutterBundle extends Target {
