@@ -623,7 +623,7 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
-    final bool createAotSizeJson = argParser.options.containsKey('analyze') &&
+    final bool analyzeAotSize = argParser.options.containsKey('analyze') &&
       boolArg('analyze');
 
     if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
@@ -694,7 +694,7 @@ abstract class FlutterCommand extends Command<void> {
       bundleSkSLPath: bundleSkSLPath,
       dartExperiments: experiments,
       performanceMeasurementFile: performanceMeasurementFile,
-      createAotSizeJson: createAotSizeJson,
+      analyzeAotSize: analyzeAotSize,
     );
   }
 

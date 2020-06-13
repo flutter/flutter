@@ -29,7 +29,7 @@ class BuildInfo {
     this.dartExperiments = const <String>[],
     @required this.treeShakeIcons,
     this.performanceMeasurementFile,
-    this.createAotSizeJson = false,
+    this.analyzeAotSize = false,
   });
 
   final BuildMode mode;
@@ -100,7 +100,7 @@ class BuildInfo {
   final String performanceMeasurementFile;
 
   /// Whether to also produce a JSON file detailing the APK's AOT's content size.
-  final bool createAotSizeJson;
+  final bool analyzeAotSize;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);

@@ -314,12 +314,20 @@ Future<void> buildGradleApp({
     command.add('-Pextra-front-end-options=${encodeDartDefines(buildInfo.extraFrontEndOptions)}');
   }
 
-  if (buildInfo.createAotSizeJson || buildInfo.extraGenSnapshotOptions != null) {
-    final List<String> extraGenSnapShotOptions = <String> [
-      if (buildInfo.createAotSizeJson)
-        SizeAnalyzer.getAotSizeAnalysisExtraGenSnapshotOption(getApkDirectory(project).absolute.path),
-      ...?buildInfo.extraGenSnapshotOptions,
-    ];
+  List<String> extraGenSnapShotOptions;
+  String aotSizeJson;
+
+  if (buildInfo.extraGenSnapshotOptions != null) {
+    extraGenSnapShotOptions = buildInfo.extraGenSnapshotOptions;
+  }
+
+  if (buildInfo.analyzeAotSize) {
+    aotSizeJson = SizeAnalyzer.getAotSizeAnalysisJsonFile(getApkDirectory(project).absolute.path);
+    (extraGenSnapShotOptions ??= <String>[])
+        .add(SizeAnalyzer.getAotSizeAnalysisExtraGenSnapshotOption(getApkDirectory(project).absolute.path));
+  }
+
+  if (extraGenSnapShotOptions != null) {
     command.add('-Pextra-gen-snapshot-options=${encodeDartDefines(extraGenSnapShotOptions)}');
   }
 
@@ -485,10 +493,17 @@ Future<void> buildGradleApp({
     : listApkPaths(androidBuildInfo);
   final Directory apkDirectory = getApkDirectory(project);
   final File apkFile = apkDirectory.childFile(apkFilesPaths.first);
+  final File aotSizeJsonFile = apkDirectory.childFile(globals.fs.path.basename(aotSizeJson));
   if (!apkFile.existsSync()) {
     _exitWithExpectedFileNotFound(
       project: project,
       fileExtension: '.apk',
+    );
+  }
+  if (!aotSizeJsonFile.existsSync()) {
+    _exitWithExpectedFileNotFound(
+      project: project,
+      fileExtension: '.json',
     );
   }
 
@@ -507,6 +522,10 @@ Future<void> buildGradleApp({
     '$successMark Built ${globals.fs.path.relative(apkFile.path)}$appSize.',
     color: TerminalColor.green,
   );
+
+  if (buildInfo.analyzeAotSize) {
+    SizeAnalyzer().analyzeApkSize(apk: apkFile, aotSizeJson: aotSizeJsonFile);
+  }
 }
 
 /// Builds AAR and POM files.
