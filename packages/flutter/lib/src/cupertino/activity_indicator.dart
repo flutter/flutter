@@ -162,11 +162,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     final Paint paint = Paint();
 
     canvas.save();
-
-    // It is important that we translate by a fixed amount (ie. the radius), rather
-    // than size.height, because size.height changes as the user drags downward. If
-    // we use size.height, the spinner moves as the user drags down.
-    canvas.translate(size.width / 2.0, radius);
+    canvas.translate(size.width / 2.0, size.height / 2.0);
 
     final int activeTick = (_kTickCount * position.value).floor();
 
