@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  testWidgets('Texture with defalut FilterQuality', (WidgetTester tester) async {
+  testWidgets('Texture with default FilterQuality', (WidgetTester tester) async {
     await tester.pumpWidget(
         const Center(child: Texture(textureId: 1,))
     );
