@@ -241,6 +241,7 @@ String getVersionFromParts(List<int> parts) {
   return buf.toString();
 }
 
+/// A wrapper around git process calls that can be mocked for unit testing.
 class Git {
   const Git();
 
