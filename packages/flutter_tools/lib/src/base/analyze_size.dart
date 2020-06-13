@@ -20,13 +20,13 @@ class SizeAnalyzer {
     return '--print-instructions-sizes-to=${getAotSizeAnalysisJsonFile(aotOutputPath)}';
   }
 
-  final RegExp _kGetDuOutput = RegExp(r'(\d+)');
+  // Parse the output of unzip -v which shows the zip's contents' compressed sizes.
   final RegExp _kGetUnzipOutput =
       RegExp(r'^\s*\d+\s+[\w|:]+\s+(\d+)\s+.*  (.+)$');
 
   void analyzeApkSize({@required File apk, @required File aotSizeJson}) {
     globals.printStatus('▒' * 80);
-    _printEntrySize(
+    _printEntitySize(
         '${apk.basename} (total compressed)', apk.lengthSync() ~/ 1024, 0);
     globals.printStatus('━' * 80);
     final Directory tempApkContent =
@@ -40,16 +40,19 @@ class SizeAnalyzer {
       '-d',
       tempApkContent.path
     ]).stdout;
+    // We just want the the stdout printout. We don't need the files.
+    tempApkContent.deleteSync(recursive: true);
     final Map<String, int> collapsedPathsToSizes =
         _parseUnzipFileList(unzipOut);
 
     bool shownAotBreakdown = false;
     for (final String path in collapsedPathsToSizes.keys) {
-      _printEntrySize(
-        path,
-        collapsedPathsToSizes[path] ~/ 1024,
-        path.startsWith('lib/') ? 2 : 1);
+      _printEntitySize(path, collapsedPathsToSizes[path] ~/ 1024,
+          path.startsWith('lib/') ? 2 : 1);
       if (path.endsWith('(Dart AOT)') && !shownAotBreakdown) {
+        // TODO: an APK might contain multiple architectures. We should show a
+        // warning and print the overwritten JSON for just the matching
+        // architecture.
         _analyzeAotSize(aotSizeJson);
         shownAotBreakdown = true;
       }
@@ -58,6 +61,8 @@ class SizeAnalyzer {
     globals.printStatus('▒' * 80);
   }
 
+  // Go through the AOT gen snapshot size JSON and print out a collapsed summary
+  // for the first package level.
   void _analyzeAotSize(File aotSizeJson) {
     final SymbolNode root = _parseSymbols(
         json.decode(aotSizeJson.readAsStringSync()) as List<dynamic>);
@@ -65,17 +70,18 @@ class SizeAnalyzer {
         0,
         (int previousValue, SymbolNode element) =>
             previousValue + element.value);
-    _printEntrySize(
-        'Dart AOT symbols accounted decompressed size', totalSymbolSize ~/ 1024, 3);
+    _printEntitySize('Dart AOT symbols accounted decompressed size',
+        totalSymbolSize ~/ 1024, 3);
     final List<SymbolNode> sortedSymbols = root.children.toList()
       ..sort((SymbolNode a, SymbolNode b) => b.value.compareTo(a.value));
     for (final SymbolNode node in sortedSymbols.take(10)) {
-      _printEntrySize(node.name, node.value ~/ 1024, 4);
+      _printEntitySize(node.name, node.value ~/ 1024, 4);
     }
   }
 
   final NumberFormat numberFormat = NumberFormat('#,###,###');
-  void _printEntrySize(String entityName, int sizeInKb, int level) {
+  // A pretty printer for an entity with a size.
+  void _printEntitySize(String entityName, int sizeInKb, int level) {
     const int tableWidth = 80;
     final bool emphasis = level <= 1;
     final TerminalColor color = level == 0
@@ -93,9 +99,12 @@ class SizeAnalyzer {
     globals.printStatus(formattedSize, color: color);
   }
 
+  // Take a flat list of zipped files from unzip. Collapse all files into
+  // the first level of directory (except the lib directory). Get sums of
+  // compressed file sizes per directory.
   Map<String, int> _parseUnzipFileList(String unzipOut) {
-    Map<List<String>, int> pathsToSize = <List<String>, int>{};
-    Map<String, int> collapsedPathsToSize = <String, int>{};
+    final Map<List<String>, int> pathsToSize = <List<String>, int>{};
+    final Map<String, int> collapsedPathsToSize = <String, int>{};
     for (final String line in const LineSplitter().convert(unzipOut)) {
       final RegExpMatch match = _kGetUnzipOutput.firstMatch(line);
       if (match == null) {
