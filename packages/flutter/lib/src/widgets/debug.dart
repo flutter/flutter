@@ -257,7 +257,7 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 ///
 /// Each one can be null, in which case it is skipped (this is the default).
 /// If they are non-null, they are included in the order above, interspersed
-/// with the more generic advice regarding Directionality.
+/// with the more generic advice regarding [Directionality].
 ///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasDirectionality(BuildContext context, { String why, String hint, String alternative }) {
