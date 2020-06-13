@@ -221,7 +221,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// Becomes the leading component of the [NavigationToolBar] built
   /// by this widget. The [leading] widget's width and height are constrained to
-  /// be no bigger than default toolbar's height, which is [kToolbarHeight].
+  /// be no bigger than default toolbar's height, which is [kToolbarHeight] and
+  /// [toolbarHeight] respectively.
   ///
   /// If this is null and [automaticallyImplyLeading] is set to true, the
   /// [AppBar] will imply an appropriate widget. For example, if the [AppBar] is
