@@ -515,6 +515,41 @@ TEST_F(AccessibilityBridgeTest, HitTest) {
   EXPECT_EQ(hit_node_id, 4u);
 }
 
+TEST_F(AccessibilityBridgeTest, HitTestOverlapping) {
+  // Tests that the first node in hit test order wins, even if a later node
+  // would be able to recieve the hit.
+  flutter::SemanticsNode node0;
+  node0.id = 0;
+  node0.rect.setLTRB(0, 0, 100, 100);
+
+  flutter::SemanticsNode node1;
+  node1.id = 1;
+  node1.rect.setLTRB(0, 0, 100, 100);
+
+  flutter::SemanticsNode node2;
+  node2.id = 2;
+  node2.rect.setLTRB(25, 10, 45, 20);
+
+  node0.childrenInTraversalOrder = {1, 2};
+  node0.childrenInHitTestOrder = {2, 1};
+
+  accessibility_bridge_->AddSemanticsNodeUpdate({
+      {0, node0},
+      {1, node1},
+      {2, node2},
+  });
+  RunLoopUntilIdle();
+
+  uint32_t hit_node_id;
+  auto callback = [&hit_node_id](fuchsia::accessibility::semantics::Hit hit) {
+    EXPECT_TRUE(hit.has_node_id());
+    hit_node_id = hit.node_id();
+  };
+
+  accessibility_bridge_->HitTest({30, 15}, callback);
+  EXPECT_EQ(hit_node_id, 2u);
+}
+
 TEST_F(AccessibilityBridgeTest, Actions) {
   flutter::SemanticsNode node0;
   node0.id = 0;
