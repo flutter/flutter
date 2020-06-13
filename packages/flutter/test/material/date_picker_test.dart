@@ -803,8 +803,7 @@ void main() {
 
       await prepareDatePicker(tester, (Future<DateTime> date) async {
         // Header
-        expect(
-            tester.getSemantics(find.text('SELECT DATE')), matchesSemantics(
+        expect(tester.getSemantics(find.text('SELECT DATE')), matchesSemantics(
           label: 'SELECT DATE\nFri, Jan 15',
         ));
 
@@ -819,8 +818,7 @@ void main() {
         ));
 
         // Year mode drop down button
-        expect(
-            tester.getSemantics(find.text('January 2016')), matchesSemantics(
+        expect(tester.getSemantics(find.text('January 2016')), matchesSemantics(
           label: 'Select year',
           isButton: true,
         ));
@@ -983,7 +981,6 @@ void main() {
           hasEnabledState: true,
           isFocusable: true,
         ));
-
       });
 
       semantics.dispose();
@@ -1104,6 +1101,63 @@ void main() {
       });
 
       semantics.dispose();
+    });
+  });
+
+  group('Keyboard navigation', () {
+    testWidgets('Can toggle to calendar entry mode', (WidgetTester tester) async {
+      await prepareDatePicker(tester, (Future<DateTime> date) async {
+        expect(find.byType(TextField), findsNothing);
+        // Navigate to the entry toggle button and activate it
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+        // Should be in the input mode
+        expect(find.byType(TextField), findsOneWidget);
+      });
+    });
+
+    testWidgets('Can toggle to year mode', (WidgetTester tester) async {
+      await prepareDatePicker(tester, (Future<DateTime> date) async {
+        expect(find.text('2016'), findsNothing);
+        // Navigate to the year selector and activate it
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+        // The years should be visible
+        expect(find.text('2016'), findsOneWidget);
+      });
+    });
+
+    testWidgets('Can navigate next/previous months', (WidgetTester tester) async {
+      await prepareDatePicker(tester, (Future<DateTime> date) async {
+        expect(find.text('January 2016'), findsOneWidget);
+        // Navigate to the previous month button and activate it twice
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+        // Should be showing Nov 2015
+        expect(find.text('November 2015'), findsOneWidget);
+
+        // Navigate to the next month button and activate it four times
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+        // Should be on Mar 2016
+        expect(find.text('March 2016'), findsOneWidget);
+      });
     });
   });
 
