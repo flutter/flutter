@@ -384,11 +384,13 @@ std::optional<int32_t> AccessibilityBridge::GetHitNode(int32_t node_id,
       !node.screen_rect.contains(x, y)) {
     return {};
   }
-  auto hit = node_id;
   for (int32_t child_id : node.children_in_hit_test_order) {
-    hit = GetHitNode(child_id, x, y).value_or(hit);
+    auto candidate = GetHitNode(child_id, x, y);
+    if (candidate) {
+      return candidate;
+    }
   }
-  return hit;
+  return node_id;
 }
 
 // |fuchsia::accessibility::semantics::SemanticListener|
