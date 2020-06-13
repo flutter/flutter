@@ -657,6 +657,8 @@ class CompileTest {
         break;
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.fake:
+        throw Exception('Unsupported option for fake devices');
     }
 
     metrics.addAll(<String, dynamic>{
@@ -681,6 +683,8 @@ class CompileTest {
         break;
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.fake:
+        throw Exception('Unsupported option for fake devices');
     }
     watch.start();
     await flutter('build', options: options);
