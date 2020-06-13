@@ -109,17 +109,25 @@ bool run({
     throw Exception('Commit $commit is already on the dev branch as $lastVersion.');
   }
 
-  if (!force) {
-    git.run(
-      'merge-base --is-ancestor $lastVersion $commit',
-      'verify $lastVersion is a direct ancestor of $commit. The flag `--force` '
-      'is required to force push a new release past a cherry-pick',
-    );
-  }
-
   if (justPrint) {
     print(version);
     return false;
+  }
+
+  if (skipTagging) {
+    git.run(
+      'describe --exact-match --tags $commit',
+      'verify $commit is already tagged. You can only use the flag '
+      '`$kSkipTagging` if the commit has already been tagged.'
+    );
+  }
+
+  if (!force) {
+    git.run(
+      'merge-base --is-ancestor $lastVersion $commit',
+      'verify $lastVersion is a direct ancestor of $commit. The flag `$kForce`'
+      'is required to force push a new release past a cherry-pick',
+    );
   }
 
   git.run('reset $commit --hard', 'reset to the release commit');

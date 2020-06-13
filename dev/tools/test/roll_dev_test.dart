@@ -144,6 +144,45 @@ void main() {
       verifyNever(mockGit.getOutput('rev-parse HEAD', any));
     });
 
+    test('exits with exception if --skip-tagging is provided but commit isn\'t '
+         'already tagged', () {
+      when(mockGit.getOutput('remote get-url $origin', any)).thenReturn(kUpstreamRemote);
+      when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
+      when(mockGit.getOutput(
+        'describe --match *.*.*-*.*.pre --exact-match --tags refs/remotes/$origin/dev',
+        any,
+      )).thenReturn(lastVersion);
+      when(mockGit.getOutput(
+        'rev-parse $lastVersion',
+        any,
+      )).thenReturn('zxy321');
+      const String exceptionMessage = 'Failed to verify $commit is already '
+        'tagged. You can only use the flag `$kSkipTagging` if the commit has '
+        'already been tagged.';
+      when(mockGit.run(
+        'describe --exact-match --tags $commit',
+        any,
+      )).thenThrow(Exception(exceptionMessage));
+
+      fakeArgResults = FakeArgResults(
+        level: level,
+        commit: commit,
+        origin: origin,
+        skipTagging: true,
+      );
+      expect(
+        () => run(
+          usage: usage,
+          argResults: fakeArgResults,
+          git: mockGit,
+        ),
+        throwsExceptionWith(exceptionMessage),
+      );
+      verify(mockGit.run('fetch $origin', any));
+      verifyNever(mockGit.run('reset $commit --hard', any));
+      verifyNever(mockGit.getOutput('rev-parse HEAD', any));
+    });
+
     test('throws exception if desired commit is already tip of dev branch', () {
       when(mockGit.getOutput('remote get-url $origin', any)).thenReturn(kUpstreamRemote);
       when(mockGit.getOutput('status --porcelain', any)).thenReturn('');
