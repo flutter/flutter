@@ -204,10 +204,11 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
       home: Scaffold(
-          appBar: AppBar(
-            title: const Text('Title'),
-            centerTitle: false,
-          )),
+        appBar: AppBar(
+          title: const Text('Title'),
+          centerTitle: false,
+        ),
+      ),
     ));
 
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
@@ -231,10 +232,11 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(shadowColor: Colors.red)),
       home: Scaffold(
-          appBar: AppBar(
-        title: const Text('Title'),
-        shadowColor: Colors.yellow,
-      )),
+        appBar: AppBar(
+          title: const Text('Title'),
+          shadowColor: Colors.yellow,
+        ),
+      ),
     ));
 
     final AppBar appBar = tester.widget(find.byType(AppBar));
