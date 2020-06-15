@@ -11,6 +11,7 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/services.dart';
@@ -396,7 +397,7 @@ class Slider extends StatefulWidget {
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If this property is null, [ButtonThemeData.mouseCursor] will be used.
   final MouseCursor mouseCursor;
 
   /// The callback used to create a semantic value from a slider value.
@@ -701,7 +702,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       ),
     );
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+      widget.mouseCursor ?? theme.buttonTheme.mouseCursor,
       <MaterialState>{
         if (!_enabled) MaterialState.disabled,
         if (_hovering) MaterialState.hovered,

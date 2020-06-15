@@ -222,7 +222,7 @@ class Switch extends StatefulWidget {
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If this property is null, [ButtonThemeData.mouseCursor] will be used.
   final MouseCursor mouseCursor;
 
   /// The color for the button's [Material] when it has the input focus.
@@ -323,7 +323,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white10 : Colors.black12);
     }
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+      widget.mouseCursor ?? theme.buttonTheme.mouseCursor,
       <MaterialState>{
         if (!enabled) MaterialState.disabled,
         if (_hovering) MaterialState.hovered,

@@ -125,7 +125,7 @@ class Checkbox extends StatefulWidget {
   /// When [value] is null and [tristate] is true, [MaterialState.selected] is
   /// included as a state.
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If this property is null, [ButtonThemeData.mouseCursor] will be used.
   final MouseCursor mouseCursor;
 
   /// The color to use when this checkbox is checked.
@@ -248,7 +248,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
     size += (widget.visualDensity ?? themeData.visualDensity).baseSizeAdjustment;
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+      widget.mouseCursor ?? themeData.buttonTheme.mouseCursor,
       <MaterialState>{
         if (!enabled) MaterialState.disabled,
         if (_hovering) MaterialState.hovered,

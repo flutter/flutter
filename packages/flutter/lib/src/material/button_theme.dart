@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -87,6 +88,7 @@ class ButtonTheme extends InheritedTheme {
     Color splashColor,
     ColorScheme colorScheme,
     MaterialTapTargetSize materialTapTargetSize,
+    MouseCursor mouseCursor,
     Widget child,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
@@ -109,6 +111,7 @@ class ButtonTheme extends InheritedTheme {
          splashColor: splashColor,
          colorScheme: colorScheme,
          materialTapTargetSize: materialTapTargetSize,
+         mouseCursor: mouseCursor,
        ),
        super(key: key, child: child);
 
@@ -273,6 +276,7 @@ class ButtonThemeData with Diagnosticable {
     Color highlightColor,
     Color splashColor,
     this.colorScheme,
+    this.mouseCursor = MaterialStateMouseCursor.clickable,
     MaterialTapTargetSize materialTapTargetSize,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
@@ -479,6 +483,9 @@ class ButtonThemeData with Diagnosticable {
   /// of [colorScheme]. When it's possible, the existing buttons will
   /// (continue to) gradually migrate to it.
   final ColorScheme colorScheme;
+
+    /// {@macro flutter.material.button.mouseCursor}
+  final MouseCursor mouseCursor;
 
   // The minimum size of a button's tap target.
   //

@@ -172,7 +172,7 @@ class Radio<T> extends StatefulWidget {
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If this property is null, [ButtonThemeData.mouseCursor] will be used.
   final MouseCursor mouseCursor;
 
   /// Set to true if this radio button is allowed to be returned to an
@@ -345,7 +345,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
     final bool selected = widget.value == widget.groupValue;
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+      widget.mouseCursor ?? themeData.buttonTheme.mouseCursor,
       <MaterialState>{
         if (!enabled) MaterialState.disabled,
         if (_hovering) MaterialState.hovered,

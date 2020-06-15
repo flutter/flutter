@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../material.dart';
 import 'button_theme.dart';
 import 'constants.dart';
 import 'ink_well.dart';
@@ -117,7 +118,7 @@ class RawMaterialButton extends StatefulWidget {
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If this property is null, [ButtonThemeData.mouseCursor] will be used.
   /// {@endtemplate flutter.material.button.mouseCursor}
   final MouseCursor mouseCursor;
 
@@ -387,7 +388,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     final Offset densityAdjustment = widget.visualDensity.baseSizeAdjustment;
     final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(widget.constraints);
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+      widget.mouseCursor ?? ButtonTheme.of(context).mouseCursor,
       _states,
     );
     final EdgeInsetsGeometry padding = widget.padding.add(

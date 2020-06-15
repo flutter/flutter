@@ -254,7 +254,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   ///
   ///  * [MaterialState.disabled].
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If this property is null, [ButtonThemeData.mouseCursor] will be used.
   final MouseCursor mouseCursor;
 
   /// The widget below this widget in the tree.
@@ -336,7 +336,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
       );
     }
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+      widget.mouseCursor ?? theme.buttonTheme.mouseCursor,
       <MaterialState>{
         if (!widget.enabled) MaterialState.disabled,
       },

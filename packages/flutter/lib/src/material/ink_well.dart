@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../material.dart';
 import 'debug.dart';
 import 'feedback.dart';
 import 'ink_highlight.dart';
@@ -380,7 +381,7 @@ class InkResponse extends StatelessWidget {
   /// When [value] is null and [tristate] is true, [MaterialState.selected] is
   /// included as a state.
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If this property is null, [ButtonThemeData.mouseCursor] will be used.
   final MouseCursor mouseCursor;
 
   /// Whether this ink response should be clipped its bounds.
@@ -1073,7 +1074,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
     _currentSplash?.color = widget.splashColor ?? Theme.of(context).splashColor;
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+      widget.mouseCursor ?? ButtonTheme.of(context).mouseCursor,
       <MaterialState>{
         if (!enabled) MaterialState.disabled,
         if (_hovering) MaterialState.hovered,
