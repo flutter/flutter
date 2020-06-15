@@ -108,6 +108,17 @@ class Template {
         }
         relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
       }
+
+      final bool iOS = context['ios'] as bool;
+      if (relativeDestinationPath.contains('ios') && !iOS) {
+        return null;
+      }
+
+      final bool android = context['android'] as bool;
+      if (relativeDestinationPath.contains('android') && !android) {
+        return null;
+      }
+
       // Only build a web project if explicitly asked.
       final bool web = context['web'] as bool;
       if (relativeDestinationPath.contains('web') && !web) {
@@ -128,6 +139,7 @@ class Template {
       if (relativeDestinationPath.startsWith('windows.tmpl') && !windows) {
         return null;
       }
+
       final String projectName = context['projectName'] as String;
       final String androidIdentifier = context['androidIdentifier'] as String;
       final String pluginClass = context['pluginClass'] as String;
@@ -139,7 +151,7 @@ class Template {
         .replaceAll(imageTemplateExtension, '')
         .replaceAll(templateExtension, '');
 
-      if (androidIdentifier != null) {
+      if (android != null && android && androidIdentifier != null) {
         finalDestinationPath = finalDestinationPath
             .replaceAll('androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
       }

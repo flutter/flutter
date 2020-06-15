@@ -648,6 +648,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     template.render(
       target,
       <String, dynamic>{
+        'ios': true,
         'projectName': parent.manifest.appName,
         'iosIdentifier': parent.manifest.iosBundleIdentifier,
       },
@@ -797,6 +798,7 @@ class AndroidProject extends FlutterProjectPlatform {
     template.render(
       target,
       <String, dynamic>{
+        'android': true,
         'projectName': parent.manifest.appName,
         'androidIdentifier': parent.manifest.androidPackage,
         'androidX': usesAndroidX,
