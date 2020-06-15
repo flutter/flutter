@@ -252,8 +252,9 @@ class DeviceManager {
       }
       // If it was not able to prioritize a device. For example, if the user
       // has two active Android devices running, then we request the user to
-      // choose one.
-      if (devices.length > 1 && _allEphemeral(devices) && globals.stdio.stdinHasTerminal) {
+      // choose one. If the user has two nonEphemeral devices running, we also
+      // request input to choose one.
+      if (devices.length > 1 && globals.stdio.stdinHasTerminal) {
         globals.printStatus(globals.userMessages.flutterMultipleDevicesFound);
         await Device.printDevices(devices);
         final Device chosenDevice = await _chooseOneOfAvailableDevices(devices);
@@ -262,10 +263,6 @@ class DeviceManager {
       }
     }
     return devices;
-  }
-
-  bool _allEphemeral(List<Device> devices) {
-    return devices.every((Device device) => device.ephemeral == true);
   }
 
   Future<Device> _chooseOneOfAvailableDevices(List<Device> devices) async {
