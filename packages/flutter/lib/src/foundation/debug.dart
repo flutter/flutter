@@ -76,7 +76,7 @@ Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
 ///
 ///  * [Timeline.startSync], which typically takes this value as its `arguments`
 ///    argument.
-const Map<String, String> timelineWhitelistArguments = <String, String>{
+const Map<String, String> timelineAllowlistArguments = <String, String>{
   'mode': 'basic',
 };
 
