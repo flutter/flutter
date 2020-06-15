@@ -107,8 +107,14 @@ class RunCommand extends RunCommandBase {
               'By default, Flutter will not log skia code.',
       )
       ..addOption('trace-whitelist',
+        hide: true,
+        help: '(deprecated) Use --trace-allowlist instead',
+        valueHelp: 'foo,bar',
+      )
+      ..addOption('trace-allowlist',
+        hide: true,
         help: 'Filters out all trace events except those that are specified in '
-              'this comma separated list of whitelisted prefixes.',
+            'this comma separated list of allowed prefixes.',
         valueHelp: 'foo,bar',
       )
       ..addFlag('endless-trace-buffer',
@@ -147,8 +153,8 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'Pass a list of comma separated flags to the Dart instance at '
               'application startup. Flags passed through this option must be '
-              'present on the whitelist defined within the Flutter engine. If '
-              'a non-whitelisted flag is encountered, the process will be '
+              'present on the allowlist defined within the Flutter engine. If '
+              'a disallowed flag is encountered, the process will be '
               'terminated immediately.\n\n'
               'This flag is not available on the stable channel and is only '
               'applied in debug and profile modes. This option should only '
@@ -348,6 +354,14 @@ class RunCommand extends RunCommandBase {
     }
   }
 
+  String get _traceAllowlist {
+    final String deprecatedValue = stringArg('trace-whitelist');
+    if (deprecatedValue != null) {
+      globals.printError('--trace-whitelist has been deprecated, use --trace-allowlist instead');
+    }
+    return stringArg('trace-allowlist') ?? deprecatedValue;
+  }
+
   DebuggingOptions _createDebuggingOptions() {
     final BuildInfo buildInfo = getBuildInfo();
     final int browserDebugPort = featureFlags.isWebEnabled && argResults.wasParsed('web-browser-debug-port')
@@ -374,7 +388,7 @@ class RunCommand extends RunCommandBase {
         enableSoftwareRendering: boolArg('enable-software-rendering'),
         skiaDeterministicRendering: boolArg('skia-deterministic-rendering'),
         traceSkia: boolArg('trace-skia'),
-        traceWhitelist: stringArg('trace-whitelist'),
+        traceAllowlist: _traceAllowlist,
         traceSystrace: boolArg('trace-systrace'),
         endlessTraceBuffer: boolArg('endless-trace-buffer'),
         dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
