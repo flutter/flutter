@@ -5,7 +5,7 @@
 import 'package:file/file.dart';
 import 'package:package_config/package_config.dart';
 
-final RegExp _languageVersion = RegExp('/\/\\s*@dart');
+final RegExp _languageVersion = RegExp(r'\/\/\s*@dart');
 final RegExp _declarationEnd = RegExp('(import)|(library)|(part)');
 const String _blockCommentStart = '/*';
 const String _blockCommentEnd = '*/';
