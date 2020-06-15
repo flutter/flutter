@@ -15,8 +15,9 @@ import 'build_system/targets/icon_tree_shaker.dart';
 import 'build_system/targets/ios.dart';
 import 'cache.dart';
 import 'globals.dart' as globals;
-import 'ios/bitcode.dart';
 import 'project.dart';
+
+const bool kBitcodeEnabledDefault = false;
 
 /// Builds AOT snapshots given a platform, build mode and a path to a Dart
 /// library.
