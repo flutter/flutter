@@ -265,7 +265,7 @@ class DeviceManager {
   }
 
   bool _allEphemeral(List<Device> devices) {
-      return devices.every((Device device) => device.ephemeral == true);
+    return devices.every((Device device) => device.ephemeral == true);
   }
 
   Future<Device> _chooseOneOfAvailableDevices(List<Device> devices) async {
