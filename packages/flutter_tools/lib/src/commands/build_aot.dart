@@ -7,7 +7,6 @@ import 'dart:async';
 import '../aot.dart';
 import '../base/common.dart';
 import '../build_info.dart';
-import '../ios/bitcode.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
