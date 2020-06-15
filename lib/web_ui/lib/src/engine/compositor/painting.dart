@@ -190,12 +190,31 @@ class SkPaint extends SkiaObject implements ui.Paint {
 
   ui.MaskFilter _maskFilter;
 
-  // TODO(yjbanov): implement
   @override
   ui.FilterQuality get filterQuality => _filterQuality;
   @override
   set filterQuality(ui.FilterQuality value) {
     _filterQuality = value;
+    _syncFilterQuality(skiaObject);
+  }
+
+  void _syncFilterQuality(js.JsObject object) {
+    js.JsObject skFilterQuality;
+    switch (_filterQuality) {
+      case ui.FilterQuality.none:
+        skFilterQuality = canvasKit['FilterQuality']['None'];
+        break;
+      case ui.FilterQuality.low:
+        skFilterQuality = canvasKit['FilterQuality']['Low'];
+        break;
+      case ui.FilterQuality.medium:
+        skFilterQuality = canvasKit['FilterQuality']['Medium'];
+        break;
+      case ui.FilterQuality.high:
+        skFilterQuality = canvasKit['FilterQuality']['High'];
+        break;
+    }
+    object.callMethod('setFilterQuality', <js.JsObject>[skFilterQuality]);
   }
 
   ui.FilterQuality _filterQuality = ui.FilterQuality.none;
@@ -268,6 +287,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
     _syncMaskFilter(obj);
     _syncColorFilter(obj);
     _syncImageFilter(obj);
+    _syncFilterQuality(obj);
     return obj;
   }
 }
