@@ -253,7 +253,7 @@ class DeviceManager {
       // If it was not able to prioritize a device. For example, if the user
       // has two active Android devices running, then we request the user to
       // choose one.
-      if (devices.length > 1 && _allEphemeral(devices)){
+      if (devices.length > 1 && _allEphemeral(devices) && globals.stdio.stdinHasTerminal) {
         globals.printStatus(globals.userMessages.flutterMultipleDevicesFound);
         await Device.printDevices(devices);
         final Device chosenDevice = await _chooseOneOfAvailableDevices(devices);
@@ -283,16 +283,12 @@ class DeviceManager {
   }
 
   Future<String> _readUserInput(int deviceCount) async {
-   if (globals.stdio.stdinHasTerminal)  {
-      globals.terminal.usesTerminalUi = true;
-      final String result = await globals.terminal.promptForCharInput(
-       _createPossibleInputsList(deviceCount),
+    globals.terminal.usesTerminalUi = true;
+    final String result = await globals.terminal.promptForCharInput(
+        _createPossibleInputsList(deviceCount),
         logger: globals.logger,
-        prompt: userMessages.flutterChooseOne
-      );
-      return result;
-    }
-    return null;
+        prompt: userMessages.flutterChooseOne);
+    return result;
   }
 
   List<String> _createPossibleInputsList(int length) {
