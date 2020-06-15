@@ -1,4 +1,4 @@
-Signature: 7efcc9af808ccc050dabbc48d23a6908
+Signature: 31c9c98c6818419cf0abe877f0d52cc7
 
 UNUSED LICENSES:
 
@@ -3915,6 +3915,7 @@ FILE: ../../../third_party/skia/src/core/SkIDChangeListener.cpp
 FILE: ../../../third_party/skia/src/core/SkMatrixProvider.h
 FILE: ../../../third_party/skia/src/core/SkVM_fwd.h
 FILE: ../../../third_party/skia/src/gpu/GrBackendSurfaceMutableStateImpl.h
+FILE: ../../../third_party/skia/src/gpu/GrBackendUtils.h
 FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.h
 FILE: ../../../third_party/skia/src/gpu/GrManagedResource.cpp
