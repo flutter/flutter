@@ -270,7 +270,7 @@ class AndroidDevice extends Device {
       workingDirectory: workingDirectory,
       allowReentrantFlutter: allowReentrantFlutter,
       environment: environment,
-      allowFailures: (int value) => allowHeapCorruptionOnWindows(value, _platform),
+      allowedFailures: (int value) => allowHeapCorruptionOnWindows(value, _platform),
     ).stdout.trim();
   }
 
@@ -284,7 +284,7 @@ class AndroidDevice extends Device {
       throwOnError: true,
       workingDirectory: workingDirectory,
       allowReentrantFlutter: allowReentrantFlutter,
-      allowFailures: (int value) => allowHeapCorruptionOnWindows(value, _platform),
+      allowedFailures: (int value) => allowHeapCorruptionOnWindows(value, _platform),
     );
   }
 
