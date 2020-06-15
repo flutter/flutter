@@ -141,13 +141,18 @@ source_set("flutter_framework_source") {
   public_configs = [ "//flutter:config" ]
 
   libs = [
+    "AudioToolbox.framework",
     "CoreMedia.framework",
     "CoreVideo.framework",
-    "UIKit.framework",
     "OpenGLES.framework",
-    "AudioToolbox.framework",
     "QuartzCore.framework",
+    "UIKit.framework",
   ]
+  if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "debug") {
+    # This is required by the profiler_metrics_ios.mm to get GPU statistics.
+    # Usage in release builds will cause rejection from the App Store.
+    libs += [ "IOKit.framework" ]
+  }
 }
 
 ios_test_flutter_path = rebase_path("$root_out_dir/libios_test_flutter.dylib")

@@ -54,6 +54,12 @@ void SamplingProfiler::SampleRepeatedly(fml::TimeDelta task_delay) const {
                                "owned_shared_memory_usage",
                                owned_shared_memory_usage.c_str());
         }
+        if (usage.gpu_usage) {
+          std::string gpu_usage =
+              std::to_string(usage.gpu_usage->percent_usage);
+          TRACE_EVENT_INSTANT1("flutter::profiling", "GpuUsage", "gpu_usage",
+                               gpu_usage.c_str());
+        }
         profiler->SampleRepeatedly(task_delay);
       },
       task_delay);

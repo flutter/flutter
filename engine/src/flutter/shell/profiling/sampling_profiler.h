@@ -43,6 +43,13 @@ struct MemoryUsageInfo {
 };
 
 /**
+ * @brief Polled information related to the usage of the GPU.
+ */
+struct GpuUsageInfo {
+  double percent_usage;
+};
+
+/**
  * @brief Container for the metrics we collect during each run of `Sampler`.
  * This currently holds `CpuUsageInfo` and `MemoryUsageInfo` but the intent
  * is to expand it to other metrics.
@@ -52,6 +59,7 @@ struct MemoryUsageInfo {
 struct ProfileSample {
   std::optional<CpuUsageInfo> cpu_usage;
   std::optional<MemoryUsageInfo> memory_usage;
+  std::optional<GpuUsageInfo> gpu_usage;
 };
 
 /**

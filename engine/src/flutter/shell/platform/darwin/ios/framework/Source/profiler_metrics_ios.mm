@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.h"
+#import <Foundation/Foundation.h>
+#import "IOKit.h"
 
 namespace {
 
@@ -28,9 +30,126 @@ class MachThreads {
 }
 
 namespace flutter {
+namespace {
+
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
+    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
+
+template <typename T>
+T ClearValue() {
+  return nullptr;
+}
+
+template <>
+io_object_t ClearValue<io_object_t>() {
+  return 0;
+}
+
+template <typename T>
+/// Generic RAII wrapper like unique_ptr but gives access to its handle.
+class Scoped {
+ public:
+  typedef void (*Deleter)(T);
+  explicit Scoped(Deleter deleter) : object_(ClearValue<T>()), deleter_(deleter) {}
+  Scoped(T object, Deleter deleter) : object_(object), deleter_(deleter) {}
+  ~Scoped() {
+    if (object_) {
+      deleter_(object_);
+    }
+  }
+  T* handle() {
+    if (object_) {
+      deleter_(object_);
+      object_ = ClearValue<T>();
+    }
+    return &object_;
+  }
+  T get() { return object_; }
+  void reset(T new_value) {
+    if (object_) {
+      deleter_(object_);
+    }
+    object_ = new_value;
+  }
+
+ private:
+  FML_DISALLOW_COPY_ASSIGN_AND_MOVE(Scoped);
+  T object_;
+  Deleter deleter_;
+};
+
+void DeleteCF(CFMutableDictionaryRef value) {
+  CFRelease(value);
+}
+
+void DeleteIO(io_object_t value) {
+  IOObjectRelease(value);
+}
+
+std::optional<GpuUsageInfo> FindGpuUsageInfo(io_iterator_t iterator) {
+  for (Scoped<io_registry_entry_t> regEntry(IOIteratorNext(iterator), DeleteIO); regEntry.get();
+       regEntry.reset(IOIteratorNext(iterator))) {
+    Scoped<CFMutableDictionaryRef> serviceDictionary(DeleteCF);
+    if (IORegistryEntryCreateCFProperties(regEntry.get(), serviceDictionary.handle(),
+                                          kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess) {
+      continue;
+    }
+
+    NSDictionary* dictionary =
+        ((__bridge NSDictionary*)serviceDictionary.get())[@"PerformanceStatistics"];
+    NSNumber* utilization = dictionary[@"Device Utilization %"];
+    if (utilization) {
+      return (GpuUsageInfo){.percent_usage = [utilization doubleValue]};
+    }
+  }
+  return std::nullopt;
+}
+
+[[maybe_unused]] std::optional<GpuUsageInfo> FindSimulatorGpuUsageInfo() {
+  Scoped<io_iterator_t> iterator(DeleteIO);
+  if (IOServiceGetMatchingServices(kIOMasterPortDefault, IOServiceNameMatching("IntelAccelerator"),
+                                   iterator.handle()) == kIOReturnSuccess) {
+    return FindGpuUsageInfo(iterator.get());
+  }
+  return std::nullopt;
+}
+
+[[maybe_unused]] std::optional<GpuUsageInfo> FindDeviceGpuUsageInfo() {
+  Scoped<io_iterator_t> iterator(DeleteIO);
+  if (IOServiceGetMatchingServices(kIOMasterPortDefault, IOServiceNameMatching("sgx"),
+                                   iterator.handle()) == kIOReturnSuccess) {
+    for (Scoped<io_registry_entry_t> regEntry(IOIteratorNext(iterator.get()), DeleteIO);
+         regEntry.get(); regEntry.reset(IOIteratorNext(iterator.get()))) {
+      Scoped<io_iterator_t> innerIterator(DeleteIO);
+      if (IORegistryEntryGetChildIterator(regEntry.get(), kIOServicePlane,
+                                          innerIterator.handle()) == kIOReturnSuccess) {
+        std::optional<GpuUsageInfo> result = FindGpuUsageInfo(innerIterator.get());
+        if (result.has_value()) {
+          return result;
+        }
+      }
+    }
+  }
+  return std::nullopt;
+}
+
+#endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG ||
+        // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
+
+std::optional<GpuUsageInfo> PollGpuUsage() {
+#if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE || \
+     FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_JIT_RELEASE)
+  return std::nullopt;
+#elif TARGET_IPHONE_SIMULATOR
+  return FindSimulatorGpuUsageInfo();
+#elif TARGET_OS_IOS
+  return FindDeviceGpuUsageInfo();
+#endif  // TARGET_IPHONE_SIMULATOR
+}
+}  // namespace
 
 ProfileSample ProfilerMetricsIOS::GenerateSample() {
-  return {.cpu_usage = CpuUsage(), .memory_usage = MemoryUsage()};
+  return {.cpu_usage = CpuUsage(), .memory_usage = MemoryUsage(), .gpu_usage = PollGpuUsage()};
 }
 
 std::optional<CpuUsageInfo> ProfilerMetricsIOS::CpuUsage() {
