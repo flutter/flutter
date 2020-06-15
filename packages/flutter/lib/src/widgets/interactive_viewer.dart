@@ -659,13 +659,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Returns true iff the given _GestureType is enabled.
   bool _gestureIsSupported(_GestureType gestureType) {
-    if (_gestureType == _GestureType.pan && !widget.panEnabled) {
+    if (gestureType == _GestureType.pan && !widget.panEnabled) {
       return false;
     }
-    if (_gestureType == _GestureType.scale && !widget.scaleEnabled) {
+    if (gestureType == _GestureType.scale && !widget.scaleEnabled) {
       return false;
     }
-    if (_gestureType == _GestureType.rotate && !_rotateEnabled) {
+    if (gestureType == _GestureType.rotate && !_rotateEnabled) {
       return false;
     }
     return true;
@@ -841,6 +841,9 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Handle mousewheel scroll events.
   void _receivedPointerSignal(PointerSignalEvent event) {
+    if (!_gestureIsSupported(_GestureType.scale)) {
+      return;
+    }
     if (event is PointerScrollEvent) {
       final RenderBox childRenderBox = _childKey.currentContext.findRenderObject() as RenderBox;
       final Size childSize = childRenderBox.size;
