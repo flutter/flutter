@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
@@ -63,6 +66,7 @@ class OutlineButton extends MaterialButton {
     Key key,
     @required VoidCallback onPressed,
     VoidCallback onLongPress,
+    MouseCursor mouseCursor,
     ButtonTextTheme textTheme,
     Color textColor,
     Color disabledTextColor,
@@ -89,6 +93,7 @@ class OutlineButton extends MaterialButton {
          key: key,
          onPressed: onPressed,
          onLongPress: onLongPress,
+         mouseCursor: mouseCursor,
          textTheme: textTheme,
          textColor: textColor,
          disabledTextColor: disabledTextColor,
@@ -119,6 +124,7 @@ class OutlineButton extends MaterialButton {
     Key key,
     @required VoidCallback onPressed,
     VoidCallback onLongPress,
+    MouseCursor mouseCursor,
     ButtonTextTheme textTheme,
     Color textColor,
     Color disabledTextColor,
@@ -178,6 +184,7 @@ class OutlineButton extends MaterialButton {
       autofocus: autofocus,
       onPressed: onPressed,
       onLongPress: onLongPress,
+      mouseCursor: mouseCursor,
       brightness: buttonTheme.getBrightness(this),
       textTheme: textTheme,
       textColor: buttonTheme.getTextColor(this),
@@ -218,6 +225,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
     Key key,
     @required VoidCallback onPressed,
     VoidCallback onLongPress,
+    MouseCursor mouseCursor,
     ButtonTextTheme textTheme,
     Color textColor,
     Color disabledTextColor,
@@ -247,6 +255,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
          key: key,
          onPressed: onPressed,
          onLongPress: onLongPress,
+         mouseCursor: mouseCursor,
          textTheme: textTheme,
          textColor: textColor,
          disabledTextColor: disabledTextColor,
@@ -281,6 +290,7 @@ class _OutlineButton extends StatefulWidget {
     Key key,
     @required this.onPressed,
     this.onLongPress,
+    this.mouseCursor,
     this.brightness,
     this.textTheme,
     this.textColor,
@@ -309,6 +319,7 @@ class _OutlineButton extends StatefulWidget {
 
   final VoidCallback onPressed;
   final VoidCallback onLongPress;
+  final MouseCursor mouseCursor;
   final Brightness brightness;
   final ButtonTextTheme textTheme;
   final Color textColor;
@@ -462,6 +473,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
           disabledColor: Colors.transparent,
           onPressed: widget.onPressed,
           onLongPress: widget.onLongPress,
+          mouseCursor: widget.mouseCursor,
           elevation: 0.0,
           disabledElevation: 0.0,
           focusElevation: 0.0,

@@ -35,13 +35,14 @@ class MacrobenchmarksApp extends StatelessWidget {
         kCubicBezierRouteName: (BuildContext context) => CubicBezierPage(),
         kBackdropFilterRouteName: (BuildContext context) => BackdropFilterPage(),
         kPostBackdropFilterRouteName: (BuildContext context) => PostBackdropFilterPage(),
-        kSimpleAnimationRouteName: (BuildContext conttext) => SimpleAnimationPage(),
+        kSimpleAnimationRouteName: (BuildContext context) => SimpleAnimationPage(),
         kPictureCacheRouteName: (BuildContext context) => PictureCachePage(),
         kLargeImagesRouteName: (BuildContext context) => LargeImagesPage(),
         kTextRouteName: (BuildContext context) => TextPage(),
         kAnimatedPlaceholderRouteName: (BuildContext context) => AnimatedPlaceholderPage(),
         kColorFilterAndFadeRouteName: (BuildContext context) => ColorFilterAndFadePage(),
         kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
+        kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
       },
     );
   }
@@ -55,6 +56,7 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text(kMacrobenchmarks)),
       body: ListView(
+        key: const Key(kScrollableName),
         children: <Widget>[
           RaisedButton(
             key: const Key(kCullOpacityRouteName),
@@ -131,6 +133,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Fading Child Animation'),
             onPressed: () {
               Navigator.pushNamed(context, kFadingChildAnimationRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kImageFilteredTransformAnimationRouteName),
+            child: const Text('ImageFiltered Transform Animation'),
+            onPressed: () {
+              Navigator.pushNamed(context, kImageFilteredTransformAnimationRouteName);
             },
           ),
         ],

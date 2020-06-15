@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -53,6 +55,7 @@ class MaterialButton extends StatelessWidget {
     @required this.onPressed,
     this.onLongPress,
     this.onHighlightChanged,
+    this.mouseCursor,
     this.textTheme,
     this.textColor,
     this.disabledTextColor,
@@ -114,6 +117,9 @@ class MaterialButton extends StatelessWidget {
   /// this can fire during the build phase (in which case calling
   /// [State.setState] is not allowed).
   final ValueChanged<bool> onHighlightChanged;
+
+  /// {@macro flutter.material.button.mouseCursor}
+  final MouseCursor mouseCursor;
 
   /// Defines the button's base colors, and the defaults for the button's minimum
   /// size, internal padding, and shape.
@@ -387,6 +393,7 @@ class MaterialButton extends StatelessWidget {
       onLongPress: onLongPress,
       enableFeedback: enableFeedback,
       onHighlightChanged: onHighlightChanged,
+      mouseCursor: mouseCursor,
       fillColor: buttonTheme.getFillColor(this),
       textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
       focusColor: focusColor ?? buttonTheme.getFocusColor(this) ?? theme.focusColor,
@@ -410,6 +417,7 @@ class MaterialButton extends StatelessWidget {
       animationDuration: buttonTheme.getAnimationDuration(this),
       child: child,
       materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
+      disabledElevation: disabledElevation ?? 0.0,
     );
   }
 

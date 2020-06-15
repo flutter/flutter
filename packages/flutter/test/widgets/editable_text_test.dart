@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
@@ -48,9 +51,12 @@ void main() {
   final MockClipboard mockClipboard = MockClipboard();
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
-  setUp(() {
+  setUp(() async {
     debugResetSemanticsIdCounter();
     controller = TextEditingController();
+    // Fill the clipboard so that the Paste option is available in the text
+    // selection menu.
+    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
   tearDown(() {
@@ -261,6 +267,134 @@ void main() {
       action: TextInputAction.emergencyCall,
       serializedActionName: 'TextInputAction.emergencyCall',
     );
+  });
+
+  group('Infer keyboardType from autofillHints', () {
+    testWidgets('infer keyboard types from autofillHints: ios',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: FocusScope(
+                node: focusScopeNode,
+                autofocus: true,
+                child: EditableText(
+                  controller: controller,
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                  autofillHints: const <String>[AutofillHints.streetAddressLine1],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.byType(EditableText));
+        await tester.showKeyboard(find.byType(EditableText));
+        controller.text = 'test';
+        await tester.idle();
+        expect(tester.testTextInput.editingState['text'], equals('test'));
+        expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.name'));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+    testWidgets('infer keyboard types from autofillHints: non-ios',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: FocusScope(
+                node: focusScopeNode,
+                autofocus: true,
+                child: EditableText(
+                  controller: controller,
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                  autofillHints: const <String>[AutofillHints.streetAddressLine1],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.byType(EditableText));
+        await tester.showKeyboard(find.byType(EditableText));
+        controller.text = 'test';
+        await tester.idle();
+        expect(tester.testTextInput.editingState['text'], equals('test'));
+        expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.address'));
+      });
+
+    testWidgets('inferred keyboard types can be overridden: ios',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: FocusScope(
+                node: focusScopeNode,
+                autofocus: true,
+                child: EditableText(
+                  controller: controller,
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                  keyboardType: TextInputType.text,
+                  autofillHints: const <String>[AutofillHints.streetAddressLine1],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.byType(EditableText));
+        await tester.showKeyboard(find.byType(EditableText));
+        controller.text = 'test';
+        await tester.idle();
+        expect(tester.testTextInput.editingState['text'], equals('test'));
+        expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.text'));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+    testWidgets('inferred keyboard types can be overridden: non-ios',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: FocusScope(
+                node: focusScopeNode,
+                autofocus: true,
+                child: EditableText(
+                  controller: controller,
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                  keyboardType: TextInputType.text,
+                  autofillHints: const <String>[AutofillHints.streetAddressLine1],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.byType(EditableText));
+        await tester.showKeyboard(find.byType(EditableText));
+        controller.text = 'test';
+        await tester.idle();
+        expect(tester.testTextInput.editingState['text'], equals('test'));
+        expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.text'));
+    });
   });
 
   testWidgets('multiline keyboard is requested when set explicitly', (WidgetTester tester) async {
@@ -961,8 +1095,8 @@ void main() {
 
     // Can't show the toolbar when there's no focus.
     expect(state.showToolbar(), false);
-    await tester.pump();
-    expect(find.text('PASTE'), findsNothing);
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsNothing);
 
     // Can show the toolbar when focused even though there's no text.
     state.renderEditable.selectWordsInRange(
@@ -971,20 +1105,20 @@ void main() {
     );
     await tester.pump();
     expect(state.showToolbar(), true);
-    await tester.pump();
-    expect(find.text('PASTE'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsOneWidget);
 
     // Hide the menu again.
     state.hideToolbar();
     await tester.pump();
-    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
 
     // Can show the menu with text and a selection.
     controller.text = 'blah';
     await tester.pump();
     expect(state.showToolbar(), true);
-    await tester.pump();
-    expect(find.text('PASTE'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsOneWidget);
   }, skip: isBrowser);
 
   testWidgets('can show the toolbar after clearing all text', (WidgetTester tester) async {
@@ -1015,7 +1149,7 @@ void main() {
     await tester.pump();
 
     // Clear the text and selection.
-    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
     state.updateEditingValue(const TextEditingValue(
       text: '',
     ));
@@ -1023,8 +1157,8 @@ void main() {
 
     // Should be able to show the toolbar.
     expect(state.showToolbar(), true);
-    await tester.pump();
-    expect(find.text('PASTE'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.text('Paste'), findsOneWidget);
   });
 
   testWidgets('can dynamically disable options in toolbar', (WidgetTester tester) async {
@@ -1056,10 +1190,10 @@ void main() {
     await tester.pump();
     expect(state.showToolbar(), true);
     await tester.pump();
-    expect(find.text('SELECT ALL'), findsOneWidget);
-    expect(find.text('COPY'), findsOneWidget);
-    expect(find.text('PASTE'), findsNothing);
-    expect(find.text('CUT'), findsNothing);
+    expect(find.text('Select all'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
   });
 
   testWidgets('can dynamically disable select all option in toolbar - cupertino', (WidgetTester tester) async {
@@ -1122,10 +1256,10 @@ void main() {
     await tester.pump();
     expect(state.showToolbar(), true);
     await tester.pump();
-    expect(find.text('SELECT ALL'), findsNothing);
-    expect(find.text('COPY'), findsOneWidget);
-    expect(find.text('PASTE'), findsNothing);
-    expect(find.text('CUT'), findsNothing);
+    expect(find.text('Select all'), findsNothing);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
   });
 
   testWidgets('cut and paste are disabled in read only mode even if explicit set', (WidgetTester tester) async {
@@ -1160,10 +1294,10 @@ void main() {
     await tester.pump();
     expect(state.showToolbar(), true);
     await tester.pump();
-    expect(find.text('SELECT ALL'), findsOneWidget);
-    expect(find.text('COPY'), findsOneWidget);
-    expect(find.text('PASTE'), findsNothing);
-    expect(find.text('CUT'), findsNothing);
+    expect(find.text('Select all'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
   });
 
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
@@ -1192,9 +1326,9 @@ void main() {
     final Finder textFinder = find.byType(EditableText);
     await tester.longPress(textFinder);
     tester.state<EditableTextState>(textFinder).showToolbar();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    await tester.tap(find.text('PASTE'));
+    await tester.tap(find.text('Paste'));
     await tester.pump();
 
     expect(changedValue, clipboardContent);
@@ -2412,12 +2546,13 @@ void main() {
 
       controls = MockTextSelectionControls();
       when(controls.buildHandle(any, any, any)).thenReturn(Container());
-      when(controls.buildToolbar(any, any, any, any, any, any))
+      when(controls.buildToolbar(any, any, any, any, any, any, any))
           .thenReturn(Container());
     });
 
     testWidgets('are exposed', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
+      addTearDown(semantics.dispose);
 
       when(controls.canCopy(any)).thenReturn(false);
       when(controls.canCut(any)).thenReturn(false);
@@ -2457,6 +2592,7 @@ void main() {
       when(controls.canCopy(any)).thenReturn(false);
       when(controls.canPaste(any)).thenReturn(true);
       await _buildApp(controls, tester);
+      await tester.pumpAndSettle();
       expect(
         semantics,
         includesNodeWith(
@@ -2504,8 +2640,6 @@ void main() {
           ],
         ),
       );
-
-      semantics.dispose();
     });
 
     testWidgets('can copy/cut/paste with a11y', (WidgetTester tester) async {
@@ -2564,7 +2698,7 @@ void main() {
       );
 
       owner.performAction(expectedNodeId, SemanticsAction.copy);
-      verify(controls.handleCopy(any)).called(1);
+      verify(controls.handleCopy(any, any)).called(1);
 
       owner.performAction(expectedNodeId, SemanticsAction.cut);
       verify(controls.handleCut(any)).called(1);
@@ -4079,6 +4213,95 @@ void main() {
     expect(scrollable.controller.position.pixels, equals(renderEditable.maxScrollExtent));
   }, skip: isBrowser);
 
+  testWidgets('bringIntoView brings the caret into view when in a viewport', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/55547.
+    final TextEditingController controller = TextEditingController(text: testText * 20);
+    final ScrollController editableScrollController = ScrollController();
+    final ScrollController outerController = ScrollController();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 200,
+          height: 200,
+          child: SingleChildScrollView(
+            controller: outerController,
+            child: EditableText(
+              maxLines: null,
+              controller: controller,
+              scrollController: editableScrollController,
+              focusNode: FocusNode(),
+              style: textStyle,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+
+    expect(outerController.offset, 0);
+    expect(editableScrollController.offset, 0);
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.bringIntoView(TextPosition(offset: controller.text.length));
+
+    await tester.pumpAndSettle();
+    // The SingleChildScrollView is scrolled instead of the EditableText to
+    // reveal the caret.
+    expect(outerController.offset, outerController.position.maxScrollExtent);
+    expect(editableScrollController.offset, 0);
+  });
+
+  testWidgets('bringIntoView does nothing if the physics prohibits implicit scrolling', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: testText * 20);
+    final ScrollController scrollController = ScrollController();
+
+    Future<void> buildWithPhysics({ ScrollPhysics physics }) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200,
+            height: 200,
+            child: EditableText(
+              maxLines: null,
+              controller: controller,
+              scrollController: scrollController,
+              focusNode: FocusNode(),
+              style: textStyle,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              scrollPhysics: physics,
+            ),
+          ),
+        ),
+      ));
+    }
+
+
+    await buildWithPhysics();
+    expect(scrollController.offset, 0);
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.bringIntoView(TextPosition(offset: controller.text.length));
+
+    await tester.pumpAndSettle();
+    // Scrolled to the maxScrollExtent to reveal to caret.
+    expect(scrollController.offset, scrollController.position.maxScrollExtent);
+
+    scrollController.jumpTo(0);
+    await buildWithPhysics(physics: const NoImplicitScrollPhysics());
+    expect(scrollController.offset, 0);
+
+    state.bringIntoView(TextPosition(offset: controller.text.length));
+
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0);
+  });
+
   testWidgets('obscured multiline fields throw an exception', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
     expect(
@@ -4699,6 +4922,64 @@ void main() {
     state.updateEditingValue(const TextEditingValue(text: '\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ 🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
     expect(state.currentTextEditingValue.text, equals('\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ \u{200F}🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
   });
+
+  testWidgets('EditableText changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+                mouseCursor: SystemMouseCursors.click,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(EditableText)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            child: MouseRegion(
+              cursor: SystemMouseCursors.forbidden,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+  });
 }
 
 class MockTextFormatter extends TextInputFormatter {
@@ -4836,5 +5117,17 @@ class _TransformedEditableTextState extends State<TransformedEditableText> {
         ),
       ),
     );
+  }
+}
+
+class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
+  const NoImplicitScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
+
+  @override
+  bool get allowImplicitScrolling => false;
+
+  @override
+  NoImplicitScrollPhysics applyTo(ScrollPhysics ancestor) {
+    return NoImplicitScrollPhysics(parent: buildParent(ancestor));
   }
 }

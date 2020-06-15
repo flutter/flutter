@@ -76,27 +76,6 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  codegen_integration_win:
-    description: >
-      Runs codegeneration and verifies that it can execute
-      correctly.
-    stage: devicelab_win
-    required_agent_capabilities: ["windows/android"]
-
-  codegen_integration_mac:
-    description: >
-      Runs codegeneration and verifies that it can execute
-      correctly.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  codegen_integration_linux:
-    description: >
-      Runs codegeneration and verifies that it can execute
-      correctly.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-
   uncaught_image_error_linux:
     description: >
       Ensures that an error thrown into the zone can be caught by the ImageStream
@@ -189,6 +168,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  cubic_bezier_perf_sksl_warmup__timeline_summary:
+    description: >
+      Measures the runtime performance of cubic bezier animations on Android
+      with SkSL shader warm-up.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   backdrop_filter_perf__timeline_summary:
     description: >
       Measures the runtime performance of backdrop filter blurs on Android.
@@ -210,6 +196,12 @@ tasks:
   fading_child_animation_perf__timeline_summary:
     description: >
       Measures the runtime performance of opacity filter with fade on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  imagefiltered_transform_animation_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of imagefiltered widget with transform on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
@@ -284,6 +276,12 @@ tasks:
       Measures memory usage of the scroll performance test.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+
+  complex_layout_scroll_perf__devtools_memory:
+    description: >
+      Measures memory usage of the scroll performance test using DevTools.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
 
   hello_world_android__compile:
     description: >
@@ -454,13 +452,6 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  tiles_scroll_perf_iphonexs__timeline_summary:
-    description: >
-      Measures the runtime performance of the tiles tab in the Complex Layout sample app on iPhone XS.
-    stage: devicelab_ios
-    # TODO(keyonghan): change with https://github.com/flutter/flutter/issues/50383
-    required_agent_capabilities: ["mac/ios"]
-
   platform_views_scroll_perf_ios__timeline_summary:
     description: >
       Measures the runtime performance of platform views in the Complex Layout sample app on iPhone 6.
@@ -479,7 +470,6 @@ tasks:
       32-bit iOS (iPhone 4S).
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
-    flaky: true # TODO(jmagman): https://github.com/flutter/flutter/issues/57225
 
   flavors_test_ios:
     description: >
@@ -560,7 +550,6 @@ tasks:
       iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true # TODO(jmagman): https://github.com/flutter/flutter/issues/57225
 
   hello_world_ios__compile:
     description: >
@@ -673,9 +662,9 @@ tasks:
 #    required_agent_capabilities: ["mac/ios"]
 #    flaky: true
 
-  ios_app_with_watch_companion:
+  ios_app_with_extensions_test:
     description: >
-      Checks that an iOS app with a watchOS companion can be build for physical and simulated devices.
+      Checks that an iOS app with extensions can be built for physical and simulated devices.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
@@ -762,14 +751,12 @@ tasks:
       Measures memory usage after repeated navigation in Gallery.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__back_button_memory:
     description: >
       Measures memory usage after Android app suspend and resume.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__image_cache_memory:
     description: >
@@ -782,6 +769,12 @@ tasks:
       Measures the performance of screen transitions in the new Flutter Gallery on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+
+  new_gallery_ios__transition_perf:
+    description: >
+      Measures the performance of screen transitions in the new Flutter Gallery on iOS.
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios"]
 
   fast_scroll_large_images__memory:
     description: >

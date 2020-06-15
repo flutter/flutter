@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -227,9 +229,9 @@ class Material extends StatefulWidget {
   /// [MaterialType.transparency].
   ///
   /// To support dark themes, if the surrounding
-  /// [ThemeData.applyElevationOverlayColor] is true then a semi-transparent
-  /// overlay color will be composited on top this color to indicate
-  /// the elevation.
+  /// [ThemeData.applyElevationOverlayColor] is true and [ThemeData.brightness]
+  /// is [Brightness.dark] then a semi-transparent overlay color will be
+  /// composited on top of this color to indicate the elevation.
   ///
   /// By default, the color is derived from the [type] of material.
   final Color color;

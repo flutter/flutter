@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart' show TestWidgetsFlutterBinding;
@@ -83,6 +85,23 @@ void main() {
       await viewController.setSize(const Size(200.0, 300.0));
       await viewController.dispose();
       await viewController.dispose();
+    });
+
+    test('dispose clears focusCallbacks', () async {
+      bool didFocus = false;
+      viewsController.registerViewType('webview');
+      final AndroidViewController viewController = PlatformViewsService.initAndroidView(
+          id: 0,
+          viewType: 'webview',
+          layoutDirection: TextDirection.ltr,
+          onFocus: () { didFocus = true; }
+      );
+      await viewController.setSize(const Size(100.0, 100.0));
+      await viewController.dispose();
+      final ByteData message =
+          SystemChannels.platform_views.codec.encodeMethodCall(const MethodCall('viewFocused', 0));
+      await SystemChannels.platform_views.binaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, message, (_) { });
+      expect(didFocus, isFalse);
     });
 
     test('resize Android view', () async {

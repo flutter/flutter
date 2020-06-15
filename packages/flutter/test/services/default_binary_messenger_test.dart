@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -33,5 +35,27 @@ void main() {
       return null;
     });
     expect(count, equals(1));
+  });
+
+  test('can check the handler', () {
+    Future<ByteData> handler(ByteData call) => Future<ByteData>.value(null);
+    final BinaryMessenger messenger = ServicesBinding.instance.defaultBinaryMessenger;
+
+    expect(messenger.checkMessageHandler('test_channel', null), true);
+    expect(messenger.checkMessageHandler('test_channel', handler), false);
+    messenger.setMessageHandler('test_channel', handler);
+    expect(messenger.checkMessageHandler('test_channel', handler), true);
+    messenger.setMessageHandler('test_channel', null);
+  });
+
+  test('can check the mock handler', () {
+    Future<ByteData> handler(ByteData call) => Future<ByteData>.value(null);
+    final BinaryMessenger messenger = ServicesBinding.instance.defaultBinaryMessenger;
+
+    expect(messenger.checkMockMessageHandler('test_channel', null), true);
+    expect(messenger.checkMockMessageHandler('test_channel', handler), false);
+    messenger.setMockMessageHandler('test_channel', handler);
+    expect(messenger.checkMockMessageHandler('test_channel', handler), true);
+    messenger.setMockMessageHandler('test_channel', null);
   });
 }

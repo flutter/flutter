@@ -98,7 +98,7 @@ Future<void> main(List<String> args) async {
   Cache.disableLocking(); // ignore: invalid_use_of_visible_for_testing_member
   await runner.run(
     command,
-    <FlutterCommand>[
+    () => <FlutterCommand>[
       _FuchsiaAttachCommand(),
       _FuchsiaDoctorCommand(), // If attach fails the tool will attempt to run doctor.
     ],

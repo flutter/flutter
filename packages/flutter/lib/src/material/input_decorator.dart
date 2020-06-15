@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
@@ -17,6 +19,7 @@ import 'theme_data.dart';
 
 const Duration _kTransitionDuration = Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
+const double _kFinalLabelScale = 0.75;
 
 // Defines the gap in the InputDecorator's outline border where the
 // floating label will appear.
@@ -465,7 +468,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   }
 }
 
-/// Defines the behaviour of the floating label
+/// Defines the behavior of the floating label
 enum FloatingLabelBehavior {
   /// The label will always be positioned within the content, or hidden.
   never,
@@ -781,20 +784,22 @@ class _RenderDecoration extends RenderBox {
     markNeedsLayout();
   }
 
+  TextAlignVertical get _defaultTextAlignVertical => _isOutlineAligned
+      ? TextAlignVertical.center
+      : TextAlignVertical.top;
   TextAlignVertical get textAlignVertical {
     if (_textAlignVertical == null) {
-      return _isOutlineAligned ? TextAlignVertical.center : TextAlignVertical.top;
+      return _defaultTextAlignVertical;
     }
     return _textAlignVertical;
   }
   TextAlignVertical _textAlignVertical;
   set textAlignVertical(TextAlignVertical value) {
-    assert(value != null);
     if (_textAlignVertical == value) {
       return;
     }
     // No need to relayout if the effective value is still the same.
-    if (textAlignVertical.y == value.y) {
+    if (textAlignVertical.y == (value?.y ?? _defaultTextAlignVertical.y)) {
       _textAlignVertical = value;
       return;
     }
@@ -979,9 +984,11 @@ class _RenderDecoration extends RenderBox {
       + _boxSize(suffix).width
       + _boxSize(suffixIcon).width
       + contentPadding.right));
+    // Increase the available width for the label when it is scaled down.
+    final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress);
     boxToBaseline[label] = _layoutLineBox(
       label,
-      boxConstraints.copyWith(maxWidth: inputWidth),
+      boxConstraints.copyWith(maxWidth: inputWidth * invertedLabelScale),
     );
     boxToBaseline[hint] = _layoutLineBox(
       hint,
@@ -1450,11 +1457,10 @@ class _RenderDecoration extends RenderBox {
       final bool isOutlineBorder = decoration.border != null && decoration.border.isOutline;
       // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
       // Center the scaled label relative to the border.
-      const double finalLabelScale = 0.75;
       final double floatingY = decoration.fixTextFieldOutlineLabel
-        ? isOutlineBorder ? (-labelHeight * finalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top
+        ? isOutlineBorder ? (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top
         : isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
-      final double scale = lerpDouble(1.0, finalLabelScale, t);
+      final double scale = lerpDouble(1.0, _kFinalLabelScale, t);
       double dx;
       switch (textDirection) {
         case TextDirection.rtl:
@@ -1707,10 +1713,11 @@ class _Decorator extends RenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderDecoration renderObject) {
     renderObject
      ..decoration = decoration
-     ..textDirection = textDirection
-     ..textBaseline = textBaseline
      ..expands = expands
-     ..isFocused = isFocused;
+     ..isFocused = isFocused
+     ..textAlignVertical = textAlignVertical
+     ..textBaseline = textBaseline
+     ..textDirection = textDirection;
   }
 }
 
@@ -1769,7 +1776,7 @@ class InputDecorator extends StatefulWidget {
   /// be null.
   const InputDecorator({
     Key key,
-    this.decoration,
+    @required this.decoration,
     this.baseStyle,
     this.textAlign,
     this.textAlignVertical,
@@ -1778,7 +1785,8 @@ class InputDecorator extends StatefulWidget {
     this.expands = false,
     this.isEmpty = false,
     this.child,
-  }) : assert(isFocused != null),
+  }) : assert(decoration != null),
+       assert(isFocused != null),
        assert(isHovering != null),
        assert(expands != null),
        assert(isEmpty != null),
@@ -1786,9 +1794,10 @@ class InputDecorator extends StatefulWidget {
 
   /// The text and styles to use when decorating the child.
   ///
-  /// If null, `const InputDecoration()` is used. Null [InputDecoration]
-  /// properties are initialized with the corresponding values from
-  /// [ThemeData.inputDecorationTheme].
+  /// Null [InputDecoration] properties are initialized with the corresponding
+  /// values from [ThemeData.inputDecorationTheme].
+  ///
+  /// Must not be null.
   final InputDecoration decoration;
 
   /// The style on which to base the label, hint, counter, and error styles
@@ -1877,7 +1886,9 @@ class InputDecorator extends StatefulWidget {
 
   /// Whether the label needs to get out of the way of the input, either by
   /// floating or disappearing.
-  bool get _labelShouldWithdraw => !isEmpty || isFocused;
+  ///
+  /// Will withdraw when not empty, or when focused while enabled.
+  bool get _labelShouldWithdraw => !isEmpty || (isFocused && decoration.enabled);
 
   @override
   _InputDecoratorState createState() => _InputDecoratorState();
@@ -1961,7 +1972,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextAlign get textAlign => widget.textAlign;
-  bool get isFocused => widget.isFocused && decoration.enabled;
+  bool get isFocused => widget.isFocused;
   bool get isHovering => widget.isHovering && decoration.enabled;
   bool get isEmpty => widget.isEmpty;
   bool get _floatingLabelEnabled {
@@ -1975,11 +1986,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (widget.decoration != old.decoration)
       _effectiveDecoration = null;
 
-    final bool floatBehaviourChanged = widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior
+    final bool floatBehaviorChanged = widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior
         // ignore: deprecated_member_use_from_same_package
         || widget.decoration.hasFloatingPlaceholder != old.decoration.hasFloatingPlaceholder;
 
-    if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviourChanged) {
+    if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviorChanged) {
       if (_floatingLabelEnabled
           && (widget._labelShouldWithdraw || widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always))
         _floatingLabelController.forward();
@@ -2058,7 +2069,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getDefaultIconColor(ThemeData themeData) {
-    if (!decoration.enabled)
+    if (!decoration.enabled && !isFocused)
       return themeData.disabledColor;
 
     switch (themeData.brightness) {
@@ -2120,7 +2131,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     }
 
     Color borderColor;
-    if (decoration.enabled) {
+    if (decoration.enabled || isFocused) {
       borderColor = decoration.errorText == null
         ? _getDefaultBorderColor(themeData)
         : themeData.errorColor;
@@ -2506,7 +2517,7 @@ class InputDecoration {
     this.errorStyle,
     this.errorMaxLines,
     @Deprecated(
-      'Use floatingLabelBehaviour instead. '
+      'Use floatingLabelBehavior instead. '
       'This feature was deprecated after v1.13.2.'
     )
     this.hasFloatingPlaceholder = true, // ignore: deprecated_member_use_from_same_package
@@ -2552,7 +2563,7 @@ class InputDecoration {
   const InputDecoration.collapsed({
     @required this.hintText,
     @Deprecated(
-      'Use floatingLabelBehaviour instead. '
+      'Use floatingLabelBehavior instead. '
       'This feature was deprecated after v1.13.2.'
     )
     // ignore: deprecated_member_use_from_same_package
@@ -2728,7 +2739,7 @@ class InputDecoration {
   /// Defaults to true.
   ///
   @Deprecated(
-    'Use floatingLabelBehaviour instead. '
+    'Use floatingLabelBehavior instead. '
     'This feature was deprecated after v1.13.2.'
   )
   final bool hasFloatingPlaceholder;
@@ -2775,7 +2786,7 @@ class InputDecoration {
   /// `contentPadding` is `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is
   /// true and `EdgeInsets.fromLTRB(0, 12, 0, 12)` when [isDense] is false`.
   ///
-  /// If `isOutline` property of [border] is true then `contentPaddding` is
+  /// If `isOutline` property of [border] is true then `contentPadding` is
   /// `EdgeInsets.fromLTRB(12, 20, 12, 12)` when [isDense] is true
   /// and `EdgeInsets.fromLTRB(12, 24, 12, 16)` when [isDense] is false.
   final EdgeInsetsGeometry contentPadding;
@@ -3610,7 +3621,7 @@ class InputDecorationTheme with Diagnosticable {
     this.errorStyle,
     this.errorMaxLines,
     @Deprecated(
-      'Use floatingLabelBehaviour instead. '
+      'Use floatingLabelBehavior instead. '
       'This feature was deprecated after v1.13.2.'
     )
     // ignore: deprecated_member_use_from_same_package
@@ -3705,7 +3716,7 @@ class InputDecorationTheme with Diagnosticable {
   ///
   /// Defaults to true.
   @Deprecated(
-    'Use floatingLabelBehaviour instead. '
+    'Use floatingLabelBehavior instead. '
     'This feature was deprecated after v1.13.2.'
   )
   final bool hasFloatingPlaceholder;
@@ -3960,7 +3971,7 @@ class InputDecorationTheme with Diagnosticable {
     TextStyle errorStyle,
     int errorMaxLines,
     @Deprecated(
-      'Use floatingLabelBehaviour instead. '
+      'Use floatingLabelBehavior instead. '
       'This feature was deprecated after v1.13.2.'
     )
     bool hasFloatingPlaceholder,

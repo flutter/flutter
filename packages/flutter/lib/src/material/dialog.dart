@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // TODO(shihaohong): remove ignoring deprecated member use analysis
 // when AlertDialog.scrollable parameter is removed. See
 // https://flutter.dev/go/scrollable-alert-dialog for more details.
@@ -117,7 +119,7 @@ class Dialog extends StatelessWidget {
   ///
   /// Defines the dialog's [Material.shape].
   ///
-  /// The default shape is a [RoundedRectangleBorder] with a radius of 2.0.
+  /// The default shape is a [RoundedRectangleBorder] with a radius of 4.0
   /// {@endtemplate}
   final ShapeBorder shape;
 
@@ -126,9 +128,8 @@ class Dialog extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  // TODO(johnsonmh): Update default dialog border radius to 4.0 to match material spec.
   static const RoundedRectangleBorder _defaultDialogShape =
-    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
   static const double _defaultElevation = 24.0;
 
   @override

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
@@ -374,6 +376,30 @@ void main() {
     expect(textBox.size, const Size(633.0, 28.0));
   });
 
+  testWidgets('can switch between textHeightBehavior', (WidgetTester tester) async {
+    const String text = 'selectable text';
+    const TextHeightBehavior textHeightBehavior = TextHeightBehavior(
+      applyHeightToFirstAscent: false,
+      applyHeightToLastDescent: false,
+    );
+    await tester.pumpWidget(
+      boilerplate(
+        child: const SelectableText(text),
+      ),
+    );
+    expect(findRenderEditable(tester).textHeightBehavior, isNull);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: const SelectableText(
+          text,
+          textHeightBehavior: textHeightBehavior,
+        ),
+      ),
+    );
+    expect(findRenderEditable(tester).textHeightBehavior, textHeightBehavior);
+  });
+
   testWidgets('Cursor blinks when showCursor is true', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
@@ -430,7 +456,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(find.text('SELECT ALL'), findsOneWidget);
+    expect(find.text('Select all'), findsOneWidget);
   });
 
   testWidgets('Caret position is updated on tap', (WidgetTester tester) async {
@@ -607,9 +633,9 @@ void main() {
     await tester.pump();
 
     // Context menu should not have paste and cut.
-    expect(find.text('COPY'), findsOneWidget);
-    expect(find.text('PASTE'), findsNothing);
-    expect(find.text('CUT'), findsNothing);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
   });
 
   testWidgets('selectable text can disable toolbar options', (WidgetTester tester) async {
@@ -629,8 +655,8 @@ void main() {
     await tester.longPressAt(dPos);
     await tester.pump();
     // Context menu should not have copy.
-    expect(find.text('COPY'), findsNothing);
-    expect(find.text('SELECT ALL'), findsOneWidget);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Select all'), findsOneWidget);
   });
 
   testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
@@ -922,14 +948,14 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
-    // SELECT ALL should select all the text.
-    await tester.tap(find.text('SELECT ALL'));
+    // Select all should select all the text.
+    await tester.tap(find.text('Select all'));
     await tester.pump();
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, testValue.length);
 
-    // COPY should reset the selection.
-    await tester.tap(find.text('COPY'));
+    // Copy should reset the selection.
+    await tester.tap(find.text('Copy'));
     await skipPastScrollingAnimation(tester);
     expect(controller.selection.isCollapsed, true);
   });
@@ -1060,7 +1086,7 @@ void main() {
 
     expect(controller.selection.baseOffset, 5);
     expect(controller.selection.extentOffset, 50);
-    await tester.tap(find.text('COPY'));
+    await tester.tap(find.text('Copy'));
     await tester.pump();
     expect(controller.selection.isCollapsed, true);
   });
@@ -3843,5 +3869,25 @@ void main() {
     );
     // Long press triggers gesture recognizer.
     expect(spyLongPress, 1);
+  });
+
+  testWidgets('SelectableText changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: SelectableText('test'),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.text('test')));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 }

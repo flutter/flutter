@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -16,7 +18,7 @@ void main() {
     expect(json['stateful'], isFalse);
   });
 
-  test('StatefulElement diganostics are stateful', () {
+  test('StatefulElement diagnostics are stateful', () {
     final Element element = StatefulElement(const Tooltip(message: 'foo'));
 
     final Map<String, Object> json = element.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate());

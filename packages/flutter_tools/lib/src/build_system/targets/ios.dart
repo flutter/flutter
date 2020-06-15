@@ -16,7 +16,7 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
-import 'dart.dart';
+import 'common.dart';
 import 'icon_tree_shaker.dart';
 
 /// Supports compiling a dart kernel file to an assembly file.
@@ -46,7 +46,7 @@ abstract class AotAssemblyBase extends Target {
     if (environment.defines[kTargetPlatform] == null) {
       throw MissingDefineException(kTargetPlatform, 'aot_assembly');
     }
-    final List<String> extraGenSnapshotOptions = parseExtraGenSnapshotOptions(environment);
+    final List<String> extraGenSnapshotOptions = decodeDartDefines(environment.defines, kExtraGenSnapshotOptions);
     final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
@@ -58,7 +58,13 @@ abstract class AotAssemblyBase extends Target {
       ?.toList()
       ?? <DarwinArch>[DarwinArch.arm64];
     if (targetPlatform != TargetPlatform.ios) {
-      throw Exception('aot_assembly is only supported for iOS applications');
+      throw Exception('aot_assembly is only supported for iOS applications.');
+    }
+    if (iosArchs.contains(DarwinArch.x86_64)) {
+      throw Exception(
+        'release/profile builds are only supported for physical devices. '
+        'attempted to build for $iosArchs.'
+      );
     }
 
     // If we're building multiple iOS archs the binaries need to be lipo'd
@@ -302,7 +308,11 @@ abstract class IosAssetBundle extends Target {
     }
 
     // Copy the assets.
-    final Depfile assetDepfile = await copyAssets(environment, assetDirectory);
+    final Depfile assetDepfile = await copyAssets(
+      environment,
+      assetDirectory,
+      targetPlatform: TargetPlatform.ios,
+    );
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
@@ -440,14 +450,4 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool in
       throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
     }
   }
-}
-
-/// iOS and macOS build scripts may pass extraGenSnapshotOptions as an empty
-/// string.
-List<String> parseExtraGenSnapshotOptions(Environment environment) {
-  final String value = environment.defines[kExtraGenSnapshotOptions];
-  if (value == null || value.trim().isEmpty) {
-    return <String>[];
-  }
-  return value.split(',');
 }

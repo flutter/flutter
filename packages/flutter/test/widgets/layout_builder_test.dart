@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -618,7 +620,7 @@ void main() {
     // builder invocation.
     expect(builderInvocationCount, 1);
 
-    // Invalidate the layout without chaning the constraints.
+    // Invalidate the layout without changing the constraints.
     tester.renderObject(find.byType(LayoutBuilder)).markNeedsLayout();
 
     // The second pump will not go through the `performRebuild` or `update`, and

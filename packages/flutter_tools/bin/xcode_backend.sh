@@ -54,6 +54,11 @@ BuildApp() {
     derived_dir="${project_path}/.ios/Flutter"
   fi
 
+  local bundle_sksl_path=""
+  if [[ -n "$BUNDLE_SKSL_PATH" ]]; then
+    bundle_sksl_path="-iBundleSkSLPath=${BUNDLE_SKSL_PATH}"
+  fi
+
   # Default value of assets_path is flutter_assets
   local assets_path="flutter_assets"
   # The value of assets_path can set by add FLTAssetsPath to
@@ -87,17 +92,10 @@ BuildApp() {
       exit -1;;
   esac
 
-  # Archive builds (ACTION=install) should always run in release mode.
+  # Warn the user if not archiving (ACTION=install) in release mode.
   if [[ "$ACTION" == "install" && "$build_mode" != "release" ]]; then
-    EchoError "========================================================================"
-    EchoError "ERROR: Flutter archive builds must be run in Release mode."
-    EchoError ""
-    EchoError "To correct, ensure FLUTTER_BUILD_MODE is set to release or run:"
-    EchoError "flutter build ios --release"
-    EchoError ""
-    EchoError "then re-run Archive from Xcode."
-    EchoError "========================================================================"
-    exit -1
+    echo "warning: Flutter archive not built in Release mode. Ensure FLUTTER_BUILD_MODE \
+is set to release or run \"flutter build ios --release\", then re-run Archive from Xcode."
   fi
 
   local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
@@ -173,9 +171,10 @@ BuildApp() {
     -dTrackWidgetCreation="${TRACK_WIDGET_CREATION}"                      \
     -dDartObfuscation="${DART_OBFUSCATION}"                               \
     -dEnableBitcode="${bitcode_flag}"                                     \
+    ${bundle_sksl_path}                                                   \
     --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"             \
     --DartDefines="${DART_DEFINES}"                                       \
-    -dExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                   \
+    --ExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                   \
     "${build_mode}_ios_bundle_flutter_assets"
 
   if [[ $? -ne 0 ]]; then
@@ -264,15 +263,18 @@ ThinAppFrameworks() {
 # Adds the App.framework as an embedded binary and the flutter_assets as
 # resources.
 EmbedFlutterFrameworks() {
-  AssertExists "${FLUTTER_APPLICATION_PATH}"
+  local project_path="${SOURCE_ROOT}/.."
+  if [[ -n "$FLUTTER_APPLICATION_PATH" ]]; then
+    project_path="${FLUTTER_APPLICATION_PATH}"
+  fi
 
   # Prefer the hidden .ios folder, but fallback to a visible ios folder if .ios
   # doesn't exist.
-  local flutter_ios_out_folder="${FLUTTER_APPLICATION_PATH}/.ios/Flutter"
-  local flutter_ios_engine_folder="${FLUTTER_APPLICATION_PATH}/.ios/Flutter/engine"
+  local flutter_ios_out_folder="${project_path}/.ios/Flutter"
+  local flutter_ios_engine_folder="${project_path}/.ios/Flutter/engine"
   if [[ ! -d ${flutter_ios_out_folder} ]]; then
-    flutter_ios_out_folder="${FLUTTER_APPLICATION_PATH}/ios/Flutter"
-    flutter_ios_engine_folder="${FLUTTER_APPLICATION_PATH}/ios/Flutter"
+    flutter_ios_out_folder="${project_path}/ios/Flutter"
+    flutter_ios_engine_folder="${project_path}/ios/Flutter"
   fi
 
   AssertExists "${flutter_ios_out_folder}"

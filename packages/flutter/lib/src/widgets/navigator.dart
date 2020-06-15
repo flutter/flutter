@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer' as developer;
 
@@ -16,6 +19,7 @@ import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'heroes.dart';
 import 'overlay.dart';
 import 'route_notification_messages.dart';
 import 'routes.dart';
@@ -524,6 +528,7 @@ abstract class Page<T> extends RouteSettings {
   /// Creates the [Route] that corresponds to this page.
   ///
   /// The created [Route] must have its [Route.settings] property set to this [Page].
+  @factory
   Route<T> createRoute(BuildContext context);
 
   @override
@@ -604,6 +609,45 @@ class NavigatorObserver {
   ///
   /// Paired with an earlier call to [didStartUserGesture].
   void didStopUserGesture() { }
+}
+
+/// An inherited widget to host a hero controller.
+///
+/// This class should not be used directly. The [MaterialApp] and [CupertinoApp]
+/// use this class to host the [HeroController], and they should be the only
+/// exception to use this class. If you want to subscribe your own
+/// [HeroController], use the [Navigator.observers] instead.
+///
+/// The hosted hero controller will be picked up by the navigator in the
+/// [child] subtree. Once a navigator picks up this controller, the navigator
+/// will bar any navigator below its subtree from receiving this controller.
+///
+/// See also:
+///
+///  * [Navigator.observers], which is the standard way of providing a
+///    [HeroController].
+class HeroControllerScope extends InheritedWidget {
+  /// Creates a widget to host the input [controller].
+  const HeroControllerScope({
+    Key key,
+    this.controller,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  /// The hero controller that is hosted inside this widget.
+  final HeroController controller;
+
+  /// Retrieves the [HeroController] from the closest [HeroControllerScope]
+  /// ancestor.
+  static HeroController of(BuildContext context) {
+    final HeroControllerScope host = context.dependOnInheritedWidgetOfExactType<HeroControllerScope>();
+    return host?.controller;
+  }
+
+  @override
+  bool updateShouldNotify(HeroControllerScope oldWidget) {
+    return oldWidget.controller != controller;
+  }
 }
 
 /// A [Route] wrapper interface that can be staged for [TransitionDelegate] to
@@ -2130,9 +2174,17 @@ class Navigator extends StatefulWidget {
     bool rootNavigator = false,
     bool nullOk = false,
   }) {
-    final NavigatorState navigator = rootNavigator
-        ? context.findRootAncestorStateOfType<NavigatorState>()
-        : context.findAncestorStateOfType<NavigatorState>();
+    // Handles the case where the input context is a navigator element.
+    NavigatorState navigator;
+    if (context is StatefulElement && context.state is NavigatorState) {
+        navigator = context.state as NavigatorState;
+    }
+    if (rootNavigator) {
+      navigator = context.findRootAncestorStateOfType<NavigatorState>() ?? navigator;
+    } else {
+      navigator = navigator ?? context.findAncestorStateOfType<NavigatorState>();
+    }
+
     assert(() {
       if (navigator == null && !nullOk) {
         throw FlutterError(
@@ -2292,6 +2344,12 @@ enum _RouteLifecycle {
 
 typedef _RouteEntryPredicate = bool Function(_RouteEntry entry);
 
+class _NotAnnounced extends Route<void> {
+  // A placeholder for the lastAnnouncedPreviousRoute, the
+  // lastAnnouncedPoppedNextRoute, and the lastAnnouncedNextRoute before any
+  // change has been announced.
+}
+
 class _RouteEntry extends RouteTransitionRecord {
   _RouteEntry(
     this.route, {
@@ -2310,10 +2368,12 @@ class _RouteEntry extends RouteTransitionRecord {
   @override
   final Route<dynamic> route;
 
+  static Route<dynamic> notAnnounced = _NotAnnounced();
+
   _RouteLifecycle currentState;
-  Route<dynamic> lastAnnouncedPreviousRoute; // last argument to Route.didChangePrevious
-  Route<dynamic> lastAnnouncedPoppedNextRoute; // last argument to Route.didPopNext
-  Route<dynamic> lastAnnouncedNextRoute; // last argument to Route.didChangeNext
+  Route<dynamic> lastAnnouncedPreviousRoute = notAnnounced; // last argument to Route.didChangePrevious
+  Route<dynamic> lastAnnouncedPoppedNextRoute = notAnnounced; // last argument to Route.didPopNext
+  Route<dynamic> lastAnnouncedNextRoute = notAnnounced; // last argument to Route.didChangeNext
 
   bool get hasPage => route.settings is Page;
 
@@ -2326,7 +2386,7 @@ class _RouteEntry extends RouteTransitionRecord {
     return page.canUpdate(routePage);
   }
 
-  void handleAdd({ @required NavigatorState navigator}) {
+  void handleAdd({ @required NavigatorState navigator, @required Route<dynamic> previousPresent }) {
     assert(currentState == _RouteLifecycle.add);
     assert(navigator != null);
     assert(navigator._debugLocked);
@@ -2335,6 +2395,9 @@ class _RouteEntry extends RouteTransitionRecord {
     route.install();
     assert(route.overlayEntries.isNotEmpty);
     currentState = _RouteLifecycle.adding;
+    navigator._observedRouteAdditions.add(
+      _NavigatorPushObservation(route, previousPresent)
+    );
   }
 
   void handlePush({ @required NavigatorState navigator, @required bool isNewFirst, @required Route<dynamic> previous, @required Route<dynamic> previousPresent }) {
@@ -2368,12 +2431,14 @@ class _RouteEntry extends RouteTransitionRecord {
     }
 
     if (previousState == _RouteLifecycle.replace || previousState == _RouteLifecycle.pushReplace) {
-      for (final NavigatorObserver observer in navigator.widget.observers)
-        observer.didReplace(newRoute: route, oldRoute: previousPresent);
+      navigator._observedRouteAdditions.add(
+        _NavigatorReplaceObservation(route, previousPresent)
+      );
     } else {
       assert(previousState == _RouteLifecycle.push);
-      for (final NavigatorObserver observer in navigator.widget.observers)
-        observer.didPush(route, previousPresent);
+      navigator._observedRouteAdditions.add(
+        _NavigatorPushObservation(route, previousPresent)
+      );
     }
   }
 
@@ -2387,8 +2452,9 @@ class _RouteEntry extends RouteTransitionRecord {
     assert(navigator._debugLocked);
     assert(route._navigator == navigator);
     currentState = _RouteLifecycle.popping;
-    for (final NavigatorObserver observer in navigator.widget.observers)
-      observer.didPop(route, previousPresent);
+    navigator._observedRouteDeletions.add(
+      _NavigatorPopObservation(route, previousPresent)
+    );
   }
 
   void handleRemoval({ @required NavigatorState navigator, @required Route<dynamic> previousPresent }) {
@@ -2397,21 +2463,20 @@ class _RouteEntry extends RouteTransitionRecord {
     assert(route._navigator == navigator);
     currentState = _RouteLifecycle.removing;
     if (_reportRemovalToObserver) {
-      for (final NavigatorObserver observer in navigator.widget.observers)
-        observer.didRemove(route, previousPresent);
+      navigator._observedRouteDeletions.add(
+        _NavigatorRemoveObservation(route, previousPresent)
+      );
     }
   }
 
   bool doingPop = false;
 
-  void didAdd({ @required NavigatorState navigator, @required bool isNewFirst, @required Route<dynamic> previous, @required Route<dynamic> previousPresent }) {
+  void didAdd({ @required NavigatorState navigator, @required bool isNewFirst}) {
     route.didAdd();
     currentState = _RouteLifecycle.idle;
     if (isNewFirst) {
       route.didChangeNext(null);
     }
-    for (final NavigatorObserver observer in navigator.widget.observers)
-      observer.didPush(route, previousPresent);
   }
 
   void pop<T>(T result) {
@@ -2570,15 +2635,80 @@ class _RouteEntry extends RouteTransitionRecord {
   }
 }
 
+abstract class _NavigatorObservation {
+  _NavigatorObservation(
+    this.primaryRoute,
+    this.secondaryRoute,
+  );
+  final Route<dynamic> primaryRoute;
+  final Route<dynamic> secondaryRoute;
+
+  void notify(NavigatorObserver observer);
+}
+
+class _NavigatorPushObservation extends _NavigatorObservation {
+  _NavigatorPushObservation(
+    Route<dynamic> primaryRoute,
+    Route<dynamic> secondaryRoute
+  ) : super(primaryRoute, secondaryRoute);
+
+  @override
+  void notify(NavigatorObserver observer) {
+    observer.didPush(primaryRoute, secondaryRoute);
+  }
+}
+
+class _NavigatorPopObservation extends _NavigatorObservation {
+  _NavigatorPopObservation(
+    Route<dynamic> primaryRoute,
+    Route<dynamic> secondaryRoute
+  ) : super(primaryRoute, secondaryRoute);
+
+  @override
+  void notify(NavigatorObserver observer) {
+    observer.didPop(primaryRoute, secondaryRoute);
+  }
+}
+
+class _NavigatorRemoveObservation extends _NavigatorObservation {
+  _NavigatorRemoveObservation(
+    Route<dynamic> primaryRoute,
+    Route<dynamic> secondaryRoute
+  ) : super(primaryRoute, secondaryRoute);
+
+  @override
+  void notify(NavigatorObserver observer) {
+    observer.didRemove(primaryRoute, secondaryRoute);
+  }
+}
+
+class _NavigatorReplaceObservation extends _NavigatorObservation {
+  _NavigatorReplaceObservation(
+    Route<dynamic> primaryRoute,
+    Route<dynamic> secondaryRoute
+  ) : super(primaryRoute, secondaryRoute);
+
+  @override
+  void notify(NavigatorObserver observer) {
+    observer.didReplace(newRoute: primaryRoute, oldRoute: secondaryRoute);
+  }
+}
+
 /// The state for a [Navigator] widget.
 class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   final GlobalKey<OverlayState> _overlayKey = GlobalKey<OverlayState>();
   List<_RouteEntry> _history = <_RouteEntry>[];
+  final Queue<_NavigatorObservation> _observedRouteAdditions = Queue<_NavigatorObservation>();
+  final Queue<_NavigatorObservation> _observedRouteDeletions = Queue<_NavigatorObservation>();
 
   /// The [FocusScopeNode] for the [FocusScope] that encloses the routes.
   final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'Navigator Scope');
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
+
+  HeroController _heroControllerFromScope;
+
+  List<NavigatorObserver> _effectiveObservers;
 
   @override
   void initState() {
@@ -2591,6 +2721,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       assert(observer.navigator == null);
       observer._navigator = this;
     }
+    _effectiveObservers = widget.observers;
+
+    // We have to manually extract the inherited widget in initState because
+    // the current context is not fully initialized.
+    final HeroControllerScope heroControllerScope = context
+      .getElementForInheritedWidgetOfExactType<HeroControllerScope>()
+      ?.widget as HeroControllerScope;
+    _updateHeroController(heroControllerScope?.controller);
+
     String initialRoute = widget.initialRoute;
     if (widget.pages.isNotEmpty) {
       _history.addAll(
@@ -2624,6 +2763,28 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateHeroController(HeroControllerScope.of(context));
+  }
+
+  void _updateHeroController(HeroController newHeroController) {
+    if (_heroControllerFromScope != newHeroController) {
+      _heroControllerFromScope?._navigator = null;
+      newHeroController?._navigator = this;
+      _heroControllerFromScope = newHeroController;
+      _updateEffectiveObservers();
+    }
+  }
+
+  void _updateEffectiveObservers() {
+    if (_heroControllerFromScope != null)
+      _effectiveObservers = widget.observers + <NavigatorObserver>[_heroControllerFromScope];
+    else
+      _effectiveObservers = widget.observers;
+  }
+
+  @override
   void didUpdateWidget(Navigator oldWidget) {
     super.didUpdateWidget(oldWidget);
     assert(
@@ -2637,6 +2798,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         assert(observer.navigator == null);
         observer._navigator = this;
       }
+      _updateEffectiveObservers();
     }
     if (oldWidget.pages != widget.pages) {
       assert(
@@ -2670,7 +2832,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       _debugLocked = true;
       return true;
     }());
-    for (final NavigatorObserver observer in widget.observers)
+    for (final NavigatorObserver observer in _effectiveObservers)
       observer._navigator = null;
     focusScopeNode.dispose();
     for (final _RouteEntry entry in _history)
@@ -2975,6 +3137,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           assert(rearrangeOverlay);
           entry.handleAdd(
             navigator: this,
+            previousPresent: _getRouteBefore(index - 1, _RouteEntry.isPresentPredicate)?.route,
           );
           assert(entry.currentState == _RouteLifecycle.adding);
           continue;
@@ -2982,8 +3145,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           if (canRemoveOrAdd || next == null) {
             entry.didAdd(
               navigator: this,
-              previous: previous?.route,
-              previousPresent: _getRouteBefore(index - 1, _RouteEntry.isPresentPredicate)?.route,
               isNewFirst: next == null
             );
             assert(entry.currentState == _RouteLifecycle.idle);
@@ -3070,6 +3231,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       entry = previous;
       previous = index > 0 ? _history[index - 1] : null;
     }
+
+    // Informs navigator observers about route changes.
+    _flushObserverNotifications();
+
     // Now that the list is clean, send the didChangeNext/didChangePrevious
     // notifications.
     _flushRouteAnnouncement();
@@ -3091,6 +3256,23 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }
     if (rearrangeOverlay)
       overlay?.rearrange(_allRouteOverlayEntries);
+  }
+
+  void _flushObserverNotifications() {
+    if (_effectiveObservers.isEmpty) {
+      _observedRouteDeletions.clear();
+      _observedRouteAdditions.clear();
+      return;
+    }
+    while (_observedRouteAdditions.isNotEmpty) {
+      final _NavigatorObservation observation = _observedRouteAdditions.removeLast();
+      _effectiveObservers.forEach(observation.notify);
+    }
+
+    while (_observedRouteDeletions.isNotEmpty) {
+      final _NavigatorObservation observation = _observedRouteDeletions.removeFirst();
+      _effectiveObservers.forEach(observation.notify);
+    }
   }
 
   void _flushRouteAnnouncement() {
@@ -3641,8 +3823,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```
   /// {@end-tool}
   void popUntil(RoutePredicate predicate) {
-    while (!predicate(_history.lastWhere(_RouteEntry.isPresentPredicate).route)) {
+    _RouteEntry candidate = _history.lastWhere(_RouteEntry.isPresentPredicate, orElse: () => null);
+    while(candidate != null) {
+      if (predicate(candidate.route))
+        return;
       pop();
+      candidate = _history.lastWhere(_RouteEntry.isPresentPredicate, orElse: () => null);
     }
   }
 
@@ -3777,7 +3963,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           _RouteEntry.willBePresentPredicate,
         ).route;
       }
-      for (final NavigatorObserver observer in widget.observers)
+      for (final NavigatorObserver observer in _effectiveObservers)
         observer.didStartUserGesture(route, previousRoute);
     }
   }
@@ -3790,7 +3976,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(_userGesturesInProgress > 0);
     _userGesturesInProgress -= 1;
     if (_userGesturesInProgress == 0) {
-      for (final NavigatorObserver observer in widget.observers)
+      for (final NavigatorObserver observer in _effectiveObservers)
         observer.didStopUserGesture();
     }
   }
@@ -3825,18 +4011,23 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     assert(!_debugLocked);
     assert(_history.isNotEmpty);
-    return Listener(
-      onPointerDown: _handlePointerDown,
-      onPointerUp: _handlePointerUpOrCancel,
-      onPointerCancel: _handlePointerUpOrCancel,
-      child: AbsorbPointer(
-        absorbing: false, // it's mutated directly by _cancelActivePointers above
-        child: FocusScope(
-          node: focusScopeNode,
-          autofocus: true,
-          child: Overlay(
-            key: _overlayKey,
-            initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+    // Hides the HeroControllerScope for the widget subtree so that the other
+    // nested navigator underneath will not pick up the hero controller above
+    // this level.
+    return HeroControllerScope(
+      child: Listener(
+        onPointerDown: _handlePointerDown,
+        onPointerUp: _handlePointerUpOrCancel,
+        onPointerCancel: _handlePointerUpOrCancel,
+        child: AbsorbPointer(
+          absorbing: false, // it's mutated directly by _cancelActivePointers above
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: Overlay(
+              key: _overlayKey,
+              initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+            ),
           ),
         ),
       ),
