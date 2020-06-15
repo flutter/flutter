@@ -200,10 +200,10 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<void> chooseWorkingDeviceById(String deviceId) async {
-    deviceId = _findMatchId(await discoverDevices(), deviceId);
-    if (deviceId != null) {
-      _workingDevice = AndroidDevice(deviceId: deviceId);
-      print('Choose device by ID: ' + _workingDevice.toString());
+    final String matchedId = _findMatchId(await discoverDevices(), deviceId);
+    if (matchedId != null) {
+      _workingDevice = AndroidDevice(deviceId: matchedId);
+      print('Choose device by ID: $matchedId');
       return;
     }
     throw DeviceException(
@@ -319,10 +319,10 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<void> chooseWorkingDeviceById(String deviceId) async {
-    deviceId = _findMatchId(await discoverDevices(), deviceId);
+    final String matchedId = _findMatchId(await discoverDevices(), deviceId);
     if (deviceId != null) {
-      _workingDevice = FuchsiaDevice(deviceId: deviceId);
-      print('Choose device by ID: ' + _workingDevice.toString());
+      _workingDevice = FuchsiaDevice(deviceId: matchedId);
+      print('Choose device by ID: $matchedId');
       return;
     }
     throw DeviceException(
@@ -620,10 +620,10 @@ class IosDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<void> chooseWorkingDeviceById(String deviceId) async {
-    deviceId = _findMatchId(await discoverDevices(), deviceId);
-    if (deviceId != null) {
-      _workingDevice = IosDevice(deviceId: deviceId);
-      print('Choose device by ID: ' + _workingDevice.toString());
+    final String matchedId = _findMatchId(await discoverDevices(), deviceId);
+    if (matchedId != null) {
+      _workingDevice = IosDevice(deviceId: matchedId);
+      print('Choose device by ID: $matchedId');
       return;
     }
     throw DeviceException(
@@ -881,10 +881,10 @@ class FakeDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<void> chooseWorkingDeviceById(String deviceId) async {
-    deviceId = _findMatchId(await discoverDevices(), deviceId);
-    if (deviceId != null) {
-      _workingDevice = FakeDevice(deviceId: deviceId);
-      print('Choose device by ID: ' + _workingDevice.toString());
+    final String matchedId = _findMatchId(await discoverDevices(), deviceId);
+    if (matchedId != null) {
+      _workingDevice = FakeDevice(deviceId: matchedId);
+      print('Choose device by ID: $matchedId');
       return;
     }
     throw DeviceException(
