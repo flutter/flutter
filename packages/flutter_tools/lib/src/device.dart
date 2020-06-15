@@ -285,18 +285,10 @@ class DeviceManager {
   Future<String> _readUserInput(int deviceCount) async {
     globals.terminal.usesTerminalUi = true;
     final String result = await globals.terminal.promptForCharInput(
-        _createPossibleInputsList(deviceCount),
+        <String>[ for (int i = 0; i < deviceCount; i++) '$i' ],
         logger: globals.logger,
         prompt: userMessages.flutterChooseOne);
     return result;
-  }
-
-  List<String> _createPossibleInputsList(int length) {
-    final List<String> possibleInputs = <String>[];
-    for (int i = 0; i < length; i++){
-      possibleInputs.add(i.toString());
-    }
-    return possibleInputs;
   }
 
   /// Returns whether the device is supported for the project.
