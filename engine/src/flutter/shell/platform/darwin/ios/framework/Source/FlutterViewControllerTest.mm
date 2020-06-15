@@ -60,7 +60,7 @@ typedef enum UIAccessibilityContrast : NSInteger {
 
 @implementation FlutterViewControllerTest
 
-- (void)testViewDidDisappearDoesntPauseEngine {
+- (void)testViewDidDisappearDoesntPauseEngineWhenNotTheViewController {
   id engine = OCMClassMock([FlutterEngine class]);
   id lifecycleChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   OCMStub([engine lifecycleChannel]).andReturn(lifecycleChannel);
@@ -78,7 +78,7 @@ typedef enum UIAccessibilityContrast : NSInteger {
   OCMReject([viewControllerMock surfaceUpdated:[OCMArg any]]);
 }
 
-- (void)testViewDidDisappearDoesPauseEngine {
+- (void)testViewDidDisappearDoesPauseEngineWhenIsTheViewController {
   id engine = OCMClassMock([FlutterEngine class]);
   id lifecycleChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   OCMStub([engine lifecycleChannel]).andReturn(lifecycleChannel);
