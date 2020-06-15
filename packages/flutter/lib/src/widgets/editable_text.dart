@@ -2571,7 +2571,9 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
         composingEnd -= outputCodepoints.length < composingEnd ? 1 : 0;
       }
 
-     final bool isBackspace = oldValue.text.runes.length - newValue.text.runes.length == 1 && isDirectionalityMarker(oldValue.text.runes.last);
+     final bool isBackspace = oldValue.text.runes.length - newValue.text.runes.length == 1 &&
+                              isDirectionalityMarker(oldValue.text.runes.last) &&
+                              oldValue.text.substring(0, oldValue.text.length - 1) == newValue.text;
 
       bool previousWasWhitespace = false;
       bool previousWasDirectionalityMarker = false;
