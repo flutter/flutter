@@ -33,8 +33,6 @@ dependencies:
   yaml: 2.2.1
   native_stack_traces: 0.3.6
   build_daemon: 2.1.4
-  flutter_goldens_client:
-    path: ../flutter_goldens_client
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
