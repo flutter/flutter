@@ -33,6 +33,7 @@ void main() {
     expect(SystemChrome.latestStyle.statusBarBrightness, Brightness.dark);
     expect(widget.color, Colors.blue);
     expect(widget.elevation, 4.0);
+    expect(widget.shadowColor, Colors.black);
     expect(iconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionIconText.text.style.color, Colors.white);
@@ -61,6 +62,7 @@ void main() {
     expect(SystemChrome.latestStyle.statusBarBrightness, appBarTheme.brightness);
     expect(widget.color, appBarTheme.color);
     expect(widget.elevation, appBarTheme.elevation);
+    expect(widget.shadowColor, appBarTheme.shadowColor);
     expect(iconTheme.data, appBarTheme.iconTheme);
     expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
     expect(actionIconText.text.style.color, appBarTheme.actionsIconTheme.color);
@@ -71,6 +73,7 @@ void main() {
     const Brightness brightness = Brightness.dark;
     const Color color = Colors.orange;
     const double elevation = 3.0;
+    const Color shadowColor = Colors.red;
     const IconThemeData iconThemeData = IconThemeData(color: Colors.green);
     const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.lightBlue);
     const TextTheme textTheme = TextTheme(headline6: TextStyle(color: Colors.orange), bodyText2: TextStyle(color: Colors.pink));
@@ -83,6 +86,7 @@ void main() {
         backgroundColor: color,
         brightness: brightness,
         elevation: elevation,
+        shadowColor: shadowColor,
         iconTheme: iconThemeData,
         actionsIconTheme: actionsIconThemeData,
         textTheme: textTheme,
@@ -101,6 +105,7 @@ void main() {
     expect(SystemChrome.latestStyle.statusBarBrightness, brightness);
     expect(widget.color, color);
     expect(widget.elevation, elevation);
+    expect(widget.shadowColor, shadowColor);
     expect(iconTheme.data, iconThemeData);
     expect(actionsIconTheme.data, actionsIconThemeData);
     expect(actionIconText.text.style.color, actionsIconThemeData.color);
@@ -151,6 +156,7 @@ void main() {
     expect(SystemChrome.latestStyle.statusBarBrightness, appBarTheme.brightness);
     expect(widget.color, appBarTheme.color);
     expect(widget.elevation, appBarTheme.elevation);
+    expect(widget.shadowColor, appBarTheme.shadowColor);
     expect(iconTheme.data, appBarTheme.iconTheme);
     expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
     expect(actionIconText.text.style.color, appBarTheme.actionsIconTheme.color);
@@ -178,6 +184,7 @@ void main() {
     expect(SystemChrome.latestStyle.statusBarBrightness, themeData.brightness);
     expect(widget.color, themeData.primaryColor);
     expect(widget.elevation, 4.0);
+    expect(widget.shadowColor, Colors.black);
     expect(iconTheme.data, themeData.primaryIconTheme);
     expect(actionsIconTheme.data, themeData.primaryIconTheme);
     expect(actionIconText.text.style.color, themeData.primaryIconTheme.color);
@@ -199,10 +206,11 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
       home: Scaffold(
-          appBar: AppBar(
-            title: const Text('Title'),
-            centerTitle: false,
-          )),
+        appBar: AppBar(
+          title: const Text('Title'),
+          centerTitle: false,
+        ),
+      ),
     ));
 
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
@@ -221,12 +229,29 @@ void main() {
     // the value of NavigationToolBar.centerMiddle should be true.
     expect(navToolBar.centerMiddle, true);
   });
+
+  testWidgets('AppBar.shadowColor takes priority over AppBarTheme.shadowColor', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(shadowColor: Colors.red)),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Title'),
+          shadowColor: Colors.yellow,
+        ),
+      ),
+    ));
+
+    final AppBar appBar = tester.widget(find.byType(AppBar));
+    // The AppBar.shadowColor should be used instead of AppBarTheme.shadowColor.
+    expect(appBar.shadowColor, Colors.yellow);
+  });
 }
 
 AppBarTheme _appBarTheme() {
   const Brightness brightness = Brightness.light;
   const Color color = Colors.lightBlue;
   const double elevation = 6.0;
+  const Color shadowColor = Colors.red;
   const IconThemeData iconThemeData = IconThemeData(color: Colors.black);
   const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.pink);
   const TextTheme textTheme = TextTheme(bodyText2: TextStyle(color: Colors.yellow));
@@ -235,6 +260,7 @@ AppBarTheme _appBarTheme() {
     brightness: brightness,
     color: color,
     elevation: elevation,
+    shadowColor: shadowColor,
     iconTheme: iconThemeData,
     textTheme: textTheme,
   );
@@ -284,6 +310,7 @@ RichText _getAppBarIconRichText(WidgetTester tester) {
     ).first,
   );
 }
+
 DefaultTextStyle _getAppBarText(WidgetTester tester) {
   return tester.widget<DefaultTextStyle>(
     find.descendant(
