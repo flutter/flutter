@@ -22,7 +22,6 @@ import 'media_query.dart';
 import 'navigator.dart';
 import 'pages.dart';
 import 'performance_overlay.dart';
-import 'routes.dart';
 import 'scrollable.dart';
 import 'semantics_debugger.dart';
 import 'shortcuts.dart';
@@ -853,8 +852,8 @@ class WidgetsApp extends StatefulWidget {
     LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
     LogicalKeySet(LogicalKeyboardKey.gameButtonA): const ActivateIntent(),
 
-    // Dismissal
-    LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
+    // Cancel
+    LogicalKeySet(LogicalKeyboardKey.escape): const CancelIntent(),
     LogicalKeySet(LogicalKeyboardKey.gameButtonB): const ActivateIntent(),
 
     // Keyboard traversal.
@@ -879,8 +878,8 @@ class WidgetsApp extends StatefulWidget {
     // Activation
     LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
 
-    // Dismissal
-    LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
+    // Cancel
+    LogicalKeySet(LogicalKeyboardKey.escape): const CancelIntent(),
 
     // Keyboard traversal.
     LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
@@ -901,8 +900,8 @@ class WidgetsApp extends StatefulWidget {
     LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
     LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
 
-    // Dismissal
-    LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
+    // Cancel
+    LogicalKeySet(LogicalKeyboardKey.escape): const CancelIntent(),
 
     // Keyboard traversal
     LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
