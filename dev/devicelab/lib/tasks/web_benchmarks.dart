@@ -99,6 +99,13 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
             profileData.complete(collectedProfiles);
             return Response.notFound('Finished running benchmarks.');
           }
+        } else if (request.requestedUri.path.endsWith('/print-to-console')) {
+          // A passthrough used by
+          // `dev/benchmarks/macrobenchmarks/lib/web_benchmarks.dart`
+          // to print information.
+          final String message = await request.readAsString();
+          print('[Gallery] $message');
+          return Response.ok('Reported.');
         } else {
           return Response.notFound(
               'This request is not handled by the profile-data handler.');

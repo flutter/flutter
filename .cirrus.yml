@@ -18,8 +18,10 @@ web_shard_template: &WEB_SHARD_TEMPLATE
 linux_shard_template: &LINUX_SHARD_TEMPLATE
   environment:
     # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
-    CPU: 2
-    MEMORY: 8G
+    # In June 2020, the CPU and memory were increased so that
+    # web benchmarks (including gallery benchmarks) can be run successfully on Linux.
+    CPU: 4
+    MEMORY: 16G
   script:
     - dart --enable-asserts ./dev/bots/test.dart
 
