@@ -10,7 +10,8 @@ final RegExp _declarationEnd = RegExp('(import)|(library)|(part)');
 const String _blockCommentStart = '/*';
 const String _blockCommentEnd = '*/';
 
-/// Attempts to read the language version of a dart [file].
+/// Attempts to read the language version of a dart [file], returning
+/// the entire comment.
 ///
 /// If this is not present, falls back to the language version defined in
 /// [package]. If [package] is not provided and there is no
