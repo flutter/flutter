@@ -2913,7 +2913,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
 /// [DiagnosticsNode] that lazily calls the associated [Diagnosticable] [value]
 /// to implement [getChildren] and [getProperties].
 class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
-  /// Create a diagnostics describing a [DiagnosticableMixin] value.
+  /// Create a diagnostics describing a [Diagnosticable] value.
   ///
   /// The [value] argument must not be null.
   DiagnosticableNode({
@@ -3040,7 +3040,7 @@ String describeEnum(Object enumEntry) {
 }
 
 /// Builder to accumulate properties and configuration used to assemble a
-/// [DiagnosticsNode] from a [DiagnosticableMixin] object.
+/// [DiagnosticsNode] from a [Diagnosticable] object.
 class DiagnosticPropertiesBuilder {
   /// Creates a [DiagnosticPropertiesBuilder] with [properties] initialize to
   /// an empty array.
@@ -3065,48 +3065,6 @@ class DiagnosticPropertiesBuilder {
 
   /// Description to show if the node has no displayed properties or children.
   String emptyBodyDescription;
-}
-
-// TODO(gspencergoog): Remove DiagnosticableMixin once the mixin Diagnosticable is in stable.
-// https://github.com/flutter/flutter/issues/50498
-
-/// A mixin class implementing the [Diagnosticable] interface that provides
-/// string and [DiagnosticsNode] debug representations describing the properties
-/// of an object.
-///
-/// _This mixin exists only to support plugins and packages that require older
-/// Flutter versions: Use the identical mixin [Diagnosticable] instead for all
-/// new code. If you are authoring code that needs to work on the stable branch
-/// as well as master (in a package, for instance), mix this in instead of
-/// extending [Diagnosticable]. Once [Diagnosticable] as a mixin reaches the
-/// stable channel, this class will be deprecated._
-mixin DiagnosticableMixin implements Diagnosticable {
-  @override
-  String toStringShort() => describeIdentity(this);
-
-  @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-    String fullString;
-    assert(() {
-      fullString = toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);
-      return true;
-    }());
-    return fullString ?? toStringShort();
-  }
-
-  @override
-  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return DiagnosticableNode<Diagnosticable>(
-      name: name,
-      value: this,
-      style: style,
-    );
-  }
-
-  @override
-  @protected
-  @mustCallSuper
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) { }
 }
 
 // Examples can assume:
@@ -3395,7 +3353,7 @@ mixin Diagnosticable {
 /// See also:
 ///
 ///  * [DiagnosticableTreeMixin], a mixin that implements this class.
-///  * [DiagnosticableMixin], which should be used instead of this class to
+///  * [Diagnosticable], which should be used instead of this class to
 ///    provide diagnostics for objects without children.
 abstract class DiagnosticableTree with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -3712,7 +3670,7 @@ abstract class DiagnosticsSerializationDelegate {
   ///    will be included.
   bool get includeProperties;
 
-  /// Whether properties that have a [DiagnosticableMixin] as value should be
+  /// Whether properties that have a [Diagnosticable] as value should be
   /// expanded.
   bool get expandPropertyValues;
 
