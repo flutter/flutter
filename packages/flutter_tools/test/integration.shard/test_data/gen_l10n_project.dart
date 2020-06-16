@@ -94,7 +94,7 @@ class Home extends StatelessWidget {
     final List<String> results = [];
     return Row(
       children: <Widget>[
-        ResultBuilder(
+        LocaleBuilder(
           test: 'supportedLocales',
           callback: (BuildContext context) {
             results.add('--- supportedLocales tests ---');
@@ -254,8 +254,8 @@ class Home extends StatelessWidget {
             ]);
           },
         ),
-        Builder(
-          builder: (BuildContext context) {
+        LocaleBuilder(
+          callback: (BuildContext context) {
             try {
               int n = 0;
               for (final String result in results) {
