@@ -82,8 +82,8 @@ int get webShardCount => Platform.environment.containsKey('WEB_SHARD_COUNT')
 
 /// Tests that we don't run on Web for various reasons.
 //
-// TODO(yjbanov): we're getting rid of this blacklist as part of https://github.com/flutter/flutter/projects/60
-const List<String> kWebTestFileBlacklist = <String>[
+// TODO(yjbanov): we're getting rid of this as part of https://github.com/flutter/flutter/projects/60
+const List<String> kWebTestFileKnownFailures = <String>[
   // This test doesn't compile because it depends on code outside the flutter package.
   'test/examples/sector_layout_test.dart',
   // This test relies on widget tracking capability in the VM.
@@ -699,7 +699,7 @@ Future<void> _runWebUnitTests() async {
     )
     .whereType<File>()
     .map<String>((File file) => path.relative(file.path, from: flutterPackageDirectory.path))
-    .where((String filePath) => !kWebTestFileBlacklist.contains(filePath))
+    .where((String filePath) => !kWebTestFileKnownFailures.contains(filePath))
     .toList()
     // Finally we shuffle the list because we want the average cost per file to be uniformly
     // distributed. If the list is not sorted then different shards and batches may have
