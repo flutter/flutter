@@ -1166,4 +1166,41 @@ void main() {
     expect(isDivider(boxes[offset + 3], false, true), isTrue);
     expect(isDivider(boxes[offset + 4], true, false), isTrue);
   });
+
+  testWidgets('MergeableMaterial respects dividerColor', (WidgetTester tester) async {
+    const Color dividerColor = Colors.red;
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: MergeableMaterial(
+              hasDividers: true,
+              dividerColor: dividerColor,
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox).last);
+    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    // Since we are getting the last DecoratedBox, it will have a Border.top.
+    expect(decoration.border.top.color, dividerColor);
+  });
 }
