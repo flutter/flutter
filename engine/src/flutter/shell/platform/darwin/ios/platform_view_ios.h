@@ -129,6 +129,7 @@ class PlatformViewIOS final : public PlatformView {
   fml::scoped_nsprotocol<FlutterTextInputPlugin*> text_input_plugin_;
   fml::closure firstFrameCallback_;
   ScopedObserver dealloc_view_controller_observer_;
+  std::vector<std::string> platform_resolved_locale_;
 
   // |PlatformView|
   void HandlePlatformMessage(fml::RefPtr<flutter::PlatformMessage> message) override;
@@ -151,6 +152,10 @@ class PlatformViewIOS final : public PlatformView {
 
   // |PlatformView|
   void OnPreEngineRestart() const override;
+
+  // |PlatformView|
+  std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocales(
+      const std::vector<std::string>& supported_locale_data) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewIOS);
 };

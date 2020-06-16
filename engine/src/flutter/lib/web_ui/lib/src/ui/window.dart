@@ -616,6 +616,19 @@ abstract class Window {
   /// See [locales], which is the list of locales the user/device prefers.
   Locale/*?*/ get platformResolvedLocale;
 
+  /// Performs the platform-native locale resolution.
+  ///
+  /// Each platform may return different results.
+  ///
+  /// If the platform fails to resolve a locale, then this will return null.
+  ///
+  /// This method returns synchronously and is a direct call to
+  /// platform specific APIs without invoking method channels.
+  Locale computePlatformResolvedLocale(List<Locale> supportedLocales) {
+    // TODO(garyq): Implement on web.
+    return null;
+  }
+
   /// A callback that is invoked whenever [locale] changes value.
   ///
   /// The framework invokes this callback in the same zone in which the

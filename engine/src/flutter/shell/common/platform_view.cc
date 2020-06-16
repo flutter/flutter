@@ -137,4 +137,12 @@ void PlatformView::SetNextFrameCallback(const fml::closure& closure) {
   delegate_.OnPlatformViewSetNextFrameCallback(closure);
 }
 
+std::unique_ptr<std::vector<std::string>>
+PlatformView::ComputePlatformResolvedLocales(
+    const std::vector<std::string>& supported_locale_data) {
+  std::unique_ptr<std::vector<std::string>> out =
+      std::make_unique<std::vector<std::string>>();
+  return out;
+}
+
 }  // namespace flutter

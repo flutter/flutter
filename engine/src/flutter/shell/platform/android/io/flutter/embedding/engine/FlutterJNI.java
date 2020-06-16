@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
+import android.os.Build;
 import android.os.Looper;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -22,10 +23,14 @@ import io.flutter.embedding.engine.dart.PlatformMessageHandler;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.embedding.engine.renderer.RenderSurface;
 import io.flutter.plugin.common.StandardMessageCodec;
+import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.view.AccessibilityBridge;
 import io.flutter.view.FlutterCallbackInformation;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -169,6 +174,7 @@ public class FlutterJNI {
   @Nullable private Long nativePlatformViewId;
   @Nullable private AccessibilityDelegate accessibilityDelegate;
   @Nullable private PlatformMessageHandler platformMessageHandler;
+  @Nullable private LocalizationPlugin localizationPlugin;
   @Nullable private PlatformViewsController platformViewsController;
 
   @NonNull
@@ -833,6 +839,65 @@ public class FlutterJNI {
     return platformViewsController.createOverlaySurface();
   }
   // ----- End Engine Lifecycle Support ----
+
+  // ----- Start Localization Support ----
+
+  /** Sets the localization plugin that is used in various localization methods. */
+  @UiThread
+  public void setLocalizationPlugin(@Nullable LocalizationPlugin localizationPlugin) {
+    ensureRunningOnMainThread();
+    this.localizationPlugin = localizationPlugin;
+  }
+
+  /** Invoked by native to obtain the results of Android's locale resolution algorithm. */
+  @SuppressWarnings("unused")
+  @VisibleForTesting
+  String[] computePlatformResolvedLocale(@NonNull String[] strings) {
+    if (localizationPlugin == null) {
+      return new String[0];
+    }
+    List<Locale> supportedLocales = new ArrayList<Locale>();
+    final int localeDataLength = 3;
+    for (int i = 0; i < strings.length; i += localeDataLength) {
+      String languageCode = strings[i + 0];
+      String countryCode = strings[i + 1];
+      String scriptCode = strings[i + 2];
+      // Convert to Locales via LocaleBuilder if available (API 24+) to include scriptCode.
+      if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+        Locale.Builder localeBuilder = new Locale.Builder();
+        if (!languageCode.isEmpty()) {
+          localeBuilder.setLanguage(languageCode);
+        }
+        if (!countryCode.isEmpty()) {
+          localeBuilder.setRegion(countryCode);
+        }
+        if (!scriptCode.isEmpty()) {
+          localeBuilder.setScript(scriptCode);
+        }
+        supportedLocales.add(localeBuilder.build());
+      } else {
+        // Pre-API 24, we fall back on scriptCode-less locales.
+        supportedLocales.add(new Locale(languageCode, countryCode));
+      }
+    }
+
+    Locale result = localizationPlugin.resolveNativeLocale(supportedLocales);
+
+    if (result == null) {
+      return new String[0];
+    }
+    String[] output = new String[localeDataLength];
+    output[0] = result.getLanguage();
+    output[1] = result.getCountry();
+    if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+      output[2] = result.getScript();
+    } else {
+      output[2] = "";
+    }
+    return output;
+  }
+
+  // ----- End Localization Support ----
 
   // @SuppressWarnings("unused")
   @UiThread

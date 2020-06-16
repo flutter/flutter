@@ -107,6 +107,10 @@ class PlatformViewAndroid final : public PlatformView {
   // |PlatformView|
   void ReleaseResourceContext() const override;
 
+  // |PlatformView|
+  std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocales(
+      const std::vector<std::string>& supported_locale_data) override;
+
   void InstallFirstFrameCallback();
 
   void FireFirstFrameCallback();

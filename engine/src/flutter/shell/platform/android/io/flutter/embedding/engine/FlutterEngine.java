@@ -28,6 +28,7 @@ import io.flutter.embedding.engine.systemchannels.RestorationChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
+import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -73,6 +74,7 @@ public class FlutterEngine {
   @NonNull private final FlutterRenderer renderer;
   @NonNull private final DartExecutor dartExecutor;
   @NonNull private final FlutterEnginePluginRegistry pluginRegistry;
+  @NonNull private final LocalizationPlugin localizationPlugin;
 
   // System channels.
   @NonNull private final AccessibilityChannel accessibilityChannel;
@@ -260,20 +262,8 @@ public class FlutterEngine {
       @Nullable String[] dartVmArgs,
       boolean automaticallyRegisterPlugins,
       boolean waitForRestorationData) {
-    this.flutterJNI = flutterJNI;
-    flutterLoader.startInitialization(context.getApplicationContext());
-    flutterLoader.ensureInitializationComplete(context, dartVmArgs);
-
-    flutterJNI.addEngineLifecycleListener(engineLifecycleListener);
-    flutterJNI.setPlatformViewsController(platformViewsController);
-    attachToJni();
-
     this.dartExecutor = new DartExecutor(flutterJNI, context.getAssets());
     this.dartExecutor.onAttachedToJNI();
-
-    // TODO(mattcarroll): FlutterRenderer is temporally coupled to attach(). Remove that coupling if
-    // possible.
-    this.renderer = new FlutterRenderer(flutterJNI);
 
     accessibilityChannel = new AccessibilityChannel(dartExecutor, flutterJNI);
     keyEventChannel = new KeyEventChannel(dartExecutor);
@@ -286,6 +276,21 @@ public class FlutterEngine {
     settingsChannel = new SettingsChannel(dartExecutor);
     systemChannel = new SystemChannel(dartExecutor);
     textInputChannel = new TextInputChannel(dartExecutor);
+
+    this.localizationPlugin = new LocalizationPlugin(context, localizationChannel);
+
+    this.flutterJNI = flutterJNI;
+    flutterLoader.startInitialization(context.getApplicationContext());
+    flutterLoader.ensureInitializationComplete(context, dartVmArgs);
+
+    flutterJNI.addEngineLifecycleListener(engineLifecycleListener);
+    flutterJNI.setPlatformViewsController(platformViewsController);
+    flutterJNI.setLocalizationPlugin(localizationPlugin);
+    attachToJni();
+
+    // TODO(mattcarroll): FlutterRenderer is temporally coupled to attach(). Remove that coupling if
+    // possible.
+    this.renderer = new FlutterRenderer(flutterJNI);
 
     this.platformViewsController = platformViewsController;
     this.platformViewsController.onAttachedToJNI();
@@ -484,6 +489,12 @@ public class FlutterEngine {
   @NonNull
   public PluginRegistry getPlugins() {
     return pluginRegistry;
+  }
+
+  /** The LocalizationPlugin this FlutterEngine created. */
+  @NonNull
+  public LocalizationPlugin getLocalizationPlugin() {
+    return localizationPlugin;
   }
 
   /**
