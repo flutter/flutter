@@ -1704,8 +1704,9 @@ class Codec extends NativeFieldWrapperClass2 {
 /// The [targetWidth] and [targetHeight] arguments specify the size of the output
 /// image, in image pixels. If they are not equal to the intrinsic dimensions of the
 /// image, then the image will be scaled after being decoded. If only one dimension
-/// is specified, the omitted dimension will remain its original size. If both are
-/// not specified, then the image maintains its real size.
+/// is specified, the omitted dimension will be scaled to maintain the original
+/// aspect ratio. If both are not specified, then the image maintains its real
+/// size.
 ///
 /// The returned future can complete with an error if the image decoding has
 /// failed.
