@@ -151,6 +151,8 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
 // Zooms and fades a new page in, zooming out the previous page. This transition
 // is designed to match the Android 10 activity transition.
 class _ZoomPageTransition extends StatelessWidget {
+  /// Creates a [_ZoomPageTransition].
+  ///
   /// The [animation] and [secondaryAnimation] argument are required and must
   /// not be null.
   const _ZoomPageTransition({
