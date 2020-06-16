@@ -48,9 +48,12 @@ class Tooltip extends StatefulWidget {
   ///
   /// All parameters that are defined in the constructor will
   /// override the default values _and_ the values in [TooltipTheme.of].
+  ///
+  /// If [message] is `null`, the semantics label of the [child] will be used as
+  /// the string in the tooltip.
   const Tooltip({
     Key key,
-    @required this.message,
+    this.message,
     this.height,
     this.padding,
     this.margin,
@@ -62,33 +65,7 @@ class Tooltip extends StatefulWidget {
     this.waitDuration,
     this.showDuration,
     this.child,
-  }) : assert(message != null),
-       _customMessageWidget = null,
-       super(key: key);
-
-  /// Creates a tooltip that will display the [message] widget inside of the
-  /// tooltip.
-  ///
-  /// Prefer using the [Tooltip] constructor, this should only be used if you do
-  /// not have access to the String that will be rendered in the tooltip.
-  const Tooltip.fromWidget({
-    Key key,
-    @required Widget message,
-    this.height,
-    this.padding,
-    this.margin,
-    this.verticalOffset,
-    this.preferBelow,
-    this.excludeFromSemantics,
-    this.decoration,
-    this.textStyle,
-    this.waitDuration,
-    this.showDuration,
-    this.child,
-  }) : message = null,
-       _customMessageWidget = message,
-       super(key: key);
-
+  }) : super(key: key);
 
   /// The text to display in the tooltip.
   final String message;
@@ -178,8 +155,6 @@ class Tooltip extends StatefulWidget {
   /// Defaults to 1.5 seconds.
   final Duration showDuration;
 
-  final Widget _customMessageWidget;
-
   @override
   _TooltipState createState() => _TooltipState();
 
@@ -226,6 +201,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   Duration waitDuration;
   bool _mouseIsConnected;
   bool _longPressActivated = false;
+  final GlobalKey _semanticsKey = GlobalKey();
 
   @override
   void initState() {
@@ -314,13 +290,22 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     final RenderBox box = context.findRenderObject() as RenderBox;
     final Offset target = box.localToGlobal(box.size.center(Offset.zero));
 
+    String tooltipString;
+    if (widget.message != null) {
+      tooltipString = widget.message;
+    } else {
+      final _RenderTooltipSemanticsWidget semanticsRenderObject =
+        _semanticsKey.currentContext.findRenderObject() as _RenderTooltipSemanticsWidget;
+      tooltipString = semanticsRenderObject.label;
+    }
+
     // We create this widget outside of the overlay entry's builder to prevent
     // updated values from happening to leak into the overlay when the overlay
     // rebuilds.
     final Widget overlay = Directionality(
       textDirection: Directionality.of(context),
       child: _TooltipOverlay(
-        message: widget._customMessageWidget ?? Text(widget.message, style: textStyle),
+        message: tooltipString,
         height: height,
         padding: padding,
         margin: margin,
@@ -337,9 +322,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     );
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
     Overlay.of(context, debugRequiredFor: widget).insert(_entry);
-    if (widget.message != null) {
-      SemanticsService.tooltip(widget.message);
-    }
+    SemanticsService.tooltip(tooltipString);
   }
 
   void _removeEntry() {
@@ -429,7 +412,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       onLongPress: _handleLongPress,
       excludeFromSemantics: true,
       child: Semantics(
-        label: excludeFromSemantics ? null : widget.message,
+        label: excludeFromSemantics || widget.message == null ? null : widget.message,
         child: widget.child,
       ),
     );
@@ -439,6 +422,13 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       result = MouseRegion(
         onEnter: (PointerEnterEvent event) => _showTooltip(),
         onExit: (PointerExitEvent event) => _hideTooltip(),
+        child: result,
+      );
+    }
+
+    if (widget.message == null) {
+      result = _TooltipSemanticsWidget(
+        key: _semanticsKey,
         child: result,
       );
     }
@@ -512,7 +502,7 @@ class _TooltipOverlay extends StatelessWidget {
     this.preferBelow,
   }) : super(key: key);
 
-  final Widget message;
+  final String message;
   final double height;
   final EdgeInsetsGeometry padding;
   final EdgeInsetsGeometry margin;
@@ -538,7 +528,7 @@ class _TooltipOverlay extends StatelessWidget {
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: height),
               child: DefaultTextStyle(
-                style: Theme.of(context).textTheme.bodyText2.merge(textStyle),
+                style: Theme.of(context).textTheme.bodyText2,
                 child: Container(
                   decoration: decoration,
                   padding: padding,
@@ -546,7 +536,10 @@ class _TooltipOverlay extends StatelessWidget {
                   child: Center(
                     widthFactor: 1.0,
                     heightFactor: 1.0,
-                    child: message,
+                    child: Text(
+                      message,
+                      style: textStyle,
+                    ),
                   ),
                 ),
               ),
@@ -555,5 +548,53 @@ class _TooltipOverlay extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _TooltipSemanticsWidget extends SingleChildRenderObjectWidget {
+  const _TooltipSemanticsWidget({
+    Key key, 
+    Widget child
+  }) : super(key: key, child: child);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderTooltipSemanticsWidget();
+  }
+}
+
+class _RenderTooltipSemanticsWidget extends RenderProxyBox {
+  _RenderTooltipSemanticsWidget({RenderBox child}) : super(child) {
+    markNeedsSemanticsUpdate();
+  }
+
+  String label;
+
+  @override
+  void assembleSemanticsNode(
+    SemanticsNode node,
+    SemanticsConfiguration config,
+    Iterable<SemanticsNode> children,
+  ) {
+    super.assembleSemanticsNode(node, config, children);
+    label = node.label;
+
+    bool isNullOrEmpty(String label) => label == null || label == '';
+
+    if (isNullOrEmpty(label)) {
+      for (final SemanticsNode child in children) {
+        if (!isNullOrEmpty(child.label)) {
+          label = child.label;
+          return;
+        }
+      }
+    }
+  }
+
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
   }
 }

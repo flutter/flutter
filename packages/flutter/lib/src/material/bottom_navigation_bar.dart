@@ -503,10 +503,9 @@ class _BottomNavigationTile extends StatelessWidget {
       ),
     );
 
-    result = Tooltip.fromWidget(
+    result = Tooltip(
       preferBelow: false,
       verticalOffset: selectedIconSize + selectedFontSize,
-      message: item.title,
       child: result,
     );
 

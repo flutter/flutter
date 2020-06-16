@@ -578,27 +578,27 @@ void main() {
     expect(textStyle.decoration, TextDecoration.underline);
   });
 
-  testWidgets('Tooltip.fromWidget - custom tooltip message textStyle', (WidgetTester tester) async {
+  testWidgets('no message provided - custom tooltip message textStyle', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(MaterialApp(
-      home: Tooltip.fromWidget(
+      home: Tooltip(
         key: key,
         textStyle: const TextStyle(
           color: Colors.orange,
           decoration: TextDecoration.underline,
         ),
-        message: const Text(tooltipText),
         child: Container(
           width: 100.0,
           height: 100.0,
           color: Colors.green[500],
+          child: const Text(tooltipText)
         ),
       ),
     ));
     (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final TextStyle textStyle = tester.renderObject<RenderParagraph>(find.text(tooltipText)).text.style;
+    final TextStyle textStyle = tester.renderObject<RenderParagraph>(find.text(tooltipText).last).text.style;
     expect(textStyle.color, Colors.orange);
     expect(textStyle.fontFamily, 'Roboto');
     expect(textStyle.decoration, TextDecoration.underline);
@@ -1167,6 +1167,71 @@ void main() {
     semantics.dispose();
     SystemChannels.accessibility.setMockMessageHandler(null);
   });
+
+  testWidgets('Uses semantic label of child when message is null', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Tooltip(
+            child: Container(
+              width: 100.0,
+              height: 100.0,
+              color: Colors.green[500],
+              child: const Text('Bar'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Bar'), findsOneWidget);
+    await tester.longPress(find.byType(Tooltip));
+    expect(find.text('Bar'), findsNWidgets(2));
+  });
+
+  testWidgets('Sends semantic event when message is null', (WidgetTester tester) async {
+    final List<dynamic> semanticEvents = <dynamic>[];
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
+      semanticEvents.add(message);
+    });
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Tooltip(
+            child: Container(
+              width: 100.0,
+              height: 100.0,
+              color: Colors.green[500],
+              child: const Text('Bar'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.longPress(find.byType(Tooltip));
+    final RenderObject object = tester.firstRenderObject(find.byType(Tooltip));
+
+    expect(semanticEvents, unorderedEquals(<dynamic>[
+      <String, dynamic>{
+        'type': 'longPress',
+        'nodeId': findDebugSemantics(object).id,
+        'data': <String, dynamic>{},
+      },
+      <String, dynamic>{
+        'type': 'tooltip',
+        'data': <String, dynamic>{
+          'message': 'Bar',
+        },
+      },
+    ]));
+    semantics.dispose();
+    SystemChannels.accessibility.setMockMessageHandler(null);
+  });
+
+
   testWidgets('default Tooltip debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
@@ -1180,6 +1245,7 @@ void main() {
       '"message"',
     ]);
   });
+
   testWidgets('Tooltip implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
