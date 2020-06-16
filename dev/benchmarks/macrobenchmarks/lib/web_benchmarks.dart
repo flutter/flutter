@@ -70,7 +70,7 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
     '${_galleryBenchmarkPrefix}_animated_widgets_perf': () => GalleryRecorder(
       benchmarkName: '${_galleryBenchmarkPrefix}_animated_widgets_perf',
       shouldRunPredicate: (String demo) =>
-      demo == 'progress-indicator@material', // TODO: For debugging purposes.
+      demo == 'progress-indicator@material',
     ),
     '${_galleryBenchmarkPrefix}_unanimated_widgets_perf': () => GalleryRecorder(
       benchmarkName: '${_galleryBenchmarkPrefix}_unanimated_widgets_perf',
