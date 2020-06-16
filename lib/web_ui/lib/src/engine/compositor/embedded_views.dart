@@ -93,8 +93,8 @@ class HtmlViewEmbedder {
       return;
     }
 
-    final PlatformViewFactory factory =
-        platformViewRegistry.registeredFactories[viewType];
+    final ui.PlatformViewFactory factory =
+        ui.platformViewRegistry.registeredFactories[viewType];
     if (factory == null) {
       callback(codec.encodeErrorEnvelope(
         code: 'unregistered_view_type',

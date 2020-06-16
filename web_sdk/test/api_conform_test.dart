@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.6
+
 import 'dart:io';
 
-import 'package:analyzer/analyzer.dart';
+import 'package:analyzer/dart/analysis/results.dart';
+import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/analysis/features.dart';
+import 'package:analyzer/dart/ast/ast.dart';
 
 // Ignore members defined on Object.
 const Set<String> _kObjectMembers = <String>{
@@ -14,23 +18,30 @@ const Set<String> _kObjectMembers = <String>{
   'hashCode',
 };
 
-void main() {
-  // TODO(yjbanov): fix and re-enable API conform test.
-  if (!Platform.environment.containsKey('REALLY_DO_RUN_API_CONFORM_TEST')) {
-    return;
-  }
-  // These files just contain imports to the part files;
+CompilationUnit _parseAndCheckDart(String path) {
   final FeatureSet analyzerFeatures = FeatureSet.fromEnableFlags(<String>['non-nullable']);
-  final CompilationUnit uiUnit = parseDartFile('lib/ui/ui.dart',
-      parseFunctionBodies: false, suppressErrors: false, featureSet: analyzerFeatures);
-  final CompilationUnit webUnit = parseDartFile('lib/web_ui/lib/ui.dart',
-      parseFunctionBodies: false, suppressErrors: false);
+  if (!analyzerFeatures.isEnabled(Feature.non_nullable)) {
+    throw Exception('non-nullable feature is disabled.');
+  }
+  final ParseStringResult result = parseFile(path: path, featureSet: analyzerFeatures, throwIfDiagnostics: false);
+  if (result.errors.isNotEmpty) {
+    result.errors.forEach(stderr.writeln);
+    stderr.writeln('Failure!');
+    exit(1);
+  }
+  return result.unit;
+}
+
+void main() {
+  // These files just contain imports to the part files;
+  final CompilationUnit uiUnit = _parseAndCheckDart('lib/ui/ui.dart');
+  final CompilationUnit webUnit = _parseAndCheckDart('lib/web_ui/lib/ui.dart');
   final Map<String, ClassDeclaration> uiClasses = <String, ClassDeclaration>{};
   final Map<String, ClassDeclaration> webClasses = <String, ClassDeclaration>{};
 
   // Gather all public classes from each library. For now we are skiping
   // other top level members.
-  _collectPublicClasses(uiUnit, uiClasses, 'lib/ui/', analyzerFeatures: analyzerFeatures);
+  _collectPublicClasses(uiUnit, uiClasses, 'lib/ui/');
   _collectPublicClasses(webUnit, webClasses, 'lib/web_ui/lib/');
 
   if (uiClasses.isEmpty || webClasses.isEmpty) {
@@ -169,8 +180,10 @@ void main() {
         // allow dynamic in web implementation.
         if (webMethod.returnType?.toString() != 'dynamic') {
           failed = true;
-          print('Warning: lib/ui/ui.dart $className.$methodName return type'
-              '${uiMethod.returnType?.toString()} is not the same as in lib/web_ui/ui.dart.');
+          print(
+            'Warning: $className.$methodName return type mismatch:\n'
+            '  lib/ui/ui.dart     : ${uiMethod.returnType?.toSource()}\n'
+            '  lib/web_ui/ui.dart : ${webMethod.returnType?.toSource()}');
         }
       }
     }
@@ -185,24 +198,19 @@ void main() {
 
 // Collects all public classes defined by the part files of [unit].
 void _collectPublicClasses(CompilationUnit unit,
-    Map<String, ClassDeclaration> destination, String root, {FeatureSet analyzerFeatures}) {
+    Map<String, ClassDeclaration> destination, String root) {
   for (Directive directive in unit.directives) {
     if (directive is! PartDirective) {
       continue;
     }
-    final PartDirective partDirective = directive;
+    final PartDirective partDirective = directive as PartDirective;
     final String literalUri = partDirective.uri.toString();
-    final CompilationUnit subUnit = parseDartFile(
-      '$root${literalUri.substring(1, literalUri.length - 1)}',
-      parseFunctionBodies: false,
-      suppressErrors: false,
-      featureSet: analyzerFeatures,
-    );
+    final CompilationUnit subUnit = _parseAndCheckDart('$root${literalUri.substring(1, literalUri.length - 1)}');
     for (CompilationUnitMember member in subUnit.declarations) {
       if (member is! ClassDeclaration) {
         continue;
       }
-      final ClassDeclaration classDeclaration = member;
+      final ClassDeclaration classDeclaration = member as ClassDeclaration;
       if (classDeclaration.name.name.startsWith('_')) {
         continue;
       }
@@ -217,7 +225,7 @@ void _collectPublicConstructors(ClassDeclaration classDeclaration,
     if (member is! ConstructorDeclaration) {
       continue;
     }
-    final ConstructorDeclaration method = member;
+    final ConstructorDeclaration method = member as ConstructorDeclaration;
     if (method?.name?.name == null) {
       destination['Unnamed Constructor'] = method;
       continue;
@@ -235,7 +243,7 @@ void _collectPublicMethods(ClassDeclaration classDeclaration,
     if (member is! MethodDeclaration) {
       continue;
     }
-    final MethodDeclaration method = member;
+    final MethodDeclaration method = member as MethodDeclaration;
     if (method.name.name.startsWith('_')) {
       continue;
     }

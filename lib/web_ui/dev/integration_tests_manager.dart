@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.6
+
 import 'dart:io' as io;
 import 'package:path/path.dart' as pathlib;
 import 'package:web_driver_installer/chrome_driver_installer.dart';
@@ -51,7 +53,7 @@ class IntegrationTestsManager {
         // LUCI installs driver from CIPD, so we skip installing it on LUCI.
         await _prepareDriver();
       } else {
-        await _verifyDriverForLUCI();
+        _verifyDriverForLUCI();
       }
       await _startDriver(_browserDriverDir.path);
       // TODO(nurhan): https://github.com/flutter/flutter/issues/52987
@@ -109,13 +111,13 @@ class IntegrationTestsManager {
     }
   }
 
-  void _startDriver(String workingDirectory) async {
+  Future<void> _startDriver(String workingDirectory) async {
     await startProcess('./chromedriver/chromedriver', ['--port=4444'],
         workingDirectory: workingDirectory);
     print('INFO: Driver started');
   }
 
-  void _prepareDriver() async {
+  Future<void> _prepareDriver() async {
     if (_browserDriverDir.existsSync()) {
       _browserDriverDir.deleteSync(recursive: true);
     }
@@ -130,7 +132,10 @@ class IntegrationTestsManager {
     final String chromeDriverVersion = await queryChromeDriverVersion();
     ChromeDriverInstaller chromeDriverInstaller =
         ChromeDriverInstaller.withVersion(chromeDriverVersion);
-    await chromeDriverInstaller.install(alwaysInstall: true);
+    // TODO(yjbanov): remove this dynamic hack when chromeDriverInstaller.install returns Future<void>
+    //                https://github.com/flutter/flutter/issues/59376
+    final dynamic installationFuture = chromeDriverInstaller.install(alwaysInstall: true) as dynamic;
+    await installationFuture;
     io.Directory.current = temp;
   }
 
@@ -172,7 +177,7 @@ class IntegrationTestsManager {
         .whereType<io.File>()
         .toList();
 
-    final List<String> e2eTestsToRun = List<String>();
+    final List<String> e2eTestsToRun = <String>[];
     final List<String> blockedTests =
         blockedTestsListsMap[getBlockedTestsListMapKey(_browser)] ?? <String>[];
 
@@ -265,7 +270,7 @@ class IntegrationTestsManager {
     // Whether the project has the pubspec.yaml file.
     bool pubSpecFound = false;
     // The test directory 'test_driver'.
-    io.Directory testDirectory = null;
+    io.Directory testDirectory;
 
     for (io.FileSystemEntity e in entities) {
       // The tests should be under this directories.
