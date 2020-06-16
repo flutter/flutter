@@ -821,6 +821,53 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
+  testWidgets('Tooltip does not attempt to show after unmount', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/54096.
+    const Duration waitDuration = Duration(seconds: 1);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(() async {
+      if (gesture != null)
+        return gesture.removePointer();
+    });
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(1.0, 1.0));
+    await tester.pump();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            waitDuration: waitDuration,
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+
+    // Pump another random widget to unmount the Tooltip widget.
+    await tester.pumpWidget(
+        const MaterialApp(
+          home: Center(
+            child: SizedBox(),
+        ),
+      ),
+    );
+
+    // If the issue regresses, an exception will be thrown while we are waiting.
+    await tester.pump(waitDuration);
+  });
+
   testWidgets('Does tooltip contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
