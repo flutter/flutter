@@ -3,6 +3,8 @@
 # uncommented, we'll delete this file and simply inherit the root options.
 
 analyzer:
+  enable-experiment:
+    - non-nullable
   strong-mode:
     # TODO(uncomment) implicit-casts: false
     implicit-dynamic: false

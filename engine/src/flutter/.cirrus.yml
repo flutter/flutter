@@ -127,7 +127,7 @@ task:
       script:
         - cd $ENGINE_PATH/src/flutter/lib/web_ui
         - $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/pub get
-        - $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/dartanalyzer --fatal-warnings --fatal-hints dev/ lib/ test/ tool/
+        - $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/dartanalyzer --enable-experiment=non-nullable --fatal-warnings --fatal-hints dev/ lib/ test/ tool/
 
     - name: format_and_dart_test
       format_script: |
