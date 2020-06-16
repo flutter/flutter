@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/common/animator.h"
-#include <memory>
 
 #include "flutter/fml/trace_event.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
@@ -29,7 +28,18 @@ Animator::Animator(Delegate& delegate,
       last_frame_begin_time_(),
       last_frame_target_time_(),
       dart_frame_deadline_(0),
-      layer_tree_holder_(std::make_shared<LayerTreeHolder>()),
+#if FLUTTER_SHELL_ENABLE_METAL
+      layer_tree_pipeline_(fml::MakeRefCounted<LayerTreePipeline>(2)),
+#else   // FLUTTER_SHELL_ENABLE_METAL
+      // TODO(dnfield): We should remove this logic and set the pipeline depth
+      // back to 2 in this case. See
+      // https://github.com/flutter/engine/pull/9132 for discussion.
+      layer_tree_pipeline_(fml::MakeRefCounted<LayerTreePipeline>(
+          task_runners.GetPlatformTaskRunner() ==
+                  task_runners.GetRasterTaskRunner()
+              ? 1
+              : 2)),
+#endif  // FLUTTER_SHELL_ENABLE_METAL
       pending_frame_semaphore_(1),
       frame_number_(1),
       paused_(false),
@@ -37,7 +47,8 @@ Animator::Animator(Delegate& delegate,
       frame_scheduled_(false),
       notify_idle_task_id_(0),
       dimension_change_pending_(false),
-      weak_factory_(this) {}
+      weak_factory_(this) {
+}
 
 Animator::~Animator() = default;
 
@@ -103,6 +114,25 @@ void Animator::BeginFrame(fml::TimePoint frame_start_time,
   regenerate_layer_tree_ = false;
   pending_frame_semaphore_.Signal();
 
+  if (!producer_continuation_) {
+    // We may already have a valid pipeline continuation in case a previous
+    // begin frame did not result in an Animation::Render. Simply reuse that
+    // instead of asking the pipeline for a fresh continuation.
+    producer_continuation_ = layer_tree_pipeline_->Produce();
+
+    if (!producer_continuation_) {
+      // If we still don't have valid continuation, the pipeline is currently
+      // full because the consumer is being too slow. Try again at the next
+      // frame interval.
+      RequestFrame();
+      return;
+    }
+  }
+
+  // We have acquired a valid continuation from the pipeline and are ready
+  // to service potential frame.
+  FML_DCHECK(producer_continuation_);
+
   last_frame_begin_time_ = frame_start_time;
   last_frame_target_time_ = frame_target_time;
   dart_frame_deadline_ = FxlToDartOrEarlier(frame_target_time);
@@ -154,8 +184,13 @@ void Animator::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
                                 last_frame_target_time_);
   }
 
-  layer_tree_holder_->PushIfNewer(std::move(layer_tree));
-  delegate_.OnAnimatorDraw(layer_tree_holder_, last_frame_target_time_);
+  // Commit the pending continuation.
+  bool result = producer_continuation_.Complete(std::move(layer_tree));
+  if (!result) {
+    FML_DLOG(INFO) << "No pending continuation to commit";
+  }
+
+  delegate_.OnAnimatorDraw(layer_tree_pipeline_, last_frame_target_time_);
 }
 
 bool Animator::CanReuseLastLayerTree() {
