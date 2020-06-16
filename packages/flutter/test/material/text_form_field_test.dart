@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -336,8 +338,8 @@ void main() {
     await tester.pump();
 
     // Context menu should not have paste.
-    expect(find.text('SELECT ALL'), findsOneWidget);
-    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('Select all'), findsOneWidget);
+    expect(find.text('Paste'), findsNothing);
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;

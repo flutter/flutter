@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:collection' show LinkedHashSet;
 
@@ -141,7 +143,7 @@ abstract class MouseCursorSession {
 /// I-beam.
 ///
 /// During the painting phase, [MouseCursor] objects are assigned to regions on
-/// the screen via annotaions. Later during a device update (e.g. when a mouse
+/// the screen via annotations. Later during a device update (e.g. when a mouse
 /// moves), [MouseTracker] finds the _active cursor_ of each mouse device, which
 /// is the front-most region associated with the position of each mouse cursor,
 /// or defaults to [SystemMouseCursors.basic] if no cursors are associated with
@@ -218,7 +220,7 @@ abstract class MouseCursor with Diagnosticable {
 
   /// A very short description of the mouse cursor.
   ///
-  /// The [debugDescription] shoule be a few words that can describe this cursor
+  /// The [debugDescription] should be a few words that can describe this cursor
   /// to make debug information more readable. It is returned as the [toString]
   /// when the diagnostic level is at or above [DiagnosticLevel.info].
   ///
@@ -431,7 +433,7 @@ class SystemMouseCursors {
 
   /// A cursor that indicates a forbidden action.
   ///
-  /// Typically the shape of a circle with a diagnal line.
+  /// Typically the shape of a circle with a diagonal line.
   static const SystemMouseCursor forbidden = SystemMouseCursor._(kind: 'forbidden');
 
   /// A cursor that indicates something that can be dragged.
@@ -443,4 +445,16 @@ class SystemMouseCursors {
   ///
   /// Typically the shape of a closed hand.
   static const SystemMouseCursor grabbing = SystemMouseCursor._(kind: 'grabbing');
+
+  /// A cursor in the shape of a horizontal double-arrow.
+  ///
+  /// This cursor is typically used when moving or resizing an object, and the
+  /// object can be moved left or right.
+  static const SystemMouseCursor horizontalDoubleArrow = SystemMouseCursor._(kind: 'horizontalDoubleArrow');
+
+  /// A cursor in the shape of a vertical double-arrow.
+  ///
+  /// This cursor is typically used when moving or resizing an object, and the
+  /// object can be moved up or down.
+  static const SystemMouseCursor verticalDoubleArrow = SystemMouseCursor._(kind: 'verticalDoubleArrow');
 }

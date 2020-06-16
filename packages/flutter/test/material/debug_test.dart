@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -67,8 +69,8 @@ void main() {
       '   No MaterialLocalizations found.\n'
       '   BackButton widgets require MaterialLocalizations to be provided\n'
       '   by a Localizations widget ancestor.\n'
-      '   Localizations are used to generate many different messages,\n'
-      '   labels, and abbreviations which are used by the material library.\n'
+      '   The material library uses Localizations to generate messages,\n'
+      '   labels, and abbreviations.\n'
       '   To introduce a MaterialLocalizations, either use a MaterialApp at\n'
       '   the root of your application to include them automatically, or\n'
       '   add a Localization widget with a MaterialLocalizations delegate.\n'

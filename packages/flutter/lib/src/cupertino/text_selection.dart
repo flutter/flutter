@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -478,7 +480,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
     ) as double;
 
-    // The y-coordinate has to be calculated instead of directly quoting postion.dy,
+    // The y-coordinate has to be calculated instead of directly quoting position.dy,
     // since the caller (TextSelectionOverlay._buildToolbar) does not know whether
     // the toolbar is going to be facing up or down.
     final double localBarTopY = isArrowPointingDown

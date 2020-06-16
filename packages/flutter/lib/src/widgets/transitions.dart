@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -723,6 +725,60 @@ class RelativeRectTween extends Tween<RelativeRect> {
 /// Here's an illustration of the [PositionedTransition] widget, with it's [rect]
 /// animated by a [CurvedAnimation] set to [Curves.elasticInOut]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/positioned_transition.mp4}
+///
+/// {@tool dartpad --template=stateful_widget_material_ticker}
+///
+/// The following code implements the [PositionedTransition] as seen in the video
+/// above:
+///
+/// ```dart
+/// AnimationController _controller;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _controller = AnimationController(
+///     duration: const Duration(seconds: 2),
+///     vsync: this,
+///   )..repeat(reverse: true);
+/// }
+///
+/// @override
+/// void dispose() {
+///   _controller.dispose();
+///   super.dispose();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   final double smallLogo = 100;
+///   final double bigLogo = 200;
+///
+///   return LayoutBuilder(
+///     builder: (context, constraints) {
+///       final Size biggest = constraints.biggest;
+///       return Stack(
+///         children: [
+///           PositionedTransition(
+///             rect: RelativeRectTween(
+///               begin: RelativeRect.fromSize(Rect.fromLTWH(0, 0, smallLogo, smallLogo), biggest),
+///               end: RelativeRect.fromSize(Rect.fromLTWH(biggest.width - bigLogo, biggest.height - bigLogo, bigLogo, bigLogo), biggest),
+///             ).animate(CurvedAnimation(
+///               parent: _controller,
+///               curve: Curves.elasticInOut,
+///             )),
+///             child: Padding(
+///               padding: const EdgeInsets.all(8),
+///               child: FlutterLogo()
+///             ),
+///           ),
+///         ],
+///       );
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

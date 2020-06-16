@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -173,7 +175,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// and [automaticallyImplyLeading] must not be null. Additionally, if
   /// [elevation] is specified, it must be non-negative.
   ///
-  /// If [backgroundColor], [elevation], [brightness], [iconTheme],
+  /// If [backgroundColor], [elevation], [shadowColor], [brightness], [iconTheme],
   /// [actionsIconTheme], [textTheme] or [centerTitle] are null, then their
   /// [AppBarTheme] values will be used. If the corresponding [AppBarTheme] property is null,
   /// then the default specified in the property's documentation will be used.
@@ -188,6 +190,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.flexibleSpace,
     this.bottom,
     this.elevation,
+    this.shadowColor,
     this.shape,
     this.backgroundColor,
     this.brightness,
@@ -336,6 +339,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// for app bars.
   final double elevation;
 
+  /// The color to paint the shadow below the app bar.
+  ///
+  /// If this property is null, then [ThemeData.appBarTheme.shadowColor] is used,
+  /// if that is also null, the default value is fully opaque black, the appropriate
+  /// color for shadows.
+  final Color shadowColor;
+
   /// The material's shape as well its shadow.
   ///
   /// A shadow is only displayed if the [elevation] is greater than
@@ -454,6 +464,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _AppBarState extends State<AppBar> {
   static const double _defaultElevation = 4.0;
+  static const Color _defaultShadowColor = Color(0xFF000000);
 
   void _handleDrawerButton() {
     Scaffold.of(context).openDrawer();
@@ -663,6 +674,9 @@ class _AppBarState extends State<AppBar> {
           elevation: widget.elevation
             ?? appBarTheme.elevation
             ?? _defaultElevation,
+          shadowColor: widget.shadowColor
+            ?? appBarTheme.shadowColor
+            ?? _defaultShadowColor,
           shape: widget.shape,
           child: Semantics(
             explicitChildNodes: true,
@@ -735,6 +749,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.flexibleSpace,
     @required this.bottom,
     @required this.elevation,
+    @required this.shadowColor,
     @required this.forceElevated,
     @required this.backgroundColor,
     @required this.brightness,
@@ -763,6 +778,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final Widget flexibleSpace;
   final PreferredSizeWidget bottom;
   final double elevation;
+  final Color shadowColor;
   final bool forceElevated;
   final Color backgroundColor;
   final Brightness brightness;
@@ -820,6 +836,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
           : flexibleSpace,
         bottom: bottom,
         elevation: forceElevated || overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent) ? elevation ?? 4.0 : 0.0,
+        shadowColor: shadowColor,
         backgroundColor: backgroundColor,
         brightness: brightness,
         iconTheme: iconTheme,
@@ -847,6 +864,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || bottom != oldDelegate.bottom
         || _bottomHeight != oldDelegate._bottomHeight
         || elevation != oldDelegate.elevation
+        || shadowColor != oldDelegate.shadowColor
         || backgroundColor != oldDelegate.backgroundColor
         || brightness != oldDelegate.brightness
         || iconTheme != oldDelegate.iconTheme
@@ -860,7 +878,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || pinned != oldDelegate.pinned
         || floating != oldDelegate.floating
         || snapConfiguration != oldDelegate.snapConfiguration
-        || stretchConfiguration != oldDelegate.stretchConfiguration;
+        || stretchConfiguration != oldDelegate.stretchConfiguration
+        || forceElevated != oldDelegate.forceElevated;
   }
 
   @override
@@ -961,6 +980,7 @@ class SliverAppBar extends StatefulWidget {
     this.flexibleSpace,
     this.bottom,
     this.elevation,
+    this.shadowColor,
     this.forceElevated = false,
     this.backgroundColor,
     this.brightness,
@@ -1077,6 +1097,14 @@ class SliverAppBar extends StatefulWidget {
   /// content is scrolled under it, or if it scrolls with the content, then no
   /// shadow is drawn, regardless of the value of [elevation].
   final double elevation;
+
+  /// The color to paint the shadow below the app bar. Typically this should be set
+  /// along with [elevation].
+  ///
+  /// If this property is null, then [ThemeData.appBarTheme.shadowColor] is used,
+  /// if that is also null, the default value is fully opaque black, the appropriate
+  /// color for shadows.
+  final Color shadowColor;
 
   /// Whether to show the shadow appropriate for the [elevation] even if the
   /// content is not scrolled under the [AppBar].
@@ -1336,6 +1364,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           flexibleSpace: widget.flexibleSpace,
           bottom: widget.bottom,
           elevation: widget.elevation,
+          shadowColor: widget.shadowColor,
           forceElevated: widget.forceElevated,
           backgroundColor: widget.backgroundColor,
           brightness: widget.brightness,
