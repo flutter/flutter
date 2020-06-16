@@ -88,6 +88,24 @@ void main() {
       expect(response.type, 'Success');
     });
 
+    test('ext.flutter.brightnessOverride can toggle window brightness', () async {
+      final IsolateRef isolate = (await vmService.getVM()).isolates.first;
+      final Response response = await vmService.callServiceExtension(
+        'ext.flutter.brightnessOverride',
+        isolateId: isolate.id,
+      );
+      expect(response.json['value'], 'Brightness.light');
+
+      final Response updateResponse = await vmService.callServiceExtension(
+        'ext.flutter.brightnessOverride',
+        isolateId: isolate.id,
+        args: <String, String>{
+          'value': 'Brightness.dark',
+        }
+      );
+      expect(updateResponse.json['value'], 'Brightness.dark');
+    });
+
     // TODO(devoncarew): These tests fail on cirrus-ci windows.
   }, skip: Platform.isWindows);
 }
