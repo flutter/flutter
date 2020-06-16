@@ -1480,7 +1480,6 @@ class _MediaQueryFromWindowsState extends State<_MediaQueryFromWindow> with Widg
         child: widget.child,
       );
     }
-    print(debugBrightnessOverride);
     return MediaQuery(
       data: MediaQueryData.fromWindow(
         WidgetsBinding.instance.window,
