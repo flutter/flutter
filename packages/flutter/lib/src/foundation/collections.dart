@@ -126,7 +126,8 @@ const int _kMergeSortLimit = 32;
 ///
 /// If `compare` is omitted, this defaults to calling [Comparable.compareTo] on
 /// the objects. If any object is not [Comparable], this throws a [TypeError]
-/// (`CastError` on some SDK versions).
+/// (The stack trace may call it `_CastError` or `_TypeError`, but to catch it,
+/// use [TypeError]).
 ///
 /// Merge-sorting works by splitting the job into two parts, sorting each
 /// recursively, and then merging the two sorted parts.
@@ -187,7 +188,8 @@ Comparator<T> _defaultCompare<T>() {
 ///
 /// If `compare` is omitted, this defaults to calling [Comparable.compareTo] on
 /// the objects. If any object is not [Comparable], this throws a [TypeError]
-/// (`CastError` on some SDK versions).
+/// (The stack trace may call it `_CastError` or `_TypeError`, but to catch it,
+/// use [TypeError]).
 ///
 /// Insertion sort is a simple sorting algorithm. For `n` elements it does on
 /// the order of `n * log(n)` comparisons but up to `n` squared moves. The
