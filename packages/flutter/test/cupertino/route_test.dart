@@ -1359,6 +1359,47 @@ void main() {
     expect(find.text('second'), findsOneWidget);
     expect(find.widgetWithText(CupertinoNavigationBar, 'title two'), findsOneWidget);
   });
+
+  testWidgets('CupertinoPage can toggle MaintainState', (WidgetTester tester) async {
+    final LocalKey pageKeyOne = UniqueKey();
+    final LocalKey pageKeyTwo = UniqueKey();
+    final TransitionDetector detector = TransitionDetector();
+    List<Page<void>> myPages = <Page<void>>[
+      CupertinoPage<void>(key: pageKeyOne, maintainState: false, builder: (BuildContext context) => const Text('first')),
+      CupertinoPage<void>(key: pageKeyTwo, builder: (BuildContext context) => const Text('second')),
+    ];
+    await tester.pumpWidget(
+      buildNavigator(
+        pages: myPages,
+        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        transitionDelegate: detector,
+      )
+    );
+
+    expect(detector.hasTransition, isFalse);
+    // Page one does not maintain state.
+    expect(find.text('first', skipOffstage: false), findsNothing);
+    expect(find.text('second'), findsOneWidget);
+
+    myPages = <Page<void>>[
+      CupertinoPage<void>(key: pageKeyOne, maintainState: true, builder: (BuildContext context) => const Text('first')),
+      CupertinoPage<void>(key: pageKeyTwo, builder: (BuildContext context) => const Text('second')),
+    ];
+
+    await tester.pumpWidget(
+      buildNavigator(
+        pages: myPages,
+        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        transitionDelegate: detector,
+      )
+    );
+    // There should be no transition because the page has the same key.
+    expect(detector.hasTransition, isFalse);
+    // Page one sets the maintain state to be true, its widget tree should be
+    // built.
+    expect(find.text('first', skipOffstage: false), findsOneWidget);
+    expect(find.text('second'), findsOneWidget);
+  });
 }
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}

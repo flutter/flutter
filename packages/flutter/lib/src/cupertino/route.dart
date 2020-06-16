@@ -79,19 +79,13 @@ final DecorationTween _kGradientShadowTween = DecorationTween(
 /// A mixin that replaces the entire screen with an iOS transition for a
 /// [PageRoute].
 ///
+/// {@template flutter.cupertino.cupertinoRouteTransitionMixin}
 /// The page slides in from the right and exits in reverse. The page also shifts
 /// to the left in parallax when another page enters to cover it.
 ///
 /// The page slides in from the bottom and exits in reverse with no parallax
 /// effect for fullscreen dialogs.
-///
-/// By default, when a modal route is replaced by another, the previous route
-/// remains in memory. To free all the resources when this is not necessary, set
-/// [maintainState] to false.
-///
-/// The type `T` specifies the return type of the route which can be supplied as
-/// the route is popped from the stack via [Navigator.pop] when an optional
-/// `result` can be provided.
+/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -318,11 +312,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
 /// A modal route that replaces the entire screen with an iOS transition.
 ///
-/// The route slides in from the right and exits in reverse. The route also
-/// shifts to the left in parallax when another route enters to cover it.
-///
-/// The route slides in from the bottom and exits in reverse with no parallax
-/// effect for fullscreen dialogs.
+/// {@macro flutter.cupertino.cupertinoRouteTransitionMixin}
 ///
 /// By default, when a modal route is replaced by another, the previous route
 /// remains in memory. To free all the resources when this is not necessary, set
@@ -404,15 +394,11 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
 
 /// A page that creates a cupertino style [PageRoute].
 ///
-/// The created route slides in from the right and exits in reverse. The route
-/// also shifts to the left in parallax when another route enters to cover it.
+/// {@macro flutter.cupertino.cupertinoRouteTransitionMixin}
 ///
-/// The route slides in from the bottom and exits in reverse with no parallax
-/// effect for fullscreen dialogs.
-///
-/// By default, when a modal route is replaced by another, the previous route
-/// remains in memory. To free all the resources when this is not necessary, set
-/// [maintainState] to false.
+/// By default, when a created modal route is replaced by another, the previous
+/// route remains in memory. To free all the resources when this is not
+/// necessary, set [maintainState] to false.
 ///
 /// The type `T` specifies the return type of the route which can be supplied as
 /// the route is popped from the stack via [Navigator.transitionDelegate] by

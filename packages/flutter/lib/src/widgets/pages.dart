@@ -49,7 +49,7 @@ Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animat
 ///
 /// See also:
 ///
-///  * [TransitionPage], which is a [Page] of this class.
+///  * [TransitionBuilderPage], which is a [Page] of this class.
 class PageRouteBuilder<T> extends PageRoute<T> {
   /// Creates a route that delegates to builder callbacks.
   ///
@@ -126,9 +126,9 @@ class PageRouteBuilder<T> extends PageRoute<T> {
 /// See also:
 ///
 ///  * [PageRouteBuilder], which is a [PageRoute] version of this class.
-class TransitionPage<T> extends Page<T> {
-  /// Creates a [TransitionPage].
-  const TransitionPage({
+class TransitionBuilderPage<T> extends Page<T> {
+  /// Creates a [TransitionBuilderPage].
+  const TransitionBuilderPage({
     @required this.pageBuilder,
     this.transitionsBuilder = _defaultTransitionsBuilder,
     this.transitionDuration = const Duration(milliseconds: 300),
@@ -142,12 +142,12 @@ class TransitionPage<T> extends Page<T> {
     String name,
     Object arguments,
   }) : assert(pageBuilder != null),
-      assert(transitionsBuilder != null),
-      assert(opaque != null),
-      assert(barrierDismissible != null),
-      assert(maintainState != null),
-      assert(fullscreenDialog != null),
-      super(key: key, name: name, arguments: arguments);
+       assert(transitionsBuilder != null),
+       assert(opaque != null),
+       assert(barrierDismissible != null),
+       assert(maintainState != null),
+       assert(fullscreenDialog != null),
+       super(key: key, name: name, arguments: arguments);
 
   /// {@macro flutter.widgets.pageRouteBuilder.pageBuilder}
   final RoutePageBuilder pageBuilder;
@@ -182,15 +182,15 @@ class TransitionPage<T> extends Page<T> {
 
 // A page-based version of the [PageRouteBuilder].
 //
-// This class gets its builder and settings directly from the [TransitionPage],
-// so that its content updates accordingly to the [TransitionPage].
+// This class gets its builder and settings directly from the [TransitionBuilderPage],
+// so that its content updates accordingly to the [TransitionBuilderPage].
 class _PageBasedPageRouteBuilder<T> extends PageRoute<T>{
   _PageBasedPageRouteBuilder(
-    TransitionPage<T> page,
+    TransitionBuilderPage<T> page,
   ) : assert(page != null),
        super(settings: page, fullscreenDialog: page.fullscreenDialog);
 
-  TransitionPage<T> get page => settings as TransitionPage<T>;
+  TransitionBuilderPage<T> get page => settings as TransitionBuilderPage<T>;
 
   @override
   Duration get transitionDuration => page.transitionDuration;

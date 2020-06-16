@@ -533,11 +533,11 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
   });
 
-  testWidgets('TransitionPage works', (WidgetTester tester) async {
+  testWidgets('TransitionBuilderPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
     List<Page<void>> myPages = <Page<void>>[
-      TransitionPage<void>(
+      TransitionBuilderPage<void>(
         key: pageKey,
         pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
           return const Text('first');
@@ -556,7 +556,7 @@ void main() {
     expect(find.text('first'), findsOneWidget);
 
     myPages = <Page<void>>[
-      TransitionPage<void>(
+      TransitionBuilderPage<void>(
         key: pageKey,
         pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
           return const Text('second');
@@ -578,7 +578,7 @@ void main() {
     expect(find.text('second'), findsOneWidget);
 
     myPages = <Page<void>>[
-      TransitionPage<void>(
+      TransitionBuilderPage<void>(
         key: pageKey,
         pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
           return const Text('dummy');
@@ -604,6 +604,69 @@ void main() {
     expect(find.text('second'), findsNothing);
     expect(find.text('dummy'), findsNothing);
     expect(find.text('third'), findsOneWidget);
+  });
+
+  testWidgets('TransitionBuilderPage can toggle MaintainState', (WidgetTester tester) async {
+    final LocalKey pageKeyOne = UniqueKey();
+    final LocalKey pageKeyTwo = UniqueKey();
+    final TransitionDetector detector = TransitionDetector();
+    List<Page<void>> myPages = <Page<void>>[
+      TransitionBuilderPage<void>(
+        key: pageKeyOne,
+        maintainState: false,
+        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return const Text('first');
+        },
+      ),
+      TransitionBuilderPage<void>(
+        key: pageKeyTwo,
+        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return const Text('second');
+        },
+      )
+    ];
+    await tester.pumpWidget(
+      buildNavigator(
+        pages: myPages,
+        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        transitionDelegate: detector,
+      )
+    );
+
+    expect(detector.hasTransition, isFalse);
+    // Page one does not maintain state.
+    expect(find.text('first', skipOffstage: false), findsNothing);
+    expect(find.text('second'), findsOneWidget);
+
+    myPages = <Page<void>>[
+      TransitionBuilderPage<void>(
+        key: pageKeyOne,
+        maintainState: true,
+        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return const Text('first');
+        },
+      ),
+      TransitionBuilderPage<void>(
+        key: pageKeyTwo,
+        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return const Text('second');
+        },
+      )
+    ];
+
+    await tester.pumpWidget(
+      buildNavigator(
+        pages: myPages,
+        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        transitionDelegate: detector,
+      )
+    );
+    // There should be no transition because the page has the same key.
+    expect(detector.hasTransition, isFalse);
+    // Page one sets the maintain state to be true, its widget tree should be
+    // built.
+    expect(find.text('first', skipOffstage: false), findsOneWidget);
+    expect(find.text('second'), findsOneWidget);
   });
 
   group('TransitionRoute', () {

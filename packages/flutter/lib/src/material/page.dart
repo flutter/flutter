@@ -11,13 +11,7 @@ import 'theme.dart';
 /// A modal route that replaces the entire screen with a platform-adaptive
 /// transition.
 ///
-/// For Android, the entrance transition for the route slides the page upwards
-/// and fades it in. The exit transition is the same, but in reverse.
-///
-/// The transition is adaptive to the platform and on iOS, the route slides in
-/// from the right and exits in reverse. The route also shifts to the left in
-/// parallax when another page enters to cover it. (These directions are flipped
-/// in environments with a right-to-left reading direction.)
+/// {@macro flutter.material.materialRouteTransitionMixin}
 ///
 /// By default, when a modal route is replaced by another, the previous route
 /// remains in memory. To free all the resources when this is not necessary, set
@@ -65,6 +59,7 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
 
 /// A mixin that provides platform-adaptive transitions for a [PageRoute].
 ///
+/// {@template flutter.material.materialRouteTransitionMixin}
 /// For Android, the entrance transition for the page slides the route upwards
 /// and fades it in. The exit transition is the same, but in reverse.
 ///
@@ -72,6 +67,7 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
 /// from the right and exits in reverse. The route also shifts to the left in
 /// parallax when another page enters to cover it. (These directions are flipped
 /// in environments with a right-to-left reading direction.)
+/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -129,13 +125,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
 
 /// A page that creates a material style [PageRoute].
 ///
-/// For Android, the entrance transition for the created route slides the page
-/// upwards and fades it in. The exit transition is the same, but in reverse.
-///
-/// The transition is adaptive to the platform and on iOS, the route slides in
-/// from the right and exits in reverse. The route also shifts to the left in
-/// parallax when another page enters to cover it. (These directions are flipped
-/// in environments with a right-to-left reading direction.)
+/// {@macro flutter.material.materialRouteTransitionMixin}
 ///
 /// By default, when the created route is replaced by another, the previous
 /// route remains in memory. To free all the resources when this is not

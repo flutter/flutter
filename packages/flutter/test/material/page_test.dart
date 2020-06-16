@@ -869,6 +869,47 @@ void main() {
     expect(find.text('first'), findsNothing);
     expect(find.text('second'), findsOneWidget);
   });
+
+  testWidgets('MaterialPage can toggle MaintainState', (WidgetTester tester) async {
+    final LocalKey pageKeyOne = UniqueKey();
+    final LocalKey pageKeyTwo = UniqueKey();
+    final TransitionDetector detector = TransitionDetector();
+    List<Page<void>> myPages = <Page<void>>[
+      MaterialPage<void>(key: pageKeyOne, maintainState: false, builder: (BuildContext context) => const Text('first')),
+      MaterialPage<void>(key: pageKeyTwo, builder: (BuildContext context) => const Text('second')),
+    ];
+    await tester.pumpWidget(
+      buildNavigator(
+        pages: myPages,
+        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        transitionDelegate: detector,
+      )
+    );
+
+    expect(detector.hasTransition, isFalse);
+    // Page one does not maintain state.
+    expect(find.text('first', skipOffstage: false), findsNothing);
+    expect(find.text('second'), findsOneWidget);
+
+    myPages = <Page<void>>[
+      MaterialPage<void>(key: pageKeyOne, maintainState: true, builder: (BuildContext context) => const Text('first')),
+      MaterialPage<void>(key: pageKeyTwo, builder: (BuildContext context) => const Text('second')),
+    ];
+
+    await tester.pumpWidget(
+      buildNavigator(
+        pages: myPages,
+        onPopPage: (Route<dynamic> route, dynamic result) => null,
+        transitionDelegate: detector,
+      )
+    );
+    // There should be no transition because the page has the same key.
+    expect(detector.hasTransition, isFalse);
+    // Page one sets the maintain state to be true, its widget tree should be
+    // built.
+    expect(find.text('first', skipOffstage: false), findsOneWidget);
+    expect(find.text('second'), findsOneWidget);
+  });
 }
 
 class TransitionDetector extends DefaultTransitionDelegate<void> {
