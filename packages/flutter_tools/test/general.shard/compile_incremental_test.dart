@@ -171,10 +171,11 @@ void main() {
 
     // Compiler message is not printed with suppressErrors: true above.
     expect(testLogger.errorText, isNot(equals(
-      'line0\nline1\n'
-      'line1\nline2\n'
       'line1\nline2\n'
     )));
+    expect(testLogger.traceText, contains(
+      'line1\nline2\n'
+    ));
   });
 
   testWithoutContext('incremental compile and recompile twice', () async {

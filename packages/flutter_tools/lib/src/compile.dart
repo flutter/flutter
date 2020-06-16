@@ -155,6 +155,8 @@ class StdoutHandler {
     if (state == StdoutState.CollectDiagnostic) {
       if (!_suppressCompilerMessages) {
         _logger.printError(message);
+      } else {
+        _logger.printTrace(message);
       }
     } else {
       assert(state == StdoutState.CollectDependencies);
