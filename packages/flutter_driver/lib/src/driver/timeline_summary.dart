@@ -253,7 +253,8 @@ class TimelineSummary {
   /// begin ("ph": "B"). This routine assumes that the next event with the same
   /// name is phase end ("ph": "E"), but it's not examined.
   /// "SceneDisplayLag" event is an exception, with phase ("ph") labeled
-  /// 'b' and 'e'. See [SceneDisplayLagSummarizer].
+  /// 'b' and 'e', meaning begin and end phase for an async event. 
+  /// See [SceneDisplayLagSummarizer].
   /// See: https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU
   List<Duration> _extractBeginEndEvents(String name) {
     return _extractDurations(
