@@ -23,6 +23,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../dart/language_version.dart';
 import '../dart/pub.dart';
 import '../devfs.dart';
 import '../device.dart';
@@ -581,6 +582,10 @@ class _ResidentWebRunner extends ResidentWebRunner {
       }
 
       final String entrypoint = <String>[
+        determineLanguageVersion(
+          globals.fs.file(mainUri),
+          packageConfig[flutterProject.manifest.appName],
+        ),
         '// Flutter web bootstrap script for $importedEntrypoint.',
         '',
         "import 'dart:ui' as ui;",

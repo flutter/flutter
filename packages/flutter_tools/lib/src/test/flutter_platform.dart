@@ -5,14 +5,14 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
-
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/suite.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -20,6 +20,7 @@ import '../base/io.dart';
 import '../build_info.dart';
 import '../compile.dart';
 import '../convert.dart';
+import '../dart/language_version.dart';
 import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -151,7 +152,7 @@ String generateTestBootstrap({
   @required InternetAddress host,
   File testConfigFile,
   bool updateGoldens = false,
-  bool nullSafety = false,
+  String languageVersionHeader = '',
 }) {
   assert(testUrl != null);
   assert(host != null);
@@ -164,6 +165,7 @@ String generateTestBootstrap({
 
   final StringBuffer buffer = StringBuffer();
   buffer.write('''
+$languageVersionHeader
 import 'dart:async';
 import 'dart:convert';  // ignore: dart_convert_import
 import 'dart:io';  // ignore: dart_io_import
@@ -181,17 +183,11 @@ import '$testUrl' as test;
 import '${Uri.file(testConfigFile.path)}' as test_config;
 ''');
   }
-  // This type is sensitive to the non-nullable experiment.
-  final String beforeLoadTypedef = nullSafety
-    ? 'Future<dynamic> Function()?'
-    : 'Future<dynamic> Function()';
   buffer.write('''
 
 /// Returns a serialized test suite.
-StreamChannel<dynamic> serializeSuite(Function getMain(),
-    {bool hidePrints = true, $beforeLoadTypedef beforeLoad}) {
-  return RemoteListener.start(getMain,
-      hidePrints: hidePrints, beforeLoad: beforeLoad);
+StreamChannel<dynamic> serializeSuite(Function getMain()) {
+  return RemoteListener.start(getMain);
 }
 
 /// Capture any top-level errors (mostly lazy syntax errors, since other are
@@ -402,11 +398,17 @@ class FlutterPlatform extends PlatformPlugin {
   @visibleForTesting
   Future<HttpServer> bind(InternetAddress host, int port) => HttpServer.bind(host, port);
 
+  PackageConfig _packageConfig;
+
   Future<_AsyncError> _startTest(
     String testPath,
     StreamChannel<dynamic> controller,
     int ourTestCount,
   ) async {
+    _packageConfig ??= await loadPackageConfigWithLogging(
+      globals.fs.file(globalPackagesPath),
+      logger: globals.logger,
+    );
     globals.printTrace('test $ourTestCount: starting test $testPath');
 
     _AsyncError outOfBandError; // error that we couldn't send to the harness that we need to send via our future
@@ -748,14 +750,19 @@ class FlutterPlatform extends PlatformPlugin {
     Uri testUrl,
   }) {
     assert(testUrl.scheme == 'file');
+    final File file = globals.fs.file(testUrl);
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl)),
       host: host,
       updateGoldens: updateGoldens,
-      nullSafety: extraFrontEndOptions?.contains('--enable-experiment=non-nullable') ?? false,
+      languageVersionHeader: determineLanguageVersion(
+        file,
+        _packageConfig[flutterProject?.manifest?.appName],
+      ),
     );
   }
+
 
   File _cachedFontConfig;
 
