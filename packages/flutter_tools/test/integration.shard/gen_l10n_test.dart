@@ -163,5 +163,5 @@ void main() {
     flutter = FlutterRunTestDriver(tempDir);
     final StringBuffer stdout = await runApp();
     expectOutput(stdout);
-  }, skip: true); // https://github.com/flutter/flutter/issues/59509 deferred loading support is a WIP for the VM/Flutter.
+  });
 }
