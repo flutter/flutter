@@ -79,7 +79,7 @@ class CommandHelp {
   CommandHelpOption _b;
   CommandHelpOption get b => _b ??= _makeOption(
     'b',
-    'Toggle the platform brightness setting.',
+    'Toggle the platform brightness setting (dark and light mode).',
     'debugBrightnessOverride',
   );
 
