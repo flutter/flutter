@@ -62,4 +62,20 @@ void main() {
 
     expect(result.stdout, isEmpty);
   });
+
+  test('flutter build aot is deprecated', () async {
+    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final ProcessResult result = await const LocalProcessManager().run(<String>[
+      flutterBin,
+      'build',
+      '-h',
+      '-v',
+    ]);
+
+    // Deprecated.
+    expect(result.stdout, isNot(contains('aot')));
+
+    // Only printed by verbose tool.
+    expect(result.stdout, isNot(contains('exiting with code 0')));
+  });
 }
