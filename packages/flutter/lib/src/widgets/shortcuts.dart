@@ -6,7 +6,6 @@
 
 import 'dart:collection';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -79,8 +78,8 @@ class KeySet<T extends KeyboardKey> {
         assert(!keys.contains(null)),
         _keys = HashSet<T>.from(keys);
 
-  /// Returns an unmodifiable view of the [KeyboardKey]s in this [KeySet].
-  Set<T> get keys => UnmodifiableSetView<T>(_keys);
+  /// Returns a copy of the [KeyboardKey]s in this [KeySet].
+  Set<T> get keys => _keys.toSet();
   final HashSet<T> _keys;
 
   @override
