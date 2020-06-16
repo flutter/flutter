@@ -819,6 +819,10 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
 
   int get _currentLength => _effectiveController.value.text.runes.length;
 
+  bool get _hasIntrinsicError => widget.maxLength != null && widget.maxLength > 0 && _effectiveController.value.text.runes.length > widget.maxLength;
+
+  bool get _hasError => widget.decoration?.errorText != null || _hasIntrinsicError;
+
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData themeData = Theme.of(context);
@@ -869,17 +873,16 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
       counterText += '/${widget.maxLength}';
       final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength) as int;
       semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
+    }
 
-      // Handle length exceeds maxLength
-      if (_effectiveController.value.text.runes.length > widget.maxLength) {
-        return effectiveDecoration.copyWith(
-          errorText: effectiveDecoration.errorText ?? '',
-          counterStyle: effectiveDecoration.errorStyle
-            ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor),
-          counterText: counterText,
-          semanticCounterText: semanticCounterText,
-        );
-      }
+    if (_hasIntrinsicError) {
+      return effectiveDecoration.copyWith(
+        errorText: effectiveDecoration.errorText ?? '',
+        counterStyle: effectiveDecoration.errorStyle
+          ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor),
+        counterText: counterText,
+        semanticCounterText: semanticCounterText,
+      );
     }
 
     return effectiveDecoration.copyWith(
@@ -1114,15 +1117,12 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
       ),
     );
 
-    bool hasError = false;
     if (widget.decoration != null) {
-      final InputDecoration effectiveDecoration = _getEffectiveDecoration();
-      hasError = effectiveDecoration.errorText != null;
       child = AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[ focusNode, controller ]),
         builder: (BuildContext context, Widget child) {
           return InputDecorator(
-            decoration: effectiveDecoration,
+            decoration: _getEffectiveDecoration(),
             baseStyle: widget.style,
             textAlign: widget.textAlign,
             textAlignVertical: widget.textAlignVertical,
@@ -1142,7 +1142,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         if (!_isEnabled) MaterialState.disabled,
         if (_isHovering) MaterialState.hovered,
         if (focusNode.hasFocus) MaterialState.focused,
-        if (hasError) MaterialState.error,
+        if (_hasError) MaterialState.error,
       },
     );
 
