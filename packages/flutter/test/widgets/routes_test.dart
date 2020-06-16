@@ -1267,9 +1267,7 @@ void main() {
       ;
 
       expect(semantics, hasSemantics(expectedSemantics));
-
       semantics.dispose();
-
     });
 
     testWidgets('focus traverse correct when pop multiple page simultaneously', (WidgetTester tester) async {
