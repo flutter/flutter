@@ -1474,17 +1474,12 @@ class _MediaQueryFromWindowsState extends State<_MediaQueryFromWindow> with Widg
 
   @override
   Widget build(BuildContext context) {
-    if (kReleaseMode) {
-      return MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
-        child: widget.child,
-      );
+    MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+    if (!kReleaseMode) {
+      data = data.copyWith(platformBrightness: debugBrightnessOverride);
     }
     return MediaQuery(
-      data: MediaQueryData.fromWindow(
-        WidgetsBinding.instance.window,
-        platformBrightness: debugBrightnessOverride,
-      ),
+      data: data,
       child: widget.child,
     );
   }

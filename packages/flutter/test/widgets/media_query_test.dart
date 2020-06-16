@@ -74,12 +74,6 @@ void main() {
     expect(data.physicalDepth, equals(WidgetsBinding.instance.window.physicalDepth));
   });
 
-  testWidgets('MediaQueryData can have brightness overriden', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window, platformBrightness: Brightness.dark);
-
-    expect(data.platformBrightness, Brightness.dark);
-  });
-
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
     final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     final MediaQueryData copied = data.copyWith();
