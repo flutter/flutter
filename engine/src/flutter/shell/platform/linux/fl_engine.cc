@@ -6,7 +6,10 @@
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
+#include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
 #include "flutter/shell/platform/linux/fl_renderer.h"
+#include "flutter/shell/platform/linux/fl_renderer_headless.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
 
 #include <gmodule.h>
 
@@ -35,7 +38,15 @@ struct _FlEngine {
 
 G_DEFINE_QUARK(fl_engine_error_quark, fl_engine_error)
 
-G_DEFINE_TYPE(FlEngine, fl_engine, G_TYPE_OBJECT)
+static void fl_engine_plugin_registry_iface_init(
+    FlPluginRegistryInterface* iface);
+
+G_DEFINE_TYPE_WITH_CODE(
+    FlEngine,
+    fl_engine,
+    G_TYPE_OBJECT,
+    G_IMPLEMENT_INTERFACE(fl_plugin_registry_get_type(),
+                          fl_engine_plugin_registry_iface_init))
 
 // Subclass of GSource that integrates Flutter tasks into the GLib main loop.
 typedef struct {
@@ -169,6 +180,20 @@ static void fl_engine_platform_message_response_cb(const uint8_t* data,
                         (GDestroyNotify)g_bytes_unref);
 }
 
+// Implements FlPluginRegistry::get_registrar_for_plugin.
+static FlPluginRegistrar* fl_engine_get_registrar_for_plugin(
+    FlPluginRegistry* registry,
+    const gchar* name) {
+  FlEngine* self = FL_ENGINE(registry);
+
+  return fl_plugin_registrar_new(nullptr, self->binary_messenger);
+}
+
+static void fl_engine_plugin_registry_iface_init(
+    FlPluginRegistryInterface* iface) {
+  iface->get_registrar_for_plugin = fl_engine_get_registrar_for_plugin;
+}
+
 static void fl_engine_dispose(GObject* object) {
   FlEngine* self = FL_ENGINE(object);
 
@@ -210,11 +235,15 @@ FlEngine* fl_engine_new(FlDartProject* project, FlRenderer* renderer) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(project), nullptr);
   g_return_val_if_fail(FL_IS_RENDERER(renderer), nullptr);
 
-  FlEngine* self =
-      static_cast<FlEngine*>(g_object_new(fl_engine_get_type(), nullptr));
-  self->project = static_cast<FlDartProject*>(g_object_ref(project));
-  self->renderer = static_cast<FlRenderer*>(g_object_ref(renderer));
+  FlEngine* self = FL_ENGINE(g_object_new(fl_engine_get_type(), nullptr));
+  self->project = FL_DART_PROJECT(g_object_ref(project));
+  self->renderer = FL_RENDERER(g_object_ref(renderer));
   return self;
+}
+
+G_MODULE_EXPORT FlEngine* fl_engine_new_headless(FlDartProject* project) {
+  g_autoptr(FlRendererHeadless) renderer = fl_renderer_headless_new();
+  return fl_engine_new(project, FL_RENDERER(renderer));
 }
 
 gboolean fl_engine_start(FlEngine* self, GError** error) {
