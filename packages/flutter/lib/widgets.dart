@@ -15,6 +15,7 @@
 library widgets;
 
 export 'package:vector_math/vector_math_64.dart' show Matrix4;
+export 'package:characters/characters.dart';
 
 export 'src/widgets/actions.dart';
 export 'src/widgets/animated_cross_fade.dart';
