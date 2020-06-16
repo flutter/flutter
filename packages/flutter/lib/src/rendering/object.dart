@@ -173,7 +173,7 @@ class PaintingContext extends ClipContext {
   void paintChild(RenderObject child, Offset offset) {
     assert(() {
       if (debugProfilePaintsEnabled)
-        Timeline.startSync('${child.runtimeType}', arguments: timelineWhitelistArguments);
+        Timeline.startSync('${child.runtimeType}', arguments: timelineArgumentsIndicatingLandmarkEvent);
       if (debugOnProfilePaint != null)
         debugOnProfilePaint(child);
       return true;
@@ -873,7 +873,7 @@ class PipelineOwner {
   /// See [RendererBinding] for an example of how this function is used.
   void flushLayout() {
     if (!kReleaseMode) {
-      Timeline.startSync('Layout', arguments: timelineWhitelistArguments);
+      Timeline.startSync('Layout', arguments: timelineArgumentsIndicatingLandmarkEvent);
     }
     assert(() {
       _debugDoingLayout = true;
@@ -965,7 +965,7 @@ class PipelineOwner {
   /// See [RendererBinding] for an example of how this function is used.
   void flushPaint() {
     if (!kReleaseMode) {
-      Timeline.startSync('Paint', arguments: timelineWhitelistArguments);
+      Timeline.startSync('Paint', arguments: timelineArgumentsIndicatingLandmarkEvent);
     }
     assert(() {
       _debugDoingPaint = true;

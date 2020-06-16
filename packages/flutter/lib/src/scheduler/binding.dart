@@ -994,7 +994,7 @@ mixin SchedulerBinding on BindingBase {
   /// statements printed during a frame from those printed between frames (e.g.
   /// in response to events or timers).
   void handleBeginFrame(Duration rawTimeStamp) {
-    Timeline.startSync('Frame', arguments: timelineWhitelistArguments);
+    Timeline.startSync('Frame', arguments: timelineArgumentsIndicatingLandmarkEvent);
     _firstRawTimeStampInEpoch ??= rawTimeStamp;
     _currentFrameTimeStamp = _adjustForEpoch(rawTimeStamp ?? _lastRawTimeStamp);
     if (rawTimeStamp != null)
@@ -1021,7 +1021,7 @@ mixin SchedulerBinding on BindingBase {
     _hasScheduledFrame = false;
     try {
       // TRANSIENT FRAME CALLBACKS
-      Timeline.startSync('Animate', arguments: timelineWhitelistArguments);
+      Timeline.startSync('Animate', arguments: timelineArgumentsIndicatingLandmarkEvent);
       _schedulerPhase = SchedulerPhase.transientCallbacks;
       final Map<int, _FrameCallbackEntry> callbacks = _transientCallbacks;
       _transientCallbacks = <int, _FrameCallbackEntry>{};

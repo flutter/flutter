@@ -909,9 +909,6 @@ class ScrollIntent extends Intent {
 /// size of the scroll window, and for [ScrollIncrementType.line], 50 logical
 /// pixels.
 class ScrollAction extends Action<ScrollIntent> {
-  /// The [LocalKey] that uniquely connects this action to a [ScrollIntent].
-  static const LocalKey key = ValueKey<Type>(ScrollAction);
-
   @override
   bool isEnabled(ScrollIntent intent) {
     final FocusNode focus = primaryFocus;
