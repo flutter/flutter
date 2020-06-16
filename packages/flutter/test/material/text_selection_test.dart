@@ -113,10 +113,10 @@ void main() {
       ));
 
       // Initially, the menu isn't shown at all.
-      expect(find.text('CUT'), findsNothing);
-      expect(find.text('COPY'), findsNothing);
-      expect(find.text('PASTE'), findsNothing);
-      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsNothing);
 
       // Tap to place the cursor in the field, then tap the handle to show the
@@ -132,10 +132,10 @@ void main() {
       final Offset handlePos = endpoints[0].point + const Offset(0.0, 1.0);
       await tester.tapAt(handlePos, pointer: 7);
       await tester.pumpAndSettle();
-      expect(find.text('CUT'), findsNothing);
-      expect(find.text('COPY'), findsNothing);
-      expect(find.text('PASTE'), findsOneWidget);
-      expect(find.text('SELECT ALL'), findsOneWidget);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Select all'), findsOneWidget);
       expect(find.byType(IconButton), findsNothing);
 
       // Long press to select a word and show the full selection menu.
@@ -145,10 +145,10 @@ void main() {
       await tester.pump();
 
       // The full menu is shown without the more button.
-      expect(find.text('CUT'), findsOneWidget);
-      expect(find.text('COPY'), findsOneWidget);
-      expect(find.text('PASTE'), findsOneWidget);
-      expect(find.text('SELECT ALL'), findsOneWidget);
+      expect(find.text('Cut'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Select all'), findsOneWidget);
       expect(find.byType(IconButton), findsNothing);
     },
       skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
@@ -156,7 +156,7 @@ void main() {
     );
 
     testWidgets('When menu items don\'t fit, an overflow menu is used.', (WidgetTester tester) async {
-      // Set the screen size to more narrow, so that SELECT ALL can't fit.
+      // Set the screen size to more narrow, so that Select all can't fit.
       tester.binding.window.physicalSizeTestValue = const Size(1000, 800);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
@@ -179,10 +179,10 @@ void main() {
       ));
 
       // Initially, the menu isn't shown at all.
-      expect(find.text('CUT'), findsNothing);
-      expect(find.text('COPY'), findsNothing);
-      expect(find.text('PASTE'), findsNothing);
-      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsNothing);
 
       // Long press to show the menu.
@@ -191,24 +191,24 @@ void main() {
       await tester.pumpAndSettle();
 
       // The last button is missing, and a more button is shown.
-      expect(find.text('CUT'), findsOneWidget);
-      expect(find.text('COPY'), findsOneWidget);
-      expect(find.text('PASTE'), findsOneWidget);
-      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.text('Cut'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
-      final Offset cutOffset = tester.getTopLeft(find.text('CUT'));
+      final Offset cutOffset = tester.getTopLeft(find.text('Cut'));
 
       // Tapping the button shows the overflow menu.
       await tester.tap(find.byType(IconButton));
       await tester.pumpAndSettle();
-      expect(find.text('CUT'), findsNothing);
-      expect(find.text('COPY'), findsNothing);
-      expect(find.text('PASTE'), findsNothing);
-      expect(find.text('SELECT ALL'), findsOneWidget);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Select all'), findsOneWidget);
       expect(find.byType(IconButton), findsOneWidget);
 
       // The back button is at the bottom of the overflow menu.
-      final Offset selectAllOffset = tester.getTopLeft(find.text('SELECT ALL'));
+      final Offset selectAllOffset = tester.getTopLeft(find.text('Select all'));
       final Offset moreOffset = tester.getTopLeft(find.byType(IconButton));
       expect(moreOffset.dy, greaterThan(selectAllOffset.dy));
 
@@ -219,10 +219,10 @@ void main() {
       expect(find.byType(IconButton), findsOneWidget);
       await tester.tap(find.byType(IconButton));
       await tester.pumpAndSettle();
-      expect(find.text('CUT'), findsOneWidget);
-      expect(find.text('COPY'), findsOneWidget);
-      expect(find.text('PASTE'), findsOneWidget);
-      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.text('Cut'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     },
       skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
@@ -230,7 +230,7 @@ void main() {
     );
 
     testWidgets('A smaller menu bumps more items to the overflow menu.', (WidgetTester tester) async {
-      // Set the screen size so narrow that only CUT and COPY can fit.
+      // Set the screen size so narrow that only Cut and Copy can fit.
       tester.binding.window.physicalSizeTestValue = const Size(800, 800);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
@@ -253,10 +253,10 @@ void main() {
       ));
 
       // Initially, the menu isn't shown at all.
-      expect(find.text('CUT'), findsNothing);
-      expect(find.text('COPY'), findsNothing);
-      expect(find.text('PASTE'), findsNothing);
-      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsNothing);
 
       // Long press to show the menu.
@@ -265,29 +265,29 @@ void main() {
       await tester.pumpAndSettle();
 
       // The last two buttons are missing, and a more button is shown.
-      expect(find.text('CUT'), findsOneWidget);
-      expect(find.text('COPY'), findsOneWidget);
-      expect(find.text('PASTE'), findsNothing);
-      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.text('Cut'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
 
       // Tapping the button shows the overflow menu, which contains both buttons
       // missing from the main menu, and a back button.
       await tester.tap(find.byType(IconButton));
       await tester.pumpAndSettle();
-      expect(find.text('CUT'), findsNothing);
-      expect(find.text('COPY'), findsNothing);
-      expect(find.text('PASTE'), findsOneWidget);
-      expect(find.text('SELECT ALL'), findsOneWidget);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Select all'), findsOneWidget);
       expect(find.byType(IconButton), findsOneWidget);
 
       // Tapping the back button shows the selection menu again.
       await tester.tap(find.byType(IconButton));
       await tester.pumpAndSettle();
-      expect(find.text('CUT'), findsOneWidget);
-      expect(find.text('COPY'), findsOneWidget);
-      expect(find.text('PASTE'), findsNothing);
-      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.text('Cut'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     },
       skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
@@ -295,7 +295,7 @@ void main() {
     );
 
     testWidgets('When the menu renders below the text, the overflow menu back button is at the top.', (WidgetTester tester) async {
-      // Set the screen size to more narrow, so that SELECT ALL can't fit.
+      // Set the screen size to more narrow, so that Select all can't fit.
       tester.binding.window.physicalSizeTestValue = const Size(1000, 800);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
@@ -319,10 +319,10 @@ void main() {
       ));
 
       // Initially, the menu isn't shown at all.
-      expect(find.text('CUT'), findsNothing);
-      expect(find.text('COPY'), findsNothing);
-      expect(find.text('PASTE'), findsNothing);
-      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsNothing);
 
       // Long press to show the menu.
@@ -331,24 +331,24 @@ void main() {
       await tester.pumpAndSettle();
 
       // The last button is missing, and a more button is shown.
-      expect(find.text('CUT'), findsOneWidget);
-      expect(find.text('COPY'), findsOneWidget);
-      expect(find.text('PASTE'), findsOneWidget);
-      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.text('Cut'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
-      final Offset cutOffset = tester.getTopLeft(find.text('CUT'));
+      final Offset cutOffset = tester.getTopLeft(find.text('Cut'));
 
       // Tapping the button shows the overflow menu.
       await tester.tap(find.byType(IconButton));
       await tester.pumpAndSettle();
-      expect(find.text('CUT'), findsNothing);
-      expect(find.text('COPY'), findsNothing);
-      expect(find.text('PASTE'), findsNothing);
-      expect(find.text('SELECT ALL'), findsOneWidget);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Select all'), findsOneWidget);
       expect(find.byType(IconButton), findsOneWidget);
 
       // The back button is at the top of the overflow menu.
-      final Offset selectAllOffset = tester.getTopLeft(find.text('SELECT ALL'));
+      final Offset selectAllOffset = tester.getTopLeft(find.text('Select all'));
       final Offset moreOffset = tester.getTopLeft(find.byType(IconButton));
       expect(moreOffset.dy, lessThan(selectAllOffset.dy));
 
@@ -358,10 +358,10 @@ void main() {
       // Tapping the back button shows the selection menu again.
       await tester.tap(find.byType(IconButton));
       await tester.pumpAndSettle();
-      expect(find.text('CUT'), findsOneWidget);
-      expect(find.text('COPY'), findsOneWidget);
-      expect(find.text('PASTE'), findsOneWidget);
-      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.text('Cut'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     },
       skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
@@ -369,7 +369,7 @@ void main() {
     );
 
     testWidgets('When the menu items change, the menu is closed and _closedWidth reset.', (WidgetTester tester) async {
-      // Set the screen size to more narrow, so that SELECT ALL can't fit.
+      // Set the screen size to more narrow, so that Select all can't fit.
       tester.binding.window.physicalSizeTestValue = const Size(1000, 800);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
@@ -393,10 +393,10 @@ void main() {
       ));
 
       // Initially, the menu isn't shown at all.
-      expect(find.text('CUT'), findsNothing);
-      expect(find.text('COPY'), findsNothing);
-      expect(find.text('PASTE'), findsNothing);
-      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsNothing);
 
       // Tap to place the cursor and tap again to show the menu without a
@@ -412,30 +412,30 @@ void main() {
       final Offset handlePos = endpoints[0].point + const Offset(0.0, 1.0);
       await tester.tapAt(handlePos, pointer: 7);
       await tester.pumpAndSettle();
-      expect(find.text('CUT'), findsNothing);
-      expect(find.text('COPY'), findsNothing);
-      expect(find.text('PASTE'), findsOneWidget);
-      expect(find.text('SELECT ALL'), findsOneWidget);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Select all'), findsOneWidget);
       expect(find.byType(IconButton), findsNothing);
 
-      // Tap SELECT ALL and measure the usual position of CUT, without
+      // Tap Select all and measure the usual position of Cut, without
       // _closedWidth having been used yet.
-      await tester.tap(find.text('SELECT ALL'));
+      await tester.tap(find.text('Select all'));
       await tester.pumpAndSettle();
-      expect(find.text('CUT'), findsOneWidget);
-      expect(find.text('COPY'), findsOneWidget);
-      expect(find.text('PASTE'), findsOneWidget);
-      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.text('Cut'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsNothing);
-      final Offset cutOffset = tester.getTopLeft(find.text('CUT'));
+      final Offset cutOffset = tester.getTopLeft(find.text('Cut'));
 
       // Tap to clear the selection.
       await tester.tapAt(textOffsetToPosition(tester, 0));
       await tester.pumpAndSettle();
-      expect(find.text('CUT'), findsNothing);
-      expect(find.text('COPY'), findsNothing);
-      expect(find.text('PASTE'), findsNothing);
-      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsNothing);
 
       // Long press to show the menu.
@@ -443,31 +443,31 @@ void main() {
       await tester.pumpAndSettle();
 
       // The last button is missing, and a more button is shown.
-      expect(find.text('CUT'), findsOneWidget);
-      expect(find.text('COPY'), findsOneWidget);
-      expect(find.text('PASTE'), findsOneWidget);
-      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.text('Cut'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
 
       // Tapping the button shows the overflow menu.
       await tester.tap(find.byType(IconButton));
       await tester.pumpAndSettle();
-      expect(find.text('CUT'), findsNothing);
-      expect(find.text('COPY'), findsNothing);
-      expect(find.text('PASTE'), findsNothing);
-      expect(find.text('SELECT ALL'), findsOneWidget);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Select all'), findsOneWidget);
       expect(find.byType(IconButton), findsOneWidget);
 
-      // Tapping SELECT ALL changes the menu items so that there is no no longer
+      // Tapping Select all changes the menu items so that there is no no longer
       // any overflow.
-      await tester.tap(find.text('SELECT ALL'));
+      await tester.tap(find.text('Select all'));
       await tester.pumpAndSettle();
-      expect(find.text('CUT'), findsOneWidget);
-      expect(find.text('COPY'), findsOneWidget);
-      expect(find.text('PASTE'), findsOneWidget);
-      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.text('Cut'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsNothing);
-      final Offset newCutOffset = tester.getTopLeft(find.text('CUT'));
+      final Offset newCutOffset = tester.getTopLeft(find.text('Cut'));
       expect(newCutOffset, equals(cutOffset));
     },
       skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
@@ -497,10 +497,10 @@ void main() {
       ));
 
       // Initially, the menu isn't shown at all.
-      expect(find.text('CUT'), findsNothing);
-      expect(find.text('COPY'), findsNothing);
-      expect(find.text('PASTE'), findsNothing);
-      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsNothing);
 
       // Tap to place the cursor in the field, then tap the handle to show the
@@ -516,21 +516,21 @@ void main() {
       final Offset handlePos = endpoints[0].point + const Offset(0.0, 1.0);
       await tester.tapAt(handlePos, pointer: 7);
       await tester.pumpAndSettle();
-      expect(find.text('CUT'), findsNothing);
-      expect(find.text('COPY'), findsNothing);
-      expect(find.text('PASTE'), findsOneWidget);
-      expect(find.text('SELECT ALL'), findsOneWidget);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Select all'), findsOneWidget);
       expect(find.byType(IconButton), findsNothing);
 
       // Tap to select all.
-      await tester.tap(find.text('SELECT ALL'));
+      await tester.tap(find.text('Select all'));
       await tester.pumpAndSettle();
 
-      // Only CUT, COPY, and PASTE are shown.
-      expect(find.text('CUT'), findsOneWidget);
-      expect(find.text('COPY'), findsOneWidget);
-      expect(find.text('PASTE'), findsOneWidget);
-      expect(find.text('SELECT ALL'), findsNothing);
+      // Only Cut, Copy, and Paste are shown.
+      expect(find.text('Cut'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Select all'), findsNothing);
       expect(find.byType(IconButton), findsNothing);
 
       // The menu appears below the bottom handle.
@@ -541,7 +541,7 @@ void main() {
       );
       expect(endpoints.length, 2);
       final Offset bottomHandlePos = endpoints[1].point;
-      final Offset cutOffset = tester.getTopLeft(find.text('CUT'));
+      final Offset cutOffset = tester.getTopLeft(find.text('Cut'));
       expect(cutOffset.dy, greaterThan(bottomHandlePos.dy));
     },
       skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
@@ -613,17 +613,17 @@ void main() {
     await tester.pumpAndSettle();
 
     // No Paste yet, because nothing has been copied.
-    expect(find.text('PASTE'), findsNothing);
-    expect(find.text('COPY'), findsOneWidget);
-    expect(find.text('CUT'), findsOneWidget);
-    expect(find.text('SELECT ALL'), findsOneWidget);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Cut'), findsOneWidget);
+    expect(find.text('Select all'), findsOneWidget);
 
     // Tap copy to add something to the clipboard and close the menu.
-    await tester.tapAt(tester.getCenter(find.text('COPY')));
+    await tester.tapAt(tester.getCenter(find.text('Copy')));
     await tester.pumpAndSettle();
-    expect(find.text('COPY'), findsNothing);
-    expect(find.text('CUT'), findsNothing);
-    expect(find.text('SELECT ALL'), findsNothing);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Select all'), findsNothing);
 
     // Double tap to show the menu again.
     await tester.tapAt(textOffsetToPosition(tester, index));
@@ -632,9 +632,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Paste now shows.
-    expect(find.text('COPY'), findsOneWidget);
-    expect(find.text('CUT'), findsOneWidget);
-    expect(find.text('PASTE'), findsOneWidget);
-    expect(find.text('SELECT ALL'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Cut'), findsOneWidget);
+    expect(find.text('Paste'), findsOneWidget);
+    expect(find.text('Select all'), findsOneWidget);
   }, skip: isBrowser);
 }
