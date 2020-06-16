@@ -29,9 +29,21 @@ DateTimeRange datesOnly(DateTimeRange range) {
 /// year.
 bool isSameDay(DateTime dateA, DateTime dateB) {
   return
+    dateA != null &&
+    dateB != null &&
     dateA.year == dateB.year &&
     dateA.month == dateB.month &&
     dateA.day == dateB.day;
+}
+
+/// Returns true if the two [DateTime] objects have the same month, and
+/// year.
+bool isSameMonth(DateTime dateA, DateTime dateB) {
+  return
+    dateA != null &&
+    dateB != null &&
+    dateA.year == dateB.year &&
+    dateA.month == dateB.month;
 }
 
 /// Determines the number of months between two [DateTime] objects.
