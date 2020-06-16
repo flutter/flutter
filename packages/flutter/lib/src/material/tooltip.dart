@@ -270,10 +270,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   bool ensureTooltipVisible() {
     _showTimer?.cancel();
     _showTimer = null;
-    if (!mounted) {
-      assert(_entry == null);
-      return false;
-    }
     if (_entry != null) {
       // Stop trying to hide, if we were.
       _hideTimer?.cancel();
@@ -341,6 +337,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (_entry != null) {
       _hideTooltip(immediately: true);
     }
+    _showTimer?.cancel();
     super.deactivate();
   }
 
