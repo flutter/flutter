@@ -275,8 +275,17 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.trace_skia =
       command_line.HasOption(FlagForSwitch(Switch::TraceSkia));
 
-  command_line.GetOptionValue(FlagForSwitch(Switch::TraceWhitelist),
-                              &settings.trace_whitelist);
+  command_line.GetOptionValue(FlagForSwitch(Switch::TraceAllowlist),
+                              &settings.trace_allowlist);
+
+  if (settings.trace_allowlist.empty()) {
+    command_line.GetOptionValue(FlagForSwitch(Switch::TraceWhitelist),
+                                &settings.trace_allowlist);
+    if (!settings.trace_allowlist.empty()) {
+      FML_LOG(INFO)
+          << "--trace-whitelist is deprecated. Use --trace-allowlist instead.";
+    }
+  }
 
   settings.trace_systrace =
       command_line.HasOption(FlagForSwitch(Switch::TraceSystrace));
