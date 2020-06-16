@@ -1731,6 +1731,84 @@ void main() {
     // See https://github.com/flutter/flutter/issues/54292.
     skip: kIsWeb,
   );
+
+  testWidgets('Assert image has size along viewport axis', (WidgetTester tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          return Image.memory(Uint8List.fromList(kTransparentImage));
+        },
+        itemCount: 1,
+      ),
+    ));
+
+    AssertionError exception = tester.takeException() as AssertionError;
+    expect(
+      exception.message,
+      'A RenderImage was laid out within a vertical Viewport with a zero sized '
+      'height. This will result in the Viewport seeing the image as not taking '
+      'up any space, and build more children than necessary. You can resolve '
+      'this by providing a height on the Image widget or specifying an '
+      'itemExtent on the creator of the Viewport, e.g. the ListView or '
+      'GridView.',
+    );
+    expect(find.byType(Image), findsNothing);
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (BuildContext context, int index) {
+          return Image.memory(Uint8List.fromList(kTransparentImage));
+        },
+        itemCount: 1,
+      ),
+    ));
+
+    exception = tester.takeException() as AssertionError;
+    expect(
+      exception.message,
+      'A RenderImage was laid out within a horizontal Viewport with a zero sized '
+      'width. This will result in the Viewport seeing the image as not taking '
+      'up any space, and build more children than necessary. You can resolve '
+      'this by providing a width on the Image widget or specifying an '
+      'itemExtent on the creator of the Viewport, e.g. the ListView or '
+      'GridView.',
+    );
+    expect(find.byType(Image), findsNothing);
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (BuildContext context, int index) {
+          return Image.memory(Uint8List.fromList(kTransparentImage));
+        },
+        itemCount: 1,
+        itemExtent: 10,
+      ),
+    ));
+
+    exception = tester.takeException() as AssertionError;
+    expect(exception, isNull);
+    expect(find.byType(Image), findsOneWidget);
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (BuildContext context, int index) {
+          return Image.memory(Uint8List.fromList(kTransparentImage), width: 10);
+        },
+        itemCount: 1,
+      ),
+    ));
+
+    exception = tester.takeException() as AssertionError;
+    expect(exception, isNull);
+    expect(find.byType(Image), findsOneWidget);
+  });
 }
 
 class ImagePainter extends CustomPainter {

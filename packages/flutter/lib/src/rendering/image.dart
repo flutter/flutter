@@ -8,6 +8,7 @@ import 'dart:ui' as ui show Image;
 
 import 'box.dart';
 import 'object.dart';
+import 'viewport.dart';
 
 export 'package:flutter/painting.dart' show
   BoxFit,
@@ -361,9 +362,46 @@ class RenderImage extends RenderBox {
   @override
   bool hitTestSelf(Offset position) => true;
 
+  void _debugCheckImageSizeError(Axis axis) {
+    final String paramName = axis == Axis.horizontal ? 'width' : 'height';
+    final String rest =  'This will result in the Viewport seeing the image as '
+                         'not taking up any space, and build more children '
+                         'than necessary. You can resolve this by providing a '
+                         '$paramName on the Image widget or specifying an '
+                         'itemExtent on the creator of the Viewport, e.g. the '
+                         'ListView or GridView.';
+    switch(axis) {
+      case Axis.horizontal:
+        assert(
+          size.width > 0,
+          'A RenderImage was laid out within a horizontal Viewport with a zero '
+          'sized $paramName. $rest',
+        );
+        break;
+      case Axis.vertical:
+        assert(
+          size.height > 0,
+          'A RenderImage was laid out within a vertical Viewport with a zero '
+          'sized $paramName. $rest',
+        );
+        break;
+    }
+  }
+
   @override
   void performLayout() {
     size = _sizeForConstraints(constraints);
+    assert(() {
+      RenderObject renderObject = parent as RenderObject;
+      while (renderObject != null) {
+        if (renderObject is RenderViewportBase) {
+          _debugCheckImageSizeError(renderObject.axis);
+          break;
+        }
+        renderObject = renderObject.parent as RenderObject;
+      }
+      return true;
+    }());
   }
 
   @override
