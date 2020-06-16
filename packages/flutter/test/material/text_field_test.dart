@@ -146,7 +146,7 @@ void main() {
 
   setUp(() async {
     debugResetSemanticsIdCounter();
-    // Fill the clipboard so that the Paste option is available in the text
+    // Fill the clipboard so that the PASTE option is available in the text
     // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
@@ -445,7 +445,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     // Sanity check that the toolbar widget exists.
-    expect(find.text('Paste'), findsOneWidget);
+    expect(find.text('PASTE'), findsOneWidget);
 
     await expectLater(
       // The toolbar exists in the Overlay above the MaterialApp.
@@ -627,11 +627,11 @@ void main() {
     await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
     await tester.pump();
 
-    // Selected text shows 'Copy', and not 'Paste', 'Cut', 'Select all'.
-    expect(find.text('Paste'), findsNothing);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Cut'), findsNothing);
-    expect(find.text('Select all'), findsNothing);
+    // Selected text shows 'COPY', and not 'PASTE', 'CUT', 'SELECT ALL'.
+    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('COPY'), findsOneWidget);
+    expect(find.text('CUT'), findsNothing);
+    expect(find.text('SELECT ALL'), findsNothing);
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.android,
@@ -980,13 +980,13 @@ void main() {
       ),
     ));
 
-    expect(find.text('Paste'), findsNothing);
+    expect(find.text('PASTE'), findsNothing);
 
     final Offset emptyPos = textOffsetToPosition(tester, 0);
     await tester.longPressAt(emptyPos, pointer: 7);
     await tester.pumpAndSettle();
 
-    expect(find.text('Paste'), findsOneWidget);
+    expect(find.text('PASTE'), findsOneWidget);
   });
 
   testWidgets('Entering text hides selection handle caret', (WidgetTester tester) async {
@@ -1092,9 +1092,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Context menu should not have paste and cut.
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Paste'), findsNothing);
-    expect(find.text('Cut'), findsNothing);
+    expect(find.text('COPY'), findsOneWidget);
+    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('CUT'), findsNothing);
   });
 
   testWidgets('does not paint toolbar when no options available', (WidgetTester tester) async {
@@ -1630,14 +1630,14 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
-    // Select all should select all the text.
-    await tester.tap(find.text('Select all'));
+    // SELECT ALL should select all the text.
+    await tester.tap(find.text('SELECT ALL'));
     await tester.pump();
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, testValue.length);
 
-    // Copy should reset the selection.
-    await tester.tap(find.text('Copy'));
+    // COPY should reset the selection.
+    await tester.tap(find.text('COPY'));
     await skipPastScrollingAnimation(tester);
     expect(controller.selection.isCollapsed, true);
 
@@ -1661,8 +1661,8 @@ void main() {
     expect(controller.selection.baseOffset, testValue.indexOf('e'));
     expect(controller.selection.extentOffset, testValue.indexOf('e'));
 
-    // Paste right before the 'e'.
-    await tester.tap(find.text('Paste'));
+    // PASTE right before the 'e'.
+    await tester.tap(find.text('PASTE'));
     await tester.pump();
     expect(controller.text, 'abc d${testValue}ef ghi');
   });
@@ -1673,7 +1673,7 @@ void main() {
     await tester.tapAt(tester.getCenter(find.byType(EditableText)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
-    expect(find.text('Select all'), findsNothing);
+    expect(find.text('SELECT ALL'), findsNothing);
 
     // Tap the selection handle to bring up the "paste / select all" menu for
     // the last line of text.
@@ -1719,7 +1719,7 @@ void main() {
       await _showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
 
       // Verify the selection toolbar position is below the text.
-      Offset toolbarTopLeft = tester.getTopLeft(find.text('Select all'));
+      Offset toolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
       Offset textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
       expect(textFieldTopLeft.dy, lessThan(toolbarTopLeft.dy));
 
@@ -1740,7 +1740,7 @@ void main() {
       await _showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
 
       // Verify the selection toolbar position
-      toolbarTopLeft = tester.getTopLeft(find.text('Select all'));
+      toolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
       textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
       expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
     },
@@ -1766,7 +1766,7 @@ void main() {
         ),
       ));
 
-      expect(find.text('Select all'), findsNothing);
+      expect(find.text('SELECT ALL'), findsNothing);
       const String testValue = 'abc\ndef\nghi\njkl\nmno\npqr';
       await tester.enterText(find.byType(TextField), testValue);
       await skipPastScrollingAnimation(tester);
@@ -1774,8 +1774,8 @@ void main() {
       // Show the selection menu on the first line and verify the selection
       // toolbar position is below the first line.
       await _showSelectionMenuAt(tester, controller, testValue.indexOf('c'));
-      expect(find.text('Select all'), findsOneWidget);
-      final Offset firstLineToolbarTopLeft = tester.getTopLeft(find.text('Select all'));
+      expect(find.text('SELECT ALL'), findsOneWidget);
+      final Offset firstLineToolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
       final Offset firstLineTopLeft = textOffsetToPosition(tester, testValue.indexOf('a'));
       expect(firstLineTopLeft.dy, lessThan(firstLineToolbarTopLeft.dy));
 
@@ -1783,8 +1783,8 @@ void main() {
       // selection toolbar position is above that line and above the first
       // line's toolbar.
       await _showSelectionMenuAt(tester, controller, testValue.indexOf('o'));
-      expect(find.text('Select all'), findsOneWidget);
-      final Offset penultimateLineToolbarTopLeft = tester.getTopLeft(find.text('Select all'));
+      expect(find.text('SELECT ALL'), findsOneWidget);
+      final Offset penultimateLineToolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
       final Offset penultimateLineTopLeft = textOffsetToPosition(tester, testValue.indexOf('p'));
       expect(penultimateLineToolbarTopLeft.dy, lessThan(penultimateLineTopLeft.dy));
       expect(penultimateLineToolbarTopLeft.dy, lessThan(firstLineToolbarTopLeft.dy));
@@ -1793,8 +1793,8 @@ void main() {
       // toolbar position is above that line and below the position of the
       // second to last line's toolbar.
       await _showSelectionMenuAt(tester, controller, testValue.indexOf('r'));
-      expect(find.text('Select all'), findsOneWidget);
-      final Offset lastLineToolbarTopLeft = tester.getTopLeft(find.text('Select all'));
+      expect(find.text('SELECT ALL'), findsOneWidget);
+      final Offset lastLineToolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
       final Offset lastLineTopLeft = textOffsetToPosition(tester, testValue.indexOf('p'));
       expect(lastLineToolbarTopLeft.dy, lessThan(lastLineTopLeft.dy));
       expect(lastLineToolbarTopLeft.dy, greaterThan(penultimateLineToolbarTopLeft.dy));
@@ -1832,7 +1832,7 @@ void main() {
     await tester.pump();
 
     // Toolbar should fade in. Starting at 0% opacity.
-    final Element target = tester.element(find.text('Select all'));
+    final Element target = tester.element(find.text('SELECT ALL'));
     final FadeTransition opacity = target.findAncestorWidgetOfExactType<FadeTransition>();
     expect(opacity, isNotNull);
     expect(opacity.opacity.value, equals(0.0));
@@ -1942,10 +1942,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Should only have paste option when whole obscure text is selected.
-    expect(find.text('Paste'), findsOneWidget);
-    expect(find.text('Copy'), findsNothing);
-    expect(find.text('Cut'), findsNothing);
-    expect(find.text('Select all'), findsNothing);
+    expect(find.text('PASTE'), findsOneWidget);
+    expect(find.text('COPY'), findsNothing);
+    expect(find.text('CUT'), findsNothing);
+    expect(find.text('SELECT ALL'), findsNothing);
 
     // Long press at the end
     final Offset iPos = textOffsetToPosition(tester, 10);
@@ -1954,10 +1954,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Should have paste and select all options when collapse.
-    expect(find.text('Paste'), findsOneWidget);
-    expect(find.text('Select all'), findsOneWidget);
-    expect(find.text('Copy'), findsNothing);
-    expect(find.text('Cut'), findsNothing);
+    expect(find.text('PASTE'), findsOneWidget);
+    expect(find.text('SELECT ALL'), findsOneWidget);
+    expect(find.text('COPY'), findsNothing);
+    expect(find.text('CUT'), findsNothing);
   });
 
   testWidgets('TextField height with minLines unset', (WidgetTester tester) async {
@@ -2436,7 +2436,7 @@ void main() {
     expect(controller.selection.baseOffset, 5);
     expect(controller.selection.extentOffset, 50);
 
-    await tester.tap(find.text('Cut'));
+    await tester.tap(find.text('CUT'));
     await tester.pump();
     expect(controller.selection.isCollapsed, true);
     expect(controller.text, cutValue);
@@ -3234,7 +3234,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
     Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
-    await tester.tap(find.text('Paste'));
+    await tester.tap(find.text('PASTE'));
     await tester.pump();
     // Puts 456 before the 2 in 123.
     expect(textController.text, '145623');
@@ -6047,14 +6047,14 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, 0));
       await tester.pumpAndSettle();
-      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('PASTE'), findsOneWidget);
 
       // Double tap again keeps the selection menu visible.
       await tester.tapAt(textOffsetToPosition(tester, 0));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, 0));
       await tester.pumpAndSettle();
-      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('PASTE'), findsOneWidget);
     },
   );
 
@@ -6079,12 +6079,12 @@ void main() {
       // Long press shows the selection menu.
       await tester.longPressAt(textOffsetToPosition(tester, 0));
       await tester.pumpAndSettle();
-      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('PASTE'), findsOneWidget);
 
       // Long press again keeps the selection menu visible.
       await tester.longPressAt(textOffsetToPosition(tester, 0));
       await tester.pump();
-      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('PASTE'), findsOneWidget);
     },
   );
 
@@ -6109,12 +6109,12 @@ void main() {
       // Long press shows the selection menu.
       await tester.longPress(find.byType(TextField));
       await tester.pumpAndSettle();
-      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('PASTE'), findsOneWidget);
 
       // Tap hides the selection menu.
       await tester.tap(find.byType(TextField));
       await tester.pump();
-      expect(find.text('Paste'), findsNothing);
+      expect(find.text('PASTE'), findsNothing);
     },
   );
 
@@ -6141,10 +6141,10 @@ void main() {
       await tester.pump();
 
       // Long press shows the selection menu.
-      expect(find.text('Paste'), findsNothing);
+      expect(find.text('PASTE'), findsNothing);
       await tester.longPress(find.byType(TextField));
       await tester.pumpAndSettle();
-      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('PASTE'), findsOneWidget);
     },
   );
 

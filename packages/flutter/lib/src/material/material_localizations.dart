@@ -899,19 +899,19 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get continueButtonLabel => 'CONTINUE';
 
   @override
-  String get copyButtonLabel => 'Copy';
+  String get copyButtonLabel => 'COPY';
 
   @override
-  String get cutButtonLabel => 'Cut';
+  String get cutButtonLabel => 'CUT';
 
   @override
   String get okButtonLabel => 'OK';
 
   @override
-  String get pasteButtonLabel => 'Paste';
+  String get pasteButtonLabel => 'PASTE';
 
   @override
-  String get selectAllButtonLabel => 'Select all';
+  String get selectAllButtonLabel => 'SELECT ALL';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENSES';
