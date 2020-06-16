@@ -101,9 +101,9 @@ String debugFormatDouble(double value) {
 }
 
 /// A setting that can be used to override the platform [Brightness] exposed
-/// from [BindingBase.window]
+/// from [BindingBase.window].
 ///
-/// For an example of using [debugBrightnessOverride], see
+/// See also:
 ///
-///  * [WidgetsApp], which uses this setting to construct a [MediaQueryData].
+///  * [WidgetsApp], which uses the [debugBrightnessOverride] setting to construct a [MediaQueryData].
 ui.Brightness debugBrightnessOverride;
