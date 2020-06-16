@@ -270,15 +270,16 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   bool ensureTooltipVisible() {
     _showTimer?.cancel();
     _showTimer = null;
+    if (!mounted) {
+      assert(_entry == null);
+      return false;
+    }
     if (_entry != null) {
       // Stop trying to hide, if we were.
       _hideTimer?.cancel();
       _hideTimer = null;
       _controller.forward();
       return false; // Already visible.
-    }
-    if (context == null) {
-      return false;
     }
     _createNewEntry();
     _controller.forward();
