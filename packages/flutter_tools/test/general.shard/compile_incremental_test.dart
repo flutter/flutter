@@ -58,7 +58,7 @@ void main() {
     );
   });
 
-  testUsingContext('incremental compile single dart compile', () async {
+  testWithoutContext('incremental compile single dart compile', () async {
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
           Future<List<int>>.value(utf8.encode(
@@ -78,7 +78,7 @@ void main() {
     expect(output.outputFilename, equals('/path/to/main.dart.dill'));
   });
 
-  testUsingContext('incremental compile single dart compile abnormally terminates', () async {
+  testWithoutContext('incremental compile single dart compile abnormally terminates', () async {
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty()
     );
@@ -91,7 +91,7 @@ void main() {
     )), throwsToolExit());
   });
 
-  testUsingContext('incremental compile single dart compile abnormally terminates via exitCode', () async {
+  testWithoutContext('incremental compile single dart compile abnormally terminates via exitCode', () async {
     when(mockFrontendServer.exitCode)
         .thenAnswer((Invocation invocation) async => 1);
     when(mockFrontendServer.stdout)
@@ -106,7 +106,7 @@ void main() {
     )), throwsToolExit());
   });
 
-  testUsingContext('incremental compile and recompile', () async {
+  testWithoutContext('incremental compile and recompile', () async {
     final StreamController<List<int>> streamController = StreamController<List<int>>();
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => streamController.stream);
@@ -143,7 +143,7 @@ void main() {
     ));
   });
 
-  testUsingContext('incremental compile can suppress errors', () async {
+  testWithoutContext('incremental compile can suppress errors', () async {
     final StreamController<List<int>> stdoutController = StreamController<List<int>>();
     when(mockFrontendServer.stdout)
       .thenAnswer((Invocation invocation) => stdoutController.stream);
@@ -177,7 +177,7 @@ void main() {
     )));
   });
 
-  testUsingContext('incremental compile and recompile twice', () async {
+  testWithoutContext('incremental compile and recompile twice', () async {
     final StreamController<List<int>> streamController = StreamController<List<int>>();
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => streamController.stream);
