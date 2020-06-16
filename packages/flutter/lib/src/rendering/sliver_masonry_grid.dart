@@ -857,4 +857,3 @@ class _CrossAxisChildrenData {
     leadingChildren.addAll(trailingChildren);
   }
 }
-
