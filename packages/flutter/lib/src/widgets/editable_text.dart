@@ -2571,9 +2571,14 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
         composingEnd -= outputCodepoints.length < composingEnd ? 1 : 0;
       }
 
+     final bool isBackspace = oldValue.text.runes.length - newValue.text.runes.length == 1 &&
+                              isDirectionalityMarker(oldValue.text.runes.last) &&
+                              oldValue.text.substring(0, oldValue.text.length - 1) == newValue.text;
+
       bool previousWasWhitespace = false;
       bool previousWasDirectionalityMarker = false;
       int previousNonWhitespaceCodepoint;
+      int index = 0;
       for (final int codepoint in newValue.text.runes) {
         if (isWhitespace(codepoint)) {
           // Only compute the directionality of the non-whitespace
@@ -2587,9 +2592,15 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
             subtractFromLength();
             outputCodepoints.removeLast();
           }
-          outputCodepoints.add(codepoint);
-          addToLength();
-          outputCodepoints.add(_previousNonWhitespaceDirection == TextDirection.rtl ? _rlm : _lrm);
+          // Handle trailing whitespace deleting the directionality char instead of the whitespace.
+          if (isBackspace && index == newValue.text.runes.length - 1) {
+            // Do not append the whitespace to the outputCodepoints.
+            subtractFromLength();
+          } else {
+            outputCodepoints.add(codepoint);
+            addToLength();
+            outputCodepoints.add(_previousNonWhitespaceDirection == TextDirection.rtl ? _rlm : _lrm);
+          }
 
           previousWasWhitespace = true;
           previousWasDirectionalityMarker = false;
@@ -2620,6 +2631,7 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
           previousWasWhitespace = false;
           previousWasDirectionalityMarker = false;
         }
+        index++;
       }
       final String formatted = String.fromCharCodes(outputCodepoints);
       return TextEditingValue(
