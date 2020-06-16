@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:io' show File;
 import 'dart:typed_data';
@@ -87,7 +89,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 ///
 /// Callers should be cautious about pinning large images or a large number of
 /// images in memory, as this can result in running out of memory and being
-/// killed by the operating system. The lower the avilable physical memory, the
+/// killed by the operating system. The lower the available physical memory, the
 /// more susceptible callers will be to running into OOM issues. These issues
 /// manifest as immediate process death, sometimes with no other error messages.
 ///
@@ -1079,8 +1081,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     super.didUpdateWidget(oldWidget);
     if (_isListeningToStream &&
         (widget.loadingBuilder == null) != (oldWidget.loadingBuilder == null)) {
-      _imageStream.removeListener(_getListener(oldWidget.loadingBuilder));
-      _imageStream.addListener(_getListener());
+      _imageStream.removeListener(_getListener());
+      _imageStream.addListener(_getListener(recreateListener: true));
     }
     if (widget.image != oldWidget.image)
       _resolveImage();
@@ -1119,22 +1121,25 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     _updateSourceStream(newStream);
   }
 
-  ImageStreamListener _getListener([ImageLoadingBuilder loadingBuilder]) {
-    loadingBuilder ??= widget.loadingBuilder;
-    _lastException = null;
-    _lastStack = null;
-    return ImageStreamListener(
-      _handleImageFrame,
-      onChunk: loadingBuilder == null ? null : _handleImageChunk,
-      onError: widget.errorBuilder != null
-        ? (dynamic error, StackTrace stackTrace) {
-            setState(() {
-              _lastException = error;
-              _lastStack = stackTrace;
-            });
-          }
-        : null,
-    );
+  ImageStreamListener _imageStreamListener;
+  ImageStreamListener _getListener({bool recreateListener = false}) {
+    if(_imageStreamListener == null || recreateListener) {
+      _lastException = null;
+      _lastStack = null;
+      _imageStreamListener = ImageStreamListener(
+        _handleImageFrame,
+        onChunk: widget.loadingBuilder == null ? null : _handleImageChunk,
+        onError: widget.errorBuilder != null
+            ? (dynamic error, StackTrace stackTrace) {
+                setState(() {
+                  _lastException = error;
+                  _lastStack = stackTrace;
+                });
+              }
+            : null,
+      );
+    }
+    return _imageStreamListener;
   }
 
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {

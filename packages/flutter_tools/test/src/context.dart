@@ -126,7 +126,7 @@ void testUsingContext(
           SimControl: () => MockSimControl(),
           Usage: () => FakeUsage(),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
-          FileSystem: () => const LocalFileSystemBlockingSetCurrentDirectory(),
+          FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
           TimeoutConfiguration: () => const TimeoutConfiguration(),
           PlistParser: () => FakePlistParser(),
           Signals: () => FakeSignals(),
@@ -443,7 +443,9 @@ class FakePlistParser implements PlistParser {
 }
 
 class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
-  const LocalFileSystemBlockingSetCurrentDirectory();
+  LocalFileSystemBlockingSetCurrentDirectory() : super.test(
+    signals: LocalSignals.instance,
+  );
 
   @override
   set currentDirectory(dynamic value) {

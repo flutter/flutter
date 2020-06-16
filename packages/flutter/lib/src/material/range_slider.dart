@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -30,6 +32,39 @@ typedef PaintRangeValueIndicator = void Function(PaintingContext context, Offset
 /// A Material Design range slider.
 ///
 /// Used to select a range from a range of values.
+///
+/// {@tool dartpad --template=stateful_widget_scaffold}
+///
+/// ![A range slider widget, consisting of 5 divisions and showing the default
+/// value indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/range_slider.png)
+///
+/// This range values are in intervals of 20 because the Range Slider has 5
+/// divisions, from 0 to 100. This means are values are split between 0, 20, 40,
+/// 60, 80, and 100. The range values are initialized with 40 and 80 in this demo.
+///
+/// ```dart
+/// RangeValues _currentRangeValues = const RangeValues(40, 80);
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return RangeSlider(
+///     values: _currentRangeValues,
+///     min: 0,
+///     max: 100,
+///     divisions: 5,
+///     labels: RangeLabels(
+///       _currentRangeValues.start.round().toString(),
+///       _currentRangeValues.end.round().toString(),
+///     ),
+///     onChanged: (RangeValues values) {
+///       setState(() {
+///         _currentRangeValues = values;
+///       });
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// A range slider can be used to select from either a continuous or a discrete
 /// set of values. The default is to use a continuous range of values from [min]
@@ -439,6 +474,10 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     enableController.dispose();
     startPositionController.dispose();
     endPositionController.dispose();
+    if (overlayEntry != null) {
+      overlayEntry.remove();
+      overlayEntry = null;
+    }
     super.dispose();
   }
 
@@ -1121,6 +1160,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
+    if (!_state.mounted) {
+      return;
+    }
+
     final double dragValue = _getValueFromGlobalPosition(details.globalPosition);
 
     // If no selection has been made yet, test for thumb selection again now
@@ -1157,7 +1200,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   void _endInteraction() {
-    _state.overlayController.reverse();
+    if (!_state.mounted) {
+      return;
+    }
+
     if (showValueIndicator && _state.interactionTimer == null) {
       _state.valueIndicatorController.reverse();
     }
@@ -1169,6 +1215,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       }
       _active = false;
     }
+    _state.overlayController.reverse();
   }
 
   void _handleDragStart(DragStartDetails details) {
@@ -1355,22 +1402,24 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
     if (shouldPaintValueIndicators) {
       _state.paintBottomValueIndicator = (PaintingContext context, Offset offset) {
-        _sliderTheme.rangeValueIndicatorShape.paint(
-          context,
-          bottomThumbCenter,
-          activationAnimation: _valueIndicatorAnimation,
-          enableAnimation: _enableAnimation,
-          isDiscrete: isDiscrete,
-          isOnTop: false,
-          labelPainter: bottomLabelPainter,
-          parentBox: this,
-          sliderTheme: _sliderTheme,
-          textDirection: _textDirection,
-          thumb: bottomThumb,
-          value: bottomValue,
-          textScaleFactor: textScaleFactor,
-          sizeWithOverflow: resolvedscreenSize,
-        );
+        if (attached) {
+          _sliderTheme.rangeValueIndicatorShape.paint(
+            context,
+            bottomThumbCenter,
+            activationAnimation: _valueIndicatorAnimation,
+            enableAnimation: _enableAnimation,
+            isDiscrete: isDiscrete,
+            isOnTop: false,
+            labelPainter: bottomLabelPainter,
+            parentBox: this,
+            sliderTheme: _sliderTheme,
+            textDirection: _textDirection,
+            thumb: bottomThumb,
+            value: bottomValue,
+            textScaleFactor: textScaleFactor,
+            sizeWithOverflow: resolvedscreenSize,
+          );
+        }
       };
     }
 
@@ -1429,22 +1478,24 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       }
 
       _state.paintTopValueIndicator = (PaintingContext context, Offset offset) {
-        _sliderTheme.rangeValueIndicatorShape.paint(
-          context,
-          topThumbCenter,
-          activationAnimation: _valueIndicatorAnimation,
-          enableAnimation: _enableAnimation,
-          isDiscrete: isDiscrete,
-          isOnTop: thumbDelta < innerOverflow,
-          labelPainter: topLabelPainter,
-          parentBox: this,
-          sliderTheme: _sliderTheme,
-          textDirection: _textDirection,
-          thumb: topThumb,
-          value: topValue,
-          textScaleFactor: textScaleFactor,
-          sizeWithOverflow: resolvedscreenSize,
-        );
+        if (attached) {
+          _sliderTheme.rangeValueIndicatorShape.paint(
+            context,
+            topThumbCenter,
+            activationAnimation: _valueIndicatorAnimation,
+            enableAnimation: _enableAnimation,
+            isDiscrete: isDiscrete,
+            isOnTop: thumbDelta < innerOverflow,
+            labelPainter: topLabelPainter,
+            parentBox: this,
+            sliderTheme: _sliderTheme,
+            textDirection: _textDirection,
+            thumb: topThumb,
+            value: topValue,
+            textScaleFactor: textScaleFactor,
+            sizeWithOverflow: resolvedscreenSize,
+          );
+        }
       };
     }
 

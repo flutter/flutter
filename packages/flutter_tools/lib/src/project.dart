@@ -324,9 +324,6 @@ abstract class XcodeBasedProject {
 
   /// The CocoaPods 'Manifest.lock'.
   File get podManifestLock;
-
-  /// Directory containing symlinks to pub cache plugins source generated on `pod install`.
-  Directory get symlinks;
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -389,7 +386,6 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   /// The default 'Info.plist' file of the host app. The developer can change this location in Xcode.
   File get defaultHostInfoPlist => hostAppRoot.childDirectory(_hostAppProjectName).childFile('Info.plist');
 
-  @override
   Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
 
   @override
@@ -970,9 +966,6 @@ class MacOSProject extends FlutterProjectPlatform implements XcodeBasedProject {
   @override
   Directory get xcodeWorkspace => _macOSDirectory.childDirectory('$_hostAppProjectName.xcworkspace');
 
-  @override
-  Directory get symlinks => ephemeralDirectory.childDirectory('.symlinks');
-
   /// The file where the Xcode build will write the name of the built app.
   ///
   /// Ideally this will be replaced in the future with inspection of the Runner
@@ -1006,7 +999,7 @@ class WindowsProject extends FlutterProjectPlatform {
   String get pluginConfigKey => WindowsPlugin.kConfigKey;
 
   @override
-  bool existsSync() => _editableDirectory.existsSync();
+  bool existsSync() => _editableDirectory.existsSync() && solutionFile.existsSync();
 
   Directory get _editableDirectory => project.directory.childDirectory('windows');
 
@@ -1068,15 +1061,15 @@ class LinuxProject extends FlutterProjectPlatform {
   @override
   bool existsSync() => _editableDirectory.existsSync();
 
-  /// The Linux project makefile.
-  File get makeFile => _editableDirectory.childFile('Makefile');
+  /// The Linux project CMake specification.
+  File get cmakeFile => _editableDirectory.childFile('CMakeLists.txt');
 
   /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
   /// the build.
-  File get generatedMakeConfigFile => ephemeralDirectory.childFile('generated_config.mk');
+  File get generatedCmakeConfigFile => ephemeralDirectory.childFile('generated_config.cmake');
 
-  /// Makefile with rules and variables for plugin builds.
-  File get generatedPluginMakeFile => managedDirectory.childFile('generated_plugins.mk');
+  /// Includable CMake with rules and variables for plugin builds.
+  File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
 
   /// The directory to write plugin symlinks.
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');

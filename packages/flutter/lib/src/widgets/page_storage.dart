@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
@@ -177,7 +179,7 @@ class PageStorageBucket {
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       appBar: AppBar(
-///         title: Text("Persistance Example"),
+///         title: Text("Persistence Example"),
 ///       ),
 ///       body: PageStorage(
 ///         child: pages[currentTab],

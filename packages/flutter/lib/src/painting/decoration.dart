@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -164,6 +166,7 @@ abstract class Decoration with Diagnosticable {
   /// The `onChanged` argument configures [BoxPainter.onChanged]. It can be
   /// omitted if there is no chance that the painter will change (for example,
   /// if it is a [BoxDecoration] with definitely no [DecorationImage]).
+  @factory
   BoxPainter createBoxPainter([ VoidCallback onChanged ]);
 
   /// Returns a closed [Path] that describes the outer edge of this decoration.

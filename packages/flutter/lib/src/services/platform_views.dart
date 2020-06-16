@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -99,7 +101,7 @@ class PlatformViewsService {
   /// first time.
   ///
   /// The `id, `viewType, and `layoutDirection` parameters must not be null.
-  /// If `creationParams` is non null then `cretaionParamsCodec` must not be null.
+  /// If `creationParams` is non null then `creationParamsCodec` must not be null.
   static AndroidViewController initAndroidView({
     @required int id,
     @required String viewType,
@@ -532,6 +534,7 @@ class AndroidViewController {
       await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
     _platformViewCreatedCallbacks.clear();
     _state = _AndroidViewState.disposed;
+    PlatformViewsService._instance._focusCallbacks.remove(id);
   }
 
   /// Sizes the Android View.

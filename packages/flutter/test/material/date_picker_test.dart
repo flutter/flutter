@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -679,6 +681,63 @@ void main() {
         expect(find.text(errorInvalidText), findsOneWidget);
       });
     });
+
+    testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {
+      BuildContext buttonContext;
+      const InputBorder border = InputBorder.none;
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData.light().copyWith(
+          inputDecorationTheme: const InputDecorationTheme(
+            filled: false,
+            border: border,
+          ),
+        ),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  buttonContext = context;
+                },
+                child: const Text('Go'),
+              );
+            },
+          ),
+        ),
+      ));
+
+      await tester.tap(find.text('Go'));
+      expect(buttonContext, isNotNull);
+
+      showDatePicker(
+        context: buttonContext,
+        initialDate: initialDate,
+        firstDate: firstDate,
+        lastDate: lastDate,
+        currentDate: today,
+        initialEntryMode: DatePickerEntryMode.input,
+      );
+
+      await tester.pumpAndSettle();
+
+      // Get the border and container color from the painter of the _BorderContainer
+      // (this was cribbed from input_decorator_test.dart).
+      final CustomPaint customPaint = tester.widget(find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
+        matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
+      ));
+      final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+      final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
+      final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
+      final InputBorder actualBorder = inputBorderTween.evaluate(animation) as InputBorder;
+      final Color containerColor = inputBorderPainter.blendedColor as Color;
+
+      // Border should match
+      expect(actualBorder, equals(border));
+
+      // It shouldn't be filled, so the color should be transparent
+      expect(containerColor, equals(Colors.transparent));
+    });
   });
 
   group('Haptic feedback', () {
@@ -744,8 +803,7 @@ void main() {
 
       await prepareDatePicker(tester, (Future<DateTime> date) async {
         // Header
-        expect(
-            tester.getSemantics(find.text('SELECT DATE')), matchesSemantics(
+        expect(tester.getSemantics(find.text('SELECT DATE')), matchesSemantics(
           label: 'SELECT DATE\nFri, Jan 15',
         ));
 
@@ -760,8 +818,7 @@ void main() {
         ));
 
         // Year mode drop down button
-        expect(
-            tester.getSemantics(find.text('January 2016')), matchesSemantics(
+        expect(tester.getSemantics(find.text('January 2016')), matchesSemantics(
           label: 'Select year',
           isButton: true,
         ));
@@ -924,7 +981,6 @@ void main() {
           hasEnabledState: true,
           isFocusable: true,
         ));
-
       });
 
       semantics.dispose();
@@ -1045,6 +1101,63 @@ void main() {
       });
 
       semantics.dispose();
+    });
+  });
+
+  group('Keyboard navigation', () {
+    testWidgets('Can toggle to calendar entry mode', (WidgetTester tester) async {
+      await prepareDatePicker(tester, (Future<DateTime> date) async {
+        expect(find.byType(TextField), findsNothing);
+        // Navigate to the entry toggle button and activate it
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+        // Should be in the input mode
+        expect(find.byType(TextField), findsOneWidget);
+      });
+    });
+
+    testWidgets('Can toggle to year mode', (WidgetTester tester) async {
+      await prepareDatePicker(tester, (Future<DateTime> date) async {
+        expect(find.text('2016'), findsNothing);
+        // Navigate to the year selector and activate it
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+        // The years should be visible
+        expect(find.text('2016'), findsOneWidget);
+      });
+    });
+
+    testWidgets('Can navigate next/previous months', (WidgetTester tester) async {
+      await prepareDatePicker(tester, (Future<DateTime> date) async {
+        expect(find.text('January 2016'), findsOneWidget);
+        // Navigate to the previous month button and activate it twice
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+        // Should be showing Nov 2015
+        expect(find.text('November 2015'), findsOneWidget);
+
+        // Navigate to the next month button and activate it four times
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pumpAndSettle();
+        // Should be on Mar 2016
+        expect(find.text('March 2016'), findsOneWidget);
+      });
     });
   });
 

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:ui' show Offset;
 
@@ -220,6 +222,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
   /// Subclasses should override this method to create per-pointer state
   /// objects to track the pointer associated with the given event.
   @protected
+  @factory
   T createNewPointerState(PointerDownEvent event);
 
   void _handleEvent(PointerEvent event) {

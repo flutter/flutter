@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
@@ -1410,7 +1412,7 @@ void main() {
       );
 
       // Drag the content down far enough so that
-      // geometry.paintExent > constraints.maxPaintExtent
+      // geometry.paintExtent > constraints.maxPaintExtent
       await tester.dragFrom(const Offset(10, 10), const Offset(0, 500));
       await tester.pump();
 

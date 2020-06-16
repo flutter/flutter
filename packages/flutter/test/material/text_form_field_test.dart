@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -424,5 +426,22 @@ void main() {
 
     expect(find.text('initialValue'), findsNothing);
     expect(find.text('changedValue'), findsOneWidget);
+  });
+
+  testWidgets('autofillHints is passed to super', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              autofillHints: const <String>[AutofillHints.countryName],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TextField widget = tester.widget(find.byType(TextField));
+    expect(widget.autofillHints, equals(const <String>[AutofillHints.countryName]));
   });
 }

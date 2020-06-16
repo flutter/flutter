@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -1533,7 +1535,7 @@ void main() {
         child: MouseRegion(
           cursor: SystemMouseCursors.forbidden,
           child: MouseRegion(
-            cursor: null,
+            cursor: MouseCursor.defer,
             onEnter: (_) { logEnters.add('enter'); },
             child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
           ),
@@ -1673,6 +1675,7 @@ void main() {
       onEnter: (PointerEnterEvent event) {},
       onExit: (PointerExitEvent event) {},
       onHover: (PointerHoverEvent event) {},
+      cursor: SystemMouseCursors.click,
       child: RenderErrorBox(),
     ).debugFillProperties(builder);
 
@@ -1683,6 +1686,7 @@ void main() {
       'constraints: MISSING',
       'size: MISSING',
       'listeners: enter, hover, exit',
+      'cursor: SystemMouseCursor(click)',
     ]);
   });
 

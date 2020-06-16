@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui;
 import 'dart:ui' show PointerChange;
 
@@ -240,7 +242,7 @@ void main() {
     ]);
   });
 
-  test('The first annotation with non-null cursor is used', () {
+  test('The first annotation with non-deferring cursor is used', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     List<MouseTrackerAnnotation> annotations;
     _setUpMouseTracker(
@@ -249,7 +251,7 @@ void main() {
     );
 
     annotations = <MouseTrackerAnnotation>[
-      const MouseTrackerAnnotation(cursor: null),
+      const MouseTrackerAnnotation(cursor: MouseCursor.defer),
       const MouseTrackerAnnotation(cursor: SystemMouseCursors.click),
       const MouseTrackerAnnotation(cursor: SystemMouseCursors.grabbing),
     ];
@@ -268,7 +270,7 @@ void main() {
     ]));
   });
 
-  test('Annotations with null cursors are ignored', () {
+  test('Annotations with deferring cursors are ignored', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     List<MouseTrackerAnnotation> annotations;
     _setUpMouseTracker(
@@ -277,8 +279,8 @@ void main() {
     );
 
     annotations = <MouseTrackerAnnotation>[
-      const MouseTrackerAnnotation(cursor: null),
-      const MouseTrackerAnnotation(cursor: null),
+      const MouseTrackerAnnotation(cursor: MouseCursor.defer),
+      const MouseTrackerAnnotation(cursor: MouseCursor.defer),
       const MouseTrackerAnnotation(cursor: SystemMouseCursors.grabbing),
     ];
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
@@ -496,7 +498,7 @@ class _TestGestureFlutterBinding extends BindingBase
   @override
   SchedulerPhase get schedulerPhase => _overridePhase ?? super.schedulerPhase;
 
-  // Mannually schedule a postframe check.
+  // Manually schedule a post-frame check.
   //
   // In real apps this is done by the renderer binding, but in tests we have to
   // bypass the phase assertion of [MouseTracker.schedulePostFrameCheck].

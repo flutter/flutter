@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
@@ -2732,12 +2734,14 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 class AspectRatio extends SingleChildRenderObjectWidget {
   /// Creates a widget with a specific aspect ratio.
   ///
-  /// The [aspectRatio] argument must not be null.
+  /// The [aspectRatio] argument must be a finite number greater than zero.
   const AspectRatio({
     Key key,
     @required this.aspectRatio,
     Widget child,
   }) : assert(aspectRatio != null),
+       assert(aspectRatio > 0.0),
+       // can't test isFinite because that's not a constant expression
        super(key: key, child: child);
 
   /// The aspect ratio to attempt to use.
@@ -3258,8 +3262,21 @@ class Stack extends MultiChildRenderObjectWidget {
   /// [Overflow.clip], children cannot paint outside of the stack's box.
   final Overflow overflow;
 
+  bool _debugCheckHasDirectionality(BuildContext context) {
+    if (alignment is AlignmentDirectional && textDirection == null) {
+      assert(debugCheckHasDirectionality(
+        context,
+        why: 'to resolve the \'alignment\' argument',
+        hint: alignment == AlignmentDirectional.topStart ? 'The default value for \'alignment\' is AlignmentDirectional.topStart, which requires a text direction.' : null,
+        alternative: 'Instead of providing a Directionality widget, another solution would be passing a non-directional \'alignment\', or an explicit \'textDirection\', to the $runtimeType.'),
+      );
+    }
+    return true;
+  }
+
   @override
   RenderStack createRenderObject(BuildContext context) {
+    assert(_debugCheckHasDirectionality(context));
     return RenderStack(
       alignment: alignment,
       textDirection: textDirection ?? Directionality.of(context),
@@ -3270,6 +3287,7 @@ class Stack extends MultiChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderStack renderObject) {
+    assert(_debugCheckHasDirectionality(context));
     renderObject
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.of(context)
@@ -3318,6 +3336,7 @@ class IndexedStack extends Stack {
 
   @override
   RenderIndexedStack createRenderObject(BuildContext context) {
+    assert(_debugCheckHasDirectionality(context));
     return RenderIndexedStack(
       index: index,
       alignment: alignment,
@@ -3327,6 +3346,7 @@ class IndexedStack extends Stack {
 
   @override
   void updateRenderObject(BuildContext context, RenderIndexedStack renderObject) {
+    assert(_debugCheckHasDirectionality(context));
     renderObject
       ..index = index
       ..alignment = alignment
@@ -5880,17 +5900,18 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 class MouseRegion extends StatefulWidget {
   /// Creates a widget that forwards mouse events to callbacks.
   ///
-  /// By default, all callbacks are empty, `cursor` is unset, and `opaque` is
-  /// `true`.
+  /// By default, all callbacks are empty, [cursor] is [MouseCursor.defer], and
+  /// [opaque] is true. The [cursor] must not be null.
   const MouseRegion({
     Key key,
     this.onEnter,
     this.onExit,
     this.onHover,
-    this.cursor,
+    this.cursor = MouseCursor.defer,
     this.opaque = true,
     this.child,
-  }) : assert(opaque != null),
+  }) : assert(cursor != null),
+       assert(opaque != null),
        super(key: key);
 
   /// Triggered when a mouse pointer has entered this widget.
@@ -6000,7 +6021,7 @@ class MouseRegion extends StatefulWidget {
   ///
   /// {@tool dartpad --template=stateful_widget_scaffold_center}
   /// The following example shows a widget that hides its content one second
-  /// after behing hovered, and also exposes the enter and exit callbacks.
+  /// after being hovered, and also exposes the enter and exit callbacks.
   /// Because the widget conditionally creates the `MouseRegion`, and leaks the
   /// hover state, it needs to take the restriction into consideration. In this
   /// case, since it has access to the event that triggers the disappearance of
@@ -6099,15 +6120,14 @@ class MouseRegion extends StatefulWidget {
   ///    this callback is internally implemented, but without the restriction.
   final PointerExitEventListener onExit;
 
-  /// The mouse cursor for mouse pointers that are hovering over the annotated
-  /// region.
+  /// The mouse cursor for mouse pointers that are hovering over the region.
   ///
   /// When a mouse enters the region, its cursor will be changed to the [cursor].
-  /// The [cursor] defaults to null, meaning the region does not control cursors,
-  /// but defers the choice to the next region behind this one on the screen in
-  /// hit-test order, or [SystemMouseCursors.basic] if no others can be found.
   /// When the mouse leaves the region, the cursor will be decided by the region
   /// found at the new location.
+  ///
+  /// The [cursor] defaults to [MouseCursor.defer], deferring the choice of
+  /// cursor to the next region behind it in hit-test order.
   final MouseCursor cursor;
 
   /// Whether this widget should prevent other [MouseRegion]s visually behind it

@@ -355,7 +355,7 @@ void main() {
       ));
     });
 
-    testWithoutContext('prints warning, if Podfile is out of date', () async {
+    testWithoutContext('prints warning, if Podfile creates the Flutter engine symlink', () async {
       pretendPodIsInstalled();
 
       fs.file(fs.path.join('project', 'ios', 'Podfile'))
@@ -365,6 +365,20 @@ void main() {
       final Directory symlinks = projectUnderTest.ios.symlinks
         ..createSync(recursive: true);
       symlinks.childLink('flutter').createSync('cache');
+
+      await cocoaPodsUnderTest.processPods(
+        xcodeProject: projectUnderTest.ios,
+        engineDir: 'engine/path',
+      );
+      expect(logger.errorText, contains('Warning: Podfile is out of date'));
+    });
+
+    testWithoutContext('prints warning, if Podfile parses .flutter-plugins', () async {
+      pretendPodIsInstalled();
+
+      fs.file(fs.path.join('project', 'ios', 'Podfile'))
+        ..createSync()
+        ..writeAsStringSync('plugin_pods = parse_KV_file(\'../.flutter-plugins\')');
 
       await cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.ios,

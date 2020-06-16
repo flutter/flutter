@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection';
 
 import 'package:collection/collection.dart';
@@ -275,6 +277,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   Map<LogicalKeySet, Intent> get shortcuts => _shortcuts;
   Map<LogicalKeySet, Intent> _shortcuts;
   set shortcuts(Map<LogicalKeySet, Intent> value) {
+    assert(value != null);
     if (!mapEquals<LogicalKeySet, Intent>(_shortcuts, value)) {
       _shortcuts = value;
       notifyListeners();
@@ -349,16 +352,18 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
 ///    invoked.
 ///  * [Action], a class for defining an invocation of a user action.
 class Shortcuts extends StatefulWidget {
-  /// Creates a ActionManager object.
+  /// Creates a const [Shortcuts] widget.
   ///
-  /// The [child] argument must not be null.
+  /// The [child] and [shortcuts] arguments are required and must not be null.
   const Shortcuts({
     Key key,
     this.manager,
-    this.shortcuts,
-    this.child,
+    @required this.shortcuts,
+    @required this.child,
     this.debugLabel,
-  }) : super(key: key);
+  }) : assert(shortcuts != null),
+       assert(child != null),
+       super(key: key);
 
   /// The [ShortcutManager] that will manage the mapping between key
   /// combinations and [Action]s.

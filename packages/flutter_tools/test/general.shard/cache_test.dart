@@ -43,7 +43,7 @@ void main() {
       // Restore locking to prevent potential side-effects in
       // tests outside this group (this option is globally shared).
       Cache.enableLocking();
-      Cache.releaseLockEarly();
+      Cache.releaseLock();
     });
 
     test('should throw when locking is not acquired', () {
@@ -60,7 +60,7 @@ void main() {
       when(mockFile.openSync(mode: anyNamed('mode'))).thenReturn(mockRandomAccessFile);
       await Cache.lock();
       Cache.checkLockAcquired();
-      Cache.releaseLockEarly();
+      Cache.releaseLock();
     }, overrides: <Type, Generator>{
       FileSystem: () => mockFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -610,6 +610,19 @@ void main() {
     when(mockCache.platformOverrideArtifacts).thenReturn(<String>{'linux'});
 
     expect(artifacts.getBinaryDirs(), isNotEmpty);
+  });
+
+  testWithoutContext('Linux desktop artifacts include profile and release artifacts', () {
+    final MockCache mockCache = MockCache();
+    final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(
+      mockCache,
+      platform: FakePlatform(operatingSystem: 'linux'),
+    );
+
+    expect(artifacts.getBinaryDirs(), containsAll(<Matcher>[
+      contains(contains('profile')),
+      contains(contains('release')),
+    ]));
   });
 }
 

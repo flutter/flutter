@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -1331,6 +1333,73 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
   }, skip: isBrowser);
 
+  testWidgets('Verify Image resets its ImageListeners', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    final TestImageStreamCompleter imageStreamCompleter = TestImageStreamCompleter();
+    final TestImageProvider imageProvider1 = TestImageProvider(streamCompleter: imageStreamCompleter);
+    await tester.pumpWidget(
+      Container(
+        key: key,
+        child: Image(
+          image: imageProvider1,
+        ),
+      ),
+    );
+    // listener from resolveStreamForKey is always added.
+    expect(imageStreamCompleter.listeners.length, 2);
+
+
+    final TestImageProvider imageProvider2 = TestImageProvider();
+    await tester.pumpWidget(
+      Container(
+        key: key,
+        child: Image(
+          image: imageProvider2,
+          excludeFromSemantics: true,
+        ),
+      ),
+      null,
+      EnginePhase.layout,
+    );
+
+    // only listener from resolveStreamForKey is left.
+    expect(imageStreamCompleter.listeners.length, 1);
+  });
+
+  testWidgets('Verify Image resets its ErrorListeners', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    final TestImageStreamCompleter imageStreamCompleter = TestImageStreamCompleter();
+    final TestImageProvider imageProvider1 = TestImageProvider(streamCompleter: imageStreamCompleter);
+    await tester.pumpWidget(
+      Container(
+        key: key,
+        child: Image(
+          image: imageProvider1,
+          errorBuilder: (_,__,___) => Container(),
+        ),
+      ),
+    );
+    // listener from resolveStreamForKey is always added.
+    expect(imageStreamCompleter.listeners.length, 2);
+
+
+    final TestImageProvider imageProvider2 = TestImageProvider();
+    await tester.pumpWidget(
+      Container(
+        key: key,
+        child: Image(
+          image: imageProvider2,
+          excludeFromSemantics: true,
+        ),
+      ),
+      null,
+      EnginePhase.layout,
+    );
+
+    // only listener from resolveStreamForKey is left.
+    expect(imageStreamCompleter.listeners.length, 1);
+  });
+
   testWidgets('Image defers loading while fast scrolling', (WidgetTester tester) async {
     const int gridCells = 1000;
     final List<TestImageProvider> imageProviders = <TestImageProvider>[];
@@ -1486,7 +1555,7 @@ void main() {
     expect(provider.loadCallCount, 1);
   });
 
-  testWidgets('precacheImage allows time to take over weak refernce', (WidgetTester tester) async {
+  testWidgets('precacheImage allows time to take over weak reference', (WidgetTester tester) async {
     final TestImageProvider provider = TestImageProvider();
     Future<void> precache;
     await tester.pumpWidget(

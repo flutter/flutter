@@ -76,7 +76,7 @@ class CreateCommand extends FlutterCommand {
     argParser.addOption(
       'list-samples',
       help: 'Specifies a JSON output file for a listing of Flutter code samples '
-        'that can created with --sample.',
+        'that can be created with --sample.',
       valueHelp: 'path',
     );
     argParser.addFlag(
@@ -262,8 +262,6 @@ class CreateCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     if (argResults['list-samples'] != null) {
       // _writeSamplesJson can potentially be long-lived.
-      Cache.releaseLockEarly();
-
       await _writeSamplesJson(stringArg('list-samples'));
       return FlutterCommandResult.success();
     }

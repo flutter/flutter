@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -10,7 +12,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap = false }) {
+Widget buildSliverAppBarApp({
+  bool floating,
+  bool pinned,
+  double collapsedHeight,
+  double expandedHeight,
+  bool snap = false,
+}) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: const <LocalizationsDelegate<dynamic>>[
@@ -31,6 +39,7 @@ Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight,
                   title: const Text('AppBar Title'),
                   floating: floating,
                   pinned: pinned,
+                  collapsedHeight: collapsedHeight,
                   expandedHeight: expandedHeight,
                   snap: snap,
                   bottom: TabBar(
@@ -369,7 +378,7 @@ void main() {
 
     // Centering a title with width 700 within the 800 pixel wide test widget
     // would mean that its start edge would have to be 50. The material spec says
-    // that the start edge of the title must be atleast 72.
+    // that the start edge of the title must be at least 72.
     await tester.pumpWidget(buildApp());
 
     final Finder title = find.byKey(titleKey);
@@ -424,7 +433,7 @@ void main() {
 
     // Centering a title with width 700 within the 800 pixel wide test widget
     // would mean that its start edge would have to be 50. The material spec says
-    // that the start edge of the title must be atleast 72.
+    // that the start edge of the title must be at least 72.
     await tester.pumpWidget(buildApp());
 
     final Finder title = find.byKey(titleKey);
@@ -844,6 +853,71 @@ void main() {
     expect(appBarBottom(tester), kTextTabBarHeight);
   });
 
+  testWidgets('SliverAppBar expandedHeight, collapsedHeight', (WidgetTester tester) async {
+    const double expandedAppBarHeight = 400.0;
+    const double collapsedAppBarHeight = 200.0;
+
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: false,
+      pinned: false,
+      collapsedHeight: collapsedAppBarHeight,
+      expandedHeight: expandedAppBarHeight,
+    ));
+
+    final ScrollController controller = primaryScrollController(tester);
+    expect(controller.offset, 0.0);
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight);
+
+    final double initialTabBarHeight = tabBarHeight(tester);
+
+    // Scroll the not-pinned appbar partially out of view.
+    controller.jumpTo(50.0);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight - 50.0);
+    expect(tabBarHeight(tester), initialTabBarHeight);
+
+    // Scroll the not-pinned appbar out of view, to its collapsed height.
+    controller.jumpTo(600.0);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsNothing);
+    expect(appBarHeight(tester), collapsedAppBarHeight + initialTabBarHeight);
+    expect(tabBarHeight(tester), initialTabBarHeight);
+
+    // Scroll the not-pinned appbar back into view.
+    controller.jumpTo(0.0);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight);
+    expect(tabBarHeight(tester), initialTabBarHeight);
+  });
+
+  testWidgets('SliverAppBar rebuilds when forceElevated changes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/59158.
+    Widget buildSliverAppBar(bool forceElevated) {
+      return MaterialApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              title: const Text('Title'),
+              forceElevated: forceElevated,
+            ),
+          ],
+        ),
+      );
+    }
+
+    final Finder appBarFinder = find.byType(AppBar);
+    AppBar getAppBarWidget(Finder finder) => tester.widget<AppBar>(finder);
+
+    await tester.pumpWidget(buildSliverAppBar(false));
+    expect(getAppBarWidget(appBarFinder).elevation, 0.0);
+
+    await tester.pumpWidget(buildSliverAppBar(true));
+    expect(getAppBarWidget(appBarFinder).elevation, 4.0);
+  });
+
   testWidgets('AppBar dimensions, with and without bottom, primary', (WidgetTester tester) async {
     const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0));
 
@@ -1185,7 +1259,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100));
 
     // Because the topPadding eliminates the vertical space for the
-    // NavigtationToolbar within the AppBar, the toolbar is constrained
+    // NavigationToolbar within the AppBar, the toolbar is constrained
     // with minHeight=maxHeight=0. The _AppBarTitle widget vertically centers
     // the title, so its Y coordinate relative to the toolbar is -kToolbarHeight / 2
     // (-28). The top of the toolbar is at (screen coordinates) y=100, so the

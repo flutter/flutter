@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -44,7 +46,7 @@ RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text)
   return tester.element<StatelessElement>(find.descendant(of: find.byType(AlertDialog), matching: find.text(text))).renderObject as RenderParagraph;
 }
 
-const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
+const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
 void main() {
   testWidgets('Dialog is scrollable', (WidgetTester tester) async {
@@ -232,6 +234,46 @@ void main() {
 
     final Future<int> result = showDialog<int>(
       context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: const Text('Title'),
+          children: <Widget>[
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context, 42);
+              },
+              child: const Text('First option'),
+            ),
+            const SimpleDialogOption(
+              child: Text('Second option'),
+            ),
+          ],
+        );
+      },
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Title'), findsOneWidget);
+    await tester.tap(find.text('First option'));
+
+    expect(await result, equals(42));
+  });
+
+  testWidgets('Can show dialog using navigator global key', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        home: const Material(
+          child: Center(
+            child: Text('Go'),
+          ),
+        ),
+      ),
+    );
+
+    final Future<int> result = showDialog<int>(
+      context: navigator.currentContext,
       builder: (BuildContext context) {
         return SimpleDialog(
           title: const Text('Title'),
@@ -882,7 +924,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Dismissable.confirmDismiss defers to an AlertDialog', (WidgetTester tester) async {
+  testWidgets('Dismissible.confirmDismiss defers to an AlertDialog', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     final List<int> dismissedItems = <int>[];
 

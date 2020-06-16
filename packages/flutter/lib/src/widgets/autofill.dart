@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/services.dart';
 import 'framework.dart';
 
@@ -21,7 +23,7 @@ export 'package:flutter/services.dart' show AutofillHints;
 /// viewport. To workaround this problem, ensure clients in the same [AutofillGroup]
 /// are built together:
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// An example form with autofillable fields grouped into different `AutofillGroup`s.
 ///
@@ -125,7 +127,7 @@ class AutofillGroup extends StatefulWidget {
   ///
   /// See also:
   ///
-  /// * [EditableTextState], where this method is used to retrive the closest
+  /// * [EditableTextState], where this method is used to retrieve the closest
   ///   [AutofillGroupState].
   static AutofillGroupState of(BuildContext context) {
     final _AutofillScope scope = context.dependOnInheritedWidgetOfExactType<_AutofillScope>();

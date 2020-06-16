@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/rendering.dart';
@@ -436,7 +438,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
         }
       } else {
         // Check whether the items are the same type. If they are, it means that
-        // their places have been swaped.
+        // their places have been swapped.
         if ((_children[j] is MaterialGap) == (newChildren[i] is MaterialGap)) {
           _children[j] = newChildren[i];
 
