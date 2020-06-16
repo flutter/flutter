@@ -144,6 +144,7 @@ Future<void> _runBenchmark(String benchmarkName) async {
           parent.print(zone, '[$benchmarkName] $error, $stackTrace');
           parent.handleUncaughtError(zone, error, stackTrace);
         } else {
+          parent.print(zone, '[$benchmarkName] $error, $stackTrace');
           await _client.reportError(error, stackTrace);
         }
       },
