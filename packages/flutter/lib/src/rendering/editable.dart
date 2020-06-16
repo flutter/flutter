@@ -542,19 +542,27 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
   }
 
-  /// Returns the index of the first character after extent.
+  /// Returns the index into the string of the next character boundary after the
+  /// given index.
+  ///
+  /// The character boundary is determined by the characters package, so
+  /// surrogate pairs and extended grapheme clusters are considered.
+  ///
+  /// The index must be between 0 and string.length, inclusive. If given
+  /// string.length, string.length is returned.
   ///
   /// Setting includeWhitespace to false will only return the index of non-space
   /// characters.
   @visibleForTesting
-  static int nextCharacter(int extent, String string, [bool includeWhitespace = true]) {
-    if (extent >= string.length) {
+  static int nextCharacter(int index, String string, [bool includeWhitespace = true]) {
+    assert(index >= 0 && index <= string.length);
+    if (index == string.length) {
       return string.length;
     }
 
     int count = 0;
     final Characters remaining = string.characters.skipWhile((String currentString) {
-      if (count <= extent) {
+      if (count <= index) {
         count += currentString.length;
         return true;
       }
@@ -566,13 +574,21 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return string.length - remaining.toString().length;
   }
 
-  /// Returns the index of the first character before extent.
+  /// Returns the index into the string of the previous character boundary
+  /// before the given index.
+  ///
+  /// The character boundary is determined by the characters package, so
+  /// surrogate pairs and extended grapheme clusters are considered.
+  ///
+  /// The index must be between 0 and string.length, inclusive. If index is 0,
+  /// 0 will be returned.
   ///
   /// Setting includeWhitespace to false will only return the index of non-space
   /// characters.
   @visibleForTesting
-  static int previousCharacter(int extent, String string, [bool includeWhitespace = true]) {
-    if (extent <= 0) {
+  static int previousCharacter(int index, String string, [bool includeWhitespace = true]) {
+    assert(index >= 0 && index <= string.length);
+    if (index == 0) {
       return 0;
     }
 
@@ -583,7 +599,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           !_isWhitespace(currentString.characters.first.toString().codeUnitAt(0))) {
         lastNonWhitespace = count;
       }
-      if (count + currentString.length >= extent) {
+      if (count + currentString.length >= index) {
         return includeWhitespace ? count : lastNonWhitespace ?? 0;
       }
       count += currentString.length;

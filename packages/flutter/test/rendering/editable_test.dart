@@ -926,6 +926,11 @@ void main() {
       expect(RenderEditable.nextCharacter(8, '01234567'), 8);
     });
 
+    test('throws for invalid indices', () {
+      expect(() => RenderEditable.nextCharacter(-1, '01234567'), throwsAssertionError);
+      expect(() => RenderEditable.nextCharacter(9, '01234567'), throwsAssertionError);
+    });
+
     test('skips spaces in normal strings when includeWhitespace is false', () {
       expect(RenderEditable.nextCharacter(3, '0123 5678', false), 5);
       expect(RenderEditable.nextCharacter(4, '0123 5678', false), 5);
@@ -966,6 +971,12 @@ void main() {
       expect(RenderEditable.previousCharacter(0, '01234567'), 0);
       expect(RenderEditable.previousCharacter(1, '01234567'), 0);
       expect(RenderEditable.previousCharacter(5, '01234567'), 4);
+      expect(RenderEditable.previousCharacter(8, '01234567'), 7);
+    });
+
+    test('throws for invalid indices', () {
+      expect(() => RenderEditable.previousCharacter(-1, '01234567'), throwsAssertionError);
+      expect(() => RenderEditable.previousCharacter(9, '01234567'), throwsAssertionError);
     });
 
     test('skips spaces in normal strings when includeWhitespace is false', () {
