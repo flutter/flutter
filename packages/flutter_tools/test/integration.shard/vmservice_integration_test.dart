@@ -105,12 +105,25 @@ void main() {
       );
       expect(updateResponse.json['value'], 'Brightness.dark');
 
-      // Confirms that the window brightness is dark.
+      // Change the brightness back to light
       final Response verifyResponse = await vmService.callServiceExtension(
         'ext.flutter.brightnessOverride',
         isolateId: isolate.id,
+        args: <String, String>{
+          'value': 'Brightness.light',
+        }
       );
-      expect(verifyResponse.json['value'], 'Brightness.dark');
+      expect(verifyResponse.json['value'], 'Brightness.light');
+
+      // Change the brightness back to light
+      final Response bogusResponse = await vmService.callServiceExtension(
+        'ext.flutter.brightnessOverride',
+        isolateId: isolate.id,
+        args: <String, String>{
+          'value': 'dark',
+        }
+      );
+      expect(bogusResponse.json['value'], 'Brightness.light');
     });
 
     // TODO(devoncarew): These tests fail on cirrus-ci windows.
