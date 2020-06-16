@@ -25,6 +25,16 @@ G_DECLARE_FINAL_TYPE(FlEngine, fl_engine, FL, ENGINE, GObject)
  */
 
 /**
+ * fl_engine_new_headless:
+ * @project: an #FlDartProject.
+ *
+ * Creates new Flutter engine running in headless mode.
+ *
+ * Returns: a new #FlEngine.
+ */
+FlEngine* fl_engine_new_headless(FlDartProject* project);
+
+/**
  * fl_engine_get_binary_messenger:
  * @engine: an #FlEngine.
  *

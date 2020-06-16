@@ -94,6 +94,7 @@ source_set("flutter_linux_sources") {
     "fl_plugin_registrar.cc",
     "fl_plugin_registry.cc",
     "fl_renderer.cc",
+    "fl_renderer_headless.cc",
     "fl_renderer_x11.cc",
     "fl_standard_message_codec.cc",
     "fl_standard_method_codec.cc",
