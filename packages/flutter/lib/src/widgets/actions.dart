@@ -1154,21 +1154,20 @@ class SelectIntent extends Intent {}
 /// select something. It is not bound to any key by default.
 abstract class SelectAction extends Action<SelectIntent> {}
 
-/// An [Intent] that cancels or dismisses the currently focused widget.
+/// An [Intent] that dismisses the currently focused widget.
 ///
-/// By default, this intent is bound to [LogicalKeyboardKey.escape],
-/// and [LogicalKeyboardKey.gameButtonB] in the
-/// default keyboard shortcuts in [WidgetsApp].
+/// The [WidgetsApp.defaultShortcuts] binds this intent to the
+/// [LogicalKeyboardKey.escape] and [LogicalKeyboardKey.gameButtonB] keys.
 ///
 /// See also:
 ///  - [ModalRoute] which listens for this intent to dismiss modal routes
 ///    (dialogs, pop-up menus, drawers, etc).
-class CancelIntent extends Intent {
-  /// Creates a const [CancelIntent].
-  const CancelIntent();
+class DismissIntent extends Intent {
+  /// Creates a const [DismissIntent].
+  const DismissIntent();
 }
 
-/// An action that cancels or dismisses the focused widget.
+/// An action that dismisses the focused widget.
 ///
-/// This is an abstract class that serves as a base class for cancel actions.
-abstract class CancelAction extends Action<CancelIntent> {}
+/// This is an abstract class that serves as a base class for dismiss actions.
+abstract class DismissAction extends Action<DismissIntent> {}

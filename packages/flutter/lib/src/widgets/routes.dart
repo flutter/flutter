@@ -652,9 +652,9 @@ mixin LocalHistoryRoute<T> on Route<T> {
   }
 }
 
-class _DismissModalAction extends CancelAction {
+class _DismissModalAction extends DismissAction {
   @override
-  Object invoke(CancelIntent intent) {
+  Object invoke(DismissIntent intent) {
     return Navigator.of(primaryFocus.context).maybePop();
   }
 }
@@ -771,7 +771,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   }
 
   static final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
-    CancelIntent: _DismissModalAction(),
+    DismissIntent: _DismissModalAction(),
   };
 
   @override

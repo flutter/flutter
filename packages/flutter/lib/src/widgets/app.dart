@@ -852,8 +852,8 @@ class WidgetsApp extends StatefulWidget {
     LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
     LogicalKeySet(LogicalKeyboardKey.gameButtonA): const ActivateIntent(),
 
-    // Cancel
-    LogicalKeySet(LogicalKeyboardKey.escape): const CancelIntent(),
+    // Dismissal
+    LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
     LogicalKeySet(LogicalKeyboardKey.gameButtonB): const ActivateIntent(),
 
     // Keyboard traversal.
@@ -878,8 +878,8 @@ class WidgetsApp extends StatefulWidget {
     // Activation
     LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
 
-    // Cancel
-    LogicalKeySet(LogicalKeyboardKey.escape): const CancelIntent(),
+    // Dismissal
+    LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
 
     // Keyboard traversal.
     LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
@@ -900,8 +900,8 @@ class WidgetsApp extends StatefulWidget {
     LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
     LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
 
-    // Cancel
-    LogicalKeySet(LogicalKeyboardKey.escape): const CancelIntent(),
+    // Dismissal
+    LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
 
     // Keyboard traversal
     LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
