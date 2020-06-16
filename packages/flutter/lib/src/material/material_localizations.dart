@@ -49,6 +49,33 @@ import 'typography.dart';
 //
 // 5. If you are a Google employee, you should then also follow the instructions
 //    at go/flutter-l10n. If you're not, don't worry about it.
+//
+// UPDATING AN EXISTING STRING
+//
+// If you (someone contributing to the Flutter framework) want to modify an
+// existing string in the MaterialLocalizations objects, follow these steps:
+//
+// 1. Modify the default value of the relevant getter(s) in
+//    DefaultMaterialLocalizations below.
+//
+// 2. Update the flutter_localizations package. Modify the out-of-date English
+//    strings in lib/src/l10n/material_en.arb.
+//
+//    You also need to re-generate lib/src/l10n/localizations.dart by running:
+//    ```
+//    dart dev/tools/localization/bin/gen_localizations.dart --overwrite
+//    ```
+//
+//    This script may result in your updated getters being created in newer
+//    locales and set to the old value of the strings. This is to be expected.
+//    Leave them as they were generated, and they will be picked up for
+//    translation.
+//
+//    There is a README file with further information in the lib/src/l10n/
+//    directory.
+//
+// 3. If you are a Google employee, you should then also follow the instructions
+//    at go/flutter-l10n. If you're not, don't worry about it.
 
 /// Defines the localized resource values used by the Material widgets.
 ///
@@ -872,19 +899,19 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get continueButtonLabel => 'CONTINUE';
 
   @override
-  String get copyButtonLabel => 'COPY';
+  String get copyButtonLabel => 'Copy';
 
   @override
-  String get cutButtonLabel => 'CUT';
+  String get cutButtonLabel => 'Cut';
 
   @override
   String get okButtonLabel => 'OK';
 
   @override
-  String get pasteButtonLabel => 'PASTE';
+  String get pasteButtonLabel => 'Paste';
 
   @override
-  String get selectAllButtonLabel => 'SELECT ALL';
+  String get selectAllButtonLabel => 'Select all';
 
   @override
   String get viewLicensesButtonLabel => 'VIEW LICENSES';
