@@ -395,6 +395,14 @@ void PlatformViewAndroid::ReleaseResourceContext() const {
   }
 }
 
+// |PlatformView|
+std::unique_ptr<std::vector<std::string>>
+PlatformViewAndroid::ComputePlatformResolvedLocales(
+    const std::vector<std::string>& supported_locale_data) {
+  return jni_facade_->FlutterViewComputePlatformResolvedLocale(
+      supported_locale_data);
+}
+
 void PlatformViewAndroid::InstallFirstFrameCallback() {
   // On Platform Task Runner.
   SetNextFrameCallback(

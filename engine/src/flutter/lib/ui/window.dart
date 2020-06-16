@@ -809,6 +809,34 @@ class Window {
   Locale? get platformResolvedLocale => _platformResolvedLocale;
   Locale? _platformResolvedLocale;
 
+  /// Performs the platform-native locale resolution.
+  ///
+  /// Each platform may return different results.
+  ///
+  /// If the platform fails to resolve a locale, then this will return null.
+  ///
+  /// This method returns synchronously and is a direct call to
+  /// platform specific APIs without invoking method channels.
+  Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
+    final List<String?> supportedLocalesData = <String?>[];
+    for (Locale locale in supportedLocales) {
+      supportedLocalesData.add(locale.languageCode);
+      supportedLocalesData.add(locale.countryCode);
+      supportedLocalesData.add(locale.scriptCode);
+    }
+
+    final List<String> result = _computePlatformResolvedLocale(supportedLocalesData);
+
+    if (result.isNotEmpty) {
+      return Locale.fromSubtags(
+        languageCode: result[0],
+        countryCode: result[1] == '' ? null : result[1],
+        scriptCode: result[2] == '' ? null : result[2]);
+    }
+    return null;
+  }
+  List<String> _computePlatformResolvedLocale(List<String?> supportedLocalesData) native 'Window_computePlatformResolvedLocale';
+
   /// A callback that is invoked whenever [locale] changes value.
   ///
   /// The framework invokes this callback in the same zone in which the
