@@ -32,6 +32,7 @@ import io.flutter.embedding.engine.systemchannels.NavigationChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
+import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import org.junit.Before;
 import org.junit.Test;
@@ -626,6 +627,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(engine.getTextInputChannel()).thenReturn(mock(TextInputChannel.class));
     when(engine.getMouseCursorChannel()).thenReturn(mock(MouseCursorChannel.class));
     when(engine.getActivityControlSurface()).thenReturn(mock(ActivityControlSurface.class));
+    when(engine.getLocalizationPlugin()).thenReturn(mock(LocalizationPlugin.class));
 
     return engine;
   }

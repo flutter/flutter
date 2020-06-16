@@ -37,6 +37,10 @@ class RuntimeDelegate {
 
   virtual void SetNeedsReportTimings(bool value) = 0;
 
+  virtual std::unique_ptr<std::vector<std::string>>
+  ComputePlatformResolvedLocale(
+      const std::vector<std::string>& supported_locale_data) = 0;
+
  protected:
   virtual ~RuntimeDelegate();
 };

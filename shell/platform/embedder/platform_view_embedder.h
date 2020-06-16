@@ -76,6 +76,10 @@ class PlatformViewEmbedder final : public PlatformView {
   // |PlatformView|
   std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
 
+  // |PlatformView|
+  std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocales(
+      const std::vector<std::string>& supported_locale_data) override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewEmbedder);
 };
 
