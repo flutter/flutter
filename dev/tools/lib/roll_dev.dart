@@ -22,6 +22,7 @@ const String kJustPrint = 'just-print';
 const String kYes = 'yes';
 const String kHelp = 'help';
 const String kForce = 'force';
+const String kSkipTagging = 'skip-tagging';
 
 const String kUpstreamRemote = 'git@github.com:flutter/flutter.git';
 
@@ -64,6 +65,7 @@ bool run({
   final bool autoApprove = argResults[kYes] as bool;
   final bool help = argResults[kHelp] as bool;
   final bool force = argResults[kForce] as bool;
+  final bool skipTagging = argResults[kSkipTagging] as bool;
 
   if (help || level == null || commit == null) {
     print(
@@ -79,8 +81,8 @@ bool run({
   );
   if (remote != kUpstreamRemote) {
     throw Exception(
-      'The current directory is not a Flutter repository checkout with a '
-      'correctly configured upstream remote.\nFor more details see: '
+      'The remote named $origin is set to $remote, when $kUpstreamRemote was '
+      'expected.\nFor more details see: '
       'https://github.com/flutter/flutter/wiki/Release-process'
     );
   }
@@ -92,22 +94,45 @@ bool run({
     );
   }
 
-  // TODO(fujino): move this after `justPrint`
   git.run('fetch $origin', 'fetch $origin');
-  git.run('reset $commit --hard', 'reset to the release commit');
 
-  String version = getFullTag(git, origin);
+  final String lastVersion = getFullTag(git, origin);
 
-  version = incrementLevel(version, level);
+  final String version = skipTagging
+    ? lastVersion
+    : incrementLevel(lastVersion, level);
+
+  if (git.getOutput(
+    'rev-parse $lastVersion',
+    'check if commit is already on dev',
+  ).contains(commit.trim())) {
+    throw Exception('Commit $commit is already on the dev branch as $lastVersion.');
+  }
 
   if (justPrint) {
     print(version);
     return false;
   }
 
-  final String hash = git.getOutput('rev-parse HEAD', 'Get git hash for $commit');
+  if (skipTagging) {
+    git.run(
+      'describe --exact-match --tags $commit',
+      'verify $commit is already tagged. You can only use the flag '
+      '`$kSkipTagging` if the commit has already been tagged.'
+    );
+  }
 
-  git.run('tag $version', 'tag the commit with the version label');
+  if (!force) {
+    git.run(
+      'merge-base --is-ancestor $lastVersion $commit',
+      'verify $lastVersion is a direct ancestor of $commit. The flag `$kForce`'
+      'is required to force push a new release past a cherry-pick',
+    );
+  }
+
+  git.run('reset $commit --hard', 'reset to the release commit');
+
+  final String hash = git.getOutput('rev-parse HEAD', 'Get git hash for $commit');
 
   // PROMPT
 
@@ -118,13 +143,15 @@ bool run({
       'to the "dev" channel.');
     stdout.write('Are you? [yes/no] ');
     if (stdin.readLineSync() != 'yes') {
-      git.run('tag -d $version', 'remove the tag you did not want to publish');
       print('The dev roll has been aborted.');
       return false;
     }
   }
 
-  git.run('push $origin $version', 'publish the version');
+  if (!skipTagging) {
+    git.run('tag $version', 'tag the commit with the version label');
+    git.run('push $origin $version', 'publish the version');
+  }
   git.run(
     'push ${force ? "--force " : ""}$origin HEAD:dev',
     'land the new version on the "dev" branch',
@@ -170,6 +197,12 @@ ArgResults parseArguments(ArgParser argParser, List<String> args) {
         "Don't actually roll the dev channel; "
         'just print the would-be version and quit.',
   );
+  argParser.addFlag(
+    kSkipTagging,
+    negatable: false,
+    help: 'Do not create tag and push to remote, only update release branch. '
+    'For recovering when the script fails trying to git push to the release branch.'
+  );
   argParser.addFlag(kYes, negatable: false, abbr: 'y', help: 'Skip the confirmation prompt.');
   argParser.addFlag(kHelp, negatable: false, help: 'Show this help message.', hide: true);
 
@@ -208,6 +241,7 @@ String getVersionFromParts(List<int> parts) {
   return buf.toString();
 }
 
+/// A wrapper around git process calls that can be mocked for unit testing.
 class Git {
   const Git();
 
@@ -230,16 +264,17 @@ class Git {
   }
 
   void _reportFailureAndExit(ProcessResult result, String explanation) {
+    final StringBuffer message = StringBuffer();
     if (result.exitCode != 0) {
-      print('Failed to $explanation. Git exited with error code ${result.exitCode}.');
+      message.writeln('Failed to $explanation. Git exited with error code ${result.exitCode}.');
     } else {
-      print('Failed to $explanation.');
+      message.writeln('Failed to $explanation.');
     }
     if ((result.stdout as String).isNotEmpty)
-      print('stdout from git:\n${result.stdout}\n');
+      message.writeln('stdout from git:\n${result.stdout}\n');
     if ((result.stderr as String).isNotEmpty)
-      print('stderr from git:\n${result.stderr}\n');
-    exit(1);
+      message.writeln('stderr from git:\n${result.stderr}\n');
+    throw Exception(message);
   }
 }
 
