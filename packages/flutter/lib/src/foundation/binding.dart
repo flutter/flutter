@@ -192,7 +192,6 @@ abstract class BindingBase {
       registerServiceExtension(
         name: brightnessOverrideExtensionName,
         callback: (Map<String, String> parameters) async {
-          print('CALLED WITH $parameters');
           if (parameters.containsKey('value')) {
             switch (parameters['value']) {
               case 'Brightness.light':
