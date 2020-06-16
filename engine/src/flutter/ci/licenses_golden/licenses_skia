@@ -1,4 +1,4 @@
-Signature: 93378c5610d31831502887e96ae07a91
+Signature: 5553cef0fb425ceab486e701a22e3248
 
 UNUSED LICENSES:
 
@@ -1320,6 +1320,9 @@ FILE: ../../../third_party/skia/modules/canvaskit/perf/assets/confetti.json
 FILE: ../../../third_party/skia/modules/canvaskit/perf/assets/drinks.json
 FILE: ../../../third_party/skia/modules/canvaskit/perf/assets/lego_loader.json
 FILE: ../../../third_party/skia/modules/canvaskit/perf/assets/onboarding.json
+FILE: ../../../third_party/skia/modules/canvaskit/perf/assets/test_1500x959.jpg
+FILE: ../../../third_party/skia/modules/canvaskit/perf/assets/test_512x512.png
+FILE: ../../../third_party/skia/modules/canvaskit/perf/assets/test_64x64.png
 FILE: ../../../third_party/skia/modules/canvaskit/perf/canvas.bench.js
 FILE: ../../../third_party/skia/modules/canvaskit/perf/matrix.bench.js
 FILE: ../../../third_party/skia/modules/canvaskit/postamble.js
