@@ -45,7 +45,6 @@ enum Artifact {
   iosDeploy,
   idevicesyslog,
   idevicescreenshot,
-  ideviceinstaller,
   iproxy,
   /// The root of the Linux desktop sources.
   linuxDesktopPath,
@@ -116,8 +115,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'idevicesyslog';
     case Artifact.idevicescreenshot:
       return 'idevicescreenshot';
-    case Artifact.ideviceinstaller:
-      return 'ideviceinstaller';
     case Artifact.iproxy:
       return 'iproxy';
     case Artifact.linuxDesktopPath:
@@ -272,9 +269,6 @@ class CachedArtifacts extends Artifacts {
       case Artifact.iosDeploy:
         final String artifactFileName = _artifactToFileName(artifact);
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName).path;
-      case Artifact.ideviceinstaller:
-        final String artifactFileName = _artifactToFileName(artifact);
-        return _cache.getArtifactDirectory('ideviceinstaller').childFile(artifactFileName).path;
       case Artifact.iproxy:
         final String artifactFileName = _artifactToFileName(artifact);
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
@@ -533,8 +527,6 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
         return _cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName).path;
-      case Artifact.ideviceinstaller:
-        return _cache.getArtifactDirectory('ideviceinstaller').childFile(artifactFileName).path;
       case Artifact.iosDeploy:
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName).path;
       case Artifact.iproxy:
