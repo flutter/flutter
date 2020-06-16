@@ -292,11 +292,16 @@ class _ZoomEnterTransition extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double opacity = 0;
-    // The transition's scrim opacity only increases on the forward transition.
-    // In the reverse transition, the opacity should always be 0.0.
+    // The transition's scrim opacity only increases on the forward transition. In the reverse
+    // transition, the opacity should always be 0.0.
     //
-    // Therefore, we need to only apply the scrim opacity animation when the
-    // transition is running forwards.
+    // Therefore, we need to only apply the scrim opacity animation when the transition
+    // is running forwards.
+    //
+    // The reason that we check that the animation's status is not `completed` instead
+    // of checking that it is `forward` is that this allows the interrupted reversal of the
+    // forward transition to smoothly fade the scrim away. This prevents a disjointed
+    // removal of the scrim.
     if (!reverse && animation.status != AnimationStatus.completed) {
       opacity = _scrimOpacityTween.evaluate(animation);
     }
