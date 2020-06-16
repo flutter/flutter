@@ -338,8 +338,8 @@ void main() {
     await tester.pump();
 
     // Context menu should not have paste.
-    expect(find.text('Select all'), findsOneWidget);
-    expect(find.text('Paste'), findsNothing);
+    expect(find.text('SELECT ALL'), findsOneWidget);
+    expect(find.text('PASTE'), findsNothing);
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;

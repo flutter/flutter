@@ -118,12 +118,12 @@
     "description": "The label for continue buttons and menu items."
   },
 
-  "copyButtonLabel": "Copy",
+  "copyButtonLabel": "COPY",
   "@copyButtonLabel": {
     "description": "The label for copy buttons and menu items."
   },
 
-  "cutButtonLabel": "Cut",
+  "cutButtonLabel": "CUT",
   "@cutButtonLabel": {
     "description": "The label for cut buttons and menu items."
   },
@@ -133,12 +133,12 @@
     "description": "The label for OK buttons and menu items."
   },
 
-  "pasteButtonLabel": "Paste",
+  "pasteButtonLabel": "PASTE",
   "@pasteButtonLabel": {
     "description": "The label for paste buttons and menu items."
   },
 
-  "selectAllButtonLabel": "Select all",
+  "selectAllButtonLabel": "SELECT ALL",
   "@selectAllButtonLabel": {
     "description": "The label for select-all buttons and menu items."
   },
