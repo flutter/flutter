@@ -15,7 +15,6 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
-import 'base/terminal.dart';
 import 'build_info.dart';
 import 'codegen.dart';
 import 'convert.dart';
@@ -57,8 +56,6 @@ class KernelCompilerFactory {
     );
   }
 }
-
-typedef CompilerMessageConsumer = void Function(String message, { bool emphasis, TerminalColor color });
 
 /// The target model describes the set of core libraries that are available within
 /// the SDK.
