@@ -6,7 +6,6 @@
 
 import 'dart:async';
 
-import 'package:collection/collection.dart' show SetEquality;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/cupertino.dart';
@@ -178,7 +177,7 @@ void main() {
       .toSet();
 
     expect(
-      const SetEquality<String>().equals(
+      setEquals(
         description,
         <String>{ 'brightness',
           'primaryColor',
