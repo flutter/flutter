@@ -793,7 +793,47 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
 }
 ''';
 
+const String _linuxPluginRegistryHeaderTemplate = '''
+//
+//  Generated file. Do not edit.
+//
+
+#ifndef GENERATED_PLUGIN_REGISTRANT_
+#define GENERATED_PLUGIN_REGISTRANT_
+
+#include <flutter_linux/flutter_linux.h>
+
+// Registers Flutter plugins.
+void fl_register_plugins(FlPluginRegistry* registry);
+
+#endif  // GENERATED_PLUGIN_REGISTRANT_
+''';
+
+const String _linuxPluginRegistryImplementationTemplate = '''
+//
+//  Generated file. Do not edit.
+//
+
+#include "generated_plugin_registrant.h"
+
+{{#plugins}}
+#include <{{name}}/{{filename}}.h>
+{{/plugins}}
+
+void fl_register_plugins(FlPluginRegistry* registry) {
+{{#plugins}}
+  g_autoptr(FlPluginRegistrar) {{name}}_registrar =
+      fl_plugin_registry_get_registrar_for_plugin(registry, "{{class}}");
+  {{filename}}_register_with_registrar({{name}}_registrar);
+{{/plugins}}
+}
+''';
+
 const String _linuxPluginCmakefileTemplate = r'''
+#
+# Generated file, do not edit.
+#
+
 list(APPEND FLUTTER_PLUGIN_LIST
 {{#plugins}}
   {{name}}
@@ -864,8 +904,22 @@ Future<void> _writeLinuxPluginFiles(FlutterProject project, List<Plugin> plugins
       from: makefileDirPath,
     ),
   };
-  await _writeCppPluginRegistrant(project.linux.managedDirectory, context);
+  await _writeLinuxPluginRegistrant(project.linux.managedDirectory, context);
   await _writeLinuxPluginCmakefile(project.linux.generatedPluginCmakeFile, context);
+}
+
+Future<void> _writeLinuxPluginRegistrant(Directory destination, Map<String, dynamic> templateContext) async {
+  final String registryDirectory = destination.path;
+  _renderTemplateToFile(
+    _linuxPluginRegistryHeaderTemplate,
+    templateContext,
+    globals.fs.path.join(registryDirectory, 'generated_plugin_registrant.h'),
+  );
+  _renderTemplateToFile(
+    _linuxPluginRegistryImplementationTemplate,
+    templateContext,
+    globals.fs.path.join(registryDirectory, 'generated_plugin_registrant.cc'),
+  );
 }
 
 Future<void> _writeLinuxPluginCmakefile(File destinationFile, Map<String, dynamic> templateContext) async {
