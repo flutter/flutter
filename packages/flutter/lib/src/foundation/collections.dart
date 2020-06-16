@@ -119,30 +119,34 @@ int binarySearch<T extends Comparable<Object>>(List<T> sortedList, T value) {
 }
 
 /// Limit below which merge sort defaults to insertion sort.
-const int _MERGE_SORT_LIMIT = 32;
+const int _kMergeSortLimit = 32;
 
-/// Sorts a list between [start] (inclusive) and [end] (exclusive) using the
+/// Sorts a list between `start` (inclusive) and `end` (exclusive) using the
 /// merge sort algorithm.
 ///
-/// If [compare] is omitted, this defaults to calling [Comparable.compareTo] on
+/// If `compare` is omitted, this defaults to calling [Comparable.compareTo] on
 /// the objects. If any object is not [Comparable], this throws a [TypeError]
 /// (`CastError` on some SDK versions).
 ///
 /// Merge-sorting works by splitting the job into two parts, sorting each
 /// recursively, and then merging the two sorted parts.
 ///
-/// This takes on the order of `n * log(n)` comparisons and moves to sort
-/// `n` elements, but requires extra space of about the same size as the list
-/// being sorted.
+/// This takes on the order of `n * log(n)` comparisons and moves to sort `n`
+/// elements, but requires extra space of about the same size as the list being
+/// sorted.
 ///
-/// This merge sort is stable: Equal elements end up in the same order
-/// as they started in.
+/// This merge sort is stable: Equal elements end up in the same order as they
+/// started in.
 ///
 /// For small lists (less than 32 elements), `mergeSort` automatically uses an
 /// insertion sort instead, as that is more efficient for small lists. The
 /// insertion sort is also stable.
-void mergeSort<T>(List<T> list,
-    {int start = 0, int end, int Function(T, T) compare}) {
+void mergeSort<T>(
+  List<T> list, {
+  int start = 0,
+  int end,
+  int Function(T, T) compare,
+}) {
   end ??= list.length;
   compare ??= _defaultCompare<T>();
 
@@ -150,16 +154,15 @@ void mergeSort<T>(List<T> list,
   if (length < 2) {
     return;
   }
-  if (length < _MERGE_SORT_LIMIT) {
+  if (length < _kMergeSortLimit) {
     _insertionSort(list, compare: compare, start: start, end: end);
     return;
   }
-  // Special case the first split instead of directly calling
-  // _mergeSort, because the _mergeSort requires its target to
-  // be different from its source, and it requires extra space
-  // of the same size as the list to sort.
-  // This split allows us to have only half as much extra space,
-  // and it ends up in the original place.
+  // Special case the first split instead of directly calling _mergeSort,
+  // because the _mergeSort requires its target to be different from its source,
+  // and it requires extra space of the same size as the list to sort. This
+  // split allows us to have only half as much extra space, and it ends up in
+  // the original place.
   final int middle = start + ((end - start) >> 1);
   final int firstLength = middle - start;
   final int secondLength = end - middle;
@@ -168,8 +171,7 @@ void mergeSort<T>(List<T> list,
   _mergeSort(list, compare, middle, end, scratchSpace, 0);
   final int firstTarget = end - firstLength;
   _mergeSort(list, compare, start, middle, list, firstTarget);
-  _merge(compare, list, firstTarget, end, scratchSpace, 0, secondLength, list,
-      start);
+  _merge(compare, list, firstTarget, end, scratchSpace, 0, secondLength, list, start);
 }
 
 /// Returns a [Comparator] that asserts that its first argument is comparable.
@@ -180,10 +182,10 @@ Comparator<T> _defaultCompare<T>() {
   return (T value1, T value2) => (value1 as Comparable<dynamic>).compareTo(value2);
 }
 
-/// Sort a list between [start] (inclusive) and [end] (exclusive) using
+/// Sort a list between `start` (inclusive) and `end` (exclusive) using
 /// insertion sort.
 ///
-/// If [compare] is omitted, this defaults to calling [Comparable.compareTo] on
+/// If `compare` is omitted, this defaults to calling [Comparable.compareTo] on
 /// the objects. If any object is not [Comparable], this throws a [TypeError]
 /// (`CastError` on some SDK versions).
 ///
@@ -194,10 +196,14 @@ Comparator<T> _defaultCompare<T>() {
 /// For short lists the many moves have less impact than the simple algorithm,
 /// and it is often the favored sorting algorithm for short lists.
 ///
-/// This insertion sort is stable: Equal elements end up in the same order
-/// as they started in.
-void _insertionSort<T>(List<T> list,
-    {int Function(T, T) compare, int start = 0, int end}) {
+/// This insertion sort is stable: Equal elements end up in the same order as
+/// they started in.
+void _insertionSort<T>(
+  List<T> list, {
+  int Function(T, T) compare,
+  int start = 0,
+  int end,
+}) {
   // If the same method could have both positional and named optional
   // parameters, this should be (list, [start, end], {compare}).
   compare ??= _defaultCompare<T>();
@@ -221,12 +227,18 @@ void _insertionSort<T>(List<T> list,
   }
 }
 
-/// Performs an insertion sort into a potentially different list than the
-/// one containing the original values.
+/// Performs an insertion sort into a potentially different list than the one
+/// containing the original values.
 ///
 /// It will work in-place as well.
-void _movingInsertionSort<T>(List<T> list, int Function(T, T) compare,
-    int start, int end, List<T> target, int targetOffset) {
+void _movingInsertionSort<T>(
+  List<T> list,
+  int Function(T, T) compare,
+  int start,
+  int end,
+  List<T> target,
+  int targetOffset,
+) {
   final int length = end - start;
   if (length == 0) {
     return;
@@ -249,17 +261,23 @@ void _movingInsertionSort<T>(List<T> list, int Function(T, T) compare,
   }
 }
 
-/// Sorts [list] from [start] to [end] into [target] at [targetOffset].
+/// Sorts `list` from `start` to `end` into `target` at `targetOffset`.
 ///
 /// The `target` list must be able to contain the range from `start` to `end`
 /// after `targetOffset`.
 ///
-/// Allows target to be the same list as [list], as long as it's not
-/// overlapping the `start..end` range.
-void _mergeSort<T>(List<T> list, int Function(T, T) compare, int start, int end,
-    List<T> target, int targetOffset) {
+/// Allows target to be the same list as `list`, as long as it's not overlapping
+/// the `start..end` range.
+void _mergeSort<T>(
+    List<T> list,
+    int Function(T, T) compare,
+    int start,
+    int end,
+    List<T> target,
+    int targetOffset,
+    ) {
   final int length = end - start;
-  if (length < _MERGE_SORT_LIMIT) {
+  if (length < _kMergeSortLimit) {
     _movingInsertionSort(list, compare, start, end, target, targetOffset);
     return;
   }
@@ -273,28 +291,37 @@ void _mergeSort<T>(List<T> list, int Function(T, T) compare, int start, int end,
   // Sort the first half into the end of the source area.
   _mergeSort(list, compare, start, middle, list, middle);
   // Merge the two parts into the target area.
-  _merge(compare, list, middle, middle + firstLength, target, targetMiddle,
-      targetMiddle + secondLength, target, targetOffset);
+  _merge(
+    compare,
+    list,
+    middle,
+    middle + firstLength,
+    target,
+    targetMiddle,
+    targetMiddle + secondLength,
+    target,
+    targetOffset,
+  );
 }
 
 /// Merges two lists into a target list.
 ///
-/// One of the input lists may be positioned at the end of the target
-/// list.
+/// One of the input lists may be positioned at the end of the target list.
 ///
-/// For equal object, elements from [firstList] are always preferred.
-/// This allows the merge to be stable if the first list contains elements
-/// that started out earlier than the ones in [secondList]
+/// For equal object, elements from `firstList` are always preferred. This
+/// allows the merge to be stable if the first list contains elements that
+/// started out earlier than the ones in `secondList`.
 void _merge<T>(
-    int Function(T, T) compare,
-    List<T> firstList,
-    int firstStart,
-    int firstEnd,
-    List<T> secondList,
-    int secondStart,
-    int secondEnd,
-    List<T> target,
-    int targetOffset) {
+  int Function(T, T) compare,
+  List<T> firstList,
+  int firstStart,
+  int firstEnd,
+  List<T> secondList,
+  int secondStart,
+  int secondEnd,
+  List<T> target,
+  int targetOffset,
+) {
   // No empty lists reaches here.
   assert(firstStart < firstEnd);
   assert(secondStart < secondEnd);
@@ -318,14 +345,11 @@ void _merge<T>(
       }
       // Second list empties first. Flushing first list here.
       target[targetOffset++] = firstElement;
-      target.setRange(targetOffset, targetOffset + (firstEnd - cursor1),
-          firstList, cursor1);
+      target.setRange(targetOffset, targetOffset + (firstEnd - cursor1), firstList, cursor1);
       return;
     }
   }
   // First list empties first. Reached by break above.
   target[targetOffset++] = secondElement;
-  target.setRange(
-      targetOffset, targetOffset + (secondEnd - cursor2), secondList, cursor2);
+  target.setRange(targetOffset, targetOffset + (secondEnd - cursor2), secondList, cursor2);
 }
-

@@ -102,8 +102,12 @@ void main() {
       final List<OrderedComparable> copy = list.toList();
       final int min = size >> 2;
       final int max = size - min;
-      mergeSort<OrderedComparable>(list,
-          start: min, end: max, compare: (OrderedComparable a, OrderedComparable b) => b.compareTo(a));
+      mergeSort<OrderedComparable>(
+        list,
+        start: min,
+        end: max,
+        compare: (OrderedComparable a, OrderedComparable b) => b.compareTo(a),
+      );
       prev = list[min];
       for (int i = min + 1; i < max; i++) {
         final OrderedComparable next = list[i];
