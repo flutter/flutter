@@ -1361,6 +1361,14 @@ class _TimePickerInputState extends State<_TimePickerInput> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              if (!use24HourDials && timeOfDayFormat == TimeOfDayFormat.a_space_h_colon_mm) ...<Widget>[
+                _DayPeriodControl(
+                  selectedTime: _selectedTime,
+                  orientation: Orientation.portrait,
+                  onChanged: _handleDayPeriodChanged,
+                ),
+                const SizedBox(width: 12.0),
+              ],
               Expanded(child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -1404,14 +1412,14 @@ class _TimePickerInputState extends State<_TimePickerInput> {
                     ),
                 ],
               )),
-              if (!use24HourDials) ...<Widget>[
+              if (!use24HourDials && timeOfDayFormat != TimeOfDayFormat.a_space_h_colon_mm) ...<Widget>[
                 const SizedBox(width: 12.0),
                 _DayPeriodControl(
                   selectedTime: _selectedTime,
                   orientation: Orientation.portrait,
                   onChanged: _handleDayPeriodChanged,
                 ),
-              ]
+              ],
             ],
           ),
           if (hourHasError || minuteHasError)
