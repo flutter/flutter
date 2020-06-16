@@ -1451,7 +1451,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     }
     barrier = IgnorePointer(
       ignoring: animation.status == AnimationStatus.reverse || // changedInternalState is called when animation.status updates
-        animation.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
+                animation.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
       child: barrier,
     );
     if (barrierDismissible) {
