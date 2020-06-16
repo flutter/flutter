@@ -12,7 +12,8 @@ G_BEGIN_DECLS
 
 /**
  * fl_plugin_registrar_new:
- * @view: the #FlView that is being plugged into.
+ * @view: (allow-none): the #FlView that is being plugged into or %NULL for
+ * headless mode.
  * @messenger: the #FlBinaryMessenger to communicate with.
  *
  * Creates a new #FlPluginRegistrar.
