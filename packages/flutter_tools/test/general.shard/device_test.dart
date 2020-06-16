@@ -123,21 +123,47 @@ void main() {
       expect(filtered.single, ephemeralOne);
     });
 
-    testUsingContext('does not remove all non-ephemeral', () async {
+    testUsingContext('choose first non-ephemeral device', () async {
       final List<Device> devices = <Device>[
         nonEphemeralOne,
         nonEphemeralTwo,
       ];
 
+      when(globals.terminal.promptForCharInput(<String>['0', '1'],
+      logger: globals.logger,
+      prompt: globals.userMessages.flutterChooseOne)
+      ).thenAnswer((Invocation invocation) async => '0');
+
       final DeviceManager deviceManager = TestDeviceManager(devices);
       final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
 
       expect(filtered, <Device>[
-        nonEphemeralOne,
-        nonEphemeralTwo,
+        nonEphemeralOne
       ]);
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => MockTerminal(),
     });
 
+    testUsingContext('choose second non-ephemeral device', () async {
+      final List<Device> devices = <Device>[
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ];
+
+      when(globals.terminal.promptForCharInput(<String>['0', '1'],
+      logger: globals.logger,
+      prompt: globals.userMessages.flutterChooseOne)
+      ).thenAnswer((Invocation invocation) async => '1');
+
+      final DeviceManager deviceManager = TestDeviceManager(devices);
+      final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
+
+      expect(filtered, <Device>[
+        nonEphemeralTwo
+      ]);
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => MockTerminal(),
+    });
 
     testUsingContext('choose first ephemeral device', () async {
       final List<Device> devices = <Device>[
