@@ -41,7 +41,7 @@ abstract class TickerProvider {
   Ticker createTicker(TickerCallback onTick);
 }
 
-// TODO(jacobr): make Ticker use DiagnosticableMixin to simplify reporting errors
+// TODO(jacobr): make Ticker use Diagnosticable to simplify reporting errors
 // related to a ticker.
 /// Calls its callback once per animation frame.
 ///
