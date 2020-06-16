@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.6
 import 'dart:html' as html;
 
 import 'package:ui/src/engine.dart';
@@ -41,7 +42,7 @@ void main() async {
   void _paintShadowBounds(SurfacePath path, double elevation) {
     final Rect shadowBounds =
         computePenumbraBounds(path.getBounds(), elevation);
-    final EnginePictureRecorder recorder = PictureRecorder();
+    final EnginePictureRecorder recorder = EnginePictureRecorder();
     final RecordingCanvas canvas = recorder.beginRecording(Rect.largest);
     canvas.drawRect(
       shadowBounds,

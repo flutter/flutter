@@ -582,7 +582,7 @@ class EngineWindow extends ui.Window {
         if (experimentalUseSkia) {
           rasterizer.viewEmbedder.handlePlatformViewCall(data, callback);
         } else {
-          handlePlatformViewCall(data, callback);
+          ui.handlePlatformViewCall(data, callback);
         }
         return;
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+// @dart = 2.9
 part of ui;
 
 /// A complex, one-dimensional subset of a plane.
@@ -36,64 +36,64 @@ abstract class Path {
   ///
   /// This copy is fast and does not require additional memory unless either
   /// the `source` path or the path returned by this constructor are modified.
-  factory Path.from(Path/*!*/ source) {
+  factory Path.from(Path source) {
     if (engine.experimentalUseSkia) {
-      return engine.SkPath.from(source);
+      return engine.SkPath.from(source as engine.SkPath);
     } else {
-      return engine.SurfacePath.from(source);
+      return engine.SurfacePath.from(source as engine.SurfacePath);
     }
   }
 
   /// Determines how the interior of this path is calculated.
   ///
   /// Defaults to the non-zero winding rule, [PathFillType.nonZero].
-  PathFillType/*!*/ get fillType;
-  set fillType(PathFillType/*!*/ value);
+  PathFillType get fillType;
+  set fillType(PathFillType value);
 
   /// Starts a new subpath at the given coordinate.
-  void moveTo(double/*!*/ x, double/*!*/ y);
+  void moveTo(double x, double y);
 
   /// Starts a new subpath at the given offset from the current point.
-  void relativeMoveTo(double/*!*/ dx, double/*!*/ dy);
+  void relativeMoveTo(double dx, double dy);
 
   /// Adds a straight line segment from the current point to the given
   /// point.
-  void lineTo(double/*!*/ x, double/*!*/ y);
+  void lineTo(double x, double y);
 
   /// Adds a straight line segment from the current point to the point
   /// at the given offset from the current point.
-  void relativeLineTo(double/*!*/ dx, double/*!*/ dy);
+  void relativeLineTo(double dx, double dy);
 
   /// Adds a quadratic bezier segment that curves from the current
   /// point to the given point (x2,y2), using the control point
   /// (x1,y1).
-  void quadraticBezierTo(double/*!*/ x1, double/*!*/ y1, double/*!*/ x2, double/*!*/ y2);
+  void quadraticBezierTo(double x1, double y1, double x2, double y2);
 
   /// Adds a quadratic bezier segment that curves from the current
   /// point to the point at the offset (x2,y2) from the current point,
   /// using the control point at the offset (x1,y1) from the current
   /// point.
-  void relativeQuadraticBezierTo(double/*!*/ x1, double/*!*/ y1, double/*!*/ x2, double/*!*/ y2);
+  void relativeQuadraticBezierTo(double x1, double y1, double x2, double y2);
 
   /// Adds a cubic bezier segment that curves from the current point
   /// to the given point (x3,y3), using the control points (x1,y1) and
   /// (x2,y2).
   void cubicTo(
-      double/*!*/ x1, double/*!*/ y1, double/*!*/ x2, double/*!*/ y2, double/*!*/ x3, double/*!*/ y3);
+      double x1, double y1, double x2, double y2, double x3, double y3);
 
   /// Adds a cubic bezier segment that curves from the current point
   /// to the point at the offset (x3,y3) from the current point, using
   /// the control points at the offsets (x1,y1) and (x2,y2) from the
   /// current point.
   void relativeCubicTo(
-      double/*!*/ x1, double/*!*/ y1, double/*!*/ x2, double/*!*/ y2, double/*!*/ x3, double/*!*/ y3);
+      double x1, double y1, double x2, double y2, double x3, double y3);
 
   /// Adds a bezier segment that curves from the current point to the
   /// given point (x2,y2), using the control points (x1,y1) and the
   /// weight w. If the weight is greater than 1, then the curve is a
   /// hyperbola; if the weight equals 1, it's a parabola; and if it is
   /// less than 1, it is an ellipse.
-  void conicTo(double/*!*/ x1, double/*!*/ y1, double/*!*/ x2, double/*!*/ y2, double/*!*/ w);
+  void conicTo(double x1, double y1, double x2, double y2, double w);
 
   /// Adds a bezier segment that curves from the current point to the
   /// point at the offset (x2,y2) from the current point, using the
@@ -101,7 +101,7 @@ abstract class Path {
   /// the weight w. If the weight is greater than 1, then the curve is
   /// a hyperbola; if the weight equals 1, it's a parabola; and if it
   /// is less than 1, it is an ellipse.
-  void relativeConicTo(double/*!*/ x1, double/*!*/ y1, double/*!*/ x2, double/*!*/ y2, double/*!*/ w);
+  void relativeConicTo(double x1, double y1, double x2, double y2, double w);
 
   /// If the `forceMoveTo` argument is false, adds a straight line
   /// segment and an arc segment.
@@ -120,7 +120,7 @@ abstract class Path {
   /// The line segment added if `forceMoveTo` is false starts at the
   /// current point and ends at the start of the arc.
   void arcTo(
-      Rect/*!*/ rect, double/*!*/ startAngle, double/*!*/ sweepAngle, bool/*!*/ forceMoveTo);
+      Rect rect, double startAngle, double sweepAngle, bool forceMoveTo);
 
   /// Appends up to four conic curves weighted to describe an oval of `radius`
   /// and rotated by `rotation`.
@@ -138,11 +138,11 @@ abstract class Path {
   /// https://www.w3.org/TR/SVG/implnote.html#ArcConversionEndpointToCenter
   /// as reference for implementation.
   void arcToPoint(
-      Offset/*!*/ arcEnd, {
-        Radius/*!*/ radius = Radius.zero,
-        double/*!*/ rotation = 0.0,
-        bool/*!*/ largeArc = false,
-        bool/*!*/ clockwise = true,
+      Offset arcEnd, {
+        Radius radius = Radius.zero,
+        double rotation = 0.0,
+        bool largeArc = false,
+        bool clockwise = true,
       });
 
   /// Appends up to four conic curves weighted to describe an oval of `radius`
@@ -160,16 +160,16 @@ abstract class Path {
   /// fit the last path point if both are greater than zero but too small to
   /// describe an arc.
   void relativeArcToPoint(
-      Offset/*!*/ arcEndDelta, {
-        Radius/*!*/ radius = Radius.zero,
-        double/*!*/ rotation = 0.0,
-        bool/*!*/ largeArc = false,
-        bool/*!*/ clockwise = true,
+      Offset arcEndDelta, {
+        Radius radius = Radius.zero,
+        double rotation = 0.0,
+        bool largeArc = false,
+        bool clockwise = true,
       });
 
   /// Adds a new subpath that consists of four lines that outline the
   /// given rectangle.
-  void addRect(Rect/*!*/ rect);
+  void addRect(Rect rect);
 
   /// Adds a new subpath that consists of a curve that forms the
   /// ellipse that fills the given rectangle.
@@ -177,7 +177,7 @@ abstract class Path {
   /// To add a circle, pass an appropriate rectangle as `oval`.
   /// [Rect.fromCircle] can be used to easily describe the circle's center
   /// [Offset] and radius.
-  void addOval(Rect/*!*/ oval);
+  void addOval(Rect oval);
 
   /// Adds a new subpath with one arc segment that consists of the arc
   /// that follows the edge of the oval bounded by the given
@@ -187,7 +187,7 @@ abstract class Path {
   /// crosses the horizontal line that intersects the center of the
   /// rectangle and with positive angles going clockwise around the
   /// oval.
-  void addArc(Rect/*!*/ oval, double/*!*/ startAngle, double/*!*/ sweepAngle);
+  void addArc(Rect oval, double startAngle, double sweepAngle);
 
   /// Adds a new subpath with a sequence of line segments that connect the given
   /// points.
@@ -196,12 +196,12 @@ abstract class Path {
   /// last point to the first point.
   ///
   /// The `points` argument is interpreted as offsets from the origin.
-  void addPolygon(List<Offset/*!*/>/*!*/ points, bool/*!*/ close);
+  void addPolygon(List<Offset> points, bool close);
 
   /// Adds a new subpath that consists of the straight lines and
   /// curves needed to form the rounded rectangle described by the
   /// argument.
-  void addRRect(RRect/*!*/ rrect);
+  void addRRect(RRect rrect);
 
   /// Adds a new subpath that consists of the given `path` offset by the given
   /// `offset`.
@@ -209,7 +209,7 @@ abstract class Path {
   /// If `matrix4` is specified, the path will be transformed by this matrix
   /// after the matrix is translated by the given offset. The matrix is a 4x4
   /// matrix stored in column major order.
-  void addPath(Path/*!*/ path, Offset/*!*/ offset, {Float64List/*?*/ matrix4});
+  void addPath(Path path, Offset offset, {Float64List? matrix4});
 
   /// Adds the given path to this path by extending the current segment of this
   /// path with the first segment of the given path.
@@ -217,7 +217,7 @@ abstract class Path {
   /// If `matrix4` is specified, the path will be transformed by this matrix
   /// after the matrix is translated by the given `offset`.  The matrix is a 4x4
   /// matrix stored in column major order.
-  void extendWithPath(Path/*!*/ path, Offset/*!*/ offset, {Float64List/*?*/ matrix4});
+  void extendWithPath(Path path, Offset offset, {Float64List? matrix4});
 
   /// Closes the last subpath, as if a straight line had been drawn
   /// from the current point to the first point of the subpath.
@@ -235,15 +235,15 @@ abstract class Path {
   /// The `point` argument is interpreted as an offset from the origin.
   ///
   /// Returns true if the point is in the path, and false otherwise.
-  bool/*!*/ contains(Offset/*!*/ point);
+  bool contains(Offset point);
 
   /// Returns a copy of the path with all the segments of every
   /// subpath translated by the given offset.
-  Path/*!*/ shift(Offset/*!*/ offset);
+  Path shift(Offset offset);
 
   /// Returns a copy of the path with all the segments of every
   /// sub path transformed by the given matrix.
-  Path/*!*/ transform(Float64List/*!*/ matrix4);
+  Path transform(Float64List matrix4);
 
   /// Computes the bounding rectangle for this path.
   ///
@@ -260,7 +260,7 @@ abstract class Path {
   /// therefore ends up grossly overestimating the actual area covered by the
   /// circle.
   // see https://skia.org/user/api/SkPath_Reference#SkPath_getBounds
-  Rect/*!*/ getBounds();
+  Rect getBounds();
 
   /// Combines the two paths according to the manner specified by the given
   /// `operation`.
@@ -268,9 +268,9 @@ abstract class Path {
   /// The resulting path will be constructed from non-overlapping contours. The
   /// curve order is reduced where possible so that cubics may be turned into
   /// quadratics, and quadratics maybe turned into lines.
-  static Path/*!*/ combine(PathOperation/*!*/ operation, Path/*!*/ path1, Path/*!*/ path2) {
-    assert(path1 != null);
-    assert(path2 != null);
+  static Path combine(PathOperation operation, Path path1, Path path2) {
+    assert(path1 != null); // ignore: unnecessary_null_comparison
+    assert(path2 != null); // ignore: unnecessary_null_comparison
     if (engine.experimentalUseSkia) {
       return engine.SkPath.combine(operation, path1, path2);
     }
@@ -281,5 +281,5 @@ abstract class Path {
   ///
   /// If `forceClosed` is set to true, the contours of the path will be measured
   /// as if they had been closed, even if they were not explicitly closed.
-  PathMetrics computeMetrics({bool/*!*/ forceClosed = false});
+  PathMetrics computeMetrics({bool forceClosed = false});
 }

@@ -47,7 +47,7 @@ class PersistedPlatformView extends PersistedLeafSurface {
       }''';
     _shadowRoot.append(_styleReset);
     final html.Element platformView =
-        platformViewRegistry.getCreatedView(viewId);
+        ui.platformViewRegistry.getCreatedView(viewId);
     if (platformView != null) {
       _shadowRoot.append(platformView);
     } else {
@@ -67,7 +67,7 @@ class PersistedPlatformView extends PersistedLeafSurface {
       ..height = '${height}px';
     // Set size of the root element created by the PlatformView.
     final html.Element platformView =
-        platformViewRegistry.getCreatedView(viewId);
+        ui.platformViewRegistry.getCreatedView(viewId);
     if (platformView != null) {
       platformView.style
         ..width = '${width}px'

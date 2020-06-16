@@ -87,7 +87,7 @@ class SurfaceCanvas implements ui.Canvas {
 
   @override
   void clipRect(ui.Rect/*!*/ rect,
-      {ui.ClipOp clipOp/*!*/ = ui.ClipOp.intersect, bool/*!*/ doAntiAlias = true}) {
+      {ui.ClipOp/*!*/ clipOp = ui.ClipOp.intersect, bool/*!*/ doAntiAlias = true}) {
     assert(rectIsValid(rect));
     assert(clipOp != null);
     assert(doAntiAlias != null);

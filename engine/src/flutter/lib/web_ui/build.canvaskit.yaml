@@ -11,6 +11,8 @@ targets:
           dart2js_args:
             - --no-minify
             - --enable-asserts
+            - --enable-experiment=non-nullable
+            - --no-sound-null-safety
             - -DFLUTTER_WEB_USE_SKIA=true
         generate_for:
           include:

@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.6
+// @dart = 2.9
 part of ui;
 
 /// The possible actions that can be conveyed from the operating system
 /// accessibility APIs to a semantics node.
 class SemanticsAction {
-  const SemanticsAction._(this.index) : assert(index != null);
+  const SemanticsAction._(this.index) : assert(index != null); // ignore: unnecessary_null_comparison
 
   static const int _kTapIndex = 1 << 0;
   static const int _kLongPressIndex = 1 << 1;
@@ -35,7 +35,7 @@ class SemanticsAction {
   /// The numerical value for this action.
   ///
   /// Each action has one bit set in this bit field.
-  final int/*!*/ index;
+  final int index;
 
   /// The equivalent of a user briefly tapping the screen with the finger
   /// without moving it.
@@ -298,12 +298,12 @@ class SemanticsFlag {
   static const int _kIsFocusableIndex = 1 << 21;
   static const int _kIsLinkIndex = 1 << 22;
 
-  const SemanticsFlag._(this.index) : assert(index != null);
+  const SemanticsFlag._(this.index) : assert(index != null); // ignore: unnecessary_null_comparison
 
   /// The numerical value for this flag.
   ///
   /// Each flag has one bit set in this bit field.
-  final int/*!*/ index;
+  final int index;
 
   /// The semantics node has the quality of either being "checked" or "unchecked".
   ///
@@ -667,32 +667,32 @@ class SemanticsUpdateBuilder {
   /// The `transform` is a matrix that maps this node's coordinate system into
   /// its parent's coordinate system.
   void updateNode({
-    int/*!*/ id,
-    int/*!*/ flags,
-    int/*!*/ actions,
-    int/*!*/ maxValueLength,
-    int/*!*/ currentValueLength,
-    int/*!*/ textSelectionBase,
-    int/*!*/ textSelectionExtent,
-    int/*!*/ platformViewId,
-    int/*!*/ scrollChildren,
-    int/*!*/ scrollIndex,
-    double/*!*/ scrollPosition,
-    double/*!*/ scrollExtentMax,
-    double/*!*/ scrollExtentMin,
-    double/*!*/ elevation,
-    double/*!*/ thickness,
-    Rect/*!*/ rect,
-    String/*!*/ label,
-    String/*!*/ hint,
-    String/*!*/ value,
-    String/*!*/ increasedValue,
-    String/*!*/ decreasedValue,
-    TextDirection/*?*/ textDirection,
-    Float64List/*!*/ transform,
-    Int32List/*!*/ childrenInTraversalOrder,
-    Int32List/*!*/ childrenInHitTestOrder,
-    Int32List/*!*/ additionalActions,
+    required int id,
+    required int flags,
+    required int actions,
+    required int maxValueLength,
+    required int currentValueLength,
+    required int textSelectionBase,
+    required int textSelectionExtent,
+    required int platformViewId,
+    required int scrollChildren,
+    required int scrollIndex,
+    required double scrollPosition,
+    required double scrollExtentMax,
+    required double scrollExtentMin,
+    required double elevation,
+    required double thickness,
+    required Rect rect,
+    required String label,
+    required String hint,
+    required String value,
+    required String increasedValue,
+    required String decreasedValue,
+    TextDirection? textDirection,
+    required Float64List transform,
+    required Int32List childrenInTraversalOrder,
+    required Int32List childrenInHitTestOrder,
+    required Int32List additionalActions,
   }) {
     if (transform.length != 16)
       throw ArgumentError('transform argument must have 16 entries.');
@@ -727,7 +727,7 @@ class SemanticsUpdateBuilder {
   }
 
   void updateCustomAction(
-      {int/*!*/ id, String/*?*/ label, String/*?*/ hint, int/*!*/ overrideId = -1}) {
+      {required int id, String? label, String? hint, int overrideId = -1}) {
     // TODO(yjbanov): implement.
   }
 
@@ -736,7 +736,7 @@ class SemanticsUpdateBuilder {
   ///
   /// The returned object can be passed to [Window.updateSemantics] to actually
   /// update the semantics retained by the system.
-  SemanticsUpdate/*!*/ build() {
+  SemanticsUpdate build() {
     return SemanticsUpdate._(
       nodeUpdates: _nodeUpdates,
     );
@@ -754,7 +754,7 @@ abstract class SemanticsUpdate {
   /// or extended directly.
   ///
   /// To create a SemanticsUpdate object, use a [SemanticsUpdateBuilder].
-  factory SemanticsUpdate._({List<engine.SemanticsNodeUpdate> nodeUpdates}) =
+  factory SemanticsUpdate._({List<engine.SemanticsNodeUpdate>? nodeUpdates}) =
       engine.SemanticsUpdate;
 
   /// Releases the resources used by this semantics update.

@@ -446,6 +446,7 @@ class TestCommand extends Command<bool> with ArgUtils {
       'run',
       'build_runner',
       'build',
+      '--enable-experiment=non-nullable',
       'test',
       '-o',
       forCanvasKit ? canvasKitOutputRelativePath : 'build',
