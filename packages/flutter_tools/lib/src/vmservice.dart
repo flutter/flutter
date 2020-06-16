@@ -686,10 +686,10 @@ extension FlutterVmService on vm_service.VmService {
     }, test: (dynamic error) => error is vm_service.SentinelException || error is vm_service.RPCError);
   }
 
-  /// Return the current brightness override for the flutter view running with
+  /// Return the current platform override for the flutter view running with
   /// the main isolate [isolateId].
   ///
-  /// If a non-null value is provided for [brightness], the platform override
+  /// If a non-null value is provided for [platform], the platform override
   /// is updated with this value.
   Future<String> flutterPlatformOverride({
     String platform,
@@ -708,10 +708,10 @@ extension FlutterVmService on vm_service.VmService {
     return 'unknown';
   }
 
-  /// Return the current platform override for the flutter view running with
+  /// Return the current brightness value for the flutter view running with
   /// the main isolate [isolateId].
   ///
-  /// If a non-null value is provided for [platform], the platform override
+  /// If a non-null value is provided for [brightness], the brightness override
   /// is updated with this value.
   Future<Brightness> flutterBrightnessOverride({
     Brightness brightness,
