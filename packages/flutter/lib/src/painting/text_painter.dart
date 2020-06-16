@@ -600,7 +600,7 @@ class TextPainter {
 
   // Complex glyphs can be represented by two or more UTF16 codepoints. This
   // checks if the value represents a UTF16 glyph by itself or is a 'surrogate'.
-  bool _isUtf16Surrogate(int value) {
+  static bool _isUtf16Surrogate(int value) {
     return value & 0xF800 == 0xD800;
   }
 
@@ -608,7 +608,7 @@ class TextPainter {
   // up zero space and do not have valid bounding boxes around them.
   //
   // We do not directly use the [Unicode] constants since they are strings.
-  bool _isUnicodeDirectionality(int value) {
+  static bool _isUnicodeDirectionality(int value) {
     return value == 0x200F || value == 0x200E;
   }
 
@@ -637,15 +637,13 @@ class TextPainter {
 
   // Get the Rect of the cursor (in logical pixels) based off the near edge
   // of the character upstream from the given string offset.
-  // TODO(garyq): Use actual extended grapheme cluster length instead of
-  // an increasing cluster length amount to achieve deterministic performance.
   Rect _getRectFromUpstream(int offset, Rect caretPrototype) {
     final String flattenedText = _text.toPlainText(includePlaceholders: false);
     final int prevCodeUnit = _text.codeUnitAt(max(0, offset - 1));
     if (prevCodeUnit == null)
       return null;
 
-    // Check for multi-code-unit glyphs such as emojis or zero width joiner
+    // Check for multi-code-unit glyphs such as emojis or zero width joiner.
     final bool needsSearch = _isUtf16Surrogate(prevCodeUnit) || _text.codeUnitAt(offset) == _zwjUtf16 || _isUnicodeDirectionality(prevCodeUnit);
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
@@ -688,8 +686,6 @@ class TextPainter {
 
   // Get the Rect of the cursor (in logical pixels) based off the near edge
   // of the character downstream from the given string offset.
-  // TODO(garyq): Use actual extended grapheme cluster length instead of
-  // an increasing cluster length amount to achieve deterministic performance.
   Rect _getRectFromDownstream(int offset, Rect caretPrototype) {
     final String flattenedText = _text.toPlainText(includePlaceholders: false);
     // We cap the offset at the final index of the _text.
