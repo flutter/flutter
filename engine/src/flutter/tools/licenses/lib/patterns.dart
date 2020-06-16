@@ -1164,12 +1164,27 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
   MultipleVersionedLicenseReferencePattern(
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
+    licenseIndices: const <int>[4],
+    checkLocalFirst: false,
+    pattern: RegExp(
+      kIndent +
+      r'(?:©|Copyright (©|\(C\))) 20.. and later: Unicode, Inc. and others.[ *]*\n'
+      r'^\1\2License & terms of use: (http://www.unicode.org/copyright.html)',
+      multiLine: true,
+      caseSensitive: false,
+    )
+  ),
+
+  // ICU (Unicode)
+  MultipleVersionedLicenseReferencePattern(
+    firstPrefixIndex: 1,
+    indentPrefixIndex: 2,
     licenseIndices: const <int>[3],
     checkLocalFirst: false,
     pattern: RegExp(
       kIndent +
-      r'(?:©|Copyright \(C\)) 20.. and later: Unicode, Inc. and others.[ *]*\n'
-      r'^\1\2License & terms of use: (http://www.unicode.org/copyright.html)',
+      r'(?:Copyright ©) 20..-20.. Unicode, Inc. and others. All rights reserved. '
+      r'Distributed under the Terms of Use in (http://www.unicode.org/copyright.html)',
       multiLine: true,
       caseSensitive: false,
     )
