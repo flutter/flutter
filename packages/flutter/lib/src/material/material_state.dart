@@ -238,10 +238,9 @@ class _MaterialStateColor extends MaterialStateColor {
 ///
 /// See also:
 ///
-///  * [MouseCursor] for introduction on the mouse cursor system, such as how to
-///    use them.
-///  * [SystemMouseCursors], which contains many cursors supported natively by the
-///    platform.
+///  * [MouseCursor] for introduction on the mouse cursor system.
+///  * [SystemMouseCursors], which defines cursors that are supported by most
+///    native platforms.
 abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialStateProperty<MouseCursor> {
   /// Creates a [MaterialStateMouseCursor].
   const MaterialStateMouseCursor();
@@ -266,8 +265,8 @@ abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialS
   /// disabled, the cursor resolves to [SystemMouseCursors.basic].
   ///
   /// This cursor is the default for many Material widgets.
-  static const MaterialStateMouseCursor clickable = _SpecifyDisabledMouseCursor(
-    usualCursor: SystemMouseCursors.click,
+  static const MaterialStateMouseCursor clickable = _EnabledAndDisabledMouseCursor(
+    enabledCursor: SystemMouseCursors.click,
     disabledCursor: SystemMouseCursors.basic,
     name: 'clickable',
   );
@@ -279,21 +278,21 @@ abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialS
   /// disabled, the cursor resolves to [SystemMouseCursors.basic].
   ///
   /// This cursor is the default for many Material widgets.
-  static const MaterialStateMouseCursor textable = _SpecifyDisabledMouseCursor(
-    usualCursor: SystemMouseCursors.text,
+  static const MaterialStateMouseCursor textable = _EnabledAndDisabledMouseCursor(
+    enabledCursor: SystemMouseCursors.text,
     disabledCursor: SystemMouseCursors.basic,
     name: 'textable',
   );
 }
 
-class _SpecifyDisabledMouseCursor extends MaterialStateMouseCursor {
-  const _SpecifyDisabledMouseCursor({
-    this.usualCursor,
+class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
+  const _EnabledAndDisabledMouseCursor({
+    this.enabledCursor,
     this.disabledCursor,
     this.name,
   });
 
-  final MouseCursor usualCursor;
+  final MouseCursor enabledCursor;
   final MouseCursor disabledCursor;
   final String name;
 
@@ -302,7 +301,7 @@ class _SpecifyDisabledMouseCursor extends MaterialStateMouseCursor {
     if (states.contains(MaterialState.disabled)) {
       return disabledCursor;
     }
-    return usualCursor;
+    return enabledCursor;
   }
 
   @override
