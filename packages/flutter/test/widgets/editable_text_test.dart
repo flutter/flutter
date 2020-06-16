@@ -4923,6 +4923,46 @@ void main() {
     expect(state.currentTextEditingValue.text, equals('\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ \u{200F}🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
   });
 
+  testWidgets('Whitespace directionality formatter handles deletion of trailing whitespace', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'testText');
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.blue,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = '';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(state.wantKeepAlive, true);
+
+    // Simulate deleting only the trailing RTL mark.
+    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200E}الْعَ بِيَّةُ \u{200F}'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200E}الْعَ بِيَّةُ '));
+    // The trailing space should be gone here.
+    expect(state.currentTextEditingValue.text, equals('hello \u{200E}الْعَ بِيَّةُ'));
+  });
+
   testWidgets('EditableText changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
