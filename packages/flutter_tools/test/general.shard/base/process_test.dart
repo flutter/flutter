@@ -161,7 +161,7 @@ void main() {
              throwsA(isA<ProcessException>()));
     });
 
-    testWithoutContext(' does not throw on failure with whitelist', () async {
+    testWithoutContext(' does not throw on allowed Failures', () async {
       when(mockProcessManager.run(<String>['kaboom'])).thenAnswer((_) {
         return Future<ProcessResult>.value(ProcessResult(0, 1, '', ''));
       });
@@ -169,13 +169,13 @@ void main() {
         (await processUtils.run(
           <String>['kaboom'],
           throwOnError: true,
-          whiteListFailures: (int c) => c == 1,
+          allowedFailures: (int c) => c == 1,
         )).exitCode,
         1,
       );
     });
 
-    testWithoutContext(' throws on failure when not in whitelist', () async {
+    testWithoutContext(' throws on disallowed failure', () async {
       when(mockProcessManager.run(<String>['kaboom'])).thenAnswer((_) {
         return Future<ProcessResult>.value(ProcessResult(0, 2, '', ''));
       });
@@ -183,7 +183,7 @@ void main() {
         () => processUtils.run(
           <String>['kaboom'],
           throwOnError: true,
-          whiteListFailures: (int c) => c == 1,
+          allowedFailures: (int c) => c == 1,
         ),
         throwsA(isA<ProcessException>()),
       );
@@ -295,7 +295,7 @@ void main() {
              throwsA(isA<ProcessException>()));
     });
 
-    testWithoutContext(' does not throw on failure with whitelist', () async {
+    testWithoutContext(' does not throw on allowed Failures', () async {
       when(mockProcessManager.runSync(<String>['kaboom'])).thenReturn(
         ProcessResult(0, 1, '', '')
       );
@@ -303,12 +303,12 @@ void main() {
         processUtils.runSync(
           <String>['kaboom'],
           throwOnError: true,
-          whiteListFailures: (int c) => c == 1,
+          allowedFailures: (int c) => c == 1,
         ).exitCode,
         1);
     });
 
-    testWithoutContext(' throws on failure when not in whitelist', () async {
+    testWithoutContext(' throws on disallowed failure', () async {
       when(mockProcessManager.runSync(<String>['kaboom'])).thenReturn(
         ProcessResult(0, 2, '', '')
       );
@@ -316,7 +316,7 @@ void main() {
         () => processUtils.runSync(
           <String>['kaboom'],
           throwOnError: true,
-          whiteListFailures: (int c) => c == 1,
+          allowedFailures: (int c) => c == 1,
         ),
         throwsA(isA<ProcessException>()));
     });
