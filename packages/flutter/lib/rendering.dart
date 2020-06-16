@@ -62,6 +62,7 @@ export 'src/rendering/sliver_fill.dart';
 export 'src/rendering/sliver_fixed_extent_list.dart';
 export 'src/rendering/sliver_grid.dart';
 export 'src/rendering/sliver_list.dart';
+export 'src/rendering/sliver_masonry_grid.dart';
 export 'src/rendering/sliver_multi_box_adaptor.dart';
 export 'src/rendering/sliver_padding.dart';
 export 'src/rendering/sliver_persistent_header.dart';
