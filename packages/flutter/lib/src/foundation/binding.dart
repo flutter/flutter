@@ -210,8 +210,7 @@ abstract class BindingBase {
             await reassembleApplication();
           }
           return <String, dynamic>{
-            'value': (debugBrightnessOverride ?? window.platformBrightness)
-                     .toString(),
+            'value': (debugBrightnessOverride ?? window.platformBrightness).toString(),
           };
         },
       );
