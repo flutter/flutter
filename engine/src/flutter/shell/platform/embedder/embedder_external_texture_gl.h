@@ -30,7 +30,8 @@ class EmbedderExternalTextureGL : public flutter::Texture {
   void Paint(SkCanvas& canvas,
              const SkRect& bounds,
              bool freeze,
-             GrContext* context) override;
+             GrContext* context,
+             SkFilterQuality filter_quality) override;
 
   // |flutter::Texture|
   void OnGrContextCreated() override;

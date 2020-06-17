@@ -92,7 +92,8 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
                   double width,
                   double height,
                   int64_t textureId,
-                  bool freeze);
+                  bool freeze,
+                  int filterQuality);
 
   void addPlatformView(double dx,
                        double dy,
