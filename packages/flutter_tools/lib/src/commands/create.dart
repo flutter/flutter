@@ -258,6 +258,29 @@ class CreateCommand extends FlutterCommand {
     return template;
   }
 
+  Set<Uri> get templateManifest => _templateManifest ??= _computeTemplateManifest();
+  Set<Uri> _templateManifest;
+  Set<Uri> _computeTemplateManifest() {
+    final String flutterToolsAbsolutePath = globals.fs.path.join(
+      Cache.flutterRoot,
+      'packages',
+      'flutter_tools',
+    );
+    final String manifestPath = globals.fs.path.join(
+      flutterToolsAbsolutePath,
+      'templates',
+      'template_manifest.json',
+    );
+    final Map<String, Object> manifest = json.decode(
+      globals.fs.file(manifestPath).readAsStringSync(),
+    ) as Map<String, Object>;
+    return Set<Uri>.from(
+      (manifest['files'] as List<Object>)
+        .cast<String>()
+        .map<Uri>((String path) => Uri.file(globals.fs.path.join(flutterToolsAbsolutePath, path))),
+      );
+  }
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (argResults['list-samples'] != null) {
@@ -625,7 +648,11 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
   }
 
   Future<int> _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, { bool overwrite = false }) async {
-    final Template template = await Template.fromName(templateName, fileSystem: globals.fs);
+    final Template template = await Template.fromName(
+      templateName,
+      fileSystem: globals.fs,
+      templateManifest: templateManifest,
+    );
     return template.render(directory, context, overwriteExisting: overwrite);
   }
 
