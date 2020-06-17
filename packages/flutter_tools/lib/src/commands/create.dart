@@ -590,6 +590,8 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     final String pluginClass = pluginDartClass.endsWith('Plugin')
         ? pluginDartClass
         : pluginDartClass + 'Plugin';
+    final String pluginClassSnakeCase = snakeCase(pluginClass);
+    final String pluginClassCapitalSnakeCase = pluginClassSnakeCase.toUpperCase();
     final String appleIdentifier = _createUTIIdentifier(organization, projectName);
 
     return <String, dynamic>{
@@ -605,8 +607,9 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
       'withDriverTest': renderDriverTest,
       'pluginClass': pluginClass,
+      'pluginClassSnakeCase': pluginClassSnakeCase,
+      'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
       'pluginDartClass': pluginDartClass,
-      'pluginCppHeaderGuard': projectName.toUpperCase(),
       'pluginProjectUUID': Uuid().v4().toUpperCase(),
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,

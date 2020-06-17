@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -311,6 +313,36 @@ void main() {
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..circle(x: 50, y: 50, color: splashColor));
     await gesture.up();
+  });
+
+  testWidgets('ink response uses radius for focus highlight', (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Container(
+              width: 100,
+              height: 100,
+              child: InkResponse(
+                focusNode: focusNode,
+                radius: 20,
+                focusColor: const Color(0xff0000ff),
+                onTap: () { },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paints..circle(radius: 20, color: const Color(0xff0000ff)));
   });
 
   testWidgets("ink response doesn't change color on focus when on touch device", (WidgetTester tester) async {

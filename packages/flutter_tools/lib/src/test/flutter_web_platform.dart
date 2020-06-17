@@ -41,7 +41,6 @@ import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/chrome.dart';
-
 import 'test_compiler.dart';
 import 'test_config.dart';
 
@@ -222,20 +221,22 @@ class FlutterWebPlatform extends PlatformPlugin {
         scheme: 'package',
         pathSegments: request.requestedUri.pathSegments.skip(1),
       ));
-      final String dirname = p.dirname(fileUri.toFilePath());
-      final String basename = p.basename(fileUri.toFilePath());
-      final shelf.Handler handler = createStaticHandler(dirname);
-      final shelf.Request modifiedRequest = shelf.Request(
-        request.method,
-        request.requestedUri.replace(path: basename),
-        protocolVersion: request.protocolVersion,
-        headers: request.headers,
-        handlerPath: request.handlerPath,
-        url: request.url.replace(path: basename),
-        encoding: request.encoding,
-        context: request.context,
-      );
-      return handler(modifiedRequest);
+      if (fileUri != null) {
+        final String dirname = p.dirname(fileUri.toFilePath());
+        final String basename = p.basename(fileUri.toFilePath());
+        final shelf.Handler handler = createStaticHandler(dirname);
+        final shelf.Request modifiedRequest = shelf.Request(
+          request.method,
+          request.requestedUri.replace(path: basename),
+          protocolVersion: request.protocolVersion,
+          headers: request.headers,
+          handlerPath: request.handlerPath,
+          url: request.url.replace(path: basename),
+          encoding: request.encoding,
+          context: request.context,
+        );
+        return handler(modifiedRequest);
+      }
     }
     return shelf.Response.notFound('Not Found');
   }

@@ -32,6 +32,16 @@ void main() {
     expect(flutterManifest.assets, isEmpty);
   });
 
+  testWithoutContext('FlutterManifest is null when the pubspec.yaml file is not a map', () async {
+    final BufferLogger logger = BufferLogger.test();
+    expect(FlutterManifest.createFromString(
+      'Not a map',
+      logger: logger,
+    ), isNull);
+
+    expect(logger.errorText, contains('Expected YAML map'));
+  });
+
   testWithoutContext('FlutterManifest has no fonts or assets when the "flutter" section is empty', () async {
     const String manifest = '''
 name: test

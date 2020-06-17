@@ -45,14 +45,11 @@ enum Artifact {
   iosDeploy,
   idevicesyslog,
   idevicescreenshot,
-  ideviceinstaller,
   iproxy,
   /// The root of the Linux desktop sources.
   linuxDesktopPath,
   // The root of the cpp headers for Linux desktop.
   linuxHeaders,
-  // The root of the cpp client code for Linux desktop.
-  linuxCppClientWrapper,
   /// The root of the Windows desktop sources.
   windowsDesktopPath,
   /// The root of the cpp client code for Windows desktop.
@@ -116,8 +113,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'idevicesyslog';
     case Artifact.idevicescreenshot:
       return 'idevicescreenshot';
-    case Artifact.ideviceinstaller:
-      return 'ideviceinstaller';
     case Artifact.iproxy:
       return 'iproxy';
     case Artifact.linuxDesktopPath:
@@ -128,8 +123,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return '';
     case Artifact.windowsCppClientWrapper:
       return 'cpp_client_wrapper';
-    case Artifact.linuxCppClientWrapper:
-      return 'cpp_client_wrapper_glfw';
     case Artifact.skyEnginePath:
       return 'sky_engine';
     case Artifact.flutterMacOSPodspec:
@@ -272,9 +265,6 @@ class CachedArtifacts extends Artifacts {
       case Artifact.iosDeploy:
         final String artifactFileName = _artifactToFileName(artifact);
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName).path;
-      case Artifact.ideviceinstaller:
-        final String artifactFileName = _artifactToFileName(artifact);
-        return _cache.getArtifactDirectory('ideviceinstaller').childFile(artifactFileName).path;
       case Artifact.iproxy:
         final String artifactFileName = _artifactToFileName(artifact);
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
@@ -376,9 +366,6 @@ class CachedArtifacts extends Artifacts {
       case Artifact.windowsCppClientWrapper:
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
         return _fileSystem.path.join(engineArtifactsPath, 'windows-x64', _artifactToFileName(artifact, platform, mode));
-      case Artifact.linuxCppClientWrapper:
-        final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
-        return _fileSystem.path.join(engineArtifactsPath, 'linux-x64', _artifactToFileName(artifact, platform, mode));
       case Artifact.skyEnginePath:
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         return _fileSystem.path.join(dartPackageDirectory.path,  _artifactToFileName(artifact));
@@ -533,16 +520,12 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
         return _cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName).path;
-      case Artifact.ideviceinstaller:
-        return _cache.getArtifactDirectory('ideviceinstaller').childFile(artifactFileName).path;
       case Artifact.iosDeploy:
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName).path;
       case Artifact.iproxy:
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
       case Artifact.linuxDesktopPath:
       case Artifact.linuxHeaders:
-        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
-      case Artifact.linuxCppClientWrapper:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.windowsDesktopPath:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);

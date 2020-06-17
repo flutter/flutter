@@ -324,9 +324,6 @@ abstract class XcodeBasedProject {
 
   /// The CocoaPods 'Manifest.lock'.
   File get podManifestLock;
-
-  /// Directory containing symlinks to pub cache plugins source generated on `pod install`.
-  Directory get symlinks;
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -389,7 +386,6 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   /// The default 'Info.plist' file of the host app. The developer can change this location in Xcode.
   File get defaultHostInfoPlist => hostAppRoot.childDirectory(_hostAppProjectName).childFile('Info.plist');
 
-  @override
   Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
 
   @override
@@ -969,9 +965,6 @@ class MacOSProject extends FlutterProjectPlatform implements XcodeBasedProject {
 
   @override
   Directory get xcodeWorkspace => _macOSDirectory.childDirectory('$_hostAppProjectName.xcworkspace');
-
-  @override
-  Directory get symlinks => ephemeralDirectory.childDirectory('.symlinks');
 
   /// The file where the Xcode build will write the name of the built app.
   ///

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 import 'dart:ui' as ui show TextBox, lerpDouble, BoxHeightStyle, BoxWidthStyle;
 
@@ -228,6 +230,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     EdgeInsets floatingCursorAddedMargin = const EdgeInsets.fromLTRB(4, 4, 4, 5),
     TextRange promptRectRange,
     Color promptRectColor,
+    Clip clipBehavior = Clip.hardEdge,
     @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
@@ -258,6 +261,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        assert(devicePixelRatio != null),
        assert(selectionHeightStyle != null),
        assert(selectionWidthStyle != null),
+       assert(clipBehavior != null),
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -292,7 +296,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _obscureText = obscureText,
        _readOnly = readOnly,
        _forceLine = forceLine,
-       _promptRectRange = promptRectRange {
+       _promptRectRange = promptRectRange,
+       _clipBehavior = clipBehavior {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
     this.hasFocus = hasFocus ?? false;
@@ -794,7 +799,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _textLayoutLastMinWidth = null;
   }
 
-  // Retuns a cached plain text version of the text in the painter.
+  // Returns a cached plain text version of the text in the painter.
   String _cachedPlainText;
   String get _plainText {
     _cachedPlainText ??= _textPainter.text.toPlainText();
@@ -1251,6 +1256,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   double _maxScrollExtent = 0;
 
   double get _caretMargin => _kCaretGap + cursorWidth;
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge], and must not be null.
+  Clip get clipBehavior => _clipBehavior;
+  Clip _clipBehavior = Clip.hardEdge;
+  set clipBehavior(Clip value) {
+    assert(value != null);
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
+  }
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
@@ -2146,8 +2165,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   void paint(PaintingContext context, Offset offset) {
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
-    if (_hasVisualOverflow)
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents);
+    if (_hasVisualOverflow && clipBehavior != Clip.none)
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents, clipBehavior: clipBehavior);
     else
       _paintContents(context, offset);
     _paintHandleLayers(context, getEndpointsForSelection(selection));

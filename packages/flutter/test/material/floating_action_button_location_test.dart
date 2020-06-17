@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -110,14 +112,14 @@ void main() {
               lessThanOrEqualTo(maxDeltaWidth),
               reason: "The Floating Action Button's width should not change "
                   'faster than $maxDeltaWidth per animation step.\n'
-                  'Prevous rect: $previousRect, current rect: $currentRect',
+                  'Previous rect: $previousRect, current rect: $currentRect',
             );
             expect(
               deltaHeight.abs(),
               lessThanOrEqualTo(maxDeltaHeight),
               reason: "The Floating Action Button's width should not change "
                   'faster than $maxDeltaHeight per animation step.\n'
-                  'Prevous rect: $previousRect, current rect: $currentRect',
+                  'Previous rect: $previousRect, current rect: $currentRect',
             );
           }
           previousRect = currentRect;
@@ -152,7 +154,7 @@ void main() {
                   'faster than $maxDeltaRotation per animation step.\n'
                   'Detected deltas were: $deltas\n'
                   'Previous values: $previousRotations, current values: $currentRotations\n'
-                  'Prevous rect: $previousRect, current rect: $currentRect',);
+                  'Previous rect: $previousRect, current rect: $currentRect',);
             }
           }
           previousRotations = currentRotations;

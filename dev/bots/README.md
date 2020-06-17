@@ -72,12 +72,12 @@ search for files named `api.py` or `example.py` under `infra/build`.
 ### Editing a recipe
 
 Flutter has one recipe per repository. Currently
-[flutter/flutter](https://chromium.googlesource.com/chromium/tools/build.git/+/master/scripts/slave/recipes/flutter/flutter.py)
+[flutter/flutter](https://flutter.googlesource.com/recipes/+/refs/heads/master/recipes/flutter.py)
 and
-[flutter/engine](https://chromium.googlesource.com/chromium/tools/build.git/+/master/scripts/slave/recipes/flutter/engine.py):
+[flutter/engine](https://flutter.googlesource.com/recipes/+/refs/heads/master/recipes/engine.py):
 
-- build/scripts/slave/recipes/flutter/flutter.py
-- build/scripts/slave/recipes/flutter/engine.py
+- recipes/flutter.py
+- recipes/engine.py
 
 Recipes are just Python with some limitations on what can be imported. They are
 [documented](https://github.com/luci/recipes-py/blob/master/doc/user_guide.md)
@@ -85,18 +85,19 @@ by the [luci/recipes-py github project](https://github.com/luci/recipes-py).
 
 The typical cycle for editing a recipe is:
 
-1. Make your edits (probably to files in
-   `//chrome_infra/build/scripts/slave/recipes/flutter`).
-2. Update the tests. Run `build/scripts/slave/recipes.py test train` to update
+1. Checkout the recipes project using `git clone https://flutter.googlesource.com/recipes`.
+2. Make your edits (probably to files in
+   `//recipes/recipes`).
+3. Update the tests. Run `recipes.py test train` to update
    existing expected output to match the new output. Verify completely new test
    cases by altering the `GenTests` method of the recipe. The recipe is required
    to have 100% test coverage.
-3. Run `led get-builder 'luci.flutter.prod:BUILDER_NAME' | led edit -p 'revision="GIT_HASH"' | led edit-recipe-bundle | led launch`, where `BUILDER_NAME` is the builder name (e.g. `Linux Engine`), and
+4. Run `led get-builder 'luci.flutter.prod:BUILDER_NAME' | led edit -p 'revision="GIT_HASH"' | led edit-recipe-bundle | led launch`, where `BUILDER_NAME` is the builder name (e.g. `Linux Engine`), and
    `GIT_HASH` is the hash to build (which is important for the engine but not
    for the framework).
-4. To submit a CL, you need a local branch first (`git checkout -b [some branch name]`).
-5. Upload the patch (`git commit`, `git cl upload`) and send it to someone in
-   the `recipes/flutter/OWNERS` file for review.
+5. To submit a CL, you need a local branch first (`git checkout -b [some branch name]`).
+6. Upload the patch (`git commit`, `git cl upload`) and send it to someone in
+   the `OWNERS` file for review.
 
 ### The infra config repository
 

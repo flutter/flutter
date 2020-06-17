@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix4;
+
+import 'gesture_utils.dart';
 
 void main() {
   group('InteractiveViewer', () {
@@ -154,7 +159,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(transformationController.value, equals(Matrix4.identity()));
 
-      // Attempting to pinch to zoom doens't work because it's disabled.
+      // Attempting to pinch to zoom doesn't work because it's disabled.
       final Offset scaleStart1 = childInterior;
       final Offset scaleStart2 = Offset(childInterior.dx + 10.0, childInterior.dy);
       final Offset scaleEnd1 = Offset(childInterior.dx - 10.0, childInterior.dy);
@@ -399,6 +404,51 @@ void main() {
       final Offset newSceneFocalPoint = transformationController.toScene(viewportFocalPoint);
       expect(newSceneFocalPoint.dx, closeTo(sceneFocalPoint.dx, 1.0));
       expect(newSceneFocalPoint.dy, closeTo(sceneFocalPoint.dy, 1.0));
+    });
+
+    testWidgets('Can scale with mouse', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                transformationController: transformationController,
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset center = tester.getCenter(find.byType(InteractiveViewer));
+      await scrollAt(center, tester);
+      await tester.pumpAndSettle();
+
+      expect(transformationController.value.getMaxScaleOnAxis(), greaterThan(1.0));
+    });
+
+    testWidgets('Cannot scale with mouse when scale is disabled', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                transformationController: transformationController,
+                scaleEnabled: false,
+                child: Container(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset center = tester.getCenter(find.byType(InteractiveViewer));
+      await scrollAt(center, tester);
+      await tester.pumpAndSettle();
+
+      expect(transformationController.value.getMaxScaleOnAxis(), equals(1.0));
     });
   });
 

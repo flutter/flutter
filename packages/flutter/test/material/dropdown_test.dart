@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
@@ -2143,8 +2145,8 @@ void main() {
                           // hard coded 16px margin in the dropdown code, so that
                           // this hint aligns "properly" with the menu.
                           return Stack(
+                            clipBehavior: Clip.none,
                             alignment: Alignment.topCenter,
-                            overflow: Overflow.visible,
                             children: <Widget>[
                               PositionedDirectional(
                                 width: constraints.maxWidth + hintPaddingOffset,

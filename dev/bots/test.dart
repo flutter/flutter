@@ -82,8 +82,8 @@ int get webShardCount => Platform.environment.containsKey('WEB_SHARD_COUNT')
 
 /// Tests that we don't run on Web for various reasons.
 //
-// TODO(yjbanov): we're getting rid of this blacklist as part of https://github.com/flutter/flutter/projects/60
-const List<String> kWebTestFileBlacklist = <String>[
+// TODO(yjbanov): we're getting rid of this as part of https://github.com/flutter/flutter/projects/60
+const List<String> kWebTestFileKnownFailures = <String>[
   // This test doesn't compile because it depends on code outside the flutter package.
   'test/examples/sector_layout_test.dart',
   // This test relies on widget tracking capability in the VM.
@@ -544,24 +544,27 @@ Future<void> _runAddToAppLifeCycleTests() async {
 
 Future<void> _runFrameworkTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
+  final List<String> nullSafetyOptions = <String>['--enable-experiment=non-nullable'];
+  final List<String> trackWidgetCreationAlternatives = <String>['--track-widget-creation', '--no-track-widget-creation'];
 
   Future<void> runWidgets() async {
     print('${green}Running packages/flutter tests for$reset: ${cyan}test/widgets/$reset');
-    await _runFlutterTest(
-      path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--track-widget-creation'],
-      tableData: bigqueryApi?.tabledata,
-      tests: <String>[ path.join('test', 'widgets') + path.separator ],
-    );
-    await _runFlutterTest(
-      path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--no-track-widget-creation'],
-      tableData: bigqueryApi?.tabledata,
-      tests: <String>[ path.join('test', 'widgets') + path.separator ],
-    );
+    for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
+      await _runFlutterTest(
+        path.join(flutterRoot, 'packages', 'flutter'),
+        options: <String>[trackWidgetCreationOption, ...nullSafetyOptions],
+        tableData: bigqueryApi?.tabledata,
+        tests: <String>[ path.join('test', 'widgets') + path.separator ],
+      );
+    }
     // Try compiling code outside of the packages/flutter directory with and without --track-widget-creation
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'), options: <String>['--track-widget-creation'], tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'), options: <String>['--no-track-widget-creation'], tableData: bigqueryApi?.tabledata);
+    for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
+      await _runFlutterTest(
+        path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'),
+        options: <String>[trackWidgetCreationOption],
+        tableData: bigqueryApi?.tabledata,
+      );
+    }
   }
 
   Future<void> runLibraries() async {
@@ -572,18 +575,14 @@ Future<void> _runFrameworkTests() async {
       .map<String>((Directory dir) => path.join('test', path.basename(dir.path)) + path.separator)
       .toList();
     print('${green}Running packages/flutter tests$reset for: $cyan${tests.join(", ")}$reset');
-    await _runFlutterTest(
-      path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--track-widget-creation'],
-      tableData: bigqueryApi?.tabledata,
-      tests: tests,
-    );
-    await _runFlutterTest(
-      path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--no-track-widget-creation'],
-      tableData: bigqueryApi?.tabledata,
-      tests: tests,
-    );
+    for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
+      await _runFlutterTest(
+        path.join(flutterRoot, 'packages', 'flutter'),
+        options: <String>[trackWidgetCreationOption, ...nullSafetyOptions],
+        tableData: bigqueryApi?.tabledata,
+        tests: tests,
+      );
+    }
   }
 
   Future<void> runMisc() async {
@@ -604,9 +603,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'),
-      options: <String>['--enable-experiment=non-nullable', '--no-sound-null-safety'],
-    );
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'), options: nullSafetyOptions);
     await _runFlutterTest(
       path.join(flutterRoot, 'dev', 'tracing_tests'),
       options: <String>['--enable-vmservice'],
@@ -702,7 +699,7 @@ Future<void> _runWebUnitTests() async {
     )
     .whereType<File>()
     .map<String>((File file) => path.relative(file.path, from: flutterPackageDirectory.path))
-    .where((String filePath) => !kWebTestFileBlacklist.contains(filePath))
+    .where((String filePath) => !kWebTestFileKnownFailures.contains(filePath))
     .toList()
     // Finally we shuffle the list because we want the average cost per file to be uniformly
     // distributed. If the list is not sorted then different shards and batches may have

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 /// The Flutter widgets framework.
 ///
 /// To use, import `package:flutter/widgets.dart`.
@@ -35,6 +37,7 @@ export 'src/widgets/dismissible.dart';
 export 'src/widgets/disposable_build_context.dart';
 export 'src/widgets/drag_target.dart';
 export 'src/widgets/draggable_scrollable_sheet.dart';
+export 'src/widgets/dual_transition_builder.dart';
 export 'src/widgets/editable_text.dart';
 export 'src/widgets/fade_in_image.dart';
 export 'src/widgets/focus_manager.dart';

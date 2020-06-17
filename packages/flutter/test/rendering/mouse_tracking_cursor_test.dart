@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui;
 import 'dart:ui' show PointerChange;
 
@@ -496,7 +498,7 @@ class _TestGestureFlutterBinding extends BindingBase
   @override
   SchedulerPhase get schedulerPhase => _overridePhase ?? super.schedulerPhase;
 
-  // Mannually schedule a postframe check.
+  // Manually schedule a post-frame check.
   //
   // In real apps this is done by the renderer binding, but in tests we have to
   // bypass the phase assertion of [MouseTracker.schedulePostFrameCheck].

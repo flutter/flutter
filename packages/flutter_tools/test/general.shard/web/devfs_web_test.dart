@@ -364,6 +364,13 @@ void main() {
     expect(response.statusCode, HttpStatus.notFound);
   }));
 
+  test('handles serving unresolvable package file', () => testbed.run(() async {
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/packages/notpackage/file')));
+
+    expect(response.statusCode, HttpStatus.notFound);
+  }));
+
   test('serves /packages/<package>/<path> files as if they were '
        'package:<package>/<path> uris', () => testbed.run(() async {
     final Uri expectedUri = packages.resolve(

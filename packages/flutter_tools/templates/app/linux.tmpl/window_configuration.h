@@ -1,7 +1,7 @@
 #ifndef WINDOW_CONFIGURATION_
 #define WINDOW_CONFIGURATION_
 
-// This is a temporary approach to isolate common customizations from main.cpp,
+// This is a temporary approach to isolate common customizations from main.cc,
 // where the APIs are still in flux. This should simplify re-creating the
 // runner while preserving local changes.
 //

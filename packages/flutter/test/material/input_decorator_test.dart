@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -4049,7 +4051,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // floatingLabelGeight = 12 (ahem font size 16dps * 0.75 = 12)
+    // floatingLabelHeight = 12 (ahem font size 16dps * 0.75 = 12)
     // labelY = -floatingLabelHeight/2 + borderWidth/2
     expect(tester.getTopLeft(find.text('label')).dy, -4.0);
   });
