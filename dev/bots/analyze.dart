@@ -145,8 +145,8 @@ final RegExp _deprecationPattern4 = RegExp(r'^ *\)$');
 /// the regexp just above...)
 const String _ignoreDeprecation = ' // ignore: flutter_deprecation_syntax (see analyze.dart)';
 
-/// Some deprecation notices are grand-fathered in for now. They must have an issue listed.
-final RegExp _grandfatheredDeprecation = RegExp(r' // ignore: flutter_deprecation_syntax, https://github.com/flutter/flutter/issues/[0-9]+$');
+/// Some deprecation notices are exempt for historical reasons. They must have an issue listed.
+final RegExp _legacyDeprecation = RegExp(r' // ignore: flutter_deprecation_syntax, https://github.com/flutter/flutter/issues/[0-9]+$');
 
 Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 2000 }) async {
   final List<String> errors = <String>[];
@@ -157,7 +157,7 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
     for (final String line in lines) {
       if (line.contains(_findDeprecationPattern) &&
           !line.endsWith(_ignoreDeprecation) &&
-          !line.contains(_grandfatheredDeprecation)) {
+          !line.contains(_legacyDeprecation)) {
         linesWithDeprecations.add(lineNumber);
       }
       lineNumber += 1;
@@ -691,7 +691,7 @@ class Hash256 {
 // If you are adding/changing template images, use the flutter_template_images
 // package and a .img.tmpl placeholder instead.
 // If you have other binaries to add, please consult Hixie for advice.
-final Set<Hash256> _grandfatheredBinaries = <Hash256>{
+final Set<Hash256> _legacyBinaries = <Hash256>{
   // DEFAULT ICON IMAGES
 
   // packages/flutter_tools/templates/app/android.tmpl/app/src/main/res/mipmap-hdpi/ic_launcher.png
@@ -1046,18 +1046,18 @@ final Set<Hash256> _grandfatheredBinaries = <Hash256>{
   const Hash256(0x63D2ABD0041C3E3B, 0x4B52AD8D382353B5, 0x3C51C6785E76CE56, 0xED9DACAD2D2E31C4),
 };
 
-Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> grandfatheredBinaries }) async {
-  // Please do not add anything to the _grandfatheredBinaries set above.
+Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> legacyBinaries }) async {
+  // Please do not add anything to the _legacyBinaries set above.
   // We have a policy of not checking in binaries into this repository.
   // If you are adding/changing template images, use the flutter_template_images
   // package and a .img.tmpl placeholder instead.
   // If you have other binaries to add, please consult Hixie for advice.
   assert(
-    _grandfatheredBinaries
+    _legacyBinaries
       .expand<int>((Hash256 hash) => <int>[hash.a, hash.b, hash.c, hash.d])
       .reduce((int value, int element) => value ^ element) == 0x606B51C908B40BFA // Please do not modify this line.
   );
-  grandfatheredBinaries ??= _grandfatheredBinaries;
+  legacyBinaries ??= _legacyBinaries;
   if (!Platform.isWindows) { // TODO(ianh): Port this to Windows
     final EvalResult evalResult = await _evalCommand(
       'git', <String>['ls-files', '-z'],
@@ -1087,7 +1087,7 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> grandfathe
         utf8.decode(bytes);
       } on FormatException catch (error) {
         final Digest digest = sha256.convert(bytes);
-        if (!grandfatheredBinaries.contains(Hash256.fromDigest(digest)))
+        if (!legacyBinaries.contains(Hash256.fromDigest(digest)))
           problems.add('${file.path}:${error.offset}: file is not valid UTF-8');
       }
     }

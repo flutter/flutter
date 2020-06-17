@@ -270,7 +270,7 @@ class AndroidDevice extends Device {
       workingDirectory: workingDirectory,
       allowReentrantFlutter: allowReentrantFlutter,
       environment: environment,
-      whiteListFailures: (int value) => allowHeapCorruptionOnWindows(value, _platform),
+      allowedFailures: (int value) => allowHeapCorruptionOnWindows(value, _platform),
     ).stdout.trim();
   }
 
@@ -284,7 +284,7 @@ class AndroidDevice extends Device {
       throwOnError: true,
       workingDirectory: workingDirectory,
       allowReentrantFlutter: allowReentrantFlutter,
-      whiteListFailures: (int value) => allowHeapCorruptionOnWindows(value, _platform),
+      allowedFailures: (int value) => allowHeapCorruptionOnWindows(value, _platform),
     );
   }
 
@@ -1077,7 +1077,7 @@ class AdbLogReader extends DeviceLogReader {
   // 'W/ActivityManager(pid): '
   static final RegExp _logFormat = RegExp(r'^[VDIWEF]\/.*?\(\s*(\d+)\):\s');
 
-  static final List<RegExp> _whitelistedTags = <RegExp>[
+  static final List<RegExp> _allowedTags = <RegExp>[
     RegExp(r'^[VDIWEF]\/flutter[^:]*:\s+', caseSensitive: false),
     RegExp(r'^[IE]\/DartVM[^:]*:\s+'),
     RegExp(r'^[WEF]\/AndroidRuntime:\s+'),
@@ -1149,7 +1149,7 @@ class AdbLogReader extends DeviceLogReader {
         }
       } else {
         // Filter on approved names and levels.
-        acceptLine = _whitelistedTags.any((RegExp re) => re.hasMatch(line));
+        acceptLine = _allowedTags.any((RegExp re) => re.hasMatch(line));
       }
 
       if (acceptLine) {

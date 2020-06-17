@@ -185,6 +185,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         }
         break;
     }
+    changedInternalState();
   }
 
   @override
@@ -192,19 +193,16 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     assert(!_transitionCompleter.isCompleted, 'Cannot install a $runtimeType after disposing it.');
     _controller = createAnimationController();
     assert(_controller != null, '$runtimeType.createAnimationController() returned null.');
-    _animation = createAnimation()
-      ..addStatusListener(_handleStatusChanged);
+    _animation = createAnimation();
     assert(_animation != null, '$runtimeType.createAnimation() returned null.');
     super.install();
-    if (_animation.isCompleted && overlayEntries.isNotEmpty) {
-      overlayEntries.first.opaque = opaque;
-    }
   }
 
   @override
   TickerFuture didPush() {
     assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
+    _didPushOrReplace();
     super.didPush();
     return _controller.forward();
   }
@@ -213,6 +211,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   void didAdd() {
     assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
+    _didPushOrReplace();
     super.didAdd();
     _controller.value = _controller.upperBound;
   }
@@ -223,7 +222,17 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     if (oldRoute is TransitionRoute)
       _controller.value = oldRoute._controller.value;
+    _didPushOrReplace();
     super.didReplace(oldRoute);
+  }
+
+  void _didPushOrReplace() {
+    _animation.addStatusListener(_handleStatusChanged);
+    // If the animation is already completed, _handleStatusChanged will not get
+    // a chance to set opaqueness of OverlayEntry.
+    if (_animation.isCompleted && overlayEntries.isNotEmpty) {
+      overlayEntries.first.opaque = opaque;
+    }
   }
 
   @override
@@ -847,7 +856,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// ```
   ///
   /// The given [BuildContext] will be rebuilt if the state of the route changes
-  /// while it is visible (specifically, if [isCurrent] or [canPop] change value).
+  /// (specifically, if [isCurrent] or [canPop] change value).
   @optionalTypeArgs
   static ModalRoute<T> of<T extends Object>(BuildContext context) {
     final _ModalScopeStatus widget = context.dependOnInheritedWidgetOfExactType<_ModalScopeStatus>();
@@ -927,8 +936,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// is not wrapped in any transition widgets.
   ///
   /// The [buildTransitions] method, in contrast to [buildPage], is called each
-  /// time the [Route]'s state changes while it is visible (e.g. if the value of
-  /// [canPop] changes on the active route).
+  /// time the [Route]'s state changes (e.g. the value of [canPop]).
   ///
   /// The [buildTransitions] method is typically used to define transitions
   /// that animate the new topmost route's comings and goings. When the
@@ -1384,9 +1392,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// Whether this route can be popped.
   ///
-  /// When this changes, if the route is visible, the route will
-  /// rebuild, and any widgets that used [ModalRoute.of] will be
-  /// notified.
+  /// When this changes, the route will rebuild, and any widgets that used
+  /// [ModalRoute.of] will be notified.
   bool get canPop => !isFirst || willHandlePopInternally;
 
   // Internals

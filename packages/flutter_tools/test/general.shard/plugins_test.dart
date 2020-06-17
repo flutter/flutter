@@ -956,7 +956,7 @@ flutter:
 
         expect(registrantHeader.existsSync(), isTrue);
         expect(registrantImpl.existsSync(), isTrue);
-        expect(registrantImpl.readAsStringSync(), contains('SomePluginRegisterWithRegistrar'));
+        expect(registrantImpl.readAsStringSync(), contains('some_plugin_register_with_registrar'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -984,6 +984,7 @@ flutter:
 
         expect(registrantImpl, exists);
         expect(registrantImpl, isNot(contains('SomePlugin')));
+        expect(registrantImpl, isNot(contains('some_plugin')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
