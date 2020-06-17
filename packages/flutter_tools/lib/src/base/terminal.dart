@@ -5,12 +5,12 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import '../convert.dart';
 import '../globals.dart' as globals;
 import 'io.dart' as io;
 import 'logger.dart';
+import 'platform.dart';
 
 enum TerminalColor {
   red,

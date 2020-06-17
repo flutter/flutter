@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/semantics.dart';
+
+import 'semantics_tester.dart';
 
 class TestFocus extends StatefulWidget {
   const TestFocus({
@@ -1585,6 +1589,12 @@ void main() {
       expect(containerNode.hasFocus, isFalse);
       expect(unfocusableNode.hasFocus, isFalse);
     });
+    testWidgets("Focus doesn't introduce a Semantics node when includeSemantics is false", (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(Focus(includeSemantics: false, child: Container()));
+      final TestSemantics expectedSemantics = TestSemantics.root();
+      expect(semantics, hasSemantics(expectedSemantics));
+    });
   });
   group(ExcludeFocus, () {
     testWidgets("Descendants of ExcludeFocus aren't focusable.", (WidgetTester tester) async {
@@ -1624,6 +1634,12 @@ void main() {
       expect(gotFocus, isNull);
       expect(containerNode.hasFocus, isFalse);
       expect(unfocusableNode.hasFocus, isFalse);
+    });
+    testWidgets("ExcludeFocus doesn't introduce a Semantics node", (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(ExcludeFocus(child: Container()));
+      final TestSemantics expectedSemantics = TestSemantics.root();
+      expect(semantics, hasSemantics(expectedSemantics));
     });
   });
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -40,24 +42,16 @@ class ValueClipper<T> extends CustomClipper<T> {
   }
 }
 
-class _UpdateCountedClipRect extends ClipRect {
-  const _UpdateCountedClipRect({Clip clipBehavior = Clip.antiAlias})
-    : super(clipBehavior: clipBehavior);
-}
+class NotifyClipper<T> extends CustomClipper<T> {
+  NotifyClipper({this.clip}) : super(reclip: clip);
 
-class _UpdateCountedClipRRect extends ClipRRect {
-  _UpdateCountedClipRRect({Clip clipBehavior = Clip.antiAlias})
-      : super(clipBehavior: clipBehavior, borderRadius: BorderRadius.circular(1.0));
-}
+  final ValueNotifier<T> clip;
 
-class _UpdateCountedClipOval extends ClipOval {
-  const _UpdateCountedClipOval({Clip clipBehavior = Clip.antiAlias})
-      : super(clipBehavior: clipBehavior);
-}
+  @override
+  T getClip(Size size) => clip.value;
 
-class _UpdateCountedClipPath extends ClipPath {
-  const _UpdateCountedClipPath({Clip clipBehavior = Clip.antiAlias})
-      : super(clipBehavior: clipBehavior);
+  @override
+  bool shouldReclip(NotifyClipper<T> oldClipper) => clip != oldClipper.clip;
 }
 
 void main() {
@@ -81,15 +75,15 @@ void main() {
   });
 
   testWidgets('ClipRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
-    await tester.pumpWidget(const _UpdateCountedClipRect());
+    await tester.pumpWidget(const ClipRect());
 
     final RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
 
-    expect(renderClip.clipBehavior, equals(Clip.antiAlias));
-
-    await tester.pumpWidget(const _UpdateCountedClipRect(clipBehavior: Clip.hardEdge));
-
     expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+
+    await tester.pumpWidget(const ClipRect(clipBehavior: Clip.antiAlias));
+
+    expect(renderClip.clipBehavior, equals(Clip.antiAlias));
   });
 
   test('ClipRRect constructs with the right default values', () {
@@ -99,37 +93,37 @@ void main() {
   });
 
   testWidgets('ClipRRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
-    await tester.pumpWidget(_UpdateCountedClipRRect());
+    await tester.pumpWidget(const ClipRRect());
 
     final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
 
     expect(renderClip.clipBehavior, equals(Clip.antiAlias));
 
-    await tester.pumpWidget(_UpdateCountedClipRRect(clipBehavior: Clip.hardEdge));
+    await tester.pumpWidget(const ClipRRect(clipBehavior: Clip.hardEdge));
 
     expect(renderClip.clipBehavior, equals(Clip.hardEdge));
   });
 
   testWidgets('ClipOval updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
-    await tester.pumpWidget(const _UpdateCountedClipOval());
+    await tester.pumpWidget(const ClipOval());
 
     final RenderClipOval renderClip = tester.allRenderObjects.whereType<RenderClipOval>().first;
 
     expect(renderClip.clipBehavior, equals(Clip.antiAlias));
 
-    await tester.pumpWidget(const _UpdateCountedClipOval(clipBehavior: Clip.hardEdge));
+    await tester.pumpWidget(const ClipOval(clipBehavior: Clip.hardEdge));
 
     expect(renderClip.clipBehavior, equals(Clip.hardEdge));
   });
 
   testWidgets('ClipPath updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
-    await tester.pumpWidget(const _UpdateCountedClipPath());
+    await tester.pumpWidget(const ClipPath());
 
     final RenderClipPath renderClip = tester.allRenderObjects.whereType<RenderClipPath>().first;
 
     expect(renderClip.clipBehavior, equals(Clip.antiAlias));
 
-    await tester.pumpWidget(const _UpdateCountedClipPath(clipBehavior: Clip.hardEdge));
+    await tester.pumpWidget(const ClipPath(clipBehavior: Clip.hardEdge));
 
     expect(renderClip.clipBehavior, equals(Clip.hardEdge));
   });
@@ -836,5 +830,38 @@ void main() {
       '--5',
       'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
     ]);
+  });
+
+  testWidgets('CustomClipper reclips when notified', (WidgetTester tester) async {
+    final ValueNotifier<Rect> clip = ValueNotifier<Rect>(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+
+    await tester.pumpWidget(
+      ClipRect(
+        child: const Placeholder(),
+        clipper: NotifyClipper<Rect>(clip: clip),
+      ),
+    );
+
+    expect(tester.renderObject(find.byType(ClipRect)).paint, paints
+      ..save()
+      ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0))
+      ..save()
+      ..path() // Placeholder
+      ..restore()
+      ..restore(),
+    );
+
+    expect(tester.renderObject(find.byType(ClipRect)).debugNeedsPaint, isFalse);
+    clip.value = const Rect.fromLTWH(50.0, 50.0, 150.0, 100.0);
+    expect(tester.renderObject(find.byType(ClipRect)).debugNeedsPaint, isTrue);
+
+    expect(tester.renderObject(find.byType(ClipRect)).paint, paints
+      ..save()
+      ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 150.0, 100.0))
+      ..save()
+      ..path() // Placeholder
+      ..restore()
+      ..restore(),
+    );
   });
 }

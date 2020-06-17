@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -14,6 +13,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -44,17 +44,23 @@ final RegExp licenseNotAccepted = RegExp(r'licenses? not accepted', caseSensitiv
 final RegExp licenseAccepted = RegExp(r'All SDK package licenses accepted.');
 
 class AndroidWorkflow implements Workflow {
+  AndroidWorkflow({
+    @required AndroidSdk androidSdk,
+  }) : _androidSdk = androidSdk;
+
+  final AndroidSdk _androidSdk;
+
   @override
   bool get appliesToHostPlatform => true;
 
   @override
-  bool get canListDevices => getAdbPath(androidSdk) != null;
+  bool get canListDevices => getAdbPath(_androidSdk) != null;
 
   @override
-  bool get canLaunchDevices => androidSdk != null && androidSdk.validateSdkWellFormed().isEmpty;
+  bool get canLaunchDevices => _androidSdk != null && _androidSdk.validateSdkWellFormed().isEmpty;
 
   @override
-  bool get canListEmulators => getEmulatorPath(androidSdk) != null;
+  bool get canListEmulators => getEmulatorPath(_androidSdk) != null;
 }
 
 class AndroidValidator extends DoctorValidator {
@@ -242,13 +248,13 @@ class AndroidLicenseValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
     // Match pre-existing early termination behavior
-    if (androidSdk == null || androidSdk.latestVersion == null ||
-        androidSdk.validateSdkWellFormed().isNotEmpty ||
+    if (globals.androidSdk == null || globals.androidSdk.latestVersion == null ||
+        globals.androidSdk.validateSdkWellFormed().isNotEmpty ||
         ! await _checkJavaVersionNoOutput()) {
       return ValidationResult(ValidationType.missing, messages);
     }
 
-    final String sdkVersionText = userMessages.androidStatusInfo(androidSdk.latestVersion.buildToolsVersionName);
+    final String sdkVersionText = userMessages.androidStatusInfo(globals.androidSdk.latestVersion.buildToolsVersionName);
 
     // Check for licenses.
     switch (await licensesAccepted) {
@@ -325,8 +331,8 @@ class AndroidLicenseValidator extends DoctorValidator {
 
     try {
       final Process process = await processUtils.start(
-        <String>[androidSdk.sdkManagerPath, '--licenses'],
-        environment: androidSdk.sdkManagerEnv,
+        <String>[globals.androidSdk.sdkManagerPath, '--licenses'],
+        environment: globals.androidSdk.sdkManagerEnv,
       );
       process.stdin.write('n\n');
       // We expect logcat streams to occasionally contain invalid utf-8,
@@ -351,19 +357,19 @@ class AndroidLicenseValidator extends DoctorValidator {
 
   /// Run the Android SDK manager tool in order to accept SDK licenses.
   static Future<bool> runLicenseManager() async {
-    if (androidSdk == null) {
+    if (globals.androidSdk == null) {
       globals.printStatus(userMessages.androidSdkShort);
       return false;
     }
 
     if (!_canRunSdkManager()) {
-      throwToolExit(userMessages.androidMissingSdkManager(androidSdk.sdkManagerPath, globals.platform));
+      throwToolExit(userMessages.androidMissingSdkManager(globals.androidSdk.sdkManagerPath, globals.platform));
     }
 
     try {
       final Process process = await processUtils.start(
-        <String>[androidSdk.sdkManagerPath, '--licenses'],
-        environment: androidSdk.sdkManagerEnv,
+        <String>[globals.androidSdk.sdkManagerPath, '--licenses'],
+        environment: globals.androidSdk.sdkManagerEnv,
       );
 
       // The real stdin will never finish streaming. Pipe until the child process
@@ -393,7 +399,7 @@ class AndroidLicenseValidator extends DoctorValidator {
       return exitCode == 0;
     } on ProcessException catch (e) {
       throwToolExit(userMessages.androidCannotRunSdkManager(
-        androidSdk.sdkManagerPath,
+        globals.androidSdk.sdkManagerPath,
         e.toString(),
         globals.platform,
       ));
@@ -402,8 +408,8 @@ class AndroidLicenseValidator extends DoctorValidator {
   }
 
   static bool _canRunSdkManager() {
-    assert(androidSdk != null);
-    final String sdkManagerPath = androidSdk.sdkManagerPath;
+    assert(globals.androidSdk != null);
+    final String sdkManagerPath = globals.androidSdk.sdkManagerPath;
     return globals.processManager.canRun(sdkManagerPath);
   }
 }

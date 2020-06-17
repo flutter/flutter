@@ -66,6 +66,12 @@ class VisualStudioSolutionUtils {
   /// dependencies to include [plugins], removing any previous plugins from the
   /// solution.
   Future<void> updatePlugins(List<Plugin> plugins) async {
+    if (!_project.solutionFile.existsSync()) {
+      throwToolExit(
+        'Attempted to update Windows plugins on a project that does not '
+        'support Windows.',
+      );
+    }
     final String solutionContent = await _project.solutionFile.readAsString();
 
     // Map of GUID to name for the current plugin list.

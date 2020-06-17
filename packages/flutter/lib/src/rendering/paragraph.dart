@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, TextHeightBehavior;
@@ -916,10 +918,13 @@ class RenderParagraph extends RenderBox
           if (recognizer is TapGestureRecognizer) {
             configuration.onTap = recognizer.onTap;
             configuration.isLink = true;
+          } else if (recognizer is DoubleTapGestureRecognizer) {
+            configuration.onTap = recognizer.onDoubleTap;
+            configuration.isLink = true;
           } else if (recognizer is LongPressGestureRecognizer) {
             configuration.onLongPress = recognizer.onLongPress;
           } else {
-            assert(false);
+            assert(false, '${recognizer.runtimeType} is not supported.');
           }
         }
         final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty == true)

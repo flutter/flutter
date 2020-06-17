@@ -749,7 +749,7 @@ class GitTagVersion {
       if (channel == 'dev' || channel == 'beta' || channel == 'stable') {
         globals.printTrace('Skipping request to fetchTags - on well known channel $channel.');
       } else {
-        _runGit('git fetch $_flutterGit --tags', processUtils, workingDirectory);
+        _runGit('git fetch $_flutterGit --tags -f', processUtils, workingDirectory);
       }
     }
     final List<String> tags = _runGit(

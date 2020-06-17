@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:developer';
 import 'dart:io' show Platform;
 import 'dart:ui' as ui show Scene, SceneBuilder, Window;
@@ -224,7 +226,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// Actually causes the output of the rendering pipeline to appear on screen.
   void compositeFrame() {
-    Timeline.startSync('Compositing', arguments: timelineWhitelistArguments);
+    Timeline.startSync('Compositing', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();
       final ui.Scene scene = layer.buildScene(builder);

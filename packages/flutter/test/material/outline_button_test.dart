@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -109,6 +111,75 @@ void main() {
     gesture.removePointer();
   });
 
+  testWidgets('OutlineButton changes mouse cursor when hovered', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: OutlineButton.icon(
+            icon: const Icon(Icons.add),
+            label: const Text('Hello'),
+            onPressed: () {},
+            mouseCursor: SystemMouseCursors.text,
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(1, 1));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: OutlineButton(
+            onPressed: () {},
+            mouseCursor: SystemMouseCursors.text,
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: OutlineButton(
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: OutlineButton(
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
   testWidgets('Does OutlineButton work with focus', (WidgetTester tester) async {
     const Color focusColor = Color(0xff001122);
 
@@ -127,6 +198,30 @@ void main() {
 
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: focusColor));
+  });
+
+  testWidgets('Does OutlineButton work with autofocus', (WidgetTester tester) async {
+    const Color focusColor = Color(0xff001122);
+
+    final FocusNode focusNode = FocusNode(debugLabel: 'OutlineButton Node');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: OutlineButton(
+          autofocus: true,
+          focusColor: focusColor,
+          focusNode: focusNode,
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     await tester.pumpAndSettle();
 
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');

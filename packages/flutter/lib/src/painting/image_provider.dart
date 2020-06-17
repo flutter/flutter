@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -347,10 +349,10 @@ abstract class ImageProvider<T> {
           stack: stack,
           context: ErrorDescription('while resolving an image'),
           silent: true, // could be a network error or whatnot
-          informationCollector: collector
-          );
-        },
-      );
+          informationCollector: collector,
+        );
+      },
+    );
     return stream;
   }
 

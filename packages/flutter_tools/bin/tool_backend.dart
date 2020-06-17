@@ -22,6 +22,7 @@ Future<void> main(List<String> arguments) async {
   final String localEngine = Platform.environment['LOCAL_ENGINE'];
   final String projectDirectory = Platform.environment['PROJECT_DIR'];
   final String splitDebugInfo = Platform.environment['SPLIT_DEBUG_INFO'];
+  final String bundleSkSLPath = Platform.environment['BUNDLE_SKSL_PATH'];
   final bool trackWidgetCreation = Platform.environment['TRACK_WIDGET_CREATION'] == 'true';
   final bool treeShakeIcons = Platform.environment['TREE_SHAKE_ICONS'] == 'true';
   final bool verbose = Platform.environment['VERBOSE_SCRIPT_LOGGING'] == 'true';
@@ -44,12 +45,9 @@ or
 
   final String flutterExecutable = path.join(
     flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
-  final String target = targetPlatform == 'windows-x64'
-    ? 'debug_bundle_windows_assets'
-    : 'debug_bundle_linux_assets';
+  final String bundlePlatform = targetPlatform == 'windows-x64' ? 'windows' : 'linux';
+  final String target = '${buildMode}_bundle_${bundlePlatform}_assets';
 
-  // TODO(jonahwilliams): currently all builds are debug builds. Remove the
-  // hardcoded mode when profile and release support is added.
   final Process assembleProcess = await Process.start(
     flutterExecutable,
     <String>[
@@ -61,10 +59,12 @@ or
       '--output=build',
       '-dTargetPlatform=$targetPlatform',
       '-dTrackWidgetCreation=$trackWidgetCreation',
-      '-dBuildMode=debug',
+      '-dBuildMode=$buildMode',
       '-dTargetFile=$flutterTarget',
       '-dTreeShakeIcons="$treeShakeIcons"',
       '-dDartObfuscation=$dartObfuscation',
+      if (bundleSkSLPath != null)
+        '-iBundleSkSLPath=$bundleSkSLPath',
       if (splitDebugInfo != null)
         '-dSplitDebugInfo=$splitDebugInfo',
       if (dartDefines != null)
@@ -72,7 +72,7 @@ or
       if (extraGenSnapshotOptions != null)
         '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
       if (extraFrontEndOptions != null)
-        '-dExtraFrontEndOptions=$extraFrontEndOptions',
+        '--ExtraFrontEndOptions=$extraFrontEndOptions',
       target,
     ],
   );

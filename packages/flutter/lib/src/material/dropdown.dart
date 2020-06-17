@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
@@ -1560,5 +1562,13 @@ class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
     super.didChange(value);
     assert(widget.onChanged != null);
     widget.onChanged(value);
+  }
+
+  @override
+  void didUpdateWidget(DropdownButtonFormField<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialValue != widget.initialValue) {
+      setValue(widget.initialValue);
+    }
   }
 }

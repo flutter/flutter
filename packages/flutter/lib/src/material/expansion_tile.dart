@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -41,8 +43,18 @@ class ExpansionTile extends StatefulWidget {
     this.children = const <Widget>[],
     this.trailing,
     this.initiallyExpanded = false,
+    this.maintainState = false,
     this.tilePadding,
+    this.expandedCrossAxisAlignment,
+    this.expandedAlignment,
+    this.childrenPadding,
   }) : assert(initiallyExpanded != null),
+       assert(maintainState != null),
+       assert(
+       expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
+       'CrossAxisAlignment.baseline is not supported since the expanded children '
+           'are aligned in a column, not a row. Try to use another constant.',
+       ),
        super(key: key);
 
   /// A widget to display before the title.
@@ -81,6 +93,13 @@ class ExpansionTile extends StatefulWidget {
   /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
   final bool initiallyExpanded;
 
+  /// Specifies whether the state of the children is maintained when the tile expands and collapses.
+  ///
+  /// When true, the children are kept in the tree while the tile is collapsed.
+  /// When false (default), the children are removed from the tree when the tile is
+  /// collapsed and recreated upon expansion.
+  final bool maintainState;
+
   /// Specifies padding for the [ListTile].
   ///
   /// Analogous to [ListTile.contentPadding], this property defines the insets for
@@ -89,6 +108,43 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// When the value is null, the tile's padding is `EdgeInsets.symmetric(horizontal: 16.0)`.
   final EdgeInsetsGeometry tilePadding;
+
+  /// Specifies the alignment of [children], which are arranged in a column when
+  /// the tile is expanded.
+  ///
+  /// The internals of the expanded tile make use of a [Column] widget for
+  /// [children], and [Align] widget to align the column. The `expandedAlignment`
+  /// parameter is passed directly into the [Align].
+  ///
+  /// Modifying this property controls the alignment of the column within the
+  /// expanded tile, not the alignment of [children] widgets within the column.
+  /// To align each child within [children], see [expandedCrossAxisAlignment].
+  ///
+  /// The width of the column is the width of the widest child widget in [children].
+  ///
+  /// When the value is null, the value of `expandedAlignment` is [Alignment.center].
+  final Alignment expandedAlignment;
+
+  /// Specifies the alignment of each child within [children] when the tile is expanded.
+  ///
+  /// The internals of the expanded tile make use of a [Column] widget for
+  /// [children], and the `crossAxisAlignment` parameter is passed directly into the [Column].
+  ///
+  /// Modifying this property controls the cross axis alignment of each child
+  /// within its [Column]. Note that the width of the [Column] that houses
+  /// [children] will be the same as the widest child widget in [children]. It is
+  /// not necessarily the width of [Column] is equal to the width of expanded tile.
+  ///
+  /// To align the [Column] along the expanded tile, use the [expandedAlignment] property
+  /// instead.
+  ///
+  /// When the value is null, the value of `expandedCrossAxisAlignment` is [CrossAxisAlignment.center].
+  final CrossAxisAlignment expandedCrossAxisAlignment;
+
+  /// Specifies padding for [children].
+  ///
+  /// When the value is null, the value of `childrenPadding` is [EdgeInsets.zero].
+  final EdgeInsetsGeometry childrenPadding;
 
   @override
   _ExpansionTileState createState() => _ExpansionTileState();
@@ -187,6 +243,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           ),
           ClipRect(
             child: Align(
+              alignment: widget.expandedAlignment ?? Alignment.center,
               heightFactor: _heightFactor.value,
               child: child,
             ),
@@ -213,11 +270,26 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     final bool closed = !_isExpanded && _controller.isDismissed;
+    final bool shouldRemoveChildren = closed && !widget.maintainState;
+
+    final Widget result = Offstage(
+      child: TickerMode(
+        child: Padding(
+          padding: widget.childrenPadding ?? EdgeInsets.zero,
+          child: Column(
+            crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
+            children: widget.children,
+          ),
+        ),
+        enabled: !closed,
+      ),
+      offstage: closed
+    );
+
     return AnimatedBuilder(
       animation: _controller.view,
       builder: _buildChildren,
-      child: closed ? null : Column(children: widget.children),
+      child: shouldRemoveChildren ? null : result,
     );
-
   }
 }

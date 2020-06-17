@@ -12,15 +12,15 @@ import 'package:dwds/src/readers/asset_reader.dart';
 import 'package:dwds/src/services/expression_compiler.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/build_runner/devfs_web.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:logging/logging.dart';
 import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
-import 'package:platform/platform.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
@@ -106,6 +106,27 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{
     Platform: () => linux,
+  }));
+
+  test('Removes leading slashes for valid requests to avoid requesting outside'
+    ' of served directory', () => testbed.run(() async {
+    globals.fs.file('foo.png').createSync();
+    globals.fs.currentDirectory = globals.fs.directory('project_directory')
+      ..createSync();
+
+    final File source = globals.fs.file(globals.fs.path.join('web', 'foo.png'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(kTransparentImage);
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar////foo.png')));
+
+    expect(response.headers, allOf(<Matcher>[
+      containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
+      containsPair(HttpHeaders.contentTypeHeader, 'image/png'),
+      containsPair(HttpHeaders.etagHeader, isNotNull),
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
+    ]));
+    expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
 
   test('serves JavaScript files from in memory cache not from manifest', () => testbed.run(() async {
@@ -339,6 +360,13 @@ void main() {
   test('handles serving missing asset file', () => testbed.run(() async {
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/assets/foo')));
+
+    expect(response.statusCode, HttpStatus.notFound);
+  }));
+
+  test('handles serving unresolvable package file', () => testbed.run(() async {
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/packages/notpackage/file')));
 
     expect(response.statusCode, HttpStatus.notFound);
   }));

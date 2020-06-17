@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -9,7 +11,6 @@ import 'package:flutter/widgets.dart';
 
 import 'scaffold.dart';
 
-// TODO(hmuller): should be device dependent.
 /// The margin that a [FloatingActionButton] should leave between it and the
 /// edge of the screen.
 ///

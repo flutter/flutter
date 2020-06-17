@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:ui' show lerpDouble;
 
@@ -70,7 +72,7 @@ class Tab extends StatelessWidget {
     this.iconMargin = const EdgeInsets.only(bottom: 10.0),
     this.child,
   }) : assert(text != null || child != null || icon != null),
-       assert(!(text != null && null != child)), // TODO(goderbauer): https://github.com/dart-lang/sdk/issues/34180
+       assert(text == null || child == null),
        super(key: key);
 
   /// The text to display as the tab's label.
@@ -611,7 +613,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.mouseCursor,
     this.onTap,
+    this.physics,
   }) : assert(tabs != null),
        assert(isScrollable != null),
        assert(dragStartBehavior != null),
@@ -734,6 +738,12 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// individual tab widgets.
+  ///
+  /// If this property is null, [SystemMouseCursors.click] will be used.
+  final MouseCursor mouseCursor;
+
   /// An optional callback that's called when the [TabBar] is tapped.
   ///
   /// The callback is applied to the index of the tab where the tap occurred.
@@ -744,6 +754,14 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// callbacks should not make changes to the TabController since that would
   /// interfere with the default tap handler.
   final ValueChanged<int> onTap;
+
+  /// How the [TabBar]'s scroll view should respond to user input.
+  ///
+  /// For example, determines how the scroll view continues to animate after the
+  /// user stops dragging the scroll view.
+  ///
+  /// Defaults to matching platform conventions.
+  final ScrollPhysics physics;
 
   /// A size whose height depends on if the tabs have both icons and text.
   ///
@@ -1067,6 +1085,7 @@ class _TabBarState extends State<TabBar> {
     final int tabCount = widget.tabs.length;
     for (int index = 0; index < tabCount; index += 1) {
       wrappedTabs[index] = InkWell(
+        mouseCursor: widget.mouseCursor ?? SystemMouseCursors.click,
         onTap: () { _handleTap(index); },
         child: Padding(
           padding: EdgeInsets.only(bottom: widget.indicatorWeight),
@@ -1107,6 +1126,7 @@ class _TabBarState extends State<TabBar> {
         dragStartBehavior: widget.dragStartBehavior,
         scrollDirection: Axis.horizontal,
         controller: _scrollController,
+        physics: widget.physics,
         child: tabBar,
       );
     }
@@ -1171,7 +1191,7 @@ class TabBarView extends StatefulWidget {
   _TabBarViewState createState() => _TabBarViewState();
 }
 
-final PageScrollPhysics _kTabBarViewPhysics = const PageScrollPhysics().applyTo(const ClampingScrollPhysics());
+const PageScrollPhysics _kTabBarViewPhysics = PageScrollPhysics();
 
 class _TabBarViewState extends State<TabBarView> {
   TabController _controller;
@@ -1266,8 +1286,12 @@ class _TabBarViewState extends State<TabBarView> {
       return Future<void>.value();
 
     final int previousIndex = _controller.previousIndex;
-    if ((_currentIndex - previousIndex).abs() == 1)
-      return _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
+    if ((_currentIndex - previousIndex).abs() == 1) {
+      _warpUnderwayCount += 1;
+      await _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
+      _warpUnderwayCount -= 1;
+      return Future<void>.value();
+    }
 
     assert((_currentIndex - previousIndex).abs() > 1);
     final int initialPage = _currentIndex > previousIndex
@@ -1337,7 +1361,9 @@ class _TabBarViewState extends State<TabBarView> {
       child: PageView(
         dragStartBehavior: widget.dragStartBehavior,
         controller: _pageController,
-        physics: widget.physics == null ? _kTabBarViewPhysics : _kTabBarViewPhysics.applyTo(widget.physics),
+        physics: widget.physics == null
+          ? _kTabBarViewPhysics.applyTo(const ClampingScrollPhysics())
+          : _kTabBarViewPhysics.applyTo(widget.physics),
         children: _childrenWithKey,
       ),
     );

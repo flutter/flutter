@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
+import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';

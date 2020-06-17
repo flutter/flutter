@@ -26,35 +26,21 @@ class Timeline {
 /// A single timeline event.
 class TimelineEvent {
   /// Creates a timeline event given JSON-encoded event data.
-  factory TimelineEvent(Map<String, dynamic> json) {
-    return TimelineEvent._(
-      json,
-      json['name'] as String,
-      json['cat'] as String,
-      json['ph'] as String,
-      json['pid'] as int,
-      json['tid'] as int,
-      json['dur'] != null ? Duration(microseconds: json['dur'] as int) : null,
-      json['tdur'] != null ? Duration(microseconds: json['tdur'] as int) : null,
-      json['ts'] as int,
-      json['tts'] as int,
-      json['args'] as Map<String, dynamic>,
-    );
-  }
-
-  TimelineEvent._(
-    this.json,
-    this.name,
-    this.category,
-    this.phase,
-    this.processId,
-    this.threadId,
-    this.duration,
-    this.threadDuration,
-    this.timestampMicros,
-    this.threadTimestampMicros,
-    this.arguments,
-  );
+  TimelineEvent(this.json)
+      : name = json['name'] as String,
+        category = json['cat'] as String,
+        phase = json['ph'] as String,
+        processId = json['pid'] as int,
+        threadId = json['tid'] as int,
+        duration = json['dur'] != null
+            ? Duration(microseconds: json['dur'] as int)
+            : null,
+        threadDuration = json['tdur'] != null
+            ? Duration(microseconds: json['tdur'] as int)
+            : null,
+        timestampMicros = json['ts'] as int,
+        threadTimestampMicros = json['tts'] as int,
+        arguments = json['args'] as Map<String, dynamic>;
 
   /// The original event JSON.
   final Map<String, dynamic> json;

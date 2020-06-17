@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // Modeled after Android's ViewConfiguration:
 // https://github.com/android/platform_frameworks_base/blob/master/core/java/android/view/ViewConfiguration.java
 
@@ -26,7 +28,7 @@ const Duration kLongPressTimeout = Duration(milliseconds: 500);
 
 /// The maximum time from the start of the first tap to the start of the second
 /// tap in a double-tap gesture.
-// TODO(ianh): In Android, this is actually the time from the first's up event
+// In Android, this is actually the time from the first's up event
 // to the second's down event, according to the ViewConfiguration docs.
 const Duration kDoubleTapTimeout = Duration(milliseconds: 300);
 

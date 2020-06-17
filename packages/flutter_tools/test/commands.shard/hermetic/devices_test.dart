@@ -38,6 +38,16 @@ void main() {
       ProcessManager: () => MockProcessManager(),
     });
 
+    testUsingContext('get devices\' platform types', () async {
+      final List<String> platformTypes = Device.devicesPlatformTypes(
+        await deviceManager.getAllConnectedDevices(),
+      );
+      expect(platformTypes, <String>['android', 'web']);
+    }, overrides: <Type, Generator>{
+      DeviceManager: () => _FakeDeviceManager(),
+      ProcessManager: () => MockProcessManager(),
+    });
+
     testUsingContext('Outputs parsable JSON with --machine flag', () async {
       final DevicesCommand command = DevicesCommand();
       await createTestCommandRunner(command).run(<String>['devices', '--machine']);
@@ -74,11 +84,30 @@ void main() {
               'screenshot': false,
               'fastStart': false,
               'flutterExit': true,
-              'hardwareRendering': false,
+              'hardwareRendering': true,
               'startPaused': true
             }
           }
         ]
+      );
+    }, overrides: <Type, Generator>{
+      DeviceManager: () => _FakeDeviceManager(),
+      ProcessManager: () => MockProcessManager(),
+    });
+
+    testUsingContext('available devices and diagnostics', () async {
+      final DevicesCommand command = DevicesCommand();
+      await createTestCommandRunner(command).run(<String>['devices']);
+      expect(
+        testLogger.statusText,
+        '''
+2 connected devices:
+
+ephemeral • ephemeral • android-arm    • Test SDK (1.2.3) (emulator)
+webby     • webby     • web-javascript • Web SDK (1.2.4) (emulator)
+
+• Cannot connect to device ABC
+'''
       );
     }, overrides: <Type, Generator>{
       DeviceManager: () => _FakeDeviceManager(),
@@ -126,4 +155,8 @@ class _FakeDeviceManager extends DeviceManager {
   Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
     getAllConnectedDevices();
 
+  @override
+  Future<List<String>> getDeviceDiagnostics() => Future<List<String>>.value(
+    <String>['Cannot connect to device ABC']
+  );
 }

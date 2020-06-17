@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -23,14 +25,11 @@ import 'edge_insets.dart';
 ///  * [BorderSide], which is used to describe each side of the box.
 ///  * [Border], which, when used with [BoxDecoration], can also
 ///    describe a circle.
-class CircleBorder extends ShapeBorder {
+class CircleBorder extends OutlinedBorder {
   /// Create a circle border.
   ///
   /// The [side] argument must not be null.
-  const CircleBorder({ this.side = BorderSide.none }) : assert(side != null);
-
-  /// The style of this border.
-  final BorderSide side;
+  const CircleBorder({ BorderSide side = BorderSide.none }) : assert(side != null), super(side: side);
 
   @override
   EdgeInsetsGeometry get dimensions {
@@ -70,6 +69,11 @@ class CircleBorder extends ShapeBorder {
         center: rect.center,
         radius: rect.shortestSide / 2.0,
       ));
+  }
+
+  @override
+  CircleBorder copyWith({ BorderSide side }) {
+    return CircleBorder(side: side ?? this.side);
   }
 
   @override

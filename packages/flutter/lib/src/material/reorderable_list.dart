@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math';
 
 import 'package:flutter/widgets.dart';
@@ -384,8 +386,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         if (startIndex != endIndex)
           widget.onReorder(startIndex, endIndex);
         // Animates leftover space in the drop area closed.
-        // TODO(djshuckerow): bring the animation in line with the Material
-        // specifications.
         _ghostController.reverse(from: 0.1);
         _entranceController.reverse(from: 0.1);
         _dragging = null;

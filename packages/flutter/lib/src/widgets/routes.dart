@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -31,6 +33,7 @@ abstract class OverlayRoute<T> extends Route<T> {
   }) : super(settings: settings);
 
   /// Subclasses should override this getter to return the builders for the overlay.
+  @factory
   Iterable<OverlayEntry> createOverlayEntries();
 
   @override

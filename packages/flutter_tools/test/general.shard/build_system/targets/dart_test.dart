@@ -5,15 +5,15 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
-import 'package:flutter_tools/src/build_system/targets/dart.dart';
+import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../../../src/common.dart';
@@ -86,6 +86,7 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -115,6 +116,7 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -144,6 +146,7 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -174,6 +177,7 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -206,6 +210,7 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -236,6 +241,7 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -278,6 +284,7 @@ void main() {
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
@@ -319,7 +326,7 @@ void main() {
     ]);
     androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
 
-    await const AotElfProfile().build(androidEnvironment);
+    await const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment);
 
     expect(processManager.hasRemainingExpectations, false);
   }));
@@ -327,14 +334,14 @@ void main() {
   test('AotElfProfile throws error if missing build mode', () => testbed.run(() async {
     androidEnvironment.defines.remove(kBuildMode);
 
-    expect(const AotElfProfile().build(androidEnvironment),
+    expect(const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment),
       throwsA(isA<MissingDefineException>()));
   }));
 
   test('AotElfProfile throws error if missing target platform', () => testbed.run(() async {
     androidEnvironment.defines.remove(kTargetPlatform);
 
-    expect(const AotElfProfile().build(androidEnvironment),
+    expect(const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment),
       throwsA(isA<MissingDefineException>()));
   }));
 
@@ -580,7 +587,7 @@ void main() {
       ]),
     ]);
 
-    await const AotElfRelease().build(androidEnvironment);
+    await const AotElfRelease(TargetPlatform.android_arm).build(androidEnvironment);
 
     expect(processManager.hasRemainingExpectations, false);
   }));

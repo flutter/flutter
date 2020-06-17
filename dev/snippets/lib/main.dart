@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' hide Platform;
+import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
-import 'package:platform/platform.dart';
 
 import 'configuration.dart';
 import 'snippets.dart';
@@ -35,8 +34,7 @@ String getChannelName() {
 /// Generates snippet dartdoc output for a given input, and creates any sample
 /// applications needed by the snippet.
 void main(List<String> argList) {
-  const Platform platform = LocalPlatform();
-  final Map<String, String> environment = platform.environment;
+  final Map<String, String> environment = Platform.environment;
   final ArgParser parser = ArgParser();
   final List<String> snippetTypes =
       SnippetType.values.map<String>((SnippetType type) => getEnumName(type)).toList();

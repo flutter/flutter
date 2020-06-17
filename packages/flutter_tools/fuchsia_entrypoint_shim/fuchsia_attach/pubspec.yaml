@@ -1,0 +1,14 @@
+name: flutter_attach
+description: Tools for building Flutter applications
+homepage: https://flutter.dev
+author: Flutter Authors <flutter-dev@googlegroups.com>
+
+environment:
+  # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
+  sdk: ">=2.7.0 <3.0.0"
+
+dartdoc:
+  # Exclude this package from the hosted API docs.
+  nodoc: true
+
+# PUBSPEC CHECKSUM: 0000

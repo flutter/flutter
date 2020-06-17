@@ -29,7 +29,7 @@ void main() {
         'a.txt',
         'b.txt',
       ],
-      clientSourcePath: 'foo',
+      clientSourcePaths: <String>['foo'],
     );
 
     // Files are copied
@@ -61,7 +61,7 @@ void main() {
       artifacts: <String>[
         'a.txt',
       ],
-      clientSourcePath: 'foo'
+      clientSourcePaths: <String>['foo'],
     ), throwsA(isA<Exception>()));
   });
 
@@ -76,7 +76,7 @@ void main() {
       artifacts: <String>[
         'a.txt',
       ],
-      clientSourcePath: 'foo'
+      clientSourcePaths: <String>['foo'],
     ), throwsA(isA<Exception>()));
   });
 

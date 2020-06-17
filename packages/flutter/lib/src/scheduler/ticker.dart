@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -35,10 +37,11 @@ abstract class TickerProvider {
   /// Creates a ticker with the given callback.
   ///
   /// The kind of ticker provided depends on the kind of ticker provider.
+  @factory
   Ticker createTicker(TickerCallback onTick);
 }
 
-// TODO(jacobr): make Ticker use DiagnosticableMixin to simplify reporting errors
+// TODO(jacobr): make Ticker use Diagnosticable to simplify reporting errors
 // related to a ticker.
 /// Calls its callback once per animation frame.
 ///

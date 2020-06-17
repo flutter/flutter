@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:developer';
 import 'dart:ui' as ui show PictureRecorder;
 
@@ -171,7 +173,7 @@ class PaintingContext extends ClipContext {
   void paintChild(RenderObject child, Offset offset) {
     assert(() {
       if (debugProfilePaintsEnabled)
-        Timeline.startSync('${child.runtimeType}', arguments: timelineWhitelistArguments);
+        Timeline.startSync('${child.runtimeType}', arguments: timelineArgumentsIndicatingLandmarkEvent);
       if (debugOnProfilePaint != null)
         debugOnProfilePaint(child);
       return true;
@@ -871,7 +873,7 @@ class PipelineOwner {
   /// See [RendererBinding] for an example of how this function is used.
   void flushLayout() {
     if (!kReleaseMode) {
-      Timeline.startSync('Layout', arguments: timelineWhitelistArguments);
+      Timeline.startSync('Layout', arguments: timelineArgumentsIndicatingLandmarkEvent);
     }
     assert(() {
       _debugDoingLayout = true;
@@ -963,7 +965,7 @@ class PipelineOwner {
   /// See [RendererBinding] for an example of how this function is used.
   void flushPaint() {
     if (!kReleaseMode) {
-      Timeline.startSync('Paint', arguments: timelineWhitelistArguments);
+      Timeline.startSync('Paint', arguments: timelineArgumentsIndicatingLandmarkEvent);
     }
     assert(() {
       _debugDoingPaint = true;
@@ -2482,15 +2484,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// render objects in production, obtain a [SemanticsHandle] from
   /// [PipelineOwner.ensureSemantics].
   ///
-  /// Only valid when asserts are enabled. In release builds, always returns
+  /// Only valid in debug and profile mode. In release builds, always returns
   /// null.
   SemanticsNode get debugSemantics {
-    SemanticsNode result;
-    assert(() {
-      result = _semantics;
-      return true;
-    }());
-    return result;
+    if (!kReleaseMode) {
+      return _semantics;
+    }
+    return null;
   }
 
   /// Removes all semantics from this render object and its descendants.

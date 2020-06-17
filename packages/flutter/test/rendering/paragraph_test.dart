@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/gestures.dart';
@@ -417,4 +419,37 @@ void main() {
     expect(boxes[8], const TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0 , TextDirection.ltr));
   // Ahem-based tests don't yet quite work on Windows or some MacOS environments
   }, skip: isWindows || isMacOS || isBrowser);
+
+  test('Supports gesture recognizer semantics', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      TextSpan(text: _kText, children: <InlineSpan>[
+        TextSpan(text: 'one', recognizer: TapGestureRecognizer()..onTap = () {}),
+        TextSpan(text: 'two', recognizer: LongPressGestureRecognizer()..onLongPress = () {}),
+        TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()..onDoubleTap = () {}),
+      ]),
+      textDirection: TextDirection.rtl,
+    );
+    layout(paragraph);
+
+    paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
+  });
+
+  test('Asserts on unsupported gesture recognizer', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      TextSpan(text: _kText, children: <InlineSpan>[
+        TextSpan(text: 'three', recognizer: MultiTapGestureRecognizer()..onTap = (int id) {}),
+      ]),
+      textDirection: TextDirection.rtl,
+    );
+    layout(paragraph);
+
+    bool failed = false;
+    try {
+      paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
+    } catch(e) {
+      failed = true;
+      expect(e.message, 'MultiTapGestureRecognizer is not supported.');
+    }
+    expect(failed, true);
+  });
 }

@@ -4,10 +4,9 @@
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:platform/platform.dart';
-
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -278,6 +277,7 @@ void main() {
         r'--split-debug-info=C:\foo\',
         '--dart-define=foo=a',
         '--dart-define=bar=b',
+        r'--bundle-sksl-path=foo\bar.sksl.json',
         r'--target=lib\main.dart',
       ]
     );
@@ -292,12 +292,13 @@ void main() {
     expect(props.findAllElements('FLUTTER_ROOT').first.text, flutterRoot);
     expect(props.findAllElements('TRACK_WIDGET_CREATION').first.text, 'true');
     expect(props.findAllElements('TREE_SHAKE_ICONS').first.text, 'true');
-    expect(props.findAllElements('EXTRA_GEN_SNAPSHOT_OPTIONS').first.text, '--enable-experiment=non-nullable');
-    expect(props.findAllElements('EXTRA_FRONT_END_OPTIONS').first.text, '--enable-experiment=non-nullable');
-    expect(props.findAllElements('DART_DEFINES').first.text, 'foo=a,bar=b');
+    expect(props.findAllElements('EXTRA_GEN_SNAPSHOT_OPTIONS').first.text, '--enable-experiment%3Dnon-nullable');
+    expect(props.findAllElements('EXTRA_FRONT_END_OPTIONS').first.text, '--enable-experiment%3Dnon-nullable');
+    expect(props.findAllElements('DART_DEFINES').first.text, 'foo%3Da,bar%3Db');
     expect(props.findAllElements('DART_OBFUSCATION').first.text, 'true');
     expect(props.findAllElements('SPLIT_DEBUG_INFO').first.text, r'C:\foo\');
     expect(props.findAllElements('FLUTTER_TARGET').first.text, r'lib\main.dart');
+    expect(props.findAllElements('BUNDLE_SKSL_PATH').first.text, r'foo\bar.sksl.json');
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => mockProcessManager,
@@ -305,31 +306,28 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
-  testUsingContext('Release build prints an under-construction warning', () async {
+  testUsingContext('Windows profile build passes Profile configuration', () async {
     final BuildWindowsCommand command = BuildWindowsCommand()
       ..visualStudioOverride = mockVisualStudio;
     applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
 
-    when(mockProcessManager.start(
-      <String>[
+    when(mockProcessManager.start(<String>[
         fileSystem.path.join(flutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
         vcvarsPath,
         fileSystem.path.basename(solutionPath),
-        'Release',
+        'Profile',
       ],
       environment: <String, String>{},
-      workingDirectory: fileSystem.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
-        return mockProcess;
-      },
-    );
+      workingDirectory: fileSystem.path.dirname(solutionPath))
+    ).thenAnswer((Invocation invocation) async {
+      return mockProcess;
+    });
 
     await createTestCommandRunner(command).run(
-      const <String>['windows', '--no-pub']
+      const <String>['windows', '--profile', '--no-pub']
     );
-
-    expect(testLogger.statusText, contains('🚧'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => mockProcessManager,

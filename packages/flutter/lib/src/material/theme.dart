@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -253,7 +255,7 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    // TODO(ianh): Use constructor tear-offs when it becomes possible
+    // TODO(ianh): Use constructor tear-offs when it becomes possible, https://github.com/dart-lang/sdk/issues/10659
     _data = visitor(_data, widget.data, (dynamic value) => ThemeDataTween(begin: value as ThemeData)) as ThemeDataTween;
     assert(_data != null);
   }

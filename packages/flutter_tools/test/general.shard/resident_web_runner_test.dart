@@ -4,13 +4,13 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
-import 'package:flutter_tools/src/vmservice.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_runner/devfs_web.dart';
@@ -23,10 +23,11 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:vm_service/vm_service.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
@@ -36,14 +37,12 @@ import '../src/testbed.dart';
 
 const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(
-    id: '1',
     method: 'streamListen',
     args: <String, Object>{
       'streamId': 'Stdout',
     },
   ),
   FakeVmServiceRequest(
-    id: '2',
     method: 'streamListen',
     args: <String, Object>{
       'streamId': 'Stderr',
@@ -53,14 +52,18 @@ const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>
 
 const List<VmServiceExpectation> kAttachIsolateExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(
-    id: '3',
     method: 'streamListen',
     args: <String, Object>{
       'streamId': 'Isolate'
     }
   ),
   FakeVmServiceRequest(
-    id: '4',
+    method: 'streamListen',
+    args: <String, Object>{
+      'streamId': 'Extension',
+    },
+  ),
+  FakeVmServiceRequest(
     method: 'registerService',
     args: <String, Object>{
       'service': 'reloadSources',
@@ -145,7 +148,7 @@ void main() {
       projectRootPath: anyNamed('projectRootPath'),
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
-      trackWidgetCreation: true,
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
       packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation _) async {
       return UpdateFSReport(success: true,  syncedBytes: 0)..invalidatedModules = <String>[];
@@ -261,13 +264,21 @@ void main() {
     expect(bufferLogger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
     expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
   }, overrides: <Type, Generator>{
-    Logger: () => DelegateLogger(BufferLogger(
-      terminal: AnsiTerminal(
-        stdio: null,
-        platform: const LocalPlatform(),
-      ),
-      outputPreferences: OutputPreferences.test(),
-    )),
+    Logger: () => DelegateLogger(BufferLogger.test()),
+  }));
+
+  test('WebRunner copies compiled app.dill to cache during startup', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+    _setupMocks();
+
+    residentWebRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    expect(await globals.fs.file(globals.fs.path.join('build', 'cache.dill')).readAsString(), 'ABC');
   }));
 
   test('Can successfully run without an index.html including status warning', () => testbed.run(() async {
@@ -336,6 +347,68 @@ void main() {
     expect(testLogger.statusText, contains('SO IS THIS'));
   }));
 
+  test('Listens to extension events with structured errors', () => testbed.run(() async {
+    final Map<String, String> extensionData = <String, String>{
+      'test': 'data',
+      'renderedErrorText': 'error text',
+    };
+    final Map<String, String> emptyExtensionData = <String, String>{
+      'test': 'data',
+      'renderedErrorText': '',
+    };
+    final Map<String, String> nonStructuredErrorData = <String, String>{
+      'other': 'other stuff',
+    };
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      ...kAttachExpectations,
+      FakeVmServiceStreamResponse(
+        streamId: 'Extension',
+        event: vm_service.Event(
+          timestamp: 0,
+          extensionKind: 'Flutter.Error',
+          extensionData: vm_service.ExtensionData.parse(extensionData),
+          kind: vm_service.EventStreams.kExtension,
+        ),
+      ),
+      // Empty error text should not break anything.
+      FakeVmServiceStreamResponse(
+        streamId: 'Extension',
+        event: vm_service.Event(
+          timestamp: 0,
+          extensionKind: 'Flutter.Error',
+          extensionData: vm_service.ExtensionData.parse(emptyExtensionData),
+          kind: vm_service.EventStreams.kExtension,
+        ),
+      ),
+      // This is not Flutter.Error kind data, so it should not be logged.
+      FakeVmServiceStreamResponse(
+        streamId: 'Extension',
+        event: vm_service.Event(
+          timestamp: 0,
+          extensionKind: 'Other',
+          extensionData: vm_service.ExtensionData.parse(nonStructuredErrorData),
+          kind: vm_service.EventStreams.kExtension,
+        ),
+      ),
+    ]);
+
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    // Need these to run events, otherwise expect statements below run before
+    // structured errors are processed.
+    await null;
+    await null;
+    await null;
+
+    expect(testLogger.statusText, contains('\nerror text'));
+    expect(testLogger.statusText, isNot(contains('other stuff')));
+  }));
+
   test('Does not run main with --start-paused', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
     residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
@@ -362,7 +435,6 @@ void main() {
       ...kAttachExpectations,
       const FakeVmServiceRequest(
         method: 'hotRestart',
-        id: '5',
         jsonResponse: <String, Object>{
           'type': 'Success',
         }
@@ -439,7 +511,6 @@ void main() {
       ...kAttachExpectations,
       const FakeVmServiceRequest(
         method: 'hotRestart',
-        id: '5',
         jsonResponse: <String, Object>{
           'type': 'Success',
         }
@@ -589,7 +660,7 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
       packageConfig: anyNamed('packageConfig'),
-      trackWidgetCreation: true,
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
     )).thenAnswer((Invocation _) async {
       return UpdateFSReport(success: false,  syncedBytes: 0)..invalidatedModules = <String>[];
     });
@@ -652,7 +723,7 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
       packageConfig: anyNamed('packageConfig'),
-      trackWidgetCreation: true,
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
     )).thenAnswer((Invocation _) async {
       return UpdateFSReport(success: false,  syncedBytes: 0)..invalidatedModules = <String>[];
     });
@@ -670,7 +741,6 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-        id: '5',
         method: 'hotRestart',
         jsonResponse: <String, Object>{
           'type': 'Failed',
@@ -693,7 +763,6 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-        id: '5',
         method: 'hotRestart',
         // Failed response,
         errorCode: RPCErrorCodes.kInternalError,
@@ -725,7 +794,6 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-        id: '5',
         method: 'ext.flutter.debugDumpApp',
         args: <String, Object>{
           'isolateId': null,
@@ -747,7 +815,6 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-        id: '5',
         method: 'ext.flutter.debugDumpLayerTree',
         args: <String, Object>{
           'isolateId': null,
@@ -769,7 +836,6 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-        id: '5',
         method: 'ext.flutter.debugDumpRenderTree',
         args: <String, Object>{
           'isolateId': null,
@@ -791,7 +857,6 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-        id: '5',
         method: 'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
         args: <String, Object>{
           'isolateId': null,
@@ -813,7 +878,6 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-        id: '5',
         method: 'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
         args: <String, Object>{
           'isolateId': null,
@@ -836,7 +900,6 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-        id: '5',
         method: 'ext.flutter.debugPaint',
         args: <String, Object>{
           'isolateId': null,
@@ -846,7 +909,6 @@ void main() {
         },
       ),
       const FakeVmServiceRequest(
-        id: '6',
         method: 'ext.flutter.debugPaint',
         args: <String, Object>{
           'isolateId': null,
@@ -874,7 +936,6 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-        id: '5',
         method: 'ext.flutter.showPerformanceOverlay',
         args: <String, Object>{
           'isolateId': null,
@@ -884,7 +945,6 @@ void main() {
         },
       ),
       const FakeVmServiceRequest(
-        id: '6',
         method: 'ext.flutter.showPerformanceOverlay',
         args: <String, Object>{
           'isolateId': null,
@@ -911,7 +971,6 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-        id: '5',
         method: 'ext.flutter.inspector.show',
         args: <String, Object>{
           'isolateId': null,
@@ -921,7 +980,6 @@ void main() {
         },
       ),
       const FakeVmServiceRequest(
-        id: '6',
         method: 'ext.flutter.inspector.show',
         args: <String, Object>{
           'isolateId': null,
@@ -948,7 +1006,6 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-        id: '5',
         method: 'ext.flutter.profileWidgetBuilds',
         args: <String, Object>{
           'isolateId': null,
@@ -958,7 +1015,6 @@ void main() {
         },
       ),
       const FakeVmServiceRequest(
-        id: '6',
         method: 'ext.flutter.profileWidgetBuilds',
         args: <String, Object>{
           'isolateId': null,
@@ -985,7 +1041,6 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-        id: '5',
         method: 'ext.flutter.platformOverride',
         args: <String, Object>{
           'isolateId': null,
@@ -995,7 +1050,6 @@ void main() {
         },
       ),
       const FakeVmServiceRequest(
-        id: '6',
         method: 'ext.flutter.platformOverride',
         args: <String, Object>{
           'isolateId': null,
@@ -1026,7 +1080,7 @@ void main() {
     ]);
     _setupMocks();
     bool debugClosed = false;
-    when(mockDevice.stopApp(any)).thenAnswer((Invocation invocation) async {
+    when(mockDevice.stopApp(any, userIdentifier: anyNamed('userIdentifier'))).thenAnswer((Invocation invocation) async {
       if (debugClosed) {
         throw StateError('debug connection closed twice');
       }
@@ -1088,21 +1142,7 @@ void main() {
   test('Sends launched app.webLaunchUrl event for Chrome device', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachLogExpectations,
-      const FakeVmServiceRequest(
-        id: '3',
-        method: 'streamListen',
-        args: <String, Object>{
-          'streamId': 'Isolate'
-        }
-      ),
-      const FakeVmServiceRequest(
-        id: '4',
-        method: 'registerService',
-        args: <String, Object>{
-          'service': 'reloadSources',
-          'alias': 'FlutterTools',
-        }
-      )
+      ...kAttachIsolateExpectations,
     ]);
     _setupMocks();
     final ChromiumLauncher chromiumLauncher = MockChromeLauncher();

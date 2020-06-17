@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import 'base/context.dart';
+import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
 import 'globals.dart' as globals;
@@ -138,13 +139,13 @@ class BuildInfo {
   Map<String, String> toEnvironmentConfig() {
     return <String, String>{
       if (dartDefines?.isNotEmpty ?? false)
-        'DART_DEFINES': dartDefines.join(','),
+        'DART_DEFINES': encodeDartDefines(dartDefines),
       if (dartObfuscation != null)
         'DART_OBFUSCATION': dartObfuscation.toString(),
       if (extraFrontEndOptions?.isNotEmpty ?? false)
-        'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
+        'EXTRA_FRONT_END_OPTIONS': encodeDartDefines(extraFrontEndOptions),
       if (extraGenSnapshotOptions?.isNotEmpty ?? false)
-        'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions.join(','),
+        'EXTRA_GEN_SNAPSHOT_OPTIONS': encodeDartDefines(extraGenSnapshotOptions),
       if (splitDebugInfoPath != null)
         'SPLIT_DEBUG_INFO': splitDebugInfoPath,
       if (trackWidgetCreation != null)
@@ -153,6 +154,8 @@ class BuildInfo {
         'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
       if (performanceMeasurementFile != null)
         'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile,
+      if (bundleSkSLPath != null)
+        'BUNDLE_SKSL_PATH': bundleSkSLPath,
     };
   }
 }
@@ -265,7 +268,7 @@ BuildMode getBuildModeForName(String name) {
   return BuildMode.fromName(name);
 }
 
-String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber) {
+String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber, Logger logger) {
   if (buildNumber == null) {
     return null;
   }
@@ -286,7 +289,7 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     }
     tmpBuildNumber = segments.join('.');
     if (tmpBuildNumber != buildNumber) {
-      globals.printTrace('Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
+      logger.printTrace('Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
           'See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
     }
     return tmpBuildNumber;
@@ -304,7 +307,7 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     }
     tmpBuildNumberStr = tmpBuildNumberInt.toString();
     if (tmpBuildNumberStr != buildNumber) {
-      globals.printTrace('Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
+      logger.printTrace('Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
           'See versionCode at https://developer.android.com/studio/publish/versioning');
     }
     return tmpBuildNumberStr;
@@ -312,7 +315,7 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
   return buildNumber;
 }
 
-String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String buildName) {
+String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String buildName, Logger logger) {
   if (buildName == null) {
     return null;
   }
@@ -333,7 +336,7 @@ String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String build
     }
     tmpBuildName = segments.join('.');
     if (tmpBuildName != buildName) {
-      globals.printTrace('Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
+      logger.printTrace('Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
           'See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
     }
     return tmpBuildName;
@@ -653,4 +656,26 @@ String getWindowsBuildDirectory() {
 /// Returns the Fuchsia build output directory.
 String getFuchsiaBuildDirectory() {
   return globals.fs.path.join(getBuildDirectory(), 'fuchsia');
+}
+
+/// Defines specified via the `--dart-define` command-line option.
+///
+/// These values are URI-encoded and then combined into a comma-separated string.
+const String kDartDefines = 'DartDefines';
+
+/// Encode a List of dart defines in a URI string.
+String encodeDartDefines(List<String> defines) {
+  return defines.map(Uri.encodeComponent).join(',');
+}
+
+/// Dart defines are encoded inside [environmentDefines] as a comma-separated list.
+List<String> decodeDartDefines(Map<String, String> environmentDefines, String key) {
+  if (!environmentDefines.containsKey(key) || environmentDefines[key].isEmpty) {
+    return const <String>[];
+  }
+  return environmentDefines[key]
+    .split(',')
+    .map<Object>(Uri.decodeComponent)
+    .cast<String>()
+    .toList();
 }

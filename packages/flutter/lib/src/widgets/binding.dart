@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback;
@@ -877,6 +879,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }
     _needToReportFirstFrame = false;
     if (firstFrameCallback != null && !sendFramesToEngine) {
+      // This frame is deferred and not the first frame sent to the engine that
+      // should be reported.
+      _needToReportFirstFrame = true;
       SchedulerBinding.instance.removeTimingsCallback(firstFrameCallback);
     }
   }

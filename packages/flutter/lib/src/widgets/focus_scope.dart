@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
@@ -16,7 +18,7 @@ import 'inherited_notifier.dart';
 ///
 /// For keyboard events, [onKey] is called if [FocusNode.hasFocus] is true for
 /// this widget's [focusNode], unless a focused descendant's [onKey] callback
-/// returns false when called.
+/// returns true when called.
 ///
 /// This widget does not provide any visual indication that the focus has
 /// changed. Any desired visual changes should be made when [onFocusChanged] is
@@ -367,15 +369,17 @@ class Focus extends StatefulWidget {
   /// still be focused explicitly.
   final bool skipTraversal;
 
-  /// Include semantics information in this [Focus] widget.
+  /// {@template flutter.widgets.Focus.includeSemantics}
+  /// Include semantics information in this widget.
   ///
-  /// If true, this [Focus] widget will include a [Semantics] node that
+  /// If true, this widget will include a [Semantics] node that
   /// indicates the [Semantics.focusable] and [Semantics.focused] properties.
   ///
   /// It is not typical to set this to false, as that can affect the semantics
   /// information available to accessibility systems.
   ///
   /// Must not be null, defaults to true.
+  /// {@endtemplate}
   final bool includeSemantics;
 
   /// {@template flutter.widgets.Focus.canRequestFocus}
@@ -997,6 +1001,7 @@ class ExcludeFocus extends StatelessWidget {
     return Focus(
       canRequestFocus: false,
       skipTraversal: true,
+      includeSemantics: false,
       descendantsAreFocusable: !excluding,
       child: child,
     );

@@ -5,14 +5,15 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
+import 'package:vm_service/vm_service_io.dart' as vm_service_io;
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -194,6 +195,11 @@ class Xcode {
   }
 }
 
+enum XCDeviceEvent {
+  attach,
+  detach,
+}
+
 /// A utility class for interacting with Xcode xcdevice command line tools.
 class XCDevice {
   XCDevice({
@@ -218,13 +224,33 @@ class XCDevice {
         platform: platform,
         processManager: processManager,
       ),
-      _xcode = xcode;
+      _xcode = xcode {
+
+    _setupDeviceIdentifierByEventStream();
+  }
+
+  void dispose() {
+    _deviceObservationProcess?.kill();
+  }
 
   final ProcessUtils _processUtils;
   final Logger _logger;
   final IMobileDevice _iMobileDevice;
   final IOSDeploy _iosDeploy;
   final Xcode _xcode;
+
+  List<dynamic> _cachedListResults;
+  Process _deviceObservationProcess;
+  StreamController<Map<XCDeviceEvent, String>> _deviceIdentifierByEvent;
+
+  void _setupDeviceIdentifierByEventStream() {
+    // _deviceIdentifierByEvent Should always be available for listeners
+    // in case polling needs to be stopped and restarted.
+    _deviceIdentifierByEvent = StreamController<Map<XCDeviceEvent, String>>.broadcast(
+      onListen: _startObservingTetheredIOSDevices,
+      onCancel: _stopObservingTetheredIOSDevices,
+    );
+  }
 
   bool get isInstalled => _xcode.isInstalledAndMeetsVersionCheck && xcdevicePath != null;
 
@@ -287,10 +313,102 @@ class XCDevice {
     return null;
   }
 
-  List<dynamic> _cachedListResults;
+  /// Observe identifiers (UDIDs) of devices as they attach and detach.
+  ///
+  /// Each attach and detach event is a tuple of one event type
+  /// and identifier.
+  Stream<Map<XCDeviceEvent, String>> observedDeviceEvents() {
+    if (!isInstalled) {
+      _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
+      return null;
+    }
+    return _deviceIdentifierByEvent.stream;
+  }
+
+  // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+  // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+  final RegExp _observationIdentifierPattern = RegExp(r'^(\w*): (\w*)$');
+
+  Future<void> _startObservingTetheredIOSDevices() async {
+    try {
+      if (_deviceObservationProcess != null) {
+        throw Exception('xcdevice observe restart failed');
+      }
+
+      // Run in interactive mode (via script) to convince
+      // xcdevice it has a terminal attached in order to redirect stdout.
+      _deviceObservationProcess = await _processUtils.start(
+        <String>[
+          'script',
+          '-t',
+          '0',
+          '/dev/null',
+          'xcrun',
+          'xcdevice',
+          'observe',
+          '--both',
+        ],
+      );
+
+      final StreamSubscription<String> stdoutSubscription = _deviceObservationProcess.stdout
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+
+        // xcdevice observe example output of UDIDs:
+        //
+        // Listening for all devices, on both interfaces.
+        // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+        // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+        // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+        final RegExpMatch match = _observationIdentifierPattern.firstMatch(line);
+        if (match != null && match.groupCount == 2) {
+          final String verb = match.group(1).toLowerCase();
+          final String identifier = match.group(2);
+          if (verb.startsWith('attach')) {
+            _deviceIdentifierByEvent.add(<XCDeviceEvent, String>{
+              XCDeviceEvent.attach: identifier
+            });
+          } else if (verb.startsWith('detach')) {
+            _deviceIdentifierByEvent.add(<XCDeviceEvent, String>{
+              XCDeviceEvent.detach: identifier
+            });
+          }
+        }
+      });
+      final StreamSubscription<String> stderrSubscription = _deviceObservationProcess.stderr
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+        _logger.printTrace('xcdevice observe error: $line');
+      });
+      unawaited(_deviceObservationProcess.exitCode.then((int status) {
+        _logger.printTrace('xcdevice exited with code $exitCode');
+        unawaited(stdoutSubscription.cancel());
+        unawaited(stderrSubscription.cancel());
+      }).whenComplete(() async {
+        if (_deviceIdentifierByEvent.hasListener) {
+          // Tell listeners the process died.
+          await _deviceIdentifierByEvent.close();
+        }
+        _deviceObservationProcess = null;
+
+        // Reopen it so new listeners can resume polling.
+        _setupDeviceIdentifierByEventStream();
+      }));
+    } on ProcessException catch (exception, stackTrace) {
+      _deviceIdentifierByEvent.addError(exception, stackTrace);
+    } on ArgumentError catch (exception, stackTrace) {
+      _deviceIdentifierByEvent.addError(exception, stackTrace);
+    }
+  }
+
+  void _stopObservingTetheredIOSDevices() {
+    _deviceObservationProcess?.kill();
+  }
 
   /// [timeout] defaults to 2 seconds.
-  Future<List<IOSDevice>> getAvailableTetheredIOSDevices({ Duration timeout }) async {
+  Future<List<IOSDevice>> getAvailableIOSDevices({ Duration timeout }) async {
     final List<dynamic> allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 2));
 
     if (allAvailableDevices == null) {
@@ -364,8 +482,11 @@ class XCDevice {
         }
       }
 
+      final IOSDeviceInterface interface = _interfaceType(deviceProperties);
+
       // Only support USB devices, skip "network" interface (Xcode > Window > Devices and Simulators > Connect via network).
-      if (!_isUSBTethered(deviceProperties)) {
+      // TODO(jmagman): Remove this check once wirelessly detected devices can be observed and attached, https://github.com/flutter/flutter/issues/15072.
+      if (interface != IOSDeviceInterface.usb) {
         continue;
       }
 
@@ -373,6 +494,7 @@ class XCDevice {
         device['identifier'] as String,
         name: device['name'] as String,
         cpuArchitecture: _cpuArchitecture(deviceProperties),
+        interfaceType: interface,
         sdkVersion: _sdkVersion(deviceProperties),
         artifacts: globals.artifacts,
         fileSystem: globals.fs,
@@ -380,6 +502,7 @@ class XCDevice {
         iosDeploy: _iosDeploy,
         iMobileDevice: _iMobileDevice,
         platform: globals.platform,
+        vmServiceConnectUri: vm_service_io.vmServiceConnectUri,
       ));
     }
     return devices;
@@ -409,10 +532,18 @@ class XCDevice {
     return null;
   }
 
-  static bool _isUSBTethered(Map<String, dynamic> deviceProperties) {
-    // Interface can be "usb", "network", or not present for simulators.
-    return deviceProperties.containsKey('interface') &&
-        (deviceProperties['interface'] as String).toLowerCase() == 'usb';
+  static IOSDeviceInterface _interfaceType(Map<String, dynamic> deviceProperties) {
+    // Interface can be "usb", "network", or "none" for simulators
+    // and unknown future interfaces.
+    if (deviceProperties.containsKey('interface')) {
+      if ((deviceProperties['interface'] as String).toLowerCase() == 'network') {
+        return IOSDeviceInterface.network;
+      } else {
+        return IOSDeviceInterface.usb;
+      }
+    }
+
+    return IOSDeviceInterface.none;
   }
 
   static String _sdkVersion(Map<String, dynamic> deviceProperties) {

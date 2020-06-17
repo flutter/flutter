@@ -23,6 +23,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../dart/language_version.dart';
 import '../dart/pub.dart';
 import '../devfs.dart';
 import '../device.dart';
@@ -112,6 +113,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
   ConnectionResult _connectionResult;
   StreamSubscription<vmservice.Event> _stdOutSub;
   StreamSubscription<vmservice.Event> _stdErrSub;
+  StreamSubscription<vmservice.Event> _extensionEventSub;
   bool _exited = false;
   WipConnection _wipConnection;
   ChromiumLauncher _chromiumLauncher;
@@ -150,6 +152,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
     }
     await _stdOutSub?.cancel();
     await _stdErrSub?.cancel();
+    await _extensionEventSub?.cancel();
     await device.device.stopApp(null);
     try {
       _generatedEntrypointDirectory?.deleteSync(recursive: true);
@@ -174,8 +177,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
     }
     const String fire = '🔥';
     const String rawMessage =
-        '  To hot restart changes while running, press "r". '
-        'To hot restart (and refresh the browser), press "R".';
+        '  To hot restart changes while running, press "r" or "R".';
     final String message = globals.terminal.color(
       fire + globals.terminal.bolden(rawMessage),
       TerminalColor.red,
@@ -188,6 +190,11 @@ abstract class ResidentWebRunner extends ResidentRunner {
     globals.printStatus(message);
     const String quitMessage = 'To quit, press "q".';
     globals.printStatus('For a more detailed help message, press "h". $quitMessage');
+  }
+
+  @override
+  Future<List<FlutterView>> listFlutterViews() async {
+    return <FlutterView>[];
   }
 
   @override
@@ -365,6 +372,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
     firstBuildTime = DateTime.now();
     final ApplicationPackage package = await ApplicationPackageFactory.instance.getPackageForPlatform(
       TargetPlatform.web_javascript,
+      buildInfo: debuggingOptions.buildInfo,
       applicationBinary: null,
     );
     if (package == null) {
@@ -429,6 +437,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             return 1;
           }
           device.generator.accept();
+          cacheInitialDillCompilation();
         } else {
           await buildWeb(
             flutterProject,
@@ -436,7 +445,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
             debuggingOptions.buildInfo,
             debuggingOptions.initializePlatform,
             false,
-            debuggingOptions.buildInfo.dartExperiments,
           );
         }
         await device.device.startApp(
@@ -481,6 +489,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
     );
 
     if (debuggingOptions.buildInfo.isDebug) {
+      await runSourceGenerators();
       // Full restart is always false for web, since the extra recompile is wasteful.
       final UpdateFSReport report = await _updateDevFS(fullRestart: false);
       if (report.success) {
@@ -498,7 +507,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions.buildInfo,
           debuggingOptions.initializePlatform,
           false,
-          debuggingOptions.buildInfo.dartExperiments,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -518,8 +526,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
         });
       }
     } on Exception catch (err) {
-      return OperationResult(1, err.toString(), fatal: true);
-    } on WipError catch (err) {
       return OperationResult(1, err.toString(), fatal: true);
     } finally {
       status.stop();
@@ -576,6 +582,10 @@ class _ResidentWebRunner extends ResidentWebRunner {
       }
 
       final String entrypoint = <String>[
+        determineLanguageVersion(
+          globals.fs.file(mainUri),
+          packageConfig[flutterProject.manifest.appName],
+        ),
         '// Flutter web bootstrap script for $importedEntrypoint.',
         '',
         "import 'dart:ui' as ui;",
@@ -635,7 +645,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
       pathToReload: getReloadPath(fullRestart: fullRestart),
       invalidatedFiles: invalidationResult.uris,
       packageConfig: invalidationResult.packageConfig,
-      trackWidgetCreation: true,
+      trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
     );
     devFSStatus.stop();
     globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
@@ -672,6 +682,8 @@ class _ResidentWebRunner extends ResidentWebRunner {
         final String message = utf8.decode(base64.decode(log.bytes));
         globals.printStatus(message, newline: false);
       });
+      _extensionEventSub =
+          _vmService.onExtensionEvent.listen(printStructuredErrorLog);
       try {
         await _vmService.streamListen(vmservice.EventStreams.kStdout);
       } on vmservice.RPCError {
@@ -686,6 +698,12 @@ class _ResidentWebRunner extends ResidentWebRunner {
       }
       try {
         await _vmService.streamListen(vmservice.EventStreams.kIsolate);
+      } on vmservice.RPCError {
+        // It is safe to ignore this error because we expect an error to be
+        // thrown if we're not already subscribed.
+      }
+      try {
+        await _vmService.streamListen(vmservice.EventStreams.kExtension);
       } on vmservice.RPCError {
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're not already subscribed.

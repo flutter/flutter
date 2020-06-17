@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -289,7 +291,6 @@ class DataCell {
 /// ```
 ///
 /// {@end-tool}
-// TODO(ianh): Also suggest [ScrollingDataTable] once we have it.
 ///
 /// See also:
 ///
@@ -543,7 +544,8 @@ class DataTable extends StatelessWidget {
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: AnimatedDefaultTextStyle(
         style: TextStyle(
-          // TODO(ianh): font family should match Theme; see https://github.com/flutter/flutter/issues/3116
+          // TODO(hansmuller): This should use the information provided by
+          // textTheme/DataTableTheme, https://github.com/flutter/flutter/issues/56079
           fontWeight: FontWeight.w500,
           fontSize: _headingFontSize,
           height: math.min(1.0, headingRowHeight / _headingFontSize),
@@ -596,7 +598,8 @@ class DataTable extends StatelessWidget {
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: DefaultTextStyle(
         style: TextStyle(
-          // TODO(ianh): font family should be Roboto; see https://github.com/flutter/flutter/issues/3116
+          // TODO(hansmuller): This should use the information provided by
+          // textTheme/DataTableTheme, https://github.com/flutter/flutter/issues/56079
           fontSize: 13.0,
           color: isLightTheme
             ? (placeholder ? Colors.black38 : Colors.black87)

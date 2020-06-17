@@ -5,16 +5,16 @@
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
 
 const String _kInitialVersion = 'v1.9.1';
 const String _kBranch = 'dev';
-const FileSystem fileSystem = LocalFileSystem();
+final FileSystem fileSystem = LocalFileSystem.instance;
 const ProcessManager processManager = LocalProcessManager();
 final Stdio stdio = Stdio();
 final ProcessUtils processUtils = ProcessUtils(processManager: processManager, logger: StdoutLogger(

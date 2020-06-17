@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 @TestOn('!chrome') // diagnostics use Platform.operatingSystem.
 import 'dart:io' show Platform;
 
@@ -289,8 +291,9 @@ void main() {
       '                     │ crossAxisDirection: right\n'
       '                     │ offset: ScrollPositionWithSingleContext#00000(offset: 0.0, range:\n'
       '                     │   0.0..39400.0, viewport: 600.0, ScrollableState,\n'
-      '                     │   AlwaysScrollableScrollPhysics -> ClampingScrollPhysics,\n'
-      '                     │   IdleScrollActivity#00000, ScrollDirection.idle)\n'
+      '                     │   AlwaysScrollableScrollPhysics -> ClampingScrollPhysics ->\n'
+      '                     │   RangeMaintainingScrollPhysics, IdleScrollActivity#00000,\n'
+      '                     │   ScrollDirection.idle)\n'
       '                     │ anchor: 0.0\n'
       '                     │\n'
       '                     └─center child: RenderSliverFixedExtentList#00000 relayoutBoundary=up1\n'
@@ -436,8 +439,9 @@ void main() {
       '                     │ crossAxisDirection: right\n'
       '                     │ offset: ScrollPositionWithSingleContext#00000(offset: 2000.0,\n'
       '                     │   range: 0.0..39400.0, viewport: 600.0, ScrollableState,\n'
-      '                     │   AlwaysScrollableScrollPhysics -> ClampingScrollPhysics,\n'
-      '                     │   IdleScrollActivity#00000, ScrollDirection.idle)\n'
+      '                     │   AlwaysScrollableScrollPhysics -> ClampingScrollPhysics ->\n'
+      '                     │   RangeMaintainingScrollPhysics, IdleScrollActivity#00000,\n'
+      '                     │   ScrollDirection.idle)\n'
       '                     │ anchor: 0.0\n'
       '                     │\n'
       '                     └─center child: RenderSliverFixedExtentList#00000 relayoutBoundary=up1\n'

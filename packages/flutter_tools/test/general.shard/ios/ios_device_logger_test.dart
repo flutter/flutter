@@ -153,25 +153,42 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         logger: logger,
       ),
     );
-    final StreamController<Event> controller = StreamController<Event>();
+    final StreamController<Event> stdoutController = StreamController<Event>();
+    final StreamController<Event> stderController = StreamController<Event>();
     final Completer<Success> stdoutCompleter = Completer<Success>();
+    final Completer<Success> stderrCompleter = Completer<Success>();
     when(vmService.streamListen('Stdout')).thenAnswer((Invocation invocation) {
       return stdoutCompleter.future;
     });
+    when(vmService.streamListen('Stderr')).thenAnswer((Invocation invocation) {
+      return stderrCompleter.future;
+    });
     when(vmService.onStdoutEvent).thenAnswer((Invocation invocation) {
-      return controller.stream;
+      return stdoutController.stream;
+    });
+    when(vmService.onStderrEvent).thenAnswer((Invocation invocation) {
+      return stderController.stream;
     });
     logReader.connectedVMService = vmService;
 
     stdoutCompleter.complete(Success());
-    controller.add(Event(
+    stderrCompleter.complete(Success());
+    stdoutController.add(Event(
       kind: 'Stdout',
       timestamp: 0,
       bytes: base64.encode(utf8.encode('  This is a message ')),
     ));
+    stderController.add(Event(
+      kind: 'Stderr',
+      timestamp: 0,
+      bytes: base64.encode(utf8.encode('  And this is an error ')),
+    ));
 
     // Wait for stream listeners to fire.
-    await expectLater(logReader.logLines, emits('  This is a message '));
+    await expectLater(logReader.logLines, emitsInAnyOrder(<Matcher>[
+      equals('  This is a message '),
+      equals('  And this is an error '),
+    ]));
   });
 }
 

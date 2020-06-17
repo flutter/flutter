@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
@@ -65,8 +67,8 @@ class HitTestEntry {
   ///
   /// See also:
   ///
-  ///  * [HitTestResult.pushTransform], which is used during hit
-  ///    testing to build up the transform returned by this method.
+  ///  * [HitTestResult.addWithPaintTransform], which is used during hit testing
+  ///    to build up this transform.
   Matrix4 get transform => _transform;
   Matrix4 _transform;
 }
@@ -142,7 +144,7 @@ class HitTestResult {
       _debugVectorMoreOrLessEquals(transform.getColumn(2), Vector4(0, 0, 1, 0)),
       'The third row and third column of a transform matrix for pointer '
       'events must be Vector4(0, 0, 1, 0) to ensure that a transformed '
-      'point is directly under the pointer device. Did you forget to run the paint '
+      'point is directly under the pointing device. Did you forget to run the paint '
       'matrix through PointerEvent.removePerspectiveTransform? '
       'The provided matrix is:\n$transform'
     );

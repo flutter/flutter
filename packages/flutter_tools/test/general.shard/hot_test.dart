@@ -21,6 +21,36 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
+final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
+  id: '1',
+  pauseEvent: vm_service.Event(
+    kind: vm_service.EventKind.kResume,
+    timestamp: 0
+  ),
+  breakpoints: <vm_service.Breakpoint>[],
+  exceptionPauseMode: null,
+  libraries: <vm_service.LibraryRef>[],
+  livePorts: 0,
+  name: 'test',
+  number: '1',
+  pauseOnExit: false,
+  runnable: true,
+  startTime: 0,
+);
+
+final FlutterView fakeFlutterView = FlutterView(
+  id: 'a',
+  uiIsolate: fakeUnpausedIsolate,
+);
+
+final FakeVmServiceRequest listViews = FakeVmServiceRequest(
+  method: kListViewsMethod,
+  jsonResponse: <String, Object>{
+    'views': <Object>[
+      fakeFlutterView.toJson(),
+    ],
+  },
+);
 void main() {
   group('validateReloadReport', () {
     testUsingContext('invalid', () async {
@@ -172,42 +202,72 @@ void main() {
 
     testUsingContext('Does hot restarts when all devices support it', () async {
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          id: '1',
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          }
-        ),
-         const FakeVmServiceRequest(
-          id: '2',
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          }
+        listViews,
+        FakeVmServiceRequest(
+          method: 'getIsolate',
+          args: <String, Object>{
+            'isolateId': fakeUnpausedIsolate.id,
+          },
+          jsonResponse: fakeUnpausedIsolate.toJson(),
         ),
         FakeVmServiceRequest(
-          id: '3',
           method: 'getVM',
           jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
         ),
+        listViews,
         FakeVmServiceRequest(
-          id: '4',
+          method: 'getIsolate',
+          args: <String, Object>{
+            'isolateId': fakeUnpausedIsolate.id,
+          },
+          jsonResponse: fakeUnpausedIsolate.toJson(),
+        ),
+        FakeVmServiceRequest(
           method: 'getVM',
           jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
         ),
+        listViews,
+        listViews,
         const FakeVmServiceRequest(
-          id: '5',
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
+          method: 'streamListen',
+          args: <String, Object>{
+            'streamId': 'Isolate',
           }
         ),
         const FakeVmServiceRequest(
-          id: '6',
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
+          method: 'streamListen',
+          args: <String, Object>{
+            'streamId': 'Isolate',
+          }
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Isolate',
+          event: vm_service.Event(
+            timestamp: 0,
+            kind: vm_service.EventKind.kIsolateRunnable,
+          )
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Isolate',
+          event: vm_service.Event(
+            timestamp: 0,
+            kind: vm_service.EventKind.kIsolateRunnable,
+          )
+        ),
+        FakeVmServiceRequest(
+          method: kRunInViewMethod,
+          args: <String, Object>{
+            'viewId': fakeFlutterView.id,
+            'mainScript': 'lib/main.dart.dill',
+            'assetDirectory': 'build/flutter_assets',
+          }
+        ),
+        FakeVmServiceRequest(
+          method: kRunInViewMethod,
+          args: <String, Object>{
+            'viewId': fakeFlutterView.id,
+            'mainScript': 'lib/main.dart.dill',
+            'assetDirectory': 'build/flutter_assets',
           }
         ),
       ]);
@@ -257,24 +317,39 @@ void main() {
     testUsingContext('hot restart supported', () async {
       // Setup mocks
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        listViews,
+        FakeVmServiceRequest(
+          method: 'getIsolate',
+          args: <String, Object>{
+            'isolateId': fakeUnpausedIsolate.id,
+          },
+          jsonResponse: fakeUnpausedIsolate.toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getVM',
+          jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
+        ),
+        listViews,
         const FakeVmServiceRequest(
-          id: '1',
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
+          method: 'streamListen',
+          args: <String, Object>{
+            'streamId': 'Isolate',
           }
         ),
         FakeVmServiceRequest(
-          id: '2',
-          method: 'getVM',
-          jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
-        ),
-        const FakeVmServiceRequest(
-          id: '3',
-          method: kListViewsMethod,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
+          method: kRunInViewMethod,
+          args: <String, Object>{
+            'viewId': fakeFlutterView.id,
+            'mainScript': 'lib/main.dart.dill',
+            'assetDirectory': 'build/flutter_assets',
           }
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Isolate',
+          event: vm_service.Event(
+            timestamp: 0,
+            kind: vm_service.EventKind.kIsolateRunnable,
+          )
         ),
       ]);
       final MockDevice mockDevice = MockDevice();
@@ -340,15 +415,15 @@ void main() {
   });
 
   group('hot attach', () {
-    MockResidentCompiler residentCompiler = MockResidentCompiler();
     MockLocalEngineArtifacts mockArtifacts;
 
     setUp(() {
-      residentCompiler = MockResidentCompiler();
       mockArtifacts = MockLocalEngineArtifacts();
     });
 
-    testUsingContext('Prints message when HttpException is thrown - 1', () async {
+    testUsingContext('Exits with code 2 when when HttpException is thrown '
+      'during VM service connection', () async {
+      final MockResidentCompiler residentCompiler = MockResidentCompiler();
       final MockDevice mockDevice = MockDevice();
       when(mockDevice.supportsHotReload).thenReturn(true);
       when(mockDevice.supportsHotRestart).thenReturn(false);
@@ -368,38 +443,6 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ).attach();
       expect(exitCode, 2);
-      expect(testLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
-          'consider using an emulator running API level 29 or lower.'));
-      expect(testLogger.statusText, contains('Learn more about the status of this issue on '
-          'https://issuetracker.google.com/issues/132325318'));
-    }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
-      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
-    });
-
-    testUsingContext('Prints message when HttpException is thrown - 2', () async {
-      final MockDevice mockDevice = MockDevice();
-      when(mockDevice.supportsHotReload).thenReturn(true);
-      when(mockDevice.supportsHotRestart).thenReturn(false);
-      when(mockDevice.targetPlatform).thenAnswer((Invocation _) async => TargetPlatform.tester);
-      when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation _) async => 'Android 10');
-
-      final List<FlutterDevice> devices = <FlutterDevice>[
-        TestFlutterDevice(
-          device: mockDevice,
-          generator: residentCompiler,
-          exception: const HttpException(', uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws'),
-        ),
-      ];
-
-      final int exitCode = await HotRunner(devices,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ).attach();
-      expect(exitCode, 2);
-      expect(testLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
-          'consider using an emulator running API level 29 or lower.'));
-      expect(testLogger.statusText, contains('Learn more about the status of this issue on '
-          'https://issuetracker.google.com/issues/132325318'));
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
       HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
@@ -466,6 +509,8 @@ class TestFlutterDevice extends FlutterDevice {
     Restart restart,
     CompileExpression compileExpression,
     ReloadMethod reloadMethod,
+    GetSkSLMethod getSkSLMethod,
+    PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
   }) async {
     throw exception;
   }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -120,10 +122,6 @@ class ButtonTheme extends InheritedTheme {
   }) : assert(data != null),
        super(key: key, child: child);
 
-  // TODO(darrenaustin): remove after this deprecation warning has been on
-  // stable for a couple of releases.
-  // See https://github.com/flutter/flutter/issues/37333
-  //
   /// Creates a button theme that is appropriate for button bars, as used in
   /// dialog footers and in the headers of data tables.
   ///
@@ -406,7 +404,7 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// If the button is in the focused, hovering, or highlighted state, then the
   /// [focusColor], [hoverColor], or [highlightColor] will take precedence over
-  /// the [focusColor].
+  /// the [buttonColor].
   ///
   /// See also:
   ///

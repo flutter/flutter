@@ -8,9 +8,9 @@ import 'dart:io' as io show Directory, File, Link;
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p; // ignore: package_path_import
-import 'package:platform/platform.dart';
 
 import 'common.dart' show throwToolExit;
+import 'platform.dart';
 
 // The Flutter tool hits file system errors that only the end-user can address.
 // We would like these errors to not hit crash logging. In these cases, we

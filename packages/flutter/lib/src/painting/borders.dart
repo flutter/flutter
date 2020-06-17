@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
 
@@ -490,6 +492,27 @@ abstract class ShapeBorder {
   String toString() {
     return '${objectRuntimeType(this, 'ShapeBorder')}()';
   }
+}
+
+/// A ShapeBorder that draws an outline with the width and color specified
+/// by [side].
+@immutable
+abstract class OutlinedBorder extends ShapeBorder {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  ///
+  /// The value of [side] must not be null.
+  const OutlinedBorder({ this.side = BorderSide.none }) : assert(side != null);
+
+  /// The border outline's color and weight.
+  ///
+  /// If [side] is [BorderSide.none], which is the default, an outline is not drawn.
+  /// Otherwise the outline is centered over the shape's boundary.
+  final BorderSide side;
+
+  /// Returns a copy of this OutlinedBorder that draws its outline with the
+  /// specified [side], if [side] is non-null.
+  OutlinedBorder copyWith({ BorderSide side });
 }
 
 /// Represents the addition of two otherwise-incompatible borders.

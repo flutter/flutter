@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import 'android/gradle_utils.dart';
 import 'base/common.dart';
@@ -14,6 +13,7 @@ import 'base/io.dart' show SocketException;
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
+import 'base/platform.dart';
 import 'base/process.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
@@ -111,7 +111,7 @@ class Cache {
       _artifacts.add(MaterialFonts(this));
 
       _artifacts.add(GradleWrapper(this));
-      _artifacts.add(AndroidMavenArtifacts());
+      _artifacts.add(AndroidMavenArtifacts(this));
       _artifacts.add(AndroidGenSnapshotArtifacts(this));
       _artifacts.add(AndroidInternalBuildArtifacts(this));
 
@@ -166,7 +166,7 @@ class Cache {
   static RandomAccessFile _lock;
   static bool _lockEnabled = true;
 
-  /// Turn off the [lock]/[releaseLockEarly] mechanism.
+  /// Turn off the [lock]/[releaseLock] mechanism.
   ///
   /// This is used by the tests since they run simultaneously and all in one
   /// process and so it would be a mess if they had to use the lock.
@@ -175,7 +175,7 @@ class Cache {
     _lockEnabled = false;
   }
 
-  /// Turn on the [lock]/[releaseLockEarly] mechanism.
+  /// Turn on the [lock]/[releaseLock] mechanism.
   ///
   /// This is used by the tests.
   @visibleForTesting
@@ -183,13 +183,20 @@ class Cache {
     _lockEnabled = true;
   }
 
+  /// Check if lock acquired, skipping FLUTTER_ALREADY_LOCKED reentrant checks.
+  ///
+  /// This is used by the tests.
+  @visibleForTesting
+  static bool isLocked() {
+    return _lock != null;
+  }
+
   /// Lock the cache directory.
   ///
-  /// This happens automatically on startup (see [FlutterCommandRunner.runCommand]).
+  /// This happens while required artifacts are updated
+  /// (see [FlutterCommandRunner.runCommand]).
   ///
-  /// Normally the lock will be held until the process exits (this uses normal
-  /// POSIX flock semantics). Long-lived commands should release the lock by
-  /// calling [Cache.releaseLockEarly] once they are no longer touching the cache.
+  /// This uses normal POSIX flock semantics.
   static Future<void> lock() async {
     if (!_lockEnabled) {
       return;
@@ -222,8 +229,11 @@ class Cache {
     }
   }
 
-  /// Releases the lock. This is not necessary unless the process is long-lived.
-  static void releaseLockEarly() {
+  /// Releases the lock.
+  ///
+  /// This happens automatically on startup (see [FlutterCommand.verifyThenRunCommand])
+  /// after the command's required artifacts are updated.
+  static void releaseLock() {
     if (!_lockEnabled || _lock == null) {
       return;
     }
@@ -990,12 +1000,15 @@ class AndroidInternalBuildArtifacts extends EngineCachedArtifact {
 
 /// A cached artifact containing the Maven dependencies used to build Android projects.
 class AndroidMavenArtifacts extends ArtifactSet {
-  AndroidMavenArtifacts() : super(DevelopmentArtifact.androidMaven);
+  AndroidMavenArtifacts(this.cache) : super(DevelopmentArtifact.androidMaven);
+
+  final Cache cache;
 
   @override
   Future<void> update() async {
-    final Directory tempDir =
-        globals.fs.systemTempDirectory.createTempSync('flutter_gradle_wrapper.');
+    final Directory tempDir = cache.getRoot().createTempSync(
+      'flutter_gradle_wrapper.',
+    );
     gradleUtils.injectGradleWrapperIfNeeded(tempDir);
 
     final Status status = globals.logger.startProgress('Downloading Android Maven dependencies...',
@@ -1387,8 +1400,9 @@ const List<List<String>> _windowsDesktopBinaryDirs = <List<String>>[
 ];
 
 const List<List<String>> _linuxDesktopBinaryDirs = <List<String>>[
-  <String>['linux-x64', 'linux-x64/linux-x64-flutter-glfw.zip'],
-  <String>['linux-x64', 'linux-x64/flutter-cpp-client-wrapper-glfw.zip'],
+  <String>['linux-x64', 'linux-x64/linux-x64-flutter-gtk.zip'],
+  <String>['linux-x64-profile', 'linux-x64-profile/linux-x64-flutter-gtk.zip'],
+  <String>['linux-x64-release', 'linux-x64-release/linux-x64-flutter-gtk.zip'],
 ];
 
 const List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[
