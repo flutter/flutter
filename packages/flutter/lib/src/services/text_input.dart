@@ -1259,7 +1259,7 @@ class TextInput {
   ///   used to call [finishAutofillContext] when appropriate.
   static void finishAutofillContext({ bool shouldSave = true }) {
     assert(shouldSave != null);
-    assert(TextInput._instance._currentConnection = null);
+    assert(TextInput._instance._currentConnection == null);
     TextInput._instance._channel.invokeMethod<void>(
       shouldSave
         ? 'TextInput.AutofillContext.commit'

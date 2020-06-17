@@ -180,8 +180,6 @@ class FormState extends State<Form> {
   void save() {
     for (final FormFieldState<dynamic> field in _fields)
       field.save();
-
-    AutofillContextLifecycleAction.of(context).onFormSave(this);
   }
 
   /// Resets every [FormField] that is a descendant of this [Form] back to its

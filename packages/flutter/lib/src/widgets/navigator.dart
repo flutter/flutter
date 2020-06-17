@@ -2378,12 +2378,10 @@ class _RouteEntry extends RouteTransitionRecord {
     if (previousState == _RouteLifecycle.replace || previousState == _RouteLifecycle.pushReplace) {
       for (final NavigatorObserver observer in navigator.widget.observers)
         observer.didReplace(newRoute: route, oldRoute: previousPresent);
-      AutofillContextLifecycleAction.of(navigator.context).didReplace(newRoute: route, oldRoute: previousPresent);
     } else {
       assert(previousState == _RouteLifecycle.push);
       for (final NavigatorObserver observer in navigator.widget.observers)
         observer.didPush(route, previousPresent);
-      AutofillContextLifecycleAction.of(navigator.context).didPush(route, previousPresent);
     }
   }
 
@@ -2399,7 +2397,6 @@ class _RouteEntry extends RouteTransitionRecord {
     currentState = _RouteLifecycle.popping;
     for (final NavigatorObserver observer in navigator.widget.observers)
       observer.didPop(route, previousPresent);
-    AutofillContextLifecycleAction.of(navigator.context).didPop(route, previousPresent);
   }
 
   void handleRemoval({ @required NavigatorState navigator, @required Route<dynamic> previousPresent }) {
@@ -2410,7 +2407,6 @@ class _RouteEntry extends RouteTransitionRecord {
     if (_reportRemovalToObserver) {
       for (final NavigatorObserver observer in navigator.widget.observers)
         observer.didRemove(route, previousPresent);
-      AutofillContextLifecycleAction.of(navigator.context).didRemove(route, previousPresent);
     }
   }
 
@@ -2424,7 +2420,6 @@ class _RouteEntry extends RouteTransitionRecord {
     }
     for (final NavigatorObserver observer in navigator.widget.observers)
       observer.didPush(route, previousPresent);
-    AutofillContextLifecycleAction.of(navigator.context).didPush(route, previousPresent);
   }
 
   void pop<T>(T result) {

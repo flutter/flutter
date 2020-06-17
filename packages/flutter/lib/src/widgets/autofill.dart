@@ -3,30 +3,43 @@
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart';
-import 'form.dart' show FormState;
 import 'framework.dart';
-import 'navigator.dart' show Route;
-import 'routes.dart';
 
 export 'package:flutter/services.dart' show AutofillHints;
 
+/// Predefined autofill context clean up actions.
+enum AutofillContextAction {
+  /// Destroy the current autofill context after informing the platform to save
+  /// the user input from it.
+  ///
+  /// Corresponds to calling [TextInput.finishAutofillContext] with
+  /// `shouldSave == true`.
+  commit,
+
+  /// Destroy the current autofill context without saving the user input.
+  ///
+  /// Corresponds to calling [TextInput.finishAutofillContext] with
+  /// `shouldSave == false`.
+  cancel,
+}
+
 /// An [AutofillScope] widget that groups [AutofillClient]s together.
 ///
-/// [AutofillClient]s within the same [AutofillScope] must be built together, and
-/// they be will be autofilled together.
-///
+/// [AutofillClient]s that share the same closest [AutofillGroup] ancestor must
+/// be built together, and they be will be autofilled together.
 /// {@macro flutter.services.autofill.AutofillScope}
 ///
 /// The [AutofillGroup] widget only knows about [AutofillClient]s registered to
 /// it using the [AutofillGroupState.register] API. Typically, [AutofillGroup]
 /// will not pick up [AutofillClient]s that are not mounted, for example, an
 /// [AutofillClient] within a [Scrollable] that has never been scrolled into the
-/// viewport. To workaround this problem, ensure clients in the same [AutofillGroup]
-/// are built together:
+/// viewport. To workaround this problem, ensure clients in the same
+/// [AutofillGroup] are built together:
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
 ///
-/// An example form with autofillable fields grouped into different `AutofillGroup`s.
+/// An example form with autofillable fields grouped into different
+/// `AutofillGroup`s.
 ///
 /// ```dart
 ///  bool isSameAddress = true;
@@ -45,8 +58,8 @@ export 'package:flutter/services.dart' show AutofillHints;
 ///    return ListView(
 ///      children: <Widget>[
 ///        const Text('Shipping address'),
-///        // The address fields are grouped together as some platforms are capable
-///        // of autofilling all these fields in one go.
+///        // The address fields are grouped together as some platforms are
+///        // capable of autofilling all these fields in one go.
 ///        AutofillGroup(
 ///          child: Column(
 ///            children: <Widget>[
@@ -84,8 +97,8 @@ export 'package:flutter/services.dart' show AutofillHints;
 ///          ),
 ///        ),
 ///        const Text('Credit Card Information'),
-///        // The credit card number and the security code are grouped together as
-///        // some platforms are capable of autofilling both fields.
+///        // The credit card number and the security code are grouped together
+///        // as some platforms are capable of autofilling both fields.
 ///        AutofillGroup(
 ///          child: Column(
 ///            children: <Widget>[
@@ -112,6 +125,21 @@ export 'package:flutter/services.dart' show AutofillHints;
 ///  }
 /// ```
 /// {@end-tool}
+///
+/// [AutofillGroup] widgets can be nested. When a topmost [AutofillGroup] (i.e.,
+/// the ones that are closest to the root widget) is disposed, its
+/// [onDisposeAction] will be run. By default, [onDisposeAction] is set to
+/// [AutofillContextAction.commit], to make sure when the [AutofillGroup] is
+/// disposed, the current autofill context is properly destroyed and its
+/// resources are freed, after the platform is given a chance to save the user
+/// input contained in the autofill context.
+///
+/// {@macro flutter.services.autofill.autofillContext}
+///
+/// See also:
+///
+/// * [AutofillContextAction], an enum that contains predefined autofill context
+///   clean up actions to be run when a topmost [AutofillGroup] is disposed.
 class AutofillGroup extends StatefulWidget {
   /// Creates a scope for autofillable input fields.
   ///
@@ -119,6 +147,7 @@ class AutofillGroup extends StatefulWidget {
   const AutofillGroup({
     Key key,
     @required this.child,
+    this.onDisposeAction = AutofillContextAction.commit,
   }) : assert(child != null),
        super(key: key);
 
@@ -137,6 +166,18 @@ class AutofillGroup extends StatefulWidget {
 
   /// {@macro flutter.widgets.child}
   final Widget child;
+
+  /// The [AutofillContextAction] to be run when this [AutofillGroup] is the
+  /// topmost [AutofillGroup] and it's being disposed, in order to clean up the
+  /// current autofill context.
+  ///
+  /// {@macro flutter.services.autofill.autofillContext}
+  ///
+  /// Defaults to [AutofillContextAction.commit], which prompts the platform to
+  /// save the user input and then destroy the current autofill context. Setting
+  /// this to null will prevent the current autofill context from being
+  /// destroyed when this [AutofillGroup] is disposed.
+  final AutofillContextAction onDisposeAction;
 
   @override
   AutofillGroupState createState() => AutofillGroupState();
@@ -160,6 +201,8 @@ class AutofillGroup extends StatefulWidget {
 /// Typically obtained using [AutofillGroup.of].
 class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   final Map<String, AutofillClient> _clients = <String, AutofillClient>{};
+
+  bool _isTopmostAutofillGroup = false;
 
   @override
   AutofillClient getAutofillClient(String tag) => _clients[tag];
@@ -205,11 +248,33 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _isTopmostAutofillGroup = AutofillGroup.of(context) == null;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return _AutofillScope(
       autofillScopeState: this,
       child: widget.child,
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    if (!_isTopmostAutofillGroup || widget.onDisposeAction == null)
+      return;
+    switch (widget.onDisposeAction) {
+      case AutofillContextAction.cancel:
+        TextInput.finishAutofillContext(shouldSave: false);
+        break;
+      case AutofillContextAction.commit:
+        TextInput.finishAutofillContext(shouldSave: true);
+        break;
+    }
   }
 }
 
@@ -228,142 +293,3 @@ class _AutofillScope extends InheritedWidget {
   @override
   bool updateShouldNotify(_AutofillScope old) => _scope != old._scope;
 }
-
-/// An [InheritedWidget] that configures its descendant [Navigator]s and [Form]s,
-/// as to whether the current autofill context should be saved or discarded, or
-/// no action should be taken at all, when any of the [Navigator]s' topmost
-/// opaque [ModalRoute]s changes, or when [FormState.save] is called on any of
-/// the [Form]s.
-///
-/// {@macro flutter.services.autofill.autofillContext}
-///
-/// Set [AutofillContextLifecycleAction.globalLifecycleDelegate] if you wish to
-/// change the default [AutofillContextLifecycleDelegate] for the entire app.
-///
-/// The default [globalLifecycleDelegate] saves the current autofill context
-/// when any [Navigator] observes a change in its topmost opaque [ModalRoute],
-/// or when a [Form] is saved.
-///
-/// See also:
-///
-/// * [AutofillContextLifecycleDelegate], the configuration data this
-///   [InheritWidget] carries.
-///
-/// * [TextInput.finishAutofillContext], the method that cleans up the current
-///   autofill context.
-class AutofillContextLifecycleAction extends InheritedWidget {
-  /// Creates a widget that provides its descendants with an
-  /// [AutofillContextLifecycleDelegate], which cleans up the current autofill
-  /// context on certian lifecycle events of [Router] and [Form].
-  const AutofillContextLifecycleAction({
-    Key key,
-    Widget child,
-    this.lifecycleDelegate,
-  }): super(key: key, child: child);
-
-  /// The [AutofillContextLifecycleDelegate] that descendant
-  final AutofillContextLifecycleDelegate lifecycleDelegate;
-
-  /// The [AutofillContextLifecycleDelegate] to fall back to, when there's no
-  /// enclosing [AutofillContextLifecycleAction] in the context.
-  ///
-  /// This value can be changed to modify the global configuration. Changes
-  /// apply immediately: the new [globalLifecycleDelegate] takes effect starting
-  /// from the next monitored lifecycle event.
-  ///
-  /// Must not be null.
-  static AutofillContextLifecycleDelegate get globalLifecycleDelegate => _globalLifecycleDelegate;
-  static AutofillContextLifecycleDelegate _globalLifecycleDelegate = const AutofillContextLifecycleDelegate();
-  static set globalLifecycleDelegate(AutofillContextLifecycleDelegate newDelegate) {
-    assert(newDelegate != null);
-    if (_globalLifecycleDelegate != newDelegate)
-      _globalLifecycleDelegate = newDelegate;
-  }
-
-  /// The [AutofillContextLifecycleDelegate] from the closest
-  /// [AutofillContextLifecycleAction] widget that encloses the given [context],
-  /// or the default configuration [AutofillContextLifecycleAction.globalLifecycleDelegate]
-  /// if the given [context] does not contain an [AutofillContextLifecycleDelegate].
-  static AutofillContextLifecycleDelegate of(BuildContext context) {
-    return context?.dependOnInheritedWidgetOfExactType<AutofillContextLifecycleAction>()?.lifecycleDelegate ?? globalLifecycleDelegate;
-  }
-
-  // Changing delegates shouldn't make anything other than the widget itself
-  // rebuild.
-  @override
-  bool updateShouldNotify(covariant AutofillContextLifecycleAction oldWidget) => false;
-}
-
-/// Configures whether the current autofill context should be saved or discarded
-/// , or no action should be taken at all, when [Navigator]s and [Form]s
-/// configured by this [AutofillContextLifecycleDelegate] observes certain types
-/// of events.
-///
-/// Typically retrieved using [AutofillContextLifecycleAction.of].
-///
-/// The default implementation signals the platform to save the current autofill
-/// context (before discarding it), when any of the affected [Form]s is saved,
-/// or any of the affected [Navigator]s pushes/pops opaque [ModalRoute], or the
-/// current route is replaced with an opaque [ModalRoute].
-class AutofillContextLifecycleDelegate {
-  /// Creates a delegate object that can be used to clean up the current
-  /// autofill context at proper times, for example, when [Route]s change or
-  /// when [Form]s are saved.
-  const AutofillContextLifecycleDelegate();
-
-  /// The action needs to be taken after [FormState.save] is called on
-  /// [savedForm].
-  ///
-  /// The default implementation saves the current autofill context.
-  void onFormSave(FormState savedForm) {
-    TextInput.finishAutofillContext(shouldSave: true);
-  }
-
-  /// The action to take when any [Navigator] in the app pushed [route], on top
-  /// of the previous active route [previousRoute].
-  ///
-  /// {@macro flutter.widgets.navigatorObserver.didPush}
-  ///
-  /// The default implementation saves the current autofill context if [route]
-  /// is an opaque [ModalRoute].
-  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
-    // TODO(LongCatIsLooong): Ideally we want to set the current context aside
-    // and start a new autofill context for the new route we pushed. This
-    // doesn't seem to be possible on Android currently.
-    if (route is ModalRoute && route.opaque)
-      TextInput.finishAutofillContext(shouldSave: true);
-  }
-
-  /// The action to take when a [Navigator] in the app popped [route].
-  ///
-  /// {@macro flutter.widgets.navigatorObserver.didPop}
-  ///
-  /// The default implementation saves the current autofill context if [route]
-  /// is an opaque [ModalRoute].
-  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
-    if (route is ModalRoute && route.opaque)
-      TextInput.finishAutofillContext(shouldSave: true);
-  }
-
-  /// The action to take when any [Navigator] in the app removed [route], and
-  /// its current route is [previousRoute].
-  ///
-  /// {@macro flutter.widgets.navigatorObserver.didRemove}
-  ///
-  /// The default implementation does not do anything.
-  void didRemove(Route<dynamic> route, Route<dynamic> previousRoute) {
-  }
-
-  /// The action to take when any [Navigator] in the app replaced [oldRoute]
-  /// with [newRoute].
-  ///
-  /// The default implementation saves the current autofill context if
-  /// [newRoute] or [oldRoute] is an opaque [ModalRoute], and [newRoute] is the
-  /// current route.
-  void didReplace({ Route<dynamic> newRoute, Route<dynamic> oldRoute }) {
-    if ((oldRoute is ModalRoute && oldRoute.opaque && oldRoute.isCurrent)
-      || (newRoute is ModalRoute && newRoute.opaque && newRoute.isCurrent))
-      TextInput.finishAutofillContext(shouldSave: true);
-  }
-}
-

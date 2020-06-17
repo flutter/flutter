@@ -41,16 +41,15 @@ void main() {
     );
 
     expect(outerState.autofillClients, <EditableTextState>[clientState1]);
+    // The second TextField doesn't have autofill enabled.
     expect(innerState.autofillClients, <EditableTextState>[clientState2]);
   });
 
   testWidgets('new clients can be added & removed to a scope', (WidgetTester tester) async {
     const Key scopeKey = Key('scope');
 
-    final List<String> hints = <String>[];
-
     const TextField client1 = TextField(autofillHints: <String>['1']);
-    final TextField client2 = TextField(autofillHints: hints);
+    TextField client2 = const TextField(autofillHints: <String>[]);
 
     StateSetter setState;
 
@@ -82,16 +81,16 @@ void main() {
     expect(scopeState.autofillClients, <EditableTextState>[clientState1]);
 
     // Add to scope.
-    setState(() { hints.add('2'); });
+    setState(() { client2 = const TextField(autofillHints: <String>['2']); });
 
     await tester.pump();
 
-    expect(scopeState.autofillClients.length, 2);
     expect(scopeState.autofillClients, contains(clientState1));
     expect(scopeState.autofillClients, contains(clientState2));
+    expect(scopeState.autofillClients.length, 2);
 
     // Remove from scope again.
-    setState(() { hints.clear(); });
+    setState(() { client2 = const TextField(autofillHints: <String>[]); });
 
     await tester.pump();
 
