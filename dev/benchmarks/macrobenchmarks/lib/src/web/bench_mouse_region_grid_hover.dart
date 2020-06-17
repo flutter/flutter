@@ -13,6 +13,25 @@ import 'package:flutter/scheduler.dart';
 import 'recorder.dart';
 import 'test_data.dart';
 
+class _NestedMouseRegion extends StatelessWidget {
+  _NestedMouseRegion({this.nests, this.child});
+
+  final int nests;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget current = child;
+    for (int i = 0; i < nests; i++) {
+      current = MouseRegion(
+        onEnter: (_) => {},
+        child: child,
+      );
+    }
+    return current;
+  }
+}
+
 /// Creates a grid of mouse regions, then continuously hover over them.
 ///
 /// Measures our ability to hit test mouse regions.
@@ -65,18 +84,21 @@ class BenchMouseRegionGridHover extends WidgetRecorder {
             itemCount: rowsCount,
             cacheExtent: rowsCount * containerSize,
             physics: const ClampingScrollPhysics(),
-            itemBuilder: (BuildContext context, int rowIndex) => Row(
-              children: List<Widget>.generate(
-                columnsCount,
-                (int columnIndex) => MouseRegion(
-                  onEnter: (_) => {},
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: _getBorder(columnIndex, rowIndex),
-                      color: Color.fromARGB(255, rowIndex * 20 % 256, 127, 127),
+            itemBuilder: (BuildContext context, int rowIndex) => _NestedMouseRegion(
+              nests: 10,
+              child: Row(
+                children: List<Widget>.generate(
+                  columnsCount,
+                  (int columnIndex) => _NestedMouseRegion(
+                    nests: 10,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: _getBorder(columnIndex, rowIndex),
+                        color: Color.fromARGB(255, rowIndex * 20 % 256, 127, 127),
+                      ),
+                      width: containerSize,
+                      height: containerSize,
                     ),
-                    width: containerSize,
-                    height: containerSize,
                   ),
                 ),
               ),
