@@ -1,4 +1,4 @@
-Signature: 96856fb476332fa26aeeaf04f26d4b14
+Signature: 090a84dfb61d6f67c3097a4aa18aa70f
 
 UNUSED LICENSES:
 
@@ -5234,6 +5234,7 @@ FILE: ../../../third_party/skia/gm/skbug_9819.cpp
 FILE: ../../../third_party/skia/gm/strokerect_anisotropic.cpp
 FILE: ../../../third_party/skia/gm/verifiers/gmverifier.cpp
 FILE: ../../../third_party/skia/gm/verifiers/gmverifier.h
+FILE: ../../../third_party/skia/gm/widebuttcaps.cpp
 FILE: ../../../third_party/skia/include/core/SkM44.h
 FILE: ../../../third_party/skia/include/effects/SkStrokeAndFillPathEffect.h
 FILE: ../../../third_party/skia/include/private/SkOpts_spi.h
