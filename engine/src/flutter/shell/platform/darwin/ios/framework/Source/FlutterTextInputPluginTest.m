@@ -235,4 +235,17 @@ FLUTTER_ASSERT_ARC
   // Clean up mocks
   [engine stopMocking];
 }
+
+- (void)testTextRangeFromPositionMatchesUITextViewBehavior {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithFrame:CGRectZero];
+  FlutterTextPosition* fromPosition = [[FlutterTextPosition alloc] initWithIndex:2];
+  FlutterTextPosition* toPosition = [[FlutterTextPosition alloc] initWithIndex:0];
+
+  FlutterTextRange* flutterRange = (FlutterTextRange*)[inputView textRangeFromPosition:fromPosition
+                                                                            toPosition:toPosition];
+  NSRange range = flutterRange.range;
+
+  XCTAssertEqual(range.location, 0);
+  XCTAssertEqual(range.length, 2);
+}
 @end
