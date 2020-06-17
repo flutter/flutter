@@ -9,7 +9,8 @@ import 'method_channel_{{projectName}}.dart';
 /// Platform implementations should extend this class rather than implement it.
 class {{pluginDartClass}}Platform extends PlatformInterface {
 
-  /// Default constructor.
+  /// This constructor registers a unique token for this {{pluginDartClass}}Platform,
+  /// to enforce instances to extend this class, rather than implement it.
   {{pluginDartClass}}Platform() : super(token: _token);
 
   static final Object _token = Object();
@@ -28,8 +29,7 @@ class {{pluginDartClass}}Platform extends PlatformInterface {
     _instance = instance;
   }
 
-  // Below this line are the methods that each platform must implement to provide
-  // functionality from the platform side.
+  // Methods that platforms must implement to provide native functionality follow...
 
   /// Returns a [String] containing the version of the platform.
   Future<String> getPlatformVersion() {

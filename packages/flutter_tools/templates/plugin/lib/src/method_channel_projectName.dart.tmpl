@@ -4,9 +4,7 @@ import 'package:flutter/services.dart';
 
 import '{{projectName}}_platform.dart';
 
-/// The interface that implementations of image_picker must implement.
-///
-/// Platform implementations should extend this class rather than implement it.
+/// A MethodChannel-based implementation of the {{pluginDartClass}}Platform class.
 class MethodChannel{{pluginDartClass}} extends {{pluginDartClass}}Platform {
   final _channel = MethodChannel('{{projectName}}');
 

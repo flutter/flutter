@@ -10,9 +10,7 @@ import '{{projectName}}_platform.dart';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html show window;
 
-/// The interface that implementations of image_picker must implement.
-///
-/// Platform implementations should extend this class rather than implement it.
+/// A web implementation of the {{pluginDartClass}}Platform class.
 class {{pluginDartClass}}Web extends {{pluginDartClass}}Platform {
   static void registerWith(Registrar registrar) {
     {{pluginDartClass}}Platform.instance = {{pluginDartClass}}Web();
