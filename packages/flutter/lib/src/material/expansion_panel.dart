@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -366,7 +365,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// during expansion.
   final EdgeInsets expandedHeaderPadding;
 
-  /// Defines Color for the divider when [ExpansionPanel.isExpanded] is false.
+  /// Defines color for the divider when [ExpansionPanel.isExpanded] is false.
   ///
   /// If `dividerColor` is null, then [DividerThemeData.color] is used. If that
   /// is null, then [ThemeData.dividerColor] is used.
