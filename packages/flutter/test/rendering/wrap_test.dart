@@ -7,6 +7,8 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'rendering_tester.dart';
+
 void main() {
   test('Wrap test; toStringDeep', () {
     final RenderWrap renderWrap = RenderWrap();
@@ -152,5 +154,23 @@ void main() {
     expect(renderWrap.computeMinIntrinsicWidth(100), 80);
     expect(renderWrap.computeMinIntrinsicWidth(79), 80);
     expect(renderWrap.computeMinIntrinsicWidth(80), 80);
+  });
+
+  test('Wrap respects clipBehavior', () {
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    final TestClipPaintingContext context = TestClipPaintingContext();
+
+    // By default, clipBehavior should be Clip.none
+    final RenderWrap defaultWrap = RenderWrap(textDirection: TextDirection.ltr, children: <RenderBox>[box200x200]);
+    layout(defaultWrap, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+    defaultWrap.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.none));
+
+    for (final Clip clip in Clip.values) {
+      final RenderWrap wrap = RenderWrap(textDirection: TextDirection.ltr, children: <RenderBox>[box200x200], clipBehavior: clip);
+      layout(wrap, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
+      wrap.paint(context, Offset.zero);
+      expect(context.clipBehavior, equals(clip));
+    }
   });
 }
