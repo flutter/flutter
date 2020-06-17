@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/windows/angle_surface_manager.h"
 
+#include <iostream>
+
 namespace flutter {
 
 AngleSurfaceManager::AngleSurfaceManager()
@@ -69,7 +71,7 @@ bool AngleSurfaceManager::Initialize() {
       reinterpret_cast<PFNEGLGETPLATFORMDISPLAYEXTPROC>(
           eglGetProcAddress("eglGetPlatformDisplayEXT"));
   if (!eglGetPlatformDisplayEXT) {
-    OutputDebugString(L"EGL: Failed to get a compatible EGLdisplay");
+    std::cerr << "EGL: eglGetPlatformDisplayEXT not available" << std::endl;
     return false;
   }
 
@@ -78,7 +80,7 @@ bool AngleSurfaceManager::Initialize() {
       eglGetPlatformDisplayEXT(EGL_PLATFORM_ANGLE_ANGLE, EGL_DEFAULT_DISPLAY,
                                default_display_attributes);
   if (egl_display_ == EGL_NO_DISPLAY) {
-    OutputDebugString(L"EGL: Failed to get a compatible EGLdisplay");
+    std::cerr << "EGL: Failed to get a compatible EGLdisplay" << std::endl;
     return false;
   }
 
@@ -89,7 +91,8 @@ bool AngleSurfaceManager::Initialize() {
         eglGetPlatformDisplayEXT(EGL_PLATFORM_ANGLE_ANGLE, EGL_DEFAULT_DISPLAY,
                                  fl9_3_display_attributes);
     if (egl_display_ == EGL_NO_DISPLAY) {
-      OutputDebugString(L"EGL: Failed to get a compatible EGLdisplay");
+      std::cerr << "EGL: Failed to get a compatible 9.3 EGLdisplay"
+                << std::endl;
       return false;
     }
 
@@ -100,12 +103,13 @@ bool AngleSurfaceManager::Initialize() {
                                               EGL_DEFAULT_DISPLAY,
                                               warp_display_attributes);
       if (egl_display_ == EGL_NO_DISPLAY) {
-        OutputDebugString(L"EGL: Failed to get a compatible EGLdisplay");
+        std::cerr << "EGL: Failed to get a compatible WARP EGLdisplay"
+                  << std::endl;
         return false;
       }
 
       if (eglInitialize(egl_display_, nullptr, nullptr) == EGL_FALSE) {
-        OutputDebugString(L"EGL: Failed to initialize EGL");
+        std::cerr << "EGL: Failed to initialize EGL" << std::endl;
         return false;
       }
     }
@@ -115,14 +119,14 @@ bool AngleSurfaceManager::Initialize() {
   if ((eglChooseConfig(egl_display_, configAttributes, &egl_config_, 1,
                        &numConfigs) == EGL_FALSE) ||
       (numConfigs == 0)) {
-    OutputDebugString(L"EGL: Failed to choose first context");
+    std::cerr << "EGL: Failed to choose first context" << std::endl;
     return false;
   }
 
   egl_context_ = eglCreateContext(egl_display_, egl_config_, EGL_NO_CONTEXT,
                                   display_context_attributes);
   if (egl_context_ == EGL_NO_CONTEXT) {
-    OutputDebugString(L"EGL: Failed to create EGL context");
+    std::cerr << "EGL: Failed to create EGL context" << std::endl;
     return false;
   }
 
@@ -130,7 +134,7 @@ bool AngleSurfaceManager::Initialize() {
       egl_display_, egl_config_, egl_context_, display_context_attributes);
 
   if (egl_resource_context_ == EGL_NO_CONTEXT) {
-    OutputDebugString(L"EGL: Failed to create EGL resource context");
+    std::cerr << "EGL: Failed to create EGL resource context" << std::endl;
     return false;
   }
 
@@ -145,7 +149,7 @@ void AngleSurfaceManager::CleanUp() {
     egl_context_ = EGL_NO_CONTEXT;
 
     if (result == EGL_FALSE) {
-      OutputDebugString(L"EGL: Failed to destroy context");
+      std::cerr << "EGL: Failed to destroy context" << std::endl;
     }
   }
 
@@ -155,7 +159,7 @@ void AngleSurfaceManager::CleanUp() {
     egl_resource_context_ = EGL_NO_CONTEXT;
 
     if (result == EGL_FALSE) {
-      OutputDebugString(L"EGL: Failed to destroy resource context");
+      std::cerr << "EGL: Failed to destroy resource context" << std::endl;
     }
   }
 
@@ -178,7 +182,7 @@ EGLSurface AngleSurfaceManager::CreateSurface(HWND window) {
                                    static_cast<EGLNativeWindowType>(window),
                                    surfaceAttributes);
   if (surface == EGL_NO_SURFACE) {
-    OutputDebugString(L"Surface creation failed.");
+    std::cerr << "Surface creation failed." << std::endl;
   }
 
   return surface;
