@@ -1136,11 +1136,13 @@ abstract class ResidentRunner {
       _devtoolsServer ??= await devtools_server.serveDevTools(
         enableStdinCommands: false,
       );
+      final Uri vmServiceAddress = flutterDevices.first.vmService.httpAddress ??
+        flutterDevices.first.vmService.wsAddress;
       await devtools_server.launchDevTools(
         <String, dynamic>{
           'reuseWindows': true,
         },
-        flutterDevices.first.vmService.httpAddress,
+        vmServiceAddress,
         'http://${_devtoolsServer.address.host}:${_devtoolsServer.port}',
         false,  // headless mode,
         false,  // machine mode
