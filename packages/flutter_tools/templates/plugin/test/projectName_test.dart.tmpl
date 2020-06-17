@@ -7,6 +7,8 @@ void main() {
 
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  final _plugin = {{pluginDartClass}}();
+
   setUp(() {
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
       return '42';
@@ -18,6 +20,6 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    expect(await {{pluginDartClass}}.platformVersion, '42');
+    expect(await _plugin.platformVersion, '42');
   });
 }

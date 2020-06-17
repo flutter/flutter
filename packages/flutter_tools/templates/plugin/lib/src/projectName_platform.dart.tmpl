@@ -1,0 +1,38 @@
+import 'dart:async';
+
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+
+import 'method_channel_{{projectName}}.dart';
+
+/// The interface that implementations of image_picker must implement.
+///
+/// Platform implementations should extend this class rather than implement it.
+class {{pluginDartClass}}Platform extends PlatformInterface {
+
+  /// Default constructor.
+  {{pluginDartClass}}Platform() : super(token: _token);
+
+  static final Object _token = Object();
+
+  static {{pluginDartClass}}Platform _instance = MethodChannel{{pluginDartClass}}();
+
+  /// The default instance of [{{pluginDartClass}}Platform] to use.
+  ///
+  /// Defaults to [MethodChannel{{pluginDartClass}}].
+  static {{pluginDartClass}}Platform get instance => _instance;
+
+  /// Platform-specific plugins should set this with their own platform-specific
+  /// class that extends [{{pluginDartClass}}Platform] when they register themselves.
+  static set instance({{pluginDartClass}}Platform instance) {
+    PlatformInterface.verifyToken(instance, _token);
+    _instance = instance;
+  }
+
+  // Below this line are the methods that each platform must implement to provide
+  // functionality from the platform side.
+
+  /// Returns a [String] containing the version of the platform.
+  Future<String> getPlatformVersion() {
+    throw UnimplementedError('getPlatformVersion() is not implemented.');
+  }
+}

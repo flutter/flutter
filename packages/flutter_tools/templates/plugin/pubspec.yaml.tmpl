@@ -9,8 +9,13 @@ environment:
   flutter: ">=1.10.0"
 
 dependencies:
+  plugin_platform_interface: ^1.0.1
   flutter:
     sdk: flutter
+{{#web}}
+  flutter_web_plugins:
+    sdk: flutter
+{{/web}}
 
 dev_dependencies:
   flutter_test:
@@ -40,6 +45,11 @@ flutter:
       macos:
         pluginClass: {{pluginClass}}
 {{/macos}}
+{{#web}}
+      web:
+        pluginClass: {{pluginDartClass}}Web
+        fileName: src/{{projectName}}_web.dart
+{{/web}}
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

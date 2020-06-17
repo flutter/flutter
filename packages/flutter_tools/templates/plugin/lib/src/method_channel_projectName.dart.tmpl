@@ -1,0 +1,18 @@
+import 'dart:async';
+
+import 'package:flutter/services.dart';
+
+import '{{projectName}}_platform.dart';
+
+/// The interface that implementations of image_picker must implement.
+///
+/// Platform implementations should extend this class rather than implement it.
+class MethodChannel{{pluginDartClass}} extends {{pluginDartClass}}Platform {
+  final _channel = MethodChannel('{{projectName}}');
+
+  /// Returns a [String] containing the version of the platform.
+  Future<String> getPlatformVersion() async {
+    final version = await _channel.invokeMethod('getPlatformVersion');
+    return version.toString();
+  }
+}
