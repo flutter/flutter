@@ -15,9 +15,9 @@ G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 static void my_application_activate(GApplication* application) {
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
-  gtk_widget_show(GTK_WIDGET(window));
-  gtk_widget_set_size_request(GTK_WIDGET(window), kFlutterWindowWidth,
+  gtk_window_set_default_size(window, kFlutterWindowWidth,
                               kFlutterWindowHeight);
+  gtk_widget_show(GTK_WIDGET(window));
   gtk_window_set_title(window, kFlutterWindowTitle);
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
