@@ -30,6 +30,7 @@ import 'theme_data.dart';
 ///  * [ContainedButton], a filled ButtonStyleButton whose material elevates when pressed.
 ///  * [OutlinedButton], similar to [TextButton], but with an outline.
 abstract class ButtonStyleButton extends StatefulWidget {
+  /// Create a [ButtonStyleButton].
   const ButtonStyleButton({
     Key key,
     @required this.onPressed,

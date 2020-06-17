@@ -89,6 +89,9 @@ class ContainedButtonThemeData with Diagnosticable {
 ///  * [ThemeData.containedButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [ContainedButton]s below the overall [Theme].
 class ContainedButtonTheme extends InheritedTheme {
+  /// Create a [ContainedButtonTheme].
+  ///
+  /// The [data] parameter must not be null.
   const ContainedButtonTheme({
     Key key,
     @required this.data,

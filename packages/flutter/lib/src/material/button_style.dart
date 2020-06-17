@@ -99,7 +99,7 @@ import 'theme_data.dart';
 ///  * [OutlinedButtonTheme], the theme for [OutlinedButton]s.
 @immutable
 class ButtonStyle with Diagnosticable {
-  // Create a ButtonStyle.
+  /// Create a [ButtonStyle].
   const ButtonStyle({
     this.textStyle,
     this.backgroundColor,
@@ -340,6 +340,7 @@ class ButtonStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
   }
 
+  /// Linearly interpolate between two [ButtonStyle]s.
   static ButtonStyle lerp(ButtonStyle a, ButtonStyle b, double t) {
     assert (t != null);
     if (a == null && b == null)

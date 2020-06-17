@@ -89,6 +89,9 @@ class TextButtonThemeData with Diagnosticable {
 ///  * [ThemeData.textButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [TextButton]s below the overall [Theme].
 class TextButtonTheme extends InheritedTheme {
+  /// Create a [TextButtonTheme].
+  ///
+  /// The [data] parameter must not be null.
   const TextButtonTheme({
     Key key,
     @required this.data,
