@@ -26,7 +26,8 @@ IOSExternalTextureMetal::~IOSExternalTextureMetal() = default;
 void IOSExternalTextureMetal::Paint(SkCanvas& canvas,
                                     const SkRect& bounds,
                                     bool freeze,
-                                    GrContext* context) {
+                                    GrContext* context,
+                                    SkFilterQuality filter_quality) {
   const bool needs_updated_texture = (!freeze && texture_frame_available_) || !external_image_;
 
   if (needs_updated_texture) {
@@ -45,10 +46,12 @@ void IOSExternalTextureMetal::Paint(SkCanvas& canvas,
   }
 
   if (external_image_) {
+    SkPaint paint;
+    paint.setFilterQuality(filter_quality);
     canvas.drawImageRect(external_image_,                                      // image
                          external_image_->bounds(),                            // source rect
                          bounds,                                               // destination rect
-                         nullptr,                                              // paint
+                         &paint,                                               // paint
                          SkCanvas::SrcRectConstraint::kFast_SrcRectConstraint  // constraint
     );
   }
