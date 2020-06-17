@@ -4,10 +4,11 @@
 
 // @dart = 2.8
 
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
+import 'theme.dart';
 
 /// A [ButtonStyle] that overrides the default appearance of
 /// [OutlinedButton]s when it's used with [OutlinedButtonTheme] or with the

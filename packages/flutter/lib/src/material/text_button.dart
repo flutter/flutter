@@ -6,11 +6,17 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
 import 'button_style_button.dart';
+import 'color_scheme.dart';
+import 'colors.dart';
+import 'constants.dart';
+import 'material_state.dart';
 import 'text_button_theme.dart';
+import 'theme.dart';
+import 'theme_data.dart';
 
 /// A Material Design "Text Button".
 ///

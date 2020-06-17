@@ -7,8 +7,11 @@
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
+
+import 'material_state.dart';
+import 'theme_data.dart';
 
 /// A simple container for the visual properties that most buttons have in common.
 ///
