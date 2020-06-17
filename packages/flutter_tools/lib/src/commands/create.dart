@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
-import '../android/android.dart' as android;
+import '../android/android.dart' as android_common;
 import '../android/android_sdk.dart' as android_sdk;
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
@@ -29,6 +29,7 @@ import '../template.dart';
 
 class CreateCommand extends FlutterCommand {
   CreateCommand() {
+    addPlatformsOptions();
     argParser.addFlag('pub',
       defaultsTo: true,
       help: 'Whether to run "flutter pub get" after the project has been created.',
@@ -316,7 +317,7 @@ class CreateCommand extends FlutterCommand {
 
     final FlutterProjectType template = _getProjectType(projectDir);
     final bool generateModule = template == FlutterProjectType.module;
-    final bool generatePlugin = template == FlutterProjectType.plugin;
+    final bool willGeneratePlugin = template == FlutterProjectType.plugin;
     final bool generatePackage = template == FlutterProjectType.package;
 
     String organization = stringArg('org');
@@ -334,7 +335,7 @@ class CreateCommand extends FlutterCommand {
     }
 
     final bool overwrite = boolArg('overwrite');
-    String error = _validateProjectDir(projectDirPath, flutterRoot: flutterRoot, overwrite: overwrite);
+    String error = validateProjectDir(projectDirPath, flutterRoot: flutterRoot, overwrite: overwrite);
     if (error != null) {
       throwToolExit(error);
     }
@@ -345,19 +346,25 @@ class CreateCommand extends FlutterCommand {
       throwToolExit(error);
     }
 
+    final List<String> platforms = stringsArg('platform');
+    if (platforms == null || platforms.isEmpty) {
+      throwToolExit('Must specify at least one platform using --platforms',
+          exitCode: 2);
+    }
+
     final Map<String, dynamic> templateContext = createTemplateContext(
       organization: organization,
       projectName: projectName,
       projectDescription: stringArg('description'),
       flutterRoot: flutterRoot,
       renderDriverTest: boolArg('with-driver-test'),
-      withPluginHook: generatePlugin,
+      withPluginHook: willGeneratePlugin,
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
-      web: featureFlags.isWebEnabled,
-      linux: featureFlags.isLinuxEnabled,
-      macos: featureFlags.isMacOSEnabled,
-      windows: featureFlags.isWindowsEnabled,
+      web: featureFlags.isWebEnabled && platforms.contains('web'),
+      linux: featureFlags.isLinuxEnabled && platforms.contains('linux'),
+      macos: featureFlags.isMacOSEnabled && platforms.contains('macos'),
+      windows: featureFlags.isWindowsEnabled && platforms.contains('windows'),
     );
 
     final String relativeDirPath = globals.fs.path.relative(projectDirPath);
@@ -375,7 +382,7 @@ class CreateCommand extends FlutterCommand {
     int generatedFileCount = 0;
     switch (template) {
       case FlutterProjectType.app:
-        generatedFileCount += await _generateApp(relativeDir, templateContext, overwrite: overwrite);
+        generatedFileCount += await generateApp(relativeDir, templateContext, overwrite: overwrite);
         break;
       case FlutterProjectType.module:
         generatedFileCount += await _generateModule(relativeDir, templateContext, overwrite: overwrite);
@@ -384,7 +391,7 @@ class CreateCommand extends FlutterCommand {
         generatedFileCount += await _generatePackage(relativeDir, templateContext, overwrite: overwrite);
         break;
       case FlutterProjectType.plugin:
-        generatedFileCount += await _generatePlugin(relativeDir, templateContext, overwrite: overwrite);
+        generatedFileCount += await generatePlugin(relativeDir, templateContext, overwrite: overwrite);
         break;
     }
     if (sampleCode != null) {
@@ -427,7 +434,7 @@ In order to run your $application, type:
 
 Your $application code is in $relativeAppMain.
 ''');
-        if (generatePlugin) {
+        if (willGeneratePlugin) {
           globals.printStatus('''
 Your plugin code is in $relativePluginMain.
 
@@ -468,6 +475,36 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     return FlutterCommandResult.success();
   }
 
+  /// Adds a `platform` argument to the command.
+  ///
+  /// The type of the argument is [List]. The valid options are: `ios`, `android`, `windows`, `linux`, `macos`, `web`.
+  ///
+  /// These platforms should indicate what platforms the project will support after running the command.
+  /// The result can be used in generate methods such as [generateApp] and [generatePlugin].
+  ///
+  /// Adding argument is optional if the command does not require the user to explicitly state what platforms the project supports.
+  @visibleForTesting
+  void addPlatformsOptions() {
+    argParser.addMultiOption('platform',
+        help: 'the platforms supported by this plugin.',
+        defaultsTo: <String>[
+          'ios',
+          'android',
+          'windows',
+          'linux',
+          'macos',
+          'web'
+        ],
+        allowed: <String>[
+          'ios',
+          'android',
+          'windows',
+          'linux',
+          'macos',
+          'web'
+        ]);
+  }
+
   Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
@@ -505,9 +542,18 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
   }
 
   @visibleForTesting
-  Future<int> generatePlugin(Directory directory, Map<String, dynamic> templateContext, final List<String> platforms, { bool overwrite = false }) async {
-  
-    _updateTemplateContextWithPlatforms(templateContext, platforms);
+  Future<int> generatePlugin(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
+    // Plugin doesn't create any platform by default
+    templateContext['ios'] = false;
+    templateContext['android'] = false;
+    templateContext['web'] = false;
+    templateContext['linux'] = false;
+    templateContext['macos'] = false;
+    templateContext['windows'] = false;
+    if (argResults.wasParsed('platform')) {
+      final List<String> platforms = stringsArg('platform');
+      _updateTemplateContextWithPlatforms(templateContext, platforms);
+    }
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? stringArg('description')
@@ -522,7 +568,11 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       );
     }
     final FlutterProject project = FlutterProject.fromDirectory(directory);
-    gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+    final bool generateAndroid = templateContext['android'] == true;
+    if (generateAndroid) {
+        gradle.updateLocalProperties(
+            project: project, requireAndroidSdk: false);
+    }
 
     final String projectName = templateContext['projectName'] as String;
     final String organization = templateContext['organization'] as String;
@@ -531,19 +581,23 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     templateContext['projectName'] = exampleProjectName;
     templateContext['androidIdentifier'] = _createAndroidIdentifier(organization, exampleProjectName);
     templateContext['iosIdentifier'] = _createUTIIdentifier(organization, exampleProjectName);
+    templateContext['macosIdentifier'] = _createUTIIdentifier(organization, exampleProjectName);
     templateContext['description'] = 'Demonstrates how to use the $projectName plugin.';
     templateContext['pluginProjectName'] = projectName;
     templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
 
-    generatedCount += await _generateApp(project.example.directory, templateContext, overwrite: overwrite);
+    generatedCount += await generateApp(project.example.directory, templateContext, overwrite: overwrite);
     return generatedCount;
   }
 
-  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
+  @visibleForTesting
+  Future<int> generateApp(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     generatedCount += await _renderTemplate('app', directory, templateContext, overwrite: overwrite);
     final FlutterProject project = FlutterProject.fromDirectory(directory);
-    generatedCount += _injectGradleWrapper(project);
+    if (templateContext['android'] == true) {
+      generatedCount += _injectGradleWrapper(project);
+    }
 
     if (boolArg('with-driver-test')) {
       final Directory testDirectory = directory.childDirectory('test_driver');
@@ -555,8 +609,9 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
     }
 
-    gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
-
+    if (templateContext['android'] == true) {
+      gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+    }
     return generatedCount;
   }
 
@@ -570,16 +625,16 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
           context['android'] = true;
           break;
         case 'web':
-          context['web'] = true;
+          context['web'] =  featureFlags.isWebEnabled && true;
           break;
         case 'linux':
-          context['linux'] = true;
+          context['linux'] = featureFlags.isLinuxEnabled && true;
           break;
         case 'macos':
-          context['macos'] = true;
+          context['macos'] = featureFlags.isMacOSEnabled && true;
           break;
         case 'windows':
-          context['windows'] = true;
+          context['windows'] = featureFlags.isWindowsEnabled && true;
           break;
       }
     }
@@ -609,6 +664,8 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     String flutterRoot,
     bool renderDriverTest = false,
     bool withPluginHook = false,
+    bool ios = false,
+    bool android = false,
     bool web = false,
     bool linux = false,
     bool macos = false,
@@ -633,7 +690,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'useAndroidEmbeddingV2': featureFlags.isAndroidEmbeddingV2Enabled,
-      'androidMinApiLevel': android.minApiLevel,
+      'androidMinApiLevel': android_common.minApiLevel,
       'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
       'withDriverTest': renderDriverTest,
       'pluginClass': pluginClass,
@@ -646,8 +703,8 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'iosLanguage': iosLanguage,
       'flutterRevision': globals.flutterVersion.frameworkRevision,
       'flutterChannel': globals.flutterVersion.channel,
-      'ios': false,
-      'android': false,
+      'ios': ios,
+      'android': android,
       'web': web,
       'linux': linux,
       'macos': macos,
@@ -861,7 +918,8 @@ String _validateProjectName(String projectName) {
 
 /// Return null if the project directory is legal. Return a validation message
 /// if we should disallow the directory name.
-String _validateProjectDir(String dirPath, { String flutterRoot, bool overwrite = false }) {
+@visibleForTesting
+String validateProjectDir(String dirPath, { String flutterRoot, bool overwrite = false }) {
   if (globals.fs.path.isWithin(flutterRoot, dirPath)) {
     return 'Cannot create a project within the Flutter SDK. '
       "Target directory '$dirPath' is within the Flutter SDK at '$flutterRoot'.";

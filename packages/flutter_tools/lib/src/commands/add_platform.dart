@@ -15,26 +15,21 @@ import '../runner/flutter_command.dart';
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
-import '../android/android.dart' as android_common;
-import '../android/android_sdk.dart' as android_sdk;
-import '../android/gradle_utils.dart' as gradle;
+
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/utils.dart';
 import '../cache.dart';
-import '../dart/pub.dart';
-import '../features.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
-import '../template.dart';
 
 class AddPlatformCommand extends CreateCommand {
   AddPlatformCommand() {
+    // TODO(cyanglaz): remove the below ignore when https://github.com/flutter/flutter/issues/59494 is done.
+    // ignore: invalid_use_of_visible_for_testing_member
     addPlatformsOptions();
     addPubFlag();
     addOfflineFlag();
@@ -70,7 +65,8 @@ class AddPlatformCommand extends CreateCommand {
     final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
 
     // TODO(cyanglaz): remove the below ignore when https://github.com/flutter/flutter/issues/59494 is done.
-    final FlutterProjectType template = determineTemplateType(projectDir); // ignore: invalid_use_of_visible_for_testing_member
+    // ignore: invalid_use_of_visible_for_testing_member
+    final FlutterProjectType template = determineTemplateType(projectDir);
     if (template != FlutterProjectType.plugin) {
           throwToolExit('The target directory is not a flutter plugin directory.',
           exitCode: 2);
@@ -129,6 +125,8 @@ class AddPlatformCommand extends CreateCommand {
     int generatedCount = 0;
     switch (projectType) {
       case FlutterProjectType.plugin:
+        // TODO(cyanglaz): remove the below ignore when https://github.com/flutter/flutter/issues/59494 is done.
+        // ignore: invalid_use_of_visible_for_testing_member
         generatedCount += await generatePlugin(directory, templateContext, platforms, overwrite: overwrite);
         break;
       case FlutterProjectType.app:
@@ -138,27 +136,6 @@ class AddPlatformCommand extends CreateCommand {
           exitCode: 2);
     }
     return generatedCount;
-  }
-
-  /// Adds a `platform` argument to the command.
-  ///
-  /// The type of the argument is [List]. The valid options are: `ios`, `android`, `windows`, `linux`, `macos`, `web`.
-  ///
-  /// These platforms should indicate what platforms the project will support after running the command.
-  /// The result can be used in generate methods such as [generateApp] and [generatePlugin].
-  ///
-  /// Adding argument is optional if the command does not require the user to explicitly state what platforms the project supports.
-  void addPlatformsOptions() {
-    argParser.addMultiOption('platform',
-        help: 'the platforms supported by this plugin.',
-        allowed: <String>[
-          'ios',
-          'android',
-          'windows',
-          'linux',
-          'macos',
-          'web'
-        ]);
   }
 
   /// Adds the `with-driver-test` argument to the command
@@ -242,17 +219,6 @@ class AddPlatformCommand extends CreateCommand {
       negatable: true,
       defaultsTo: false,
       help: 'When performing operations, overwrite existing files.',
-    );
-  }
-
-  /// Add the `description` argument to the command.
-  ///
-  /// The type of the argument is [String] and it defaults to `A new Flutter project.`.
-  void _addDescriptionFlag() {
-    argParser.addOption(
-      'description',
-      defaultsTo: 'A new Flutter project.',
-      help: 'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
     );
   }
 
@@ -383,31 +349,13 @@ class AddPlatformCommand extends CreateCommand {
   /// Throws an error if the directory is not a valid Flutter project directory.
   bool _getOverwrite({@required String projectDirPath, @required String flutterRoot}) {
     final bool overwrite = boolArg('overwrite');
-    final String error = _validateProjectDir(projectDirPath, flutterRoot: flutterRoot, overwrite: overwrite);
+    // TODO(cyanglaz): remove the below ignore when https://github.com/flutter/flutter/issues/59494 is done.
+    // ignore: invalid_use_of_visible_for_testing_member
+    final String error = validateProjectDir(projectDirPath, flutterRoot: flutterRoot, overwrite: overwrite);
     if (error != null) {
       throwToolExit(error);
     }
     return overwrite;
-  }
-
-  /// Extract the project name.
-  ///
-  /// If `project-name` argument is added to the command via [addProjectNameFlag], the value of the argument is returned.
-  /// Otherwise, the directory's name is returned.
-  ///
-  /// Throws an error if the project name is not valid.
-  String _getProjectName({@required String projectDirPath}) {
-    String projectName;
-    if (argResults['project-name'] != null) {
-      projectName = stringArg('project-name');
-    } else {
-      projectName = globals.fs.path.basename(projectDirPath);
-    }
-    final String error = _validateProjectName(projectName);
-    if (error != null) {
-      throwToolExit(error);
-    }
-    return projectName;
   }
 
     /// Run doctor; tell the user the next steps.
@@ -467,24 +415,5 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
             'Flutter updates.');
       }
     }
-  }
-
-  String _createPluginClassName(String name) {
-    final String camelizedName = camelCase(name);
-    return camelizedName[0].toUpperCase() + camelizedName.substring(1);
-  }
-
-  /// Return null if the project name is legal. Return a validation message if
-  /// we should disallow the project name.
-  String _validateProjectName(String projectName) {
-    if (!isValidPackageName(projectName)) {
-      return '"$projectName" is not a valid Dart package name.\n\n'
-          'See https://dart.dev/tools/pub/pubspec#name for more information.';
-    }
-    if (_packageDependencies.contains(projectName)) {
-      return "Invalid project name: '$projectName' - this will conflict with Flutter "
-          'package dependencies.';
-    }
-    return null;
   }
 }
