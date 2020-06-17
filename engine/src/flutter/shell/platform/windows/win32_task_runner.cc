@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/win32_task_runner.h"
 
 #include <atomic>
+#include <iostream>
 #include <utility>
 
 namespace flutter {
@@ -93,7 +94,7 @@ void Win32TaskRunner::PostTask(FlutterTask flutter_task,
   }
 
   if (!PostThreadMessage(main_thread_id_, WM_NULL, 0, 0)) {
-    OutputDebugString(L"Failed to post message to main thread.");
+    std::cerr << "Failed to post message to main thread." << std::endl;
   }
 }
 
