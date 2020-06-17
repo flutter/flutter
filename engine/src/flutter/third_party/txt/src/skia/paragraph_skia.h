@@ -17,6 +17,8 @@
 #ifndef LIB_TXT_SRC_PARAGRAPH_SKIA_H_
 #define LIB_TXT_SRC_PARAGRAPH_SKIA_H_
 
+#include <optional>
+
 #include "txt/paragraph.h"
 
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
