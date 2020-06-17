@@ -105,5 +105,6 @@ String debugFormatDouble(double value) {
 ///
 /// See also:
 ///
-///  * [WidgetsApp], which uses the [debugBrightnessOverride] setting to construct a [MediaQueryData].
+///  * [WidgetsApp], which uses the [debugBrightnessOverride] setting in debug mode
+///    to construct a [MediaQueryData].
 ui.Brightness debugBrightnessOverride;
