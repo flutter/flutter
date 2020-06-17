@@ -1817,12 +1817,21 @@ void main() {
       return MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
-            return MediaQuery(
-              data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
-              child: Scaffold(
-                appBar: AppBar(
-                  centerTitle: false,
-                  title: const Text('Jumbo', style: TextStyle(fontSize: 18)),
+            final ThemeData themeData = Theme.of(context);
+            return Theme(
+              data: themeData.copyWith(
+                appBarTheme: themeData.appBarTheme.copyWith(
+                  // ignore: deprecated_member_use_from_same_package
+                  shouldCapTextScaleForTitle: true,
+                ),
+              ),
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                child: Scaffold(
+                  appBar: AppBar(
+                    centerTitle: false,
+                    title: const Text('Jumbo', style: TextStyle(fontSize: 18)),
+                  ),
                 ),
               ),
             );
@@ -1846,7 +1855,7 @@ void main() {
     expect(tester.getRect(appBarTitle).height, 24);
   });
 
-  testWidgets('AppBars with jumbo title, overriding upper limit on text scale limit, textScaleFactor = 3, 3.5, 4', (WidgetTester tester) async {
+  testWidgets('AppBars with jumbo titles, textScaleFactor = 3, 3.5, 4', (WidgetTester tester) async {
     double textScaleFactor;
     TextDirection textDirection;
     bool centerTitle;
@@ -1857,18 +1866,18 @@ void main() {
           builder: (BuildContext context) {
             return Directionality(
               textDirection: textDirection,
-              child: Builder(
-                builder: (BuildContext context) {
-                  return Scaffold(
-                    appBar: AppBar(
-                      centerTitle: centerTitle,
-                      title: MediaQuery(
-                        data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
-                        child: const Text('Jumbo'),
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return Scaffold(
+                      appBar: AppBar(
+                        centerTitle: centerTitle,
+                        title: const Text('Jumbo'),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             );
           },
