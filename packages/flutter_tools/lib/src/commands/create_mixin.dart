@@ -303,26 +303,6 @@ mixin CreateCommandMixin on FlutterCommand {
   ///
   /// Besides the parameters, some other default values are generated into the returning map,
   /// including:
-  ///   * `dartSdk`: '$flutterRoot/bin/cache/dart-sdk'.
-  ///   * `useAndroidEmbeddingV2`: based on if the feature is enabled
-  ///   * `androidMinApiLevel`: the minApiLevel.
-  ///   * `androidSdkVersion`: the minimumAndroidSdkVersion.
-  ///   * `pluginClass`: the Pascal case of `projectName` + 'Plugin', or the Pascal case of `projectName` if it ends with 'Plugin'.
-  ///   * `pluginDartClass`: The Pascal case of `projectName`.
-  ///   * `pluginCppHeaderGuard`: the `projectName` in upper case.
-  ///   * `pluginProjectUUID`: Randomly generated UUID in upper case.
-  ///   * `flutterRevision`: global flutter framework revision.
-  ///   * `flutterChannel`: global flutter version.
-  ///   * `ios`: false,
-  ///   * `android`: false,
-  ///   * `web`: featureFlags.isWebEnabled,
-  ///   * `linux`: featureFlags.isLinuxEnabled,
-  ///   * `macos`': featureFlags.isMacOSEnabled,
-  ///   * `windows`: featureFlags.isWindowsEnabled,
-  ///   * `year`: the current year.
-  ///   * `androidIdentifier`: generated with [createAndroidIdentifier].
-  ///   * `iosIdentifier`: generated with [createUTIIdentifier].
-  ///   * `macosIdentifier`: generated with [createUTIIdentifier].
   Map<String, dynamic> createTemplateContext({
     String organization,
     String projectName,
