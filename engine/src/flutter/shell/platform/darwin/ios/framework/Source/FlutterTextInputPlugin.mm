@@ -549,7 +549,17 @@ static NSString* uniqueIdFromDictionary(NSDictionary* dictionary) {
                            toPosition:(UITextPosition*)toPosition {
   NSUInteger fromIndex = ((FlutterTextPosition*)fromPosition).index;
   NSUInteger toIndex = ((FlutterTextPosition*)toPosition).index;
-  return [FlutterTextRange rangeWithNSRange:NSMakeRange(fromIndex, toIndex - fromIndex)];
+  if (toIndex >= fromIndex) {
+    return [FlutterTextRange rangeWithNSRange:NSMakeRange(fromIndex, toIndex - fromIndex)];
+  } else {
+    // toIndex may be less than fromIndex, because
+    // UITextInputStringTokenizer does not handle CJK characters
+    // well in some cases. See:
+    // https://github.com/flutter/flutter/issues/58750#issuecomment-644469521
+    // Swap fromPosition and toPosition to match the behavior of native
+    // UITextViews.
+    return [FlutterTextRange rangeWithNSRange:NSMakeRange(toIndex, fromIndex - toIndex)];
+  }
 }
 
 - (NSUInteger)decrementOffsetPosition:(NSUInteger)position {
