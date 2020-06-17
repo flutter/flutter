@@ -22,7 +22,8 @@ class Texture {
   virtual void Paint(SkCanvas& canvas,
                      const SkRect& bounds,
                      bool freeze,
-                     GrContext* context) = 0;
+                     GrContext* context,
+                     SkFilterQuality quality) = 0;
 
   // Called from raster thread.
   virtual void OnGrContextCreated() = 0;

@@ -67,6 +67,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     double width = 0.0,
     double height = 0.0,
     bool freeze = false,
+    ui.FilterQuality filterQuality = ui.FilterQuality.low,
   }) {
     // TODO(b/128315641): implement addTexture.
   }

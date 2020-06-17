@@ -21,7 +21,8 @@ EmbedderExternalTextureGL::~EmbedderExternalTextureGL() = default;
 void EmbedderExternalTextureGL::Paint(SkCanvas& canvas,
                                       const SkRect& bounds,
                                       bool freeze,
-                                      GrContext* context) {
+                                      GrContext* context,
+                                      SkFilterQuality filter_quality) {
   if (auto image = external_texture_callback_(
           Id(),                                           //
           canvas.getGrContext(),                          //
@@ -31,10 +32,12 @@ void EmbedderExternalTextureGL::Paint(SkCanvas& canvas,
   }
 
   if (last_image_) {
+    SkPaint paint;
+    paint.setFilterQuality(filter_quality);
     if (bounds != SkRect::Make(last_image_->bounds())) {
-      canvas.drawImageRect(last_image_, bounds, nullptr);
+      canvas.drawImageRect(last_image_, bounds, &paint);
     } else {
-      canvas.drawImage(last_image_, bounds.x(), bounds.y());
+      canvas.drawImage(last_image_, bounds.x(), bounds.y(), &paint);
     }
   }
 }

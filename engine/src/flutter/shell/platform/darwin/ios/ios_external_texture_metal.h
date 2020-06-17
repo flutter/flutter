@@ -35,7 +35,11 @@ class IOSExternalTextureMetal final : public Texture {
   sk_sp<SkImage> external_image_;
 
   // |Texture|
-  void Paint(SkCanvas& canvas, const SkRect& bounds, bool freeze, GrContext* context) override;
+  void Paint(SkCanvas& canvas,
+             const SkRect& bounds,
+             bool freeze,
+             GrContext* context,
+             SkFilterQuality filter_quality) override;
 
   // |Texture|
   void OnGrContextCreated() override;
