@@ -615,15 +615,13 @@ class _MonthPickerState extends State<_MonthPicker> {
   /// Handler for when the overall day grid obtains or loses focus.
   void _handleGridFocusChange(bool focused) {
     setState(() {
-      if (focused) {
-        if (_focusedDay == null) {
-          if (utils.isSameMonth(widget.selectedDate, _currentMonth)) {
-            _focusedDay = widget.selectedDate;
-          } else if (utils.isSameMonth(widget.currentDate, _currentMonth)) {
-            _focusedDay = _focusableDayForMonth(_currentMonth, widget.currentDate.day);
-          } else {
-            _focusedDay = _focusableDayForMonth(_currentMonth, 1);
-          }
+      if (focused && _focusedDay == null) {
+        if (utils.isSameMonth(widget.selectedDate, _currentMonth)) {
+          _focusedDay = widget.selectedDate;
+        } else if (utils.isSameMonth(widget.currentDate, _currentMonth)) {
+          _focusedDay = _focusableDayForMonth(_currentMonth, widget.currentDate.day);
+        } else {
+          _focusedDay = _focusableDayForMonth(_currentMonth, 1);
         }
       }
     });
@@ -784,14 +782,13 @@ class _FocusedDate extends InheritedWidget {
   final DateTime date;
 
   @override
-  bool updateShouldNotify(InheritedWidget oldWidget) {
-    return !(oldWidget is _FocusedDate
-      && (date == oldWidget.date || utils.isSameDay(date, oldWidget.date)));
+  bool updateShouldNotify(_FocusedDate oldWidget) {
+    return date != oldWidget.date && !utils.isSameDay(date, oldWidget.date);
   }
 
   static DateTime of(BuildContext context) {
-    final _FocusedDate focusWidget = context.dependOnInheritedWidgetOfExactType<_FocusedDate>();
-    return focusWidget?.date;
+    final _FocusedDate focusedDate = context.dependOnInheritedWidgetOfExactType<_FocusedDate>();
+    return focusedDate?.date;
   }
 }
 
@@ -859,22 +856,22 @@ class _DayPickerState extends State<_DayPicker> {
 
   @override
   void initState() {
+    super.initState();
     final int daysInMonth = utils.getDaysInMonth(widget.displayedMonth.year, widget.displayedMonth.month);
     _dayFocusNodes = List<FocusNode>.generate(
       daysInMonth,
       (int index) => FocusNode(skipTraversal: true, debugLabel: 'Day ${index + 1}')
     );
-    super.initState();
   }
 
   @override
   void didChangeDependencies() {
+    super.didChangeDependencies();
     // Check to see if the focused date is in this month, if so focus it.
     final DateTime focusedDate = _FocusedDate.of(context);
     if (focusedDate != null && utils.isSameMonth(widget.displayedMonth, focusedDate)) {
       _dayFocusNodes[focusedDate.day - 1].requestFocus();
     }
-    super.didChangeDependencies();
   }
 
   @override
