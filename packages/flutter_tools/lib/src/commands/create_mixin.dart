@@ -12,13 +12,9 @@ import '../android/android.dart' as android_common;
 import '../android/android_sdk.dart' as android_sdk;
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
-import '../base/net.dart';
 import '../base/utils.dart';
 import '../cache.dart';
-import '../convert.dart';
 import '../dart/pub.dart';
 import '../features.dart';
 import '../flutter_project_metadata.dart';
@@ -342,6 +338,8 @@ mixin CreateCommandMixin on FlutterCommand {
     final String pluginClass = pluginDartClass.endsWith('Plugin')
         ? pluginDartClass
         : pluginDartClass + 'Plugin';
+    final String pluginClassSnakeCase = snakeCase(pluginClass);
+    final String pluginClassCapitalSnakeCase = pluginClassSnakeCase.toUpperCase();
 
     return <String, dynamic>{
       'organization': organization,
@@ -353,6 +351,8 @@ mixin CreateCommandMixin on FlutterCommand {
       'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
       'withDriverTest': renderDriverTest,
       'pluginClass': pluginClass,
+      'pluginClassSnakeCase': pluginClassSnakeCase,
+      'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
       'pluginDartClass': pluginDartClass,
       'pluginCppHeaderGuard': projectName.toUpperCase(),
       'pluginProjectUUID': Uuid().v4().toUpperCase(),
