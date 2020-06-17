@@ -1397,9 +1397,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         child: result,
       );
     }
-    
-    final Locale platformResolvedLocale = WidgetsBinding.instance.computePlatformResolvedLocale(widget.supportedLocales);
-    print(platformResolvedLocale);
     final Locale appLocale = widget.locale != null
       ? _resolveLocales(<Locale>[widget.locale], widget.supportedLocales)
       : _locale;
