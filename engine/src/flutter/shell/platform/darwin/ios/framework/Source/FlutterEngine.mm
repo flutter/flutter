@@ -396,17 +396,22 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
 - (void)maybeSetupPlatformViewChannels {
   if (_shell && self.shell.IsSetup()) {
+    FlutterPlatformPlugin* platformPlugin = _platformPlugin.get();
     [_platformChannel.get() setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
-      [_platformPlugin.get() handleMethodCall:call result:result];
+      [platformPlugin handleMethodCall:call result:result];
     }];
 
+    fml::WeakPtr<FlutterEngine> weakSelf = [self getWeakPtr];
     [_platformViewsChannel.get()
         setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
-          _platformViewsController->OnMethodCall(call, result);
+          if (weakSelf) {
+            weakSelf.get().platformViewsController->OnMethodCall(call, result);
+          }
         }];
 
+    FlutterTextInputPlugin* textInputPlugin = _textInputPlugin.get();
     [_textInputChannel.get() setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
-      [_textInputPlugin.get() handleMethodCall:call result:result];
+      [textInputPlugin handleMethodCall:call result:result];
     }];
   }
 }
