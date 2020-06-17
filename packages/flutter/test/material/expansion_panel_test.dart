@@ -1347,7 +1347,7 @@ void main() {
     expect(box.size.width, equals(736.0));
   });
 
-  testWidgets('ExpansionPanelList respect dividerColor', (WidgetTester tester) async {
+  testWidgets('ExpansionPanelList respects dividerColor', (WidgetTester tester) async {
     const Color dividerColor = Colors.red;
     await tester.pumpWidget(const MaterialApp(
       home: SingleChildScrollView(
@@ -1360,11 +1360,11 @@ void main() {
     final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox).last);
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
 
-    // For the last DecoratedBox, we will have a Border.top.
+    // For the last DecoratedBox, we will have a Border.top with the provided dividerColor.
     expect(decoration.border.top.color, dividerColor);
   });
 
-  testWidgets('ExpansionPanelList.Radio respects DividerColor', (WidgetTester tester) async {
+  testWidgets('ExpansionPanelList.radio respects DividerColor', (WidgetTester tester) async {
     const Color dividerColor = Colors.red;
     await tester.pumpWidget(MaterialApp(
       home: SingleChildScrollView(
@@ -1387,13 +1387,13 @@ void main() {
             ),
           ],
         ),
-      )
+      ),
     ));
 
     final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox).last);
     final BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
 
-    // For the last DecoratedBox, we will have a Border.top.
+    // For the last DecoratedBox, we will have a Border.top with the provided dividerColor.
     expect(boxDecoration.border.top.color, dividerColor);
   });
 }
