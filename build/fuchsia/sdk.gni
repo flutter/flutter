@@ -9,6 +9,10 @@ declare_args() {
   # The Flutter buildroot is outside the Fuchsia root and can only use the SDK.
   using_fuchsia_sdk = true
 
+  # This is set by the dart sources. Once the engine repo switches to using the GN SDK,
+  # this flag can be unified with `using_fuchsia_sdk`.
+  using_fuchsia_gn_sdk = false
+
   # The following variables are Flutter buildroot specific.
   fuchsia_sdk_path = "//fuchsia/sdk/$host_os"
   fuchsia_toolchain_path = "//fuchsia/toolchain/$host_os"
