@@ -382,6 +382,9 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
     // Places the value from startIndex one space before the element at endIndex.
     void reorder(int startIndex, int endIndex) {
+      if (widget.children.length <= 1) {
+        return;
+      }
       setState(() {
         if (startIndex != endIndex)
           widget.onReorder(startIndex, endIndex);
