@@ -6,7 +6,6 @@
 
 import 'dart:math' as math;
 
-import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 
 import 'text_editing.dart';
