@@ -70,7 +70,11 @@ static void StartupAndShutdownShell(benchmark::State& state,
     // The ui thread could be busy processing tasks after shell created, e.g.,
     // default font manager setup. The measurement of shell shutdown should be
     // considered after those ui tasks have been done.
-    benchmarking::ScopedPauseTiming pause(state, true);
+    //
+    // However, if we're measuring the complete time from startup to shutdown,
+    // this time should still be included.
+    benchmarking::ScopedPauseTiming pause(
+        state, !measure_shutdown || !measure_startup);
     fml::AutoResetWaitableEvent latch;
     fml::TaskRunner::RunNowOrPostTask(thread_host->ui_thread->GetTaskRunner(),
                                       [&latch]() { latch.Signal(); });
