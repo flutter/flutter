@@ -607,8 +607,10 @@ class RawKeyboard {
       assert(mappedKeys != null,
         'Platform key support for ${Platform.operatingSystem} is '
         'producing unsupported modifier combinations.');
-      for (final PhysicalKeyboardKey physicalModifier in mappedKeys) {
-        modifierKeys[physicalModifier] = _allModifiers[physicalModifier];
+      if (mappedKeys != null) {
+        for (final PhysicalKeyboardKey physicalModifier in mappedKeys) {
+          modifierKeys[physicalModifier] = _allModifiers[physicalModifier];
+        }
       }
     }
     _allModifiersExceptFn.keys.forEach(_keysPressed.remove);
