@@ -115,12 +115,12 @@ void main() {
       );
       expect(verifyResponse.json['value'], 'Brightness.light');
 
-      // Change the brightness back to light
+      // Change with a bogus value
       final Response bogusResponse = await vmService.callServiceExtension(
         'ext.flutter.brightnessOverride',
         isolateId: isolate.id,
         args: <String, String>{
-          'value': 'dark',
+          'value': 'dark', // Intentionally invalid value.
         }
       );
       expect(bogusResponse.json['value'], 'Brightness.light');
