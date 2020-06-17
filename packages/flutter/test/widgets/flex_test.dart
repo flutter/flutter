@@ -142,4 +142,13 @@ void main() {
     final String message = tester.takeException().toString();
     expect(message, contains('\nSee also:'));
   });
+
+  testWidgets('Can set and update clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(Flex(direction: Axis.vertical));
+    final RenderFlex renderObject = tester.allRenderObjects.whereType<RenderFlex>().first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    await tester.pumpWidget(Flex(direction: Axis.vertical, clipBehavior: Clip.antiAlias));
+    expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
 }

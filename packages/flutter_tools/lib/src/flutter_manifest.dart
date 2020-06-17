@@ -40,16 +40,16 @@ class FlutterManifest {
   /// Returns null on missing or invalid manifest
   @visibleForTesting
   static FlutterManifest createFromString(String manifest, { @required Logger logger }) {
-    return _createFromYaml(loadYaml(manifest) as YamlMap, logger);
+    return _createFromYaml(manifest != null ? loadYaml(manifest) : null, logger);
   }
 
-  static FlutterManifest _createFromYaml(YamlMap yamlDocument, Logger logger) {
-    final FlutterManifest pubspec = FlutterManifest._(logger);
+  static FlutterManifest _createFromYaml(dynamic yamlDocument, Logger logger) {
     if (yamlDocument != null && !_validate(yamlDocument, logger)) {
       return null;
     }
 
-    final Map<dynamic, dynamic> yamlMap = yamlDocument;
+    final FlutterManifest pubspec = FlutterManifest._(logger);
+    final Map<dynamic, dynamic> yamlMap = yamlDocument as YamlMap;
     if (yamlMap != null) {
       pubspec._descriptor = yamlMap.cast<String, dynamic>();
     } else {
@@ -332,32 +332,36 @@ String buildSchemaPath(FileSystem fileSystem) {
 /// This method should be kept in sync with the schema in
 /// `$FLUTTER_ROOT/packages/flutter_tools/schema/pubspec_yaml.json`,
 /// but avoid introducing dependencies on packages for simple validation.
-bool _validate(YamlMap manifest, Logger logger) {
+bool _validate(dynamic manifest, Logger logger) {
   final List<String> errors = <String>[];
-  for (final MapEntry<dynamic, dynamic> kvp in manifest.entries) {
-    if (kvp.key is! String) {
-      errors.add('Expected YAML key to be a string, but got ${kvp.key}.');
-      continue;
-    }
-    switch (kvp.key as String) {
-      case 'name':
-        if (kvp.value is! String) {
-          errors.add('Expected "${kvp.key}" to be a string, but got ${kvp.value}.');
-        }
-        break;
-      case 'flutter':
-        if (kvp.value == null) {
-          continue;
-        }
-        if (kvp.value is! YamlMap) {
-          errors.add('Expected "${kvp.key}" section to be an object or null, but got ${kvp.value}.');
-        } else {
-          _validateFlutter(kvp.value as YamlMap, errors);
-        }
-        break;
-      default:
+  if (manifest is! YamlMap) {
+    errors.add('Expected YAML map');
+  } else {
+    for (final MapEntry<dynamic, dynamic> kvp in (manifest as YamlMap).entries) {
+      if (kvp.key is! String) {
+        errors.add('Expected YAML key to be a string, but got ${kvp.key}.');
+        continue;
+      }
+      switch (kvp.key as String) {
+        case 'name':
+          if (kvp.value is! String) {
+            errors.add('Expected "${kvp.key}" to be a string, but got ${kvp.value}.');
+          }
+          break;
+        case 'flutter':
+          if (kvp.value == null) {
+            continue;
+          }
+          if (kvp.value is! YamlMap) {
+            errors.add('Expected "${kvp.key}" section to be an object or null, but got ${kvp.value}.');
+          } else {
+            _validateFlutter(kvp.value as YamlMap, errors);
+          }
+          break;
+        default:
         // additionalProperties are allowed.
-        break;
+          break;
+      }
     }
   }
 
