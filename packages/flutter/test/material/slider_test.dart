@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -653,7 +655,7 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
     // Check default theme for enabled widget.
     expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.inactiveTrackColor));
@@ -769,16 +771,8 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
-        ..rrect(color: sliderTheme.activeTrackColor)
-        ..rrect(color: sliderTheme.inactiveTrackColor)
-        ..circle(color: sliderTheme.overlayColor)
-        ..circle(color: sliderTheme.activeTickMarkColor)
-        ..circle(color: sliderTheme.activeTickMarkColor)
-        ..circle(color: sliderTheme.inactiveTickMarkColor)
-        ..circle(color: sliderTheme.inactiveTickMarkColor)
-        ..shadow(color: Colors.black)
-        ..circle(color: sliderTheme.thumbColor)
-        ..path(color: sliderTheme.valueIndicatorColor),
+        ..path(color: sliderTheme.valueIndicatorColor)
+        ..paragraph(),
     );
     await gesture.up();
     // Wait for value indicator animation to finish.
@@ -1037,7 +1031,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester.firstRenderObject(find.byType(Overlay)),
+      tester.renderObject(find.byType(Overlay)),
       paints
         ..path(
           includes: const <Offset>[
@@ -1047,7 +1041,8 @@ void main() {
             Offset(-216.0, -16.0),
           ],
           color: const Color(0xf55f5f5f),
-        ),
+        )
+        ..paragraph(),
     );
 
     await gesture.up();
@@ -1059,7 +1054,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester.firstRenderObject(find.byType(Overlay)),
+      tester.renderObject(find.byType(Overlay)),
       paints
         ..path(
           includes: const <Offset>[
@@ -1069,7 +1064,8 @@ void main() {
             Offset(-216.0, -16.0),
           ],
           color: const Color(0xf55f5f5f),
-        ),
+        )
+        ..paragraph(),
     );
 
     await gesture.up();
@@ -1085,7 +1081,7 @@ void main() {
     gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    expect(tester.firstRenderObject(find.byType(Overlay)),
+    expect(tester.renderObject(find.byType(Overlay)),
       paints
         ..path(
           includes: const <Offset>[
@@ -1095,7 +1091,8 @@ void main() {
             Offset(-216.0, -16.0),
           ],
           color: const Color(0xf55f5f5f),
-        ),
+        )
+        ..paragraph(),
     );
 
     await gesture.up();
@@ -1111,7 +1108,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester.firstRenderObject(find.byType(Overlay)),
+      tester.renderObject(find.byType(Overlay)),
       paints
         ..path(
           includes: const <Offset>[
@@ -1121,7 +1118,8 @@ void main() {
             Offset(-216.0, -16.0),
           ],
           color: const Color(0xf55f5f5f),
-        ),
+        )
+        ..paragraph(),
     );
 
     await gesture.up();
@@ -1347,17 +1345,12 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
-                          actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
-                        ),
-                      ],
+                      flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
+                      actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                      value: '50%',
+                      increasedValue: '55%',
+                      decreasedValue: '45%',
+                      textDirection: TextDirection.ltr,
                     ),
                   ],
                 ),
@@ -1400,7 +1393,12 @@ void main() {
                   flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      id: 5,
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState],
+                      value: '50%',
+                      increasedValue: '55%',
+                      decreasedValue: '45%',
+                      textDirection: TextDirection.ltr,
                     ),
                   ],
                 ),
@@ -1455,17 +1453,60 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          value: '50%',
-                          increasedValue: '60%',
-                          decreasedValue: '40%',
-                          textDirection: TextDirection.ltr,
-                          actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
-                        ),
-                      ],
+                      flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
+                      actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                      value: '50%',
+                      increasedValue: '60%',
+                      decreasedValue: '40%',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    // Disable slider
+    await tester.pumpWidget(MaterialApp(
+      home: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(window),
+          child: const Material(
+            child: Slider(
+              value: 0.5,
+              onChanged: null,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 4,
+                      flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState],
+                      value: '50%',
+                      increasedValue: '60%',
+                      decreasedValue: '40%',
+                      textDirection: TextDirection.ltr,
                     ),
                   ],
                 ),
@@ -1517,17 +1558,12 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          value: '40',
-                          increasedValue: '60',
-                          decreasedValue: '20',
-                          textDirection: TextDirection.ltr,
-                          actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
-                        ),
-                      ],
+                      flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
+                      actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                      value: '40',
+                      increasedValue: '60',
+                      decreasedValue: '20',
+                      textDirection: TextDirection.ltr,
                     ),
                   ],
                 ),
@@ -1868,12 +1904,12 @@ void main() {
       await tester.pumpAndSettle();
 
 
-      final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+      final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
       expect(
         valueIndicatorBox,
         isVisible
-            ? (paints..path(color: theme.valueIndicatorColor))
-            : isNot(paints..path(color: theme.valueIndicatorColor)),
+            ? (paints..path(color: theme.valueIndicatorColor)..paragraph())
+            : isNot(paints..path(color: theme.valueIndicatorColor)..paragraph()),
       );
       await gesture.up();
     }
@@ -1951,6 +1987,7 @@ void main() {
 
   testWidgets('Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
+    const Color fillColor = Color(0xf55f5f5f);
     double value = 0.0;
 
     Widget buildApp({
@@ -1960,43 +1997,43 @@ void main() {
       bool enabled = true,
     }) {
       return MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(
-            child: Navigator(onGenerateRoute: (RouteSettings settings) {
-              return MaterialPageRoute<void>(builder: (BuildContext context) {
-                return Column(
-                  children: <Widget>[
-                    Slider(
-                      key: sliderKey,
-                      min: 0.0,
-                      max: 100.0,
-                      divisions: divisions,
-                      label: '${value.round()}',
-                      value: value,
-                      onChanged: (double newValue) {
-                        value = newValue;
-                      },
-                    ),
-                    RaisedButton(
-                      child: const Text('Next'),
-                      onPressed: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute<void>(
-                            builder: (BuildContext context) {
-                              return RaisedButton(
-                                child: const Text('Inner page'),
-                                onPressed: () => Navigator.of(context).pop(),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                );
-              });
-            }),
+        home: Scaffold(
+          body: Builder(
+            // The builder is used to pass the context from the MaterialApp widget
+            // to the [Navigator]. This context is required in order for the
+            // Navigator to work.
+            builder: (BuildContext context) {
+              return Column(
+                children: <Widget>[
+                  Slider(
+                    key: sliderKey,
+                    min: 0.0,
+                    max: 100.0,
+                    divisions: divisions,
+                    label: '${value.round()}',
+                    value: value,
+                    onChanged: (double newValue) {
+                      value = newValue;
+                    },
+                  ),
+                  RaisedButton(
+                    child: const Text('Next'),
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) {
+                            return RaisedButton(
+                              child: const Text('Inner page'),
+                              onPressed: () { Navigator.of(context).pop(); },
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
           ),
         ),
       );
@@ -2004,10 +2041,7 @@ void main() {
 
     await tester.pumpWidget(buildApp(divisions: 3));
 
-    /// The value indicator is added to the overlay when it is clicked or dragged.
-    /// Because both of these gestures are occurring then it adds same value indicator
-    /// twice into the overlay.
-    final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
+    final RenderObject valueIndicatorBox = tester.renderObject(find.byType(Overlay));
     final Offset topRight = tester.getTopRight(find.byType(Slider)).translate(-24, 0);
     final TestGesture gesture = await tester.startGesture(topRight);
     // Wait for value indicator animation to finish.
@@ -2017,9 +2051,16 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
-        ..rrect(color: const Color(0xff2196f3)) // Active track.
-        ..rrect(color: const Color(0x3d2196f3)), // Inactive track.
+        // Represents the raised button with text, next.
+        ..path(color: Colors.black)
+        ..paragraph()
+        // Represents the Slider.
+        ..path(color: fillColor)
+        ..paragraph()
     );
+
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 2));
 
     await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();
@@ -2028,11 +2069,15 @@ void main() {
     expect(
       valueIndicatorBox,
       isNot(
-          paints
-            ..rrect(color: const Color(0xff2196f3)) // Active track.
-            ..rrect(color: const Color(0x3d2196f3)) // Inactive track.
+        paints
+          ..path(color: fillColor)
+          ..paragraph(),
       ),
     );
+
+    // Represents the RaisedButton with inner Text, inner page.
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 1));
 
     // Don't stop holding the value indicator.
     await gesture.up();

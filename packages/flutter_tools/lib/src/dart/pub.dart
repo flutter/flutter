@@ -328,7 +328,6 @@ class _DefaultPub implements Pub {
     String directory,
     @required io.Stdio stdio,
   }) async {
-    Cache.releaseLockEarly();
     final io.Process process = await _processUtils.start(
       _pubCommand(arguments),
       workingDirectory: directory,

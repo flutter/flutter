@@ -277,6 +277,7 @@ void main() {
         r'--split-debug-info=C:\foo\',
         '--dart-define=foo=a',
         '--dart-define=bar=b',
+        r'--bundle-sksl-path=foo\bar.sksl.json',
         r'--target=lib\main.dart',
       ]
     );
@@ -297,6 +298,7 @@ void main() {
     expect(props.findAllElements('DART_OBFUSCATION').first.text, 'true');
     expect(props.findAllElements('SPLIT_DEBUG_INFO').first.text, r'C:\foo\');
     expect(props.findAllElements('FLUTTER_TARGET').first.text, r'lib\main.dart');
+    expect(props.findAllElements('BUNDLE_SKSL_PATH').first.text, r'foo\bar.sksl.json');
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => mockProcessManager,

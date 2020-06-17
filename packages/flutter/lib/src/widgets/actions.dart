@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/gestures.dart';
@@ -930,7 +932,7 @@ class FocusableActionDetector extends StatefulWidget {
   /// widget.
   ///
   /// The [cursor] defaults to [MouseCursor.defer], deferring the choice of
-  /// cursor to the next region behing it in hit-test order.
+  /// cursor to the next region behind it in hit-test order.
   final MouseCursor mouseCursor;
 
   /// The child widget for this [FocusableActionDetector] widget.

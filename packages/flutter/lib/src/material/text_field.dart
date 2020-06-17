@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(Piinks): Remove ignoring deprecated member use analysis
-// when TextField.canAssertMaterialLocalizations parameter is removed.
-// ignore_for_file: deprecated_member_use_from_same_package
+// @dart = 2.8
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
+import 'package:characters/characters.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -352,7 +351,6 @@ class TextField extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
     this.autofillHints,
-    bool canAssertMaterialLocalizations,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -398,7 +396,6 @@ class TextField extends StatefulWidget {
            selectAll: true,
            paste: true,
          )),
-       canAssertMaterialLocalizations = canAssertMaterialLocalizations ?? true,
        super(key: key);
 
   /// Controls the text being edited.
@@ -728,17 +725,8 @@ class TextField extends StatefulWidget {
   final ScrollController scrollController;
 
   /// {@macro flutter.widgets.editableText.autofillHints}
+  /// {@macro flutter.services.autofill.autofillHints}
   final Iterable<String> autofillHints;
-
-  /// Indicates whether [debugCheckHasMaterialLocalizations] can be called
-  /// during build.
-  @Deprecated(
-    'Set canAssertMaterialLocalizations to `true`. This parameter will be '
-    'removed and was introduced to migrate TextField to assert '
-    'debugCheckHasMaterialLocalizations by default. '
-    'This feature was deprecated after v1.18.0.'
-  )
-  final bool canAssertMaterialLocalizations;
 
   @override
   _TextFieldState createState() => _TextFieldState();
@@ -810,7 +798,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
 
   bool get _isEnabled =>  widget.enabled ?? widget.decoration?.enabled ?? true;
 
-  int get _currentLength => _effectiveController.value.text.runes.length;
+  int get _currentLength => _effectiveController.value.text.characters.length;
 
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -864,7 +852,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
       semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
 
       // Handle length exceeds maxLength
-      if (_effectiveController.value.text.runes.length > widget.maxLength) {
+      if (_effectiveController.value.text.characters.length > widget.maxLength) {
         return effectiveDecoration.copyWith(
           errorText: effectiveDecoration.errorText ?? '',
           counterStyle: effectiveDecoration.errorStyle
@@ -1001,8 +989,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    if (widget.canAssertMaterialLocalizations)
-      assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
     assert(
       !(widget.style != null && widget.style.inherit == false &&

@@ -10,7 +10,6 @@ import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
-import 'dart/sdk.dart';
 import 'globals.dart' as globals;
 
 enum Artifact {
@@ -46,14 +45,11 @@ enum Artifact {
   iosDeploy,
   idevicesyslog,
   idevicescreenshot,
-  ideviceinstaller,
   iproxy,
   /// The root of the Linux desktop sources.
   linuxDesktopPath,
   // The root of the cpp headers for Linux desktop.
   linuxHeaders,
-  // The root of the cpp client code for Linux desktop.
-  linuxCppClientWrapper,
   /// The root of the Windows desktop sources.
   windowsDesktopPath,
   /// The root of the cpp client code for Windows desktop.
@@ -117,8 +113,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'idevicesyslog';
     case Artifact.idevicescreenshot:
       return 'idevicescreenshot';
-    case Artifact.ideviceinstaller:
-      return 'ideviceinstaller';
     case Artifact.iproxy:
       return 'iproxy';
     case Artifact.linuxDesktopPath:
@@ -129,8 +123,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return '';
     case Artifact.windowsCppClientWrapper:
       return 'cpp_client_wrapper';
-    case Artifact.linuxCppClientWrapper:
-      return 'cpp_client_wrapper_glfw';
     case Artifact.skyEnginePath:
       return 'sky_engine';
     case Artifact.flutterMacOSPodspec:
@@ -273,9 +265,6 @@ class CachedArtifacts extends Artifacts {
       case Artifact.iosDeploy:
         final String artifactFileName = _artifactToFileName(artifact);
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName).path;
-      case Artifact.ideviceinstaller:
-        final String artifactFileName = _artifactToFileName(artifact);
-        return _cache.getArtifactDirectory('ideviceinstaller').childFile(artifactFileName).path;
       case Artifact.iproxy:
         final String artifactFileName = _artifactToFileName(artifact);
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
@@ -339,9 +328,9 @@ class CachedArtifacts extends Artifacts {
         final String platformDirName = getNameForTargetPlatform(platform);
         return _fileSystem.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
       case Artifact.engineDartSdkPath:
-        return dartSdkPath;
+        return _dartSdkPath(_fileSystem);
       case Artifact.engineDartBinary:
-        return _fileSystem.path.join(dartSdkPath, 'bin', _artifactToFileName(artifact, platform));
+        return _fileSystem.path.join(_dartSdkPath(_fileSystem), 'bin', _artifactToFileName(artifact, platform));
       case Artifact.platformKernelDill:
         return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
@@ -355,11 +344,11 @@ class CachedArtifacts extends Artifacts {
       case Artifact.webPlatformKernelDill:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
       case Artifact.dart2jsSnapshot:
-        return _fileSystem.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
+        return _fileSystem.path.join(_dartSdkPath(_fileSystem), 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.dartdevcSnapshot:
-        return _fileSystem.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
+        return _fileSystem.path.join(_dartSdkPath(_fileSystem), 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.kernelWorkerSnapshot:
-        return _fileSystem.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
+        return _fileSystem.path.join(_dartSdkPath(_fileSystem), 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.flutterMacOSFramework:
       case Artifact.linuxDesktopPath:
       case Artifact.windowsDesktopPath:
@@ -377,9 +366,6 @@ class CachedArtifacts extends Artifacts {
       case Artifact.windowsCppClientWrapper:
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
         return _fileSystem.path.join(engineArtifactsPath, 'windows-x64', _artifactToFileName(artifact, platform, mode));
-      case Artifact.linuxCppClientWrapper:
-        final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
-        return _fileSystem.path.join(engineArtifactsPath, 'linux-x64', _artifactToFileName(artifact, platform, mode));
       case Artifact.skyEnginePath:
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         return _fileSystem.path.join(dartPackageDirectory.path,  _artifactToFileName(artifact));
@@ -528,22 +514,18 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.dart2jsSnapshot:
         return _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', artifactFileName);
       case Artifact.dartdevcSnapshot:
-        return _fileSystem.path.join(dartSdkPath, 'bin', 'snapshots', artifactFileName);
+        return _fileSystem.path.join(_dartSdkPath(_fileSystem), 'bin', 'snapshots', artifactFileName);
       case Artifact.kernelWorkerSnapshot:
         return _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', artifactFileName);
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
         return _cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName).path;
-      case Artifact.ideviceinstaller:
-        return _cache.getArtifactDirectory('ideviceinstaller').childFile(artifactFileName).path;
       case Artifact.iosDeploy:
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName).path;
       case Artifact.iproxy:
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
       case Artifact.linuxDesktopPath:
       case Artifact.linuxHeaders:
-        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
-      case Artifact.linuxCppClientWrapper:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.windowsDesktopPath:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
@@ -660,4 +642,9 @@ class OverrideArtifacts implements Artifacts {
 
   @override
   bool get isLocalEngine => parent.isLocalEngine;
+}
+
+/// Locate the Dart SDK.
+String _dartSdkPath(FileSystem fileSystem) {
+  return fileSystem.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk');
 }

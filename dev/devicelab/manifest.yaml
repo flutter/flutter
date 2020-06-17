@@ -168,6 +168,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  cubic_bezier_perf_sksl_warmup__timeline_summary:
+    description: >
+      Measures the runtime performance of cubic bezier animations on Android
+      with SkSL shader warm-up.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   backdrop_filter_perf__timeline_summary:
     description: >
       Measures the runtime performance of backdrop filter blurs on Android.
@@ -744,14 +751,12 @@ tasks:
       Measures memory usage after repeated navigation in Gallery.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__back_button_memory:
     description: >
       Measures memory usage after Android app suspend and resume.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__image_cache_memory:
     description: >
@@ -770,7 +775,6 @@ tasks:
       Measures the performance of screen transitions in the new Flutter Gallery on iOS.
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   fast_scroll_large_images__memory:
     description: >

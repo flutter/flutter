@@ -4,7 +4,6 @@
 
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
-import 'package:vm_service/vm_service_io.dart' as vm_service_io;
 
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -44,8 +43,7 @@ class FallbackDiscovery {
     @required Logger logger,
     @required ProtocolDiscovery protocolDiscovery,
     @required Usage flutterUsage,
-    VmServiceConnector vmServiceConnectUri =
-      vm_service_io.vmServiceConnectUri,
+    @required VmServiceConnector vmServiceConnectUri,
     Duration pollingDelay,
   }) : _logger = logger,
        _mDnsObservatoryDiscovery = mDnsObservatoryDiscovery,
@@ -137,7 +135,7 @@ class FallbackDiscovery {
   // Returns `null` if no connection can be made.
   Future<Uri> _attemptServiceConnection({
     @required int assumedDevicePort,
-    @required int  hostVmservicePort,
+    @required int hostVmservicePort,
     @required String packageName,
   }) async {
     int hostPort;

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../base/file_system.dart';
-import '../cache.dart';
 import '../codegen.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
@@ -25,7 +24,6 @@ class GenerateCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
     final FlutterProject flutterProject = FlutterProject.current();
     globals.printError(<String>[
       '"flutter generate" is deprecated, use "dart pub run build_runner" instead. ',

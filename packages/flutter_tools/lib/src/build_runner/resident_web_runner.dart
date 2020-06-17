@@ -23,6 +23,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../dart/language_version.dart';
 import '../dart/pub.dart';
 import '../devfs.dart';
 import '../device.dart';
@@ -112,6 +113,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
   ConnectionResult _connectionResult;
   StreamSubscription<vmservice.Event> _stdOutSub;
   StreamSubscription<vmservice.Event> _stdErrSub;
+  StreamSubscription<vmservice.Event> _extensionEventSub;
   bool _exited = false;
   WipConnection _wipConnection;
   ChromiumLauncher _chromiumLauncher;
@@ -150,6 +152,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
     }
     await _stdOutSub?.cancel();
     await _stdErrSub?.cancel();
+    await _extensionEventSub?.cancel();
     await device.device.stopApp(null);
     try {
       _generatedEntrypointDirectory?.deleteSync(recursive: true);
@@ -579,6 +582,10 @@ class _ResidentWebRunner extends ResidentWebRunner {
       }
 
       final String entrypoint = <String>[
+        determineLanguageVersion(
+          globals.fs.file(mainUri),
+          packageConfig[flutterProject.manifest.appName],
+        ),
         '// Flutter web bootstrap script for $importedEntrypoint.',
         '',
         "import 'dart:ui' as ui;",
@@ -675,6 +682,8 @@ class _ResidentWebRunner extends ResidentWebRunner {
         final String message = utf8.decode(base64.decode(log.bytes));
         globals.printStatus(message, newline: false);
       });
+      _extensionEventSub =
+          _vmService.onExtensionEvent.listen(printStructuredErrorLog);
       try {
         await _vmService.streamListen(vmservice.EventStreams.kStdout);
       } on vmservice.RPCError {
@@ -689,6 +698,12 @@ class _ResidentWebRunner extends ResidentWebRunner {
       }
       try {
         await _vmService.streamListen(vmservice.EventStreams.kIsolate);
+      } on vmservice.RPCError {
+        // It is safe to ignore this error because we expect an error to be
+        // thrown if we're not already subscribed.
+      }
+      try {
+        await _vmService.streamListen(vmservice.EventStreams.kExtension);
       } on vmservice.RPCError {
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're not already subscribed.

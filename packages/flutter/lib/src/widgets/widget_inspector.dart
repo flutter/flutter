@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
@@ -929,8 +931,17 @@ mixin WidgetInspectorService {
     );
 
     errorJson['errorsSinceReload'] = _errorsSinceReload;
-    _errorsSinceReload += 1;
+    if (_errorsSinceReload == 0) {
+      errorJson['renderedErrorText'] = TextTreeRenderer(
+        wrapWidth: FlutterError.wrapWidth,
+        wrapWidthProperties: FlutterError.wrapWidth,
+        maxDescendentsTruncatableNode: 5,
+      ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight();
+    } else {
+      errorJson['renderedErrorText'] = 'Another exception was thrown: ${details.summary}';
+    }
 
+    _errorsSinceReload += 1;
     postEvent('Flutter.Error', errorJson);
   }
 

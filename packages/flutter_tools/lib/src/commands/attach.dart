@@ -12,7 +12,6 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../cache.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
 import '../device.dart';
@@ -63,6 +62,7 @@ class AttachCommand extends FlutterCommand {
     usesFilesystemOptions(hide: !verboseHelp);
     usesFuchsiaOptions(hide: !verboseHelp);
     usesDartDefineOption();
+    usesDeviceUserOption();
     argParser
       ..addOption(
         'debug-port',
@@ -136,6 +136,8 @@ class AttachCommand extends FlutterCommand {
     return stringArg('app-id');
   }
 
+  String get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
+
   @override
   Future<void> validateCommand() async {
     await super.validateCommand();
@@ -159,12 +161,17 @@ class AttachCommand extends FlutterCommand {
       throwToolExit(
         'Either --debugPort or --debugUri can be provided, not both.');
     }
+
+    if (userIdentifier != null) {
+      final Device device = await findTargetDevice();
+      if (device is! AndroidDevice) {
+        throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
+      }
+    }
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
-
     await _validateArguments();
 
     writePidFile(stringArg('pid-file'));
@@ -200,7 +207,9 @@ class AttachCommand extends FlutterCommand {
       ? Daemon(
           stdinCommandStream,
           stdoutCommandResponse,
-          notifyingLogger: NotifyingLogger(verbose: globals.logger.isVerbose),
+          notifyingLogger: (globals.logger is NotifyingLogger)
+            ? globals.logger as NotifyingLogger
+            : NotifyingLogger(verbose: globals.logger.isVerbose),
           logToStdout: true,
         )
       : null;
@@ -356,6 +365,7 @@ class AttachCommand extends FlutterCommand {
       target: stringArg('target'),
       targetModel: TargetModel(stringArg('target-model')),
       buildInfo: getBuildInfo(),
+      userIdentifier: userIdentifier,
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
