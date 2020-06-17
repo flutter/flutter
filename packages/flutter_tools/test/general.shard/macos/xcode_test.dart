@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -21,7 +23,7 @@ import '../../src/context.dart';
 
 void main() {
   ProcessManager processManager;
-  Logger logger;
+  BufferLogger logger;
 
   setUp(() {
     logger = BufferLogger.test();
@@ -113,7 +115,7 @@ void main() {
       when(platform.isMacOS).thenReturn(true);
       const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
       when(processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
-        .thenReturn(ProcessResult(1, 0, xcodePath, ''));
+          .thenReturn(ProcessResult(1, 0, xcodePath, ''));
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
 
       expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
@@ -122,7 +124,7 @@ void main() {
     testWithoutContext('isInstalledAndMeetsVersionCheck is false when no xcode-select', () {
       when(platform.isMacOS).thenReturn(true);
       when(processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
-        .thenReturn(ProcessResult(1, 127, '', 'ERROR'));
+          .thenReturn(ProcessResult(1, 127, '', 'ERROR'));
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
       when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
       when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
@@ -134,7 +136,7 @@ void main() {
       when(platform.isMacOS).thenReturn(true);
       const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
       when(processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
-        .thenReturn(ProcessResult(1, 0, xcodePath, ''));
+          .thenReturn(ProcessResult(1, 0, xcodePath, ''));
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
       when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
       when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
@@ -146,7 +148,7 @@ void main() {
       when(platform.isMacOS).thenReturn(true);
       const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
       when(processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
-        .thenReturn(ProcessResult(1, 0, xcodePath, ''));
+          .thenReturn(ProcessResult(1, 0, xcodePath, ''));
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
       when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
       when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
@@ -203,7 +205,7 @@ void main() {
         Future<ProcessResult>.value(ProcessResult(1, 1, '', 'xcrun: error:')));
 
         expect(() async => await xcode.sdkLocation(SdkType.iPhone),
-          throwsToolExit(message: 'Could not find SDK location'));
+            throwsToolExit(message: 'Could not find SDK location'));
       });
     });
   });
@@ -274,6 +276,73 @@ void main() {
 
         expect(await xcdevice.getAvailableTetheredIOSDevices(), isEmpty);
       });
+    });
+
+    group('observe device events', () {
+      testWithoutContext('Xcode not installed', () async {
+        when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
+
+        expect(xcdevice.observedDeviceEvents(), isNull);
+        expect(logger.traceText, contains("Xcode not found. Run 'flutter doctor' for more information."));
+      });
+
+      testUsingContext('relays events', () async {
+        final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
+        when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+        fakeProcessManager.addCommand(const FakeCommand(
+          command: <String>['xcrun', '--find', 'xcdevice'],
+          stdout: '/path/to/xcdevice',
+        ));
+
+        fakeProcessManager.addCommand(const FakeCommand(
+          command: <String>[
+            'script',
+            '-t',
+            '0',
+            '/dev/null',
+            'xcrun',
+            'xcdevice',
+            'observe',
+            '--both',
+          ], stdout: 'Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418\n'
+            'Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418',
+          stderr: 'Some error',
+        ));
+
+        final Completer<void> attach = Completer<void>();
+        final Completer<void> detach = Completer<void>();
+
+        // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+        // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
+
+        final XCDevice xcdevice = XCDevice(
+          processManager: fakeProcessManager,
+          logger: logger,
+          xcode: mockXcode,
+          platform: null,
+          artifacts: mockArtifacts,
+          cache: mockCache,
+        );
+        xcdevice.observedDeviceEvents().listen((Map<XCDeviceEvent, String> event) {
+          expect(event.length, 1);
+          if (event.containsKey(XCDeviceEvent.attach)) {
+            expect(event[XCDeviceEvent.attach], 'd83d5bc53967baa0ee18626ba87b6254b2ab5418');
+            attach.complete();
+          } else if (event.containsKey(XCDeviceEvent.detach)) {
+            expect(event[XCDeviceEvent.detach], 'd83d5bc53967baa0ee18626ba87b6254b2ab5418');
+            detach.complete();
+          } else {
+            fail('Unexpected event');
+          }
+        });
+        await attach.future;
+        await detach.future;
+        expect(logger.traceText, contains('xcdevice observe error: Some error'));
+      });
+    });
+
+    group('available devices', () {
+      final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
 
       testUsingContext('returns devices', () async {
         when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
@@ -398,10 +467,10 @@ void main() {
         when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
 
         when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
-          .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
+            .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
 
         when(processManager.run(any))
-          .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, '[]', '')));
+            .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, '[]', '')));
         await xcdevice.getAvailableTetheredIOSDevices(timeout: const Duration(seconds: 20));
         verify(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '20'])).called(1);
       });

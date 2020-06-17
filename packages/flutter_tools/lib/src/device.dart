@@ -80,6 +80,7 @@ class DeviceManager {
       platform: globals.platform,
       xcdevice: globals.xcdevice,
       iosWorkflow: globals.iosWorkflow,
+      logger: globals.logger,
     ),
     IOSSimulators(iosSimulatorUtils: globals.iosSimulatorUtils),
     FuchsiaDevices(),
@@ -277,14 +278,18 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   static const Duration _pollingTimeout = Duration(seconds: 30);
 
   final String name;
-  ItemListNotifier<Device> _items;
+
+  @protected
+  @visibleForTesting
+  ItemListNotifier<Device> deviceNotifier;
+
   Timer _timer;
 
   Future<List<Device>> pollingGetDevices({ Duration timeout });
 
-  void startPolling() {
+  Future<void> startPolling() async {
     if (_timer == null) {
-      _items ??= ItemListNotifier<Device>();
+      deviceNotifier ??= ItemListNotifier<Device>();
       _timer = _initTimer();
     }
   }
@@ -293,7 +298,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     return Timer(_pollingInterval, () async {
       try {
         final List<Device> devices = await pollingGetDevices(timeout: _pollingTimeout);
-        _items.updateWithNewList(devices);
+        deviceNotifier.updateWithNewList(devices);
       } on TimeoutException {
         globals.printTrace('Device poll timed out. Will retry.');
       }
@@ -301,7 +306,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     });
   }
 
-  void stopPolling() {
+  Future<void> stopPolling() async {
     _timer?.cancel();
     _timer = null;
   }
@@ -313,23 +318,23 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   @override
   Future<List<Device>> discoverDevices({ Duration timeout }) async {
-    _items = null;
+    deviceNotifier = null;
     return _populateDevices(timeout: timeout);
   }
 
   Future<List<Device>> _populateDevices({ Duration timeout }) async {
-    _items ??= ItemListNotifier<Device>.from(await pollingGetDevices(timeout: timeout));
-    return _items.items;
+    deviceNotifier ??= ItemListNotifier<Device>.from(await pollingGetDevices(timeout: timeout));
+    return deviceNotifier.items;
   }
 
   Stream<Device> get onAdded {
-    _items ??= ItemListNotifier<Device>();
-    return _items.onAdded;
+    deviceNotifier ??= ItemListNotifier<Device>();
+    return deviceNotifier.onAdded;
   }
 
   Stream<Device> get onRemoved {
-    _items ??= ItemListNotifier<Device>();
-    return _items.onRemoved;
+    deviceNotifier ??= ItemListNotifier<Device>();
+    return deviceNotifier.onRemoved;
   }
 
   void dispose() => stopPolling();
