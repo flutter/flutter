@@ -4,6 +4,7 @@
 
 // @dart = 2.8
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -230,6 +231,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
+    this.dividerColor,
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = false,
@@ -319,6 +321,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.animationDuration = kThemeAnimationDuration,
     this.initialOpenPanelValue,
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
+    this.dividerColor,
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = true,
@@ -362,6 +365,12 @@ class ExpansionPanelList extends StatefulWidget {
   /// By default, 16px of space is added to the header vertically (above and below)
   /// during expansion.
   final EdgeInsets expandedHeaderPadding;
+
+  /// Defines Color for the divider when [ExpansionPanel.isExpanded] is false.
+  ///
+  /// If `dividerColor` is null, then [DividerThemeData.color] is used. If that
+  /// is null, then [ThemeData.dividerColor] is used.
+  final Color dividerColor;
 
   @override
   State<StatefulWidget> createState() => _ExpansionPanelListState();
@@ -528,6 +537,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
     return MergeableMaterial(
       hasDividers: true,
+      dividerColor: widget.dividerColor,
       children: items,
     );
   }
