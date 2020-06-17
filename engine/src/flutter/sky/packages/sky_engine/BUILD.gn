@@ -5,24 +5,24 @@
 import("//build/fuchsia/sdk.gni")
 import("//flutter/build/dart/rules.gni")
 import("//flutter/lib/ui/dart_ui.gni")
-import("//third_party/dart/sdk_nnbd/lib/_http/http_sources.gni")
+import("//third_party/dart/sdk/lib/_http/http_sources.gni")
 import(
-    "//third_party/dart/sdk_nnbd/lib/_internal/js_runtime/interceptors_sources.gni")
-import("//third_party/dart/sdk_nnbd/lib/async/async_sources.gni")
-import("//third_party/dart/sdk_nnbd/lib/collection/collection_sources.gni")
-import("//third_party/dart/sdk_nnbd/lib/convert/convert_sources.gni")
-import("//third_party/dart/sdk_nnbd/lib/core/core_sources.gni")
-import("//third_party/dart/sdk_nnbd/lib/developer/developer_sources.gni")
-import("//third_party/dart/sdk_nnbd/lib/ffi/ffi_sources.gni")
-import("//third_party/dart/sdk_nnbd/lib/html/html_sources.gni")
-import("//third_party/dart/sdk_nnbd/lib/internal/internal_sources.gni")
-import("//third_party/dart/sdk_nnbd/lib/io/io_sources.gni")
-import("//third_party/dart/sdk_nnbd/lib/isolate/isolate_sources.gni")
-import("//third_party/dart/sdk_nnbd/lib/js/js_sources.gni")
-import("//third_party/dart/sdk_nnbd/lib/js_util/js_util_sources.gni")
-import("//third_party/dart/sdk_nnbd/lib/math/math_sources.gni")
-import("//third_party/dart/sdk_nnbd/lib/typed_data/typed_data_sources.gni")
-import("//third_party/dart/sdk_nnbd/lib/wasm/wasm_sources.gni")
+    "//third_party/dart/sdk/lib/_internal/js_runtime/interceptors_sources.gni")
+import("//third_party/dart/sdk/lib/async/async_sources.gni")
+import("//third_party/dart/sdk/lib/collection/collection_sources.gni")
+import("//third_party/dart/sdk/lib/convert/convert_sources.gni")
+import("//third_party/dart/sdk/lib/core/core_sources.gni")
+import("//third_party/dart/sdk/lib/developer/developer_sources.gni")
+import("//third_party/dart/sdk/lib/ffi/ffi_sources.gni")
+import("//third_party/dart/sdk/lib/html/html_sources.gni")
+import("//third_party/dart/sdk/lib/internal/internal_sources.gni")
+import("//third_party/dart/sdk/lib/io/io_sources.gni")
+import("//third_party/dart/sdk/lib/isolate/isolate_sources.gni")
+import("//third_party/dart/sdk/lib/js/js_sources.gni")
+import("//third_party/dart/sdk/lib/js_util/js_util_sources.gni")
+import("//third_party/dart/sdk/lib/math/math_sources.gni")
+import("//third_party/dart/sdk/lib/typed_data/typed_data_sources.gni")
+import("//third_party/dart/sdk/lib/wasm/wasm_sources.gni")
 
 if (!is_fuchsia) {
   copy("copy_sky_engine_authors") {
@@ -36,10 +36,10 @@ if (!is_fuchsia) {
   }
 }
 
-dart_sdk_nnbd_lib_path = rebase_path("//third_party/dart/sdk_nnbd/lib")
+dart_sdk_lib_path = rebase_path("//third_party/dart/sdk/lib")
 
 copy("async") {
-  lib_path = rebase_path("async", "", dart_sdk_nnbd_lib_path)
+  lib_path = rebase_path("async", "", dart_sdk_lib_path)
   sources = rebase_path(async_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/async/{{source_file_part}}",
@@ -47,7 +47,7 @@ copy("async") {
 }
 
 copy("collection") {
-  lib_path = rebase_path("collection", "", dart_sdk_nnbd_lib_path)
+  lib_path = rebase_path("collection", "", dart_sdk_lib_path)
   sources = rebase_path(collection_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/collection/{{source_file_part}}",
@@ -55,7 +55,7 @@ copy("collection") {
 }
 
 copy("convert") {
-  lib_path = rebase_path("convert", "", dart_sdk_nnbd_lib_path)
+  lib_path = rebase_path("convert", "", dart_sdk_lib_path)
   sources = rebase_path(convert_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/convert/{{source_file_part}}",
@@ -63,7 +63,7 @@ copy("convert") {
 }
 
 copy("core") {
-  lib_path = rebase_path("core", "", dart_sdk_nnbd_lib_path)
+  lib_path = rebase_path("core", "", dart_sdk_lib_path)
   sources = rebase_path(core_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/core/{{source_file_part}}",
@@ -71,7 +71,7 @@ copy("core") {
 }
 
 copy("developer") {
-  lib_path = rebase_path("developer", "", dart_sdk_nnbd_lib_path)
+  lib_path = rebase_path("developer", "", dart_sdk_lib_path)
   sources = rebase_path(developer_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/developer/{{source_file_part}}",
@@ -79,7 +79,7 @@ copy("developer") {
 }
 
 copy("_http") {
-  lib_path = rebase_path("_http", "", dart_sdk_nnbd_lib_path)
+  lib_path = rebase_path("_http", "", dart_sdk_lib_path)
   sources = rebase_path(http_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/_http/{{source_file_part}}",
@@ -87,7 +87,7 @@ copy("_http") {
 }
 
 copy("_interceptors") {
-  lib_path = rebase_path("_internal/js_runtime", "", dart_sdk_nnbd_lib_path)
+  lib_path = rebase_path("_internal/js_runtime", "", dart_sdk_lib_path)
   sources = rebase_path(interceptors_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/_interceptors/{{source_file_part}}",
@@ -95,7 +95,7 @@ copy("_interceptors") {
 }
 
 copy("internal") {
-  lib_path = rebase_path("internal", "", dart_sdk_nnbd_lib_path)
+  lib_path = rebase_path("internal", "", dart_sdk_lib_path)
   sources = rebase_path(internal_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/internal/{{source_file_part}}",
@@ -103,7 +103,7 @@ copy("internal") {
 }
 
 copy("io") {
-  lib_path = rebase_path("io", "", dart_sdk_nnbd_lib_path)
+  lib_path = rebase_path("io", "", dart_sdk_lib_path)
   sources = rebase_path(io_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/io/{{source_file_part}}",
@@ -111,7 +111,7 @@ copy("io") {
 }
 
 copy("ffi") {
-  lib_path = rebase_path("ffi", "", dart_sdk_nnbd_lib_path)
+  lib_path = rebase_path("ffi", "", dart_sdk_lib_path)
   sources = rebase_path(ffi_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/ffi/{{source_file_part}}",
@@ -119,7 +119,7 @@ copy("ffi") {
 }
 
 copy("html") {
-  lib_path = rebase_path("html", "", dart_sdk_nnbd_lib_path)
+  lib_path = rebase_path("html", "", dart_sdk_lib_path)
   sources = rebase_path(html_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/html/{{source_file_part}}",
@@ -127,7 +127,7 @@ copy("html") {
 }
 
 copy("isolate") {
-  lib_path = rebase_path("isolate", "", dart_sdk_nnbd_lib_path)
+  lib_path = rebase_path("isolate", "", dart_sdk_lib_path)
   sources = rebase_path(isolate_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/isolate/{{source_file_part}}",
@@ -135,7 +135,7 @@ copy("isolate") {
 }
 
 copy("js") {
-  lib_path = rebase_path("js", "", dart_sdk_nnbd_lib_path)
+  lib_path = rebase_path("js", "", dart_sdk_lib_path)
   sources = rebase_path(js_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/js/{{source_file_part}}",
@@ -143,7 +143,7 @@ copy("js") {
 }
 
 copy("js_util") {
-  lib_path = rebase_path("js_util", "", dart_sdk_nnbd_lib_path)
+  lib_path = rebase_path("js_util", "", dart_sdk_lib_path)
   sources = rebase_path(js_util_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/js_util/{{source_file_part}}",
@@ -151,7 +151,7 @@ copy("js_util") {
 }
 
 copy("math") {
-  lib_path = rebase_path("math", "", dart_sdk_nnbd_lib_path)
+  lib_path = rebase_path("math", "", dart_sdk_lib_path)
   sources = rebase_path(math_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/math/{{source_file_part}}",
@@ -159,7 +159,7 @@ copy("math") {
 }
 
 copy("typed_data") {
-  lib_path = rebase_path("typed_data", "", dart_sdk_nnbd_lib_path)
+  lib_path = rebase_path("typed_data", "", dart_sdk_lib_path)
   sources = rebase_path(typed_data_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/typed_data/{{source_file_part}}",
@@ -167,7 +167,7 @@ copy("typed_data") {
 }
 
 copy("wasm") {
-  lib_path = rebase_path("wasm", "", dart_sdk_nnbd_lib_path)
+  lib_path = rebase_path("wasm", "", dart_sdk_lib_path)
   sources = rebase_path(wasm_sdk_sources, "", lib_path)
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/wasm/{{source_file_part}}",
@@ -184,7 +184,7 @@ copy("copy_dart_ui") {
 
 copy("copy_allowed_experiments") {
   sources = [
-    "//third_party/dart/sdk_nnbd/lib/_internal/allowed_experiments.json",
+    "//third_party/dart/sdk/lib/_internal/allowed_experiments.json",
   ]
 
   outputs = [
@@ -233,7 +233,7 @@ dart_pkg("sky_engine") {
     deps += [ ":copy_sky_engine_authors" ]
   }
 
-  service_isolate_dir = "//third_party/dart/sdk_nnbd/lib/_internal/vm/bin/"
+  service_isolate_dir = "//third_party/dart/sdk/lib/_internal/vm/bin/"
   sdk_ext_directory = "$root_gen_dir/sky/bindings"
   sdk_ext_files = [
     "$service_isolate_dir/vmservice_io.dart",
