@@ -10,14 +10,17 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:yaml/yaml.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
+import '../src/pubspec_schema.dart';
 import '../src/context.dart';
 
 void main() {
@@ -109,16 +112,14 @@ void main() {
           ..writeAsStringSync('apackage:file://${dummyPackageDirectory.path}\n');
     });
 
-    // Makes the dummy package pointed to by packagesFile look like a plugin.
-    void configureDummyPackageAsPlugin() {
-      dummyPackageDirectory.parent.childFile('pubspec.yaml')..createSync(recursive: true)..writeAsStringSync('''
+    const String _pluginYaml = '''
   flutter:
     plugin:
       platforms:
         ios:
-          pluginClass: FLESomePlugin
+          pluginClass: SomePlugin
         macos:
-          pluginClass: FLESomePlugin
+          pluginClass: SomePlugin
         windows:
           pluginClass: SomePlugin
         linux:
@@ -129,7 +130,10 @@ void main() {
         android:
           pluginClass: SomePlugin
           package: AndroidPackage
-  ''');
+  ''';
+    // Makes the dummy package pointed to by packagesFile look like a plugin.
+    void configureDummyPackageAsPlugin() {
+      dummyPackageDirectory.parent.childFile('pubspec.yaml')..createSync(recursive: true)..writeAsStringSync(_pluginYaml);
     }
 
     void createNewJavaPlugin1() {
@@ -1297,6 +1301,138 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
+    });
+
+    group('pubspec', () {
+      const String _pubspecWithNoPlatform = '''
+  flutter:
+    plugin:
+      platforms:
+        some_platform:
+          pluginClass: somePluginClass
+  ''';
+
+      Directory projectDir;
+      Directory tempDir;
+      setUp(() {
+        tempDir = globals.fs.systemTempDirectory.createTempSync('plugin_test.');
+        projectDir = tempDir.childDirectory('flutter_project');
+      });
+
+      tearDown(() {
+        tryToDelete(tempDir);
+      });
+
+      void _createPubspecFile(String yamlString) {
+        projectDir.childFile('pubspec.yaml')..createSync(recursive: true)..writeAsStringSync(yamlString);
+      }
+
+      test('get platforms map correctly from a pubspec.yaml', () async {
+        final YamlMap pubspecMap = loadYaml(_pluginYaml) as YamlMap;
+        final YamlMap platformsMap = Plugin.getPlatformsYamlMap(pubspecMap);
+        expect(platformsMap['ios'], isNotNull);
+        expect(platformsMap['ios']['pluginClass'], 'SomePlugin');
+        expect(platformsMap['macos'], isNotNull);
+        expect(platformsMap['macos']['pluginClass'], 'SomePlugin');
+        expect(platformsMap['windows'], isNotNull);
+        expect(platformsMap['windows']['pluginClass'], 'SomePlugin');
+        expect(platformsMap['linux'], isNotNull);
+        expect(platformsMap['linux']['pluginClass'], 'SomePlugin');
+        expect(platformsMap['android'], isNotNull);
+        expect(platformsMap['android']['pluginClass'], 'SomePlugin');
+        expect(platformsMap['android']['package'], 'AndroidPackage');
+        expect(platformsMap['web'], isNotNull);
+        expect(platformsMap['web']['pluginClass'], 'SomePlugin');
+      });
+
+      test('validatePubspecForPlugin works', () async {
+        _createPubspecFile(_pluginYaml);
+        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
+          'ios', 'macos', 'windows', 'linux', 'android', 'web'
+        ], androidIdentifier: 'AndroidPackage');
+      });
+
+      test('start with a "some_platform" and add ios, should remove "some_platform"', () async {
+        _createPubspecFile(_pubspecWithNoPlatform);
+        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['ios'], 'SomePlugin', null);
+        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
+          'ios',
+        ],
+        unexpectedPlatforms: <String>['some_platform']);
+      });
+
+      test('start with a "some_platform" and add android, should remove "some_platform"', () async {
+        _createPubspecFile(_pubspecWithNoPlatform);
+        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['android'], 'SomePlugin', 'identifier');
+        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
+          'android',
+        ],
+        unexpectedPlatforms: <String>['some_platform'],
+        androidIdentifier: 'identifier');
+      });
+
+      test('start with a "some_platform" and add macos, should remove "some_platform"', () async {
+        _createPubspecFile(_pubspecWithNoPlatform);
+        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['macos'], 'SomePlugin', null);
+        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
+          'macos',
+        ],
+        unexpectedPlatforms: <String>['some_platform']);
+      });
+
+      test('start with a "some_platform" and add linux, should remove "some_platform"', () async {
+        _createPubspecFile(_pubspecWithNoPlatform);
+        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['linux'], 'SomePlugin', null);
+        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
+          'linux',
+        ],
+        unexpectedPlatforms: <String>['some_platform']);
+      });
+
+      test('start with a "some_platform" and add windows, should remove "some_platform"', () async {
+        _createPubspecFile(_pubspecWithNoPlatform);
+        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['windows'], 'SomePlugin', null);
+        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
+          'windows',
+        ],
+        unexpectedPlatforms: <String>['some_platform']);
+      });
+
+      test('start with a "some_platform" and add web, should remove "some_platform"', () async {
+        _createPubspecFile(_pubspecWithNoPlatform);
+        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['web'], 'SomePlugin', null);
+        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
+          'web',
+        ],
+        unexpectedPlatforms: <String>['some_platform']);
+      });
+
+      test('start with a "some_platform", add android and ios"', () async {
+        _createPubspecFile(_pubspecWithNoPlatform);
+        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['android', 'ios'], 'SomePlugin', 'identifier');
+        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
+          'ios', 'android'
+        ],
+        unexpectedPlatforms: <String>['some_platform'],
+        androidIdentifier: 'identifier');
+      });
+
+      test('start with a "some_platform" and add android, then add ios"', () async {
+        _createPubspecFile(_pubspecWithNoPlatform);
+        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['android'], 'SomePlugin', 'identifier');
+        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
+          'android',
+        ],
+        unexpectedPlatforms: <String>['some_platform', 'ios'],
+        androidIdentifier: 'identifier');
+        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['ios'], 'SomePlugin', null);
+        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
+          'android', 'ios'
+        ],
+        unexpectedPlatforms: <String>['some_platform'],
+        androidIdentifier: 'identifier');
+      });
+
     });
   });
 }

@@ -6,9 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:analyzer/dart/ast/ast.dart';
-import 'package:archive/archive.dart';
-import 'package:yaml/yaml.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -29,6 +26,7 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/pubspec_schema.dart';
 import '../../src/testbed.dart';
 
 const String frameworkRevision = '12345678';
@@ -254,9 +252,6 @@ void main() {
         'lib/flutter_project.dart',
       ],
       unexpectedPaths: <String>[
-        'example/ios/Runner/AppDelegate.h',
-        'example/ios/Runner/AppDelegate.m',
-        'example/ios/Runner/main.m',
         'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
         'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',]
@@ -388,11 +383,8 @@ void main() {
       unexpectedPaths: <String>[
         'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
-        'example/ios/Runner/AppDelegate.h',
-        'example/ios/Runner/AppDelegate.m',
-        'example/ios/Runner/main.m',
-        'ios/Classes/FlutterProjectPlugin.h',
-        'ios/Classes/FlutterProjectPlugin.m',
+        // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
+        // https://github.com/flutter/flutter/issues/59787
       ]
     );
     return _runFlutterTest(projectDir.childDirectory('example'));
@@ -671,7 +663,10 @@ void main() {
 
     expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('linux').existsSync(), true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'linux', 'FlutterProjectPlugin', null);
+        validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
+      'linux',
+    ], pluginClass: 'FlutterProjectPlugin',
+    unexpectedPlatforms: <String>['some_platform']);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
@@ -719,7 +714,10 @@ void main() {
 
     expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('macos').existsSync(), true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'macos', 'FlutterProjectPlugin', null);
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
+      'macos',
+    ], pluginClass: 'FlutterProjectPlugin',
+    unexpectedPlatforms: <String>['some_platform']);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
@@ -782,7 +780,10 @@ void main() {
 
     expect(projectDir.childDirectory('windows').childFile('plugin.vcxproj').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('windows').existsSync(), true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'windows', 'FlutterProjectPlugin', null);
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
+      'windows'
+    ], pluginClass: 'FlutterProjectPlugin',
+    unexpectedPlatforms: <String>['some_platform']);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -1501,27 +1502,49 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
-    expect(projectDir.childDirectory('ios').existsSync(), false);
+    // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
+    // https://github.com/flutter/flutter/issues/59787
+    expect(projectDir.childDirectory('ios').existsSync(), true);
     expect(projectDir.childDirectory('android').existsSync(), false);
     expect(projectDir.childDirectory('web').existsSync(), false);
     expect(projectDir.childDirectory('linux').existsSync(), false);
     expect(projectDir.childDirectory('windows').existsSync(), false);
     expect(projectDir.childDirectory('macos').existsSync(), false);
-    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), false);
+
+    // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
+    // https://github.com/flutter/flutter/issues/59787
+    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), false);
     expect(projectDir.childDirectory('example').childDirectory('web').existsSync(), false);
     expect(projectDir.childDirectory('example').childDirectory('linux').existsSync(), false);
     expect(projectDir.childDirectory('example').childDirectory('windows').existsSync(), false);
     expect(projectDir.childDirectory('example').childDirectory('macos').existsSync(), false);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'ios', 'FlutterProjectPlugin', null, checkNotExist: true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'android', 'FlutterProjectPlugin', null, checkNotExist: true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'web', 'FlutterProjectPlugin', null, checkNotExist: true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'linux', 'FlutterProjectPlugin', null, checkNotExist: true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'windows', 'FlutterProjectPlugin', null, checkNotExist: true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'macos', 'FlutterProjectPlugin', null, checkNotExist: true);
-
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: <String>[
+      'some_platform'
+    ], pluginClass: 'somePluginClass',
+    unexpectedPlatforms: <String>[ 'ios', 'android', 'web', 'linux', 'windows', 'macos']);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+  });
+
+
+  // TODO(cyanglaz): no-op iOS folder should be removed after 1.20.0 release
+  // https://github.com/flutter/flutter/issues/59787
+  testUsingContext('create an empty plugin contains a no-op ios folder, but no pubspec entry.', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+
+    expect(projectDir.childDirectory('ios').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
+      'some_platform'
+    ], pluginClass: 'somePluginClass',
+    unexpectedPlatforms: <String>['ios']);
   });
 
   testUsingContext('plugin supports ios if requested', () async {
@@ -1536,7 +1559,10 @@ void main() {
 
     expect(projectDir.childDirectory('ios').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'ios', 'FlutterProjectPlugin', null);
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: [
+      'ios',
+    ], pluginClass: 'FlutterProjectPlugin',
+    unexpectedPlatforms: <String>['some_platform']);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
@@ -1553,7 +1579,11 @@ void main() {
 
     expect(projectDir.childDirectory('android').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'android', 'FlutterProjectPlugin', 'com.example.flutter_project');
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
+      'android'
+    ], pluginClass: 'FlutterProjectPlugin',
+    unexpectedPlatforms: <String>['some_platform'],
+    androidIdentifier: 'com.example.flutter_project');
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
@@ -1570,8 +1600,10 @@ void main() {
 
     expect(projectDir.childDirectory('ios').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'ios', 'FlutterProjectPlugin', null);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'some_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
+      'ios',
+    ], pluginClass: 'FlutterProjectPlugin',
+    unexpectedPlatforms: <String>['some_platform']);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
@@ -1588,8 +1620,11 @@ void main() {
 
     expect(projectDir.childDirectory('android').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'android', 'FlutterProjectPlugin', 'com.example.flutter_project');
-    _validatePubspecForPlugin(projectDir.absolute.path, 'some_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
+      'android'
+    ], pluginClass: 'FlutterProjectPlugin',
+    unexpectedPlatforms: <String>['some_platform'],
+    androidIdentifier: 'com.example.flutter_project');
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
@@ -1606,8 +1641,10 @@ void main() {
 
     expect(projectDir.childDirectory('linux').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('linux').existsSync(), true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'linux', 'FlutterProjectPlugin', null);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'some_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
+      'linux'
+    ], pluginClass: 'FlutterProjectPlugin',
+    unexpectedPlatforms: <String>['some_platform']);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
@@ -1624,8 +1661,10 @@ void main() {
 
     expect(projectDir.childDirectory('macos').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('macos').existsSync(), true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'macos', 'FlutterProjectPlugin', null);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'some_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
+      'macos'
+    ], pluginClass: 'FlutterProjectPlugin',
+    unexpectedPlatforms: <String>['some_platform']);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
@@ -1642,8 +1681,10 @@ void main() {
 
     expect(projectDir.childDirectory('windows').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('windows').existsSync(), true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'windows', 'FlutterProjectPlugin', null);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'some_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
+      'windows'
+    ], pluginClass: 'FlutterProjectPlugin',
+    unexpectedPlatforms: <String>['some_platform']);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -1658,17 +1699,20 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=ios', projectDir.path]);
     expect(projectDir.childDirectory('ios').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'ios', 'FlutterProjectPlugin', null);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'some_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
+      'ios',
+    ], pluginClass: 'FlutterProjectPlugin',
+    unexpectedPlatforms: <String>['some_platform']);
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=macos', projectDir.path]);
     expect(projectDir.childDirectory('macos').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('macos').existsSync(), true);
     expect(projectDir.childDirectory('ios').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'ios', 'FlutterProjectPlugin', null);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'macos', 'FlutterProjectPlugin', null);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'some_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
+      'ios', 'macos'
+    ], pluginClass: 'FlutterProjectPlugin',
+    unexpectedPlatforms: <String>['some_platform']);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
@@ -1688,9 +1732,11 @@ void main() {
     expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), true);
     expect(projectDir.childDirectory('ios').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'android', 'FlutterProjectPlugin', 'com.example.flutter_project');
-    _validatePubspecForPlugin(projectDir.absolute.path, 'ios', 'FlutterProjectPlugin', null);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'some_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
+      'ios', 'android'
+    ], pluginClass: 'FlutterProjectPlugin',
+    unexpectedPlatforms: <String>['some_platform'],
+    androidIdentifier: 'com.example.flutter_project');
   });
 
   testUsingContext('create a module with --platforms throws error.', () async {
@@ -1758,36 +1804,6 @@ Future<void> _createAndAnalyzeProject(
 }) async {
   await _createProject(dir, createArgs, expectedPaths, unexpectedPaths: unexpectedPaths);
   await _analyzeProject(dir.path);
-}
-
-YamlMap _getPlatformsInPubspec(String projectDir) {
-  final String pubspecPath = globals.fs.path.join(projectDir, 'pubspec.yaml');
-  final YamlMap pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync()) as YamlMap;
-  if (pubspec == null) {
-      return null;
-  }
-  final YamlMap flutterConfig = pubspec['flutter'] as YamlMap;
-  if (flutterConfig == null) {
-    return null;
-  }
-  final YamlMap pluginConfig = flutterConfig['plugin'] as YamlMap;
-  if (pluginConfig == null) {
-    return null;
-  }
-  return pluginConfig['platforms'] as YamlMap;
-}
-
-void _validatePubspecForPlugin(String projectDir, String platform, String pluginClass, String androidPackage, {bool checkNotExist = false}) {
-    final YamlMap platformsMap = _getPlatformsInPubspec(projectDir);
-    if (checkNotExist) {
-      expect(platformsMap[platform], isNull);
-      return;
-    }
-    expect(platformsMap[platform], isNotNull);
-    expect(platformsMap[platform]['pluginClass'], pluginClass);
-    if (platform == 'android') {
-      expect(platformsMap[platform]['package'], androidPackage);
-    }
 }
 
 Future<void> _ensureFlutterToolsSnapshot() async {

@@ -23,6 +23,7 @@ import '../dart/pub.dart';
 import '../features.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
+import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
@@ -598,7 +599,9 @@ directory. You can also find a detailed instruction on how to add platforms in t
         offline: boolArg('offline'),
       );
     }
-    await _updatePubspec(directory.absolute.path, templateContext, templateContext['pluginClass'] as String, templateContext['androidIdentifier'] as String);
+
+    final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
+    await Plugin.updatePubspecWithPlatforms(directory.absolute.path, platforms, templateContext['pluginClass'] as String, templateContext['androidIdentifier'] as String);
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     final bool generateAndroid = templateContext['android'] == true;
@@ -692,105 +695,6 @@ directory. You can also find a detailed instruction on how to add platforms in t
     }
     return platforms;
   }
-
-  Future<void> _updatePubspec(String projectDir, Map<String, dynamic> templateContext, String pluginClass, String androidIdentifier) async {
-    final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
-    final String pubspecPath = globals.fs.path.join(projectDir, 'pubspec.yaml');
-    final YamlMap pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync()) as YamlMap;
-    final bool isPubspecValid = _validatePubspec(pubspec);
-    if (!isPubspecValid) {
-      throwToolExit('Invalid flutter plugin `pubspec.yaml` file.',
-          exitCode: 2);
-    }
-    try {
-      // The format of the updated pubspec might not be preserved.
-      final List<String> existingPlatforms = _getExistingPlatforms(pubspec);
-      final List<String> platformsToAdd = List<String>.from(platforms);
-      platformsToAdd.removeWhere((String platform) => existingPlatforms.contains(platform));
-      if (platformsToAdd.isEmpty) {
-        return;
-      }
-      final File pubspecFile = globals.fs.file(pubspecPath);
-      final List<String> fileContents = pubspecFile.readAsLinesSync();
-      int index = -1;
-      int fakePlatformIndex = -1;
-      String frontSpaces;
-      for (int i = 0; i < fileContents.length; i ++) {
-        // Find the line of `platforms:`
-        final String line = fileContents[i];
-        if (line.contains('platforms:')) {
-          final String lastLine = fileContents[i-1];
-          if (!lastLine.contains('plugin:')) {
-            continue;
-          }
-          // Find how many spaces are in front of the `platforms`.
-          frontSpaces = line.split('platforms:').first;
-          index = i + 1;
-        }
-        if (line.contains('some_platform:')) {
-            fakePlatformIndex = i;
-        }
-        if (index != -1 && fakePlatformIndex != -1) {
-          break;
-        }
-      }
-      if (fakePlatformIndex != -1) {
-        // If the plugin was generated without specifying a platform,
-        // a some_platform is added to the pubspec.yaml to preserve the pubspec format.
-        // remove the some_platform related section before moving on.
-        fileContents.removeAt(fakePlatformIndex + 1);
-        fileContents.removeAt(fakePlatformIndex);
-      }
-      for (final String platform in platformsToAdd) {
-        fileContents.insert(index, frontSpaces + '  $platform:');
-        index ++;
-        fileContents.insert(index, frontSpaces + '    pluginClass: $pluginClass');
-        index ++;
-        if (platform == 'android') {
-          fileContents.insert(index, frontSpaces + '    package: $androidIdentifier');
-        }
-      }
-      final String writeString = fileContents.join('\n');
-      pubspecFile.writeAsStringSync(writeString);
-    } on FileSystemException catch (e) {
-      globals.printError('Error updating the pubspec.yaml:');
-      throwToolExit(e.message, exitCode: 2);
-    }
-  }
-
-  bool _validatePubspec(YamlMap pubspec) {
-    return _getPlatformsYamlMap(pubspec) != null;
-  }
-
-  List<String> _getExistingPlatforms(YamlMap pubspec) {
-    final YamlMap platformsMap = _getPlatformsYamlMap(pubspec);
-    return platformsMap.keys.cast<String>().toList();
-  }
-
-  YamlMap _getPlatformsYamlMap(YamlMap pubspec) {
-    if (pubspec == null) {
-       return null;
-    }
-    final YamlMap flutterConfig = pubspec['flutter'] as YamlMap;
-    if (flutterConfig == null) {
-      return null;
-    }
-    final YamlMap pluginConfig = flutterConfig['plugin'] as YamlMap;
-    if (pluginConfig == null) {
-      return null;
-    }
-    if (pluginConfig['platforms'] == null) {
-      throwToolExit('''
-      The `platforms` key is not found in the pubspec.yaml.
-      If your plugin still uses the old "plugin" format in the pubspec.yaml,
-      please migrate to the new format with the instruction here:
-      https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
-      ''', exitCode: 2);
-    }
-
-    return pluginConfig['platforms'] as YamlMap;
-  }
-
 
   Map<String, dynamic> _createTemplateContext({
     String organization,

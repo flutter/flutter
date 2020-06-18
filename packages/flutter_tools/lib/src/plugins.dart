@@ -174,6 +174,98 @@ class Plugin {
     );
   }
 
+  static YamlMap getPlatformsYamlMap(YamlMap pubspec) {
+    if (pubspec == null) {
+       return null;
+    }
+    final YamlMap flutterConfig = pubspec['flutter'] as YamlMap;
+    if (flutterConfig == null) {
+      return null;
+    }
+    final YamlMap pluginConfig = flutterConfig['plugin'] as YamlMap;
+    if (pluginConfig == null) {
+      return null;
+    }
+    if (pluginConfig['platforms'] == null) {
+      throwToolExit('Did not find valid `platforms` map in pubspec.yaml', exitCode: 2);
+    }
+
+    return pluginConfig['platforms'] as YamlMap;
+  }
+
+  static Future<void> updatePubspecWithPlatforms(String projectDir, List<String> platforms, String pluginClass, String androidIdentifier) async {
+    final String pubspecPath = globals.fs.path.join(projectDir, 'pubspec.yaml');
+    final YamlMap pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync()) as YamlMap;
+    final List<String> errors = validatePluginYaml(pubspec);
+    if (errors.isNotEmpty) {
+      throwToolExit('Invalid plugin specification: \n${errors.join('\n')}');
+    }
+    try {
+      // The format of the updated pubspec might not be preserved.
+      final List<String> platformsToAdd = List<String>.from(platforms);
+      final YamlMap platformsMap = getPlatformsYamlMap(pubspec);
+      final List<String> existingPlatforms = platformsMap.keys.cast<String>().toList();
+      platformsToAdd.removeWhere((String platform) => existingPlatforms.contains(platform));
+      if (platformsToAdd.isEmpty) {
+        return;
+      }
+      final File pubspecFile = globals.fs.file(pubspecPath);
+      final List<String> fileContents = pubspecFile.readAsLinesSync();
+      int index = -1;
+      int fakePlatformIndex = -1;
+      String frontSpaces;
+      for (int i = 0; i < fileContents.length; i ++) {
+        // Find the line of `platforms:`
+        final String line = fileContents[i];
+        if (line.contains('platforms:')) {
+          final String lastLine = fileContents[i-1];
+          if (!lastLine.contains('plugin:')) {
+            continue;
+          }
+          // Find how many spaces are in front of the `platforms`.
+          frontSpaces = line.split('platforms:').first;
+          index = i + 1;
+        }
+        if (line.contains('some_platform:')) {
+            fakePlatformIndex = i;
+        }
+        if (index != -1 && fakePlatformIndex != -1) {
+          break;
+        }
+      }
+      if (index == -1) {
+        throwToolExit('''
+          The `platforms` key is not found in the pubspec.yaml.
+          If your plugin still uses the old "plugin" format in the pubspec.yaml,
+          please migrate to the new format with the instruction here:
+          https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
+          ''', exitCode: 2);
+        }
+      if (fakePlatformIndex != -1) {
+        // If the plugin was generated without specifying a platform,
+        // a some_platform is added to the pubspec.yaml to preserve the pubspec format.
+        // remove the some_platform related section before moving on.
+        fileContents.removeAt(fakePlatformIndex + 1);
+        fileContents.removeAt(fakePlatformIndex);
+      }
+      for (final String platform in platformsToAdd) {
+        fileContents.insert(index, frontSpaces + '  $platform:');
+        index ++;
+        fileContents.insert(index, frontSpaces + '    pluginClass: $pluginClass');
+        index ++;
+        if (platform == 'android') {
+          fileContents.insert(index, frontSpaces + '    package: $androidIdentifier');
+          index ++;
+        }
+      }
+      final String writeString = fileContents.join('\n');
+      pubspecFile.writeAsStringSync(writeString);
+    } on FileSystemException catch (e) {
+      globals.printError('Error updating the pubspec.yaml:');
+      throwToolExit(e.message, exitCode: 2);
+    }
+  }
+
   static List<String> validatePluginYaml(YamlMap yaml) {
     if (yaml == null) {
       return <String>['Invalid "plugin" specification.'];
