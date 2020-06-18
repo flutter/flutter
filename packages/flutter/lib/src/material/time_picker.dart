@@ -1797,20 +1797,13 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     final ShapeBorder shape = TimePickerTheme.of(context).shape ?? _kDefaultShape;
     final Orientation orientation = media.orientation;
 
-    Color toggleColor;
-    switch (theme.colorScheme.brightness) {
-      case Brightness.light:
-        toggleColor = Colors.grey[700];
-        break;
-      case Brightness.dark:
-        toggleColor = Colors.white;
-        break;
-    }
     final Widget actions = Row(
       children: <Widget>[
         const SizedBox(width: 10.0),
         IconButton(
-          color: toggleColor,
+          color: theme.colorScheme.onSurface.withOpacity(
+            theme.colorScheme.brightness == Brightness.dark ? 1.0 : 0.6,
+          ),
           onPressed: _handleEntryModeToggle,
           icon: Icon(_entryMode == TimePickerEntryMode.dial ? Icons.keyboard : Icons.access_time),
           // TODO(rami-a): Localize these strings.
