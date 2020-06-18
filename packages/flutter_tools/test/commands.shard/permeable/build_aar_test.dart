@@ -26,7 +26,7 @@ void main() {
   Cache.disableLocking();
 
   Future<BuildAarCommand> runCommandIn(String target, { List<String> arguments }) async {
-    final BuildAarCommand command = BuildAarCommand();
+    final BuildAarCommand command = BuildAarCommand(verboseHelp: false);
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>[
       'aar',
@@ -282,7 +282,7 @@ Future<BuildAarCommand> runBuildAarCommand(
   String target, {
   List<String> arguments,
 }) async {
-  final BuildAarCommand command = BuildAarCommand();
+  final BuildAarCommand command = BuildAarCommand(verboseHelp: false);
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'aar',
