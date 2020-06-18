@@ -166,24 +166,11 @@ void GetPersistentIsolateData(Dart_NativeArguments args) {
                                         persistent_isolate_data->GetSize()));
 }
 
-}  // namespace
-
 Dart_Handle ToByteData(const std::vector<uint8_t>& buffer) {
-  Dart_Handle data_handle =
-      Dart_NewTypedData(Dart_TypedData_kByteData, buffer.size());
-  if (Dart_IsError(data_handle))
-    return data_handle;
-
-  Dart_TypedData_Type type;
-  void* data = nullptr;
-  intptr_t num_bytes = 0;
-  FML_CHECK(!Dart_IsError(
-      Dart_TypedDataAcquireData(data_handle, &type, &data, &num_bytes)));
-
-  memcpy(data, buffer.data(), num_bytes);
-  Dart_TypedDataReleaseData(data_handle);
-  return data_handle;
+  return tonic::DartByteData::Create(buffer.data(), buffer.size());
 }
+
+}  // namespace
 
 WindowClient::~WindowClient() {}
 

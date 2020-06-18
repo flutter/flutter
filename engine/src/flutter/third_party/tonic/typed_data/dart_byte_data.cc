@@ -8,10 +8,32 @@
 
 namespace tonic {
 
+namespace {
+
+// For large objects it is more efficient to use an external typed data object
+// with a buffer allocated outside the Dart heap.
+const int kExternalSizeThreshold = 1000;
+
+void FreeFinalizer(void* isolate_callback_data,
+                   Dart_WeakPersistentHandle handle,
+                   void* peer) {
+  free(peer);
+}
+
+}  // anonymous namespace
+
 Dart_Handle DartByteData::Create(const void* data, size_t length) {
-  auto handle = DartByteData{data, length}.dart_handle();
-  // The destructor should release the typed data.
-  return handle;
+  if (length < kExternalSizeThreshold) {
+    auto handle = DartByteData{data, length}.dart_handle();
+    // The destructor should release the typed data.
+    return handle;
+  } else {
+    void* buf = ::malloc(length);
+    TONIC_DCHECK(buf);
+    ::memcpy(buf, data, length);
+    return Dart_NewExternalTypedDataWithFinalizer(
+        Dart_TypedData_kByteData, buf, length, buf, length, FreeFinalizer);
+  }
 }
 
 DartByteData::DartByteData()
