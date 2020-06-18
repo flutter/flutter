@@ -12,7 +12,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'recorder.dart';
-import 'test_data.dart';
 
 /// Creates a grid of mouse regions, then continuously scrolls them up and down.
 ///
@@ -75,7 +74,7 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
               children: List<Widget>.generate(
                 columnsCount,
                 (int columnIndex) => MouseRegion(
-                  onEnter: (_) => {},
+                  onEnter: () {},
                   child: Container(
                     decoration: BoxDecoration(
                       border: _getBorder(columnIndex, rowIndex),
@@ -96,11 +95,11 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
 
 class _Tester {
   static const int scrollFrequency = 60;
-  static const Offset dragStartLocation = const Offset(200, 200);
-  static const Offset dragUpOffset = const Offset(0, 200);
-  static const Offset dragDownOffset = const Offset(0, -200);
-  static const Duration hoverDuration = const Duration(milliseconds: 20);
-  static const Duration dragDuration = const Duration(milliseconds: 200);
+  static const Offset dragStartLocation = Offset(200, 200);
+  static const Offset dragUpOffset = Offset(0, 200);
+  static const Offset dragDownOffset = Offset(0, -200);
+  static const Duration hoverDuration = Duration(milliseconds: 20);
+  static const Duration dragDuration = Duration(milliseconds: 200);
 
   bool _stopped = false;
 
@@ -121,15 +120,15 @@ class _Tester {
 
   Duration currentTime = Duration.zero;
 
-  void _hoverTo(Offset location, Duration duration) async {
+  Future<void> _hoverTo(Offset location, Duration duration) async {
     currentTime += duration;
     await gesture.moveTo(location, timeStamp: currentTime);
     await Future<void>.delayed(Duration.zero);
   }
 
-  void _scroll(Offset start, Offset offset, Duration duration) async {
+  Future<void> _scroll(Offset start, Offset offset, Duration duration) async {
     final int durationMs = duration.inMilliseconds;
-    final Duration fullFrameDuration = Duration(seconds: 1) ~/ scrollFrequency;
+    final Duration fullFrameDuration = const Duration(seconds: 1) ~/ scrollFrequency;
     final int frameDurationMs = fullFrameDuration.inMilliseconds;
 
     final int fullFrames = duration.inMilliseconds ~/ frameDurationMs;
@@ -147,7 +146,7 @@ class _Tester {
       await Future<void>.delayed(Duration.zero);
     }
 
-    if (finalFrameOffset != Duration.zero) {
+    if (finalFrameOffset != Offset.zero) {
       currentTime += finalFrameDuration;
       await gesture.moveBy(finalFrameOffset, timeStamp: currentTime);
       await Future<void>.delayed(Duration.zero);
@@ -157,7 +156,7 @@ class _Tester {
     await Future<void>.delayed(Duration.zero);
   }
 
-  void start() async {
+  Future<void> start() async {
     await Future<void>.delayed(Duration.zero);
     while (!_stopped) {
       await _hoverTo(dragStartLocation, hoverDuration);

@@ -12,10 +12,9 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'recorder.dart';
-import 'test_data.dart';
 
 class _NestedMouseRegion extends StatelessWidget {
-  _NestedMouseRegion({this.nests, this.child});
+  const _NestedMouseRegion({this.nests, this.child});
 
   final int nests;
   final Widget child;
@@ -25,7 +24,7 @@ class _NestedMouseRegion extends StatelessWidget {
     Widget current = child;
     for (int i = 0; i < nests; i++) {
       current = MouseRegion(
-        onEnter: (_) => {},
+        onEnter: (_) {},
         child: child,
       );
     }
@@ -62,7 +61,7 @@ class BenchMouseRegionGridHover extends WidgetRecorder {
     if (!started) {
       started = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) async {
-        tester.startTesting();
+        tester.start();
       });
     }
     super.frameDidDraw();
@@ -111,7 +110,7 @@ class BenchMouseRegionGridHover extends WidgetRecorder {
 }
 
 class _Tester {
-  static const Duration hoverDuration = const Duration(milliseconds: 20);
+  static const Duration hoverDuration = Duration(milliseconds: 20);
 
   bool _stopped = false;
 
@@ -132,13 +131,13 @@ class _Tester {
 
   Duration currentTime = Duration.zero;
 
-  void _hoverTo(Offset location, Duration duration) async {
+  Future<void> _hoverTo(Offset location, Duration duration) async {
     currentTime += duration;
     await gesture.moveTo(location, timeStamp: currentTime);
     await Future<void>.delayed(Duration.zero);
   }
 
-  void startTesting() async {
+  Future<void> start() async {
     await Future<void>.delayed(Duration.zero);
     while (!_stopped) {
       await _hoverTo(const Offset(30, 10), hoverDuration);
