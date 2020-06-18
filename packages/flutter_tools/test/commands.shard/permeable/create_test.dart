@@ -669,6 +669,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=linux', projectDir.path]);
 
     expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('linux').existsSync(), true);
     _validatePubspecForPlugin(projectDir.absolute.path, 'linux', 'FlutterProjectPlugin', null);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
@@ -685,6 +686,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
     expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt').existsSync(), false);
+    expect(projectDir.childDirectory('example').childDirectory('linux').existsSync(), false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
@@ -715,6 +717,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=macos', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('macos').existsSync(), true);
     _validatePubspecForPlugin(projectDir.absolute.path, 'macos', 'FlutterProjectPlugin', null);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -731,6 +734,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), false);
+    expect(projectDir.childDirectory('example').childDirectory('macos').existsSync(), false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
@@ -776,6 +780,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=windows', projectDir.path]);
 
     expect(projectDir.childDirectory('windows').childFile('plugin.vcxproj').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('windows').existsSync(), true);
     _validatePubspecForPlugin(projectDir.absolute.path, 'windows', 'FlutterProjectPlugin', null);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
@@ -792,6 +797,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
     expect(projectDir.childDirectory('windows').childFile('plugin.vcxproj').existsSync(), false);
+    expect(projectDir.childDirectory('example').childDirectory('windows').existsSync(), false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
   });
@@ -1528,6 +1534,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=ios', projectDir.path]);
 
     expect(projectDir.childDirectory('ios').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
     _validatePubspecForPlugin(projectDir.absolute.path, 'ios', 'FlutterProjectPlugin', null);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
@@ -1544,6 +1551,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
 
     expect(projectDir.childDirectory('android').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), true);
     _validatePubspecForPlugin(projectDir.absolute.path, 'android', 'FlutterProjectPlugin', 'com.example.flutter_project');
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
@@ -1560,11 +1568,130 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=ios', projectDir.path]);
 
     expect(projectDir.childDirectory('ios').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
     _validatePubspecForPlugin(projectDir.absolute.path, 'ios', 'FlutterProjectPlugin', null);
-    _validatePubspecForPlugin(projectDir.absolute.path, 'fake_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
+    _validatePubspecForPlugin(projectDir.absolute.path, 'some_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
+
+  testUsingContext('create an empty plugin, then add android', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=android', projectDir.path]);
+
+    expect(projectDir.childDirectory('android').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), true);
+    _validatePubspecForPlugin(projectDir.absolute.path, 'android', 'FlutterProjectPlugin', 'com.example.flutter_project');
+    _validatePubspecForPlugin(projectDir.absolute.path, 'some_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+  });
+
+  testUsingContext('create an empty plugin, then add linux', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=linux', projectDir.path]);
+
+    expect(projectDir.childDirectory('linux').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('linux').existsSync(), true);
+    _validatePubspecForPlugin(projectDir.absolute.path, 'linux', 'FlutterProjectPlugin', null);
+    _validatePubspecForPlugin(projectDir.absolute.path, 'some_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('create an empty plugin, then add macos', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=macos', projectDir.path]);
+
+    expect(projectDir.childDirectory('macos').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('macos').existsSync(), true);
+    _validatePubspecForPlugin(projectDir.absolute.path, 'macos', 'FlutterProjectPlugin', null);
+    _validatePubspecForPlugin(projectDir.absolute.path, 'some_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('create an empty plugin, then add windows', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=windows', projectDir.path]);
+
+    expect(projectDir.childDirectory('windows').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('windows').existsSync(), true);
+    _validatePubspecForPlugin(projectDir.absolute.path, 'windows', 'FlutterProjectPlugin', null);
+    _validatePubspecForPlugin(projectDir.absolute.path, 'some_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('create a plugin with ios, then add macos', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=ios', projectDir.path]);
+    expect(projectDir.childDirectory('ios').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
+    _validatePubspecForPlugin(projectDir.absolute.path, 'ios', 'FlutterProjectPlugin', null);
+    _validatePubspecForPlugin(projectDir.absolute.path, 'some_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=macos', projectDir.path]);
+    expect(projectDir.childDirectory('macos').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('macos').existsSync(), true);
+    expect(projectDir.childDirectory('ios').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
+    _validatePubspecForPlugin(projectDir.absolute.path, 'ios', 'FlutterProjectPlugin', null);
+    _validatePubspecForPlugin(projectDir.absolute.path, 'macos', 'FlutterProjectPlugin', null);
+    _validatePubspecForPlugin(projectDir.absolute.path, 'some_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('create a plugin with ios and android', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=ios,android', projectDir.path]);
+    expect(projectDir.childDirectory('ios').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
+
+    expect(projectDir.childDirectory('android').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), true);
+    expect(projectDir.childDirectory('ios').existsSync(), true);
+    expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
+    _validatePubspecForPlugin(projectDir.absolute.path, 'android', 'FlutterProjectPlugin', 'com.example.flutter_project');
+    _validatePubspecForPlugin(projectDir.absolute.path, 'ios', 'FlutterProjectPlugin', null);
+    _validatePubspecForPlugin(projectDir.absolute.path, 'some_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
+  });
+
 }
 
 Future<void> _createProject(

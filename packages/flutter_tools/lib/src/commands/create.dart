@@ -494,7 +494,6 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
           'windows',
           'linux',
           'macos',
-          'web'
         ],
         allowed: <String>[
           'ios',
@@ -502,7 +501,6 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
           'windows',
           'linux',
           'macos',
-          'web'
         ]);
   }
 
@@ -564,13 +562,12 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     templateContext['description'] = description;
     generatedCount += await _renderTemplate('plugin', directory, templateContext, overwrite: overwrite);
     if (!argResults.wasParsed('platforms')) {
-        globals.printStatus('''
-WARNING: You have generated a new plugin project without
-          specify the `--platforms` flag. An empty plugin project
-          is generated. The `platform:` under `pubspec.yaml` is empty.
-          The project will not compile until you add platforms implementation to the project.
-          To add platforms, run `flutter create -t plugin --platforms <platforms>` in the same
-          directory. ''');
+        globals.printError('''
+You have generated a new plugin project without
+specifying the `--platforms` flag. A plugin project supports no platforms is generated.
+The project will not compile until you add platforms implementation.
+To add platforms, run `flutter create -t plugin --platforms <platforms> .` under the same
+directory. You can also find a detailed instruction on how to add platforms in the `pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.''');
     }
     if (boolArg('pub')) {
       await pub.get(
@@ -718,18 +715,20 @@ WARNING: You have generated a new plugin project without
           frontSpaces = line.split('platforms:').first;
           index = i + 1;
         }
-        if (line.contains('fake_platform:')) {
+        if (line.contains('some_platform:')) {
             fakePlatformIndex = i;
         }
         if (index != -1 && fakePlatformIndex != -1) {
           break;
         }
       }
-      // If the plugin was generated without specifying a platform,
-      // a fake_platform is added to the pubspec.yaml to preserve the pubspec format.
-      // remove the fake_platform related section before moving on.
-      fileContents.removeAt(fakePlatformIndex + 1);
-      fileContents.removeAt(fakePlatformIndex);
+      if (fakePlatformIndex != -1) {
+        // If the plugin was generated without specifying a platform,
+        // a some_platform is added to the pubspec.yaml to preserve the pubspec format.
+        // remove the some_platform related section before moving on.
+        fileContents.removeAt(fakePlatformIndex + 1);
+        fileContents.removeAt(fakePlatformIndex);
+      }
       for (final String platform in platformsToAdd) {
         fileContents.insert(index, frontSpaces + '  $platform:');
         index ++;
@@ -742,6 +741,7 @@ WARNING: You have generated a new plugin project without
       final String writeString = fileContents.join('\n');
       pubspecFile.writeAsStringSync(writeString);
     } on FileSystemException catch (e) {
+      globals.printError('Error updating the pubspec.yaml:');
       throwToolExit(e.message, exitCode: 2);
     }
   }
