@@ -384,7 +384,7 @@ class CreateCommand extends FlutterCommand {
     int generatedFileCount = 0;
     switch (template) {
       case FlutterProjectType.app:
-        generatedFileCount += await generateApp(relativeDir, templateContext, overwrite: overwrite);
+        generatedFileCount += await _generateApp(relativeDir, templateContext, overwrite: overwrite);
         break;
       case FlutterProjectType.module:
         generatedFileCount += await _generateModule(relativeDir, templateContext, overwrite: overwrite);
@@ -616,10 +616,10 @@ WARNING: You have generated a new plugin project without
       generatedCount += await _renderTemplate('driver', testDirectory, templateContext, overwrite: overwrite);
     }
 
-
-    await pub.get(context: PubContext.create, directory: directory.path, offline: boolArg('offline'));
-    await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
-
+    if (boolArg('pub')) {
+      await pub.get(context: PubContext.create, directory: directory.path, offline: boolArg('offline'));
+      await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
+    }
     if (templateContext['android'] == true) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
     }

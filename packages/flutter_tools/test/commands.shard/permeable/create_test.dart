@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:analyzer/dart/ast/ast.dart';
+import 'package:yaml/yaml.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -242,7 +244,7 @@ void main() {
   testUsingContext('detects and recreates a plugin project correctly', () async {
     await projectDir.create(recursive: true);
     await projectDir.absolute.childFile('.metadata').writeAsString('project_type: plugin\n');
-    return _createAndAnalyzeProject(
+    await _createAndAnalyzeProject(
       projectDir,
       <String>[],
       <String>[
@@ -257,66 +259,6 @@ void main() {
         'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
         'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',]
-    );
-  }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      usage: globals.flutterUsage,
-      botDetector: globals.botDetector,
-      platform: globals.platform,
-    ),
-  });
-
-  testUsingContext('detects and recreates a plugin project correctly(ios)', () async {
-    await projectDir.create(recursive: true);
-    await projectDir.absolute.childFile('.metadata').writeAsString('project_type: plugin\n');
-    return _createAndAnalyzeProject(
-      projectDir,
-      <String>[
-        '-i', 'objc', '--platforms', 'ios'
-      ],
-      <String>[
-        'example/ios/Runner/AppDelegate.h',
-        'example/ios/Runner/AppDelegate.m',
-        'example/ios/Runner/main.m',
-        'example/lib/main.dart',
-        'flutter_project.iml',
-        'ios/Classes/FlutterProjectPlugin.h',
-        'ios/Classes/FlutterProjectPlugin.m',
-        'lib/flutter_project.dart',
-      ],
-    );
-  }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      usage: globals.flutterUsage,
-      botDetector: globals.botDetector,
-      platform: globals.platform,
-    ),
-  });
-
-  testUsingContext('detects and recreates a plugin project correctly(android)', () async {
-    await projectDir.create(recursive: true);
-    await projectDir.absolute.childFile('.metadata').writeAsString('project_type: plugin\n');
-    return _createAndAnalyzeProject(
-      projectDir,
-      <String>[
-        '-a', 'java', '--platforms', 'android'
-      ],
-      <String>[
-        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
-        'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
-        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
-        'example/lib/main.dart',
-        'flutter_project.iml',
-        'ios/Classes/FlutterProjectPlugin.h',
-        'ios/Classes/FlutterProjectPlugin.m',
-        'lib/flutter_project.dart',
-      ],
     );
   }, overrides: <Type, Generator>{
     Pub: () => Pub(
@@ -438,17 +380,19 @@ void main() {
       projectDir,
       <String>['--template=plugin', '-i', 'objc', '-a', 'java'],
       <String>[
+        'example/lib/main.dart',
+        'flutter_project.iml',
+        'lib/flutter_project.dart',
+      ],
+      unexpectedPaths: <String>[
         'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
         'example/ios/Runner/AppDelegate.h',
         'example/ios/Runner/AppDelegate.m',
         'example/ios/Runner/main.m',
-        'example/lib/main.dart',
-        'flutter_project.iml',
         'ios/Classes/FlutterProjectPlugin.h',
         'ios/Classes/FlutterProjectPlugin.m',
-        'lib/flutter_project.dart',
-      ],
+      ]
     );
     return _runFlutterTest(projectDir.childDirectory('example'));
   }, overrides: <Type, Generator>{
@@ -491,7 +435,7 @@ void main() {
   testUsingContext('kotlin/swift plugin project', () async {
     return _createProject(
       projectDir,
-      <String>['--no-pub', '--template=plugin', '-a', 'kotlin', '--ios-language', 'swift'],
+      <String>['--no-pub', '--template=plugin', '-a', 'kotlin', '--ios-language', 'swift', '--platforms', 'ios,android'],
       <String>[
         'android/src/main/kotlin/com/example/flutter_project/FlutterProjectPlugin.kt',
         'example/android/app/src/main/kotlin/com/example/flutter_project_example/MainActivity.kt',
@@ -522,6 +466,7 @@ void main() {
         '--org', 'com.bar.foo',
         '-i', 'objc',
         '-a', 'java',
+        '--platforms', 'android',
       ], <String>[
         'android/src/main/java/com/bar/foo/flutter_project/FlutterProjectPlugin.java',
         'example/android/app/src/main/java/com/bar/foo/flutter_project_example/MainActivity.java',
@@ -542,6 +487,7 @@ void main() {
         '--project-name', 'xyz',
         '-i', 'objc',
         '-a', 'java',
+        '--platforms', 'android,ios',
       ], <String>[
         'android/src/main/java/com/example/xyz/XyzPlugin.java',
         'example/android/app/src/main/java/com/example/xyz_example/MainActivity.java',
@@ -556,7 +502,7 @@ void main() {
   testUsingContext('plugin project with invalid custom project name', () async {
     expect(
       () => _createProject(projectDir,
-        <String>['--no-pub', '--template=plugin', '--project-name', 'xyz.xyz'],
+        <String>['--no-pub', '--template=plugin', '--project-name', 'xyz.xyz', '--platforms', 'android,ios',],
         <String>[],
       ),
       throwsToolExit(message: '"xyz.xyz" is not a valid Dart package name.'),
@@ -669,7 +615,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms', 'android', projectDir.path]);
 
     void expectExists(String relPath) {
       expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
@@ -720,9 +666,10 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=linux', projectDir.path]);
 
     expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt').existsSync(), true);
+    _validatePubspecForPlugin(projectDir.absolute.path, 'linux', 'FlutterProjectPlugin', null);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
@@ -765,7 +712,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=macos', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), true);
   }, overrides: <Type, Generator>{
@@ -825,7 +772,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=windows', projectDir.path]);
 
     expect(projectDir.childDirectory('windows').childFile('plugin.vcxproj').existsSync(), true);
   }, overrides: <Type, Generator>{
@@ -1296,6 +1243,7 @@ void main() {
         '--org', 'com.bar.foo',
         '-i', 'objc',
         '-a', 'java',
+        '--platforms', 'ios,android'
       ],
       <String>[],
     );
@@ -1303,7 +1251,7 @@ void main() {
     projectDir.childDirectory('ios').deleteSync(recursive: true);
     await _createProject(
       projectDir,
-      <String>['--no-pub', '--template=plugin', '-i', 'objc', '-a', 'java'],
+      <String>['--no-pub', '--template=plugin', '-i', 'objc', '-a', 'java', '--platforms', 'ios,android'],
       <String>[
         'example/android/app/src/main/java/com/bar/foo/flutter_project_example/MainActivity.java',
         'ios/Classes/FlutterProjectPlugin.h',
@@ -1533,6 +1481,27 @@ void main() {
     HttpClientFactory: () =>
         () => MockHttpClient(404, result: 'not found'),
   });
+
+  testUsingContext('plugin does not support any platform by default', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+
+    expect(projectDir.childDirectory('ios').existsSync(), false);
+    expect(projectDir.childDirectory('android').existsSync(), false);
+    expect(projectDir.childDirectory('web').existsSync(), false);
+    expect(projectDir.childDirectory('linux').existsSync(), false);
+    expect(projectDir.childDirectory('windows').existsSync(), false);
+    expect(projectDir.childDirectory('macos').existsSync(), false);
+
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+  });
 }
 
 Future<void> _createProject(
@@ -1574,6 +1543,32 @@ Future<void> _createAndAnalyzeProject(
 }) async {
   await _createProject(dir, createArgs, expectedPaths, unexpectedPaths: unexpectedPaths);
   await _analyzeProject(dir.path);
+}
+
+YamlMap _getPlatformsInPubspec(String projectDir) {
+  final String pubspecPath = globals.fs.path.join(projectDir, 'pubspec.yaml');
+  final YamlMap pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync()) as YamlMap;
+  if (pubspec == null) {
+      return null;
+  }
+  final YamlMap flutterConfig = pubspec['flutter'] as YamlMap;
+  if (flutterConfig == null) {
+    return null;
+  }
+  final YamlMap pluginConfig = flutterConfig['plugin'] as YamlMap;
+  if (pluginConfig == null) {
+    return null;
+  }
+  return pluginConfig['platforms'] as YamlMap;
+}
+
+void _validatePubspecForPlugin(String projectDir, String platform, String pluginClass, String androidPackage) {
+    final YamlMap platformsMap = _getPlatformsInPubspec(projectDir);
+    expect(platformsMap[platform], isNotNull);
+    expect(platformsMap[platform]['pluginClass'], pluginClass);
+    if (platform == 'android') {
+      expect(platformsMap[platform]['package'], androidPackage);
+    }
 }
 
 Future<void> _ensureFlutterToolsSnapshot() async {
