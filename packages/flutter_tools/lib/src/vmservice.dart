@@ -708,6 +708,30 @@ extension FlutterVmService on vm_service.VmService {
     return 'unknown';
   }
 
+  /// Return the current brightness value for the flutter view running with
+  /// the main isolate [isolateId].
+  ///
+  /// If a non-null value is provided for [brightness], the brightness override
+  /// is updated with this value.
+  Future<Brightness> flutterBrightnessOverride({
+    Brightness brightness,
+    @required String isolateId,
+  }) async {
+    final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw(
+      'ext.flutter.brightnessOverride',
+      isolateId: isolateId,
+      args: brightness != null
+        ? <String, dynamic>{'value': brightness.toString()}
+        : <String, String>{},
+    );
+    if (result != null && result['value'] is String) {
+      return (result['value'] as String) == 'Brightness.light'
+        ? Brightness.light
+        : Brightness.dark;
+    }
+    return null;
+  }
+
   /// Invoke a flutter extension method, if the flutter extension is not
   /// available, returns null.
   Future<Map<String, dynamic>> invokeFlutterExtensionRpcRaw(
@@ -859,4 +883,20 @@ Future<String> sharedSkSlWriter(Device device, Map<String, Object> data, {
   outputFile.writeAsStringSync(json.encode(manifest));
   globals.logger.printStatus('Wrote SkSL data to ${outputFile.path}.');
   return outputFile.path;
+}
+
+/// A brightness enum that matches the values https://github.com/flutter/engine/blob/3a96741247528133c0201ab88500c0c3c036e64e/lib/ui/window.dart#L1328
+/// Describes the contrast of a theme or color palette.
+enum Brightness {
+  /// The color is dark and will require a light text color to achieve readable
+  /// contrast.
+  ///
+  /// For example, the color might be dark grey, requiring white text.
+  dark,
+
+  /// The color is light and will require a dark text color to achieve readable
+  /// contrast.
+  ///
+  /// For example, the color might be bright white, requiring black text.
+  light,
 }
