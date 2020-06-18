@@ -530,9 +530,10 @@ class RenderParagraph extends RenderBox
       // Only constrain the width to the maximum width of the paragraph.
       // Leave height unconstrained, which will overflow if expanded past.
       child.layout(
-        BoxConstraints(
-          maxWidth: constraints.maxWidth,
-        ),
+        // The content will be enlarged by textScaleFactor during painting phase.
+        // We reduce contraint by textScaleFactor so that the content will fit
+        // into the box once it is enlarged.
+        BoxConstraints(maxWidth: constraints.maxWidth) / textScaleFactor,
         parentUsesSize: true,
       );
       double baselineOffset;
