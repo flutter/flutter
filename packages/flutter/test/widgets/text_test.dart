@@ -163,6 +163,68 @@ void main() {
     expect(tester.takeException(), null);
   }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42086
 
+  testWidgets('inline widgets works with textScaleFactor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/59316
+    final UniqueKey key = UniqueKey();
+    double textScaleFactor = 1.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('title')),
+          body: Center(
+            child: Text.rich(
+              TextSpan(
+                children: <InlineSpan>[
+                  WidgetSpan(
+                    child: RichText(
+                      text: const TextSpan(text: 'widget should be truncated'),
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ),
+                ],
+              ),
+              key: key,
+              textDirection: TextDirection.ltr,
+              textScaleFactor: textScaleFactor,
+            ),
+          ),
+        ),
+      ),
+    );
+    RenderBox renderText = tester.renderObject(find.byKey(key));
+    final double singleLineHeight = renderText.size.height;
+    // Now, increases the text scale factor by 5 times.
+    textScaleFactor = textScaleFactor * 5;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('title')),
+          body: Center(
+            child: Text.rich(
+              TextSpan(
+                children: <InlineSpan>[
+                  WidgetSpan(
+                    child: RichText(
+                      text: const TextSpan(text: 'widget should be truncated'),
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ),
+                ],
+              ),
+              key: key,
+              textDirection: TextDirection.ltr,
+              textScaleFactor: textScaleFactor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    renderText = tester.renderObject(find.byKey(key));
+    // The RichText in the widget span should wrap into three lines.
+    expect(renderText.size.height, singleLineHeight * textScaleFactor * 3);
+  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42086
+
   testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
