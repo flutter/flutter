@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
+import 'package:yaml/yaml.dart';
 
 import '../android/android.dart' as android_common;
 import '../android/android_sdk.dart' as android_sdk;
@@ -155,8 +156,7 @@ class CreateCommand extends FlutterCommand {
   // If it has an ios dir and an ios/Flutter dir, it's a legacy app
   // Otherwise, we don't presume to know what type of project it could be, since
   // many of the files could be missing, and we can't really tell definitively.
-  @visibleForTesting
-  FlutterProjectType determineTemplateType(Directory projectDir) {
+  FlutterProjectType _determineTemplateType(Directory projectDir) {
     final File metadataFile = globals.fs.file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));
     final FlutterProjectMetadata projectMetadata = FlutterProjectMetadata(metadataFile, globals.logger);
     if (projectMetadata.projectType != null) {
@@ -240,7 +240,7 @@ class CreateCommand extends FlutterCommand {
       // If the project directory exists and isn't empty, then try to determine the template
       // type from the project directory.
       if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
-        detectedProjectType = determineTemplateType(projectDir);
+        detectedProjectType = _determineTemplateType(projectDir);
         if (detectedProjectType == null && metadataExists) {
           // We can only be definitive that this is the wrong type if the .metadata file
           // exists and contains a type that we don't understand, or doesn't contain a type.
@@ -335,7 +335,7 @@ class CreateCommand extends FlutterCommand {
     }
 
     final bool overwrite = boolArg('overwrite');
-    String error = validateProjectDir(projectDirPath, flutterRoot: flutterRoot, overwrite: overwrite);
+    String error = _validateProjectDir(projectDirPath, flutterRoot: flutterRoot, overwrite: overwrite);
     if (error != null) {
       throwToolExit(error);
     }
@@ -352,7 +352,7 @@ class CreateCommand extends FlutterCommand {
           exitCode: 2);
     }
 
-    final Map<String, dynamic> templateContext = createTemplateContext(
+    final Map<String, dynamic> templateContext = _createTemplateContext(
       organization: organization,
       projectName: projectName,
       projectDescription: stringArg('description'),
@@ -579,6 +579,7 @@ WARNING: You have generated a new plugin project without
         offline: boolArg('offline'),
       );
     }
+    await _updatePubspec(directory.absolute.path, templateContext, templateContext['pluginClass'] as String, templateContext['androidIdentifier'] as String);
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     final bool generateAndroid = templateContext['android'] == true;
@@ -599,11 +600,11 @@ WARNING: You have generated a new plugin project without
     templateContext['pluginProjectName'] = projectName;
     templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
 
-    generatedCount += await _generateApp(project.example.directory, templateContext, overwrite: overwrite);
+    generatedCount += await _generateApp(project.example.directory, templateContext, overwrite: overwrite, pluginExampleApp: true);
     return generatedCount;
   }
 
-  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false}) async {
+  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false, bool pluginExampleApp = false}) async {
     int generatedCount = 0;
     generatedCount += await _renderTemplate('app', directory, templateContext, overwrite: overwrite);
     final FlutterProject project = FlutterProject.fromDirectory(directory);
@@ -618,7 +619,7 @@ WARNING: You have generated a new plugin project without
 
     if (boolArg('pub')) {
       await pub.get(context: PubContext.create, directory: directory.path, offline: boolArg('offline'));
-      await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
+      await project.ensureReadyForPlatformSpecificTooling(checkProjects: pluginExampleApp);
     }
     if (templateContext['android'] == true) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
@@ -665,8 +666,121 @@ WARNING: You have generated a new plugin project without
     return -files.length;
   }
 
-  @visibleForTesting
-  Map<String, dynamic> createTemplateContext({
+  Future<void> _updatePubspec(String projectDir, Map<String, dynamic> templateContext, String pluginClass, String androidIdentifier) async {
+    final List<String> platforms = <String>[];
+    if (templateContext['ios'] as bool) {
+      platforms.add('ios');
+    }
+    if (templateContext['android'] as bool) {
+      platforms.add('android');
+    }
+    if (templateContext['web'] as bool) {
+      platforms.add('web');
+    }
+    if (templateContext['linux'] as bool) {
+      platforms.add('linux');
+    }
+    if (templateContext['windows'] as bool) {
+      platforms.add('windows');
+    }
+    if (templateContext['macos'] as bool) {
+      platforms.add('macos');
+    }
+    final String pubspecPath = globals.fs.path.join(projectDir, 'pubspec.yaml');
+    final YamlMap pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync()) as YamlMap;
+    final bool isPubspecValid = _validatePubspec(pubspec);
+    if (!isPubspecValid) {
+      throwToolExit('Invalid flutter plugin `pubspec.yaml` file.',
+          exitCode: 2);
+    }
+    try {
+      // The format of the updated pubspec might not be preserved.
+      final List<String> existingPlatforms = _getExistingPlatforms(pubspec);
+      final List<String> platformsToAdd = List<String>.from(platforms);
+      platformsToAdd.removeWhere((String platform) => existingPlatforms.contains(platform));
+      if (platformsToAdd.isEmpty) {
+        return;
+      }
+      final File pubspecFile = globals.fs.file(pubspecPath);
+      final List<String> fileContents = pubspecFile.readAsLinesSync();
+      int index = -1;
+      int fakePlatformIndex = -1;
+      String frontSpaces;
+      for (int i = 0; i < fileContents.length; i ++) {
+        // Find the line of `platforms:`
+        final String line = fileContents[i];
+        if (line.contains('platforms:')) {
+          final String lastLine = fileContents[i-1];
+          if (!lastLine.contains('plugin:')) {
+            continue;
+          }
+          // Find how many spaces are in front of the `platforms`.
+          frontSpaces = line.split('platforms:').first;
+          index = i + 1;
+        }
+        if (line.contains('fake_platform:')) {
+            fakePlatformIndex = i;
+        }
+        if (index != -1 && fakePlatformIndex != -1) {
+          break;
+        }
+      }
+      // If the plugin was generated without specifying a platform,
+      // a fake_platform is added to the pubspec.yaml to preserve the pubspec format.
+      // remove the fake_platform related section before moving on.
+      fileContents.removeAt(fakePlatformIndex + 1);
+      fileContents.removeAt(fakePlatformIndex);
+      for (final String platform in platformsToAdd) {
+        fileContents.insert(index, frontSpaces + '  $platform:');
+        index ++;
+        fileContents.insert(index, frontSpaces + '    pluginClass: $pluginClass');
+        index ++;
+        if (platform == 'android') {
+          fileContents.insert(index, frontSpaces + '    package: $androidIdentifier');
+        }
+      }
+      final String writeString = fileContents.join('\n');
+      pubspecFile.writeAsStringSync(writeString);
+    } on FileSystemException catch (e) {
+      throwToolExit(e.message, exitCode: 2);
+    }
+  }
+
+  bool _validatePubspec(YamlMap pubspec) {
+    return _getPlatformsYamlMap(pubspec) != null;
+  }
+
+  List<String> _getExistingPlatforms(YamlMap pubspec) {
+    final YamlMap platformsMap = _getPlatformsYamlMap(pubspec);
+    return platformsMap.keys.cast<String>().toList();
+  }
+
+  YamlMap _getPlatformsYamlMap(YamlMap pubspec) {
+    if (pubspec == null) {
+       return null;
+    }
+    final YamlMap flutterConfig = pubspec['flutter'] as YamlMap;
+    if (flutterConfig == null) {
+      return null;
+    }
+    final YamlMap pluginConfig = flutterConfig['plugin'] as YamlMap;
+    if (pluginConfig == null) {
+      return null;
+    }
+    if (pluginConfig['platforms'] == null) {
+      throwToolExit('''
+      The `platforms` key is not found in the pubspec.yaml.
+      If your plugin still uses the old "plugin" format in the pubspec.yaml,
+      please migrate to the new format with the instruction here:
+      https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
+      ''', exitCode: 2);
+    }
+
+    return pluginConfig['platforms'] as YamlMap;
+  }
+
+
+  Map<String, dynamic> _createTemplateContext({
     String organization,
     String projectName,
     String projectDescription,
@@ -929,8 +1043,7 @@ String _validateProjectName(String projectName) {
 
 /// Return null if the project directory is legal. Return a validation message
 /// if we should disallow the directory name.
-@visibleForTesting
-String validateProjectDir(String dirPath, { String flutterRoot, bool overwrite = false }) {
+String _validateProjectDir(String dirPath, { String flutterRoot, bool overwrite = false }) {
   if (globals.fs.path.isWithin(flutterRoot, dirPath)) {
     return 'Cannot create a project within the Flutter SDK. '
       "Target directory '$dirPath' is within the Flutter SDK at '$flutterRoot'.";
