@@ -2099,10 +2099,10 @@ class _RepositoryFlutterDirectory extends _RepositoryDirectory {
 /// A specialized crawler for "github.com/flutter/engine/lib" directory.
 ///
 /// It includes everything except build tools, test build artifacts, and test code.
-_RelativePathBlacklistRepositoryDirectory _createLibDirectoryRoot(fs.Directory entry, _RepositoryDirectory parent) {
-  return _RelativePathBlacklistRepositoryDirectory(
+_RelativePathDenylistRepositoryDirectory _createLibDirectoryRoot(fs.Directory entry, _RepositoryDirectory parent) {
+  return _RelativePathDenylistRepositoryDirectory(
     rootDir: entry,
-    blacklist: <Pattern>[
+    denylist: <Pattern>[
       'web_ui/lib/assets/ahem.ttf',  // this gitignored file exists only for testing purposes
       RegExp(r'web_ui/build/.*'),  // this is compiler-generated output
       RegExp(r'web_ui/dev/.*'),  // these are build tools; they do not end up in Engine artifacts
@@ -2117,10 +2117,10 @@ _RelativePathBlacklistRepositoryDirectory _createLibDirectoryRoot(fs.Directory e
 ///
 /// It includes everything except the "web_engine_tester" package, which is only
 /// used to test the engine itself and is not shipped as part of the Flutter SDK.
-_RelativePathBlacklistRepositoryDirectory _createWebSdkDirectoryRoot(fs.Directory entry, _RepositoryDirectory parent) {
-  return _RelativePathBlacklistRepositoryDirectory(
+_RelativePathDenylistRepositoryDirectory _createWebSdkDirectoryRoot(fs.Directory entry, _RepositoryDirectory parent) {
+  return _RelativePathDenylistRepositoryDirectory(
     rootDir: entry,
-    blacklist: <Pattern>[
+    denylist: <Pattern>[
       RegExp(r'web_engine_tester/.*'),  // contains test code for the engine itself
     ],
     parent: parent,
@@ -2128,32 +2128,32 @@ _RelativePathBlacklistRepositoryDirectory _createWebSdkDirectoryRoot(fs.Director
   );
 }
 
-/// Walks a [rootDir] recursively, omitting paths that match a [blacklist].
+/// Walks a [rootDir] recursively, omitting paths that match a [denylist].
 ///
-/// The path patterns in the [blacklist] are specified relative to the [rootDir].
-class _RelativePathBlacklistRepositoryDirectory extends _RepositoryDirectory {
-  _RelativePathBlacklistRepositoryDirectory({
+/// The path patterns in the [denylist] are specified relative to the [rootDir].
+class _RelativePathDenylistRepositoryDirectory extends _RepositoryDirectory {
+  _RelativePathDenylistRepositoryDirectory({
     @required this.rootDir,
-    @required this.blacklist,
+    @required this.denylist,
     @required _RepositoryDirectory parent,
     @required fs.Directory io,
   }) : super(parent, io);
 
-  /// The directory, relative to which the paths are [blacklist]ed.
+  /// The directory, relative to which the paths are [denylist]ed.
   final fs.Directory rootDir;
 
-  /// Blacklisted path patterns.
+  /// Blocked path patterns.
   ///
   /// Paths are assumed relative to [rootDir].
-  final List<Pattern> blacklist;
+  final List<Pattern> denylist;
 
   @override
   bool shouldRecurse(fs.IoNode entry) {
     final String relativePath = path.relative(entry.fullName, from: rootDir.fullName);
-    final bool isBlacklisted = blacklist.any(
+    final bool denied = denylist.any(
       (Pattern pattern) => pattern.matchAsPrefix(relativePath) != null,
     );
-    if (isBlacklisted) {
+    if (denied) {
       return false;
     }
     return super.shouldRecurse(entry);
@@ -2161,9 +2161,9 @@ class _RelativePathBlacklistRepositoryDirectory extends _RepositoryDirectory {
 
   @override
   _RepositoryDirectory createSubdirectory(fs.Directory entry) {
-    return _RelativePathBlacklistRepositoryDirectory(
+    return _RelativePathDenylistRepositoryDirectory(
       rootDir: rootDir,
-      blacklist: blacklist,
+      denylist: denylist,
       parent: this,
       io: entry,
     );

@@ -40,7 +40,7 @@ struct SwitchDesc {
 #if FLUTTER_RELEASE
 
 // clang-format off
-static const std::string gDartFlagsWhitelist[] = {
+static const std::string gAllowedDartFlags[] = {
     "--no-causal_async_stacks",
     "--lazy_async_stacks",
 };
@@ -49,7 +49,7 @@ static const std::string gDartFlagsWhitelist[] = {
 #else
 
 // clang-format off
-static const std::string gDartFlagsWhitelist[] = {
+static const std::string gAllowedDartFlags[] = {
     "--enable_mirrors",
     "--enable-service-port-fallback",
     "--lazy_async_stacks",
@@ -148,10 +148,10 @@ const std::string_view FlagForSwitch(Switch swtch) {
   return std::string_view();
 }
 
-static bool IsWhitelistedDartVMFlag(const std::string& flag) {
-  for (uint32_t i = 0; i < fml::size(gDartFlagsWhitelist); ++i) {
-    const std::string& allowed = gDartFlagsWhitelist[i];
-    // Check that the prefix of the flag matches one of the whitelisted flags.
+static bool IsAllowedDartVMFlag(const std::string& flag) {
+  for (uint32_t i = 0; i < fml::size(gAllowedDartFlags); ++i) {
+    const std::string& allowed = gAllowedDartFlags[i];
+    // Check that the prefix of the flag matches one of the allowed flags.
     // We don't need to worry about cases like "--safe --sneaky_dangerous" as
     // the VM will discard these as a single unrecognized flag.
     if (std::equal(allowed.begin(), allowed.end(), flag.begin())) {
@@ -372,8 +372,8 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
 
     // Assume that individual flags are comma separated.
     while (std::getline(stream, flag, ',')) {
-      if (!IsWhitelistedDartVMFlag(flag)) {
-        FML_LOG(FATAL) << "Encountered blacklisted Dart VM flag: " << flag;
+      if (!IsAllowedDartVMFlag(flag)) {
+        FML_LOG(FATAL) << "Encountered disallowed Dart VM flag: " << flag;
       }
       settings.dart_flags.push_back(flag);
     }
