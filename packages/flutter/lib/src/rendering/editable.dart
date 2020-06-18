@@ -572,7 +572,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       if (includeWhitespace) {
         return false;
       }
-      return _isWhitespace(currentString.characters.first.toString().codeUnitAt(0));
+      return _isWhitespace(currentString.codeUnitAt(0));
     });
     return string.length - remaining.toString().length;
   }
