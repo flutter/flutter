@@ -352,7 +352,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     return deviceNotifier.onRemoved;
   }
 
-  void dispose() => stopPolling();
+  Future<void> dispose() async => await stopPolling();
 
   @override
   String toString() => '$name device discovery';

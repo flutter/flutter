@@ -482,6 +482,28 @@ void main() {
       expect(rescheduledStream.hasListener, isFalse);
     });
 
+    testWithoutContext('dispose cancels polling subscription', () async {
+      final IOSDevices iosDevices = IOSDevices(
+        platform: macPlatform,
+        xcdevice: mockXcdevice,
+        iosWorkflow: mockIosWorkflow,
+        logger: logger,
+      );
+      when(mockXcdevice.isInstalled).thenReturn(true);
+      when(mockXcdevice.getAvailableIOSDevices())
+          .thenAnswer((Invocation invocation) => Future<List<IOSDevice>>.value(<IOSDevice>[]));
+
+      final StreamController<Map<XCDeviceEvent, String>> eventStream = StreamController<Map<XCDeviceEvent, String>>();
+      when(mockXcdevice.observedDeviceEvents()).thenAnswer((_) => eventStream.stream);
+
+      await iosDevices.startPolling();
+      expect(iosDevices.deviceNotifier.items, isEmpty);
+      expect(eventStream.hasListener, isTrue);
+
+      await iosDevices.dispose();
+      expect(eventStream.hasListener, isFalse);
+    });
+
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
     for (final Platform unsupportedPlatform in unsupportedPlatforms) {
       testWithoutContext('pollingGetDevices throws Unsupported Operation exception on ${unsupportedPlatform.operatingSystem}', () async {
