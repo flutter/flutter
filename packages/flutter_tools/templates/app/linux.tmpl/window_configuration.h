@@ -11,6 +11,5 @@
 extern const char *kFlutterWindowTitle;
 extern const unsigned int kFlutterWindowWidth;
 extern const unsigned int kFlutterWindowHeight;
-extern const bool kUseHeaderBar;
 
 #endif  // WINDOW_CONFIGURATION_
