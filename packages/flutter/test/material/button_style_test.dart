@@ -50,14 +50,14 @@ void main() {
   testWidgets('ButtonStyle debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     ButtonStyle(
-      textStyle: MaterialStateProperty.all<TextStyle>(const TextStyle(fontSize: 10)),
+      textStyle: MaterialStateProperty.all<TextStyle>(const TextStyle(fontSize: 10.0)),
       backgroundColor: MaterialStateProperty.all<Color>(const Color(0xfffffff1)),
       foregroundColor: MaterialStateProperty.all<Color>(const Color(0xfffffff2)),
       overlayColor: MaterialStateProperty.all<Color>(const Color(0xfffffff3)),
-      elevation: MaterialStateProperty.all<double>(1),
-      padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(1)),
-      minimumSize: MaterialStateProperty.all<Size>(const Size(1, 2)),
-      side: MaterialStateProperty.all<BorderSide>(const BorderSide(width: 4, color: Color(0xfffffff4))),
+      elevation: MaterialStateProperty.all<double>(1.0),
+      padding: MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(1.0)),
+      minimumSize: MaterialStateProperty.all<Size>(const Size(1.0, 2.0)),
+      side: MaterialStateProperty.all<BorderSide>(const BorderSide(width: 4.0, color: Color(0xfffffff4))),
       shape: MaterialStateProperty.all<OutlinedBorder>(const StadiumBorder()),
       mouseCursor: MaterialStateProperty.all<MouseCursor>(SystemMouseCursors.forbidden),
       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -66,9 +66,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
 
     expect(description, <String>[
       'textStyle: MaterialStateProperty.all(TextStyle(inherit: true, size: 10.0))',
