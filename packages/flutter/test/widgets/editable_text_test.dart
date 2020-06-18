@@ -54,7 +54,7 @@ void main() {
   setUp(() async {
     debugResetSemanticsIdCounter();
     controller = TextEditingController();
-    // Fill the clipboard so that the PASTE option is available in the text
+    // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
@@ -1096,7 +1096,7 @@ void main() {
     // Can't show the toolbar when there's no focus.
     expect(state.showToolbar(), false);
     await tester.pumpAndSettle();
-    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
 
     // Can show the toolbar when focused even though there's no text.
     state.renderEditable.selectWordsInRange(
@@ -1106,19 +1106,19 @@ void main() {
     await tester.pump();
     expect(state.showToolbar(), true);
     await tester.pumpAndSettle();
-    expect(find.text('PASTE'), findsOneWidget);
+    expect(find.text('Paste'), findsOneWidget);
 
     // Hide the menu again.
     state.hideToolbar();
     await tester.pump();
-    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
 
     // Can show the menu with text and a selection.
     controller.text = 'blah';
     await tester.pump();
     expect(state.showToolbar(), true);
     await tester.pumpAndSettle();
-    expect(find.text('PASTE'), findsOneWidget);
+    expect(find.text('Paste'), findsOneWidget);
   }, skip: isBrowser);
 
   testWidgets('can show the toolbar after clearing all text', (WidgetTester tester) async {
@@ -1149,7 +1149,7 @@ void main() {
     await tester.pump();
 
     // Clear the text and selection.
-    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
     state.updateEditingValue(const TextEditingValue(
       text: '',
     ));
@@ -1158,7 +1158,7 @@ void main() {
     // Should be able to show the toolbar.
     expect(state.showToolbar(), true);
     await tester.pumpAndSettle();
-    expect(find.text('PASTE'), findsOneWidget);
+    expect(find.text('Paste'), findsOneWidget);
   });
 
   testWidgets('can dynamically disable options in toolbar', (WidgetTester tester) async {
@@ -1190,10 +1190,10 @@ void main() {
     await tester.pump();
     expect(state.showToolbar(), true);
     await tester.pump();
-    expect(find.text('SELECT ALL'), findsOneWidget);
-    expect(find.text('COPY'), findsOneWidget);
-    expect(find.text('PASTE'), findsNothing);
-    expect(find.text('CUT'), findsNothing);
+    expect(find.text('Select all'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
   });
 
   testWidgets('can dynamically disable select all option in toolbar - cupertino', (WidgetTester tester) async {
@@ -1256,10 +1256,10 @@ void main() {
     await tester.pump();
     expect(state.showToolbar(), true);
     await tester.pump();
-    expect(find.text('SELECT ALL'), findsNothing);
-    expect(find.text('COPY'), findsOneWidget);
-    expect(find.text('PASTE'), findsNothing);
-    expect(find.text('CUT'), findsNothing);
+    expect(find.text('Select all'), findsNothing);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
   });
 
   testWidgets('cut and paste are disabled in read only mode even if explicit set', (WidgetTester tester) async {
@@ -1294,10 +1294,10 @@ void main() {
     await tester.pump();
     expect(state.showToolbar(), true);
     await tester.pump();
-    expect(find.text('SELECT ALL'), findsOneWidget);
-    expect(find.text('COPY'), findsOneWidget);
-    expect(find.text('PASTE'), findsNothing);
-    expect(find.text('CUT'), findsNothing);
+    expect(find.text('Select all'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
   });
 
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
@@ -1328,7 +1328,7 @@ void main() {
     tester.state<EditableTextState>(textFinder).showToolbar();
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('PASTE'));
+    await tester.tap(find.text('Paste'));
     await tester.pump();
 
     expect(changedValue, clipboardContent);
