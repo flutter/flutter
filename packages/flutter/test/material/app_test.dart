@@ -506,7 +506,7 @@ void main() {
     );
 
     // Default US "select all" text.
-    expect(find.text('SELECT ALL'), findsOneWidget);
+    expect(find.text('Select all'), findsOneWidget);
     // Default Cupertino US "select all" text.
     expect(find.text('Select All'), findsOneWidget);
   });
