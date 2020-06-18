@@ -184,7 +184,7 @@ void main() {
     expect(lightTheme.disabledColor, equals(Colors.black.withAlpha(0x0c)));
     expect(lightTheme.selectedColor, equals(Colors.black.withAlpha(0x3d)));
     expect(lightTheme.secondarySelectedColor, equals(customColor1.withAlpha(0x3d)));
-    expect(lightTheme.labelPadding, equals(const EdgeInsets.symmetric(horizontal: 8.0)));
+    expect(lightTheme.labelPadding, isNull);
     expect(lightTheme.padding, equals(const EdgeInsets.all(4.0)));
     expect(lightTheme.shape, isA<StadiumBorder>());
     expect(lightTheme.labelStyle.color, equals(Colors.black.withAlpha(0xde)));
@@ -202,7 +202,7 @@ void main() {
     expect(darkTheme.disabledColor, equals(Colors.white.withAlpha(0x0c)));
     expect(darkTheme.selectedColor, equals(Colors.white.withAlpha(0x3d)));
     expect(darkTheme.secondarySelectedColor, equals(customColor1.withAlpha(0x3d)));
-    expect(darkTheme.labelPadding, equals(const EdgeInsets.symmetric(horizontal: 8.0)));
+    expect(darkTheme.labelPadding, isNull);
     expect(darkTheme.padding, equals(const EdgeInsets.all(4.0)));
     expect(darkTheme.shape, isA<StadiumBorder>());
     expect(darkTheme.labelStyle.color, equals(Colors.white.withAlpha(0xde)));
@@ -220,7 +220,7 @@ void main() {
     expect(customTheme.disabledColor, equals(customColor1.withAlpha(0x0c)));
     expect(customTheme.selectedColor, equals(customColor1.withAlpha(0x3d)));
     expect(customTheme.secondarySelectedColor, equals(customColor2.withAlpha(0x3d)));
-    expect(customTheme.labelPadding, equals(const EdgeInsets.symmetric(horizontal: 8.0)));
+    expect(customTheme.labelPadding, isNull);
     expect(customTheme.padding, equals(const EdgeInsets.all(4.0)));
     expect(customTheme.shape, isA<StadiumBorder>());
     expect(customTheme.labelStyle.color, equals(customColor1.withAlpha(0xde)));
@@ -235,6 +235,7 @@ void main() {
       labelStyle: ThemeData.fallback().textTheme.bodyText1.copyWith(color: Colors.black),
     ).copyWith(
       elevation: 1.0,
+      labelPadding: const EdgeInsets.symmetric(horizontal: 8.0),
       pressElevation: 4.0,
       shadowColor: Colors.black,
       selectedShadowColor: Colors.black,
