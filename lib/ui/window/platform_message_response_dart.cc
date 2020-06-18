@@ -8,42 +8,11 @@
 
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/make_copyable.h"
-#include "flutter/lib/ui/window/window.h"
 #include "third_party/tonic/dart_state.h"
 #include "third_party/tonic/logging/dart_invoke.h"
+#include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace flutter {
-
-namespace {
-
-// Avoid copying the contents of messages beyond a certain size.
-const int kMessageCopyThreshold = 1000;
-
-void MessageDataFinalizer(void* isolate_callback_data,
-                          Dart_WeakPersistentHandle handle,
-                          void* peer) {
-  std::vector<uint8_t>* data = reinterpret_cast<std::vector<uint8_t>*>(peer);
-  delete data;
-}
-
-Dart_Handle WrapByteData(std::vector<uint8_t> data) {
-  if (data.size() < kMessageCopyThreshold) {
-    return ToByteData(data);
-  } else {
-    std::vector<uint8_t>* heap_data = new std::vector<uint8_t>(std::move(data));
-    return Dart_NewExternalTypedDataWithFinalizer(
-        Dart_TypedData_kByteData, heap_data->data(), heap_data->size(),
-        heap_data, heap_data->size(), MessageDataFinalizer);
-  }
-}
-
-Dart_Handle WrapByteData(std::unique_ptr<fml::Mapping> mapping) {
-  std::vector<uint8_t> data(mapping->GetSize());
-  memcpy(data.data(), mapping->GetMapping(), mapping->GetSize());
-  return WrapByteData(std::move(data));
-}
-
-}  // anonymous namespace
 
 PlatformMessageResponseDart::PlatformMessageResponseDart(
     tonic::DartPersistentValue callback,
@@ -71,7 +40,8 @@ void PlatformMessageResponseDart::Complete(std::unique_ptr<fml::Mapping> data) {
           return;
         tonic::DartState::Scope scope(dart_state);
 
-        Dart_Handle byte_buffer = WrapByteData(std::move(data));
+        Dart_Handle byte_buffer =
+            tonic::DartByteData::Create(data->GetMapping(), data->GetSize());
         tonic::DartInvoke(callback.Release(), {byte_buffer});
       }));
 }
