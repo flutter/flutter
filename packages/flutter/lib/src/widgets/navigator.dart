@@ -11,7 +11,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-import 'autofill.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'focus_manager.dart';
@@ -572,23 +571,18 @@ class NavigatorObserver {
 
   /// The [Navigator] pushed `route`.
   ///
-  /// {@template flutter.widgets.navigatorObserver.didPush}
   /// The route immediately below that one, and thus the previously active
   /// route, is `previousRoute`.
-  /// {@endtemplate}
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
   /// The [Navigator] popped `route`.
   ///
-  /// {@template flutter.widgets.navigatorObserver.didPop}
   /// The route immediately below that one, and thus the newly active
   /// route, is `previousRoute`.
-  /// {@endtemplate}
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
   /// The [Navigator] removed `route`.
   ///
-  /// {@template flutter.widgets.navigatorObserver.didRemove}
   /// If only one route is being removed, then the route immediately below
   /// that one, if any, is `previousRoute`.
   ///
@@ -596,7 +590,6 @@ class NavigatorObserver {
   /// bottommost route being removed, if any, is `previousRoute`, and this
   /// method will be called once for each removed route, from the topmost route
   /// to the bottommost route.
-  /// {@endtemplate}
   void didRemove(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
   /// The [Navigator] replaced `oldRoute` with `newRoute`.

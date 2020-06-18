@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -161,5 +162,129 @@ void main() {
     expect(outerState.autofillClients, contains(clientState1));
     expect(outerState.autofillClients, contains(clientState3));
     expect(innerState.autofillClients, <EditableTextState>[clientState2]);
+  });
+
+  testWidgets('disposing AutofillGroups', (WidgetTester tester) async {
+    StateSetter setState;
+    const Key group1 = Key('group1');
+    const Key group2 = Key('group2');
+    const Key group3 = Key('group3');
+    const TextField placeholder = TextField(autofillHints: <String>[AutofillHints.name]);
+
+    List<Widget> children = const <Widget> [
+      AutofillGroup(
+        key: group1,
+        onDisposeAction: AutofillContextAction.commit,
+        child: AutofillGroup(child: placeholder),
+      ),
+      AutofillGroup(key: group2, onDisposeAction: AutofillContextAction.cancel, child: placeholder),
+      AutofillGroup(
+        key: group3,
+        onDisposeAction: AutofillContextAction.commit,
+        child: AutofillGroup(child: placeholder),
+      ),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return Column(children: children);
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.testTextInput.log,
+      isNot(contains('TextInput.AutofillContext.commit')),
+    );
+    expect(
+      tester.testTextInput.log,
+      isNot(contains('TextInput.AutofillContext.cancel')),
+    );
+
+    tester.testTextInput.log.clear();
+
+    // Remove the first topmost group group1. Should commit.
+    setState(() {
+      children = const <Widget> [
+        AutofillGroup(key: group2, onDisposeAction: AutofillContextAction.cancel, child: placeholder),
+        AutofillGroup(
+          key: group3,
+          onDisposeAction: AutofillContextAction.commit,
+          child: AutofillGroup(child: placeholder),
+        ),
+      ];
+    });
+
+    await tester.pump();
+
+    expect(
+      tester.testTextInput.log.map((MethodCall call) => call.method),
+      <String>['TextInput.AutofillContext.commit'],
+    );
+
+    tester.testTextInput.log.clear();
+
+    // Remove the topmost group group2. Should cancel.
+    setState(() {
+      children = const <Widget> [
+        AutofillGroup(
+          key: group3,
+          onDisposeAction: AutofillContextAction.commit,
+          child: AutofillGroup(child: placeholder),
+        ),
+      ];
+    });
+
+    await tester.pump();
+
+    expect(
+      tester.testTextInput.log.map((MethodCall call) => call.method),
+      <String>['TextInput.AutofillContext.cancel'],
+    );
+
+    tester.testTextInput.log.clear();
+
+    // Remove the inner group within group3. No action.
+    setState(() {
+      children = const <Widget> [
+        AutofillGroup(
+          key: group3,
+          onDisposeAction: AutofillContextAction.commit,
+          child: placeholder,
+        ),
+      ];
+    });
+
+    await tester.pump();
+
+    expect(
+      tester.testTextInput.log,
+      isNot(contains('TextInput.AutofillContext.commit')),
+    );
+    expect(
+      tester.testTextInput.log,
+      isNot(contains('TextInput.AutofillContext.cancel')),
+    );
+
+    tester.testTextInput.log.clear();
+
+    // Remove the topmosts group group3. Should commit.
+    setState(() {
+      children = const <Widget> [
+      ];
+    });
+
+    await tester.pump();
+
+    expect(
+      tester.testTextInput.log.map((MethodCall call) => call.method),
+      <String>['TextInput.AutofillContext.commit'],
+    );
   });
 }

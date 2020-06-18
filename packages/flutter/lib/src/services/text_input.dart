@@ -1180,7 +1180,6 @@ class TextInput {
     _channel.invokeMethod<void>('TextInput.requestAutofill');
   }
 
-
   void _setEditableSizeAndTransform(Map<String, dynamic> args) {
     _channel.invokeMethod<void>(
       'TextInput.setEditableSizeAndTransform',
@@ -1195,8 +1194,8 @@ class TextInput {
     );
   }
 
-  /// Finishes the current autofill context, potentially saves the user input
-  /// for future use if [shouldSave] is true.
+  /// Finishes the current autofill context, and potentially saves the user
+  /// input for future use if [shouldSave] is true.
   ///
   /// {@template flutter.services.autofill.autofillContext}
   /// An autofill context is a collection of input fields that lives in the
@@ -1208,10 +1207,9 @@ class TextInput {
   /// Currently, there can only be at most one autofill context at any given
   /// time. When any input field in an [AutofillGroup] requests for autofill
   /// (which is done automatically when an autofillable [EditableText] gains
-  /// focus), autofillable input fields in the group that may need saving will be
-  /// added to the existing autofill context, if it's not already in the context.
-  /// When there isn't an existing autofill context, one will be created to hold
-  /// the newly added input fields.
+  /// focus), the current autofill context will merge the content of that
+  /// [AutofillGroup] into itself. When there isn't an existing autofill context,
+  /// one will be created to hold the newly added input fields from the group.
   ///
   /// Once added to an autofill context, an input field will stay in the context
   /// until the context is destroyed. To prevent leaks, call [finishAutofillContext]
@@ -1219,44 +1217,31 @@ class TextInput {
   /// the current autofill context. The platform text input plugin either
   /// encourages or discourages the platform from saving the user input based on
   /// the value of the [shouldSave] parameter. The platform usually shows a
-  /// "Save for autofill?" prompt to ask for confirmation from the user for
-  /// saving the input.
+  /// "Save for autofill?" prompt for user confirmation.
   /// {@endtemplate}
   ///
   /// Typically, this method should be called when the user has finalized their
-  /// input and ready to submit. For example, in a [Form], it's typically done
-  /// immediately before or after its content is submitted. You should make sure
-  /// that any connected [TextInputClient] is disconnected and no input field is
-  /// focused before calling [finishAutofillContext]. This is to ensure the user
-  /// can't interact with the input fields while it's being processed.
+  /// input. For example, in a [Form], it's typically done immediately before or
+  /// after its content is submitted. You should make sure that any connected
+  /// [TextInputClient] is disconnected and no input field is focused before
+  /// calling [finishAutofillContext], to ensure the user can't interact with
+  /// the input fields while it's being processed.
   ///
-  /// In many cases you don't have to call [finishAutofillContext] yourself. The
-  /// [AutofillContextLifecycleAction] widget provides configurable event hooks
-  /// on [Navigator]s and [Form]s that you can call [finishAutofillContext] from.
-  /// By default, it calls [finishAutofillContext] with [shouldSave] equals to
-  /// `true` when a [Form] is saved, or whenever the an opaque [ModalRoute] in
-  /// any [Navigator]s becomes the current route, or is popped/removed from its
-  /// [Navigator]. See [AutofillContextLifecycleAction] for more details.
+  /// The topmost [AutofillGroup]s also have the ability to call
+  /// [finishAutofillContext] automatically when they are getting disposed. The
+  /// exact behavior can be configured using [AutofillGroup.onDisposeAction].
   ///
   /// Calling [finishAutofillContext] may cause the platform to show the "save
-  /// for autofill" UI, which should typically only be shown no more than once
-  /// for every screen. Consider removing premature [finishAutofillContext] calls
-  /// to prevent showing the "Save for autofill?" UI too frequently. However,
-  /// calling [finishAutofillContext] when there's no existing autofill context
-  /// does not do anything.
-  ///
-  /// ## Limitations
-  ///
-  /// Currently there can be at most one autofill context, and
-  /// [finishAutofillContext] either saves/discards everything or nothing at all.
-  /// With more complex navigation schemes, the ability to switch autofill
-  /// contexts is desirable.
+  /// for autofill" dialog and disrupts the user's flow. Ideally the dialog
+  /// should only be shown no more than once for every screen. Consider removing
+  /// premature [finishAutofillContext] calls to prevent showing the "Save for
+  /// autofill?" UI too frequently. However, calling [finishAutofillContext]
+  /// when there's no existing autofill context does not do anything.
   ///
   /// See also:
   ///
-  /// * [AutofillContextLifecycleAction], a widget that provides customizable
-  ///   lifecycle event callbacks on [Navigator]s and [Forms]s, which can be
-  ///   used to call [finishAutofillContext] when appropriate.
+  /// * [AutofillGroup.onDisposeAction], a configurable action that runs when a
+  ///   topmost [AutofillGroup] is getting disposed.
   static void finishAutofillContext({ bool shouldSave = true }) {
     assert(shouldSave != null);
     assert(TextInput._instance._currentConnection == null);

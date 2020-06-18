@@ -810,10 +810,10 @@ mixin AutofillScopeMixin implements AutofillScope {
             || (hints?.contains(AutofillHints.newPassword) ?? false);
         }
 
-        // In a native iOS app, Only password fields that have multi-field
+        // In a native iOS app, only password related fields have multi-field
         // autofill. Remove other fields in the scope if the scope does not
         // contain a password field, as they will be autofilled individually.
-        if (!autofillClients.any(isPassword)) {
+        if (!kIsWeb && !autofillClients.any(isPassword)) {
           inputConfiguration = configuration;
         }
         break;

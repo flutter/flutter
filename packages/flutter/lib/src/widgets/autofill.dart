@@ -9,14 +9,14 @@ export 'package:flutter/services.dart' show AutofillHints;
 
 /// Predefined autofill context clean up actions.
 enum AutofillContextAction {
-  /// Destroy the current autofill context after informing the platform to save
+  /// Destroys the current autofill context after informing the platform to save
   /// the user input from it.
   ///
   /// Corresponds to calling [TextInput.finishAutofillContext] with
   /// `shouldSave == true`.
   commit,
 
-  /// Destroy the current autofill context without saving the user input.
+  /// Destroys the current autofill context without saving the user input.
   ///
   /// Corresponds to calling [TextInput.finishAutofillContext] with
   /// `shouldSave == false`.
@@ -27,6 +27,7 @@ enum AutofillContextAction {
 ///
 /// [AutofillClient]s that share the same closest [AutofillGroup] ancestor must
 /// be built together, and they be will be autofilled together.
+///
 /// {@macro flutter.services.autofill.AutofillScope}
 ///
 /// The [AutofillGroup] widget only knows about [AutofillClient]s registered to
@@ -34,7 +35,21 @@ enum AutofillContextAction {
 /// will not pick up [AutofillClient]s that are not mounted, for example, an
 /// [AutofillClient] within a [Scrollable] that has never been scrolled into the
 /// viewport. To workaround this problem, ensure clients in the same
-/// [AutofillGroup] are built together:
+/// [AutofillGroup] are built together.
+///
+/// The topmost [AutofillGroup] widgets (the ones that are closest to the root
+/// widget) can be used to clean up the current autofill context when the
+/// current autofill context is no longer relevant.
+///
+/// {@macro flutter.services.autofill.autofillContext}
+///
+/// By default, [onDisposeAction] is set to [AutofillContextAction.commit], in
+/// which case when any of the topmost [AutofillGroup]s is being disposed, the
+/// platform will be informed to save the user input from the current autofill
+/// context, then the current autofill context will be destroyed, to free
+/// resources. You can, for example, wrap a route that contains a [Form] full of
+/// autofillable input fields in an [AutofillGroup], so the user input of the
+/// [Form] can be saved for future autofill by the platform.
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
 ///
@@ -125,16 +140,6 @@ enum AutofillContextAction {
 ///  }
 /// ```
 /// {@end-tool}
-///
-/// [AutofillGroup] widgets can be nested. When a topmost [AutofillGroup] (i.e.,
-/// the ones that are closest to the root widget) is disposed, its
-/// [onDisposeAction] will be run. By default, [onDisposeAction] is set to
-/// [AutofillContextAction.commit], to make sure when the [AutofillGroup] is
-/// disposed, the current autofill context is properly destroyed and its
-/// resources are freed, after the platform is given a chance to save the user
-/// input contained in the autofill context.
-///
-/// {@macro flutter.services.autofill.autofillContext}
 ///
 /// See also:
 ///
