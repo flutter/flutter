@@ -1,4 +1,0 @@
-glider@chromium.org
-earthdok@chromium.org
-per-file tsan_suppressions.cc=*
-per-file lsan_suppressions.cc=*

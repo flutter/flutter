@@ -19,7 +19,3 @@ source_set("cpu_features") {
   configs -= [ "//build/config/compiler:chromium_code" ]
   configs += [ "//build/config/compiler:no_chromium_code" ]
 }
-
-android_java_prebuilt("uiautomator_java") {
-  jar_path = "$android_sdk/uiautomator.jar"
-}

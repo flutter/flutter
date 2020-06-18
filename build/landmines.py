@@ -33,11 +33,11 @@ def get_build_dir(build_tool, is_iphone=False):
   """
   Returns output directory absolute path dependent on build and targets.
   Examples:
-    r'c:\b\build\slave\win\build\src\out'
-    '/mnt/data/b/build/slave/linux/build/src/out'
-    '/b/build/slave/ios_rel_device/build/src/xcodebuild'
+    r'c:\b\build\win\build\src\out'
+    '/mnt/data/b/build/linux/build/src/out'
+    '/b/build/ios_rel_device/build/src/xcodebuild'
 
-  Keep this function in sync with tools/build/scripts/slave/compile.py
+  Keep this function in sync with tools/build/scripts/compile.py
   """
   ret = None
   if build_tool == 'xcode':

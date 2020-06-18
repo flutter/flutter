@@ -1,6 +1,0 @@
-This is a file that needs to live here until http://crbug.com/158155 has
-been fixed.
-
-The ant build system requires that a src folder is always present, and for
-some of our targets that is not the case. Giving it an empty src-folder works
-nicely though.
