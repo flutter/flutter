@@ -6,7 +6,7 @@ homepage:
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
-  flutter: ">=1.10.0"
+  flutter: ">=1.20.0-1.0.pre.94"
 
 dependencies:
   flutter:
@@ -27,11 +27,24 @@ flutter:
   # adding or updating assets for this project.
   plugin:
     platforms:
+{{#no_platforms}}
+    # This plugin doesn't support any platform, remove the below `fake_platform` map
+    # and add platforms. Instructions on how to add platforms can be found at
+    # https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
+    # -------------------
+      fake_platform:
+        pluginClass: somePluginClass
+    # -------------------
+{{/no_platforms}}
+{{#android}}
       android:
         package: {{androidIdentifier}}
         pluginClass: {{pluginClass}}
+{{/android}}
+{{#ios}}
       ios:
         pluginClass: {{pluginClass}}
+{{/ios}}
 {{#linux}}
       linux:
         pluginClass: {{pluginClass}}

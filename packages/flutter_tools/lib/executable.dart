@@ -16,7 +16,6 @@ import 'src/build_runner/mustache_template.dart';
 import 'src/build_runner/resident_web_runner.dart';
 import 'src/build_runner/web_compilation_delegate.dart';
 import 'src/codegen.dart';
-import 'src/commands/add_platform.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
@@ -71,7 +70,6 @@ Future<void> main(List<String> args) async {
     (args.contains('--machine') && args.contains('attach'));
 
   await runner.run(args, () => <FlutterCommand>[
-    AddPlatformCommand(),
     AnalyzeCommand(
       verboseHelp: verboseHelp,
       fileSystem: globals.fs,

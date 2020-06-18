@@ -244,15 +244,73 @@ void main() {
     await projectDir.absolute.childFile('.metadata').writeAsString('project_type: plugin\n');
     return _createAndAnalyzeProject(
       projectDir,
+      <String>[],
       <String>[
-        '-i', 'objc', '-a', 'java',
+        'example/lib/main.dart',
+        'flutter_project.iml',
+        'lib/flutter_project.dart',
       ],
-      <String>[
-        'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
-        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
+      unexpectedPaths: <String>[
         'example/ios/Runner/AppDelegate.h',
         'example/ios/Runner/AppDelegate.m',
         'example/ios/Runner/main.m',
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',]
+    );
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
+  });
+
+  testUsingContext('detects and recreates a plugin project correctly(ios)', () async {
+    await projectDir.create(recursive: true);
+    await projectDir.absolute.childFile('.metadata').writeAsString('project_type: plugin\n');
+    return _createAndAnalyzeProject(
+      projectDir,
+      <String>[
+        '-i', 'objc', '--platforms', 'ios'
+      ],
+      <String>[
+        'example/ios/Runner/AppDelegate.h',
+        'example/ios/Runner/AppDelegate.m',
+        'example/ios/Runner/main.m',
+        'example/lib/main.dart',
+        'flutter_project.iml',
+        'ios/Classes/FlutterProjectPlugin.h',
+        'ios/Classes/FlutterProjectPlugin.m',
+        'lib/flutter_project.dart',
+      ],
+    );
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+    ),
+  });
+
+  testUsingContext('detects and recreates a plugin project correctly(android)', () async {
+    await projectDir.create(recursive: true);
+    await projectDir.absolute.childFile('.metadata').writeAsString('project_type: plugin\n');
+    return _createAndAnalyzeProject(
+      projectDir,
+      <String>[
+        '-a', 'java', '--platforms', 'android'
+      ],
+      <String>[
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
         'example/lib/main.dart',
         'flutter_project.iml',
         'ios/Classes/FlutterProjectPlugin.h',

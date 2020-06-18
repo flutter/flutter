@@ -29,7 +29,7 @@ import '../template.dart';
 
 class CreateCommand extends FlutterCommand {
   CreateCommand() {
-    addPlatformsOptions();
+    _addPlatformsOptions();
     argParser.addFlag('pub',
       defaultsTo: true,
       help: 'Whether to run "flutter pub get" after the project has been created.',
@@ -346,7 +346,7 @@ class CreateCommand extends FlutterCommand {
       throwToolExit(error);
     }
 
-    final List<String> platforms = stringsArg('platform');
+    final List<String> platforms = stringsArg('platforms');
     if (platforms == null || platforms.isEmpty) {
       throwToolExit('Must specify at least one platform using --platforms',
           exitCode: 2);
@@ -361,6 +361,8 @@ class CreateCommand extends FlutterCommand {
       withPluginHook: willGeneratePlugin,
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
+      ios: platforms.contains('ios'),
+      android: platforms.contains('android'),
       web: featureFlags.isWebEnabled && platforms.contains('web'),
       linux: featureFlags.isLinuxEnabled && platforms.contains('linux'),
       macos: featureFlags.isMacOSEnabled && platforms.contains('macos'),
@@ -391,7 +393,7 @@ class CreateCommand extends FlutterCommand {
         generatedFileCount += await _generatePackage(relativeDir, templateContext, overwrite: overwrite);
         break;
       case FlutterProjectType.plugin:
-        generatedFileCount += await generatePlugin(relativeDir, templateContext, overwrite: overwrite);
+        generatedFileCount += await _generatePlugin(relativeDir, templateContext, overwrite: overwrite);
         break;
     }
     if (sampleCode != null) {
@@ -438,7 +440,7 @@ Your $application code is in $relativeAppMain.
           globals.printStatus('''
 Your plugin code is in $relativePluginMain.
 
-Host platform code is in the "android" and "ios" directories under $relativePluginPath.
+Host platform code is in the platform directories under $relativePluginPath.
 To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
 ''');
         }
@@ -483,10 +485,9 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
   /// The result can be used in generate methods such as [generateApp] and [generatePlugin].
   ///
   /// Adding argument is optional if the command does not require the user to explicitly state what platforms the project supports.
-  @visibleForTesting
-  void addPlatformsOptions() {
-    argParser.addMultiOption('platform',
-        help: 'the platforms supported by this plugin.',
+  void _addPlatformsOptions() {
+    argParser.addMultiOption('platforms',
+        help: 'the platforms supported by this project.',
         defaultsTo: <String>[
           'ios',
           'android',
@@ -541,8 +542,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     return generatedCount;
   }
 
-  @visibleForTesting
-  Future<int> generatePlugin(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
+  Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     // Plugin doesn't create any platform by default
     templateContext['ios'] = false;
     templateContext['android'] = false;
@@ -550,9 +550,12 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     templateContext['linux'] = false;
     templateContext['macos'] = false;
     templateContext['windows'] = false;
-    if (argResults.wasParsed('platform')) {
-      final List<String> platforms = stringsArg('platform');
+    if (argResults.wasParsed('platforms')) {
+      final List<String> platforms = stringsArg('platforms');
       _updateTemplateContextWithPlatforms(templateContext, platforms);
+      templateContext['no_platforms'] = false;
+    } else {
+      templateContext['no_platforms'] = true;
     }
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
@@ -560,6 +563,15 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         : 'A new flutter plugin project.';
     templateContext['description'] = description;
     generatedCount += await _renderTemplate('plugin', directory, templateContext, overwrite: overwrite);
+    if (!argResults.wasParsed('platforms')) {
+        globals.printStatus('''
+WARNING: You have generated a new plugin project without
+          specify the `--platforms` flag. An empty plugin project
+          is generated. The `platform:` under `pubspec.yaml` is empty.
+          The project will not compile until you add platforms implementation to the project.
+          To add platforms, run `flutter create -t plugin --platforms <platforms>` in the same
+          directory. ''');
+    }
     if (boolArg('pub')) {
       await pub.get(
         context: PubContext.createPlugin,
@@ -567,6 +579,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         offline: boolArg('offline'),
       );
     }
+
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     final bool generateAndroid = templateContext['android'] == true;
     if (generateAndroid) {
@@ -586,12 +599,11 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     templateContext['pluginProjectName'] = projectName;
     templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
 
-    generatedCount += await generateApp(project.example.directory, templateContext, overwrite: overwrite);
+    generatedCount += await _generateApp(project.example.directory, templateContext, overwrite: overwrite);
     return generatedCount;
   }
 
-  @visibleForTesting
-  Future<int> generateApp(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
+  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false}) async {
     int generatedCount = 0;
     generatedCount += await _renderTemplate('app', directory, templateContext, overwrite: overwrite);
     final FlutterProject project = FlutterProject.fromDirectory(directory);
@@ -604,10 +616,9 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       generatedCount += await _renderTemplate('driver', testDirectory, templateContext, overwrite: overwrite);
     }
 
-    if (boolArg('pub')) {
-      await pub.get(context: PubContext.create, directory: directory.path, offline: boolArg('offline'));
-      await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
-    }
+
+    await pub.get(context: PubContext.create, directory: directory.path, offline: boolArg('offline'));
+    await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
 
     if (templateContext['android'] == true) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
