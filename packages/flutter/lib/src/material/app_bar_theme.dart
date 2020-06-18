@@ -89,9 +89,13 @@ class AppBarTheme with Diagnosticable {
   /// If null, the value is adapted to current [TargetPlatform].
   final bool centerTitle;
 
-  /// This flag is deprecated and caps the text scaling to a maximum for the
-  /// [title] of the app bar, to keep the visual hierarchy in the app for large
-  /// font sizes.
+  /// Cap text scale to a maximum for [AppBar.title].
+  ///
+  /// This flag is deprecated and caps the text scaling to a maximum for
+  /// [AppBar.title], to keep the visual hierarchy in an app with large font
+  /// sizes. It exists to provide backwards compatibility to ease migrations,
+  /// and will eventually be removed as the maximum text scale will be enabled
+  /// by default.
   @Deprecated(
     'Deprecated property to cap text scaling for title. '
     'This feature was deprecated after v1.19.0.'
