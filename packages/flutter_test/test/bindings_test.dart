@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,5 +25,11 @@ void main() {
       binding.defaultTestTimeout = const test_package.Timeout(Duration(minutes: 5));
       expect(binding.defaultTestTimeout.duration, const Duration(minutes: 5));
     });
+  });
+
+  test('Initializes httpOverrides and testTextInput', () async {
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+    expect(binding.testTextInput.isRegistered, true);
+    expect(HttpOverrides.current, isNotNull);
   });
 }

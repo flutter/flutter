@@ -249,14 +249,19 @@ Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem) as
   if (!fileSystem.file(packageFilePath).existsSync()) {
     await _ensurePackageDependencies(toolPackagePath);
   }
-  final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+  PackageConfig packageConfig = await loadPackageConfigWithLogging(
     fileSystem.file(packageFilePath),
     logger: globals.logger,
   );
-  final Uri imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
+  Uri imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
   // Ensure that the template image package is present.
   if (imagePackageLibDir == null || !fileSystem.directory(imagePackageLibDir).existsSync()) {
     await _ensurePackageDependencies(toolPackagePath);
+    packageConfig = await loadPackageConfigWithLogging(
+      fileSystem.file(packageFilePath),
+      logger: globals.logger,
+    );
+    imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
   }
   return fileSystem.directory(imagePackageLibDir)
       .parent

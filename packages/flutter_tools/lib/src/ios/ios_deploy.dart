@@ -14,6 +14,7 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import 'code_signing.dart';
+import 'devices.dart';
 
 // Error message patterns from ios-deploy output
 const String noProvisioningProfileErrorOne = 'Error 0xe8008015';
@@ -84,6 +85,7 @@ class IOSDeploy {
     @required String deviceId,
     @required String bundlePath,
     @required List<String>launchArguments,
+    @required IOSDeviceInterface interfaceType,
   }) async {
     final List<String> launchCommand = <String>[
       _binaryPath,
@@ -91,7 +93,8 @@ class IOSDeploy {
       deviceId,
       '--bundle',
       bundlePath,
-      '--no-wifi',
+      if (interfaceType != IOSDeviceInterface.network)
+        '--no-wifi',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
         launchArguments.join(' '),
@@ -113,6 +116,7 @@ class IOSDeploy {
     @required String deviceId,
     @required String bundlePath,
     @required List<String> launchArguments,
+    @required IOSDeviceInterface interfaceType,
   }) async {
     final List<String> launchCommand = <String>[
       _binaryPath,
@@ -120,7 +124,8 @@ class IOSDeploy {
       deviceId,
       '--bundle',
       bundlePath,
-      '--no-wifi',
+      if (interfaceType != IOSDeviceInterface.network)
+        '--no-wifi',
       '--justlaunch',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',

@@ -42,7 +42,6 @@ void main() {
     MockDeviceManager mockDeviceManager;
     MockFlutterVersion mockStableFlutterVersion;
     MockFlutterVersion mockUnstableFlutterVersion;
-    MockStdio mockStdio;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -50,10 +49,6 @@ void main() {
       mockDeviceManager = MockDeviceManager();
       mockStableFlutterVersion = MockFlutterVersion(isStable: true);
       mockUnstableFlutterVersion = MockFlutterVersion(isStable: false);
-    });
-
-    setUp((){
-      mockStdio = MockStdio()..stdout.terminalColumns = 80;
     });
 
     testUsingContext('fails when target not found', () async {
@@ -120,38 +115,6 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
-    });
-
-    testUsingContext('Fails with toolExit run in profile mode on emulator with machine flag', () async {
-      globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('.packages').writeAsStringSync('\n');
-      globals.fs.file('lib/main.dart').createSync(recursive: true);
-      final FakeDevice device = FakeDevice(isLocalEmulator: true);
-      when(deviceManager.getAllConnectedDevices()).thenAnswer((Invocation invocation) async {
-        return <Device>[device];
-      });
-      when(deviceManager.getDevices()).thenAnswer((Invocation invocation) async {
-        return <Device>[device];
-      });
-      when(deviceManager.findTargetDevices(any)).thenAnswer((Invocation invocation) async {
-        return <Device>[device];
-      });
-      when(deviceManager.hasSpecifiedAllDevices).thenReturn(false);
-      when(deviceManager.deviceDiscoverers).thenReturn(<DeviceDiscovery>[]);
-
-      final RunCommand command = RunCommand();
-      applyMocksToCommand(command);
-      await expectLater(createTestCommandRunner(command).run(<String>[
-        'run',
-        '--no-pub',
-        '--machine',
-        '--profile',
-      ]), throwsToolExit(message: 'not supported for emulators'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager: () => MockDeviceManager(),
-      Stdio: () => mockStdio,
     });
 
     testUsingContext('Walks upward looking for a pubspec.yaml and exits if missing', () async {
@@ -241,6 +204,94 @@ void main() {
         ProcessManager: () => mockProcessManager,
       });
 
+      testUsingContext('fails when targeted device is not Android with --device-user', () async {
+        globals.fs.file('pubspec.yaml').createSync();
+        globals.fs.file('.packages').writeAsStringSync('\n');
+        globals.fs.file('lib/main.dart').createSync(recursive: true);
+        final FakeDevice device = FakeDevice(isLocalEmulator: true);
+        when(deviceManager.getAllConnectedDevices()).thenAnswer((Invocation invocation) async {
+          return <Device>[device];
+        });
+        when(deviceManager.getDevices()).thenAnswer((Invocation invocation) async {
+          return <Device>[device];
+        });
+        when(deviceManager.findTargetDevices(any)).thenAnswer((Invocation invocation) async {
+          return <Device>[device];
+        });
+        when(deviceManager.hasSpecifiedAllDevices).thenReturn(false);
+        when(deviceManager.deviceDiscoverers).thenReturn(<DeviceDiscovery>[]);
+
+        final RunCommand command = RunCommand();
+        applyMocksToCommand(command);
+        await expectLater(createTestCommandRunner(command).run(<String>[
+          'run',
+          '--no-pub',
+          '--device-user',
+          '10',
+        ]), throwsToolExit(message: '--device-user is only supported for Android. At least one Android device is required.'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => MockDeviceManager(),
+        Stdio: () => MockStdio(),
+      });
+
+      testUsingContext('shows unsupported devices when no supported devices are found',  () async {
+        final RunCommand command = RunCommand();
+        applyMocksToCommand(command);
+
+        final MockDevice mockDevice = MockDevice(TargetPlatform.android_arm);
+        when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) => Future<bool>.value(true));
+        when(mockDevice.isSupported()).thenAnswer((Invocation invocation) => true);
+        when(mockDevice.supportsFastStart).thenReturn(true);
+        when(mockDevice.id).thenReturn('mock-id');
+        when(mockDevice.name).thenReturn('mock-name');
+        when(mockDevice.platformType).thenReturn(PlatformType.android);
+        when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) => Future<String>.value('api-14'));
+
+        when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
+          return Future<List<Device>>.value(<Device>[
+            mockDevice,
+          ]);
+        });
+
+        when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
+            (Invocation invocation) => Future<List<Device>>.value(<Device>[]),
+        );
+
+        try {
+          await createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--no-hot',
+          ]);
+          fail('Expect exception');
+        } on ToolExit catch (e) {
+          expect(e.message, null);
+        }
+
+        expect(
+          testLogger.statusText,
+          containsIgnoringWhitespace(userMessages.flutterNoSupportedDevices),
+        );
+        expect(
+          testLogger.statusText,
+          containsIgnoringWhitespace(userMessages.flutterFoundButUnsupportedDevices),
+        );
+        expect(
+          testLogger.statusText,
+          containsIgnoringWhitespace(
+            userMessages.flutterMissPlatformProjects(
+              Device.devicesPlatformTypes(<Device>[mockDevice]),
+            ),
+          ),
+        );
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => mockDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
+      });
+
       testUsingContext('updates cache before checking for devices', () async {
         final RunCommand command = RunCommand();
         applyMocksToCommand(command);
@@ -288,6 +339,7 @@ void main() {
         final RunCommand command = RunCommand();
         applyMocksToCommand(command);
         final MockDevice mockDevice = MockDevice(TargetPlatform.ios);
+        when(mockDevice.supportsRuntimeMode(any)).thenAnswer((Invocation invocation) => true);
         when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) => Future<bool>.value(false));
         when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(FakeDeviceLogReader());
         when(mockDevice.supportsFastStart).thenReturn(true);
@@ -301,6 +353,7 @@ void main() {
           route: anyNamed('route'),
           prebuiltApplication: anyNamed('prebuiltApplication'),
           ipv6: anyNamed('ipv6'),
+          userIdentifier: anyNamed('userIdentifier'),
         )).thenAnswer((Invocation invocation) => Future<LaunchResult>.value(LaunchResult.failed()));
 
         when(mockArtifacts.getArtifactPath(
@@ -633,6 +686,9 @@ class FakeDevice extends Fake implements Device {
   Future<bool> get isLocalEmulator => Future<bool>.value(_isLocalEmulator);
 
   @override
+  bool supportsRuntimeMode(BuildMode mode) => true;
+
+  @override
   bool get supportsHotReload => false;
 
   @override
@@ -668,6 +724,7 @@ class FakeDevice extends Fake implements Device {
     bool prebuiltApplication = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
+    String userIdentifier,
   }) async {
     final String dartFlags = debuggingOptions.dartFlags;
     // In release mode, --dart-flags should be set to the empty string and

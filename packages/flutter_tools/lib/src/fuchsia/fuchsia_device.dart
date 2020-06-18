@@ -54,13 +54,14 @@ Future<vm_service.VmService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) 
 
 /// Read the log for a particular device.
 class _FuchsiaLogReader extends DeviceLogReader {
-  _FuchsiaLogReader(this._device, [this._app]);
+  _FuchsiaLogReader(this._device, this._systemClock, [this._app]);
 
   // \S matches non-whitespace characters.
   static final RegExp _flutterLogOutput = RegExp(r'INFO: \S+\(flutter\): ');
 
   final FuchsiaDevice _device;
   final ApplicationPackage _app;
+  final SystemClock _systemClock;
 
   @override
   String get name => _device.name;
@@ -79,7 +80,7 @@ class _FuchsiaLogReader extends DeviceLogReader {
     }
     // Get the starting time of the log processor to filter logs from before
     // the process attached.
-    final DateTime startTime = systemClock.now();
+    final DateTime startTime = _systemClock.now();
     // Determine if line comes from flutter, and optionally whether it matches
     // the correct fuchsia module.
     final RegExp matchRegExp = _app == null
@@ -236,19 +237,31 @@ class FuchsiaDevice extends Device {
   bool get supportsStartPaused => false;
 
   @override
-  Future<bool> isAppInstalled(ApplicationPackage app) async => false;
+  Future<bool> isAppInstalled(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => false;
 
   @override
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
-  Future<bool> installApp(ApplicationPackage app) => Future<bool>.value(false);
+  Future<bool> installApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) => Future<bool>.value(false);
 
   @override
-  Future<bool> uninstallApp(ApplicationPackage app) async => false;
+  Future<bool> uninstallApp(
+    ApplicationPackage app, {
+    String userIdentifier,
+  }) async => false;
 
   @override
   bool isSupported() => true;
+
+  @override
+  bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
   @override
   Future<LaunchResult> startApp(
@@ -259,6 +272,7 @@ class FuchsiaDevice extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
+    String userIdentifier,
   }) async {
     if (!prebuiltApplication) {
       await buildFuchsia(fuchsiaProject: FlutterProject.current().fuchsia,
@@ -430,7 +444,10 @@ class FuchsiaDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(covariant FuchsiaApp app) async {
+  Future<bool> stopApp(
+    covariant FuchsiaApp app, {
+    String userIdentifier,
+  }) async {
     final int appKey = await FuchsiaTilesCtl.findAppKey(this, app.id);
     if (appKey != -1) {
       if (!await fuchsiaDeviceTools.tilesCtl.remove(this, appKey)) {
@@ -534,7 +551,7 @@ class FuchsiaDevice extends Device {
     bool includePastLogs = false,
   }) {
     assert(!includePastLogs, 'Past log reading not supported on Fuchsia.');
-    return _logReader ??= _FuchsiaLogReader(this, app);
+    return _logReader ??= _FuchsiaLogReader(this, globals.systemClock, app);
   }
   _FuchsiaLogReader _logReader;
 

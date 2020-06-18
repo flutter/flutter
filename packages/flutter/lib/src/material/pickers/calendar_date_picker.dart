@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -366,8 +368,7 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
         children: <Widget>[
           Flexible(
             child: Semantics(
-              // TODO(darrenaustin): localize 'Select year'
-              label: 'Select year',
+              label: MaterialLocalizations.of(context).selectYearSemanticsLabel,
               excludeSemantics: true,
               button: true,
               child: Container(

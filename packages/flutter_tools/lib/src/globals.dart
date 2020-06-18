@@ -17,8 +17,10 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/signals.dart';
 import 'base/template.dart';
 import 'base/terminal.dart';
+import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
@@ -45,20 +47,22 @@ HttpClientFactory get httpClientFactory => context.get<HttpClientFactory>();
 Logger get logger => context.get<Logger>();
 OperatingSystemUtils get os => context.get<OperatingSystemUtils>();
 PersistentToolState get persistentToolState => PersistentToolState.instance;
+Signals get signals => context.get<Signals>() ?? LocalSignals.instance;
 Usage get flutterUsage => context.get<Usage>();
-FlutterProjectFactory get projectFactory => context.get<FlutterProjectFactory>() ?? FlutterProjectFactory(
-  logger: logger,
-  fileSystem: fs,
-);
 
-const FileSystem _kLocalFs = LocalFileSystem();
+FlutterProjectFactory get projectFactory {
+  return context.get<FlutterProjectFactory>() ?? FlutterProjectFactory(
+    logger: logger,
+    fileSystem: fs,
+  );
+}
 
 /// Currently active implementation of the file system.
 ///
 /// By default it uses local disk-based implementation. Override this in tests
 /// with [MemoryFileSystem].
 FileSystem get fs => ErrorHandlingFileSystem(
-  delegate: context.get<FileSystem>() ?? _kLocalFs,
+  delegate: context.get<FileSystem>() ?? LocalFileSystem.instance,
   platform: platform,
 );
 
@@ -103,6 +107,9 @@ final BotDetector _defaultBotDetector = BotDetector(
 BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector;
 
 Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
+
+/// The current system clock instance.
+SystemClock get systemClock => context.get<SystemClock>();
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.

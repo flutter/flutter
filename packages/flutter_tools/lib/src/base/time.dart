@@ -2,11 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'context.dart';
-
-/// The current system clock instance.
-SystemClock get systemClock => context.get<SystemClock>();
-
 /// A class for making time based operations testable.
 class SystemClock {
   /// A const constructor to allow subclasses to be const.

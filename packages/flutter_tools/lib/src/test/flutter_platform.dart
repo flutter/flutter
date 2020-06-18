@@ -5,14 +5,14 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
-
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/suite.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -20,6 +20,7 @@ import '../base/io.dart';
 import '../build_info.dart';
 import '../compile.dart';
 import '../convert.dart';
+import '../dart/language_version.dart';
 import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -88,7 +89,9 @@ FlutterPlatform installHook({
   FlutterProject flutterProject,
   String icudtlPath,
   PlatformPluginRegistration platformPluginRegistration,
-  @required List<String> dartExperiments,
+  List<String> extraFrontEndOptions,
+  // Deprecated, use extraFrontEndOptions.
+  List<String> dartExperiments,
 }) {
   assert(testWrapper != null);
   assert(enableObservatory || (!startPaused && observatoryPort == null));
@@ -121,7 +124,7 @@ FlutterPlatform installHook({
     projectRootDirectory: projectRootDirectory,
     flutterProject: flutterProject,
     icudtlPath: icudtlPath,
-    dartExperiments: dartExperiments,
+    extraFrontEndOptions: extraFrontEndOptions,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -142,12 +145,14 @@ FlutterPlatform installHook({
 ///
 /// The [updateGoldens] argument will set the [autoUpdateGoldens] global
 /// variable in the [flutter_test] package before invoking the test.
+// NOTE: this API is used by the fuchsia source tree, do not add new
+// required or position parameters.
 String generateTestBootstrap({
   @required Uri testUrl,
   @required InternetAddress host,
   File testConfigFile,
   bool updateGoldens = false,
-  @required bool nullSafety,
+  String languageVersionHeader = '',
 }) {
   assert(testUrl != null);
   assert(host != null);
@@ -160,6 +165,7 @@ String generateTestBootstrap({
 
   final StringBuffer buffer = StringBuffer();
   buffer.write('''
+$languageVersionHeader
 import 'dart:async';
 import 'dart:convert';  // ignore: dart_convert_import
 import 'dart:io';  // ignore: dart_io_import
@@ -177,17 +183,11 @@ import '$testUrl' as test;
 import '${Uri.file(testConfigFile.path)}' as test_config;
 ''');
   }
-  // This type is sensitive to the non-nullable experiment.
-  final String beforeLoadTypedef = nullSafety
-    ? 'Future<dynamic> Function()?'
-    : 'Future<dynamic> Function()';
   buffer.write('''
 
 /// Returns a serialized test suite.
-StreamChannel<dynamic> serializeSuite(Function getMain(),
-    {bool hidePrints = true, $beforeLoadTypedef beforeLoad}) {
-  return RemoteListener.start(getMain,
-      hidePrints: hidePrints, beforeLoad: beforeLoad);
+StreamChannel<dynamic> serializeSuite(Function getMain()) {
+  return RemoteListener.start(getMain);
 }
 
 /// Capture any top-level errors (mostly lazy syntax errors, since other are
@@ -211,7 +211,7 @@ void catchIsolateErrors() {
 
 void main() {
   print('$_kStartTimeoutTimerMessage');
-  String serverPort = Platform.environment['SERVER_PORT'];
+  String serverPort = Platform.environment['SERVER_PORT'] ?? '';
   String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
   StreamChannel<dynamic> channel = serializeSuite(() {
     catchIsolateErrors();
@@ -267,7 +267,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.projectRootDirectory,
     this.flutterProject,
     this.icudtlPath,
-    @required this.dartExperiments,
+    @required this.extraFrontEndOptions,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -288,7 +288,7 @@ class FlutterPlatform extends PlatformPlugin {
   final Uri projectRootDirectory;
   final FlutterProject flutterProject;
   final String icudtlPath;
-  final List<String> dartExperiments;
+  final List<String> extraFrontEndOptions;
 
   Directory fontsDirectory;
 
@@ -398,11 +398,17 @@ class FlutterPlatform extends PlatformPlugin {
   @visibleForTesting
   Future<HttpServer> bind(InternetAddress host, int port) => HttpServer.bind(host, port);
 
+  PackageConfig _packageConfig;
+
   Future<_AsyncError> _startTest(
     String testPath,
     StreamChannel<dynamic> controller,
     int ourTestCount,
   ) async {
+    _packageConfig ??= await loadPackageConfigWithLogging(
+      globals.fs.file(globalPackagesPath),
+      logger: globals.logger,
+    );
     globals.printTrace('test $ourTestCount: starting test $testPath');
 
     _AsyncError outOfBandError; // error that we couldn't send to the harness that we need to send via our future
@@ -457,7 +463,7 @@ class FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= TestCompiler(buildMode, trackWidgetCreation, flutterProject, dartExperiments);
+        compiler ??= TestCompiler(buildMode, trackWidgetCreation, flutterProject, extraFrontEndOptions);
         mainDart = await compiler.compile(globals.fs.file(mainDart).uri);
 
         if (mainDart == null) {
@@ -744,14 +750,19 @@ class FlutterPlatform extends PlatformPlugin {
     Uri testUrl,
   }) {
     assert(testUrl.scheme == 'file');
+    final File file = globals.fs.file(testUrl);
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl)),
       host: host,
       updateGoldens: updateGoldens,
-      nullSafety: dartExperiments.contains('non-nullable'),
+      languageVersionHeader: determineLanguageVersion(
+        file,
+        _packageConfig[flutterProject?.manifest?.appName],
+      ),
     );
   }
+
 
   File _cachedFontConfig;
 

@@ -9,7 +9,7 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import 'makefile.dart';
+import 'cmake.dart';
 
 abstract class LinuxApp extends ApplicationPackage {
   LinuxApp({@required String projectBundleId}) : super(id: projectBundleId);
@@ -58,8 +58,13 @@ class BuildableLinuxApp extends LinuxApp {
 
   @override
   String executable(BuildMode buildMode) {
-    final String binaryName = makefileExecutableName(project);
-    return globals.fs.path.join(getLinuxBuildDirectory(), getNameForBuildMode(buildMode), binaryName);
+    final String binaryName = getCmakeExecutableName(project);
+    return globals.fs.path.join(
+        getLinuxBuildDirectory(),
+        getNameForBuildMode(buildMode),
+        'bundle',
+        binaryName,
+    );
   }
 
   @override

@@ -5,7 +5,6 @@
 #import <Foundation/Foundation.h>
 
 #import "NativeViewController.h"
-#import "MDButton.h"
 
 @interface NativeViewController ()
 @property int counter;
@@ -19,7 +18,7 @@
   self.counter = 0;
 }
 
-- (IBAction)handleIncrement:(MDButton*)sender {
+- (IBAction)handleIncrement:(id)sender {
   [self.delegate didTapIncrementButton];
 }
 

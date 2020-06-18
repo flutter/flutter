@@ -395,7 +395,7 @@ Exited (sigterm)''',
       final MockFile pbxprojFile = MockFile();
 
       when(project.xcodeProjectInfoFile).thenReturn(pbxprojFile);
-      when(project.hostAppBundleName).thenAnswer((_) => Future<String>.value('UnitTestRunner.app'));
+      when(project.hostAppBundleName(any)).thenAnswer((_) => Future<String>.value('UnitTestRunner.app'));
       when(pbxprojFile.readAsLinesSync())
           .thenAnswer((_) => flutterAssetPbxProjLines);
       when(pbxprojFile.existsSync())

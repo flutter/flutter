@@ -66,7 +66,7 @@ class CoverageCollector extends TestWatcher {
     assert(data != null);
 
     _logMessage('($observatoryUri): collected coverage data; merging...');
-    _addHitmap(coverage.createHitmap(data['coverage'] as List<Map<String, dynamic>>));
+    _addHitmap(await coverage.createHitmap(data['coverage'] as List<Map<String, dynamic>>));
     _logMessage('($observatoryUri): done merging coverage data into global coverage map.');
   }
 
@@ -98,7 +98,7 @@ class CoverageCollector extends TestWatcher {
     assert(data != null);
 
     _logMessage('pid $pid ($observatoryUri): collected coverage data; merging...');
-    _addHitmap(coverage.createHitmap(data['coverage'] as List<Map<String, dynamic>>));
+    _addHitmap(await coverage.createHitmap(data['coverage'] as List<Map<String, dynamic>>));
     _logMessage('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
   }
 

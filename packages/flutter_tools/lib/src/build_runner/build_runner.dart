@@ -19,12 +19,11 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../codegen.dart';
 import '../dart/pub.dart';
-import '../dart/sdk.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 
 /// The minimum version of build_runner we can support in the flutter tool.
-const String kMinimumBuildRunnerVersion = '1.7.1';
+const String kMinimumBuildRunnerVersion = '1.10.0';
 const String kSupportedBuildDaemonVersion = '2.1.0';
 
 /// A wrapper for a build_runner process which delegates to a generated
@@ -111,7 +110,14 @@ class BuildRunner extends CodeGenerator {
       }
       scriptIdFile.writeAsBytesSync(appliedBuilderDigest);
       final ProcessResult generateResult = await globals.processManager.run(<String>[
-        sdkBinaryName('pub'), 'run', 'build_runner', 'generate-build-script',
+        globals.fs.path.join(
+          globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+          'bin',
+          (globals.platform.isWindows) ? 'pub.bat' : 'pub'
+        ),
+        'run',
+        'build_runner',
+        'generate-build-script',
       ], workingDirectory: syntheticPubspec.parent.path);
       if (generateResult.exitCode != 0) {
         throwToolExit('Error generating build_script snapshot: ${generateResult.stderr}');
@@ -119,6 +125,7 @@ class BuildRunner extends CodeGenerator {
       final File buildScript = globals.fs.file(generateResult.stdout.trim());
       final ProcessResult result = await globals.processManager.run(<String>[
         globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--disable-dart-dev',
         '--snapshot=${buildSnapshot.path}',
         '--snapshot-kind=app-jit',
         '--packages=${globals.fs.path.join(generatedDirectory.path, '.packages')}',

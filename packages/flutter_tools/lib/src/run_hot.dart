@@ -63,7 +63,6 @@ class DeviceReloadReport {
   List<vm_service.ReloadReport> reports; // List has one report per Flutter view.
 }
 
-// TODO(mklim): Test this, flutter/flutter#23031.
 class HotRunner extends ResidentRunner {
   HotRunner(
     List<FlutterDevice> devices, {
@@ -225,6 +224,7 @@ class HotRunner extends ResidentRunner {
         restart: _restartService,
         compileExpression: _compileExpressionService,
         reloadMethod: reloadMethod,
+        getSkSLMethod: writeSkSL,
       );
     // Catches all exceptions, non-Exception objects are rethrown.
     } catch (error) { // ignore: avoid_catches_without_on_clauses
@@ -232,20 +232,6 @@ class HotRunner extends ResidentRunner {
         rethrow;
       }
       globals.printError('Error connecting to the service protocol: $error');
-      // https://github.com/flutter/flutter/issues/33050
-      // TODO(blasten): Remove this check once
-      // https://issuetracker.google.com/issues/132325318 has been fixed.
-      if (await hasDeviceRunningAndroidQ(flutterDevices) &&
-          error.toString().contains(kAndroidQHttpConnectionClosedExp)) {
-        globals.printStatus(
-          '🔨 If you are using an emulator running Android Q Beta, '
-          'consider using an emulator running API level 29 or lower.',
-        );
-        globals.printStatus(
-          'Learn more about the status of this issue on '
-          'https://issuetracker.google.com/issues/132325318.',
-        );
-      }
       return 2;
     }
 
@@ -371,6 +357,11 @@ class HotRunner extends ResidentRunner {
           device.generator.recompile(
             globals.fs.file(mainPath).uri,
             <Uri>[],
+            // When running without a provided applicationBinary, the tool will
+            // simultaneously run the initial frontend_server compilation and
+            // the native build step. If there is a Dart compilation error, it
+            // should only be displayed once.
+            suppressErrors: applicationBinary == null,
             outputPath: dillOutputPath ??
               getDefaultApplicationKernelPath(trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation),
             packageConfig: packageConfig,
@@ -387,6 +378,7 @@ class HotRunner extends ResidentRunner {
       if (!results.every((bool passed) => passed)) {
         return 1;
       }
+      cacheInitialDillCompilation();
     } on Exception catch (err) {
       globals.printError(err.toString());
       return 1;

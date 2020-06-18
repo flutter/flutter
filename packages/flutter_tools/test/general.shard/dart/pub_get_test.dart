@@ -338,8 +338,6 @@ void main() {
     expect(logger.statusText, 'Running "flutter pub get" in /...\n');
     expect(logger.errorText, isEmpty);
     expect(fileSystem.file('pubspec.yaml').lastModifiedSync(), DateTime(2001)); // because nothing should touch it
-    expect(fileSystem.file('.dart_tool/package_config.json').lastModifiedSync(), isNot(DateTime(2000))); // because pub changes it to 2002
-    expect(fileSystem.file('.dart_tool/package_config.json').lastModifiedSync(), isNot(DateTime(2002))); // because we set the timestamp again after pub
     logger.clear();
 
     // bad scenario 1: pub doesn't update file; doesn't matter, because we do instead
@@ -352,8 +350,6 @@ void main() {
     expect(logger.statusText, 'Running "flutter pub get" in /...\n');
     expect(logger.errorText, isEmpty);
     expect(fileSystem.file('pubspec.yaml').lastModifiedSync(), DateTime(2001)); // because nothing should touch it
-    expect(fileSystem.file('.dart_tool/package_config.json').lastModifiedSync(), isNot(DateTime(2000))); // because we set the timestamp
-    expect(fileSystem.file('.dart_tool/package_config.json').lastModifiedSync(), isNot(DateTime(2002))); // just in case FakeProcessManager is buggy
     logger.clear();
 
     // bad scenario 2: pub changes pubspec.yaml instead
@@ -370,7 +366,6 @@ void main() {
     expect(logger.statusText, 'Running "flutter pub get" in /...\n');
     expect(logger.errorText, isEmpty);
     expect(fileSystem.file('pubspec.yaml').lastModifiedSync(), DateTime(2002)); // because fake pub above touched it
-    expect(fileSystem.file('.dart_tool/package_config.json').lastModifiedSync(), DateTime(2000)); // because nothing touched it
 
     // bad scenario 3: pubspec.yaml was created in the future
     fileSystem.file('.dart_tool/package_config.json')

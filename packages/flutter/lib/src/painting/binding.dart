@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:typed_data' show Uint8List;
 import 'dart:ui' as ui show instantiateImageCodec, Codec;
 import 'package:flutter/foundation.dart';
@@ -102,7 +104,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   @override
   void handleMemoryPressure() {
     super.handleMemoryPressure();
-    imageCache.clear();
+    imageCache?.clear();
   }
 
   /// Listenable that notifies when the available fonts on the system have

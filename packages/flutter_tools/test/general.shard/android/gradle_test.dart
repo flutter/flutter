@@ -391,7 +391,7 @@ include ':app'
           'flutter_tools',
           'gradle');
       globals.fs.directory(toolGradlePath).createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join(toolGradlePath, 'deprecated_settings.gradle'))
+      globals.fs.file(globals.fs.path.join(toolGradlePath, 'settings.gradle.legacy_versions'))
           .writeAsStringSync(currentSettingsGradle);
 
       globals.fs.file(globals.fs.path.join(toolGradlePath, 'settings_aar.gradle.tmpl'))
@@ -424,7 +424,7 @@ include ':app'
           'flutter_tools',
           'gradle');
       globals.fs.directory(toolGradlePath).createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join(toolGradlePath, 'deprecated_settings.gradle'))
+      globals.fs.file(globals.fs.path.join(toolGradlePath, 'settings.gradle.legacy_versions'))
           .writeAsStringSync(currentSettingsGradle);
 
       globals.fs.file(globals.fs.path.join(toolGradlePath, 'settings_aar.gradle.tmpl'))
@@ -2324,13 +2324,13 @@ plugin1=${plugin1.path}
           '  1. Open <host>/app/build.gradle\n'
           '  2. Ensure you have the repositories configured, otherwise add them:\n'
           '\n'
-          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "storage.googleapis.com"\n'
+          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"\n'
           '      repositories {\n'
           '        maven {\n'
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'https://\$storageUrl/download.flutter.io'\n"
+          "            url '\$storageUrl/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2375,13 +2375,13 @@ plugin1=${plugin1.path}
           '  1. Open <host>/app/build.gradle\n'
           '  2. Ensure you have the repositories configured, otherwise add them:\n'
           '\n'
-          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "storage.googleapis.com"\n'
+          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"\n'
           '      repositories {\n'
           '        maven {\n'
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'https://\$storageUrl/download.flutter.io'\n"
+          "            url '\$storageUrl/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2413,13 +2413,13 @@ plugin1=${plugin1.path}
           '  1. Open <host>/app/build.gradle\n'
           '  2. Ensure you have the repositories configured, otherwise add them:\n'
           '\n'
-          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "storage.googleapis.com"\n'
+          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"\n'
           '      repositories {\n'
           '        maven {\n'
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'https://\$storageUrl/download.flutter.io'\n"
+          "            url '\$storageUrl/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2452,13 +2452,13 @@ plugin1=${plugin1.path}
           '  1. Open <host>/app/build.gradle\n'
           '  2. Ensure you have the repositories configured, otherwise add them:\n'
           '\n'
-          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "storage.googleapis.com"\n'
+          '      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"\n'
           '      repositories {\n'
           '        maven {\n'
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'https://\$storageUrl/download.flutter.io'\n"
+          "            url '\$storageUrl/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2483,6 +2483,18 @@ plugin1=${plugin1.path}
         )
       );
     });
+  });
+
+  test('Current settings.gradle is in our legacy settings.gradle file set', () {
+    // If this test fails, you probably edited templates/app/android.tmpl.
+    // That's fine, but you now need to add a copy of that file to gradle/settings.gradle.legacy_versions, separated
+    // from the previous versions by a line that just says ";EOF".
+    final File templateSettingsDotGradle = globals.fs.file(globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'app', 'android.tmpl', 'settings.gradle'));
+    final File legacySettingsDotGradleFiles = globals.fs.file(globals.fs.path.join(Cache.flutterRoot, 'packages','flutter_tools', 'gradle', 'settings.gradle.legacy_versions'));
+    expect(
+      legacySettingsDotGradleFiles.readAsStringSync().split(';EOF').map<String>((String body) => body.trim()),
+      contains(templateSettingsDotGradle.readAsStringSync().trim()),
+    );
   });
 }
 

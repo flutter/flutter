@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -350,10 +352,8 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
           onConfirm: _hasSelectedDateRange ? _handleOk : null,
           onCancel: _handleCancel,
           onToggleEntryMode: _handleEntryModeToggle,
-          // TODO(darrenaustin): localize 'SAVE'
-          confirmText: widget.saveText ?? 'SAVE',
-          // TODO(darrenaustin): localize 'SELECTED RANGE'
-          helpText: widget.helpText ?? 'SELECTED RANGE',
+          confirmText: widget.saveText ?? localizations.saveButtonLabel,
+          helpText: widget.helpText ?? localizations.dateRangePickerHelpText,
         );
         size = mediaQuery.size;
         insetPadding = const EdgeInsets.all(0.0);
@@ -404,18 +404,12 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
           onToggleEntryMode: _handleEntryModeToggle,
           confirmText: widget.confirmText ?? localizations.okButtonLabel,
           cancelText: widget.cancelText ?? localizations.cancelButtonLabel,
-          // TODO(darrenaustin): localize 'SELECTED DATE RANGE'
-          helpText: widget.helpText ?? 'SELECTED DATE RANGE',
+          helpText: widget.helpText ?? localizations.dateRangePickerHelpText,
         );
         final DialogTheme dialogTheme = Theme.of(context).dialogTheme;
         size = orientation == Orientation.portrait ? _inputPortraitDialogSize : _inputLandscapeDialogSize;
         insetPadding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0);
-        // The default dialog shape is radius 2 rounded rect, but the spec has
-        // been updated to 4, so we will use that here for the Input Date Range
-        // Picker, but only if there isn't one provided in the theme.
-        shape = dialogTheme.shape ?? const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(4.0))
-        );
+        shape = dialogTheme.shape;
         elevation = dialogTheme.elevation ?? 24;
         break;
     }
@@ -501,7 +495,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
       padding: EdgeInsets.zero,
       color: headerForeground,
       icon: const Icon(Icons.edit),
-      tooltip: 'Switch to input',
+      tooltip: localizations.inputDateModeButtonLabel,
       onPressed: onToggleEntryMode,
     );
 
@@ -621,8 +615,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     final String startText = utils.formatRangeStartDate(localizations, start, end);
     final String endText = utils.formatRangeEndDate(localizations, start, end, now);
     if (start == null || end == null) {
-      // TODO(darrenaustin): localize 'Date Range'
-      return 'Date Range';
+      return localizations.unspecifiedDateRange;
     }
     if (Directionality.of(context) == TextDirection.ltr) {
       return '$startText – $endText';
@@ -651,16 +644,14 @@ class _InputDateRangePickerDialog extends StatelessWidget {
       : '';
 
     final Widget header = DatePickerHeader(
-      // TODO(darrenaustin): localize 'SELECT DATE RANGE'
-      helpText: helpText ?? 'SELECT DATE RANGE',
+      helpText: helpText ?? localizations.dateRangePickerHelpText,
       titleText: dateText,
       titleSemanticsLabel: semanticDateText,
       titleStyle: dateStyle,
       orientation: orientation,
       isShort: orientation == Orientation.landscape,
       icon: Icons.calendar_today,
-      // TODO(darrenaustin): localize 'Switch to calendar'
-      iconTooltip: 'Switch to calendar',
+      iconTooltip: localizations.calendarModeButtonLabel,
       onIconPressed: onToggleEntryMode,
     );
 

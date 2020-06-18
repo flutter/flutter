@@ -64,7 +64,7 @@ void main() {
     );
 
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-    expect(testLogger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
+    expect(testLogger.errorText, equals('line1\nline2\n'));
     expect(output.outputFilename, equals('/path/to/main.dart.dill'));
     final VerificationResult argVerification = verify(mockProcessManager.start(captureAny));
     expect(argVerification.captured.single, containsAll(<String>[
@@ -163,7 +163,7 @@ void main() {
     );
 
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-    expect(testLogger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
+    expect(testLogger.errorText, equals('line1\nline2\n'));
     expect(output, equals(null));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
@@ -191,7 +191,7 @@ void main() {
       packagesPath: '.packages',
     );
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-    expect(testLogger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
+    expect(testLogger.errorText, equals('line1\nline2\n'));
     expect(output, equals(null));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,

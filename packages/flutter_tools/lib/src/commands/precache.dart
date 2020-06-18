@@ -111,6 +111,11 @@ class PrecacheCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    // Re-lock the cache.
+    if (globals.platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
+      await Cache.lock();
+    }
+
     final bool includeAllPlatforms = boolArg('all-platforms');
     if (includeAllPlatforms) {
       globals.cache.includeAllPlatforms = true;

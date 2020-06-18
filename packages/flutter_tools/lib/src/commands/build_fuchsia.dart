@@ -21,6 +21,7 @@ class BuildFuchsiaCommand extends BuildSubCommand {
     usesTargetOption();
     usesDartDefineOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
+    addNullSafetyModeOptions();
     argParser.addOption(
       'runner-source',
       help: 'The package source to use for the flutter_runner. '
@@ -55,7 +56,6 @@ class BuildFuchsiaCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.releaseLockEarly();
     final BuildInfo buildInfo = getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
     if (!globals.platform.isLinux && !globals.platform.isMacOS) {

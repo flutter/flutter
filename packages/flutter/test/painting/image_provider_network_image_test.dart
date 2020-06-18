@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
@@ -183,7 +185,7 @@ void main() {
       expect(events[i].cumulativeBytesLoaded, math.min((i + 1) * chunkSize, kTransparentImage.length));
       expect(events[i].expectedTotalBytes, kTransparentImage.length);
     }
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56317
+  }, skip: isBrowser); // Browser loads images through <img> not Http.
 
   test('NetworkImage is evicted from cache on SocketException', () async {
     final _MockHttpClient mockHttpClient = _MockHttpClient();

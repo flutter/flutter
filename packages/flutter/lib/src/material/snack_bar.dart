@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -107,7 +109,7 @@ class SnackBarAction extends StatefulWidget {
   final VoidCallback onPressed;
 
   @override
-  _SnackBarActionState createState() => _SnackBarActionState();
+  State<SnackBarAction> createState() => _SnackBarActionState();
 }
 
 class _SnackBarActionState extends State<SnackBarAction> {

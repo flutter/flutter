@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 /// The Flutter rendering tree.
 ///
 /// To use, import `package:flutter/rendering.dart`.
@@ -45,6 +47,7 @@ export 'src/rendering/image.dart';
 export 'src/rendering/layer.dart';
 export 'src/rendering/list_body.dart';
 export 'src/rendering/list_wheel_viewport.dart';
+export 'src/rendering/mouse_cursor.dart';
 export 'src/rendering/mouse_tracking.dart';
 export 'src/rendering/object.dart';
 export 'src/rendering/paragraph.dart';

@@ -1006,7 +1006,7 @@ import 'output-localization-file_zh.dart';
 '''));
     });
 
-    test('imports are deferred when useDeferredImports are set', () {
+    test('imports are deferred and loaded when useDeferredImports are set', () {
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
         ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString);
 
@@ -1033,6 +1033,7 @@ import 'output-localization-file_zh.dart';
 '''
 import 'output-localization-file_en.dart' deferred as output-localization-file_en;
 '''));
+      expect(localizationsFile, contains('output-localization-file_en.loadLibrary()'));
     });
 
     group('DateTime tests', () {
