@@ -81,10 +81,10 @@ class Form extends StatefulWidget {
     this.autovalidate = false,
     this.onWillPop,
     this.onChanged,
-    AutoValidateMode autoValidateMode = AutoValidateMode.disabled,
+    AutoValidateMode autoValidateMode,
   }) : assert(child != null),
-        autoValidateMode = autovalidate ? AutoValidateMode.always : autoValidateMode,
-        super(key: key);
+       autoValidateMode = autovalidate ? AutoValidateMode.always : autoValidateMode,
+       super(key: key);
 
   /// Returns the closest [FormState] which encloses the given context.
   ///
@@ -318,9 +318,9 @@ class FormField<T> extends StatefulWidget {
     this.enabled = true,
     AutoValidateMode autoValidateMode = AutoValidateMode.disabled,
   }) : assert(builder != null),
-        assert(autoValidateMode != null),
-        autoValidateMode = autovalidate ? AutoValidateMode.always : autoValidateMode,
-        super(key: key);
+       assert(autoValidateMode != null),
+       autoValidateMode = autovalidate ? AutoValidateMode.always : autoValidateMode,
+       super(key: key);
 
   /// An optional method to call with the final value when the form is saved via
   /// [FormState.save].
@@ -500,7 +500,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   }
 }
 
-/// Used to configure the auto validation of [TextFormField] and [Fom] widgets.
+/// Used to configure the auto validation of [TextFormField] and [Form] widgets.
 enum AutoValidateMode {
   /// No auto validation will occur.
   disabled,
