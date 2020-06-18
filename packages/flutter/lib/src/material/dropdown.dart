@@ -672,7 +672,7 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
   const DropdownMenuItem({
     Key key,
     this.onTap,
-    @required this.value,
+    this.value,
     @required Widget child,
   }) : assert(child != null),
        super(key: key, child: child);
@@ -1467,6 +1467,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     FormFieldSetter<T> onSaved,
     FormFieldValidator<T> validator,
     bool autovalidate = false,
+    AutoValidateMode autoValidateMode = AutoValidateMode.disabled,
   }) : assert(items == null || items.isEmpty || value == null ||
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
@@ -1488,7 +1489,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
          onSaved: onSaved,
          initialValue: value,
          validator: validator,
-         autovalidate: autovalidate,
+         autoValidateMode: autovalidate ? AutoValidateMode.always : autoValidateMode,
          builder: (FormFieldState<T> field) {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
            final InputDecoration decorationArg =  decoration ?? InputDecoration(focusColor: focusColor);
@@ -1560,5 +1561,13 @@ class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
     super.didChange(value);
     assert(widget.onChanged != null);
     widget.onChanged(value);
+  }
+
+  @override
+  void didUpdateWidget(DropdownButtonFormField<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialValue != widget.initialValue) {
+      setValue(widget.initialValue);
+    }
   }
 }

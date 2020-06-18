@@ -189,7 +189,7 @@ void main() {
     expect(_value, 'Soup');
   });
 
-  testWidgets('autovalidate is passed to super', (WidgetTester tester) async {
+  testWidgets('autoValidateMode is passed to super', (WidgetTester tester) async {
     int _validateCalled = 0;
 
     await tester.pumpWidget(
@@ -197,7 +197,7 @@ void main() {
         home: Material(
           child: Center(
             child: TextFormField(
-              autovalidate: true,
+              autoValidateMode: AutoValidateMode.always,
               validator: (String value) {
                 _validateCalled++;
                 return null;
@@ -223,7 +223,7 @@ void main() {
           child: Center(
             child: TextFormField(
               enabled: true,
-              autovalidate: true,
+              autoValidateMode: AutoValidateMode.always,
               validator: (String value) {
                 _validateCalled += 1;
                 return null;
@@ -424,5 +424,47 @@ void main() {
 
     expect(find.text('initialValue'), findsNothing);
     expect(find.text('changedValue'), findsOneWidget);
+  });
+
+  testWidgets('autofillHints is passed to super', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              autofillHints: const <String>[AutofillHints.countryName],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TextField widget = tester.widget(find.byType(TextField));
+    expect(widget.autofillHints, equals(const <String>[AutofillHints.countryName]));
+  });
+
+  testWidgets('autoValidateMode is passed to super', (WidgetTester tester) async {
+    int _validateCalled = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Scaffold(
+            body: TextFormField(
+              autoValidateMode: AutoValidateMode.onUserInteraction,
+              validator: (String value) {
+                _validateCalled++;
+                return null;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(_validateCalled, 0);
+    await tester.enterText(find.byType(TextField), 'a');
+    await tester.pump();
+    expect(_validateCalled, 1);
   });
 }
