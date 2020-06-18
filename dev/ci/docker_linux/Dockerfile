@@ -127,3 +127,6 @@ RUN bundle config set system 'true' && \
 COPY bots/download_goldctl.sh /download_goldctl.sh
 ENV GOLDCTL '/depot_tools/goldctl'
 RUN /download_goldctl.sh
+
+# Adding a comment to clear any existing cache,
+# and to make sure we are using the latest versions.
