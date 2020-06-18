@@ -17,7 +17,8 @@
       "fuchsia.sysmem.Allocator",
       "fuchsia.vulkan.loader.Loader",
       "fuchsia.logger.LogSink",
-      "fuchsia.tracing.provider.Registry"
+      "fuchsia.tracing.provider.Registry",
+      "fuchsia.intl.PropertyProvider"
     ]
   }
 }
