@@ -772,16 +772,6 @@ config("no_rtti") {
 
 # Warnings ---------------------------------------------------------------------
 
-# This will generate warnings when using Clang if code generates exit-time
-# destructors, which will slow down closing the program.
-# TODO(thakis): Make this a blacklist instead, http://crbug.com/101600
-config("wexit_time_destructors") {
-  # TODO: Enable on Windows too, http://crbug.com/404525
-  if (is_clang && !is_win) {
-    cflags = [ "-Wexit-time-destructors" ]
-  }
-}
-
 # On Windows compiling on x64, VC will issue a warning when converting
 # size_t to int because it will truncate the value. Our code should not have
 # these warnings and one should use a static_cast or a checked_cast for the
