@@ -484,6 +484,8 @@ class LicensePage extends StatefulWidget {
 }
 
 class _LicensePageState extends State<LicensePage> {
+  final ValueNotifier<int> selectedId = ValueNotifier<int>(null);
+
   @override
   Widget build(BuildContext context) {
     return _MasterDetailFlow(
@@ -511,7 +513,11 @@ class _LicensePageState extends State<LicensePage> {
         version: widget.applicationVersion ?? _defaultApplicationVersion(context),
         legalese: widget.applicationLegalese,
       );
-    return _PackagesView(about: about, isLateral: isLateral);
+    return _PackagesView(
+      about: about,
+      isLateral: isLateral,
+      selectedId: selectedId,
+    );
   }
 }
 
@@ -573,20 +579,22 @@ class _AboutProgram extends StatelessWidget {
 class _PackagesView extends StatefulWidget {
   const _PackagesView({
     Key key,
-    this.about,
-    this.isLateral,
-  }) : super(key: key);
+    @required this.about,
+    @required this.isLateral,
+    @required this.selectedId,
+  })  : assert(about != null),
+        assert(isLateral != null),
+        super(key: key);
 
   final Widget about;
   final bool isLateral;
+  final ValueNotifier<int> selectedId;
 
   @override
   _PackagesViewState createState() => _PackagesViewState();
 }
 
 class _PackagesViewState extends State<_PackagesView> {
-  final ValueNotifier<int> selectedId = ValueNotifier<int>(null);
-
   final Future<_LicenseData> licenses = LicenseRegistry.licenses.fold<_LicenseData>(
     _LicenseData(),
     (_LicenseData prev, LicenseEntry license) => prev..addLicense(license),
@@ -607,7 +615,7 @@ class _PackagesViewState extends State<_PackagesView> {
                 case ConnectionState.done:
                   _initDefaultDetailPage(snapshot.data, context);
                   return ValueListenableBuilder<int>(
-                    valueListenable: selectedId,
+                    valueListenable: widget.selectedId,
                     builder: (BuildContext context, int selectedId, Widget _) {
                       return Center(
                         child: Material(
@@ -638,7 +646,7 @@ class _PackagesViewState extends State<_PackagesView> {
   }
 
   void _initDefaultDetailPage(_LicenseData data, BuildContext context) {
-    final String packageName = data.packages[selectedId.value ?? 0];
+    final String packageName = data.packages[widget.selectedId.value ?? 0];
     final List<int> bindings = data.packageLicenseBindings[packageName];
     _MasterDetailFlow.of(context).setInitialDetailPage(
       _DetailArguments(
@@ -670,7 +678,7 @@ class _PackagesViewState extends State<_PackagesView> {
             isSelected: drawSelection && entry.key == (selectedId ?? 0),
             numberLicenses: bindings.length,
             onTap: () {
-              this.selectedId.value = index;
+              widget.selectedId.value = index;
               _MasterDetailFlow.of(context).openDetailPage(_DetailArguments(
                 packageName,
                 bindings.map((int i) => data.licenses[i]).toList(growable: false),
