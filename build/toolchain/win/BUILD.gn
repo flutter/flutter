@@ -176,8 +176,9 @@ template("msvc_toolchain") {
       binary_output =
           "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"
       rspfile = "$binary_output.rsp"
+      pdbfile = "$binary_output.pdb"
 
-      link_command = "$python_path gyp-win-tool link-wrapper $env False link.exe /nologo /OUT:$binary_output /PDB:$binary_output.pdb @$rspfile"
+      link_command = "$python_path gyp-win-tool link-wrapper $env False link.exe /nologo /OUT:$binary_output /PDB:$pdbfile @$rspfile"
 
       # TODO(brettw) support manifests
       #manifest_command = "$python_path gyp-win-tool manifest-wrapper $env mt.exe -nologo -manifest $manifests -out:{{output}}.manifest"
@@ -188,7 +189,7 @@ template("msvc_toolchain") {
       description = "LINK $binary_output"
       outputs = [
         binary_output,
-        "{{root_out_dir}}/{{target_output_name}}.lib",
+        pdbfile,
       ]
 
       # The use of inputs_newline is to work around a fixed per-line buffer
