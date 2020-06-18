@@ -481,6 +481,7 @@ class _MonthPickerState extends State<_MonthPicker> {
   PageController _pageController;
   MaterialLocalizations _localizations;
   TextDirection _textDirection;
+  Map<LogicalKeySet, Intent> _shortcutMap;
   Map<Type, Action<Intent>> _actionMap;
   FocusNode _dayGridFocus;
   DateTime _focusedDay;
@@ -492,6 +493,12 @@ class _MonthPickerState extends State<_MonthPicker> {
     _previousMonthDate = utils.addMonthsToMonthDate(_currentMonth, -1);
     _nextMonthDate = utils.addMonthsToMonthDate(_currentMonth, 1);
     _pageController = PageController(initialPage: utils.monthDelta(widget.firstDate, _currentMonth));
+    _shortcutMap = <LogicalKeySet, Intent>{
+      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+      LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+      LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+    };
     _actionMap = <Type, Action<Intent>>{
       NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleGridNextFocus),
       PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handleGridPreviousFocus),
@@ -740,23 +747,22 @@ class _MonthPickerState extends State<_MonthPicker> {
             ),
           ),
           Expanded(
-            child: Actions(
+            child: FocusableActionDetector(
+              shortcuts: _shortcutMap,
               actions: _actionMap,
-              child: Focus(
-                focusNode: _dayGridFocus,
-                onFocusChange: _handleGridFocusChange,
-                child: _FocusedDate(
-                  date: _dayGridFocus.hasFocus ? _focusedDay : null,
-                  child: Container(
-                    color: _dayGridFocus.hasFocus ? Theme.of(context).focusColor : null,
-                    child: PageView.builder(
-                      key: _pageViewKey,
-                      controller: _pageController,
-                      itemBuilder: _buildItems,
-                      itemCount: utils.monthDelta(widget.firstDate, widget.lastDate) + 1,
-                      scrollDirection: Axis.horizontal,
-                      onPageChanged: _handleMonthPageChanged,
-                    ),
+              focusNode: _dayGridFocus,
+              onFocusChange: _handleGridFocusChange,
+              child: _FocusedDate(
+                date: _dayGridFocus.hasFocus ? _focusedDay : null,
+                child: Container(
+                  color: _dayGridFocus.hasFocus ? Theme.of(context).focusColor : null,
+                  child: PageView.builder(
+                    key: _pageViewKey,
+                    controller: _pageController,
+                    itemBuilder: _buildItems,
+                    itemCount: utils.monthDelta(widget.firstDate, widget.lastDate) + 1,
+                    scrollDirection: Axis.horizontal,
+                    onPageChanged: _handleMonthPageChanged,
                   ),
                 ),
               ),
