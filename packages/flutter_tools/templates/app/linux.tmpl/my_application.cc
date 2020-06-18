@@ -15,10 +15,14 @@ G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 static void my_application_activate(GApplication* application) {
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
+  GtkHeaderBar *header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
+  gtk_widget_show(GTK_WIDGET(header_bar));
+  gtk_header_bar_set_title(header_bar, kFlutterWindowTitle);
+  gtk_header_bar_set_show_close_button(header_bar, TRUE);
+  gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   gtk_widget_show(GTK_WIDGET(window));
   gtk_widget_set_size_request(GTK_WIDGET(window), kFlutterWindowWidth,
                               kFlutterWindowHeight);
-  gtk_window_set_title(window, kFlutterWindowTitle);
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
 
