@@ -18,7 +18,7 @@ import 'windows_workflow.dart';
 /// A device that represents a desktop Windows target.
 class WindowsDevice extends DesktopDevice {
   WindowsDevice() : super(
-      'Windows',
+      'windows',
       platformType: PlatformType.windows,
       ephemeral: false,
   );
@@ -27,7 +27,7 @@ class WindowsDevice extends DesktopDevice {
   bool isSupported() => true;
 
   @override
-  String get name => 'Windows';
+  String get name => 'Windows desktop';
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.windows_x64;
