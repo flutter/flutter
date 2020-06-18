@@ -317,16 +317,20 @@ class CreateCommand extends FlutterCommand {
 
     final FlutterProjectType template = _getProjectType(projectDir);
     final bool generateModule = template == FlutterProjectType.module;
-    final bool willGeneratePlugin = template == FlutterProjectType.plugin;
+    final bool generatePlugin = template == FlutterProjectType.plugin;
     final bool generatePackage = template == FlutterProjectType.package;
 
+    final List<String> platforms = stringsArg('platforms');
     // `--platforms` does not support module and package.
     if (argResults.wasParsed('platforms') && (generateModule || generatePackage)) {
-        String template = generateModule?'module':'package';
+        final String template = generateModule?'module':'package';
         throwToolExit(
           'The "--platforms" argument is not supported in $template template. please remove the argument and try again.',
           exitCode: 2
         );
+    } else if (platforms == null || platforms.isEmpty) {
+      throwToolExit('Must specify at least one platform using --platforms',
+          exitCode: 2);
     }
 
     String organization = stringArg('org');
@@ -355,19 +359,13 @@ class CreateCommand extends FlutterCommand {
       throwToolExit(error);
     }
 
-    final List<String> platforms = stringsArg('platforms');
-    if (platforms == null || platforms.isEmpty) {
-      throwToolExit('Must specify at least one platform using --platforms',
-          exitCode: 2);
-    }
-
     final Map<String, dynamic> templateContext = _createTemplateContext(
       organization: organization,
       projectName: projectName,
       projectDescription: stringArg('description'),
       flutterRoot: flutterRoot,
       renderDriverTest: boolArg('with-driver-test'),
-      withPluginHook: willGeneratePlugin,
+      withPluginHook: generatePlugin,
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
       ios: platforms.contains('ios'),
@@ -436,7 +434,14 @@ class CreateCommand extends FlutterCommand {
       if (globals.doctor.canLaunchAnything) {
         // Let them know a summary of the state of their tooling.
         await globals.doctor.summary();
-
+        final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
+        String platformsString = '';
+        for (int i = 0; i < platforms.length; i++) {
+          if (i != 0) {
+            platformsString += ', ';
+          }
+          platformsString += platforms[i];
+        }
         globals.printStatus('''
 In order to run your $application, type:
 
@@ -445,11 +450,11 @@ In order to run your $application, type:
 
 Your $application code is in $relativeAppMain.
 ''');
-        if (willGeneratePlugin) {
+        if (generatePlugin) {
           globals.printStatus('''
 Your plugin code is in $relativePluginMain.
 
-Host platform code is in the platform directories under $relativePluginPath.
+Host platform code is in the $platformsString directories under $relativePluginPath.
 To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
 ''');
         }
@@ -496,7 +501,13 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
   /// Adding argument is optional if the command does not require the user to explicitly state what platforms the project supports.
   void _addPlatformsOptions() {
     argParser.addMultiOption('platforms',
-        help: 'the platforms supported by this project.',
+        help: 'the platforms supported by this project.'
+          'This argument only works when the --template is set to app or plugin.'
+          'Respective folders will be generated in the target project.'
+          'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform.'
+          'When adding windows, linux or macos platforms, the platform feature has to be enable. Otherwise it would be a no-op.'
+          'To enable desktop features, run `flutter config --enable-<desktopName>-desktop.'
+          'For example, to enable for macos, run `flutter config --enable-macos-desktop.',
         defaultsTo: <String>[
           'ios',
           'android',
@@ -672,7 +683,7 @@ directory. You can also find a detailed instruction on how to add platforms in t
     return -files.length;
   }
 
-  Future<void> _updatePubspec(String projectDir, Map<String, dynamic> templateContext, String pluginClass, String androidIdentifier) async {
+  List<String> _getSupportedPlatformsFromTemplateContext(Map<String, dynamic> templateContext) {
     final List<String> platforms = <String>[];
     if (templateContext['ios'] as bool) {
       platforms.add('ios');
@@ -692,6 +703,11 @@ directory. You can also find a detailed instruction on how to add platforms in t
     if (templateContext['macos'] as bool) {
       platforms.add('macos');
     }
+    return platforms;
+  }
+
+  Future<void> _updatePubspec(String projectDir, Map<String, dynamic> templateContext, String pluginClass, String androidIdentifier) async {
+    final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
     final String pubspecPath = globals.fs.path.join(projectDir, 'pubspec.yaml');
     final YamlMap pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync()) as YamlMap;
     final bool isPubspecValid = _validatePubspec(pubspec);
