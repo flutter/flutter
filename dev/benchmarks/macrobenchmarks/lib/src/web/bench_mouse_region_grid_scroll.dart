@@ -74,7 +74,7 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
               children: List<Widget>.generate(
                 columnsCount,
                 (int columnIndex) => MouseRegion(
-                  onEnter: () {},
+                  onEnter: (_) {},
                   child: Container(
                     decoration: BoxDecoration(
                       border: _getBorder(columnIndex, rowIndex),
