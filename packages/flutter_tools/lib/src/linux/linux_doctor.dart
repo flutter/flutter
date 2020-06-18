@@ -17,7 +17,7 @@ class _VersionInfo {
   /// This should contain a version number. For example:
   ///     "clang version 9.0.1-6+build1"
   _VersionInfo(this.description) {
-    final String versionString = RegExp(r'[0-9]+\.[0-9]+\.[0-9]+').firstMatch(description).group(0);
+    final String versionString = RegExp(r'[0-9]+\.[0-9]+(?:\.[0-9]+)?').firstMatch(description).group(0);
     number = Version.parse(versionString);
   }
 
@@ -43,12 +43,20 @@ class LinuxDoctorValidator extends DoctorValidator {
   static const String kClangBinary = 'clang++';
   static const String kCmakeBinary = 'cmake';
   static const String kNinjaBinary = 'ninja';
+  static const String kPkgConfigBinary = 'pkg-config';
 
   final Map<String, Version> _requiredBinaryVersions = <String, Version>{
     kClangBinary: Version(3, 4, 0),
     kCmakeBinary: Version(3, 10, 0),
     kNinjaBinary: Version(1, 8, 0),
+    kPkgConfigBinary: Version(0, 29, 0),
   };
+
+  final List<String> _requiredLibraries = <String>[
+    'gtk+-3.0',
+    'glib-2.0',
+    'gio-2.0',
+  ];
 
   @override
   Future<ValidationResult> validate() async {
@@ -103,12 +111,42 @@ class LinuxDoctorValidator extends DoctorValidator {
       if (version == null) {
         messages.add(ValidationMessage.error(_userMessages.ninjaMissing));
       } else {
-        // The full version description is just the number, so context.
+        // The full version description is just the number, so add context.
         messages.add(ValidationMessage(_userMessages.ninjaVersion(version.description)));
         final Version requiredVersion = _requiredBinaryVersions[kNinjaBinary];
         if (version.number < requiredVersion) {
           messages.add(ValidationMessage.error(_userMessages.ninjaTooOld(requiredVersion.toString())));
         }
+      }
+    }
+
+    // Message for pkg-config.
+    {
+      final _VersionInfo version = installedVersions[kPkgConfigBinary];
+      if (version == null) {
+        messages.add(ValidationMessage.error(_userMessages.pkgConfigMissing));
+      } else {
+        // The full version description is just the number, so add context.
+        messages.add(ValidationMessage(_userMessages.pkgConfigVersion(version.description)));
+        final Version requiredVersion = _requiredBinaryVersions[kPkgConfigBinary];
+        if (version.number < requiredVersion) {
+          messages.add(ValidationMessage.error(_userMessages.pkgConfigTooOld(requiredVersion.toString())));
+        }
+      }
+    }
+
+    // Message for libraries.
+    {
+      bool libraryMissing = false;
+      for (final String library in _requiredLibraries) {
+        if (!await _libraryIsPresent(library)) {
+          libraryMissing = true;
+          break;
+        }
+      }
+      if (libraryMissing) {
+        validationType = ValidationType.missing;
+        messages.add(ValidationMessage.error(_userMessages.gtkLibrariesMissing));
       }
     }
 
@@ -134,5 +172,20 @@ class LinuxDoctorValidator extends DoctorValidator {
     }
     final String firstLine = (result.stdout as String).split('\n').first.trim();
     return _VersionInfo(firstLine);
+  }
+
+  /// Checks that [library] is available via pkg-config.
+  Future<bool> _libraryIsPresent(String library) async {
+    ProcessResult result;
+    try {
+      result = await _processManager.run(<String>[
+        'pkg-config',
+        '--exists',
+        library,
+      ]);
+    } on ArgumentError {
+      // ignore error.
+    }
+    return (result?.exitCode ?? 1) == 0;
   }
 }
