@@ -484,171 +484,45 @@ class LicensePage extends StatefulWidget {
 }
 
 class _LicensePageState extends State<LicensePage> {
-  final ValueNotifier<int> selectedId = ValueNotifier<int>(null);
-
-  final Future<_LicenseData> licenses =
-    LicenseRegistry.licenses.fold<_LicenseData>(
-      _LicenseData(),
-      (_LicenseData previous, LicenseEntry license) => previous..addLicense(license),
-    );
-
   @override
   Widget build(BuildContext context) {
     return _MasterDetailFlow(
       detailPageFABlessGutterWidth: _getGutterSize(context),
       title: Text(MaterialLocalizations.of(context).licensesPageTitle),
-      masterViewBuilder: _buildPackagesView,
-      detailPageBuilder: _buildPackageLicensePage,
+      detailPageBuilder: _packageLicensePage,
+      masterViewBuilder: _packagesView,
     );
   }
 
-  Widget _buildPackagesView(final BuildContext _, final bool isLateral) {
-    return FutureBuilder<_LicenseData>(
-        future: licenses,
-        builder: (BuildContext context, AsyncSnapshot<_LicenseData> snapshot) {
-          return AnimatedSwitcher(
-            transitionBuilder: (Widget child, Animation<double> animation) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            duration: kThemeAnimationDuration,
-            child: LayoutBuilder(
-              key: ValueKey<ConnectionState>(snapshot.connectionState),
-              builder: (BuildContext context, BoxConstraints constraints) {
-                switch (snapshot.connectionState) {
-                  case ConnectionState.done:
-                    _initDefaultDetailPage(snapshot.data, context);
-                    return ValueListenableBuilder<int>(
-                      valueListenable: selectedId,
-                      builder:
-                          (BuildContext context, int selectedId, Widget _) {
-                        return Center(
-                          child: Material(
-                            color: Theme.of(context).cardColor,
-                            elevation: 4,
-                            child: Container(
-                              constraints: BoxConstraints.loose(
-                                  const Size.fromWidth(600)),
-                              child: _buildPackagesList(
-                                context,
-                                selectedId,
-                                snapshot.data,
-                                isLateral,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  default:
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        _AboutProgram(
-                          name: widget.applicationName ??
-                              _defaultApplicationName(context),
-                          icon: widget.applicationIcon ??
-                              _defaultApplicationIcon(context),
-                          version: widget.applicationVersion ??
-                              _defaultApplicationVersion(context),
-                          legalese: widget.applicationLegalese,
-                        ),
-                        const Center(child: CircularProgressIndicator()),
-                      ],
-                    );
-                }
-              },
-            ),
-          );
-        },
-    );
-  }
-
-  void _initDefaultDetailPage(_LicenseData data, BuildContext context) {
-    final String packageName = data.packages[selectedId.value ?? 0];
-    final List<int> bindings = data.packageLicenseBindings[packageName];
-    _MasterDetailFlow.of(context).setInitialDetailPage(
-      _DetailArguments(
-        packageName,
-        bindings.map((int i) => data.licenses[i]).toList(growable: false),
-      ),
-    );
-  }
-
-  Widget _buildPackagesList(
-    final BuildContext context,
-    final int selectedId,
-    final _LicenseData data,
-    final bool drawSelection,
-  ) {
-    return ListView(
-      children: <Widget>[
-        _AboutProgram(
-          name: widget.applicationName ?? _defaultApplicationName(context),
-          icon: widget.applicationIcon ?? _defaultApplicationIcon(context),
-          version:
-              widget.applicationVersion ?? _defaultApplicationVersion(context),
-          legalese: widget.applicationLegalese,
-        ),
-        ...data.packages
-            .asMap()
-            .entries
-            .map<Widget>((MapEntry<int, String> entry) {
-          return _buildPackageTile(context, entry.value, entry.key,
-              drawSelection && entry.key == (selectedId ?? 0), data);
-        }),
-      ],
-    );
-  }
-
-  Widget _buildPackageTile(final BuildContext context, final String packageName,
-      final int index, final bool isSelected, final _LicenseData data,
-  ) {
-    final List<int> bindings = data.packageLicenseBindings[packageName];
-    return Ink(
-      color: isSelected
-          ? Theme.of(context).highlightColor
-          : Theme.of(context).cardColor,
-      child: ListTile(
-        title: Text(packageName),
-        subtitle: Text(
-          MaterialLocalizations.of(context)
-              .licensesPackageDetailText(bindings.length),
-        ),
-        selected: isSelected,
-        onTap: () {
-          selectedId.value = index;
-          _MasterDetailFlow.of(context).openDetailPage(_DetailArguments(
-            packageName,
-            bindings.map((int i) => data.licenses[i]).toList(growable: false),
-          ));
-        },
-      ),
-    );
-  }
-
-  Widget _buildPackageLicensePage(
-    final BuildContext context,
-    final Object arguments,
-    final ScrollController scrollController,
-  ) {
-    assert(arguments is _DetailArguments);
-    final _DetailArguments args = arguments as _DetailArguments;
+  Widget _packageLicensePage(BuildContext _, Object args, ScrollController sc) {
+    assert(args is _DetailArguments);
+    final _DetailArguments a = args as _DetailArguments;
     return _PackageLicensePage(
-      packageName: args.packageName,
-      licenseEntries: args.licenseEntries,
-      scrollController: scrollController,
+      packageName: a.packageName,
+      licenseEntries: a.licenseEntries,
+      scrollController: sc,
     );
+  }
+
+  Widget _packagesView(final BuildContext _, final bool isLateral) {
+    final Widget about = _AboutProgram(
+        name: widget.applicationName ?? _defaultApplicationName(context),
+        icon: widget.applicationIcon ?? _defaultApplicationIcon(context),
+        version: widget.applicationVersion ?? _defaultApplicationVersion(context),
+        legalese: widget.applicationLegalese,
+      );
+    return _PackagesView(about: about, isLateral: isLateral);
   }
 }
 
 class _AboutProgram extends StatelessWidget {
-  const _AboutProgram(
-      {Key key,
-      @required this.name,
-      @required this.version,
-      this.icon,
-      this.legalese})
-      : assert(name != null),
+  const _AboutProgram({
+    Key key,
+    @required this.name,
+    @required this.version,
+    this.icon,
+    this.legalese,
+  })  : assert(name != null),
         assert(version != null),
         super(key: key);
 
@@ -672,10 +546,7 @@ class _AboutProgram extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           if (icon != null)
-            IconTheme(
-              data: Theme.of(context).iconTheme,
-              child: icon,
-            ),
+            IconTheme(data: Theme.of(context).iconTheme, child: icon),
           Text(
             version,
             style: Theme.of(context).textTheme.bodyText2,
@@ -694,6 +565,149 @@ class _AboutProgram extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PackagesView extends StatefulWidget {
+  const _PackagesView({
+    Key key,
+    this.about,
+    this.isLateral,
+  }) : super(key: key);
+
+  final Widget about;
+  final bool isLateral;
+
+  @override
+  _PackagesViewState createState() => _PackagesViewState();
+}
+
+class _PackagesViewState extends State<_PackagesView> {
+  final ValueNotifier<int> selectedId = ValueNotifier<int>(null);
+
+  final Future<_LicenseData> licenses = LicenseRegistry.licenses.fold<_LicenseData>(
+    _LicenseData(),
+    (_LicenseData prev, LicenseEntry license) => prev..addLicense(license),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<_LicenseData>(
+      future: licenses,
+      builder: (BuildContext context, AsyncSnapshot<_LicenseData> snapshot) {
+        return AnimatedSwitcher(
+          transitionBuilder: (Widget child, Animation<double> animation) => FadeTransition(opacity: animation, child: child),
+          duration: kThemeAnimationDuration,
+          child: LayoutBuilder(
+            key: ValueKey<ConnectionState>(snapshot.connectionState),
+            builder: (BuildContext context, BoxConstraints constraints) {
+              switch (snapshot.connectionState) {
+                case ConnectionState.done:
+                  _initDefaultDetailPage(snapshot.data, context);
+                  return ValueListenableBuilder<int>(
+                    valueListenable: selectedId,
+                    builder: (BuildContext context, int selectedId, Widget _) {
+                      return Center(
+                        child: Material(
+                          color: Theme.of(context).cardColor,
+                          elevation: 4,
+                          child: Container(
+                            constraints: BoxConstraints.loose(const Size.fromWidth(600)),
+                            child: _packagesList(context, selectedId, snapshot.data, widget.isLateral),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                default:
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      widget.about,
+                      const Center(child: CircularProgressIndicator()),
+                    ],
+                  );
+              }
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  void _initDefaultDetailPage(_LicenseData data, BuildContext context) {
+    final String packageName = data.packages[selectedId.value ?? 0];
+    final List<int> bindings = data.packageLicenseBindings[packageName];
+    _MasterDetailFlow.of(context).setInitialDetailPage(
+      _DetailArguments(
+        packageName,
+        bindings.map((int i) => data.licenses[i]).toList(growable: false),
+      ),
+    );
+  }
+
+  Widget _packagesList(
+    final BuildContext context,
+    final int selectedId,
+    final _LicenseData data,
+    final bool drawSelection,
+  ) {
+    return ListView(
+      children: <Widget>[
+        widget.about,
+        ...data.packages
+            .asMap()
+            .entries
+            .map<Widget>((MapEntry<int, String> entry) {
+          final String packageName = entry.value;
+          final int index = entry.key;
+          final List<int> bindings = data.packageLicenseBindings[packageName];
+          return _PackageListTile(
+            packageName: packageName,
+            index: index,
+            isSelected: drawSelection && entry.key == (selectedId ?? 0),
+            numberLicenses: bindings.length,
+            onTap: () {
+              this.selectedId.value = index;
+              _MasterDetailFlow.of(context).openDetailPage(_DetailArguments(
+                packageName,
+                bindings.map((int i) => data.licenses[i]).toList(growable: false),
+              ));
+            },
+          );
+        }),
+      ],
+    );
+  }
+}
+
+class _PackageListTile extends StatelessWidget {
+  const _PackageListTile({
+    Key key,
+    this.packageName,
+    this.index,
+    this.isSelected,
+    this.numberLicenses,
+    this.onTap,
+}) : super(key:key);
+
+  final String packageName;
+  final int index;
+  final bool isSelected;
+  final int numberLicenses;
+  final GestureTapCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Ink(
+      color: isSelected ? Theme.of(context).highlightColor : Theme.of(context).cardColor,
+      child: ListTile(
+        title: Text(packageName),
+        subtitle: Text(MaterialLocalizations.of(context).licensesPackageDetailText(numberLicenses)),
+        selected: isSelected,
+        onTap: onTap,
       ),
     );
   }
@@ -1222,24 +1236,24 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
   Widget build(BuildContext context) {
     switch (widget.displayMode) {
       case _LayoutMode.nested:
-        return _buildNestedUI(context);
+        return _nestedUI(context);
       case _LayoutMode.lateral:
-        return _buildLateralUI(context);
+        return _lateralUI(context);
       case _LayoutMode.auto:
       default:
         return LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
               final double availableWidth = constraints.maxWidth;
               if (availableWidth >= (widget.breakpoint ?? 840)) {
-                return _buildLateralUI(context);
+                return _lateralUI(context);
               } else {
-                return _buildNestedUI(context);
+                return _nestedUI(context);
               }
             });
     }
   }
 
-  Widget _buildNestedUI(BuildContext context) {
+  Widget _nestedUI(BuildContext context) {
     _builtLayout = _LayoutMode.nested;
     final MaterialPageRoute<void> masterPageRoute = _masterPageRoute(context);
 
@@ -1305,44 +1319,33 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
   }
 
   MaterialPageRoute<void> _detailPageRoute(Object arguments) {
-    return MaterialPageRoute<dynamic>(
-              builder: (BuildContext context) => WillPopScope(
-                onWillPop: () async {
-                  // No need for setState() as rebuild happens on navigation pop.
-                  focus = _Focus.master;
-                  Navigator.of(context).pop();
-                  return false;
-                },
-                child: BlockSemantics(
-                  child: widget.detailPageBuilder(context, arguments, null),
-                ),
-              ),
-            );
+    return MaterialPageRoute<dynamic>(builder: (BuildContext context) {
+      return WillPopScope(
+        onWillPop: () async {
+          // No need for setState() as rebuild happens on navigation pop.
+          focus = _Focus.master;
+          Navigator.of(context).pop();
+          return false;
+        },
+        child: BlockSemantics(child: widget.detailPageBuilder(context, arguments, null)),
+      );
+    });
   }
 
-  Widget _buildLateralUI(BuildContext context) {
+  Widget _lateralUI(BuildContext context) {
     _builtLayout = _LayoutMode.lateral;
     return _MasterDetailScaffold(
-      actionBuilder: widget.actionBuilder ??
-              (BuildContext context, _ActionLevel actionLevel) => const
-              <Widget>[],
+      actionBuilder: widget.actionBuilder ?? (_, __) => const<Widget>[],
       automaticallyImplyLeading: widget.automaticallyImplyLeading,
       centerTitle: widget.centerTitle,
-      detailPageBuilder: (BuildContext context, Object arguments,
-          ScrollController scrollController) =>
-          widget.detailPageBuilder(
-            context,
-            arguments ?? _cachedDetailArguments,
-            scrollController,
-          ),
+      detailPageBuilder: (BuildContext context, Object args, ScrollController sc) => widget.detailPageBuilder(context, args ?? _cachedDetailArguments, sc),
       floatingActionButton: widget.floatingActionButton,
       detailPageFABlessGutterWidth: widget.detailPageFABlessGutterWidth,
       detailPageFABGutterWidth: widget.detailPageFABGutterWidth,
       floatingActionButtonLocation: widget.floatingActionButtonLocation,
       initialArguments: _cachedDetailArguments,
       leading: widget.leading,
-      masterViewBuilder: (BuildContext context, bool isLateral) =>
-          widget.masterViewBuilder(context, isLateral),
+      masterViewBuilder: (BuildContext context, bool isLateral) => widget.masterViewBuilder(context, isLateral),
       masterViewWidth: widget.masterViewWidth,
       title: widget.title,
     );
@@ -1507,7 +1510,7 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
               ),
             ),
           ),
-          body: _buildMasterPanel(context),
+          body: _masterPanel(context),
           floatingActionButton: widget.floatingActionButton,
         ),
         // Detail view stacked above main scaffold and master view.
@@ -1546,22 +1549,20 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
     );
   }
 
-  ConstrainedBox _buildMasterPanel(
-      BuildContext context, {
-        bool needsScaffold = false,
-      }) {
+  ConstrainedBox _masterPanel(BuildContext context, {bool needsScaffold = false}) {
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: masterViewWidth),
       child: needsScaffold
           ? Scaffold(
-          appBar: AppBar(
-            title: widget.title,
-            actions: widget.actionBuilder(context, _ActionLevel.top),
-            leading: widget.leading,
-            automaticallyImplyLeading: widget.automaticallyImplyLeading,
-            centerTitle: widget.centerTitle,
-          ),
-          body: widget.masterViewBuilder(context, true))
+              appBar: AppBar(
+                title: widget.title,
+                actions: widget.actionBuilder(context, _ActionLevel.top),
+                leading: widget.leading,
+                automaticallyImplyLeading: widget.automaticallyImplyLeading,
+                centerTitle: widget.centerTitle,
+              ),
+              body: widget.masterViewBuilder(context, true),
+            )
           : widget.masterViewBuilder(context, true),
     );
   }
