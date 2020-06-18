@@ -4165,8 +4165,9 @@ void main() {
   testWidgets('InputDecorator label width isn\'t affected by prefix or suffix', (WidgetTester tester) async {
     const String labelText = 'My Label';
     const String prefixText = 'The five boxing wizards jump quickly.';
+    const String suffixText = 'Suffix';
 
-    Widget getLabeledInputDecorator(bool showPrefix) {
+    Widget getLabeledInputDecorator(bool showFix) {
       return MaterialApp(
         home: Material(
           child: Builder(
@@ -4178,7 +4179,8 @@ void main() {
                   child: TextField(
                     decoration: InputDecoration(
                       icon: const Icon(Icons.assistant),
-                      prefixText: showPrefix ? prefixText : null,
+                      prefixText: showFix ? prefixText : null,
+                      suffixText: showFix ? suffixText : null,
                       suffixIcon: const Icon(Icons.threesixty),
                       labelText: labelText,
                     ),
@@ -4191,28 +4193,31 @@ void main() {
       );
     }
 
-    // Build with no prefix.
+    // Build with no prefix or suffix.
     await tester.pumpWidget(getLabeledInputDecorator(false));
 
-    // Get the width of the label when there is no prefix.
+    // Get the width of the label when there is no prefix/suffix.
     expect(find.text(prefixText), findsNothing);
+    expect(find.text(suffixText), findsNothing);
     final double labelWidth = tester.getSize(find.text(labelText)).width;
 
-    // Build with a prefix.
+    // Build with a prefix and suffix.
     await tester.pumpWidget(getLabeledInputDecorator(true));
 
-    // The prefix exists but isn't visible. It has not affected the width of the
-    // label.
+    // The prefix and suffix exist but aren't visible. They have not affected
+    // the width of the label.
     expect(find.text(prefixText), findsOneWidget);
     expect(getOpacity(tester, prefixText), 0.0);
+    expect(find.text(suffixText), findsOneWidget);
+    expect(getOpacity(tester, suffixText), 0.0);
     expect(tester.getSize(find.text(labelText)).width, labelWidth);
 
     // Tap to focus.
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
 
-    // The prefix is visible, and the label is floating and still hasn't had its
-    // width affected.
+    // The prefix and suffix are visible, and the label is floating and still
+    // hasn't had its width affected.
     expect(tester.getSize(find.text(labelText)).width, labelWidth);
     expect(getOpacity(tester, prefixText), 1.0);
   });
