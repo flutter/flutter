@@ -298,28 +298,54 @@ void main() {
     expect(glyphText.text.style.fontSize, 20.0);
   });
 
-  testWidgets('hint color has correct default', (WidgetTester tester) async {
+  testWidgets('default hint color passes contract test - light', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Text('dummy'),
+        home: Scaffold(
+          body: TextField(
+            decoration: InputDecoration(
+              labelText: 'label text',
+            ),
+          ),
+        ),
       ),
     );
-    ThemeData data = tester.widget<Theme>(find.byType(Theme)).data;
-    expect(data.hintColor, const Color(0x99000000));
+    await expectLater(
+      tester,
+      meetsGuideline(
+        CustomMinimumContrastGuideline(
+          finder: find.text('label text'),
+          minimumRatio: 5.5,
+        ),
+      )
+    );
+  });
 
+  testWidgets('default hint color passes contract test - dark', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.dark(),
-        home: const Text('dummy'),
+        home: const Scaffold(
+          body: TextField(
+            decoration: InputDecoration(
+              labelText: 'label text',
+            ),
+          ),
+        ),
       ),
     );
 
-    // Waits for theme transition.
-    await tester.pumpAndSettle();
-
-    data = tester.widget<Theme>(find.byType(Theme)).data;
-    expect(data.hintColor, const Color(0x99FFFFFF));
+    await expectLater(
+      tester,
+      meetsGuideline(
+        CustomMinimumContrastGuideline(
+          finder: find.text('label text'),
+          minimumRatio: 5.5,
+        ),
+      )
+    );
   });
+
 
   testWidgets(
     'Same ThemeData reapplied does not trigger descendants rebuilds',
