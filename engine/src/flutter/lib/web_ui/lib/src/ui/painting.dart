@@ -1581,6 +1581,7 @@ Future<Codec> instantiateImageCodec(
   Uint8List list, {
   int? targetWidth,
   int? targetHeight,
+  bool allowUpscaling = true,
 }) {
   return _futurize<Codec>((engine.Callback<Codec> callback) =>
       // TODO: Implement targetWidth and targetHeight support.
@@ -1647,9 +1648,12 @@ void decodeImageFromPixels(
   int width,
   int height,
   PixelFormat format,
-  ImageDecoderCallback callback,
-  {int? rowBytes, int? targetWidth, int? targetHeight}
-) {
+  ImageDecoderCallback callback, {
+  int? rowBytes,
+  int? targetWidth,
+  int? targetHeight,
+  bool allowUpscaling = true,
+}) {
   final _ImageInfo imageInfo =
       _ImageInfo(width, height, format.index, rowBytes);
   final Future<Codec> codecFuture = _futurize(
