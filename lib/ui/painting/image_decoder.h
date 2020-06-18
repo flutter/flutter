@@ -23,6 +23,9 @@
 
 namespace flutter {
 
+// Whether to allow for image upscaling when resizing an image.
+enum class ImageUpscalingMode { kAllowed, kNotAllowed };
+
 // An object that coordinates image decompression and texture upload across
 // multiple threads/components in the shell. This object must be created,
 // accessed and collected on the UI thread (typically the engine or its runtime
@@ -47,6 +50,7 @@ class ImageDecoder {
     std::optional<ImageInfo> decompressed_image_info;
     std::optional<uint32_t> target_width;
     std::optional<uint32_t> target_height;
+    ImageUpscalingMode image_upscaling = ImageUpscalingMode::kNotAllowed;
   };
 
   using ImageResult = std::function<void(SkiaGPUObject<SkImage>)>;
@@ -72,6 +76,7 @@ class ImageDecoder {
 sk_sp<SkImage> ImageFromCompressedData(sk_sp<SkData> data,
                                        std::optional<uint32_t> target_width,
                                        std::optional<uint32_t> target_height,
+                                       ImageUpscalingMode image_upscaling,
                                        const fml::tracing::TraceFlow& flow);
 
 }  // namespace flutter
