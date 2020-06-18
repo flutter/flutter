@@ -18,25 +18,21 @@ void main() {
   test('TimePickerThemeData null fields by default', () {
     const TimePickerThemeData timePickerTheme = TimePickerThemeData();
     expect(timePickerTheme.backgroundColor, null);
-    expect(timePickerTheme.hourMinuteSelectedTextColor, null);
-    expect(timePickerTheme.hourMinuteSelectedColor, null);
-    expect(timePickerTheme.hourMinuteUnselectedTextColor, null);
-    expect(timePickerTheme.hourMinuteUnselectedColor, null);
-    expect(timePickerTheme.dayPeriodSelectedTextColor, null);
-    expect(timePickerTheme.dayPeriodSelectedColor, null);
-    expect(timePickerTheme.dayPeriodUnselectedTextColor, null);
-    expect(timePickerTheme.dayPeriodUnselectedColor, null);
+    expect(timePickerTheme.hourMinuteTextColor, null);
+    expect(timePickerTheme.hourMinuteColor, null);
+    expect(timePickerTheme.dayPeriodTextColor, null);
+    expect(timePickerTheme.dayPeriodColor, null);
     expect(timePickerTheme.dialHandColor, null);
     expect(timePickerTheme.dialBackgroundColor, null);
     expect(timePickerTheme.dialHandColor, null);
     expect(timePickerTheme.dialBackgroundColor, null);
-    expect(timePickerTheme.dayPeriodBorderColor, null);
     expect(timePickerTheme.hourMinuteTextStyle, null);
     expect(timePickerTheme.dayPeriodTextStyle, null);
     expect(timePickerTheme.helpTextStyle, null);
     expect(timePickerTheme.shape, null);
     expect(timePickerTheme.hourMinuteShape, null);
     expect(timePickerTheme.dayPeriodShape, null);
+    expect(timePickerTheme.dayPeriodBorderSide, null);
     expect(timePickerTheme.inputDecorationTheme, null);
   });
 
@@ -56,23 +52,19 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TimePickerThemeData(
       backgroundColor: Color(0xFFFFFFFF),
-      hourMinuteSelectedTextColor: Color(0xFFFFFFFF),
-      hourMinuteSelectedColor: Color(0xFFFFFFFF),
-      hourMinuteUnselectedTextColor: Color(0xFFFFFFFF),
-      hourMinuteUnselectedColor: Color(0xFFFFFFFF),
-      dayPeriodSelectedTextColor: Color(0xFFFFFFFF),
-      dayPeriodSelectedColor: Color(0xFFFFFFFF),
-      dayPeriodUnselectedTextColor: Color(0xFFFFFFFF),
-      dayPeriodUnselectedColor: Color(0xFFFFFFFF),
+      hourMinuteTextColor: Color(0xFFFFFFFF),
+      hourMinuteColor: Color(0xFFFFFFFF),
+      dayPeriodTextColor: Color(0xFFFFFFFF),
+      dayPeriodColor: Color(0xFFFFFFFF),
       dialHandColor: Color(0xFFFFFFFF),
       dialBackgroundColor: Color(0xFFFFFFFF),
-      dayPeriodBorderColor: Color(0xFFFFFFFF),
       hourMinuteTextStyle: TextStyle(),
       dayPeriodTextStyle: TextStyle(),
       helpTextStyle: TextStyle(),
       shape: RoundedRectangleBorder(),
       hourMinuteShape: RoundedRectangleBorder(),
       dayPeriodShape: RoundedRectangleBorder(),
+      dayPeriodBorderSide: BorderSide(),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -82,23 +74,19 @@ void main() {
 
     expect(description, <String>[
       'backgroundColor: Color(0xffffffff)',
-      'hourMinuteSelectedTextColor: Color(0xffffffff)',
-      'hourMinuteSelectedColor: Color(0xffffffff)',
-      'hourMinuteUnselectedTextColor: Color(0xffffffff)',
-      'hourMinuteUnselectedColor: Color(0xffffffff)',
-      'dayPeriodSelectedTextColor: Color(0xffffffff)',
-      'dayPeriodSelectedColor: Color(0xffffffff)',
-      'dayPeriodUnselectedTextColor: Color(0xffffffff)',
-      'dayPeriodUnselectedColor: Color(0xffffffff)',
+      'hourMinuteTextColor: Color(0xffffffff)',
+      'hourMinuteColor: Color(0xffffffff)',
+      'dayPeriodTextColor: Color(0xffffffff)',
+      'dayPeriodColor: Color(0xffffffff)',
       'dialHandColor: Color(0xffffffff)',
       'dialBackgroundColor: Color(0xffffffff)',
-      'dayPeriodBorderColor: Color(0xffffffff)',
       'hourMinuteTextStyle: TextStyle(<all styles inherited>)',
       'dayPeriodTextStyle: TextStyle(<all styles inherited>)',
       'helpTextStyle: TextStyle(<all styles inherited>)',
       'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
       'hourMinuteShape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
       'dayPeriodShape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
+      'dayPeriodBorderSide: BorderSide(Color(0xff000000), 1.0, BorderStyle.solid)',
     ]);
   });
 
@@ -173,27 +161,23 @@ void main() {
     final Material pmMaterial = _textMaterial(tester, 'PM');
     expect(pmMaterial.color, Colors.transparent);
 
+    final Color expectedBorderColor = Color.alphaBlend(
+      defaultTheme.colorScheme.onBackground.withOpacity(0.38),
+      defaultTheme.colorScheme.surface,
+    );
     final Material dayPeriodMaterial = _dayPeriodMaterial(tester);
     expect(
       dayPeriodMaterial.shape,
       RoundedRectangleBorder(
         borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-        side: BorderSide(
-          color: Color.alphaBlend(
-            defaultTheme.colorScheme.onBackground.withOpacity(0.38),
-            defaultTheme.colorScheme.surface,
-          ),
-        ),
+        side: BorderSide(color: expectedBorderColor),
       ),
     );
 
-    final VerticalDivider dayPeriodDivider = _dayPeriodDivider(tester);
+    final Container dayPeriodDivider = _dayPeriodDivider(tester);
     expect(
-      dayPeriodDivider.color,
-      Color.alphaBlend(
-        defaultTheme.colorScheme.onBackground.withOpacity(0.38),
-        defaultTheme.colorScheme.surface,
-      ),
+      dayPeriodDivider.decoration,
+      BoxDecoration(border: Border(left: BorderSide(color: expectedBorderColor))),
     );
   });
 
@@ -243,7 +227,7 @@ void main() {
       Typography.material2014().englishLike.bodyText2
           .merge(Typography.material2014().black.bodyText2)
           .merge(timePickerTheme.hourMinuteTextStyle)
-          .copyWith(color: timePickerTheme.hourMinuteSelectedTextColor),
+          .copyWith(color: _selectedColor),
     );
 
     final RenderParagraph minuteText = _textRenderParagraph(tester, '15');
@@ -252,7 +236,7 @@ void main() {
       Typography.material2014().englishLike.bodyText2
           .merge(Typography.material2014().black.bodyText2)
           .merge(timePickerTheme.hourMinuteTextStyle)
-          .copyWith(color: timePickerTheme.hourMinuteUnselectedTextColor),
+          .copyWith(color: _unselectedColor),
     );
 
     final RenderParagraph amText = _textRenderParagraph(tester, 'AM');
@@ -261,7 +245,7 @@ void main() {
       Typography.material2014().englishLike.subtitle1
           .merge(Typography.material2014().black.subtitle1)
           .merge(timePickerTheme.dayPeriodTextStyle)
-          .copyWith(color: timePickerTheme.dayPeriodSelectedTextColor),
+          .copyWith(color: _selectedColor),
     );
 
     final RenderParagraph pmText = _textRenderParagraph(tester, 'PM');
@@ -270,7 +254,7 @@ void main() {
       Typography.material2014().englishLike.subtitle1
           .merge(Typography.material2014().black.subtitle1)
           .merge(timePickerTheme.dayPeriodTextStyle)
-          .copyWith(color: timePickerTheme.dayPeriodUnselectedTextColor),
+          .copyWith(color: _unselectedColor),
     );
 
     final RenderParagraph helperText = _textRenderParagraph(tester, 'SELECT TIME');
@@ -282,24 +266,30 @@ void main() {
     );
 
     final Material hourMaterial = _textMaterial(tester, '7');
-    expect(hourMaterial.color, timePickerTheme.hourMinuteSelectedColor);
+    expect(hourMaterial.color, _selectedColor);
     expect(hourMaterial.shape, timePickerTheme.hourMinuteShape);
 
     final Material minuteMaterial = _textMaterial(tester, '15');
-    expect(minuteMaterial.color, timePickerTheme.hourMinuteUnselectedColor);
+    expect(minuteMaterial.color, _unselectedColor);
     expect(minuteMaterial.shape, timePickerTheme.hourMinuteShape);
 
     final Material amMaterial = _textMaterial(tester, 'AM');
-    expect(amMaterial.color, timePickerTheme.dayPeriodSelectedColor);
+    expect(amMaterial.color, _selectedColor);
 
     final Material pmMaterial = _textMaterial(tester, 'PM');
-    expect(pmMaterial.color, timePickerTheme.dayPeriodUnselectedColor);
+    expect(pmMaterial.color, _unselectedColor);
 
     final Material dayPeriodMaterial = _dayPeriodMaterial(tester);
-    expect(dayPeriodMaterial.shape, timePickerTheme.dayPeriodShape);
+    expect(
+      dayPeriodMaterial.shape,
+      timePickerTheme.dayPeriodShape.copyWith(side: timePickerTheme.dayPeriodBorderSide),
+    );
 
-    final VerticalDivider dayPeriodDivider = _dayPeriodDivider(tester);
-    expect(dayPeriodDivider.color, timePickerTheme.dayPeriodBorderColor);
+    final Container dayPeriodDivider = _dayPeriodDivider(tester);
+    expect(
+      dayPeriodDivider.decoration,
+      BoxDecoration(border: Border(left: timePickerTheme.dayPeriodBorderSide)),
+    );
   });
 
   testWidgets('Time picker uses values from TimePickerThemeData - input mode', (WidgetTester tester) async {
@@ -320,26 +310,29 @@ void main() {
   });
 }
 
+final Color _selectedColor = Colors.green[100];
+final Color _unselectedColor = Colors.green[200];
+
 TimePickerThemeData _timePickerTheme() {
+  Color getColor(Set<MaterialState> states) {
+    return states.contains(MaterialState.selected) ? _selectedColor : _unselectedColor;
+  }
+  final MaterialStateColor materialStateColor = MaterialStateColor.resolveWith(getColor);
   return TimePickerThemeData(
     backgroundColor: Colors.orange,
-    hourMinuteSelectedTextColor: Colors.green[100],
-    hourMinuteSelectedColor: Colors.green[200],
-    hourMinuteUnselectedTextColor: Colors.green[300],
-    hourMinuteUnselectedColor: Colors.green[400],
-    dayPeriodSelectedTextColor: Colors.green[500],
-    dayPeriodSelectedColor: Colors.green[600],
-    dayPeriodUnselectedTextColor: Colors.green[700],
-    dayPeriodUnselectedColor: Colors.green[800],
+    hourMinuteTextColor: materialStateColor,
+    hourMinuteColor: materialStateColor,
+    dayPeriodTextColor: materialStateColor,
+    dayPeriodColor: materialStateColor,
     dialHandColor: Colors.brown,
     dialBackgroundColor: Colors.pinkAccent,
-    dayPeriodBorderColor: Colors.teal,
     hourMinuteTextStyle: const TextStyle(fontSize: 8.0),
     dayPeriodTextStyle: const TextStyle(fontSize: 8.0),
     helpTextStyle: const TextStyle(fontSize: 8.0),
     shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
     hourMinuteShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
     dayPeriodShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
+    dayPeriodBorderSide: const BorderSide(color: Colors.blueAccent),
     inputDecorationTheme: const InputDecorationTheme(
       filled: true,
       fillColor: Colors.purple,
@@ -404,8 +397,8 @@ Material _dayPeriodMaterial(WidgetTester tester) {
   return tester.widget<Material>(find.descendant(of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'), matching: find.byType(Material)).first);
 }
 
-VerticalDivider _dayPeriodDivider(WidgetTester tester) {
-  return tester.widget<VerticalDivider>(find.descendant(of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'), matching: find.byType(VerticalDivider)).first);
+Container _dayPeriodDivider(WidgetTester tester) {
+  return tester.widget<Container>(find.descendant(of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'), matching: find.byType(Container)).at(1));
 }
 
 RenderParagraph _textRenderParagraph(WidgetTester tester, String text) {

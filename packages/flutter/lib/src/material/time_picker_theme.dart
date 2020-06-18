@@ -35,23 +35,19 @@ class TimePickerThemeData with Diagnosticable {
   /// [ThemeData.timePickerTheme].
   const TimePickerThemeData({
     this.backgroundColor,
-    this.hourMinuteSelectedTextColor,
-    this.hourMinuteSelectedColor,
-    this.hourMinuteUnselectedTextColor,
-    this.hourMinuteUnselectedColor,
-    this.dayPeriodSelectedTextColor,
-    this.dayPeriodSelectedColor,
-    this.dayPeriodUnselectedTextColor,
-    this.dayPeriodUnselectedColor,
+    this.hourMinuteTextColor,
+    this.hourMinuteColor,
+    this.dayPeriodTextColor,
+    this.dayPeriodColor,
     this.dialHandColor,
     this.dialBackgroundColor,
-    this.dayPeriodBorderColor,
     this.hourMinuteTextStyle,
     this.dayPeriodTextStyle,
     this.helpTextStyle,
     this.shape,
     this.hourMinuteShape,
     this.dayPeriodShape,
+    this.dayPeriodBorderSide,
     this.inputDecorationTheme,
   });
 
@@ -61,82 +57,58 @@ class TimePickerThemeData with Diagnosticable {
   /// [ColorScheme.background].
   final Color backgroundColor;
 
-  /// The color used for the selected text in the header of a time picker.
+  /// The color used for the text in the header of a time picker.
   ///
-  /// This determines the selected color of the header text that represent
-  /// hours and minutes.
+  /// This determines the color of the header text that represent
+  /// hours and minutes and can utilize [MaterialStateColor] to provide
+  /// different colors for the selected and unselected text.
   ///
-  /// If this is null, the time picker defaults to the overall theme's
-  /// [ColorScheme.primary].
-  final Color hourMinuteSelectedTextColor;
+  /// If this is null and the hour/minute is selected, the time picker defaults
+  /// to the overall theme's [ColorScheme.primary].
+  /// If this is null and the hour/minute is unselected, the time picker
+  /// defaults to the overall theme's [ColorScheme.onSurface].
+  final Color hourMinuteTextColor;
 
-  /// The color used for the selected background in the header of a time picker.
+  /// The color used for the background in the header of a time picker.
   ///
-  /// This determines the selected color of the header segments that represent
-  /// hours and minutes.
+  /// This determines the color of the header segments that represent
+  /// hours and minutes and can utilize [MaterialStateColor] to provide
+  /// different colors for the selected and unselected background.
   ///
-  /// If this is null, the time picker defaults to
-  /// `ColorScheme.primary.withOpacity(0.12)` if the overall theme's brightness
-  /// is light and `ColorScheme.primary.withOpacity(0.24)` if the overall
-  /// theme's brightness is dark.
-  final Color hourMinuteSelectedColor;
-
-  /// The color used for the unselected text in the header of a time picker.
-  ///
-  /// This determines the unselected color of the header text that represent
-  /// hours and minutes.
-  ///
-  /// If this is null, the time picker defaults to the overall theme's
-  /// [ColorScheme.onSurface].
-  final Color hourMinuteUnselectedTextColor;
-
-  /// The color used for the unselected background in the header of a time
-  /// picker.
-  ///
-  /// This determines the unselected color of the header segments that represent
-  /// hours and minutes.
-  ///
-  /// If this is null, the time picker defaults to
-  /// `ColorScheme.onSurface.withOpacity(0.12)`.
-  final Color hourMinuteUnselectedColor;
+  /// If this is null and the hour/minute is selected, the time picker defaults
+  /// to `ColorScheme.primary.withOpacity(0.12)` if the overall theme's
+  /// brightness is light and `ColorScheme.primary.withOpacity(0.24)` if the
+  /// overall theme's brightness is dark.
+  /// If this is null and the hour/minute is unselected, the time picker
+  /// defaults to the overall theme's `ColorScheme.onSurface.withOpacity(0.12)`.
+  final Color hourMinuteColor;
 
   /// The color used for the selected text in the day period of a time picker.
   ///
-  /// This determines the selected color of the text that represent AM/PM.
+  /// This determines the color of the text that represent AM/PM and can
+  /// utilize [MaterialStateColor] to provide different colors for the selected
+  /// and unselected text.
   ///
-  /// If this is null, the time picker defaults to the overall theme's
-  /// [ColorScheme.primary].
-  final Color dayPeriodSelectedTextColor;
+  /// If this is null and the AM/PM is selected, the time picker defaults
+  /// to the overall theme's [ColorScheme.primary].
+  /// If this is null and the AM/PM is unselected, the time picker
+  /// defaults to the overall theme's `ColorScheme.onSurface.withOpacity(0.60)`.
+  final Color dayPeriodTextColor;
 
   /// The color used for the selected background in the day period of a time
   /// picker.
   ///
-  /// This determines the selected color of the day period that represent
-  /// AM/PM.
+  /// This determines the background color of the day period that represent
+  /// AM/PM and can utilize [MaterialStateColor] to provide different colors for
+  /// the selected and unselected backgrounds.
   ///
-  /// If this is null, the time picker defaults to
+  /// If this is null and the AM/PM is selected, the time picker defaults to
   /// `ColorScheme.primary.withOpacity(0.12)` if the overall theme's brightness
   /// is light and `ColorScheme.primary.withOpacity(0.24)` if the overall
   /// theme's brightness is dark.
-  final Color dayPeriodSelectedColor;
-
-  /// The color used for the unselected text in the day period of a time picker.
-  ///
-  /// This determines the unselected color of the text that represent AM/PM.
-  ///
-  /// If this is null, the time picker defaults to
-  /// `ColorScheme.onSurface.withOpacity(0.60)`.
-  final Color dayPeriodUnselectedTextColor;
-
-  /// The color used for the unselected background in the day period of a time
-  /// picker.
-  ///
-  /// This determines the unselected color of the day period that represent
-  /// AM/PM.
-  ///
-  /// If this is null, the time picker defaults to [Colors.transparent] to
-  /// allow the [Dialog]'s color to be used.
-  final Color dayPeriodUnselectedColor;
+  /// If this is null and the AM/PM is unselected, the time picker defaults to
+  /// [Colors.transparent] to allow the [Dialog]'s color to be used.
+  final Color dayPeriodColor;
 
   /// The color of the time picker dial's hand.
   ///
@@ -149,14 +121,6 @@ class TimePickerThemeData with Diagnosticable {
   /// If this is null, the time picker defaults to the overall theme's
   /// [ColorScheme.primary].
   final Color dialBackgroundColor;
-
-  /// The color of the day period border.
-  ///
-  /// If this is null, the time picker defaults to:
-  /// ```
-  /// Color.alphaBlend(colorScheme.onBackground.withOpacity(0.38), colorScheme.surface)
-  /// ```
-  final Color dayPeriodBorderColor;
 
   /// Used to configure the [TextStyle]s for the hour/minute controls.
   ///
@@ -197,7 +161,17 @@ class TimePickerThemeData with Diagnosticable {
   ///   side: BorderSide(),
   /// )
   /// ```
-  final ShapeBorder dayPeriodShape;
+  final OutlinedBorder dayPeriodShape;
+
+  /// The border side of the day period.
+  ///
+  /// If this is null, the time picker defaults to:
+  /// ```
+  /// BorderSide(
+  ///   color: Color.alphaBlend(colorScheme.onBackground.withOpacity(0.38), colorScheme.surface),
+  /// )
+  /// ```
+  final BorderSide dayPeriodBorderSide;
 
   /// The input decoration theme for the [TextField]s in the time picker.
   ///
@@ -208,44 +182,38 @@ class TimePickerThemeData with Diagnosticable {
   /// new values.
   TimePickerThemeData copyWith({
     Color backgroundColor,
-    Color hourMinuteSelectedTextColor,
-    Color hourMinuteSelectedColor,
+    Color hourMinuteTextColor,
+    Color hourMinuteColor,
     Color hourMinuteUnselectedTextColor,
     Color hourMinuteUnselectedColor,
-    Color dayPeriodSelectedTextColor,
-    Color dayPeriodSelectedColor,
-    Color dayPeriodUnselectedTextColor,
-    Color dayPeriodUnselectedColor,
+    Color dayPeriodTextColor,
+    Color dayPeriodColor,
     Color dialHandColor,
     Color dialBackgroundColor,
-    Color dayPeriodBorderColor,
     TextStyle hourMinuteTextStyle,
     TextStyle dayPeriodTextStyle,
     TextStyle helpTextStyle,
     ShapeBorder shape,
     ShapeBorder hourMinuteShape,
-    ShapeBorder dayPeriodShape,
+    OutlinedBorder dayPeriodShape,
+    BorderSide dayPeriodBorderSide,
     InputDecorationTheme inputDecorationTheme,
   }) {
     return TimePickerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
-      hourMinuteSelectedTextColor: hourMinuteSelectedTextColor ?? this.hourMinuteSelectedTextColor,
-      hourMinuteSelectedColor: hourMinuteSelectedColor ?? this.hourMinuteSelectedColor,
-      hourMinuteUnselectedTextColor: hourMinuteUnselectedTextColor ?? this.hourMinuteUnselectedTextColor,
-      hourMinuteUnselectedColor: hourMinuteUnselectedColor ?? this.hourMinuteUnselectedColor,
-      dayPeriodSelectedTextColor: dayPeriodSelectedTextColor ?? this.dayPeriodSelectedTextColor,
-      dayPeriodSelectedColor: dayPeriodSelectedColor ?? this.dayPeriodSelectedColor,
-      dayPeriodUnselectedTextColor: dayPeriodUnselectedTextColor ?? this.dayPeriodUnselectedTextColor,
-      dayPeriodUnselectedColor: dayPeriodUnselectedColor ?? this.dayPeriodUnselectedColor,
+      hourMinuteTextColor: hourMinuteTextColor ?? this.hourMinuteTextColor,
+      hourMinuteColor: hourMinuteColor ?? this.hourMinuteColor,
+      dayPeriodTextColor: dayPeriodTextColor ?? this.dayPeriodTextColor,
+      dayPeriodColor: dayPeriodColor ?? this.dayPeriodColor,
       dialHandColor: dialHandColor ?? this.dialHandColor,
       dialBackgroundColor: dialBackgroundColor ?? this.dialBackgroundColor,
-      dayPeriodBorderColor: dayPeriodBorderColor ?? this.dayPeriodBorderColor,
       hourMinuteTextStyle: hourMinuteTextStyle ?? this.hourMinuteTextStyle,
       dayPeriodTextStyle: dayPeriodTextStyle ?? this.dayPeriodTextStyle,
       helpTextStyle: helpTextStyle ?? this.helpTextStyle,
       shape: shape ?? this.shape,
       hourMinuteShape: hourMinuteShape ?? this.hourMinuteShape,
       dayPeriodShape: dayPeriodShape ?? this.dayPeriodShape,
+      dayPeriodBorderSide: dayPeriodBorderSide ?? this.dayPeriodBorderSide,
       inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
     );
   }
@@ -257,25 +225,33 @@ class TimePickerThemeData with Diagnosticable {
   /// {@macro dart.ui.shadow.lerp}
   static TimePickerThemeData lerp(TimePickerThemeData a, TimePickerThemeData b, double t) {
     assert(t != null);
+
+    // Workaround since BorderSide's lerp does not allow for null arguments.
+    BorderSide lerpedBorderSide;
+    if (a?.dayPeriodBorderSide == null && b?.dayPeriodBorderSide == null) {
+      lerpedBorderSide = null;
+    } else if (a?.dayPeriodBorderSide == null) {
+      lerpedBorderSide = b?.dayPeriodBorderSide;
+    } else if (b?.dayPeriodBorderSide == null) {
+      lerpedBorderSide = a?.dayPeriodBorderSide;
+    } else {
+      lerpedBorderSide = BorderSide.lerp(a?.dayPeriodBorderSide, b?.dayPeriodBorderSide, t);
+    }
     return TimePickerThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
-      hourMinuteSelectedTextColor: Color.lerp(a?.hourMinuteSelectedTextColor, b?.hourMinuteSelectedTextColor, t),
-      hourMinuteSelectedColor: Color.lerp(a?.hourMinuteSelectedColor, b?.hourMinuteSelectedColor, t),
-      hourMinuteUnselectedTextColor: Color.lerp(a?.hourMinuteUnselectedTextColor, b?.hourMinuteUnselectedTextColor, t),
-      hourMinuteUnselectedColor: Color.lerp(a?.hourMinuteUnselectedColor, b?.hourMinuteUnselectedColor, t),
-      dayPeriodSelectedTextColor: Color.lerp(a?.dayPeriodSelectedTextColor, b?.dayPeriodSelectedTextColor, t),
-      dayPeriodSelectedColor: Color.lerp(a?.dayPeriodSelectedColor, b?.dayPeriodSelectedColor, t),
-      dayPeriodUnselectedTextColor: Color.lerp(a?.dayPeriodUnselectedTextColor, b?.dayPeriodUnselectedTextColor, t),
-      dayPeriodUnselectedColor: Color.lerp(a?.dayPeriodUnselectedColor, b?.dayPeriodUnselectedColor, t),
+      hourMinuteTextColor: Color.lerp(a?.hourMinuteTextColor, b?.hourMinuteTextColor, t),
+      hourMinuteColor: Color.lerp(a?.hourMinuteColor, b?.hourMinuteColor, t),
+      dayPeriodTextColor: Color.lerp(a?.dayPeriodTextColor, b?.dayPeriodTextColor, t),
+      dayPeriodColor: Color.lerp(a?.dayPeriodColor, b?.dayPeriodColor, t),
       dialHandColor: Color.lerp(a?.dialHandColor, b?.dialHandColor, t),
       dialBackgroundColor: Color.lerp(a?.dialBackgroundColor, b?.dialBackgroundColor, t),
-      dayPeriodBorderColor: Color.lerp(a?.dayPeriodBorderColor, b?.dayPeriodBorderColor, t),
       hourMinuteTextStyle: TextStyle.lerp(a?.hourMinuteTextStyle, b?.hourMinuteTextStyle, t),
       dayPeriodTextStyle: TextStyle.lerp(a?.dayPeriodTextStyle, b?.dayPeriodTextStyle, t),
       helpTextStyle: TextStyle.lerp(a?.helpTextStyle, b?.helpTextStyle, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       hourMinuteShape: ShapeBorder.lerp(a?.hourMinuteShape, b?.hourMinuteShape, t),
-      dayPeriodShape: ShapeBorder.lerp(a?.dayPeriodShape, b?.dayPeriodShape, t),
+      dayPeriodShape: ShapeBorder.lerp(a?.dayPeriodShape, b?.dayPeriodShape, t) as OutlinedBorder,
+      dayPeriodBorderSide: lerpedBorderSide,
       inputDecorationTheme: t < 0.5 ? a.inputDecorationTheme : b.inputDecorationTheme,
     );
   }
@@ -284,23 +260,19 @@ class TimePickerThemeData with Diagnosticable {
   int get hashCode {
     return hashValues(
       backgroundColor,
-      hourMinuteSelectedTextColor,
-      hourMinuteSelectedColor,
-      hourMinuteUnselectedTextColor,
-      hourMinuteUnselectedColor,
-      dayPeriodSelectedTextColor,
-      dayPeriodSelectedColor,
-      dayPeriodUnselectedTextColor,
-      dayPeriodUnselectedColor,
+      hourMinuteTextColor,
+      hourMinuteColor,
+      dayPeriodTextColor,
+      dayPeriodColor,
       dialHandColor,
       dialBackgroundColor,
-      dayPeriodBorderColor,
       hourMinuteTextStyle,
       dayPeriodTextStyle,
       helpTextStyle,
       shape,
       hourMinuteShape,
       dayPeriodShape,
+      dayPeriodBorderSide,
       inputDecorationTheme,
     );
   }
@@ -313,23 +285,19 @@ class TimePickerThemeData with Diagnosticable {
       return false;
     return other is TimePickerThemeData
         && other.backgroundColor == backgroundColor
-        && other.hourMinuteSelectedTextColor == hourMinuteSelectedTextColor
-        && other.hourMinuteSelectedColor == hourMinuteSelectedColor
-        && other.hourMinuteUnselectedTextColor == hourMinuteUnselectedTextColor
-        && other.hourMinuteUnselectedColor == hourMinuteUnselectedColor
-        && other.dayPeriodSelectedTextColor == dayPeriodSelectedTextColor
-        && other.dayPeriodSelectedColor == dayPeriodSelectedColor
-        && other.dayPeriodUnselectedTextColor == dayPeriodUnselectedTextColor
-        && other.dayPeriodUnselectedColor == dayPeriodUnselectedColor
+        && other.hourMinuteTextColor == hourMinuteTextColor
+        && other.hourMinuteColor == hourMinuteColor
+        && other.dayPeriodTextColor == dayPeriodTextColor
+        && other.dayPeriodColor == dayPeriodColor
         && other.dialHandColor == dialHandColor
         && other.dialBackgroundColor == dialBackgroundColor
-        && other.dayPeriodBorderColor == dayPeriodBorderColor
         && other.hourMinuteTextStyle == hourMinuteTextStyle
         && other.dayPeriodTextStyle == dayPeriodTextStyle
         && other.helpTextStyle == helpTextStyle
         && other.shape == shape
         && other.hourMinuteShape == hourMinuteShape
         && other.dayPeriodShape == dayPeriodShape
+        && other.dayPeriodBorderSide == dayPeriodBorderSide
         && other.inputDecorationTheme == inputDecorationTheme;
   }
 
@@ -337,23 +305,19 @@ class TimePickerThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(ColorProperty('hourMinuteSelectedTextColor', hourMinuteSelectedTextColor, defaultValue: null));
-    properties.add(ColorProperty('hourMinuteSelectedColor', hourMinuteSelectedColor, defaultValue: null));
-    properties.add(ColorProperty('hourMinuteUnselectedTextColor', hourMinuteUnselectedTextColor, defaultValue: null));
-    properties.add(ColorProperty('hourMinuteUnselectedColor', hourMinuteUnselectedColor, defaultValue: null));
-    properties.add(ColorProperty('dayPeriodSelectedTextColor', dayPeriodSelectedTextColor, defaultValue: null));
-    properties.add(ColorProperty('dayPeriodSelectedColor', dayPeriodSelectedColor, defaultValue: null));
-    properties.add(ColorProperty('dayPeriodUnselectedTextColor', dayPeriodUnselectedTextColor, defaultValue: null));
-    properties.add(ColorProperty('dayPeriodUnselectedColor', dayPeriodUnselectedColor, defaultValue: null));
+    properties.add(ColorProperty('hourMinuteTextColor', hourMinuteTextColor, defaultValue: null));
+    properties.add(ColorProperty('hourMinuteColor', hourMinuteColor, defaultValue: null));
+    properties.add(ColorProperty('dayPeriodTextColor', dayPeriodTextColor, defaultValue: null));
+    properties.add(ColorProperty('dayPeriodColor', dayPeriodColor, defaultValue: null));
     properties.add(ColorProperty('dialHandColor', dialHandColor, defaultValue: null));
     properties.add(ColorProperty('dialBackgroundColor', dialBackgroundColor, defaultValue: null));
-    properties.add(ColorProperty('dayPeriodBorderColor', dayPeriodBorderColor, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('hourMinuteTextStyle', hourMinuteTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('dayPeriodTextStyle', dayPeriodTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('helpTextStyle', helpTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('hourMinuteShape', hourMinuteShape, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('dayPeriodShape', dayPeriodShape, defaultValue: null));
+    properties.add(DiagnosticsProperty<BorderSide>('dayPeriodBorderSide', dayPeriodBorderSide, defaultValue: null));
     properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme, defaultValue: null));
   }
 }

@@ -19,7 +19,6 @@ import 'constants.dart';
 import 'curves.dart';
 import 'debug.dart';
 import 'dialog.dart';
-import 'divider.dart';
 import 'feedback.dart';
 import 'flat_button.dart';
 import 'icon_button.dart';
@@ -29,6 +28,7 @@ import 'input_border.dart';
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'text_form_field.dart';
 import 'text_theme.dart';
 import 'theme.dart';
@@ -253,17 +253,24 @@ class _HourMinuteControl extends StatelessWidget {
     final ThemeData themeData = Theme.of(context);
     final TimePickerThemeData timePickerTheme = TimePickerTheme.of(context);
     final bool isDark = themeData.colorScheme.brightness == Brightness.dark;
-    final Color selectedTextColor = timePickerTheme.hourMinuteSelectedTextColor ?? themeData.colorScheme.primary;
-    final Color unselectedTextColor = timePickerTheme.hourMinuteUnselectedTextColor ?? themeData.colorScheme.onSurface;
-    final Color selectedColor = timePickerTheme.hourMinuteSelectedColor ?? themeData.colorScheme.primary.withOpacity(isDark ? 0.24 : 0.12);
-    final Color unselectedColor = timePickerTheme.hourMinuteUnselectedColor ?? themeData.colorScheme.onSurface.withOpacity(0.12);
+    final Color defaultTextColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      return states.contains(MaterialState.selected) ? themeData.colorScheme.primary : themeData.colorScheme.onSurface;
+    });
+    final Color textColor = timePickerTheme.hourMinuteTextColor ?? defaultTextColor;
+    final Color defaultBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      return states.contains(MaterialState.selected)
+          ? themeData.colorScheme.primary.withOpacity(isDark ? 0.24 : 0.12)
+          : themeData.colorScheme.onSurface.withOpacity(0.12);
+    });
+    final Color backgroundColor = timePickerTheme.hourMinuteColor ?? defaultBackgroundColor;
     final TextStyle style = timePickerTheme.hourMinuteTextStyle ?? themeData.textTheme.headline2;
     final ShapeBorder shape = timePickerTheme.hourMinuteShape ?? _kDefaultShape;
 
+    final Set<MaterialState> states = isSelected ? <MaterialState>{MaterialState.selected} : {};
     return Container(
       height: _kTimePickerHeaderControlHeight,
       child: Material(
-        color: isSelected ? selectedColor : unselectedColor,
+        color: MaterialStateProperty.resolveAs(backgroundColor, states),
         clipBehavior: Clip.antiAlias,
         shape: shape,
         child: InkWell(
@@ -271,7 +278,7 @@ class _HourMinuteControl extends StatelessWidget {
           child: Center(
             child: Text(
               text,
-              style: style.copyWith(color: isSelected ? selectedTextColor : unselectedTextColor),
+              style: style.copyWith(color: MaterialStateProperty.resolveAs(textColor, states)),
               textScaleFactor: 1.0,
             ),
           ),
@@ -376,7 +383,7 @@ class _StringFragment extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final TimePickerThemeData timePickerTheme = TimePickerTheme.of(context);
     final TextStyle hourMinuteStyle = timePickerTheme.hourMinuteTextStyle ?? theme.textTheme.headline2;
-    final Color textColor = timePickerTheme.hourMinuteUnselectedTextColor ?? theme.colorScheme.onSurface;
+    final Color textColor = timePickerTheme.hourMinuteTextColor ?? theme.colorScheme.onSurface;
 
     return ExcludeSemantics(
       child: Padding(
@@ -384,7 +391,7 @@ class _StringFragment extends StatelessWidget {
         child: Center(
           child: Text(
             _stringFragmentValue(timeOfDayFormat),
-            style: hourMinuteStyle.apply(color: textColor),
+            style: hourMinuteStyle.apply(color: MaterialStateProperty.resolveAs(textColor, <MaterialState>{})),
             textScaleFactor: 1.0,
           ),
         ),
@@ -499,35 +506,44 @@ class _DayPeriodControl extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TimePickerThemeData timePickerTheme = TimePickerTheme.of(context);
     final bool isDark = colorScheme.brightness == Brightness.dark;
-    final Color selectedTextColor = timePickerTheme.dayPeriodSelectedTextColor ?? colorScheme.primary;
-    final Color unselectedTextColor = timePickerTheme.dayPeriodUnselectedTextColor ?? colorScheme.onSurface.withOpacity(0.60);
-    final Color selectedColor = timePickerTheme.dayPeriodSelectedColor ?? colorScheme.primary.withOpacity(isDark ? 0.24 : 0.12);
-    // The unselected day period should match the overall picker dialog color.
-    // Making it transparent enables that without being redundant and allows
-    // the optional elevation overlay for dark mode to be visible.
-    final Color unselectedColor = timePickerTheme.dayPeriodUnselectedColor ?? Colors.transparent;
-
+    final Color defaultTextColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      return states.contains(MaterialState.selected) ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.60);
+    });
+    final Color textColor = timePickerTheme.dayPeriodTextColor ?? defaultTextColor;
+    final Color defaultBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      // The unselected day period should match the overall picker dialog color.
+      // Making it transparent enables that without being redundant and allows
+      // the optional elevation overlay for dark mode to be visible.
+      return states.contains(MaterialState.selected)
+          ? colorScheme.primary.withOpacity(isDark ? 0.24 : 0.12)
+          : Colors.transparent;
+    });
+    final Color backgroundColor = timePickerTheme.dayPeriodColor ?? defaultBackgroundColor;
     final bool amSelected = selectedTime.period == DayPeriod.am;
-    final bool pmSelexted = !amSelected;
-    final TextStyle textStyle = TimePickerTheme.of(context).dayPeriodTextStyle ?? Theme.of(context).textTheme.subtitle1;
+    final Set<MaterialState> amStates = amSelected ? <MaterialState>{MaterialState.selected} : {};
+    final bool pmSelected = !amSelected;
+    final Set<MaterialState> pmStates = pmSelected ? <MaterialState>{MaterialState.selected} : {};
+    final TextStyle textStyle = timePickerTheme.dayPeriodTextStyle ?? Theme.of(context).textTheme.subtitle1;
     final TextStyle amStyle = textStyle.copyWith(
-      color: amSelected ? selectedTextColor: unselectedTextColor,
+      color: MaterialStateProperty.resolveAs(textColor, amStates),
     );
     final TextStyle pmStyle = textStyle.copyWith(
-      color: pmSelexted ? selectedTextColor: unselectedTextColor,
+      color: MaterialStateProperty.resolveAs(textColor, pmStates),
     );
-    final Color borderColor = TimePickerTheme.of(context).dayPeriodBorderColor
-        ?? Color.alphaBlend(colorScheme.onBackground.withOpacity(0.38), colorScheme.surface);
-    final ShapeBorder shape = TimePickerTheme.of(context).dayPeriodShape ??
-        RoundedRectangleBorder(
-          borderRadius: _kDefaultBorderRadius,
-          side: BorderSide(color: borderColor),
-        );
+    OutlinedBorder shape = timePickerTheme.dayPeriodShape ??
+        const RoundedRectangleBorder(borderRadius: _kDefaultBorderRadius);
+    final BorderSide borderSide = timePickerTheme.dayPeriodBorderSide ?? BorderSide(
+      color: Color.alphaBlend(colorScheme.onBackground.withOpacity(0.38), colorScheme.surface),
+    );
+    // Apply the custom borderSide.
+    shape = shape.copyWith(
+      side: borderSide,
+    );
 
     final double buttonTextScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 2.0);
 
     final Widget amButton = Material(
-      color: amSelected ? selectedColor : unselectedColor,
+      color: MaterialStateProperty.resolveAs(backgroundColor, amStates),
       child: InkWell(
         onTap: Feedback.wrapForTap(() => _setAm(context), context),
         child: Semantics(
@@ -544,11 +560,11 @@ class _DayPeriodControl extends StatelessWidget {
     );
 
     final Widget pmButton = Material(
-      color: pmSelexted ? selectedColor : unselectedColor,
+      color: MaterialStateProperty.resolveAs(backgroundColor, pmStates),
       child: InkWell(
         onTap: Feedback.wrapForTap(() => _setPm(context), context),
         child: Semantics(
-          selected: pmSelexted,
+          selected: pmSelected,
           child: Center(
             child: Text(
               materialLocalizations.postMeridiemAbbreviation,
@@ -577,7 +593,12 @@ class _DayPeriodControl extends StatelessWidget {
               child: Column(
                 children: <Widget>[
                   Expanded(child: amButton),
-                  Divider(color: borderColor, height: 1, thickness: 1),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border(top: borderSide),
+                    ),
+                    height: 1,
+                  ),
                   Expanded(child: pmButton),
                 ],
               ),
@@ -598,7 +619,12 @@ class _DayPeriodControl extends StatelessWidget {
               child: Row(
                 children: <Widget>[
                   Expanded(child: amButton),
-                  VerticalDivider(color: borderColor, width: 1, thickness: 1),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border(left: borderSide),
+                    ),
+                    width: 1,
+                  ),
                   Expanded(child: pmButton),
                 ],
               ),
