@@ -4047,7 +4047,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get licensesPackageDetailTextOther => '\$licenseCount licenses';
 
   @override
-  String get licensesPackageDetailTextZero => 'No licenses';
+  String get licensesPackageDetailTextZero => null;
 
   @override
   String get licensesPageTitle => 'Licenses';
