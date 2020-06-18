@@ -43,11 +43,6 @@ class IOSDevices extends PollingDeviceDiscovery {
        _logger = logger ?? globals.logger,
        super('iOS devices');
 
-  @override
-  void dispose() {
-    _observedDeviceEventsSubscription?.cancel();
-  }
-
   final Platform _platform;
   final XCDevice _xcdevice;
   final IOSWorkflow _iosWorkflow;
