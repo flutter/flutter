@@ -425,6 +425,24 @@ class FlutterDevice {
     }
   }
 
+  Future<Brightness> toggleBrightness({ Brightness current }) async {
+    final List<FlutterView> views = await vmService.getFlutterViews();
+    Brightness next;
+    if (current == Brightness.light) {
+      next = Brightness.dark;
+    } else if (current == Brightness.dark) {
+      next = Brightness.light;
+    }
+
+    for (final FlutterView view in views) {
+      next = await vmService.flutterBrightnessOverride(
+        isolateId: view.uiIsolate.id,
+        brightness: next,
+      );
+    }
+    return next;
+  }
+
   Future<String> togglePlatform({ String from }) async {
     final List<FlutterView> views = await vmService.getFlutterViews();
     final String to = nextPlatform(from, featureFlags);
@@ -973,6 +991,17 @@ abstract class ResidentRunner {
     }
   }
 
+  Future<void> debugToggleBrightness() async {
+    final Brightness brightness = await flutterDevices.first.toggleBrightness();
+    Brightness next;
+    for (final FlutterDevice device in flutterDevices) {
+      next = await device.toggleBrightness(
+        current: brightness,
+      );
+      globals.logger.printStatus('Changed brightness to $next.');
+    }
+  }
+
   /// Take a screenshot on the provided [device].
   ///
   /// If the device has a connected vmservice, this method will attempt to hide
@@ -1221,6 +1250,7 @@ abstract class ResidentRunner {
       commandHelp.s.print();
     }
     if (supportsServiceProtocol) {
+      commandHelp.b.print();
       commandHelp.w.print();
       commandHelp.t.print();
       if (isRunningDebug) {
@@ -1362,6 +1392,9 @@ class TerminalHandler {
           return true;
         }
         return false;
+      case 'b':
+        await residentRunner.debugToggleBrightness();
+        return true;
       case 'c':
         residentRunner.clearScreen();
         return true;
