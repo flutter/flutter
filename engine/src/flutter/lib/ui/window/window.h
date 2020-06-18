@@ -35,8 +35,6 @@ namespace flutter {
 class FontCollection;
 class Scene;
 
-Dart_Handle ToByteData(const std::vector<uint8_t>& buffer);
-
 // Must match the AccessibilityFeatureFlag enum in window.dart.
 enum class AccessibilityFeatureFlag : int32_t {
   kAccessibleNavigation = 1 << 0,
