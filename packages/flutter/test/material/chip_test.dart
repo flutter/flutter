@@ -590,9 +590,9 @@ void main() {
     // https://github.com/flutter/flutter/issues/12357
     expect(tester.getSize(find.text('Chip A')), anyOf(const Size(252.0, 42.0), const Size(251.0, 42.0)));
     expect(tester.getSize(find.text('Chip B')), anyOf(const Size(252.0, 42.0), const Size(251.0, 42.0)));
-    expect(tester.getSize(find.byType(Chip).first).width, anyOf(318.0, 319.0));
+    expect(tester.getSize(find.byType(Chip).first).width, anyOf(310.0, 311.0));
     expect(tester.getSize(find.byType(Chip).first).height, equals(50.0));
-    expect(tester.getSize(find.byType(Chip).last).width, anyOf(318.0, 319.0));
+    expect(tester.getSize(find.byType(Chip).last).width, anyOf(310.0, 311.0));
     expect(tester.getSize(find.byType(Chip).last).height, equals(50.0));
 
     // Check that individual text scales are taken into account.
