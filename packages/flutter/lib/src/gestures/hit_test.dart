@@ -79,12 +79,37 @@ class _Ref<T> {
   T value;
 }
 
+@immutable
+class _MatrixPart {
+  const _MatrixPart.matrix(this.matrix)
+    : assert(matrix != null),
+      offset = null;
+  const _MatrixPart.offset(this.offset)
+    : assert(offset != null),
+      matrix = null;
+
+  bool get isMatrix => matrix != null;
+
+  final Matrix4 matrix;
+  final Offset offset;
+
+  Matrix4 get assertMatrix {
+    assert(isMatrix);
+    return matrix;
+  }
+
+  Offset get assertOffset {
+    assert(!isMatrix);
+    return offset;
+  }
+}
+
 /// The result of performing a hit test.
 class HitTestResult {
   /// Creates an empty hit test result.
   HitTestResult()
      : _path = <HitTestEntry>[],
-       _transforms = <Matrix4>[],
+       _transforms = <_MatrixPart>[],
        _globalizedTransforms = _Ref<int>(1);
 
   /// Wraps `result` (usually a subtype of [HitTestResult]) to create a
@@ -106,7 +131,7 @@ class HitTestResult {
   Iterable<HitTestEntry> get path => _path;
   final List<HitTestEntry> _path;
 
-  final List<Matrix4> _transforms;
+  final List<_MatrixPart> _transforms;
   // The number of elements (from the head) in `_transforms` that has been
   // globalized.
   //
@@ -126,8 +151,15 @@ class HitTestResult {
       assert(globalizedTransforms == _transforms.length);
       return;
     }
-    for (Matrix4 last = _transforms[globalizedTransforms - 1]; globalizedTransforms < _transforms.length; globalizedTransforms += 1) {
-      last = _transforms[globalizedTransforms] * last as Matrix4;
+    for (_MatrixPart last = _transforms[globalizedTransforms - 1]; globalizedTransforms < _transforms.length; globalizedTransforms += 1) {
+      final Matrix4 lastMatrix = last.assertMatrix;
+      final _MatrixPart next = _transforms[globalizedTransforms];
+      if (next.isMatrix) {
+        last = _MatrixPart.matrix(next.assertMatrix * lastMatrix as Matrix4);
+      } else {
+        final Offset offset = next.assertOffset;
+        last = _MatrixPart.matrix(lastMatrix.clone()..leftTranslate(offset.dx, offset.dy));
+      }
       _transforms[globalizedTransforms] = last;
     }
     _globalizedTransforms.value = globalizedTransforms;
@@ -135,7 +167,7 @@ class HitTestResult {
 
   Matrix4 get _lastTransform {
     _globalizeTransforms();
-    return _transforms.last;
+    return _transforms.last.assertMatrix;
   }
 
   /// Add a [HitTestEntry] to the path.
@@ -186,7 +218,16 @@ class HitTestResult {
       'matrix through PointerEvent.removePerspectiveTransform? '
       'The provided matrix is:\n$transform'
     );
-    _transforms.add(transform);
+    _transforms.add(_MatrixPart.matrix(transform));
+  }
+
+  @protected
+  void pushOffset(Offset offset) {
+    if (_transforms.isEmpty) {
+      _transforms.add(_MatrixPart.matrix(Matrix4.translationValues(offset.dx, offset.dy, 0.0)));
+    } else {
+      _transforms.add(_MatrixPart.offset(offset));
+    }
   }
 
   /// Removes the last transform added via [pushTransform].
