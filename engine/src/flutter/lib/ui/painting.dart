@@ -1695,28 +1695,45 @@ class Codec extends NativeFieldWrapperClass2 {
   void dispose() native 'Codec_dispose';
 }
 
-/// Instantiates an image codec [Codec] object.
+/// Instantiates an image [Codec].
 ///
-/// [list] is the binary image data (e.g a PNG or GIF binary data).
+/// The `list` parameter is the binary image data (e.g a PNG or GIF binary data).
 /// The data can be for either static or animated images. The following image
 /// formats are supported: {@macro flutter.dart:ui.imageFormats}
 ///
-/// The [targetWidth] and [targetHeight] arguments specify the size of the output
-/// image, in image pixels. If they are not equal to the intrinsic dimensions of the
-/// image, then the image will be scaled after being decoded. If only one dimension
-/// is specified, the omitted dimension will be scaled to maintain the original
-/// aspect ratio. If both are not specified, then the image maintains its real
-/// size.
+/// The `targetWidth` and `targetHeight` arguments specify the size of the
+/// output image, in image pixels. If they are not equal to the intrinsic
+/// dimensions of the image, then the image will be scaled after being decoded.
+/// If the `allowUpscaling` parameter is not set to true, both dimensions will
+/// be capped at the intrinsic dimensions of the image, even if only one of
+/// them would have exceeded those intrinsic dimensions. If exactly one of these
+/// two arguments is specified, then the aspect ratio will be maintained while
+/// forcing the image to match the other given dimension. If neither is
+/// specified, then the image maintains its intrinsic size.
+///
+/// Scaling the image to larger than its intrinsic size should usually be
+/// avoided, since it causes the image to use more memory than necessary.
+/// Instead, prefer scaling the [Canvas] transform. If the image must be scaled
+/// up, the `allowUpscaling` parameter must be set to true.
 ///
 /// The returned future can complete with an error if the image decoding has
 /// failed.
-Future<Codec> instantiateImageCodec(Uint8List list, {
+Future<Codec> instantiateImageCodec(
+  Uint8List list, {
   int? targetWidth,
   int? targetHeight,
+  bool allowUpscaling = true,
 }) {
-  return _futurize(
-    (_Callback<Codec> callback) => _instantiateImageCodec(list, callback, null, targetWidth ?? _kDoNotResizeDimension, targetHeight ?? _kDoNotResizeDimension)
-  );
+  return _futurize((_Callback<Codec> callback) {
+    return _instantiateImageCodec(
+      list,
+      callback,
+      null,
+      targetWidth ?? _kDoNotResizeDimension,
+      targetHeight ?? _kDoNotResizeDimension,
+      allowUpscaling,
+    );
+  });
 }
 
 /// Instantiates a [Codec] object for an image binary data.
@@ -1730,8 +1747,14 @@ Future<Codec> instantiateImageCodec(Uint8List list, {
 /// If both are equal to [_kDoNotResizeDimension], then the image maintains its real size.
 ///
 /// Returns an error message if the instantiation has failed, null otherwise.
-String? _instantiateImageCodec(Uint8List list, _Callback<Codec> callback, _ImageInfo? imageInfo, int targetWidth, int targetHeight)
-  native 'instantiateImageCodec';
+String? _instantiateImageCodec(
+  Uint8List list,
+  _Callback<Codec> callback,
+  _ImageInfo? imageInfo,
+  int targetWidth,
+  int targetHeight,
+  bool allowUpscaling,
+) native 'instantiateImageCodec';
 
 /// Loads a single image frame from a byte array into an [Image] object.
 ///
@@ -1751,30 +1774,56 @@ Future<void> _decodeImageFromListAsync(Uint8List list,
 
 /// Convert an array of pixel values into an [Image] object.
 ///
-/// [pixels] is the pixel data in the encoding described by [format].
+/// The `pixels` parameter is the pixel data in the encoding described by
+/// `format`.
 ///
-/// [rowBytes] is the number of bytes consumed by each row of pixels in the
-/// data buffer.  If unspecified, it defaults to [width] multiplied by the
-/// number of bytes per pixel in the provided [format].
+/// The `rowBytes` parameter is the number of bytes consumed by each row of
+/// pixels in the data buffer. If unspecified, it defaults to `width` multiplied
+/// by the number of bytes per pixel in the provided `format`.
 ///
-/// The [targetWidth] and [targetHeight] arguments specify the size of the output
-/// image, in image pixels. If they are not equal to the intrinsic dimensions of the
-/// image, then the image will be scaled after being decoded. If exactly one of
-/// these two arguments is specified, then the aspect ratio will be maintained
-/// while forcing the image to match the other given dimension. If neither is
-/// specified, then the image maintains its real size.
+/// The `targetWidth` and `targetHeight` arguments specify the size of the
+/// output image, in image pixels. If they are not equal to the intrinsic
+/// dimensions of the image, then the image will be scaled after being decoded.
+/// If the `allowUpscaling` parameter is not set to true, both dimensions will
+/// be capped at the intrinsic dimensions of the image, even if only one of
+/// them would have exceeded those intrinsic dimensions. If exactly one of these
+/// two arguments is specified, then the aspect ratio will be maintained while
+/// forcing the image to match the other given dimension. If neither is
+/// specified, then the image maintains its intrinsic size.
+///
+/// Scaling the image to larger than its intrinsic size should usually be
+/// avoided, since it causes the image to use more memory than necessary.
+/// Instead, prefer scaling the [Canvas] transform. If the image must be scaled
+/// up, the `allowUpscaling` parameter must be set to true.
 void decodeImageFromPixels(
   Uint8List pixels,
   int width,
   int height,
   PixelFormat format,
-  ImageDecoderCallback callback,
-  {int? rowBytes, int? targetWidth, int? targetHeight}
-) {
+  ImageDecoderCallback callback, {
+  int? rowBytes,
+  int? targetWidth,
+  int? targetHeight,
+  bool allowUpscaling = true,
+}) {
+  if (targetWidth != null) {
+    assert(allowUpscaling || targetWidth <= width);
+  }
+  if (targetHeight != null) {
+    assert(allowUpscaling || targetHeight <= height);
+  }
+
   final _ImageInfo imageInfo = _ImageInfo(width, height, format.index, rowBytes);
-  final Future<Codec> codecFuture = _futurize(
-    (_Callback<Codec> callback) => _instantiateImageCodec(pixels, callback, imageInfo, targetWidth ?? _kDoNotResizeDimension, targetHeight ?? _kDoNotResizeDimension)
-  );
+  final Future<Codec> codecFuture = _futurize((_Callback<Codec> callback) {
+    return _instantiateImageCodec(
+      pixels,
+      callback,
+      imageInfo,
+      targetWidth ?? _kDoNotResizeDimension,
+      targetHeight ?? _kDoNotResizeDimension,
+      allowUpscaling,
+    );
+  });
   codecFuture.then((Codec codec) => codec.getNextFrame())
       .then((FrameInfo frameInfo) => callback(frameInfo.image));
 }

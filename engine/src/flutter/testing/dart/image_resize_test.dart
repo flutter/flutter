@@ -12,6 +12,12 @@ import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 void main() {
+  bool assertsEnabled = false;
+  assert(() {
+    assertsEnabled = true;
+    return true;
+  }());
+
   test('no resize by default', () async {
     final Uint8List bytes = await readFile('4x4.png');
     final Codec codec = await instantiateImageCodec(bytes);
@@ -44,7 +50,7 @@ void main() {
 
   test('upscale image by 5x', () async {
     final Uint8List bytes = await readFile('4x4.png');
-    final Codec codec = await instantiateImageCodec(bytes, targetWidth: 10);
+    final Codec codec = await instantiateImageCodec(bytes, targetWidth: 10, allowUpscaling: true);
     final FrameInfo frame = await codec.getNextFrame();
     final int codecHeight = frame.image.height;
     final int codecWidth = frame.image.width;
@@ -52,15 +58,36 @@ void main() {
     expect(codecWidth, 10);
   });
 
+  test('upscale image by 5x - no upscaling', () async {
+    final Uint8List bytes = await readFile('4x4.png');
+    final Codec codec = await instantiateImageCodec(bytes, targetWidth: 10, allowUpscaling: false);
+    final FrameInfo frame = await codec.getNextFrame();
+    final int codecHeight = frame.image.height;
+    final int codecWidth = frame.image.width;
+    expect(codecHeight, 2);
+    expect(codecWidth, 2);
+  });
+
   test('upscale image varying width and height', () async {
     final Uint8List bytes = await readFile('4x4.png');
     final Codec codec =
-        await instantiateImageCodec(bytes, targetWidth: 10, targetHeight: 1);
+        await instantiateImageCodec(bytes, targetWidth: 10, targetHeight: 1, allowUpscaling: true);
     final FrameInfo frame = await codec.getNextFrame();
     final int codecHeight = frame.image.height;
     final int codecWidth = frame.image.width;
     expect(codecHeight, 1);
     expect(codecWidth, 10);
+  });
+
+  test('upscale image varying width and height - no upscaling', () async {
+    final Uint8List bytes = await readFile('4x4.png');
+    final Codec codec =
+        await instantiateImageCodec(bytes, targetWidth: 10, targetHeight: 1, allowUpscaling: false);
+    final FrameInfo frame = await codec.getNextFrame();
+    final int codecHeight = frame.image.height;
+    final int codecWidth = frame.image.width;
+    expect(codecHeight, 1);
+    expect(codecWidth, 2);
   });
 
   test('pixels: no resize by default', () async {
@@ -86,18 +113,59 @@ void main() {
 
   test('pixels: upscale image by 5x', () async {
     final BlackSquare blackSquare = BlackSquare.create();
-    final Image resized = await blackSquare.resize(targetWidth: 10);
+    final Image resized = await blackSquare.resize(targetWidth: 10, allowUpscaling: true);
     expect(resized.height, 10);
     expect(resized.width, 10);
   });
 
+  test('pixels: upscale image by 5x - no upscaling', () async {
+    final BlackSquare blackSquare = BlackSquare.create();
+    bool threw = false;
+    try {
+      decodeImageFromPixels(
+        blackSquare.pixels,
+        blackSquare.width,
+        blackSquare.height,
+        PixelFormat.rgba8888,
+        (Image image) => null,
+        targetHeight: 10,
+        allowUpscaling: false,
+      );
+    } catch (e) {
+      expect(e is AssertionError, true);
+      threw = true;
+    }
+    expect(threw, true);
+  }, skip: !assertsEnabled);
+
   test('pixels: upscale image varying width and height', () async {
     final BlackSquare blackSquare = BlackSquare.create();
     final Image resized =
-        await blackSquare.resize(targetHeight: 1, targetWidth: 10);
+        await blackSquare.resize(targetHeight: 1, targetWidth: 10, allowUpscaling: true);
     expect(resized.height, 1);
     expect(resized.width, 10);
   });
+
+  test('pixels: upscale image varying width and height - no upscaling', () async {
+    final BlackSquare blackSquare = BlackSquare.create();
+    bool threw = false;
+    try {
+      decodeImageFromPixels(
+        blackSquare.pixels,
+        blackSquare.width,
+        blackSquare.height,
+        PixelFormat.rgba8888,
+        (Image image) => null,
+        targetHeight: 10,
+        targetWidth: 1,
+        allowUpscaling: false,
+      );
+    } catch (e) {
+      expect(e is AssertionError, true);
+      threw = true;
+    }
+    expect(threw, true);
+  }, skip: !assertsEnabled);
 
   test('pixels: large negative dimensions', () async {
     final BlackSquare blackSquare = BlackSquare.create();
@@ -117,11 +185,18 @@ class BlackSquare {
     return BlackSquare._(width, height, pixels);
   }
 
-  Future<Image> resize({int targetWidth, int targetHeight}) async {
+  Future<Image> resize({int targetWidth, int targetHeight, bool allowUpscaling = false}) async {
     final Completer<Image> imageCompleter = Completer<Image>();
-    decodeImageFromPixels(pixels, width, height, PixelFormat.rgba8888,
-        (Image image) => imageCompleter.complete(image),
-        targetHeight: targetHeight, targetWidth: targetWidth);
+    decodeImageFromPixels(
+      pixels,
+      width,
+      height,
+      PixelFormat.rgba8888,
+      (Image image) => imageCompleter.complete(image),
+      targetHeight: targetHeight,
+      targetWidth: targetWidth,
+      allowUpscaling: allowUpscaling,
+    );
     return await imageCompleter.future;
   }
 
