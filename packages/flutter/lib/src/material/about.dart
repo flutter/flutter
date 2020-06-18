@@ -1609,7 +1609,7 @@ class _DetailView extends StatelessWidget {
         expand: false,
         builder: (BuildContext context, ScrollController controller) {
           return MouseRegion(
-            // Workaround bug where things behind sheet still get mouse hover events.
+            // TODO(TonicArtos): Remove MouseRegion workaround for pointer hover events passing through DraggableScrollableSheet once https://github.com/flutter/flutter/issues/59741 is resolved.
             child: Card(
               color: Theme.of(context).cardColor,
               elevation: _kCardElevation,
