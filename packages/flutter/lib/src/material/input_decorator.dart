@@ -986,9 +986,15 @@ class _RenderDecoration extends RenderBox {
       + contentPadding.right));
     // Increase the available width for the label when it is scaled down.
     final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress);
+    final double labelWidth = math.max(0.0, constraints.maxWidth - (
+      _boxSize(icon).width
+      + contentPadding.left
+      + _boxSize(prefixIcon).width
+      + _boxSize(suffixIcon).width
+      + contentPadding.right));
     boxToBaseline[label] = _layoutLineBox(
       label,
-      boxConstraints.copyWith(maxWidth: inputWidth * invertedLabelScale),
+      boxConstraints.copyWith(maxWidth: labelWidth * invertedLabelScale),
     );
     boxToBaseline[hint] = _layoutLineBox(
       hint,
