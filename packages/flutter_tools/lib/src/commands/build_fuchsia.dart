@@ -22,6 +22,7 @@ class BuildFuchsiaCommand extends BuildSubCommand {
     usesDartDefineOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
     addNullSafetyModeOptions();
+    addEnableExperimentation();
     argParser.addOption(
       'runner-source',
       help: 'The package source to use for the flutter_runner. '
