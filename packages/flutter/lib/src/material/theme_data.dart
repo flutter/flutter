@@ -315,7 +315,7 @@ class ThemeData with Diagnosticable {
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
     dialogBackgroundColor ??= isDark ? Colors.grey[800] : Colors.white;
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
-    hintColor ??= isDark ? const Color(0x80FFFFFF) : const Color(0x8A000000);
+    hintColor ??= isDark ? const Color(0x99FFFFFF) : const Color(0x99000000);
     errorColor ??= Colors.red[700];
     inputDecorationTheme ??= const InputDecorationTheme();
     pageTransitionsTheme ??= const PageTransitionsTheme();

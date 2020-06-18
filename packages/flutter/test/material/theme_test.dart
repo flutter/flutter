@@ -298,6 +298,29 @@ void main() {
     expect(glyphText.text.style.fontSize, 20.0);
   });
 
+  testWidgets('hint color has correct default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Text('dummy'),
+      ),
+    );
+    ThemeData data = tester.widget<Theme>(find.byType(Theme)).data;
+    expect(data.hintColor, const Color(0x99000000));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: const Text('dummy'),
+      ),
+    );
+
+    // Waits for theme transition.
+    await tester.pumpAndSettle();
+
+    data = tester.widget<Theme>(find.byType(Theme)).data;
+    expect(data.hintColor, const Color(0x99FFFFFF));
+  });
+
   testWidgets(
     'Same ThemeData reapplied does not trigger descendants rebuilds',
     (WidgetTester tester) async {
