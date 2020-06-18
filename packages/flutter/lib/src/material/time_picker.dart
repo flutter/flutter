@@ -62,12 +62,12 @@ const double _kTimePickerHeightLandscapeCollapsed = 304.0;
 const BorderRadius _kDefaultBorderRadius = BorderRadius.all(Radius.circular(4.0));
 const ShapeBorder _kDefaultShape = RoundedRectangleBorder(borderRadius: _kDefaultBorderRadius);
 
-/// Mode of the time picker dialog.
+/// Interactive input mode of the time picker dialog.
 ///
-/// Either a dial or text input. In [dial] mode, a clock dial is displayed and
-/// the user taps or drags the time they wish to select. In [input] mode,
-/// [TextField]s are displayed and the user types in the time they wish to
-/// select.
+/// In [TimePickerEntryMode.dial] mode, a clock dial is displayed and
+/// the user taps or drags the time they wish to select. In
+/// TimePickerEntryMode.input] mode, [TextField]s are displayed and the user
+/// types in the time they wish to select.
 enum TimePickerEntryMode {
   /// Tapping/dragging on a clock dial.
   dial,
@@ -240,7 +240,9 @@ class _HourMinuteControl extends StatelessWidget {
     @required this.text,
     @required this.onTap,
     @required this.isSelected,
-  });
+  }) : assert(text != null),
+       assert(onTap != null),
+       assert(isSelected != null);
 
   final String text;
   final GestureTapCallback onTap;
@@ -929,8 +931,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   double _getThetaForTime(TimeOfDay time) {
     final int hoursFactor = widget.use24HourDials ? TimeOfDay.hoursPerDay : TimeOfDay.hoursPerPeriod;
     final double fraction = widget.mode == _TimePickerMode.hour
-        ? (time.hour / hoursFactor) % hoursFactor
-        : (time.minute / TimeOfDay.minutesPerHour) % TimeOfDay.minutesPerHour;
+      ? (time.hour / hoursFactor) % hoursFactor
+      : (time.minute / TimeOfDay.minutesPerHour) % TimeOfDay.minutesPerHour;
     return (math.pi / 2.0 - fraction * _kTwoPi) % _kTwoPi;
   }
 
@@ -1220,6 +1222,7 @@ class _TimePickerInput extends StatefulWidget {
     @required this.helpText,
     @required this.onChanged,
   }) : assert(initialSelectedTime != null),
+       assert(onChanged != null),
        super(key: key);
 
   /// The time initially selected when the dialog is shown.
@@ -1479,10 +1482,10 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
   String get _formattedValue {
     final bool alwaysUse24HourFormat = MediaQuery.of(context).alwaysUse24HourFormat;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    return widget.isHour ? localizations.formatHour(
+    return !widget.isHour ? localizations.formatMinute(widget.selectedTime) : localizations.formatHour(
       widget.selectedTime,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
-    ) : localizations.formatMinute(widget.selectedTime);
+    );
   }
 
   @override
@@ -1492,7 +1495,9 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
 
     final InputDecorationTheme inputDecorationTheme = TimePickerTheme.of(context).inputDecorationTheme;
     InputDecoration inputDecoration;
-    if (inputDecorationTheme == null) {
+    if (inputDecorationTheme != null) {
+      inputDecoration = const InputDecoration().applyDefaults(inputDecorationTheme);
+    } else {
       inputDecoration = InputDecoration(
         contentPadding: const EdgeInsetsDirectional.only(bottom: 16.0, start: 3.0),
         filled: true,
@@ -1513,8 +1518,6 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> {
         // TODO(rami-a): Remove this logic once https://github.com/flutter/flutter/issues/54104 is fixed.
         errorStyle: const TextStyle(fontSize: 0.0, height: 0.0), // Prevent the error text from appearing.
       );
-    } else {
-      inputDecoration = const InputDecoration().applyDefaults(inputDecorationTheme);
     }
     inputDecoration = inputDecoration.copyWith(
       // Remove the hint text when focused because the centered cursor appears
@@ -1715,7 +1718,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     if (_entryMode == TimePickerEntryMode.input) {
       final FormState form = _formKey.currentState;
       if (!form.validate()) {
-        setState(() => _autoValidate = true);
+        setState(() { _autoValidate = true; });
         return;
       }
       form.save();
@@ -1726,7 +1729,9 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   Size _dialogSize(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
     final ThemeData theme = Theme.of(context);
-    // Constrain the textScaleFactor to prevent layout issues.
+    // Constrain the textScaleFactor to prevent layout issues. Since only some
+    // parts of the time picker scale up with textScaleFactor, we cap the factor
+    // to 1.1 as that provides enough space to reasonably fit all the content.
     final double textScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 1.1);
 
     double timePickerWidth;
@@ -1764,10 +1769,10 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     final bool use24HourDials = hourFormat(of: timeOfDayFormat) != HourFormat.h;
     final ThemeData theme = Theme.of(context);
     final ShapeBorder shape = TimePickerTheme.of(context).shape ?? _kDefaultShape;
-    final Orientation orientation = MediaQuery.of(context).orientation;
+    final Orientation orientation = media.orientation;
 
     Color toggleColor;
-    switch (theme.brightness) {
+    switch (theme.colorScheme.brightness) {
       case Brightness.light:
         toggleColor = Colors.grey[700];
         break;
@@ -1809,7 +1814,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     switch (_entryMode) {
       case TimePickerEntryMode.dial:
         final Widget dial = Padding(
-          padding: EdgeInsets.symmetric(horizontal: orientation == Orientation.portrait ? 36.0 : 24.0, vertical: 24.0),
+          padding: orientation == Orientation.portrait ? const EdgeInsets.symmetric(horizontal: 36, vertical: 24) : const EdgeInsets.all(24),
           child: ExcludeSemantics(
             child: AspectRatio(
               aspectRatio: 1.0,

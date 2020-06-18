@@ -26,6 +26,8 @@ import 'theme.dart';
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
+///  * [TimePickerTheme], which describes the actual configuration of a time
+///    picker theme.
 @immutable
 class TimePickerThemeData with Diagnosticable {
 
@@ -55,7 +57,8 @@ class TimePickerThemeData with Diagnosticable {
 
   /// The background color of a time picker.
   ///
-  /// If this is null, the time picker defaults to [ColorScheme.background].
+  /// If this is null, the time picker defaults to the overall theme's
+  /// [ColorScheme.background].
   final Color backgroundColor;
 
   /// The color used for the selected text in the header of a time picker.
@@ -63,7 +66,8 @@ class TimePickerThemeData with Diagnosticable {
   /// This determines the selected color of the header text that represent
   /// hours and minutes.
   ///
-  /// If this is null, the time picker defaults to [ColorScheme.primary].
+  /// If this is null, the time picker defaults to the overall theme's
+  /// [ColorScheme.primary].
   final Color hourMinuteSelectedTextColor;
 
   /// The color used for the selected background in the header of a time picker.
@@ -72,8 +76,9 @@ class TimePickerThemeData with Diagnosticable {
   /// hours and minutes.
   ///
   /// If this is null, the time picker defaults to
-  /// `ColorScheme.primary.withOpacity(0.12)` if the brightness is light and
-  /// `ColorScheme.primary.withOpacity(0.24)` if the brightness is dark.
+  /// `ColorScheme.primary.withOpacity(0.12)` if the overall theme's brightness
+  /// is light and `ColorScheme.primary.withOpacity(0.24)` if the overall
+  /// theme's brightness is dark.
   final Color hourMinuteSelectedColor;
 
   /// The color used for the unselected text in the header of a time picker.
@@ -81,7 +86,8 @@ class TimePickerThemeData with Diagnosticable {
   /// This determines the unselected color of the header text that represent
   /// hours and minutes.
   ///
-  /// If this is null, the time picker defaults to [ColorScheme.onSurface].
+  /// If this is null, the time picker defaults to the overall theme's
+  /// [ColorScheme.onSurface].
   final Color hourMinuteUnselectedTextColor;
 
   /// The color used for the unselected background in the header of a time
@@ -98,7 +104,8 @@ class TimePickerThemeData with Diagnosticable {
   ///
   /// This determines the selected color of the text that represent AM/PM.
   ///
-  /// If this is null, the time picker defaults to [ColorScheme.primary].
+  /// If this is null, the time picker defaults to the overall theme's
+  /// [ColorScheme.primary].
   final Color dayPeriodSelectedTextColor;
 
   /// The color used for the selected background in the day period of a time
@@ -108,8 +115,9 @@ class TimePickerThemeData with Diagnosticable {
   /// AM/PM.
   ///
   /// If this is null, the time picker defaults to
-  /// `ColorScheme.primary.withOpacity(0.12)` if the brightness is light and
-  /// `ColorScheme.primary.withOpacity(0.24)` if the brightness is dark.
+  /// `ColorScheme.primary.withOpacity(0.12)` if the overall theme's brightness
+  /// is light and `ColorScheme.primary.withOpacity(0.24)` if the overall
+  /// theme's brightness is dark.
   final Color dayPeriodSelectedColor;
 
   /// The color used for the unselected text in the day period of a time picker.
@@ -132,12 +140,14 @@ class TimePickerThemeData with Diagnosticable {
 
   /// The color of the time picker dial's hand.
   ///
-  /// If this is null, the time picker defaults to [ColorScheme.primary].
+  /// If this is null, the time picker defaults to the overall theme's
+  /// [ColorScheme.primary].
   final Color dialHandColor;
 
   /// The background color of the time picker dial.
   ///
-  /// If this is null, the time picker defaults to [ColorScheme.primary].
+  /// If this is null, the time picker defaults to the overall theme's
+  /// [ColorScheme.primary].
   final Color dialBackgroundColor;
 
   /// The color of the day period border.
@@ -150,17 +160,20 @@ class TimePickerThemeData with Diagnosticable {
 
   /// Used to configure the [TextStyle]s for the hour/minute controls.
   ///
-  /// If this is null, the time picker defaults to [TextTheme.headline3].
+  /// If this is null, the time picker defaults to the overall theme's
+  /// [TextTheme.headline3].
   final TextStyle hourMinuteTextStyle;
 
   /// Used to configure the [TextStyle]s for the day period control.
   ///
-  /// If this is null, the time picker defaults to [TextTheme.subtitle1].
+  /// If this is null, the time picker defaults to the overall theme's
+  /// [TextTheme.subtitle1].
   final TextStyle dayPeriodTextStyle;
 
   /// Used to configure the [TextStyle]s for the helper text in the header.
   ///
-  /// If this is null, the time picker defaults to [TextTheme.overline].
+  /// If this is null, the time picker defaults to the overall theme's
+  /// [TextTheme.overline].
   final TextStyle helpTextStyle;
 
   /// The shape of the [Dialog] that the time picker is presented in.
@@ -346,7 +359,7 @@ class TimePickerThemeData with Diagnosticable {
 }
 
 /// An inherited widget that defines the configuration for time pickers
-/// displayed in this widget's subtree.
+/// displayed using [showTimePicker] in this widget's subtree.
 ///
 /// Values specified here are used for time picker properties that are not
 /// given an explicit non-null value.
@@ -355,9 +368,10 @@ class TimePickerTheme extends InheritedTheme {
   /// time pickers displayed in its widget subtree.
   const TimePickerTheme({
     Key key,
-    this.data,
+    @required this.data,
     Widget child,
-  }) : super(key: key, child: child);
+  }) : assert(data != null),
+       super(key: key, child: child);
 
   /// The properties for descendant time picker widgets.
   final TimePickerThemeData data;
