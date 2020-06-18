@@ -400,16 +400,16 @@ const uint32_t STAFF_OF_AESCULAPIUS = 0x2695;
 
 // Characters where we want to continue using existing font run instead of
 // recomputing the best match in the fallback list.
-static const uint32_t stickyWhitelist[] = {
+static const uint32_t stickyAllowlist[] = {
     '!',   ',',         '-',       '.',
     ':',   ';',         '?',       NBSP,
     ZWJ,   ZWNJ,        HYPHEN,    NB_HYPHEN,
     NNBSP, FEMALE_SIGN, MALE_SIGN, STAFF_OF_AESCULAPIUS};
 
-static bool isStickyWhitelisted(uint32_t c) {
-  for (size_t i = 0; i < sizeof(stickyWhitelist) / sizeof(stickyWhitelist[0]);
+static bool isStickyAllowed(uint32_t c) {
+  for (size_t i = 0; i < sizeof(stickyAllowlist) / sizeof(stickyAllowlist[0]);
        i++) {
-    if (stickyWhitelist[i] == c)
+    if (stickyAllowlist[i] == c)
       return true;
   }
   return false;
@@ -489,9 +489,9 @@ void FontCollection::itemize(const uint16_t* string,
 
     bool shouldContinueRun = false;
     if (lastFamily != nullptr) {
-      if (isStickyWhitelisted(ch)) {
+      if (isStickyAllowed(ch)) {
         // Continue using existing font as long as it has coverage and is
-        // whitelisted
+        // allowed.
         shouldContinueRun = lastFamily->getCoverage().get(ch);
       } else if (ch == SOFT_HYPHEN || isVariationSelector(ch)) {
         // Always continue if the character is the soft hyphen or a variation

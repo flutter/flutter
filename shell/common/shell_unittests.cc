@@ -246,7 +246,7 @@ TEST_F(ShellTest, LastEntrypoint) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
-TEST(ShellTestNoFixture, EnableMirrorsIsWhitelisted) {
+TEST(ShellTestNoFixture, EnableMirrorsIsAllowed) {
   if (DartVM::IsRunningPrecompiledCode()) {
     // This covers profile and release modes which use AOT (where this flag does
     // not make sense anyway).
@@ -265,7 +265,7 @@ TEST(ShellTestNoFixture, EnableMirrorsIsWhitelisted) {
   EXPECT_EQ(settings.dart_flags.size(), 1u);
 }
 
-TEST_F(ShellTest, BlacklistedDartVMFlag) {
+TEST_F(ShellTest, DisallowedDartVMFlag) {
   // Run this test in a thread-safe manner, otherwise gtest will complain.
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -273,13 +273,13 @@ TEST_F(ShellTest, BlacklistedDartVMFlag) {
       fml::CommandLine::Option("dart-flags", "--verify_after_gc")};
   fml::CommandLine command_line("", options, std::vector<std::string>());
 
-  // Upon encountering a non-whitelisted Dart flag the process terminates.
+  // Upon encountering a disallowed Dart flag the process terminates.
   const char* expected =
-      "Encountered blacklisted Dart VM flag: --verify_after_gc";
+      "Encountered disallowed Dart VM flag: --verify_after_gc";
   ASSERT_DEATH(flutter::SettingsFromCommandLine(command_line), expected);
 }
 
-TEST_F(ShellTest, WhitelistedDartVMFlag) {
+TEST_F(ShellTest, AllowedDartVMFlag) {
   const std::vector<fml::CommandLine::Option> options = {
 #if !FLUTTER_RELEASE
     fml::CommandLine::Option("dart-flags",

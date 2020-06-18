@@ -107,9 +107,8 @@ public class FlutterShellArgs {
     }
 
     // NOTE: all flags provided with this argument are subject to filtering
-    // based on a whitelist in shell/common/switches.cc. If any flag provided
-    // is not present in the whitelist, the process will immediately
-    // terminate.
+    // based on a a list of allowed flags in shell/common/switches.cc. If any
+    // flag provided is not allowed, the process will immediately terminate.
     if (intent.hasExtra(ARG_KEY_DART_FLAGS)) {
       args.add(ARG_DART_FLAGS + "=" + intent.getStringExtra(ARG_KEY_DART_FLAGS));
     }
