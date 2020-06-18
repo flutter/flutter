@@ -130,3 +130,4 @@ RUN /download_goldctl.sh
 
 # Adding a comment to clear any existing cache,
 # and to make sure we are using the latest versions.
+RUN echo hello
