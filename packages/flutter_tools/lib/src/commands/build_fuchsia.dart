@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../base/common.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -16,12 +18,13 @@ import 'build.dart';
 
 /// A command to build a Fuchsia target.
 class BuildFuchsiaCommand extends BuildSubCommand {
-  BuildFuchsiaCommand({bool verboseHelp = false}) {
+  BuildFuchsiaCommand({ @required bool verboseHelp }) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     usesDartDefineOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
-    addNullSafetyModeOptions();
+    addNullSafetyModeOptions(hide: !verboseHelp);
+    addEnableExperimentation(hide: !verboseHelp);
     argParser.addOption(
       'runner-source',
       help: 'The package source to use for the flutter_runner. '

@@ -43,8 +43,8 @@ export 'package:flutter/rendering.dart' show
   LayerLink,
   MainAxisAlignment,
   MainAxisSize,
-  MultiChildLayoutDelegate,
   Overflow,
+  MultiChildLayoutDelegate,
   PaintingContext,
   PointerCancelEvent,
   PointerCancelEventListener,
@@ -1413,9 +1413,11 @@ class FittedBox extends SingleChildRenderObjectWidget {
     Key key,
     this.fit = BoxFit.contain,
     this.alignment = Alignment.center,
+    this.clipBehavior = Clip.hardEdge,
     Widget child,
   }) : assert(fit != null),
        assert(alignment != null),
+       assert(clipBehavior != null),
        super(key: key, child: child);
 
   /// How to inscribe the child into the space allocated during layout.
@@ -1437,12 +1439,19 @@ class FittedBox extends SingleChildRenderObjectWidget {
   ///    relative to text direction.
   final AlignmentGeometry alignment;
 
+  // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
   @override
   RenderFittedBox createRenderObject(BuildContext context) {
     return RenderFittedBox(
       fit: fit,
       alignment: alignment,
       textDirection: Directionality.of(context),
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -1451,7 +1460,8 @@ class FittedBox extends SingleChildRenderObjectWidget {
     renderObject
       ..fit = fit
       ..alignment = alignment
-      ..textDirection = Directionality.of(context);
+      ..textDirection = Directionality.of(context)
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -2233,7 +2243,9 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
     this.textDirection,
     this.alignment = Alignment.center,
     this.constrainedAxis,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(alignment != null),
+       assert(clipBehavior != null),
        super(key: key, child: child);
 
   /// The text direction to use when interpreting the [alignment] if it is an
@@ -2259,12 +2271,19 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
   /// will be retained.
   final Axis constrainedAxis;
 
+  // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
   @override
   void updateRenderObject(BuildContext context, covariant RenderUnconstrainedBox renderObject) {
     renderObject
       ..textDirection = textDirection ?? Directionality.of(context)
       ..alignment = alignment
-      ..constrainedAxis = constrainedAxis;
+      ..constrainedAxis = constrainedAxis
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -2272,6 +2291,7 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
     textDirection: textDirection ?? Directionality.of(context),
     alignment: alignment,
     constrainedAxis: constrainedAxis,
+    clipBehavior: clipBehavior,
   );
 
   @override
@@ -3218,8 +3238,10 @@ class Stack extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.fit = StackFit.loose,
     this.overflow = Overflow.clip,
+    this.clipBehavior = Clip.hardEdge,
     List<Widget> children = const <Widget>[],
-  }) : super(key: key, children: children);
+  }) : assert(clipBehavior != null),
+       super(key: key, children: children);
 
   /// How to align the non-positioned and partially-positioned children in the
   /// stack.
@@ -3256,11 +3278,21 @@ class Stack extends MultiChildRenderObjectWidget {
   /// ([StackFit.expand]).
   final StackFit fit;
 
+  // TODO(liyuqian): Deprecate and remove [overflow] once its usages are removed from Google.
+
   /// Whether overflowing children should be clipped. See [Overflow].
   ///
   /// Some children in a stack might overflow its box. When this flag is set to
   /// [Overflow.clip], children cannot paint outside of the stack's box.
+  ///
+  /// This overrides [clipBehavior] for now due to a staged roll out without
+  /// breaking Google. We will remove it and only use [clipBehavior] soon.
   final Overflow overflow;
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
 
   bool _debugCheckHasDirectionality(BuildContext context) {
     if (alignment is AlignmentDirectional && textDirection == null) {
@@ -3281,7 +3313,7 @@ class Stack extends MultiChildRenderObjectWidget {
       alignment: alignment,
       textDirection: textDirection ?? Directionality.of(context),
       fit: fit,
-      overflow: overflow,
+      clipBehavior: overflow == Overflow.visible ? Clip.none : clipBehavior,
     );
   }
 
@@ -3292,7 +3324,7 @@ class Stack extends MultiChildRenderObjectWidget {
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.of(context)
       ..fit = fit
-      ..overflow = overflow;
+      ..clipBehavior = overflow == Overflow.visible ? Clip.none : clipBehavior;
   }
 
   @override
@@ -3301,7 +3333,7 @@ class Stack extends MultiChildRenderObjectWidget {
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<StackFit>('fit', fit));
-    properties.add(EnumProperty<Overflow>('overflow', overflow));
+    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
   }
 }
 
@@ -3829,6 +3861,7 @@ class Flex extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
     this.textBaseline,
+    this.clipBehavior = Clip.hardEdge,
     List<Widget> children = const <Widget>[],
   }) : assert(direction != null),
        assert(mainAxisAlignment != null),
@@ -3836,6 +3869,7 @@ class Flex extends MultiChildRenderObjectWidget {
        assert(crossAxisAlignment != null),
        assert(verticalDirection != null),
        assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null),
+       assert(clipBehavior != null),
        super(key: key, children: children);
 
   /// The direction to use as the main axis.
@@ -3920,6 +3954,12 @@ class Flex extends MultiChildRenderObjectWidget {
   /// If aligning items according to their baseline, which baseline to use.
   final TextBaseline textBaseline;
 
+  // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
   bool get _needTextDirection {
     assert(direction != null);
     switch (direction) {
@@ -3963,6 +4003,7 @@ class Flex extends MultiChildRenderObjectWidget {
       textDirection: getEffectiveTextDirection(context),
       verticalDirection: verticalDirection,
       textBaseline: textBaseline,
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -3975,7 +4016,8 @@ class Flex extends MultiChildRenderObjectWidget {
       ..crossAxisAlignment = crossAxisAlignment
       ..textDirection = getEffectiveTextDirection(context)
       ..verticalDirection = verticalDirection
-      ..textBaseline = textBaseline;
+      ..textBaseline = textBaseline
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -4646,8 +4688,9 @@ class Wrap extends MultiChildRenderObjectWidget {
     this.crossAxisAlignment = WrapCrossAlignment.start,
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
+    this.clipBehavior = Clip.hardEdge,
     List<Widget> children = const <Widget>[],
-  }) : super(key: key, children: children);
+  }) : assert(clipBehavior != null), super(key: key, children: children);
 
   /// The direction to use as the main axis.
   ///
@@ -4781,6 +4824,12 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// [verticalDirection] must not be null.
   final VerticalDirection verticalDirection;
 
+  // TODO(liyuqian): defaults to [Clip.none] once Google references are updated.
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
   @override
   RenderWrap createRenderObject(BuildContext context) {
     return RenderWrap(
@@ -4792,6 +4841,7 @@ class Wrap extends MultiChildRenderObjectWidget {
       crossAxisAlignment: crossAxisAlignment,
       textDirection: textDirection ?? Directionality.of(context),
       verticalDirection: verticalDirection,
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -4805,7 +4855,8 @@ class Wrap extends MultiChildRenderObjectWidget {
       ..runSpacing = runSpacing
       ..crossAxisAlignment = crossAxisAlignment
       ..textDirection = textDirection ?? Directionality.of(context)
-      ..verticalDirection = verticalDirection;
+      ..verticalDirection = verticalDirection
+      ..clipBehavior = clipBehavior;
   }
 
   @override
