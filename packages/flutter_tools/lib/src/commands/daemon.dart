@@ -918,7 +918,7 @@ dynamic _toJsonable(dynamic obj) {
 }
 
 class NotifyingLogger extends Logger {
-  NotifyingLogger({ @required this.verbose, @required this.parent }) {
+  NotifyingLogger({ @required this.verbose, this.parent }) {
     _messageController = StreamController<LogMessage>.broadcast(
       onListen: _onListen,
     );
@@ -969,7 +969,7 @@ class NotifyingLogger extends Logger {
     if (!verbose) {
       return;
     }
-    parent.printError(message);
+    parent?.printError(message);
   }
 
   @override
