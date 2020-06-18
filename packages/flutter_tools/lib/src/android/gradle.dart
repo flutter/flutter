@@ -171,14 +171,14 @@ void createSettingsAarGradle(Directory androidDirectory) {
       timeout: timeoutConfiguration.fastOperation);
 
   final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);
-  final File deprecatedFile = globals.fs.file(globals.fs.path.join(flutterRoot, 'packages','flutter_tools',
-      'gradle', 'deprecated_settings.gradle'));
-  assert(deprecatedFile.existsSync());
+  final File legacySettingsDotGradleFiles = globals.fs.file(globals.fs.path.join(flutterRoot, 'packages','flutter_tools',
+      'gradle', 'settings.gradle.legacy_versions'));
+  assert(legacySettingsDotGradleFiles.existsSync());
   final String settingsAarContent = globals.fs.file(globals.fs.path.join(flutterRoot, 'packages','flutter_tools',
       'gradle', 'settings_aar.gradle.tmpl')).readAsStringSync();
 
   // Get the `settings.gradle` content variants that should be patched.
-  final List<String> existingVariants = deprecatedFile.readAsStringSync().split(';EOF');
+  final List<String> existingVariants = legacySettingsDotGradleFiles.readAsStringSync().split(';EOF');
   existingVariants.add(settingsAarContent);
 
   bool exactMatch = false;
@@ -245,7 +245,7 @@ Future<void> buildGradleApp({
     globals.printStatus("$warningMark Your app isn't using AndroidX.", emphasis: true);
     globals.printStatus(
       'To avoid potential build failures, you can quickly migrate your app '
-      'by following the steps on https://goo.gl/CP92wY.',
+      'by following the steps on https://goo.gl/CP92wY .',
       indent: 4,
     );
   }
@@ -310,10 +310,10 @@ Future<void> buildGradleApp({
   command.add('-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}');
 
   if (buildInfo.extraFrontEndOptions != null) {
-    command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions.join(',')}');
+    command.add('-Pextra-front-end-options=${encodeDartDefines(buildInfo.extraFrontEndOptions)}');
   }
   if (buildInfo.extraGenSnapshotOptions != null) {
-    command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions.join(',')}');
+    command.add('-Pextra-gen-snapshot-options=${encodeDartDefines(buildInfo.extraGenSnapshotOptions)}');
   }
   if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty) {
     command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
@@ -328,7 +328,7 @@ Future<void> buildGradleApp({
     command.add('-Pshrink=true');
   }
   if (androidBuildInfo.buildInfo.dartDefines?.isNotEmpty ?? false) {
-    command.add('-Pdart-defines=${androidBuildInfo.buildInfo.dartDefines.join(',')}');
+    command.add('-Pdart-defines=${encodeDartDefines(androidBuildInfo.buildInfo.dartDefines)}');
   }
   if (shouldBuildPluginAsAar) {
     // Pass a system flag instead of a project flag, so this flag can be
@@ -664,13 +664,13 @@ void printHowToConsumeAar({
   1. Open ${fileSystem.path.join('<host>', 'app', 'build.gradle')}
   2. Ensure you have the repositories configured, otherwise add them:
 
-      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "storage.googleapis.com"
+      String storageUrl = System.env.FLUTTER_STORAGE_BASE_URL ?: "https://storage.googleapis.com"
       repositories {
         maven {
             url '${repoDirectory.path}'
         }
         maven {
-            url 'https://\$storageUrl/download.flutter.io'
+            url '\$storageUrl/download.flutter.io'
         }
       }
 
@@ -1001,8 +1001,11 @@ Directory _getLocalEngineRepo({
     .createTempSync('flutter_tool_local_engine_repo.');
 
   // Remove the local engine repo before the tool exits.
-  shutdownHooks.addShutdownHook(
-    () => localEngineRepo.deleteSync(recursive: true),
+  shutdownHooks.addShutdownHook(() {
+      if (localEngineRepo.existsSync()) {
+        localEngineRepo.deleteSync(recursive: true);
+      }
+    },
     ShutdownStage.CLEANUP,
   );
 

@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/widgets.dart';
 
 import '../color_scheme.dart';
 import '../icon_button.dart';
+import '../material.dart';
 import '../text_theme.dart';
 import '../theme.dart';
 
@@ -125,69 +128,65 @@ class DatePickerHeader extends StatelessWidget {
 
     switch (orientation) {
       case Orientation.portrait:
-         return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              height: _datePickerHeaderPortraitHeight,
-              color: primarySurfaceColor,
-              padding: const EdgeInsetsDirectional.only(
-                start: 24,
-                end: 12,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const SizedBox(height: 16),
-                  Flexible(child: help),
-                  const SizedBox(height: 38),
-                  Row(
-                    children: <Widget>[
-                      Expanded(child: title),
-                      icon,
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
+         return SizedBox(
+           height: _datePickerHeaderPortraitHeight,
+           child: Material(
+             color: primarySurfaceColor,
+             child: Padding(
+               padding: const EdgeInsetsDirectional.only(
+                 start: 24,
+                 end: 12,
+               ),
+               child: Column(
+                 crossAxisAlignment: CrossAxisAlignment.start,
+                 children: <Widget>[
+                   const SizedBox(height: 16),
+                   Flexible(child: help),
+                   const SizedBox(height: 38),
+                   Row(
+                     children: <Widget>[
+                       Expanded(child: title),
+                       icon,
+                     ],
+                   ),
+                 ],
+               ),
+             ),
+           ),
+         );
       case Orientation.landscape:
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              width: _datePickerHeaderLandscapeWidth,
-              color: primarySurfaceColor,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const SizedBox(height: 16),
-                  Padding(
+        return SizedBox(
+          width: _datePickerHeaderLandscapeWidth,
+          child: Material(
+            color: primarySurfaceColor,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: _headerPaddingLandscape,
+                  ),
+                  child: help,
+                ),
+                SizedBox(height: isShort ? 16 : 56),
+                Expanded(
+                  child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: _headerPaddingLandscape,
                     ),
-                    child: help,
+                    child: title,
                   ),
-                  SizedBox(height: isShort ? 16 : 56),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: _headerPaddingLandscape,
-                      ),
-                      child: title,
-                    ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                    ),
-                    child: icon,
-                  ),
-                ],
-              ),
+                  child: icon,
+                ),
+              ],
             ),
-          ],
+          ),
         );
     }
     return null;

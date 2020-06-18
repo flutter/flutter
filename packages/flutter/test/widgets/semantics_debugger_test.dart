@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show window;
 
 import 'package:flutter/material.dart';
@@ -10,6 +12,16 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('SemanticsDebugger will schedule a frame', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      SemanticsDebugger(
+        child: Container(),
+      ),
+    );
+
+    expect(tester.binding.hasScheduledFrame, isTrue);
+  });
+
   testWidgets('SemanticsDebugger smoke test', (WidgetTester tester) async {
 
     // This is a smoketest to verify that adding a debugger doesn't crash.

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
@@ -338,7 +340,7 @@ class _HeroState extends State<Hero> {
   // needs to be built to replace the original hero widget. When
   // `shouldIncludeChildInPlaceholder` is set to true and `widget.placeholderBuilder`
   // is null, the placeholder widget will include the original hero's child
-  // widget as a descendant, allowing the orignal element tree to be preserved.
+  // widget as a descendant, allowing the original element tree to be preserved.
   //
   // It is typically set to true for the *from* hero in a push transition,
   // and false otherwise.
@@ -533,6 +535,14 @@ class _HeroFlight {
   }
 
   void _handleAnimationUpdate(AnimationStatus status) {
+    // The animation will not finish until the user lifts their finger, so we
+    // should ignore the status update if the gesture is in progress.
+    //
+    // This also relies on the animation to update its status at the end of the
+    // gesture. See the _CupertinoBackGestureController.dragEnd for how
+    // cupertino page route achieves that.
+    if (manifest.fromRoute?.navigator?.userGestureInProgress == true)
+      return;
     if (status == AnimationStatus.completed || status == AnimationStatus.dismissed) {
       _proxyAnimation.parent = null;
 

@@ -226,7 +226,7 @@ void main() {
 
   testWithoutContext('Throws type error if Directory type is set to curentDirectory with LocalFileSystem', () {
     final FileSystem fs = ErrorHandlingFileSystem(
-      delegate: const LocalFileSystem(),
+      delegate: LocalFileSystem.instance,
       platform: const LocalPlatform(),
     );
     final MockDirectory directory = MockDirectory();

@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/convert.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:mockito/mockito.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -101,6 +103,8 @@ void main() {
       null,
       null,
       null,
+      null,
+      null,
       mockVMService,
     );
 
@@ -119,6 +123,8 @@ void main() {
       null,
       null,
       reloadMethod,
+      null,
+      null,
       mockVMService,
     );
 
@@ -137,10 +143,50 @@ void main() {
       null,
       mockDevice,
       null,
+      null,
+      null,
       mockVMService,
     );
 
     verify(mockVMService.registerService('flutterMemoryInfo', 'Flutter Tools')).called(1);
+  }, overrides: <Type, Generator>{
+    Logger: () => BufferLogger.test()
+  });
+
+  testUsingContext('VmService registers flutterGetSkSL service', () async {
+    final MockVMService mockVMService = MockVMService();
+    setUpVmService(
+      null,
+      null,
+      null,
+      null,
+      null,
+      () async => 'hello',
+      null,
+      mockVMService,
+    );
+
+    verify(mockVMService.registerService('flutterGetSkSL', 'Flutter Tools')).called(1);
+  }, overrides: <Type, Generator>{
+    Logger: () => BufferLogger.test()
+  });
+
+  testUsingContext('VmService registers flutterPrintStructuredErrorLogMethod', () async {
+    final MockVMService mockVMService = MockVMService();
+    when(mockVMService.onExtensionEvent).thenAnswer((Invocation invocation) {
+      return const Stream<vm_service.Event>.empty();
+    });
+    setUpVmService(
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      (vm_service.Event event) async => 'hello',
+      mockVMService,
+    );
+    verify(mockVMService.streamListen(vm_service.EventStreams.kExtension)).called(1);
   }, overrides: <Type, Generator>{
     Logger: () => BufferLogger.test()
   });
@@ -153,12 +199,46 @@ void main() {
       null,
       null,
       null,
+      null,
+      null,
       mockVMService,
     );
 
     verify(mockVMService.registerService('flutterVersion', 'Flutter Tools')).called(1);
   }, overrides: <Type, Generator>{
     FlutterVersion: () => MockFlutterVersion(),
+  });
+
+  testUsingContext('VMService prints messages for connection failures', () {
+    FakeAsync().run((FakeAsync time) {
+      final Uri uri = Uri.parse('ws://127.0.0.1:12345/QqL7EFEDNG0=/ws');
+      unawaited(connectToVmService(uri));
+
+      time.elapse(const Duration(seconds: 5));
+      expect(testLogger.statusText, isEmpty);
+
+      time.elapse(const Duration(minutes: 2));
+
+      final String statusText = testLogger.statusText;
+      expect(
+        statusText,
+        containsIgnoringWhitespace('Connecting to the VM Service is taking longer than expected...'),
+      );
+      expect(
+        statusText,
+        containsIgnoringWhitespace('try re-running with --host-vmservice-port'),
+      );
+      expect(
+        statusText,
+        containsIgnoringWhitespace('Exception attempting to connect to the VM Service:'),
+      );
+      expect(
+        statusText,
+        containsIgnoringWhitespace('This was attempt #50. Will retry'),
+      );
+    });
+  }, overrides: <Type, Generator>{
+    WebSocketConnector: () => failingWebSocketConnector,
   });
 
   testWithoutContext('setAssetDirectory forwards arguments correctly', () async {
@@ -322,4 +402,12 @@ class MockVMService extends Mock implements vm_service.VmService {}
 class MockFlutterVersion extends Mock implements FlutterVersion {
   @override
   Map<String, Object> toJson() => const <String, Object>{'Mock': 'Version'};
+}
+
+/// A [WebSocketConnector] that always throws an [io.SocketException].
+Future<io.WebSocket> failingWebSocketConnector(
+  String url, {
+  io.CompressionOptions compression,
+}) {
+  throw const io.SocketException('Failed WebSocket connection');
 }

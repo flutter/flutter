@@ -4,6 +4,7 @@
 
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -172,6 +173,31 @@ void main() {
     fileCache.initialize();
 
     expect(logger.errorText, contains('Out of space!'));
+  });
+
+  testWithoutContext('FileStore handles chunked conversion of a file', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File cacheFile = fileSystem
+      .directory('example')
+      .childFile(FileStore.kFileCache)
+      ..createSync(recursive: true);
+    final FileStore fileCache = FileStore(
+      cacheFile: cacheFile,
+      logger: BufferLogger.test(),
+      fileChunkThreshold: 1, // Chunk files larger than 1 byte.
+    );
+    final File file = fileSystem.file('foo.dart')
+      ..createSync()
+      ..writeAsStringSync('hello');
+    fileCache.initialize();
+
+    cacheFile.parent.deleteSync(recursive: true);
+
+    await fileCache.diffFileList(<File>[file]);
+
+    // Validate that chunked hash is the same as non-chunked.
+    expect(fileCache.currentAssetKeys['foo.dart'],
+      md5.convert(file.readAsBytesSync()).toString());
   });
 }
 

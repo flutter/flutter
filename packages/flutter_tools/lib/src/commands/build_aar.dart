@@ -40,6 +40,8 @@ class BuildAarCommand extends BuildSubCommand {
     usesPubOption();
     addSplitDebugInfoOption();
     addDartObfuscationOption();
+    usesTrackWidgetCreation(verboseHelp: false);
+    addNullSafetyModeOptions();
     argParser
       ..addMultiOption(
         'target-platform',

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
@@ -183,6 +185,11 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// possible. Containers with children size themselves to their children. The
 /// `width`, `height`, and [constraints] arguments to the constructor override
 /// this.
+///
+/// By default, containers return false for all hit tests. If the [color]
+/// property is specified, the hit testing is handled by [ColoredBox], which
+/// always returns true. If the [decoration] or [foregroundDecoration] properties
+/// are specified, hit testing is handled by [Decoration.hitTest].
 ///
 /// ## Layout behavior
 ///

@@ -104,7 +104,7 @@ class EmulatorsCommand extends FlutterCommand {
 
   void _printEmulatorList(List<Emulator> emulators, String message) {
     globals.printStatus('$message\n');
-    Emulator.printEmulators(emulators);
+    Emulator.printEmulators(emulators, globals.logger);
     _printAdditionalInfo(showCreateInstruction: true, showRunInstruction: true);
   }
 

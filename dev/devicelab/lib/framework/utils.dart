@@ -324,8 +324,39 @@ Future<int> exec(
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   String workingDirectory,
 }) async {
-  final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
-  await forwardStandardStreams(process);
+  return _execute(
+    executable,
+    arguments,
+    environment: environment,
+    canFail : canFail,
+    workingDirectory: workingDirectory,
+  );
+}
+
+Future<int> _execute(
+  String executable,
+  List<String> arguments, {
+  Map<String, String> environment,
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
+  String workingDirectory,
+  StringBuffer output, // if not null, the stdout will be written here
+  StringBuffer stderr, // if not null, the stderr will be written here
+  bool printStdout = true,
+  bool printStderr = true,
+}) async {
+  final Process process = await startProcess(
+    executable,
+    arguments,
+    environment: environment,
+    workingDirectory: workingDirectory,
+  );
+  await forwardStandardStreams(
+    process,
+    output: output,
+    stderr: stderr,
+    printStdout: printStdout,
+    printStderr: printStderr,
+    );
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
@@ -335,26 +366,42 @@ Future<int> exec(
 }
 
 /// Forwards standard out and standard error from [process] to this process'
-/// respective outputs.
+/// respective outputs. Also writes stdout to [output] and stderr to [stderr]
+/// if they are not null.
 ///
 /// Returns a future that completes when both out and error streams a closed.
-Future<void> forwardStandardStreams(Process process) {
+Future<void> forwardStandardStreams(
+  Process process, {
+  StringBuffer output,
+  StringBuffer stderr,
+  bool printStdout = true,
+  bool printStderr = true,
+  }) {
   final Completer<void> stdoutDone = Completer<void>();
   final Completer<void> stderrDone = Completer<void>();
   process.stdout
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen((String line) {
-        print('stdout: $line');
+        if (printStdout) {
+          print('stdout: $line');
+        }
+        output?.writeln(line);
       }, onDone: () { stdoutDone.complete(); });
   process.stderr
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen((String line) {
-        print('stderr: $line');
+        if (printStderr) {
+          print('stderr: $line');
+        }
+        stderr?.writeln(line);
       }, onDone: () { stderrDone.complete(); });
 
-  return Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
+  return Future.wait<void>(<Future<void>>[
+    stdoutDone.future,
+    stderrDone.future,
+  ]);
 }
 
 /// Executes a command and returns its standard output as a String.
@@ -370,36 +417,18 @@ Future<String> eval(
   bool printStdout = true,
   bool printStderr = true,
 }) async {
-  final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
-
   final StringBuffer output = StringBuffer();
-  final Completer<void> stdoutDone = Completer<void>();
-  final Completer<void> stderrDone = Completer<void>();
-  process.stdout
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen((String line) {
-        if (printStdout) {
-          print('stdout: $line');
-        }
-        output.writeln(line);
-      }, onDone: () { stdoutDone.complete(); });
-  process.stderr
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen((String line) {
-        if (printStderr) {
-          print('stderr: $line');
-        }
-        stderr?.writeln(line);
-      }, onDone: () { stderrDone.complete(); });
-
-  await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
-  final int exitCode = await process.exitCode;
-
-  if (exitCode != 0 && !canFail)
-    fail('Executable "$executable" failed with exit code $exitCode.');
-
+  await _execute(
+    executable,
+    arguments,
+    environment: environment,
+    canFail: canFail,
+    workingDirectory: workingDirectory,
+    output: output,
+    stderr: stderr,
+    printStdout: printStdout,
+    printStderr: printStderr,
+  );
   return output.toString().trimRight();
 }
 
@@ -437,6 +466,9 @@ Future<String> evalFlutter(String command, {
 String get dartBin =>
     path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
 
+String get pubBin =>
+    path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'pub');
+
 Future<int> dart(List<String> args) => exec(dartBin, args);
 
 /// Returns a future that completes with a path suitable for JAVA_HOME
@@ -472,11 +504,11 @@ void cd(dynamic directory) {
     cwd = directory.path;
     d = directory;
   } else {
-    throw 'Unsupported type ${directory.runtimeType} of $directory';
+    throw FileSystemException('Unsupported directory type ${directory.runtimeType}', directory.toString());
   }
 
   if (!d.existsSync())
-    throw 'Cannot cd into directory that does not exist: $directory';
+    throw FileSystemException('Cannot cd into directory that does not exist', d.toString());
 }
 
 Directory get flutterDirectory => Directory.current.parent.parent;
@@ -658,6 +690,13 @@ void checkFileNotExists(String file) {
 void checkDirectoryExists(String directory) {
   if (!exists(Directory(directory))) {
     throw FileSystemException('Expected directory to exist.', directory);
+  }
+}
+
+/// Checks that the directory does not exist, otherwise throws a [FileSystemException].
+void checkDirectoryNotExists(String directory) {
+  if (exists(Directory(directory))) {
+    throw FileSystemException('Expected directory to not exist.', directory);
   }
 }
 

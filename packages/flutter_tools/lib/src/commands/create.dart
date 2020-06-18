@@ -76,7 +76,7 @@ class CreateCommand extends FlutterCommand {
     argParser.addOption(
       'list-samples',
       help: 'Specifies a JSON output file for a listing of Flutter code samples '
-        'that can created with --sample.',
+        'that can be created with --sample.',
       valueHelp: 'path',
     );
     argParser.addFlag(
@@ -262,8 +262,6 @@ class CreateCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     if (argResults['list-samples'] != null) {
       // _writeSamplesJson can potentially be long-lived.
-      Cache.releaseLockEarly();
-
       await _writeSamplesJson(stringArg('list-samples'));
       return FlutterCommandResult.success();
     }
@@ -592,6 +590,8 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     final String pluginClass = pluginDartClass.endsWith('Plugin')
         ? pluginDartClass
         : pluginDartClass + 'Plugin';
+    final String pluginClassSnakeCase = snakeCase(pluginClass);
+    final String pluginClassCapitalSnakeCase = pluginClassSnakeCase.toUpperCase();
     final String appleIdentifier = _createUTIIdentifier(organization, projectName);
 
     return <String, dynamic>{
@@ -607,8 +607,9 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
       'withDriverTest': renderDriverTest,
       'pluginClass': pluginClass,
+      'pluginClassSnakeCase': pluginClassSnakeCase,
+      'pluginClassCapitalSnakeCase': pluginClassCapitalSnakeCase,
       'pluginDartClass': pluginDartClass,
-      'pluginCppHeaderGuard': projectName.toUpperCase(),
       'pluginProjectUUID': Uuid().v4().toUpperCase(),
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,

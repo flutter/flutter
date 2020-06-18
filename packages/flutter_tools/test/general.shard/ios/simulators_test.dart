@@ -83,6 +83,23 @@ void main() {
     }, testOn: 'posix');
   });
 
+  testUsingContext('simulators only support debug mode', () async {
+    final IOSSimulator simulator = IOSSimulator(
+      '123',
+      simControl: MockSimControl(),
+      xcode: MockXcode(),
+    );
+
+    expect(simulator.supportsRuntimeMode(BuildMode.debug), true);
+    expect(simulator.supportsRuntimeMode(BuildMode.profile), false);
+    expect(simulator.supportsRuntimeMode(BuildMode.release), false);
+    expect(simulator.supportsRuntimeMode(BuildMode.jitRelease), false);
+  }, overrides: <Type, Generator>{
+    Platform: () => osx,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
   group('logFilePath', () {
     MockSimControl mockSimControl;
     MockXcode mockXcode;
@@ -553,7 +570,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           xcode: mockXcode,
         );
         final DeviceLogReader logReader = device.getLogReader(
-          app: await BuildableIOSApp.fromProject(mockIosProject),
+          app: await BuildableIOSApp.fromProject(mockIosProject, null),
         );
 
         final List<String> lines = await logReader.logLines.toList();
@@ -587,7 +604,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           xcode: mockXcode,
         );
         final DeviceLogReader logReader = device.getLogReader(
-          app: await BuildableIOSApp.fromProject(mockIosProject),
+          app: await BuildableIOSApp.fromProject(mockIosProject, null),
         );
 
         final List<String> lines = await logReader.logLines.toList();
@@ -634,7 +651,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           xcode: mockXcode,
         );
         final DeviceLogReader logReader = device.getLogReader(
-          app: await BuildableIOSApp.fromProject(mockIosProject),
+          app: await BuildableIOSApp.fromProject(mockIosProject, null),
         );
 
         final List<String> lines = await logReader.logLines.toList();
@@ -699,7 +716,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
           xcode: mockXcode,
         );
         final DeviceLogReader logReader = device.getLogReader(
-          app: await BuildableIOSApp.fromProject(mockIosProject),
+          app: await BuildableIOSApp.fromProject(mockIosProject, null),
         );
 
         final List<String> lines = await logReader.logLines.toList();

@@ -70,7 +70,8 @@ define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_
       window.\$dartStackTraceUtility.ready = true;
       let dart = dart_sdk.dart;
       window.\$dartStackTraceUtility.setSourceMapProvider(function(url) {
-        url = url.replace(window.\$dartUriBase + '/', '');
+        var baseUrl = window.location.protocol + '//' + window.location.host;
+        url = url.replace(baseUrl + '/', '');
         if (url == 'dart_sdk.js') {
           return dart.getSourceMap('dart_sdk');
         }

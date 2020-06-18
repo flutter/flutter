@@ -46,7 +46,12 @@ class Tracing {
       );
       try {
         final Completer<void> whenFirstFrameRendered = Completer<void>();
-        await vmService.streamListen('Extension');
+        try {
+          await vmService.streamListen(vm_service.EventStreams.kExtension);
+        } on vm_service.RPCError {
+          // It is safe to ignore this error because we expect an error to be
+          // thrown if we're already subscribed.
+        }
         vmService.onExtensionEvent.listen((vm_service.Event event) {
           if (event.extensionKind == 'Flutter.FirstFrame') {
             whenFirstFrameRendered.complete();

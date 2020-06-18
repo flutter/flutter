@@ -35,6 +35,11 @@ void main() {
     expect(await device.isAppInstalled(linuxApp), true);
     expect(await device.stopApp(linuxApp), true);
     expect(device.category, Category.desktop);
+
+    expect(device.supportsRuntimeMode(BuildMode.debug), true);
+    expect(device.supportsRuntimeMode(BuildMode.profile), true);
+    expect(device.supportsRuntimeMode(BuildMode.release), true);
+    expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
   });
 
   testWithoutContext('LinuxDevice: no devices listed if platform unsupported', () async {

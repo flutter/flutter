@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/plugins.dart';
@@ -26,15 +27,15 @@ void main() {
     const String pluginCGuid = '8E010714-28FF-416A-BC6F-9CDE336A02A7';
     const String pluginDGuid = '304F1860-7E8B-4C99-8E1D-F5E55259F5C3';
 
-    FileSystem fs;
+    FileSystem fileSystem;
     MockWindowsProject project;
 
     setUp(() async {
-      fs = MemoryFileSystem(style: FileSystemStyle.windows);
+      fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
       project = MockWindowsProject();
       when(project.pluginConfigKey).thenReturn('windows');
-      final Directory windowsManagedDirectory = fs.directory('C:').childDirectory('windows').childDirectory('flutter');
+      final Directory windowsManagedDirectory = fileSystem.directory('C:').childDirectory('windows').childDirectory('flutter');
       when(project.solutionFile).thenReturn(windowsManagedDirectory.parent.childFile('Runner.sln'));
       when(project.vcprojFile).thenReturn(windowsManagedDirectory.parent.childFile('Runner.vcxproj'));
       when(project.pluginSymlinkDirectory).thenReturn(windowsManagedDirectory.childDirectory('ephemeral').childDirectory('.plugin_symlinks'));
@@ -239,13 +240,13 @@ EndGlobal''');
       final List<Plugin> plugins = <Plugin>[
         getMockPlugin('plugin_a', pluginAGuid),
       ];
-      await VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins(plugins);
+      await VisualStudioSolutionUtils(project: project, fileSystem: fileSystem).updatePlugins(plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
 
       // Check for:
       // - Plugin project.
-      final String pluginSubpath = fs.path.join('Flutter', 'ephemeral', '.plugin_symlinks', 'plugin_a', 'windows', 'plugin.vcxproj');
+      final String pluginSubpath = fileSystem.path.join('Flutter', 'ephemeral', '.plugin_symlinks', 'plugin_a', 'windows', 'plugin.vcxproj');
       expect(newSolutionContents, contains('Project("{$solutionTypeGuidVcxproj}") = "plugin_a", "$pluginSubpath", "{$pluginAGuid}"'));
       // - A dependency on the plugin project (from the Runner).
       expect(newSolutionContents, contains('{$pluginAGuid} = {$pluginAGuid}'));
@@ -268,7 +269,7 @@ EndGlobal''');
         getMockPlugin('plugin_a', pluginAGuid),
         getMockPlugin('plugin_c', pluginCGuid),
       ];
-      await VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins(plugins);
+      await VisualStudioSolutionUtils(project: project, fileSystem: fileSystem).updatePlugins(plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
 
@@ -289,7 +290,7 @@ EndGlobal''');
 
       final List<Plugin> plugins = <Plugin>[
       ];
-      await VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins( plugins);
+      await VisualStudioSolutionUtils(project: project, fileSystem: fileSystem).updatePlugins( plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
 
@@ -309,7 +310,7 @@ EndGlobal''');
         getMockPlugin('plugin_c', pluginCGuid),
         getMockPlugin('plugin_d', pluginDGuid),
       ];
-      await VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins(plugins);
+      await VisualStudioSolutionUtils(project: project, fileSystem: fileSystem).updatePlugins(plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
 
@@ -326,7 +327,7 @@ EndGlobal''');
 
       // All the plugin D values should be added:
       // - Plugin project.
-      final String pluginSubpath = fs.path.join('Flutter', 'ephemeral', '.plugin_symlinks', 'plugin_d', 'windows', 'plugin.vcxproj');
+      final String pluginSubpath = fileSystem.path.join('Flutter', 'ephemeral', '.plugin_symlinks', 'plugin_d', 'windows', 'plugin.vcxproj');
       expect(newSolutionContents, contains('Project("{$solutionTypeGuidVcxproj}") = "plugin_d", "$pluginSubpath", "{$pluginDGuid}"'));
       // - A dependency on the plugin project (from the Runner).
       expect(newSolutionContents, contains('{$pluginDGuid} = {$pluginDGuid}'));
@@ -350,7 +351,7 @@ EndGlobal''');
         getMockPlugin('plugin_c', pluginCGuid),
         getMockPlugin('plugin_d', pluginDGuid),
       ];
-      await VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins(plugins);
+      await VisualStudioSolutionUtils(project: project, fileSystem: fileSystem).updatePlugins(plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
       // There should only be:
@@ -375,7 +376,7 @@ EndGlobal''');
         getMockPlugin('plugin_c', pluginCGuid),
         getMockPlugin('plugin_d', pluginDGuid),
       ];
-      await VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins(plugins);
+      await VisualStudioSolutionUtils(project: project, fileSystem: fileSystem).updatePlugins(plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
       // Plugin A should still be before Flutter Build in the Runner dependencies.
@@ -393,7 +394,7 @@ EndGlobal''');
       writeSolutionWithPlugins();
 
       final List<Plugin> plugins = <Plugin>[];
-      await VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins(plugins);
+      await VisualStudioSolutionUtils(project: project, fileSystem: fileSystem).updatePlugins(plugins);
 
       // Visual Studio expects sln files to start with a BOM.
       final List<int> solutionStartingBytes = project.solutionFile.readAsBytesSync().take(3).toList();
@@ -408,7 +409,7 @@ EndGlobal''');
         getMockPlugin('plugin_a', pluginAGuid),
         getMockPlugin('plugin_b', pluginBGuid),
       ];
-      await VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins(plugins);
+      await VisualStudioSolutionUtils(project: project, fileSystem: fileSystem).updatePlugins(plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
       // Project, EndProject, Global, and EndGlobal should be at the start of
@@ -431,8 +432,20 @@ EndGlobal''');
       final List<Plugin> plugins = <Plugin>[
         getMockPlugin('plugin_a', pluginAGuid, createProject: false),
       ];
-      expect(() => VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins(plugins),
+      expect(() => VisualStudioSolutionUtils(project: project, fileSystem: fileSystem).updatePlugins(plugins),
         throwsToolExit());
+    });
+
+    test('A Windows project with a missing Runner.sln file throws a ToolExit', () async {
+      final MockWindowsProject windowsProject = MockWindowsProject();
+      final File file = fileSystem.file('does_not_exist');
+
+      expect(file, isNot(exists));
+
+      when(windowsProject.solutionFile).thenReturn(file);
+
+      expect(() async => await VisualStudioSolutionUtils(project: project, fileSystem: fileSystem)
+        .updatePlugins(<Plugin>[]), throwsToolExit());
     });
   });
 }

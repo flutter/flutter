@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
@@ -16,6 +18,7 @@ import 'inherited_model.dart';
 export 'dart:ui' show hashValues, hashList;
 
 export 'package:flutter/foundation.dart' show
+  factory,
   immutable,
   mustCallSuper,
   optionalTypeArgs,
@@ -186,11 +189,11 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   static void _debugVerifyGlobalKeyReservation() {
     assert(() {
       final Map<GlobalKey, Element> keyToParent = <GlobalKey, Element>{};
-      _debugReservations.forEach((Element parent, Map<Element, GlobalKey> chidToKey) {
+      _debugReservations.forEach((Element parent, Map<Element, GlobalKey> childToKey) {
         // We ignore parent that are detached.
         if (parent.renderObject?.attached == false)
           return;
-        chidToKey.forEach((Element child, GlobalKey key) {
+        childToKey.forEach((Element child, GlobalKey key) {
           // If parent = null, the node is deactivated by its parent and is
           // not re-attached to other part of the tree. We should ignore this
           // node.
@@ -488,6 +491,7 @@ abstract class Widget extends DiagnosticableTree {
   /// widget that is incorporated into the tree multiple times will be inflated
   /// multiple times.
   @protected
+  @factory
   Element createElement();
 
   /// A short, textual description of this widget.
@@ -660,9 +664,11 @@ abstract class StatelessWidget extends Widget {
 
   /// Describes the part of the user interface represented by this widget.
   ///
-  /// The framework calls this method when this widget is inserted into the
-  /// tree in a given [BuildContext] and when the dependencies of this widget
-  /// change (e.g., an [InheritedWidget] referenced by this widget changes).
+  /// The framework calls this method when this widget is inserted into the tree
+  /// in a given [BuildContext] and when the dependencies of this widget change
+  /// (e.g., an [InheritedWidget] referenced by this widget changes). This
+  /// method can potentially be called in every frame and should not have any side
+  /// effects beyond building a widget.
   ///
   /// The framework replaces the subtree below this widget with the widget
   /// returned by this method, either by updating the existing subtree or by
@@ -911,6 +917,7 @@ abstract class StatefulWidget extends Widget {
   /// again to create a fresh [State] object, simplifying the lifecycle of
   /// [State] objects.
   @protected
+  @factory
   State createState();
 }
 
@@ -1312,7 +1319,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
 
   /// Describes the part of the user interface represented by this widget.
   ///
-  /// The framework calls this method in a number of different situations:
+  /// The framework calls this method in a number of different situations. For
+  /// example:
   ///
   ///  * After calling [initState].
   ///  * After calling [didUpdateWidget].
@@ -1321,6 +1329,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///    [InheritedWidget] referenced by the previous [build] changes).
   ///  * After calling [deactivate] and then reinserting the [State] object into
   ///    the tree at another location.
+  ///
+  /// This method can potentially be called in every frame and should not have
+  /// any side effects beyond building a widget.
   ///
   /// The framework replaces the subtree below this widget with the widget
   /// returned by this method, either by updating the existing subtree or by
@@ -1730,6 +1741,7 @@ abstract class RenderObjectWidget extends Widget {
 
   /// RenderObjectWidgets always inflate to a [RenderObjectElement] subclass.
   @override
+  @factory
   RenderObjectElement createElement();
 
   /// Creates an instance of the [RenderObject] class that this
@@ -1742,6 +1754,7 @@ abstract class RenderObjectWidget extends Widget {
   /// [createElement] method. See, for example,
   /// [SingleChildRenderObjectElement.mount].
   @protected
+  @factory
   RenderObject createRenderObject(BuildContext context);
 
   /// Copies the configuration described by this [RenderObjectWidget] to the
@@ -2590,7 +2603,7 @@ class BuildOwner {
       _debugBuilding = true;
       return true;
     }());
-    Timeline.startSync('Build', arguments: timelineWhitelistArguments);
+    Timeline.startSync('Build', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
       _scheduledFlushDirtyElements = true;
       if (callback != null) {
@@ -2622,7 +2635,34 @@ class BuildOwner {
       while (index < dirtyCount) {
         assert(_dirtyElements[index] != null);
         assert(_dirtyElements[index]._inDirtyList);
-        assert(!_dirtyElements[index]._active || _dirtyElements[index]._debugIsInScope(context));
+        assert(() {
+          if (_dirtyElements[index]._active && !_dirtyElements[index]._debugIsInScope(context)) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Tried to build dirty widget in the wrong build scope.'),
+              ErrorDescription(
+                'A widget which was marked as dirty and is still active was scheduled to be built, '
+                'but the current build scope unexpectedly does not contain that widget.',
+              ),
+              ErrorHint(
+                'Sometimes this is detected when an element is removed from the widget tree, but the '
+                'element somehow did not get marked as inactive. In that case, it might be caused by '
+                'an ancestor element failing to implement visitChildren correctly, thus preventing '
+                'some or all of its descendants from being correctly deactivated.',
+              ),
+              DiagnosticsProperty<Element>(
+                'The root of the build scope was',
+                context,
+                style: DiagnosticsTreeStyle.errorProperty,
+              ),
+              DiagnosticsProperty<Element>(
+                'The offending element (which does not appear to be a descendant of the root of the build scope) was',
+                _dirtyElements[index],
+                style: DiagnosticsTreeStyle.errorProperty,
+              ),
+            ]);
+          }
+          return true;
+        }());
         try {
           _dirtyElements[index].rebuild();
         } catch (e, stack) {
@@ -2708,7 +2748,7 @@ class BuildOwner {
   /// After the current call stack unwinds, a microtask that notifies listeners
   /// about changes to global keys will run.
   void finalizeTree() {
-    Timeline.startSync('Finalize tree', arguments: timelineWhitelistArguments);
+    Timeline.startSync('Finalize tree', arguments: timelineArgumentsIndicatingLandmarkEvent);
     try {
       lockState(() {
         _inactiveElements._unmountAll(); // this unregisters the GlobalKeys
@@ -3369,7 +3409,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   Element _retakeInactiveElement(GlobalKey key, Widget newWidget) {
     // The "inactivity" of the element being retaken here may be forward-looking: if
     // we are taking an element with a GlobalKey from an element that currently has
-    // it as a child, then we know that that element will soon no longer have that
+    // it as a child, then we know that element will soon no longer have that
     // element as a child. The only way that assumption could be false is if the
     // global key is being duplicated, and we'll try to track that using the
     // _debugTrackElementThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans call below.
@@ -4494,7 +4534,7 @@ abstract class ComponentElement extends Element {
   @override
   void performRebuild() {
     if (!kReleaseMode && debugProfileBuildsEnabled)
-      Timeline.startSync('${widget.runtimeType}',  arguments: timelineWhitelistArguments);
+      Timeline.startSync('${widget.runtimeType}',  arguments: timelineArgumentsIndicatingLandmarkEvent);
 
     assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
     Widget built;

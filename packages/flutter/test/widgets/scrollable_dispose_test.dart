@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,13 +34,13 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/27707.
 
     final ScrollController controller = ScrollController();
-    final Key outterContainer = GlobalKey();
+    final Key outerContainer = GlobalKey();
 
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
           child: Container(
-            key: outterContainer,
+            key: outerContainer,
             color: Colors.purple,
             width: 400.0,
             child: SingleChildScrollView(
@@ -75,7 +77,7 @@ void main() {
     final double currentOffset = controller.offset;
 
     // Start a hold activity by putting one pointer down.
-    await tester.startGesture(tester.getTopLeft(find.byKey(outterContainer)) + const Offset(50.0, 50.0));
+    await tester.startGesture(tester.getTopLeft(find.byKey(outerContainer)) + const Offset(50.0, 50.0));
     await tester.pumpAndSettle(); // This shouldn't change the scroll offset because of the down event above.
     expect(controller.offset, currentOffset);
 

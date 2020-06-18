@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:ui';
 
@@ -12,6 +14,7 @@ import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'layer.dart';
+import 'mouse_cursor.dart';
 import 'mouse_tracking.dart';
 import 'object.dart';
 
@@ -230,10 +233,10 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
 /// A render object for an iOS UIKit UIView.
 ///
 /// {@template flutter.rendering.platformView.preview}
-/// Embedding UIViews is still in release preview, to enable the preview for an iOS app add a boolean
+/// Embedding UIViews is still preview-quality. To enable the preview for an iOS app add a boolean
 /// field with the key 'io.flutter.embedded_views_preview' and the value set to 'YES' to the
 /// application's Info.plist file. A list of open issued with embedding UIViews is available on
-/// [Github](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22a%3A+platform-views%22+label%3A%22%E2%8C%BA%E2%80%AC+platform-ios%22)
+/// [Github](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22a%3A+platform-views%22+label%3Aplatform-ios+sort%3Acreated-asc)
 /// {@endtemplate}
 ///
 /// [RenderUiKitView] is responsible for sizing and displaying an iOS
@@ -757,9 +760,10 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   void paint(PaintingContext context, Offset offset) {
     assert(_controller.viewId != null);
     context.addLayer(PlatformViewLayer(
-            rect: offset & size,
-            viewId: _controller.viewId,
-            hoverAnnotation: _hoverAnnotation));
+      rect: offset & size,
+      viewId: _controller.viewId,
+      hoverAnnotation: _hoverAnnotation,
+    ));
   }
 
   @override
@@ -787,7 +791,16 @@ mixin _PlatformViewGestureMixin on RenderBox {
   /// and apply it to all subsequent move events, but there is no down event
   /// for a hover. To support native hover gesture handling by platform views,
   /// we attach/detach this layer annotation as necessary.
-  MouseTrackerAnnotation _hoverAnnotation;
+  MouseTrackerAnnotation get _hoverAnnotation {
+    return _cachedHoverAnnotation ??= MouseTrackerAnnotation(
+      onHover: (PointerHoverEvent event) {
+        if (_handlePointerEvent != null)
+          _handlePointerEvent(event);
+      },
+      cursor: MouseCursor.uncontrolled,
+    );
+  }
+  MouseTrackerAnnotation _cachedHoverAnnotation;
 
   _HandlePointerEvent _handlePointerEvent;
 
@@ -831,19 +844,8 @@ mixin _PlatformViewGestureMixin on RenderBox {
   }
 
   @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    assert(_hoverAnnotation == null);
-    _hoverAnnotation = MouseTrackerAnnotation(onHover: (PointerHoverEvent event) {
-      if (_handlePointerEvent != null)
-        _handlePointerEvent(event);
-    });
-  }
-
-  @override
   void detach() {
     _gestureRecognizer.reset();
-    _hoverAnnotation = null;
     super.detach();
   }
 }

@@ -11,7 +11,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 
 final List<String> flutterAssets = <String>[
   'assets/flutter_assets/AssetManifest.json',
-  'assets/flutter_assets/LICENSE',
+  'assets/flutter_assets/NOTICES',
   'assets/flutter_assets/fonts/MaterialIcons-Regular.ttf',
   'assets/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf',
 ];
@@ -226,6 +226,7 @@ class FlutterProject {
 
   String get rootPath => path.join(parent.path, name);
   String get androidPath => path.join(rootPath, 'android');
+  String get iosPath => path.join(rootPath, 'ios');
 
   Future<void> addCustomBuildType(String name, {String initWith}) async {
     final File buildScript = File(

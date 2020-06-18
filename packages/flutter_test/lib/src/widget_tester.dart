@@ -566,6 +566,29 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     }).then<int>((_) => count);
   }
 
+  /// Repeatedly pump frames that render the `target` widget with a fixed time
+  /// `interval` as many as `maxDuration` allows.
+  ///
+  /// The `maxDuration` argument is required. The `interval` argument defaults to
+  /// 16.683 milliseconds (59.94 FPS).
+  Future<void> pumpFrames(
+    Widget target,
+    Duration maxDuration, [
+    Duration interval = const Duration(milliseconds: 16, microseconds: 683),
+  ]) {
+    assert(maxDuration != null);
+    // The interval following the last frame doesn't have to be within the fullDuration.
+    Duration elapsed = Duration.zero;
+    return TestAsyncUtils.guard<void>(() async {
+      binding.attachRootWidget(target);
+      binding.scheduleFrame();
+      while (elapsed < maxDuration) {
+        await binding.pump(interval);
+        elapsed += interval;
+      }
+    });
+  }
+
   /// Runs a [callback] that performs real asynchronous work.
   ///
   /// This is intended for callers who need to call asynchronous methods where

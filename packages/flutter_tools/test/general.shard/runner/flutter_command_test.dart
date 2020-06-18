@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 
+import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/error_handling_file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -43,7 +44,7 @@ void main() {
     });
 
     testUsingContext('help text contains global options', () {
-      final FakeCommand fake = FakeCommand();
+      final FakeDeprecatedCommand fake = FakeDeprecatedCommand();
       createTestCommandRunner(fake);
       expect(fake.usage, contains('Global options:\n'));
     });
@@ -52,6 +53,8 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: false);
       await flutterCommand.run();
       verifyZeroInteractions(cache);
+      expect(flutterCommand.deprecated, isFalse);
+      expect(flutterCommand.hidden, isFalse);
     },
     overrides: <Type, Generator>{
       Cache: () => cache,
@@ -71,6 +74,21 @@ void main() {
     },
     overrides: <Type, Generator>{
       Cache: () => cache,
+    });
+
+    testUsingContext('deprecated command should warn', () async {
+      final FakeDeprecatedCommand flutterCommand = FakeDeprecatedCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+      await runner.run(<String>['deprecated']);
+
+      expect(testLogger.statusText,
+        contains('The "deprecated" command is deprecated and will be removed in '
+            'a future version of Flutter.'));
+      expect(flutterCommand.usage,
+        contains('Deprecated. This command will be removed in a future version '
+            'of Flutter.'));
+      expect(flutterCommand.deprecated, isTrue);
+      expect(flutterCommand.hidden, isTrue);
     });
 
     testUsingContext('uses the error handling file system', () async {
@@ -321,7 +339,7 @@ void main() {
         await completer.future;
 
         await Cache.lock();
-        Cache.releaseLockEarly();
+        Cache.releaseLock();
       }, overrides: <Type, Generator>{
         ProcessInfo: () => mockProcessInfo,
         Signals: () => FakeSignals(
@@ -429,12 +447,15 @@ void main() {
   });
 }
 
-class FakeCommand extends FlutterCommand {
+class FakeDeprecatedCommand extends FlutterCommand {
   @override
   String get description => 'A fake command';
 
   @override
-  String get name => 'fake';
+  String get name => 'deprecated';
+
+  @override
+  bool get deprecated => true;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -450,7 +471,7 @@ class FakeSignals implements Signals {
   FakeSignals({
     this.subForSigTerm,
     List<ProcessSignal> exitSignals,
-  }) : delegate = Signals(exitSignals: exitSignals);
+  }) : delegate = Signals.test(exitSignals: exitSignals);
 
   final ProcessSignal subForSigTerm;
   final Signals delegate;

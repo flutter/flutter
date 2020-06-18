@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -12,7 +14,6 @@ import '../button_theme.dart';
 import '../color_scheme.dart';
 import '../debug.dart';
 import '../dialog.dart';
-import '../dialog_theme.dart';
 import '../flat_button.dart';
 import '../icons.dart';
 import '../material_localizations.dart';
@@ -369,8 +370,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
     final String dateText = _selectedDate != null
       ? localizations.formatMediumDate(_selectedDate)
-      // TODO(darrenaustin): localize 'Date'
-      : 'Date';
+      : localizations.unspecifiedDate;
     final Color dateColor = colorScheme.brightness == Brightness.light
       ? colorScheme.onPrimary
       : colorScheme.onSurface;
@@ -409,8 +409,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           initialCalendarMode: widget.initialCalendarMode,
         );
         entryModeIcon = Icons.edit;
-        // TODO(darrenaustin): localize 'Switch to input'
-        entryModeTooltip = 'Switch to input';
+        entryModeTooltip = localizations.inputDateModeButtonLabel;
         break;
 
       case DatePickerEntryMode.input:
@@ -442,14 +441,12 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           ),
         );
         entryModeIcon = Icons.calendar_today;
-        // TODO(darrenaustin): localize 'Switch to calendar'
-        entryModeTooltip = 'Switch to calendar';
+        entryModeTooltip = localizations.calendarModeButtonLabel;
         break;
     }
 
     final Widget header = DatePickerHeader(
-      // TODO(darrenaustin): localize 'SELECT DATE'
-      helpText: widget.helpText ?? 'SELECT DATE',
+      helpText: widget.helpText ?? localizations.datePickerHelpText,
       titleText: dateText,
       titleStyle: dateStyle,
       orientation: orientation,
@@ -460,7 +457,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     );
 
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
-    final DialogTheme dialogTheme = Theme.of(context).dialogTheme;
     return Dialog(
       child: AnimatedContainer(
         width: dialogSize.width,
@@ -507,12 +503,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         ),
       ),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-      // The default dialog shape is radius 2 rounded rect, but the spec has
-      // been updated to 4, so we will use that here for the Date Picker, but
-      // only if there isn't one provided in the theme.
-      shape: dialogTheme.shape ?? const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(4.0))
-      ),
       clipBehavior: Clip.antiAlias,
     );
   }

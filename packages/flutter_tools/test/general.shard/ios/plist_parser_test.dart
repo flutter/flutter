@@ -52,7 +52,7 @@ void main() {
         stdio: null,
       ),
     );
-    fileSystem = const LocalFileSystemBlockingSetCurrentDirectory();
+    fileSystem = LocalFileSystemBlockingSetCurrentDirectory();
     processManager = const LocalProcessManager();
     parser = PlistParser(
       fileSystem: fileSystem,

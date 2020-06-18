@@ -85,7 +85,7 @@ void main() {
           'compile file:///path/to/main.dart\n');
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(testLogger.errorText,
-          equals('\nCompiler message:\nline1\nline2\n'));
+          equals('line1\nline2\n'));
       expect(output.outputFilename, equals('/path/to/main.dart.dill'));
 
       compileExpressionResponseCompleter.complete(
@@ -131,7 +131,7 @@ void main() {
         packageConfig: PackageConfig.empty,
       ).then((CompilerOutput outputCompile) {
         expect(testLogger.errorText,
-            equals('\nCompiler message:\nline1\nline2\n'));
+            equals('line1\nline2\n'));
         expect(outputCompile.outputFilename, equals('/path/to/main.dart.dill'));
 
         compileExpressionResponseCompleter1.complete(Future<List<int>>.value(utf8.encode(

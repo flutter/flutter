@@ -47,6 +47,14 @@ void batch1() {
     );
   }
 
+ test('flutter run expression evaluation - no native javascript objects in static scope', () async {
+    await initProject();
+    await _flutter.run(withDebugger: true, chrome: true);
+    await breakInTopLevelFunction(_flutter);
+    await checkStaticScope(_flutter);
+    await cleanProject();
+  }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
+
   test('flutter run expression evaluation - can handle compilation errors', () async {
     await initProject();
     await _flutter.run(withDebugger: true, chrome: true);
@@ -128,6 +136,10 @@ void batch2() {
   }, skip: 'CI not setup for web tests'); // https://github.com/flutter/flutter/issues/53779
 }
 
+Future<void> checkStaticScope(FlutterTestDriver flutter) async {
+  final Frame res = await flutter.getTopStackFrame();
+  expect(res.vars, equals(<BoundVariable>[]));
+}
 
 Future<void> evaluateErrorExpressions(FlutterTestDriver flutter) async {
   final ObjRef res = await flutter.evaluateInFrame('typo');

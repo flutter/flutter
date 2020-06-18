@@ -68,7 +68,7 @@ void main() {
       platform.environment = const <String, String>{};
 
       expect(await xcodeProjectInterpreter.getBuildSettings(
-        '', '', timeout: delay),
+        '', scheme: 'Runner', timeout: delay),
         const <String, String>{});
       // build settings times out and is killed once, then succeeds.
       verify(processManager.killPid(any)).called(1);
@@ -246,14 +246,31 @@ void main() {
         '/usr/bin/xcodebuild',
         '-project',
         '/',
-        '-target',
-        'Runner',
+        '-scheme',
+        'Free',
         '-showBuildSettings'
       ],
       exitCode: 1,
     ));
 
-    expect(await xcodeProjectInterpreter.getBuildSettings('', 'Runner'), const <String, String>{});
+    expect(await xcodeProjectInterpreter.getBuildSettings('', scheme: 'Free'), const <String, String>{});
+    expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+  });
+
+  testWithoutContext('build settings accepts an empty scheme', () async {
+    platform.environment = const <String, String>{};
+
+    fakeProcessManager.addCommand(const FakeCommand(
+      command: <String>[
+        '/usr/bin/xcodebuild',
+        '-project',
+        '/',
+        '-showBuildSettings'
+      ],
+      exitCode: 1,
+    ));
+
+    expect(await xcodeProjectInterpreter.getBuildSettings(''), const <String, String>{});
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
@@ -267,14 +284,14 @@ void main() {
         xcodebuild,
         '-project',
         fileSystem.path.separator,
-        '-target',
-        'Runner',
+        '-scheme',
+        'Free',
         '-showBuildSettings',
         'CODE_SIGN_STYLE=Manual',
         'ARCHS=arm64'
       ],
     ));
-    expect(await xcodeProjectInterpreter.getBuildSettings('', 'Runner'), const <String, String>{});
+    expect(await xcodeProjectInterpreter.getBuildSettings('', scheme: 'Free'), const <String, String>{});
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
@@ -290,7 +307,7 @@ void main() {
         '-workspace',
         'workspace_path',
         '-scheme',
-        'Runner',
+        'Free',
         '-quiet',
         'clean',
         'CODE_SIGN_STYLE=Manual',
@@ -298,7 +315,7 @@ void main() {
       ],
     ));
 
-    await xcodeProjectInterpreter.cleanWorkspace('workspace_path', 'Runner');
+    await xcodeProjectInterpreter.cleanWorkspace('workspace_path', 'Free');
     expect(fakeProcessManager.hasRemainingExpectations, isFalse);
   });
 
