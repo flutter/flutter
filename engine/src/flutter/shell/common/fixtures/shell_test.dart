@@ -138,3 +138,15 @@ void canDecompressImageFromAsset() {
 }
 
 List<int> getFixtureImage() native 'GetFixtureImage';
+
+void notifyLocalTime(String string) native 'NotifyLocalTime';
+
+@pragma('vm:entry-point')
+void localtimesMatch() {
+  final now = DateTime.now().toLocal();
+  // This is: "$y-$m-$d $h:$min:$sec.$ms$us";
+  final timeStr = now.toString();
+  // Forward only "$y-$m-$d $h" for timestamp comparison.  Not using DateTime
+  // formatting since package:intl is not available.
+  notifyLocalTime(timeStr.split(":")[0]);
+}
