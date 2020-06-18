@@ -26,6 +26,7 @@ void main() {
     expect(timePickerTheme.dialBackgroundColor, null);
     expect(timePickerTheme.dialHandColor, null);
     expect(timePickerTheme.dialBackgroundColor, null);
+    expect(timePickerTheme.entryModeIconColor, null);
     expect(timePickerTheme.hourMinuteTextStyle, null);
     expect(timePickerTheme.dayPeriodTextStyle, null);
     expect(timePickerTheme.helpTextStyle, null);
@@ -58,6 +59,7 @@ void main() {
       dayPeriodColor: Color(0xFFFFFFFF),
       dialHandColor: Color(0xFFFFFFFF),
       dialBackgroundColor: Color(0xFFFFFFFF),
+      entryModeIconColor: Color(0xFFFFFFFF),
       hourMinuteTextStyle: TextStyle(),
       dayPeriodTextStyle: TextStyle(),
       helpTextStyle: TextStyle(),
@@ -80,6 +82,7 @@ void main() {
       'dayPeriodColor: Color(0xffffffff)',
       'dialHandColor: Color(0xffffffff)',
       'dialBackgroundColor: Color(0xffffffff)',
+      'entryModeIconColor: Color(0xffffffff)',
       'hourMinuteTextStyle: TextStyle(<all styles inherited>)',
       'dayPeriodTextStyle: TextStyle(<all styles inherited>)',
       'helpTextStyle: TextStyle(<all styles inherited>)',
@@ -178,6 +181,12 @@ void main() {
     expect(
       dayPeriodDivider.decoration,
       BoxDecoration(border: Border(left: BorderSide(color: expectedBorderColor))),
+    );
+
+    final IconButton entryModeIconButton = _entryModeIconButton(tester);
+    expect(
+      entryModeIconButton.color,
+      defaultTheme.colorScheme.onSurface.withOpacity(0.6),
     );
   });
 
@@ -290,6 +299,12 @@ void main() {
       dayPeriodDivider.decoration,
       BoxDecoration(border: Border(left: timePickerTheme.dayPeriodBorderSide)),
     );
+
+    final IconButton entryModeIconButton = _entryModeIconButton(tester);
+    expect(
+      entryModeIconButton.color,
+      timePickerTheme.entryModeIconColor,
+    );
   });
 
   testWidgets('Time picker uses values from TimePickerThemeData - input mode', (WidgetTester tester) async {
@@ -326,6 +341,7 @@ TimePickerThemeData _timePickerTheme() {
     dayPeriodColor: materialStateColor,
     dialHandColor: Colors.brown,
     dialBackgroundColor: Colors.pinkAccent,
+    entryModeIconColor: Colors.red,
     hourMinuteTextStyle: const TextStyle(fontSize: 8.0),
     dayPeriodTextStyle: const TextStyle(fontSize: 8.0),
     helpTextStyle: const TextStyle(fontSize: 8.0),
@@ -399,6 +415,10 @@ Material _dayPeriodMaterial(WidgetTester tester) {
 
 Container _dayPeriodDivider(WidgetTester tester) {
   return tester.widget<Container>(find.descendant(of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'), matching: find.byType(Container)).at(1));
+}
+
+IconButton _entryModeIconButton(WidgetTester tester) {
+  return tester.widget<IconButton>(find.descendant(of: find.byType(Dialog), matching: find.byType(IconButton)).first);
 }
 
 RenderParagraph _textRenderParagraph(WidgetTester tester, String text) {

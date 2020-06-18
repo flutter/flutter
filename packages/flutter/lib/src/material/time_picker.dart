@@ -1801,7 +1801,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
       children: <Widget>[
         const SizedBox(width: 10.0),
         IconButton(
-          color: theme.colorScheme.onSurface.withOpacity(
+          color: TimePickerTheme.of(context).entryModeIconColor ?? theme.colorScheme.onSurface.withOpacity(
             theme.colorScheme.brightness == Brightness.dark ? 1.0 : 0.6,
           ),
           onPressed: _handleEntryModeToggle,
@@ -1812,6 +1812,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
               : 'Switch to dial picker mode',
         ),
         Expanded(
+          // TODO(rami-a): Move away from ButtonBar to avoid https://github.com/flutter/flutter/issues/53378.
           child: ButtonBar(
             layoutBehavior: ButtonBarLayoutBehavior.constrained,
             children: <Widget>[
