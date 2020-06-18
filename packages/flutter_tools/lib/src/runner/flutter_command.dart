@@ -477,9 +477,10 @@ abstract class FlutterCommand extends Command<void> {
   void addNullSafetyModeOptions({ @required bool hide }) {
     argParser.addFlag(FlutterOptions.kNullSafety,
       help:
-        'Whether to override the inferred null safety mode to support out of '
-        'order migrations. By default, Flutter applications will attempt to '
-        'run at the null safety level of their entrypoint library.',
+        'Whether to override the inferred null safety mode. This allows null-safe '
+        'libraries to depend on un-migrated (non-null safe) libraries. By default, '
+        'Flutter applications will attempt to run at the null safety level of their '
+        'entrypoint library (usually lib/main.dart).',
       defaultsTo: null,
       hide: hide,
     );
