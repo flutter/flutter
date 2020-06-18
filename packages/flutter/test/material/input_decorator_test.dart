@@ -4161,4 +4161,59 @@ void main() {
 
     expect(tester.getTopLeft(find.text(hintText)).dy, topPosition);
   });
+
+  testWidgets('InputDecorator label width isn\'t affected by prefix or suffix', (WidgetTester tester) async {
+    const String labelText = 'My Label';
+    const String prefixText = 'The five boxing wizards jump quickly.';
+
+    Widget getLabeledInputDecorator(bool showPrefix) {
+      return MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Theme(
+                data: Theme.of(context),
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: TextField(
+                    decoration: InputDecoration(
+                      icon: const Icon(Icons.assistant),
+                      prefixText: showPrefix ? prefixText : null,
+                      suffixIcon: const Icon(Icons.threesixty),
+                      labelText: labelText,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    // Build with no prefix.
+    await tester.pumpWidget(getLabeledInputDecorator(false));
+
+    // Get the width of the label when there is no prefix.
+    expect(find.text(prefixText), findsNothing);
+    final double labelWidth = tester.getSize(find.text(labelText)).width;
+
+    // Build with a prefix.
+    await tester.pumpWidget(getLabeledInputDecorator(true));
+
+    // The prefix exists but isn't visible. It has not affected the width of the
+    // label.
+    expect(find.text(prefixText), findsOneWidget);
+    expect(getOpacity(tester, prefixText), 0.0);
+    expect(tester.getSize(find.text(labelText)).width, labelWidth);
+
+    // Tap to focus.
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    // The prefix is visible, and the label is floating and still hasn't had its
+    // width affected.
+    expect(tester.getSize(find.text(labelText)).width, labelWidth);
+    expect(getOpacity(tester, prefixText), 1.0);
+  });
 }
