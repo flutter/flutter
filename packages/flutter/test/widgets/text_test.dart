@@ -178,7 +178,7 @@ void main() {
                   WidgetSpan(
                     child: RichText(
                       text: const TextSpan(text: 'widget should be truncated'),
-                      textDirection: TextDirection.rtl,
+                      textDirection: TextDirection.ltr,
                     ),
                   ),
                 ],
@@ -206,7 +206,7 @@ void main() {
                   WidgetSpan(
                     child: RichText(
                       text: const TextSpan(text: 'widget should be truncated'),
-                      textDirection: TextDirection.rtl,
+                      textDirection: TextDirection.ltr,
                     ),
                   ),
                 ],
@@ -223,7 +223,7 @@ void main() {
     renderText = tester.renderObject(find.byKey(key));
     // The RichText in the widget span should wrap into three lines.
     expect(renderText.size.height, singleLineHeight * textScaleFactor * 3);
-  });
+  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42086
 
   testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
