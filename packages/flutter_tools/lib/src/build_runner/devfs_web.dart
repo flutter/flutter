@@ -598,8 +598,8 @@ class WebAssetServer implements AssetReader {
   }
 
   @override
-  Future<String> metadataContents(String serverPath) {
-    return null;
+  Future<String> metadataContents(String serverPath) async {
+    return utf8.decode(_metadataFiles[serverPath]);
   }
 }
 
