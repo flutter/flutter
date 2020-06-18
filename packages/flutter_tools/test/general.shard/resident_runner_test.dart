@@ -700,6 +700,7 @@ void main() {
           commandHelp.c,
           commandHelp.q,
           commandHelp.s,
+          commandHelp.b,
           commandHelp.w,
           commandHelp.t,
           commandHelp.L,
@@ -1094,6 +1095,36 @@ void main() {
     await residentRunner.debugToggleDebugPaintSizeEnabled();
 
     verify(mockFlutterDevice.toggleDebugPaintSizeEnabled()).called(1);
+  }));
+
+  testUsingContext('ResidentRunner debugToggleBrightness calls flutter device', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    await residentRunner.debugToggleBrightness();
+
+    verify(mockFlutterDevice.toggleBrightness()).called(2);
+  }));
+
+  testUsingContext('FlutterDevice.toggleBrightness invokes correct VM service request', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      const FakeVmServiceRequest(
+        method: 'ext.flutter.brightnessOverride',
+        args: <String, Object>{
+          'isolateId': '1',
+        },
+        jsonResponse: <String, Object>{
+          'value': 'Brightness.dark'
+        },
+      ),
+    ]);
+    final FlutterDevice device = FlutterDevice(
+      mockDevice,
+      buildInfo: BuildInfo.debug,
+    );
+    device.vmService = fakeVmServiceHost.vmService;
+
+    expect(await device.toggleBrightness(), Brightness.dark);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
   testUsingContext('ResidentRunner debugToggleDebugCheckElevationsEnabled calls flutter device', () => testbed.run(() async {

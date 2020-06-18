@@ -8,6 +8,7 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -1318,6 +1319,28 @@ void main() {
       await tester.pump();
       expect(tester.takeException(), null);
     });
+  });
+
+  testWidgets('can be dismissed with escape keyboard shortcut', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: navigatorKey,
+      home: const Text('dummy1'),
+    ));
+    final Element textOnPageOne = tester.element(find.text('dummy1'));
+
+    // Show a simple dialog
+    showDialog<void>(
+      context: textOnPageOne,
+      builder: (BuildContext context) => const Text('dialog1'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('dialog1'), findsOneWidget);
+
+    // Try to dismiss the dialog with the shortcut key
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text('dialog1'), findsNothing);
   });
 }
 

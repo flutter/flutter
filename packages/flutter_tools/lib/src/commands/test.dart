@@ -31,7 +31,7 @@ class TestCommand extends FlutterCommand {
   }) : assert(testWrapper != null) {
     requiresPubspecYaml();
     usesPubOption();
-    addNullSafetyModeOptions();
+    addNullSafetyModeOptions(hide: !verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     argParser
