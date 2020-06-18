@@ -1,4 +1,4 @@
-Signature: 6d341c161e586454fe9cc536e445b362
+Signature: 8350b75d113a41c4617f4d112df3446e
 
 UNUSED LICENSES:
 
@@ -2714,7 +2714,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/cpp/message_buff
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/cpp/message_builder.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/cpp/message_part.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/walker.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/linearizing.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/message.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/message_buffer.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/message_builder.cc
