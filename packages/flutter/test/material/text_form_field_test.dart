@@ -469,4 +469,21 @@ void main() {
     await tester.pump();
     expect(_validateCalled, 1);
   });
+
+  testWidgets('autoValidateMode and autovalidate should not be used at the same time', (WidgetTester tester) async {
+    expect(() async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Scaffold(
+              body: TextFormField(
+                autovalidate: true,
+                autoValidateMode: AutoValidateMode.onUserInteraction,
+              ),
+            ),
+          ),
+        ),
+      );
+      }, throwsAssertionError);
+  });
 }

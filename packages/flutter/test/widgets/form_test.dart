@@ -809,4 +809,44 @@ void main() {
     await tester.pump();
     expect(find.text(errorText('bar')), findsNothing);
   });
+
+  testWidgets('Form.autoValidateMode and Form.autovalidate should not be used at the same time', (WidgetTester tester) async {
+    Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Form(
+              autovalidate: true,
+              autoValidateMode: AutoValidateMode.disabled,
+              child: Container(),
+            ),
+          ),
+        ),
+      );
+    }
+    expect(() => builder(), throwsAssertionError);
+  });
+
+  testWidgets('FormField.autoValidateMode and FormField.autovalidate should not be used at the same time', (WidgetTester tester) async {
+    Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: FormField<String>(
+              autovalidate: true,
+              autoValidateMode: AutoValidateMode.disabled,
+              builder: (_) {
+                return Container();
+              },
+            ),
+          ),
+        ),
+      );
+    }
+    expect(() => builder(), throwsAssertionError);
+  });
 }

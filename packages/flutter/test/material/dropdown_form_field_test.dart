@@ -793,4 +793,27 @@ void main() {
     expect(_validateCalled, 1);
   });
 
+  testWidgets('autoValidateMode and autovalidate should not be used at the same time', (WidgetTester tester) async {
+    Widget builder() {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: DropdownButtonFormField<String>(
+              autovalidate: true,
+              autoValidateMode: AutoValidateMode.always,
+              items: menuItems.map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: onChanged,
+            ),
+          ),
+        ),
+      );
+    }
+    expect(() => builder(), throwsAssertionError);
+  });
+
 }

@@ -83,7 +83,12 @@ class Form extends StatefulWidget {
     this.onChanged,
     AutoValidateMode autoValidateMode,
   }) : assert(child != null),
-       autoValidateMode = autovalidate ? AutoValidateMode.always : autoValidateMode,
+       assert(autovalidate == false && autoValidateMode != null ||
+       autovalidate == true && autoValidateMode == null,
+       'autovalidate and autovalidateMode should not be used together.'
+       ),
+       autoValidateMode = autovalidate ? AutoValidateMode.always
+       : (autoValidateMode ?? AutoValidateMode.disabled),
        super(key: key);
 
   /// Returns the closest [FormState] which encloses the given context.
@@ -316,10 +321,14 @@ class FormField<T> extends StatefulWidget {
     this.initialValue,
     this.autovalidate = false,
     this.enabled = true,
-    AutoValidateMode autoValidateMode = AutoValidateMode.disabled,
+    AutoValidateMode autoValidateMode,
   }) : assert(builder != null),
-       assert(autoValidateMode != null),
-       autoValidateMode = autovalidate ? AutoValidateMode.always : autoValidateMode,
+       assert(autovalidate == false && autoValidateMode != null ||
+       autovalidate == true && autoValidateMode == null,
+       'autovalidate and autovalidateMode should not be used together.'
+       ),
+       autoValidateMode = autovalidate ? AutoValidateMode.always
+       : (autoValidateMode ?? AutoValidateMode.disabled),
        super(key: key);
 
   /// An optional method to call with the final value when the form is saved via

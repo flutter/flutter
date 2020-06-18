@@ -177,7 +177,7 @@ class TextFormField extends FormField<String> {
     InputCounterWidgetBuilder buildCounter,
     ScrollPhysics scrollPhysics,
     Iterable<String> autofillHints,
-    AutoValidateMode autoValidateMode = AutoValidateMode.disabled,
+    AutoValidateMode autoValidateMode,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -187,7 +187,10 @@ class TextFormField extends FormField<String> {
        assert(autocorrect != null),
        assert(enableSuggestions != null),
        assert(autovalidate != null),
-       assert(autoValidateMode != null),
+       assert(autovalidate == false && autoValidateMode != null ||
+       autovalidate == true && autoValidateMode == null,
+       'autovalidate and autovalidateMode should not be used together.'
+       ),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
@@ -208,7 +211,8 @@ class TextFormField extends FormField<String> {
        onSaved: onSaved,
        validator: validator,
        enabled: enabled ?? decoration?.enabled ?? true,
-       autoValidateMode: autovalidate ? AutoValidateMode.always : autoValidateMode,
+       autoValidateMode: autovalidate ? AutoValidateMode.always
+       : (autoValidateMode ?? AutoValidateMode.disabled),
        builder: (FormFieldState<String> field) {
          final _TextFormFieldState state = field as _TextFormFieldState;
          final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
