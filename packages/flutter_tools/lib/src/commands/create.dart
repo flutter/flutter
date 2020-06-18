@@ -320,6 +320,15 @@ class CreateCommand extends FlutterCommand {
     final bool willGeneratePlugin = template == FlutterProjectType.plugin;
     final bool generatePackage = template == FlutterProjectType.package;
 
+    // `--platforms` does not support module and package.
+    if (argResults.wasParsed('platforms') && (generateModule || generatePackage)) {
+        String template = generateModule?'module':'package';
+        throwToolExit(
+          'The "--platforms" argument is not supported in $template template. please remove the argument and try again.',
+          exitCode: 2
+        );
+    }
+
     String organization = stringArg('org');
     if (!argResults.wasParsed('org')) {
       final FlutterProject project = FlutterProject.fromDirectory(projectDir);

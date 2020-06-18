@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:archive/archive.dart';
 import 'package:yaml/yaml.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -1690,6 +1691,30 @@ void main() {
     _validatePubspecForPlugin(projectDir.absolute.path, 'android', 'FlutterProjectPlugin', 'com.example.flutter_project');
     _validatePubspecForPlugin(projectDir.absolute.path, 'ios', 'FlutterProjectPlugin', null);
     _validatePubspecForPlugin(projectDir.absolute.path, 'some_platform', 'FlutterProjectPlugin', null, checkNotExist: true);
+  });
+
+  testUsingContext('create a module with --platforms throws error.', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await expectLater(
+      runner.run(<String>['create', '--no-pub', '--template=module', '--platforms=ios', projectDir.path]) 
+      , throwsToolExit(message: 'The "--platforms" argument is not supported', exitCode:2));
+  });
+
+  testUsingContext('create a package with --platforms throws error.', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await expectLater(
+      runner.run(<String>['create', '--no-pub', '--template=package', '--platforms=ios', projectDir.path]) 
+      , throwsToolExit(message: 'The "--platforms" argument is not supported', exitCode: 2));
   });
 
 }
