@@ -266,9 +266,7 @@ vm_service.VmService setUpVmService(
           isStatic);
       return <String, dynamic>{
         'type': 'Success',
-        'result': <String, dynamic>{
-          'result': <String, dynamic>{'kernelBytes': kernelBytesBase64},
-        },
+        'result': <String, dynamic>{'kernelBytes': kernelBytesBase64},
       };
     });
     vmService.registerService('compileExpression', 'Flutter Tools');
