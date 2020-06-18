@@ -107,6 +107,10 @@ task:
     - flutter doctor -v
     - flutter update-packages
     - ./dev/bots/accept_android_sdk_licenses.sh
+    - echo 'Google Chrome Directory'
+    - which google-chrome
+    - echo 'Google Chrome Version'
+    - google-chrome --version
     - date
   on_failure:
     failure_script:
