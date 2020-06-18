@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'recorder.dart';
 import 'test_data.dart';
@@ -42,7 +43,13 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
     if (!started) {
       started = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) async {
-        tester.startTesting();
+        tester.start();
+        final VoidCallback localDidStop = didStop;
+        didStop = () {
+          if (localDidStop != null)
+            localDidStop();
+          tester.stop();
+        };
       });
     }
     super.frameDidDraw();
@@ -88,113 +95,74 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
 }
 
 class _Tester {
-  static const scrollFrequency = 60;
-  static const dragStartLocation = const Offset(200, 200);
-  static const dragUpOffset = const Offset(0, 200);
-  static const dragDownOffset = const Offset(0, -200);
+  static const int scrollFrequency = 60;
+  static const Offset dragStartLocation = const Offset(200, 200);
+  static const Offset dragUpOffset = const Offset(0, 200);
+  static const Offset dragDownOffset = const Offset(0, -200);
+  static const Duration hoverDuration = const Duration(milliseconds: 20);
+  static const Duration dragDuration = const Duration(milliseconds: 200);
+
+  bool _stopped = false;
+
+  TestGesture get gesture {
+    return _gesture ??= TestGesture(
+      dispatcher: (PointerEvent event, HitTestResult result) async {
+        RendererBinding.instance.dispatchEvent(event, result);
+      },
+      hitTester: (Offset location) {
+        final HitTestResult result = HitTestResult();
+        RendererBinding.instance.hitTest(result, location);
+        return result;
+      },
+      kind: PointerDeviceKind.mouse,
+    );
+  }
+  TestGesture _gesture;
 
   Duration currentTime = Duration.zero;
-  Offset currentLocation = Offset.zero;
 
-  void _hoverTo(Offset location, {Duration duration = const Duration(milliseconds: 20)}) async {
+  void _hoverTo(Offset location, Duration duration) async {
     currentTime += duration;
-    Offset delta = location - currentLocation;
-    currentLocation = location;
-
-    RendererBinding.instance.dispatchEvent(
-      PointerHoverEvent(
-        timeStamp: currentTime,
-        kind: PointerDeviceKind.mouse,
-        position: location,
-        delta: delta,
-        buttons: 0,
-      ),
-      null,
-    );
-    // await Future<void>.delayed(Duration.zero);
-    await Future<void>.delayed(duration);
+    await gesture.moveTo(location, timeStamp: currentTime);
   }
 
-  void _scroll(Offset offset, {Duration duration = const Duration(milliseconds: 100)}) async {
+  void _scroll(Offset start, Offset offset, Duration duration) async {
     final int durationMs = duration.inMilliseconds;
-    final Duration frameDuration = Duration(seconds: 1) ~/ scrollFrequency;
-    final int frameDurationMs = frameDuration.inMilliseconds;
+    final Duration fullFrameDuration = Duration(seconds: 1) ~/ scrollFrequency;
+    final int frameDurationMs = fullFrameDuration.inMilliseconds;
 
     final int fullFrames = duration.inMilliseconds ~/ frameDurationMs;
     final Offset fullFrameOffset = offset * ((frameDurationMs as double) / durationMs);
 
-    final Duration finalFrameDuration = duration - frameDuration * fullFrames;
+    final Duration finalFrameDuration = duration - fullFrameDuration * fullFrames;
     final Offset finalFrameOffset = offset - fullFrameOffset * (fullFrames as double);
 
-    final HitTestResult hitTestResult = HitTestResult();
-    RendererBinding.instance.hitTest(hitTestResult, currentLocation);
-
-    // Down event
-    RendererBinding.instance.dispatchEvent(
-      PointerDownEvent(
-        timeStamp: currentTime,
-        kind: PointerDeviceKind.mouse,
-        position: currentLocation,
-        buttons: kPrimaryButton,
-      ),
-      hitTestResult,
-    );
-    await Future<void>.delayed(Duration.zero);
+    await gesture.down(start, timeStamp: currentTime);
 
     for (int frame = 0; frame < fullFrames; frame += 1) {
-      currentLocation += fullFrameOffset;
-      RendererBinding.instance.dispatchEvent(
-        PointerMoveEvent(
-          timeStamp: currentTime,
-          kind: PointerDeviceKind.mouse,
-          position: currentLocation,
-          delta: fullFrameOffset,
-          buttons: kPrimaryButton,
-        ),
-        hitTestResult,
-      );
-      currentTime += frameDuration;
-      await Future<void>.delayed(frameDuration);
-      // await Future<void>.delayed(Duration.zero);
+      currentTime += fullFrameDuration;
+      await gesture.moveBy(fullFrameOffset, timeStamp: currentTime);
     }
 
     if (finalFrameOffset != Duration.zero) {
-      currentLocation += finalFrameOffset;
-      RendererBinding.instance.dispatchEvent(
-        PointerMoveEvent(
-          timeStamp: currentTime,
-          kind: PointerDeviceKind.mouse,
-          position: currentLocation,
-          delta: finalFrameOffset,
-          buttons: kPrimaryButton,
-        ),
-        hitTestResult,
-      );
       currentTime += finalFrameDuration;
-      await Future<void>.delayed(finalFrameDuration);
-      // await Future<void>.delayed(Duration.zero);
+      await gesture.moveBy(finalFrameOffset, timeStamp: currentTime);
     }
 
-    // Up event
-    RendererBinding.instance.dispatchEvent(
-      PointerUpEvent(
-        timeStamp: currentTime,
-        kind: PointerDeviceKind.mouse,
-        position: currentLocation,
-        buttons: 0,
-      ),
-      hitTestResult,
-    );
-    await Future<void>.delayed(Duration.zero);
+    await gesture.up(timeStamp: currentTime);
   }
 
-  void startTesting() async {
+  void start() async {
     await Future<void>.delayed(Duration.zero);
-    while (true) {
-      await _hoverTo(dragStartLocation);
-      await _scroll(dragUpOffset);
-      await _hoverTo(dragStartLocation);
-      await _scroll(dragDownOffset);
+    while (!_stopped) {
+      await _hoverTo(dragStartLocation, hoverDuration);
+      await _scroll(dragStartLocation, dragUpOffset, dragDuration);
+      await _hoverTo(dragStartLocation, hoverDuration);
+      await _scroll(dragStartLocation, dragDownOffset, dragDuration);
     }
+  }
+
+  void stop() {
+    _stopped = true;
   }
 }

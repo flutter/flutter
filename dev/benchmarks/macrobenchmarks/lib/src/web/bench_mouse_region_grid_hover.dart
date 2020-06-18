@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'recorder.dart';
 import 'test_data.dart';
@@ -110,40 +111,44 @@ class BenchMouseRegionGridHover extends WidgetRecorder {
 }
 
 class _Tester {
-  static const scrollFrequency = 60;
-  static const dragStartLocation = const Offset(200, 200);
-  static const dragUpOffset = const Offset(0, 200);
-  static const dragDownOffset = const Offset(0, -200);
+  static const Duration hoverDuration = const Duration(milliseconds: 20);
+
+  bool _stopped = false;
+
+  TestGesture get gesture {
+    return _gesture ??= TestGesture(
+      dispatcher: (PointerEvent event, HitTestResult result) async {
+        RendererBinding.instance.dispatchEvent(event, result);
+      },
+      hitTester: (Offset location) {
+        final HitTestResult result = HitTestResult();
+        RendererBinding.instance.hitTest(result, location);
+        return result;
+      },
+      kind: PointerDeviceKind.mouse,
+    );
+  }
+  TestGesture _gesture;
 
   Duration currentTime = Duration.zero;
-  Offset currentLocation = Offset.zero;
 
-  void _hoverTo(Offset location, {Duration duration = const Duration(milliseconds: 20)}) async {
+  void _hoverTo(Offset location, Duration duration) async {
     currentTime += duration;
-    Offset delta = location - currentLocation;
-    currentLocation = location;
-
-    RendererBinding.instance.dispatchEvent(
-      PointerHoverEvent(
-        timeStamp: currentTime,
-        kind: PointerDeviceKind.mouse,
-        position: location,
-        delta: delta,
-        buttons: 0,
-      ),
-      null,
-    );
-    // await Future<void>.delayed(Duration.zero);
-    await Future<void>.delayed(duration);
+    await gesture.moveTo(location, timeStamp: currentTime);
+    await Future<void>.delayed(Duration.zero);
   }
 
   void startTesting() async {
     await Future<void>.delayed(Duration.zero);
-    while (true) {
-      await _hoverTo(const Offset(10, 10));
-      await _hoverTo(const Offset(10, 390));
-      await _hoverTo(const Offset(390, 390));
-      await _hoverTo(const Offset(390, 10));
+    while (!_stopped) {
+      await _hoverTo(const Offset(30, 10), hoverDuration);
+      await _hoverTo(const Offset(10, 370), hoverDuration);
+      await _hoverTo(const Offset(370, 390), hoverDuration);
+      await _hoverTo(const Offset(390, 30), hoverDuration);
     }
+  }
+
+  void stop() {
+    _stopped = true;
   }
 }
