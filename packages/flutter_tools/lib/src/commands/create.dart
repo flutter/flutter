@@ -582,12 +582,14 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     templateContext['description'] = description;
     generatedCount += await _renderTemplate('plugin', directory, templateContext, overwrite: overwrite);
     if (!argResults.wasParsed('platforms')) {
-        globals.printError('''
+        const String noPlatformsErrorMessage =
+        '''
 You have generated a new plugin project without
 specifying the `--platforms` flag. A plugin project supports no platforms is generated.
-The project will not compile until you add platforms implementation.
 To add platforms, run `flutter create -t plugin --platforms <platforms> .` under the same
-directory. You can also find a detailed instruction on how to add platforms in the `pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.''');
+directory. You can also find a detailed instruction on how to add platforms in the `pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
+        ''';
+        globals.printError(noPlatformsErrorMessage);
     }
     if (boolArg('pub')) {
       await pub.get(
@@ -646,27 +648,12 @@ directory. You can also find a detailed instruction on how to add platforms in t
 
   void _updateTemplateContextWithPlatforms(Map<String, dynamic> context, List<String> platforms) {
     for (final String platform in platforms) {
-      switch (platform) {
-        case 'ios':
-          context['ios'] = true;
-          break;
-        case 'android':
-          context['android'] = true;
-          break;
-        case 'web':
-          context['web'] =  featureFlags.isWebEnabled && true;
-          break;
-        case 'linux':
-          context['linux'] = featureFlags.isLinuxEnabled && true;
-          break;
-        case 'macos':
-          context['macos'] = featureFlags.isMacOSEnabled && true;
-          break;
-        case 'windows':
-          context['windows'] = featureFlags.isWindowsEnabled && true;
-          break;
-      }
+      context[platform] = true;
     }
+    context['web'] = context['web'] as bool && featureFlags.isWebEnabled;
+    context['linux'] = context['linux'] as bool && featureFlags.isLinuxEnabled;
+    context['macos'] = context['macos'] as bool && featureFlags.isMacOSEnabled;
+    context['windows'] = context['windows'] as bool && featureFlags.isWindowsEnabled;
   }
 
   // Takes an application template and replaces the main.dart with one from the
