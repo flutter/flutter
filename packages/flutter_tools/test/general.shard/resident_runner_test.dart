@@ -1044,6 +1044,16 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
+  testUsingContext('listViews handles a null VM service', () => testbed.run(() async {
+    final FlutterDevice device = FlutterDevice(mockDevice, buildInfo: BuildInfo.debug);
+    final ResidentRunner residentRunner = HotRunner(
+      <FlutterDevice>[device],
+    );
+
+    expect(await residentRunner.listFlutterViews(), isEmpty);
+  }));
+
+
   testUsingContext('ResidentRunner debugDumpApp calls flutter device', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     await residentRunner.debugDumpApp();
