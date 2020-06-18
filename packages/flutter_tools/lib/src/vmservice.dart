@@ -444,9 +444,9 @@ class FlutterView {
 
 /// Flutter specific VM Service functionality.
 extension FlutterVmService on vm_service.VmService {
-  Uri get wsAddress => _wsAddressExpando[this];
+  Uri get wsAddress => this != null ? _wsAddressExpando[this] : null;
 
-  Uri get httpAddress => _httpAddressExpando[this];
+  Uri get httpAddress => this != null ? _httpAddressExpando[this] : null;
 
   /// Set the asset directory for the an attached Flutter view.
   Future<void> setAssetDirectory({
