@@ -357,8 +357,7 @@ class TimePickerTheme extends InheritedTheme {
   /// The properties for descendant time picker widgets.
   final TimePickerThemeData data;
 
-  /// The closest instance of this class's [data] value that encloses the given
-  /// context.
+  /// The [data] value of the closest [TimePickerTheme] ancestor.
   ///
   /// If there is no ancestor, it returns [ThemeData.timePickerTheme].
   /// Applications can assume that the returned value will not be null.
