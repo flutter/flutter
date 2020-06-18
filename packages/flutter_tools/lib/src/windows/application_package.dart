@@ -55,7 +55,7 @@ class PrebuiltWindowsApp extends WindowsApp {
 class BuildableWindowsApp extends WindowsApp {
   BuildableWindowsApp({
     @required this.project,
-  }) : super(projectBundleId: project.project.manifest.appName);
+  }) : super(projectBundleId: project.parent.manifest.appName);
 
   final WindowsProject project;
 
@@ -74,5 +74,5 @@ class BuildableWindowsApp extends WindowsApp {
   }
 
   @override
-  String get name => project.project.manifest.appName;
+  String get name => project.parent.manifest.appName;
 }

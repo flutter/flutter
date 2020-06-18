@@ -11,6 +11,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
+import '../linux/cmake.dart';  // XXX Move, obviously.
 import '../plugins.dart';
 import '../project.dart';
 import 'property_sheet.dart';
@@ -44,7 +45,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
 
   // Ensure that necessary emphemeral files are generated and up to date.
   _writeGeneratedFlutterProperties(windowsProject, buildInfo, target);
-  createPluginSymlinks(windowsProject.project);
+  createPluginSymlinks(windowsProject.parent);
 
   final VisualStudio visualStudio = visualStudioOverride ?? VisualStudio(
     fileSystem: globals.fs,
@@ -110,7 +111,7 @@ void _writeGeneratedFlutterProperties(
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': Cache.flutterRoot,
     'FLUTTER_EPHEMERAL_DIR': windowsProject.ephemeralDirectory.path,
-    'PROJECT_DIR': windowsProject.project.directory.path,
+    'PROJECT_DIR': windowsProject.parent.directory.path,
     if (target != null)
       'FLUTTER_TARGET': target,
     ...buildInfo.toEnvironmentConfig(),
@@ -125,6 +126,7 @@ void _writeGeneratedFlutterProperties(
   final File propsFile = windowsProject.generatedPropertySheetFile;
   propsFile.createSync(recursive: true);
   propsFile.writeAsStringSync(PropertySheet(environmentVariables: environment).toString());
+  writeGeneratedCmakeConfig(Cache.flutterRoot, windowsProject, environment);
 }
 
 // Checks the template version of [project] against the current template

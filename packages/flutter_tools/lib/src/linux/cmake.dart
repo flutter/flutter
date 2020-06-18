@@ -24,13 +24,13 @@ String getCmakeExecutableName(LinuxProject project) {
 /// Writes a generated CMake configuration file for [project], including
 /// variables expected by the build template and an environment variable list
 /// for calling back into Flutter.
-void writeGeneratedCmakeConfig(String flutterRoot, LinuxProject project, Map<String, String> environment) {
+void writeGeneratedCmakeConfig(String flutterRoot, CmakeBasedProject project, Map<String, String> environment) {
   // Only a limited set of variables are needed by the CMake files themselves,
   // the rest are put into a list to pass to the re-entrant build step.
   final StringBuffer buffer = StringBuffer('''
 # Generated code do not commit.
 set(FLUTTER_ROOT "$flutterRoot")
-set(PROJECT_DIR "${project.project.directory.path}")
+set(PROJECT_DIR "${project.parent.directory.path}")
 
 # Environment variables to pass to tool_backend.sh
 list(APPEND FLUTTER_TOOL_ENVIRONMENT

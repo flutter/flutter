@@ -52,7 +52,7 @@ class PrebuiltLinuxApp extends LinuxApp {
 }
 
 class BuildableLinuxApp extends LinuxApp {
-  BuildableLinuxApp({this.project}) : super(projectBundleId: project.project.manifest.appName);
+  BuildableLinuxApp({this.project}) : super(projectBundleId: project.parent.manifest.appName);
 
   final LinuxProject project;
 
@@ -68,5 +68,5 @@ class BuildableLinuxApp extends LinuxApp {
   }
 
   @override
-  String get name => project.project.manifest.appName;
+  String get name => project.parent.manifest.appName;
 }

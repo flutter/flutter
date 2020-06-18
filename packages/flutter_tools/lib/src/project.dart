@@ -326,6 +326,27 @@ abstract class XcodeBasedProject {
   File get podManifestLock;
 }
 
+/// Represents a CMake-based sub-project.
+///
+/// This defines interfaces common to Windows and Linux projects.
+abstract class CmakeBasedProject {
+  /// The parent of this project.
+  FlutterProject get parent;
+
+  /// Whether the subproject (either Windows or Linux) exists in the Flutter project.
+  bool existsSync();
+
+  /// The native project CMake specification.
+  File get cmakeFile;
+
+  /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
+  /// the build.
+  File get generatedCmakeConfigFile;
+
+  /// Includable CMake with rules and variables for plugin builds.
+  File get generatedPluginCmakeFile;
+}
+
 /// Represents the iOS sub-project of a Flutter project.
 ///
 /// Instances will reflect the contents of the `ios/` sub-folder of
@@ -990,10 +1011,11 @@ class MacOSProject extends FlutterProjectPlatform implements XcodeBasedProject {
 }
 
 /// The Windows sub project
-class WindowsProject extends FlutterProjectPlatform {
-  WindowsProject._(this.project);
+class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject {
+  WindowsProject._(this.parent);
 
-  final FlutterProject project;
+  @override
+  final FlutterProject parent;
 
   @override
   String get pluginConfigKey => WindowsPlugin.kConfigKey;
@@ -1001,7 +1023,16 @@ class WindowsProject extends FlutterProjectPlatform {
   @override
   bool existsSync() => _editableDirectory.existsSync() && solutionFile.existsSync();
 
-  Directory get _editableDirectory => project.directory.childDirectory('windows');
+  @override
+  File get cmakeFile => _editableDirectory.childFile('CMakeLists.txt');
+
+  @override
+  File get generatedCmakeConfigFile => ephemeralDirectory.childFile('generated_config.cmake');
+
+  @override
+  File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
+
+  Directory get _editableDirectory => parent.directory.childDirectory('windows');
 
   /// The directory in the project that is managed by Flutter. As much as
   /// possible, files that are edited by Flutter tooling after initial project
@@ -1017,6 +1048,7 @@ class WindowsProject extends FlutterProjectPlatform {
   /// the build.
   File get generatedPropertySheetFile => ephemeralDirectory.childFile('Generated.props');
 
+// XXX Remove unused getters.
   /// Contains configuration to add plugins to the build.
   File get generatedPluginPropertySheetFile => managedDirectory.childFile('GeneratedPlugins.props');
 
@@ -1026,6 +1058,7 @@ class WindowsProject extends FlutterProjectPlatform {
   // The MSBuild solution file.
   File get solutionFile => _editableDirectory.childFile('Runner.sln');
 
+// XXX Share the Linux logic.
   /// The file where the VS build will write the name of the built app.
   ///
   /// Ideally this will be replaced in the future with inspection of the project.
@@ -1038,15 +1071,16 @@ class WindowsProject extends FlutterProjectPlatform {
 }
 
 /// The Linux sub project.
-class LinuxProject extends FlutterProjectPlatform {
-  LinuxProject._(this.project);
+class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
+  LinuxProject._(this.parent);
 
-  final FlutterProject project;
+  @override
+  final FlutterProject parent;
 
   @override
   String get pluginConfigKey => LinuxPlugin.kConfigKey;
 
-  Directory get _editableDirectory => project.directory.childDirectory('linux');
+  Directory get _editableDirectory => parent.directory.childDirectory('linux');
 
   /// The directory in the project that is managed by Flutter. As much as
   /// possible, files that are edited by Flutter tooling after initial project
@@ -1061,14 +1095,13 @@ class LinuxProject extends FlutterProjectPlatform {
   @override
   bool existsSync() => _editableDirectory.existsSync();
 
-  /// The Linux project CMake specification.
+  @override
   File get cmakeFile => _editableDirectory.childFile('CMakeLists.txt');
 
-  /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
-  /// the build.
+  @override
   File get generatedCmakeConfigFile => ephemeralDirectory.childFile('generated_config.cmake');
 
-  /// Includable CMake with rules and variables for plugin builds.
+  @override
   File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
 
   /// The directory to write plugin symlinks.

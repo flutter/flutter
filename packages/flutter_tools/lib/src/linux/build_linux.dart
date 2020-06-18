@@ -53,7 +53,7 @@ Future<void> buildLinux(
   }
   writeGeneratedCmakeConfig(Cache.flutterRoot, linuxProject, environmentConfig);
 
-  createPluginSymlinks(linuxProject.project);
+  createPluginSymlinks(linuxProject.parent);
 
   final Status status = globals.logger.startProgress(
     'Building Linux application...',

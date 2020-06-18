@@ -829,7 +829,7 @@ void fl_register_plugins(FlPluginRegistry* registry) {
 }
 ''';
 
-const String _linuxPluginCmakefileTemplate = r'''
+const String _pluginCmakefileTemplate = r'''
 #
 # Generated file, do not edit.
 #
@@ -843,7 +843,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
 set(PLUGIN_BUNDLED_LIBRARIES)
 
 foreach(plugin ${FLUTTER_PLUGIN_LIST})
-  add_subdirectory({{pluginsDir}}/${plugin}/linux plugins/${plugin})
+  add_subdirectory({{pluginsDir}}/${plugin}/${os} plugins/${plugin})
   target_link_libraries(${BINARY_NAME} PRIVATE ${plugin}_plugin)
   list(APPEND PLUGIN_BUNDLED_LIBRARIES $<TARGET_FILE:${plugin}_plugin>)
   list(APPEND PLUGIN_BUNDLED_LIBRARIES ${${plugin}_bundled_libraries})
@@ -898,6 +898,7 @@ Future<void> _writeLinuxPluginFiles(FlutterProject project, List<Plugin> plugins
   // that file's directory.
   final String makefileDirPath = project.linux.cmakeFile.parent.absolute.path;
   final Map<String, dynamic> context = <String, dynamic>{
+    'os': 'linux',
     'plugins': linuxPlugins,
     'pluginsDir': globals.fs.path.relative(
       project.linux.pluginSymlinkDirectory.absolute.path,
@@ -905,7 +906,7 @@ Future<void> _writeLinuxPluginFiles(FlutterProject project, List<Plugin> plugins
     ),
   };
   await _writeLinuxPluginRegistrant(project.linux.managedDirectory, context);
-  await _writeLinuxPluginCmakefile(project.linux.generatedPluginCmakeFile, context);
+  await _writePluginCmakefile(project.linux.generatedPluginCmakeFile, context);
 }
 
 Future<void> _writeLinuxPluginRegistrant(Directory destination, Map<String, dynamic> templateContext) async {
@@ -922,9 +923,9 @@ Future<void> _writeLinuxPluginRegistrant(Directory destination, Map<String, dyna
   );
 }
 
-Future<void> _writeLinuxPluginCmakefile(File destinationFile, Map<String, dynamic> templateContext) async {
+Future<void> _writePluginCmakefile(File destinationFile, Map<String, dynamic> templateContext) async {
   _renderTemplateToFile(
-    _linuxPluginCmakefileTemplate,
+    _pluginCmakefileTemplate,
     templateContext,
     destinationFile.path,
   );
@@ -965,11 +966,21 @@ List<Plugin> _filterNativePlugins(List<Plugin> plugins, String platformKey) {
 Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins) async {
   final List<Plugin>nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
   final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(nativePlugins, WindowsPlugin.kConfigKey);
+    // The generated file is checked in, so can't use absolute paths. It is
+  // included by the main CMakeLists.txt, so relative paths must be relative to
+  // that file's directory.
+  final String makefileDirPath = project.windows.cmakeFile.parent.absolute.path;
   final Map<String, dynamic> context = <String, dynamic>{
+    'os': 'windows',
     'plugins': windowsPlugins,
+    'pluginsDir': globals.fs.path.relative(
+      project.windows.pluginSymlinkDirectory.absolute.path,
+      from: makefileDirPath,
+    ),
   };
   await _writeCppPluginRegistrant(project.windows.managedDirectory, context);
   await _writeWindowsPluginProperties(project.windows, windowsPlugins);
+  await _writePluginCmakefile(project.linux.generatedPluginCmakeFile, context);
 }
 
 Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynamic> templateContext) async {
