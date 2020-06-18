@@ -1,4 +1,4 @@
-Signature: b5736a286ec2b409430a063bf7fcdb15
+Signature: 16647e398b7efde209f7d82e3f886049
 
 UNUSED LICENSES:
 
@@ -8265,6 +8265,10 @@ FILE: ../../../third_party/dart/runtime/bin/dartdev_utils.cc
 FILE: ../../../third_party/dart/runtime/bin/dartdev_utils.h
 FILE: ../../../third_party/dart/runtime/bin/exe_utils.cc
 FILE: ../../../third_party/dart/runtime/bin/exe_utils.h
+FILE: ../../../third_party/dart/runtime/include/dart_api_dl.cc
+FILE: ../../../third_party/dart/runtime/include/dart_api_dl.h
+FILE: ../../../third_party/dart/runtime/include/dart_version.h
+FILE: ../../../third_party/dart/runtime/include/internal/dart_api_dl_impl.h
 FILE: ../../../third_party/dart/runtime/observatory/bin/heap_snapshot.dart
 FILE: ../../../third_party/dart/runtime/platform/leak_sanitizer.h
 FILE: ../../../third_party/dart/runtime/platform/unaligned.h
@@ -8320,6 +8324,7 @@ FILE: ../../../third_party/dart/runtime/vm/visitor.cc
 FILE: ../../../third_party/dart/samples/ffi/async/async_test.dart
 FILE: ../../../third_party/dart/samples/ffi/async/sample_async_callback.dart
 FILE: ../../../third_party/dart/samples/ffi/async/sample_native_port_call.dart
+FILE: ../../../third_party/dart/samples/ffi/sample_ffi_functions_callbacks_closures.dart
 FILE: ../../../third_party/dart/sdk/lib/_http/embedder_config.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_patch.dart
