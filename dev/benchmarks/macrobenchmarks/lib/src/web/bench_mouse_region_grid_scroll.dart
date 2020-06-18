@@ -124,6 +124,7 @@ class _Tester {
   void _hoverTo(Offset location, Duration duration) async {
     currentTime += duration;
     await gesture.moveTo(location, timeStamp: currentTime);
+    await Future<void>.delayed(Duration.zero);
   }
 
   void _scroll(Offset start, Offset offset, Duration duration) async {
@@ -138,18 +139,22 @@ class _Tester {
     final Offset finalFrameOffset = offset - fullFrameOffset * (fullFrames as double);
 
     await gesture.down(start, timeStamp: currentTime);
+    await Future<void>.delayed(Duration.zero);
 
     for (int frame = 0; frame < fullFrames; frame += 1) {
       currentTime += fullFrameDuration;
       await gesture.moveBy(fullFrameOffset, timeStamp: currentTime);
+      await Future<void>.delayed(Duration.zero);
     }
 
     if (finalFrameOffset != Duration.zero) {
       currentTime += finalFrameDuration;
       await gesture.moveBy(finalFrameOffset, timeStamp: currentTime);
+      await Future<void>.delayed(Duration.zero);
     }
 
     await gesture.up(timeStamp: currentTime);
+    await Future<void>.delayed(Duration.zero);
   }
 
   void start() async {
