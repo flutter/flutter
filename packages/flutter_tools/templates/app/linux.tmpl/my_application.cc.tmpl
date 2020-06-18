@@ -3,7 +3,10 @@
 #include <flutter_linux/flutter_linux.h>
 
 #include "flutter/generated_plugin_registrant.h"
-#include "window_configuration.h"
+
+const char *kFlutterWindowTitle = "{{projectName}}";
+const unsigned int kFlutterWindowWidth = 1280;
+const unsigned int kFlutterWindowHeight = 720;
 
 struct _MyApplication {
   GtkApplication parent_instance;
