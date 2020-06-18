@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
-import 'package:yaml/yaml.dart';
 
 import '../android/android.dart' as android_common;
 import '../android/android_sdk.dart' as android_sdk;
