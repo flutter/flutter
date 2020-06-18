@@ -77,7 +77,6 @@ class BenchMouseRegionGridHover extends WidgetRecorder {
       child: Align(
         alignment: Alignment.topLeft,
         child: SizedBox(
-          key: const ValueKey<String>('scrollable'),
           width: 400,
           height: 400,
           child: ListView.builder(
