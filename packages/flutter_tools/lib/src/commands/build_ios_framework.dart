@@ -19,12 +19,10 @@ import '../build_system/build_system.dart';
 import '../build_system/targets/common.dart';
 import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/ios.dart';
-import '../bundle.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
-import '../macos/xcode.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
@@ -38,13 +36,11 @@ import 'build.dart';
 class BuildIOSFrameworkCommand extends BuildSubCommand {
   BuildIOSFrameworkCommand({
     FlutterVersion flutterVersion, // Instantiating FlutterVersion kicks off networking, so delay until it's needed, but allow test injection.
-    @required BundleBuilder bundleBuilder,
     @required BuildSystem buildSystem,
     Cache cache,
     Platform platform
   }) : _flutterVersion = flutterVersion,
        _buildSystem = buildSystem,
-       _bundleBuilder = bundleBuilder,
        _injectedCache = cache,
        _injectedPlatform = platform {
     addTreeShakeIconsFlag();
@@ -98,7 +94,6 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       );
   }
 
-  final BundleBuilder _bundleBuilder;
   final BuildSystem _buildSystem;
   BuildSystem get buildSystem => _buildSystem ?? globals.buildSystem;
 
@@ -188,8 +183,6 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       if (modeDirectory.existsSync()) {
         modeDirectory.deleteSync(recursive: true);
       }
-      final Directory iPhoneBuildOutput = modeDirectory.childDirectory('iphoneos');
-      final Directory simulatorBuildOutput = modeDirectory.childDirectory('iphonesimulator');
 
       if (boolArg('cocoapods')) {
         // FlutterVersion.instance kicks off git processing which can sometimes fail, so don't try it until needed.
@@ -201,10 +194,12 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       }
 
       // Build aot, create module.framework and copy.
-      await _produceAppFramework(buildInfo, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory);
+      await _produceAppFramework(buildInfo, modeDirectory);
 
       // Build and copy plugins.
       await processPodsIfNeeded(_project.ios, getIosBuildDirectory(), buildInfo.mode);
+      final Directory iPhoneBuildOutput = modeDirectory.childDirectory('iphoneos');
+      final Directory simulatorBuildOutput = modeDirectory.childDirectory('iphonesimulator');
       if (hasPlugins(_project)) {
         await _producePlugins(buildInfo.mode, xcodeBuildConfiguration, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory, outputDirectory);
       }
@@ -345,100 +340,26 @@ end
     await _produceXCFramework(buildInfo, fatFlutterFrameworkCopy);
   }
 
-  Future<void> _produceAppFramework(BuildInfo buildInfo, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory modeDirectory) async {
+  Future<void> _produceAppFramework(BuildInfo buildInfo, Directory modeDirectory) async {
     const String appFrameworkName = 'App.framework';
-    final Directory destinationAppFrameworkDirectory = modeDirectory.childDirectory(appFrameworkName);
-
-    if (buildInfo.mode == BuildMode.debug) {
-      final Status status = globals.logger.startProgress(' ├─Adding placeholder App.framework for debug...', timeout: timeoutConfiguration.fastOperation);
-      try {
-        destinationAppFrameworkDirectory.createSync(recursive: true);
-        await _produceStubAppFrameworkIfNeeded(buildInfo, iPhoneBuildOutput, simulatorBuildOutput, destinationAppFrameworkDirectory);
-      } finally {
-        status.stop();
-      }
-    } else {
-      await _produceAotAppFrameworkIfNeeded(buildInfo, modeDirectory);
-    }
-
-    final File sourceInfoPlist = _project.ios.hostAppRoot.childDirectory('Flutter').childFile('AppFrameworkInfo.plist');
-    final File destinationInfoPlist = destinationAppFrameworkDirectory.childFile('Info.plist')..createSync(recursive: true);
-
-    destinationInfoPlist.writeAsBytesSync(sourceInfoPlist.readAsBytesSync());
 
     final Status status = globals.logger.startProgress(
-      ' ├─Assembling Flutter resources for App.framework...', timeout: timeoutConfiguration.slowOperation);
-    try {
-      if (buildInfo.mode == BuildMode.debug) {
-      await _bundleBuilder.build(
-          platform: TargetPlatform.ios,
-          buildInfo: buildInfo,
-          // Relative paths show noise in the compiler https://github.com/dart-lang/sdk/issues/37978.
-          mainPath: globals.fs.path.absolute(targetFile),
-          assetDirPath: destinationAppFrameworkDirectory.childDirectory('flutter_assets').path,
-          precompiledSnapshot: buildInfo.mode != BuildMode.debug,
-          treeShakeIcons: buildInfo.treeShakeIcons,
-        );
-      }
-    } finally {
-      status.stop();
-    }
-    await _produceXCFramework(buildInfo, destinationAppFrameworkDirectory);
-  }
-
-  Future<void> _produceStubAppFrameworkIfNeeded(BuildInfo buildInfo, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory destinationAppFrameworkDirectory) async {
-    if (buildInfo.mode != BuildMode.debug) {
-      return;
-    }
-    const String appFrameworkName = 'App.framework';
-    const String binaryName = 'App';
-
-    final Directory iPhoneAppFrameworkDirectory = iPhoneBuildOutput.childDirectory(appFrameworkName);
-    final File iPhoneAppFrameworkFile = iPhoneAppFrameworkDirectory.childFile(binaryName);
-    await createStubAppFramework(iPhoneAppFrameworkFile, SdkType.iPhone);
-
-    final Directory simulatorAppFrameworkDirectory = simulatorBuildOutput.childDirectory(appFrameworkName);
-    final File simulatorAppFrameworkFile = simulatorAppFrameworkDirectory.childFile(binaryName);
-    await createStubAppFramework(simulatorAppFrameworkFile, SdkType.iPhoneSimulator);
-
-    final List<String> lipoCommand = <String>[
-      'xcrun',
-      'lipo',
-      '-create',
-      iPhoneAppFrameworkFile.path,
-      simulatorAppFrameworkFile.path,
-      '-output',
-      destinationAppFrameworkDirectory.childFile(binaryName).path
-    ];
-
-    final RunResult lipoResult = await processUtils.run(
-      lipoCommand,
-      allowReentrantFlutter: false,
-    );
-
-    if (lipoResult.exitCode != 0) {
-      throwToolExit('Unable to create compiled dart universal framework: ${lipoResult.stderr}');
-    }
-  }
-
-  Future<void> _produceAotAppFrameworkIfNeeded(
-    BuildInfo buildInfo,
-    Directory destinationDirectory,
-  ) async {
-    if (buildInfo.mode == BuildMode.debug) {
-      return;
-    }
-    final Status status = globals.logger.startProgress(
-      ' ├─Building Dart AOT for App.framework...',
+      ' ├─Building App.framework...',
       timeout: timeoutConfiguration.slowOperation,
     );
     try {
-      final Target target = buildInfo.isRelease
-        ? const ReleaseIosApplicationBundle()
-        : const ProfileIosApplicationBundle();
+      Target target;
+      if (buildInfo.isDebug) {
+        target = const DebugIosApplicationBundle();
+      } else if (buildInfo.isProfile) {
+        target = const ProfileIosApplicationBundle();
+      } else {
+        target = const ReleaseIosApplicationBundle();
+      }
+
       final Environment environment = Environment(
         projectDir: globals.fs.currentDirectory,
-        outputDir: destinationDirectory,
+        outputDir: modeDirectory,
         buildDir: _project.dartTool.childDirectory('flutter_build'),
         cacheDir: null,
         flutterRootDir: globals.fs.directory(Cache.flutterRoot),
@@ -469,11 +390,14 @@ end
         for (final ExceptionMeasurement measurement in result.exceptions.values) {
           globals.printError(measurement.exception.toString());
         }
-        throwToolExit('The aot build failed.');
+        throwToolExit('The App.framework build failed.');
       }
     } finally {
       status.stop();
     }
+
+    final Directory destinationAppFrameworkDirectory = modeDirectory.childDirectory(appFrameworkName);
+    await _produceXCFramework(buildInfo, destinationAppFrameworkDirectory);
   }
 
   Future<void> _producePlugins(
