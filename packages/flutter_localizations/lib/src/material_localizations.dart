@@ -460,7 +460,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * [licensesPackageDetailTextMany], the "many" form
   ///  * [licensesPackageDetailTextOther], the "other" form
   @protected
-  String get licensesPackageDetailTextZero;
+  String get licensesPackageDetailTextZero => null;
 
   /// The "one" form of [licensesPackageDetailText].
   ///
