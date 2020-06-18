@@ -474,11 +474,14 @@ abstract class FlutterCommand extends Command<void> {
       );
   }
 
-  void addNullSafetyModeOptions() {
+  void addNullSafetyModeOptions({ @required bool hide }) {
     argParser.addFlag(FlutterOptions.kNullSafety,
-      help: 'Whether to override the default null safety setting.',
+      help:
+        'Whether to override the inferred null safety mode to support out of '
+        'order migrations. By default, Flutter applications will attempt to '
+        'run at the null safety level of their entrypoint library.',
       defaultsTo: null,
-      hide: true,
+      hide: hide,
     );
   }
 
@@ -506,7 +509,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addEnableExperimentation({ bool hide = false }) {
+  void addEnableExperimentation({ @required bool hide }) {
     argParser.addMultiOption(
       FlutterOptions.kEnableExperiment,
       help:
