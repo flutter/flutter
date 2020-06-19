@@ -649,6 +649,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
       scale: key.scale,
+      tag: key.name,
       informationCollector: collector
     );
   }
@@ -846,6 +847,7 @@ class FileImage extends ImageProvider<FileImage> {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
       scale: key.scale,
+      tag: key.file.path,
       informationCollector: () sync* {
         yield ErrorDescription('Path: ${file?.path}');
       },
@@ -919,6 +921,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
       scale: key.scale,
+      tag: 'MemoryImage(${describeIdentity(key.bytes)})',
     );
   }
 

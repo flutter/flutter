@@ -5290,6 +5290,7 @@ class RawImage extends LeafRenderObjectWidget {
   const RawImage({
     Key key,
     this.image,
+    this.imageTag,
     this.width,
     this.height,
     this.scale = 1.0,
@@ -5312,6 +5313,9 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// The image to display.
   final ui.Image image;
+
+  /// A string identifying the source of the image.
+  final String imageTag;
 
   /// If non-null, require the image to have this width.
   ///
@@ -5432,6 +5436,7 @@ class RawImage extends LeafRenderObjectWidget {
     assert((!matchTextDirection && alignment is Alignment) || debugCheckHasDirectionality(context));
     return RenderImage(
       image: image,
+      imageTag: imageTag,
       width: width,
       height: height,
       scale: scale,
@@ -5453,6 +5458,7 @@ class RawImage extends LeafRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderImage renderObject) {
     renderObject
       ..image = image
+      ..imageTag = imageTag
       ..width = width
       ..height = height
       ..scale = scale

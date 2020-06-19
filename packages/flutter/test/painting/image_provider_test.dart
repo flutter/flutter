@@ -6,13 +6,17 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:file/memory.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 import '../rendering/rendering_tester.dart';
+import 'image_data.dart';
 import 'mocks_for_image_cache.dart';
 
 void main() {
@@ -136,4 +140,52 @@ void main() {
 
     expect(await error.future, isStateError);
   });
+
+  Future<Codec> _decoder(Uint8List bytes, {int cacheWidth, int cacheHeight}) async {
+    return FakeCodec();
+  }
+
+  test('File image sets tag', () async {
+    final MemoryFileSystem fs = MemoryFileSystem();
+    final File file = fs.file('/blue.png')..createSync(recursive: true)..writeAsBytesSync(kBlueRectPng);
+    final FileImage provider = FileImage(file);
+
+    final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
+
+    expect(completer.tag, file.path);
+  });
+
+  test('Memory image sets tag', () async {
+    final Uint8List bytes = Uint8List.fromList(kBlueRectPng);
+    final MemoryImage provider = MemoryImage(bytes);
+
+    final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
+
+    expect(completer.tag, 'MemoryImage(${describeIdentity(bytes)})');
+  });
+
+  test('Asset image sets tag', () async {
+    const String asset = 'images/blue.png';
+    const ExactAssetImage provider = ExactAssetImage(asset);
+    final AssetBundleImageKey key = await provider.obtainKey(ImageConfiguration.empty);
+    final MultiFrameImageStreamCompleter completer = provider.load(key, _decoder) as MultiFrameImageStreamCompleter;
+
+    expect(completer.tag, asset);
+  });
+}
+
+class FakeCodec implements Codec {
+  @override
+  void dispose() {}
+
+  @override
+  int get frameCount => throw UnimplementedError();
+
+  @override
+  Future<FrameInfo> getNextFrame() {
+    throw UnimplementedError();
+  }
+
+  @override
+  int get repetitionCount => throw UnimplementedError();
 }

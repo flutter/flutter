@@ -51,6 +51,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       codec: _loadAsync(key as NetworkImage, chunkEvents, decode),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
+      tag: key.url,
       informationCollector: () {
         return <DiagnosticsNode>[
           DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),

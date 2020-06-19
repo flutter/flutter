@@ -1731,6 +1731,39 @@ void main() {
     // See https://github.com/flutter/flutter/issues/54292.
     skip: kIsWeb,
   );
+
+  testWidgets('Reports error if debugImageOverheadAllowedInKilobytes is violated', (WidgetTester tester) async {
+    debugImageOverheadAllowedInKilobytes = 0;
+
+    final ui.Image image = await tester.runAsync(() => createTestImage(kBlueRectPng));
+    final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter(
+      ImageInfo(
+        image: image,
+        scale: 1.0,
+        tag: 'test.png',
+      ),
+    );
+    final TestImageProvider imageProvider = TestImageProvider(streamCompleter: streamCompleter);
+
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(
+          height: 50,
+          width: 50,
+          child: Image(image: imageProvider),
+        ),
+      ),
+    );
+
+    final String error = tester.takeException() as String;
+    expect(
+      error,
+      'The image test.png (100×100) exceeds its paint bounds (50×50), adding an overhead of 39kb.\n\n'
+      'If this image is never displayed at its full resolution, consider using a ResizeImage ImageProvider or setting the cacheWidth/cacheHeight parameters on the Image widget.',
+    );
+
+    debugImageOverheadAllowedInKilobytes = null;
+  });
 }
 
 class ImagePainter extends CustomPainter {

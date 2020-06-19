@@ -54,6 +54,7 @@ class NetworkImage
         chunkEvents: chunkEvents.stream,
         codec: _loadAsync(key as NetworkImage, decode, chunkEvents),
         scale: key.scale,
+        tag: key.url,
         informationCollector: _imageStreamInformationCollector(key));
   }
 

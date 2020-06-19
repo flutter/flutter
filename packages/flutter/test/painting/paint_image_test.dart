@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import '../flutter_test_alternative.dart';
@@ -61,5 +62,66 @@ void main() {
     expect(command.positionalArguments[2], equals(const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0)));
   });
 
+  test('Reports unnecessary memory usage', () {
+    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    FlutterErrorDetails lastErrorDetails;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      expect(lastErrorDetails, null);
+      lastErrorDetails = details;
+    };
+    debugImageOverheadAllowedInKilobytes = 0;
+
+    final TestImage image = TestImage(width: 300, height: 300);
+    final TestCanvas canvas = TestCanvas();
+    paintImage(
+      canvas: canvas,
+      rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
+      image: image,
+      imageTag: 'test.png',
+    );
+    expect(lastErrorDetails, isNotNull);
+    expect(
+      lastErrorDetails.exception,
+      'The image test.png (300×300) exceeds its paint bounds (200×100), adding an overhead of 364kb.\n\n'
+      'If this image is never displayed at its full resolution, consider using a ResizeImage ImageProvider or setting the cacheWidth/cacheHeight parameters on the Image widget.',
+    );
+
+    FlutterError.onError = oldHandler;
+    debugImageOverheadAllowedInKilobytes = null;
+  });
+
+  test('Passes fair memory usage', () {
+    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    FlutterErrorDetails lastErrorDetails;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      fail('Expected no FlutterError to be thrown.');
+    };
+    debugImageOverheadAllowedInKilobytes = 0;
+
+    TestImage image = TestImage(width: 200, height: 100);
+    TestCanvas canvas = TestCanvas();
+    paintImage(
+      canvas: canvas,
+      rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
+      image: image,
+      imageTag: 'test.png',
+    );
+    expect(lastErrorDetails, null);
+
+    debugImageOverheadAllowedInKilobytes = 100;
+
+    image = TestImage(width: 220, height: 110);
+    canvas = TestCanvas();
+    paintImage(
+      canvas: canvas,
+      rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
+      image: image,
+      imageTag: 'test.png',
+    );
+    expect(lastErrorDetails, null);
+
+    FlutterError.onError = oldHandler;
+    debugImageOverheadAllowedInKilobytes = null;
+  });
   // See also the DecorationImage tests in: decoration_test.dart
 }

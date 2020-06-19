@@ -12,6 +12,7 @@ import 'alignment.dart';
 import 'basic_types.dart';
 import 'borders.dart';
 import 'box_fit.dart';
+import 'debug.dart';
 import 'image_provider.dart';
 import 'image_stream.dart';
 
@@ -275,6 +276,7 @@ class DecorationImagePainter {
       canvas: canvas,
       rect: rect,
       image: _image.image,
+      imageTag: _image.tag,
       scale: _details.scale * _image.scale,
       colorFilter: _details.colorFilter,
       fit: _details.fit,
@@ -389,6 +391,7 @@ void paintImage({
   @required Canvas canvas,
   @required Rect rect,
   @required ui.Image image,
+  String imageTag,
   double scale = 1.0,
   ColorFilter colorFilter,
   BoxFit fit,
@@ -410,6 +413,7 @@ void paintImage({
     return;
   Size outputSize = rect.size;
   Size inputSize = Size(image.width.toDouble(), image.height.toDouble());
+
   Offset sliceBorder;
   if (centerSlice != null) {
     sliceBorder = Offset(
@@ -431,6 +435,29 @@ void paintImage({
     // as we apply a nine-patch stretch.
     assert(sourceSize == inputSize, 'centerSlice was used with a BoxFit that does not guarantee that the image is fully visible.');
   }
+
+  // Output size is fully calculated.
+  assert(() {
+    if (debugImageOverheadAllowedInKilobytes != null) {
+      final int acutalSizeKilobytes = (image.width * image.height * 4 * (4/3)) ~/ 1024;
+      final int possibleSizeKilobytes = (outputSize.width * outputSize.height * 4 * (4/3)) ~/ 1024;
+      final int overhead = acutalSizeKilobytes - possibleSizeKilobytes;
+      if (overhead > debugImageOverheadAllowedInKilobytes) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: 'The image $imageTag (${image.width}×${image.height}) '
+            'exceeds its paint bounds '
+            '(${outputSize.width.toInt()}×${outputSize.height.toInt()}), '
+            'adding an overhead of ${overhead}kb.\n\n'
+            'If this image is never displayed at its full resolution, consider '
+            'using a ResizeImage ImageProvider or setting the cacheWidth/cacheHeight '
+            'parameters on the Image widget.',
+          context: ErrorSummary('while painting an image'),
+        ));
+      }
+    }
+    return true;
+  }());
+
   if (repeat != ImageRepeat.noRepeat && destinationSize == outputSize) {
     // There's no need to repeat the image because we're exactly filling the
     // output rect with the image.

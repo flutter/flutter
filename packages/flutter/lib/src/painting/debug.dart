@@ -31,6 +31,24 @@ typedef HttpClientProvider = HttpClient Function();
 /// This value is ignored in non-debug builds.
 HttpClientProvider debugNetworkImageHttpClientProvider;
 
+
+/// If this value is a positive number, the framework will check that images
+/// it renders are not more than that many kilobytes greater than the minimum
+/// size needed to display the image at its current resolution without scaling.
+///
+/// For example, if a 100x100 image is decoded it takes roughly 53kb in memory
+/// (including mipmapping overhead). If it is only ever displayed at 50x50, it
+/// would take only 13kb if the cacheHeight/cacheWidth parameters had been
+/// specified at that size. This problem becomes more serious for larger
+/// images, such as a high resolution image from a 12MP camera, which would be
+/// 64mb when decoded.
+///
+/// When using this setting, developers should consider whether the image will
+/// be panned or scaled up in the application, how many images are being
+/// displayed, and whether the application will run on multiple devices with
+/// different resolutions and memory capacities.
+int debugImageOverheadAllowedInKilobytes;
+
 /// Returns true if none of the painting library debug variables have been changed.
 ///
 /// This function is used by the test framework to ensure that debug variables
@@ -45,7 +63,8 @@ HttpClientProvider debugNetworkImageHttpClientProvider;
 bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOverride = false }) {
   assert(() {
     if (debugDisableShadows != debugDisableShadowsOverride ||
-        debugNetworkImageHttpClientProvider != null) {
+        debugNetworkImageHttpClientProvider != null ||
+        debugImageOverheadAllowedInKilobytes != null) {
       throw FlutterError(reason);
     }
     return true;
