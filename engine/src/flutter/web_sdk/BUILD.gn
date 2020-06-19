@@ -45,14 +45,16 @@ prebuilt_dart_action("web_ui_sources") {
   output_dir = rebase_path("$root_out_dir/flutter_web_sdk/lib/ui/")
   input_dir = rebase_path("//flutter/lib/web_ui/lib/")
 
+  outputs = [
+    "$target_gen_dir/$target_name.stamp",
+  ]
+
   args = [
     "--output-dir=$output_dir",
     "--input-dir=$input_dir",
     "--ui",
-  ]
-
-  outputs = [
-    "$root_out_dir/flutter_web_engine_sdk_stamp",
+    "--stamp",
+    rebase_path(outputs[0], root_build_dir),
   ]
 
   foreach(source_file, web_ui_sources) {
@@ -69,14 +71,16 @@ prebuilt_dart_action("web_engine_sources") {
   output_dir = rebase_path("$root_out_dir/flutter_web_sdk/lib/_engine/")
   input_dir = rebase_path("//flutter/lib/web_ui/lib/src/")
 
+  outputs = [
+    "$target_gen_dir/$target_name.stamp",
+  ]
+
   args = [
     "--output-dir=$output_dir",
     "--input-dir=$input_dir",
     "--engine",
-  ]
-
-  outputs = [
-    "$root_out_dir/flutter_web_sdk_stamp",
+    "--stamp",
+    rebase_path(outputs[0], root_build_dir),
   ]
 
   foreach(source_file, web_engine_sources) {
