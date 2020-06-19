@@ -92,7 +92,7 @@ class HotEvent extends UsageEvent {
       if (overallTimeInMs != null)
         CustomDimensions.hotEventOverallTimeInMs: overallTimeInMs.toString(),
       if (nullSafety != null)
-        CustomDimensions.hotEventNullSafety: nullSafety.toString(),
+        CustomDimensions.nullSafety: nullSafety.toString(),
     });
     flutterUsage.sendEvent(category, parameter, parameters: parameters);
   }
