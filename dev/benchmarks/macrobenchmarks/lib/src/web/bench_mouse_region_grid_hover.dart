@@ -109,6 +109,23 @@ class BenchMouseRegionGridHover extends WidgetRecorder {
   }
 }
 
+class _UntilNextFrame {
+  _UntilNextFrame._();
+
+  static Completer<void> _completer;
+
+  static Future<void> wait() {
+    if (_UntilNextFrame._completer == null) {
+      _UntilNextFrame._completer = Completer<void>();
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _UntilNextFrame._completer.complete(null);
+        _UntilNextFrame._completer = null;
+      });
+    }
+    return _UntilNextFrame._completer.future;
+  }
+}
+
 class _Tester {
   static const Duration hoverDuration = Duration(milliseconds: 20);
 
@@ -134,7 +151,7 @@ class _Tester {
   Future<void> _hoverTo(Offset location, Duration duration) async {
     currentTime += duration;
     await gesture.moveTo(location, timeStamp: currentTime);
-    await Future<void>.delayed(Duration.zero);
+    await _UntilNextFrame.wait();
   }
 
   Future<void> start() async {

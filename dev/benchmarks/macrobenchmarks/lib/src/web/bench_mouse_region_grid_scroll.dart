@@ -93,6 +93,23 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
   }
 }
 
+class _UntilNextFrame {
+  _UntilNextFrame._();
+
+  static Completer<void> _completer;
+
+  static Future<void> wait() {
+    if (_UntilNextFrame._completer == null) {
+      _UntilNextFrame._completer = Completer<void>();
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _UntilNextFrame._completer.complete(null);
+        _UntilNextFrame._completer = null;
+      });
+    }
+    return _UntilNextFrame._completer.future;
+  }
+}
+
 class _Tester {
   static const int scrollFrequency = 60;
   static const Offset dragStartLocation = Offset(200, 200);
@@ -120,12 +137,6 @@ class _Tester {
 
   Duration currentTime = Duration.zero;
 
-  Future<void> _hoverTo(Offset location, Duration duration) async {
-    currentTime += duration;
-    await gesture.moveTo(location, timeStamp: currentTime);
-    await Future<void>.delayed(Duration.zero);
-  }
-
   Future<void> _scroll(Offset start, Offset offset, Duration duration) async {
     final int durationMs = duration.inMilliseconds;
     final Duration fullFrameDuration = const Duration(seconds: 1) ~/ scrollFrequency;
@@ -138,30 +149,26 @@ class _Tester {
     final Offset finalFrameOffset = offset - fullFrameOffset * (fullFrames as double);
 
     await gesture.down(start, timeStamp: currentTime);
-    await Future<void>.delayed(Duration.zero);
 
     for (int frame = 0; frame < fullFrames; frame += 1) {
       currentTime += fullFrameDuration;
       await gesture.moveBy(fullFrameOffset, timeStamp: currentTime);
-      await Future<void>.delayed(Duration.zero);
+      await _UntilNextFrame.wait();
     }
 
     if (finalFrameOffset != Offset.zero) {
       currentTime += finalFrameDuration;
       await gesture.moveBy(finalFrameOffset, timeStamp: currentTime);
-      await Future<void>.delayed(Duration.zero);
+      await _UntilNextFrame.wait();
     }
 
     await gesture.up(timeStamp: currentTime);
-    await Future<void>.delayed(Duration.zero);
   }
 
   Future<void> start() async {
     await Future<void>.delayed(Duration.zero);
     while (!_stopped) {
-      await _hoverTo(dragStartLocation, hoverDuration);
       await _scroll(dragStartLocation, dragUpOffset, dragDuration);
-      await _hoverTo(dragStartLocation, hoverDuration);
       await _scroll(dragStartLocation, dragDownOffset, dragDuration);
     }
   }
