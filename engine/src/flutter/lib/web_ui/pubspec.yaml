@@ -8,7 +8,6 @@ dependencies:
   meta: ^1.1.8
 
 dev_dependencies:
-  # Pin the analyzer version as a temporary workaround for https://github.com/dart-lang/sdk/issues/42163
   analyzer: 0.39.10
   http: 0.12.1
   image: 2.1.13
