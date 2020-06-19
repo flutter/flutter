@@ -460,7 +460,7 @@ class EditableText extends StatefulWidget {
        keyboardType = keyboardType ?? _inferKeyboardType(autofillHints: autofillHints, maxLines: maxLines),
        inputFormatters = maxLines == 1
            ? <TextInputFormatter>[
-               BlacklistingTextInputFormatter.singleLineFormatter,
+               FilteringTextInputFormatter.singleLineFormatter,
                ...inputFormatters ?? const Iterable<TextInputFormatter>.empty(),
              ]
            : inputFormatters,
