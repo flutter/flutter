@@ -187,8 +187,9 @@ class TextFormField extends FormField<String> {
        assert(autocorrect != null),
        assert(enableSuggestions != null),
        assert(autovalidate != null),
-       assert(autovalidate == false && autoValidateMode != null ||
-       autovalidate == true && autoValidateMode == null,
+       assert(autovalidate == false && autoValidateMode == null ||
+       autovalidate == true && autoValidateMode == null ||
+       autovalidate == false && autoValidateMode != null,
        'autovalidate and autovalidateMode should not be used together.'
        ),
        assert(maxLengthEnforced != null),

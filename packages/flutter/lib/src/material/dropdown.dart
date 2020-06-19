@@ -1485,8 +1485,9 @@ class DropdownButtonFormField<T> extends FormField<T> {
        assert(isExpanded != null),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
        assert(autofocus != null),
-       assert(autovalidate == false && autoValidateMode != null ||
-       autovalidate == true && autoValidateMode == null,
+       assert(autovalidate == false && autoValidateMode == null ||
+       autovalidate == true && autoValidateMode == null ||
+       autovalidate == false && autoValidateMode != null,
        'autovalidate and autovalidateMode should not be used together.'
        ),
        decoration = decoration ?? InputDecoration(focusColor: focusColor),
