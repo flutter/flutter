@@ -4162,7 +4162,7 @@ void main() {
     expect(tester.getTopLeft(find.text(hintText)).dy, topPosition);
   });
 
-  testWidgets('InputDecorator label width isn\'t affected by prefix or suffix', (WidgetTester tester) async {
+  testWidgets("InputDecorator label width isn't affected by prefix or suffix", (WidgetTester tester) async {
     const String labelText = 'My Label';
     const String prefixText = 'The five boxing wizards jump quickly.';
     const String suffixText = 'Suffix';
