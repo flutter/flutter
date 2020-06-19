@@ -437,6 +437,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool startPaused = false,
     bool pauseOnExceptions = false,
     bool chrome = false,
+    bool expressionEvaluation = true,
     bool structuredErrors = false,
     File pidFile,
     String script,
@@ -449,7 +450,11 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         '--machine',
         '-d',
         if (chrome)
-          ...<String>['chrome', '--web-run-headless', '--web-enable-expression-evaluation']
+          ...<String>[
+            'chrome',
+            '--web-run-headless',
+            if (!expressionEvaluation) '--no-web-enable-expression-evaluation'
+          ]
         else
           'flutter-tester',
         if (structuredErrors)
