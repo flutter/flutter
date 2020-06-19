@@ -1002,6 +1002,8 @@ class SurfacePath implements ui.Path {
                 }
               }
             }
+            curX = endX;
+            curY = endY;
             break;
           case PathCommandTypes.rect:
             final RectCommand cmd = op;
