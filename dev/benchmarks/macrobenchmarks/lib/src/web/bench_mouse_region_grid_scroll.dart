@@ -115,7 +115,6 @@ class _Tester {
   static const Offset dragStartLocation = Offset(200, 200);
   static const Offset dragUpOffset = Offset(0, 200);
   static const Offset dragDownOffset = Offset(0, -200);
-  static const Duration hoverDuration = Duration(milliseconds: 20);
   static const Duration dragDuration = Duration(milliseconds: 200);
 
   bool _stopped = false;
