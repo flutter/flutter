@@ -65,5 +65,5 @@ void main() {
 
     expect(stdout.toString(), contains(_exceptionStart));
     await _flutter.stop();
-  });
+  }, skip: 'Running in cirrus environment causes premature exit');
 }
