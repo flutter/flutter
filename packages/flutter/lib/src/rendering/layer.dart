@@ -604,11 +604,7 @@ class TextureLayer extends Layer {
   /// un-freezes it when it is certain that a frame with the new size is ready.
   final bool freeze;
 
-  /// Used to set the filterQuality of the texture.
-  ///
-  /// Use the [FilterQuality.low] quality setting to scale the texture, which corresponds to
-  /// bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
-  /// to nearest-neighbor.
+  /// {@macro FilterQuality}
   final ui.FilterQuality filterQuality;
 
   @override

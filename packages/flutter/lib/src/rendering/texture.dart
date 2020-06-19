@@ -55,11 +55,13 @@ class TextureBox extends RenderBox {
     }
   }
 
-  /// Used to set the filterQuality of the texture.
+  /// {@template FilterQuality}
+  /// The quality of sampling texture the texture and rendering it on screen.
   ///
   /// Use the [FilterQuality.low] quality setting to scale the texture, which corresponds to
-  /// bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
+  /// bilinear interpolation, and the [FilterQuality.none] corresponds
   /// to nearest-neighbor.
+  /// {@endtemplate}
   FilterQuality get filterQuality => _filterQuality;
   FilterQuality _filterQuality;
   set filterQuality(FilterQuality value) {
