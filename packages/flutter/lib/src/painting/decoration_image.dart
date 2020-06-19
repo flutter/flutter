@@ -413,7 +413,6 @@ void paintImage({
     return;
   Size outputSize = rect.size;
   Size inputSize = Size(image.width.toDouble(), image.height.toDouble());
-
   Offset sliceBorder;
   if (centerSlice != null) {
     sliceBorder = Offset(
@@ -439,18 +438,18 @@ void paintImage({
   // Output size is fully calculated.
   assert(() {
     if (debugImageOverheadAllowedInKilobytes != null) {
-      final int acutalSizeKilobytes = (image.width * image.height * 4 * (4/3)) ~/ 1024;
-      final int possibleSizeKilobytes = (outputSize.width * outputSize.height * 4 * (4/3)) ~/ 1024;
-      final int overhead = acutalSizeKilobytes - possibleSizeKilobytes;
+      final double acutalSizeBytes = image.width * image.height * 4 * (4/3);
+      final double possibleSizeBytes = outputSize.width * outputSize.height * 4 * (4/3);
+      final int overhead = (acutalSizeBytes - possibleSizeBytes) ~/ 1024;
       if (overhead > debugImageOverheadAllowedInKilobytes) {
         FlutterError.reportError(FlutterErrorDetails(
-          exception: 'The image $imageTag (${image.width}×${image.height}) '
-            'exceeds its paint bounds '
-            '(${outputSize.width.toInt()}×${outputSize.height.toInt()}), '
+          exception: FlutterError(
+            'The image $imageTag (${image.width}×${image.height}) exceeds its '
+            'paint bounds (${outputSize.width.toInt()}×${outputSize.height.toInt()}), '
             'adding an overhead of ${overhead}kb.\n\n'
             'If this image is never displayed at its full resolution, consider '
             'using a ResizeImage ImageProvider or setting the cacheWidth/cacheHeight '
-            'parameters on the Image widget.',
+            'parameters on the Image widget.'),
           context: ErrorSummary('while painting an image'),
         ));
       }

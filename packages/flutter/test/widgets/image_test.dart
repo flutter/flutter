@@ -1755,9 +1755,9 @@ void main() {
       ),
     );
 
-    final String error = tester.takeException() as String;
+    final FlutterError error = tester.takeException() as FlutterError;
     expect(
-      error,
+      error.message,
       'The image test.png (100×100) exceeds its paint bounds (50×50), adding an overhead of 39kb.\n\n'
       'If this image is never displayed at its full resolution, consider using a ResizeImage ImageProvider or setting the cacheWidth/cacheHeight parameters on the Image widget.',
     );

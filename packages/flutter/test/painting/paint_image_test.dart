@@ -80,8 +80,9 @@ void main() {
       imageTag: 'test.png',
     );
     expect(lastErrorDetails, isNotNull);
+    expect(lastErrorDetails.exception, isA<FlutterError>());
     expect(
-      lastErrorDetails.exception,
+      lastErrorDetails.exceptionAsString(),
       'The image test.png (300×300) exceeds its paint bounds (200×100), adding an overhead of 364kb.\n\n'
       'If this image is never displayed at its full resolution, consider using a ResizeImage ImageProvider or setting the cacheWidth/cacheHeight parameters on the Image widget.',
     );
