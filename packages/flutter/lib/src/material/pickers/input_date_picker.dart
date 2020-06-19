@@ -244,16 +244,16 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
 }
 
 /// A `TextInputFormatter` set up to format dates.
-//
-// This is not publicly exported (see pickers.dart), as it is
-// just meant for internal use by `InputDatePickerFormField` and
-// `InputDateRangePicker`.
+///
+/// Note: this is not publicly exported (see pickers.dart), as it is
+/// just meant for internal use by `InputDatePickerFormField` and
+/// `InputDateRangePicker`.
 class DateTextInputFormatter extends TextInputFormatter {
 
   /// Creates a date formatter with the given separator.
   DateTextInputFormatter(
     this.separator
-  ) : _filterFormatter = FilteringTextInputFormatter.allow(RegExp('[\\d$_commonSeparators\\$separator]+'));
+  ) : _filterFormatter = WhitelistingTextInputFormatter(RegExp('[\\d$_commonSeparators\\$separator]+'));
 
   /// List of common separators that are used in dates. This is used to make
   /// sure that if given platform's [TextInputType.datetime] keyboard doesn't
@@ -267,7 +267,7 @@ class DateTextInputFormatter extends TextInputFormatter {
 
   // Formatter that will filter out all characters except digits and date
   // separators.
-  final TextInputFormatter _filterFormatter;
+  final WhitelistingTextInputFormatter _filterFormatter;
 
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
