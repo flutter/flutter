@@ -141,7 +141,8 @@ Future<void> main() async {
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
-        '\ndependencies:\n  device_info:\n  google_maps_flutter:\n', // One dynamic and one static framework.
+        // One dynamic framework, one static framework, and one that does not support iOS.
+        '\ndependencies:\n  device_info:\n  google_maps_flutter:\n  android_alarm_manager:\n',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -160,13 +161,15 @@ Future<void> main() async {
         );
       });
 
-      final bool ephemeralHostAppWithCocoaPodsBuilt = exists(Directory(path.join(
+      final Directory ephemeralHostAppWithCocoaPods = Directory(path.join(
         projectDir.path,
         'build',
         'ios',
         'iphoneos',
         'Runner.app',
-      )));
+      ));
+
+      final bool ephemeralHostAppWithCocoaPodsBuilt = exists(ephemeralHostAppWithCocoaPods);
 
       if (!ephemeralHostAppWithCocoaPodsBuilt) {
         return TaskResult.failure('Failed to build ephemeral host .app with CocoaPods');
@@ -177,9 +180,18 @@ Future<void> main() async {
       if (!podfileLockOutput.contains(':path: Flutter/engine')
         || !podfileLockOutput.contains(':path: Flutter/FlutterPluginRegistrant')
         || !podfileLockOutput.contains(':path: Flutter/.symlinks/device_info/ios')
-        || !podfileLockOutput.contains(':path: Flutter/.symlinks/google_maps_flutter/ios')) {
+        || !podfileLockOutput.contains(':path: Flutter/.symlinks/google_maps_flutter/ios')
+        || podfileLockOutput.contains('android_alarm_manager')) {
         return TaskResult.failure('Building ephemeral host app Podfile.lock does not contain expected pods');
       }
+
+      checkFileExists(path.join(ephemeralHostAppWithCocoaPods.path, 'Frameworks', 'device_info.framework', 'device_info'));
+
+      // Static, no embedded framework.
+      checkDirectoryNotExists(path.join(ephemeralHostAppWithCocoaPods.path, 'Frameworks', 'google_maps_flutter.framework'));
+
+      // Android-only, no embedded framework.
+      checkDirectoryNotExists(path.join(ephemeralHostAppWithCocoaPods.path, 'Frameworks', 'android_alarm_manager.framework'));
 
       section('Clean build');
 
