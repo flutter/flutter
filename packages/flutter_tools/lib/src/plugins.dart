@@ -14,6 +14,7 @@ import 'base/file_system.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
+import 'flutter_manifest.dart';
 import 'globals.dart' as globals;
 import 'platform_plugins.dart';
 import 'project.dart';
@@ -234,17 +235,18 @@ class Plugin {
     if (!globals.fs.file(pubspecPath).existsSync()) {
       return;
     }
-    final YamlMap pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync()) as YamlMap;
-    final List<String> errors = validatePluginYaml(pubspec);
-    if (errors.isNotEmpty) {
-      throwToolExit('Invalid plugin specification: \n${errors.join('\n')}');
-    }
+    // final YamlMap pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync()) as YamlMap;
+    final FlutterManifest manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger);
     try {
       // The format of the updated pubspec might not be preserved.
       final List<String> platformsToAdd = List<String>.from(platforms);
-      final YamlMap platformsMap = getPlatformsYamlMap(pubspec);
-      final List<String> existingPlatforms = platformsMap.keys.cast<String>().toList();
-      platformsToAdd.removeWhere((String platform) => existingPlatforms.contains(platform));
+      final YamlMap platformsMap = manifest.supportedPlatforms as YamlMap;
+      final List<String> errors = _validateMultiPlatformYaml(platformsMap);
+      if (errors.isNotEmpty) {
+        throwToolExit('Invalid plugin specification: \n${errors.join('\n')}');
+      }
+      final List<String> existingPlatforms = manifest.supportedPlatforms.keys.toList();
+      platformsToAdd.removeWhere(existingPlatforms.contains);
       if (platformsToAdd.isEmpty) {
         return;
       }

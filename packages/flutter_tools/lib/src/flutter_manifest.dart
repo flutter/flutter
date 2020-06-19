@@ -163,17 +163,8 @@ class FlutterManifest {
     if (isModule) {
       return _flutterDescriptor['module']['androidPackage'] as String;
     }
-    if (isPlugin) {
-      final YamlMap plugin = _flutterDescriptor['plugin'] as YamlMap;
-      if (plugin.containsKey('platforms')) {
-        final YamlMap platforms = plugin['platforms'] as YamlMap;
-
-        if (platforms.containsKey('android')) {
-          return platforms['android']['package'] as String;
-        }
-      } else {
-        return plugin['androidPackage'] as String;
-      }
+    if (supportedPlatforms.containsKey('android')) {
+       return supportedPlatforms['android']['package'] as String;
     }
     return null;
   }
@@ -183,6 +174,17 @@ class FlutterManifest {
   String get iosBundleIdentifier {
     if (isModule) {
       return _flutterDescriptor['module']['iosBundleIdentifier'] as String;
+    }
+    return null;
+  }
+
+  Map<String, dynamic> get supportedPlatforms {
+    if (isPlugin) {
+      final YamlMap plugin = _flutterDescriptor['plugin'] as YamlMap;
+      if (plugin.containsKey('platforms')) {
+        final YamlMap platformsMap = plugin['platforms'] as YamlMap;
+        return platformsMap.value.cast<String, dynamic>();
+      }
     }
     return null;
   }

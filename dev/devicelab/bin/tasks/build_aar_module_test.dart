@@ -41,7 +41,7 @@ Future<void> main() async {
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
-          options: <String>['--org', 'io.flutter.devicelab', '--template', 'plugin', 'plugin_with_android'],
+          options: <String>['--org', 'io.flutter.devicelab', '--template', 'plugin', '--platforms=android', 'plugin_with_android'],
         );
       });
 
@@ -50,24 +50,9 @@ Future<void> main() async {
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
-          options: <String>['--org', 'io.flutter.devicelab', '--template', 'plugin', 'plugin_without_android'],
+          options: <String>['--org', 'io.flutter.devicelab', '--template', 'plugin', '--platforms=ios', 'plugin_without_android'],
         );
       });
-
-      // Delete the android/ directory.
-      File(path.join(
-        tempDir.path,
-        'plugin_without_android',
-        'android'
-      )).deleteSync(recursive: true);
-
-      // Remove Android support from the plugin pubspec.yaml
-      final File pluginPubspec = File(path.join(tempDir.path, 'plugin_without_android', 'pubspec.yaml'));
-      pluginPubspec.writeAsStringSync(pluginPubspec.readAsStringSync().replaceFirst('''
-      android:
-        package: io.flutter.devicelab.plugin_without_android
-        pluginClass: PluginWithoutAndroidPlugin
-''', ''), flush: true);
 
       section('Add plugins to pubspec.yaml');
 

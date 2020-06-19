@@ -39,7 +39,7 @@ const List<String> _availablePlatforms = <String>[
 const String _noPlatformsErrorMessage =
         '''
 You have generated a new plugin project without
-specifying the `--platforms` flag. A plugin project supports no platforms is generated.
+specifying the `--platforms` flag. A plugin project that supports no platforms is generated.
 To add platforms, run `flutter create -t plugin --platforms <platforms> .` under the same
 directory. You can also find a detailed instruction on how to add platforms in the `pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
         ''';
@@ -339,9 +339,9 @@ class CreateCommand extends FlutterCommand {
     final List<String> platforms = stringsArg('platforms');
     // `--platforms` does not support module and package.
     if (argResults.wasParsed('platforms') && (generateModule || generatePackage)) {
-      final String template = generateModule? 'module': 'package';
+      final String template = generateModule ? 'module' : 'package';
       throwToolExit(
-        'The "--platforms" argument is not supported in $template template. please remove the argument and try again.',
+        'The "--platforms" argument is not supported in $template template.',
         exitCode: 2
       );
     } else if (platforms == null || platforms.isEmpty) {
