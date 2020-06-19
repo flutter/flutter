@@ -217,7 +217,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                     validator: _validatePhoneNumber,
                     // TextInputFormatters are applied in sequence.
                     inputFormatters: <TextInputFormatter> [
-                      FilteringTextInputFormatter.digitsOnly,
+                      WhitelistingTextInputFormatter.digitsOnly,
                       // Fit the validating format.
                       _phoneNumberFormatter,
                     ],
