@@ -455,6 +455,62 @@ void main() {
       await tester.pumpAndSettle();
       expect(textField.focusNode.hasFocus, isTrue);
     });
+
+    testWidgets('itemCount change test', (WidgetTester tester) async {
+      final ScrollController controller = ScrollController();
+      int itemCount = 100;
+      await tester.pumpWidget(materialAppBoilerplate(
+        child: MasonryTestPage(
+          controller: controller,
+          crossAxisCount: 4,
+          itemCount: itemCount,
+          setState: (_MasonryTestPageState state) {
+             state._itemCount = itemCount;
+          },
+        )),
+      );
+      expect(find.widgetWithText(Container, '0'), findsOneWidget);
+      controller.jumpTo(10000);
+      await tester.pumpAndSettle();
+
+      itemCount = 0;
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(Container, '0'), findsNothing);
+      expect(controller.offset, 0.0);
+
+      itemCount = 100;
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(Container, '3'), findsOneWidget);
+
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '0')),
+        const Offset(0.0, 0.0),
+      );
+
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '1')),
+        const Offset(200.0, 0.0),
+      );
+
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '2')),
+        const Offset(400.0, 0.0),
+      );
+
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '3')),
+        const Offset(600.0, 0.0),
+      );
+
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '4')),
+        const Offset(0.0, 100.0),
+      );
+    });
   });
 }
 
@@ -520,6 +576,40 @@ Widget masonryGridViewBoilerplate({
   );
 }
 
+Widget masonryGridViewBuilderBoilerplate({
+  int crossAxisCount = 4,
+  double crossAxisSpacing = 0.0,
+  double mainAxisSpacing = 0.0,
+  double maxCrossAxisExtent,
+  int itemCount = 20,
+  ScrollController controller,
+}) {
+  final SliverMasonryGridDelegate delegate = maxCrossAxisExtent != null ?
+    SliverMasonryGridDelegateWithMaxCrossAxisExtent(
+      maxCrossAxisExtent: maxCrossAxisExtent,
+      mainAxisSpacing: mainAxisSpacing,
+      crossAxisSpacing: crossAxisSpacing) :
+    SliverMasonryGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: crossAxisCount,
+      mainAxisSpacing: mainAxisSpacing,
+      crossAxisSpacing: crossAxisSpacing);
+
+  return MasonryGridView.builder(
+    gridDelegate: delegate,
+    itemBuilder: (BuildContext context, int index) {
+      return Container(
+        alignment: Alignment.center,
+        child: Text(
+          '$index',
+        ),
+        height: ((index % crossAxisCount) + 1) * 100.0,
+      );
+    },
+    itemCount: itemCount,
+    controller: controller,
+  );
+}
+
 Widget materialAppBoilerplate(
     {Widget child, TextDirection textDirection = TextDirection.ltr}) {
   return MaterialApp(
@@ -556,6 +646,74 @@ Widget textFieldBoilerplate({Widget child}) {
       ),
     ),
   );
+}
+
+class MasonryTestPage extends StatefulWidget {
+  const MasonryTestPage({
+    this.crossAxisCount = 4,
+    this.mainAxisSpacing = 0.0,
+    this.crossAxisSpacing = 0.0,
+    this.textDirection = TextDirection.ltr,
+    this.maxCrossAxisExtent,
+    this.itemCount = 50,
+    this.controller,
+    this.setState,
+  });
+  final int crossAxisCount;
+  final double mainAxisSpacing;
+  final double crossAxisSpacing;
+  final TextDirection textDirection;
+  final double maxCrossAxisExtent;
+  final int itemCount;
+  final ScrollController controller;
+  final void Function(_MasonryTestPageState setState) setState;
+  @override
+  _MasonryTestPageState createState() => _MasonryTestPageState();
+}
+
+class _MasonryTestPageState extends State<MasonryTestPage> {
+  int _crossAxisCount;
+  double _crossAxisSpacing;
+  double _mainAxisSpacing;
+  TextDirection _textDirection;
+  double _maxCrossAxisExtent;
+  int _itemCount;
+  ScrollController _controller;
+  @override
+  void initState() {
+    _crossAxisCount = widget.crossAxisCount;
+    _mainAxisSpacing = widget.mainAxisSpacing;
+    _crossAxisSpacing =widget.crossAxisSpacing;
+    _textDirection = widget.textDirection;
+    _maxCrossAxisExtent = widget.maxCrossAxisExtent;
+    _itemCount = widget.itemCount;
+    _controller = widget.controller;
+    super.initState();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Directionality(
+        textDirection: _textDirection,
+        child: masonryGridViewBuilderBoilerplate(
+          crossAxisCount: _crossAxisCount,
+          mainAxisSpacing: _mainAxisSpacing,
+          crossAxisSpacing: _crossAxisSpacing,
+          maxCrossAxisExtent: _maxCrossAxisExtent,
+          controller:  _controller,
+          itemCount: _itemCount,
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            widget.setState?.call(this);
+          });
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
 }
 
 class MaterialLocalizationsDelegate
