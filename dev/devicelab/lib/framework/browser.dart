@@ -105,7 +105,9 @@ class Chrome {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
-      '--disable-web-security',
+      '--disable-web-security', // added to allow CORS
+      '--enable-logging=stderr', // added to see errors
+      '--v=1', // added to see errors
     ];
     final io.Process chromeProcess = await io.Process.start(
       _findSystemChromeExecutable(),
