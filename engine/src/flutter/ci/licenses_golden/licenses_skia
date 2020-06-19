@@ -1,4 +1,4 @@
-Signature: d83ce1a82da3629126da7b88b50601b5
+Signature: c397d0bc079d139c356df63c30253466
 
 UNUSED LICENSES:
 
@@ -5219,6 +5219,9 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/TessellatePathBench.cpp
 FILE: ../../../third_party/skia/experimental/skrive/include/SkRive.h
 FILE: ../../../third_party/skia/experimental/skrive/src/Artboard.cpp
+FILE: ../../../third_party/skia/experimental/skrive/src/Drawable.cpp
+FILE: ../../../third_party/skia/experimental/skrive/src/Node.cpp
+FILE: ../../../third_party/skia/experimental/skrive/src/Shape.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/SkRive.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/reader/BinaryReader.cpp
 FILE: ../../../third_party/skia/experimental/skrive/src/reader/JsonReader.cpp
