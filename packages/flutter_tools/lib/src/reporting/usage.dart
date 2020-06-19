@@ -57,6 +57,8 @@ enum CustomDimensions {
   commandResultEventMaxRss,  // cd44
   commandRunAndroidEmbeddingVersion, // cd45
   commandPackagesAndroidEmbeddingVersion, // cd46
+  commandUsingNullSafety, // cd47
+  hotEventNullSafety, // cd48
 }
 
 String cdKey(CustomDimensions cd) => 'cd${cd.index + 1}';

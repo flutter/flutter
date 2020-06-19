@@ -841,6 +841,10 @@ abstract class FlutterCommand extends Command<void> {
           ...?await usageValues,
           CustomDimensions.commandHasTerminal:
             globals.stdio.hasTerminal ? 'true' : 'false',
+          if (argParser.options.containsKey(FlutterOptions.kEnableExperiment))
+            CustomDimensions.commandUsingNullSafety: stringsArg(FlutterOptions.kEnableExperiment)
+              .contains('non-nullable')
+              .toString()
         };
       Usage.command(commandPath, parameters: additionalUsageValues);
     }
