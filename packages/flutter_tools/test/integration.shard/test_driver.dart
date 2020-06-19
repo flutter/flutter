@@ -437,6 +437,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool startPaused = false,
     bool pauseOnExceptions = false,
     bool chrome = false,
+    bool structuredErrors = false,
     File pidFile,
     String script,
   }) async {
@@ -451,6 +452,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           ...<String>['chrome', '--web-run-headless', '--web-enable-expression-evaluation']
         else
           'flutter-tester',
+        if (structuredErrors)
+          '--dart-define=flutter.inspector.structuredErrors=true',
       ],
       withDebugger: withDebugger,
       startPaused: startPaused,
