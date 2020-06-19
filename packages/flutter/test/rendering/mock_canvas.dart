@@ -1163,13 +1163,15 @@ class _PathPaintPredicate extends _DrawCommandPaintPredicate {
     if (includes != null) {
       for (final Offset offset in includes) {
         if (!pathArgument.contains(offset))
-          throw 'It called $methodName with a path that unexpectedly did not contain $offset.';
+          throw 'It called $methodName with a path that unexpectedly did not '
+              'contain $offset. Path bounds = ${pathArgument.getBounds()}';
       }
     }
     if (excludes != null) {
       for (final Offset offset in excludes) {
         if (pathArgument.contains(offset))
-          throw 'It called $methodName with a path that unexpectedly contained $offset.';
+          throw 'It called $methodName with a path that unexpectedly '
+              'contained $offset. . Path bounds = ${pathArgument.getBounds()}';
       }
     }
   }
