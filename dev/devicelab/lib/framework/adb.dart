@@ -566,14 +566,44 @@ class IosDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<List<String>> discoverDevices() async {
-    final String ideviceIdPath = path.join(getArtifactPath(), 'libimobiledevice', 'idevice_id');
-    final List<String> iosDeviceIDs = LineSplitter.split(await eval(ideviceIdPath, <String>['-l'], environment: _ideviceIdEnvironment))
-      .map<String>((String line) => line.trim())
-      .where((String line) => line.isNotEmpty)
-      .toList();
-    if (iosDeviceIDs.isEmpty)
+    final List<dynamic> results = json.decode(await eval(
+      path.join(flutterDirectory.path, 'bin', 'flutter'),
+      <String>['devices', '--machine', '--suppress-analytics'],
+    )) as List<dynamic>;
+
+    // [
+    //   {
+    //     "name": "Christopher’s iPhone",
+    //     "id": "00008020-00017DA80CC1002E",
+    //     "isSupported": true,
+    //     "targetPlatform": "ios",
+    //     "emulator": false,
+    //     "sdk": "iOS 13.2",
+    //     "capabilities": {
+    //       "hotReload": true,
+    //       "hotRestart": true,
+    //       "screenshot": true,
+    //       "fastStart": false,
+    //       "flutterExit": true,
+    //       "hardwareRendering": false,
+    //       "startPaused": false
+    //     }
+    //   }
+    // ]
+
+    final List<String> deviceIds = <String>[];
+
+    for (final dynamic result in results) {
+      final Map<String, dynamic> device = result as Map<String, dynamic>;
+      if (device['targetPlatform'] == 'ios' && device['id'] != null) {
+        deviceIds.add(device['id'] as String);
+      }
+    }
+
+    if (deviceIds.isEmpty) {
       throw const DeviceException('No connected iOS devices found.');
-    return iosDeviceIDs;
+    }
+    return deviceIds;
   }
 
   @override
