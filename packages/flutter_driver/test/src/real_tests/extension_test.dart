@@ -41,7 +41,7 @@ void main() {
     });
 
     testWidgets('returns immediately when transient callback queue is empty', (WidgetTester tester) async {
-      extension.call(const WaitUntilNoTransientCallbacks().serialize())
+      extension.call(const WaitUntilNoTransientCallbacks().serialize()) // ignore: deprecated_member_use_from_same_package
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
       }));
@@ -61,7 +61,7 @@ void main() {
         // Intentionally blank. We only care about existence of a callback.
       });
 
-      extension.call(const WaitUntilNoTransientCallbacks().serialize())
+      extension.call(const WaitUntilNoTransientCallbacks().serialize()) // ignore: deprecated_member_use_from_same_package
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
       }));
@@ -888,7 +888,7 @@ void main() {
 
     testWidgets('returns immediately when frame is synced', (
         WidgetTester tester) async {
-      extension.call(const WaitUntilNoPendingFrame().serialize())
+      extension.call(const WaitUntilNoPendingFrame().serialize()) // ignore: deprecated_member_use_from_same_package
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
       }));
@@ -909,7 +909,7 @@ void main() {
         // Intentionally blank. We only care about existence of a callback.
       });
 
-      extension.call(const WaitUntilNoPendingFrame().serialize())
+      extension.call(const WaitUntilNoPendingFrame().serialize()) // ignore: deprecated_member_use_from_same_package
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
       }));
@@ -933,7 +933,7 @@ void main() {
         'waits until no pending scheduled frame', (WidgetTester tester) async {
       SchedulerBinding.instance.scheduleFrame();
 
-      extension.call(const WaitUntilNoPendingFrame().serialize())
+      extension.call(const WaitUntilNoPendingFrame().serialize()) // ignore: deprecated_member_use_from_same_package
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
       }));
