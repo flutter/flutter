@@ -2846,7 +2846,6 @@ void main() {
         isEmpty: true,
         decoration: const InputDecoration(
           border: OutlineInputBorder(borderSide: BorderSide.none),
-          // ignore: deprecated_member_use_from_same_package
           hasFloatingPlaceholder: false,
           labelText: 'label',
         ),
@@ -2871,7 +2870,6 @@ void main() {
         // isFocused: false (default)
         decoration: const InputDecoration(
           border: OutlineInputBorder(borderSide: BorderSide.none),
-          // ignore: deprecated_member_use_from_same_package
           hasFloatingPlaceholder: false,
           labelText: 'label',
         ),
@@ -3941,7 +3939,6 @@ void main() {
       helperMaxLines: 6,
       hintStyle: TextStyle(),
       errorMaxLines: 5,
-      // ignore: deprecated_member_use_from_same_package
       hasFloatingPlaceholder: false,
       floatingLabelBehavior: FloatingLabelBehavior.never,
       contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
