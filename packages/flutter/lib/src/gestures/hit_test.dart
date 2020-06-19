@@ -80,11 +80,11 @@ class _Ref<T> {
 }
 
 @immutable
-class _MatrixPart {
-  const _MatrixPart.matrix(this.matrix)
+class _TransformPart {
+  const _TransformPart.matrix(this.matrix)
     : assert(matrix != null),
       offset = null;
-  const _MatrixPart.offset(this.offset)
+  const _TransformPart.offset(this.offset)
     : assert(offset != null),
       matrix = null;
 
@@ -102,6 +102,17 @@ class _MatrixPart {
     assert(!isMatrix);
     return offset;
   }
+
+  _TransformPart multiply(_TransformPart rhs) {
+    assert(rhs.isMatrix);
+    Matrix4 result;
+    if (isMatrix) {
+      result = matrix * rhs.assertMatrix as Matrix4;
+    } else {
+      result = rhs.assertMatrix.clone()..leftTranslate(offset.dx, offset.dy);
+    }
+    return _TransformPart.matrix(result);
+  }
 }
 
 /// The result of performing a hit test.
@@ -109,7 +120,7 @@ class HitTestResult {
   /// Creates an empty hit test result.
   HitTestResult()
      : _path = <HitTestEntry>[],
-       _transforms = <_MatrixPart>[],
+       _transforms = <_TransformPart>[],
        _globalizedTransforms = _Ref<int>(1);
 
   /// Wraps `result` (usually a subtype of [HitTestResult]) to create a
@@ -131,7 +142,7 @@ class HitTestResult {
   Iterable<HitTestEntry> get path => _path;
   final List<HitTestEntry> _path;
 
-  final List<_MatrixPart> _transforms;
+  final List<_TransformPart> _transforms;
   // The number of elements (from the head) in `_transforms` that has been
   // globalized.
   //
@@ -151,15 +162,8 @@ class HitTestResult {
       assert(globalizedTransforms == _transforms.length);
       return;
     }
-    for (_MatrixPart last = _transforms[globalizedTransforms - 1]; globalizedTransforms < _transforms.length; globalizedTransforms += 1) {
-      final Matrix4 lastMatrix = last.assertMatrix;
-      final _MatrixPart next = _transforms[globalizedTransforms];
-      if (next.isMatrix) {
-        last = _MatrixPart.matrix(next.assertMatrix * lastMatrix as Matrix4);
-      } else {
-        final Offset offset = next.assertOffset;
-        last = _MatrixPart.matrix(lastMatrix.clone()..leftTranslate(offset.dx, offset.dy));
-      }
+    for (_TransformPart last = _transforms[globalizedTransforms - 1]; globalizedTransforms < _transforms.length; globalizedTransforms += 1) {
+      last = _transforms[globalizedTransforms].multiply(last);
       _transforms[globalizedTransforms] = last;
     }
     _globalizedTransforms.value = globalizedTransforms;
@@ -218,15 +222,15 @@ class HitTestResult {
       'matrix through PointerEvent.removePerspectiveTransform? '
       'The provided matrix is:\n$transform'
     );
-    _transforms.add(_MatrixPart.matrix(transform));
+    _transforms.add(_TransformPart.matrix(transform));
   }
 
   @protected
   void pushOffset(Offset offset) {
     if (_transforms.isEmpty) {
-      _transforms.add(_MatrixPart.matrix(Matrix4.translationValues(offset.dx, offset.dy, 0.0)));
+      _transforms.add(_TransformPart.matrix(Matrix4.translationValues(offset.dx, offset.dy, 0.0)));
     } else {
-      _transforms.add(_MatrixPart.offset(offset));
+      _transforms.add(_TransformPart.offset(offset));
     }
   }
 
