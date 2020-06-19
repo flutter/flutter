@@ -101,7 +101,7 @@ void main() {
         'safety',
         parameters: captureAnyNamed('parameters'),
       ));
-      expect(resultA.captured.first, <String, String>{'cd31': 'true', 'cd47': 'true'});
+      expect(resultA.captured.first, containsPair('cd47', 'true'));
       reset(usage);
 
       await commandRunner.run(<String>['safety', '--enable-experiment=foo']);
@@ -110,7 +110,7 @@ void main() {
         'safety',
         parameters: captureAnyNamed('parameters'),
       ));
-      expect(resultB.captured.first, <String, String>{'cd31': 'true', 'cd47': 'false'});
+      expect(resultB.captured.first, containsPair('cd47', 'false'));
     }, overrides: <Type, Generator>{
       Usage: () => usage,
     });
