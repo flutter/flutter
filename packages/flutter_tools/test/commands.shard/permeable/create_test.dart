@@ -1747,7 +1747,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await expectLater(
-      runner.run(<String>['create', '--no-pub', '--template=module', '--platforms=ios', projectDir.path]) 
+      runner.run(<String>['create', '--no-pub', '--template=module', '--platforms=ios', projectDir.path])
       , throwsToolExit(message: 'The "--platforms" argument is not supported', exitCode:2));
   });
 
@@ -1759,7 +1759,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await expectLater(
-      runner.run(<String>['create', '--no-pub', '--template=package', '--platforms=ios', projectDir.path]) 
+      runner.run(<String>['create', '--no-pub', '--template=package', '--platforms=ios', projectDir.path])
       , throwsToolExit(message: 'The "--platforms" argument is not supported', exitCode: 2));
   });
 

@@ -226,7 +226,14 @@ class Plugin {
   ///
   /// This method doesn't support the legacy plugin pubspec format and will throw error if try to update a pubspec.yaml that uses the legacy format.
   static Future<void> updatePubspecWithPlatforms(String projectDir, List<String> platforms, String pluginClass, String androidIdentifier) async {
+    if (platforms.isEmpty) {
+      return;
+    }
+
     final String pubspecPath = globals.fs.path.join(projectDir, 'pubspec.yaml');
+    if (!globals.fs.file(pubspecPath).existsSync()) {
+      return;
+    }
     final YamlMap pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync()) as YamlMap;
     final List<String> errors = validatePluginYaml(pubspec);
     if (errors.isNotEmpty) {
@@ -244,36 +251,35 @@ class Plugin {
       final File pubspecFile = globals.fs.file(pubspecPath);
       final List<String> fileContents = pubspecFile.readAsLinesSync();
       int index = -1;
-      int fakePlatformIndex = -1;
       String frontSpaces;
       for (int i = 0; i < fileContents.length; i ++) {
+        final String lineWithoutSpace = fileContents[i].replaceAll(' ', '');
+        // ignore all the comments.
+        if (lineWithoutSpace.contains('#')) {
+          continue;
+        }
         // Find the line of `platforms:`
-        final String line = fileContents[i];
-        if (line.contains('platforms:')) {
-          final String lastLine = fileContents[i-1];
-          if (!lastLine.contains('plugin:')) {
+        if (lineWithoutSpace == 'platforms:') {
+          if (!_isPlatformKeyInsidePluginKey(fileContents, i)) {
             continue;
           }
           // Find how many spaces are in front of the `platforms`.
-          frontSpaces = line.split('platforms:').first;
+          frontSpaces = fileContents[i].split('platforms:').first;
           index = i + 1;
-        }
-        if (line.contains('some_platform:')) {
-            fakePlatformIndex = i;
-        }
-        if (index != -1 && fakePlatformIndex != -1) {
           break;
         }
       }
       if (index == -1) {
         throwToolExit(_invalidPlatformsErrorMessage, exitCode: 2);
-        }
-      if (fakePlatformIndex != -1) {
+      }
+      final List<int> dummyPlatformIndexes = _findDummyPlatformMapLines(fileContents, index);
+      assert(dummyPlatformIndexes.isEmpty || dummyPlatformIndexes.length == 2);
+      if (dummyPlatformIndexes.length == 2) {
         // If the plugin was generated without specifying a platform,
         // a some_platform is added to the pubspec.yaml to preserve the pubspec format.
         // remove the some_platform related section before moving on.
-        fileContents.removeAt(fakePlatformIndex + 1);
-        fileContents.removeAt(fakePlatformIndex);
+        fileContents.removeAt(dummyPlatformIndexes[1]);
+        fileContents.removeAt(dummyPlatformIndexes[0]);
       }
       for (final String platform in platformsToAdd) {
         fileContents.insert(index, frontSpaces + '  $platform:');
@@ -569,6 +575,40 @@ List<dynamic> _createPluginLegacyDependencyGraph(List<Plugin> plugins) {
     });
   }
   return directAppDependencies;
+}
+
+bool _isPlatformKeyInsidePluginKey(final List<String> fileContents, int platformKeyIndex) {
+  int pluginKeyIndex = platformKeyIndex - 1;
+  while (pluginKeyIndex >= 0) {
+    final String lineWithoutSpace = fileContents[pluginKeyIndex].replaceAll(' ', '');
+    if (lineWithoutSpace.contains('#') || lineWithoutSpace.isEmpty) {
+      pluginKeyIndex --;
+      continue;
+    }
+    if (lineWithoutSpace.contains('plugin:')){
+      return true;
+    }
+    return false;
+  }
+  return false;
+}
+
+List<int> _findDummyPlatformMapLines(final List<String> fileContents, int startIndex) {
+  bool foundDummyPlatformKey = false; // If this is true, start looking for "pluginClass" key.
+  final List<int> keyIndexes = <int>[];
+  for (int i = 0; i < fileContents.length; i ++) {
+    final String lineWithoutSpace = fileContents[i].replaceAll(' ', '');
+    if (lineWithoutSpace.contains('#') || lineWithoutSpace.isEmpty) {
+      continue;
+    }
+    if (foundDummyPlatformKey && lineWithoutSpace == 'pluginClass:somePluginClass') {
+      keyIndexes.add(i);
+    } else if (lineWithoutSpace == 'some_platform:'){
+      foundDummyPlatformKey = true;
+      keyIndexes.add(i);
+    }
+  }
+  return keyIndexes;
 }
 
 // The .flutter-plugins file will be DEPRECATED in favor of .flutter-plugins-dependencies.
