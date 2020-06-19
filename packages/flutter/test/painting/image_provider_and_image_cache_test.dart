@@ -20,7 +20,7 @@ void main() {
   TestRenderingFlutterBinding();
 
   final DecoderCallback _basicDecoder = (Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) {
-    return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
+    return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
   };
 
   FlutterExceptionHandler oldError;
