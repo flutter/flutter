@@ -379,6 +379,9 @@ class FlutterErrorDetails with Diagnosticable {
   /// The [exception] must not be null; other arguments can be left to
   /// their default values. (`throw null` results in a
   /// [NullThrownError] exception.)
+  // If you add a property to this class, do not forget to update _runTest in
+  // packages/flutter_test/lib/src/binding.dart, where we copy this class
+  // and unmangle the stack property.
   const FlutterErrorDetails({
     this.exception,
     this.stack,
