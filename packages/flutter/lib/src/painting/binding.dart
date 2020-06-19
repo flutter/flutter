@@ -84,6 +84,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   Future<ui.Codec> instantiateImageCodec(Uint8List bytes, {
     int cacheWidth,
     int cacheHeight,
+    bool allowUpscaling = false,
   }) {
     assert(cacheWidth == null || cacheWidth > 0);
     assert(cacheHeight == null || cacheHeight > 0);
@@ -91,6 +92,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
       bytes,
       targetWidth: cacheWidth,
       targetHeight: cacheHeight,
+      allowUpscaling: allowUpscaling,
     );
   }
 
