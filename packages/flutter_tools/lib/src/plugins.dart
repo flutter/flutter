@@ -20,6 +20,11 @@ import 'project.dart';
 import 'windows/property_sheet.dart';
 import 'windows/visual_studio_solution_utils.dart';
 
+const String _invalidPlatformsErrorMessage = '''
+Did not find a valid `platforms` map, it could be that the project is still using the legacy format for plugins.
+See https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms for an instruction on how to specify supported platforms.
+''';
+
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
   final String renderedTemplate = globals.templateRenderer
     .renderString(template, context, htmlEscapeValues: false);
@@ -189,8 +194,8 @@ class Plugin {
     if (pluginConfig == null) {
       throwToolExit('Did not find valid `plugin` map in pubspec.yaml', exitCode: 2);
     }
-    if (pluginConfig['platforms'] == null) {
-      throwToolExit('Did not find valid `platforms` map in pubspec.yaml', exitCode: 2);
+    if (pluginConfig['platforms'] == null || pluginConfig['platforms'] is! YamlMap) {
+      throwToolExit(_invalidPlatformsErrorMessage, exitCode: 2);
     }
 
     return pluginConfig['platforms'] as YamlMap;
@@ -261,12 +266,7 @@ class Plugin {
         }
       }
       if (index == -1) {
-        throwToolExit('''
-          The `platforms` key is not found in the pubspec.yaml.
-          If your plugin still uses the old "plugin" format in the pubspec.yaml,
-          please migrate to the new format with the instruction here:
-          https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
-          ''', exitCode: 2);
+        throwToolExit(_invalidPlatformsErrorMessage, exitCode: 2);
         }
       if (fakePlatformIndex != -1) {
         // If the plugin was generated without specifying a platform,

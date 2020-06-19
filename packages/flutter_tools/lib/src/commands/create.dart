@@ -28,6 +28,22 @@ import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 
+const List<String> _availablePlatforms = <String>[
+          'ios',
+          'android',
+          'windows',
+          'linux',
+          'macos',
+        ];
+
+const String _noPlatformsErrorMessage =
+        '''
+You have generated a new plugin project without
+specifying the `--platforms` flag. A plugin project supports no platforms is generated.
+To add platforms, run `flutter create -t plugin --platforms <platforms> .` under the same
+directory. You can also find a detailed instruction on how to add platforms in the `pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
+        ''';
+
 class CreateCommand extends FlutterCommand {
   CreateCommand() {
     _addPlatformsOptions();
@@ -323,11 +339,11 @@ class CreateCommand extends FlutterCommand {
     final List<String> platforms = stringsArg('platforms');
     // `--platforms` does not support module and package.
     if (argResults.wasParsed('platforms') && (generateModule || generatePackage)) {
-        final String template = generateModule?'module':'package';
-        throwToolExit(
-          'The "--platforms" argument is not supported in $template template. please remove the argument and try again.',
-          exitCode: 2
-        );
+      final String template = generateModule? 'module': 'package';
+      throwToolExit(
+        'The "--platforms" argument is not supported in $template template. please remove the argument and try again.',
+        exitCode: 2
+      );
     } else if (platforms == null || platforms.isEmpty) {
       throwToolExit('Must specify at least one platform using --platforms',
           exitCode: 2);
@@ -435,13 +451,7 @@ class CreateCommand extends FlutterCommand {
         // Let them know a summary of the state of their tooling.
         await globals.doctor.summary();
         final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
-        String platformsString = '';
-        for (int i = 0; i < platforms.length; i++) {
-          if (i != 0) {
-            platformsString += ', ';
-          }
-          platformsString += platforms[i];
-        }
+        final String platformsString = platforms.join(', ');
         globals.printStatus('''
 In order to run your $application, type:
 
@@ -503,25 +513,11 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     argParser.addMultiOption('platforms',
         help: 'the platforms supported by this project.'
           'This argument only works when the --template is set to app or plugin.'
-          'Respective folders will be generated in the target project.'
+          'Platform folders(android/) will be generated in the target project.'
           'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform.'
-          'When adding windows, linux or macos platforms, the platform feature has to be enable. Otherwise it would be a no-op.'
-          'To enable desktop features, run `flutter config --enable-<desktopName>-desktop.'
-          'For example, to enable for macos, run `flutter config --enable-macos-desktop.',
-        defaultsTo: <String>[
-          'ios',
-          'android',
-          'windows',
-          'linux',
-          'macos',
-        ],
-        allowed: <String>[
-          'ios',
-          'android',
-          'windows',
-          'linux',
-          'macos',
-        ]);
+          'Adding desktop platforms requires the corresponding desktop config setting to be enabled.',
+        defaultsTo: _availablePlatforms,
+        allowed: _availablePlatforms);
   }
 
   Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
@@ -562,18 +558,18 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
   Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     // Plugin doesn't create any platform by default
-    templateContext['ios'] = false;
-    templateContext['android'] = false;
-    templateContext['web'] = false;
-    templateContext['linux'] = false;
-    templateContext['macos'] = false;
-    templateContext['windows'] = false;
     if (argResults.wasParsed('platforms')) {
-      final List<String> platforms = stringsArg('platforms');
-      _updateTemplateContextWithPlatforms(templateContext, platforms);
       templateContext['no_platforms'] = false;
     } else {
+      // If the user didn't explicitly declare the platforms, we don't generate any platforms.
+      templateContext['ios'] = false;
+      templateContext['android'] = false;
+      templateContext['web'] = false;
+      templateContext['linux'] = false;
+      templateContext['macos'] = false;
+      templateContext['windows'] = false;
       templateContext['no_platforms'] = true;
+      globals.printError(_noPlatformsErrorMessage);
     }
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
@@ -581,16 +577,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         : 'A new flutter plugin project.';
     templateContext['description'] = description;
     generatedCount += await _renderTemplate('plugin', directory, templateContext, overwrite: overwrite);
-    if (!argResults.wasParsed('platforms')) {
-        const String noPlatformsErrorMessage =
-        '''
-You have generated a new plugin project without
-specifying the `--platforms` flag. A plugin project supports no platforms is generated.
-To add platforms, run `flutter create -t plugin --platforms <platforms> .` under the same
-directory. You can also find a detailed instruction on how to add platforms in the `pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
-        ''';
-        globals.printError(noPlatformsErrorMessage);
-    }
+
     if (boolArg('pub')) {
       await pub.get(
         context: PubContext.createPlugin,
@@ -646,16 +633,6 @@ directory. You can also find a detailed instruction on how to add platforms in t
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
     }
     return generatedCount;
-  }
-
-  void _updateTemplateContextWithPlatforms(Map<String, dynamic> context, List<String> platforms) {
-    for (final String platform in platforms) {
-      context[platform] = true;
-    }
-    context['web'] = context['web'] as bool && featureFlags.isWebEnabled;
-    context['linux'] = context['linux'] as bool && featureFlags.isLinuxEnabled;
-    context['macos'] = context['macos'] as bool && featureFlags.isMacOSEnabled;
-    context['windows'] = context['windows'] as bool && featureFlags.isWindowsEnabled;
   }
 
   // Takes an application template and replaces the main.dart with one from the
