@@ -12,7 +12,7 @@ import '../material.dart';
 import '../text_theme.dart';
 import '../theme.dart';
 
-// This is an internal implementation file. Even though there are public
+// NOTE: This is an internal implementation file. Even though there are public
 // classes and functions defined here, they are only meant to be used by the
 // date picker implementation and are not exported as part of the Material library.
 // See pickers.dart for exactly what is considered part of the public API.

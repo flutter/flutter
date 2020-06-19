@@ -55,42 +55,6 @@ void test10() { }
 
 @Deprecated(
   'URLs are not required. '
-  'This feature was deprecated after v1.0.0.'
+  'This feature was deprecated after v2.0.0.'
 )
 void test11() { }
-
-@Deprecated(
-  'Version number test (should fail). '
-  'This feature was deprecated after v1.19.0.'
-)
-void test12() { }
-
-@Deprecated(
-  'Version number test (should fail). '
-  'This feature was deprecated after v1.20.0.'
-)
-void test13() { }
-
-@Deprecated(
-  'Version number test (should fail). '
-  'This feature was deprecated after v1.21.0.'
-)
-void test14() { }
-
-@Deprecated(
-  'Version number test (should fail). '
-  'This feature was deprecated after v3.1.0.'
-)
-void test15() { }
-
-@Deprecated(
-  'Version number test (should be fine). '
-  'This feature was deprecated after v0.1.0.'
-)
-void test16() { }
-
-@Deprecated(
-  'Version number test (should be fine). '
-  'This feature was deprecated after v1.20.0-1.0.pre.'
-)
-void test17() { }

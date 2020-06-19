@@ -29,9 +29,9 @@ const double _maxCalendarWidthPortrait = 480.0;
 
 /// Displays a scrollable calendar grid that allows a user to select a range
 /// of dates.
-//
-// This is not publicly exported (see pickers.dart), as it is an
-// internal component used by [showDateRangePicker].
+///
+/// Note: this is not publicly exported (see pickers.dart), as it is an
+/// internal component used by [showDateRangePicker].
 class CalendarDateRangePicker extends StatefulWidget {
   /// Creates a scrollable calendar grid for picking date ranges.
   CalendarDateRangePicker({

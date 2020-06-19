@@ -9,10 +9,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  const TextEditingValue testOldValue = TextEditingValue();
+  TextEditingValue testOldValue;
   TextEditingValue testNewValue;
 
   test('withFunction wraps formatting function', () {
+    testOldValue = const TextEditingValue();
     testNewValue = const TextEditingValue();
 
     TextEditingValue calledOldValue;
@@ -46,62 +47,7 @@ void main() {
       );
     });
 
-    test('test filtering formatter example', () {
-      const TextEditingValue intoTheWoods = TextEditingValue(text: 'Into the Woods');
-      expect(
-        FilteringTextInputFormatter('o', allow: true, replacementString: '*').formatEditUpdate(testOldValue, intoTheWoods),
-        const TextEditingValue(text: '*o*oo*'),
-      );
-      expect(
-        FilteringTextInputFormatter('o', allow: false, replacementString: '*').formatEditUpdate(testOldValue, intoTheWoods),
-        const TextEditingValue(text: 'Int* the W**ds'),
-      );
-      expect(
-        FilteringTextInputFormatter(RegExp('o+'), allow: true, replacementString: '*').formatEditUpdate(testOldValue, intoTheWoods),
-        const TextEditingValue(text: '*o*oo*'),
-      );
-      expect(
-        FilteringTextInputFormatter(RegExp('o+'), allow: false, replacementString: '*').formatEditUpdate(testOldValue, intoTheWoods),
-        const TextEditingValue(text: 'Int* the W*ds'),
-      );
-
-      const TextEditingValue selectedIntoTheWoods = TextEditingValue(text: 'Into the Woods', selection: TextSelection(baseOffset: 11, extentOffset: 14));
-      expect(
-        FilteringTextInputFormatter('o', allow: true, replacementString: '*').formatEditUpdate(testOldValue, selectedIntoTheWoods),
-        const TextEditingValue(text: '*o*oo*', selection: TextSelection(baseOffset: 4, extentOffset: 6)),
-      );
-      expect(
-        FilteringTextInputFormatter('o', allow: false, replacementString: '*').formatEditUpdate(testOldValue, selectedIntoTheWoods),
-        const TextEditingValue(text: 'Int* the W**ds', selection: TextSelection(baseOffset: 11, extentOffset: 14)),
-      );
-      expect(
-        FilteringTextInputFormatter(RegExp('o+'), allow: true, replacementString: '*').formatEditUpdate(testOldValue, selectedIntoTheWoods),
-        const TextEditingValue(text: '*o*oo*', selection: TextSelection(baseOffset: 4, extentOffset: 6)),
-      );
-      expect(
-        FilteringTextInputFormatter(RegExp('o+'), allow: false, replacementString: '*').formatEditUpdate(testOldValue, selectedIntoTheWoods),
-        const TextEditingValue(text: 'Int* the W**ds', selection: TextSelection(baseOffset: 11, extentOffset: 14)),
-      );
-    });
-
-    test('test filtering formatter, deny mode', () {
-      final TextEditingValue actualValue =
-          FilteringTextInputFormatter.deny(RegExp(r'[a-z]'))
-              .formatEditUpdate(testOldValue, testNewValue);
-
-      // Expecting
-      // 1(23
-      // 4)56
-      expect(actualValue, const TextEditingValue(
-        text: '123\n456',
-        selection: TextSelection(
-          baseOffset: 1,
-          extentOffset: 5,
-        ),
-      ));
-    });
-
-    test('test filtering formatter, deny mode (deprecated names)', () {
+    test('test blacklisting formatter', () {
       final TextEditingValue actualValue =
           BlacklistingTextInputFormatter(RegExp(r'[a-z]'))
               .formatEditUpdate(testOldValue, testNewValue);
@@ -120,22 +66,6 @@ void main() {
 
     test('test single line formatter', () {
       final TextEditingValue actualValue =
-          FilteringTextInputFormatter.singleLineFormatter
-              .formatEditUpdate(testOldValue, testNewValue);
-
-      // Expecting
-      // a1b(2c3d4)e5f6
-      expect(actualValue, const TextEditingValue(
-        text: 'a1b2c3d4e5f6',
-        selection: TextSelection(
-          baseOffset: 3,
-          extentOffset: 8,
-        ),
-      ));
-    });
-
-    test('test single line formatter (deprecated names)', () {
-      final TextEditingValue actualValue =
           BlacklistingTextInputFormatter.singleLineFormatter
               .formatEditUpdate(testOldValue, testNewValue);
 
@@ -150,23 +80,7 @@ void main() {
       ));
     });
 
-    test('test filtering formatter, allow mode', () {
-      final TextEditingValue actualValue =
-          FilteringTextInputFormatter.allow(RegExp(r'[a-c]'))
-              .formatEditUpdate(testOldValue, testNewValue);
-
-      // Expecting
-      // ab(c)
-      expect(actualValue, const TextEditingValue(
-        text: 'abc',
-        selection: TextSelection(
-          baseOffset: 2,
-          extentOffset: 3,
-        ),
-      ));
-    });
-
-    test('test filtering formatter, allow mode (deprecated names)', () {
+    test('test whitelisting formatter', () {
       final TextEditingValue actualValue =
           WhitelistingTextInputFormatter(RegExp(r'[a-c]'))
               .formatEditUpdate(testOldValue, testNewValue);
@@ -183,22 +97,6 @@ void main() {
     });
 
     test('test digits only formatter', () {
-      final TextEditingValue actualValue =
-          FilteringTextInputFormatter.digitsOnly
-              .formatEditUpdate(testOldValue, testNewValue);
-
-      // Expecting
-      // 1(234)56
-      expect(actualValue, const TextEditingValue(
-        text: '123456',
-        selection: TextSelection(
-          baseOffset: 1,
-          extentOffset: 4,
-        ),
-      ));
-    });
-
-    test('test digits only formatter (deprecated names)', () {
       final TextEditingValue actualValue =
           WhitelistingTextInputFormatter.digitsOnly
               .formatEditUpdate(testOldValue, testNewValue);
@@ -348,5 +246,6 @@ void main() {
         ),
       ));
     });
+
   });
 }

@@ -5709,17 +5709,17 @@ class Listener extends StatelessWidget {
       'Use MouseRegion.onEnter instead. See MouseRegion.opaque for behavioral difference. '
       'This feature was deprecated after v1.10.14.'
     )
-    this.onPointerEnter,
+    this.onPointerEnter, // ignore: deprecated_member_use_from_same_package
     @Deprecated(
       'Use MouseRegion.onExit instead. See MouseRegion.opaque for behavioral difference. '
       'This feature was deprecated after v1.10.14.'
     )
-    this.onPointerExit,
+    this.onPointerExit, // ignore: deprecated_member_use_from_same_package
     @Deprecated(
       'Use MouseRegion.onHover instead. See MouseRegion.opaque for behavioral difference. '
       'This feature was deprecated after v1.10.14.'
     )
-    this.onPointerHover,
+    this.onPointerHover, // ignore: deprecated_member_use_from_same_package
     this.onPointerUp,
     this.onPointerCancel,
     this.onPointerSignal,
