@@ -9,7 +9,6 @@ import 'package:package_config/package_config.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
-import '../base/terminal.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../codegen.dart';
@@ -71,11 +70,12 @@ class TestCompiler {
 
   ResidentCompiler compiler;
   File outputDill;
-  // Whether to report compiler messages.
-  bool _suppressOutput = false;
 
   Future<String> compile(Uri mainDart) {
     final Completer<String> completer = Completer<String>();
+    if (compilerController.isClosed) {
+      return null;
+    }
     compilerController.add(_CompilationRequest(mainDart, completer));
     return completer.future;
   }
@@ -99,9 +99,11 @@ class TestCompiler {
   Future<ResidentCompiler> createCompiler() async {
     final ResidentCompiler residentCompiler = ResidentCompiler(
       globals.artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      artifacts: globals.artifacts,
+      logger: globals.logger,
+      processManager: globals.processManager,
       buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation,
-      compilerMessageConsumer: _reportCompilerMessage,
       initializeFromDill: testFilePath,
       unsafePackageSerialization: false,
       dartDefines: const <String>[],
@@ -129,10 +131,28 @@ class TestCompiler {
     if (!isEmpty) {
       return;
     }
-    _packageConfig ??= await loadPackageConfigWithLogging(
-      globals.fs.file(globalPackagesPath),
-      logger: globals.logger,
-    );
+    if (_packageConfig == null) {
+      _packageConfig ??= await loadPackageConfigWithLogging(
+        globals.fs.file(globalPackagesPath),
+        logger: globals.logger,
+      );
+      // Compilation will fail if there is no flutter_test dependency, since
+      // this library is imported by the generated entrypoint script.
+      if (_packageConfig['flutter_test'] == null) {
+        globals.printError(
+          '\n'
+          'Error: cannot run without a dependency on "package:flutter_test". '
+          'Ensure the following lines are present in your pubspec.yaml:'
+          '\n\n'
+          'dev_dependencies:\n'
+          '  flutter_test:\n'
+          '    sdk: flutter\n',
+        );
+        request.result.complete(null);
+        await compilerController.close();
+        return;
+      }
+    }
     while (compilationQueue.isNotEmpty) {
       final _CompilationRequest request = compilationQueue.first;
       globals.printTrace('Compiling ${request.mainUri}');
@@ -142,7 +162,6 @@ class TestCompiler {
         compiler = await createCompiler();
         firstCompile = true;
       }
-      _suppressOutput = false;
       final CompilerOutput compilerOutput = await compiler.recompile(
         request.mainUri,
         <Uri>[request.mainUri],
@@ -178,21 +197,5 @@ class TestCompiler {
       // Only remove now when we finished processing the element
       compilationQueue.removeAt(0);
     }
-  }
-
-  void _reportCompilerMessage(String message, {bool emphasis, TerminalColor color}) {
-    if (_suppressOutput) {
-      return;
-    }
-    if (message.startsWith("Error: Could not resolve the package 'flutter_test'")) {
-      globals.printTrace(message);
-      globals.printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n',
-        emphasis: emphasis,
-        color: color,
-      );
-      _suppressOutput = true;
-      return;
-    }
-    globals.printError(message);
   }
 }

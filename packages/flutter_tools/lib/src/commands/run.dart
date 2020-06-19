@@ -66,7 +66,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     usesIsolateFilterOption(hide: !verboseHelp);
-    addNullSafetyModeOptions();
+    addNullSafetyModeOptions(hide: !verboseHelp);
     usesDeviceUserOption();
   }
 
@@ -417,7 +417,7 @@ class RunCommand extends RunCommandBase {
         stdoutCommandResponse,
         notifyingLogger: (globals.logger is NotifyingLogger)
           ? globals.logger as NotifyingLogger
-          : NotifyingLogger(verbose: globals.logger.isVerbose),
+          : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
         logToStdout: true,
       );
       AppInstance app;

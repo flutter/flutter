@@ -463,7 +463,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
     );
 
     final Color actionsForegroundColor = CupertinoDynamicColor.resolve(
-      widget.actionsForegroundColor, // ignore: deprecated_member_use_from_same_package
+      widget.actionsForegroundColor,
       context,
     );
     if (!widget.transitionBetweenRoutes || !_isTransitionable(context)) {
@@ -694,8 +694,8 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   @override
   Widget build(BuildContext context) {
     // Lint ignore to maintain backward compatibility.
-    final Color actionsForegroundColor = CupertinoDynamicColor.resolve(widget.actionsForegroundColor, context)  // ignore: deprecated_member_use_from_same_package
-                                       ?? CupertinoTheme.of(context).primaryColor;
+    final Color actionsForegroundColor = CupertinoDynamicColor.resolve(widget.actionsForegroundColor, context)
+                                      ?? CupertinoTheme.of(context).primaryColor;
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,

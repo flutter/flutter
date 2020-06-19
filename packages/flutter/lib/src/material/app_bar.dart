@@ -26,6 +26,7 @@ import 'text_theme.dart';
 import 'theme.dart';
 
 const double _kLeadingWidth = kToolbarHeight; // So the leading button is square.
+const double _kMaxTitleTextScaleFactor = 1.34; // TODO(perc): Add link to Material spec when available, https://github.com/flutter/flutter/issues/58769.
 
 // Bottom justify the kToolbarHeight child which may overflow the top.
 class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
@@ -565,6 +566,25 @@ class _AppBarState extends State<AppBar> {
         overflow: TextOverflow.ellipsis,
         child: title,
       );
+
+      // Set maximum text scale factor to [_kMaxTitleTextScaleFactor] for the
+      // title to keep the visual hierarchy the same even with larger font
+      // sizes. To opt out, wrap the [title] widget in a [MediaQuery] widget
+      // with [MediaQueryData.textScaleFactor] set to
+      // `MediaQuery.textScaleFactorOf(context)`.
+      // ignore: deprecated_member_use_from_same_package
+      if (appBarTheme?.shouldCapTextScaleForTitle == true) {
+        final MediaQueryData mediaQueryData = MediaQuery.of(context);
+        title = MediaQuery(
+          data: mediaQueryData.copyWith(
+            textScaleFactor: math.min(
+              mediaQueryData.textScaleFactor,
+              _kMaxTitleTextScaleFactor,
+            ),
+          ),
+          child: title,
+        );
+      }
     }
 
     Widget actions;
