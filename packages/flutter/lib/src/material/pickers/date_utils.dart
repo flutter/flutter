@@ -4,10 +4,9 @@
 
 // @dart = 2.8
 
-
 // Common date utility functions used by the date picker implementation
 
-// NOTE: This is an internal implementation file. Even though there are public
+// This is an internal implementation file. Even though there are public
 // classes and functions defined here, they are only meant to be used by the
 // date picker implementation and are not exported as part of the Material library.
 // See pickers.dart for exactly what is considered part of the public API.

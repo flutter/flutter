@@ -21,7 +21,7 @@ import '../theme.dart';
 
 import 'date_picker_common.dart';
 
-// NOTE: this is the original implementation for the Material Date Picker.
+// This is the original implementation for the Material Date Picker.
 // These classes are deprecated and the whole file can be removed after
 // this has been on stable for long enough for people to migrate to the new
 // CalendarDatePicker (if needed, as showDatePicker has already been migrated
@@ -406,7 +406,6 @@ class MonthPicker extends StatefulWidget {
   _MonthPickerState createState() => _MonthPickerState();
 }
 
-// ignore: deprecated_member_use_from_same_package
 class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStateMixin {
   static final Animatable<double> _chevronOpacityTween = Tween<double>(begin: 1.0, end: 0.0)
     .chain(CurveTween(curve: Curves.easeInOut));
@@ -428,7 +427,6 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
   }
 
   @override
-  // ignore: deprecated_member_use_from_same_package
   void didUpdateWidget(MonthPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.selectedDate != oldWidget.selectedDate) {
@@ -479,7 +477,6 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
 
   Widget _buildItems(BuildContext context, int index) {
     final DateTime month = _addMonthsToMonthDate(widget.firstDate, index);
-    // ignore: deprecated_member_use_from_same_package
     return DayPicker(
       key: ValueKey<DateTime>(month),
       selectedDate: widget.selectedDate,
@@ -675,7 +672,6 @@ class YearPicker extends StatefulWidget {
   _YearPickerState createState() => _YearPickerState();
 }
 
-// ignore: deprecated_member_use_from_same_package
 class _YearPickerState extends State<YearPicker> {
   static const double _itemExtent = 50.0;
   ScrollController scrollController;
