@@ -218,7 +218,7 @@ class Plugin {
     try {
       // The format of the updated pubspec might not be preserved.
       final List<String> platformsToAdd = List<String>.from(platforms);
-      final YamlMap platformsMap = manifest.supportedPlatforms as YamlMap;
+      final YamlMap platformsMap = YamlMap.wrap(manifest.supportedPlatforms);
       final List<String> errors = _validateMultiPlatformYaml(platformsMap);
       if (errors.isNotEmpty) {
         throwToolExit('Invalid plugin specification: \n${errors.join('\n')}');

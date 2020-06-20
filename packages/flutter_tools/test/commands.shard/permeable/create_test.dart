@@ -1559,7 +1559,7 @@ void main() {
 
     expect(projectDir.childDirectory('ios').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
-    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: [
+    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: <String>[
       'ios',
     ], pluginClass: 'FlutterProjectPlugin',
     unexpectedPlatforms: <String>['some_platform']);

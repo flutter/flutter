@@ -15,13 +15,12 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:yaml/yaml.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
-import '../src/pubspec_schema.dart';
 import '../src/context.dart';
+import '../src/pubspec_schema.dart';
 
 void main() {
   group('plugins', () {
@@ -1326,24 +1325,6 @@ flutter:
       void _createPubspecFile(String yamlString) {
         projectDir.childFile('pubspec.yaml')..createSync(recursive: true)..writeAsStringSync(yamlString);
       }
-
-      test('get platforms map correctly from a pubspec.yaml', () async {
-        final YamlMap pubspecMap = loadYaml(_pluginYaml) as YamlMap;
-        final YamlMap platformsMap = Plugin.getPlatformsYamlMap(pubspecMap);
-        expect(platformsMap['ios'], isNotNull);
-        expect(platformsMap['ios']['pluginClass'], 'SomePlugin');
-        expect(platformsMap['macos'], isNotNull);
-        expect(platformsMap['macos']['pluginClass'], 'SomePlugin');
-        expect(platformsMap['windows'], isNotNull);
-        expect(platformsMap['windows']['pluginClass'], 'SomePlugin');
-        expect(platformsMap['linux'], isNotNull);
-        expect(platformsMap['linux']['pluginClass'], 'SomePlugin');
-        expect(platformsMap['android'], isNotNull);
-        expect(platformsMap['android']['pluginClass'], 'SomePlugin');
-        expect(platformsMap['android']['package'], 'AndroidPackage');
-        expect(platformsMap['web'], isNotNull);
-        expect(platformsMap['web']['pluginClass'], 'SomePlugin');
-      });
 
       test('validatePubspecForPlugin works', () async {
         _createPubspecFile(_pluginYaml);
