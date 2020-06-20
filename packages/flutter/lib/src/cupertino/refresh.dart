@@ -143,22 +143,9 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
       parentUsesSize: true,
     );
     if (active) {
-      // The _CupertinoActivityIndicatorPainter performs an internal translation so that
-      // its painting is always vertically centered based on its height. However, the
-      // requirement here is that the top of the activity indicator (not the center) is
-      // pinned to the top of the sliver, so we need to account for the internal adjustment
-      // here taking into account that the child's height will change as the user drags down.
-      final double internalPainterDelta = _activityIndicatorRadius - (min(child.size.height / 2.0, _activityIndicatorRadius));
-
-      // The standard iOS pull-to-refresh layout includes a margin above the activity indicator.
-      // A subtle consequence of that is that in the very early stages of the drag, a portion
-      // the first tick is actually drawn over the top of the content being dragged down. To
-      // achieve the same effect, we apply the margin to the paintOrigin.
-      const double topMargin = 16.0;
-
       geometry = SliverGeometry(
         scrollExtent: layoutExtent,
-        paintOrigin: topMargin + internalPainterDelta - overscrolledExtent - constraints.scrollOffset,
+        paintOrigin: -overscrolledExtent - constraints.scrollOffset,
         paintExtent: max(
           // Check child size (which can come from overscroll) because
           // layoutExtent may be zero. Check layoutExtent also since even
@@ -394,9 +381,26 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     }
 
     final double percentageComplete = min((pulledExtent - dragThreshold) / (refreshTriggerPullDistance - dragThreshold), 1.0);
-    return Align(
-      alignment: Alignment.topCenter,
-      child: _buildIndicatorForRefreshState(refreshState, _activityIndicatorRadius, percentageComplete),
+
+    // Place the indicator at the top of the sliver that opens up. Note that we're using
+    // a Stack/Positioned widget because the CupertinoActivityIndicator does some internal
+    // translations based on the current size (which grows as the user drags) that makes
+    // Padding calculations difficult. Rather than be reliant on the internal implementation
+    // of the activity indicator, the Positioned widget allows us to be explicit where the
+    // widget gets placed. Also note that the indicator should appear over the top of the
+    // dragged widget, hence the use of Overflow.visible.
+    return Center(
+      child: Stack(
+        overflow: Overflow.visible,
+        children: <Widget>[
+          Positioned(
+            top: dragThreshold,
+            left: 0,
+            right: 0,
+            child: _buildIndicatorForRefreshState(refreshState, _activityIndicatorRadius, percentageComplete),
+          ),
+        ],
+      ),
     );
   }
 
