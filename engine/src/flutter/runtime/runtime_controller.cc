@@ -131,8 +131,6 @@ std::unique_ptr<RuntimeController> RuntimeController::Clone() const {
 bool RuntimeController::FlushRuntimeStateToIsolate() {
   return SetViewportMetrics(window_data_.viewport_metrics) &&
          SetLocales(window_data_.locale_data) &&
-         SetPlatformResolvedLocale(
-             window_data_.platform_resolved_locale_data) &&
          SetSemanticsEnabled(window_data_.semantics_enabled) &&
          SetAccessibilityFeatures(window_data_.accessibility_feature_flags_) &&
          SetUserSettingsData(window_data_.user_settings_data) &&
@@ -155,18 +153,6 @@ bool RuntimeController::SetLocales(
 
   if (auto* window = GetWindowIfAvailable()) {
     window->UpdateLocales(locale_data);
-    return true;
-  }
-
-  return false;
-}
-
-bool RuntimeController::SetPlatformResolvedLocale(
-    const std::vector<std::string>& locale_data) {
-  window_data_.platform_resolved_locale_data = locale_data;
-
-  if (auto* window = GetWindowIfAvailable()) {
-    window->UpdatePlatformResolvedLocale(locale_data);
     return true;
   }
 

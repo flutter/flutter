@@ -33,10 +33,6 @@ FLUTTER_ASSERT_ARC
   XCTAssertTrue([textInputSemanticsObject waitForExistenceWithTimeout:timeout]);
 
   [textInputSemanticsObject tap];
-
-  // [NSLocale currentLocale] always includes a country code.
-  textInputSemanticsObject = [self.application.textFields matchingIdentifier:@"en_US"].element;
-  XCTAssertTrue([textInputSemanticsObject waitForExistenceWithTimeout:timeout]);
 }
 
 @end
