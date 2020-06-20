@@ -561,7 +561,7 @@ class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeB
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        canvas.drawPath(shape.getOuterPath(rect, textDirection: textDirection), side.toPaint());
+        canvas.drawPath(shape.getOuterPath(rect.deflate(side.width / 2.0), textDirection: textDirection), side.toPaint());
     }
   }
 

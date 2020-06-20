@@ -48,20 +48,21 @@ enum DayPeriod {
 ///  * [DateTime], which represents date and time, and is subject to eras and
 ///    time zones.
 @immutable
-class TimeOfDay {
+class TimeOfDay implements Comparable<TimeOfDay> {
   /// Creates a time of day.
   ///
   /// The [hour] argument must be between 0 and 23, inclusive. The [minute]
   /// argument must be between 0 and 59, inclusive.
-  const TimeOfDay({ @required this.hour, @required this.minute });
+  const TimeOfDay({ @required this.hour, @required this.minute })
+      : assert(hour != null && hour >= 0 && hour < hoursPerDay),
+        assert(minute != null && minute >= 0 && minute < minutesPerHour);
 
   /// Creates a time of day based on the given time.
   ///
   /// The [hour] is set to the time's hour and the [minute] is set to the time's
   /// minute in the timezone of the given [DateTime].
   TimeOfDay.fromDateTime(DateTime time)
-    : hour = time.hour,
-      minute = time.minute;
+    : this(hour: time.hour, minute: time.minute);
 
   /// Creates a time of day based on the current time.
   ///
@@ -80,8 +81,6 @@ class TimeOfDay {
 
   /// Returns a new TimeOfDay with the hour and/or minute replaced.
   TimeOfDay replacing({ int hour, int minute }) {
-    assert(hour == null || (hour >= 0 && hour < hoursPerDay));
-    assert(minute == null || (minute >= 0 && minute < minutesPerHour));
     return TimeOfDay(hour: hour ?? this.hour, minute: minute ?? this.minute);
   }
 
@@ -135,6 +134,19 @@ class TimeOfDay {
     final String minuteLabel = _addLeadingZeroIfNeeded(minute);
 
     return '$TimeOfDay($hourLabel:$minuteLabel)';
+  }
+
+  static int _inMinutesOf(TimeOfDay time) => minutesPerHour * time.hour + time.minute;
+
+  @override
+  int compareTo(TimeOfDay other) {
+    if (other == null) {
+      return 1;
+    }
+    if (other == this) {
+      return 0;
+    }
+    return _inMinutesOf(this).compareTo(_inMinutesOf(other));
   }
 }
 
