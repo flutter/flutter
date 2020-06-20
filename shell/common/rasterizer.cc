@@ -391,9 +391,9 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
 
   SkCanvas* embedder_root_canvas = nullptr;
   if (external_view_embedder != nullptr) {
-    external_view_embedder->BeginFrame(layer_tree.frame_size(),
-                                       surface_->GetContext(),
-                                       layer_tree.device_pixel_ratio());
+    external_view_embedder->BeginFrame(
+        layer_tree.frame_size(), surface_->GetContext(),
+        layer_tree.device_pixel_ratio(), raster_thread_merger_);
     embedder_root_canvas = external_view_embedder->GetRootCanvas();
   }
 

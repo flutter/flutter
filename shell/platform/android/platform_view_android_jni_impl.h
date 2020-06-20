@@ -66,7 +66,8 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
 
   void FlutterViewEndFrame() override;
 
-  void FlutterViewCreateOverlaySurface() override;
+  std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
+  FlutterViewCreateOverlaySurface() override;
 
   std::unique_ptr<std::vector<std::string>>
   FlutterViewComputePlatformResolvedLocale(

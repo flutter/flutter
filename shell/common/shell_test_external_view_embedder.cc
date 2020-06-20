@@ -6,9 +6,11 @@ namespace flutter {
 void ShellTestExternalViewEmbedder::CancelFrame() {}
 
 // |ExternalViewEmbedder|
-void ShellTestExternalViewEmbedder::BeginFrame(SkISize frame_size,
-                                               GrContext* context,
-                                               double device_pixel_ratio) {}
+void ShellTestExternalViewEmbedder::BeginFrame(
+    SkISize frame_size,
+    GrContext* context,
+    double device_pixel_ratio,
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {}
 
 // |ExternalViewEmbedder|
 void ShellTestExternalViewEmbedder::PrerollCompositeEmbeddedView(

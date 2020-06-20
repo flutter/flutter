@@ -92,12 +92,14 @@ TEST(RasterThreadMerger, IsNotOnRasterizingThread) {
 
   loop1->GetTaskRunner()->PostTask([&]() {
     ASSERT_FALSE(raster_thread_merger_->IsOnRasterizingThread());
+    ASSERT_TRUE(raster_thread_merger_->IsOnPlatformThread());
     ASSERT_EQ(fml::MessageLoop::GetCurrentTaskQueueId(), qid1);
     pre_merge.CountDown();
   });
 
   loop2->GetTaskRunner()->PostTask([&]() {
     ASSERT_TRUE(raster_thread_merger_->IsOnRasterizingThread());
+    ASSERT_FALSE(raster_thread_merger_->IsOnPlatformThread());
     ASSERT_EQ(fml::MessageLoop::GetCurrentTaskQueueId(), qid2);
     pre_merge.CountDown();
   });
@@ -108,6 +110,7 @@ TEST(RasterThreadMerger, IsNotOnRasterizingThread) {
 
   loop1->GetTaskRunner()->PostTask([&]() {
     ASSERT_TRUE(raster_thread_merger_->IsOnRasterizingThread());
+    ASSERT_TRUE(raster_thread_merger_->IsOnPlatformThread());
     ASSERT_EQ(fml::MessageLoop::GetCurrentTaskQueueId(), qid1);
     post_merge.CountDown();
   });
@@ -116,6 +119,7 @@ TEST(RasterThreadMerger, IsNotOnRasterizingThread) {
     // this will be false since this is going to be run
     // on loop1 really.
     ASSERT_TRUE(raster_thread_merger_->IsOnRasterizingThread());
+    ASSERT_TRUE(raster_thread_merger_->IsOnPlatformThread());
     ASSERT_EQ(fml::MessageLoop::GetCurrentTaskQueueId(), qid1);
     post_merge.CountDown();
   });
@@ -126,12 +130,14 @@ TEST(RasterThreadMerger, IsNotOnRasterizingThread) {
 
   loop1->GetTaskRunner()->PostTask([&]() {
     ASSERT_FALSE(raster_thread_merger_->IsOnRasterizingThread());
+    ASSERT_TRUE(raster_thread_merger_->IsOnPlatformThread());
     ASSERT_EQ(fml::MessageLoop::GetCurrentTaskQueueId(), qid1);
     post_unmerge.CountDown();
   });
 
   loop2->GetTaskRunner()->PostTask([&]() {
     ASSERT_TRUE(raster_thread_merger_->IsOnRasterizingThread());
+    ASSERT_FALSE(raster_thread_merger_->IsOnPlatformThread());
     ASSERT_EQ(fml::MessageLoop::GetCurrentTaskQueueId(), qid2);
     post_unmerge.CountDown();
   });

@@ -13,19 +13,22 @@ namespace flutter {
 
 AndroidSurfaceGL::AndroidSurfaceGL(
     std::shared_ptr<AndroidContext> android_context,
-    std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
-    : native_window_(nullptr),
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+    const AndroidSurface::Factory& surface_factory)
+    : external_view_embedder_(
+          std::make_unique<AndroidExternalViewEmbedder>(android_context,
+                                                        jni_facade,
+                                                        surface_factory)),
+      android_context_(
+          std::static_pointer_cast<AndroidContextGL>(android_context)),
+      native_window_(nullptr),
       onscreen_surface_(nullptr),
       offscreen_surface_(nullptr) {
-  android_context_ =
-      std::static_pointer_cast<AndroidContextGL>(android_context);
   // Acquire the offscreen surface.
   offscreen_surface_ = android_context_->CreateOffscreenSurface();
   if (!offscreen_surface_->IsValid()) {
     offscreen_surface_ = nullptr;
   }
-  external_view_embedder_ =
-      std::make_unique<AndroidExternalViewEmbedder>(jni_facade);
 }
 
 AndroidSurfaceGL::~AndroidSurfaceGL() = default;
