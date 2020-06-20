@@ -290,14 +290,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     final RenderBox box = context.findRenderObject() as RenderBox;
     final Offset target = box.localToGlobal(box.size.center(Offset.zero));
 
-    String tooltipString;
-    if (widget.message != null) {
-      tooltipString = widget.message;
-    } else {
-      final _RenderTooltipSemanticsWidget semanticsRenderObject =
-        _semanticsKey.currentContext.findRenderObject() as _RenderTooltipSemanticsWidget;
-      tooltipString = semanticsRenderObject.label;
-    }
+    final String tooltipString = widget.message
+       ?? (_semanticsKey.currentContext.findRenderObject() as _RenderTooltipSemanticsWidget).label
+       ?? '';
 
     // We create this widget outside of the overlay entry's builder to prevent
     // updated values from happening to leak into the overlay when the overlay
@@ -578,17 +573,6 @@ class _RenderTooltipSemanticsWidget extends RenderProxyBox {
   ) {
     super.assembleSemanticsNode(node, config, children);
     label = node.label;
-
-    bool isNullOrEmpty(String label) => label == null || label == '';
-
-    if (isNullOrEmpty(label)) {
-      for (final SemanticsNode child in children) {
-        if (!isNullOrEmpty(child.label)) {
-          label = child.label;
-          return;
-        }
-      }
-    }
   }
 
 

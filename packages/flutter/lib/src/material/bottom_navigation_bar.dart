@@ -464,49 +464,51 @@ class _BottomNavigationTile extends StatelessWidget {
       selected: selected,
       child: Stack(
         children: <Widget>[
-          InkResponse(
-            onTap: onTap,
-            mouseCursor: mouseCursor,
-            child: Padding(
-              padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  _TileIcon(
-                    colorTween: colorTween,
-                    animation: animation,
-                    iconSize: iconSize,
-                    selected: selected,
-                    item: item,
-                    selectedIconTheme: selectedIconTheme ?? bottomTheme.selectedIconTheme,
-                    unselectedIconTheme: unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
+          MergeSemantics(
+            child: Semantics(
+              container: true,
+              label: indexLabel,
+              child: Tooltip(
+                preferBelow: false,
+                excludeFromSemantics: true,
+                verticalOffset: selectedIconSize + selectedFontSize,
+                child: InkResponse(
+                  onTap: onTap,
+                  mouseCursor: mouseCursor,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        _TileIcon(
+                          colorTween: colorTween,
+                          animation: animation,
+                          iconSize: iconSize,
+                          selected: selected,
+                          item: item,
+                          selectedIconTheme: selectedIconTheme ?? bottomTheme.selectedIconTheme,
+                          unselectedIconTheme: unselectedIconTheme ?? bottomTheme.unselectedIconTheme,
+                        ),
+                        _Label(
+                          colorTween: colorTween,
+                          animation: animation,
+                          item: item,
+                          selectedLabelStyle: selectedLabelStyle ?? bottomTheme.selectedLabelStyle,
+                          unselectedLabelStyle: unselectedLabelStyle ?? bottomTheme.unselectedLabelStyle,
+                          showSelectedLabels: showSelectedLabels ?? bottomTheme.showUnselectedLabels,
+                          showUnselectedLabels: showUnselectedLabels ?? bottomTheme.showUnselectedLabels,
+                        ),
+                      ],
+                    ),
                   ),
-                  _Label(
-                    colorTween: colorTween,
-                    animation: animation,
-                    item: item,
-                    selectedLabelStyle: selectedLabelStyle ?? bottomTheme.selectedLabelStyle,
-                    unselectedLabelStyle: unselectedLabelStyle ?? bottomTheme.unselectedLabelStyle,
-                    showSelectedLabels: showSelectedLabels ?? bottomTheme.showUnselectedLabels,
-                    showUnselectedLabels: showUnselectedLabels ?? bottomTheme.showUnselectedLabels,
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-          Semantics(
-            label: indexLabel,
-          ),
         ],
       ),
-    );
-
-    result = Tooltip(
-      preferBelow: false,
-      verticalOffset: selectedIconSize + selectedFontSize,
-      child: result,
     );
 
     return Expanded(
