@@ -551,19 +551,6 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     print('Device chosen: $_workingDevice');
   }
 
-  // Returns a colon-separated environment variable that contains the paths
-  // of linked libraries for idevice_id
-  Map<String, String> get _ideviceIdEnvironment {
-    final String libPath = const <String>[
-      'libimobiledevice',
-      'usbmuxd',
-      'libplist',
-      'openssl',
-      'ios-deploy',
-    ].map((String packageName) => path.join(getArtifactPath(), packageName)).join(':');
-    return <String, String>{'DYLD_LIBRARY_PATH': libPath};
-  }
-
   @override
   Future<List<String>> discoverDevices() async {
     final List<dynamic> results = json.decode(await eval(
