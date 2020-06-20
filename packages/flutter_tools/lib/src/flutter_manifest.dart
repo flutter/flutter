@@ -164,6 +164,11 @@ class FlutterManifest {
       return _flutterDescriptor['module']['androidPackage'] as String;
     }
     if (supportedPlatforms == null) {
+      // Legacy format
+      if (isPlugin) {
+        final YamlMap plugin = _flutterDescriptor['plugin'] as YamlMap;
+        return plugin['androidPackage'] as String;
+      }
       return null;
     }
     if (supportedPlatforms.containsKey('android')) {
@@ -181,6 +186,9 @@ class FlutterManifest {
     return null;
   }
 
+  /// Gets the supported platforms. This only supports the new `platforms` format.
+  ///
+  /// If the plugin uses the legacy pubspec format, this method returns null.
   Map<String, dynamic> get supportedPlatforms {
     if (isPlugin) {
       final YamlMap plugin = _flutterDescriptor['plugin'] as YamlMap;
