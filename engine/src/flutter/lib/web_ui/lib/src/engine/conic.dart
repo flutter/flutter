@@ -33,7 +33,7 @@ class Conic {
 
     // Split conic into quads, writes quad coordinates into [_pointList] and
     // returns number of quads.
-    assert(subdivideCount > 0);
+    assert(subdivideCount >= 0 && subdivideCount <= _maxSubdivisionCount);
     int quadCount = 1 << subdivideCount;
     bool skipSubdivide = false;
     pointList.add(ui.Offset(p0x, p0y));
