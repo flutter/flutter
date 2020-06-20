@@ -5,10 +5,9 @@
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:flutter_tools/src/plugins.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:test/test.dart';
+import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
 import 'package:yaml/yaml.dart';
 
 /// Writes a schemaData used for validating pubspec.yaml files when parsing
@@ -30,9 +29,8 @@ void writeEmptySchemaFile(FileSystem filesystem) {
 
 /// Check if the pubspec.yaml file under the `projectDir` is valid for a plugin project.
 void validatePubspecForPlugin({@required String projectDir, @required String pluginClass, @required List<String> expectedPlatforms, List<String> unexpectedPlatforms = const <String>[], String androidIdentifier}) {
-  final String pubspecPath = globals.fs.path.join(projectDir, 'pubspec.yaml');
-  final YamlMap pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync()) as YamlMap;
-  final YamlMap platformsMap = Plugin.getPlatformsYamlMap(pubspec);
+    final FlutterManifest manifest = FlutterManifest.createFromPath(projectDir, fileSystem: globals.fs, logger: globals.logger);
+    final YamlMap platformsMap = manifest.supportedPlatforms as YamlMap;
     for (final String platform in expectedPlatforms) {
       expect(platformsMap[platform], isNotNull);
       expect(platformsMap[platform]['pluginClass'], pluginClass);

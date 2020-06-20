@@ -163,6 +163,9 @@ class FlutterManifest {
     if (isModule) {
       return _flutterDescriptor['module']['androidPackage'] as String;
     }
+    if (supportedPlatforms == null) {
+      return null;
+    }
     if (supportedPlatforms.containsKey('android')) {
        return supportedPlatforms['android']['package'] as String;
     }

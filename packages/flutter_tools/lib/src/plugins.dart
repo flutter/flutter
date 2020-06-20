@@ -180,28 +180,6 @@ class Plugin {
     );
   }
 
-  /// Queries the `pubpsec` and returns the `platforms` sub map.
-  ///
-  /// Throws ToolExit if cannot find the `platforms:` map.
-  static YamlMap getPlatformsYamlMap(YamlMap pubspec) {
-    if (pubspec == null) {
-       throwToolExit('Invalid pubspec.yaml', exitCode: 2);
-    }
-    final YamlMap flutterConfig = pubspec['flutter'] as YamlMap;
-    if (flutterConfig == null) {
-      throwToolExit('Did not find valid `flutter` map in pubspec.yaml', exitCode: 2);
-    }
-    final YamlMap pluginConfig = flutterConfig['plugin'] as YamlMap;
-    if (pluginConfig == null) {
-      throwToolExit('Did not find valid `plugin` map in pubspec.yaml', exitCode: 2);
-    }
-    if (pluginConfig['platforms'] == null || pluginConfig['platforms'] is! YamlMap) {
-      throwToolExit(_invalidPlatformsErrorMessage, exitCode: 2);
-    }
-
-    return pluginConfig['platforms'] as YamlMap;
-  }
-
   /// Updates the pubspec.yaml under `projectDir`, adding each platform in `platforms` under `plugin: platforms:`
   ///
   /// If the dummy platform `some_platform` exists, remove it.
