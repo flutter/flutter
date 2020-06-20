@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
-import 'package:test/test.dart';
 import 'dart:js_util' as js_util;
 import 'dart:html' as html;
+import 'package:test/test.dart';
 import 'package:ui/ui.dart' hide window;
 import 'package:ui/src/engine.dart';
 
@@ -308,5 +308,11 @@ void main() {
     expect(path2.contains(Offset(100, 50)), isFalse);
     expect(path2.contains(Offset(100, 100)), isFalse);
     expect(path2.contains(Offset(50, 100)), isFalse);
+  });
+
+  test('Should convert conic to quad when approximation error is small', () {
+    Conic conic = Conic(120.0, 20.0, 160.99470420829266, 20.0,
+        190.19301120261332, 34.38770865870253, 0.9252691032413082);
+    expect(conic.toQuads().length, 3);
   });
 }
