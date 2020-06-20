@@ -604,18 +604,6 @@ abstract class Window {
   ///    observe when this value changes.
   List<Locale>? get locales;
 
-  /// The locale that the platform's native locale resolution system resolves to.
-  ///
-  /// This value may differ between platforms and is meant to allow flutter locale
-  /// resolution algorithms to into resolving consistently with other apps on the
-  /// device.
-  ///
-  /// This value may be used in a custom [localeListResolutionCallback] or used directly
-  /// in order to arrive at the most appropriate locale for the app.
-  ///
-  /// See [locales], which is the list of locales the user/device prefers.
-  Locale? get platformResolvedLocale;
-
   /// Performs the platform-native locale resolution.
   ///
   /// Each platform may return different results.

@@ -78,7 +78,7 @@ class LocaleInitialization extends Scenario {
     String label;
     switch(_tapCount) {
       case 1: {
-        label = window.platformResolvedLocale.toString();
+        // Set label to string data we wish to pass on first frame.
         break;
       }
       // Expand for other test cases.

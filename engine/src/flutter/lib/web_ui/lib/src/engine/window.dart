@@ -303,10 +303,6 @@ class EngineWindow extends ui.Window {
     return locales;
   }
 
-  /// On the web "platform" is the browser, so it's the same as [locale].
-  @override
-  ui.Locale get platformResolvedLocale => locale;
-
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnLocaleChanged() {
