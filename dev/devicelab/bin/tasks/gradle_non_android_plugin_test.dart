@@ -32,11 +32,44 @@ Future<void> main() async {
           options: <String>[
             '--org', 'io.flutter.devicelab',
             '-t', 'plugin',
-            '--platforms=ios',
+            '--platforms=ios,android',
             'ios_only',
           ],
         );
       });
+
+      section("Delete plugin's Android folder");
+
+      final File androidFolder = File(path.join(
+        projectDir.path,
+        'android',
+      ));
+      androidFolder.deleteSync(recursive: true);
+
+      section('Update pubspec.yaml to iOS only plugin');
+      final File pubspecFile = File(path.join(projectDir.path, 'pubspec.yaml'));
+      final String pubspecString = pubspecFile.readAsStringSync();
+
+      final StringBuffer iosOnlyPubspec = StringBuffer();
+      bool inAndroidSection = false;
+      const String pluginPlatformIndentation = '      ';
+      for (final String line in pubspecString.split('\n')) {
+        // Skip everything in the Android section of the plugin platforms list.
+        if (line.startsWith('${pluginPlatformIndentation}android:')) {
+          inAndroidSection = true;
+          continue;
+        }
+        if (inAndroidSection) {
+          if (line.startsWith('$pluginPlatformIndentation  ')) {
+            continue;
+          } else {
+            inAndroidSection = false;
+          }
+        }
+        iosOnlyPubspec.write('$line\n');
+      }
+
+      pubspecFile.writeAsStringSync(iosOnlyPubspec.toString());
 
       section('Build example APK');
 
