@@ -203,8 +203,8 @@ class DefaultTextStyle extends InheritedTheme {
   }
 }
 
-/// The [TextHeightBehavior] that will apply to descendant [Text] widgets which
-/// have not explicitly set [Text.textHeightBehavior].
+/// The [TextHeightBehavior] that will apply to descendant [Text] and [EditableText]
+/// widgets which have not explicitly set [Text.textHeightBehavior].
 ///
 /// If there is a [DefaultTextStyle] with a non-null [DefaultTextStyle.textHeightBehavior]
 /// below this widget, the [DefaultTextStyle.textHeightBehavior] will be used
