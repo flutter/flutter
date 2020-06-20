@@ -16,6 +16,7 @@
 
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 

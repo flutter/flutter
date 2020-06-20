@@ -23,20 +23,14 @@ shared_library("flutter_shell_native") {
 
   sources = [
     "$root_build_dir/flutter_icu/icudtl.o",
-    "android_context.cc",
-    "android_context.h",
     "android_context_gl.cc",
     "android_context_gl.h",
     "android_environment_gl.cc",
     "android_environment_gl.h",
     "android_external_texture_gl.cc",
     "android_external_texture_gl.h",
-    "android_native_window.cc",
-    "android_native_window.h",
     "android_shell_holder.cc",
     "android_shell_holder.h",
-    "android_surface.cc",
-    "android_surface.h",
     "android_surface_gl.cc",
     "android_surface_gl.h",
     "android_surface_software.cc",
@@ -67,8 +61,11 @@ shared_library("flutter_shell_native") {
     "//flutter/runtime",
     "//flutter/runtime:libdart",
     "//flutter/shell/common",
+    "//flutter/shell/platform/android/context",
     "//flutter/shell/platform/android/external_view_embedder",
     "//flutter/shell/platform/android/jni",
+    "//flutter/shell/platform/android/surface",
+    "//flutter/shell/platform/android/surface:native_window",
     "//third_party/skia",
   ]
 

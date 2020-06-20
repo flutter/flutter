@@ -18,6 +18,7 @@ source_set("testing_lib") {
 
   public_deps = [
     "//flutter/fml",
+    "//third_party/googletest:gmock",
     "//third_party/googletest:gtest",
   ]
   public_configs = [ "//flutter:config" ]
