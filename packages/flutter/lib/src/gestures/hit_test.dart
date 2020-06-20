@@ -80,38 +80,41 @@ class _Ref<T> {
 }
 
 @immutable
-class _TransformPart {
-  const _TransformPart.matrix(this.matrix)
-    : assert(matrix != null),
-      offset = null;
-  const _TransformPart.offset(this.offset)
-    : assert(offset != null),
-      matrix = null;
+abstract class TransformPart {
+  const TransformPart();
 
-  bool get isMatrix => matrix != null;
+  factory TransformPart.matrix(Matrix4 matrix) => _MatrixTransformPart(matrix);
+
+  Matrix4 _assertMatrix() {
+    assert(false, '$this is not a Matrix transform part.');
+    throw UnimplementedError('$this is not a Matrix transform part.');
+  }
+
+  TransformPart multiply(Matrix4 rhs);
+}
+
+class _MatrixTransformPart extends TransformPart {
+  const _MatrixTransformPart(this.matrix);
 
   final Matrix4 matrix;
+
+  @override
+  Matrix4 _assertMatrix() => matrix;
+
+  @override
+  TransformPart multiply(Matrix4 rhs) {
+    return TransformPart.matrix(matrix * rhs as Matrix4);
+  }
+}
+
+class OffsetTransformPart extends TransformPart {
+  const OffsetTransformPart(this.offset);
+
   final Offset offset;
 
-  Matrix4 get assertMatrix {
-    assert(isMatrix);
-    return matrix;
-  }
-
-  Offset get assertOffset {
-    assert(!isMatrix);
-    return offset;
-  }
-
-  _TransformPart multiply(_TransformPart rhs) {
-    assert(rhs.isMatrix);
-    Matrix4 result;
-    if (isMatrix) {
-      result = matrix * rhs.assertMatrix as Matrix4;
-    } else {
-      result = rhs.assertMatrix.clone()..leftTranslate(offset.dx, offset.dy);
-    }
-    return _TransformPart.matrix(result);
+  @override
+  TransformPart multiply(Matrix4 rhs) {
+    return TransformPart.matrix(rhs.clone()..leftTranslate(offset.dx, offset.dy));
   }
 }
 
@@ -120,7 +123,7 @@ class HitTestResult {
   /// Creates an empty hit test result.
   HitTestResult()
      : _path = <HitTestEntry>[],
-       _transforms = <_TransformPart>[],
+       _transforms = <TransformPart>[TransformPart.matrix(Matrix4.identity())],
        _globalizedTransforms = _Ref<int>(1);
 
   /// Wraps `result` (usually a subtype of [HitTestResult]) to create a
@@ -142,7 +145,7 @@ class HitTestResult {
   Iterable<HitTestEntry> get path => _path;
   final List<HitTestEntry> _path;
 
-  final List<_TransformPart> _transforms;
+  final List<TransformPart> _transforms;
   // The number of elements (from the head) in `_transforms` that has been
   // globalized.
   //
@@ -156,14 +159,13 @@ class HitTestResult {
   final _Ref<int> _globalizedTransforms;
 
   void _globalizeTransforms() {
-    assert(_transforms.isNotEmpty);
-    int globalizedTransforms = max(_globalizedTransforms.value, 1);
+    int globalizedTransforms = _globalizedTransforms.value;
     if (globalizedTransforms >= _transforms.length) {
       assert(globalizedTransforms == _transforms.length);
       return;
     }
-    for (_TransformPart last = _transforms[globalizedTransforms - 1]; globalizedTransforms < _transforms.length; globalizedTransforms += 1) {
-      last = _transforms[globalizedTransforms].multiply(last);
+    for (TransformPart last = _transforms[globalizedTransforms - 1]; globalizedTransforms < _transforms.length; globalizedTransforms += 1) {
+      last = _transforms[globalizedTransforms].multiply(last._assertMatrix());
       _transforms[globalizedTransforms] = last;
     }
     _globalizedTransforms.value = globalizedTransforms;
@@ -171,7 +173,7 @@ class HitTestResult {
 
   Matrix4 get _lastTransform {
     _globalizeTransforms();
-    return _transforms.last.assertMatrix;
+    return _transforms.last._assertMatrix();
   }
 
   /// Add a [HitTestEntry] to the path.
@@ -212,26 +214,28 @@ class HitTestResult {
   ///    around this function for hit testing on [RenderSliver]s.
   @protected
   void pushTransform(Matrix4 transform) {
-    assert(transform != null);
-    assert(
-      _debugVectorMoreOrLessEquals(transform.getRow(2), Vector4(0, 0, 1, 0)) &&
-      _debugVectorMoreOrLessEquals(transform.getColumn(2), Vector4(0, 0, 1, 0)),
-      'The third row and third column of a transform matrix for pointer '
-      'events must be Vector4(0, 0, 1, 0) to ensure that a transformed '
-      'point is directly under the pointing device. Did you forget to run the paint '
-      'matrix through PointerEvent.removePerspectiveTransform? '
-      'The provided matrix is:\n$transform'
-    );
-    _transforms.add(_TransformPart.matrix(transform));
+    pushTransformPart(TransformPart.matrix(transform));
   }
 
   @protected
-  void pushOffset(Offset offset) {
-    if (_transforms.isEmpty) {
-      _transforms.add(_TransformPart.matrix(Matrix4.translationValues(offset.dx, offset.dy, 0.0)));
-    } else {
-      _transforms.add(_TransformPart.offset(offset));
-    }
+  void pushTransformPart(TransformPart transform) {
+    assert(transform != null);
+    assert(() {
+      if (transform is _MatrixTransformPart) {
+        final Matrix4 matrix = transform.matrix;
+        assert(
+          _debugVectorMoreOrLessEquals(matrix.getRow(2), Vector4(0, 0, 1, 0)) &&
+          _debugVectorMoreOrLessEquals(matrix.getColumn(2), Vector4(0, 0, 1, 0)),
+          'The third row and third column of a transform matrix for pointer '
+          'events must be Vector4(0, 0, 1, 0) to ensure that a transformed '
+          'point is directly under the pointing device. Did you forget to run the paint '
+          'matrix through PointerEvent.removePerspectiveTransform? '
+          'The provided matrix is:\n$matrix'
+        );
+      }
+      return true;
+    }());
+    _transforms.add(transform);
   }
 
   /// Removes the last transform added via [pushTransform].
