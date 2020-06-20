@@ -6,9 +6,6 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_CONTEXT_H_
 
 #include "flutter/fml/macros.h"
-#include "flutter/fml/memory/ref_counted.h"
-#include "flutter/fml/memory/ref_ptr.h"
-#include "flutter/shell/common/platform_view.h"
 
 namespace flutter {
 
@@ -27,10 +24,9 @@ class AndroidContext {
 
   ~AndroidContext();
 
-  static std::shared_ptr<AndroidContext> Create(
-      AndroidRenderingAPI rendering_api);
-
   AndroidRenderingAPI RenderingApi() const;
+
+  bool IsValid() const;
 
  private:
   const AndroidRenderingAPI rendering_api_;

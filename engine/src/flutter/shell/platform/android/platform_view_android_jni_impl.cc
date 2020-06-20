@@ -1104,17 +1104,21 @@ void PlatformViewAndroidJNIImpl::FlutterViewEndFrame() {
   FML_CHECK(CheckException(env));
 }
 
-void PlatformViewAndroidJNIImpl::FlutterViewCreateOverlaySurface() {
+std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
+PlatformViewAndroidJNIImpl::FlutterViewCreateOverlaySurface() {
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
   auto java_object = java_object_.get(env);
   if (java_object.is_null()) {
-    return;
+    return nullptr;
   }
 
   env->CallVoidMethod(java_object.obj(), g_create_overlay_surface_method);
 
   FML_CHECK(CheckException(env));
+  // TODO(egarciad): Wire this up.
+  // https://github.com/flutter/flutter/issues/55270
+  return std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(0, nullptr);
 }
 
 std::unique_ptr<std::vector<std::string>>

@@ -47,9 +47,11 @@ void EmbedderExternalViewEmbedder::CancelFrame() {
 }
 
 // |ExternalViewEmbedder|
-void EmbedderExternalViewEmbedder::BeginFrame(SkISize frame_size,
-                                              GrContext* context,
-                                              double device_pixel_ratio) {
+void EmbedderExternalViewEmbedder::BeginFrame(
+    SkISize frame_size,
+    GrContext* context,
+    double device_pixel_ratio,
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   Reset();
 
   pending_frame_size_ = frame_size;

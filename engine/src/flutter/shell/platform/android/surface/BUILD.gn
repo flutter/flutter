@@ -1,0 +1,54 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("surface") {
+  sources = [
+    "android_surface.cc",
+    "android_surface.h",
+  ]
+
+  public_configs = [ "//flutter:config" ]
+
+  deps = [
+    ":native_window",
+    "//flutter/flow",
+    "//flutter/fml",
+    "//flutter/shell/platform/android/context",
+    "//flutter/shell/platform/android/jni",
+    "//third_party/skia",
+  ]
+}
+
+source_set("native_window") {
+  sources = [
+    "android_native_window.cc",
+    "android_native_window.h",
+  ]
+
+  public_configs = [ "//flutter:config" ]
+
+  deps = [
+    "//flutter/fml",
+    "//third_party/skia",
+  ]
+}
+
+source_set("surface_mock") {
+  testonly = true
+
+  sources = [
+    "android_surface_mock.cc",
+    "android_surface_mock.h",
+  ]
+
+  public_configs = [ "//flutter:config" ]
+
+  deps = [
+    ":surface",
+    "//flutter/shell/gpu:gpu_surface_gl",
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest",
+    "//third_party/skia",
+  ]
+}

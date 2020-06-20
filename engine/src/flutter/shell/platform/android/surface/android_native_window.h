@@ -5,10 +5,14 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_NATIVE_WINDOW_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_NATIVE_WINDOW_H_
 
+#include "flutter/fml/build_config.h"
+
+#if OS_ANDROID
 #include <android/native_window.h>
+#endif  // OS_ANDROID
+
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
-#include "flutter/fml/memory/ref_ptr.h"
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {
@@ -16,7 +20,11 @@ namespace flutter {
 class AndroidNativeWindow
     : public fml::RefCountedThreadSafe<AndroidNativeWindow> {
  public:
+#if OS_ANDROID
   using Handle = ANativeWindow*;
+#else   // OS_ANDROID
+  using Handle = std::nullptr_t;
+#endif  // OS_ANDROID
 
   bool IsValid() const;
 

@@ -94,7 +94,10 @@ void IOSSurface::CancelFrame() {
 }
 
 // |ExternalViewEmbedder|
-void IOSSurface::BeginFrame(SkISize frame_size, GrContext* context, double device_pixel_ratio) {
+void IOSSurface::BeginFrame(SkISize frame_size,
+                            GrContext* context,
+                            double device_pixel_ratio,
+                            fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   TRACE_EVENT0("flutter", "IOSSurface::BeginFrame");
   FML_CHECK(platform_views_controller_ != nullptr);
   platform_views_controller_->SetFrameSize(frame_size);

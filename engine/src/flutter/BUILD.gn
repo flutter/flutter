@@ -74,7 +74,6 @@ group("flutter") {
       "//flutter/lib/ui:ui_unittests",
       "//flutter/runtime:runtime_unittests",
       "//flutter/shell/common:shell_unittests",
-      "//flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",
       "//flutter/shell/platform/embedder:embedder_unittests",
       "//flutter/testing:testing_unittests",
       "//flutter/third_party/txt:txt_unittests",
@@ -85,6 +84,8 @@ group("flutter") {
         "//flutter/fml:fml_benchmarks",
         "//flutter/lib/ui:ui_benchmarks",
         "//flutter/shell/common:shell_benchmarks",
+        "//flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",
+        "//flutter/shell/platform/android/jni:jni_unittests",
         "//flutter/third_party/txt:txt_benchmarks",
       ]
     }

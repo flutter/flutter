@@ -44,7 +44,10 @@ class RasterThreadMerger
   // Returns true if the current thread owns rasterizing.
   // When the threads are merged, platform thread owns rasterizing.
   // When un-merged, raster thread owns rasterizing.
-  bool IsOnRasterizingThread();
+  bool IsOnRasterizingThread() const;
+
+  // Returns true if the current thread is the platform thread.
+  bool IsOnPlatformThread() const;
 
  private:
   static const int kLeaseNotSet;
