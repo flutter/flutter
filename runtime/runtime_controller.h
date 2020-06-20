@@ -162,23 +162,6 @@ class RuntimeController final : public WindowClient {
   bool SetLocales(const std::vector<std::string>& locale_data);
 
   //----------------------------------------------------------------------------
-  /// @brief      Forward the specified locale data to the running isolate. If
-  ///             the isolate is not running, this data will be saved and
-  ///             flushed to the isolate when it starts running.
-  ///
-  ///
-  /// @deprecated The persistent isolate data must be used for this purpose
-  ///             instead.
-  ///
-  /// @param[in]  locale_data  The locale data. This should consist of a vector
-  ///             of 4 strings, representing languageCode, contryCode,
-  ///             scriptCode, and variant of the locale.
-  ///
-  /// @return     If the locale data was forwarded to the running isolate.
-  ///
-  bool SetPlatformResolvedLocale(const std::vector<std::string>& locale_data);
-
-  //----------------------------------------------------------------------------
   /// @brief      Forward the user settings data to the running isolate. If the
   ///             isolate is not running, this data will be saved and flushed to
   ///             the isolate when it starts running.
