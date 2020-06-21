@@ -888,10 +888,10 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    final MaterialLocalizations localisations = MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData theme = Theme.of(context);
     final String title = widget.packageName;
-    final String subtitle = localisations.licensesPackageDetailText(widget.licenseEntries.length);
+    final String subtitle = localizations.licensesPackageDetailText(widget.licenseEntries.length);
     final double pad = _getGutterSize(context);
     final EdgeInsets padding = EdgeInsets.only(left: pad, right: pad, bottom: pad);
     final List<Widget> listWidgets = <Widget>[
