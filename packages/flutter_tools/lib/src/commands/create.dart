@@ -4,8 +4,11 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
+import 'package:yaml/yaml.dart';
 
 import '../android/android.dart' as android_common;
 import '../android/android_sdk.dart' as android_sdk;
@@ -513,7 +516,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     argParser.addMultiOption('platforms',
         help: 'the platforms supported by this project.'
           'This argument only works when the --template is set to app or plugin.'
-          'Platform folders(android/) will be generated in the target project.'
+          'Platform folders (android/) will be generated in the target project.'
           'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform.'
           'Adding desktop platforms requires the corresponding desktop config setting to be enabled.',
         defaultsTo: _availablePlatforms,
@@ -558,8 +561,9 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
   Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     // Plugin doesn't create any platform by default
+    bool willAddPlatforms = false;
     if (argResults.wasParsed('platforms')) {
-      templateContext['no_platforms'] = false;
+      willAddPlatforms = true;
     } else {
       // If the user didn't explicitly declare the platforms, we don't generate any platforms.
       templateContext['ios'] = false;
@@ -568,9 +572,10 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       templateContext['linux'] = false;
       templateContext['macos'] = false;
       templateContext['windows'] = false;
-      templateContext['no_platforms'] = true;
+      willAddPlatforms = false;
       globals.printError(_noPlatformsErrorMessage);
     }
+    templateContext['no_platforms'] = !willAddPlatforms;
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? stringArg('description')
@@ -586,8 +591,40 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       );
     }
 
-    final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
-    await Plugin.updatePubspecWithPlatforms(directory.absolute.path, platforms, templateContext['pluginClass'] as String, templateContext['androidIdentifier'] as String);
+    if (willAddPlatforms) {
+      // If adding new platforms to an existing plugin project, prints
+      // a help message containing the platforms maps need to be added to the `platforms` key in the pubspec.
+      final String pubspecPath = globals.fs.path.join(directory.absolute.path, 'pubspec.yaml');
+      final List<String> platforms = _getSupportedPlatformsFromTemplateContext(templateContext);
+      final List<String> platformsToAdd = List<String>.from(platforms);
+      final FlutterManifest manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger);
+      final List<String> existingPlatforms = manifest.supportedPlatforms.keys.toList();
+      platformsToAdd.removeWhere(existingPlatforms.contains);
+      final YamlMap platformsMapToPrint = Plugin.createPlatformsYamlMap(platformsToAdd, templateContext['pluginClass'] as String, templateContext['androidIdentifier'] as String);
+      if (platformsMapToPrint.isNotEmpty) {
+        String prettyYaml = '';
+        for (final String platform in platformsMapToPrint.keys.toList().cast<String>()) {
+          prettyYaml += '$platform:\n';
+          for (final String key in (platformsMapToPrint[platform] as YamlMap).keys.toList().cast<String>()) {
+            prettyYaml += ' $key: ${platformsMapToPrint[platform][key] as String}\n';
+          }
+        }
+        globals.printStatus(
+          '''
+
+The `pubspec.yaml` under the project directory must be updated to support ${platformsToAdd.join(', ')},
+Add below lines to under the `platform:` key:
+          ''', emphasis: true);
+      globals.printStatus(prettyYaml, emphasis: true, color: TerminalColor.blue);
+      globals.printStatus(
+          '''
+For detailed instructions on how to format the pubspec.yaml to support platforms, see:
+https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
+
+          ''', emphasis: true);
+      }
+    }
+
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     final bool generateAndroid = templateContext['android'] == true;

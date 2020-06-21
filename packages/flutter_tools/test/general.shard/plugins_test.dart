@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -1333,85 +1334,23 @@ flutter:
         ], androidIdentifier: 'AndroidPackage');
       });
 
-      test('start with a "some_platform" and add ios, should remove "some_platform"', () async {
-        _createPubspecFile(_pubspecWithNoPlatform);
-        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['ios'], 'SomePlugin', null);
-        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
-          'ios',
-        ],
-        unexpectedPlatforms: <String>['some_platform']);
+      test('createPlatformsYamlMap should create the correct map', () async {
+        final YamlMap map = Plugin.createPlatformsYamlMap(<String>['ios', 'android', 'linux'], 'PluginClass', 'some.android.package');
+        expect(map['platforms']['ios'], <String, String> {
+          'pluginClass' : 'PluginClass'
+        });
+        expect(map['android'], <String, String> {
+          'pluginClass' : 'PluginClass',
+          'package': 'some.android.package',
+        });
+        expect(map['linux'], <String, String> {
+          'pluginClass' : 'PluginClass'
+        });
       });
 
-      test('start with a "some_platform" and add android, should remove "some_platform"', () async {
-        _createPubspecFile(_pubspecWithNoPlatform);
-        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['android'], 'SomePlugin', 'identifier');
-        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
-          'android',
-        ],
-        unexpectedPlatforms: <String>['some_platform'],
-        androidIdentifier: 'identifier');
-      });
-
-      test('start with a "some_platform" and add macos, should remove "some_platform"', () async {
-        _createPubspecFile(_pubspecWithNoPlatform);
-        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['macos'], 'SomePlugin', null);
-        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
-          'macos',
-        ],
-        unexpectedPlatforms: <String>['some_platform']);
-      });
-
-      test('start with a "some_platform" and add linux, should remove "some_platform"', () async {
-        _createPubspecFile(_pubspecWithNoPlatform);
-        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['linux'], 'SomePlugin', null);
-        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
-          'linux',
-        ],
-        unexpectedPlatforms: <String>['some_platform']);
-      });
-
-      test('start with a "some_platform" and add windows, should remove "some_platform"', () async {
-        _createPubspecFile(_pubspecWithNoPlatform);
-        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['windows'], 'SomePlugin', null);
-        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
-          'windows',
-        ],
-        unexpectedPlatforms: <String>['some_platform']);
-      });
-
-      test('start with a "some_platform" and add web, should remove "some_platform"', () async {
-        _createPubspecFile(_pubspecWithNoPlatform);
-        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['web'], 'SomePlugin', null);
-        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
-          'web',
-        ],
-        unexpectedPlatforms: <String>['some_platform']);
-      });
-
-      test('start with a "some_platform", add android and ios"', () async {
-        _createPubspecFile(_pubspecWithNoPlatform);
-        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['android', 'ios'], 'SomePlugin', 'identifier');
-        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
-          'ios', 'android'
-        ],
-        unexpectedPlatforms: <String>['some_platform'],
-        androidIdentifier: 'identifier');
-      });
-
-      test('start with a "some_platform" and add android, then add ios"', () async {
-        _createPubspecFile(_pubspecWithNoPlatform);
-        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['android'], 'SomePlugin', 'identifier');
-        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
-          'android',
-        ],
-        unexpectedPlatforms: <String>['some_platform', 'ios'],
-        androidIdentifier: 'identifier');
-        await Plugin.updatePubspecWithPlatforms(projectDir.absolute.path, <String>['ios'], 'SomePlugin', null);
-        validatePubspecForPlugin(projectDir: projectDir.absolute.path, pluginClass: 'SomePlugin', expectedPlatforms: <String>[
-          'android', 'ios'
-        ],
-        unexpectedPlatforms: <String>['some_platform'],
-        androidIdentifier: 'identifier');
+      test('createPlatformsYamlMap should create empty map', () async {
+        final YamlMap map = Plugin.createPlatformsYamlMap(<String>[], null, null);
+        expect(map.isEmpty, true);
       });
 
     });

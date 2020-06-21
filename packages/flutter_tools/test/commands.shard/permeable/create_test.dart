@@ -1600,10 +1600,6 @@ void main() {
 
     expect(projectDir.childDirectory('ios').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
-    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'ios',
-    ], pluginClass: 'FlutterProjectPlugin',
-    unexpectedPlatforms: <String>['some_platform']);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
@@ -1620,11 +1616,6 @@ void main() {
 
     expect(projectDir.childDirectory('android').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('android').existsSync(), true);
-    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'android'
-    ], pluginClass: 'FlutterProjectPlugin',
-    unexpectedPlatforms: <String>['some_platform'],
-    androidIdentifier: 'com.example.flutter_project');
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
@@ -1641,10 +1632,6 @@ void main() {
 
     expect(projectDir.childDirectory('linux').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('linux').existsSync(), true);
-    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'linux'
-    ], pluginClass: 'FlutterProjectPlugin',
-    unexpectedPlatforms: <String>['some_platform']);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
@@ -1661,10 +1648,6 @@ void main() {
 
     expect(projectDir.childDirectory('macos').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('macos').existsSync(), true);
-    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'macos'
-    ], pluginClass: 'FlutterProjectPlugin',
-    unexpectedPlatforms: <String>['some_platform']);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
@@ -1681,10 +1664,6 @@ void main() {
 
     expect(projectDir.childDirectory('windows').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('windows').existsSync(), true);
-    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'windows'
-    ], pluginClass: 'FlutterProjectPlugin',
-    unexpectedPlatforms: <String>['some_platform']);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -1709,10 +1688,6 @@ void main() {
     expect(projectDir.childDirectory('example').childDirectory('macos').existsSync(), true);
     expect(projectDir.childDirectory('ios').existsSync(), true);
     expect(projectDir.childDirectory('example').childDirectory('ios').existsSync(), true);
-    validatePubspecForPlugin(projectDir: projectDir.absolute.path, expectedPlatforms: const <String>[
-      'ios', 'macos'
-    ], pluginClass: 'FlutterProjectPlugin',
-    unexpectedPlatforms: <String>['some_platform']);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });

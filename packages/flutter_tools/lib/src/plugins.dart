@@ -180,103 +180,23 @@ class Plugin {
     );
   }
 
-  /// Updates the pubspec.yaml under `projectDir`, adding each platform in `platforms` under `plugin: platforms:`
+  /// Create a YamlMap that represents the supported platforms.
   ///
-  /// If the dummy platform `some_platform` exists, remove it.
-  /// For example, if the original `plugin` map is:
-  /// ```
-  ///   flutter:
-  ///      plugin:
-  ///        platforms:
-  ///          some_platform:
-  ///            pluginClass: somePluginClass
-  /// ```
-  /// and the `platforms` is specified as `['ios','android'], the yaml map becomes:
-  /// ```
-  ///    flutter:
-  ///      plugin:
-  ///        platforms:
-  ///          android:
-  ///            package: <androidIdentifier>
-  ///            pluginClass: <pluginClass>
-  ///          ios:
-  ///            pluginClass: <pluginClass>
-  /// ```
-  ///
-  /// This method doesn't support the legacy plugin pubspec format and will throw error if try to update a pubspec.yaml that uses the legacy format.
-  static Future<void> updatePubspecWithPlatforms(String projectDir, List<String> platforms, String pluginClass, String androidIdentifier) async {
-    if (platforms.isEmpty) {
-      return;
+  /// For example, if the `platforms` contains 'ios' and 'android', the return map looks like:
+  ///    android:
+  ///      package: io.flutter.plugins.sample
+  ///      pluginClass: SamplePlugin
+  ///    ios:
+  ///      pluginClass: SamplePlugin
+  static YamlMap createPlatformsYamlMap(List<String> platforms, String pluginClass, String androidPackage) {
+    Map<String, dynamic> map = <String, dynamic>{};
+    for (final String platform in platforms) {
+      map[platform] = <String, String>{
+        'pluginClass': pluginClass,
+        ...platform == 'android' ? <String, String>{'package': androidPackage} : <String, String>{},
+      };
     }
-
-    final String pubspecPath = globals.fs.path.join(projectDir, 'pubspec.yaml');
-    if (!globals.fs.file(pubspecPath).existsSync()) {
-      return;
-    }
-    // final YamlMap pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync()) as YamlMap;
-    final FlutterManifest manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger);
-    try {
-      // The format of the updated pubspec might not be preserved.
-      final List<String> platformsToAdd = List<String>.from(platforms);
-      final YamlMap platformsMap = YamlMap.wrap(manifest.supportedPlatforms);
-      final List<String> errors = _validateMultiPlatformYaml(platformsMap);
-      if (errors.isNotEmpty) {
-        throwToolExit('Invalid plugin specification: \n${errors.join('\n')}');
-      }
-      final List<String> existingPlatforms = manifest.supportedPlatforms.keys.toList();
-      platformsToAdd.removeWhere(existingPlatforms.contains);
-      if (platformsToAdd.isEmpty) {
-        return;
-      }
-      final File pubspecFile = globals.fs.file(pubspecPath);
-      final List<String> fileContents = pubspecFile.readAsLinesSync();
-      int index = -1;
-      String frontSpaces;
-      for (int i = 0; i < fileContents.length; i ++) {
-        final String lineWithoutSpace = fileContents[i].replaceAll(' ', '');
-        // ignore all the comments.
-        if (lineWithoutSpace.contains('#')) {
-          continue;
-        }
-        // Find the line of `platforms:`
-        if (lineWithoutSpace == 'platforms:') {
-          if (!_isPlatformKeyInsidePluginKey(fileContents, i)) {
-            continue;
-          }
-          // Find how many spaces are in front of the `platforms`.
-          frontSpaces = fileContents[i].split('platforms:').first;
-          index = i + 1;
-          break;
-        }
-      }
-      if (index == -1) {
-        throwToolExit(_invalidPlatformsErrorMessage, exitCode: 2);
-      }
-      final List<int> dummyPlatformIndexes = _findDummyPlatformMapLines(fileContents, index);
-      assert(dummyPlatformIndexes.isEmpty || dummyPlatformIndexes.length == 2);
-      if (dummyPlatformIndexes.length == 2) {
-        // If the plugin was generated without specifying a platform,
-        // a some_platform is added to the pubspec.yaml to preserve the pubspec format.
-        // remove the some_platform related section before moving on.
-        fileContents.removeAt(dummyPlatformIndexes[1]);
-        fileContents.removeAt(dummyPlatformIndexes[0]);
-      }
-      for (final String platform in platformsToAdd) {
-        fileContents.insert(index, frontSpaces + '  $platform:');
-        index ++;
-        fileContents.insert(index, frontSpaces + '    pluginClass: $pluginClass');
-        index ++;
-        if (platform == 'android') {
-          fileContents.insert(index, frontSpaces + '    package: $androidIdentifier');
-          index ++;
-        }
-      }
-      final String writeString = fileContents.join('\n');
-      pubspecFile.writeAsStringSync(writeString);
-    } on FileSystemException catch (e) {
-      globals.printError('Error updating the pubspec.yaml:');
-      throwToolExit(e.message, exitCode: 2);
-    }
+    return YamlMap.wrap(map);
   }
 
   static List<String> validatePluginYaml(YamlMap yaml) {
