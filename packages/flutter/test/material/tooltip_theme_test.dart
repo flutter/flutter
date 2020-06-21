@@ -90,8 +90,8 @@ void main() {
       'semantics: excluded',
       'decoration: BoxDecoration(color: Color(0xffffffff))',
       'textStyle: TextStyle(inherit: true, decoration: TextDecoration.underline)',
-      'wait duration: 0:00:00.100000',
-      'show duration: 0:00:00.200000',
+      'wait duration: ${Duration(milliseconds: 100).toString()}',
+      'show duration: ${Duration(milliseconds: 200).toString()}',
     ]);
   });
 
