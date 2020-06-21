@@ -741,17 +741,20 @@ class _LicenseData {
     if (!packageLicenseBindings.containsKey(package)) {
       packageLicenseBindings[package] = <int>[];
       firstPackage ??= package;
-        packages.add(package);
-        packages.sort((String a, String b) {
-          // Make sure first package remains at front
-          if (a == firstPackage) {
-            return -1;
-          }
-          if (b == firstPackage) {
-            return -1;
-          }
-          return a.toLowerCase().compareTo(b.toLowerCase());
-        });
+      packages.add(package);
+      packages.sort((String a, String b) {
+        // Based on how LicenseRegistry currently behaves, the first package
+        // returned is the end user application license. This should be
+        // presented first in the list. So here we make sure that first package
+        // remains at the front regardless of alphabetical sorting.
+        if (a == firstPackage) {
+          return -1;
+        }
+        if (b == firstPackage) {
+          return 1;
+        }
+        return a.toLowerCase().compareTo(b.toLowerCase());
+      });
     }
   }
 }
