@@ -70,7 +70,6 @@
   "dateRangePickerHelpText": "SELECT RANGE",
   "calendarModeButtonLabel": "Switch to calendar",
   "inputDateModeButtonLabel": "Switch to input",
-  "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 license",
   "licensesPackageDetailTextOther": "$licenseCount licenses"
 }
