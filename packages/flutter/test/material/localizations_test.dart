@@ -89,11 +89,10 @@ void main() {
     expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$lastRow'), isFalse);
     expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$rowCount'), isFalse);
 
-    expect(localizations.licensesPackageDetailText(0), isNotNull);
+    expect(() => localizations.licensesPackageDetailText(0), throwsA(const TypeMatcher<AssertionError>()));
     expect(localizations.licensesPackageDetailText(1), isNotNull);
     expect(localizations.licensesPackageDetailText(2), isNotNull);
     expect(localizations.licensesPackageDetailText(100), isNotNull);
-    expect(localizations.licensesPackageDetailText(0).contains(r'$licensesCount'), isFalse);
     expect(localizations.licensesPackageDetailText(1).contains(r'$licensesCount'), isFalse);
     expect(localizations.licensesPackageDetailText(2).contains(r'$licensesCount'), isFalse);
     expect(localizations.licensesPackageDetailText(100).contains(r'$licensesCount'), isFalse);
