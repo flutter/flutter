@@ -499,13 +499,13 @@ class _LicensePageState extends State<LicensePage> {
     );
   }
 
-  Widget _packageLicensePage(BuildContext _, Object args, ScrollController sc) {
+  Widget _packageLicensePage(BuildContext _, Object args, ScrollController scrollController) {
     assert(args is _DetailArguments);
-    final _DetailArguments a = args as _DetailArguments;
+    final _DetailArguments detailArguments = args as _DetailArguments;
     return _PackageLicensePage(
-      packageName: a.packageName,
-      licenseEntries: a.licenseEntries,
-      scrollController: sc,
+      packageName: detailArguments.packageName,
+      licenseEntries: detailArguments.licenseEntries,
+      scrollController: scrollController,
     );
   }
 
@@ -1371,7 +1371,8 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
       actionBuilder: widget.actionBuilder ?? (_, __) => const<Widget>[],
       automaticallyImplyLeading: widget.automaticallyImplyLeading,
       centerTitle: widget.centerTitle,
-      detailPageBuilder: (BuildContext context, Object args, ScrollController sc) => widget.detailPageBuilder(context, args ?? _cachedDetailArguments, sc),
+      detailPageBuilder: (BuildContext context, Object args, ScrollController scrollController) =>
+          widget.detailPageBuilder(context, args ?? _cachedDetailArguments, scrollController),
       floatingActionButton: widget.floatingActionButton,
       detailPageFABlessGutterWidth: widget.detailPageFABlessGutterWidth,
       detailPageFABGutterWidth: widget.detailPageFABGutterWidth,
