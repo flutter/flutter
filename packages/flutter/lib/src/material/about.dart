@@ -1010,7 +1010,12 @@ Widget _defaultApplicationIcon(BuildContext context) {
   return null;
 }
 
-double _getGutterSize(BuildContext context) => MediaQuery.of(context).size.width >= 720 ? 24 : 12;
+const int _materialGutterThreshold = 720;
+const double _wideGutterSize = 24;
+const double _narrowGutterSize = 12;
+
+double _getGutterSize(BuildContext context) =>
+    MediaQuery.of(context).size.width >= _materialGutterThreshold ? _wideGutterSize : _narrowGutterSize;
 
 /// Signature for the builder callback used by [_MasterDetailFlow].
 typedef _MasterViewBuilder = Widget Function(BuildContext context, bool isLateralUI);
@@ -1235,8 +1240,9 @@ abstract class _PageOpener {
   void setInitialDetailPage(Object arguments);
 }
 
-class _MasterDetailFlowState extends State<_MasterDetailFlow>
-    implements _PageOpener {
+const int _materialWideDisplayThreshold = 840;
+
+class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOpener {
   /// Tracks whether focus is on the detail or master views. Determines behaviour when switching
   /// from lateral to nested navigation.
   _Focus focus = _Focus.master;
@@ -1277,7 +1283,7 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
         return LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
               final double availableWidth = constraints.maxWidth;
-              if (availableWidth >= (widget.breakpoint ?? 840)) {
+              if (availableWidth >= (widget.breakpoint ?? _materialWideDisplayThreshold)) {
                 return _lateralUI(context);
               } else {
                 return _nestedUI(context);
